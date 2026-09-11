@@ -772,6 +772,10 @@ public class FormAIController implements AIController {
      * extracts are what the model says it read — they are not checked against
      * the document.
      * <p>
+     * A source describes where in an attached document a value was read. A
+     * value with nothing to point at, such as one taken from the chat prompt,
+     * carries no source.
+     * <p>
      * A source says where a snippet is inside a document, but not which
      * document. Send at most one attachment per prompt while source tracking is
      * on: with several, there is no way to tell which one a reported location
@@ -1742,34 +1746,36 @@ public class FormAIController implements AIController {
         }
 
         @Override
+        public boolean isSourceTrackingEnabled() {
+            return sourceTrackingEnabled;
+        }
+
+        @Override
         public String sourceInstructions() {
             if (!sourceTrackingEnabled) {
                 return "";
             }
             return """
                     \s\
-                    Source tracking is on. When a value comes from an \
-                    attached document, wrap it in an object instead of \
-                    sending it plainly: {"value": <the value as you would \
-                    otherwise send it>, "confidence": <level>, "extracts": \
-                    [{"text": <snippet>, "location": {"type": \
-                    "page-region", "page": <page>, "rect": [x, y, width, \
-                    height]}}]}. "value" is required; plain values stay \
-                    valid for fields with nothing to point at. List in \
-                    "extracts" every snippet you read to produce the \
-                    value, each with its text copied verbatim from the \
-                    document. "rect" is the snippet's bounding box as \
+                    Source tracking is on. Send every entry of "values" as \
+                    an object: {"value": <the value as you would otherwise \
+                    send it>, "confidence": <level>, "extracts": [{"text": \
+                    <snippet>, "location": {"type": "page-region", "page": \
+                    <page>, "rect": [x, y, width, height]}}]}. "value" is \
+                    required. When the value was read from an attached \
+                    document, list in "extracts" every snippet you read to \
+                    produce it, each with its text copied verbatim from \
+                    the document. "rect" is the snippet's bounding box as \
                     fractions of the page as displayed, [left, top, width, \
                     height] measured from the top-left corner. "page" \
                     starts at 1; leave it out when the source has a single \
                     surface, such as an image. Leave "location" out when \
-                    the snippet has no position, such as pasted text; \
-                    leave "extracts" out when there is no source document \
-                    at all. "confidence" is "high" when %s; "medium" when \
-                    %s; "low" when %s. Leave "confidence" out when you \
-                    cannot judge it, such as for a value taken from the \
-                    chat prompt. Never invent a snippet, a location, or a \
-                    confidence level.""".formatted(
+                    the snippet has no position, such as pasted text. \
+                    "confidence" is "high" when %s; "medium" when %s; \
+                    "low" when %s. Leave "confidence" and "extracts" out \
+                    when the value did not come from a document, such as a \
+                    value taken from the chat prompt. Never invent a \
+                    snippet, a location, or a confidence level.""".formatted(
                     describeConfidence(ConfidenceLevel.HIGH),
                     describeConfidence(ConfidenceLevel.MEDIUM),
                     describeConfidence(ConfidenceLevel.LOW));

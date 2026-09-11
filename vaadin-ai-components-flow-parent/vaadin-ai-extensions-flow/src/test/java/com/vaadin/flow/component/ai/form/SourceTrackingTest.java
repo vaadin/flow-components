@@ -97,6 +97,96 @@ class SourceTrackingTest {
     }
 
     @Nested
+    class ToolSchema {
+
+        @Test
+        void schemaDescribesEnvelopeOnlyWhileTrackingIsOn() {
+            var controller = controllerFor(new TestField());
+            var untracked = fillFormSchema(controller);
+            Assertions.assertTrue(valueSchema(untracked).isBoolean(),
+                    "Untracked schema must keep the open-keyed values map, "
+                            + "got: " + untracked);
+
+            controller.setSourceTrackingEnabled(true);
+            var tracked = fillFormSchema(controller);
+            Assertions.assertEquals("object",
+                    valueSchema(tracked).path("type").asString(),
+                    "Tracking must make every value the envelope object, "
+                            + "got: " + tracked);
+            Assertions.assertEquals(tracked, fillFormSchema(controller),
+                    "Tracked schema must be byte-identical across calls so "
+                            + "providers can cache the tool definition");
+
+            controller.setSourceTrackingEnabled(false);
+            Assertions.assertEquals(untracked, fillFormSchema(controller),
+                    "Toggling tracking off must restore the untracked "
+                            + "schema");
+        }
+
+        @Test
+        void envelopeRequiresOnlyTheValue() {
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var envelope = valueSchema(fillFormSchema(controller));
+            var properties = envelope.path("properties");
+            Assertions.assertTrue(properties.has("value"));
+            Assertions.assertTrue(properties.has("confidence"));
+            Assertions.assertTrue(properties.has("extracts"));
+            Assertions.assertEquals(List.of("value"),
+                    stringsOf(envelope.path("required")),
+                    "A value with nothing to point at is sent without "
+                            + "confidence and extracts");
+        }
+
+        @Test
+        void envelopeListsEveryConfidenceLevel() {
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var levels = stringsOf(valueSchema(fillFormSchema(controller))
+                    .path("properties").path("confidence").path("enum"));
+
+            var expected = new ArrayList<String>();
+            for (var level : ConfidenceLevel.values()) {
+                expected.add(level.name().toLowerCase());
+            }
+            Assertions.assertEquals(expected, levels,
+                    "The schema must offer exactly the levels the parser "
+                            + "accepts, in lower case");
+        }
+
+        @Test
+        void envelopeDescribesExtractsAsParserReadsThem() {
+            var controller = controllerFor(new TestField())
+                    .setSourceTrackingEnabled(true);
+
+            var extract = valueSchema(fillFormSchema(controller))
+                    .path("properties").path("extracts").path("items");
+            Assertions.assertEquals(List.of("text"),
+                    stringsOf(extract.path("required")),
+                    "An extract needs its text, the location is optional");
+            var location = extract.path("properties").path("location")
+                    .path("properties");
+            Assertions.assertTrue(location.has("type"));
+            Assertions.assertTrue(location.has("page"));
+            Assertions.assertTrue(location.has("rect"));
+        }
+
+        /** The schema of one entry of the {@code values} map. */
+        private JsonNode valueSchema(String schema) {
+            return JacksonUtils.readTree(schema).path("properties")
+                    .path("values").path("additionalProperties");
+        }
+
+        private List<String> stringsOf(JsonNode array) {
+            var strings = new ArrayList<String>();
+            array.forEach(node -> strings.add(node.asString()));
+            return strings;
+        }
+    }
+
+    @Nested
     class ToolDescription {
 
         @Test
@@ -1022,5 +1112,10 @@ class SourceTrackingTest {
 
     private static String fillFormDescription(FormAIController controller) {
         return findTool(controller.getTools(), "fill_form").getDescription();
+    }
+
+    private static String fillFormSchema(FormAIController controller) {
+        return findTool(controller.getTools(), "fill_form")
+                .getParametersSchema();
     }
 }

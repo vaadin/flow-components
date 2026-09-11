@@ -8,12 +8,16 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -32,6 +36,89 @@ final class FormAITools {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormAITools.class);
+
+    /**
+     * The {@code fill_form} parameter schema while source tracking is off: an
+     * open-keyed map of field ids to plain values.
+     */
+    private static final String FILL_FORM_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "values": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "required": ["values"]
+            }""";
+
+    /**
+     * The {@code fill_form} parameter schema while source tracking is on: every
+     * entry of the {@code values} map is the source-reporting envelope
+     * {@link ValueSourceParser} reads, with only {@code value} required. The
+     * envelope is the only value shape the schema offers on purpose: given the
+     * choice between a plain value and the envelope, smaller models always pick
+     * the plain one and never report a source, while a mandatory object they
+     * fill. A plain value that arrives anyway is still written, without a
+     * source.
+     */
+    private static final String TRACKED_FILL_FORM_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "values": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "description": "One field's value, with its source when the value was read from an attached document.",
+                    "properties": {
+                      "value": {
+                        "description": "The value as you would otherwise send it."
+                      },
+                      "confidence": {
+                        "type": "string",
+                        "enum": [%s]
+                      },
+                      "extracts": {
+                        "type": "array",
+                        "description": "Every snippet read from the attached document to produce the value. Leave out when the value did not come from a document.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string",
+                              "description": "The snippet, copied verbatim from the document."
+                            },
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "type": { "type": "string", "enum": ["page-region"] },
+                                "page": { "type": "integer", "minimum": 1 },
+                                "rect": {
+                                  "type": "array",
+                                  "description": "[left, top, width, height] as fractions of the page.",
+                                  "items": { "type": "number" },
+                                  "minItems": 4,
+                                  "maxItems": 4
+                                }
+                              },
+                              "required": ["type", "rect"]
+                            }
+                          },
+                          "required": ["text"]
+                        }
+                      }
+                    },
+                    "required": ["value"]
+                  }
+                }
+              },
+              "required": ["values"]
+            }"""
+            .formatted(Arrays.stream(ConfidenceLevel.values()).map(
+                    level -> '"' + level.name().toLowerCase(Locale.ROOT) + '"')
+                    .collect(Collectors.joining(", ")));
 
     private FormAITools() {
     }
@@ -100,6 +187,16 @@ final class FormAITools {
          *         off; never {@code null}
          */
         String sourceInstructions();
+
+        /**
+         * Returns whether source tracking is on. While it is, the
+         * {@code fill_form} parameter schema describes the source-reporting
+         * envelope every value is sent in; otherwise the schema is the plain
+         * open-keyed one.
+         *
+         * @return {@code true} while source tracking is on
+         */
+        boolean isSourceTrackingEnabled();
 
         /**
          * Applies the {@code fill_form} payload onto the form's fields and
@@ -266,14 +363,17 @@ final class FormAITools {
      * The parameter schema is static and open-keyed so the tool definition
      * stays byte-identical across the session — LLM providers that cache prompt
      * prefixes (system prompt + tool defs) hit the cache on every subsequent
-     * prompt. The LLM discovers per-field shape via {@code get_form_state} on
-     * each turn; this keeps the two tools' view of the form coherent and lets
-     * structural changes between tool calls within a single turn surface on the
-     * next {@code get_form_state} call (the dynamic per-field shape would
-     * freeze at stream open and silently miss such changes). The {@code values}
-     * wrapper exists so future top-level parameters (e.g. a {@code dryRun}
-     * flag) can be added without breaking the field-map shape. Per-field type
-     * validation is enforced server-side by
+     * prompt. The only variation is the source-tracking toggle: while it is on,
+     * the schema describes the envelope every value is sent in and the
+     * description carries the matching instructions; while it is off, both are
+     * the untracked ones. The LLM discovers per-field shape via
+     * {@code get_form_state} on each turn; this keeps the two tools' view of
+     * the form coherent and lets structural changes between tool calls within a
+     * single turn surface on the next {@code get_form_state} call (the dynamic
+     * per-field shape would freeze at stream open and silently miss such
+     * changes). The {@code values} wrapper exists so future top-level
+     * parameters (e.g. a {@code dryRun} flag) can be added without breaking the
+     * field-map shape. Per-field type validation is enforced server-side by
      * {@code FormValueConverter.convert(...)} — failures surface in the
      * {@code rejected} array of the JSON response, keyed by the offending
      * field's id.
@@ -317,17 +417,9 @@ final class FormAITools {
 
             @Override
             public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {
-                            "values": {
-                              "type": "object",
-                              "additionalProperties": true
-                            }
-                          },
-                          "required": ["values"]
-                        }""";
+                return callbacks.isSourceTrackingEnabled()
+                        ? TRACKED_FILL_FORM_SCHEMA
+                        : FILL_FORM_SCHEMA;
             }
 
             @Override
