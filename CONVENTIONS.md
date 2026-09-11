@@ -142,6 +142,8 @@ When adding new published Maven modules to the project (a `-flow` or `-testbench
 
 A module declaring `@NpmPackage` annotations pins the npm versions of those packages in its own jar. Declare `org.codehaus.mojo:exec-maven-plugin` in its build, without any configuration of its own: the root POM configures the execution that generates `META-INF/VAADIN/versions/<artifactId>-versions.json` from the annotations. The annotation is then the only place the version is written.
 
+Every published component module declares a dependency on `vaadin-flow-components-base`, even when it uses none of its classes. That jar pins the npm versions of the packages the web components share, such as `@vaadin/tooltip` and the base packages they are built on, and a versions file only applies when its jar is on the classpath of the application. Relying on another module to pull it in leaves those versions unpinned as soon as that dependency changes.
+
 Keep POM dependencies minimal, only add what is really needed by the respective module. Do not simply copy dependencies from existing modules or add the whole range of Flow framework dependencies.
 
 ## Miscellaneous
