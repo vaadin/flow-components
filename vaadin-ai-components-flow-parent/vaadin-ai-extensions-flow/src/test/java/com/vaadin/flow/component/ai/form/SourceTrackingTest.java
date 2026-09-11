@@ -277,6 +277,57 @@ class SourceTrackingTest {
         }
 
         @Test
+        void sourceLandsOnTheFieldItsKeyNames() {
+            // The case the feature exists for: one field read from the
+            // attachment, another taken from the prompt, in one fill.
+            var fromDocument = new TestField();
+            var fromPrompt = new TestField();
+            var controller = trackingControllerFor(fromDocument, fromPrompt);
+
+            fillRaw(controller,
+                    """
+                            {"values": {"%s": "Acme Ltd", "%s": "Ada"},
+                             "sources": {"%s": {"confidence": "high",
+                               "extracts": [{"text": "Invoiced to Acme Ltd."}]}}}"""
+                            .formatted(idOf(fromDocument), idOf(fromPrompt),
+                                    idOf(fromDocument)));
+
+            Assertions.assertEquals("Acme Ltd", fromDocument.getValue());
+            Assertions.assertEquals("Ada", fromPrompt.getValue());
+            var source = controller.getFieldSource(fromDocument).orElseThrow();
+            Assertions.assertEquals("Invoiced to Acme Ltd.",
+                    source.extracts().get(0).text());
+            Assertions.assertTrue(
+                    controller.getFieldSource(fromPrompt).isEmpty(),
+                    "The prompt-derived field must carry no source");
+        }
+
+        @Test
+        void sourcesAreMatchedByIdNotByOrder() {
+            // Sources listed in the opposite order of the values, each with
+            // its own snippet, so a positional match would swap them.
+            var first = new TestField();
+            var second = new TestField();
+            var controller = trackingControllerFor(first, second);
+
+            fillRaw(controller,
+                    """
+                            {"values": {"%s": "one", "%s": "two"},
+                             "sources": {
+                               "%s": {"extracts": [{"text": "second snippet"}]},
+                               "%s": {"extracts": [{"text": "first snippet"}]}}}"""
+                            .formatted(idOf(first), idOf(second), idOf(second),
+                                    idOf(first)));
+
+            Assertions.assertEquals("first snippet",
+                    controller.getFieldSource(first).orElseThrow().extracts()
+                            .get(0).text());
+            Assertions.assertEquals("second snippet",
+                    controller.getFieldSource(second).orElseThrow().extracts()
+                            .get(0).text());
+        }
+
+        @Test
         void multipleExtractsAreKeptInReportedOrder() {
             var field = new TestField();
             var controller = trackingControllerFor(field);
@@ -1156,6 +1207,14 @@ class SourceTrackingTest {
             {"confidence": "high", "extracts": [
               {"text": "snippet", "location": {"type": "page-region",
                "page": 1, "rect": [0.1, 0.2, 0.3, 0.04]}}]}""";
+
+    /** Executes {@code fill_form} with the given arguments JSON. */
+    private static JsonNode fillRaw(FormAIController controller,
+            String arguments) {
+        var response = findTool(controller.getTools(), "fill_form")
+                .execute(JacksonUtils.readTree(arguments));
+        return JacksonUtils.readTree(response);
+    }
 
     /**
      * Executes {@code fill_form} with a single-field payload whose value is the
