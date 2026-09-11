@@ -339,7 +339,10 @@ class SourceTrackingTest {
         }
 
         @Test
-        void sourceForAFieldThatWasNotWrittenIsIgnored() {
+        void sourceWithoutAValueIsReportedAndNotStored() {
+            // The model keyed the source with an id that is not among the
+            // values, so the source describes nothing. It is reported in
+            // "rejected" so the model can fix the key, and nothing is stored.
             var field = new TestField();
             field.setValue("before");
             var controller = trackingControllerFor(field);
@@ -351,11 +354,34 @@ class SourceTrackingTest {
                                     + "\": " + TRACKED_SOURCE + "}}")));
 
             Assertions.assertEquals("before", field.getValue());
-            Assertions.assertTrue(rejectedIsEmpty(result),
-                    "A stray source must not be reported as a rejection, "
-                            + "got: " + result);
             Assertions.assertTrue(controller.getFieldSource(field).isEmpty(),
                     "A source for an unwritten field must not be stored");
+            var rejected = result.path("rejected");
+            Assertions.assertEquals(1, rejected.size(),
+                    "The stray source must be reported once, got: " + result);
+            Assertions.assertEquals(idOf(field),
+                    rejected.get(0).path("id").asString());
+            Assertions.assertTrue(
+                    rejected.get(0).path("reason").asString()
+                            .contains("not among the ids"),
+                    "The reason must point at the key mismatch, got: "
+                            + result);
+        }
+
+        @Test
+        void sourceWithoutAValueIsIgnoredWhileTrackingIsOff() {
+            var field = new TestField();
+            var controller = controllerFor(field);
+
+            var result = JacksonUtils.readTree(findTool(controller.getTools(),
+                    "fill_form")
+                    .execute(JacksonUtils.readTree(
+                            "{\"values\": {}, \"sources\": {\"" + idOf(field)
+                                    + "\": " + TRACKED_SOURCE + "}}")));
+
+            Assertions.assertTrue(rejectedIsEmpty(result),
+                    "Without tracking, sources are not read at all, got: "
+                            + result);
         }
 
         @Test

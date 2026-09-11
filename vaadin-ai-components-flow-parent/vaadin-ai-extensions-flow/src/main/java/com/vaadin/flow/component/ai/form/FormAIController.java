@@ -1845,8 +1845,10 @@ public class FormAIController implements AIController {
             }
             var rejected = new ArrayList<RejectedEntry>();
             var values = arguments.get("values");
-            // Sources are keyed like values; an entry for an id that was not
-            // written describes nothing and is skipped.
+            // Sources are keyed like values. An entry whose id is not among
+            // the values describes nothing, and is reported below so the
+            // model can fix the key instead of the source going missing
+            // without a trace.
             var sources = sourceTrackingEnabled ? arguments.path("sources")
                     : JacksonUtils.nullNode();
             // Phase 1: write the LLM's values. Convert and setValue only,
@@ -1883,6 +1885,18 @@ public class FormAIController implements AIController {
                 }
                 if (applyValue(field, value, sources.path(id), rejected)) {
                     writtenValues.put(id, value);
+                }
+            }
+            if (sources.isObject()) {
+                for (var id : sources.propertyNames()) {
+                    if (!values.has(id)) {
+                        rejected.add(new RejectedEntry(id, sources.get(id),
+                                "Source reported for '" + id
+                                        + "', which is not among the ids in "
+                                        + "\"values\". Report a source under "
+                                        + "the same field id as its value, "
+                                        + "or leave it out."));
+                    }
                 }
             }
             // Phase 2: validate the post-write state. Each written field is
