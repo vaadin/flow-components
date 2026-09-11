@@ -1859,31 +1859,8 @@ public class FormAIController implements AIController {
             var writtenValues = new LinkedHashMap<String, JsonNode>();
             for (var id : values.propertyNames()) {
                 var value = values.get(id);
-                var field = byId.get(id);
-                if (field == null) {
-                    rejected.add(new RejectedEntry(id, value,
-                            "Unknown field id '" + id
-                                    + "'. Call get_form_state to refresh "
-                                    + "the id list and retry only entries "
-                                    + "that are rejected with the reason "
-                                    + "unknown field id."));
-                    continue;
-                }
-                // Re-evaluate the field's live writability rather than the
-                // verdict captured before this turn's writes: an earlier
-                // write in the same payload (e.g. via a value-change listener)
-                // can disable or enable a field that appears later. Using the
-                // pre-write snapshot would let a write land on a field the
-                // user can no longer edit, or reject one that just became
-                // writable.
-                var raw = field.field();
-                var disabled = isDisabled(raw);
-                if (disabled || raw.isReadOnly()) {
-                    rejected.add(new RejectedEntry(id, value,
-                            notWritableReason(disabled)));
-                    continue;
-                }
-                if (applyValue(field, value, sources.path(id), rejected)) {
+                if (writeValue(id, value, byId.get(id), sources.path(id),
+                        rejected)) {
                     writtenValues.put(id, value);
                 }
             }
@@ -1929,6 +1906,42 @@ public class FormAIController implements AIController {
             // and any normalisation setters applied. Per RFC, the response
             // mirrors what get_form_state would return after the write.
             return formatResult(visibleFields(), rejected);
+        }
+
+        /**
+         * Writes one {@code fill_form} entry: rejects an id that matches no
+         * field or a field the user can no longer edit, otherwise hands the
+         * value to {@link #applyValue}.
+         *
+         * @param field
+         *            the field the id resolved to in the pre-write snapshot, or
+         *            {@code null} for an unknown id
+         * @return {@code true} when the value was written
+         */
+        private boolean writeValue(String id, JsonNode value,
+                FormFieldDescriptor field, JsonNode source,
+                List<RejectedEntry> rejected) {
+            if (field == null) {
+                rejected.add(new RejectedEntry(id, value, "Unknown field id '"
+                        + id + "'. Call get_form_state to refresh the id "
+                        + "list and retry only entries that are rejected "
+                        + "with the reason unknown field id."));
+                return false;
+            }
+            // Re-evaluate the field's live writability rather than the
+            // verdict captured before this turn's writes: an earlier write
+            // in the same payload (e.g. via a value-change listener) can
+            // disable or enable a field that appears later. Using the
+            // pre-write snapshot would let a write land on a field the user
+            // can no longer edit, or reject one that just became writable.
+            var raw = field.field();
+            var disabled = isDisabled(raw);
+            if (disabled || raw.isReadOnly()) {
+                rejected.add(new RejectedEntry(id, value,
+                        notWritableReason(disabled)));
+                return false;
+            }
+            return applyValue(field, value, source, rejected);
         }
 
         /**
