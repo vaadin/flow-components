@@ -152,7 +152,9 @@ class GridAIControllerTest {
         dbProvider.executeException = new RuntimeException("internal detail");
         var tool = findTool("update_grid_data");
         var result = tool.execute(json("{\"query\": \"SELECT foo FROM t\"}"));
-        Assertions.assertEquals("Error updating grid data.", result);
+        Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
+        Assertions.assertFalse(result.contains("internal detail"),
+                "The cause must not reach the LLM, got: " + result);
     }
 
     @Test

@@ -44,6 +44,18 @@ import tools.jackson.databind.JsonNode;
  */
 public final class ChartAITools {
 
+    /**
+     * Tail of the error a tool returns when it failed for a reason the LLM was
+     * given no detail about, because the cause was not a {@link ToolException}
+     * and so is not safe to pass on. Repeating the call unchanged can only fail
+     * the same way, which is what the LLM did without this; a rewritten attempt
+     * is still worth one try, since the cause is often something the LLM can
+     * avoid by itself, such as an identifier the database reserves.
+     */
+    private static final String RETRY_ONCE = " No details about the cause are "
+            + "available. Do not repeat the same %s: change it and try once "
+            + "more, or report the failure if you cannot.";
+
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAITools.class);
 
@@ -528,7 +540,8 @@ public final class ChartAITools {
                             + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_configuration failed", e);
-                    return "Error updating chart configuration.";
+                    return "Error updating chart configuration."
+                            + RETRY_ONCE.formatted("configuration");
                 }
             }
         };
@@ -678,7 +691,8 @@ public final class ChartAITools {
                     return "Error updating chart data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_data_source failed", e);
-                    return "Error updating chart data.";
+                    return "Error updating chart data."
+                            + RETRY_ONCE.formatted("queries");
                 }
             }
         };
