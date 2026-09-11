@@ -772,6 +772,10 @@ public class FormAIController implements AIController {
      * extracts are what the model says it read — they are not checked against
      * the document.
      * <p>
+     * A source describes where in an attached document a value was read. A
+     * value with nothing to point at, such as one taken from the chat prompt,
+     * carries no source.
+     * <p>
      * A source says where a snippet is inside a document, but not which
      * document. Send at most one attachment per prompt while source tracking is
      * on: with several, there is no way to tell which one a reported location
@@ -1742,33 +1746,36 @@ public class FormAIController implements AIController {
         }
 
         @Override
+        public boolean isSourceTrackingEnabled() {
+            return sourceTrackingEnabled;
+        }
+
+        @Override
         public String sourceInstructions() {
             if (!sourceTrackingEnabled) {
                 return "";
             }
             return """
                     \s\
-                    Source tracking is on. When a value comes from an \
-                    attached document, wrap it in an object instead of \
-                    sending it plainly: {"value": <the value as you would \
-                    otherwise send it>, "confidence": <level>, "extracts": \
-                    [{"text": <snippet>, "location": {"type": \
-                    "page-region", "page": <page>, "rect": [x, y, width, \
-                    height]}}]}. "value" is required; plain values stay \
-                    valid for fields with nothing to point at. List in \
-                    "extracts" every snippet you read to produce the \
-                    value, each with its text copied verbatim from the \
-                    document. "rect" is the snippet's bounding box as \
-                    fractions of the page as displayed, [left, top, width, \
-                    height] measured from the top-left corner. "page" \
-                    starts at 1; leave it out when the source has a single \
-                    surface, such as an image. Leave "location" out when \
-                    the snippet has no position, such as pasted text; \
-                    leave "extracts" out when there is no source document \
-                    at all. "confidence" is "high" when %s; "medium" when \
-                    %s; "low" when %s. Leave "confidence" out when you \
-                    cannot judge it, such as for a value taken from the \
-                    chat prompt. Never invent a snippet, a location, or a \
+                    Source tracking is on. For every value in "values" \
+                    that you read from an attached document, add an entry \
+                    with the same field id under "sources": {"confidence": \
+                    <level>, "extracts": [{"text": <snippet>, "location": \
+                    {"type": "page-region", "page": <page>, "rect": [x, y, \
+                    width, height]}}]}. List in "extracts" every snippet \
+                    you read to produce the value, each with its text \
+                    copied verbatim from the document. "rect" is the \
+                    snippet's bounding box as fractions of the page as \
+                    displayed, [left, top, width, height] measured from \
+                    the top-left corner. "page" starts at 1; leave it out \
+                    when the source has a single surface, such as an \
+                    image. Leave "location" out when the snippet has no \
+                    position, such as pasted text. "confidence" is "high" \
+                    when %s; "medium" when %s; "low" when %s. Leave \
+                    "confidence" out when you cannot judge it. Leave a \
+                    field out of "sources" when its value did not come \
+                    from a document, such as a value taken from the chat \
+                    prompt. Never invent a snippet, a location, or a \
                     confidence level.""".formatted(
                     describeConfidence(ConfidenceLevel.HIGH),
                     describeConfidence(ConfidenceLevel.MEDIUM),
@@ -1837,40 +1844,36 @@ public class FormAIController implements AIController {
                 byId.put(descriptor.id(), descriptor);
             }
             var rejected = new ArrayList<RejectedEntry>();
+            var values = arguments.get("values");
+            // Sources are keyed like values. An entry whose id is not among
+            // the values describes nothing, and is reported below so the
+            // model can fix the key instead of the source going missing
+            // without a trace.
+            var sources = sourceTrackingEnabled ? arguments.path("sources")
+                    : JacksonUtils.nullNode();
             // Phase 1: write the LLM's values. Convert and setValue only,
             // collecting write-level rejections (bad conversion, field-refused
             // value). Validation is deferred to the single pass below so every
             // field is judged against the fully-written form rather than a
             // partial snapshot whose verdict would depend on argument order.
             var writtenValues = new LinkedHashMap<String, JsonNode>();
-            for (var id : arguments.propertyNames()) {
-                var value = arguments.get(id);
-                var field = byId.get(id);
-                if (field == null) {
-                    rejected.add(new RejectedEntry(id, value,
-                            "Unknown field id '" + id
-                                    + "'. Call get_form_state to refresh "
-                                    + "the id list and retry only entries "
-                                    + "that are rejected with the reason "
-                                    + "unknown field id."));
-                    continue;
-                }
-                // Re-evaluate the field's live writability rather than the
-                // verdict captured before this turn's writes: an earlier
-                // write in the same payload (e.g. via a value-change listener)
-                // can disable or enable a field that appears later. Using the
-                // pre-write snapshot would let a write land on a field the
-                // user can no longer edit, or reject one that just became
-                // writable.
-                var raw = field.field();
-                var disabled = isDisabled(raw);
-                if (disabled || raw.isReadOnly()) {
-                    rejected.add(new RejectedEntry(id, value,
-                            notWritableReason(disabled)));
-                    continue;
-                }
-                if (applyValue(field, value, rejected)) {
+            for (var id : values.propertyNames()) {
+                var value = values.get(id);
+                if (writeValue(id, value, byId.get(id), sources.path(id),
+                        rejected)) {
                     writtenValues.put(id, value);
+                }
+            }
+            if (sources.isObject()) {
+                for (var id : sources.propertyNames()) {
+                    if (!values.has(id)) {
+                        rejected.add(new RejectedEntry(id, sources.get(id),
+                                "Source reported for '" + id
+                                        + "', which is not among the ids in "
+                                        + "\"values\". Report a source under "
+                                        + "the same field id as its value, "
+                                        + "or leave it out."));
+                    }
                 }
             }
             // Phase 2: validate the post-write state. Each written field is
@@ -1906,16 +1909,52 @@ public class FormAIController implements AIController {
         }
 
         /**
+         * Writes one {@code fill_form} entry: rejects an id that matches no
+         * field or a field the user can no longer edit, otherwise hands the
+         * value to {@link #applyValue}.
+         *
+         * @param field
+         *            the field the id resolved to in the pre-write snapshot, or
+         *            {@code null} for an unknown id
+         * @return {@code true} when the value was written
+         */
+        private boolean writeValue(String id, JsonNode value,
+                FormFieldDescriptor field, JsonNode source,
+                List<RejectedEntry> rejected) {
+            if (field == null) {
+                rejected.add(new RejectedEntry(id, value, "Unknown field id '"
+                        + id + "'. Call get_form_state to refresh the id "
+                        + "list and retry only entries that are rejected "
+                        + "with the reason unknown field id."));
+                return false;
+            }
+            // Re-evaluate the field's live writability rather than the
+            // verdict captured before this turn's writes: an earlier write
+            // in the same payload (e.g. via a value-change listener) can
+            // disable or enable a field that appears later. Using the
+            // pre-write snapshot would let a write land on a field the user
+            // can no longer edit, or reject one that just became writable.
+            var raw = field.field();
+            var disabled = isDisabled(raw);
+            if (disabled || raw.isReadOnly()) {
+                rejected.add(new RejectedEntry(id, value,
+                        notWritableReason(disabled)));
+                return false;
+            }
+            return applyValue(field, value, source, rejected);
+        }
+
+        /**
          * Converts {@code value} and writes it to {@code field}. Validation is
          * not run here — it happens in a single pass after every value is
          * written (see {@code doFill}). Only write failures (a rejected
          * conversion or a field that refuses the value) are recorded.
          * <p>
-         * When source tracking is on, the value may arrive wrapped in a
-         * source-reporting envelope. The plain value inside goes through the
-         * regular conversion, and the reported source is stored on a successful
-         * write, tied to the value the field then holds. Bad source data never
-         * blocks the value (see {@link ValueSourceParser}).
+         * When source tracking is on, {@code source} is the field's entry in
+         * the {@code sources} map the LLM sent, or a missing node when it sent
+         * none. The reported source is stored on a successful write, tied to
+         * the value the field then holds. Bad source data never blocks the
+         * value (see {@link ValueSourceParser}).
          *
          * @return {@code true} when the value was written and is eligible for
          *         the post-write validation pass, {@code false} when a write
@@ -1923,16 +1962,13 @@ public class FormAIController implements AIController {
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private boolean applyValue(FormFieldDescriptor field, JsonNode value,
-                List<RejectedEntry> rejected) {
-            var payload = value;
-            ValueSource reportedSource = null;
-            if (sourceTrackingEnabled && ValueSourceParser.isEnvelope(value)) {
-                payload = ValueSourceParser.unwrapValue(value);
-                reportedSource = ValueSourceParser.parse(value, field.id());
-            }
+                JsonNode source, List<RejectedEntry> rejected) {
+            var reportedSource = sourceTrackingEnabled
+                    ? ValueSourceParser.parse(source, field.id())
+                    : null;
             Object converted;
             try {
-                converted = FormValueConverter.convert(field, payload);
+                converted = FormValueConverter.convert(field, value);
             } catch (RejectedValueException ex) {
                 LOGGER.debug("Rejected value for field {}: {}", field.id(),
                         ex.getMessage());

@@ -8,12 +8,16 @@
  */
 package com.vaadin.flow.component.ai.form;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -32,6 +36,86 @@ final class FormAITools {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(FormAITools.class);
+
+    /**
+     * The {@code fill_form} parameter schema while source tracking is off: an
+     * open-keyed map of field ids to plain values.
+     */
+    private static final String FILL_FORM_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "values": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "required": ["values"]
+            }""";
+
+    /**
+     * The {@code fill_form} parameter schema while source tracking is on: the
+     * same open-keyed {@code values} map plus a {@code sources} map keyed by
+     * the same field ids, in the shape {@link ValueSourceParser} reads. Asking
+     * for the source as a named parameter, rather than in the description prose
+     * alone, is what makes smaller models report one.
+     */
+    private static final String TRACKED_FILL_FORM_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "values": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "sources": {
+                  "type": "object",
+                  "description": "For every value in \\"values\\" that was read from an attached document, where it was read from, keyed by the same field id.",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "confidence": {
+                        "type": "string",
+                        "enum": [%s]
+                      },
+                      "extracts": {
+                        "type": "array",
+                        "description": "Every snippet read to produce the value.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "text": {
+                              "type": "string",
+                              "description": "The snippet, copied verbatim from the document."
+                            },
+                            "location": {
+                              "type": "object",
+                              "properties": {
+                                "type": { "type": "string", "enum": ["page-region"] },
+                                "page": { "type": "integer", "minimum": 1 },
+                                "rect": {
+                                  "type": "array",
+                                  "description": "[left, top, width, height] as fractions of the page.",
+                                  "items": { "type": "number" },
+                                  "minItems": 4,
+                                  "maxItems": 4
+                                }
+                              },
+                              "required": ["type", "rect"]
+                            }
+                          },
+                          "required": ["text"]
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "required": ["values"]
+            }"""
+            .formatted(Arrays.stream(ConfidenceLevel.values()).map(
+                    level -> '"' + level.name().toLowerCase(Locale.ROOT) + '"')
+                    .collect(Collectors.joining(", ")));
 
     private FormAITools() {
     }
@@ -91,10 +175,10 @@ final class FormAITools {
 
         /**
          * Returns the source-tracking addendum for the {@code fill_form} tool
-         * description — the envelope shape, the request to use it, and the
-         * meaning of each confidence level. Returns an empty string when source
-         * tracking is off, so the description stays byte-identical to the
-         * untracked one.
+         * description — the request to fill the {@code sources} parameter, its
+         * shape, and the meaning of each confidence level. Returns an empty
+         * string when source tracking is off, so the description stays
+         * byte-identical to the untracked one.
          *
          * @return the addendum text, or an empty string when source tracking is
          *         off; never {@code null}
@@ -102,10 +186,22 @@ final class FormAITools {
         String sourceInstructions();
 
         /**
-         * Applies the {@code fill_form} payload onto the form's fields and
-         * returns the post-write form state plus any rejections. The shape
-         * mirrors {@code get_form_state} — a {@code fields} block listing every
-         * visible field's current state — plus a {@code rejected} block with
+         * Returns whether source tracking is on. While it is, the
+         * {@code fill_form} parameter schema declares the {@code sources}
+         * parameter next to {@code values}; otherwise the schema is the plain
+         * one.
+         *
+         * @return {@code true} while source tracking is on
+         */
+        boolean isSourceTrackingEnabled();
+
+        /**
+         * Applies the {@code fill_form} arguments — the {@code values} map and,
+         * while source tracking is on, the {@code sources} map keyed by the
+         * same field ids — onto the form's fields and returns the post-write
+         * form state plus any rejections. The shape mirrors
+         * {@code get_form_state} — a {@code fields} block listing every visible
+         * field's current state — plus a {@code rejected} block with
          * {@code {"id", "value", "reason"}} entries for any value that failed
          * to parse, resolve, or validate. The implementation owns the UI-thread
          * hop and is expected to block until the writes complete so the tool
@@ -266,14 +362,17 @@ final class FormAITools {
      * The parameter schema is static and open-keyed so the tool definition
      * stays byte-identical across the session — LLM providers that cache prompt
      * prefixes (system prompt + tool defs) hit the cache on every subsequent
-     * prompt. The LLM discovers per-field shape via {@code get_form_state} on
-     * each turn; this keeps the two tools' view of the form coherent and lets
-     * structural changes between tool calls within a single turn surface on the
-     * next {@code get_form_state} call (the dynamic per-field shape would
-     * freeze at stream open and silently miss such changes). The {@code values}
-     * wrapper exists so future top-level parameters (e.g. a {@code dryRun}
-     * flag) can be added without breaking the field-map shape. Per-field type
-     * validation is enforced server-side by
+     * prompt. The only variation is the source-tracking toggle: while it is on,
+     * the schema declares the {@code sources} map next to {@code values} and
+     * the description carries the matching instructions; while it is off, both
+     * are the untracked ones. The LLM discovers per-field shape via
+     * {@code get_form_state} on each turn; this keeps the two tools' view of
+     * the form coherent and lets structural changes between tool calls within a
+     * single turn surface on the next {@code get_form_state} call (the dynamic
+     * per-field shape would freeze at stream open and silently miss such
+     * changes). The {@code values} wrapper exists so future top-level
+     * parameters (e.g. a {@code dryRun} flag) can be added without breaking the
+     * field-map shape. Per-field type validation is enforced server-side by
      * {@code FormValueConverter.convert(...)} — failures surface in the
      * {@code rejected} array of the JSON response, keyed by the offending
      * field's id.
@@ -317,17 +416,9 @@ final class FormAITools {
 
             @Override
             public String getParametersSchema() {
-                return """
-                        {
-                          "type": "object",
-                          "properties": {
-                            "values": {
-                              "type": "object",
-                              "additionalProperties": true
-                            }
-                          },
-                          "required": ["values"]
-                        }""";
+                return callbacks.isSourceTrackingEnabled()
+                        ? TRACKED_FILL_FORM_SCHEMA
+                        : FILL_FORM_SCHEMA;
             }
 
             @Override
@@ -341,7 +432,7 @@ final class FormAITools {
                             + "mapping field ids to values.";
                 }
                 try {
-                    return callbacks.executeFill(values);
+                    return callbacks.executeFill(arguments);
                 } catch (ToolException ex) {
                     LOGGER.warn("fill_form reported user-facing error", ex);
                     return "Error: " + ex.getMessage();
