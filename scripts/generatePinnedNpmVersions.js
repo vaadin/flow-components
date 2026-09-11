@@ -10,8 +10,14 @@
  * without the platform having to declare it. Generating the file from the
  * annotations keeps that version in one place, the annotation itself.
  *
- * The script is automatically run in the Maven build of the modules shipping a
- * versions file.
+ * The script is automatically run in the Maven build of every module declaring
+ * `exec-maven-plugin`, which the root pom configures for it. A module that
+ * declares no npm package has nothing to pin, and no file is written for it.
+ *
+ * A package declared by several modules is expected to have the same version
+ * everywhere, which is what the annotation update keeps it at. Flow merges the
+ * versions files of all modules, warning about a package whose version differs
+ * between them and pinning the newest of the two.
  *
  * The packages are pinned for the Lit mode, as the web components of a Flow
  * component are what a Lit application installs; a React application gets them
@@ -38,11 +44,6 @@ const outputFile = process.argv[3];
 const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
-
-if (!fs.existsSync(sourceDir)) {
-  console.error(`Source directory not found: ${sourceDir}`);
-  process.exit(1);
-}
 
 function javaFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -77,12 +78,16 @@ function readNpmPackages() {
   return packages;
 }
 
-const npmPackages = readNpmPackages();
+const npmPackages = fs.existsSync(sourceDir) ? readNpmPackages() : {};
 const npmNames = Object.keys(npmPackages).sort();
 
+// A module without Java sources or without a single annotation ships no npm
+// package, so there is nothing for it to pin. Writing an empty versions file
+// would only add a file that declares nothing to its jar.
 if (npmNames.length === 0) {
-  console.error(`No @NpmPackage annotation found in ${sourceDir}, so there is no version to pin`);
-  process.exit(1);
+  console.log(`No @NpmPackage annotation found in ${sourceDir}, so there is no version to pin`);
+  fs.rmSync(outputFile, { force: true });
+  process.exit(0);
 }
 
 // The name of an entry is only a label; Flow identifies a package by its

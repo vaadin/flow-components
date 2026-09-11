@@ -140,6 +140,10 @@ When adding a dependency to a module POM, do not use inline versions. Instead, d
 
 When adding new published Maven modules to the project (a `-flow` or `-testbench` module), register them with a matching dependency in the BOM under `flow-components-bom/pom.xml`.
 
+A module declaring `@NpmPackage` annotations pins the npm versions of those packages in its own jar. To do so, declare `org.codehaus.mojo:exec-maven-plugin` in its build, without any configuration of its own: the root POM configures the execution that generates `META-INF/VAADIN/versions/<artifactId>-versions.json` from the annotations.
+
+Every published component module declares a dependency on `vaadin-flow-components-base`, even when it uses none of its classes. That jar pins the npm versions of the base packages the web components share.
+
 Keep POM dependencies minimal, only add what is really needed by the respective module. Do not simply copy dependencies from existing modules or add the whole range of Flow framework dependencies.
 
 ## Miscellaneous

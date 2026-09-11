@@ -21,16 +21,21 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>
         <plugins>
+            <!-- Also pins the npm versions this module ships, see the root pom. -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.6.3</version>
                 <executions>
                     <execution>
                         <id>copy-theme-distribution</id>
