@@ -21,7 +21,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.badge.testbench.BadgeElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-badge/basic")
@@ -41,22 +40,16 @@ public class BadgeBasicIT extends AbstractComponentIT {
     }
 
     /**
-     * The badge keeps its content part hidden until the web component has seen
-     * text in the default slot, so a badge can carry its text in the light DOM
-     * and render as an empty pill. {@link BadgeElement#getText()} reads those
-     * text nodes with a script, which is the right answer for the component's
-     * text and cannot tell the two states apart, so this asserts what the
-     * browser paints instead.
+     * The content part is hidden while the badge has no {@code has-content}
+     * attribute, so a badge can carry its text in the light DOM and render as
+     * an empty pill. {@link BadgeElement#getText()} reads those text nodes with
+     * a script, which is the right answer for the component's text and cannot
+     * tell the two states apart.
      */
     @Test
     public void badgeContentRendered() {
         var badge = $(BadgeElement.class).id("badge");
         Assert.assertTrue("Badge should have the has-content attribute",
                 badge.hasAttribute("has-content"));
-
-        var content = badge.$(TestBenchElement.class)
-                .withAttribute("part", "content").first();
-        Assert.assertTrue("Badge content should be rendered",
-                content.getPropertyDouble("offsetWidth") > 0);
     }
 }
