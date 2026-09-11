@@ -25,6 +25,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.shared.HasTooltip;
 
 class ButtonTest {
@@ -298,6 +299,29 @@ class ButtonTest {
         button.setDisableOnClick(true);
         button.click();
         Assertions.assertTrue(button.isEnabled(), "Button should be enabled");
+    }
+
+    @Test
+    void disableOnClickModeUntilEnabledByDefault() {
+        button = new Button();
+        Assertions.assertEquals(DisableOnClickMode.UNTIL_ENABLED,
+                button.getDisableOnClickMode());
+    }
+
+    @Test
+    void setDisableOnClickMode_modeUpdated_disableOnClickEnabled() {
+        button = new Button();
+        button.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+        Assertions.assertEquals(DisableOnClickMode.UNTIL_RESPONSE,
+                button.getDisableOnClickMode());
+        Assertions.assertTrue(button.isDisableOnClick());
+    }
+
+    @Test
+    void setDisableOnClickMode_null_throws() {
+        button = new Button();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> button.setDisableOnClick((DisableOnClickMode) null));
     }
 
     @Test

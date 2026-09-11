@@ -332,6 +332,56 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
+    public void disableOnClickUntilResponse_click_disabledDuringRoundTrip_enabledAfterResponse() {
+        var button = $(ButtonElement.class)
+                .id("disable-on-click-until-response-button");
+        var clickCount = findElement(
+                By.id("disable-on-click-until-response-count"));
+        scrollToElement(button);
+
+        getCommandExecutor().disableWaitForVaadin();
+        try {
+            for (int i = 1; i <= 3; i++) {
+                button.click();
+                Assert.assertFalse(
+                        "The button should be disabled while the click is handled",
+                        button.isEnabled());
+                waitUntil(driver -> button.isEnabled());
+                Assert.assertEquals(String.valueOf(i), clickCount.getText());
+            }
+        } finally {
+            getCommandExecutor().enableWaitForVaadin();
+        }
+    }
+
+    @Test
+    public void disableOnClickUntilResponse_clientEnablesAndClicksInSameRoundTrip_onlyFirstClickHandled() {
+        var button = $(ButtonElement.class)
+                .id("disable-on-click-until-response-button");
+        var clickCount = findElement(
+                By.id("disable-on-click-until-response-count"));
+        scrollToElement(button);
+
+        // Re-enable the button from the client side and click again, all in
+        // the same task, so that every click is sent in the same request
+        executeScript("""
+                const button = arguments[0];
+                for (let i = 0; i < 4; i++) {
+                  button.disabled = false;
+                  button.click();
+                }
+                """, button);
+
+        waitUntil(driver -> button.isEnabled());
+        Assert.assertEquals("Only the first click should have been handled",
+                "1", clickCount.getText());
+
+        button.click();
+        waitUntil(driver -> button.isEnabled());
+        Assert.assertEquals("2", clickCount.getText());
+    }
+
+    @Test
     public void disableOnClick_hideWhenDisabled_showWhenEnabled_clientSideButtonIsEnabled() {
         WebElement button = layout
                 .findElement(By.id("disable-on-click-hidden-button"));

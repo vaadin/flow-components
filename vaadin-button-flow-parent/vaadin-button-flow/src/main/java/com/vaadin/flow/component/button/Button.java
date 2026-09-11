@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.button;
 
+import java.util.Objects;
+
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.ClickEvent;
@@ -37,6 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -412,8 +415,13 @@ public class Button extends Component
      * Sets whether the button should be disabled when clicked.
      * <p>
      * When set to {@code true}, the button will be immediately disabled on the
-     * client-side when clicked, preventing further clicks until re-enabled from
-     * the server-side.
+     * client-side when clicked, preventing further clicks. How long the button
+     * stays disabled depends on the current {@link #getDisableOnClickMode()
+     * disable on click mode}. By default, the button stays disabled until it is
+     * enabled again by the application. Use
+     * {@link #setDisableOnClick(DisableOnClickMode)} to change the mode, for
+     * example to enable the button again automatically with the next response
+     * after the click.
      * <p>
      * When the enabled state is bound to a signal, the disable on click feature
      * can not be used. Disable on click requires the component to automatically
@@ -428,16 +436,54 @@ public class Button extends Component
      * @since 1.2
      */
     public void setDisableOnClick(boolean disableOnClick) {
+        if (disableOnClick) {
+            checkNoEnabledBinding();
+        }
+        disableOnClickController.setDisableOnClick(disableOnClick);
+    }
+
+    /**
+     * Sets the button to be disabled when clicked, using the given mode to
+     * determine how long the button stays disabled:
+     * <ul>
+     * <li>{@link DisableOnClickMode#UNTIL_ENABLED}: The button stays disabled
+     * until it is enabled again by the application. This is the default mode.
+     * <li>{@link DisableOnClickMode#UNTIL_RESPONSE}: The button is enabled
+     * again automatically with the next response the server sends after the
+     * click, normally the response to the request that delivered the click. If
+     * you explicitly set the enabled state of the button while the click is
+     * handled, the automatic enabling is skipped for that click. See the
+     * constant's documentation for how manual push affects this.
+     * </ul>
+     * <p>
+     * Calling this method is equivalent to calling
+     * {@link #setDisableOnClick(boolean) setDisableOnClick(true)} after setting
+     * the mode. The mode is kept when disable on click is later turned off and
+     * on again with {@link #setDisableOnClick(boolean)}.
+     *
+     * @param mode
+     *            the disable on click mode, not {@code null}
+     * @throws IllegalStateException
+     *             if the enabled state is already bound to a signal
+     * @see #setDisableOnClick(boolean)
+     * @since 25.3
+     */
+    public void setDisableOnClick(DisableOnClickMode mode) {
+        Objects.requireNonNull(mode, "DisableOnClickMode must not be null");
+        checkNoEnabledBinding();
+        disableOnClickController.setDisableOnClick(mode);
+    }
+
+    private void checkNoEnabledBinding() {
         boolean hasEnabledBinding = getElement().getNode()
                 .getFeatureIfInitialized(SignalBindingFeature.class)
                 .map(feature -> feature
                         .hasBinding(SignalBindingFeature.ENABLED))
                 .orElse(false);
-        if (disableOnClick && hasEnabledBinding) {
+        if (hasEnabledBinding) {
             throw new IllegalStateException(
                     "Disable on click is not supported when the enabled state is bound to a signal. ");
         }
-        disableOnClickController.setDisableOnClick(disableOnClick);
     }
 
     /**
@@ -448,6 +494,18 @@ public class Button extends Component
      */
     public boolean isDisableOnClick() {
         return disableOnClickController.isDisableOnClick();
+    }
+
+    /**
+     * Gets the mode that determines how long the button stays disabled after it
+     * has been disabled on click. {@link DisableOnClickMode#UNTIL_ENABLED} by
+     * default.
+     *
+     * @return the disable on click mode, not {@code null}
+     * @since 25.3
+     */
+    public DisableOnClickMode getDisableOnClickMode() {
+        return disableOnClickController.getDisableOnClickMode();
     }
 
     /**
