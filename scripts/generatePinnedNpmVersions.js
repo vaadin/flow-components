@@ -51,12 +51,20 @@ if (process.argv.length !== 4) {
 const sourceDir = process.argv[2];
 const outputFile = process.argv[3];
 
-// The npm packages of the React components, by the name the annotation gives
-// them. A class naming anything else would send a React application to a
-// package that does not exist, which nothing downstream would notice.
+const CORE = '@vaadin/react-components';
+const PRO = '@vaadin/react-components-pro';
+
+// The npm packages of the React components, by every way the annotation can
+// name them: the constants, with or without the type, and the package itself.
+// A class naming anything else would send a React application to a package
+// that does not bring it, which nothing downstream would notice.
 const REACT_COMPONENTS = {
-  'ReactComponents.CORE': '@vaadin/react-components',
-  'ReactComponents.PRO': '@vaadin/react-components-pro'
+  'ReactComponents.CORE': CORE,
+  CORE: CORE,
+  '"@vaadin/react-components"': CORE,
+  'ReactComponents.PRO': PRO,
+  PRO: PRO,
+  '"@vaadin/react-components-pro"': PRO
 };
 const mode = 'lit';
 
@@ -64,7 +72,7 @@ const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version
 
 // Matches `@ReactComponents`, with the React components it names and the
 // packages it lists, both of which may be left out.
-const REACT_COMPONENTS_REGEX = /@ReactComponents\b\s*(?:\(([\s\S]*?)\))?/;
+const REACT_COMPONENTS_REGEX = /@ReactComponents\b\s*(?:\(([\s\S]*?)\))?/g;
 
 
 function javaFiles(dir) {
@@ -84,8 +92,8 @@ function javaFiles(dir) {
  */
 function readNpmPackages(sources) {
   const packages = {};
-  sources.forEach(({ file, content }) => {
-    for (const [, npmName, version] of content.matchAll(ANNOTATION_REGEX)) {
+  sources.forEach(({ file, declared }) => {
+    for (const [, npmName, version] of declared) {
       const declared = packages[npmName];
       if (declared && declared.version !== version) {
         console.error(
@@ -102,7 +110,10 @@ function readNpmPackages(sources) {
 
 // Read the sources once, for the annotations of all of them.
 const sources = fs.existsSync(sourceDir)
-  ? javaFiles(sourceDir).map((file) => ({ file, content: fs.readFileSync(file, 'utf8') }))
+  ? javaFiles(sourceDir).map((file) => {
+      const content = fs.readFileSync(file, 'utf8');
+      return { file, content, declared: [...content.matchAll(ANNOTATION_REGEX)] };
+    })
   : [];
 
 /**
@@ -112,18 +123,28 @@ const sources = fs.existsSync(sourceDir)
  * default.
  */
 function readReactComponents(file, content, declared) {
-  const annotation = REACT_COMPONENTS_REGEX.exec(content);
-  if (!annotation) {
+  const annotations = [...content.matchAll(REACT_COMPONENTS_REGEX)];
+  if (annotations.length === 0) {
     return {};
   }
-  const args = annotation[1] || '';
-  const named = /(ReactComponents\.\w+)/.exec(args);
-  if (named && !REACT_COMPONENTS[named[1]]) {
-    console.error(`${file} names ${named[1]}, which is not one of the React components ${Object.keys(REACT_COMPONENTS).join(' and ')}`);
+  if (annotations.length > 1) {
+    console.error(`${file} has more than one @ReactComponents, which says nothing about the class each of them applies to`);
     process.exit(1);
   }
-  const reactComponents = named ? REACT_COMPONENTS[named[1]] : REACT_COMPONENTS['ReactComponents.CORE'];
+  const args = annotations[0][1] || '';
   const listed = /packages\s*=\s*(?:\{([\s\S]*?)\}|("[^"]+"))/.exec(args);
+  // What is left once the packages are taken out is what names the React
+  // components, whichever way the class writes it
+  const named = args
+    .replace(/packages\s*=\s*(?:\{[\s\S]*?\}|"[^"]*")/, '')
+    .replace(/\bvalue\s*=/, '')
+    .replace(/,/g, ' ')
+    .trim();
+  if (named && !REACT_COMPONENTS[named]) {
+    console.error(`${file} names '${named}', which is not one of the React components ${CORE} and ${PRO}`);
+    process.exit(1);
+  }
+  const reactComponents = named ? REACT_COMPONENTS[named] : CORE;
   const packages = listed
     ? [...(listed[1] || listed[2]).matchAll(/"([^"]+)"/g)].map(([, name]) => name)
     : declared;
@@ -140,11 +161,15 @@ function readReactComponents(file, content, declared) {
 
 const npmPackages = readNpmPackages(sources);
 
-// What each package of the module says brings it, by package name.
-const includedIn = sources.reduce((brought, { file, content }) => {
-  const declared = [...content.matchAll(ANNOTATION_REGEX)].map(([, npmName]) => npmName);
-  return declared.length === 0 ? brought : Object.assign(brought, readReactComponents(file, content, declared));
-}, {});
+// What each package of the module says brings it, by package name. A class
+// declaring no package says nothing about the React components.
+const includedIn = sources
+  .filter(({ declared }) => declared.length > 0)
+  .reduce(
+    (brought, { file, content, declared }) =>
+      Object.assign(brought, readReactComponents(file, content, declared.map(([, npmName]) => npmName))),
+    {}
+  );
 const npmNames = Object.keys(npmPackages).sort();
 
 // A module without Java sources or without a single annotation ships no npm
