@@ -51,9 +51,12 @@ const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
 
-// Matches the whole `static final Map<String, List<String>> REACT_COMPONENTS =
-// Map.of(...)` declaration, and then each package of it with what it brings.
+// Matches a `REACT_COMPONENTS = ...` declaration, then the whole
+// `static final Map<String, List<String>> REACT_COMPONENTS = Map.of(...)` of it,
+// and then each package of it with what it brings. Only an assignment counts as
+// a declaration, so that a javadoc reference to the map is not taken for one.
 const DECLARATION = 'REACT_COMPONENTS';
+const DECLARATION_REGEX = /\bREACT_COMPONENTS\s*=/;
 const REACT_COMPONENTS_REGEX = /\bREACT_COMPONENTS\s*=\s*Map\.of\(([\s\S]*?)\);/;
 const REACT_PACKAGE_REGEX = /"([^"]+)"\s*,\s*List\.of\(([\s\S]*?)\)/g;
 
@@ -100,7 +103,7 @@ function readNpmPackages(sources) {
  * component next to them.
  */
 function readReactComponents(sources) {
-  const naming = sources.filter(({ content }) => content.includes(DECLARATION));
+  const naming = sources.filter(({ content }) => DECLARATION_REGEX.test(content));
   if (naming.length === 0) {
     return {};
   }
