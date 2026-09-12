@@ -48,12 +48,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@NpmPackage(value = "@vaadin/a11y-base", version = "25.3.0-beta2")
-@NpmPackage(value = "@vaadin/component-base", version = "25.3.0-beta2")
-@NpmPackage(value = "@vaadin/field-base", version = "25.3.0-beta2")
-@NpmPackage(value = "@vaadin/input-container", version = "25.3.0-beta2")
-@NpmPackage(value = "@vaadin/lit-renderer", version = "25.3.0-beta2")
-@NpmPackage(value = "@vaadin/overlay", version = "25.3.0-beta2")
+@NpmPackage(value = "@vaadin/a11y-base", version = "25.3.0-beta3")
+@NpmPackage(value = "@vaadin/component-base", version = "25.3.0-beta3")
+@NpmPackage(value = "@vaadin/field-base", version = "25.3.0-beta3")
+@NpmPackage(value = "@vaadin/input-container", version = "25.3.0-beta3")
+@NpmPackage(value = "@vaadin/lit-renderer", version = "25.3.0-beta3")
+@NpmPackage(value = "@vaadin/overlay", version = "25.3.0-beta3")
 final class TransitiveNpmPackages implements Serializable {
 
     private TransitiveNpmPackages() {
