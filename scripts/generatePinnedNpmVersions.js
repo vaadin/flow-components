@@ -23,6 +23,12 @@
  * component are what a Lit application installs; a React application gets them
  * from `@vaadin/react-components` instead.
  *
+ * A module may also declare the React components themselves, in a
+ * `REACT_COMPONENTS` map of a Java class, mapping each of their npm packages
+ * to the packages it brings. Those are written for the React mode, with what
+ * they bring as their `exclusions`, and at the version of the packages the
+ * module declares, which the React components are released with.
+ *
  * Usage:
  *   node generatePinnedNpmVersions.js <source-dir> <output-file>
  *
@@ -44,6 +50,11 @@ const outputFile = process.argv[3];
 const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
+
+// Matches the whole `static final Map<String, List<String>> REACT_COMPONENTS =
+// Map.of(...)` declaration, and then each package of it with what it brings.
+const REACT_COMPONENTS_REGEX = /\bREACT_COMPONENTS\s*=\s*Map\.of\(([\s\S]*?)\);/;
+const REACT_PACKAGE_REGEX = /"([^"]+)"\s*,\s*List\.of\(([\s\S]*?)\)/g;
 
 function javaFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -78,6 +89,34 @@ function readNpmPackages() {
   return packages;
 }
 
+/**
+ * Reads the React components a module declares and the packages each of them
+ * brings, from the `REACT_COMPONENTS` map of one of its classes. A module
+ * that declares none is the normal case.
+ */
+function readReactComponents() {
+  const declarations = javaFiles(sourceDir)
+    .map((file) => ({ file, match: REACT_COMPONENTS_REGEX.exec(fs.readFileSync(file, 'utf8')) }))
+    .filter((declaration) => declaration.match);
+  if (declarations.length === 0) {
+    return {};
+  }
+  if (declarations.length > 1) {
+    console.error(`More than one REACT_COMPONENTS declaration in ${sourceDir}: ${declarations.map((declaration) => declaration.file).join(', ')}`);
+    process.exit(1);
+  }
+  const { file, match } = declarations[0];
+  const reactComponents = {};
+  for (const [, npmName, brought] of match[1].matchAll(REACT_PACKAGE_REGEX)) {
+    reactComponents[npmName] = [...brought.matchAll(/"([^"]+)"/g)].map(([, name]) => name);
+  }
+  if (Object.keys(reactComponents).length === 0) {
+    console.error(`The REACT_COMPONENTS of ${file} declares no package, so it cannot be read`);
+    process.exit(1);
+  }
+  return reactComponents;
+}
+
 const npmPackages = fs.existsSync(sourceDir) ? readNpmPackages() : {};
 const npmNames = Object.keys(npmPackages).sort();
 
@@ -105,9 +144,37 @@ npmNames.forEach((npmName) => {
   };
 });
 
+// The React components are released with the components they wrap, so they
+// carry the version the module declares for its own packages rather than one
+// written down a second time.
+const reactComponents = readReactComponents();
+const reactNames = Object.keys(reactComponents).sort();
+if (reactNames.length > 0) {
+  const versionsDeclared = [...new Set(npmNames.map((npmName) => npmPackages[npmName].version))];
+  if (versionsDeclared.length !== 1) {
+    console.error(
+      `The React components take the version of the packages of ${sourceDir}, which declares several: ${versionsDeclared.join(', ')}`
+    );
+    process.exit(1);
+  }
+  reactNames.forEach((npmName) => {
+    versions[entryName(npmName)] = {
+      exclusions: reactComponents[npmName],
+      jsVersion: versionsDeclared[0],
+      mode: 'react',
+      npmName
+    };
+  });
+}
+
 const content = `${JSON.stringify(versions, null, 4)}\n`;
 
 fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
 
-console.log(`Wrote ${outputFile} pinning ${npmNames.join(', ')} for mode ${mode}`);
+const pinned = [
+  `${npmNames.join(', ')} for mode ${mode}`,
+  reactNames.length > 0 ? `${reactNames.join(', ')} for mode react` : undefined
+].filter(Boolean);
+
+console.log(`Wrote ${outputFile} pinning ${pinned.join(' and ')}`);
