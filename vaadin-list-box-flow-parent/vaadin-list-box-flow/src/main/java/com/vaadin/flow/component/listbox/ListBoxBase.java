@@ -39,7 +39,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -72,7 +71,6 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-list-box")
 @NpmPackage(value = "@vaadin/list-box", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>

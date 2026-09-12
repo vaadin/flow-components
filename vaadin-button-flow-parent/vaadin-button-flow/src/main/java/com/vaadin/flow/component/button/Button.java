@@ -45,7 +45,6 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
@@ -62,7 +61,6 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-button")
 @NpmPackage(value = "@vaadin/button", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,

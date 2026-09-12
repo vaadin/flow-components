@@ -34,7 +34,6 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -90,7 +89,6 @@ import tools.jackson.databind.node.ObjectNode;
 // node_modules entry. Keep version in sync with the one in @vaadin/map.
 @NpmPackage(value = "ol", version = "10.10.0")
 @NpmPackage(value = "proj4", version = "2.21.0")
-@ReactComponents(value = ReactComponents.PRO, packages = "@vaadin/map")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.ts")
 public class Map extends MapBase {

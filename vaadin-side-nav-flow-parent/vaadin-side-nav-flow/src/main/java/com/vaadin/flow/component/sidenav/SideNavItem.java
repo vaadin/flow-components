@@ -34,7 +34,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
@@ -62,7 +61,6 @@ import tools.jackson.databind.node.ArrayNode;
  */
 @Tag("vaadin-side-nav-item")
 @NpmPackage(value = "@vaadin/side-nav", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends Component implements HasSideNavItems,
         HasEnabled, HasPrefix, HasSuffix, HasTooltip {

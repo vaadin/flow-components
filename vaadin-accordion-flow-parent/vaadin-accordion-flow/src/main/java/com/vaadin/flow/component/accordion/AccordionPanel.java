@@ -20,7 +20,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * An accordion panel which could be opened or closed.
@@ -29,7 +28,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-accordion-panel")
 @NpmPackage(value = "@vaadin/accordion", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
 

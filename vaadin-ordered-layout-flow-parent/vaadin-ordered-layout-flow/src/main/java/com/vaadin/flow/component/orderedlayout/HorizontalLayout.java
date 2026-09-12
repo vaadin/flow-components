@@ -30,7 +30,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
@@ -45,7 +44,6 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-horizontal-layout")
 @NpmPackage(value = "@vaadin/horizontal-layout", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout>,

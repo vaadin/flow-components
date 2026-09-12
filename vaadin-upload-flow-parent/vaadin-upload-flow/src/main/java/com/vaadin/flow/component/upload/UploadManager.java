@@ -29,7 +29,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
@@ -485,7 +484,6 @@ public class UploadManager implements Serializable {
     @Tag("vaadin-upload-manager-connector")
     @JsModule("./vaadin-upload/uploadManagerConnector.ts")
     @NpmPackage(value = "@vaadin/upload", version = "25.3.0-beta2")
-    @ReactComponents
     static class Connector extends Component {
     }
 

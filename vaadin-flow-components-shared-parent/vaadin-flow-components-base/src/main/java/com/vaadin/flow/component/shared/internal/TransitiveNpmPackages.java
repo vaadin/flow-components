@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.shared.internal;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -54,9 +56,60 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/input-container", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/lit-renderer", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/overlay", version = "25.3.0-beta2")
-@ReactComponents(packages = { "@vaadin/component-base",
-        "@vaadin/input-container", "@vaadin/lit-renderer", "@vaadin/overlay" })
 final class TransitiveNpmPackages implements Serializable {
+
+    /**
+     * The npm packages of the React components of this module, mapped to the
+     * packages they bring themselves.
+     * <p>
+     * Only the core React components are declared here.
+     * {@code @vaadin/react-components-pro} brings the commercial components,
+     * which an application using only the core ones must not install, and this
+     * module is on the classpath of every application.
+     * <p>
+     * A React application installs the components through these instead of
+     * installing the web components one by one, so the packages listed here are
+     * left out of its {@code package.json} while their versions stay locked.
+     * The versions file of this module declares them for the React mode, at the
+     * version of the components, which the React components are released with.
+     * <p>
+     * They are not declared with {@link NpmPackage}, unlike the packages above:
+     * that annotation adds the package to the {@code package.json} of every
+     * application, whichever mode it uses, and a Lit application must not
+     * install the React components.
+     * <p>
+     * The lists say which packages each of them brings today. Nothing derives
+     * them from the components, so a component that is added has to be added
+     * here as well.
+     */
+    static final Map<String, List<String>> REACT_COMPONENTS = Map.of(
+            "@vaadin/react-components",
+            List.of("@vaadin/accordion", "@vaadin/app-layout", "@vaadin/avatar",
+                    "@vaadin/avatar-group", "@vaadin/badge",
+                    "@vaadin/breadcrumbs", "@vaadin/button", "@vaadin/card",
+                    "@vaadin/checkbox", "@vaadin/checkbox-group",
+                    "@vaadin/combo-box", "@vaadin/component-base",
+                    "@vaadin/confirm-dialog", "@vaadin/context-menu",
+                    "@vaadin/custom-field", "@vaadin/date-picker",
+                    "@vaadin/date-time-picker", "@vaadin/details",
+                    "@vaadin/dialog", "@vaadin/email-field",
+                    "@vaadin/field-highlighter", "@vaadin/form-layout",
+                    "@vaadin/grid", "@vaadin/horizontal-layout", "@vaadin/icon",
+                    "@vaadin/icons", "@vaadin/input-container",
+                    "@vaadin/integer-field", "@vaadin/item", "@vaadin/list-box",
+                    "@vaadin/lit-renderer", "@vaadin/login", "@vaadin/markdown",
+                    "@vaadin/master-detail-layout", "@vaadin/menu-bar",
+                    "@vaadin/message-input", "@vaadin/message-list",
+                    "@vaadin/multi-select-combo-box", "@vaadin/notification",
+                    "@vaadin/number-field", "@vaadin/overlay",
+                    "@vaadin/password-field", "@vaadin/popover",
+                    "@vaadin/progress-bar", "@vaadin/radio-group",
+                    "@vaadin/scroller", "@vaadin/select", "@vaadin/side-nav",
+                    "@vaadin/slider", "@vaadin/split-layout", "@vaadin/switch",
+                    "@vaadin/tabs", "@vaadin/tabsheet", "@vaadin/text-area",
+                    "@vaadin/text-field", "@vaadin/time-picker",
+                    "@vaadin/tooltip", "@vaadin/upload",
+                    "@vaadin/vertical-layout", "@vaadin/virtual-list"));
 
     private TransitiveNpmPackages() {
     }

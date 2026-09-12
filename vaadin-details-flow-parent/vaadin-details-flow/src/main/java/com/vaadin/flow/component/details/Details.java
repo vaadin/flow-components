@@ -34,7 +34,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -59,7 +58,6 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-details")
 @NpmPackage(value = "@vaadin/details", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component implements HasComponents, HasSize,
         HasThemeVariant<DetailsVariant>, HasTooltip {

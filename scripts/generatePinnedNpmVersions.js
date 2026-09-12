@@ -23,21 +23,18 @@
  * component are what a Lit application installs; a React application gets them
  * from `@vaadin/react-components` instead.
  *
- * A package the React components bring says so itself, in the `includedIn`
- * field naming the npm package of the React components that brings it. A
- * React application installs that one instead of the packages it brings, so
- * it is the package that says which one covers it, rather than the React
- * components listing every package they cover.
- *
- * The class declaring the packages says it with `@ReactComponents`, next to
- * the `@NpmPackage` annotations it applies to.
+ * A module may also declare the React components themselves, in a
+ * `REACT_COMPONENTS` map of a Java class, mapping each of their npm packages
+ * to the packages it brings. Those are written for the React mode, with what
+ * they bring as their `exclusions`, and at the version of the packages the
+ * module declares, which the React components are released with.
  *
  * Usage:
  *   node generatePinnedNpmVersions.js <source-dir> <output-file>
  *
  * Example
  *   node ../../scripts/generatePinnedNpmVersions.js src/main/java \
- *     target/classes/META-INF/VAADIN/versions/vaadin-map-flow-versions.json
+ *     target/classes/META-INF/VAADIN/versions/vaadin-text-field-flow-versions.json
  */
 
 const fs = require('fs');
@@ -50,30 +47,15 @@ if (process.argv.length !== 4) {
 
 const sourceDir = process.argv[2];
 const outputFile = process.argv[3];
-
-const CORE = '@vaadin/react-components';
-const PRO = '@vaadin/react-components-pro';
-
-// The npm packages of the React components, by every way the annotation can
-// name them: the constants, with or without the type, and the package itself.
-// A class naming anything else would send a React application to a package
-// that does not bring it, which nothing downstream would notice.
-const REACT_COMPONENTS = {
-  'ReactComponents.CORE': CORE,
-  CORE: CORE,
-  '"@vaadin/react-components"': CORE,
-  'ReactComponents.PRO': PRO,
-  PRO: PRO,
-  '"@vaadin/react-components-pro"': PRO
-};
 const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
 
-// Matches `@ReactComponents`, with the React components it names and the
-// packages it lists, both of which may be left out.
-const REACT_COMPONENTS_REGEX = /@ReactComponents\b\s*(?:\(([\s\S]*?)\))?/g;
-
+// Matches the whole `static final Map<String, List<String>> REACT_COMPONENTS =
+// Map.of(...)` declaration, and then each package of it with what it brings.
+const DECLARATION = 'REACT_COMPONENTS';
+const REACT_COMPONENTS_REGEX = /\bREACT_COMPONENTS\s*=\s*Map\.of\(([\s\S]*?)\);/;
+const REACT_PACKAGE_REGEX = /"([^"]+)"\s*,\s*List\.of\(([\s\S]*?)\)/g;
 
 function javaFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -92,8 +74,8 @@ function javaFiles(dir) {
  */
 function readNpmPackages(sources) {
   const packages = {};
-  sources.forEach(({ file, declared }) => {
-    for (const [, npmName, version] of declared) {
+  sources.forEach(({ file, content }) => {
+    for (const [, npmName, version] of content.matchAll(ANNOTATION_REGEX)) {
       const declared = packages[npmName];
       if (declared && declared.version !== version) {
         console.error(
@@ -107,69 +89,49 @@ function readNpmPackages(sources) {
   return packages;
 }
 
-
-// Read the sources once, for the annotations of all of them.
-const sources = fs.existsSync(sourceDir)
-  ? javaFiles(sourceDir).map((file) => {
-      const content = fs.readFileSync(file, 'utf8');
-      return { file, content, declared: [...content.matchAll(ANNOTATION_REGEX)] };
-    })
-  : [];
-
 /**
- * Reads what a class says the React components bring, from its
- * `@ReactComponents` annotation: the React components it names, the core ones
- * by default, and the packages it lists, all of the ones the class declares by
- * default.
+ * Reads the React components a module declares and the packages each of them
+ * brings, from the `REACT_COMPONENTS` map of one of its classes. A module
+ * that declares none is the normal case.
+ *
+ * A class that names `REACT_COMPONENTS` in a shape this cannot read stops the
+ * build rather than silently shipping a versions file without the React
+ * components, which would leave a React application installing every web
+ * component next to them.
  */
-function readReactComponents(file, content, declared) {
-  const annotations = [...content.matchAll(REACT_COMPONENTS_REGEX)];
-  if (annotations.length === 0) {
+function readReactComponents(sources) {
+  const naming = sources.filter(({ content }) => content.includes(DECLARATION));
+  if (naming.length === 0) {
     return {};
   }
-  if (annotations.length > 1) {
-    console.error(`${file} has more than one @ReactComponents, which says nothing about the class each of them applies to`);
+  if (naming.length > 1) {
+    console.error(`More than one ${DECLARATION} declaration in ${sourceDir}: ${naming.map(({ file }) => file).join(', ')}`);
     process.exit(1);
   }
-  const args = annotations[0][1] || '';
-  const listed = /packages\s*=\s*(?:\{([\s\S]*?)\}|("[^"]+"))/.exec(args);
-  // What is left once the packages are taken out is what names the React
-  // components, whichever way the class writes it
-  const named = args
-    .replace(/packages\s*=\s*(?:\{[\s\S]*?\}|"[^"]*")/, '')
-    .replace(/\bvalue\s*=/, '')
-    .replace(/,/g, ' ')
-    .trim();
-  if (named && !REACT_COMPONENTS[named]) {
-    console.error(`${file} names '${named}', which is not one of the React components ${CORE} and ${PRO}`);
+  const { file, content } = naming[0];
+  const declaration = REACT_COMPONENTS_REGEX.exec(content);
+  if (!declaration) {
+    console.error(`${file} names ${DECLARATION} but not as a 'Map.of' of package names to a 'List.of' of the packages they bring, so it cannot be read`);
     process.exit(1);
   }
-  const reactComponents = named ? REACT_COMPONENTS[named] : CORE;
-  const packages = listed
-    ? [...(listed[1] || listed[2]).matchAll(/"([^"]+)"/g)].map(([, name]) => name)
-    : declared;
-  const unknown = packages.filter((npmName) => !declared.includes(npmName));
-  if (unknown.length > 0) {
-    console.error(`${file} says the React components bring ${unknown.join(', ')}, which it does not declare with @NpmPackage`);
+  const reactComponents = {};
+  for (const [, npmName, brought] of declaration[1].matchAll(REACT_PACKAGE_REGEX)) {
+    reactComponents[npmName] = [...brought.matchAll(/"([^"]+)"/g)].map(([, name]) => name);
+  }
+  if (Object.keys(reactComponents).length === 0) {
+    console.error(`The ${DECLARATION} of ${file} declares no package, so it cannot be read`);
     process.exit(1);
   }
-  return packages.reduce((brought, npmName) => {
-    brought[npmName] = reactComponents;
-    return brought;
-  }, {});
+  return reactComponents;
 }
 
-const npmPackages = readNpmPackages(sources);
+// Read every source once: both the annotations and the React components come
+// out of the same files.
+const sources = fs.existsSync(sourceDir)
+  ? javaFiles(sourceDir).map((file) => ({ file, content: fs.readFileSync(file, 'utf8') }))
+  : [];
 
-// What each package of the module says brings it, by package name. A class
-// declaring no package says nothing about the React components.
-const includedIn = sources
-  .filter(({ declared }) => declared.length > 0)
-  .reduce(
-    (brought, { file, content, declared }) =>
-      Object.assign(brought, readReactComponents(file, content, declared.map(([, npmName]) => npmName))),
-    {}
-  );
+const npmPackages = readNpmPackages(sources);
 const npmNames = Object.keys(npmPackages).sort();
 
 // A module without Java sources or without a single annotation ships no npm
@@ -187,24 +149,46 @@ function entryName(npmName) {
   return npmName.replace(/^@[^/]+\//, '');
 }
 
-const brought = npmNames.filter((npmName) => includedIn[npmName]);
-
 const versions = {};
 npmNames.forEach((npmName) => {
   versions[entryName(npmName)] = {
-    ...(includedIn[npmName] ? { includedIn: includedIn[npmName] } : {}),
     jsVersion: npmPackages[npmName].version,
     mode,
     npmName
   };
 });
 
+// The React components are released with the components they wrap, so they
+// carry the version the module declares for its own packages rather than one
+// written down a second time.
+const reactComponents = readReactComponents(sources);
+const reactNames = Object.keys(reactComponents).sort();
+if (reactNames.length > 0) {
+  const versionsDeclared = [...new Set(npmNames.map((npmName) => npmPackages[npmName].version))];
+  if (versionsDeclared.length !== 1) {
+    console.error(
+      `The React components take the version of the packages of ${sourceDir}, which declares several: ${versionsDeclared.join(', ')}`
+    );
+    process.exit(1);
+  }
+  reactNames.forEach((npmName) => {
+    versions[entryName(npmName)] = {
+      exclusions: reactComponents[npmName],
+      jsVersion: versionsDeclared[0],
+      mode: 'react',
+      npmName
+    };
+  });
+}
+
 const content = `${JSON.stringify(versions, null, 4)}\n`;
 
 fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
 
-console.log(
-  `Wrote ${outputFile} pinning ${npmNames.join(', ')} for mode ${mode}` +
-    (brought.length > 0 ? `, ${brought.map((npmName) => `${npmName} brought by ${includedIn[npmName]}`).join(', ')}` : '')
-);
+const pinned = [
+  `${npmNames.join(', ')} for mode ${mode}`,
+  reactNames.length > 0 ? `${reactNames.join(', ')} for mode react` : undefined
+].filter(Boolean);
+
+console.log(`Wrote ${outputFile} pinning ${pinned.join(' and ')}`);

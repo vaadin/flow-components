@@ -26,7 +26,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
@@ -59,7 +58,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
 @NpmPackage(value = "@vaadin/avatar", version = "25.3.0-beta2")
-@ReactComponents
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 

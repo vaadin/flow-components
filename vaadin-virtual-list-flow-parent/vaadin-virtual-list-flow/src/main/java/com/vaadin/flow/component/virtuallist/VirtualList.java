@@ -32,7 +32,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.virtuallist.paging.PagelessDataCommunicator;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -73,7 +72,6 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-virtual-list")
 @NpmPackage(value = "@vaadin/virtual-list", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-virtual-list/virtualListConnector.ts")

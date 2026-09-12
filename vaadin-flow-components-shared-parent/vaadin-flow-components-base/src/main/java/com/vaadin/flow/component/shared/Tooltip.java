@@ -23,7 +23,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -34,7 +33,6 @@ import com.vaadin.flow.function.SerializableRunnable;
  * @since 23.3
  */
 @NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 

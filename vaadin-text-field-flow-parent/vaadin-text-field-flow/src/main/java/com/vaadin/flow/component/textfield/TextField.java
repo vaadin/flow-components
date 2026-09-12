@@ -27,7 +27,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -87,7 +86,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  */
 @Tag("vaadin-text-field")
 @NpmPackage(value = "@vaadin/text-field", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {

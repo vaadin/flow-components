@@ -32,7 +32,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -60,7 +59,6 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-context-menu")
 @NpmPackage(value = "@vaadin/context-menu", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")

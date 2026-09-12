@@ -20,7 +20,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * Server-side component for the {@code <vaadin-drawer-toggle>} element. It is a
@@ -34,7 +33,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-drawer-toggle")
 @NpmPackage(value = "@vaadin/app-layout", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/app-layout/src/vaadin-drawer-toggle.js")
 public class DrawerToggle extends Button {
 

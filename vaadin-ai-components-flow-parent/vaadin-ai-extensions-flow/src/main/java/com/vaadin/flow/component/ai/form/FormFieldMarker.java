@@ -14,7 +14,6 @@ import java.util.Optional;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -48,7 +47,6 @@ import tools.jackson.databind.node.ObjectNode;
  * never shows a marker.
  */
 @NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/field-highlighter/src/vaadin-ai-field-marker.js")
 final class FormFieldMarker {
 

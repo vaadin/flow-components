@@ -22,7 +22,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * Vertical Layout places components top-to-bottom in a column. By default, it
@@ -33,7 +32,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-vertical-layout")
 @NpmPackage(value = "@vaadin/vertical-layout", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component
         implements ThemableLayout, FlexComponent, ClickNotifier<VerticalLayout>,

@@ -19,7 +19,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * Login is a component that contains a login form. You can use it for
@@ -44,7 +43,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-login-form")
 @NpmPackage(value = "@vaadin/login", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/login/src/vaadin-login-form.js")
 public class LoginForm extends AbstractLogin implements HasStyle {
 

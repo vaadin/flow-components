@@ -31,7 +31,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.signals.BindingActiveException;
@@ -44,7 +43,6 @@ import com.vaadin.flow.signals.BindingActiveException;
  */
 @Tag("vaadin-card")
 @NpmPackage(value = "@vaadin/card", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component implements HasSize, HasAriaLabel,
         HasAriaRole, HasComponents, HasThemeVariant<CardVariant> {

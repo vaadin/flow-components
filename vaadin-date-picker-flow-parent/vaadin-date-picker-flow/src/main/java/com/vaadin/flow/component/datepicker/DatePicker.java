@@ -62,7 +62,6 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -148,7 +147,6 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./vaadin-date-picker/datepickerConnector.ts")
 @NpmPackage(value = "date-fns", version = "4.4.0")
-@ReactComponents(packages = "@vaadin/date-picker")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern,

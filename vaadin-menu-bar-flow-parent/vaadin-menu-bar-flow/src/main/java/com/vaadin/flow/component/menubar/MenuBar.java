@@ -38,7 +38,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -57,7 +56,6 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @NpmPackage(value = "@vaadin/menu-bar", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-beta2")
-@ReactComponents
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 

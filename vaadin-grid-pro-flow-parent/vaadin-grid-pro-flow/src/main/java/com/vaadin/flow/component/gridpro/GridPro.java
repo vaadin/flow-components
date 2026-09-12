@@ -28,7 +28,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -57,7 +56,6 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-grid-pro")
 @NpmPackage(value = "@vaadin/grid-pro", version = "25.3.0-beta2")
-@ReactComponents(ReactComponents.PRO)
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")

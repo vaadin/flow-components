@@ -21,7 +21,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * A button component for triggering file uploads. When clicked, it opens a file
@@ -41,7 +40,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-upload-button")
 @NpmPackage(value = "@vaadin/upload", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 public class UploadButton extends Button implements HasUploadManager {
 

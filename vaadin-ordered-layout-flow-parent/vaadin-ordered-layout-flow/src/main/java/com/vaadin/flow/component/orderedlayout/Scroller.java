@@ -27,7 +27,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * Scroller is a component container which enables scrolling overflowing
@@ -40,7 +39,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-scroller")
 @NpmPackage(value = "@vaadin/scroller", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/scroller/src/vaadin-scroller.js")
 public class Scroller extends Component implements Focusable<Scroller>, HasSize,
         HasStyle, HasThemeVariant<ScrollerVariant> {

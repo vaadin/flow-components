@@ -34,7 +34,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.ModalRoot;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
@@ -66,7 +65,6 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-confirm-dialog")
 @NpmPackage(value = "@vaadin/confirm-dialog", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @ModalRoot
 public class ConfirmDialog extends Component

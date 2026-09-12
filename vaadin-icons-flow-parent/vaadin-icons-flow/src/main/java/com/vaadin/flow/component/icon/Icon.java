@@ -19,7 +19,6 @@ import java.util.Locale;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
@@ -32,7 +31,6 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @NpmPackage(value = "@vaadin/icons", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 public class Icon extends AbstractIcon<Icon> {
 

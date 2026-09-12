@@ -30,7 +30,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -53,7 +52,6 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-app-layout")
 @NpmPackage(value = "@vaadin/app-layout", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors

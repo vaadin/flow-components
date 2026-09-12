@@ -48,7 +48,6 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -115,7 +114,6 @@ import tools.jackson.databind.node.ArrayNode;
  */
 @Tag("vaadin-checkbox-group")
 @NpmPackage(value = "@vaadin/checkbox-group", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>

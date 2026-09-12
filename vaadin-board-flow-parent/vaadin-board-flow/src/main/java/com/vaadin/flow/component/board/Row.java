@@ -18,7 +18,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.board.internal.FunctionCaller;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * Row class to define rows used in a {@link Board} instance.
@@ -33,7 +32,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-board-row")
 @NpmPackage(value = "@vaadin/board", version = "25.3.0-beta2")
-@ReactComponents(ReactComponents.PRO)
 @JsModule("@vaadin/board/src/vaadin-board-row.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Row extends Component

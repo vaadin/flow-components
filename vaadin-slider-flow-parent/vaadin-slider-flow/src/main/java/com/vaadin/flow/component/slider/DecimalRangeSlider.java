@@ -18,7 +18,6 @@ package com.vaadin.flow.component.slider;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * DecimalRangeSlider is an input field that allows the user to select a decimal
@@ -34,7 +33,6 @@ import com.vaadin.flow.component.shared.internal.ReactComponents;
  */
 @Tag("vaadin-range-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/slider/src/vaadin-range-slider.js")
 public class DecimalRangeSlider extends
         NumberRangeSlider<DecimalRangeSlider, DecimalRangeSliderValue, Double> {

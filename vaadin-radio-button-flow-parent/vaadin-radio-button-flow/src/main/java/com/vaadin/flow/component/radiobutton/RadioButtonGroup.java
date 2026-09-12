@@ -46,7 +46,6 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -107,7 +106,6 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-radio-group")
 @NpmPackage(value = "@vaadin/radio-group", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>

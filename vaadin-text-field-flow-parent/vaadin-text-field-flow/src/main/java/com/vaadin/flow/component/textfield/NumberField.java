@@ -25,7 +25,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableFunction;
@@ -80,7 +79,6 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-number-field")
 @NpmPackage(value = "@vaadin/number-field", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {

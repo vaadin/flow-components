@@ -34,7 +34,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.ModalRoot;
-import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
@@ -51,7 +50,6 @@ import tools.jackson.databind.node.ArrayNode;
  */
 @Tag("vaadin-popover")
 @NpmPackage(value = "@vaadin/popover", version = "25.3.0-beta2")
-@ReactComponents
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasAriaRole,
