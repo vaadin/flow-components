@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Vaadin Badge</name>
     <description>Vaadin Badge</description>
+    <properties>
+        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

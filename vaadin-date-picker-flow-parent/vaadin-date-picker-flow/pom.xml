@@ -11,6 +11,8 @@
     <name>Vaadin Date Picker</name>
     <description>Vaadin Date Picker</description>
     <properties>
+        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
+        <pinned.npm.versions.notIncluded>date-fns</pinned.npm.versions.notIncluded>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
     <dependencies>

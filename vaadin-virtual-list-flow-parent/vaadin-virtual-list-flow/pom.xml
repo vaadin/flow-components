@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Vaadin Virtual List</name>
     <description>Vaadin Virtual List</description>
+    <properties>
+        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

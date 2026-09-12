@@ -11,6 +11,7 @@
     <name>Vaadin Popover</name>
     <description>Vaadin Popover</description>
     <properties>
+        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
     <dependencies>

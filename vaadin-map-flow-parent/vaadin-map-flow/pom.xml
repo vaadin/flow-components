@@ -11,6 +11,8 @@
     <name>Vaadin Map</name>
     <description>Vaadin Map</description>
     <properties>
+        <pinned.npm.versions.includedIn>@vaadin/react-components-pro</pinned.npm.versions.includedIn>
+        <pinned.npm.versions.notIncluded>ol,proj4</pinned.npm.versions.notIncluded>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>

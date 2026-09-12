@@ -23,39 +23,45 @@
  * component are what a Lit application installs; a React application gets them
  * from `@vaadin/react-components` instead.
  *
- * A module may also declare the React components themselves, in a
- * `REACT_COMPONENTS` map of a Java class, mapping each of their npm packages
- * to the packages it brings. Those are written for the React mode, with what
- * they bring as their `exclusions`, and at the version of the packages the
- * module declares, which the React components are released with.
+ * A package the React components bring says so itself, in the `includedIn`
+ * field naming the npm package of the React components that brings it. A
+ * React application installs that one instead of the packages it brings, so
+ * it is the package that says which one covers it, rather than the React
+ * components listing every package they cover.
+ *
+ * The module names the React components in the `included-in` argument, and
+ * the packages of its own that they do not bring in `not-included`.
  *
  * Usage:
- *   node generatePinnedNpmVersions.js <source-dir> <output-file>
+ *   node generatePinnedNpmVersions.js <source-dir> <output-file> \
+ *     [included-in] [not-included]
  *
  * Example
  *   node ../../scripts/generatePinnedNpmVersions.js src/main/java \
- *     target/classes/META-INF/VAADIN/versions/vaadin-text-field-flow-versions.json
+ *     target/classes/META-INF/VAADIN/versions/vaadin-map-flow-versions.json \
+ *     @vaadin/react-components-pro ol,proj4
  */
 
 const fs = require('fs');
 const path = require('path');
 
-if (process.argv.length !== 4) {
-  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file>');
+if (process.argv.length < 4 || process.argv.length > 6) {
+  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file> [included-in] [not-included]');
   process.exit(1);
 }
 
 const sourceDir = process.argv[2];
 const outputFile = process.argv[3];
+// The npm package of the React components bringing the packages of this
+// module, empty for a module they do not cover, such as a theme.
+const includedIn = (process.argv[4] || '').trim();
+// The packages of this module that the React components do not bring, which
+// an application installs whichever mode it uses.
+const notIncluded = (process.argv[5] || '').split(',').map((name) => name.trim()).filter(Boolean);
 const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
 
-// Matches the whole `static final Map<String, List<String>> REACT_COMPONENTS =
-// Map.of(...)` declaration, and then each package of it with what it brings.
-const DECLARATION = 'REACT_COMPONENTS';
-const REACT_COMPONENTS_REGEX = /\bREACT_COMPONENTS\s*=\s*Map\.of\(([\s\S]*?)\);/;
-const REACT_PACKAGE_REGEX = /"([^"]+)"\s*,\s*List\.of\(([\s\S]*?)\)/g;
 
 function javaFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -89,41 +95,6 @@ function readNpmPackages(sources) {
   return packages;
 }
 
-/**
- * Reads the React components a module declares and the packages each of them
- * brings, from the `REACT_COMPONENTS` map of one of its classes. A module
- * that declares none is the normal case.
- *
- * A class that names `REACT_COMPONENTS` in a shape this cannot read stops the
- * build rather than silently shipping a versions file without the React
- * components, which would leave a React application installing every web
- * component next to them.
- */
-function readReactComponents(sources) {
-  const naming = sources.filter(({ content }) => content.includes(DECLARATION));
-  if (naming.length === 0) {
-    return {};
-  }
-  if (naming.length > 1) {
-    console.error(`More than one ${DECLARATION} declaration in ${sourceDir}: ${naming.map(({ file }) => file).join(', ')}`);
-    process.exit(1);
-  }
-  const { file, content } = naming[0];
-  const declaration = REACT_COMPONENTS_REGEX.exec(content);
-  if (!declaration) {
-    console.error(`${file} names ${DECLARATION} but not as a 'Map.of' of package names to a 'List.of' of the packages they bring, so it cannot be read`);
-    process.exit(1);
-  }
-  const reactComponents = {};
-  for (const [, npmName, brought] of declaration[1].matchAll(REACT_PACKAGE_REGEX)) {
-    reactComponents[npmName] = [...brought.matchAll(/"([^"]+)"/g)].map(([, name]) => name);
-  }
-  if (Object.keys(reactComponents).length === 0) {
-    console.error(`The ${DECLARATION} of ${file} declares no package, so it cannot be read`);
-    process.exit(1);
-  }
-  return reactComponents;
-}
 
 // Read every source once: both the annotations and the React components come
 // out of the same files.
@@ -149,46 +120,31 @@ function entryName(npmName) {
   return npmName.replace(/^@[^/]+\//, '');
 }
 
+const unknownNotIncluded = notIncluded.filter((npmName) => !npmNames.includes(npmName));
+if (unknownNotIncluded.length > 0) {
+  console.error(`No @NpmPackage annotation for ${unknownNotIncluded.join(', ')} in ${sourceDir}, so it cannot be left out of the React components`);
+  process.exit(1);
+}
+
 const versions = {};
 npmNames.forEach((npmName) => {
+  const brought = includedIn && !notIncluded.includes(npmName);
   versions[entryName(npmName)] = {
+    ...(brought ? { includedIn } : {}),
     jsVersion: npmPackages[npmName].version,
     mode,
     npmName
   };
 });
 
-// The React components are released with the components they wrap, so they
-// carry the version the module declares for its own packages rather than one
-// written down a second time.
-const reactComponents = readReactComponents(sources);
-const reactNames = Object.keys(reactComponents).sort();
-if (reactNames.length > 0) {
-  const versionsDeclared = [...new Set(npmNames.map((npmName) => npmPackages[npmName].version))];
-  if (versionsDeclared.length !== 1) {
-    console.error(
-      `The React components take the version of the packages of ${sourceDir}, which declares several: ${versionsDeclared.join(', ')}`
-    );
-    process.exit(1);
-  }
-  reactNames.forEach((npmName) => {
-    versions[entryName(npmName)] = {
-      exclusions: reactComponents[npmName],
-      jsVersion: versionsDeclared[0],
-      mode: 'react',
-      npmName
-    };
-  });
-}
-
 const content = `${JSON.stringify(versions, null, 4)}\n`;
 
 fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
 
-const pinned = [
-  `${npmNames.join(', ')} for mode ${mode}`,
-  reactNames.length > 0 ? `${reactNames.join(', ')} for mode react` : undefined
-].filter(Boolean);
+const broughtNames = includedIn ? npmNames.filter((npmName) => !notIncluded.includes(npmName)) : [];
 
-console.log(`Wrote ${outputFile} pinning ${pinned.join(' and ')}`);
+console.log(
+  `Wrote ${outputFile} pinning ${npmNames.join(', ')} for mode ${mode}` +
+    (broughtNames.length > 0 ? `, ${broughtNames.join(', ')} brought by ${includedIn}` : '')
+);
