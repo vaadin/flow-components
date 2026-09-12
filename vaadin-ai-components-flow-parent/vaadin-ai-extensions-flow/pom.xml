@@ -17,7 +17,6 @@
         </license>
     </licenses>
     <properties>
-        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.export.package>com.vaadin.flow.component.ai.extensions</osgi.export.package>
         <osgi.export.package.additional>com.vaadin.flow.component.ai.chart,com.vaadin.flow.component.ai.form,com.vaadin.flow.component.ai.grid</osgi.export.package.additional>

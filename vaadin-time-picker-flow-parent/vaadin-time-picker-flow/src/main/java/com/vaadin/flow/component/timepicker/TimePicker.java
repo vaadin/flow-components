@@ -49,6 +49,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -114,6 +115,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-time-picker")
 @NpmPackage(value = "@vaadin/time-picker", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.ts")
 public class TimePicker

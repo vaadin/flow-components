@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * A drop zone component for file uploads. When files are dropped on this
@@ -46,6 +47,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @Tag("vaadin-upload-drop-zone")
 @NpmPackage(value = "@vaadin/upload", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/upload/src/vaadin-upload-drop-zone.js")
 public class UploadDropZone extends Component
         implements HasEnabled, HasUploadManager, HasSize {

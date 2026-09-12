@@ -17,6 +17,7 @@ package com.vaadin.flow.component.fieldhighlighter;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
@@ -25,6 +26,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 23.0.15
  */
 @NpmPackage(value = "@vaadin/field-highlighter", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/field-highlighter/src/vaadin-field-highlighter.js")
 public class FieldHighlighterInitializer {
     protected static Registration init(Element field) {

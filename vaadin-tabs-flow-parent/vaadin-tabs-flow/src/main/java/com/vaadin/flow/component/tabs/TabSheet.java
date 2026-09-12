@@ -34,6 +34,7 @@ import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -55,6 +56,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-tabsheet")
 @NpmPackage(value = "@vaadin/tabsheet", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {

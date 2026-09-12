@@ -67,6 +67,7 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
@@ -90,6 +91,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-chart")
 @NpmPackage(value = "@vaadin/charts", version = "25.3.0-beta2")
+@ReactComponents(ReactComponents.PRO)
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 

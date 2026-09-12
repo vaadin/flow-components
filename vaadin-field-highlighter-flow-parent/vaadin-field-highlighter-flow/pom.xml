@@ -10,9 +10,6 @@
     <packaging>jar</packaging>
     <name>Vaadin Field Highlighter</name>
     <description>Vaadin Field Highlighter</description>
-    <properties>
-        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

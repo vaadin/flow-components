@@ -32,6 +32,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -63,6 +64,7 @@ import tools.jackson.databind.node.ArrayNode;
  */
 @Tag("vaadin-rich-text-editor")
 @NpmPackage(value = "@vaadin/rich-text-editor", version = "25.3.0-beta2")
+@ReactComponents(ReactComponents.PRO)
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>

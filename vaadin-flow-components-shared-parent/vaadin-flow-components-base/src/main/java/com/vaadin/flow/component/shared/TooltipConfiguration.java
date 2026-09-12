@@ -20,6 +20,7 @@ import java.io.Serializable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.server.VaadinService;
 
 /**
@@ -29,6 +30,7 @@ import com.vaadin.flow.server.VaadinService;
  * @since 23.3
  */
 @NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("./tooltip.ts")
 public class TooltipConfiguration implements Serializable {
 

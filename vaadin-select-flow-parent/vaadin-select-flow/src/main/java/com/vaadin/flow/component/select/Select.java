@@ -50,6 +50,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -111,6 +112,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-select")
 @NpmPackage(value = "@vaadin/select", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/select/src/vaadin-select.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaDescription, HasAriaLabel,

@@ -13,6 +13,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
@@ -29,6 +30,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-dashboard-widget")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
 @NpmPackage(value = "@vaadin/dashboard", version = "25.3.0-beta2")
+@ReactComponents(ReactComponents.PRO)
 public class DashboardWidget extends Component {
 
     private int colspan = 1;

@@ -144,7 +144,7 @@ A module declaring `@NpmPackage` annotations pins the npm versions of those pack
 
 Every published component module declares a dependency on `vaadin-flow-components-base`, even when it uses none of its classes. That jar pins the npm versions of the base packages the web components share.
 
-A module whose packages a React application installs through the React components names them in the `pinned.npm.versions.includedIn` property of its POM, and the packages of its own that they do not bring in `pinned.npm.versions.notIncluded`. Each entry of its versions file then says which npm package of the React components brings it, so a React application installs that one instead. A commercial component names `@vaadin/react-components-pro`, a core one `@vaadin/react-components`, and a theme names neither.
+A class declaring an `@NpmPackage` that the React components bring says so with `@ReactComponents`, next to the annotations it applies to. Each entry of the generated versions file then names the npm package of the React components that brings it, so a React application installs that one instead. A commercial component names `ReactComponents.PRO`, and a package they do not bring, such as one a connector uses for itself or a theme, is left without the annotation.
 
 Keep POM dependencies minimal, only add what is really needed by the respective module. Do not simply copy dependencies from existing modules or add the whole range of Flow framework dependencies.
 

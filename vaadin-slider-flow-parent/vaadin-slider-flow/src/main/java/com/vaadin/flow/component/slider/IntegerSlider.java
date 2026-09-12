@@ -18,6 +18,7 @@ package com.vaadin.flow.component.slider;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * IntegerSlider is an input field that allows the user to select an integer
@@ -33,6 +34,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @Tag("vaadin-slider")
 @NpmPackage(value = "@vaadin/slider", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class IntegerSlider extends NumberSlider<IntegerSlider, Integer> {
     /**

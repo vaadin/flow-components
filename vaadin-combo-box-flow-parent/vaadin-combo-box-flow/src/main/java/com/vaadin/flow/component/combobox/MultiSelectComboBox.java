@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -99,6 +100,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-multi-select-combo-box")
 @NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-combo-box/comboBoxConnector.ts")

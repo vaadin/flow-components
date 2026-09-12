@@ -26,6 +26,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -90,6 +91,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  */
 @Tag("vaadin-email-field")
 @NpmPackage(value = "@vaadin/email-field", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {

@@ -31,6 +31,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
@@ -63,6 +64,7 @@ import tools.jackson.databind.node.ObjectNode;
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
 @NpmPackage(value = "@vaadin/dashboard", version = "25.3.0-beta2")
+@ReactComponents(ReactComponents.PRO)
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 

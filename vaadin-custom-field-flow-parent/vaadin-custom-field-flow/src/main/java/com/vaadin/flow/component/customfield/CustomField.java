@@ -30,6 +30,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -47,6 +48,7 @@ import com.vaadin.flow.dom.Element;
  */
 @Tag("vaadin-custom-field")
 @NpmPackage(value = "@vaadin/custom-field", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements Focusable<CustomField<T>>,

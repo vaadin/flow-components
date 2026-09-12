@@ -37,6 +37,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -59,6 +60,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-upload")
 @NpmPackage(value = "@vaadin/upload", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {

@@ -24,6 +24,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * This component provides an accessible and customizable tab to be used inside
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
 @Tag("vaadin-tab")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
 @NpmPackage(value = "@vaadin/tabs", version = "25.3.0-beta2")
+@ReactComponents
 public class Tab extends Component implements HasAriaLabel, HasComponents,
         HasStyle, HasThemeVariant<TabVariant>, HasTooltip {
 

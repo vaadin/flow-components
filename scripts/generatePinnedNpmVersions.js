@@ -29,53 +29,42 @@
  * it is the package that says which one covers it, rather than the React
  * components listing every package they cover.
  *
- * The module names the React components in the `included-in` argument, and
- * the packages of its own that they do not bring in `not-included`.
+ * The class declaring the packages says it with `@ReactComponents`, next to
+ * the `@NpmPackage` annotations it applies to.
  *
  * Usage:
- *   node generatePinnedNpmVersions.js <source-dir> <output-file> \
- *     [included-in] [not-included]
+ *   node generatePinnedNpmVersions.js <source-dir> <output-file>
  *
  * Example
  *   node ../../scripts/generatePinnedNpmVersions.js src/main/java \
- *     target/classes/META-INF/VAADIN/versions/vaadin-map-flow-versions.json \
- *     @vaadin/react-components-pro ol,proj4
+ *     target/classes/META-INF/VAADIN/versions/vaadin-map-flow-versions.json
  */
 
 const fs = require('fs');
 const path = require('path');
 
-if (process.argv.length < 4 || process.argv.length > 6) {
-  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file> [included-in] [not-included]');
+if (process.argv.length !== 4) {
+  console.error('Usage: node generatePinnedNpmVersions.js <source-dir> <output-file>');
   process.exit(1);
 }
 
 const sourceDir = process.argv[2];
 const outputFile = process.argv[3];
-// The npm package of the React components bringing the packages of this
-// module, empty for a module they do not cover, such as a theme.
-const includedIn = (process.argv[4] || '').trim();
-// The packages of this module that the React components do not bring, which
-// an application installs whichever mode it uses.
-const notIncluded = (process.argv[5] || '').split(',').map((name) => name.trim()).filter(Boolean);
 
-// The npm packages of the React components there are. A name that is not one
-// of them would send a React application to a package that does not exist,
-// which nothing downstream would notice.
-const REACT_COMPONENTS = ['@vaadin/react-components', '@vaadin/react-components-pro'];
-
-if (includedIn && !REACT_COMPONENTS.includes(includedIn)) {
-  console.error(`'${includedIn}' is not one of the React components ${REACT_COMPONENTS.join(' and ')}`);
-  process.exit(1);
-}
-
-if (!includedIn && notIncluded.length > 0) {
-  console.error(`${notIncluded.join(', ')} cannot be left out of the React components, as no React components are given to leave them out of`);
-  process.exit(1);
-}
+// The npm packages of the React components, by the name the annotation gives
+// them. A class naming anything else would send a React application to a
+// package that does not exist, which nothing downstream would notice.
+const REACT_COMPONENTS = {
+  'ReactComponents.CORE': '@vaadin/react-components',
+  'ReactComponents.PRO': '@vaadin/react-components-pro'
+};
 const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
+
+// Matches `@ReactComponents`, with the React components it names and the
+// packages it lists, both of which may be left out.
+const REACT_COMPONENTS_REGEX = /@ReactComponents\b\s*(?:\(([\s\S]*?)\))?/;
 
 
 function javaFiles(dir) {
@@ -116,7 +105,46 @@ const sources = fs.existsSync(sourceDir)
   ? javaFiles(sourceDir).map((file) => ({ file, content: fs.readFileSync(file, 'utf8') }))
   : [];
 
+/**
+ * Reads what a class says the React components bring, from its
+ * `@ReactComponents` annotation: the React components it names, the core ones
+ * by default, and the packages it lists, all of the ones the class declares by
+ * default.
+ */
+function readReactComponents(file, content, declared) {
+  const annotation = REACT_COMPONENTS_REGEX.exec(content);
+  if (!annotation) {
+    return {};
+  }
+  const args = annotation[1] || '';
+  const named = /(ReactComponents\.\w+)/.exec(args);
+  if (named && !REACT_COMPONENTS[named[1]]) {
+    console.error(`${file} names ${named[1]}, which is not one of the React components ${Object.keys(REACT_COMPONENTS).join(' and ')}`);
+    process.exit(1);
+  }
+  const reactComponents = named ? REACT_COMPONENTS[named[1]] : REACT_COMPONENTS['ReactComponents.CORE'];
+  const listed = /packages\s*=\s*(?:\{([\s\S]*?)\}|("[^"]+"))/.exec(args);
+  const packages = listed
+    ? [...(listed[1] || listed[2]).matchAll(/"([^"]+)"/g)].map(([, name]) => name)
+    : declared;
+  const unknown = packages.filter((npmName) => !declared.includes(npmName));
+  if (unknown.length > 0) {
+    console.error(`${file} says the React components bring ${unknown.join(', ')}, which it does not declare with @NpmPackage`);
+    process.exit(1);
+  }
+  return packages.reduce((brought, npmName) => {
+    brought[npmName] = reactComponents;
+    return brought;
+  }, {});
+}
+
 const npmPackages = readNpmPackages(sources);
+
+// What each package of the module says brings it, by package name.
+const includedIn = sources.reduce((brought, { file, content }) => {
+  const declared = [...content.matchAll(ANNOTATION_REGEX)].map(([, npmName]) => npmName);
+  return declared.length === 0 ? brought : Object.assign(brought, readReactComponents(file, content, declared));
+}, {});
 const npmNames = Object.keys(npmPackages).sort();
 
 // A module without Java sources or without a single annotation ships no npm
@@ -134,20 +162,12 @@ function entryName(npmName) {
   return npmName.replace(/^@[^/]+\//, '');
 }
 
-const unknownNotIncluded = notIncluded.filter((npmName) => !npmNames.includes(npmName));
-if (unknownNotIncluded.length > 0) {
-  console.error(`No @NpmPackage annotation for ${unknownNotIncluded.join(', ')} in ${sourceDir}, so it cannot be left out of the React components`);
-  process.exit(1);
-}
-
-// The packages of the module the React components bring, which is all of them
-// but the ones left out, and none at all without React components.
-const brought = includedIn ? npmNames.filter((npmName) => !notIncluded.includes(npmName)) : [];
+const brought = npmNames.filter((npmName) => includedIn[npmName]);
 
 const versions = {};
 npmNames.forEach((npmName) => {
   versions[entryName(npmName)] = {
-    ...(brought.includes(npmName) ? { includedIn } : {}),
+    ...(includedIn[npmName] ? { includedIn: includedIn[npmName] } : {}),
     jsVersion: npmPackages[npmName].version,
     mode,
     npmName
@@ -161,5 +181,5 @@ fs.writeFileSync(outputFile, content);
 
 console.log(
   `Wrote ${outputFile} pinning ${npmNames.join(', ')} for mode ${mode}` +
-    (brought.length > 0 ? `, ${brought.join(', ')} brought by ${includedIn}` : '')
+    (brought.length > 0 ? `, ${brought.map((npmName) => `${npmName} brought by ${includedIn[npmName]}`).join(', ')}` : '')
 );

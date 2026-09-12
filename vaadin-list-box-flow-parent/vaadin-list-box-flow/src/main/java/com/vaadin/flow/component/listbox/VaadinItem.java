@@ -20,6 +20,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.binder.HasItemComponents;
 
 /**
@@ -33,6 +34,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  */
 @Tag("vaadin-item")
 @NpmPackage(value = "@vaadin/item", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/item/src/vaadin-item.js")
 class VaadinItem<T> extends Component
         implements HasItemComponents.ItemComponent<T>, HasComponents {

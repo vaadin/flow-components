@@ -11,8 +11,6 @@
     <name>Vaadin Flow Components Base</name>
 
     <properties>
-        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
-        <pinned.npm.versions.notIncluded>@vaadin/a11y-base,@vaadin/field-base</pinned.npm.versions.notIncluded>
         <osgi.export.package>com.vaadin.flow.component.shared</osgi.export.package>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>

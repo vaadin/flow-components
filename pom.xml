@@ -88,12 +88,6 @@
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <exec.maven.plugin.version>3.6.3</exec.maven.plugin.version>
-        <!-- The npm package of the React components bringing the packages a
-            module ships, and the packages of that module they do not bring. Set
-            by the modules whose packages a React application installs through
-            the React components. -->
-        <pinned.npm.versions.includedIn/>
-        <pinned.npm.versions.notIncluded/>
         <spotless.plugin.version>3.10.2</spotless.plugin.version>
         <checkstyle.version>14.1.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
@@ -578,8 +572,6 @@
                                     <argument>${maven.multiModuleProjectDirectory}/scripts/generatePinnedNpmVersions.js</argument>
                                     <argument>src/main/java</argument>
                                     <argument>${project.build.outputDirectory}/META-INF/VAADIN/versions/${project.artifactId}-versions.json</argument>
-                                    <argument>${pinned.npm.versions.includedIn}</argument>
-                                    <argument>${pinned.npm.versions.notIncluded}</argument>
                                 </arguments>
                             </configuration>
                         </execution>

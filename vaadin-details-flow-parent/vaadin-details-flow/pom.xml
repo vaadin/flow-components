@@ -11,7 +11,6 @@
     <name>Vaadin Details</name>
     <description>Vaadin Details</description>
     <properties>
-        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>
     <dependencies>

@@ -35,6 +35,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.shared.Registration;
@@ -49,6 +50,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-master-detail-layout")
 @NpmPackage(value = "@vaadin/master-detail-layout", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
 public class MasterDetailLayout extends Component
         implements HasSize, RouterLayout {

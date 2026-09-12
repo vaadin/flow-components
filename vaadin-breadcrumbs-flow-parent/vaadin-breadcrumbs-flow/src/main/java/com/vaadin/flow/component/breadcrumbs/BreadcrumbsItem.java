@@ -25,6 +25,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -48,6 +49,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-breadcrumbs-item")
 @NpmPackage(value = "@vaadin/breadcrumbs", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs-item.js")
 public class BreadcrumbsItem extends Component
         implements HasText, HasEnabled, HasPrefix {

@@ -10,9 +10,6 @@
     <packaging>jar</packaging>
     <name>Vaadin Menu Bar</name>
     <description>Vaadin Menu Bar</description>
-    <properties>
-        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

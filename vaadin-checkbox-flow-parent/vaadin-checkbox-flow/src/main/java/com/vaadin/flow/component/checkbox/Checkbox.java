@@ -36,6 +36,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -84,6 +85,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-checkbox")
 @NpmPackage(value = "@vaadin/checkbox", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>,

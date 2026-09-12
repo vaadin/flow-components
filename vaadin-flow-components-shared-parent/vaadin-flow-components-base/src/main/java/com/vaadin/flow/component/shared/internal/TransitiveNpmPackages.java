@@ -54,6 +54,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/input-container", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/lit-renderer", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/overlay", version = "25.3.0-beta2")
+@ReactComponents(packages = { "@vaadin/component-base",
+        "@vaadin/input-container", "@vaadin/lit-renderer", "@vaadin/overlay" })
 final class TransitiveNpmPackages implements Serializable {
 
     private TransitiveNpmPackages() {

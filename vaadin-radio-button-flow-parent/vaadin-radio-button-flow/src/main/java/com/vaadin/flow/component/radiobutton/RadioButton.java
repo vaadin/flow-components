@@ -26,6 +26,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.binder.HasItemComponents;
 
 /**
@@ -35,6 +36,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  */
 @Tag("vaadin-radio-button")
 @NpmPackage(value = "@vaadin/radio-group", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/radio-group/src/vaadin-radio-button.js")
 class RadioButton<T> extends Component
         implements ClickNotifier<RadioButton<T>>, Focusable<RadioButton<T>>,

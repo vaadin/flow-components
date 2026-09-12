@@ -30,6 +30,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -49,6 +50,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-crud")
 @NpmPackage(value = "@vaadin/crud", version = "25.3.0-beta2")
+@ReactComponents(ReactComponents.PRO)
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {

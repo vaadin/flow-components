@@ -11,7 +11,6 @@
     <name>Vaadin Grid Pro</name>
     <description>Vaadin Grid Pro</description>
     <properties>
-        <pinned.npm.versions.includedIn>@vaadin/react-components-pro</pinned.npm.versions.includedIn>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
     </properties>

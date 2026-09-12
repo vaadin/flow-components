@@ -10,9 +10,6 @@
     <packaging>jar</packaging>
     <name>Vaadin Avatar</name>
     <description>Vaadin Avatar</description>
-    <properties>
-        <pinned.npm.versions.includedIn>@vaadin/react-components</pinned.npm.versions.includedIn>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

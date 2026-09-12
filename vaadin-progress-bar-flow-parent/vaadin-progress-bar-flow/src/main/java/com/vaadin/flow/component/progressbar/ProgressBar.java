@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
@@ -36,6 +37,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-progress-bar")
 @NpmPackage(value = "@vaadin/progress-bar", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {

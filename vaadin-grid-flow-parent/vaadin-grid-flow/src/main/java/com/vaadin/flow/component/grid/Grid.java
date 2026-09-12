@@ -73,6 +73,7 @@ import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -216,6 +217,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-grid")
 @NpmPackage(value = "@vaadin/grid", version = "25.3.0-beta2")
 @NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")

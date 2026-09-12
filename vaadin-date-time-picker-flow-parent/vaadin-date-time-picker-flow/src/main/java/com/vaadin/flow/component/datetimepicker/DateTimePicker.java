@@ -47,6 +47,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -105,6 +106,7 @@ class DateTimePickerTimePicker
  */
 @Tag("vaadin-date-time-picker")
 @NpmPackage(value = "@vaadin/date-time-picker", version = "25.3.0-beta2")
+@ReactComponents
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>

@@ -16,6 +16,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.board.internal.FunctionCaller;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.ReactComponents;
 
 /**
  * Vaadin Board allows creating responsive layouts in an easy way.
@@ -31,6 +32,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @Tag("vaadin-board")
 @NpmPackage(value = "@vaadin/board", version = "25.3.0-beta2")
+@ReactComponents(ReactComponents.PRO)
 @JsModule("@vaadin/board/src/vaadin-board.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Board extends Component
