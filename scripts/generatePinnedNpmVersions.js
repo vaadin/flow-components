@@ -58,6 +58,21 @@ const includedIn = (process.argv[4] || '').trim();
 // The packages of this module that the React components do not bring, which
 // an application installs whichever mode it uses.
 const notIncluded = (process.argv[5] || '').split(',').map((name) => name.trim()).filter(Boolean);
+
+// The npm packages of the React components there are. A name that is not one
+// of them would send a React application to a package that does not exist,
+// which nothing downstream would notice.
+const REACT_COMPONENTS = ['@vaadin/react-components', '@vaadin/react-components-pro'];
+
+if (includedIn && !REACT_COMPONENTS.includes(includedIn)) {
+  console.error(`'${includedIn}' is not one of the React components ${REACT_COMPONENTS.join(' and ')}`);
+  process.exit(1);
+}
+
+if (!includedIn && notIncluded.length > 0) {
+  console.error(`${notIncluded.join(', ')} cannot be left out of the React components, as no React components are given to leave them out of`);
+  process.exit(1);
+}
 const mode = 'lit';
 
 const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version\s*=\s*"([^"]+)"\s*\)/g;
@@ -96,8 +111,7 @@ function readNpmPackages(sources) {
 }
 
 
-// Read every source once: both the annotations and the React components come
-// out of the same files.
+// Read the sources once, for the annotations of all of them.
 const sources = fs.existsSync(sourceDir)
   ? javaFiles(sourceDir).map((file) => ({ file, content: fs.readFileSync(file, 'utf8') }))
   : [];
@@ -126,11 +140,14 @@ if (unknownNotIncluded.length > 0) {
   process.exit(1);
 }
 
+// The packages of the module the React components bring, which is all of them
+// but the ones left out, and none at all without React components.
+const brought = includedIn ? npmNames.filter((npmName) => !notIncluded.includes(npmName)) : [];
+
 const versions = {};
 npmNames.forEach((npmName) => {
-  const brought = includedIn && !notIncluded.includes(npmName);
   versions[entryName(npmName)] = {
-    ...(brought ? { includedIn } : {}),
+    ...(brought.includes(npmName) ? { includedIn } : {}),
     jsVersion: npmPackages[npmName].version,
     mode,
     npmName
@@ -142,9 +159,7 @@ const content = `${JSON.stringify(versions, null, 4)}\n`;
 fs.mkdirSync(path.dirname(outputFile), { recursive: true });
 fs.writeFileSync(outputFile, content);
 
-const broughtNames = includedIn ? npmNames.filter((npmName) => !notIncluded.includes(npmName)) : [];
-
 console.log(
   `Wrote ${outputFile} pinning ${npmNames.join(', ')} for mode ${mode}` +
-    (broughtNames.length > 0 ? `, ${broughtNames.join(', ')} brought by ${includedIn}` : '')
+    (brought.length > 0 ? `, ${brought.join(', ')} brought by ${includedIn}` : '')
 );
