@@ -59,8 +59,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 final class TransitiveNpmPackages implements Serializable {
 
     /**
-     * The npm packages of the React components, mapped to the packages they
-     * bring themselves.
+     * The npm packages of the React components of this module, mapped to the
+     * packages they bring themselves.
+     * <p>
+     * Only the core React components are declared here.
+     * {@code @vaadin/react-components-pro} brings the commercial components,
+     * which an application using only the core ones must not install, and this
+     * module is on the classpath of every application.
      * <p>
      * A React application installs the components through these instead of
      * installing the web components one by one, so the packages listed here are
@@ -104,11 +109,7 @@ final class TransitiveNpmPackages implements Serializable {
                     "@vaadin/tabs", "@vaadin/tabsheet", "@vaadin/text-area",
                     "@vaadin/text-field", "@vaadin/time-picker",
                     "@vaadin/tooltip", "@vaadin/upload",
-                    "@vaadin/vertical-layout", "@vaadin/virtual-list"),
-            "@vaadin/react-components-pro",
-            List.of("@vaadin/board", "@vaadin/charts", "@vaadin/crud",
-                    "@vaadin/dashboard", "@vaadin/grid-pro", "@vaadin/map",
-                    "@vaadin/rich-text-editor"));
+                    "@vaadin/vertical-layout", "@vaadin/virtual-list"));
 
     private TransitiveNpmPackages() {
     }

@@ -53,6 +53,7 @@ const ANNOTATION_REGEX = /@NpmPackage\s*\(\s*value\s*=\s*"([^"]+)"\s*,\s*version
 
 // Matches the whole `static final Map<String, List<String>> REACT_COMPONENTS =
 // Map.of(...)` declaration, and then each package of it with what it brings.
+const DECLARATION = 'REACT_COMPONENTS';
 const REACT_COMPONENTS_REGEX = /\bREACT_COMPONENTS\s*=\s*Map\.of\(([\s\S]*?)\);/;
 const REACT_PACKAGE_REGEX = /"([^"]+)"\s*,\s*List\.of\(([\s\S]*?)\)/g;
 
@@ -71,10 +72,9 @@ function javaFiles(dir) {
  * declared by several components of the module, as the components of one web
  * component are, is expected to be declared with the same version everywhere.
  */
-function readNpmPackages() {
+function readNpmPackages(sources) {
   const packages = {};
-  javaFiles(sourceDir).forEach((file) => {
-    const content = fs.readFileSync(file, 'utf8');
+  sources.forEach(({ file, content }) => {
     for (const [, npmName, version] of content.matchAll(ANNOTATION_REGEX)) {
       const declared = packages[npmName];
       if (declared && declared.version !== version) {
@@ -93,31 +93,45 @@ function readNpmPackages() {
  * Reads the React components a module declares and the packages each of them
  * brings, from the `REACT_COMPONENTS` map of one of its classes. A module
  * that declares none is the normal case.
+ *
+ * A class that names `REACT_COMPONENTS` in a shape this cannot read stops the
+ * build rather than silently shipping a versions file without the React
+ * components, which would leave a React application installing every web
+ * component next to them.
  */
-function readReactComponents() {
-  const declarations = javaFiles(sourceDir)
-    .map((file) => ({ file, match: REACT_COMPONENTS_REGEX.exec(fs.readFileSync(file, 'utf8')) }))
-    .filter((declaration) => declaration.match);
-  if (declarations.length === 0) {
+function readReactComponents(sources) {
+  const naming = sources.filter(({ content }) => content.includes(DECLARATION));
+  if (naming.length === 0) {
     return {};
   }
-  if (declarations.length > 1) {
-    console.error(`More than one REACT_COMPONENTS declaration in ${sourceDir}: ${declarations.map((declaration) => declaration.file).join(', ')}`);
+  if (naming.length > 1) {
+    console.error(`More than one ${DECLARATION} declaration in ${sourceDir}: ${naming.map(({ file }) => file).join(', ')}`);
     process.exit(1);
   }
-  const { file, match } = declarations[0];
+  const { file, content } = naming[0];
+  const declaration = REACT_COMPONENTS_REGEX.exec(content);
+  if (!declaration) {
+    console.error(`${file} names ${DECLARATION} but not as a 'Map.of' of package names to a 'List.of' of the packages they bring, so it cannot be read`);
+    process.exit(1);
+  }
   const reactComponents = {};
-  for (const [, npmName, brought] of match[1].matchAll(REACT_PACKAGE_REGEX)) {
+  for (const [, npmName, brought] of declaration[1].matchAll(REACT_PACKAGE_REGEX)) {
     reactComponents[npmName] = [...brought.matchAll(/"([^"]+)"/g)].map(([, name]) => name);
   }
   if (Object.keys(reactComponents).length === 0) {
-    console.error(`The REACT_COMPONENTS of ${file} declares no package, so it cannot be read`);
+    console.error(`The ${DECLARATION} of ${file} declares no package, so it cannot be read`);
     process.exit(1);
   }
   return reactComponents;
 }
 
-const npmPackages = fs.existsSync(sourceDir) ? readNpmPackages() : {};
+// Read every source once: both the annotations and the React components come
+// out of the same files.
+const sources = fs.existsSync(sourceDir)
+  ? javaFiles(sourceDir).map((file) => ({ file, content: fs.readFileSync(file, 'utf8') }))
+  : [];
+
+const npmPackages = readNpmPackages(sources);
 const npmNames = Object.keys(npmPackages).sort();
 
 // A module without Java sources or without a single annotation ships no npm
@@ -147,7 +161,7 @@ npmNames.forEach((npmName) => {
 // The React components are released with the components they wrap, so they
 // carry the version the module declares for its own packages rather than one
 // written down a second time.
-const reactComponents = readReactComponents();
+const reactComponents = readReactComponents(sources);
 const reactNames = Object.keys(reactComponents).sort();
 if (reactNames.length > 0) {
   const versionsDeclared = [...new Set(npmNames.map((npmName) => npmPackages[npmName].version))];
