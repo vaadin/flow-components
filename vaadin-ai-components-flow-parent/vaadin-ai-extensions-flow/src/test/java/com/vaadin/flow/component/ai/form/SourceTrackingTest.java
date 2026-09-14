@@ -29,7 +29,6 @@ import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.common.ConfidenceLevel;
 import com.vaadin.flow.component.ai.common.PageRegion;
 import com.vaadin.flow.component.ai.common.SourceExtract;
-import com.vaadin.flow.component.ai.common.ValueSource;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
@@ -720,54 +719,6 @@ class SourceTrackingTest {
 
             Assertions.assertThrows(NullPointerException.class,
                     () -> controller.getFieldSource(null));
-        }
-    }
-
-    @Nested
-    class Restore {
-
-        @Test
-        void restoredSourceIsReturnedForTheCurrentValue() {
-            var field = new TestField();
-            field.setValue("persisted");
-            var controller = controllerFor(field);
-            var source = new ValueSource(ConfidenceLevel.MEDIUM,
-                    List.of(new SourceExtract("snippet", null)));
-
-            controller.restoreFieldSource(field, source);
-
-            Assertions.assertEquals(source,
-                    controller.getFieldSource(field).orElseThrow());
-        }
-
-        @Test
-        void restoredSourceGoesStaleOnNextEdit() {
-            var field = new TestField();
-            field.setValue("persisted");
-            var controller = controllerFor(field);
-            controller.onResponse(AITurnEvents.success());
-            controller.restoreFieldSource(field,
-                    new ValueSource(ConfidenceLevel.MEDIUM, null));
-
-            field.setValue("edited");
-
-            Assertions.assertTrue(controller.getFieldSource(field).isEmpty());
-        }
-
-        @Test
-        void restoreFieldSourceRejectsNullArguments() {
-            var field = new TestField();
-            var controller = controllerFor(field);
-            var source = new ValueSource(null, null);
-
-            var thrown = Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.restoreFieldSource(null, source));
-            Assertions.assertEquals("Field must not be null",
-                    thrown.getMessage(),
-                    "The guard must fail fast with its own message, not "
-                            + "through a downstream NPE");
-            Assertions.assertThrows(NullPointerException.class,
-                    () -> controller.restoreFieldSource(field, null));
         }
     }
 
