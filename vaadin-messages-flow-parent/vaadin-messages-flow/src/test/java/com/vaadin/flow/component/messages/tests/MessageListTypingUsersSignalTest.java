@@ -39,17 +39,20 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
             MessageListTypingIndicatorFeatureFlagProvider.TYPING_INDICATOR);
 
     private MessageList messageList;
+    private ValueSignal<MessageListUser> aliceSignal;
+    private ValueSignal<List<ValueSignal<MessageListUser>>> listSignal;
 
     @BeforeEach
     void setup() {
         messageList = new MessageList();
+        aliceSignal = new ValueSignal<>(new MessageListUser("Alice"));
+        listSignal = new ValueSignal<>(List.of(aliceSignal));
     }
 
     @Test
     void bindTypingUsers_setsUsersFromSignal() {
-        var aliceSignal = new ValueSignal<>(new MessageListUser("Alice"));
         var bobSignal = new ValueSignal<>(new MessageListUser("Bob"));
-        var listSignal = new ValueSignal<>(List.of(aliceSignal, bobSignal));
+        listSignal.set(List.of(aliceSignal, bobSignal));
 
         messageList.bindTypingUsers(listSignal);
         ui.add(messageList);
@@ -59,9 +62,6 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindTypingUsers_updatesWhenListSignalChanges() {
-        var aliceSignal = new ValueSignal<>(new MessageListUser("Alice"));
-        var listSignal = new ValueSignal<>(List.of(aliceSignal));
-
         messageList.bindTypingUsers(listSignal);
         ui.add(messageList);
         assertTypingUserNames("Alice");
@@ -73,9 +73,6 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindTypingUsers_updatesWhenUserSignalChanges() {
-        var aliceSignal = new ValueSignal<>(new MessageListUser("Alice"));
-        var listSignal = new ValueSignal<>(List.of(aliceSignal));
-
         messageList.bindTypingUsers(listSignal);
         ui.add(messageList);
         assertTypingUserNames("Alice");
@@ -87,9 +84,6 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
 
     @Test
     void setTypingUsersWhileBound_throws() {
-        var aliceSignal = new ValueSignal<>(new MessageListUser("Alice"));
-        var listSignal = new ValueSignal<>(List.of(aliceSignal));
-
         messageList.bindTypingUsers(listSignal);
         ui.add(messageList);
 
@@ -99,9 +93,6 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
 
     @Test
     void bindTypingUsers_calledTwice_throws() {
-        var aliceSignal = new ValueSignal<>(new MessageListUser("Alice"));
-        var listSignal = new ValueSignal<>(List.of(aliceSignal));
-
         messageList.bindTypingUsers(listSignal);
 
         Assertions.assertThrows(BindingActiveException.class,
@@ -120,9 +111,6 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
     @Test
     void featureDisabled_bindTypingUsers_throws() {
         featureFlagExtension.disableFeature();
-        var aliceSignal = new ValueSignal<>(new MessageListUser("Alice"));
-        var listSignal = new ValueSignal<>(List.of(aliceSignal));
-
         messageList.bindTypingUsers(listSignal);
 
         Assertions.assertThrows(

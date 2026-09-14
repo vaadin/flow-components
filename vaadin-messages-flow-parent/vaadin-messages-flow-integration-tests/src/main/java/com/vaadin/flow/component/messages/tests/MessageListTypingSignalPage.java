@@ -45,7 +45,7 @@ public class MessageListTypingSignalPage extends Div {
     }
 
     private void addButton(String id, Command action) {
-        NativeButton button = new NativeButton(id, e -> action.execute());
+        var button = new NativeButton(id, e -> action.execute());
         button.setId(id);
         add(button);
     }

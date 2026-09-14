@@ -496,6 +496,16 @@ public class MessageListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void showTypingWithAbbreviationOnly_abbreviationShownAsName() {
+        clickElementWithJs("showTypingWithAbbreviationOnly");
+
+        Assert.assertEquals("Unexpected typing users", List.of("EV"),
+                messageList.getTypingUserNames());
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("EV"));
+    }
+
+    @Test
     public void showTyping_reattachList_typingIndicatorRestored() {
         clickElementWithJs("showTyping");
         clickElementWithJs("detachList");
@@ -512,9 +522,9 @@ public class MessageListIT extends AbstractComponentIT {
      * indicator, as the public TestBench API only exposes the user names.
      */
     private TestBenchElement getTypingIndicator() {
-        var query = messageList.$(TestBenchElement.class).withAttribute("slot",
-                "typing-indicator");
-        return query.exists() ? query.first() : null;
+        var indicators = messageList.$(MessageElement.class)
+                .withAttribute("slot", "typing-indicator").all();
+        return indicators.isEmpty() ? null : indicators.get(0);
     }
 
     private TestBenchElement getTypingUserAvatar() {

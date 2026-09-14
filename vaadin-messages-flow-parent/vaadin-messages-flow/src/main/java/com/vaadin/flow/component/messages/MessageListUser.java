@@ -38,8 +38,9 @@ import com.vaadin.flow.shared.Registration;
  * A user of a {@link MessageList}, rendered as an avatar with a name in the
  * typing indicator of the list.
  * <p>
- * A user can belong to one message list at a time. Adding the same instance to
- * another list removes it from the previous one.
+ * Use a separate instance for each message list. An avatar image that is set
+ * with {@link #setImageHandler(DownloadHandler)} is served as a resource of the
+ * message list that the user was added to last.
  *
  * @author Vaadin Ltd.
  * @since 25.3

@@ -163,6 +163,12 @@ public class MessageListPage extends Div {
         addButton("showTypingWithImageUrl",
                 () -> messageList.setTypingUsers(dave));
 
+        var eve = new MessageListUser();
+        eve.setAbbreviation("EV");
+
+        addButton("showTypingWithAbbreviationOnly",
+                () -> messageList.setTypingUsers(eve));
+
         // Output section for test verification
         Div outputSection = new Div();
         outputSection.getStyle().set("margin-top", "20px");

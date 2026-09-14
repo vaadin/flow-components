@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListI18n;
+import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.messages.MessageListTypingIndicatorExperimentalFeatureException;
 import com.vaadin.flow.component.messages.MessageListTypingIndicatorFeatureFlagProvider;
 import com.vaadin.flow.component.messages.MessageListTypingIndicatorType;
@@ -272,13 +273,21 @@ class MessageListTypingIndicatorTest {
     }
 
     @Test
-    void featureFlagChecked_featureDisabledLater_doesNotThrowAgain() {
-        messageList.setTypingUsers(new MessageListUser("Alice"));
-
+    void featureDisabled_setI18n_throws() {
         featureFlagExtension.disableFeature();
 
-        Assertions.assertDoesNotThrow(
-                () -> messageList.setTypingUsers(new MessageListUser("Bob")));
+        Assertions.assertThrows(
+                MessageListTypingIndicatorExperimentalFeatureException.class,
+                () -> messageList.setI18n(new MessageListI18n()));
+    }
+
+    @Test
+    void featureDisabled_typingIndicatorNotUsed_attachDoesNotThrow() {
+        featureFlagExtension.disableFeature();
+        var detachedList = new MessageList();
+        detachedList.setItems(new MessageListItem("foo"));
+
+        Assertions.assertDoesNotThrow(() -> ui.add(detachedList));
     }
 
     @Test

@@ -31,12 +31,13 @@ public class MessageListElement extends TestBenchElement {
 
     /**
      * Gets the <code>&lt;vaadin-message&gt;</code> elements rendered in this
-     * message list.
+     * message list, excluding the typing indicator.
      *
      * @return the message elements
      */
     public List<MessageElement> getMessageElements() {
-        return $(MessageElement.class).withoutAttribute("slot").all();
+        return $(MessageElement.class)
+                .withoutAttribute("slot", "typing-indicator").all();
     }
 
     /**
@@ -53,7 +54,14 @@ public class MessageListElement extends TestBenchElement {
                     .querySelector('[slot="typing-indicator"]');
                 const group = indicator
                     && indicator.querySelector('vaadin-avatar-group');
-                return group ? group.items.map((item) => item.name) : [];
+                if (!group) {
+                    return [];
+                }
+                // The indicator falls back to the abbreviation for users
+                // that have no name
+                return group.items
+                    .map((item) => item.name || item.abbr)
+                    .filter((name) => !!name);
                 """, this);
     }
 

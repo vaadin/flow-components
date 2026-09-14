@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -75,8 +76,9 @@ public class MessageList extends Component implements HasStyle, HasSize,
     private boolean pendingUpdate = false;
     private boolean pendingTextUpdate = false;
     private Integer pendingAddItemsIndex;
-    private boolean typingIndicatorFeatureFlagChecked = false;
+    private boolean typingIndicatorUsed = false;
     private MessageListI18n i18n;
+    private MessageListTypingIndicatorType typingIndicatorType = MessageListTypingIndicatorType.DEFAULT;
 
     private final SignalPropertySupport<Collection<MessageListUser>> typingUsersSupport = SignalPropertySupport
             .create(this, this::updateTypingUsers);
@@ -438,7 +440,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * @since 25.3
      */
     public void setTypingUsers(Collection<MessageListUser> typingUsers) {
-        checkTypingIndicatorFeatureFlag();
+        useTypingIndicator();
         Objects.requireNonNull(typingUsers,
                 "Can't set null typing users to MessageList.");
         typingUsers.forEach(user -> Objects.requireNonNull(user,
@@ -495,15 +497,21 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     public <S extends Signal<MessageListUser>> SignalBinding<Collection<MessageListUser>> bindTypingUsers(
             Signal<List<S>> typingUsersSignal) {
-        checkTypingIndicatorFeatureFlag();
+        useTypingIndicator();
         Objects.requireNonNull(typingUsersSignal, "Signal cannot be null");
         return typingUsersSupport.bind(() -> typingUsersSignal.get().stream()
                 .map(Signal::get).toList());
     }
 
     private void updateTypingUsers(Collection<MessageListUser> typingUsers) {
-        this.typingUsers.forEach(user -> user.setHost(null));
-        this.typingUsers = new ArrayList<>(typingUsers);
+        var users = new ArrayList<>(typingUsers);
+        // Only release the users that are no longer typing, and only when this
+        // list still hosts them, so that the ones that keep typing retain their
+        // image resource
+        this.typingUsers.stream()
+                .filter(user -> !users.contains(user) && user.getHost() == this)
+                .forEach(user -> user.setHost(null));
+        this.typingUsers = users;
         this.typingUsers.forEach(user -> user.setHost(this));
         writeTypingUsers();
     }
@@ -522,8 +530,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
     }
 
     private void writeTypingUsers() {
-        getElement().setPropertyJson(TYPING_USERS_PROPERTY, typingUsers.stream()
-                .map(JacksonUtils::beanToJson).collect(JacksonUtils.asArray()));
+        getElement().setPropertyList(TYPING_USERS_PROPERTY, typingUsers);
     }
 
     /**
@@ -534,11 +541,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * @since 25.3
      */
     public MessageListTypingIndicatorType getTypingIndicatorType() {
-        var typeName = getElement().getProperty(TYPING_INDICATOR_TYPE_PROPERTY,
-                "");
-        return Arrays.stream(MessageListTypingIndicatorType.values())
-                .filter(type -> type.getTypeName().equals(typeName)).findFirst()
-                .orElse(MessageListTypingIndicatorType.DEFAULT);
+        return typingIndicatorType;
     }
 
     /**
@@ -557,9 +560,10 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     public void setTypingIndicatorType(
             MessageListTypingIndicatorType typingIndicatorType) {
-        checkTypingIndicatorFeatureFlag();
+        useTypingIndicator();
         Objects.requireNonNull(typingIndicatorType,
                 "Can't set null typing indicator type to MessageList.");
+        this.typingIndicatorType = typingIndicatorType;
         if (typingIndicatorType == MessageListTypingIndicatorType.DEFAULT) {
             getElement().removeProperty(TYPING_INDICATOR_TYPE_PROPERTY);
         } else {
@@ -589,12 +593,17 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * <p>
      * Note: updating the object properties after setting the i18n object does
      * not update the component. Set the object again to apply the changes.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
      *
      * @param i18n
      *            the i18n object, not {@code null}
      * @since 25.3
      */
     public void setI18n(MessageListI18n i18n) {
+        useTypingIndicator();
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n object should not be null");
         var typingIndicatorText = i18n.getTypingIndicatorText();
@@ -607,24 +616,39 @@ public class MessageList extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Checks that the typing indicator feature flag is enabled, and throws
-     * otherwise. The check is run as soon as the component is attached, which
-     * is the earliest point where the feature flags can be resolved.
+     * Marks the typing indicator API as used and checks that its feature flag
+     * is enabled. While the component is detached, the check is deferred to the
+     * attach, which is the earliest point where the feature flags can be
+     * resolved.
      */
-    void checkTypingIndicatorFeatureFlag() {
-        if (typingIndicatorFeatureFlagChecked) {
-            return;
+    private void useTypingIndicator() {
+        typingIndicatorUsed = true;
+        getUI().ifPresent(this::checkTypingIndicatorFeatureFlag);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (typingIndicatorUsed) {
+            checkTypingIndicatorFeatureFlag(attachEvent.getUI());
         }
-        getElement().getNode().runWhenAttached(ui -> {
-            var featureFlags = FeatureFlags
-                    .get(ui.getSession().getService().getContext());
-            if (!featureFlags.isEnabled(
-                    MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID)
-                    && !featureFlags.isEnabled(AI_COMPONENTS_FEATURE_FLAG_ID)) {
-                throw new MessageListTypingIndicatorExperimentalFeatureException();
-            }
-            typingIndicatorFeatureFlagChecked = true;
-        });
+    }
+
+    /**
+     * Checks that the typing indicator feature flag is enabled, and throws
+     * otherwise.
+     *
+     * @param ui
+     *            the UI to resolve the feature flags from
+     */
+    private void checkTypingIndicatorFeatureFlag(UI ui) {
+        var featureFlags = FeatureFlags
+                .get(ui.getSession().getService().getContext());
+        if (!featureFlags.isEnabled(
+                MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID)
+                && !featureFlags.isEnabled(AI_COMPONENTS_FEATURE_FLAG_ID)) {
+            throw new MessageListTypingIndicatorExperimentalFeatureException();
+        }
     }
 
     /**

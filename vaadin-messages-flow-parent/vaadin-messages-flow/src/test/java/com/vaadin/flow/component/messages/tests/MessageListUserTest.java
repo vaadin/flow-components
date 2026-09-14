@@ -300,6 +300,32 @@ class MessageListUserTest {
     }
 
     @Test
+    void setTypingUsersAgain_stillTyping_imageUrlUnchanged() {
+        alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
+        var imageUrl = alice.getImage();
+
+        messageList.setTypingUsers(alice, new MessageListUser("Bob"));
+
+        Assertions.assertEquals(imageUrl, alice.getImage(),
+                "Expected the image URL to stay the same while typing");
+        assertImageIsServed(alice.getImage());
+    }
+
+    @Test
+    void moveToAnotherMessageList_removedFromPreviousList_imageStillServed() {
+        var otherList = new MessageList();
+        ui.add(otherList);
+        alice.setImageHandler(imageHandler);
+        messageList.setTypingUsers(alice);
+        otherList.setTypingUsers(alice);
+
+        messageList.setTypingUsers();
+
+        assertImageIsServed(alice.getImage());
+    }
+
+    @Test
     void moveToAnotherMessageList_previousListDetached_imageStillServed() {
         var otherList = new MessageList();
         ui.add(otherList);
