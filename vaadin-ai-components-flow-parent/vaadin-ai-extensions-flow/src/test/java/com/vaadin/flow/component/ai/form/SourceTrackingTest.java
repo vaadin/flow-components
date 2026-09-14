@@ -41,9 +41,10 @@ import tools.jackson.databind.JsonNode;
 /**
  * Tests for {@link FormAIController} source tracking. Per the RFC, with
  * {@link FormAIController#setSourceTrackingEnabled(boolean)} on, a
- * {@code fill_form} value may arrive wrapped in an envelope carrying the
- * snippets the LLM read, their locations, and a confidence level. The reported
- * source is readable from {@link FormAIController#getFieldSource(HasValue)} and
+ * {@code fill_form} value may arrive with a source under the same field id in
+ * the tool's {@code sources} parameter, carrying the snippets the LLM read,
+ * their locations, and a confidence level. The reported source is readable from
+ * {@link FormAIController#getFieldSource(HasValue)} and
  * {@link FieldValueChangeEvent#getFieldSource()}, lasts as long as the field
  * holds the value it was reported with, and bad source data is dropped without
  * ever blocking the value. Each test drives the {@code fill_form} tool the way
