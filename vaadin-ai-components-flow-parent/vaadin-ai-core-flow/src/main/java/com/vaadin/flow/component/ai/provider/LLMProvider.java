@@ -165,6 +165,28 @@ public interface LLMProvider {
         }
 
         /**
+         * Gets the session context for this turn: free-form text the
+         * application supplies through
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIOrchestrator.Builder#withMetadata(com.vaadin.flow.function.SerializableSupplier)
+         * AIOrchestrator.Builder.withMetadata}, such as the current date and
+         * time, captured when the user sent the message.
+         * <p>
+         * Send it to the model together with the user message, after the user's
+         * text, so that the system prompt and the tool definitions stay
+         * identical from turn to turn and an LLM provider that caches the
+         * prompt prefix keeps hitting its cache. The built-in providers append
+         * it to the user message text in a delimited block. The default returns
+         * {@code null}.
+         *
+         * @return the session context for this turn, or {@code null} when there
+         *         is none
+         * @since 25.3
+         */
+        default String sessionContext() {
+            return null;
+        }
+
+        /**
          * Gets the consumer that receives metadata about the model's response,
          * such as the finish reason and token usage. A provider that observes
          * such metadata passes it to this consumer as the turn progresses —
