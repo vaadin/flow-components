@@ -25,6 +25,39 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
 class LLMProviderHelpersTest {
 
     @Test
+    void withSessionContext_appendsDelimitedBlockAfterUserText() {
+        var result = LLMProviderHelpers.withSessionContext("Hello",
+                "Tenant: acme");
+
+        Assertions.assertTrue(
+                result.startsWith("Hello\n\n"
+                        + LLMProviderHelpers.SESSION_CONTEXT_OPEN + "\n"),
+                "Context block must follow the user's text; got: " + result);
+        Assertions.assertTrue(
+                result.endsWith("\nTenant: acme\n"
+                        + LLMProviderHelpers.SESSION_CONTEXT_CLOSE),
+                "Context must be the last thing in the block; got: " + result);
+        // The note's wording is tuned freely and deliberately not pinned
+        // here; what the block must always do is introduce the context
+        // with one.
+        var block = result.substring(
+                result.indexOf(LLMProviderHelpers.SESSION_CONTEXT_OPEN)
+                        + LLMProviderHelpers.SESSION_CONTEXT_OPEN.length(),
+                result.lastIndexOf(LLMProviderHelpers.SESSION_CONTEXT_CLOSE));
+        Assertions.assertFalse(block.replace("Tenant: acme", "").isBlank(),
+                "The block must introduce the context with a note; got: "
+                        + result);
+    }
+
+    @Test
+    void withSessionContext_withoutContext_returnsUserTextUnchanged() {
+        Assertions.assertEquals("Hello",
+                LLMProviderHelpers.withSessionContext("Hello", null));
+        Assertions.assertEquals("Hello",
+                LLMProviderHelpers.withSessionContext("Hello", "   "));
+    }
+
+    @Test
     void decodeAsUtf8_withValidUtf8_strictMode_returnsDecodedString() {
         var data = getValidUtf8Data();
         var input = new String(data, StandardCharsets.UTF_8);
