@@ -243,7 +243,9 @@ class ChartAIControllerTest {
 
             String result = tool
                     .execute(json("{\"queries\": [\"SELECT foo\"]}"));
-            Assertions.assertEquals("Error updating chart data.", result);
+            Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
+            Assertions.assertFalse(result.contains("internal detail"),
+                    "The cause must not reach the LLM, got: " + result);
         }
 
         @Test
