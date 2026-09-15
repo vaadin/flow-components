@@ -2569,6 +2569,57 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_streamingCancelledWhileModelResponds_skipsToolCalls() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var toolCalls = new AtomicInteger();
+        var request = requestWithCountingTool("myTool", toolCalls);
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            subscriber.cancel();
+            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(0, toolCalls.get(),
+                "A response arriving after the subscriber gave up must not "
+                        + "run its tools");
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
+    void stream_streamingCancelledDuringToolExecution_doesNotCallModelAgain() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var toolCalls = new AtomicInteger();
+        var tool = createExplicitTool("myTool", "A test tool", null, args -> {
+            toolCalls.incrementAndGet();
+            subscriber.cancel();
+            return "result";
+        });
+        var request = new TestLLMRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(request).subscribe(subscriber);
+
+        Assertions.assertEquals(1, toolCalls.get());
+        Mockito.verify(mockStreamingChatModel).chat(
+                Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+    }
+
+    @Test
     void stream_namelessToolRequestedRepeatedly_reportsThePerToolLimit() {
         // LangChain4j does not guard the name of a tool execution request, so
         // a nameless one can reach the counter. It must still report the
