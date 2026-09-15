@@ -506,6 +506,24 @@ public class MessageListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void showTwoTyping_changeLocale_typingIndicatorRetained() {
+        clickElementWithJs("showTwoTyping");
+
+        clickElementWithJs("setLocale");
+
+        // The locale change re-renders the messages, which must not drop the
+        // typing indicator that is rendered along with them
+        Assert.assertTrue(
+                "Expected the messages to be rendered in the new " + "locale",
+                getFirstMessage(messageList).getTime()
+                        .matches("1 gen 2021, [0-9]+:[0-9]+"));
+        Assert.assertEquals("Unexpected typing users", List.of("Alice", "Bob"),
+                messageList.getTypingUserNames());
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("Typing"));
+    }
+
+    @Test
     public void showTyping_reattachList_typingIndicatorRestored() {
         clickElementWithJs("showTyping");
         clickElementWithJs("detachList");
