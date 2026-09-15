@@ -60,6 +60,7 @@ import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListUser;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -343,7 +344,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void assistantPlaceholder_isCreated() {
+    void assistantMessage_isCreatedOnFirstToken() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -357,6 +358,118 @@ class AIOrchestratorTest {
 
         Mockito.verify(mockMessageList).addMessage("", "Assistant",
                 Collections.emptyList());
+    }
+
+    @Test
+    void prompt_beforeFirstToken_showsTypingIndicatorWithoutAssistantMessage() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.never());
+
+        getSimpleOrchestrator().prompt("Hello");
+
+        Mockito.verify(mockMessageList).showTypingIndicator("Assistant");
+        Mockito.verify(mockMessageList, Mockito.never()).addMessage(
+                Mockito.eq(""), Mockito.eq("Assistant"), Mockito.anyList());
+    }
+
+    @Test
+    void firstToken_hidesTypingIndicatorBeforeCreatingAssistantMessage() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        getSimpleOrchestrator().prompt("Hello");
+
+        var inOrder = Mockito.inOrder(mockMessageList);
+        inOrder.verify(mockMessageList).addMessage("Hello", "You",
+                Collections.emptyList());
+        inOrder.verify(mockMessageList).showTypingIndicator("Assistant");
+        inOrder.verify(mockMessageList).hideTypingIndicator("Assistant");
+        inOrder.verify(mockMessageList).addMessage("", "Assistant",
+                Collections.emptyList());
+    }
+
+    @Test
+    void multipleTokens_createsAssistantMessageOnce() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hello", " ", "World"));
+
+        getSimpleOrchestrator().prompt("Hello");
+
+        Mockito.verify(mockMessageList, Mockito.times(1)).addMessage(
+                Mockito.eq(""), Mockito.eq("Assistant"), Mockito.anyList());
+        Mockito.verify(mockMessage, Mockito.times(3))
+                .appendText(Mockito.anyString());
+    }
+
+    @Test
+    void emptyResponse_hidesTypingIndicatorWithoutAssistantMessage() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.empty());
+
+        getSimpleOrchestrator().prompt("Hello");
+
+        Mockito.verify(mockMessageList).hideTypingIndicator("Assistant");
+        Mockito.verify(mockMessageList, Mockito.never()).addMessage(
+                Mockito.eq(""), Mockito.eq("Assistant"), Mockito.anyList());
+    }
+
+    @Test
+    void streamError_beforeFirstToken_hidesTypingIndicatorAndShowsErrorMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(new RuntimeException("API died")));
+
+        getSimpleOrchestrator().prompt("Hello");
+
+        Mockito.verify(mockMessageList).hideTypingIndicator("Assistant");
+        Mockito.verify(mockMessage)
+                .setText("An error occurred. Please try again.");
+    }
+
+    @Test
+    void streamError_afterFirstToken_doesNotCreateSecondAssistantMessage() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.concat(Flux.just("Partial"),
+                        Flux.error(new RuntimeException("API died"))));
+
+        getSimpleOrchestrator().prompt("Hello");
+
+        Mockito.verify(mockMessageList, Mockito.times(1)).addMessage(
+                Mockito.eq(""), Mockito.eq("Assistant"), Mockito.anyList());
+        Mockito.verify(mockMessage)
+                .setText("An error occurred. Please try again.");
+    }
+
+    @Test
+    void prompt_withoutMessageList_doesNotTouchTypingIndicator() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        Assertions.assertDoesNotThrow(() -> orchestrator.prompt("Hello"));
+
+        Mockito.verifyNoInteractions(mockMessageList);
     }
 
     @Test
@@ -1673,6 +1786,65 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_withFlowMessageList_showsAssistantAsTypingUntilFirstToken() {
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.never());
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList).build().prompt("Hello");
+
+        Assertions.assertEquals(List.of("Assistant"),
+                getTypingUserNames(flowMessageList));
+    }
+
+    @Test
+    void prompt_withFlowMessageList_clearsTypingUsersOnFirstToken() {
+        var flowMessageList = new MessageList();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList).build().prompt("Hello");
+
+        Assertions.assertTrue(flowMessageList.getTypingUsers().isEmpty());
+        Assertions.assertEquals("Response",
+                flowMessageList.getItems().getLast().getText());
+    }
+
+    @Test
+    void prompt_withFlowMessageList_otherUserTyping_addsAssistantToTypingUsers() {
+        var flowMessageList = new MessageList();
+        flowMessageList.setTypingUsers(new MessageListUser("Alice"));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.never());
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList).build().prompt("Hello");
+
+        Assertions.assertEquals(List.of("Alice", "Assistant"),
+                getTypingUserNames(flowMessageList));
+    }
+
+    @Test
+    void prompt_withFlowMessageList_otherUserTyping_firstTokenKeepsOtherUser() {
+        var flowMessageList = new MessageList();
+        flowMessageList.setTypingUsers(new MessageListUser("Alice"));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList).build().prompt("Hello");
+
+        Assertions.assertEquals(List.of("Alice"),
+                getTypingUserNames(flowMessageList));
+    }
+
+    @Test
     void prompt_withFlowMessageList_scalesImageAttachmentThumbnails()
             throws Exception {
         var initialWidth = 500;
@@ -2381,7 +2553,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void streamError_setsErrorMessageOnAssistantPlaceholderExactlyOnce() {
+    void streamError_setsErrorMessageOnAssistantMessageExactlyOnce() {
         // Async errors and the pre-stream catch target the same text; the
         // two paths must not stack.
         var mockMessage = createMockMessage();
@@ -2424,8 +2596,8 @@ class AIOrchestratorTest {
 
     @Test
     void preStreamThrow_withoutMessageList_doesNotCrash() {
-        // No messageList means no assistant placeholder; the catch block
-        // must skip the setText update without an NPE.
+        // No messageList means no assistant message and no typing
+        // indicator; the catch block must skip the update without an NPE.
         var controller = mockController();
         Mockito.doThrow(new RuntimeException("controller refused"))
                 .when(controller).onRequest(Mockito.any());
@@ -2465,10 +2637,10 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void preStreamThrow_setsErrorMessageOnAssistantPlaceholder() {
+    void preStreamThrow_setsErrorMessageOnAssistantMessage() {
         // Synchronous pre-stream failures (onRequestStart, attachment
-        // listener, sync provider throw) update the placeholder, matching
-        // the async stream-error path.
+        // listener, sync provider throw) create the assistant message and
+        // update it, matching the async stream-error path.
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -2482,6 +2654,9 @@ class AIOrchestratorTest {
         Assertions.assertThrows(RuntimeException.class,
                 () -> orchestrator.prompt("Hello"));
 
+        Mockito.verify(mockMessageList).hideTypingIndicator("Assistant");
+        Mockito.verify(mockMessageList).addMessage("", "Assistant",
+                Collections.emptyList());
         Mockito.verify(mockMessage)
                 .setText("An error occurred. Please try again.");
     }
@@ -3387,6 +3562,11 @@ class AIOrchestratorTest {
                 return "result";
             }
         };
+    }
+
+    private static List<String> getTypingUserNames(MessageList messageList) {
+        return messageList.getTypingUsers().stream()
+                .map(MessageListUser::getName).toList();
     }
 
     private AIOrchestrator getSimpleOrchestrator() {

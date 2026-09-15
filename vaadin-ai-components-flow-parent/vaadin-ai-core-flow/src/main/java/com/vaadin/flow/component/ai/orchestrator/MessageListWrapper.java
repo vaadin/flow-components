@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.messages.MessageListUser;
 
 /**
  * Wrapper for Flow MessageList component to implement AIMessageList interface.
@@ -44,6 +46,30 @@ class MessageListWrapper implements AIMessageList {
         itemToMessage.put(message.getItem(), message);
         messageList.addItem(message.getItem());
         return message;
+    }
+
+    @Override
+    public void showTypingIndicator(String userName) {
+        // Only the entry of the given participant is touched, so that the
+        // typing users set by the application are kept
+        var typingUsers = messageList.getTypingUsers();
+        if (typingUsers.stream()
+                .anyMatch(user -> userName.equals(user.getName()))) {
+            return;
+        }
+        var users = new ArrayList<>(typingUsers);
+        users.add(new MessageListUser(userName));
+        messageList.setTypingUsers(users);
+    }
+
+    @Override
+    public void hideTypingIndicator(String userName) {
+        var typingUsers = messageList.getTypingUsers();
+        var users = typingUsers.stream()
+                .filter(user -> !userName.equals(user.getName())).toList();
+        if (users.size() != typingUsers.size()) {
+            messageList.setTypingUsers(users);
+        }
     }
 
     @Override
