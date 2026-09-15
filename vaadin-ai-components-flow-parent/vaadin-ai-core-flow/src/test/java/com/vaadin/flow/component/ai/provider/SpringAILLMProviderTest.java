@@ -73,6 +73,13 @@ import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 
 class SpringAILLMProviderTest {
+    /**
+     * Bound for the blocks of the tool call limit tests. Those turns only end
+     * because Spring AI stops its own loop, so a Spring AI that no longer does
+     * has to fail them rather than hang the suite.
+     */
+    private static final Duration TURN_TIMEOUT = Duration.ofSeconds(5);
+
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
@@ -1931,7 +1938,8 @@ class SpringAILLMProviderTest {
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
                 .thenReturn(mockChatResponseWithPendingToolCall());
 
-        var results = provider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
 
         Assertions.assertEquals(1, results.size());
         Assertions.assertTrue(results.getFirst().contains("doSomething"),
@@ -1952,7 +1960,8 @@ class SpringAILLMProviderTest {
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
                 .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()));
 
-        var results = provider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
 
         Assertions.assertEquals(1, results.size());
         Assertions.assertTrue(results.getFirst().contains("doSomething"),
