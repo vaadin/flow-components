@@ -64,6 +64,28 @@ public interface AIMessageList extends Serializable {
             List<AIAttachment> attachments);
 
     /**
+     * Shows an indication that the given participant is working on a response.
+     * The default implementation does nothing.
+     *
+     * @param userName
+     *            the name of the participant, not {@code null}
+     */
+    default void showTypingIndicator(String userName) {
+        // Optional for implementations that cannot show an indication
+    }
+
+    /**
+     * Hides the indication that the given participant is working on a response.
+     * The default implementation does nothing.
+     *
+     * @param userName
+     *            the name of the participant, not {@code null}
+     */
+    default void hideTypingIndicator(String userName) {
+        // Optional for implementations that cannot show an indication
+    }
+
+    /**
      * Adds a listener that is called when an attachment in the message list is
      * clicked.
      *
