@@ -94,9 +94,9 @@ import tools.jackson.databind.JsonNode;
  * answering would never end its turn, and each round costs another model call.
  * The provider ends such a turn with a {@link ToolCallLimitExceededException}
  * once the model has requested more than {@code 40} calls to any one tool, or
- * more than {@code 150} tool calls in total, within the turn. These are the
- * limits Spring AI applies by default. Adjust or remove them with
- * {@link #setMaxCallsPerTool(int)} and {@link #setMaxTotalToolCalls(int)}.
+ * more than {@code 150} tool calls in total, within the turn. Adjust or remove
+ * them with {@link #setMaxCallsPerTool(int)} and
+ * {@link #setMaxTotalToolCalls(int)}.
  * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
@@ -168,6 +168,13 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 "User message must not be null");
         var response = Flux.<String> create(sink -> {
             try {
+                if (sink.isCancelled()) {
+                    // Checked before the question is recorded: a turn
+                    // abandoned before it started must leave the conversation
+                    // as it was, not a question the next turn would repeat.
+                    LOGGER.debug("The turn was cancelled before it started");
+                    return;
+                }
                 var userMessage = buildUserMessage(request);
                 chatMemory.add(userMessage);
                 var toolContext = new ToolContext(prepareToolExecutors(request),
@@ -266,7 +273,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     /**
      * Sets the maximum number of times the model may call any one tool during a
-     * turn. The default is {@code 40}, the limit Spring AI applies by default.
+     * turn. The default is {@code 40}.
      * <p>
      * A model that keeps calling the same tool instead of answering, for
      * example to look for something the application does not have, would
@@ -311,8 +318,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     /**
      * Sets the maximum number of tool calls the model may make during a turn,
-     * all tools together. The default is {@code 150}, the limit Spring AI
-     * applies by default.
+     * all tools together. The default is {@code 150}.
      * <p>
      * This bounds a turn that {@link #setMaxCallsPerTool(int)} does not catch
      * because the model spreads its calls over several tools. Once a call would
@@ -763,11 +769,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     /**
      * The tool call limits of one turn, and the calls counted against them so
-     * far. Counts the way Spring AI does: the per-tool limit is checked before
-     * the total, and the call that takes a count past its limit is the one
-     * refused. Unlike Spring AI, which runs the calls of a round up to the
-     * refused one, the whole round is screened before anything runs, so a round
-     * containing a refused call executes none of its calls.
+     * far. The per-tool limit is checked before the total, and the call that
+     * takes a count past its limit is the one refused. The whole round is
+     * screened before anything runs, so a round containing a refused call
+     * executes none of its calls.
      */
     private static final class ToolCallLimits {
         private final int maxCallsPerTool;

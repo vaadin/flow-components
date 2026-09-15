@@ -2457,6 +2457,28 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_cancelledBeforeFirstModelCall_leavesNoQuestionUnanswered() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        subscriber.cancel();
+        provider.stream(createSimpleRequest("First")).subscribe(subscriber);
+        Mockito.verify(mockChatModel, Mockito.never())
+                .chat(Mockito.any(ChatRequest.class));
+
+        Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
+                .chat(Mockito.any(ChatRequest.class));
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var questions = getUserMessageContents(captor.getValue(),
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("Second"), questions,
+                "The cancelled turn left its question in memory unanswered");
+    }
+
+    @Test
     void stream_cancelledDuringToolExecution_finishesRoundWithoutCallingModelAgain() {
         var subscriber = new BaseSubscriber<String>() {
         };
