@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -1914,6 +1915,97 @@ class SpringAILLMProviderTest {
                     "Tool result relayed to the model must not contain '" + leak
                             + "', but got: " + result);
         }
+    }
+
+    // --- Tool call limit tests ---
+
+    @Test
+    void stream_nonStreamingToolCallLimitExceeded_completesWithSpringAIReplyAndFinishReason() {
+        // Spring AI bounds its own loop and turns the breach into a normal
+        // reply rather than an error. The provider's Javadoc describes this,
+        // so pin it against a Spring AI upgrade.
+        provider.setStreaming(false);
+        var toolCalls = new AtomicInteger();
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = toolRequestWithMetadataSink(toolCalls, collected);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponseWithPendingToolCall());
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertTrue(results.getFirst().contains("doSomething"),
+                "Spring AI's own message about the limit is the reply: "
+                        + results.getFirst());
+        Assertions.assertEquals(40, toolCalls.get());
+        Assertions.assertEquals("toolCallLimitExceeded",
+                collected.getLast().finishReason());
+        Mockito.verify(mockChatModel, Mockito.times(41))
+                .call(Mockito.any(Prompt.class));
+    }
+
+    @Test
+    void stream_streamingToolCallLimitExceeded_completesWithSpringAIReplyAndFinishReason() {
+        var toolCalls = new AtomicInteger();
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = toolRequestWithMetadataSink(toolCalls, collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, results.size());
+        Assertions.assertTrue(results.getFirst().contains("doSomething"),
+                "Spring AI's own message about the limit is the reply: "
+                        + results.getFirst());
+        Assertions.assertEquals(40, toolCalls.get());
+        Assertions.assertEquals("toolCallLimitExceeded",
+                collected.getLast().finishReason());
+    }
+
+    /**
+     * A request registering the tool that
+     * {@link #mockChatResponseWithPendingToolCall()} calls, counting its
+     * executions, and collecting the published metadata.
+     */
+    private LLMRequest toolRequestWithMetadataSink(AtomicInteger toolCalls,
+            List<ResponseMetadata> collected) {
+        var tool = createExplicitTool("doSomething", "A test tool", null,
+                args -> {
+                    toolCalls.incrementAndGet();
+                    return "tool result";
+                });
+        return new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return "invoke tool";
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public List<LLMProvider.ToolSpec> explicitTools() {
+                return List.of(tool);
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return collected::add;
+            }
+        };
     }
 
     // --- Response metadata tests ---
