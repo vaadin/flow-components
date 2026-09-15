@@ -20,17 +20,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.messages.MessageListUser;
+import com.vaadin.flow.signals.BindingActiveException;
 
 /**
  * Wrapper for Flow MessageList component to implement AIMessageList interface.
  */
 class MessageListWrapper implements AIMessageList {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MessageListWrapper.class);
 
     final MessageList messageList;
     private final Map<MessageListItem, AIMessage> itemToMessage = new HashMap<>();
@@ -59,7 +66,7 @@ class MessageListWrapper implements AIMessageList {
         }
         var users = new ArrayList<>(typingUsers);
         users.add(new MessageListUser(userName));
-        messageList.setTypingUsers(users);
+        setTypingUsers(users);
     }
 
     @Override
@@ -68,7 +75,21 @@ class MessageListWrapper implements AIMessageList {
         var users = typingUsers.stream()
                 .filter(user -> !userName.equals(user.getName())).toList();
         if (users.size() != typingUsers.size()) {
+            setTypingUsers(users);
+        }
+    }
+
+    /**
+     * Updates the typing users of the message list. When the application has
+     * bound the typing users to a signal, they cannot be set, and the typing
+     * indicator is left to the application.
+     */
+    private void setTypingUsers(List<MessageListUser> users) {
+        try {
             messageList.setTypingUsers(users);
+        } catch (BindingActiveException e) {
+            LOGGER.debug("Typing users are bound to a signal, leaving the "
+                    + "typing indicator to the application", e);
         }
     }
 

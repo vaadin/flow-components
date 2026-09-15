@@ -65,6 +65,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
@@ -461,7 +462,7 @@ class AIOrchestratorTest {
     }
 
     @Test
-    void prompt_withoutMessageList_doesNotTouchTypingIndicator() {
+    void prompt_withoutMessageList_callsProvider() {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
@@ -469,7 +470,8 @@ class AIOrchestratorTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
         Assertions.assertDoesNotThrow(() -> orchestrator.prompt("Hello"));
 
-        Mockito.verifyNoInteractions(mockMessageList);
+        Mockito.verify(mockProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
     @Test
@@ -1857,6 +1859,39 @@ class AIOrchestratorTest {
 
         Assertions.assertEquals(List.of("Alice"),
                 getTypingUserNames(flowMessageList));
+    }
+
+    @Test
+    void prompt_withFlowMessageList_typingUsersBound_responseShown() {
+        var flowMessageList = new MessageList();
+        flowMessageList.bindTypingUsers(
+                new ValueSignal<List<ValueSignal<MessageListUser>>>(List.of()));
+        ui.add(flowMessageList);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList).build().prompt("Hello");
+
+        Assertions.assertEquals("Response",
+                flowMessageList.getItems().getLast().getText());
+    }
+
+    @Test
+    void prompt_withFlowMessageList_typingUsersBound_doesNotShowAssistantTyping() {
+        var flowMessageList = new MessageList();
+        flowMessageList.bindTypingUsers(
+                new ValueSignal<List<ValueSignal<MessageListUser>>>(List.of()));
+        ui.add(flowMessageList);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.never());
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList).build().prompt("Hello");
+
+        Assertions.assertTrue(flowMessageList.getTypingUsers().isEmpty());
     }
 
     @Test

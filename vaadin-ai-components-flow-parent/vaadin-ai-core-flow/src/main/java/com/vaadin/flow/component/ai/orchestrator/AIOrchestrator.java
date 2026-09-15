@@ -1190,6 +1190,11 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the message list component.
+         * <p>
+         * While a response is pending, the assistant is shown as working on a
+         * response with {@link AIMessageList#showTypingIndicator(String)}, and
+         * the assistant message is added when the first part of the response
+         * arrives.
          *
          * @param messageList
          *            the message list
@@ -1203,6 +1208,18 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the message list component using a Flow MessageList component.
+         * <p>
+         * While a response is pending, the assistant is shown in the typing
+         * indicator of the message list, and the assistant message is added
+         * when the first part of the response arrives. A turn that produces no
+         * response text, for example one that only calls tools, adds no
+         * assistant message.
+         * <p>
+         * The orchestrator only adds and removes its own entry among the typing
+         * users, so an application that shows other typing users needs to keep
+         * the assistant's entry when it updates them. When the typing users are
+         * bound to a signal with {@link MessageList#bindTypingUsers
+         * bindTypingUsers}, the typing indicator is left to the application.
          *
          * @param messageList
          *            the Flow MessageList component
