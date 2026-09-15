@@ -109,6 +109,18 @@ class MessageListTypingUsersSignalTest extends AbstractSignalsTest {
     }
 
     @Test
+    void bindTypingUsers_nullUserInSignal_typingUsersNotUpdated() {
+        messageList.bindTypingUsers(listSignal);
+        ui.add(messageList);
+
+        var nullUserSignal = new ValueSignal<MessageListUser>(
+                (MessageListUser) null);
+        listSignal.set(List.of(aliceSignal, nullUserSignal));
+
+        assertTypingUserNames("Alice");
+    }
+
+    @Test
     void featureDisabled_bindTypingUsers_throws() {
         featureFlagExtension.disableFeature();
         messageList.bindTypingUsers(listSignal);

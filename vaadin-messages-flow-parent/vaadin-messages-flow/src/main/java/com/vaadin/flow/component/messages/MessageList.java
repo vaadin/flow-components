@@ -441,10 +441,6 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     public void setTypingUsers(Collection<MessageListUser> typingUsers) {
         useTypingIndicator();
-        Objects.requireNonNull(typingUsers,
-                "Can't set null typing users to MessageList.");
-        typingUsers.forEach(user -> Objects.requireNonNull(user,
-                "Can't include null typing users in MessageList."));
         typingUsersSupport.set(typingUsers);
     }
 
@@ -504,6 +500,12 @@ public class MessageList extends Component implements HasStyle, HasSize,
     }
 
     private void updateTypingUsers(Collection<MessageListUser> typingUsers) {
+        // Validated here rather than in the setter, so that the users coming
+        // from a signal are checked as well
+        Objects.requireNonNull(typingUsers,
+                "Can't set null typing users to MessageList.");
+        typingUsers.forEach(user -> Objects.requireNonNull(user,
+                "Can't include null typing users in MessageList."));
         var users = new ArrayList<>(typingUsers);
         // Only release the users that are no longer typing, and only when this
         // list still hosts them, so that the ones that keep typing retain their
