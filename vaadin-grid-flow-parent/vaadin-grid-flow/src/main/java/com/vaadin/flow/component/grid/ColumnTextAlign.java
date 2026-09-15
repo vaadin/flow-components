@@ -20,7 +20,7 @@ package com.vaadin.flow.component.grid;
  *
  * @author Vaadin Ltd.
  *
- * @see ColumnBase#setTextAlign(ColumnTextAlign)
+ * @see Grid.Column#setTextAlign(ColumnTextAlign)
  *
  * @since 2.1
  */
