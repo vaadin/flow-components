@@ -1830,6 +1830,21 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void prompt_withFlowMessageList_assistantAlreadyTyping_isNotAddedTwice() {
+        var flowMessageList = new MessageList();
+        flowMessageList.setTypingUsers(new MessageListUser("Assistant"));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.never());
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(flowMessageList).build().prompt("Hello");
+
+        Assertions.assertEquals(List.of("Assistant"),
+                getTypingUserNames(flowMessageList));
+    }
+
+    @Test
     void prompt_withFlowMessageList_otherUserTyping_firstTokenKeepsOtherUser() {
         var flowMessageList = new MessageList();
         flowMessageList.setTypingUsers(new MessageListUser("Alice"));
