@@ -41,13 +41,15 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * <i>not</i> appended to {@link AIOrchestrator#getHistory()}.
  * <p>
  * On failure {@link ResponseEvent#getError()} carries the cause (timeout,
- * stream error, any throw between
+ * stream error, a provider's tool call limit as a
+ * {@link com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException},
+ * any throw between
  * {@link AIController#onRequest(RequestListener.RequestEvent)} and the start of
  * the stream, or a {@link RequestInterceptor} failure — a throw, a
  * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an
- * interception timeout); the response text is either empty or a partial stream
- * that was received before the failure. An interceptor failure fires the
- * listener without a preceding
+ * interception timeout); the response text is always empty, even when part of
+ * the stream had already arrived. An interceptor failure fires the listener
+ * without a preceding
  * {@link AIController#onRequest(RequestListener.RequestEvent)}, so an error
  * does not imply that per-turn setup has happened.
  * <p>
@@ -109,10 +111,9 @@ public interface ResponseListener extends Serializable {
         }
 
         /**
-         * Gets the assistant's response text. On success this is the full text
-         * (may be empty when the model emitted only tool calls); on failure
-         * this is whatever partial stream was received before the error,
-         * possibly empty.
+         * Gets the assistant's response text. On success this is the full text,
+         * which may be empty when the model emitted only tool calls. On failure
+         * it is always empty, even when part of the stream had already arrived.
          *
          * @return the response text, never {@code null}
          */

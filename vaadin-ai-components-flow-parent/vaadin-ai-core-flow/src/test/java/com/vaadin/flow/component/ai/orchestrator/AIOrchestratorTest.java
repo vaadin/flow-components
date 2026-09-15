@@ -1779,9 +1779,9 @@ class AIOrchestratorTest {
 
     @Test
     void responseListener_afterStreamError_firesWithErrorAndEmptyResponse() {
-        // ResponseListener fires once per turn — on success and on failure.
+        // ResponseListener fires once per turn, on success and on failure.
         // On failure event.getError() carries the cause and event.getResponse()
-        // is the partial (possibly empty) stream collected before the error.
+        // is empty, whether or not part of the stream had already arrived.
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
