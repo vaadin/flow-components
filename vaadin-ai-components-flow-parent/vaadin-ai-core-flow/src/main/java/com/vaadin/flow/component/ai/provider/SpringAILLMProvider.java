@@ -77,6 +77,24 @@ import tools.jackson.databind.JsonNode;
  * user's message renders while the LLM works.
  * </p>
  * <p>
+ * <b>Tool call limits:</b> Spring AI runs the tool-calling loop itself and,
+ * from version 2.0.1, bounds it: once the model has requested more than
+ * {@code 40} calls to any one tool, or more than {@code 150} tool calls in
+ * total, within a turn, Spring AI stops the loop. It does not fail the turn.
+ * The turn completes with Spring AI's own message about the exceeded limit as
+ * the assistant's reply, which also enters chat memory, and with the finish
+ * reason {@code toolCallLimitExceeded} in the {@link ResponseMetadata response
+ * metadata}; check that finish reason to tell such a turn from a completed one.
+ * The limits belong to the {@code ToolCallingAdvisor} of the
+ * {@link ChatClient}: a provider created from a {@link ChatModel} builds its
+ * own client and keeps Spring AI's defaults. To change them, build the client
+ * yourself, passing {@code ChatClient.builder} a
+ * {@code ToolCallingAdvisor.Builder} that carries a
+ * {@code DefaultToolCallingManager} with your limits, and create the provider
+ * from that client. Spring AI 2.0.0 applies no limit, so a turn can loop on
+ * tool calls until the model stops on its own.
+ * </p>
+ * <p>
  * With the {@link #SpringAILLMProvider(ChatModel)} constructor the provider
  * maintains its own chat memory, and {@link #setHistory(List, Map)} restores a
  * saved conversation into it. To share conversation history across components,
