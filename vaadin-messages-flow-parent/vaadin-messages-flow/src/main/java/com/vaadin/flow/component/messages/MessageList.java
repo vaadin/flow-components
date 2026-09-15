@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -29,6 +31,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -61,10 +64,26 @@ public class MessageList extends Component implements HasStyle, HasSize,
 
     private static final String ITEMS_BINDING = "items";
 
+    private static final String TYPING_INDICATOR_TEXT_PROPERTY = "_typingIndicatorText";
+
+    private static final String TYPING_USERS_PROPERTY = "_usersTyping";
+
+    private static final String TYPING_INDICATOR_TYPE_PROPERTY = "_typingIndicatorType";
+
+    private static final String AI_COMPONENTS_FEATURE_FLAG_ID = "aiComponents";
+
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
     private boolean pendingTextUpdate = false;
     private Integer pendingAddItemsIndex;
+    private boolean typingIndicatorUsed = false;
+    private MessageListI18n i18n;
+    private MessageListTypingIndicatorType typingIndicatorType = MessageListTypingIndicatorType.DEFAULT;
+
+    private final SignalPropertySupport<List<MessageListUser>> typingUsersSupport = SignalPropertySupport
+            .create(this, this::updateTypingUsers);
+
+    private List<MessageListUser> typingUsers = Collections.emptyList();
 
     private final String CONNECTOR_OBJECT = "window.Vaadin.Flow.messageListConnector";
 
@@ -386,6 +405,260 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     public boolean isAnnounceMessages() {
         return getElement().getProperty("announceMessages", false);
+    }
+
+    /**
+     * Gets the users that are currently typing.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @return an unmodifiable view of the users that are currently typing,
+     *         empty by default
+     * @since 25.3
+     */
+    public List<MessageListUser> getTypingUsers() {
+        return Collections.unmodifiableList(typingUsers);
+    }
+
+    /**
+     * Sets the users that are currently typing. A typing indicator with the
+     * names and avatars of these users is rendered at the end of the message
+     * list. Pass an empty list to hide the typing indicator.
+     * <p>
+     * The message list does not remove the users on its own. It is up to the
+     * application to clear them once the users have stopped typing.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @param typingUsers
+     *            the users that are currently typing, not {@code null} and not
+     *            containing any {@code null} users
+     * @since 25.3
+     */
+    public void setTypingUsers(List<MessageListUser> typingUsers) {
+        useTypingIndicator();
+        typingUsersSupport.set(typingUsers);
+    }
+
+    /**
+     * Sets the users that are currently typing. A typing indicator with the
+     * names and avatars of these users is rendered at the end of the message
+     * list. Pass no users to hide the typing indicator.
+     * <p>
+     * The message list does not remove the users on its own. It is up to the
+     * application to clear them once the users have stopped typing.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @param typingUsers
+     *            the users that are currently typing, none of which can be
+     *            {@code null}
+     * @since 25.3
+     */
+    public void setTypingUsers(MessageListUser... typingUsers) {
+        setTypingUsers(Arrays.asList(typingUsers));
+    }
+
+    /**
+     * Binds the given signal to the users that are currently typing as a
+     * one-way binding so that the typing indicator is updated when the signal's
+     * value or any individual user signal changes.
+     * <p>
+     * When a signal is bound, the typing users are kept synchronized with the
+     * signal value while the component is attached. When the component is
+     * detached, signal value changes have no effect.
+     * <p>
+     * While a signal is bound, any attempt to modify the typing users manually
+     * through {@link #setTypingUsers(List)} throws a
+     * {@link BindingActiveException}.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @param <S>
+     *            the type of signal holding individual users
+     * @param typingUsersSignal
+     *            the signal to bind the typing users to, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
+     *         onChange} callbacks
+     * @since 25.3
+     */
+    public <S extends Signal<MessageListUser>> SignalBinding<List<MessageListUser>> bindTypingUsers(
+            Signal<List<S>> typingUsersSignal) {
+        useTypingIndicator();
+        Objects.requireNonNull(typingUsersSignal, "Signal cannot be null");
+        return typingUsersSupport.bind(() -> typingUsersSignal.get().stream()
+                .map(Signal::get).toList());
+    }
+
+    private void updateTypingUsers(List<MessageListUser> typingUsers) {
+        // Validated here rather than in the setter, so that the users coming
+        // from a signal are checked as well
+        Objects.requireNonNull(typingUsers,
+                "Can't set null typing users to MessageList.");
+        typingUsers.forEach(user -> Objects.requireNonNull(user,
+                "Can't include null typing users in MessageList."));
+        var users = new ArrayList<>(typingUsers);
+        // Only release the users that are no longer typing, and only when this
+        // list still hosts them, so that the ones that keep typing retain their
+        // image resource
+        this.typingUsers.stream()
+                .filter(user -> !users.contains(user) && user.getHost() == this)
+                .forEach(user -> user.setHost(null));
+        this.typingUsers = users;
+        this.typingUsers.forEach(user -> user.setHost(this));
+        writeTypingUsers();
+    }
+
+    /**
+     * Called when a property of a typing user changes, so that the change is
+     * sent to the client.
+     *
+     * @param user
+     *            the user that changed
+     */
+    void typingUserChanged(MessageListUser user) {
+        if (typingUsers.contains(user)) {
+            writeTypingUsers();
+        }
+    }
+
+    private void writeTypingUsers() {
+        getElement().setPropertyList(TYPING_USERS_PROPERTY, typingUsers);
+    }
+
+    /**
+     * Gets the style in which the typing indicator is rendered.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @return the typing indicator type,
+     *         {@link MessageListTypingIndicatorType#DEFAULT} by default
+     * @since 25.3
+     */
+    public MessageListTypingIndicatorType getTypingIndicatorType() {
+        return typingIndicatorType;
+    }
+
+    /**
+     * Sets the style in which the typing indicator is rendered. The style is
+     * applied right away, also when the typing indicator is currently
+     * displayed. By default, the typing indicator is rendered in the
+     * {@link MessageListTypingIndicatorType#DEFAULT} style.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @param typingIndicatorType
+     *            the typing indicator type, not {@code null}
+     * @since 25.3
+     */
+    public void setTypingIndicatorType(
+            MessageListTypingIndicatorType typingIndicatorType) {
+        useTypingIndicator();
+        Objects.requireNonNull(typingIndicatorType,
+                "Can't set null typing indicator type to MessageList.");
+        this.typingIndicatorType = typingIndicatorType;
+        if (typingIndicatorType == MessageListTypingIndicatorType.DEFAULT) {
+            getElement().removeProperty(TYPING_INDICATOR_TYPE_PROPERTY);
+        } else {
+            getElement().setProperty(TYPING_INDICATOR_TYPE_PROPERTY,
+                    typingIndicatorType.getTypeName());
+        }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the object properties after getting the i18n object does
+     * not update the component. Set the object again with
+     * {@link #setI18n(MessageListI18n)} to apply the changes.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @return the i18n object, or {@code null} if no i18n object has been set
+     * @since 25.3
+     */
+    public MessageListI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component. The texts are
+     * applied right away, also when the typing indicator is currently
+     * displayed.
+     * <p>
+     * Note: updating the object properties after setting the i18n object does
+     * not update the component. Set the object again to apply the changes.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     * @since 25.3
+     */
+    public void setI18n(MessageListI18n i18n) {
+        useTypingIndicator();
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        var typingIndicatorText = i18n.getTypingIndicatorText();
+        if (typingIndicatorText == null) {
+            getElement().removeProperty(TYPING_INDICATOR_TEXT_PROPERTY);
+        } else {
+            getElement().setProperty(TYPING_INDICATOR_TEXT_PROPERTY,
+                    typingIndicatorText);
+        }
+    }
+
+    /**
+     * Marks the typing indicator API as used and checks that its feature flag
+     * is enabled. While the component is detached, the check is deferred to the
+     * attach, which is the earliest point where the feature flags can be
+     * resolved.
+     */
+    private void useTypingIndicator() {
+        typingIndicatorUsed = true;
+        getUI().ifPresent(this::checkTypingIndicatorFeatureFlag);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (typingIndicatorUsed) {
+            checkTypingIndicatorFeatureFlag(attachEvent.getUI());
+        }
+    }
+
+    /**
+     * Checks that the typing indicator feature flag is enabled, and throws
+     * otherwise.
+     *
+     * @param ui
+     *            the UI to resolve the feature flags from
+     */
+    private void checkTypingIndicatorFeatureFlag(UI ui) {
+        var featureFlags = FeatureFlags
+                .get(ui.getSession().getService().getContext());
+        if (!featureFlags.isEnabled(
+                MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID)
+                && !featureFlags.isEnabled(AI_COMPONENTS_FEATURE_FLAG_ID)) {
+            throw new MessageListTypingIndicatorExperimentalFeatureException();
+        }
     }
 
     /**
