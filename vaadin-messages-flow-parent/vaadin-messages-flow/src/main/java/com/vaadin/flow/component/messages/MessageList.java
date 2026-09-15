@@ -537,6 +537,10 @@ public class MessageList extends Component implements HasStyle, HasSize,
 
     /**
      * Gets the style in which the typing indicator is rendered.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
      *
      * @return the typing indicator type,
      *         {@link MessageListTypingIndicatorType#DEFAULT} by default
@@ -580,6 +584,10 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * Note: updating the object properties after getting the i18n object does
      * not update the component. Set the object again with
      * {@link #setI18n(MessageListI18n)} to apply the changes.
+     * <p>
+     * This API is experimental and needs to be enabled with the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag.
      *
      * @return the i18n object, or {@code null} if no i18n object has been set
      * @since 25.3
