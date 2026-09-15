@@ -87,7 +87,7 @@ class MessageListTypingIndicatorTest {
     }
 
     @Test
-    void setTypingUsers_doesNotReflectLaterCollectionChanges() {
+    void setTypingUsers_doesNotReflectLaterListChanges() {
         var users = new ArrayList<MessageListUser>();
         users.add(new MessageListUser("Alice"));
 
@@ -98,7 +98,7 @@ class MessageListTypingIndicatorTest {
     }
 
     @Test
-    void setTypingUsers_nullCollection_throws() {
+    void setTypingUsers_nullList_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> messageList.setTypingUsers((List<MessageListUser>) null));
     }
@@ -125,7 +125,7 @@ class MessageListTypingIndicatorTest {
     }
 
     @Test
-    void setTypingUsers_emptyCollection_serializesEmptyArray() {
+    void setTypingUsers_emptyList_serializesEmptyArray() {
         messageList.setTypingUsers(new MessageListUser("Alice"));
 
         messageList.setTypingUsers();

@@ -80,7 +80,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
     private MessageListI18n i18n;
     private MessageListTypingIndicatorType typingIndicatorType = MessageListTypingIndicatorType.DEFAULT;
 
-    private final SignalPropertySupport<Collection<MessageListUser>> typingUsersSupport = SignalPropertySupport
+    private final SignalPropertySupport<List<MessageListUser>> typingUsersSupport = SignalPropertySupport
             .create(this, this::updateTypingUsers);
 
     private List<MessageListUser> typingUsers = Collections.emptyList();
@@ -425,7 +425,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
     /**
      * Sets the users that are currently typing. A typing indicator with the
      * names and avatars of these users is rendered at the end of the message
-     * list. Pass an empty collection to hide the typing indicator.
+     * list. Pass an empty list to hide the typing indicator.
      * <p>
      * The message list does not remove the users on its own. It is up to the
      * application to clear them once the users have stopped typing.
@@ -439,7 +439,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      *            containing any {@code null} users
      * @since 25.3
      */
-    public void setTypingUsers(Collection<MessageListUser> typingUsers) {
+    public void setTypingUsers(List<MessageListUser> typingUsers) {
         useTypingIndicator();
         typingUsersSupport.set(typingUsers);
     }
@@ -475,7 +475,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * detached, signal value changes have no effect.
      * <p>
      * While a signal is bound, any attempt to modify the typing users manually
-     * through {@link #setTypingUsers(Collection)} throws a
+     * through {@link #setTypingUsers(List)} throws a
      * {@link BindingActiveException}.
      * <p>
      * This API is experimental and needs to be enabled with the
@@ -491,7 +491,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      *         onChange} callbacks
      * @since 25.3
      */
-    public <S extends Signal<MessageListUser>> SignalBinding<Collection<MessageListUser>> bindTypingUsers(
+    public <S extends Signal<MessageListUser>> SignalBinding<List<MessageListUser>> bindTypingUsers(
             Signal<List<S>> typingUsersSignal) {
         useTypingIndicator();
         Objects.requireNonNull(typingUsersSignal, "Signal cannot be null");
@@ -499,7 +499,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
                 .map(Signal::get).toList());
     }
 
-    private void updateTypingUsers(Collection<MessageListUser> typingUsers) {
+    private void updateTypingUsers(List<MessageListUser> typingUsers) {
         // Validated here rather than in the setter, so that the users coming
         // from a signal are checked as well
         Objects.requireNonNull(typingUsers,
