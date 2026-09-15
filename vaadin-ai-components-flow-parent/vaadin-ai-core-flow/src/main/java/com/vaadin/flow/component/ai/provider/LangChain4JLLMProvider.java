@@ -633,8 +633,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * typically — and says nothing about how the turn ended, so it must not
      * silence the warning. This mirrors {@code SpringAILLMProvider}, whose
      * terminal-chunk check likewise ignores a reason that arrives with tool
-     * calls still pending. Called only from the two points where the turn ends,
-     * so the response passed in is by construction the terminal one.
+     * calls still pending. Called only from the points where the turn ends with
+     * the model's own answer, so the response passed in is by construction the
+     * terminal one. A turn ended by a tool call limit or by a cancelled sink
+     * does not pass through here, since neither is a normal completion.
      * <p>
      * This provider drives the tool-calling loop itself, so unlike
      * {@code SpringAILLMProvider} a turn cannot end with tool calls still

@@ -91,8 +91,14 @@ import tools.jackson.databind.JsonNode;
  * yourself, passing {@code ChatClient.builder} a
  * {@code ToolCallingAdvisor.Builder} that carries a
  * {@code DefaultToolCallingManager} with your limits, and create the provider
- * from that client. Spring AI 2.0.0 applies no limit, so a turn can loop on
- * tool calls until the model stops on its own.
+ * from that client. Its {@code maxCallsPerTool} and {@code maxTotalToolCalls}
+ * set a limit, {@code unlimitedCallsPerTool()} and
+ * {@code unlimitedTotalToolCalls()} remove one. In a Spring Boot application
+ * the {@code spring.ai.tools.limits} properties configure the same limits on
+ * the auto-configured {@code ChatClient.Builder}, so passing that client to
+ * {@link #SpringAILLMProvider(ChatClient)} needs no builder code. Spring AI
+ * 2.0.0 applies no limit, so a turn can loop on tool calls until the model
+ * stops on its own.
  * </p>
  * <p>
  * With the {@link #SpringAILLMProvider(ChatModel)} constructor the provider
