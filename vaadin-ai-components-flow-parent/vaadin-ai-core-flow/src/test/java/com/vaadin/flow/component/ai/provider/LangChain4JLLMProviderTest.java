@@ -69,6 +69,14 @@ import reactor.core.publisher.BaseSubscriber;
 import tools.jackson.databind.JsonNode;
 
 class LangChain4JLLMProviderTest {
+    /**
+     * Bound for the blocks of the tool call limit tests. What those tests
+     * assert is that a turn ends, so a turn that does not end has to fail them
+     * rather than hang the suite waiting for a terminal signal that never
+     * arrives.
+     */
+    private static final Duration TURN_TIMEOUT = Duration.ofSeconds(5);
+
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
@@ -2197,7 +2205,8 @@ class LangChain4JLLMProviderTest {
                 .thenAnswer(toolRoundsThenAnswer(
                         Collections.nCopies(40, "myTool"), "done"));
 
-        var results = provider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
 
         Assertions.assertEquals(List.of("done"), results);
         Assertions.assertEquals(40, toolCalls.get());
@@ -2214,8 +2223,8 @@ class LangChain4JLLMProviderTest {
                 .thenReturn(toolResponse);
 
         var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
 
         Assertions.assertEquals("myTool", error.getToolName());
         Assertions.assertEquals(40, error.getLimit());
@@ -2238,7 +2247,8 @@ class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenAnswer(toolRoundsThenAnswer(rounds, "done"));
 
-        var results = provider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
 
         Assertions.assertEquals(List.of("done"), results);
         Assertions.assertEquals(150, toolCalls.get());
@@ -2255,8 +2265,8 @@ class LangChain4JLLMProviderTest {
                         .get(round.getAndIncrement() % toolNames.size())));
 
         var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
 
         Assertions.assertNull(error.getToolName());
         Assertions.assertEquals(150, error.getLimit());
@@ -2276,8 +2286,8 @@ class LangChain4JLLMProviderTest {
                 .thenReturn(toolResponse);
 
         var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
 
         Assertions.assertEquals("myTool", error.getToolName());
         Assertions.assertEquals(0, toolCalls.get(),
@@ -2288,7 +2298,8 @@ class LangChain4JLLMProviderTest {
         // The refused round left nothing behind in memory
         Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
                 .chat(Mockito.any(ChatRequest.class));
-        provider.stream(createSimpleRequest("Second")).collectList().block();
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
         Assertions.assertTrue(captor.getAllValues().get(1).messages().stream()
@@ -2303,11 +2314,13 @@ class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(toolResponse);
         Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
 
         Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
                 .chat(Mockito.any(ChatRequest.class));
-        provider.stream(createSimpleRequest("Second")).collectList().block();
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(3)).chat(captor.capture());
@@ -2340,7 +2353,8 @@ class LangChain4JLLMProviderTest {
                 .thenReturn(toolResponse);
 
         Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
 
         Assertions.assertEquals(2, collected.size());
         Assertions.assertEquals(220,
@@ -2357,7 +2371,8 @@ class LangChain4JLLMProviderTest {
                 .thenAnswer(toolRoundsThenAnswer(
                         Collections.nCopies(200, "myTool"), "done"));
 
-        var results = provider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
 
         Assertions.assertEquals(List.of("done"), results);
         Assertions.assertEquals(200, toolCalls.get());
@@ -2373,8 +2388,8 @@ class LangChain4JLLMProviderTest {
                 .thenReturn(toolResponse);
 
         var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
 
         Assertions.assertEquals("myTool", error.getToolName(),
                 "The per-tool limit is checked before the total");
@@ -2388,11 +2403,12 @@ class LangChain4JLLMProviderTest {
         var request = requestWithCountingTool("myTool", toolCalls);
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenAnswer(toolRoundsThenAnswer(List.of("myTool"), "done"));
-        provider.stream(request).collectList().block();
+        provider.stream(request).collectList().block(TURN_TIMEOUT);
 
         Mockito.doAnswer(toolRoundsThenAnswer(List.of("myTool"), "done"))
                 .when(mockChatModel).chat(Mockito.any(ChatRequest.class));
-        var results = provider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
 
         Assertions.assertEquals(List.of("done"), results);
         Assertions.assertEquals(2, toolCalls.get(),
@@ -2408,8 +2424,8 @@ class LangChain4JLLMProviderTest {
                 .thenReturn(toolResponse);
 
         var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
 
         Assertions.assertNull(error.getToolName());
         Assertions.assertEquals(150, error.getLimit());
@@ -2429,8 +2445,8 @@ class LangChain4JLLMProviderTest {
                 Mockito.any(StreamingChatResponseHandler.class));
 
         var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> streamingProvider.stream(request).collectList().block());
+                ToolCallLimitExceededException.class, () -> streamingProvider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
 
         Assertions.assertEquals("myTool", error.getToolName());
         Assertions.assertEquals(2, error.getLimit());
@@ -2466,7 +2482,8 @@ class LangChain4JLLMProviderTest {
         // its tool result
         Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
                 .chat(Mockito.any(ChatRequest.class));
-        provider.stream(createSimpleRequest("Second")).collectList().block();
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
         var messages = captor.getAllValues().get(1).messages();
@@ -2474,6 +2491,36 @@ class LangChain4JLLMProviderTest {
         Assertions.assertInstanceOf(ToolExecutionResultMessage.class,
                 messages.get(2));
         Assertions.assertInstanceOf(UserMessage.class, messages.get(3));
+    }
+
+    @Test
+    void stream_cancelledDuringToolExecution_logsTheSkippedModelCall() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        var tool = createExplicitTool("myTool", "A test tool", null, args -> {
+            subscriber.cancel();
+            return "result";
+        });
+        var request = new TestLLMRequestWithExplicitTools("Loop", null,
+                Collections.emptyList(), new Object[0], List.of(tool));
+        var toolResponse = mockSimpleResponseWithTool("myTool");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        provider.stream(request).subscribe(subscriber);
+
+        // A cancelled turn ends quietly, without a terminal signal or an
+        // error, so the log is the only record of why the model was not
+        // called again.
+        Assertions.assertTrue(
+                hasCancellationDebugLog("skipping the model call"),
+                "Expected the skipped model call to be logged");
+    }
+
+    private boolean hasCancellationDebugLog(String phrase) {
+        return logger.getAllLoggingEvents().stream()
+                .anyMatch(event -> event.getLevel() == Level.DEBUG
+                        && event.getMessage().contains(phrase));
     }
 
     @Test
@@ -2487,8 +2534,8 @@ class LangChain4JLLMProviderTest {
                         List.of("toolA", "toolB", "toolA"), "done"));
 
         var error = Assertions.assertThrows(
-                ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).collectList().block(TURN_TIMEOUT));
 
         Assertions.assertEquals("toolA", error.getToolName());
         Assertions.assertEquals(2, toolCalls.get(),
@@ -2504,7 +2551,7 @@ class LangChain4JLLMProviderTest {
         var error = Assertions.assertThrows(
                 ToolCallLimitExceededException.class,
                 () -> provider.stream(createSimpleRequest("Loop")).collectList()
-                        .block());
+                        .block(TURN_TIMEOUT));
 
         Assertions.assertEquals("unknownTool", error.getToolName());
         Mockito.verify(mockChatModel, Mockito.times(41))
@@ -2526,13 +2573,15 @@ class LangChain4JLLMProviderTest {
 
         // The running turn keeps the limit it started with
         Assertions.assertThrows(ToolCallLimitExceededException.class,
-                () -> provider.stream(request).collectList().block());
+                () -> provider.stream(request).collectList()
+                        .block(TURN_TIMEOUT));
 
         // The next turn runs without the per-tool limit
         Mockito.doAnswer(
                 toolRoundsThenAnswer(Collections.nCopies(3, "myTool"), "done"))
                 .when(mockChatModel).chat(Mockito.any(ChatRequest.class));
-        var results = provider.stream(request).collectList().block();
+        var results = provider.stream(request).collectList()
+                .block(TURN_TIMEOUT);
         Assertions.assertEquals(List.of("done"), results);
     }
 
@@ -2558,7 +2607,8 @@ class LangChain4JLLMProviderTest {
         // the next turn follows the first turn's user message directly
         Mockito.doReturn(mockSimpleResponse("Hello")).when(mockChatModel)
                 .chat(Mockito.any(ChatRequest.class));
-        provider.stream(createSimpleRequest("Second")).collectList().block();
+        provider.stream(createSimpleRequest("Second")).collectList()
+                .block(TURN_TIMEOUT);
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
@@ -2632,7 +2682,7 @@ class LangChain4JLLMProviderTest {
         var error = Assertions.assertThrows(
                 ToolCallLimitExceededException.class,
                 () -> provider.stream(createSimpleRequest("Loop")).collectList()
-                        .block());
+                        .block(TURN_TIMEOUT));
 
         Assertions.assertEquals("", error.getToolName());
         Assertions.assertEquals(2, error.getLimit());
