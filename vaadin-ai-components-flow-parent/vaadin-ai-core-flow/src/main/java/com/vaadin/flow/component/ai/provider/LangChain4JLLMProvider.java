@@ -781,13 +781,18 @@ public class LangChain4JLLMProvider implements LLMProvider {
         /**
          * Counts one requested tool call against the limits.
          *
-         * @param toolName
-         *            the name of the tool the model requested
+         * @param requestedToolName
+         *            the name of the tool the model requested, possibly
+         *            {@code null}
          * @return the exception describing the limit the call exceeds, or empty
          *         if the call is within the limits
          */
         Optional<ToolCallLimitExceededException> countAndCheck(
-                String toolName) {
+                String requestedToolName) {
+            // A request the model sent without a name is counted under "", so
+            // that a null tool name in the exception keeps meaning the total
+            // limit. LangChain4j does not guard the name, so it can be null.
+            var toolName = Objects.toString(requestedToolName, "");
             totalToolCalls++;
             var callsToTool = callsPerTool.merge(toolName, 1, Integer::sum);
             if (maxCallsPerTool > 0 && callsToTool > maxCallsPerTool) {

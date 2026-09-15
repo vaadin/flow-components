@@ -2568,6 +2568,27 @@ class LangChain4JLLMProviderTest {
                 messages.stream().allMatch(UserMessage.class::isInstance));
     }
 
+    @Test
+    void stream_namelessToolRequestedRepeatedly_reportsThePerToolLimit() {
+        // LangChain4j does not guard the name of a tool execution request, so
+        // a nameless one can reach the counter. It must still report the
+        // per-tool limit: a null tool name means the total limit.
+        provider.setMaxCallsPerTool(2);
+        var toolResponse = mockSimpleResponseWithTool(null);
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(toolResponse);
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(createSimpleRequest("Loop")).collectList()
+                        .block());
+
+        Assertions.assertEquals("", error.getToolName());
+        Assertions.assertEquals(2, error.getLimit());
+        Mockito.verify(mockChatModel, Mockito.times(3))
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
     private static LLMRequest requestWithCountingTool(String toolName,
             AtomicInteger toolCalls) {
         return requestWithCountingTools(List.of(toolName), toolCalls);
