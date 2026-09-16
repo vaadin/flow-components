@@ -424,6 +424,32 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_refusedWriteToReadOnlyFieldIsNotValidatedAsWritten() {
+        // A refused write is not a write. Validating the read-only field as
+        // if this turn had written it would report the field twice: once for
+        // refusing the write, once for the value it already held.
+        var readOnly = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(readOnly)
+                .withValidator(v -> v != null && v.length() >= 3,
+                        "Name must be at least 3 characters")
+                .bind("name");
+        readOnly.setValue("X");
+        readOnly.setReadOnly(true);
+        var controller = controllerForBound(binder, readOnly);
+
+        var result = fillFormResult(controller, payload(readOnly, "\"Acme\""));
+
+        Assertions.assertEquals(List.of(idOf(readOnly)), rejectedIds(result),
+                "The refused write must be reported once, and the field's "
+                        + "own invalid value must not be reported as this "
+                        + "turn's rejection, got: " + result);
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(readOnly)).contains("read-only"),
+                "The one reason must be the refused write");
+    }
+
+    @Test
     void fillForm_rejectsWriteToFieldDisabledByEarlierWriteInSamePayload() {
         // A field's availability can change mid-fill: writing a controlling
         // field earlier in the same payload can disable a field that appears
@@ -2305,6 +2331,11 @@ class FillFormToolTest {
             @Override
             public String sourceInstructions() {
                 return "";
+            }
+
+            @Override
+            public boolean isSourceTrackingEnabled() {
+                return false;
             }
 
             @Override
