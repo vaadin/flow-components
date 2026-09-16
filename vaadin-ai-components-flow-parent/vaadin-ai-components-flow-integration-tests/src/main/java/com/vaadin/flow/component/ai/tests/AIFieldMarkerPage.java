@@ -139,8 +139,8 @@ public class AIFieldMarkerPage extends VerticalLayout {
             unchanged.setValue(UNCHANGED_VALUE);
             // A source only reaches a field through a fill, so this value is
             // written the way the LLM writes one: through the fill_form tool,
-            // wrapped in a source envelope reporting a confidence level. The
-            // marker applied at turn end then shows the level.
+            // with a source reporting a confidence level under the same field
+            // id. The marker applied at turn end then shows the level.
             fillWithSource(controller, CONFIDENT_LABEL, CONFIDENT_VALUE,
                     "high");
             controller.onResponse(
@@ -153,19 +153,21 @@ public class AIFieldMarkerPage extends VerticalLayout {
 
     /**
      * Writes a value to a field through the controller's {@code fill_form}
-     * tool, wrapped in the envelope the LLM uses to report a source with a
-     * confidence level. The field is addressed by its description in the
-     * {@code get_form_state} output, which for a plain labeled field is its
-     * label.
+     * tool, together with the source the LLM reports for it under the same
+     * field id in the tool's {@code sources} parameter. The field is addressed
+     * by its description in the {@code get_form_state} output, which for a
+     * plain labeled field is its label.
      */
     private static void fillWithSource(FormAIController controller,
             String label, String value, String confidence) {
         var tools = controller.getTools();
         var formState = JacksonUtils
                 .readTree(executeTool(tools, "get_form_state", "{}"));
+        var id = fieldIdOf(formState, label);
         executeTool(tools, "fill_form", """
-                {"values": {"%s": {"value": "%s", "confidence": "%s"}}}"""
-                .formatted(fieldIdOf(formState, label), value, confidence));
+                {"values": {"%s": "%s"}, \
+                "sources": {"%s": {"confidence": "%s"}}}""".formatted(id, value,
+                id, confidence));
     }
 
     private static String fieldIdOf(JsonNode formState, String description) {
