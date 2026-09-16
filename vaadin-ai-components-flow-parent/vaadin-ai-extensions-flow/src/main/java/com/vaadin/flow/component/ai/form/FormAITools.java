@@ -76,6 +76,7 @@ final class FormAITools {
                     "properties": {
                       "confidence": {
                         "type": "string",
+                        "description": "How sure you are about the value, by the level definitions in the tool description. Leave out when you cannot judge it.",
                         "enum": [%s]
                       },
                       "extracts": {
