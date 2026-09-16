@@ -47,19 +47,19 @@ public interface AIController {
      * The event carries the user message, the {@code messageId} assigned to it,
      * and the attachments included with it; it is the same event the
      * {@link RequestListener} receives for the turn. By the time this method
-     * fires, the user message and an empty assistant placeholder are already in
-     * the message list; the turn is committed to the conversation history and
-     * the {@link RequestListener} only after this method returns successfully.
-     * Implementations can prepare for the turn — locking UI surfaces,
-     * snapshotting state the tool definitions depend on, and so on. Since tools
-     * may execute on a background thread, this is the moment to capture any
-     * state that depends on Vaadin thread locals such as
+     * fires, the user message is already in the message list and the assistant
+     * is shown in its typing indicator; the turn is committed to the
+     * conversation history and the {@link RequestListener} only after this
+     * method returns successfully. Implementations can prepare for the turn —
+     * locking UI surfaces, snapshotting state the tool definitions depend on,
+     * and so on. Since tools may execute on a background thread, this is the
+     * moment to capture any state that depends on Vaadin thread locals such as
      * {@code UI.getCurrent()} or {@code VaadinSession.getCurrent()}.
      * <p>
      * The default does nothing. Throwing from this method aborts the turn
      * before the commit step: the conversation history is unchanged, the
      * request listener is not notified, the LLM stream is not opened, the
-     * assistant placeholder is updated to a generic error message,
+     * assistant message shows a generic error message,
      * {@link #onResponse(ResponseListener.ResponseEvent)} fires with the thrown
      * exception so per-turn state captured before the throw can still be
      * released, and the exception propagates back to the caller of the prompt

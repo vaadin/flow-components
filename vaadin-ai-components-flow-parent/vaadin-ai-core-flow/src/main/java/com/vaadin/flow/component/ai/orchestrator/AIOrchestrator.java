@@ -420,16 +420,37 @@ public class AIOrchestrator implements Serializable {
         }
     }
 
-    private AIMessage createAssistantMessagePlaceholder() {
+    /**
+     * Returns the assistant message of the turn, creating it on first use. The
+     * message is created lazily so that the typing indicator, rather than an
+     * empty message, is shown while the response is being produced.
+     * <p>
+     * Must be called on the UI thread, so that the holder is only ever written
+     * while the session lock is held.
+     *
+     * @param assistantMessage
+     *            the holder of the turn's assistant message
+     * @return the assistant message, or {@code null} if there is no message
+     *         list to add it to
+     */
+    private AIMessage getOrCreateAssistantMessage(
+            AtomicReference<AIMessage> assistantMessage) {
         if (messageList == null) {
             return null;
         }
-        return messageList.addMessage("", assistantName,
+        var existing = assistantMessage.get();
+        if (existing != null) {
+            return existing;
+        }
+        messageList.hideTypingIndicator(assistantName);
+        var created = messageList.addMessage("", assistantName,
                 Collections.emptyList());
+        assistantMessage.set(created);
+        return created;
     }
 
     private void streamResponseToMessage(LLMProvider.LLMRequest request,
-            AIMessage assistantMessage, UI ui,
+            AtomicReference<AIMessage> assistantMessage, UI ui,
             AtomicReference<ResponseMetadata> metadataHolder) {
         var responseBuilder = new StringBuilder();
         var responseStream = provider.stream(request)
@@ -438,8 +459,13 @@ public class AIOrchestrator implements Serializable {
             isProcessing.set(false);
         }).subscribe(token -> {
             responseBuilder.append(token);
-            if (assistantMessage != null && messageList != null) {
-                accessIfAttached(ui, () -> assistantMessage.appendText(token));
+            if (messageList != null) {
+                accessIfAttached(ui, () -> {
+                    var message = getOrCreateAssistantMessage(assistantMessage);
+                    if (message != null) {
+                        message.appendText(token);
+                    }
+                });
             }
         }, error -> {
             String userMessage;
@@ -451,12 +477,26 @@ public class AIOrchestrator implements Serializable {
                 userMessage = "An error occurred. Please try again.";
                 LOGGER.error("Error during LLM streaming", error);
             }
-            if (assistantMessage != null && messageList != null) {
-                accessIfAttached(ui,
-                        () -> assistantMessage.setText(userMessage));
+            if (messageList != null) {
+                accessIfAttached(ui, () -> {
+                    var message = getOrCreateAssistantMessage(assistantMessage);
+                    if (message != null) {
+                        message.setText(userMessage);
+                    }
+                });
             }
             fireResponseListener("", error, ui, metadataHolder.get());
         }, () -> {
+            if (messageList != null) {
+                // Hides the indicator of a turn that produced no tokens, for
+                // example a tool-only turn. Checked inside the command, as the
+                // command that creates the message may still be queued.
+                accessIfAttached(ui, () -> {
+                    if (assistantMessage.get() == null) {
+                        messageList.hideTypingIndicator(assistantName);
+                    }
+                });
+            }
             var responseText = responseBuilder.toString();
             if (!responseText.isEmpty()) {
                 conversationHistory
@@ -542,7 +582,10 @@ public class AIOrchestrator implements Serializable {
             List<AIAttachment> attachments) {
         var userAIMessage = messageList == null ? null
                 : messageList.addMessage(userMessage, userName, attachments);
-        var assistantMessage = createAssistantMessagePlaceholder();
+        var assistantMessage = new AtomicReference<AIMessage>();
+        if (messageList != null) {
+            messageList.showTypingIndicator(assistantName);
+        }
 
         try {
             var messageId = UUID.randomUUID().toString();
@@ -576,9 +619,9 @@ public class AIOrchestrator implements Serializable {
             // Single update — stream errors are async and never reach this
             // catch; onResponse throws are handled inside
             // fireResponseListener (which appends rather than rewrites).
-            if (assistantMessage != null) {
-                assistantMessage
-                        .setText("An error occurred. Please try again.");
+            var message = getOrCreateAssistantMessage(assistantMessage);
+            if (message != null) {
+                message.setText("An error occurred. Please try again.");
             }
             throw t;
         }
@@ -848,7 +891,8 @@ public class AIOrchestrator implements Serializable {
                     // chat memory and in our history; rewriting either
                     // would misrepresent what the LLM actually said.
                     // Only on the success path — the failure path already
-                    // rewrote the placeholder to a generic error message.
+                    // rewrote the assistant message to a generic error
+                    // message.
                     if (error == null && messageList != null) {
                         messageList.addMessage(
                                 "An error occurred. Please try again.",
@@ -1146,6 +1190,11 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the message list component.
+         * <p>
+         * While a response is pending, the assistant is shown as working on a
+         * response with {@link AIMessageList#showTypingIndicator(String)}, and
+         * the assistant message is added when the first part of the response
+         * arrives.
          *
          * @param messageList
          *            the message list
@@ -1159,6 +1208,18 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the message list component using a Flow MessageList component.
+         * <p>
+         * While a response is pending, the assistant is shown in the typing
+         * indicator of the message list, and the assistant message is added
+         * when the first part of the response arrives. A turn that produces no
+         * response text, for example one that only calls tools, adds no
+         * assistant message.
+         * <p>
+         * The orchestrator only adds and removes its own entry among the typing
+         * users, so an application that shows other typing users needs to keep
+         * the assistant's entry when it updates them. When the typing users are
+         * bound to a signal with {@link MessageList#bindTypingUsers
+         * bindTypingUsers}, the typing indicator is left to the application.
          *
          * @param messageList
          *            the Flow MessageList component
@@ -1477,8 +1538,7 @@ public class AIOrchestrator implements Serializable {
          * If the supplier returns {@code null} or an empty/blank string, no
          * context is added for that turn — useful for "context only when X"
          * patterns. If the supplier throws, the turn is aborted via the normal
-         * error path: the assistant placeholder is updated to a generic error
-         * message,
+         * error path: the assistant message shows a generic error message,
          * {@link AIController#onResponse(ResponseListener.ResponseEvent)} fires
          * with the thrown exception, and the exception propagates to the caller
          * of the prompt entry point.

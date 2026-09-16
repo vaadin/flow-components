@@ -213,8 +213,7 @@ public class SpringAILLMProvider implements LLMProvider {
      * so nothing the turn produces reaches the browser and the application
      * appears frozen. Set this to {@code true} to run the call on a background
      * thread instead: the request completes immediately, the user's message and
-     * the assistant placeholder render, and the response is added when it
-     * arrives.
+     * the typing indicator render, and the response is added when it arrives.
      * <p>
      * This requires the following from the application:
      * <ul>
