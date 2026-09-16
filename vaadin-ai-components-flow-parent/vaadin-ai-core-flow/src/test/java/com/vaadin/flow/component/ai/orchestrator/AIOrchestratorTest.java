@@ -1808,6 +1808,33 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void responseListener_afterStreamErrorWithPartialText_firesWithEmptyResponse() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var streamError = new RuntimeException("API Error");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hel", "lo")
+                        .concatWith(Flux.error(streamError)));
+
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseListener(capturedEvent::set).build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertNotNull(capturedEvent.get(),
+                "Listener must fire on error");
+        Assertions.assertEquals("", capturedEvent.get().getResponse(),
+                "The tokens that arrived before the error are not passed on");
+        Assertions.assertSame(streamError,
+                capturedEvent.get().getError().orElse(null));
+    }
+
+    @Test
     void responseCompleteListener_receivesResponseText() {
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
