@@ -128,16 +128,27 @@ public class ComboBoxElement extends TestBenchElement
     }
 
     /**
-     * Gets a list of all available options.
+     * Gets a list of available options from the dropdown. Opens the dropdown if
+     * it is not already open and returns the labels of all loaded items. Closes
+     * the dropdown afterwards if it was not open before.
      *
-     * @return a list of the options (visible text)
+     * @return labels of the items that are loaded in the popup
      */
     @SuppressWarnings("unchecked")
     public List<String> getOptions() {
+        boolean wasPopupOpen = isPopupOpen();
         openPopup();
-        return (List<String>) executeScript("var combobox=arguments[0];" //
-                + "return combobox.filteredItems.map(function(item) { return combobox._getItemLabel(item);});",
-                this);
+        waitForLoadingFinished();
+        String script = """
+                const comboBox = arguments[0];
+                return comboBox.filteredItems.map(item => comboBox._getItemLabel(item));""";
+        try {
+            return (List<String>) executeScript(script, this);
+        } finally {
+            if (!wasPopupOpen) {
+                closePopup();
+            }
+        }
     }
 
     /**
@@ -149,7 +160,7 @@ public class ComboBoxElement extends TestBenchElement
     public void setFilter(String filter) {
         openPopup();
         setProperty("filter", filter);
-        waitUntil(driver -> !getPropertyBoolean("loading"));
+        waitForLoadingFinished();
     }
 
     /**
@@ -159,6 +170,13 @@ public class ComboBoxElement extends TestBenchElement
      */
     public String getFilter() {
         return getPropertyString("filter");
+    }
+
+    /**
+     * Waits until the combo box has finished loading items to show in the popup
+     */
+    public void waitForLoadingFinished() {
+        waitUntil(driver -> !getPropertyBoolean("loading"));
     }
 
     /**
