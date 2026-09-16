@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 
 /**
  * Interface for message list components that can display AI conversation
@@ -62,6 +63,33 @@ public interface AIMessageList extends Serializable {
      */
     AIMessage addMessage(String text, String userName,
             List<AIAttachment> attachments);
+
+    /**
+     * Shows an indication that the given participant is working on a response.
+     * The {@link AIOrchestrator} calls this when a turn starts, and adds the
+     * assistant message only when the first part of the response arrives, so an
+     * implementation that wants to show progress before that needs to override
+     * this method. The default implementation does nothing.
+     *
+     * @param userName
+     *            the name of the participant, not {@code null}
+     */
+    default void showTypingIndicator(String userName) {
+        // Optional for implementations that cannot show an indication
+    }
+
+    /**
+     * Hides the indication that the given participant is working on a response.
+     * The {@link AIOrchestrator} calls this before adding the assistant
+     * message, and when a turn ends without a response. The default
+     * implementation does nothing.
+     *
+     * @param userName
+     *            the name of the participant, not {@code null}
+     */
+    default void hideTypingIndicator(String userName) {
+        // Optional for implementations that cannot show an indication
+    }
 
     /**
      * Adds a listener that is called when an attachment in the message list is
