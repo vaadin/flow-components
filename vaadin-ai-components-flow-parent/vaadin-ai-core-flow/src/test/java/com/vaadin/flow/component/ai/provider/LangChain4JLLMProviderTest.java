@@ -71,9 +71,10 @@ import tools.jackson.databind.JsonNode;
 class LangChain4JLLMProviderTest {
     /**
      * Bound for the blocks of the tool call limit tests. What those tests
-     * assert is that a turn ends, so a turn that does not end has to fail them
-     * rather than hang the suite waiting for a terminal signal that never
-     * arrives.
+     * assert is that a turn ends, so a turn that stops without a terminal
+     * signal has to fail them rather than hang the suite waiting for one. The
+     * bound does not cover a loop that keeps running inside the subscription,
+     * since the block only starts waiting once the subscription has returned.
      */
     private static final Duration TURN_TIMEOUT = Duration.ofSeconds(5);
 

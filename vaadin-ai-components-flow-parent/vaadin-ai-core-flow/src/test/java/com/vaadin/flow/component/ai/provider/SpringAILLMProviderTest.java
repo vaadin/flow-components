@@ -73,13 +73,6 @@ import reactor.core.publisher.Flux;
 import tools.jackson.databind.JsonNode;
 
 class SpringAILLMProviderTest {
-    /**
-     * Bound for the blocks of the tool call limit tests. Those turns only end
-     * because Spring AI stops its own loop, so a Spring AI that no longer does
-     * has to fail them rather than hang the suite.
-     */
-    private static final Duration TURN_TIMEOUT = Duration.ofSeconds(5);
-
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
@@ -1935,11 +1928,16 @@ class SpringAILLMProviderTest {
         var toolCalls = new AtomicInteger();
         var collected = new ArrayList<ResponseMetadata>();
         var request = toolRequestWithMetadataSink(toolCalls, collected);
+        // Far more tool rounds than the limit allows, then a plain reply: a
+        // Spring AI that no longer stops the loop ends the turn there and
+        // fails the assertions below instead of looping forever.
+        var rounds = new AtomicInteger();
         Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
-                .thenReturn(mockChatResponseWithPendingToolCall());
+                .thenAnswer(invocation -> rounds.getAndIncrement() < 200
+                        ? mockChatResponseWithPendingToolCall()
+                        : mockSimpleChatResponse("done"));
 
-        var results = provider.stream(request).collectList()
-                .block(TURN_TIMEOUT);
+        var results = provider.stream(request).collectList().block();
 
         Assertions.assertEquals(1, results.size());
         Assertions.assertTrue(results.getFirst().contains("doSomething"),
@@ -1957,11 +1955,14 @@ class SpringAILLMProviderTest {
         var toolCalls = new AtomicInteger();
         var collected = new ArrayList<ResponseMetadata>();
         var request = toolRequestWithMetadataSink(toolCalls, collected);
+        var rounds = new AtomicInteger();
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
-                .thenReturn(Flux.just(mockChatResponseWithPendingToolCall()));
+                .thenAnswer(
+                        invocation -> Flux.just(rounds.getAndIncrement() < 200
+                                ? mockChatResponseWithPendingToolCall()
+                                : mockSimpleChatResponse("done")));
 
-        var results = provider.stream(request).collectList()
-                .block(TURN_TIMEOUT);
+        var results = provider.stream(request).collectList().block();
 
         Assertions.assertEquals(1, results.size());
         Assertions.assertTrue(results.getFirst().contains("doSomething"),
