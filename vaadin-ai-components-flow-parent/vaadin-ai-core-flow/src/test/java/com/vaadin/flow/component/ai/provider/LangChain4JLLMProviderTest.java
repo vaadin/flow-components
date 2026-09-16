@@ -2480,6 +2480,24 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void stream_cancelledBeforeFirstModelCall_logsTheSkippedTurn() {
+        var subscriber = new BaseSubscriber<String>() {
+        };
+        subscriber.cancel();
+
+        provider.stream(createSimpleRequest("First")).subscribe(subscriber);
+
+        // A turn cancelled before it starts ends quietly, without a terminal
+        // signal or an error, so the log is the only record of why the model
+        // was never called. Only this thread's events count: the shared
+        // logger still holds what the other tests logged.
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .anyMatch(event -> event.getLevel() == Level.DEBUG),
+                "Expected the skipped turn to be logged");
+    }
+
+    @Test
     void stream_cancelledDuringToolExecution_finishesRoundWithoutCallingModelAgain() {
         var subscriber = new BaseSubscriber<String>() {
         };
