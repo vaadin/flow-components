@@ -1488,8 +1488,7 @@ public class AIOrchestrator implements Serializable {
          * appended to the conversation history.
          * <p>
          * On failure {@code event.getError()} carries the cause and the
-         * response text is empty or a partial stream that was received before
-         * the failure.
+         * response text is empty, even if text was received before the failure.
          * <p>
          * The thread the listener runs on depends on the provider: with a
          * streaming provider, or when the provider runs the turn on a
