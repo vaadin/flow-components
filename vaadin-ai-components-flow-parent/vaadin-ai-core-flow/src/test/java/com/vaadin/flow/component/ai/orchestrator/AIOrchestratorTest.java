@@ -2001,9 +2001,9 @@ class AIOrchestratorTest {
 
     @Test
     void responseListener_afterStreamError_firesWithErrorAndEmptyResponse() {
-        // ResponseListener fires once per turn — on success and on failure.
+        // ResponseListener fires once per turn, on success and on failure.
         // On failure event.getError() carries the cause and event.getResponse()
-        // is the partial (possibly empty) stream collected before the error.
+        // is empty, whether or not part of the stream had already arrived.
         var mockMessage = createMockMessage();
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyList()))
@@ -2027,6 +2027,33 @@ class AIOrchestratorTest {
         Assertions.assertSame(streamError,
                 capturedEvent.get().getError().orElse(null),
                 "Listener must receive the stream error verbatim");
+    }
+
+    @Test
+    void responseListener_afterStreamErrorWithPartialText_firesWithEmptyResponse() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        var streamError = new RuntimeException("API Error");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Hel", "lo")
+                        .concatWith(Flux.error(streamError)));
+
+        var capturedEvent = new AtomicReference<ResponseListener.ResponseEvent>();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList)
+                .withFileReceiver(mockFileReceiver).withInput(mockInput)
+                .withResponseListener(capturedEvent::set).build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertNotNull(capturedEvent.get(),
+                "Listener must fire on error");
+        Assertions.assertEquals("", capturedEvent.get().getResponse(),
+                "The tokens that arrived before the error are not passed on");
+        Assertions.assertSame(streamError,
+                capturedEvent.get().getError().orElse(null));
     }
 
     @Test
