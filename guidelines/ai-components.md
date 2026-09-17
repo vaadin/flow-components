@@ -141,6 +141,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   are executed by the vendor framework, whose default error handling relays
   the raw message of any exception to the model — they are deliberately out
   of scope, so route error-sensitive tools through `ToolSpec`.
+- The tool-calling loop is bounded where it is driven, never by the
+  orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
+  against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
+  the same as Spring AI's) and fails the turn with the public
+  `ToolCallLimitExceededException`. The check runs before the tool-requesting
+  message enters chat memory and before any tool of that round runs, so memory
+  never holds a tool request without its result and the next turn continues
+  from the last completed round; a cancelled turn likewise stops calling the
+  model and the tools. `SpringAILLMProvider` adds no cap of its own: Spring AI
+  bounds the loop itself, and ends such a turn normally with the finish reason
+  `toolCallLimitExceeded` rather than with an error.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 

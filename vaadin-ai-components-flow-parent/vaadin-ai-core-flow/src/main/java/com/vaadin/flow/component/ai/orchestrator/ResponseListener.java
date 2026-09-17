@@ -41,7 +41,9 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * <i>not</i> appended to {@link AIOrchestrator#getHistory()}.
  * <p>
  * On failure {@link ResponseEvent#getError()} carries the cause (timeout,
- * stream error, any throw between
+ * stream error, a provider's tool call limit as a
+ * {@link com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException},
+ * any throw between
  * {@link AIController#onRequest(RequestListener.RequestEvent)} and the start of
  * the stream, or a {@link RequestInterceptor} failure — a throw, a
  * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an

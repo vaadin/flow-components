@@ -90,6 +90,15 @@ import tools.jackson.databind.JsonNode;
  * so the request completes and the user's message renders while the LLM works.
  * </p>
  * <p>
+ * <b>Tool call limits:</b> a model that keeps requesting tool calls instead of
+ * answering would never end its turn, and each round costs another model call.
+ * The provider ends such a turn with a {@link ToolCallLimitExceededException}
+ * once the model has requested more than {@code 40} calls to any one tool, or
+ * more than {@code 150} tool calls in total, within the turn. Adjust or remove
+ * them with {@link #setMaxCallsPerTool(int)} and
+ * {@link #setMaxTotalToolCalls(int)}.
+ * </p>
+ * <p>
  * Each provider instance maintains its own chat memory. To share conversation
  * history across components, reuse the same provider instance.
  * </p>
@@ -108,12 +117,16 @@ public class LangChain4JLLMProvider implements LLMProvider {
             .getLogger(LangChain4JLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
+    private static final int DEFAULT_MAX_CALLS_PER_TOOL = 40;
+    private static final int DEFAULT_MAX_TOTAL_TOOL_CALLS = 150;
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
     private final transient ChatMemory chatMemory;
     private final BackgroundExecution backgroundExecution = new BackgroundExecution(
             LangChain4JLLMProvider.class);
+    private int maxCallsPerTool = DEFAULT_MAX_CALLS_PER_TOOL;
+    private int maxTotalToolCalls = DEFAULT_MAX_TOTAL_TOOL_CALLS;
 
     /**
      * Constructor with a streaming chat model.
@@ -155,12 +168,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 "User message must not be null");
         var response = Flux.<String> create(sink -> {
             try {
+                if (sink.isCancelled()) {
+                    // Checked before the question is recorded: a turn
+                    // abandoned before it started must leave the conversation
+                    // as it was, not a question the next turn would repeat.
+                    LOGGER.debug("The turn was cancelled before it started");
+                    return;
+                }
                 var userMessage = buildUserMessage(request);
                 chatMemory.add(userMessage);
                 var toolContext = new ToolContext(prepareToolExecutors(request),
                         prepareToolSpecifications(request));
                 var context = new ChatExecutionContext(request, sink,
-                        chatMemory, toolContext);
+                        chatMemory, toolContext,
+                        new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls));
                 executeChat(context);
             } catch (Exception e) {
                 sink.error(e);
@@ -236,6 +257,95 @@ public class LangChain4JLLMProvider implements LLMProvider {
      */
     public void setBackgroundExecution(boolean backgroundExecution) {
         this.backgroundExecution.setEnabled(backgroundExecution);
+    }
+
+    /**
+     * Gets the maximum number of times the model may call any one tool during a
+     * turn.
+     *
+     * @return the maximum number of calls per tool, or {@code 0} if there is no
+     *         limit
+     * @since 25.3
+     */
+    public int getMaxCallsPerTool() {
+        return maxCallsPerTool;
+    }
+
+    /**
+     * Sets the maximum number of times the model may call any one tool during a
+     * turn. The default is {@code 40}.
+     * <p>
+     * A model that keeps calling the same tool instead of answering, for
+     * example to look for something the application does not have, would
+     * otherwise never end its turn. Once a call would exceed the limit, the
+     * turn fails with a {@link ToolCallLimitExceededException} that names the
+     * tool: none of the tool calls of that round are executed, the model is not
+     * called again, and you receive the exception as the error of the turn. The
+     * conversation stays usable, the next prompt continues from the last
+     * completed round.
+     * <p>
+     * The limit applies to each tool separately. See
+     * {@link #setMaxTotalToolCalls(int)} for the limit on all tool calls of a
+     * turn together. The value is read when a turn starts, so a change applies
+     * from the next prompt on.
+     *
+     * @param maxCallsPerTool
+     *            the maximum number of calls per tool during a turn, or
+     *            {@code 0} to remove the limit
+     * @throws IllegalArgumentException
+     *             if the value is negative
+     * @since 25.3
+     */
+    public void setMaxCallsPerTool(int maxCallsPerTool) {
+        if (maxCallsPerTool < 0) {
+            throw new IllegalArgumentException(
+                    "maxCallsPerTool must not be negative, 0 removes the limit");
+        }
+        this.maxCallsPerTool = maxCallsPerTool;
+    }
+
+    /**
+     * Gets the maximum number of tool calls the model may make during a turn,
+     * all tools together.
+     *
+     * @return the maximum number of tool calls per turn, or {@code 0} if there
+     *         is no limit
+     * @since 25.3
+     */
+    public int getMaxTotalToolCalls() {
+        return maxTotalToolCalls;
+    }
+
+    /**
+     * Sets the maximum number of tool calls the model may make during a turn,
+     * all tools together. The default is {@code 150}.
+     * <p>
+     * This bounds a turn that {@link #setMaxCallsPerTool(int)} does not catch
+     * because the model spreads its calls over several tools. Once a call would
+     * exceed the limit, the turn fails with a
+     * {@link ToolCallLimitExceededException} whose
+     * {@link ToolCallLimitExceededException#getToolName() tool name} is
+     * {@code null}: none of the tool calls of that round are executed, the
+     * model is not called again, and you receive the exception as the error of
+     * the turn. The conversation stays usable, the next prompt continues from
+     * the last completed round.
+     * <p>
+     * The value is read when a turn starts, so a change applies from the next
+     * prompt on.
+     *
+     * @param maxTotalToolCalls
+     *            the maximum number of tool calls during a turn, or {@code 0}
+     *            to remove the limit
+     * @throws IllegalArgumentException
+     *             if the value is negative
+     * @since 25.3
+     */
+    public void setMaxTotalToolCalls(int maxTotalToolCalls) {
+        if (maxTotalToolCalls < 0) {
+            throw new IllegalArgumentException(
+                    "maxTotalToolCalls must not be negative, 0 removes the limit");
+        }
+        this.maxTotalToolCalls = maxTotalToolCalls;
     }
 
     @Override
@@ -415,6 +525,13 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private void executeChat(ChatExecutionContext context) {
+        if (context.getSink().isCancelled()) {
+            // The subscriber is gone, typically because the orchestrator's
+            // timeout fired. Another model call would only cost money for a
+            // result nobody receives.
+            LOGGER.debug("The turn was cancelled, skipping the model call");
+            return;
+        }
         var messages = buildMessages(context.getRequest(),
                 context.getChatMemory());
         if (streamingChatModel != null) {
@@ -489,6 +606,15 @@ public class LangChain4JLLMProvider implements LLMProvider {
             context.getSink().complete();
             return;
         }
+        var hasToolRequests = aiMessage.hasToolExecutionRequests();
+        if (hasToolRequests
+                && !context.admitToolCalls(aiMessage.toolExecutionRequests())) {
+            // Decided before the message enters chat memory. A turn that ends
+            // here leaves no tool request behind without its result, so the
+            // next turn continues from the last completed round instead of
+            // sending the model a request it considers unanswered.
+            return;
+        }
         context.getChatMemory().add(aiMessage);
         if (!isStreaming()) {
             var text = aiMessage.text();
@@ -496,7 +622,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 context.getSink().next(text);
             }
         }
-        if (aiMessage.hasToolExecutionRequests()) {
+        if (hasToolRequests) {
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
@@ -513,8 +639,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * typically — and says nothing about how the turn ended, so it must not
      * silence the warning. This mirrors {@code SpringAILLMProvider}, whose
      * terminal-chunk check likewise ignores a reason that arrives with tool
-     * calls still pending. Called only from the two points where the turn ends,
-     * so the response passed in is by construction the terminal one.
+     * calls still pending. Called only from the points where the turn ends with
+     * the model's own answer, so the response passed in is by construction the
+     * terminal one. A turn ended by a tool call limit or by a cancelled sink
+     * does not pass through here, since neither is a normal completion.
      * <p>
      * This provider drives the tool-calling loop itself, so unlike
      * {@code SpringAILLMProvider} a turn cannot end with tool calls still
@@ -640,6 +768,53 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
+     * The tool call limits of one turn, and the calls counted against them so
+     * far. The per-tool limit is checked before the total, and the call that
+     * takes a count past its limit is the one refused. The whole round is
+     * screened before anything runs, so a round containing a refused call
+     * executes none of its calls.
+     */
+    private static final class ToolCallLimits {
+        private final int maxCallsPerTool;
+        private final int maxTotalToolCalls;
+        private final Map<String, Integer> callsPerTool = new HashMap<>();
+        private int totalToolCalls;
+
+        ToolCallLimits(int maxCallsPerTool, int maxTotalToolCalls) {
+            this.maxCallsPerTool = maxCallsPerTool;
+            this.maxTotalToolCalls = maxTotalToolCalls;
+        }
+
+        /**
+         * Counts one requested tool call against the limits.
+         *
+         * @param requestedToolName
+         *            the name of the tool the model requested, possibly
+         *            {@code null}
+         * @return the exception describing the limit the call exceeds, or empty
+         *         if the call is within the limits
+         */
+        Optional<ToolCallLimitExceededException> countAndCheck(
+                String requestedToolName) {
+            // A request the model sent without a name is counted under "", so
+            // that a null tool name in the exception keeps meaning the total
+            // limit. LangChain4j does not guard the name, so it can be null.
+            var toolName = Objects.toString(requestedToolName, "");
+            totalToolCalls++;
+            var callsToTool = callsPerTool.merge(toolName, 1, Integer::sum);
+            if (maxCallsPerTool > 0 && callsToTool > maxCallsPerTool) {
+                return Optional.of(new ToolCallLimitExceededException(toolName,
+                        maxCallsPerTool));
+            }
+            if (maxTotalToolCalls > 0 && totalToolCalls > maxTotalToolCalls) {
+                return Optional.of(new ToolCallLimitExceededException(null,
+                        maxTotalToolCalls));
+            }
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Encapsulates execution state for a chat stream.
      */
     private static class ChatExecutionContext {
@@ -647,15 +822,46 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final FluxSink<String> sink;
         private final ChatMemory chatMemory;
         private final ToolContext toolContext;
+        private final ToolCallLimits toolCallLimits;
         private FinishReason lastFinishReason;
         private TokenUsage accumulatedUsage;
 
         ChatExecutionContext(LLMRequest request, FluxSink<String> sink,
-                ChatMemory chatMemory, ToolContext toolContext) {
+                ChatMemory chatMemory, ToolContext toolContext,
+                ToolCallLimits toolCallLimits) {
             this.request = request;
             this.sink = sink;
             this.chatMemory = chatMemory;
             this.toolContext = toolContext;
+            this.toolCallLimits = toolCallLimits;
+        }
+
+        /**
+         * Decides whether the tool calls the model requested in this round may
+         * run. Nothing runs for a turn whose subscriber has cancelled, and
+         * nothing runs once a call exceeds a tool call limit; the turn then
+         * fails with the exception describing the limit.
+         *
+         * @param requests
+         *            the tool calls the model requested in this round
+         * @return {@code true} if the calls may run, {@code false} if the turn
+         *         has ended instead
+         */
+        boolean admitToolCalls(List<ToolExecutionRequest> requests) {
+            if (sink.isCancelled()) {
+                LOGGER.debug("The turn was cancelled, skipping the tool "
+                        + "calls the model requested");
+                return false;
+            }
+            for (var request : requests) {
+                var exceededLimit = toolCallLimits
+                        .countAndCheck(request.name());
+                if (exceededLimit.isPresent()) {
+                    sink.error(exceededLimit.get());
+                    return false;
+                }
+            }
+            return true;
         }
 
         /**
