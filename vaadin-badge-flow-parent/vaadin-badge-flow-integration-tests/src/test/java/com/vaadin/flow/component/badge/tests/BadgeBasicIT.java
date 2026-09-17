@@ -38,4 +38,18 @@ public class BadgeBasicIT extends AbstractComponentIT {
         Assert.assertEquals((Integer) 5, badge.getNumber());
         Assert.assertNotNull(badge.getIcon());
     }
+
+    /**
+     * The content part is hidden while the badge has no {@code has-content}
+     * attribute, so a badge can carry its text in the light DOM and render as
+     * an empty pill. {@link BadgeElement#getText()} reads those text nodes with
+     * a script, which is the right answer for the component's text and cannot
+     * tell the two states apart.
+     */
+    @Test
+    public void badgeContentRendered() {
+        var badge = $(BadgeElement.class).id("badge");
+        Assert.assertTrue("Badge should have the has-content attribute",
+                badge.hasAttribute("has-content"));
+    }
 }
