@@ -45,11 +45,10 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * {@link AIController#onRequest(RequestListener.RequestEvent)} and the start of
  * the stream, or a {@link RequestInterceptor} failure — a throw, a
  * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an
- * interception timeout); the response text is either empty or a partial stream
- * that was received before the failure. An interceptor failure fires the
- * listener without a preceding
- * {@link AIController#onRequest(RequestListener.RequestEvent)}, so an error
- * does not imply that per-turn setup has happened.
+ * interception timeout); the response text is empty — text received before the
+ * failure is not passed on. An interceptor failure fires the listener without a
+ * preceding {@link AIController#onRequest(RequestListener.RequestEvent)}, so an
+ * error does not imply that per-turn setup has happened.
  * <p>
  * The listener is <b>not</b> called when history is restored via
  * {@code Builder.withHistory()}.
@@ -110,9 +109,9 @@ public interface ResponseListener extends Serializable {
 
         /**
          * Gets the assistant's response text. On success this is the full text
-         * (may be empty when the model emitted only tool calls); on failure
-         * this is whatever partial stream was received before the error,
-         * possibly empty.
+         * (may be empty when the model emitted only tool calls); on failure the
+         * orchestrator passes an empty string, even if text was received before
+         * the error.
          *
          * @return the response text, never {@code null}
          */
