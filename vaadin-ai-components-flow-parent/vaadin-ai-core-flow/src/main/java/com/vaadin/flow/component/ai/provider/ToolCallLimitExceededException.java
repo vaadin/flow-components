@@ -34,9 +34,8 @@ package com.vaadin.flow.component.ai.provider;
  * AIController.onResponse}.
  * <p>
  * {@link SpringAILLMProvider} does not throw this exception. Spring AI runs the
- * tool-calling loop itself and, from version 2.0.1, stops it at the same limits
- * without failing the turn; see {@link SpringAILLMProvider} for how such a turn
- * ends.
+ * tool-calling loop itself and stops it at the same limits without failing the
+ * turn; see {@link SpringAILLMProvider} for how such a turn ends.
  *
  * @author Vaadin Ltd
  * @since 25.3

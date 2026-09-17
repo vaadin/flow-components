@@ -150,8 +150,8 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   never holds a tool request without its result and the next turn continues
   from the last completed round; a cancelled turn likewise stops calling the
   model and the tools. `SpringAILLMProvider` adds no cap of its own: Spring AI
-  bounds the loop itself from 2.0.1, and ends such a turn normally with the
-  finish reason `toolCallLimitExceeded` rather than with an error.
+  bounds the loop itself, and ends such a turn normally with the finish reason
+  `toolCallLimitExceeded` rather than with an error.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 
