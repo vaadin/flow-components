@@ -93,7 +93,7 @@ class GridColumnOrderHelper<T> {
         // update the new column ordering in the column layers as well,
         // otherwise
         // any future header/footer cell joining would use old ordering.
-        final List<ColumnBase<?>> columnsPreOrder = getColumnsPreOrder();
+        final List<AbstractColumn<?>> columnsPreOrder = getColumnsPreOrder();
         for (ColumnLayer columnLayer : grid.getColumnLayers()) {
             columnLayer.updateColumnOrder(columnsPreOrder);
         }
@@ -110,14 +110,14 @@ class GridColumnOrderHelper<T> {
      * @return a list of all columns and column groups, ordered with preorder,
      *         never {@code null}.
      */
-    private List<ColumnBase<?>> getColumnsPreOrder() {
+    private List<AbstractColumn<?>> getColumnsPreOrder() {
         return getColumnsPreOrder(grid);
     }
 
-    private List<ColumnBase<?>> getColumnsPreOrder(Component parent) {
-        final List<ColumnBase<?>> list = new ArrayList<>();
+    private List<AbstractColumn<?>> getColumnsPreOrder(Component parent) {
+        final List<AbstractColumn<?>> list = new ArrayList<>();
         if (parent instanceof AbstractColumn) {
-            list.add((ColumnBase<?>) parent);
+            list.add((AbstractColumn<?>) parent);
         }
         parent.getChildren().filter(col -> col instanceof AbstractColumn)
                 .forEach(col -> list.addAll(getColumnsPreOrder(col)));
