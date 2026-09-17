@@ -284,8 +284,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * turn fails with a {@link ToolCallLimitExceededException} that names the
      * tool: none of the tool calls of that round are executed, the model is not
      * called again, and you receive the exception as the error of the turn. The
-     * conversation stays usable, the next prompt continues from the last
-     * completed round.
+     * conversation stays usable: the failed turn leaves only its prompt in the
+     * chat memory, and the next prompt continues from there.
      * <p>
      * The limit applies to each tool separately. See
      * {@link #setMaxTotalToolCalls(int)} for the limit on all tool calls of a
@@ -330,8 +330,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * {@link ToolCallLimitExceededException#getToolName() tool name} is
      * {@code null}: none of the tool calls of that round are executed, the
      * model is not called again, and you receive the exception as the error of
-     * the turn. The conversation stays usable, the next prompt continues from
-     * the last completed round.
+     * the turn. The conversation stays usable: the failed turn leaves only its
+     * prompt in the chat memory, and the next prompt continues from there.
      * <p>
      * The value is read when a turn starts, so a change applies from the next
      * prompt on.
