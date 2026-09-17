@@ -88,12 +88,12 @@ import tools.jackson.databind.JsonNode;
  * {@link LangChain4JLLMProvider} does, so you receive the exception as the
  * error of the turn whichever provider runs it. The finish reason
  * {@code toolCallLimitExceeded} is still published in the
- * {@link ResponseMetadata response metadata}, and Spring AI's reply still
- * enters the chat memory of the {@link ChatClient}, which the provider does not
- * control. The limits belong to the {@code ToolCallingAdvisor} of the
- * {@link ChatClient}: a provider created from a {@link ChatModel} builds its
- * own client and keeps Spring AI's defaults. To change them, build the client
- * yourself, passing {@code ChatClient.builder} a
+ * {@link ResponseMetadata response metadata}, and Spring AI's reply may remain
+ * in the chat memory with either constructor, since the provider does not
+ * rewrite what Spring AI's advisors stored. The limits belong to the
+ * {@code ToolCallingAdvisor} of the {@link ChatClient}: a provider created from
+ * a {@link ChatModel} builds its own client and keeps Spring AI's defaults. To
+ * change them, build the client yourself, passing {@code ChatClient.builder} a
  * {@code ToolCallingAdvisor.Builder} that carries a
  * {@code DefaultToolCallingManager} with your limits, and create the provider
  * from that client. Its {@code maxCallsPerTool} and {@code maxTotalToolCalls}

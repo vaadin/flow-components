@@ -159,8 +159,9 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   into the same exception with Spring AI's message, so both providers fail
   such a turn the same way. The exception carries no structured detail on
   purpose: Spring AI's tool name and limit only exist in its message wording,
-  which is not ours to depend on. Spring AI's reply still enters the
-  `ChatClient`'s memory, which the provider does not own.
+  which is not ours to depend on. Spring AI's reply may remain in the chat
+  memory with either constructor; the provider does not rewrite what Spring
+  AI's advisors stored.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 
