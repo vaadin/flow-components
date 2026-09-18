@@ -2751,27 +2751,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       getRowHeight: rowHeightForIndex
     });
 
-    // Build per-visible-index arrays for colX, rowY, widths, heights.
-    const colX: number[] = [];
-    const colWidths: number[] = [];
-    let cumulativeX = viewport.firstColumnPosition;
-    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-      const w = colWidthForIndex(col);
-      colX.push(cumulativeX);
-      colWidths.push(w);
-      cumulativeX += w;
-    }
-
-    const rowY: number[] = [];
-    const rowHeights: number[] = [];
-    let cumulativeY = viewport.firstRowPosition;
-    for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-      const h = rowHeightForIndex(row);
-      rowY.push(cumulativeY);
-      rowHeights.push(h);
-      cumulativeY += h;
-    }
-
     // Frozen columns: cols 1..horizontalSplitPosition (1-based,
     // inclusive). Empty when no freeze is active.
     const frozenColX: number[] = [];
@@ -2793,6 +2772,35 @@ export class Spreadsheet implements SpreadsheetClientApi {
       frozenRowY.push(frozenCumY);
       frozenRowHeights.push(h);
       frozenCumY += h;
+    }
+
+    // Build per-visible-index arrays for colX, rowY, widths, heights.
+    //
+    // Known gap: with a freeze pane these are distances from the split,
+    // not from the sheet's left edge, so the scrolling quadrants are
+    // drawn from x 0 - underneath the frozen block pinned there. The
+    // first columns after a freeze cannot be seen, and a click on one
+    // lands on a frozen cell. Adding the frozen block's size here is
+    // not enough on its own: the headers and the merged-cell overlays
+    // read the same arrays and have to move with them.
+    const colX: number[] = [];
+    const colWidths: number[] = [];
+    let cumulativeX = viewport.firstColumnPosition;
+    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+      const w = colWidthForIndex(col);
+      colX.push(cumulativeX);
+      colWidths.push(w);
+      cumulativeX += w;
+    }
+
+    const rowY: number[] = [];
+    const rowHeights: number[] = [];
+    let cumulativeY = viewport.firstRowPosition;
+    for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
+      const h = rowHeightForIndex(row);
+      rowY.push(cumulativeY);
+      rowHeights.push(h);
+      cumulativeY += h;
     }
 
     // Total grid dimensions in pixels — used by the scroll surface
