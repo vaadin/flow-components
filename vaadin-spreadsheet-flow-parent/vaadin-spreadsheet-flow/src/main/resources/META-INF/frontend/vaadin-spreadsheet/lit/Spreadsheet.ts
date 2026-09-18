@@ -62,6 +62,7 @@ import {
 } from './algorithms/SelectionPaint.js';
 import { expandToMergedRegions } from './algorithms/MergedSelection.js';
 import { isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
+import { resolveSheetRename } from './algorithms/SheetName.js';
 import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
@@ -391,6 +392,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * can restore the position on the next load.
    */
   private firstVisibleTab = 0;
+
+  /**
+   * The tab whose name the user is typing, 1-based, or 0 when none is.
+   * Client-side only: the server hears about a rename once, when it is
+   * finished.
+   */
+  private renamingSheetIndex = 0;
   private readonly overlayComponents: SlottedVirtualChildren;
   /**
    * Server-side components rendered inside a cell. Same mechanism as
@@ -705,6 +713,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs.addEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
     this.sheetTabs.addEventListener('sheet-tabs-scroll', this.handleSheetTabsScroll as EventListener);
     this.sheetTabs.addEventListener('sheet-tab-add', this.handleSheetTabAdd);
+    this.sheetTabs.addEventListener('sheet-tab-rename-start', this.handleSheetRenameStart as EventListener);
+    this.sheetTabs.addEventListener('sheet-tab-rename', this.handleSheetRename as EventListener);
+    this.sheetTabs.addEventListener('sheet-tab-rename-cancel', this.handleSheetRenameCancel);
     this.scrollContainer.addEventListener('scroll', this.handleScroll);
     // Clipboard integration (slice 163). The browser routes
     // copy/cut/paste events to the focused element when the
@@ -2251,6 +2262,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs.removeEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
     this.sheetTabs.removeEventListener('sheet-tabs-scroll', this.handleSheetTabsScroll as EventListener);
     this.sheetTabs.removeEventListener('sheet-tab-add', this.handleSheetTabAdd);
+    this.sheetTabs.removeEventListener('sheet-tab-rename-start', this.handleSheetRenameStart as EventListener);
+    this.sheetTabs.removeEventListener('sheet-tab-rename', this.handleSheetRename as EventListener);
+    this.sheetTabs.removeEventListener('sheet-tab-rename-cancel', this.handleSheetRenameCancel);
     this.cellGrid.removeEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
     this.cellGrid.removeEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
     this.cellGrid.removeEventListener('selection-paint-start', this.handleSelectionPaintStart);
@@ -2949,7 +2963,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       sheetNames: this.sheetNames,
       activeIndex: this.sheetIndex,
       firstVisibleTab: this.firstVisibleTab,
-      readOnly: this.workbookProtected
+      readOnly: this.workbookProtected,
+      renamingIndex: this.renamingSheetIndex
     };
   }
 
@@ -2984,6 +2999,66 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.firstVisibleTab = next;
     this.syncSheetTabs();
+  };
+
+  /** Double-click on the active tab: show its name in an input. */
+  private readonly handleSheetRenameStart = (e: CustomEvent<{ index: number }>): void => {
+    if (this.workbookProtected) {
+      return;
+    }
+    this.renamingSheetIndex = e.detail.index;
+    this.syncSheetTabs();
+  };
+
+  /** Escape: leave the sheet called what it was called. */
+  private readonly handleSheetRenameCancel = (): void => {
+    this.renamingSheetIndex = 0;
+    this.syncSheetTabs();
+    this.returnFocusToSheet();
+  };
+
+  /**
+   * A finished rename.
+   *
+   * A name the workbook would refuse, one that is what the sheet is
+   * already called, and one another sheet has taken all leave the tab
+   * as it was and the server none the wiser. Anything else is shown on
+   * the tab straight away - the server will send the names back, and
+   * waiting for that leaves the old name sitting there in the meantime.
+   */
+  private readonly handleSheetRename = (e: CustomEvent<{ index: number; name: string }>): void => {
+    const { index, name } = e.detail;
+    this.renamingSheetIndex = 0;
+    if (index < 1 || index > this.sheetNames.length) {
+      this.syncSheetTabs();
+      return;
+    }
+    const outcome = resolveSheetRename({
+      proposed: name,
+      index: index - 1,
+      names: this.sheetNames
+    });
+    if (outcome.kind === 'revert') {
+      this.syncSheetTabs();
+      this.returnFocusToSheet();
+      return;
+    }
+    const renamed = [...this.sheetNames];
+    renamed[index - 1] = outcome.name;
+    this.sheetNames = renamed;
+    this.syncSheetTabs();
+    this.returnFocusToSheet();
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: {
+          // The server counts sheets from 0; the strip renders from 1.
+          type: 'sheetRenamed',
+          data: { sheetIndex: index - 1, newName: outcome.name }
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
   };
 
   /** The + button: ask the server for a new sheet. */

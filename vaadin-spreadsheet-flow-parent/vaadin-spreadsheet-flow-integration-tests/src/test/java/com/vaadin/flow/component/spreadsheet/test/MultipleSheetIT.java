@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -54,31 +53,30 @@ public class MultipleSheetIT extends AbstractSpreadsheetIT {
                 spreadsheet.getCellAt("B2").getValue());
     }
 
-    @Ignore("Investigate why the action to clear the input is not working")
     @Test
     public void testRenameSheet() {
+        // Double-clicking the active tab turns its name into an input.
+        new Actions(getDriver()).doubleClick(
+                findElementInShadowRoot(By.cssSelector(".sheet-tab.active")))
+                .perform();
 
-        Actions actions = new Actions(getDriver());
-        actions.doubleClick(findElement(By.xpath(
-                "//div[@class='sheet-tabsheet-container']//div[text()='Sheet1']")));
-        actions.perform();
+        // The input opens focused with the old name selected, so typing
+        // replaces it. Typed through the keyboard rather than at the
+        // element: sending keys to an element focuses it first, and
+        // focusing it through the shadow boundary takes the focus off
+        // the input, which ends the rename before a single character
+        // has arrived.
+        Assert.assertNotNull("No rename input on the active tab",
+                findElementInShadowRoot(By.cssSelector(".sheet-tab-rename")));
+        new Actions(getDriver()).sendKeys("new sheet name" + Keys.RETURN)
+                .perform();
 
-        findElement(By.cssSelector(".sheet-tabsheet-tab.selected-tab input"))
-                .clear();
-        findElement(By.cssSelector(".sheet-tabsheet-tab.selected-tab input"))
-                .click();
-        // driver.findElement(By.xpath("//*[@class='sheet-tabsheet-container']//input")).click();
-        // driver.findElement(
-        // By.xpath("//*[@class='sheet-tabsheet-container']//input"))
-        findElement(By.cssSelector(".sheet-tabsheet-tab.selected-tab input"))
-                .sendKeys(Keys.chord(Keys.CONTROL, Keys.DELETE)
-                        + "new sheet name" + Keys.RETURN);
+        waitUntil(driver -> "new sheet name".equals(getSelectedSheetName()));
 
-        findElement(By.xpath(
-                "//*[@class='sheet-tabsheet-container']//*[text()='new sheet name']"));
+        // The server renames sheets too, and the tab follows.
         loadTestFixture(TestFixtures.Rename);
-        Assert.assertNotNull(driver.findElement(By.xpath(
-                "//*[@class='sheet-tabsheet-container']//*[text()='new_sheet_REnamed']")));
+        waitUntil(driver -> !findElementsInShadowRoot(
+                By.cssSelector("[title='new_sheet_REnamed']")).isEmpty());
     }
 
     @Test

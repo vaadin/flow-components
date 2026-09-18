@@ -36,6 +36,12 @@ export interface SheetTabsRenderState {
    * the button — Excel does — but it does nothing.
    */
   readOnly: boolean;
+  /**
+   * The tab whose name the user is typing, 1-based, or 0 when none is.
+   * Only the active tab is ever renamed, which is what double-clicking
+   * one that is not active does first: it makes it active.
+   */
+  renamingIndex?: number;
 }
 
 /** Helper: build the empty state for tests + initial render. */
@@ -44,7 +50,8 @@ export function emptySheetTabsRenderState(): SheetTabsRenderState {
     sheetNames: [],
     activeIndex: 0,
     firstVisibleTab: 0,
-    readOnly: false
+    readOnly: false,
+    renamingIndex: 0
   };
 }
 
@@ -73,7 +80,7 @@ export class SpreadsheetSheetTabs extends LitElement {
    * documented styling API silently does nothing.
    */
   static readonly EXPORTED_PARTS =
-    'tab,tab-selected,scroll-tabs-button,scroll-tabs-button-disabled,' +
+    'tab,tab-selected,tab-rename,scroll-tabs-button,scroll-tabs-button-disabled,' +
     'scroll-tabs-to-start-button,scroll-tabs-backward-button,' +
     'scroll-tabs-forward-button,scroll-tabs-to-end-button,new-tab-button';
 
@@ -87,6 +94,23 @@ export class SpreadsheetSheetTabs extends LitElement {
       display: inline-flex;
       align-items: center;
       gap: 2px;
+    }
+
+    /*
+     * The rename input stands in for the tab's own text, so it borrows
+     * the tab's typography rather than the browser's and keeps the tab
+     * from jumping in size as it appears.
+     */
+    .sheet-tab-rename {
+      width: 100%;
+      min-width: 60px;
+      box-sizing: border-box;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      color: inherit;
+      outline: none;
     }
 
     .sheet-tabsheet-container {
@@ -168,6 +192,95 @@ export class SpreadsheetSheetTabs extends LitElement {
    */
   firstUpdated(): void {
     this.shadowRoot!.addEventListener('click', this.handleShadowClick);
+    this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick);
+  }
+
+  /**
+   * Double-clicking a sheet tab renames it.
+   *
+   * Double-clicking one that is not the active sheet only makes it
+   * active - the first click already asked for that, and Excel does not
+   * put two gestures on one action. A read-only workbook renames
+   * nothing.
+   */
+  private readonly handleShadowDoubleClick = (e: Event): void => {
+    const target = e.target;
+    if (!(target instanceof Element) || this.renderState.readOnly) {
+      return;
+    }
+    const tab = target.closest<HTMLElement>('.sheet-tab');
+    if (!tab) {
+      return;
+    }
+    const index = Number(tab.dataset.index);
+    if (!Number.isFinite(index) || index < 1 || index !== this.renderState.activeIndex) {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent('sheet-tab-rename-start', {
+        detail: { index },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
+  /**
+   * The keys that end a rename.
+   *
+   * Enter and Tab keep what was typed, Escape throws it away. Every
+   * other key belongs to the input, and so does the event: without
+   * stopping it here, typing a name would also be typing into the
+   * sheet underneath.
+   */
+  private readonly handleRenameKeyDown = (e: KeyboardEvent): void => {
+    e.stopPropagation();
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      this.commitRename(e.target as HTMLInputElement);
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this.dispatchEvent(new CustomEvent('sheet-tab-rename-cancel', { bubbles: true, composed: true }));
+    }
+  };
+
+  /** Clicking away keeps the name, as leaving a cell editor does. */
+  private readonly handleRenameBlur = (e: FocusEvent): void => {
+    this.commitRename(e.target as HTMLInputElement);
+  };
+
+  /**
+   * Report a finished rename, once.
+   *
+   * Ending a rename takes the input out of the DOM, and an input that
+   * had the focus blurs on its way out - so both Escape and Enter are
+   * followed by a blur that would report the rename all over again. By
+   * then the strip has been told no tab is being renamed, which is the
+   * signal that the rename is already over.
+   */
+  private commitRename(input: HTMLInputElement | null): void {
+    const index = this.renderState.renamingIndex ?? 0;
+    if (input === null || index < 1) {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent('sheet-tab-rename', {
+        detail: { index, name: input.value },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  /** Put the caret in the rename input as soon as it appears. */
+  updated(): void {
+    const input = this.shadowRoot?.querySelector<HTMLInputElement>('.sheet-tab-rename');
+    if (input !== null && input !== undefined && this.shadowRoot!.activeElement !== input) {
+      input.focus();
+      input.select();
+    }
   }
 
   private readonly handleShadowClick = (e: Event): void => {
@@ -259,7 +372,7 @@ export class SpreadsheetSheetTabs extends LitElement {
   }
 
   render(): TemplateResult {
-    const { sheetNames, activeIndex, firstVisibleTab = 0 } = this.renderState;
+    const { sheetNames, activeIndex, firstVisibleTab = 0, renamingIndex = 0 } = this.renderState;
     if (sheetNames.length === 0) {
       return html``;
     }
@@ -277,7 +390,20 @@ export class SpreadsheetSheetTabs extends LitElement {
       // A tab is only as wide as the strip allows, so a long name is
       // cut off with an ellipsis. The title is how the user reads the
       // rest of it, and how a test names a tab it cannot see whole.
-      return html` <div class=${className} part=${part} title=${name} data-index=${oneBasedIndex}> ${name} </div> `;
+      // The tab being renamed shows an input in place of its name. It
+      // keeps its own class and part, so a stylesheet that colours the
+      // active tab still colours this one.
+      const content =
+        oneBasedIndex === renamingIndex
+          ? html`<input
+              class="sheet-tab-rename"
+              part="tab-rename"
+              value=${name}
+              @keydown=${this.handleRenameKeyDown}
+              @blur=${this.handleRenameBlur}
+            />`
+          : name;
+      return html` <div class=${className} part=${part} title=${name} data-index=${oneBasedIndex}> ${content} </div> `;
     });
     // The tabs scroll by whole tabs; hiding the ones before
     // firstVisibleTab is enough and needs no width arithmetic.
