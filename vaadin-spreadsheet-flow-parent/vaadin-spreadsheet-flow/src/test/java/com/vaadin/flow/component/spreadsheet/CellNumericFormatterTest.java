@@ -406,20 +406,48 @@ class CellNumericFormatterTest {
     }
 
     @Test
-    void valueContainsOnlyNumbers_commaUnderUSLocale_pinsRegexMetacharQuirk() {
-        // Pin a hidden quirk in the SUT (NOT a desired behavior, but the
-        // current contract): the decimal separator is concatenated into a
-        // regex without quoting. Under US the separator is '.', which is
-        // a regex metacharacter meaning "any single character". So
-        // "1,5", "1X5", "1.5" all match under US locale. A future fix
-        // that adds Pattern.quote(...) around the separator would change
-        // this — we WILL update the test then.
+    void valueContainsOnlyNumbers_separatorIsALiteral_notARegex() {
+        // The separator used to be concatenated into the regex unquoted,
+        // so under US - where it is '.' - it meant "any character" and
+        // "1,5" and "1X5" counted as numbers. It is quoted now, so only
+        // the separator the locale actually uses is accepted.
         formatter.updateLocale(Locale.US);
 
-        assertTrue(formatter.valueContainsOnlyNumbers("1,5"),
-                "Quirk: '.' is a regex any-char metacharacter under US locale");
-        assertTrue(formatter.valueContainsOnlyNumbers("1X5"),
-                "Quirk: any single char between digits matches under US locale");
+        assertFalse(formatter.valueContainsOnlyNumbers("1,5"),
+                "A comma is not a US decimal separator");
+        assertFalse(formatter.valueContainsOnlyNumbers("1X5"),
+                "Nor is any other character");
+        assertTrue(formatter.valueContainsOnlyNumbers("1.5"),
+                "The US separator still is");
+    }
+
+    @Test
+    void valueContainsOnlyNumbers_localeMinusSign_true() {
+        // Finnish writes a negative number with U+2212, not the hyphen.
+        // Reading only the hyphen left every negative number in such a
+        // locale looking like something other than a number, so it was
+        // never shortened to fit its column - it just overflowed.
+        formatter.updateLocale(new Locale("fi", "FI"));
+
+        assertTrue(formatter.valueContainsOnlyNumbers("\u221242"),
+                "The locale's own minus sign");
+        assertTrue(formatter.valueContainsOnlyNumbers("\u22121,5"),
+                "And with a decimal part");
+    }
+
+    @Test
+    void valueContainsOnlyNumbers_hyphenStillAcceptedInAnyLocale() {
+        // A value can reach here formatted either way.
+        formatter.updateLocale(new Locale("fi", "FI"));
+
+        assertTrue(formatter.valueContainsOnlyNumbers("-42"));
+    }
+
+    @Test
+    void valueContainsOnlyNumbers_twoMinusSigns_false() {
+        formatter.updateLocale(new Locale("fi", "FI"));
+
+        assertFalse(formatter.valueContainsOnlyNumbers("\u2212-42"));
     }
 
     @Test

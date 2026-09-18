@@ -121,7 +121,6 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
         checkProtectionInCell("D4", true);
     }
 
-    @Ignore("Test ignored since it always passes locally but never on CI")
     @Test
     public void sheetIsAllLocked_changeDefaultStyleAndTrySetCellValue_allCellsEditable() {
         selectSheetAt(4);

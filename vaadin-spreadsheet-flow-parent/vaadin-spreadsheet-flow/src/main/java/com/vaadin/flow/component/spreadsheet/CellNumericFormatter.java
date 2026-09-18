@@ -14,6 +14,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.Cell;
@@ -150,9 +151,26 @@ final class CellNumericFormatter implements Serializable {
         };
     }
 
+    /**
+     * Whether a formatted value is a plain number, and so a candidate for being
+     * shortened into scientific notation when it does not fit.
+     * <p>
+     * The minus sign is the locale's own: Finnish and many other locales write
+     * a negative number with U+2212, not the hyphen, and a pattern that knows
+     * only the hyphen leaves every negative number in those locales
+     * unshortened. The hyphen is still accepted, since a value can reach here
+     * formatted either way.
+     * <p>
+     * Both separators are quoted. An unquoted decimal separator is a regular
+     * expression of its own - a dot matches any character at all.
+     */
     boolean valueContainsOnlyNumbers(String value) {
-        return value.matches("^-?\\d+("
-                + localeDecimalSymbols.getDecimalSeparator() + "\\d+)?$");
+        String minus = Pattern
+                .quote(String.valueOf(localeDecimalSymbols.getMinusSign()));
+        String separator = Pattern.quote(
+                String.valueOf(localeDecimalSymbols.getDecimalSeparator()));
+        return value
+                .matches("^(" + minus + "|-)?\\d+(" + separator + "\\d+)?$");
     }
 
     boolean isGeneralCell(Cell cell) {

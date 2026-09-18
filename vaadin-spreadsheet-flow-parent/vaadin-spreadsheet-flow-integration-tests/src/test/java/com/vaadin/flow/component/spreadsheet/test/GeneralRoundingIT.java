@@ -12,7 +12,6 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -99,7 +98,6 @@ public class GeneralRoundingIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Rounding is not applied with Finnish Locale")
     public void generalFormat_spreadsheetWithGeneralFormatAndLocaleFI_negativeNumbersRoundedCorrectly() {
         setLocale(new Locale("fi", "FI"));
         loadFile("negative_general_round.xlsx");
