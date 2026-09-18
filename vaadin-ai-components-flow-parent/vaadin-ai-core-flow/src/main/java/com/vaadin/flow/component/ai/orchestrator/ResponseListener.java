@@ -52,6 +52,14 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * preceding {@link AIController#onRequest(RequestListener.RequestEvent)}, so an
  * error does not imply that per-turn setup has happened.
  * <p>
+ * A turn the model completed but the {@link AIController} could not apply is a
+ * failure too: when {@link AIController#onResponse(ResponseEvent)} throws on a
+ * successful turn, the listener receives that exception as the error, with an
+ * empty response text. The assistant's text stays in the message list and in
+ * {@link AIOrchestrator#getHistory()}, since the model did produce it. A throw
+ * while the controller handles a turn that had already failed does not replace
+ * the original error.
+ * <p>
  * The listener is <b>not</b> called when history is restored via
  * {@code Builder.withHistory()}.
  * <p>
@@ -65,7 +73,15 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * synchronous failures on the UI thread, and a postponed prompt completes on
  * the application's own thread. To update Vaadin UI components from this
  * listener, use {@code ui.access()}.
- * 
+ * <p>
+ * With an {@link AIController} attached, the listener is called right after
+ * {@link AIController#onResponse(ResponseEvent)}, from inside the same
+ * {@code ui.access()} call, so that the controller's outcome is part of the
+ * event. The session lock is then held while the listener runs, so blocking
+ * work in it also blocks the UI for its duration. A UI that is detached when
+ * the turn ends skips the controller hook but still fires the listener, on the
+ * thread that ends the turn.
+ *
  * @since 25.3
  */
 @FunctionalInterface

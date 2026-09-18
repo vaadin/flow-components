@@ -2782,6 +2782,102 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void onResponseThrows_onSuccessPath_responseListenerReceivesTheThrow() {
+        // A turn the model completed but the controller could not apply
+        // must not reach the listener as a success: the listener is the
+        // application's only hook to tell the user why nothing happened.
+        stubAddMessage();
+        var metadata = new ResponseMetadata("stop",
+                new ResponseMetadata.TokenUsage(40, 10, 50));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    LLMProvider.LLMRequest request = invocation.getArgument(0);
+                    request.metadataSink().accept(metadata);
+                    return Flux.just("Done, see the grid.");
+                });
+        var applyFailure = new IllegalStateException("query failed on apply");
+        var controller = mockController();
+        Mockito.doThrow(applyFailure).when(controller)
+                .onResponse(Mockito.any());
+
+        var events = new ArrayList<ResponseListener.ResponseEvent>();
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseListener(events::add).build().prompt("Hello");
+
+        Assertions.assertEquals(1, events.size(),
+                "The listener fires once per turn, also when the controller "
+                        + "fails to apply it");
+        var event = events.getFirst();
+        Assertions.assertSame(applyFailure, event.getError().orElse(null));
+        Assertions.assertEquals("", event.getResponse(),
+                "A failed turn carries no response text");
+        Assertions.assertSame(metadata, event.getMetadata().orElse(null),
+                "The provider's metadata still describes the turn");
+    }
+
+    @Test
+    void onResponseThrows_onFailurePath_responseListenerKeepsStreamError() {
+        stubAddMessage();
+        var streamError = new RuntimeException("API died");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(streamError));
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller blew up"))
+                .when(controller).onResponse(Mockito.any());
+
+        var events = new ArrayList<ResponseListener.ResponseEvent>();
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseListener(events::add).build().prompt("Hello");
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertSame(streamError,
+                events.getFirst().getError().orElse(null),
+                "The error the turn failed with stands; the controller's "
+                        + "own throw while handling it is only logged");
+    }
+
+    @Test
+    void withController_responseListenerFiresAfterControllerOnResponse() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var controller = mockController();
+        var listener = Mockito.mock(ResponseListener.class);
+
+        AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseListener(listener).build().prompt("Hello");
+
+        var inOrder = Mockito.inOrder(controller, listener);
+        inOrder.verify(controller).onResponse(noError());
+        inOrder.verify(listener).onResponse(noError());
+    }
+
+    @Test
+    void onResponseThrows_onSuccessPath_addsSeparateErrorMessage() {
+        // The LLM's own text stays as it was said; the failure to apply it
+        // is reported in a message of its own.
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller blew up"))
+                .when(controller).onResponse(Mockito.any());
+
+        orchestratorWith(controller).prompt("Hello");
+
+        Mockito.verify(mockMessageList).addMessage(
+                "An error occurred. Please try again.", "Assistant",
+                Collections.emptyList());
+    }
+
+    @Test
     void builder_withController_preStreamThrow_firesOnResponseWithError() {
         stubAddMessage();
         var thrown = new IllegalStateException(
@@ -4165,8 +4261,9 @@ class AIOrchestratorTest {
 
         Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
                 "The turn must still end after the UI detached");
-        // The listener fires just before the controller hook would run on
-        // the same thread — after() covers that window.
+        // On a detached UI the listener fires directly, in place of the
+        // controller hook it would otherwise follow; after() covers the
+        // window in which the hook would have run.
         Mockito.verify(controller, Mockito.after(500).never())
                 .onResponse(Mockito.any());
     }

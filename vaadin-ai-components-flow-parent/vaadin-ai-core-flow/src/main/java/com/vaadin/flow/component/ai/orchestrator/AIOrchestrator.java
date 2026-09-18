@@ -871,34 +871,75 @@ public class AIOrchestrator implements Serializable {
             UI ui, ResponseMetadata metadata) {
         var event = new ResponseListener.ResponseEvent(responseText, error,
                 metadata);
-        if (responseListener != null) {
-            try {
-                responseListener.onResponse(event);
-            } catch (Exception e) {
-                LOGGER.error("Error in response listener", e);
-            }
+        if (controller == null) {
+            notifyResponseListener(event);
+            return;
         }
-        if (controller != null) {
-            accessIfAttached(ui, () -> {
-                try {
-                    controller.onResponse(event);
-                } catch (Exception e) {
-                    LOGGER.error("Error in controller onResponse", e);
-                    // Append a separate assistant message instead of
-                    // rewriting the LLM's response. By the time this
-                    // runs, the response is already in the provider's
-                    // chat memory and in our history; rewriting either
-                    // would misrepresent what the LLM actually said.
-                    // Only on the success path — the failure path already
-                    // rewrote the assistant message to a generic error
-                    // message.
-                    if (error == null && messageList != null) {
-                        messageList.addMessage(
-                                "An error occurred. Please try again.",
-                                assistantName, Collections.emptyList());
-                    }
-                }
+        // The controller applies the turn before the listener hears of it,
+        // so that a turn the model completed but the controller could not
+        // apply (a staged grid query that fails when rendered, say) reaches
+        // the listener as the error of the turn. Firing the listener first
+        // would report a success that nothing can follow up on. The listener
+        // therefore runs inside the controller's ui.access() when a
+        // controller is attached; ResponseListener documents this.
+        try {
+            ui.access(() -> {
+                var applyFailure = applyTurnToController(event);
+                notifyResponseListener(applyFailure == null ? event
+                        : new ResponseListener.ResponseEvent("", applyFailure,
+                                metadata));
             });
+        } catch (UIDetachedException e) {
+            // Same outcome as accessIfAttached for the controller hook, but
+            // the listener still fires: it needs no UI, and an application
+            // persisting history must not lose the turn because the user
+            // navigated away.
+            LOGGER.debug(
+                    "Skipped the controller hook of an abandoned turn (UI detached)",
+                    e);
+            notifyResponseListener(event);
+        }
+    }
+
+    private void notifyResponseListener(ResponseListener.ResponseEvent event) {
+        if (responseListener == null) {
+            return;
+        }
+        try {
+            responseListener.onResponse(event);
+        } catch (Exception e) {
+            LOGGER.error("Error in response listener", e);
+        }
+    }
+
+    /**
+     * Runs the controller's {@code onResponse} hook for the turn. Returns the
+     * exception the hook threw while applying a successful turn, which the
+     * caller reports as the error of the turn; returns {@code null} when the
+     * hook completed, and also when it threw while handling a turn that had
+     * already failed, since the original error is what the turn failed with.
+     */
+    private Throwable applyTurnToController(
+            ResponseListener.ResponseEvent event) {
+        try {
+            controller.onResponse(event);
+            return null;
+        } catch (Exception e) {
+            LOGGER.error("Error in controller onResponse", e);
+            if (event.getError().isPresent()) {
+                return null;
+            }
+            // Append a separate assistant message instead of rewriting the
+            // LLM's response. By the time this runs, the response is already
+            // in the provider's chat memory and in our history; rewriting
+            // either would misrepresent what the LLM actually said. Only on
+            // the success path: the failure path already rewrote the
+            // assistant message to a generic error message.
+            if (messageList != null) {
+                messageList.addMessage("An error occurred. Please try again.",
+                        assistantName, Collections.emptyList());
+            }
+            return e;
         }
     }
 
@@ -1484,6 +1525,10 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * On failure {@code event.getError()} carries the cause and the
          * response text is empty, even if text was received before the failure.
+         * A throw from
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)} on a
+         * successful turn counts as a failure: the listener then receives that
+         * exception, since the turn was completed but not applied.
          * <p>
          * The thread the listener runs on depends on the provider: with a
          * streaming provider, or when the provider runs the turn on a
@@ -1493,7 +1538,9 @@ public class AIOrchestrator implements Serializable {
          * whole turn — this listener included — runs on the thread that
          * triggered the prompt, where blocking prolongs the current request. To
          * update Vaadin UI components from this listener, use
-         * {@code ui.access()}. See {@link ResponseListener} for the full
+         * {@code ui.access()}. With a controller attached, the listener runs
+         * right after the controller's {@code onResponse}, inside the same
+         * {@code ui.access()} call. See {@link ResponseListener} for the full
          * threading contract.
          * <p>
          * The listener is not called when history is restored via

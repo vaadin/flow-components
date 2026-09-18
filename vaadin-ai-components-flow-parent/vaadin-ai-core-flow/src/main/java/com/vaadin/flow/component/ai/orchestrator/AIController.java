@@ -108,7 +108,12 @@ public interface AIController {
      * </p>
      * <p>
      * The default does nothing. Exceptions thrown from the hook are caught and
-     * logged; Errors propagate.
+     * logged; Errors propagate. On a successful turn the thrown exception
+     * becomes the error the {@link ResponseListener} receives, so a turn the
+     * model completed but the controller could not apply is reported as a
+     * failed turn; the listener runs after this method, inside the same
+     * {@code ui.access()} call. On a turn that had already failed the original
+     * error stands.
      * </p>
      *
      * @param event

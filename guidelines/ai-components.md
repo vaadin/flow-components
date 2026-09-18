@@ -144,7 +144,11 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 - Tools validate their input eagerly so errors round-trip to the LLM within
   the turn, but stage the result and apply it once in `onResponse(null)`;
   `onResponse(error)` discards the pending state and keeps the last good
-  render.
+  render. A throw from `onResponse(null)` is the turn's error: the
+  orchestrator runs the controller hook before the `ResponseListener`,
+  inside the same `ui.access()`, and hands the listener the throw instead
+  of a success event, so a controller must not swallow its own apply
+  failures.
 - Error hygiene toward the model: only the message of a
   `ToolException` (public, in `com.vaadin.flow.component.ai.provider`) is
   forwarded verbatim — throw it, from built-in tool code or an application's
