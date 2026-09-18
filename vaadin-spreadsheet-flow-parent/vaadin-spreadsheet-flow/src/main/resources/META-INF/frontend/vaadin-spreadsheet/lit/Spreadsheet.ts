@@ -2599,10 +2599,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellComponents.sync(visible.filter((a) => a.kind === 'component').map((a) => a.nodeId));
     this.cellEditors.sync(visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId));
     // Column-header strip (slice 143). Sized + state-pushed only
-    // when headerRowHeight > 0 so the default opt-out path stays
-    // a no-op — important to avoid feedback loops with the
+    // when there is something to draw, so the default opt-out path
+    // stays a no-op — important to avoid feedback loops with the
     // ResizeObserver under wtr parallel.
-    if (this.headerRowHeight > 0) {
+    //
+    // A workbook can hide its headers and still group its columns; the
+    // outline gutter lives in this strip, so it has to be drawn even
+    // when the letters above it are not.
+    if (this.headerRowHeight > 0 || this.colGroupingMax > 0) {
       // Slice 167: compute positioned column-groupings so the
       // header can render the outline gutter. Pre-resolving
       // pixel positions in the connector keeps the header
@@ -2639,9 +2643,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
         selectedColumns: selectedColumnSet(this.selection)
       };
     }
-    // Row-header strip (slice 144). Same opt-in gate as column
-    // header — headerColumnWidth must be > 0 to render.
-    if (this.headerColumnWidth > 0) {
+    // Row-header strip (slice 144). Same opt-in gate as the column
+    // header, and the same reason for the grouping half of it.
+    if (this.headerColumnWidth > 0 || this.rowGroupingMax > 0) {
       // Row groupings mirror the column ones; heights come from the same
       // point-to-pixel conversion the grid uses.
       const ppi = FALLBACK_PPI;

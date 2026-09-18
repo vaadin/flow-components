@@ -389,7 +389,9 @@ export class SpreadsheetRowHeader extends LitElement {
       scrollTop = 0
     } = this.renderState;
 
-    if (headerWidth === 0 || viewport.lastRowIndex < viewport.firstRowIndex) {
+    // As in the column header: no width still draws the grouping
+    // gutter, for a workbook that hides its headers and groups rows.
+    if ((headerWidth === 0 && rowGroupingMax === 0) || viewport.lastRowIndex < viewport.firstRowIndex) {
       return html``;
     }
 

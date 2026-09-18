@@ -10,9 +10,17 @@ package com.vaadin.flow.component.spreadsheet.client;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * @since 23.1
  */
+/**
+ * A whole snapshot, not an update: an overlay anchored at row 0, column 0 has
+ * to say so. See
+ * {@link com.vaadin.flow.component.spreadsheet.shared.GroupingData}.
+ */
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class OverlayInfo implements Serializable {
     public enum Type {
         IMAGE, COMPONENT

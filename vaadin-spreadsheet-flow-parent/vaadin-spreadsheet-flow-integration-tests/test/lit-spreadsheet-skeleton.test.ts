@@ -3424,3 +3424,115 @@ describe('Spreadsheet — how tall it is when nobody says', () => {
         ctx.cleanup();
     });
 });
+
+/**
+ * A workbook can hide its row and column headers and still group its
+ * rows and columns. The outline gutter lives in the header strips, and
+ * skipping those strips whenever the headers have no size took the
+ * outline with them: a grouped sheet without headers had no way to
+ * collapse or expand anything.
+ */
+describe('Spreadsheet — grouping outline without headers', () => {
+    function attach(): { sheet: Spreadsheet; cleanup: () => void } {
+        const host = document.createElement('div');
+        host.style.cssText =
+            'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(20);
+        sheet.setCols(8);
+        sheet.setColW(new Array(8).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        // No headers at all, which is what the workbook asked for.
+        sheet.setHeaderRowHeight(0);
+        sheet.setHeaderColumnWidth(0);
+        return {
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    it('still draws the column outline', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setColGroupingMax(1);
+        sheet.setColGroupingData([
+            {
+                uniqueIndex: 1,
+                level: 1,
+                startIndex: 1,
+                endIndex: 3,
+                collapsed: false,
+            },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        expect(
+            sheet
+                .getColumnHeader()
+                .shadowRoot!.querySelectorAll('.col-grouping-toggle')
+        ).to.have.length(1);
+        cleanup();
+    });
+
+    it('still draws the row outline', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setRowGroupingMax(1);
+        sheet.setRowGroupingData([
+            {
+                uniqueIndex: 1,
+                level: 1,
+                startIndex: 1,
+                endIndex: 3,
+                collapsed: false,
+            },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getRowHeader().updateComplete;
+
+        expect(
+            sheet
+                .getRowHeader()
+                .shadowRoot!.querySelectorAll('.row-grouping-toggle')
+        ).to.have.length(1);
+        cleanup();
+    });
+
+    it('draws no header letters, only the outline', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setColGroupingMax(1);
+        sheet.setColGroupingData([
+            {
+                uniqueIndex: 1,
+                level: 1,
+                startIndex: 1,
+                endIndex: 3,
+                collapsed: false,
+            },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+
+        const letters = sheet
+            .getColumnHeader()
+            .shadowRoot!.querySelectorAll<HTMLElement>('.col-header-cell');
+        for (const letter of letters) {
+            expect(letter.getBoundingClientRect().height).to.equal(0);
+        }
+        cleanup();
+    });
+
+    it('stays out of the way when there is no grouping either', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.recomputeViewport();
+        await sheet.getColumnHeader().updateComplete;
+        await sheet.getRowHeader().updateComplete;
+
+        expect(sheet.getColumnHeader().shadowRoot!.children).to.have.length(0);
+        expect(sheet.getRowHeader().shadowRoot!.children).to.have.length(0);
+        cleanup();
+    });
+});

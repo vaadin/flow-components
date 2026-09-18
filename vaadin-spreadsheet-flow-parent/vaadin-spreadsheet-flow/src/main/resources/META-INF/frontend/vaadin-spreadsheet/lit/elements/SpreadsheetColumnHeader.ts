@@ -445,7 +445,9 @@ export class SpreadsheetColumnHeader extends LitElement {
       scrollLeft = 0
     } = this.renderState;
 
-    if (headerHeight === 0 || viewport.lastColumnIndex < viewport.firstColumnIndex) {
+    // A header of no height still draws its grouping gutter: a
+    // workbook can hide its headers and keep its column groups.
+    if ((headerHeight === 0 && colGroupingMax === 0) || viewport.lastColumnIndex < viewport.firstColumnIndex) {
       return html``;
     }
 

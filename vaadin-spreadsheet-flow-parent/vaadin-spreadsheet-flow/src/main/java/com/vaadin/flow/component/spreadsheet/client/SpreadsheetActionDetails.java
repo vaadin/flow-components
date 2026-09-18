@@ -10,9 +10,17 @@ package com.vaadin.flow.component.spreadsheet.client;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * @since 23.1
  */
+/**
+ * A whole snapshot, not an update: type 0 means a cell action, and leaving it
+ * out left the client with no type at all. See
+ * {@link com.vaadin.flow.component.spreadsheet.shared.GroupingData}.
+ */
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class SpreadsheetActionDetails implements Serializable {
     public String caption;
     public String key;

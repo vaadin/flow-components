@@ -42,7 +42,9 @@ import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
  * order; (2) global {@code JsonInclude.Include.NON_DEFAULT} compares to the
  * TYPE default (null / 0 / false), not the field-initializer default. So a
  * {@code cellStyle = "cs0"} field-initializer still appears on the wire because
- * {@code "cs0" != null}.
+ * {@code "cs0" != null}. A DTO that is a whole snapshot rather than a sparse
+ * update overrides that with its own {@code @JsonInclude(ALWAYS)}, because a
+ * field left out reads as {@code undefined} on the Lit client, not as 0.
  *
  * <p>
  * If a test fails, the question to answer is: "did I intend to change the wire
@@ -79,18 +81,46 @@ class DtoWireFormatTest {
 
     @Test
     void cellData_freshInstance_emitsCellStyleAndNullValue() {
-        // Pins two Jackson behaviors at once:
-        // (1) cellStyle = "cs0" is on the wire because Jackson NON_DEFAULT
-        // compares to type default (null), not field initializer ("cs0").
-        // (2) value is on the wire even when null, because CellData.value
-        // carries @JsonInclude (no argument) which defaults to ALWAYS —
-        // overriding the global NON_DEFAULT for that field.
-        // Both are load-bearing for the GWT client which expects them.
+        // Cell updates stay sparse: the client keeps what it already
+        // has for a field the server does not mention, so leaving the
+        // defaults off the wire costs nothing. Two Jackson behaviors
+        // ride along: cellStyle = "cs0" is on the wire because
+        // NON_DEFAULT compares to the type default (null), not the
+        // field initializer; and value is on the wire even when null
+        // because CellData.value carries its own @JsonInclude.
         CellData cell = new CellData();
 
         String json = Serializer.serialize(cell);
 
         assertEquals("{\"cellStyle\":\"cs0\",\"value\":null}", json);
+    }
+
+    @Test
+    void groupingData_freshInstance_emitsEveryFieldIncludingZeroes() {
+        // A group starting at index 0, at outline level 0, expanded:
+        // every one of those is a default, and every one of them is
+        // load-bearing. Left off the wire they read as undefined on the
+        // client and the outline spans nothing.
+        GroupingData grouping = new GroupingData();
+
+        String json = Serializer.serialize(grouping);
+
+        assertEquals("{\"collapsed\":false,\"endIndex\":0,\"level\":0,"
+                + "\"startIndex\":0,\"uniqueIndex\":0}", json);
+    }
+
+    @Test
+    void actionDetails_cellAction_emitsTypeZero() {
+        // Type 0 is a cell action, which is the commonest one. Dropped
+        // from the wire it left the client with no type at all.
+        SpreadsheetActionDetails action = new SpreadsheetActionDetails();
+        action.caption = "Insert comment";
+        action.key = "1";
+
+        String json = Serializer.serialize(action);
+
+        assertEquals("{\"caption\":\"Insert comment\",\"iconNodeId\":0,"
+                + "\"key\":\"1\",\"type\":0}", json);
     }
 
     @Test
@@ -105,16 +135,16 @@ class DtoWireFormatTest {
     }
 
     @Test
-    void overlayInfo_freshInstance_emitsTypeIMAGE() {
-        // Pins that the IMAGE field-initializer default IS on the wire (because
-        // Jackson NON_DEFAULT for an enum field compares to null, not to the
-        // initializer). The GWT client reads "IMAGE" as a String — matching
-        // its own IMAGE String constant.
+    void overlayInfo_freshInstance_emitsTypeIMAGEAndEveryDefault() {
+        // The enum reaches the client as the String "IMAGE", and an
+        // overlay anchored at row 0, column 0 with no offset still says
+        // so rather than leaving the client to guess.
         OverlayInfo overlay = new OverlayInfo();
 
         String json = Serializer.serialize(overlay);
 
-        assertEquals("{\"type\":\"IMAGE\"}", json);
+        assertEquals("{\"col\":0,\"dx\":0.0,\"dy\":0.0,\"height\":0.0,"
+                + "\"row\":0,\"type\":\"IMAGE\",\"width\":0.0}", json);
     }
 
     @Test

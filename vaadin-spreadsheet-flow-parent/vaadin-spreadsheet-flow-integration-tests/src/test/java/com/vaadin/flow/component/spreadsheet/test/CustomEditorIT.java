@@ -453,7 +453,8 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
         clickCell(cellAddress);
         var maybeEditor = getInputInCustomEditorFromCell(cellAddress);
-        Assert.assertTrue(maybeEditor.isPresent());
+        Assert.assertTrue("No custom editor in cell '" + cellAddress + "'",
+                maybeEditor.isPresent());
 
         var editor = maybeEditor.get();
 

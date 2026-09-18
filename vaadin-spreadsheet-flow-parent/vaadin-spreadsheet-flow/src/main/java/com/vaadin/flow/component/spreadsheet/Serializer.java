@@ -23,6 +23,13 @@ class Serializer {
             .getLogger(Serializer.class);
 
     static {
+        // Defaults are left off the wire, which keeps a cell update to
+        // the fields that actually carry something.
+        //
+        // A payload that is a whole snapshot rather than an update
+        // cannot afford that - a 0 it leaves out reads as undefined on
+        // the client, not as 0 - and says so with its own
+        // {@code @JsonInclude(ALWAYS)}.
         objectMapper = JsonMapper.builder()
                 .changeDefaultPropertyInclusion(handler -> handler
                         .withValueInclusion(JsonInclude.Include.NON_DEFAULT))
