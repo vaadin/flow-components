@@ -72,7 +72,9 @@ import tools.jackson.databind.node.ObjectNode;
  * type's plot options, including property descriptions parsed from JavaDoc.
  * <p>
  * Invoked automatically during the Maven build via {@code exec-maven-plugin}.
- * The output is consumed by {@link PlotOptionsSchema} at runtime.
+ * The output is consumed by {@link PlotOptionsSchema} at runtime. The build
+ * fails if the chart model sources cannot be found, so the published jar never
+ * silently ships without the schemas.
  * 
  * @since 25.2
  */
@@ -151,14 +153,21 @@ public final class PlotOptionsSchemaGenerator {
         Path outputFile = Path.of(args[1]);
 
         if (!Files.isDirectory(sourceDir)) {
-            LOGGER.warn("Source directory not found: {}"
-                    + " — skipping schema generation", sourceDir);
-            return;
+            throw new IllegalStateException(
+                    "Chart model source directory not found: " + sourceDir
+                            + ". The plot options schemas cannot be generated "
+                            + "without it.");
         }
 
         // Parse descriptions from source files
         Map<String, Map<String, String>> descriptions = parseDescriptions(
                 sourceDir);
+        if (descriptions.isEmpty()) {
+            throw new IllegalStateException(
+                    "No chart model sources found in " + sourceDir
+                            + ". The plot options schemas would be generated "
+                            + "without property descriptions.");
+        }
 
         // Build complete schemas for each chart type
         var plotOptionsByType = buildTypeMap();
