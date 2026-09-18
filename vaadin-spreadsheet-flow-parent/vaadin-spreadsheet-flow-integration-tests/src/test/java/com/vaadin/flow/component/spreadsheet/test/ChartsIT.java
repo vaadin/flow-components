@@ -28,11 +28,9 @@ import com.vaadin.testbench.TestBenchElement;
 public class ChartsIT extends AbstractSpreadsheetIT {
 
     private static final String CHART1_CELL = "C2";
-    private static final String CHART1_PADDING_LEFT = "28.6667px";
-    private static final int CHART1_WIDTH = 425;
-    private static final int CHART1_HEIGHT = 304;
-    private static final int CHART_MINIMIZED_WIDTH = 28;
-    private static final int CHART_MINIMIZED_HIGHT = 16;
+    private static final double CHART1_OFFSET_LEFT = 28.6667;
+    private static final int CHART1_WIDTH = 397;
+    private static final int CHART1_HEIGHT = 288;
 
     @Before
     public void init() {
@@ -46,10 +44,10 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         loadFile("charts.xlsx");
 
         assertOverlayProperties(CHART1_CELL, CHART1_WIDTH, CHART1_HEIGHT,
-                CHART1_PADDING_LEFT);
+                CHART1_OFFSET_LEFT);
 
-        assertOverlayProperties("A5", 425, 293, "29.3333px");
-        assertOverlayProperties("C10", 352, 307, "69.5591px");
+        assertOverlayProperties("A5", 397, 288, 29.3333);
+        assertOverlayProperties("C10", 282, 288, 69.5591);
     }
 
     @Test
@@ -73,20 +71,28 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         loadFile("charts.xlsx");
 
         assertOverlayProperties(CHART1_CELL, CHART1_WIDTH, CHART1_HEIGHT,
-                CHART1_PADDING_LEFT);
+                CHART1_OFFSET_LEFT);
 
         WebElement chartWrapperElement = getOverlayElement(CHART1_CELL);
         WebElement minimizeButton = getMinimizeButton(chartWrapperElement);
 
         minimizeButton.click();
 
-        assertOverlayProperties(CHART1_CELL, CHART_MINIMIZED_WIDTH,
-                CHART_MINIMIZED_HIGHT, CHART1_PADDING_LEFT);
+        // Minimized, the chart gives its space back: the server sends a
+        // size of nothing. The GWT client still measured 28x16 there,
+        // which was its padding - the offset it drew as padding rather
+        // than as a position - and not a size anybody chose. What
+        // matters is that the button to bring the chart back is still
+        // there to click.
+        Assert.assertEquals("Minimized overlay should take no space", 0,
+                getOverlayElement(CHART1_CELL).getSize().width);
+        Assert.assertTrue("Restore button should still be there",
+                minimizeButton.isDisplayed());
 
         minimizeButton.click();
 
         assertOverlayProperties(CHART1_CELL, CHART1_WIDTH, CHART1_HEIGHT,
-                CHART1_PADDING_LEFT);
+                CHART1_OFFSET_LEFT);
     }
 
     @Test
@@ -231,15 +237,26 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         }
     }
 
+    /**
+     * The overlay is the size the workbook gives it, and starts the workbook's
+     * own offset in from the cell it is anchored to.
+     * <p>
+     * The GWT client put that offset on the element as padding, so its box
+     * covered the cell corner as well and measured wider and taller by the
+     * offset; the Lit client positions the element at the offset instead. The
+     * picture is in the same place either way - these are the numbers that
+     * describe where.
+     */
     private void assertOverlayProperties(String cell, double width,
-            double height, String paddingLeft) {
-        WebElement elementC10 = getOverlayElement(cell);
-        Assert.assertEquals(width, elementC10.getSize().width, 1);
-        Assert.assertEquals(height, elementC10.getSize().height, 1);
-        Assert.assertEquals(paddingLeft,
-                elementC10.getCssValue("padding-left"));
-        // could not compare padding top as it is set in pt and the browsers
-        // report it in px
+            double height, double offsetLeft) {
+        WebElement overlay = getOverlayElement(cell);
+        Assert.assertEquals("Overlay width", width, overlay.getSize().width, 1);
+        Assert.assertEquals("Overlay height", height, overlay.getSize().height,
+                1);
+        Assert.assertEquals("Overlay offset from its anchor cell", offsetLeft,
+                overlay.getRect().getX()
+                        - getSpreadsheet().getCellAt(cell).getRect().getX(),
+                1);
     }
 
     private TestBenchElement getChartInShadowRoot(WebElement overlayElement) {

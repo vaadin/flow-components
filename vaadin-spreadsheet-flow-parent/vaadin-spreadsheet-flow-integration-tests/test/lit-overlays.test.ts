@@ -281,6 +281,69 @@ describe('Spreadsheet — component overlays', () => {
         cleanup();
     });
 
+    it('is exactly the size the workbook gives it', async () => {
+        // The wrapper is the picture, nothing more. The GWT client drew
+        // the workbook's offset as padding, so its box also covered the
+        // corner of the anchor cell and measured wider and taller than
+        // the picture by that offset - which is what made a minimized
+        // chart, whose size is nothing at all, still measure 28x16.
+        const chart = document.createElement('div');
+        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        sheet.setOverlays({
+            '31': { type: 'COMPONENT', col: 3, row: 2, width: 120, height: 45, dx: 8, dy: 12 },
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const wrapper = sheet.getCellGrid().shadowRoot!.querySelector<HTMLElement>(
+            '.sheet-overlay-component'
+        )!;
+        expect(wrapper.style.width).to.equal('120px');
+        // 45pt at 96 ppi is 60px.
+        expect(wrapper.style.height).to.equal('60px');
+        expect(wrapper.getBoundingClientRect().width).to.equal(120);
+        expect(wrapper.getBoundingClientRect().height).to.equal(60);
+        cleanup();
+    });
+
+    it('starts the workbook offset in from the anchor cell', async () => {
+        const chart = document.createElement('div');
+        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        sheet.setOverlays({
+            '31': { type: 'COMPONENT', col: 3, row: 2, width: 120, height: 45, dx: 8, dy: 12 },
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const wrapper = sheet.getCellGrid().shadowRoot!.querySelector<HTMLElement>(
+            '.sheet-overlay-component'
+        )!;
+        // col 3 starts 100px across, plus 8px of offset; row 2 starts
+        // 20px down, plus 12pt = 16px.
+        expect(wrapper.style.left).to.equal('108px');
+        expect(wrapper.style.top).to.equal('36px');
+        cleanup();
+    });
+
+    it('takes no space at all when the chart is minimized', async () => {
+        // Minimizing gives the space back: the server sends a size of
+        // nothing, and nothing is what the wrapper takes.
+        const chart = document.createElement('div');
+        const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
+        sheet.setOverlays({
+            '31': { type: 'COMPONENT', col: 3, row: 2, width: 0, height: 0, dx: 8, dy: 12 },
+        });
+        sheet.recomputeViewport();
+        await sheet.getCellGrid().updateComplete;
+
+        const wrapper = sheet.getCellGrid().shadowRoot!.querySelector<HTMLElement>(
+            '.sheet-overlay-component'
+        )!;
+        expect(wrapper.getBoundingClientRect().width).to.equal(0);
+        expect(wrapper.getBoundingClientRect().height).to.equal(0);
+        cleanup();
+    });
+
     it('takes the component back out when the overlay goes away', async () => {
         const chart = document.createElement('div');
         const { host, sheet, cleanup } = attachSheetWithFlow({ '31': chart });

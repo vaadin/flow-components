@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -113,9 +114,18 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
                 getFilterPopup().getSelectedTexts());
     }
 
+    /**
+     * The filter popup offers its "(Select All)" checkbox.
+     * <p>
+     * It is a checkbox beside the group of values, not an item in a menu -
+     * hasOption looks for a context-menu item and finds nothing here whatever
+     * the popup contains.
+     */
     private void assertSelectAll(SheetCellElement cell) {
         cell.popupButtonClick();
-        Assert.assertTrue(hasOption("(Select All)"));
+        Assert.assertTrue("Filter popup should offer (Select All)",
+                $(CheckboxElement.class).all().stream().anyMatch(
+                        checkbox -> "(Select All)".equals(checkbox.getText())));
     }
 
     private CheckboxGroupElement getFilterPopup() {

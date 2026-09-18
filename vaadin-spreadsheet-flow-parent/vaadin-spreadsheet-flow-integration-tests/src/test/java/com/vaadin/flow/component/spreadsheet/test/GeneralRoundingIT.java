@@ -64,7 +64,13 @@ public class GeneralRoundingIT extends AbstractSpreadsheetIT {
 
         Assert.assertTrue("Number not shortened",
                 cellAfterResize.length() < cellBeforeResize.length());
-        Assert.assertFalse(cellAfterResize.contains(","));
+        // Finnish writes decimals with a comma, so this half of the test
+        // asks what the US half asks of its own separator: that the
+        // number is a number, not a grouped one, and not the ### a cell
+        // shows when it has given up.
+        Assert.assertTrue("Finnish decimals are written with a comma",
+                cellAfterResize.contains(","));
+        Assert.assertFalse(cellAfterResize.contains("."));
         Assert.assertFalse(cellAfterResize.contains("−"));
         Assert.assertFalse(cellAfterResize.contains("#"));
     }
