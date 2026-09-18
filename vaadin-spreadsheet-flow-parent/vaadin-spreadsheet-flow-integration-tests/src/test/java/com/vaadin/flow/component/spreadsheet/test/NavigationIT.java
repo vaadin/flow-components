@@ -358,7 +358,6 @@ public class NavigationIT extends AbstractSpreadsheetIT {
         assertSelectedCell("A44");
     }
 
-    @Ignore("Enter and Tab in the formula field do not commit the value: J10 stays empty. Not flaky - fails every run.")
     @Test
     public void testEnterAndTabWhenFormulaFieldIsFocused() throws Exception {
         clickCell("J10");

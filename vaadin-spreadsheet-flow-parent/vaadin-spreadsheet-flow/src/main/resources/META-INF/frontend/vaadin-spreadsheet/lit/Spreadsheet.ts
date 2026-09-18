@@ -689,6 +689,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.root.appendChild(this.formulaBar);
     this.root.appendChild(this.contextMenu);
     this.formulaBar.addEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
+    this.formulaBar.addEventListener('formula-commit', this.handleFormulaCommit as EventListener);
+    this.formulaBar.addEventListener('formula-cancel', this.handleFormulaCancel);
     this.root.appendChild(this.scrollContainer);
     // Sheet tabs sit below the scroll container in the flex
     // column. flex:0 so they take their intrinsic height,
@@ -2293,6 +2295,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.hostClassObserver = null;
     }
     this.formulaBar.removeEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
+    this.formulaBar.removeEventListener('formula-commit', this.handleFormulaCommit as EventListener);
+    this.formulaBar.removeEventListener('formula-cancel', this.handleFormulaCancel);
   }
 
   /**
@@ -3013,6 +3017,61 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.firstVisibleTab = next;
     this.syncSheetTabs();
+  };
+
+  /**
+   * A value typed into the formula field.
+   *
+   * It belongs to the cell the sheet has selected, so it is reported as
+   * an ordinary edit of that cell. Enter then moves on to the next cell
+   * down and Tab to the next one right, the way finishing an edit in
+   * the cell itself does; shift+Tab commits without moving, which is
+   * what the GWT client did. Clicking away commits too and leaves the
+   * selection alone - that is how a value typed here reaches the sheet
+   * when the user goes straight back to the cell.
+   */
+  private readonly handleFormulaCommit = (e: CustomEvent<{ value: string; key?: string; shiftKey: boolean }>): void => {
+    const { value, key, shiftKey } = e.detail;
+    const { col, row } = this.selection.activeCell;
+    if (this.rows <= 0 || this.cols <= 0) {
+      return;
+    }
+    if (this.isCellLockedForEdit(col, row)) {
+      this.reportProtectedCellWriteAttempt();
+      return;
+    }
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'cellValueEdited', data: { row, col, value } },
+        bubbles: true,
+        composed: true
+      })
+    );
+    // shift+Tab stays put: the GWT client passed the move along only
+    // when shift was not held.
+    const step = key === 'Tab' && shiftKey ? null : commitStep(key, false);
+    if (step === null) {
+      return;
+    }
+    this.returnFocusToSheet();
+    const nextCol = Math.min(this.cols, Math.max(1, col + step.dCol));
+    const nextRow = Math.min(this.rows, Math.max(1, row + step.dRow));
+    this.selection = selectSingleCell(nextCol, nextRow);
+    this.extendCol = nextCol;
+    this.extendRow = nextRow;
+    this.scrollCellIntoView({ col: nextCol, row: nextRow });
+    this.recomputeViewport();
+    this.dispatchSelectionEvent();
+  };
+
+  /** Escape in the formula field: put the cell's own value back. */
+  private readonly handleFormulaCancel = (): void => {
+    const { col, row } = this.selection.activeCell;
+    this.formulaBar.renderState = {
+      ...this.formulaBar.renderState,
+      formula: this.formulaFieldValueFor(col, row)
+    };
+    this.returnFocusToSheet();
   };
 
   /**

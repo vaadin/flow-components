@@ -138,6 +138,15 @@ export class SpreadsheetFormulaBar extends LitElement {
     this.setAttribute('exportparts', SpreadsheetFormulaBar.EXPORTED_PARTS);
   }
 
+  /**
+   * Whether the formula field is being typed into.
+   *
+   * Ending an edit blurs the field, and the blur would otherwise report
+   * the same value all over again - and a blur with nothing typed is
+   * not an edit at all.
+   */
+  private editingFormula = false;
+
   firstUpdated(): void {
     // Slice 175: when the user presses Enter inside the
     // address field, dispatch `sheet-address-changed` with
@@ -147,14 +156,15 @@ export class SpreadsheetFormulaBar extends LitElement {
     const root = this.shadowRoot!;
     root.addEventListener('keydown', (e: Event) => {
       const ev = e as KeyboardEvent;
-      if (ev.key !== 'Enter') {
-        return;
-      }
       const target = ev.target;
       if (!(target instanceof HTMLInputElement)) {
         return;
       }
-      if (!target.classList.contains('address')) {
+      if (target.classList.contains('formula')) {
+        this.handleFormulaKeyDown(ev, target);
+        return;
+      }
+      if (ev.key !== 'Enter' || !target.classList.contains('address')) {
         return;
       }
       ev.preventDefault();
@@ -167,6 +177,61 @@ export class SpreadsheetFormulaBar extends LitElement {
       );
       target.blur();
     });
+    root.addEventListener('focusin', (e: Event) => {
+      const target = e.target;
+      if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
+        this.editingFormula = true;
+      }
+    });
+    // Clicking away keeps what was typed, as leaving a cell editor does.
+    // It is how a value typed here reaches the sheet when the user goes
+    // straight back to the cell rather than pressing a key.
+    root.addEventListener('focusout', (e: Event) => {
+      const target = e.target;
+      if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
+        this.commitFormula(target.value, undefined, false);
+      }
+    });
+  }
+
+  /**
+   * The keys that finish editing in the formula field.
+   *
+   * Enter commits and moves on to the next cell down, Tab to the next
+   * one right; shift+Tab commits without moving, which is what the GWT
+   * client did. Escape throws the edit away and puts the cell's own
+   * value back. Every other key belongs to the field, and so does the
+   * event - without stopping it, typing a formula would also be typing
+   * into the sheet underneath.
+   */
+  private handleFormulaKeyDown(e: KeyboardEvent, input: HTMLInputElement): void {
+    e.stopPropagation();
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      this.commitFormula(input.value, e.key, e.shiftKey);
+      input.blur();
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this.editingFormula = false;
+      this.dispatchEvent(new CustomEvent('formula-cancel', { bubbles: true, composed: true }));
+      input.blur();
+    }
+  }
+
+  private commitFormula(value: string, key: string | undefined, shiftKey: boolean): void {
+    if (!this.editingFormula) {
+      return;
+    }
+    this.editingFormula = false;
+    this.dispatchEvent(
+      new CustomEvent('formula-commit', {
+        detail: { value, key, shiftKey },
+        bubbles: true,
+        composed: true
+      })
+    );
   }
 
   /**
