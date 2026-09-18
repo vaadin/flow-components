@@ -326,12 +326,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * This bounds a turn that {@link #setMaxCallsPerTool(int)} does not catch
      * because the model spreads its calls over several tools. Once a call would
      * exceed the limit, the turn fails with a
-     * {@link ToolCallLimitExceededException} whose
-     * {@link ToolCallLimitExceededException#getToolName() tool name} is
-     * {@code null}: none of the tool calls of that round are executed, the
-     * model is not called again, and you receive the exception as the error of
-     * the turn. The conversation stays usable: the failed turn leaves only its
-     * prompt in the chat memory, and the next prompt continues from there.
+     * {@link ToolCallLimitExceededException}: none of the tool calls of that
+     * round are executed, the model is not called again, and you receive the
+     * exception as the error of the turn. The conversation stays usable: the
+     * failed turn leaves only its prompt in the chat memory, and the next
+     * prompt continues from there.
      * <p>
      * The value is read when a turn starts, so a change applies from the next
      * prompt on.
@@ -808,19 +807,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
          */
         Optional<ToolCallLimitExceededException> countAndCheck(
                 String requestedToolName) {
-            // A request the model sent without a name is counted under "", so
-            // that a null tool name in the exception keeps meaning the total
-            // limit. LangChain4j does not guard the name, so it can be null.
+            // LangChain4j does not guard the name, so it can be null; such
+            // requests are counted together under "".
             var toolName = Objects.toString(requestedToolName, "");
             totalToolCalls++;
             var callsToTool = callsPerTool.merge(toolName, 1, Integer::sum);
             if (maxCallsPerTool > 0 && callsToTool > maxCallsPerTool) {
-                return Optional.of(new ToolCallLimitExceededException(toolName,
-                        maxCallsPerTool));
+                return Optional.of(new ToolCallLimitExceededException(
+                        "Tool call limit (" + maxCallsPerTool
+                                + ") exceeded for tool '" + toolName + "'"));
             }
             if (maxTotalToolCalls > 0 && totalToolCalls > maxTotalToolCalls) {
-                return Optional.of(new ToolCallLimitExceededException(null,
-                        maxTotalToolCalls));
+                return Optional.of(new ToolCallLimitExceededException(
+                        "Total tool call limit (" + maxTotalToolCalls
+                                + ") exceeded for this turn"));
             }
             return Optional.empty();
         }

@@ -86,7 +86,11 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   `OTHER` from its Anthropic one. Framework code therefore never branches on
   the content of a finish reason: checks that must tell a completed turn from
   a truncated one use structure instead — a missing finish reason, or tool
-  calls still pending.
+  calls still pending. The one exception is Spring AI's
+  `ToolCallLimitExceededException.FINISH_REASON`: not a vendor's word but a
+  constant Spring AI defines for the reply it synthesizes itself when its
+  tool call limit is hit, so `SpringAILLMProvider` compares against that
+  constant to turn the reply back into a failed turn.
 
 ## Threading
 
@@ -154,9 +158,16 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   `ToolCallLimitExceededException`. The check runs before any tool of that
   round runs, and the tool traffic of the failed turn is discarded with it, so
   the next turn continues from the chat memory as the last completed turn
-  left it; a cancelled turn likewise stops calling the model and the tools. `SpringAILLMProvider` adds no cap of its own: Spring AI
-  bounds the loop itself, and ends such a turn normally with the finish reason
-  `toolCallLimitExceeded` rather than with an error.
+  left it; a cancelled turn likewise stops calling the model and the tools.
+  `SpringAILLMProvider` adds no cap of its own: Spring AI bounds the loop
+  itself and hands back a synthesized reply carrying its
+  `ToolCallLimitExceededException.FINISH_REASON`, which the provider turns
+  into the same exception with Spring AI's message, so both providers fail
+  such a turn the same way. The exception carries no structured detail on
+  purpose: Spring AI's tool name and limit only exist in its message wording,
+  which is not ours to depend on. Spring AI's reply may remain in the chat
+  memory with either constructor; the provider does not rewrite what Spring
+  AI's advisors stored.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 
