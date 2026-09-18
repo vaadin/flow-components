@@ -525,6 +525,38 @@ describe('Spreadsheet startup handshake', () => {
     ctx.cleanup();
   });
 
+  it('drops the cached cell values when the server drops the sheet', async () => {
+    // The server only ever sends cells that have something in them, so a
+    // cell that is empty on the new sheet is never mentioned again. Keeping
+    // the old value showed the previous sheet's content through the new one.
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.updateBottomRightCellValues([
+      { col: 1, row: 1, value: 'sheet0 value', cellStyle: 'cs0' }
+    ] as any);
+    expect(ctx.sheet.getCellData().size).to.be.greaterThan(0);
+
+    ctx.sheet.setReload(true);
+    await afterFrame();
+
+    expect(ctx.sheet.getCellData().get('col1 row1')).to.be.undefined;
+    ctx.cleanup();
+  });
+
+  it('keeps the cached cell values when the flag is lowered', async () => {
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.updateBottomRightCellValues([
+      { col: 1, row: 1, value: 'still here', cellStyle: 'cs0' }
+    ] as any);
+
+    ctx.sheet.setReload(false);
+    await afterFrame();
+
+    expect(ctx.sheet.getCellData().get('col1 row1')?.value).to.equal('still here');
+    ctx.cleanup();
+  });
+
   it('says nothing when the reload flag is lowered rather than raised', async () => {
     const ctx = attachRaw();
     giveGeometry(ctx.sheet);

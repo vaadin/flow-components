@@ -3474,9 +3474,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   setReload(triggerReload: boolean): void {
     if (triggerReload) {
+      // The server has thrown away everything it knew about the sheet —
+      // a sheet switch, a new file, a reset. Our cached cell values are
+      // the previous sheet's, and the server only ever sends cells that
+      // have something in them, so a cell that is empty on the new sheet
+      // is never mentioned again and the old value would show through.
+      this.cellDataByKey.clear();
       this.viewportAnnounced = false;
-      // The server threw its sheet state away, so the bounds it holds are
-      // gone too — re-announce even if they come out identical.
+      // The bounds it holds are gone too — re-announce even if they come
+      // out identical.
       this.announcedBounds = '';
       this.scheduleRender();
     }
