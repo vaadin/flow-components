@@ -1408,7 +1408,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Enter moves active cell down + Shift+Enter moves up (slice 149)', () => {
+    it('Enter opens the editor on a single cell, shift or no shift', () => {
+        // Enter moves on once an edit is committed, and walks a range
+        // that is selected; on one cell it is the same case as F2.
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1423,9 +1425,16 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         }));
         const scroller = sheet.getScrollContainer();
         dispatchKey(scroller, 'Enter');
-        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 4 });
+        expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 3 });
+        expect(sheet.getCellGrid().renderState.editor).to.not.be.null;
+
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-editor-cancel', {
+            bubbles: true,
+            composed: true,
+        }));
         dispatchKey(scroller, 'Enter', { shiftKey: true });
         expect(sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 3 });
+        expect(sheet.getCellGrid().renderState.editor).to.not.be.null;
         cleanup();
     });
 

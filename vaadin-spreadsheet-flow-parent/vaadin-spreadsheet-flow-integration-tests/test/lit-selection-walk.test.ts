@@ -280,15 +280,25 @@ describe('Spreadsheet — Enter and Tab inside a selected range', () => {
         });
     });
 
-    it('leaves a single-cell selection to the ordinary move', () => {
+    it('does not walk a single-cell selection', () => {
+        // There is nowhere to walk to, so Enter is the editing key it
+        // always was and the active cell stays put.
         sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
         events.length = 0;
         press('Enter');
-        expect(sheet.getSelection().activeCell).to.eql({ col: 2, row: 3 });
+        expect(sheet.getSelection().activeCell).to.eql({ col: 2, row: 2 });
+        expect(events.filter((e) => e.type === 'cellSelected')).to.be.empty;
+    });
+
+    it('walks on Tab even though Enter opens the editor', () => {
+        sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+        events.length = 0;
+        press('Tab');
+        expect(sheet.getSelection().activeCell).to.eql({ col: 3, row: 2 });
         const selected = events.filter((e) => e.type === 'cellSelected');
         expect(selected[0].data).to.eql({
-            row: 3,
-            column: 2,
+            row: 2,
+            column: 3,
             oldSelectionRangeDiscarded: true,
         });
     });

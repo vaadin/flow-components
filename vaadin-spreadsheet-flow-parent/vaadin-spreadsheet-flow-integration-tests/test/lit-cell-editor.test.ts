@@ -686,7 +686,10 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
 
-        for (const key of ['ArrowDown', 'Tab', 'Enter', 'Home', 'End', 'Escape', 'F1', 'PageDown']) {
+        // Enter is not in this list: on a single cell it opens the
+        // editor, the same case F2 is, which is what the GWT client did
+        // and what the ITs that fill a column depend on.
+        for (const key of ['ArrowDown', 'Tab', 'Home', 'End', 'Escape', 'F1', 'PageDown']) {
             sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
                 key,
                 bubbles: true,
@@ -1146,5 +1149,109 @@ describe('Spreadsheet — committing an edit with a key', () => {
         await ctx.sheet.getCellGrid().updateComplete;
 
         expect(ctx.sheet.getSelection().activeCell).to.eql({ col: 1, row: 1 });
+    });
+});
+
+/**
+ * Enter on a single cell opens its editor, exactly as F2 does. The GWT
+ * client treated the two keys as one case, and the ITs that fill a
+ * column type a value, press Enter to commit, and press Enter again to
+ * open the next cell. Treating the second Enter as "move on" skipped
+ * every other row, and the values landed in A1, A3, A5 instead of
+ * A1, A2, A3.
+ */
+describe('Spreadsheet cell editor — Enter opens it', () => {
+    function attach(): { sheet: Spreadsheet; cleanup: () => void } {
+        const host = document.createElement('div');
+        host.style.cssText =
+            'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(20);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        return {
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    function press(sheet: Spreadsheet, key: string): void {
+        sheet
+            .getScrollContainer()
+            .dispatchEvent(
+                new KeyboardEvent('keydown', {
+                    key,
+                    bubbles: true,
+                    composed: true,
+                })
+            );
+    }
+
+    async function editorInput(
+        sheet: Spreadsheet
+    ): Promise<HTMLInputElement | null> {
+        await sheet.getCellGrid().updateComplete;
+        return sheet
+            .getCellGrid()
+            .shadowRoot!.querySelector<HTMLInputElement>('.cell-editor');
+    }
+
+    it('opens the editor on the selected cell', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+
+        press(sheet, 'Enter');
+
+        expect(await editorInput(sheet), 'no editor').to.not.be.null;
+        expect(sheet.getSelection().activeCell).to.eql({ col: 2, row: 2 });
+        cleanup();
+    });
+
+    it('opens it with the value the cell already has', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.updateBottomRightCellValues([
+            {
+                row: 2,
+                col: 2,
+                value: '42',
+                originalValue: '42',
+                cellStyle: 'cs0',
+            } as any,
+        ]);
+        sheet.recomputeViewport();
+        sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+
+        press(sheet, 'Enter');
+
+        expect((await editorInput(sheet))!.value).to.equal('42');
+        cleanup();
+    });
+
+    it('moves on instead when the cell is hidden', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setHiddenRowIndexes([2]);
+        sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+
+        press(sheet, 'Enter');
+
+        expect(await editorInput(sheet), 'editor on a hidden cell').to.be.null;
+        expect(sheet.getSelection().activeCell).to.eql({ col: 2, row: 3 });
+        cleanup();
+    });
+
+    it('walks the selection instead when a range is selected', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSelectedCellAndRange('B2', 2, 2, 2, 3, 2, 4, false);
+
+        press(sheet, 'Enter');
+
+        expect(await editorInput(sheet), 'editor on a range').to.be.null;
+        expect(sheet.getSelection().activeCell).to.eql({ col: 2, row: 3 });
+        cleanup();
     });
 });

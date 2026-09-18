@@ -1658,9 +1658,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
 
-    // F2 opens the cell editor at the active cell, loaded with
-    // the cell's existing value (Excel convention). Slice 153.
-    if (key === 'F2' && !this.editor) {
+    // F2 opens the cell editor at the active cell, loaded with the
+    // cell's existing value (Excel convention). Slice 153.
+    //
+    // So does Enter on a single cell, as it always has: the GWT client
+    // treated the two keys as one case. With a range selected Enter
+    // walks inside it instead, and on a cell the user cannot see there
+    // is nothing to edit, so it falls through to moving on.
+    const entersEditor =
+      key === 'F2' ||
+      (key === 'Enter' &&
+        !isMultiCellRange(this.selection.activeRange) &&
+        !this.hiddenRowIndexes.includes(this.selection.activeCell.row) &&
+        !this.hiddenColumnIndexes.includes(this.selection.activeCell.col));
+    if (entersEditor && !this.editor) {
       if (this.rows <= 0 || this.cols <= 0) {
         return;
       }
@@ -1670,7 +1681,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return;
       }
       e.preventDefault();
-      const cellData = this.cellDataByKey.get(toKey(col, row));
       this.editor = {
         col,
         row,
