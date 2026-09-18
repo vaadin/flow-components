@@ -131,6 +131,19 @@ describe('SpreadsheetSheetTabs — render', () => {
         cleanup(el);
     });
 
+    it('gives each tab its full name as the title', async () => {
+        const el = await attachWithState({
+            sheetNames: ['Sheet1', 'A rather long sheet name'],
+            activeIndex: 1,
+        });
+        const tabs = el.shadowRoot!.querySelectorAll('.sheet-tab');
+        expect(tabs[0].getAttribute('title')).to.equal('Sheet1');
+        expect(tabs[1].getAttribute('title')).to.equal(
+            'A rather long sheet name'
+        );
+        cleanup(el);
+    });
+
     it('puts data-index on each tab (1-based)', async () => {
         const el = await attachWithState({
             sheetNames: ['A', 'B', 'C'],

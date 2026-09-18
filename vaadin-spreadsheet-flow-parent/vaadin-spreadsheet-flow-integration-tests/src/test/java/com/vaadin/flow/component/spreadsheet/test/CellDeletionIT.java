@@ -57,7 +57,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteIndividualCellSucceedsWhenHandlerReturnsTrue() {
         clickCell("B3");
-        getSpreadsheet().getCellAt("B5").click(5, 5, Keys.CONTROL);
+        selectCell("B5", true, false);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 
@@ -70,7 +70,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteIndividualCellFailsWhenHandlerReturnsFalse() {
         clickCell("C3");
-        getSpreadsheet().getCellAt("C5").click(5, 5, Keys.CONTROL);
+        selectCell("C5", true, false);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 
@@ -83,7 +83,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteCellRangeSucceedsWhenHandlerReturnsTrue() {
         clickCell("B6");
-        getSpreadsheet().getCellAt("B8").click(5, 5, Keys.SHIFT);
+        selectCell("B8", false, true);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 
@@ -97,7 +97,7 @@ public class CellDeletionIT extends AbstractSpreadsheetIT {
     @Test
     public void deletionHandler_SpreadsheetWithDeletionFixture_deleteCellRangeFailsWhenHandlerReturnsFalse() {
         clickCell("C6");
-        getSpreadsheet().getCellAt("C8").click(5, 5, Keys.SHIFT);
+        selectCell("C8", false, true);
 
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
 

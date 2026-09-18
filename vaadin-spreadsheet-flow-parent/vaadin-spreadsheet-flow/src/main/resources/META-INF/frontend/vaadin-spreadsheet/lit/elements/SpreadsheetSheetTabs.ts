@@ -274,7 +274,10 @@ export class SpreadsheetSheetTabs extends LitElement {
       // carries `tab-selected` so
       // `vaadin-spreadsheet::part(tab-selected)` works.
       const part = isActive ? 'tab tab-selected' : 'tab';
-      return html` <div class=${className} part=${part} data-index=${oneBasedIndex}> ${name} </div> `;
+      // A tab is only as wide as the strip allows, so a long name is
+      // cut off with an ellipsis. The title is how the user reads the
+      // rest of it, and how a test names a tab it cannot see whole.
+      return html` <div class=${className} part=${part} title=${name} data-index=${oneBasedIndex}> ${name} </div> `;
     });
     // The tabs scroll by whole tabs; hiding the ones before
     // firstVisibleTab is enough and needs no width arithmetic.
