@@ -133,6 +133,23 @@ export class SpreadsheetCellGrid extends LitElement {
       font-size: 0.9em;
     }
 
+    /*
+     * The note being written. Sized like the note it replaces so the
+     * overlay does not jump as it opens.
+     */
+    .v-spreadsheet-comment-overlay .comment-overlay-edit {
+      display: block;
+      box-sizing: border-box;
+      width: 160px;
+      height: 60px;
+      resize: none;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      color: inherit;
+      outline: none;
+    }
+
     .v-spreadsheet-comment-overlay .comment-overlay-author {
       font-weight: bold;
     }
@@ -384,7 +401,44 @@ export class SpreadsheetCellGrid extends LitElement {
     // selects the cell (if outside selection) and forwards as
     // contextMenuOpenOnSelection.
     this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
+    // A note being written ends when the user leaves it, or presses
+    // Escape. Delegated at the shadow root because the textarea comes
+    // and goes with the overlay it lives in.
+    this.shadowRoot!.addEventListener('focusout', this.handleCommentEditEnd);
+    this.shadowRoot!.addEventListener('keydown', this.handleCommentEditKeyDown);
   }
+
+  /** Report the note as written, once, when it is left. */
+  private readonly handleCommentEditEnd = (e: Event): void => {
+    const target = e.target;
+    if (!(target instanceof HTMLTextAreaElement) || !target.classList.contains('comment-overlay-edit')) {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent('cell-comment-commit', {
+        detail: { key: target.dataset.key, text: target.value },
+        bubbles: true,
+        composed: true
+      })
+    );
+  };
+
+  /**
+   * Escape ends the note. Every other key belongs to the textarea, and
+   * so does the event: without stopping it, typing a note would also be
+   * typing into the cell underneath.
+   */
+  private readonly handleCommentEditKeyDown = (e: Event): void => {
+    const target = e.target;
+    if (!(target instanceof HTMLTextAreaElement) || !target.classList.contains('comment-overlay-edit')) {
+      return;
+    }
+    e.stopPropagation();
+    if ((e as KeyboardEvent).key === 'Escape') {
+      e.preventDefault();
+      target.blur();
+    }
+  };
 
   /**
    * After every render, focus the editor input if one is now
@@ -394,6 +448,11 @@ export class SpreadsheetCellGrid extends LitElement {
    * the caret inside.
    */
   updated(changedProps: Map<string, unknown>): void {
+    const note = this.shadowRoot!.querySelector('.comment-overlay-edit') as HTMLTextAreaElement | null;
+    if (note !== null && this.shadowRoot!.activeElement !== note) {
+      note.focus();
+      note.setSelectionRange(note.value.length, note.value.length);
+    }
     if (this.renderState.editor && changedProps.has('renderState')) {
       const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
       if (input && document.activeElement !== input) {
@@ -1026,9 +1085,15 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
   const invalidCells = state.invalidFormulaCells ?? new Set<string>();
   const invalidMessage = state.invalidFormulaMessage ?? null;
 
+  const editingKey = state.editingCommentKey ?? null;
   const keys = new Set<string>(state.visibleCommentKeys ?? []);
   if (hoveredKey !== null && (hoveredKey in text || invalidCells.has(hoveredKey))) {
     keys.add(hoveredKey);
+  }
+  // The note being written stays up whether or not it is hovered, and
+  // whether or not it has any text yet.
+  if (editingKey !== null) {
+    keys.add(editingKey);
   }
 
   const overlays: TemplateResult[] = [];
@@ -1040,8 +1105,9 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     // An invalid formula only shows while hovered — an always-visible
     // comment is the workbook's choice, an error message is feedback.
     const showsError = key === hoveredKey && invalidCells.has(key) && invalidMessage !== null;
+    const editing = key === editingKey;
     const comment = text[key];
-    if (!showsError && comment === undefined) {
+    if (!showsError && !editing && comment === undefined) {
       continue;
     }
     const geometry = rectGeometry(state, {
@@ -1061,7 +1127,16 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
       <div class="v-spreadsheet-comment-overlay" style=${style}>
         ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
         ${author ? html`<div class="comment-overlay-author">${author}</div>` : nothing}
-        ${comment === undefined ? nothing : html`<div class="comment-overlay-label">${comment}</div>`}
+        ${editing
+          ? html`<textarea
+              class="comment-overlay-edit"
+              part="comment-edit"
+              data-key=${key}
+              .value=${comment ?? ''}
+            ></textarea>`
+          : comment === undefined
+          ? nothing
+          : html`<div class="comment-overlay-label">${comment}</div>`}
       </div>
     `);
   }

@@ -27,6 +27,7 @@ const B2 = 'col2 row2';
 
 function attachSheet(): {
   sheet: Spreadsheet;
+  host: HTMLElement;
   cleanup: () => void;
 } {
   const host = document.createElement('div');
@@ -40,6 +41,7 @@ function attachSheet(): {
   sheet.recomputeViewport();
   return {
     sheet,
+    host,
     cleanup: () => {
       sheet.dispose();
       host.remove();
@@ -235,5 +237,117 @@ describe('Spreadsheet — cell comment overlays', () => {
     await paint(ctx.sheet);
 
     expect(overlays(ctx.sheet)).to.be.empty;
+  });
+});
+
+/**
+ * A cell comment is written in the note itself. The server's Insert
+ * comment and Edit comment actions make sure there is a comment and then
+ * ask the client to open it; the connector had that call stubbed out with
+ * a TODO, so the note could be created and never written.
+ */
+describe('Spreadsheet — writing a cell comment', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+  let events: any[];
+
+  beforeEach(() => {
+    ctx = attachSheet();
+    events = [];
+    ctx.host.addEventListener('spreadsheet-event', (e: Event) =>
+      events.push((e as CustomEvent).detail)
+    );
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function note(): Promise<HTMLTextAreaElement | null> {
+    await paint(ctx.sheet);
+    return ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLTextAreaElement>('.comment-overlay-edit');
+  }
+
+  it('opens the note for typing when the server asks', async () => {
+    ctx.sheet.setCellComments({ [A1]: 'a note' });
+    ctx.sheet.editCellComment(1, 1);
+
+    const el = await note();
+    expect(el, 'no comment editor').to.not.be.null;
+    expect(el!.value).to.equal('a note');
+  });
+
+  it('opens an empty note on a cell that has none yet', async () => {
+    ctx.sheet.editCellComment(2, 3);
+
+    expect((await note())!.value).to.equal('');
+  });
+
+  it('stays up without being hovered', async () => {
+    // An ordinary note only shows on hover; the one being written has
+    // to stay where the user is typing.
+    ctx.sheet.editCellComment(1, 1);
+
+    expect(await note()).to.not.be.null;
+  });
+
+  it('tells the server what was written when the note is left', async () => {
+    ctx.sheet.editCellComment(2, 3);
+    const el = (await note())!;
+    el.value = 'Check this figure';
+    events.length = 0;
+    el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+
+    expect(events).to.have.length(1);
+    expect(events[0].type).to.equal('updateCellComment');
+    expect(events[0].data).to.eql({ text: 'Check this figure', col: 2, row: 3 });
+  });
+
+  it('shows the note without waiting for the server', async () => {
+    ctx.sheet.editCellComment(1, 1);
+    const el = (await note())!;
+    el.value = 'Typed';
+    el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+    await paint(ctx.sheet);
+
+    await hover(ctx.sheet, 1, 1);
+    expect(labels(ctx.sheet)).to.eql(['Typed']);
+  });
+
+  it('closes the note once it is written', async () => {
+    ctx.sheet.editCellComment(1, 1);
+    const el = (await note())!;
+    el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+
+    expect(await note()).to.be.null;
+  });
+
+  it('reports the note once, not again as it closes', async () => {
+    ctx.sheet.editCellComment(1, 1);
+    const el = (await note())!;
+    el.value = 'Once';
+    events.length = 0;
+    el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+    el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+
+    expect(events.map((e) => e.type)).to.eql(['updateCellComment']);
+  });
+
+  it('keeps the keys out of the sheet underneath', async () => {
+    // Without stopping them, typing a note would also be typing into
+    // the cell the sheet has selected.
+    ctx.sheet.editCellComment(1, 1);
+    let reachedSheet = false;
+    ctx.sheet
+      .getScrollContainer()
+      .addEventListener('keydown', () => {
+        reachedSheet = true;
+      });
+    (await note())!.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'a', bubbles: true, composed: true })
+    );
+
+    expect(reachedSheet).to.be.false;
   });
 });

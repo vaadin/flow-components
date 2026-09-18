@@ -401,6 +401,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * finished.
    */
   private renamingSheetIndex = 0;
+
+  /**
+   * The cell whose comment is being written, as a cell key, or null when
+   * none is. The server opens this with editCellComment and hears back
+   * once, when the note is finished.
+   */
+  private editingCommentKey: string | null = null;
   private readonly overlayComponents: SlottedVirtualChildren;
   /**
    * Server-side components rendered inside a cell. Same mechanism as
@@ -755,6 +762,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // on a cell outside the current selection selects that
     // cell, then opens the menu).
     this.cellGrid.addEventListener('cell-contextmenu', this.handleCellContextMenu as EventListener);
+    this.cellGrid.addEventListener('cell-comment-commit', this.handleCellCommentCommit as EventListener);
     this.columnHeader.addEventListener(
       'column-header-contextmenu',
       this.handleColumnHeaderContextMenu as EventListener
@@ -2265,6 +2273,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.removeEventListener('selection-paint-start', this.handleSelectionPaintStart);
     this.cellGrid.removeEventListener('popup-button-click', this.handlePopupButtonClick as EventListener);
     this.cellGrid.removeEventListener('cell-contextmenu', this.handleCellContextMenu as EventListener);
+    this.cellGrid.removeEventListener('cell-comment-commit', this.handleCellCommentCommit as EventListener);
     this.columnHeader.removeEventListener(
       'column-header-contextmenu',
       this.handleColumnHeaderContextMenu as EventListener
@@ -2897,6 +2906,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       commentText: this.cellComments,
       commentAuthors: this.cellCommentAuthors,
       visibleCommentKeys: this.visibleCellComments,
+      editingCommentKey: this.editingCommentKey,
       invalidFormulaMessage: this.invalidFormulaErrorMessage,
       // Comment-bearing + hyperlink cell keys (slice 165).
       // The maps from setCellComments / setHyperlinksTooltips
@@ -3003,6 +3013,40 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.firstVisibleTab = next;
     this.syncSheetTabs();
+  };
+
+  /**
+   * A finished comment.
+   *
+   * The note shows what was typed straight away - the server sends the
+   * comments back, and waiting for that leaves the old note on screen
+   * in the meantime. A note emptied out is a note removed, which is
+   * what the server makes of empty text.
+   */
+  private readonly handleCellCommentCommit = (e: CustomEvent<{ key?: string; text: string }>): void => {
+    const { key, text } = e.detail;
+    // Reported once. Finishing the note puts the keyboard back on the
+    // sheet, which takes the focus off the textarea and asks again,
+    // and the textarea is still there until the next render.
+    if (this.editingCommentKey === null) {
+      return;
+    }
+    this.editingCommentKey = null;
+    const coord = key === undefined ? null : parseColRow(key);
+    if (coord === null || coord.col < 1 || coord.row < 1) {
+      this.scheduleRender();
+      return;
+    }
+    this.cellComments = { ...this.cellComments, [key as string]: text };
+    this.scheduleRender();
+    this.returnFocusToSheet();
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'updateCellComment', data: { text, col: coord.col, row: coord.row } },
+        bubbles: true,
+        composed: true
+      })
+    );
   };
 
   /**
@@ -3517,8 +3561,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
   refreshCellStyles(): void {
     this.scheduleRender();
   }
-  editCellComment(_col: number, _row: number): void {
-    // TODO Phase 3.5 — open the comment-edit dialog.
+  /**
+   * Write the comment on a cell.
+   *
+   * The server calls this after its Insert comment / Edit comment
+   * action has made sure there is one, so the note is already in the
+   * comment map; all that is left is to open it for typing.
+   */
+  editCellComment(col: number, row: number): void {
+    this.editingCommentKey = toKey(col, row);
+    this.scheduleRender();
   }
 
   // ====================================================================

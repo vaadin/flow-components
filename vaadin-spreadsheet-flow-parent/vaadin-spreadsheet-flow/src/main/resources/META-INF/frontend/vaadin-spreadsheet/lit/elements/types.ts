@@ -220,6 +220,11 @@ export interface CellGridRenderState {
    * Cells whose comment is shown without hovering — Excel's "show comment".
    */
   visibleCommentKeys?: ReadonlyArray<string>;
+  /**
+   * The cell whose comment is being written, as a cell key, or null when
+   * none is. Its overlay shows a textarea instead of the note's text.
+   */
+  editingCommentKey?: string | null;
 
   /** Message shown when hovering a cell whose formula the server rejected. */
   invalidFormulaMessage?: string | null;
@@ -373,6 +378,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     commentText: {},
     commentAuthors: {},
     visibleCommentKeys: [],
+    editingCommentKey: null,
     invalidFormulaMessage: null,
     commentCells: new Set(),
     invalidFormulaCells: new Set(),
