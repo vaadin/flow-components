@@ -8,12 +8,15 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import java.util.NoSuchElementException;
-
+// Selenium's, not java.util's: that is what SpreadsheetElement.getCellAt
+// throws for a cell outside the rendered viewport, and the two are
+// unrelated types — catching the wrong one left every "this is fine too"
+// branch below unreachable.
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;

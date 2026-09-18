@@ -60,6 +60,7 @@ import {
   type CellRect,
   type PaintOutcome
 } from './algorithms/SelectionPaint.js';
+import { expandToMergedRegions } from './algorithms/MergedSelection.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import {
@@ -407,6 +408,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Whether the cell styles have changed since the last width measurement. */
   private styleWidthRatiosStale = false;
+
+  /** The viewport bounds last reported to the server, as "r1,c1,r2,c2". */
+  private announcedBounds = '';
 
   /**
    * The fill-handle drag in progress: the selection it started from and the
@@ -773,7 +777,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Extend the active range, keeping the ranges already picked
       // out with earlier Ctrl-clicks.
       const anchor = this.selection.activeCell;
-      const extended = selectRange(anchor.col, anchor.row, col, row);
+      const extended = {
+        activeCell: anchor,
+        activeRange: this.rangeTo(anchor, col, row),
+        auxRanges: []
+      };
       this.selection = { ...extended, auxRanges: this.selection.auxRanges };
       this.recomputeViewport();
       this.dispatchCellsAddedToRangeSelection(extended.activeRange);
@@ -795,7 +803,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // it does not start the selection over.
       const anchor = this.selection.activeCell;
       this.selection = {
-        ...selectRange(anchor.col, anchor.row, col, row),
+        activeCell: anchor,
+        activeRange: this.rangeTo(anchor, col, row),
         auxRanges: this.selection.auxRanges
       };
     } else {
@@ -1096,7 +1105,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Aux ranges survive, as on a shift-click.
       const anchor = this.selection.activeCell;
       this.selection = {
-        ...selectRange(anchor.col, anchor.row, col, row),
+        activeCell: anchor,
+        activeRange: this.rangeTo(anchor, col, row),
         auxRanges: this.selection.auxRanges
       };
     } else {
@@ -1130,7 +1140,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const anchor = this.selection.activeCell;
     this.selection = {
       activeCell: anchor,
-      activeRange: normalizedRange(anchor.col, anchor.row, col, row),
+      activeRange: this.rangeTo(anchor, col, row),
       auxRanges: []
     };
     this.extendCol = col;
@@ -1684,7 +1694,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       const anchor = this.selection.activeCell;
       this.selection = {
         activeCell: anchor,
-        activeRange: normalizedRange(anchor.col, anchor.row, target.col, target.row),
+        activeRange: this.rangeTo(anchor, target.col, target.row),
         auxRanges: []
       };
     } else {
@@ -1905,14 +1915,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * `onConnectorInit` first, so the server marks the next scroll as a full
    * reload rather than diffing against viewport bounds it has never seen.
    *
-   * Runs once per handshake, not once per connector: {@link setReload}
-   * clears the latch whenever the server discards its sheet state, and the
-   * next completed viewport announces itself again.
+   * The handshake runs once: {@link setReload} clears the latch whenever
+   * the server discards its sheet state, and the next completed viewport
+   * introduces itself again.
+   *
+   * The announcement itself repeats, though, every time the visible range
+   * actually changes. Only scrolling dispatches a viewport of its own, and
+   * plenty of things resize the sheet without one — a tab revealing it, a
+   * split pane opening, the window resizing. A sheet that came up 0 wide
+   * inside a hidden tab would otherwise keep the viewport it measured
+   * while hidden, and the cells and popup buttons outside it would never
+   * load.
    */
   private announceViewport(): void {
-    if (this.viewportAnnounced) {
-      return;
-    }
     if (this.rows <= 0 || this.cols <= 0) {
       // The sheet's size has not arrived yet. Announcing now would report a
       // viewport that means nothing and the server would load nothing.
@@ -1923,14 +1938,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Nothing measured yet; try again after the next render.
       return;
     }
-    this.viewportAnnounced = true;
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'onConnectorInit', data: {} },
-        bubbles: true,
-        composed: true
-      })
-    );
+    const bounds = [
+      viewport.firstRowIndex,
+      viewport.firstColumnIndex,
+      viewport.lastRowIndex,
+      viewport.lastColumnIndex
+    ].join(',');
+    if (this.viewportAnnounced && bounds === this.announcedBounds) {
+      return;
+    }
+    if (!this.viewportAnnounced) {
+      this.viewportAnnounced = true;
+      this.host.dispatchEvent(
+        new CustomEvent('spreadsheet-event', {
+          detail: { type: 'onConnectorInit', data: {} },
+          bubbles: true,
+          composed: true
+        })
+      );
+    }
+    this.announcedBounds = bounds;
     this.dispatchSheetScrollEvent();
   }
 
@@ -3448,6 +3475,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setReload(triggerReload: boolean): void {
     if (triggerReload) {
       this.viewportAnnounced = false;
+      // The server threw its sheet state away, so the bounds it holds are
+      // gone too — re-announce even if they come out identical.
+      this.announcedBounds = '';
       this.scheduleRender();
     }
   }
@@ -3852,6 +3882,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popupOverlay.replaceChildren();
     this.popupOverlay.hidden = true;
     this.scheduleRender();
+  }
+
+  /**
+   * The range from the anchor to a target cell, grown to take in whole
+   * merged regions.
+   *
+   * A merged region is one cell to the user, so a selection that ends
+   * inside one has to take all of it; reporting the literal rectangle
+   * leaves the server writing to cells nobody can see.
+   */
+  private rangeTo(anchor: { col: number; row: number }, col: number, row: number): CellRange {
+    const range = normalizedRange(anchor.col, anchor.row, col, row);
+    const grown = expandToMergedRegions({ c1: range.c1, c2: range.c2, r1: range.r1, r2: range.r2 }, this.mergedRegions);
+    return { c1: grown.c1, c2: grown.c2, r1: grown.r1, r2: grown.r2 };
   }
 
   /**

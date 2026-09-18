@@ -368,7 +368,12 @@ describe('Spreadsheet render scheduling — property batches', () => {
 });
 
 describe('Spreadsheet startup handshake', () => {
-  function attachRaw(): { sheet: Spreadsheet; events: any[]; cleanup: () => void } {
+  function attachRaw(): {
+    host: HTMLElement;
+    sheet: Spreadsheet;
+    events: any[];
+    cleanup: () => void;
+  } {
     const host = document.createElement('div');
     host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
     document.body.appendChild(host);
@@ -377,7 +382,7 @@ describe('Spreadsheet startup handshake', () => {
       events.push((e as CustomEvent).detail)
     );
     const sheet = new Spreadsheet(host);
-    return { sheet, events, cleanup: () => { sheet.dispose(); host.remove(); } };
+    return { host, sheet, events, cleanup: () => { sheet.dispose(); host.remove(); } };
   }
 
   function giveGeometry(sheet: Spreadsheet): void {
@@ -436,6 +441,64 @@ describe('Spreadsheet startup handshake', () => {
 
     const inits = ctx.events.filter((e) => e.type === 'onConnectorInit');
     expect(inits).to.have.length(1);
+    ctx.cleanup();
+  });
+
+  it('says nothing more while the visible range stays put', () => {
+    const ctx = attachRaw();
+    giveGeometry(ctx.sheet);
+    ctx.sheet.recomputeViewport();
+    ctx.events.length = 0;
+
+    ctx.sheet.recomputeViewport();
+    ctx.sheet.recomputeViewport();
+
+    expect(ctx.events.filter((e) => e.type === 'onSheetScroll')).to.be.empty;
+    ctx.cleanup();
+  });
+
+  it('announces the wider viewport when the sheet grows', () => {
+    // Only scrolling dispatches a viewport of its own, and plenty of
+    // things resize the sheet without one — a tab revealing it, a split
+    // pane opening, the window resizing. A sheet that came up 0 wide
+    // inside a hidden tab kept the viewport it measured while hidden, so
+    // the cells and popup buttons outside it never loaded.
+    const ctx = attachRaw();
+    // Narrow enough that the first measurement cannot reach the far
+    // columns, and wide enough afterwards that it plainly can.
+    ctx.host.style.width = '80px';
+    ctx.sheet.setCols(60);
+    ctx.sheet.setRows(60);
+    ctx.sheet.setColW(new Array(60).fill(50));
+    ctx.sheet.setRowH(new Array(60).fill(15));
+    ctx.sheet.recomputeViewport();
+    const first = ctx.events.find((e) => e.type === 'onSheetScroll');
+    expect(first, 'nothing announced at all').to.not.be.undefined;
+    ctx.events.length = 0;
+
+    ctx.host.style.width = '1200px';
+    ctx.sheet.recomputeViewport();
+
+    const second = ctx.events.find((e) => e.type === 'onSheetScroll');
+    expect(second, 'the wider viewport was never announced').to.not.be.undefined;
+    expect(second.data.lastColumn).to.be.greaterThan(first.data.lastColumn);
+    ctx.cleanup();
+  });
+
+  it('does not repeat the handshake when it re-announces', () => {
+    const ctx = attachRaw();
+    ctx.host.style.width = '80px';
+    ctx.sheet.setCols(60);
+    ctx.sheet.setRows(60);
+    ctx.sheet.setColW(new Array(60).fill(50));
+    ctx.sheet.setRowH(new Array(60).fill(15));
+    ctx.sheet.recomputeViewport();
+    ctx.events.length = 0;
+
+    ctx.host.style.width = '1200px';
+    ctx.sheet.recomputeViewport();
+
+    expect(ctx.events.filter((e) => e.type === 'onConnectorInit')).to.be.empty;
     ctx.cleanup();
   });
 
