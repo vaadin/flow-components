@@ -300,6 +300,12 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
                     cellAddress, "a");
             var value = getActiveElement().getDomProperty("value");
             Assert.assertEquals("a", value);
+            // Typing into the date picker opens its calendar, and Tab
+            // inside an open calendar belongs to the calendar, not to
+            // the sheet - the next cell would never be reached. Escape
+            // is how a user closes it, and leaves each cell to start
+            // from the same place.
+            getActiveElement().sendKeys(Keys.ESCAPE);
         }
     }
 
