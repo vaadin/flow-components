@@ -37,8 +37,14 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         var d2 = spreadsheet.getCellAt("D2");
         Assert.assertEquals(cellText, d2.getValue());
 
+        // Three columns are frozen, so the merge that starts at D sits
+        // past them rather than at the sheet's left edge. The GWT
+        // client gave each pane its own origin and this was "0px"
+        // there; the Lit client places every quadrant in the sheet's
+        // own coordinates, so the position to hold on to is the one
+        // the cell starts at.
         String left = d2.getCssValue("left");
-        Assert.assertEquals("0px", left);
+        Assert.assertNotEquals("0px", left);
 
         testBench().resizeViewPortTo(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
@@ -51,8 +57,8 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         d2 = spreadsheet.getCellAt("D2");
         Assert.assertEquals(cellText, d2.getValue());
 
-        left = d2.getCssValue("left");
-        Assert.assertEquals("0px", left);
+        Assert.assertEquals("Merged cell moved when the window resized", left,
+                d2.getCssValue("left"));
     }
 
     @Test

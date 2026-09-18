@@ -2776,16 +2776,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     // Build per-visible-index arrays for colX, rowY, widths, heights.
     //
-    // Known gap: with a freeze pane these are distances from the split,
-    // not from the sheet's left edge, so the scrolling quadrants are
-    // drawn from x 0 - underneath the frozen block pinned there. The
-    // first columns after a freeze cannot be seen, and a click on one
-    // lands on a frozen cell. Adding the frozen block's size here is
-    // not enough on its own: the headers and the merged-cell overlays
-    // read the same arrays and have to move with them.
+    // These are the sheet's own coordinates: the distance from its left
+    // edge, frozen columns included. The viewport reports how far into
+    // the scrolling region the first visible column is, which is
+    // measured from the split, so the frozen block's width goes back on
+    // top. Without it the scrolling columns were drawn from x 0,
+    // underneath the frozen block that is pinned there - the first
+    // columns after a freeze could not be seen at all, and a click on
+    // one landed on a frozen cell.
     const colX: number[] = [];
     const colWidths: number[] = [];
-    let cumulativeX = viewport.firstColumnPosition;
+    let cumulativeX = frozenCumX + viewport.firstColumnPosition;
     for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
       const w = colWidthForIndex(col);
       colX.push(cumulativeX);
@@ -2795,7 +2796,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     const rowY: number[] = [];
     const rowHeights: number[] = [];
-    let cumulativeY = viewport.firstRowPosition;
+    let cumulativeY = frozenCumY + viewport.firstRowPosition;
     for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
       const h = rowHeightForIndex(row);
       rowY.push(cumulativeY);

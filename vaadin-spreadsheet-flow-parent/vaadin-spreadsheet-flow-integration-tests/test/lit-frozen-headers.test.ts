@@ -170,3 +170,94 @@ describe('Row header — frozen rows', () => {
     ).to.be.null;
   });
 });
+
+/**
+ * A freeze pane splits the sheet in four, and the three quadrants that
+ * are not the frozen corner have to start where the frozen block ends.
+ * Drawn from zero instead, the scrolling columns end up underneath the
+ * frozen ones that are pinned there: the first columns after a freeze
+ * cannot be seen at all, and a click aimed at one of them lands on a
+ * frozen cell, which is somebody else's data.
+ */
+describe('Frozen panes — where the scrolling cells start', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  function cell(col: number, row: number): HTMLElement | null {
+    return ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLElement>(`.cell.col${col}.row${row}`);
+  }
+
+  function cellLeft(col: number, row: number): number {
+    return cell(col, row)!.getBoundingClientRect().left;
+  }
+
+  it('starts the scrolling columns past the frozen ones', async () => {
+    // Two 50px columns frozen, so column 3 starts 100px in.
+    ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    expect(cellLeft(3, 5) - cellLeft(1, 5)).to.equal(100);
+  });
+
+  it('starts the scrolling rows below the frozen ones', async () => {
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    const top = (col: number, row: number): number =>
+      cell(col, row)!.getBoundingClientRect().top;
+    // 15pt rows are 20px at 96 ppi, so two frozen rows are 40px.
+    expect(top(1, 3) - top(1, 1)).to.equal(40);
+  });
+
+  it('lines the frozen rows up over the scrolling columns', async () => {
+    // The top quadrant shares its column positions with the main one,
+    // so a frozen row's cell sits directly above the scrolling cell in
+    // the same column.
+    ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    expect(cellLeft(4, 1)).to.equal(cellLeft(4, 5));
+  });
+
+  it('keeps them lined up once the sheet is scrolled', async () => {
+    ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.getScrollContainer().scrollLeft = 500;
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    const first = ctx.sheet.getCellGrid().renderState.viewport
+      .firstColumnIndex;
+    expect(cellLeft(first, 1)).to.equal(cellLeft(first, 5));
+    expect(cellLeft(first, 5)).to.be.at.least(cellLeft(1, 5) + 100);
+  });
+
+  it('heads the scrolling columns where they actually are', async () => {
+    // The header reads the same positions, so a column's letter has to
+    // stay over the column itself.
+    ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+    await ctx.sheet.getColumnHeader().updateComplete;
+
+    const header = ctx.sheet
+      .getColumnHeader()
+      .shadowRoot!.querySelector<HTMLElement>('.col-header-cell.col3')!;
+    expect(Math.round(header.getBoundingClientRect().left)).to.equal(
+      Math.round(cellLeft(3, 5))
+    );
+  });
+});

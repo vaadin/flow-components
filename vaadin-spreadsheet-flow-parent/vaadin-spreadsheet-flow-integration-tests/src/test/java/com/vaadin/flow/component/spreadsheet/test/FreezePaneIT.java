@@ -177,18 +177,15 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         Assert.assertNotNull("Should have the last column header visible",
                 rightmostHeader);
 
-        // Get the rightmost visible column header
+        // Scrolled to the end, the last column ends exactly where the
+        // sheet's visible area does. The GWT client had a sized pane to
+        // measure that against; the Lit client's frozen quadrants are
+        // zero-size wrappers around absolutely positioned cells, so the
+        // edge to compare with is the scrolling area's own.
         var headerRect = rightmostHeader.getRect();
-        var topRightPane = findElementInShadowRoot(
-                By.cssSelector(".top-right-pane"));
-        var topRightPaneRect = topRightPane.getRect();
-
-        // The rightmost header should be positioned correctly within the
-        // spreadsheet bounds
         Assert.assertEquals(
-                "Rightmost column header should be within spreadsheet bounds",
-                topRightPaneRect.getX() + topRightPaneRect.getWidth(),
-                headerRect.getX() + headerRect.getWidth());
+                "Rightmost column header should end at the sheet's right edge",
+                sheetVisibleRight(), headerRect.getX() + headerRect.getWidth());
     }
 
     @Test
@@ -221,17 +218,12 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         Assert.assertNotNull("Should have the last column header visible",
                 bottommostHeader);
 
-        // Get the bottommost visible row header
+        // As above: scrolled to the end, the last row ends exactly
+        // where the sheet's visible area does.
         var headerRect = bottommostHeader.getRect();
-        var bottomLeftPane = findElementInShadowRoot(
-                By.cssSelector(".bottom-left-pane"));
-        var bottomLeftPaneRect = bottomLeftPane.getRect();
-
-        // The bottommost header should be positioned correctly within the
-        // spreadsheet bounds
         Assert.assertEquals(
-                "Bottommost row header should be within spreadsheet bounds",
-                bottomLeftPaneRect.getY() + bottomLeftPaneRect.getHeight(),
+                "Bottommost row header should end at the sheet's bottom edge",
+                sheetVisibleBottom(),
                 headerRect.getY() + headerRect.getHeight());
     }
 
@@ -267,4 +259,23 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         getCommandExecutor().waitForVaadin();
     }
 
+    /** Viewport x of the scrolling area's right edge, scrollbar excluded. */
+    private int sheetVisibleRight() {
+        return ((Number) executeScript(
+                """
+                        const s = arguments[0].shadowRoot.querySelector('.sheet-scroll');
+                        return Math.round(s.getBoundingClientRect().x + s.clientWidth);
+                        """,
+                getSpreadsheet())).intValue();
+    }
+
+    /** Viewport y of the scrolling area's bottom edge, scrollbar excluded. */
+    private int sheetVisibleBottom() {
+        return ((Number) executeScript(
+                """
+                        const s = arguments[0].shadowRoot.querySelector('.sheet-scroll');
+                        return Math.round(s.getBoundingClientRect().y + s.clientHeight);
+                        """,
+                getSpreadsheet())).intValue();
+    }
 }
