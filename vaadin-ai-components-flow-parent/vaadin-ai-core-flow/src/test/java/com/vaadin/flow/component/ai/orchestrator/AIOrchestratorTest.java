@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -48,6 +49,7 @@ import org.slf4j.event.Level;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.UIDetachedException;
+import com.vaadin.flow.component.ai.AIComponentsExperimentalFeatureException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -3575,6 +3577,253 @@ class AIOrchestratorTest {
         var base64Data = dataUrl.substring(dataUrl.indexOf(",") + 1);
         var imageBytes = Base64.getDecoder().decode(base64Data);
         return ImageIO.read(new ByteArrayInputStream(imageBytes));
+    }
+
+    @Test
+    void builder_withFlowMessageListCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(new MessageList());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withMessageList(new MessageList());
+        assertBuilderWarning("messageList");
+    }
+
+    @Test
+    void builder_withFlowMessageInputCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withInput(new MessageInput());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withInput(new MessageInput());
+        assertBuilderWarning("input");
+    }
+
+    @Test
+    void builder_withFileReceiverCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(mockFileReceiver);
+        assertNoBuilderWarning();
+        orchestratorBuilder
+                .withFileReceiver(Mockito.mock(AIFileReceiver.class));
+        assertBuilderWarning("fileReceiver");
+    }
+
+    @Test
+    void builder_withUploadManagerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(new UploadManager(new Div()));
+        assertNoBuilderWarning();
+        orchestratorBuilder.withFileReceiver(new UploadManager(new Div()));
+        assertBuilderWarning("fileReceiver");
+    }
+
+    @Test
+    void builder_withUploadCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(new Upload());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withFileReceiver(new Upload());
+        assertBuilderWarning("fileReceiver");
+    }
+
+    @Test
+    void builder_withRequestInterceptorCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withRequestInterceptor(event -> {
+                    // no interception needed, the warning is the subject
+                });
+        assertNoBuilderWarning();
+        orchestratorBuilder.withRequestInterceptor(event -> {
+            // no interception needed, the warning is the subject
+        });
+        assertBuilderWarning("requestInterceptor");
+    }
+
+    @Test
+    void builder_withRequestListenerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withRequestListener(event -> {
+                    // no handling needed, the warning is the subject
+                });
+        assertNoBuilderWarning();
+        orchestratorBuilder.withRequestListener(event -> {
+            // no handling needed, the warning is the subject
+        });
+        assertBuilderWarning("requestListener");
+    }
+
+    @Test
+    void builder_withHistoryCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(List.of(), Map.of());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withHistory(List.of(), Map.of());
+        assertBuilderWarning("history");
+    }
+
+    @Test
+    void prompt_withFeatureFlagDisabled_throwsExperimentalFeatureException() {
+        featureFlagExtension.disableFeature();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+
+        Assertions.assertThrows(AIComponentsExperimentalFeatureException.class,
+                () -> orchestrator.prompt("Hello"));
+    }
+
+    @Test
+    void prompt_featureFlagIsCheckedOncePerOrchestrator() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        orchestrator.prompt("Hello");
+
+        featureFlagExtension.disableFeature();
+
+        Assertions.assertDoesNotThrow(() -> orchestrator.prompt("Again"),
+                "The feature flag is checked once, not on every prompt");
+    }
+
+    @Test
+    void responseListener_thatThrows_isReportedAsAnError() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    throw new IllegalStateException("listener failed");
+                }).build();
+
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .anyMatch(event -> event.getLevel() == Level.ERROR),
+                "A response listener that throws must be reported, "
+                        + "not swallowed silently");
+    }
+
+    @Test
+    void reconnect_withNullProvider_throwsNullPointerException()
+            throws Exception {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        simulateDeserialization(orchestrator);
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> orchestrator.reconnect(null));
+    }
+
+    @Test
+    void reconnect_apply_usesTheNewProviderForLaterPrompts() throws Exception {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        simulateDeserialization(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        orchestrator.reconnect(newProvider).apply();
+        orchestrator.prompt("Hello");
+
+        Mockito.verify(newProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    @Test
+    void reconnect_withTools_toolsReachTheNextRequest() throws Exception {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        simulateDeserialization(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        orchestrator.reconnect(newProvider).withTools(new SampleTool()).apply();
+        orchestrator.prompt("Use tool");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(newProvider).stream(captor.capture());
+        Assertions.assertEquals(1, captor.getValue().tools().length);
+    }
+
+    @Test
+    void reconnect_withController_controllerReceivesTheNextRequest()
+            throws Exception {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        simulateDeserialization(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var requests = new ArrayList<String>();
+        AIController controller = new AIController() {
+            @Override
+            public List<LLMProvider.ToolSpec> getTools() {
+                return List.of();
+            }
+
+            @Override
+            public void onRequest(RequestListener.RequestEvent event) {
+                requests.add(event.getUserMessage());
+            }
+        };
+
+        orchestrator.reconnect(newProvider).withController(controller).apply();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertEquals(List.of("Hello"), requests);
+    }
+
+    @Test
+    void reconnect_withAttachments_restoresThemOnTheNewProvider()
+            throws Exception {
+        var history = List.of(new ChatMessage(ChatMessage.Role.USER, "Hello",
+                "msg-1", Instant.now()));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(history, Map.of()).build();
+        simulateDeserialization(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        var attachments = Map.of("msg-1", List.of(new AIAttachment("note.txt",
+                "text/plain", "note".getBytes(StandardCharsets.UTF_8))));
+
+        orchestrator.reconnect(newProvider).withAttachments(attachments)
+                .apply();
+
+        var captor = ArgumentCaptor.forClass(Map.class);
+        Mockito.verify(newProvider).setHistory(Mockito.anyList(),
+                captor.capture());
+        Assertions.assertEquals(attachments, captor.getValue());
+    }
+
+    @Test
+    void reconnect_apply_releasesAPromptThatWasInFlight() throws Exception {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.never());
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        // Leaves the busy guard claimed, as serializing mid-turn does
+        orchestrator.prompt("Interrupted");
+        simulateDeserialization(orchestrator);
+        var newProvider = Mockito.mock(LLMProvider.class);
+        Mockito.when(
+                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        orchestrator.reconnect(newProvider).apply();
+        orchestrator.prompt("After restore");
+
+        Mockito.verify(newProvider)
+                .stream(Mockito.any(LLMProvider.LLMRequest.class));
+    }
+
+    /**
+     * Nulls the transient provider field, the state an orchestrator is in after
+     * deserialization and before {@code reconnect}.
+     */
+    private static void simulateDeserialization(AIOrchestrator orchestrator)
+            throws Exception {
+        var providerField = AIOrchestrator.class.getDeclaredField("provider");
+        providerField.setAccessible(true);
+        providerField.set(orchestrator, null);
     }
 
     private void assertBuilderWarning(String fieldName) {
