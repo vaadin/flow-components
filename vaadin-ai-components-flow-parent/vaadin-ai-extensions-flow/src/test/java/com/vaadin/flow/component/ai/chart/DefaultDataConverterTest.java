@@ -140,6 +140,15 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(5, item.getLow());
             Assertions.assertEquals(12, item.getClose());
         }
+
+        @Test
+        void withoutXColumn_usesRowIndexAsX() {
+            var data = List.of(row(OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12),
+                    row(OPEN, 12, HIGH, 18, LOW, 8, CLOSE, 16));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(0, result.getData().getFirst().getX());
+            Assertions.assertEquals(1, result.getData().get(1).getX());
+        }
     }
 
     // --- BoxPlot ---
@@ -563,6 +572,16 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(200,
                     ((FlagItem) result.getData().getFirst()).getX());
         }
+
+        @Test
+        void withoutXColumn_usesRowIndexAsX() {
+            var data = List.of(row(TITLE, "Flag 1"), row(TITLE, "Flag 2"));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(0,
+                    ((FlagItem) result.getData().getFirst()).getX());
+            Assertions.assertEquals(1,
+                    ((FlagItem) result.getData().get(1)).getX());
+        }
     }
 
     // --- Range ---
@@ -578,6 +597,14 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(1, item.getX());
             Assertions.assertEquals(5, item.getLow());
             Assertions.assertEquals(15, item.getHigh());
+        }
+
+        @Test
+        void withoutXColumn_usesRowIndexAsX() {
+            var data = List.of(row(LOW, 5, HIGH, 15), row(LOW, 6, HIGH, 16));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(0, result.getData().getFirst().getX());
+            Assertions.assertEquals(1, result.getData().get(1).getX());
         }
     }
 
@@ -709,6 +736,28 @@ class DefaultDataConverterTest {
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(1.5, result.getData().getFirst().getX());
             Assertions.assertEquals(2.5, result.getData().getFirst().getY());
+        }
+
+        @Test
+        void singleNumericColumnWithColor_colorIsNotUsedAsCategory() {
+            var data = List.of(row("revenue", 1000, COLOR, "#FF0000"),
+                    row("revenue", 2000, COLOR, "#00FF00"));
+            var result = (DataSeries) convertSingle(data);
+            var item = result.getData().getFirst();
+            Assertions.assertNull(item.getName());
+            Assertions.assertEquals(0, item.getX());
+            Assertions.assertEquals(1000, item.getY());
+            assertColor("#FF0000", item.getColor());
+        }
+
+        @Test
+        void allNumericColumnsWithColor_setsItemColor() {
+            var data = List.of(row("a", 1, "b", 2, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            var item = result.getData().getFirst();
+            Assertions.assertEquals(1, item.getX());
+            Assertions.assertEquals(2, item.getY());
+            assertColor("#FF0000", item.getColor());
         }
     }
 

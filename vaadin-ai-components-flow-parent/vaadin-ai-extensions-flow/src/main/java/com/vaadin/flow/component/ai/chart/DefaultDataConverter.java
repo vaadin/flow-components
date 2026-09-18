@@ -98,6 +98,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * Additionally, any pattern that produces a {@code DataSeriesItem} (or
  * subclass) supports an optional {@code _color} column. If present, the value
  * is used to set the item's color via {@link SolidColor#SolidColor(String)}.
+ * The column is never treated as data, so the fallback skips it when it picks
+ * the category and value columns.
  * </p>
  * <p>
  * Column name matching is case-insensitive. Column names are determined from
@@ -609,7 +611,10 @@ public class DefaultDataConverter implements DataConverter {
 
     private DataSeries convertFallback(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
+        // The color column modifies any pattern and is never data, so it must
+        // not be classified as a category or value column here.
         var lowerNames = new ArrayList<>(columns);
+        lowerNames.remove(COLOR);
         if (lowerNames.isEmpty()) {
             return new DataSeries();
         }
@@ -762,9 +767,15 @@ public class DefaultDataConverter implements DataConverter {
 
     // --- Utility methods ---
 
+    /**
+     * Resolves the X value of a row: the value of the {@code _x} column, or the
+     * row index when the data has no such column.
+     */
     private static Number resolveX(Map<String, Object> row,
             Map<String, String> columnMapping, String xCol, int rowIndex) {
-        return xCol != null ? getNumber(row, columnMapping, xCol) : rowIndex;
+        return columnMapping.containsKey(xCol)
+                ? getNumber(row, columnMapping, xCol)
+                : rowIndex;
     }
 
     private static void applyColor(DataSeriesItem item, Map<String, Object> row,
