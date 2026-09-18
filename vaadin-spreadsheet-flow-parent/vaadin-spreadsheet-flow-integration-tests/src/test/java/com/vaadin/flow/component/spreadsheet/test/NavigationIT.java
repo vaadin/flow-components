@@ -449,15 +449,18 @@ public class NavigationIT extends AbstractSpreadsheetIT {
         // ("only works on windows due to
         // https://code.google.com/p/selenium/issues/detail?id=4843 (patch
         // pending)")
+        // macOS reserves Ctrl+click for the secondary click, so the page
+        // would never see a ctrl-click; Cmd is the modifier there.
+        Keys multiSelect = isMac() ? Keys.COMMAND : Keys.CONTROL;
         clickCell("A2");
         clickCell("A1");
         assertSelectedCell("A1");
-        new Actions(getDriver()).keyDown(Keys.CONTROL).build().perform();
+        new Actions(getDriver()).keyDown(multiSelect).build().perform();
         clickCell("B2");
         assertSelectedCell("A1");
         assertSelectedCell("B2");
         clickCell("F12");
-        new Actions(getDriver()).keyUp(Keys.CONTROL).build().perform();
+        new Actions(getDriver()).keyUp(multiSelect).build().perform();
         assertSelectedCell("A1");
         assertSelectedCell("B2");
         assertSelectedCell("F12");

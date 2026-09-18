@@ -61,6 +61,8 @@ import {
   type PaintOutcome
 } from './algorithms/SelectionPaint.js';
 import { expandToMergedRegions } from './algorithms/MergedSelection.js';
+import { isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
+import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import {
@@ -133,6 +135,22 @@ export function commitStep(key: string | undefined, shiftKey: boolean): { dCol: 
     default:
       return null;
   }
+}
+
+/**
+ * Which way Enter or Tab walks the active cell inside a selected range.
+ *
+ * Only those two keys walk: an arrow key means "leave this selection and
+ * go there", which is a different gesture. Returns null for anything else.
+ */
+export function inSelectionWalkDirection(key: string | undefined, shiftKey: boolean): WalkDirection | null {
+  if (key === 'Enter') {
+    return shiftKey ? 'up' : 'down';
+  }
+  if (key === 'Tab') {
+    return shiftKey ? 'left' : 'right';
+  }
+  return null;
 }
 
 /**
@@ -1340,7 +1358,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Enter moves down, Tab right, shift reverses each; an arrow key
     // moves the way it points, which is what committing from Excel's
     // "enter" editing mode does.
-    const step = commitStep(key, shiftKey === true);
+    //
+    // With a range selected the commit walks inside it, the same way
+    // Enter and Tab do when nothing is being edited: filling a block
+    // cell by cell is the reason the range is selected at all.
+    const walkDirection = inSelectionWalkDirection(key, shiftKey === true);
+    const walks =
+      walkDirection !== null && this.rows > 0 && this.cols > 0 && isMultiCellRange(this.selection.activeRange);
+    const step = walks ? null : commitStep(key, shiftKey === true);
     if (step !== null && this.rows > 0 && this.cols > 0) {
       const nextCol = Math.min(this.cols, Math.max(1, col + step.dCol));
       const nextRow = Math.min(this.rows, Math.max(1, row + step.dRow));
@@ -1348,7 +1373,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.extendCol = nextCol;
       this.extendRow = nextRow;
     }
-    this.recomputeViewport();
+    if (!walks) {
+      this.recomputeViewport();
+    }
     const data: CellValueEditedData = { row, col, value };
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
@@ -1362,6 +1389,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // 150 contract — every selection write emits an event).
     if (step !== null) {
       this.dispatchSelectionEvent();
+    }
+    if (walks) {
+      this.moveActiveCellInsideSelection(
+        walkInsideSelection({
+          range: this.selection.activeRange,
+          col,
+          row,
+          direction: walkDirection!,
+          hiddenColumns: new Set(this.hiddenColumnIndexes),
+          hiddenRows: new Set(this.hiddenRowIndexes)
+        })
+      );
     }
   };
 
@@ -1663,6 +1702,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
       );
       return;
     }
+    // With a range selected, Enter and Tab walk the active cell around
+    // inside it instead of moving on and dropping it: Enter down the
+    // column and on to the next, Tab along the row and on to the next,
+    // both wrapping at the end, shift reversing. The range stays, so the
+    // server hears a selection that did not discard its old range.
+    const walkDirection = inSelectionWalkDirection(key, e.shiftKey);
+    if (walkDirection !== null && this.rows > 0 && this.cols > 0 && isMultiCellRange(this.selection.activeRange)) {
+      e.preventDefault();
+      const next = walkInsideSelection({
+        range: this.selection.activeRange,
+        col: this.selection.activeCell.col,
+        row: this.selection.activeCell.row,
+        direction: walkDirection,
+        hiddenColumns: new Set(this.hiddenColumnIndexes),
+        hiddenRows: new Set(this.hiddenRowIndexes)
+      });
+      this.moveActiveCellInsideSelection(next);
+      return;
+    }
+
     // Map each navigation key to a (deltaCol, deltaRow) OR an
     // absolute coord. Modifier-key semantics:
     //   - shift+arrow : move "extend" corner (slice 147)
@@ -1713,6 +1772,39 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
+
+  /**
+   * Put the active cell somewhere else inside the range that is already
+   * selected, keeping the range itself.
+   *
+   * The server is told with the plain `cellSelected` event, but with
+   * `oldSelectionRangeDiscarded` false - that flag is the whole
+   * difference between "the user picked this cell" and "the user is
+   * walking through the block they picked earlier".
+   */
+  private moveActiveCellInsideSelection(next: { col: number; row: number }): void {
+    this.selection = {
+      activeCell: next,
+      activeRange: this.selection.activeRange,
+      auxRanges: this.selection.auxRanges
+    };
+    this.extendCol = next.col;
+    this.extendRow = next.row;
+    this.scrollCellIntoView(next);
+    this.recomputeViewport();
+    const data: CellSelectedData = {
+      row: next.row,
+      column: next.col,
+      oldSelectionRangeDiscarded: false
+    };
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'cellSelected', data },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
 
   /**
    * Adjust {@code scrollContainer.scrollLeft / scrollTop} so the
