@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
@@ -106,7 +105,6 @@ public class NavigationIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Known bug in Spreadsheet component implementation (notimetofix) - Shift selection does not update address field")
     public void testAddressFieldUpdatesWhenShiftSelecting() throws Exception {
         clickCell("H10");
         WebElement cell = getCellAt(8, 10);

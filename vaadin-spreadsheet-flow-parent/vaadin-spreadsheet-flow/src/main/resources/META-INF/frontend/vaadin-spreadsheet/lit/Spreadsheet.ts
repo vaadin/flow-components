@@ -408,6 +408,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * once, when the note is finished.
    */
   private editingCommentKey: string | null = null;
+
+  /**
+   * Whether the user is holding shift and growing the selection.
+   *
+   * While they are, the address field counts the block out - "3R x 3C" -
+   * rather than naming a cell, which is what Excel's name box does. It
+   * has to survive the server echoing the selection straight back, or
+   * the count would be replaced by the anchor's address before anyone
+   * could read it.
+   */
+  private extendingSelection = false;
   private readonly overlayComponents: SlottedVirtualChildren;
   /**
    * Server-side components rendered inside a cell. Same mechanism as
@@ -751,6 +762,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
     this.cellGrid.addEventListener('selection-paint-start', this.handleSelectionPaintStart);
     document.addEventListener('mouseup', this.handleDocumentMouseUp);
+    document.addEventListener('keyup', this.handleDocumentKeyUp);
     // Popup-button click → dispatch popupButtonClick (slice
     // 161). The server's `onPopupButtonClick` opens the
     // associated popup component.
@@ -1212,12 +1224,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * answers the finished selection.
    */
   private showRangeSizeInAddressField(): void {
-    const { activeRange } = this.selection;
-    const rows = Math.abs(activeRange.r2 - activeRange.r1) + 1;
-    const cols = Math.abs(activeRange.c2 - activeRange.c1) + 1;
     this.formulaBar.renderState = {
       ...this.formulaBar.renderState,
-      address: `${rows}R x ${cols}C`
+      address: selectionSizeLabel(this.selection.activeRange)
     };
   }
 
@@ -1804,10 +1813,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
         activeRange: this.rangeTo(anchor, target.col, target.row),
         auxRanges: []
       };
+      this.extendingSelection = true;
+      this.showRangeSizeInAddressField();
     } else {
+      this.extendingSelection = false;
       this.selection = selectSingleCell(target.col, target.row);
       this.extendCol = target.col;
       this.extendRow = target.row;
+      // Name the cell straight away rather than waiting for the server
+      // to say so: the address field is how the user knows where the
+      // keyboard has taken them.
+      this.formulaBar.renderState = {
+        ...this.formulaBar.renderState,
+        address: cellCoordToAddress({ col: target.col, row: target.row })
+      };
     }
     // Auto-scroll the new active cell (or extend cell) into
     // view BEFORE the render (slice 156). Excel scrolls the
@@ -2284,6 +2303,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.rowHeader.removeEventListener('row-grouping-toggle', this.handleRowGroupingToggle as EventListener);
     this.rowHeader.removeEventListener('row-header-contextmenu', this.handleRowHeaderContextMenu as EventListener);
     document.removeEventListener('mouseup', this.handleDocumentMouseUp);
+    document.removeEventListener('keyup', this.handleDocumentKeyUp);
     document.removeEventListener('mousemove', this.handleDocumentMouseMove);
     this.columnHeader.removeEventListener('column-resize-start', this.handleColumnResizeStart as EventListener);
     this.rowHeader.removeEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
@@ -3020,6 +3040,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
+   * Shift let go: the selection is made, so the address field goes back
+   * to naming the cell the user started from.
+   */
+  private readonly handleDocumentKeyUp = (e: KeyboardEvent): void => {
+    if (e.key !== 'Shift' || !this.extendingSelection) {
+      return;
+    }
+    this.extendingSelection = false;
+    this.formulaBar.renderState = {
+      ...this.formulaBar.renderState,
+      address: cellCoordToAddress(this.selection.activeCell)
+    };
+  };
+
+  /**
    * A value typed into the formula field.
    *
    * It belongs to the cell the sheet has selected, so it is reported as
@@ -3384,7 +3419,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // common case: without this the address field sits empty for every
     // selection the user makes. Slice 175.
     this.formulaBar.renderState = {
-      address: possibleName ?? cellCoordToAddress({ col, row }),
+      // While the user is still growing a selection the address field
+      // counts the block out, and this is the server naming the anchor
+      // of the range they are in the middle of making.
+      address: this.extendingSelection
+        ? selectionSizeLabel(this.selection.activeRange)
+        : possibleName ?? cellCoordToAddress({ col, row }),
       formula: this.formulaFieldValueFor(col, row),
       namedRanges: this.namedRanges
     };
@@ -3441,11 +3481,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     _locked: boolean,
     _initialSelection: boolean
   ): void {
+    // Read before the selection collapses to the one cell below: while
+    // the user is still growing a selection the address field is
+    // counting the block out, and this is the server answering the
+    // anchor of the range they are in the middle of making.
+    const sizeLabel = selectionSizeLabel(this.selection.activeRange);
     this.selection = selectSingleCell(col, row);
     this.extendCol = col;
     this.extendRow = row;
     this.formulaBar.renderState = {
-      address: name ?? cellCoordToAddress({ col, row }),
+      address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }),
       formula: formula && cellValue !== '' ? `=${cellValue}` : cellValue,
       namedRanges: this.namedRanges
     };
@@ -3601,10 +3646,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeRange: normalizedRange(c1, r1, c2, r2),
       auxRanges: this.selection.auxRanges
     };
+    // Shift+arrow grows the selection from its far corner, so that
+    // corner has to follow a selection the server made. Left where it
+    // was, the first shift+arrow after any server-driven selection
+    // stretched the range back to wherever the user had last been.
+    const far = normalizedRange(c1, r1, c2, r2);
+    this.extendCol = far.c2;
+    this.extendRow = far.r2;
     this.formulaBar.renderState = {
       // As in updateFormulaBar: the server names a selection only when
-      // it has a name, and leaves an ordinary one to the client.
-      address: name ?? cellCoordToAddress({ col, row }),
+      // it has a name, and leaves an ordinary one to the client. While
+      // the user is still growing the selection, though, the count is
+      // what they are reading, and this is the server echoing back the
+      // range they are in the middle of making.
+      address: this.extendingSelection
+        ? selectionSizeLabel(this.selection.activeRange)
+        : name ?? cellCoordToAddress({ col, row }),
       formula: this.formulaBar.renderState.formula,
       namedRanges: this.namedRanges
     };
@@ -4798,6 +4855,16 @@ export function computePositionedColGroupings(
     });
   }
   return positions;
+}
+
+/**
+ * How Excel's name box counts a block being selected: rows first, then
+ * columns, as in "3R x 3C".
+ */
+export function selectionSizeLabel(range: CellRange): string {
+  const rows = Math.abs(range.r2 - range.r1) + 1;
+  const cols = Math.abs(range.c2 - range.c1) + 1;
+  return `${rows}R x ${cols}C`;
 }
 
 export function buildSelectionEvent(
