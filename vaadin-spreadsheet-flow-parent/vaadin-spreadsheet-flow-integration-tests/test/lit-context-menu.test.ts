@@ -32,6 +32,7 @@ function action(
 
 function attachSheet(): {
   sheet: Spreadsheet;
+  host: HTMLElement;
   events: any[];
   cleanup: () => void;
 } {
@@ -51,6 +52,7 @@ function attachSheet(): {
 
   return {
     sheet,
+    host,
     events,
     cleanup: () => {
       sheet.dispose();
@@ -137,6 +139,46 @@ describe('Spreadsheet context menu — opening', () => {
     ctx.sheet.showActions([]);
 
     expect(await items(ctx.sheet)).to.have.length(0);
+  });
+});
+
+describe('Spreadsheet context menu — where it lands', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function panel(): Promise<HTMLElement> {
+    const menu = ctx.sheet.getContextMenu();
+    await menu.updateComplete;
+    return menu.shadowRoot!.querySelector<HTMLElement>('.menu')!;
+  }
+
+  it('lands on the point that was clicked', async () => {
+    ctx = attachSheet();
+    rightClickCell(ctx.sheet, 2, 2);
+    ctx.sheet.showActions([action('Test', '1', 0)]);
+
+    const rect = (await panel()).getBoundingClientRect();
+    expect(Math.round(rect.x)).to.equal(120);
+    expect(Math.round(rect.y)).to.equal(90);
+  });
+
+  it('lands there inside a transformed ancestor too', async () => {
+    // A dialog overlay is transformed, which makes it the containing
+    // block for a fixed box. Placing the menu at raw viewport
+    // coordinates then puts it somewhere else entirely, and a click
+    // aimed at one item lands on its neighbour.
+    ctx = attachSheet();
+    ctx.host.style.transform = 'translate(30px, 40px)';
+
+    rightClickCell(ctx.sheet, 2, 2);
+    ctx.sheet.showActions([action('Test', '1', 0)]);
+
+    const rect = (await panel()).getBoundingClientRect();
+    expect(Math.round(rect.x)).to.equal(120);
+    expect(Math.round(rect.y)).to.equal(90);
   });
 });
 

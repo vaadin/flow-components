@@ -12,7 +12,6 @@ import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -146,7 +145,7 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
         a1.setValue("=a");
 
         a1.contextClick();
-        waitForContexMenu();
+        waitForContextMenu();
         spreadsheetElement.getContextMenu().getItem("Delete comment").click();
 
         waitUntil(webDriver -> "#VALUE!".equals(a1.getValue()));
@@ -164,8 +163,4 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
         waitUntil(webDriver -> a1_reloaded.hasInvalidFormulaIndicator());
     }
 
-    private void waitForContexMenu() {
-        waitUntil(webDriver -> webDriver
-                .findElements(By.className("v-contextmenu")).size() > 0);
-    }
 }

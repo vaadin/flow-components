@@ -906,6 +906,23 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
      * "element whose text is X", so this walks the roots in one script rather
      * than paying a round-trip per candidate.
      */
+    /**
+     * Waits until the context menu is up and has items in it.
+     * <p>
+     * The Lit client draws the menu inside its own shadow root; GWT put a
+     * {@code .v-contextmenu} div in the document body, which nothing creates
+     * any more.
+     */
+    public void waitForContextMenu() {
+        waitUntil(webDriver -> Boolean.TRUE.equals(executeScript("""
+                const host = arguments[0];
+                const menu = host.shadowRoot.querySelector(
+                    'vaadin-spreadsheet-internal-context-menu');
+                return !!(menu && menu.shadowRoot
+                    && menu.shadowRoot.querySelector('.item'));
+                """, getSpreadsheet())));
+    }
+
     private WebElement findMenuItem(String caption) {
         return (WebElement) ((org.openqa.selenium.JavascriptExecutor) getDriver())
                 .executeScript("""
