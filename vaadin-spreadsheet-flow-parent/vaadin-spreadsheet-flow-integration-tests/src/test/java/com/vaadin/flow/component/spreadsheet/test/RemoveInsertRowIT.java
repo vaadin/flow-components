@@ -143,7 +143,6 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
                 By.cssSelector(".col1.row2.merged-cell")).isDisplayed());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
     @Test
     public void removeRow_theFirstCellHasPopupButton_thereIsNoPopupButtons() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -169,7 +168,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
                 .isEmpty());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
+    @Ignore("A popup button does not move with its row: https://github.com/vaadin/flow-components/issues/3223. The shifter takes every button off the client and nothing puts them back, and calling loadPopupButtons after the shift is not enough - the client never hears about the removal either. Predates the Lit client.")
     @Test
     public void removeRow_theSecondRowCellHasPopupButton_popupButtonIsMovedUp() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -182,7 +181,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
         Assert.assertTrue(spreadsheet.getCellAt("A1").hasPopupButton());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
+    @Ignore("A popup button does not move with its row: https://github.com/vaadin/flow-components/issues/3223. The shifter takes every button off the client and nothing puts them back, and calling loadPopupButtons after the shift is not enough - the client never hears about the removal either. Predates the Lit client.")
     @Test
     public void insertRow_theFirstCellHasPopupButton_thePopupButtonIsMovedToNextRow() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -195,7 +194,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
         Assert.assertTrue(spreadsheet.getCellAt("A2").hasPopupButton());
     }
 
-    @Ignore("This is a known issue which should be fixed. The problem is most likely on client side.")
+    @Ignore("A popup button does not move with its row: https://github.com/vaadin/flow-components/issues/3223. The shifter takes every button off the client and nothing puts them back, and calling loadPopupButtons after the shift is not enough - the client never hears about the removal either. Predates the Lit client.")
     @Test
     public void insertRow_theFirstAndSecondRowHasPopupbuttonsNewRowIsAddedToFirstRow_theSecondAndThirdRowHasPopupButton() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();

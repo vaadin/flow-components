@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
@@ -64,7 +63,6 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("=A+2", cellB1.getValue());
     }
 
-    @Ignore("flaky")
     @Test
     public void testGenericFormula() {
         createNewSpreadsheet();
