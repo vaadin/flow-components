@@ -11,9 +11,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -83,10 +81,10 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         selectCell("A1");
 
         selectCell("B2");
-        SheetCellElement c3 = getSpreadsheet().getCellAt("C3");
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .click(c3).keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
-                .contextClick(c3).build().perform();
+        // Ctrl+click is the secondary click on macOS, so the multi-select
+        // goes through the helper that picks the platform's modifier.
+        selectCell("C3", true, false);
+        getSpreadsheet().getCellAt("C3").contextClick();
         clickItem("Double cell values");
 
         selectCell("A1");

@@ -209,6 +209,39 @@ describe('Spreadsheet non-coherent selection — server events', () => {
     expect(selection.auxRanges).to.eql([{ c1: 2, c2: 2, r1: 1, r2: 3 }]);
   });
 
+  it('reports a shift-click on a selection in pieces as an added range', () => {
+    // The server hears a plain selection event as "the old range is
+    // gone", and drops the cells earlier Ctrl-clicks put there with it.
+    // Anything acting on the selection - a context-menu action, a
+    // delete - then misses them.
+    clickCell(ctx.sheet, 2, 2);
+    clickCell(ctx.sheet, 3, 3, { ctrlKey: true });
+    ctx.events.length = 0;
+    clickCell(ctx.sheet, 4, 4, { shiftKey: true });
+
+    // mouseup ends the drag and click follows it, so the range is
+    // reported twice; what matters is that neither is a replacement.
+    expect(new Set(ctx.events.map((e: any) => e.type))).to.eql(
+      new Set(['cellsAddedToRangeSelection'])
+    );
+    expect(ctx.events[0].data).to.deep.equal({
+      row1: 3,
+      col1: 3,
+      row2: 4,
+      col2: 4
+    });
+  });
+
+  it('still reports a whole selection when nothing was Ctrl-clicked', () => {
+    clickCell(ctx.sheet, 2, 2);
+    ctx.events.length = 0;
+    clickCell(ctx.sheet, 4, 4, { shiftKey: true });
+
+    expect(new Set(ctx.events.map((e: any) => e.type))).to.eql(
+      new Set(['cellSelected', 'cellRangeSelected'])
+    );
+  });
+
   it('Ctrl-shift-click reports the added range', () => {
     clickCell(ctx.sheet, 2, 2);
     ctx.events.length = 0;

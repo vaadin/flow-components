@@ -30,15 +30,20 @@ describe('Spreadsheet skeleton — constructor + identity', () => {
         expect(sheet).to.be.instanceOf(Spreadsheet);
     });
 
-    it('sets host width + height via setters', () => {
+    it('sizes the sheet, not the component, via the setters', () => {
+        // The component's size belongs to the application; the setters
+        // are how the wrapper tells the sheet how much room it has.
         const host = document.createElement('div');
         const sheet = new Spreadsheet(host);
 
         sheet.setWidth('500px');
         sheet.setHeight('400px');
 
-        expect(host.style.width).to.equal('500px');
-        expect(host.style.height).to.equal('400px');
+        const root = host.querySelector<HTMLElement>('.spreadsheet-root')!;
+        expect(root.style.width).to.equal('500px');
+        expect(root.style.height).to.equal('400px');
+        expect(host.style.width).to.equal('');
+        expect(host.style.height).to.equal('');
     });
 });
 
@@ -3338,5 +3343,75 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(state.totalGridWidthPx).to.equal(250);
 
         sheet.dispose();
+    });
+});
+
+describe('Spreadsheet — how tall it is when nobody says', () => {
+    /**
+     * A spreadsheet in a host with no height of its own used to grow to
+     * the height of the whole sheet: thousands of pixels of page pushed
+     * down by a component nobody asked to be that big. The GWT client
+     * kept its panes out of the flow and put a 100px floor under the
+     * whole thing.
+     */
+    function attach(
+        hostStyle: string
+    ): { host: HTMLElement; sheet: Spreadsheet; cleanup: () => void } {
+        const host = document.createElement('div');
+        host.style.cssText = hostStyle;
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setCols(20);
+        sheet.setRows(200);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(200).fill(15));
+        sheet.recomputeViewport();
+        return {
+            host,
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    // What <vaadin-spreadsheet> is, minus a height: its :host is a flex
+    // column at height:100%, which against an auto-height parent is auto.
+    const HOST = 'width:400px;display:flex;flex-direction:column;';
+
+    it('does not grow to the height of the sheet', () => {
+        const ctx = attach(HOST);
+        expect(ctx.host.getBoundingClientRect().height).to.be.below(200);
+        ctx.cleanup();
+    });
+
+    it('stands 100px tall rather than collapsing to its bars', () => {
+        const ctx = attach(HOST);
+        expect(ctx.host.getBoundingClientRect().height).to.equal(100);
+        ctx.cleanup();
+    });
+
+    it('leaves the height the application gave the component alone', () => {
+        // The wrapper asks the connector for 100% as it starts up. That
+        // used to land on the host and throw away setHeight("250px").
+        const ctx = attach(HOST + 'height:250px;');
+        ctx.sheet.setHeight('100%');
+        ctx.sheet.setWidth('100%');
+
+        expect(ctx.host.style.height).to.equal('250px');
+        expect(Math.round(ctx.host.getBoundingClientRect().height)).to.equal(
+            250
+        );
+        ctx.cleanup();
+    });
+
+    it('fills a host that does have a height', () => {
+        const ctx = attach(HOST + 'height:500px;');
+        const scroller = ctx.sheet.getScrollContainer();
+        // Everything left over after the formula bar and the sheet tabs.
+        expect(scroller.getBoundingClientRect().height).to.be.above(300);
+        expect(scroller.getBoundingClientRect().height).to.be.below(500);
+        ctx.cleanup();
     });
 });

@@ -117,8 +117,12 @@ describe('Spreadsheet context menu — opening', () => {
     const menu = ctx.sheet.getContextMenu();
     await menu.updateComplete;
     const el = menu.shadowRoot!.querySelector<HTMLElement>('.menu')!;
-    expect(el.style.left).to.equal('120px');
-    expect(el.style.top).to.equal('90px');
+    // Where it is drawn, not what is written on it: the style is in the
+    // sheet's coordinate space, and only the drawn position is the
+    // contract a user's click depends on.
+    const rect = el.getBoundingClientRect();
+    expect(Math.round(rect.x)).to.equal(120);
+    expect(Math.round(rect.y)).to.equal(90);
   });
 
   it('accepts the JSON-serialized payload the server actually sends', async () => {

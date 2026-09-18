@@ -604,8 +604,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // wherever the connector is used, stylesheet or not.
     this.root = document.createElement('div');
     this.root.className = 'spreadsheet-root';
+    // min-height is the floor the GWT client had on .v-spreadsheet: a
+    // spreadsheet nobody has given a height to is still a spreadsheet,
+    // not a one-line strip.
     this.root.style.cssText =
-      'display:flex;flex-direction:column;width:100%;flex:1 1 auto;min-height:0;box-sizing:border-box;';
+      'display:flex;flex-direction:column;width:100%;flex:1 1 auto;' +
+      // position:relative so the context menu, which is a child, is
+      // placed in the sheet's own coordinate space rather than the
+      // viewport's.
+      'min-height:100px;box-sizing:border-box;position:relative;';
     this.scrollContainer = document.createElement('div');
     this.scrollContainer.className = 'sheet-scroll';
     // CSS Grid layout inside the scroll container: 2 columns ×
@@ -617,8 +624,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // `flex:1` so the container takes the remaining vertical
     // space inside the flex-column host, leaving room for the
     // sheet tabs below. Slice 154.
+    // height:0 with flex:1 1 0 is what keeps the sheet from sizing the
+    // component. A column flex item still offers its content height
+    // when the container's own height is indefinite, and the grid
+    // inside is as tall as the whole sheet, so a spreadsheet with no
+    // height became thousands of pixels tall. A stated height of 0 is
+    // definite, so it offers nothing, and flex-grow still gives it
+    // every pixel left over once the host does have a height. The GWT
+    // client got this from absolutely positioned panes.
     this.scrollContainer.style.cssText =
-      'position:relative;overflow:auto;width:100%;flex:1;min-height:0;' +
+      'position:relative;overflow:auto;width:100%;flex:1 1 0;height:0;min-height:0;' +
       'display:grid;grid-template-columns:auto auto;' +
       'grid-template-rows:auto auto;' +
       // outline:none so the browser-default focus ring doesn't
@@ -829,6 +844,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
         activeRange: this.rangeTo(anchor, col, row),
         auxRanges: this.selection.auxRanges
       };
+      this.recomputeViewport();
+      this.reportRangeSelection();
+      return;
     } else {
       this.selection = selectSingleCell(col, row);
     }
@@ -1248,7 +1266,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Multi-cell range — dispatch the server-bound
       // selection event so the server learns the final
       // dragged range.
-      this.dispatchSelectionEvent();
+      this.reportRangeSelection();
     }
     // Single-cell drag (mousedown + mouseup on the same cell
     // with no mouseover-extension) is handled by the existing
@@ -2348,6 +2366,25 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /** Tell the server a whole range joined a non-coherent selection. */
+  /**
+   * Tell the server about the active range, as a whole selection or as
+   * one more piece of a selection that is already in pieces.
+   *
+   * An ordinary selection event says the old range is gone, and the
+   * server drops the cells earlier Ctrl-clicks put there along with it.
+   * Anything then acting on the selection - a context-menu action, a
+   * delete - misses them. The GWT client drew no selection outline once
+   * a Ctrl-click had broken the selection up, and used that as the same
+   * signal.
+   */
+  private reportRangeSelection(): void {
+    if (this.selection.auxRanges.length > 0) {
+      this.dispatchCellsAddedToRangeSelection(this.selection.activeRange);
+      return;
+    }
+    this.dispatchSelectionEvent();
+  }
+
   private dispatchCellsAddedToRangeSelection(range: CellRange): void {
     const data: CellRangeSelectedData = {
       row1: range.r1,
@@ -3023,12 +3060,24 @@ export class Spreadsheet implements SpreadsheetClientApi {
   // Lifecycle (Phase 3.2 wires up the real DOM)
   // ====================================================================
 
+  /** The sheet's width, not the component's. See {@link setHeight}. */
   setWidth(width: string): void {
-    this.host.style.width = width;
+    this.root.style.width = width;
   }
 
+  /**
+   * Size the sheet, not the component.
+   *
+   * The wrapper asks for 100% as it starts the connector up, which is
+   * the sheet filling whatever room the component has. Writing that on
+   * the host instead threw away the size the application had given the
+   * component with its own setHeight, and the sheet then took the
+   * height of the page rather than the 250px it was asked for. The GWT
+   * client put this on the widget, and the host was never its to
+   * touch.
+   */
   setHeight(height: string): void {
-    this.host.style.height = height;
+    this.root.style.height = height;
   }
 
   relayout(): void {
@@ -3211,9 +3260,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * answers with the actions it offers.
    */
   private rememberContextMenuPosition(detail: { clientX?: number; clientY?: number }): void {
+    // Kept relative to the sheet's own box, because that is the space
+    // the menu is placed in. Viewport coordinates stop meaning the
+    // viewport as soon as an ancestor has a transform - a dialog
+    // overlay has one while it animates - and the menu then opens
+    // somewhere other than where the user clicked.
+    const origin = this.root.getBoundingClientRect();
     this.lastContextMenuPosition = {
-      x: detail.clientX ?? 0,
-      y: detail.clientY ?? 0
+      x: (detail.clientX ?? 0) - origin.left,
+      y: (detail.clientY ?? 0) - origin.top
     };
   }
 

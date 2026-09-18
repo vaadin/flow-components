@@ -62,9 +62,13 @@ public class SpreadsheetDialogIT extends AbstractSpreadsheetIT {
     private void triggerContextMenuActionAndAssert(String action) {
         SheetCellElement cell = getSpreadsheet().getCellAt(3, 3);
         cell.contextClick();
+        waitForContextMenu();
         clickItem(action);
 
+        // The handler runs on the server, so the div catches up a round
+        // trip later; reading it once races that.
         WebElement lastAction = findElement(By.id("last-action"));
+        waitUntil(webDriver -> action.equals(lastAction.getText()));
         Assert.assertEquals(
                 "Context menu action should fire and update the page", action,
                 lastAction.getText());

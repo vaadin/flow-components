@@ -42,6 +42,14 @@ public class MultipleSpreadsheetsIT extends AbstractComponentIT {
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).id(id);
         new Actions(getDriver()).contextClick(spreadsheet.getCellAt(2, 2))
                 .perform();
+        // The server answers the right-click with the actions it offers,
+        // so the menu is a round trip away.
+        waitUntil(webDriver -> Boolean.TRUE.equals(executeScript("""
+                const menu = arguments[0].shadowRoot.querySelector(
+                    'vaadin-spreadsheet-internal-context-menu');
+                return !!(menu && menu.shadowRoot
+                    && menu.shadowRoot.querySelector('.item'));
+                """, spreadsheet)));
         // Each spreadsheet draws its own context menu inside its own
         // shadow root — which is the point of the test, so the item is
         // looked up through that instance and not at document level.

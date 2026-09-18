@@ -69,34 +69,32 @@ export class SpreadsheetContextMenu extends LitElement {
   };
 
   static styles = css`
+    /*
+     * Anchored to the spreadsheet, not to the viewport.
+     *
+     * The menu opens on a point the user clicked, which arrives in
+     * viewport coordinates. Placing a fixed box at those coordinates
+     * only works while no ancestor has a transform: a dialog overlay
+     * has one while it animates, becomes the containing block for
+     * fixed positioning, and then drops it again - so the menu was
+     * drawn 16px off and jumped a moment later, and a click aimed at
+     * one item landed on its neighbour. Sharing the sheet's own
+     * coordinate space, whatever is done to the sheet is done to the
+     * menu, and it cannot drift away from what it opened on.
+     */
     :host {
-      position: fixed;
+      position: absolute;
+      left: 0;
+      top: 0;
       z-index: 10;
-      inset: auto;
     }
 
     :host([hidden]) {
       display: none;
     }
 
-    /*
-     * A zero-size probe for where a fixed box actually starts. The menu
-     * is placed at a point the user clicked, in viewport coordinates,
-     * but a transformed ancestor - a dialog overlay, for one - becomes
-     * the containing block for fixed positioning, and then those
-     * coordinates mean something else. Measuring the probe says by how
-     * much, whoever the ancestor turns out to be.
-     */
-    .fixed-origin {
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 0;
-      height: 0;
-    }
-
     .menu {
-      position: fixed;
+      position: absolute;
       min-width: 160px;
       padding: 4px 0;
       box-sizing: border-box;
@@ -169,34 +167,13 @@ export class SpreadsheetContextMenu extends LitElement {
     });
   }
 
-  /**
-   * Put the menu on the point the user clicked.
-   *
-   * Runs after every render and before the browser paints, so the menu
-   * is never drawn in the wrong place first and corrected after - which
-   * is how a click ends up on the item next to the one aimed at.
-   */
-  updated(): void {
-    const root = this.shadowRoot;
-    const panel = root?.querySelector<HTMLElement>('.menu');
-    const probe = root?.querySelector('.fixed-origin');
-    if (!panel || !probe) {
-      return;
-    }
-    const origin = probe.getBoundingClientRect();
-    const { x, y } = this.renderState;
-    panel.style.left = `${x - origin.x}px`;
-    panel.style.top = `${y - origin.y}px`;
-  }
-
   render(): TemplateResult | typeof nothing {
-    const { open, actions } = this.renderState;
+    const { open, x, y, actions } = this.renderState;
     if (!open || actions.length === 0) {
       return nothing;
     }
     return html`
-      <div class="fixed-origin"></div>
-      <div class="menu" part="context-menu">
+      <div class="menu" part="context-menu" style="left:${x}px;top:${y}px;">
         ${actions.map(
           (action) => html`
             <button class="item" part="context-menu-item" type="button" data-key=${action.key} data-type=${action.type}>
