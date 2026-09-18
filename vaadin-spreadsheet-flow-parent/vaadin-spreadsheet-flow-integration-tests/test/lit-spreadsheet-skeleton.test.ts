@@ -905,18 +905,16 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setColW([50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
 
-        // Only column header set, row header at 0 → corner = 0x0.
+        // Only column header set, row header at 0 → nothing to draw.
         sheet.setHeaderRowHeight(24);
         sheet.setHeaderColumnWidth(0);
         sheet.recomputeViewport();
         expect(sheet.getHeaderCorner().style.width).to.equal('0px');
-        expect(sheet.getHeaderCorner().style.height).to.equal('0px');
 
-        // Only row header set → still 0x0.
+        // Only row header set → nothing to draw either.
         sheet.setHeaderRowHeight(0);
         sheet.setHeaderColumnWidth(40);
         sheet.recomputeViewport();
-        expect(sheet.getHeaderCorner().style.width).to.equal('0px');
         expect(sheet.getHeaderCorner().style.height).to.equal('0px');
 
         // Both set → real dimensions.
@@ -3534,5 +3532,134 @@ describe('Spreadsheet — grouping outline without headers', () => {
         expect(sheet.getColumnHeader().shadowRoot!.children).to.have.length(0);
         expect(sheet.getRowHeader().shadowRoot!.children).to.have.length(0);
         cleanup();
+    });
+});
+
+/**
+ * The numbered squares Excel puts above and beside the outline gutters.
+ * Clicking one shows the sheet down to that level: everything shallower
+ * expanded, that level collapsed. The connector declared the event and
+ * nothing ever sent it, so there was no way to reach the feature.
+ */
+describe('Spreadsheet — outline level buttons', () => {
+    function attach(): {
+        sheet: Spreadsheet;
+        events: any[];
+        cleanup: () => void;
+    } {
+        const host = document.createElement('div');
+        host.style.cssText =
+            'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setRows(20);
+        sheet.setCols(8);
+        sheet.setColW(new Array(8).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        sheet.setHeaderRowHeight(20);
+        sheet.setHeaderColumnWidth(40);
+        const events: any[] = [];
+        host.addEventListener('spreadsheet-event', (e) =>
+            events.push((e as CustomEvent).detail)
+        );
+        return {
+            sheet,
+            events,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    async function buttons(sheet: Spreadsheet): Promise<HTMLElement[]> {
+        const corner = sheet.getHeaderCorner() as any;
+        await corner.updateComplete;
+        return Array.from(
+            corner.shadowRoot!.querySelectorAll<HTMLElement>('.level-header')
+        );
+    }
+
+    it('draws no buttons on a sheet with no groups', async () => {
+        const ctx = attach();
+        ctx.sheet.recomputeViewport();
+
+        expect(await buttons(ctx.sheet)).to.be.empty;
+        ctx.cleanup();
+    });
+
+    it('draws one button per column outline level', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(2);
+        ctx.sheet.recomputeViewport();
+
+        const labels = (await buttons(ctx.sheet)).map((b) =>
+            b.textContent!.trim()
+        );
+        expect(labels).to.eql(['1', '2']);
+        ctx.cleanup();
+    });
+
+    it('draws the row levels too, on their own axis', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(1);
+        ctx.sheet.setRowGroupingMax(2);
+        ctx.sheet.recomputeViewport();
+
+        const all = await buttons(ctx.sheet);
+        expect(all.map((b) => b.dataset.axis)).to.eql(['cols', 'rows', 'rows']);
+        ctx.cleanup();
+    });
+
+    it('lines each column button up with its gutter row', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(2);
+        ctx.sheet.recomputeViewport();
+
+        const all = await buttons(ctx.sheet);
+        expect(all[0].style.top).to.equal('0px');
+        expect(all[1].style.top).to.equal('16px');
+        ctx.cleanup();
+    });
+
+    it('tells the server which level was asked for', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(2);
+        ctx.sheet.recomputeViewport();
+        const all = await buttons(ctx.sheet);
+        ctx.events.length = 0;
+
+        all[1].click();
+
+        expect(ctx.events).to.have.length(1);
+        expect(ctx.events[0].type).to.equal('levelHeaderClicked');
+        expect(ctx.events[0].data).to.eql({ cols: true, level: 2 });
+        ctx.cleanup();
+    });
+
+    it('says it was a row level when a row button is clicked', async () => {
+        const ctx = attach();
+        ctx.sheet.setRowGroupingMax(1);
+        ctx.sheet.recomputeViewport();
+        const all = await buttons(ctx.sheet);
+        ctx.events.length = 0;
+
+        all[0].click();
+
+        expect(ctx.events[0].data).to.eql({ cols: false, level: 1 });
+        ctx.cleanup();
+    });
+
+    it('grows the corner over the gutters so the buttons have room', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(2);
+        ctx.sheet.setRowGroupingMax(1);
+        ctx.sheet.recomputeViewport();
+
+        // 40px row header + one 16px gutter column; 20px column header
+        // + two 16px gutter rows.
+        expect(ctx.sheet.getHeaderCorner().style.width).to.equal('56px');
+        expect(ctx.sheet.getHeaderCorner().style.height).to.equal('52px');
+        ctx.cleanup();
     });
 });

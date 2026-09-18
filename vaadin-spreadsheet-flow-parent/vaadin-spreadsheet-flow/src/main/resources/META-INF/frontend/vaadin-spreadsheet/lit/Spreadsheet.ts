@@ -69,9 +69,11 @@ import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import {
   SpreadsheetColumnHeader,
   GROUPING_BUTTON_SIZE_PX,
-  type PositionedGrouping
+  type PositionedGrouping,
+  GROUPING_LEVEL_HEIGHT_PX
 } from './elements/SpreadsheetColumnHeader.js';
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
+import { SpreadsheetHeaderCorner } from './elements/SpreadsheetHeaderCorner.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
 import { emptyContextMenuRenderState, SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
@@ -475,7 +477,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@link applyRenderState}; hidden when either dimension is
    * 0. Slice 145.
    */
-  private readonly headerCorner: HTMLElement;
+  private readonly headerCorner: SpreadsheetHeaderCorner;
 
   /**
    * The sheet-tab strip below the scroll container — renders
@@ -570,7 +572,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid = new SpreadsheetCellGrid();
     this.columnHeader = new SpreadsheetColumnHeader();
     this.rowHeader = new SpreadsheetRowHeader();
-    this.headerCorner = document.createElement('div');
+    this.headerCorner = new SpreadsheetHeaderCorner();
     this.sheetTabs = new SpreadsheetSheetTabs();
     this.formulaBar = new SpreadsheetFormulaBar();
     this.contextMenu = new SpreadsheetContextMenu();
@@ -657,15 +659,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Slice 145. Hidden when either header dimension is 0.
     this.headerCorner.className = 'sheet-header-corner';
     this.headerCorner.style.cssText =
-      'grid-column:1;grid-row:1;' +
-      'position:sticky;top:0;left:0;z-index:6;' +
-      'background:var(--vaadin-spreadsheet-header-bg, #f4f4f4);' +
-      'border-right:1px solid' +
-      ' var(--vaadin-spreadsheet-header-border, #c0c0c0);' +
-      'border-bottom:1px solid' +
-      ' var(--vaadin-spreadsheet-header-border, #c0c0c0);' +
-      'box-sizing:border-box;' +
-      'width:0;height:0;';
+      'grid-column:1;grid-row:1;' + 'position:sticky;top:0;left:0;z-index:6;' + 'width:0;height:0;';
+    this.headerCorner.addEventListener('level-header-click', this.handleLevelHeaderClick as EventListener);
     // Column-header at (col 2, row 1) — top strip above cells.
     this.columnHeader.style.gridColumn = '2';
     this.columnHeader.style.gridRow = '1';
@@ -2703,13 +2698,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // dimensions are > 0 so it occupies its grid cell with
     // matching width + height. When either is 0, the corner
     // collapses to a 0×0 box and isn't visible.
-    if (this.headerRowHeight > 0 && this.headerColumnWidth > 0) {
-      this.headerCorner.style.width = `${this.headerColumnWidth}px`;
-      this.headerCorner.style.height = `${this.headerRowHeight}px`;
-    } else {
-      this.headerCorner.style.width = '0px';
-      this.headerCorner.style.height = '0px';
-    }
+    //
+    // The outline gutters are part of the strips beside it, so the corner
+    // covers them too - otherwise a grouped sheet has an empty notch where
+    // the two gutters meet, and the level buttons have nowhere to sit.
+    const rowGutterPx = this.rowGroupingMax * GROUPING_LEVEL_HEIGHT_PX;
+    const colGutterPx = this.colGroupingMax * GROUPING_LEVEL_HEIGHT_PX;
+    const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
+    const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
+    this.headerCorner.style.width = `${cornerWidth}px`;
+    this.headerCorner.style.height = `${cornerHeight}px`;
+    this.headerCorner.renderState = {
+      headerWidth: this.headerColumnWidth,
+      headerHeight: this.headerRowHeight,
+      colGroupingMax: this.colGroupingMax,
+      rowGroupingMax: this.rowGroupingMax
+    };
   }
 
   /**
@@ -2999,6 +3003,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.firstVisibleTab = next;
     this.syncSheetTabs();
+  };
+
+  /**
+   * An outline level button: show the sheet down to that level.
+   *
+   * The server expands everything shallower and collapses that level,
+   * which hides whatever is nested under it.
+   */
+  private readonly handleLevelHeaderClick = (e: CustomEvent<{ cols: boolean; level: number }>): void => {
+    this.host.dispatchEvent(
+      new CustomEvent('spreadsheet-event', {
+        detail: { type: 'levelHeaderClicked', data: { cols: e.detail.cols, level: e.detail.level } },
+        bubbles: true,
+        composed: true
+      })
+    );
   };
 
   /** Double-click on the active tab: show its name in an input. */
