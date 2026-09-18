@@ -239,6 +239,29 @@ describe('showSelectedCell — the server moving the selection', () => {
     });
   });
 
+  it('scrolls a cell below the fold into view', () => {
+    // Following an internal hyperlink from row 30 to row 10 moved the
+    // selection but left the viewport where it was, so the user was
+    // looking at a sheet with nothing selected on it.
+    ctx.sheet.getScrollContainer().scrollTop = 4000;
+    ctx.sheet.showSelectedCell('B10', 2, 10, '', false, false, false);
+
+    expect(ctx.sheet.getScrollContainer().scrollTop).to.be.at.most(180);
+  });
+
+  it('scrolls a cell to the right of the fold into view', () => {
+    ctx.sheet.showSelectedCell('AZ4', 52, 4, '', false, false, false);
+
+    expect(ctx.sheet.getScrollContainer().scrollLeft).to.be.greaterThan(0);
+  });
+
+  it('leaves the viewport alone for a cell already in view', () => {
+    ctx.sheet.getScrollContainer().scrollTop = 400;
+    ctx.sheet.showSelectedCell('B22', 2, 22, '', false, false, false);
+
+    expect(ctx.sheet.getScrollContainer().scrollTop).to.equal(400);
+  });
+
   it('puts the leading = back on a formula', () => {
     ctx.sheet.showSelectedCell('C3', 3, 3, 'A1+B2', true, false, false);
 

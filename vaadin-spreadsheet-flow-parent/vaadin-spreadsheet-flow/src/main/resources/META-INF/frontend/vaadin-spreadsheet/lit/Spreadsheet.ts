@@ -282,7 +282,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private sheetProtected = false;
   private workbookProtected = false;
   private showCustomEditorOnFocus = false;
-  private invalidFormulaErrorMessage: string | null = null;
+  // The message a cell with a formula the workbook cannot make sense of
+  // shows on hover. Held here rather than waited for: the server only
+  // pushes it when an application replaces the default, and until then a
+  // null message means the cell explains nothing at all.
+  private invalidFormulaErrorMessage: string | null = 'Invalid formula';
   private namedRanges: string[] = [];
   private cellComments: Record<string, string> = {};
   private cellCommentAuthors: Record<string, string> = {};
@@ -3175,6 +3179,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
       formula: formula && cellValue !== '' ? `=${cellValue}` : cellValue,
       namedRanges: this.namedRanges
     };
+    // The server moves the selection for the user: a hyperlink followed,
+    // an address typed into the address field, a named range picked, a
+    // sheet operation landing somewhere else. Somewhere the user cannot
+    // see is not somewhere they have been taken, so bring it into view.
+    // A cell that is already visible stays where it is.
+    this.scrollCellIntoView({ col, row });
     this.scheduleRender();
   }
   showActions(actionDetails: SpreadsheetActionDetails[]): void {

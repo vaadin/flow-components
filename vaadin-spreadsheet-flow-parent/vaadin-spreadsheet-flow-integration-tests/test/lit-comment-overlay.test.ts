@@ -179,6 +179,35 @@ describe('Spreadsheet — cell comment overlays', () => {
     expect(message!.textContent!.trim()).to.equal('Invalid formula');
   });
 
+  it('has a message to show without the server sending one', async () => {
+    // The server only pushes this string when an application replaces the
+    // default, so the connector has to carry one. Without it every
+    // invalid formula hovered silently and explained nothing.
+    ctx.sheet.setInvalidFormulaCells([A1]);
+    await paint(ctx.sheet);
+
+    await hover(ctx.sheet, 1, 1);
+
+    const message = ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector('.comment-overlay-invalidformula');
+    expect(message, 'no invalid-formula message').to.not.be.null;
+    expect(message!.textContent!.trim()).to.equal('Invalid formula');
+  });
+
+  it('lets the server replace the default message', async () => {
+    ctx.sheet.setInvalidFormulaErrorMessage('Virheellinen kaava');
+    ctx.sheet.setInvalidFormulaCells([A1]);
+    await paint(ctx.sheet);
+
+    await hover(ctx.sheet, 1, 1);
+
+    const message = ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector('.comment-overlay-invalidformula');
+    expect(message!.textContent!.trim()).to.equal('Virheellinen kaava');
+  });
+
   it('keeps the invalid-formula message hidden until hovered', async () => {
     ctx.sheet.setInvalidFormulaErrorMessage('Invalid formula');
     ctx.sheet.setInvalidFormulaCells([A1]);
