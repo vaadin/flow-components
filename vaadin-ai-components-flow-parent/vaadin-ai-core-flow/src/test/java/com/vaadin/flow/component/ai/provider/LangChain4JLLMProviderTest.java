@@ -2227,9 +2227,10 @@ class LangChain4JLLMProviderTest {
                 ToolCallLimitExceededException.class, () -> provider
                         .stream(request).collectList().block(TURN_TIMEOUT));
 
-        Assertions.assertEquals("myTool", error.getToolName());
-        Assertions.assertEquals(40, error.getLimit());
-        Assertions.assertTrue(error.getMessage().contains("myTool"));
+        Assertions.assertTrue(error.getMessage().contains("'myTool'"),
+                error.getMessage());
+        Assertions.assertTrue(error.getMessage().contains("(40)"),
+                error.getMessage());
         Assertions.assertEquals(40, toolCalls.get(),
                 "The call that exceeds the limit is not executed");
         Mockito.verify(mockChatModel, Mockito.times(41))
@@ -2269,8 +2270,9 @@ class LangChain4JLLMProviderTest {
                 ToolCallLimitExceededException.class, () -> provider
                         .stream(request).collectList().block(TURN_TIMEOUT));
 
-        Assertions.assertNull(error.getToolName());
-        Assertions.assertEquals(150, error.getLimit());
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Total tool call limit (150)"),
+                error.getMessage());
         Assertions.assertEquals(150, toolCalls.get());
         Mockito.verify(mockChatModel, Mockito.times(151))
                 .chat(Mockito.any(ChatRequest.class));
@@ -2290,7 +2292,8 @@ class LangChain4JLLMProviderTest {
                 ToolCallLimitExceededException.class, () -> provider
                         .stream(request).collectList().block(TURN_TIMEOUT));
 
-        Assertions.assertEquals("myTool", error.getToolName());
+        Assertions.assertTrue(error.getMessage().contains("'myTool'"),
+                error.getMessage());
         Assertions.assertEquals(0, toolCalls.get(),
                 "The calls before the one past the limit are not executed either");
         Mockito.verify(mockChatModel, Mockito.times(1))
@@ -2392,9 +2395,11 @@ class LangChain4JLLMProviderTest {
                 ToolCallLimitExceededException.class, () -> provider
                         .stream(request).collectList().block(TURN_TIMEOUT));
 
-        Assertions.assertEquals("myTool", error.getToolName(),
-                "The per-tool limit is checked before the total");
-        Assertions.assertEquals(2, error.getLimit());
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Tool call limit (2)")
+                        && error.getMessage().contains("'myTool'"),
+                "The per-tool limit is checked before the total: "
+                        + error.getMessage());
     }
 
     @Test
@@ -2428,8 +2433,9 @@ class LangChain4JLLMProviderTest {
                 ToolCallLimitExceededException.class, () -> provider
                         .stream(request).collectList().block(TURN_TIMEOUT));
 
-        Assertions.assertNull(error.getToolName());
-        Assertions.assertEquals(150, error.getLimit());
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Total tool call limit (150)"),
+                error.getMessage());
     }
 
     @Test
@@ -2449,8 +2455,10 @@ class LangChain4JLLMProviderTest {
                 ToolCallLimitExceededException.class, () -> streamingProvider
                         .stream(request).collectList().block(TURN_TIMEOUT));
 
-        Assertions.assertEquals("myTool", error.getToolName());
-        Assertions.assertEquals(2, error.getLimit());
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Tool call limit (2)")
+                        && error.getMessage().contains("'myTool'"),
+                error.getMessage());
         Assertions.assertEquals(2, toolCalls.get());
         Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
                 Mockito.any(ChatRequest.class),
@@ -2578,7 +2586,8 @@ class LangChain4JLLMProviderTest {
                 ToolCallLimitExceededException.class, () -> provider
                         .stream(request).collectList().block(TURN_TIMEOUT));
 
-        Assertions.assertEquals("toolA", error.getToolName());
+        Assertions.assertTrue(error.getMessage().contains("'toolA'"),
+                error.getMessage());
         Assertions.assertEquals(2, toolCalls.get(),
                 "One call to each tool is within the limit");
     }
@@ -2594,7 +2603,8 @@ class LangChain4JLLMProviderTest {
                 () -> provider.stream(createSimpleRequest("Loop")).collectList()
                         .block(TURN_TIMEOUT));
 
-        Assertions.assertEquals("unknownTool", error.getToolName());
+        Assertions.assertTrue(error.getMessage().contains("'unknownTool'"),
+                error.getMessage());
         Mockito.verify(mockChatModel, Mockito.times(41))
                 .chat(Mockito.any(ChatRequest.class));
     }
@@ -2725,8 +2735,11 @@ class LangChain4JLLMProviderTest {
                 () -> provider.stream(createSimpleRequest("Loop")).collectList()
                         .block(TURN_TIMEOUT));
 
-        Assertions.assertEquals("", error.getToolName());
-        Assertions.assertEquals(2, error.getLimit());
+        Assertions.assertTrue(
+                error.getMessage().startsWith("Tool call limit (2)")
+                        && error.getMessage().contains("''"),
+                "A nameless tool is reported under an empty name: "
+                        + error.getMessage());
         Mockito.verify(mockChatModel, Mockito.times(3))
                 .chat(Mockito.any(ChatRequest.class));
     }

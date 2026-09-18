@@ -1654,11 +1654,16 @@ class SpringAILLMProviderTest {
     }
 
     private static ChatResponse mockChatResponseWithPendingToolCall() {
+        return mockChatResponseWithPendingToolCall("doSomething");
+    }
+
+    private static ChatResponse mockChatResponseWithPendingToolCall(
+            String toolName) {
         // Mirrors what a real backend emits at the end of a tool-using
         // round-trip: empty text, a tool call attached to the assistant
         // message, and a finish_reason set.
         var toolCall = new AssistantMessage.ToolCall("call_1", "function",
-                "doSomething", "{}");
+                toolName, "{}");
         var assistantMessage = AssistantMessage.builder().content("")
                 .toolCalls(List.of(toolCall)).build();
         var metadata = ChatGenerationMetadata.builder().finishReason("STOP")
@@ -1920,10 +1925,7 @@ class SpringAILLMProviderTest {
     // --- Tool call limit tests ---
 
     @Test
-    void stream_nonStreamingToolCallLimitExceeded_completesWithSpringAIReplyAndFinishReason() {
-        // Spring AI bounds its own loop and turns the breach into a normal
-        // reply rather than an error. The provider's Javadoc describes this,
-        // so pin it against a Spring AI upgrade.
+    void stream_nonStreamingToolCallLimitExceeded_failsTurnNamingTheTool() {
         provider.setStreaming(false);
         var toolCalls = new AtomicInteger();
         var collected = new ArrayList<ResponseMetadata>();
@@ -1937,12 +1939,13 @@ class SpringAILLMProviderTest {
                         ? mockChatResponseWithPendingToolCall()
                         : mockSimpleChatResponse("done"));
 
-        var results = provider.stream(request).collectList().block();
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList().block());
 
-        Assertions.assertEquals(1, results.size());
-        Assertions.assertTrue(results.getFirst().contains("doSomething"),
-                "Spring AI's own message about the limit is the reply: "
-                        + results.getFirst());
+        Assertions.assertTrue(error.getMessage().contains("'doSomething'"),
+                "Spring AI's own message about the limit is the message: "
+                        + error.getMessage());
         Assertions.assertEquals(40, toolCalls.get());
         Assertions.assertEquals("toolCallLimitExceeded",
                 collected.getLast().finishReason());
@@ -1951,7 +1954,7 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void stream_streamingToolCallLimitExceeded_completesWithSpringAIReplyAndFinishReason() {
+    void stream_streamingToolCallLimitExceeded_failsTurnWithoutEmittingSpringAIReply() {
         var toolCalls = new AtomicInteger();
         var collected = new ArrayList<ResponseMetadata>();
         var request = toolRequestWithMetadataSink(toolCalls, collected);
@@ -1961,16 +1964,65 @@ class SpringAILLMProviderTest {
                         invocation -> Flux.just(rounds.getAndIncrement() < 200
                                 ? mockChatResponseWithPendingToolCall()
                                 : mockSimpleChatResponse("done")));
+        var emitted = new ArrayList<String>();
 
-        var results = provider.stream(request).collectList().block();
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).doOnNext(emitted::add).blockLast());
 
-        Assertions.assertEquals(1, results.size());
-        Assertions.assertTrue(results.getFirst().contains("doSomething"),
-                "Spring AI's own message about the limit is the reply: "
-                        + results.getFirst());
+        Assertions.assertTrue(error.getMessage().contains("'doSomething'"),
+                error.getMessage());
+        Assertions.assertEquals(List.of(), emitted,
+                "Spring AI's own message about the limit is not the reply");
         Assertions.assertEquals(40, toolCalls.get());
         Assertions.assertEquals("toolCallLimitExceeded",
                 collected.getLast().finishReason());
+    }
+
+    @Test
+    void stream_totalToolCallLimitExceeded_failsTurnWithoutToolName() {
+        provider.setStreaming(false);
+        var toolNames = List.of("toolA", "toolB", "toolC", "toolD");
+        var toolCalls = new AtomicInteger();
+        var request = toolRequestWithMetadataSink(toolNames, toolCalls,
+                new ArrayList<>());
+        // Spread over four tools, no single tool reaches 40 before the total
+        // reaches 150
+        var rounds = new AtomicInteger();
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenAnswer(invocation -> {
+                    var round = rounds.getAndIncrement();
+                    return round < 200
+                            ? mockChatResponseWithPendingToolCall(
+                                    toolNames.get(round % toolNames.size()))
+                            : mockSimpleChatResponse("done");
+                });
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList().block());
+
+        Assertions.assertTrue(error.getMessage().contains("(150)"),
+                error.getMessage());
+        Assertions.assertEquals(150, toolCalls.get());
+    }
+
+    @Test
+    void stream_toolCallLimitReason_failsTurnWithSpringAIMessage() {
+        // The finish reason is what the provider acts on; the reply's text
+        // becomes the exception's message as it came
+        provider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse("Limits reached, in new words",
+                        "toolCallLimitExceeded"));
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(createSimpleRequest("Hello"))
+                        .collectList().block());
+
+        Assertions.assertEquals("Limits reached, in new words",
+                error.getMessage());
     }
 
     /**
@@ -1980,11 +2032,17 @@ class SpringAILLMProviderTest {
      */
     private LLMRequest toolRequestWithMetadataSink(AtomicInteger toolCalls,
             List<ResponseMetadata> collected) {
-        var tool = createExplicitTool("doSomething", "A test tool", null,
-                args -> {
+        return toolRequestWithMetadataSink(List.of("doSomething"), toolCalls,
+                collected);
+    }
+
+    private LLMRequest toolRequestWithMetadataSink(List<String> toolNames,
+            AtomicInteger toolCalls, List<ResponseMetadata> collected) {
+        var tools = toolNames.stream().map(
+                name -> createExplicitTool(name, "A test tool", null, args -> {
                     toolCalls.incrementAndGet();
                     return "tool result";
-                });
+                })).toList();
         return new LLMRequest() {
             @Override
             public String userMessage() {
@@ -2008,7 +2066,7 @@ class SpringAILLMProviderTest {
 
             @Override
             public List<LLMProvider.ToolSpec> explicitTools() {
-                return List.of(tool);
+                return tools;
             }
 
             @Override

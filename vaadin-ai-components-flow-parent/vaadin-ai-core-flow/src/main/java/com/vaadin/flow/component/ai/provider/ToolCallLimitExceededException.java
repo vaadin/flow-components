@@ -20,79 +20,44 @@ package com.vaadin.flow.component.ai.provider;
  * than allowed.
  * <p>
  * A model that keeps requesting tool calls instead of answering never ends the
- * turn on its own, and each round costs another model call.
- * {@link LangChain4JLLMProvider} therefore ends the turn with this exception
+ * turn on its own, and each round costs another model call. Both built-in
+ * providers therefore end such a turn with this exception.
+ * {@link LangChain4JLLMProvider} runs the tool-calling loop itself and throws
  * once the model has requested more calls to any one tool, or more tool calls
  * in total, than {@link LangChain4JLLMProvider#setMaxCallsPerTool(int)} and
- * {@link LangChain4JLLMProvider#setMaxTotalToolCalls(int)} allow. None of the
+ * {@link LangChain4JLLMProvider#setMaxTotalToolCalls(int)} allow; none of the
  * tool calls of the refused round are executed, and the model is not called
- * again. You receive the exception as the error of the turn, through
+ * again. {@link SpringAILLMProvider} throws when Spring AI, which runs the loop
+ * itself, stops it at its own limits. You receive the exception as the error of
+ * the turn, through
  * {@link com.vaadin.flow.component.ai.orchestrator.ResponseListener.ResponseEvent#getError()
  * ResponseEvent.getError()} in the
  * {@link com.vaadin.flow.component.ai.orchestrator.ResponseListener} and in
  * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(com.vaadin.flow.component.ai.orchestrator.ResponseListener.ResponseEvent)
  * AIController.onResponse}.
  * <p>
- * {@link SpringAILLMProvider} does not throw this exception. Spring AI runs the
- * tool-calling loop itself and stops it at the same limits without failing the
- * turn; see {@link SpringAILLMProvider} for how such a turn ends.
+ * The {@link #getMessage() message} names the limit that was exceeded, and the
+ * tool when the limit was a per-tool one, in the words of the framework that
+ * enforced it.
  *
  * @author Vaadin Ltd
  * @since 25.3
  */
 public class ToolCallLimitExceededException extends RuntimeException {
 
-    private final String toolName;
-    private final int limit;
-
     /**
      * Creates a new exception for a tool call limit exceeded during a turn. The
-     * built-in provider creates it; the constructor is public so that you can
+     * built-in providers create it; the constructor is public so that you can
      * construct one when unit testing a
      * {@link com.vaadin.flow.component.ai.orchestrator.ResponseListener} or an
      * {@link com.vaadin.flow.component.ai.orchestrator.AIController}, or throw
      * it from a custom {@link LLMProvider} that bounds its own tool-calling
      * loop.
      *
-     * @param toolName
-     *            the name of the tool whose per-tool limit was exceeded, or
-     *            {@code null} when the limit on all tool calls of the turn was
-     *            exceeded instead
-     * @param limit
-     *            the limit that was exceeded
+     * @param message
+     *            a description of the limit that was exceeded
      */
-    public ToolCallLimitExceededException(String toolName, int limit) {
-        super(buildMessage(toolName, limit));
-        this.toolName = toolName;
-        this.limit = limit;
-    }
-
-    private static String buildMessage(String toolName, int limit) {
-        if (toolName != null) {
-            return "Tool call limit (" + limit + ") exceeded for tool '"
-                    + toolName + "'";
-        }
-        return "Total tool call limit (" + limit + ") exceeded for this turn";
-    }
-
-    /**
-     * Gets the name of the tool whose per-tool limit was exceeded.
-     *
-     * @return the tool name, or {@code null} when the limit on all tool calls
-     *         of the turn was exceeded instead
-     */
-    public String getToolName() {
-        return toolName;
-    }
-
-    /**
-     * Gets the limit that was exceeded: the maximum number of calls to the tool
-     * named by {@link #getToolName()}, or the maximum number of tool calls in
-     * the turn when that is {@code null}.
-     *
-     * @return the limit that was exceeded
-     */
-    public int getLimit() {
-        return limit;
+    public ToolCallLimitExceededException(String message) {
+        super(message);
     }
 }
