@@ -100,7 +100,10 @@ import tools.jackson.databind.JsonNode;
  * </p>
  * <p>
  * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance.
+ * history across components, reuse the same provider instance. The memory holds
+ * the user messages and the assistant's final answer of each turn; tool calls
+ * and their results are sent to the model only within the turn they belong to
+ * and are not replayed on later turns.
  * </p>
  * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
@@ -281,8 +284,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * turn fails with a {@link ToolCallLimitExceededException} that names the
      * tool: none of the tool calls of that round are executed, the model is not
      * called again, and you receive the exception as the error of the turn. The
-     * conversation stays usable, the next prompt continues from the last
-     * completed round.
+     * conversation stays usable: the failed turn leaves only its prompt in the
+     * chat memory, and the next prompt continues from there.
      * <p>
      * The limit applies to each tool separately. See
      * {@link #setMaxTotalToolCalls(int)} for the limit on all tool calls of a
@@ -325,8 +328,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * exceed the limit, the turn fails with a
      * {@link ToolCallLimitExceededException}: none of the tool calls of that
      * round are executed, the model is not called again, and you receive the
-     * exception as the error of the turn. The conversation stays usable, the
-     * next prompt continues from the last completed round.
+     * exception as the error of the turn. The conversation stays usable: the
+     * failed turn leaves only its prompt in the chat memory, and the next
+     * prompt continues from there.
      * <p>
      * The value is read when a turn starts, so a change applies from the next
      * prompt on.
@@ -531,7 +535,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             return;
         }
         var messages = buildMessages(context.getRequest(),
-                context.getChatMemory());
+                context.getChatMemory(), context.getTurnMessages());
         if (streamingChatModel != null) {
             executeStreamingChat(messages, context);
         } else {
@@ -575,7 +579,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             var toolExecutor = context.getToolContext().executors()
                     .get(toolExecRequest.name());
             var result = executeToolRequest(toolExecutor, toolExecRequest);
-            context.getChatMemory().add(result);
+            context.addTurnMessage(result);
         }
     }
 
@@ -607,13 +611,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
         var hasToolRequests = aiMessage.hasToolExecutionRequests();
         if (hasToolRequests
                 && !context.admitToolCalls(aiMessage.toolExecutionRequests())) {
-            // Decided before the message enters chat memory. A turn that ends
-            // here leaves no tool request behind without its result, so the
-            // next turn continues from the last completed round instead of
-            // sending the model a request it considers unanswered.
+            // Decided before any tool of this round runs. A turn that ends
+            // here leaves nothing behind: its tool traffic is discarded with
+            // it, so the next turn continues from the chat memory as the last
+            // completed turn left it.
             return;
         }
-        context.getChatMemory().add(aiMessage);
         if (!isStreaming()) {
             var text = aiMessage.text();
             if (text != null && !text.isEmpty()) {
@@ -621,9 +624,17 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
         }
         if (hasToolRequests) {
+            // Tool calls and their results stay within the turn: the
+            // follow-up round trips of this turn need them, but on later
+            // turns they would only be replayed as stale copies of state the
+            // model is told to fetch again, at the cost of every past tool
+            // result on every request. Only the user message and the final
+            // answer enter the chat memory, as with SpringAILLMProvider.
+            context.addTurnMessage(aiMessage);
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
+            context.getChatMemory().add(aiMessage);
             warnOnMissingFinishReason(response);
             context.getSink().complete();
         }
@@ -682,7 +693,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     private List<dev.langchain4j.data.message.ChatMessage> buildMessages(
-            LLMRequest request, ChatMemory chatMemory) {
+            LLMRequest request, ChatMemory chatMemory,
+            List<dev.langchain4j.data.message.ChatMessage> turnMessages) {
         var messages = new ArrayList<dev.langchain4j.data.message.ChatMessage>();
         if (request.systemPrompt() != null) {
             var systemPrompt = request.systemPrompt().trim();
@@ -691,6 +703,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
         }
         messages.addAll(chatMemory.messages());
+        messages.addAll(turnMessages);
         return messages;
     }
 
@@ -822,6 +835,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final ChatMemory chatMemory;
         private final ToolContext toolContext;
         private final ToolCallLimits toolCallLimits;
+        /**
+         * Tool calls and tool results of this turn, in order. Sent after the
+         * chat memory on every round trip of the turn and discarded with it.
+         */
+        private final List<dev.langchain4j.data.message.ChatMessage> turnMessages = new ArrayList<>();
         private FinishReason lastFinishReason;
         private TokenUsage accumulatedUsage;
 
@@ -914,6 +932,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
         ChatMemory getChatMemory() {
             return chatMemory;
+        }
+
+        List<dev.langchain4j.data.message.ChatMessage> getTurnMessages() {
+            return turnMessages;
+        }
+
+        void addTurnMessage(dev.langchain4j.data.message.ChatMessage message) {
+            turnMessages.add(message);
         }
 
         ToolContext getToolContext() {
