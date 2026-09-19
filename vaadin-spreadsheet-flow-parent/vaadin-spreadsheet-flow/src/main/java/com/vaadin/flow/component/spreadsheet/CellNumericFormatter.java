@@ -9,9 +9,9 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.util.LocaleUtil;
 
 /**
  * Locale-aware numeric / formula-bar formatting for cell values.
@@ -62,6 +63,8 @@ final class CellNumericFormatter implements Serializable {
     private DecimalFormatSymbols localeDecimalSymbols = DecimalFormatSymbols
             .getInstance();
     private CellValueFormatter cellValueFormatter = new CellValueFormatter();
+    private DateFormat originalValueDateFormat = shortDateTimeFormat(
+            Locale.getDefault(Locale.Category.FORMAT));
 
     CellNumericFormatter() {
     }
@@ -72,6 +75,17 @@ final class CellNumericFormatter implements Serializable {
         originalValueDecimalFormat = new DecimalFormat(
                 EXCEL_FORMULA_BAR_DECIMAL_FORMAT, localeDecimalSymbols);
         cellValueFormatter.setLocaleDecimalSymbols(localeDecimalSymbols);
+        originalValueDateFormat = shortDateTimeFormat(locale);
+    }
+
+    /**
+     * The short date + time form the formula bar shows for a date cell - the
+     * same shape a no-argument {@link java.text.SimpleDateFormat} produces, but
+     * for the spreadsheet's locale instead of the JVM's.
+     */
+    private static DateFormat shortDateTimeFormat(Locale locale) {
+        return DateFormat.getDateTimeInstance(DateFormat.SHORT,
+                DateFormat.SHORT, locale);
     }
 
     DataFormatter getDataFormatter() {
@@ -115,8 +129,14 @@ final class CellNumericFormatter implements Serializable {
     private String formatNumericCell(Cell cell) {
         if (DateUtil.isCellDateFormatted(cell)) {
             Date dateCellValue = cell.getDateCellValue();
-            return dateCellValue == null ? ""
-                    : new SimpleDateFormat().format(dateCellValue);
+            if (dateCellValue == null) {
+                return "";
+            }
+            // getDateCellValue read the cell's serial number as a wall clock
+            // in POI's time zone. Formatting in any other zone would move the
+            // date the formula bar shows off the one stored in the workbook.
+            originalValueDateFormat.setTimeZone(LocaleUtil.getUserTimeZone());
+            return originalValueDateFormat.format(dateCellValue);
         }
         return originalValueDecimalFormat.format(cell.getNumericCellValue());
     }

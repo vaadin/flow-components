@@ -68,7 +68,16 @@ public class ValueHandlerIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("29-Jun-06", getCellContent("C3"));
     }
 
+    /**
+     * Epoch milliseconds for midday on the given date.
+     * <p>
+     * The fixture's handler turns these milliseconds back into a date through
+     * the server's time zone. Midday leaves the server and this test eleven
+     * hours of room to disagree about the zone before the date moves a day;
+     * midnight left none.
+     */
     private String dateTS(int year, int month, int day) {
-        return "" + new GregorianCalendar(year, month, day).getTimeInMillis();
+        return "" + new GregorianCalendar(year, month, day, 12, 0)
+                .getTimeInMillis();
     }
 }

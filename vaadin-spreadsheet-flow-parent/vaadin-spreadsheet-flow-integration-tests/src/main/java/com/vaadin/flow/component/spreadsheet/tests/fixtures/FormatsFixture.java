@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -18,6 +19,18 @@ import org.apache.poi.ss.usermodel.Workbook;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class FormatsFixture implements SpreadsheetFixture {
+
+    /**
+     * 17 September 2004, 02:56:40 - a wall-clock time, not an instant.
+     * <p>
+     * POI turns a {@link Date} into an Excel serial number through the JVM's
+     * default time zone, so an absolute instant lands on a different serial -
+     * and often a different day - on every machine. Building the date from
+     * calendar fields gives the same serial everywhere.
+     */
+    private static final Date DATE_VALUE = new GregorianCalendar(2004,
+            Calendar.SEPTEMBER, 17, 2, 56, 40).getTime();
+
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
         Cell c;
@@ -77,7 +90,7 @@ public class FormatsFixture implements SpreadsheetFixture {
             spreadsheet.createCell(1, column + formats.length + 1,
                     "" + c.getCellType().ordinal());
 
-            c = spreadsheet.createCell(2, column, new Date(1095379000000L));
+            c = spreadsheet.createCell(2, column, DATE_VALUE);
             c.setCellStyle(style);
             spreadsheet.createCell(2, column + formats.length + 1,
                     "" + c.getCellType().ordinal());

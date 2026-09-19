@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,17 +18,20 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.util.LocaleUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -202,15 +206,11 @@ class CellNumericFormatterTest {
     }
 
     @Test
-    void getOriginalCellValue_numericDateFormatted_formatsViaSimpleDateFormat() {
-        // Pin: NUMERIC with date format runs through SimpleDateFormat
-        // (no-arg = JVM default locale's short date+time). The expected
-        // value is computed via the SAME no-arg SimpleDateFormat in the
-        // test — both test and SUT resolve to the same JVM default at
-        // runtime, so the assertion is consistent across hosts. NOT
-        // locale-independent in the absolute sense; if a future change
-        // pinned a specific Locale on the SUT, this test would need to
-        // mirror that Locale here.
+    void getOriginalCellValue_numericDateFormatted_formatsInTheSpreadsheetLocale() {
+        // Pin: NUMERIC with a date format runs through the locale's short
+        // date+time form - the same shape a no-arg SimpleDateFormat gives,
+        // but for the locale the spreadsheet was given rather than the JVM's.
+        formatter.updateLocale(Locale.US);
         when(cell.getCellType()).thenReturn(CellType.NUMERIC);
         dateUtilStatic.when(() -> DateUtil.isCellDateFormatted(cell))
                 .thenReturn(true);
@@ -218,8 +218,61 @@ class CellNumericFormatterTest {
                 .getTime();
         when(cell.getDateCellValue()).thenReturn(date);
 
-        String expected = new java.text.SimpleDateFormat().format(date);
+        String expected = DateFormat.getDateTimeInstance(DateFormat.SHORT,
+                DateFormat.SHORT, Locale.US).format(date);
         assertEquals(expected, formatter.getOriginalCellValue(cell));
+    }
+
+    @Test
+    void getOriginalCellValue_numericDateFormatted_localeChanged_followsTheNewLocale() {
+        // The formula bar has to speak the spreadsheet's language. Before
+        // this was wired up the date branch always used the JVM default,
+        // so setLocale had no effect on it.
+        when(cell.getCellType()).thenReturn(CellType.NUMERIC);
+        dateUtilStatic.when(() -> DateUtil.isCellDateFormatted(cell))
+                .thenReturn(true);
+        Date date = new GregorianCalendar(2024, Calendar.JANUARY, 15, 10, 30)
+                .getTime();
+        when(cell.getDateCellValue()).thenReturn(date);
+
+        formatter.updateLocale(Locale.US);
+        String us = formatter.getOriginalCellValue(cell);
+        formatter.updateLocale(Locale.GERMANY);
+        String germany = formatter.getOriginalCellValue(cell);
+
+        assertEquals(
+                DateFormat.getDateTimeInstance(DateFormat.SHORT,
+                        DateFormat.SHORT, Locale.GERMANY).format(date),
+                germany);
+        assertNotEquals(us, germany,
+                "US and German short date+time forms differ");
+    }
+
+    @Test
+    void getOriginalCellValue_numericDateFormatted_formatsInPoisTimeZone() {
+        // getDateCellValue reads the cell's serial number as a wall clock in
+        // POI's user time zone. Formatting in the JVM's zone instead would
+        // move the date whenever an application sets one on POI.
+        formatter.updateLocale(Locale.US);
+        when(cell.getCellType()).thenReturn(CellType.NUMERIC);
+        dateUtilStatic.when(() -> DateUtil.isCellDateFormatted(cell))
+                .thenReturn(true);
+        Date date = new GregorianCalendar(2024, Calendar.JANUARY, 15, 10, 30)
+                .getTime();
+        when(cell.getDateCellValue()).thenReturn(date);
+
+        TimeZone originalUserZone = LocaleUtil.getUserTimeZone();
+        try {
+            LocaleUtil.setUserTimeZone(TimeZone.getTimeZone("UTC"));
+            DateFormat inUtc = DateFormat.getDateTimeInstance(DateFormat.SHORT,
+                    DateFormat.SHORT, Locale.US);
+            inUtc.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+            assertEquals(inUtc.format(date),
+                    formatter.getOriginalCellValue(cell));
+        } finally {
+            LocaleUtil.setUserTimeZone(originalUserZone);
+        }
     }
 
     @Test

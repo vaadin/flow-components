@@ -14,7 +14,6 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -117,7 +116,6 @@ public class GenericIT extends AbstractSpreadsheetIT {
 
     }
 
-    @Ignore("Test is failing on TC probably because of a timezone issue")
     @Test
     public void testFormats() {
         setLocale(Locale.US);
