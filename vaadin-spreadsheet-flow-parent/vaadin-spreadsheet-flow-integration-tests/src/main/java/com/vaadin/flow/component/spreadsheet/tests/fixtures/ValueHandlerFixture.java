@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
@@ -85,7 +86,8 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
                     cell.setCellStyle(dateStyle);
                 } catch (NumberFormatException e) {
 
-                    SimpleDateFormat format = new SimpleDateFormat("dd-MMM-yy");
+                    SimpleDateFormat format = new SimpleDateFormat("dd-MMM-yy",
+                            Locale.ENGLISH);
                     try {
                         cell.setCellValue(format.parse(newValue));
                     } catch (ParseException e1) {

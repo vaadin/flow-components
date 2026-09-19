@@ -349,11 +349,14 @@ public class CellValueManager implements Serializable {
         boolean updateHyperlinks = false;
         boolean formulaChanged = false;
 
-        if (getCustomCellValueHandler() == null || getCustomCellValueHandler()
-                .cellValueUpdated(cell, activeSheet, col - 1, row - 1, value,
+        boolean handlerTookOver = getCustomCellValueHandler() != null
+                && !getCustomCellValueHandler().cellValueUpdated(cell,
+                        activeSheet, col - 1, row - 1, value,
                         getFormulaEvaluator(),
                         numericFormatter.getDataFormatter(),
-                        getConditionalFormattingEvaluator())) {
+                        getConditionalFormattingEvaluator());
+
+        if (!handlerTookOver) {
             Exception exception = null;
             try {
                 // handle new cell creation
@@ -498,10 +501,48 @@ public class CellValueManager implements Serializable {
             }
         }
 
+        if (handlerTookOver) {
+            refreshCellHandledByCustomHandler(activeSheet, col, row);
+        }
+
         spreadsheet.updateMarkedCells();
 
         if (updateHyperlinks) {
             spreadsheet.loadHyperLinks();
+        }
+    }
+
+    /**
+     * Sends the edited cell back to the client after a {@link CellValueHandler}
+     * has taken over the edit.
+     * <p>
+     * The client displays the text the user typed as soon as the editor closes.
+     * A handler is free to store something else, or nothing at all, so that
+     * text is never the authoritative value and the cell has to be sent again.
+     * Without this the client keeps showing the raw input until something else
+     * happens to refresh the cell.
+     *
+     * @param sheet
+     *            the sheet the edited cell belongs to
+     * @param col
+     *            column index of the edited cell, 1-based
+     * @param row
+     *            row index of the edited cell, 1-based
+     */
+    private void refreshCellHandledByCustomHandler(Sheet sheet, int col,
+            int row) {
+        Row r = sheet.getRow(row - 1);
+        // The handler may have created the cell, so it is read again instead
+        // of reusing the reference the handler was given.
+        Cell cell = r == null ? null : r.getCell(col - 1);
+        if (cell == null) {
+            CellData cd = new CellData();
+            cd.col = col;
+            cd.row = row;
+            flushQueue.enqueueRemoval(cd);
+            clearCellCache(SpreadsheetUtil.toKey(col, row));
+        } else {
+            spreadsheet.markCellAsUpdated(cell, true);
         }
     }
 

@@ -12,7 +12,6 @@ import java.util.GregorianCalendar;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -49,7 +48,6 @@ public class ValueHandlerIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Fails in all the browsers in framework Spreadsheet")
     public void testDateFormat() {
         selectCell("C2");
         getSpreadsheet().getCellAt("C2")
