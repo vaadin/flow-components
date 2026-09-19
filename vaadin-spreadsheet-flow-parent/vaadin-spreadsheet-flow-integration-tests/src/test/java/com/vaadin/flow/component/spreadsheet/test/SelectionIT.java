@@ -8,10 +8,10 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
@@ -110,22 +110,36 @@ public class SelectionIT extends AbstractSpreadsheetIT {
         assertRowSelected("5");
     }
 
+    /**
+     * Whole columns and a whole row stay selected while the sheet is scrolled:
+     * cells that were not rendered when the selection was made come in
+     * selected.
+     * <p>
+     * The original version of this test scrolled by typing an address into the
+     * address field. That is a selection gesture, not a scroll - it always
+     * dropped the selection first, so the test could never pass. Scrolling the
+     * sheet itself leaves the selection alone.
+     */
     @Test
-    @Ignore("Navigating to cell clears the selection in framework Spreadsheet, so this can't work -> Figure out another way to scroll")
-    public void testColumnRowWithPagination() {
+    public void columnsAndRowSelected_sheetScrolled_cellsComingIntoViewAreSelected() {
         selectColumn("C");
         selectColumn("E", true, false);
         selectRow(3, true, false);
 
-        navigateToCell("C195");
+        getSpreadsheet().scroll(10000);
+
         assertCellSelected("C190");
         assertCellSelected("C200");
         assertCellSelected("E190");
         assertCellSelected("E200");
 
-        navigateToCell("AV3");
+        getSpreadsheet().scroll(0);
+        getSpreadsheet().scrollLeft(10000);
+
         assertCellSelected("AS3");
         assertCellSelected("AZ3");
+        // Nothing outside the three selected areas comes back selected.
+        assertCellNotSelected("AZ4");
     }
 
     @Test
@@ -185,6 +199,10 @@ public class SelectionIT extends AbstractSpreadsheetIT {
 
     private void assertCellSelected(String cell) {
         assertTrue(getSpreadsheet().getCellAt(cell).isCellSelected());
+    }
+
+    private void assertCellNotSelected(String cell) {
+        assertFalse(getSpreadsheet().getCellAt(cell).isCellSelected());
     }
 
     private void assertRowSelected(String row) {

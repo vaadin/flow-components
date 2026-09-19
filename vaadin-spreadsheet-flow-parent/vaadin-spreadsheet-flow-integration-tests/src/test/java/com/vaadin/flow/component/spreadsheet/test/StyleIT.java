@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -31,7 +30,6 @@ public class StyleIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Fails in all browsers, Are POI CellStyles even supported?")
     public void testCssStyleFromFixture() {
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.Styles);

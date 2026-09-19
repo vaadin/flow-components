@@ -15,6 +15,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -483,23 +484,44 @@ public class SpreadsheetElement extends TestBenchElement {
     private Dimension sSize;
 
     boolean isElementSelected(WebElement element) {
+        // Cheapest first: a cell inside the selection but outside the active
+        // range says so on itself, and needs no outline.
+        if (isNonCoherentlySelected(element)) {
+            return true;
+        }
+        // The outline is drawn around the active range only, and the client
+        // leaves it out while that range is scrolled out of view. With no
+        // outline on screen and no marking on the cell, it is not selected.
+        if (!findSelectionOutline()) {
+            return false;
+        }
         updateSelectionLocationAndSize();
         Point location = element.getLocation();
         int centerX = location.x + element.getSize().getWidth() / 2;
         int centerY = location.y + element.getSize().getHeight() / 2;
-        return isInSelection(centerX, centerY)
-                || isNonCoherentlySelected(element);
+        return isInSelection(centerX, centerY);
     }
 
-    private void findSelectionOutline() {
+    /**
+     * Reads the four border elements of the selection outline.
+     *
+     * @return {@code false} when the client is not drawing an outline
+     */
+    private boolean findSelectionOutline() {
         // sometimes the spreadsheet takes so long to load that the selection
         // widget elements are not found
-        waitUntil(e -> findInCellGrid(".s-top") != null);
+        try {
+            waitUntil(e -> findInCellGrid(".s-top") != null);
+        } catch (TimeoutException e) {
+            sTop = null;
+            return false;
+        }
         sTop = findInCellGrid(".s-top");
         sBottom = findInCellGrid(".s-bottom");
         // Just to make sure the left element is present
         findInCellGrid(".s-left");
         sRight = findInCellGrid(".s-right");
+        return sTop != null;
     }
 
     private boolean isNonCoherentlySelected(WebElement element) {
@@ -514,9 +536,6 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     private void updateSelectionLocationAndSize() {
-        if (sTop == null) {
-            findSelectionOutline();
-        }
         sLocation = sTop.getLocation();
         int bottomY = sBottom.getLocation().getY();
         int bottomH = sBottom.getSize().getHeight();
