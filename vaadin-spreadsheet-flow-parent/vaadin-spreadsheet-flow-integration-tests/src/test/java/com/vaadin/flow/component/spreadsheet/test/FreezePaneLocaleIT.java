@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -31,18 +30,33 @@ public class FreezePaneLocaleIT extends AbstractSpreadsheetIT {
                 $(SpreadsheetElement.class).exists());
     }
 
+    /**
+     * Hiding a sheet brings the next sheet's cell styling with it.
+     * <p>
+     * The first sheet draws a black border under B5, the second sheet has
+     * nothing there, so B5 falls back to the grid line. The cell has to change
+     * colour when the first sheet goes away, or it keeps a border belonging to
+     * a sheet nobody can see.
+     * <p>
+     * This test used to read border-bottom-width and expect it not to be 1px
+     * before hiding. Every cell carries a 1px grid line, so that could never
+     * hold - it is the failure reported in <a href=
+     * "https://github.com/vaadin/flow-components/issues/4737">flow-components
+     * #4737</a>. The colour is what tells the two sheets apart.
+     */
     @Test
-    @Ignore("https://github.com/vaadin/flow-components/issues/4737")
     public void hideFirstSheet_borderStylesUpdated() {
         setSpreadsheet($(SpreadsheetElement.class).first());
 
-        Assert.assertNotEquals("1px",
-                getCellStyle("B5", "border-bottom-width"));
+        String gridLine = getCellStyle("E7", "border-bottom-color");
+        Assert.assertNotEquals("The first sheet draws its own border under B5",
+                gridLine, getCellStyle("B5", "border-bottom-color"));
 
         getCellAt(1, 1).contextClick();
         clickItem("Hide sheet");
 
-        Assert.assertEquals("1px", getCellStyle("B5", "border-bottom-width"));
+        Assert.assertEquals(
+                "B5 is empty on the second sheet, so it shows the grid line",
+                gridLine, getCellStyle("B5", "border-bottom-color"));
     }
-
 }

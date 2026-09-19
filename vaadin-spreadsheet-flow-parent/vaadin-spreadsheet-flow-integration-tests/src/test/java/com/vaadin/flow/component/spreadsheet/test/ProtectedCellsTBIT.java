@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -81,7 +80,6 @@ public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
         checkProtectionInCell("D4", true);
     }
 
-    @Ignore("Ignored until https://github.com/vaadin/flow-components/issues/3233 is fixed")
     @Test
     public void sheetHasUnprotectedRanges_trySetCellValue_onlyUnlockedCellsEditable() {
         selectSheetAt(3);
