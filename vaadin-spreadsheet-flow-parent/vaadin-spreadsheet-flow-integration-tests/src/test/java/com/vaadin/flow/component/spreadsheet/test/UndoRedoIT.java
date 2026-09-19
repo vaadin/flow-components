@@ -233,7 +233,6 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         });
     }
 
-    @Ignore("This is a known issue which should be fixed: https://github.com/vaadin/spreadsheet/issues/326")
     @Test
     public void undo_theSecondRowWithInvalidFormulaIsRemovedAndUndo_formulaIndicatorIsPresent() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -250,7 +249,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         });
     }
 
-    @Ignore("This is a known issue which should be fixed: https://github.com/vaadin/spreadsheet/issues/331")
+    @Ignore("Undo does not bring back a conditional formatting that lived only on the deleted row: https://github.com/vaadin/spreadsheet/issues/331. POI drops it when the row goes and disconnects its rule's XML, so remembering the object before the delete is not enough - see ConditionalFormattingRowUndoTest, which pins each step.")
     @Test
     public void undo_conditionalFormattedCellsRemovedAndUndo_cellsAreStillConditionallyFormatted() {
         loadFile("conditional_formatting.xlsx");

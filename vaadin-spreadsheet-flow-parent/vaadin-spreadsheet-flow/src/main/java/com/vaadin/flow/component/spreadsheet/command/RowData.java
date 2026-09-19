@@ -148,6 +148,7 @@ class RowData implements Serializable {
         private CommentData cellComment;
         private Hyperlink hyperlink;
         private CellStyle cellStyle;
+        private boolean invalidFormula;
         private Spreadsheet spreadsheet;
 
         public CellData(Spreadsheet spreadsheet) {
@@ -173,6 +174,11 @@ class RowData implements Serializable {
             hyperlink = cell.getHyperlink();
             cellStyle = cell.getCellStyle();
             cellType = cell.getCellType();
+            // A formula the server could not parse is kept as text, and the
+            // flag that says so lives beside the workbook. Restoring the text
+            // without it would leave a broken cell looking fine.
+            invalidFormula = spreadsheet
+                    .isMarkedAsInvalidFormula(columnIndex + 1, rowIndex + 1);
 
             switch (cellType) {
             case _NONE, BLANK -> stringCellValue = cell.getStringCellValue();
@@ -219,6 +225,10 @@ class RowData implements Serializable {
             case STRING -> cell.setCellValue(richTextCellValue);
             }
 
+            if (invalidFormula) {
+                spreadsheet.markInvalidFormula(cell.getColumnIndex() + 1,
+                        cell.getRowIndex() + 1);
+            }
         }
 
     }
