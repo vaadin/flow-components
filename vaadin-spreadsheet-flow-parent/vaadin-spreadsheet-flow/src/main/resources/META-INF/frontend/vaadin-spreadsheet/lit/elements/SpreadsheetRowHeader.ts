@@ -210,6 +210,14 @@ export class SpreadsheetRowHeader extends LitElement {
       border-bottom: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
     }
 
+    /* The active cell's headers are tinted so the cursor's row and
+       column stay findable on a wide sheet. This is the tint the GWT
+       client painted; the cell also carries the documented
+       ::part(header-selected) for consumers who want another one. */
+    .row-header-cell[part~='header-selected'] {
+      background: var(--vaadin-spreadsheet-header-selected-bg, #e6edf4);
+    }
+
     /* Resize handle on the bottom edge of each row header
            (slice 164). 5px tall, full-width, cursor:row-resize. */
     .row-resize-handle {

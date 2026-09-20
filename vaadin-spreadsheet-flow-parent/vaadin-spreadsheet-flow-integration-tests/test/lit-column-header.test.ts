@@ -47,6 +47,7 @@ function buildState(opts: {
     colWidths: number[];
     headerHeight: number;
     totalGridWidthPx?: number;
+    selectedColumns?: ReadonlySet<number>;
 }): ColumnHeaderRenderState {
     const empty = emptyColumnHeaderRenderState();
     return {
@@ -64,6 +65,7 @@ function buildState(opts: {
         colWidths: opts.colWidths,
         headerHeight: opts.headerHeight,
         totalGridWidthPx: opts.totalGridWidthPx ?? empty.totalGridWidthPx,
+        selectedColumns: opts.selectedColumns ?? empty.selectedColumns,
     };
 }
 
@@ -392,6 +394,82 @@ describe('SpreadsheetColumnHeader — re-renders on renderState reassignment', (
         expect(cells[1].classList.contains('col6')).to.be.true;
         expect(cells[0].textContent?.trim()).to.equal('E');
         expect(cells[1].textContent?.trim()).to.equal('F');
+
+        cleanup(el);
+    });
+});
+
+describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
+    async function attachWithSelection(
+        selectedColumns: ReadonlySet<number>
+    ): Promise<SpreadsheetColumnHeader> {
+        return attachWithState(
+            buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 3,
+                firstColumnPosition: 0,
+                colX: [0, 50, 100],
+                colWidths: [50, 50, 50],
+                headerHeight: 20,
+                selectedColumns,
+            })
+        );
+    }
+
+    it('marks only the selected column with the header-selected part', async () => {
+        const el = await attachWithSelection(new Set([2]));
+
+        const cells = el.shadowRoot!.querySelectorAll('.col-header-cell');
+        expect(cells[0].getAttribute('part')).to.equal('column-header');
+        expect(cells[1].getAttribute('part')).to.equal(
+            'column-header header-selected'
+        );
+        expect(cells[2].getAttribute('part')).to.equal('column-header');
+
+        cleanup(el);
+    });
+
+    it('tints the selected column so the cursor stays findable', async () => {
+        // The part alone does nothing visible. Before this the whole
+        // header strip rendered one flat colour, and on a wide sheet
+        // nothing said which column the cursor was in.
+        const el = await attachWithSelection(new Set([2]));
+
+        const cells = el.shadowRoot!.querySelectorAll('.col-header-cell');
+        const selected = getComputedStyle(cells[1]).backgroundColor;
+        expect(selected).to.equal('rgb(230, 237, 244)');
+        expect(getComputedStyle(cells[0]).backgroundColor).to.not.equal(
+            selected
+        );
+
+        cleanup(el);
+    });
+
+    it('takes the tint from --vaadin-spreadsheet-header-selected-bg', async () => {
+        const el = await attachWithSelection(new Set([2]));
+        el.style.setProperty(
+            '--vaadin-spreadsheet-header-selected-bg',
+            'rgb(1, 2, 3)'
+        );
+
+        const cells = el.shadowRoot!.querySelectorAll('.col-header-cell');
+        expect(getComputedStyle(cells[1]).backgroundColor).to.equal(
+            'rgb(1, 2, 3)'
+        );
+
+        cleanup(el);
+    });
+
+    it('leaves every column plain when nothing is selected', async () => {
+        const el = await attachWithSelection(new Set());
+
+        const cells = el.shadowRoot!.querySelectorAll('.col-header-cell');
+        for (const cell of cells) {
+            expect(cell.getAttribute('part')).to.equal('column-header');
+            expect(getComputedStyle(cell).backgroundColor).to.not.equal(
+                'rgb(230, 237, 244)'
+            );
+        }
 
         cleanup(el);
     });

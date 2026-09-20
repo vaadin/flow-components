@@ -225,6 +225,14 @@ export class SpreadsheetColumnHeader extends LitElement {
       border-right: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
     }
 
+    /* The active cell's headers are tinted so the cursor's row and
+       column stay findable on a wide sheet. This is the tint the GWT
+       client painted; the cell also carries the documented
+       ::part(header-selected) for consumers who want another one. */
+    .col-header-cell[part~='header-selected'] {
+      background: var(--vaadin-spreadsheet-header-selected-bg, #e6edf4);
+    }
+
     /* Resize handle on the right edge of each column header
            (slice 164). 4px wide, full-height, cursor:col-resize.
            Mousedown begins a column-resize drag. */

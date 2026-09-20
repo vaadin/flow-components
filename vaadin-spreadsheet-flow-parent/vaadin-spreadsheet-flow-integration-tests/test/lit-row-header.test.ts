@@ -49,6 +49,7 @@ function buildState(opts: {
     rowHeights: number[];
     headerWidth: number;
     totalGridHeightPx?: number;
+    selectedRows?: ReadonlySet<number>;
 }): RowHeaderRenderState {
     const empty = emptyRowHeaderRenderState();
     return {
@@ -66,6 +67,7 @@ function buildState(opts: {
         rowHeights: opts.rowHeights,
         headerWidth: opts.headerWidth,
         totalGridHeightPx: opts.totalGridHeightPx ?? empty.totalGridHeightPx,
+        selectedRows: opts.selectedRows ?? empty.selectedRows,
     };
 }
 
@@ -508,5 +510,81 @@ describe('Row header — grouping reaches the server', () => {
 
         sheet.dispose();
         host.remove();
+    });
+});
+
+describe('SpreadsheetRowHeader — the active cell\'s row', () => {
+    async function attachWithSelection(
+        selectedRows: ReadonlySet<number>
+    ): Promise<SpreadsheetRowHeader> {
+        return attachWithState(
+            buildState({
+                firstRowIndex: 1,
+                lastRowIndex: 3,
+                firstRowPosition: 0,
+                rowY: [0, 20, 40],
+                rowHeights: [20, 20, 20],
+                headerWidth: 40,
+                selectedRows,
+            })
+        );
+    }
+
+    it('marks only the selected row with the header-selected part', async () => {
+        const el = await attachWithSelection(new Set([2]));
+
+        const cells = el.shadowRoot!.querySelectorAll('.row-header-cell');
+        expect(cells[0].getAttribute('part')).to.equal('row-header');
+        expect(cells[1].getAttribute('part')).to.equal(
+            'row-header header-selected'
+        );
+        expect(cells[2].getAttribute('part')).to.equal('row-header');
+
+        cleanup(el);
+    });
+
+    it('tints the selected row so the cursor stays findable', async () => {
+        // The part alone does nothing visible. Before this the whole
+        // header strip rendered one flat colour, and on a tall sheet
+        // nothing said which row the cursor was in.
+        const el = await attachWithSelection(new Set([2]));
+
+        const cells = el.shadowRoot!.querySelectorAll('.row-header-cell');
+        const selected = getComputedStyle(cells[1]).backgroundColor;
+        expect(selected).to.equal('rgb(230, 237, 244)');
+        expect(getComputedStyle(cells[0]).backgroundColor).to.not.equal(
+            selected
+        );
+
+        cleanup(el);
+    });
+
+    it('takes the tint from --vaadin-spreadsheet-header-selected-bg', async () => {
+        const el = await attachWithSelection(new Set([2]));
+        el.style.setProperty(
+            '--vaadin-spreadsheet-header-selected-bg',
+            'rgb(1, 2, 3)'
+        );
+
+        const cells = el.shadowRoot!.querySelectorAll('.row-header-cell');
+        expect(getComputedStyle(cells[1]).backgroundColor).to.equal(
+            'rgb(1, 2, 3)'
+        );
+
+        cleanup(el);
+    });
+
+    it('leaves every row plain when nothing is selected', async () => {
+        const el = await attachWithSelection(new Set());
+
+        const cells = el.shadowRoot!.querySelectorAll('.row-header-cell');
+        for (const cell of cells) {
+            expect(cell.getAttribute('part')).to.equal('row-header');
+            expect(getComputedStyle(cell).backgroundColor).to.not.equal(
+                'rgb(230, 237, 244)'
+            );
+        }
+
+        cleanup(el);
     });
 });
