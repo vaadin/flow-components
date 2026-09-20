@@ -70,6 +70,12 @@ public enum DatePickerVariant implements ThemeVariant {
     ALIGN_START("align-start"),
     ALIGN_END("align-end"),
     HELPER_ABOVE("helper-above-field"),
+    /**
+     * Places the label next to the input instead of above it.
+     *
+     * @since 25.4
+     */
+    LABEL_ASIDE("label-aside"),
     SMALL("small");
 
     private final String variant;
