@@ -784,6 +784,35 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         };
     }
 
+    it('paints the outline above the cells, not under them', async () => {
+        // The four border divs existing is not enough. Cells are
+        // positioned with z-index 1 and an opaque background, so an
+        // outline left at the default z-index is in the DOM, correctly
+        // sized, and completely invisible - which is how it shipped
+        // until the Phase 3.0 baselines were read pixel by pixel. Only
+        // the corner handle, which had its own z-index, showed.
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 2, row: 2 },
+            activeRange: { c1: 2, c2: 3, r1: 2, r2: 3 },
+            auxRanges: [],
+        }));
+
+        const overlay = el.shadowRoot!.querySelector('.sheet-selection')!;
+        const cell = el.shadowRoot!.querySelector('.cell')!;
+        const cellZ = Number(getComputedStyle(cell).zIndex);
+        expect(cellZ).to.be.greaterThan(0);
+
+        for (const side of ['s-top', 's-left', 's-right', 's-bottom']) {
+            const border = overlay.querySelector('.' + side)!;
+            const z = Number(getComputedStyle(border).zIndex);
+            expect(z, side + ' must paint above the cells').to.be.greaterThan(
+                cellZ
+            );
+        }
+
+        cleanup(el);
+    });
+
     it('renders the .sheet-selection overlay with 4 border children', async () => {
         const el = await attachWithState(buildOverlayState({
             activeCell: { col: 2, row: 2 },

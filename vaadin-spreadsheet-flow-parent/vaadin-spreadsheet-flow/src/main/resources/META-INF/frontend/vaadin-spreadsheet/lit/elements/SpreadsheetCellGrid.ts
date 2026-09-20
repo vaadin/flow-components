@@ -170,6 +170,10 @@ export class SpreadsheetCellGrid extends LitElement {
       width: 100%;
       height: 2px;
       background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      /* Above the cells, which carry z-index 1 and paint an
+         opaque background. Without this the outline is in the DOM,
+         correctly sized, and invisible - every cell covers it. */
+      z-index: 3;
     }
     .sheet-selection .s-bottom {
       position: absolute;
@@ -178,6 +182,10 @@ export class SpreadsheetCellGrid extends LitElement {
       width: 100%;
       height: 2px;
       background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      /* Above the cells, which carry z-index 1 and paint an
+         opaque background. Without this the outline is in the DOM,
+         correctly sized, and invisible - every cell covers it. */
+      z-index: 3;
     }
     .sheet-selection .s-left {
       position: absolute;
@@ -186,6 +194,10 @@ export class SpreadsheetCellGrid extends LitElement {
       width: 2px;
       height: 100%;
       background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      /* Above the cells, which carry z-index 1 and paint an
+         opaque background. Without this the outline is in the DOM,
+         correctly sized, and invisible - every cell covers it. */
+      z-index: 3;
     }
     .sheet-selection .s-right {
       position: absolute;
@@ -194,6 +206,10 @@ export class SpreadsheetCellGrid extends LitElement {
       width: 2px;
       height: 100%;
       background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      /* Above the cells, which carry z-index 1 and paint an
+         opaque background. Without this the outline is in the DOM,
+         correctly sized, and invisible - every cell covers it. */
+      z-index: 3;
     }
     .sheet-selection .selection-corner {
       position: absolute;
@@ -207,8 +223,7 @@ export class SpreadsheetCellGrid extends LitElement {
       /* Above the cells, which carry z-index 1. Without this the handle
          paints and can be found in the DOM but the cell under it wins
          every hit test, so a real drag selects cells instead of filling
-         them. The border divs above have explicit z-indexes for the same
-         reason. */
+         them. The border divs above are raised for the same reason. */
       z-index: 3;
     }
     /* Cells inside the active range get a subtle background

@@ -65,14 +65,28 @@ public class GenericIT extends AbstractSpreadsheetIT {
         a2.setValue("6/7/2009");
         b1.setValue("=A1+3");
 
+        // TODAY() is evaluated on the server while the expected value is
+        // worked out here, so a run that crosses midnight sees the two land
+        // on different days. Both readings are accepted rather than pinning
+        // one, and B1 is checked against A1 instead of against the clock.
+        long today = excelSerialForToday();
+        String a1Value = a1.getValue();
+        Assert.assertTrue(
+                "TODAY() should be " + today + " (or " + (today + 1)
+                        + " when the run crosses midnight), was " + a1Value,
+                a1Value.equals(Long.toString(today))
+                        || a1Value.equals(Long.toString(today + 1)));
+        Assert.assertEquals(Long.parseLong(a1Value) + 3,
+                Long.parseLong(b1.getValue()));
+    }
+
+    /** Today's date as the serial number Excel counts days with. */
+    private long excelSerialForToday() {
         Calendar start = new GregorianCalendar(1900, Calendar.JANUARY, 0);
         Calendar now = Calendar.getInstance();
         now.add(Calendar.DAY_OF_YEAR, 1);
-        long today = (now.getTime().getTime() - start.getTime().getTime())
+        return (now.getTime().getTime() - start.getTime().getTime())
                 / (1000 * 60 * 60 * 24);
-
-        Assert.assertEquals(Long.toString(today), a1.getValue());
-        Assert.assertEquals(today + 3, Long.parseLong(b1.getValue()));
     }
 
     @Test
