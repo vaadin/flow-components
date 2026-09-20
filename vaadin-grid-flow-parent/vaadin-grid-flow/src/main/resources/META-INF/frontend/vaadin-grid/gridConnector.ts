@@ -54,9 +54,8 @@ export class GridConnector {
     this.#addGridEventListeners();
   }
 
-  hasRootRequestQueue(): boolean {
-    const { pendingRequests } = this.#dataProviderController.rootCache;
-    return Object.keys(pendingRequests).length > 0 || !!this.#requestDebouncer?.isActive();
+  hasPendingRequests(): boolean {
+    return this.#dataProviderController.isLoading() || !!this.#requestDebouncer?.isActive();
   }
 
   doSelection(items: (Item | null)[], userOriginated?: boolean): void {
