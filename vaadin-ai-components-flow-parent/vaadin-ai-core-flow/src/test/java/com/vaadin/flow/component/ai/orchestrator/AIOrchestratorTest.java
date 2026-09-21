@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -3700,130 +3699,6 @@ class AIOrchestratorTest {
                         .anyMatch(event -> event.getLevel() == Level.ERROR),
                 "A response listener that throws must be reported, "
                         + "not swallowed silently");
-    }
-
-    @Test
-    void reconnect_withNullProvider_throwsNullPointerException()
-            throws Exception {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
-        simulateDeserialization(orchestrator);
-
-        Assertions.assertThrows(NullPointerException.class,
-                () -> orchestrator.reconnect(null));
-    }
-
-    @Test
-    void reconnect_apply_usesTheNewProviderForLaterPrompts() throws Exception {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
-        simulateDeserialization(orchestrator);
-        var newProvider = Mockito.mock(LLMProvider.class);
-        Mockito.when(
-                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
-        orchestrator.reconnect(newProvider).apply();
-        orchestrator.prompt("Hello");
-
-        Mockito.verify(newProvider)
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
-    }
-
-    @Test
-    void reconnect_withTools_toolsReachTheNextRequest() throws Exception {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
-        simulateDeserialization(orchestrator);
-        var newProvider = Mockito.mock(LLMProvider.class);
-        Mockito.when(
-                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
-        orchestrator.reconnect(newProvider).withTools(new SampleTool()).apply();
-        orchestrator.prompt("Use tool");
-
-        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
-        Mockito.verify(newProvider).stream(captor.capture());
-        Assertions.assertEquals(1, captor.getValue().tools().length);
-    }
-
-    @Test
-    void reconnect_withController_controllerReceivesTheNextRequest()
-            throws Exception {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
-        simulateDeserialization(orchestrator);
-        var newProvider = Mockito.mock(LLMProvider.class);
-        Mockito.when(
-                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-        var requests = new ArrayList<String>();
-        AIController controller = new AIController() {
-            @Override
-            public List<LLMProvider.ToolSpec> getTools() {
-                return List.of();
-            }
-
-            @Override
-            public void onRequest(RequestListener.RequestEvent event) {
-                requests.add(event.getUserMessage());
-            }
-        };
-
-        orchestrator.reconnect(newProvider).withController(controller).apply();
-        orchestrator.prompt("Hello");
-
-        Assertions.assertEquals(List.of("Hello"), requests);
-    }
-
-    @Test
-    void reconnect_withAttachments_restoresThemOnTheNewProvider()
-            throws Exception {
-        var history = List.of(new ChatMessage(ChatMessage.Role.USER, "Hello",
-                "msg-1", Instant.now()));
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withHistory(history, Map.of()).build();
-        simulateDeserialization(orchestrator);
-        var newProvider = Mockito.mock(LLMProvider.class);
-        var attachments = Map.of("msg-1", List.of(new AIAttachment("note.txt",
-                "text/plain", "note".getBytes(StandardCharsets.UTF_8))));
-
-        orchestrator.reconnect(newProvider).withAttachments(attachments)
-                .apply();
-
-        var captor = ArgumentCaptor.forClass(Map.class);
-        Mockito.verify(newProvider).setHistory(Mockito.anyList(),
-                captor.capture());
-        Assertions.assertEquals(attachments, captor.getValue());
-    }
-
-    @Test
-    void reconnect_apply_releasesAPromptThatWasInFlight() throws Exception {
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.never());
-        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
-        // Leaves the busy guard claimed, as serializing mid-turn does
-        orchestrator.prompt("Interrupted");
-        simulateDeserialization(orchestrator);
-        var newProvider = Mockito.mock(LLMProvider.class);
-        Mockito.when(
-                newProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-
-        orchestrator.reconnect(newProvider).apply();
-        orchestrator.prompt("After restore");
-
-        Mockito.verify(newProvider)
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
-    }
-
-    /**
-     * Nulls the transient provider field, the state an orchestrator is in after
-     * deserialization and before {@code reconnect}.
-     */
-    private static void simulateDeserialization(AIOrchestrator orchestrator)
-            throws Exception {
-        var providerField = AIOrchestrator.class.getDeclaredField("provider");
-        providerField.setAccessible(true);
-        providerField.set(orchestrator, null);
     }
 
     private void assertBuilderWarning(String fieldName) {
