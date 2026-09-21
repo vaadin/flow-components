@@ -13,6 +13,7 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.JavascriptExecutor;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -48,8 +49,25 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
         getSpreadsheet().getCellAt("A1")
                 .setValue("a value far too wide for one column");
 
-        Assert.assertEquals("visible",
-                getSpreadsheet().getCellAt("A1").getCssValue("overflow"));
+        SheetCellElement a1 = getSpreadsheet().getCellAt("A1");
+        Assert.assertEquals("visible", a1.getCssValue("overflow"));
+        // And the text really is drawn past the cell, not merely allowed to
+        // be: the element holding it is wider than the cell it sits in.
+        Assert.assertTrue("The text should be drawn wider than its own column",
+                renderedTextWidth(a1) > a1.getSize().getWidth());
+    }
+
+    /**
+     * Width of the element the cell's text is drawn in, which is the cell
+     * itself until the text runs past it.
+     */
+    private long renderedTextWidth(SheetCellElement cell) {
+        Object width = ((JavascriptExecutor) getDriver()).executeScript(
+                "const held = arguments[0].querySelector('.cell-spill');"
+                        + "const box = held ? held : arguments[0];"
+                        + "return Math.round(box.getBoundingClientRect().width);",
+                cell);
+        return ((Number) width).longValue();
     }
 
     @Test
