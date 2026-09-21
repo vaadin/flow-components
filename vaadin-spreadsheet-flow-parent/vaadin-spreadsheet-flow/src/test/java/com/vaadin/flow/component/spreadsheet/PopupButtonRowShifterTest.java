@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -102,25 +101,54 @@ class PopupButtonRowShifterTest {
     }
 
     @Test
-    void shift_rowShifted_setCellReferenceWithOffset() {
-        // Pin: a button at row 11 when shifting [first=5, last=10] with
-        // n=3 has row > last=10 AND row >= first=5 → number of rows above
-        // changed. New row = 11 + 3 = 14. setCellReference called with
-        // the new ref; the new ref becomes the key in the rebuilt map.
+    void shift_rowInsideAffectedRange_movesByTheOffset() {
+        // A button inside [first=5, last=10] moves with its row: 7 + 3 = 10.
+        // The old test asked for row > last as well, so a button inside the
+        // range stayed where it was while its row moved out from under it -
+        // flow-components#3223.
         when(registry.isEmpty()).thenReturn(false);
-        CellReference ref11 = new CellReference("Sheet1", 11, 1, true, true);
-        when(button1.getCellReference()).thenReturn(ref11);
+        CellReference ref7 = new CellReference("Sheet1", 7, 1, true, true);
+        when(button1.getCellReference()).thenReturn(ref7);
         when(registry.values()).thenReturn(Arrays.asList(button1));
 
         shifter.shift(5, 10, 3);
 
         verify(binding).detach(button1);
         verify(button1).setCellReference(argThat(
-                ref -> ref != null && ref.getRow() == 14 && ref.getCol() == 1
+                ref -> ref != null && ref.getRow() == 10 && ref.getCol() == 1
                         && "Sheet1".equals(ref.getSheetName())));
         verify(registry).replaceAll(
                 argThat(updated -> updated.values().contains(button1)
                         && updated.size() == 1));
+    }
+
+    @Test
+    void shift_survivingButtons_goBackOntoTheClient() {
+        // Every button is detached at the top because its row index is
+        // stale. The ones that survive have a current one by the end, so
+        // they have to go back - otherwise the shift simply removes them.
+        when(registry.isEmpty()).thenReturn(false);
+        CellReference ref7 = new CellReference("Sheet1", 7, 1, true, true);
+        when(button1.getCellReference()).thenReturn(ref7);
+        when(registry.values()).thenReturn(Arrays.asList(button1));
+
+        shifter.shift(5, 10, 3);
+
+        verify(binding).detach(button1);
+        verify(binding).attach(button1);
+    }
+
+    @Test
+    void shift_removedButtons_doNotGoBack() {
+        when(registry.isEmpty()).thenReturn(false);
+        CellReference ref6 = new CellReference("Sheet1", 6, 1, true, true);
+        when(button1.getCellReference()).thenReturn(ref6);
+        when(registry.values()).thenReturn(Arrays.asList(button1));
+
+        shifter.shift(5, 10, -3);
+
+        verify(binding).detach(button1);
+        verify(binding, never()).attach(button1);
     }
 
     @Test
@@ -144,22 +172,19 @@ class PopupButtonRowShifterTest {
     }
 
     @Test
-    void shift_rowInBetweenFirstAndLast_butNotShiftedOut_isUnaffected() {
-        // Pin: a button at row 7 when shifting [first=5, last=10, n=3]:
-        // - row >= first (7 >= 5) AND row > last (7 > 10) → false
-        // - Therefore numberOfRowsAboveWasChanged returns false
-        // - n is positive so rowWasRemoved returns false
-        // → button is unaffected.
+    void shift_rowBelowAffectedRange_isUnaffected() {
+        // A button at row 11 is past the end of [first=5, last=10], so
+        // nothing above it moved and neither does it.
         when(registry.isEmpty()).thenReturn(false);
-        CellReference ref7 = new CellReference("Sheet1", 7, 1, true, true);
-        when(button1.getCellReference()).thenReturn(ref7);
+        CellReference ref11 = new CellReference("Sheet1", 11, 1, true, true);
+        when(button1.getCellReference()).thenReturn(ref11);
         when(registry.values()).thenReturn(Arrays.asList(button1));
 
         shifter.shift(5, 10, 3);
 
         verify(button1, never()).setCellReference(any());
         verify(registry)
-                .replaceAll(argThat(updated -> updated.get(ref7) == button1));
+                .replaceAll(argThat(updated -> updated.get(ref11) == button1));
     }
 
     @Test
@@ -184,17 +209,11 @@ class PopupButtonRowShifterTest {
         verify(binding).detach(button2);
         verify(binding).detach(button3);
 
-        // button1 unaffected (row 0 < first 5).
+        // button1 unaffected (row 0 is above first=5).
         verify(button1, never()).setCellReference(any());
-        // button2: row 15, first 5, last 10, n -3.
-        // rowWasRemoved: n<0 && row>=first(true) && row < first-n=8 → 15 < 8
-        // false
-        // numberOfRowsAboveWasChanged: row>=first(true) && row>last(true) →
-        // true
-        // New row = 15 + -3 = 12.
-        verify(button2).setCellReference(
-                argThat(ref -> ref != null && ref.getRow() == 12));
-        // button3 dropped.
+        // button2 at row 15 is past last=10, so nothing above it moved.
+        verify(button2, never()).setCellReference(any());
+        // button3 at row 6 was one of the removed rows 5..7.
         verify(button3, never()).setCellReference(any());
 
         // replaceAll contains button1 + button2 only.
@@ -222,25 +241,22 @@ class PopupButtonRowShifterTest {
     }
 
     @Test
-    void shift_zeroOffset_isANoOpForButtons_butStillDetachesAndReplaces() {
-        // Pin: n=0 means no rows moved. rowWasRemoved is false (n<0
-        // required). numberOfRowsAboveWasChanged could still trigger:
-        // row>=first && row>last. For row=15, first=5, last=10 → true.
-        // newRow = 15 + 0 = 15. setCellReference called with effectively
-        // the same row. Documents the contract that n=0 still walks
-        // through the remap logic (no early-return).
+    void shift_zeroOffset_leavesEveryReferenceAlone_butStillDetachesAndReplaces() {
+        // n=0 means no rows moved, so no button's reference changes. It
+        // still walks the remap (no early return), and the buttons come
+        // back on the client at the end.
         when(registry.isEmpty()).thenReturn(false);
-        CellReference ref15 = new CellReference("Sheet1", 15, 1, true, true);
-        when(button1.getCellReference()).thenReturn(ref15);
+        CellReference ref7 = new CellReference("Sheet1", 7, 1, true, true);
+        when(button1.getCellReference()).thenReturn(ref7);
         when(registry.values()).thenReturn(Arrays.asList(button1));
 
         shifter.shift(5, 10, 0);
 
         verify(binding).detach(button1);
-        // setCellReference called with row 15 (offset 0).
-        verify(button1, times(1)).setCellReference(
-                argThat(ref -> ref != null && ref.getRow() == 15));
-        verify(registry).replaceAll(any());
+        verify(button1, never()).setCellReference(any());
+        verify(registry)
+                .replaceAll(argThat(updated -> updated.get(ref7) == button1));
+        verify(binding).attach(button1);
     }
 
     @Test

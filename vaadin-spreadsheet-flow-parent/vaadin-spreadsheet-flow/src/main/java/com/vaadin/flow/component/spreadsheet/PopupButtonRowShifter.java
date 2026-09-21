@@ -19,7 +19,7 @@ import org.apache.poi.ss.util.CellReference;
  * shifted on the active sheet. Detaches every existing button from the DOM
  * first (its row index is stale), recomputes the new cell reference, and either
  * drops the button (if its row was removed) or rebuilds the registry with the
- * new keys.
+ * new keys and puts the button back.
  */
 final class PopupButtonRowShifter implements Serializable {
 
@@ -50,7 +50,8 @@ final class PopupButtonRowShifter implements Serializable {
             int row = cell.getRow();
             if (rowWasRemoved(row, first, n)) {
                 // do nothing -> will be removed
-            } else if (numberOfRowsAboveWasChanged(row, last, first)) {
+            } else if (n != 0
+                    && numberOfRowsAboveWasChanged(row, last, first)) {
                 int newRow = row + n;
                 int col = cell.getCol();
                 CellReference newCell = new CellReference(
@@ -63,14 +64,30 @@ final class PopupButtonRowShifter implements Serializable {
             }
         }
         registry.replaceAll(updated);
+        // Every button was detached above because its row index was stale.
+        // The ones that survived have a current one now, so they go back -
+        // without this the client is simply left without them.
+        for (PopupButton button : updated.values()) {
+            binding.attach(button);
+        }
     }
 
     private static boolean rowWasRemoved(int row, int first, int n) {
         return n < 0 && row >= first && row < first - n;
     }
 
+    /**
+     * Whether the count of rows above {@code row} changed, which is what moves
+     * a button.
+     * <p>
+     * Every row inside the affected range moves by the offset. The old test
+     * asked for {@code row > last} as well, which is true of almost nothing:
+     * {@code last} is the end of the affected range, so a button inside the
+     * range failed it and stayed where it was while its row moved out from
+     * under it. That is flow-components#3223.
+     */
     private static boolean numberOfRowsAboveWasChanged(int row, int last,
             int first) {
-        return row >= first && row > last;
+        return first <= row && row <= last;
     }
 }
