@@ -23,6 +23,7 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -50,7 +51,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
-        KeyNotifier {
+        HasThemeVariant<SliderVariant>, KeyNotifier {
 
     static final double DEFAULT_MIN = 0;
     static final double DEFAULT_MAX = 100;
