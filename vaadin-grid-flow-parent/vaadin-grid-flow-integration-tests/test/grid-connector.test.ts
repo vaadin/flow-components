@@ -201,20 +201,20 @@ describe('grid connector', () => {
       await nextFrame();
     });
 
-    it('should report a root request queue while requesting data', async () => {
-      expect(grid.$connector.hasRootRequestQueue()).to.be.false;
+    it('should report pending requests while requesting data', async () => {
+      expect(grid.$connector.hasPendingRequests()).to.be.false;
 
       // Clearing visible items makes the grid request data again (debounced)
       clear(grid.$connector, 0, 30);
-      expect(grid.$connector.hasRootRequestQueue()).to.be.true;
+      expect(grid.$connector.hasPendingRequests()).to.be.true;
 
       // The debounced request has been sent but not yet confirmed
       await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      expect(grid.$connector.hasRootRequestQueue()).to.be.true;
+      expect(grid.$connector.hasPendingRequests()).to.be.true;
 
-      // Receiving the items resolves the queue
+      // Receiving the items resolves the pending requests
       setRootItems(grid.$connector, items, 0, 30);
-      expect(grid.$connector.hasRootRequestQueue()).to.be.false;
+      expect(grid.$connector.hasPendingRequests()).to.be.false;
     });
 
     it('should request data again after reset', async () => {
