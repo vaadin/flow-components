@@ -65,13 +65,17 @@ public class PreserveOnRefreshIT extends AbstractSpreadsheetIT {
                 .findElement(By.cssSelector("input"));
         input.click();
         input.sendKeys(sampleText, Keys.ENTER);
+        // Refreshing is only a fair test once the server has the value.
+        // Without this the reload races the value change, and what comes
+        // back is empty because nothing was ever stored.
+        getCommandExecutor().waitForVaadin();
 
         getDriver().navigate().refresh();
 
-        spreadsheetElement = getSpreadsheetElement();
-        input = spreadsheetElement.findElement(By.cssSelector("input"));
-        assertComponentVisible(spreadsheetElement, "vaadin-text-field");
-        Assert.assertEquals(sampleText, input.getDomProperty("value"));
+        assertComponentVisible(getSpreadsheetElement(), "vaadin-text-field");
+        // The field comes back before the value it holds does.
+        waitUntil(driver -> sampleText.equals(getSpreadsheetElement()
+                .findElement(By.cssSelector("input")).getDomProperty("value")));
     }
 
     @Test
