@@ -26,7 +26,11 @@ public enum SliderVariant implements ThemeVariant {
     /**
      * Places the helper text above the slider instead of below it.
      */
-    HELPER_ABOVE("helper-above-field");
+    HELPER_ABOVE("helper-above-field"),
+    /**
+     * Places the label next to the slider instead of above it.
+     */
+    LABEL_ASIDE("label-aside");
 
     private final String variant;
 

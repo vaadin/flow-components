@@ -33,6 +33,12 @@ public enum CustomFieldVariant {
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),
     HELPER_ABOVE("helper-above-field"),
+    /**
+     * Places the label next to the field content instead of above it.
+     *
+     * @since 25.4
+     */
+    LABEL_ASIDE("label-aside"),
     SMALL("small");
 
     private final String variant;
