@@ -169,8 +169,8 @@ export class SpreadsheetRowHeader extends LitElement {
       font-size: 10px;
       text-align: center;
       cursor: pointer;
-      background: var(--vaadin-spreadsheet-header-bg, #f5f5f5);
-      border: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      background: var(--vaadin-spreadsheet-grouping-toggle-bg, #fff);
+      border: 1px solid var(--vaadin-spreadsheet-grouping-toggle-border-color, #888);
     }
 
     .row-grouping-toggle:hover {

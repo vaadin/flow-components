@@ -161,7 +161,7 @@ export class SpreadsheetSheetTabs extends LitElement {
     .sheet-tab.active {
       background: var(--vaadin-spreadsheet-tabs-active-bg, #fff);
       color: var(--vaadin-spreadsheet-tabs-active-fg, #1976d2);
-      border-bottom: 2px solid var(--vaadin-spreadsheet-tabs-active-bg, #1976d2);
+      border-bottom: 2px solid var(--vaadin-spreadsheet-tabs-active-fg, #1976d2);
       font-weight: 500;
     }
 

@@ -63,7 +63,8 @@ export class SpreadsheetCellGrid extends LitElement {
     'cell,cell-range,cell-input,comment-triangle,invalid-triangle,popup-button,selection-corner';
 
   static properties = {
-    renderState: { attribute: false }
+    renderState: { attribute: false },
+    tooNarrowCells: { attribute: false }
   };
 
   static styles = css`
@@ -402,10 +403,23 @@ export class SpreadsheetCellGrid extends LitElement {
    * Initialization happens in the constructor instead.
    */
   declare renderState: CellGridRenderState;
+  /**
+   * Cells whose value really is too wide for its column, by key.
+   *
+   * The server flags candidates with {@code needsMeasure}, but it judges
+   * width by one character's width times the character count, which is too
+   * coarse to decide on: it calls a date that fits too wide. So the flagged
+   * ones - a handful at most - are measured here before their value is
+   * replaced with hashes, which is what the GWT client did too.
+   */
+  declare tooNarrowCells: ReadonlySet<string>;
+  /** Hidden span the measuring is done in. */
+  private valueProbe: HTMLSpanElement | null = null;
 
   constructor() {
     super();
     this.renderState = emptyCellGridRenderState();
+    this.tooNarrowCells = new Set();
   }
 
   connectedCallback(): void {
@@ -495,7 +509,58 @@ export class SpreadsheetCellGrid extends LitElement {
    * mode so re-activating an editor at a new cell still places
    * the caret inside.
    */
+  /**
+   * The render state with this element's own measurements folded in.
+   */
+  private measuredState(): CellGridRenderState {
+    return { ...this.renderState, tooNarrowCells: this.tooNarrowCells };
+  }
+
+  /**
+   * Measures the cells the server flagged as possibly too wide.
+   * <p>
+   * The server judges width by one character's width times the character
+   * count, which is too coarse to replace a value with hashes on: it calls a
+   * date that fits too wide. So it flags candidates and the real width is
+   * measured here, the way the GWT client did. Only the flagged cells are
+   * measured, and in a probe rather than in the cells themselves - a cell
+   * already showing hashes measures as narrow and would flip back.
+   */
+  private remeasureTooNarrowCells(): void {
+    const { cellData, viewport, colWidths } = this.renderState;
+    const measured = new Set<string>();
+    for (const [key, data] of cellData) {
+      if (data.needsMeasure !== true) {
+        continue;
+      }
+      const width = colWidths[data.col - viewport.firstColumnIndex] ?? 0;
+      if (width > 0 && this.measureValue(data.cellStyle, data.value ?? '') > width) {
+        measured.add(key);
+      }
+    }
+    if (!sameKeys(measured, this.tooNarrowCells)) {
+      this.tooNarrowCells = measured;
+    }
+  }
+
+  /** What a value would be drawn at, in its own style. */
+  private measureValue(cellStyle: string, value: string): number {
+    if (this.valueProbe === null) {
+      const probe = document.createElement('span');
+      // Out of flow and off-screen so measuring never disturbs the sheet.
+      probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
+      this.shadowRoot!.appendChild(probe);
+      this.valueProbe = probe;
+    }
+    this.valueProbe.className = `cell ${cellStyle}`;
+    this.valueProbe.textContent = value;
+    return this.valueProbe.clientWidth;
+  }
+
   updated(changedProps: Map<string, unknown>): void {
+    if (changedProps.has('renderState')) {
+      this.remeasureTooNarrowCells();
+    }
     const note = this.shadowRoot!.querySelector('.comment-overlay-edit') as HTMLTextAreaElement | null;
     if (note !== null && this.shadowRoot!.activeElement !== note) {
       note.focus();
@@ -722,7 +787,7 @@ export class SpreadsheetCellGrid extends LitElement {
     // their virtual coordinates and scroll naturally with the
     // scroll container.
     const mainCells = renderQuadrant({
-      state: this.renderState,
+      state: this.measuredState(),
       quadrantName: 'main',
       colStart: viewport.firstColumnIndex,
       colEnd: viewport.lastColumnIndex,
@@ -745,7 +810,7 @@ export class SpreadsheetCellGrid extends LitElement {
     let topQuadrant: TemplateResult | string = '';
     if (verticalSplitPosition > 0) {
       const topCells = renderQuadrant({
-        state: this.renderState,
+        state: this.measuredState(),
         quadrantName: 'top',
         colStart: viewport.firstColumnIndex,
         colEnd: viewport.lastColumnIndex,
@@ -763,7 +828,7 @@ export class SpreadsheetCellGrid extends LitElement {
     let leftQuadrant: TemplateResult | string = '';
     if (horizontalSplitPosition > 0) {
       const leftCells = renderQuadrant({
-        state: this.renderState,
+        state: this.measuredState(),
         quadrantName: 'left',
         colStart: 1,
         colEnd: horizontalSplitPosition,
@@ -783,7 +848,7 @@ export class SpreadsheetCellGrid extends LitElement {
     let cornerQuadrant: TemplateResult | string = '';
     if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
       const cornerCells = renderQuadrant({
-        state: this.renderState,
+        state: this.measuredState(),
         quadrantName: 'corner',
         colStart: 1,
         colEnd: horizontalSplitPosition,
@@ -842,6 +907,19 @@ interface QuadrantRenderOpts {
  * nothing else. A second slot of the same name underneath would capture
  * the component and hide it below the merge.
  */
+/** Whether two key sets hold the same keys. */
+function sameKeys(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
+  if (a.size !== b.size) {
+    return false;
+  }
+  for (const key of a) {
+    if (!b.has(key)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function coveredByMergeCoords(
   mergedRegions: ReadonlyArray<{ col1: number; col2: number; row1: number; row2: number }>
 ): Set<string> {
@@ -883,7 +961,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // clipped prefix: "$246 913" where the value is 246 trillion reads as
       // a number, and a wrong one. The server sets needsMeasure when its
       // fit check says the value does not fit.
-      const tooNarrow = data?.needsMeasure === true && width > 0;
+      const tooNarrow = data?.needsMeasure === true && (state.tooNarrowCells?.has(key) ?? false);
       const cellText = tooNarrow ? '###' : data?.value ?? '';
       const rawText = slotName === undefined ? cellText : html`<slot name=${slotName}></slot>`;
       // Text too wide for its column runs into the empty cells beside it.

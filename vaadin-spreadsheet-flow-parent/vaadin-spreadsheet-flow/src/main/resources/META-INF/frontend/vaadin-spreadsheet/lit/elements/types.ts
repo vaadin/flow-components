@@ -66,6 +66,14 @@ export interface CellGridRenderState {
   rowHeights: ReadonlyArray<number>;
 
   /**
+   * Cells whose value has been measured and really is too wide for its
+   * column, by key. Not wire state: the server flags candidates with
+   * {@code needsMeasure}, and the cell-grid measures those few before
+   * replacing their value with hashes.
+   */
+  tooNarrowCells?: ReadonlySet<string>;
+
+  /**
    * Style-index → CSS-rule-body lookup. Each rendered cell carries
    * its style class (e.g. {@code "cs0"}) on its element; the
    * cell-grid emits a {@code <style>} block in its shadow DOM with

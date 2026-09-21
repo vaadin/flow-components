@@ -2068,6 +2068,7 @@ describe('SpreadsheetCellGrid — a value too wide for its column', () => {
         // A clipped "$246 913" reads as a number, and a wrong one by a
         // factor of a million. Excel shows hashes for exactly this reason.
         const el = await attachWithState(stateWith(true));
+        await el.updateComplete;
 
         expect(
             el.shadowRoot!.querySelector('.cell')!.textContent!.trim()
@@ -2082,6 +2083,41 @@ describe('SpreadsheetCellGrid — a value too wide for its column', () => {
         expect(
             el.shadowRoot!.querySelector('.cell')!.textContent!.trim()
         ).to.equal('$246 913 578 024 690,00');
+
+        cleanup(el);
+    });
+
+    it('shows a flagged value that turns out to fit', async () => {
+        // The server judges width by one character's width times the
+        // character count, which is coarse enough to flag a date that fits.
+        // Replacing such a cell with hashes on the flag alone hid perfectly
+        // good values - it broke ValueHandlerIT's "29-Jun-06".
+        const a1 = makeCellData(1, 1, '29-Jun-06');
+        const el = await attachWithState({
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 1,
+                lastColumnPosition: 400,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 1,
+                lastRowPosition: 20,
+            },
+            cellData: new Map<string, CellData>([
+                ['col1 row1', { ...a1, needsMeasure: true }],
+            ]),
+            colX: [0],
+            rowY: [0],
+            colWidths: [400],
+            rowHeights: [20],
+        });
+        await el.updateComplete;
+
+        expect(
+            el.shadowRoot!.querySelector('.cell')!.textContent!.trim()
+        ).to.equal('29-Jun-06');
 
         cleanup(el);
     });

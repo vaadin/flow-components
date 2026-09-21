@@ -15,8 +15,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,6 +67,30 @@ public class DeclaredCssVariableContractTest {
         assertTrue(unread.isEmpty(),
                 "Declared but never read, so setting them does nothing: "
                         + unread);
+    }
+
+    /** A read with a fallback: {@code var(--name, fallback)}. */
+    private static final Pattern READ_WITH_FALLBACK = Pattern.compile(
+            "var\\((--vaadin-spreadsheet-[a-zA-Z0-9-]+),\\s*([^)]+)\\)");
+
+    @Test
+    public void noProperty_isReadWithTwoDifferentDefaults() throws IOException {
+        Map<String, Set<String>> defaults = new LinkedHashMap<>();
+        Matcher matcher = READ_WITH_FALLBACK.matcher(readClientSources());
+        while (matcher.find()) {
+            defaults.computeIfAbsent(matcher.group(1),
+                    key -> new LinkedHashSet<>())
+                    .add(matcher.group(2).trim().replaceAll("\\s+", " "));
+        }
+
+        List<String> conflicting = defaults.entrySet().stream()
+                .filter(entry -> entry.getValue().size() > 1)
+                .map(entry -> entry.getKey() + " " + entry.getValue()).toList();
+
+        assertTrue(conflicting.isEmpty(),
+                "One property cannot mean two things: surfaces that share it"
+                        + " render differently until someone sets it, and then"
+                        + " they collapse into one colour. " + conflicting);
     }
 
     private Set<String> declaredProperties() throws IOException {
