@@ -3660,6 +3660,19 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void builder_withAttachmentClickListenerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withAttachmentClickListener(event -> {
+                    // no handling needed, the warning is the subject
+                });
+        assertNoBuilderWarning();
+        orchestratorBuilder.withAttachmentClickListener(event -> {
+            // no handling needed, the warning is the subject
+        });
+        assertBuilderWarning("attachmentClickListener");
+    }
+
+    @Test
     void prompt_withFeatureFlagDisabled_throwsExperimentalFeatureException() {
         featureFlagExtension.disableFeature();
         var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
