@@ -25,6 +25,13 @@ public class GroupingIT extends AbstractSpreadsheetIT {
 
     private static final String IMAGE_CSS_SELECTOR = "div.sheet-image";
 
+    /**
+     * The last row of row_group_at_last_row.xlsx, which is also the last row of
+     * the row group in that file, 1-based.
+     */
+    private static final int LAST_ROW = 205;
+    private static final int GROUPED_ROWS = 4;
+
     @Before
     public void init() {
         open();
@@ -99,7 +106,40 @@ public class GroupingIT extends AbstractSpreadsheetIT {
         Assert.assertTrue("Image height", Float.parseFloat(height) > 300);
     }
 
+    @Test
+    public void grouping_rowGroupEndsOnLastRow_groupingElementSpansGroup() {
+        SpreadsheetElement spreadsheetElement = loadGroupAtLastRowFile();
+
+        WebElement rowGrouping = findElementInShadowRoot(
+                By.cssSelector(".row-group-pane .grouping.minus"));
+        int rowHeight = spreadsheetElement.getRowHeader(LAST_ROW).getSize()
+                .getHeight();
+        Assert.assertTrue("Row grouping height",
+                rowGrouping.getSize().getHeight() >= GROUPED_ROWS * rowHeight);
+    }
+
+    @Test
+    public void grouping_rowGroupEndsOnLastRow_collapseRowGroup_rowsHidden() {
+        SpreadsheetElement spreadsheetElement = loadGroupAtLastRowFile();
+
+        collapseRow(spreadsheetElement);
+
+        waitUntil(driver -> !spreadsheetElement.getRowHeader(LAST_ROW)
+                .isDisplayed());
+    }
+
     // HELPERS
+    private SpreadsheetElement loadGroupAtLastRowFile() {
+        loadFile("row_group_at_last_row.xlsx");
+        SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class)
+                .first();
+        // the group is at the end of the sheet, scroll it into view
+        spreadsheetElement.scroll(100000);
+        waitUntil(driver -> !findElementsInShadowRoot(
+                By.cssSelector(".rh.row" + LAST_ROW)).isEmpty());
+        return spreadsheetElement;
+    }
+
     private SpreadsheetElement loadImageFile() {
         loadFile("group_image.xlsx");
         return $(SpreadsheetElement.class).first();
