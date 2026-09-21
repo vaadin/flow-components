@@ -266,6 +266,26 @@ export class SpreadsheetCellGrid extends LitElement {
       z-index: 1;
     }
 
+    /* A cell whose text runs past its own column. It has to stop
+       clipping, and it has to paint over the empty neighbours the text
+       reaches into - they come later in the DOM and have a ground of
+       their own, so at equal z-index they would cover the text. Comes
+       after the rule above, which is equally specific. Still below the
+       selection outline at 3. */
+    .cell.overflowing {
+      overflow: visible;
+      z-index: 2;
+    }
+
+    /* Holds the text at the width the server worked out, so the browser
+       does the clipping at the far end of the spill instead of at the
+       cell's own edge. */
+    .cell.overflowing .cell-spill {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+    }
+
     /* Sheet overlays — images, charts, and embedded
            components positioned at absolute pixel coordinates on
            the sheet. Slice 160. z-index above cells but below
@@ -843,7 +863,14 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // that instead of its own text — it is what the cell is for.
       const underMerge = covered.has(key);
       const slotName = underMerge ? undefined : (state.cellSlots ?? {})[key];
-      const text = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
+      const rawText = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
+      // Text too wide for its column runs into the empty cells beside it.
+      // The server settles how far, because it is the side that knows what
+      // the neighbours hold; a cell showing a component or sitting under a
+      // merge keeps to itself.
+      const spill = slotName === undefined && !underMerge ? data?.overflowWidth ?? 0 : 0;
+      const overflowing = spill > width;
+      const text = overflowing ? html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>` : rawText;
       const cellStyleClass = data?.cellStyle ?? '';
       const inSelection = isCellSelected(selection, col, row);
       const isActive = isActiveCell(selection, col, row);
@@ -863,7 +890,8 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
         `cell col${col} row${row} quadrant-${quadrantName}` +
         (cellStyleClass ? ` ${cellStyleClass}` : '') +
         cellRangeClass +
-        linkClass;
+        linkClass +
+        (overflowing ? ' overflowing' : '');
       const style =
         `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
         collapsedDeclaration(width, height) +

@@ -1955,3 +1955,86 @@ describe('SpreadsheetCellGrid — hidden rows and columns', () => {
         cleanup(el);
     });
 });
+
+describe('SpreadsheetCellGrid — text running past its own column', () => {
+    function stateWithSpill(overflowWidth: number): CellGridRenderState {
+        const a1 = makeCellData(1, 1, 'a value too wide for its column');
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 3,
+                lastColumnPosition: 150,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 1,
+                lastRowPosition: 20,
+            },
+            cellData: new Map<string, CellData>([
+                ['col1 row1', { ...a1, overflowWidth }],
+            ]),
+            colX: [0, 50, 100],
+            rowY: [0],
+            colWidths: [50, 50, 50],
+            rowHeights: [20],
+        };
+    }
+
+    function firstCell(el: SpreadsheetCellGrid): HTMLElement {
+        return el.shadowRoot!.querySelector<HTMLElement>('.cell')!;
+    }
+
+    it('leaves a cell that fits alone', async () => {
+        const el = await attachWithState(stateWithSpill(0));
+
+        const cell = firstCell(el);
+        expect(cell.classList.contains('overflowing')).to.be.false;
+        expect(cell.querySelector('.cell-spill')).to.be.null;
+        expect(getComputedStyle(cell).overflow).to.equal('hidden');
+
+        cleanup(el);
+    });
+
+    it('draws the text at the width the server sent', async () => {
+        const el = await attachWithState(stateWithSpill(150));
+
+        const spill = firstCell(el).querySelector<HTMLElement>('.cell-spill')!;
+        expect(spill, 'the text is wrapped so it can be given a width').to.not
+            .be.null;
+        expect(spill.style.width).to.equal('150px');
+        expect(spill.textContent).to.equal('a value too wide for its column');
+
+        cleanup(el);
+    });
+
+    it('stops clipping the cell so the text can leave it', async () => {
+        const el = await attachWithState(stateWithSpill(150));
+
+        expect(getComputedStyle(firstCell(el)).overflow).to.equal('visible');
+
+        cleanup(el);
+    });
+
+    it('paints over the empty neighbours the text reaches into', async () => {
+        // The neighbours come later in the DOM and have a ground of their
+        // own, so at equal z-index they would cover the spilled text.
+        const el = await attachWithState(stateWithSpill(150));
+
+        const cells = el.shadowRoot!.querySelectorAll<HTMLElement>('.cell');
+        const spilling = Number(getComputedStyle(cells[0]).zIndex);
+        const neighbour = Number(getComputedStyle(cells[1]).zIndex);
+        expect(spilling).to.be.greaterThan(neighbour);
+
+        cleanup(el);
+    });
+
+    it('stays put when the width is no wider than the column', async () => {
+        // A server that reports the cell's own width is saying "no spill".
+        const el = await attachWithState(stateWithSpill(50));
+
+        expect(firstCell(el).classList.contains('overflowing')).to.be.false;
+
+        cleanup(el);
+    });
+});

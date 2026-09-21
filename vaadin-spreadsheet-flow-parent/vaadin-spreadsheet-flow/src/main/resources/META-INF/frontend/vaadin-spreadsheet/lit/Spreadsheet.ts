@@ -1388,6 +1388,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       locked: previous?.locked ?? false,
       needsMeasure: previous?.needsMeasure ?? false,
       isPercentage: previous?.isPercentage ?? false,
+      // Not carried over: how far the old text ran into its neighbours says
+      // nothing about how far the newly typed text should. The server sends
+      // the new width with its answer.
+      overflowWidth: 0,
       ...(previous?.formulaValue !== undefined ? { formulaValue: previous.formulaValue } : {}),
       ...(previous?.originalValue !== undefined ? { originalValue: previous.originalValue } : {}),
       ...(previous?.textColor !== undefined ? { textColor: previous.textColor } : {})

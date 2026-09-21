@@ -42,6 +42,27 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void longText_nextCellEmpty_textRunsIntoIt() {
+        // A spreadsheet does not clip text at the column edge; it carries on
+        // across the empty cells beside it.
+        getSpreadsheet().getCellAt("A1")
+                .setValue("a value far too wide for one column");
+
+        Assert.assertEquals("visible",
+                getSpreadsheet().getCellAt("A1").getCssValue("overflow"));
+    }
+
+    @Test
+    public void longText_nextCellTaken_textStaysInItsColumn() {
+        getSpreadsheet().getCellAt("B1").setValue("in the way");
+        getSpreadsheet().getCellAt("A1")
+                .setValue("a value far too wide for one column");
+
+        Assert.assertEquals("hidden",
+                getSpreadsheet().getCellAt("A1").getCssValue("overflow"));
+    }
+
+    @Test
     public void verticalOverflowCells_noOverflow() {
         loadWrapTextTest();
 

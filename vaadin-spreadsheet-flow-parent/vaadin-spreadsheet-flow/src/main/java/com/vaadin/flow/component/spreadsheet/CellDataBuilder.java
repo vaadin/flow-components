@@ -17,6 +17,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +66,7 @@ final class CellDataBuilder implements Serializable {
         cellData.row = cell.getRowIndex() + 1;
         cellData.col = cell.getColumnIndex() + 1;
         CellStyle cellStyle = cell.getCellStyle();
+        boolean valueOverflows = false;
         cellData.cellStyle = "cs" + cellStyle.getIndex();
         cellData.locked = spreadsheet.isCellLocked(cell.getAddress());
         try {
@@ -166,6 +169,12 @@ final class CellDataBuilder implements Serializable {
                                 && (cell.getCellType() == CellType.FORMULA
                                         && cell.getCachedFormulaResultType() != CellType.STRING)) {
                             cellData.needsMeasure = true;
+                        } else {
+                            // Text. A number too wide for its column is
+                            // shortened or measured; text runs on into the
+                            // empty cells beside it instead, and how far is
+                            // settled below, once the alignment is known.
+                            valueOverflows = true;
                         }
                     }
                 }
@@ -185,6 +194,11 @@ final class CellDataBuilder implements Serializable {
                     }
                 }
 
+                if (valueOverflows) {
+                    cellData.overflowWidth = spillWidth(cell,
+                            formattedCellValue,
+                            cellData.cellStyle.endsWith(" r"));
+                }
             }
 
             // conditional formatting might be applied even if there isn't a
@@ -214,6 +228,64 @@ final class CellDataBuilder implements Serializable {
         }
 
         return cellData;
+    }
+
+    /**
+     * How wide this cell's text may be drawn so it runs into the empty cells to
+     * its right, or {@code 0} when it has nowhere to go.
+     *
+     * @param cell
+     *            the cell whose text does not fit its column
+     * @param value
+     *            the text as it will be displayed
+     * @param rightAligned
+     *            whether the cell is right-aligned, which keeps it put
+     * @return the width in pixels, or {@code 0} for no spill
+     */
+    private int spillWidth(Cell cell, String value, boolean rightAligned) {
+        Spreadsheet spreadsheet = manager.spreadsheet;
+        int textWidth = manager.fitCalculator.estimateWidth(cell, value);
+        if (textWidth < 0) {
+            // No width ratio reported yet, so there is nothing to measure
+            // against. The client asks again once it has one.
+            return 0;
+        }
+        for (CellRangeAddress merged : cell.getSheet().getMergedRegions()) {
+            if (merged.isInRange(cell)) {
+                // A merged cell already owns the columns it spans, and the
+                // cells it would run into are its own.
+                return 0;
+            }
+        }
+        Row row = cell.getRow();
+        return CellOverflowCalculator.spillWidth(cell.getColumnIndex(),
+                textWidth, rightAligned, spreadsheet.getColW(),
+                spreadsheet.getLastFrozenColumn(),
+                column -> holdsValue(row, column));
+    }
+
+    /**
+     * Whether the row shows anything at the given 0-based column.
+     * <p>
+     * Reads the cell's type rather than formatting it: this runs once per
+     * column crossed for every overflowing cell in the viewport, and formatting
+     * each neighbour would cost far more than the answer is worth. A blank
+     * cell, a missing one, and one holding an empty string all count as empty,
+     * so text runs across them.
+     */
+    private static boolean holdsValue(Row row, int column) {
+        if (row == null) {
+            return false;
+        }
+        Cell neighbour = row.getCell(column);
+        if (neighbour == null) {
+            return false;
+        }
+        return switch (neighbour.getCellType()) {
+        case BLANK, _NONE -> false;
+        case STRING -> !neighbour.getStringCellValue().isEmpty();
+        default -> true;
+        };
     }
 
     private void handleIsDisplayZeroPreference(Cell cell, CellData cellData) {

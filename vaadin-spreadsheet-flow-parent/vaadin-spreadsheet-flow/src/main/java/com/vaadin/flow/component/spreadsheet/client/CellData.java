@@ -27,6 +27,16 @@ public class CellData implements Serializable {
     public String textColor;
     public boolean locked = false;
     public boolean needsMeasure;
+    /**
+     * Width in pixels to give this cell's text so it runs into the empty cells
+     * to its right, or {@code 0} when it fits inside its own column.
+     * <p>
+     * A spreadsheet does not clip text at the column edge; it carries on across
+     * empty neighbours and stops at the first one holding a value. The server
+     * works out how far because it is the side that knows what the neighbours
+     * hold. See {@code CellOverflowCalculator}.
+     */
+    public int overflowWidth;
     public boolean isPercentage;
 
     @Override

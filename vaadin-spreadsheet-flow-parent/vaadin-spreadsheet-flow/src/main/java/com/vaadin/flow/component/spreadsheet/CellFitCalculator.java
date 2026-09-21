@@ -67,6 +67,33 @@ final class CellFitCalculator implements Serializable {
     }
 
     /**
+     * Estimated pixel width of {@code value} rendered in {@code cell}'s style,
+     * or {@code -1} when the client has not reported a width ratio for that
+     * style yet.
+     * <p>
+     * Same estimate {@link #doesValueFit} judges by, so a value that reports as
+     * not fitting cannot then measure as narrow enough to stay put.
+     *
+     * @param cell
+     *            the cell whose style sets the ratio
+     * @param value
+     *            the text as it will be displayed
+     * @return the estimated width in pixels, or {@code -1} when unknown
+     */
+    int estimateWidth(Cell cell, String value) {
+        if (cellStyleWidthRatioMap == null) {
+            return -1;
+        }
+        Float ratio = cellStyleWidthRatioMap
+                .get((int) cell.getCellStyle().getIndex());
+        if (ratio == null) {
+            return -1;
+        }
+        return (int) Math.ceil(BigDecimal.valueOf(ratio)
+                .multiply(BigDecimal.valueOf(value.length())).doubleValue());
+    }
+
+    /**
      * Width-ratio for the given style index, or {@code null} if the client
      * hasn't reported one yet. Used by the scientific-notation branch to feed
      * {@link CellValueFormatter#getScientificNotationStringForNumericCell}.
