@@ -41,6 +41,7 @@ import {
   getDefaultRowHeightPx,
   convertPointsToPixel
 } from './algorithms/ViewportMath.js';
+import { initialEditValue } from './algorithms/PercentageEntry.js';
 import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
 import {
@@ -1737,7 +1738,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
       e.preventDefault();
       // Typing over the cell: an arrow commits and moves on.
-      this.editor = { col, row, initialValue: key, mode: 'enter' };
+      // A digit typed into a percentage cell means that many percent, so
+      // the editor opens on "5%" rather than "5" - see PercentageEntry.
+      this.editor = {
+        col,
+        row,
+        initialValue: initialEditValue(key, this.cellDataByKey.get(toKey(col, row))),
+        mode: 'enter'
+      };
       this.recomputeViewport();
       return;
     }
@@ -3457,8 +3465,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     return data.originalValue ?? data.value ?? '';
   }
+  /**
+   * The server could not make sense of the address that was typed.
+   *
+   * The address field goes back to the cell the selection is actually on,
+   * as the GWT client did. Leaving the typed text would have the field
+   * naming a cell nobody is standing on, and the next Enter would send it
+   * again.
+   */
   invalidCellAddress(): void {
-    // TODO Phase 3.3 — flash the address bar to indicate invalid input.
+    this.formulaBar.revertAddress();
   }
   /**
    * The server moved the selection to a single cell.

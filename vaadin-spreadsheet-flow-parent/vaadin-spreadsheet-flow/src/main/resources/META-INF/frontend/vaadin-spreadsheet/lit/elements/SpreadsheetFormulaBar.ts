@@ -262,6 +262,22 @@ export class SpreadsheetFormulaBar extends LitElement {
     );
   };
 
+  /**
+   * Puts the address field back to the active cell's address.
+   *
+   * The field is bound by property, so Lit leaves the input alone whenever
+   * the bound address has not changed - which is exactly the case after the
+   * server rejects a typed address and the selection stays put. The input
+   * has to be written directly or the rejected text sits there naming a
+   * cell nobody is on.
+   */
+  revertAddress(): void {
+    const input = this.shadowRoot?.querySelector('.address') as HTMLInputElement | null;
+    if (input !== null && input !== undefined) {
+      input.value = this.renderState.address;
+    }
+  }
+
   render(): TemplateResult {
     const { address, formula, namedRanges = [] } = this.renderState;
     // The dropdown only appears once the workbook defines a named range,

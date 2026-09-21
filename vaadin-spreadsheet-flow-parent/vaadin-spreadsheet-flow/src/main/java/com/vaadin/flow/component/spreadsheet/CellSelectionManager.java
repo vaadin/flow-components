@@ -264,6 +264,14 @@ public class CellSelectionManager implements Serializable {
                     selectedCellReference = cellReferenceWithSheetName;
                     cellRangeAddresses.clear();
                 }
+            } else {
+                // Not a named range, not a range, not a cell reference -
+                // there is nothing to select. Saying so lets the client put
+                // the real address back; falling through in silence left the
+                // typed text in the field naming a cell nobody is on, and
+                // the next Enter sent it again.
+                spreadsheet.getRpcProxy().invalidCellAddress();
+                return;
             }
             individualSelectedCells.clear();
             spreadsheet.loadCustomEditorOnSelectedCell();

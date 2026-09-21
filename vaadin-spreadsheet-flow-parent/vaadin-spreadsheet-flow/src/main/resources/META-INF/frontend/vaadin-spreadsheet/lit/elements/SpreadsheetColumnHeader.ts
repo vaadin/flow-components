@@ -198,7 +198,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       z-index: 5;
       box-sizing: border-box;
       background: var(--vaadin-spreadsheet-header-bg, #f4f4f4);
-      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-header-font, inherit);
       font-size: var(--vaadin-spreadsheet-header-font-size, inherit);
     }
@@ -222,7 +222,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       box-sizing: border-box;
       overflow: hidden;
       text-align: center;
-      border-right: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      border-right: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
     }
 
     /* The active cell's headers are tinted so the cursor's row and
@@ -251,7 +251,7 @@ export class SpreadsheetColumnHeader extends LitElement {
     .col-grouping-line {
       position: absolute;
       height: 1px;
-      background: var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      background: var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       pointer-events: none;
     }
 
@@ -262,7 +262,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       box-sizing: border-box;
       padding: 0;
       margin: 0;
-      border: 1px solid var(--vaadin-spreadsheet-header-border, #888);
+      border: 1px solid var(--vaadin-spreadsheet-header-border-color, #888);
       background: var(--vaadin-spreadsheet-header-bg, #fff);
       color: inherit;
       font: inherit;

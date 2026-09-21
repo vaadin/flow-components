@@ -169,3 +169,57 @@ describe('Spreadsheet — editing through the formula field', () => {
         expect(reachedSheet).to.be.false;
     });
 });
+
+/**
+ * An address the server cannot resolve has to leave the field showing the
+ * cell the selection is actually on. The field is bound by property, so Lit
+ * leaves it alone when the bound address has not changed - which is exactly
+ * this case - and the rejected text stayed on screen naming a cell nobody
+ * was standing on.
+ */
+describe('Spreadsheet — an address the server rejects', () => {
+    let host: HTMLDivElement;
+    let sheet: Spreadsheet;
+
+    beforeEach(() => {
+        host = document.createElement('div');
+        host.style.cssText =
+            'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        sheet = new Spreadsheet(host);
+        sheet.setRows(20);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        sheet.setSelectedCellAndRange('C3', 3, 3, 3, 3, 3, 3, false);
+    });
+
+    afterEach(() => {
+        sheet.dispose();
+        host.remove();
+    });
+
+    function addressField(): HTMLInputElement {
+        return sheet
+            .getFormulaBar()
+            .shadowRoot!.querySelector('.address') as HTMLInputElement;
+    }
+
+    it('puts the real address back', async () => {
+        await sheet.getFormulaBar().updateComplete;
+        expect(addressField().value).to.equal('C3');
+
+        addressField().value = 'NOTACELL';
+        sheet.invalidCellAddress();
+
+        expect(addressField().value).to.equal('C3');
+    });
+
+    it('leaves a valid address alone', async () => {
+        await sheet.getFormulaBar().updateComplete;
+        sheet.setSelectedCellAndRange('D4', 4, 4, 4, 4, 4, 4, false);
+        await sheet.getFormulaBar().updateComplete;
+
+        expect(addressField().value).to.equal('D4');
+    });
+});

@@ -13,6 +13,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
+import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
 import { overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
@@ -492,9 +493,12 @@ export class SpreadsheetCellGrid extends LitElement {
       const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
       if (input && document.activeElement !== input) {
         input.focus();
-        // Place caret at end so typing extends the existing
-        // value (Excel convention).
-        input.setSelectionRange(input.value.length, input.value.length);
+        // Caret at the end so typing extends the existing value (Excel
+        // convention), except before a trailing percent sign: a cell opened
+        // on "5%" has to take the next digit into the number, not after the
+        // sign.
+        const caret = caretPosition(input.value);
+        input.setSelectionRange(caret, caret);
       }
     }
   }
@@ -863,7 +867,13 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // that instead of its own text — it is what the cell is for.
       const underMerge = covered.has(key);
       const slotName = underMerge ? undefined : (state.cellSlots ?? {})[key];
-      const rawText = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
+      // A number too wide for its column shows as hashes rather than a
+      // clipped prefix: "$246 913" where the value is 246 trillion reads as
+      // a number, and a wrong one. The server sets needsMeasure when its
+      // fit check says the value does not fit.
+      const tooNarrow = data?.needsMeasure === true && width > 0;
+      const cellText = tooNarrow ? '###' : data?.value ?? '';
+      const rawText = slotName === undefined ? cellText : html`<slot name=${slotName}></slot>`;
       // Text too wide for its column runs into the empty cells beside it.
       // The server settles how far, because it is the side that knows what
       // the neighbours hold; a cell showing a component or sitting under a

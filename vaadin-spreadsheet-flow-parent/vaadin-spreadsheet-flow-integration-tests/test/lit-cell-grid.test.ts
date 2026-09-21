@@ -2038,3 +2038,51 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         cleanup(el);
     });
 });
+
+describe('SpreadsheetCellGrid — a value too wide for its column', () => {
+    function stateWith(needsMeasure: boolean): CellGridRenderState {
+        const a1 = makeCellData(1, 1, '$246 913 578 024 690,00');
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 1,
+                lastColumnPosition: 50,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 1,
+                lastRowPosition: 20,
+            },
+            cellData: new Map<string, CellData>([
+                ['col1 row1', { ...a1, needsMeasure }],
+            ]),
+            colX: [0],
+            rowY: [0],
+            colWidths: [50],
+            rowHeights: [20],
+        };
+    }
+
+    it('shows hashes instead of a clipped number', async () => {
+        // A clipped "$246 913" reads as a number, and a wrong one by a
+        // factor of a million. Excel shows hashes for exactly this reason.
+        const el = await attachWithState(stateWith(true));
+
+        expect(
+            el.shadowRoot!.querySelector('.cell')!.textContent!.trim()
+        ).to.equal('###');
+
+        cleanup(el);
+    });
+
+    it('shows the value when it fits', async () => {
+        const el = await attachWithState(stateWith(false));
+
+        expect(
+            el.shadowRoot!.querySelector('.cell')!.textContent!.trim()
+        ).to.equal('$246 913 578 024 690,00');
+
+        cleanup(el);
+    });
+});

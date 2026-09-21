@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
@@ -497,5 +498,45 @@ public class NavigationIT extends AbstractSpreadsheetIT {
                         cellSelected);
             }
         }
+    }
+
+    /**
+     * An address the server cannot resolve leaves the field showing the cell
+     * the selection is actually on.
+     * <p>
+     * A plain word is not this case - that names the selection, as Excel's Name
+     * Box does. This is text the classifier rejects outright.
+     * <p>
+     * The field is bound by property, so nothing rewrites it when the bound
+     * address has not changed, which is exactly what happens here. The rejected
+     * text used to sit there naming a cell nobody was standing on, and pressing
+     * Enter again sent it again.
+     */
+    @Test
+    public void addressTypedThatIsNotAnAddress_fieldGoesBackToTheSelection() {
+        clickCell("B2");
+        Assert.assertEquals("B2", addressFieldValue());
+
+        navigateToCell("!!!");
+
+        Assert.assertEquals("B2", addressFieldValue());
+    }
+
+    /**
+     * A plain word names the current selection instead of being rejected, and
+     * the field keeps showing that name.
+     */
+    @Test
+    public void wordTypedIntoTheAddressField_namesTheSelection() {
+        clickCell("B2");
+
+        navigateToCell("MYRANGE");
+
+        Assert.assertEquals("MYRANGE", addressFieldValue());
+    }
+
+    private String addressFieldValue() {
+        return findElementInShadowRoot(By.cssSelector(".addressfield"))
+                .getDomProperty("value");
     }
 }

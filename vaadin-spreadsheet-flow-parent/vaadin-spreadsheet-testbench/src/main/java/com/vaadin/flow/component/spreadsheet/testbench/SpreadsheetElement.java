@@ -343,33 +343,50 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Tab-scroll buttons aren't implemented in the Lit sheet-tabs element yet.
-     * This is a no-op until they're added.
+     * Scrolls the sheet-tab strip all the way back to the first tab.
      */
     public void scrollSheetsToStart() {
-        // No-op (deferred): Lit sheet-tabs doesn't render scroll
-        // buttons.
+        clickTabScrollButton(".scroll-tabs-beginning");
     }
 
     /**
-     * Tab-scroll buttons aren't implemented in the Lit sheet-tabs element yet.
-     * This is a no-op until they're added.
+     * Scrolls the sheet-tab strip all the way to the last tab.
      */
     public void scrollSheetsToEnd() {
-        // No-op (deferred): Lit sheet-tabs doesn't render scroll
-        // buttons.
+        clickTabScrollButton(".scroll-tabs-end");
     }
 
     /**
-     * Tab-scroll isn't implemented in the Lit sheet-tabs element yet. Preserved
-     * as a public method that's effectively a no-op.
+     * Scrolls the sheet-tab strip one tab at a time.
      *
      * @param amount
-     *            Amount to scroll (ignored).
+     *            how many tabs to scroll; negative scrolls back towards the
+     *            first tab
      */
     public void scrollSheets(int amount) {
-        // No-op (deferred): Lit sheet-tabs doesn't render scroll
-        // buttons.
+        String selector = amount < 0 ? ".scroll-tabs-left"
+                : ".scroll-tabs-right";
+        for (int i = 0; i < Math.abs(amount); i++) {
+            clickTabScrollButton(selector);
+        }
+    }
+
+    /**
+     * Clicks one of the tab-strip scroll buttons, or does nothing when the
+     * strip is short enough that there is nowhere to scroll - the element marks
+     * a button it cannot use with the {@code hidden} class.
+     */
+    private void clickTabScrollButton(String selector) {
+        WebElement button = findInSheetTabs(selector);
+        if (button == null) {
+            return;
+        }
+        String classes = Optional.ofNullable(button.getDomAttribute("class"))
+                .orElse("");
+        if (classes.contains("hidden")) {
+            return;
+        }
+        button.click();
     }
 
     /**

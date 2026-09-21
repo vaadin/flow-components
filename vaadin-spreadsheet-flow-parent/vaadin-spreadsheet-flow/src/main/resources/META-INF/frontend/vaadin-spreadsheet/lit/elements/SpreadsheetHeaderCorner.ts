@@ -62,8 +62,8 @@ export class SpreadsheetHeaderCorner extends LitElement {
       position: relative;
       box-sizing: border-box;
       background: var(--vaadin-spreadsheet-header-bg, #f4f4f4);
-      border-right: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
-      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      border-right: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
     }
 
     .level-header {
@@ -74,7 +74,7 @@ export class SpreadsheetHeaderCorner extends LitElement {
       justify-content: center;
       padding: 0;
       margin: 0;
-      border: 1px solid var(--vaadin-spreadsheet-header-border, #888);
+      border: 1px solid var(--vaadin-spreadsheet-header-border-color, #888);
       background: var(--vaadin-spreadsheet-header-bg, #fff);
       color: inherit;
       font: inherit;

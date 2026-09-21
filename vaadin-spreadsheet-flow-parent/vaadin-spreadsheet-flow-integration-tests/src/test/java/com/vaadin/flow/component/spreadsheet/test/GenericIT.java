@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
@@ -87,6 +88,47 @@ public class GenericIT extends AbstractSpreadsheetIT {
         now.add(Calendar.DAY_OF_YEAR, 1);
         return (now.getTime().getTime() - start.getTime().getTime())
                 / (1000 * 60 * 60 * 24);
+    }
+
+    /**
+     * Typing a number straight into a percentage cell means that many percent.
+     * <p>
+     * Without help it meant a hundred times that: the editor sent "5", the
+     * sheet stored 5, and the percentage format drew it as 500.00%.
+     */
+    @Test
+    public void percentageCell_typeANumberIntoIt_staysThatManyPercent() {
+        setLocale(Locale.US);
+        // Move the selection off A2 first so the fill indicator is not what
+        // gets clicked when we go back to it.
+        clickCell("F1");
+        setCellValue("A2", "19%");
+        Assert.assertEquals("19.00%", getCellValue("A2"));
+
+        clickCell("A2");
+        new Actions(getDriver()).sendKeys("5").sendKeys(Keys.ENTER).build()
+                .perform();
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("5.00%", getCellValue("A2"));
+    }
+
+    /**
+     * And the caret sits before the sign, so a second digit joins the number
+     * rather than landing after the percent sign.
+     */
+    @Test
+    public void percentageCell_typeTwoDigitsIntoIt_bothJoinTheNumber() {
+        setLocale(Locale.US);
+        clickCell("F1");
+        setCellValue("A2", "19%");
+
+        clickCell("A2");
+        new Actions(getDriver()).sendKeys("53").sendKeys(Keys.ENTER).build()
+                .perform();
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("53.00%", getCellValue("A2"));
     }
 
     @Test

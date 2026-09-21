@@ -153,7 +153,7 @@ export class SpreadsheetRowHeader extends LitElement {
     .row-grouping-line {
       position: absolute;
       width: 1px;
-      background: var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      background: var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       pointer-events: none;
     }
 
@@ -170,7 +170,7 @@ export class SpreadsheetRowHeader extends LitElement {
       text-align: center;
       cursor: pointer;
       background: var(--vaadin-spreadsheet-header-bg, #f5f5f5);
-      border: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      border: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
     }
 
     .row-grouping-toggle:hover {
@@ -184,7 +184,7 @@ export class SpreadsheetRowHeader extends LitElement {
       z-index: 4;
       box-sizing: border-box;
       background: var(--vaadin-spreadsheet-header-bg, #f4f4f4);
-      border-right: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      border-right: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-header-font, inherit);
       font-size: var(--vaadin-spreadsheet-header-font-size, inherit);
     }
@@ -207,7 +207,7 @@ export class SpreadsheetRowHeader extends LitElement {
       box-sizing: border-box;
       overflow: hidden;
       text-align: center;
-      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border, #c0c0c0);
+      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
     }
 
     /* The active cell's headers are tinted so the cursor's row and

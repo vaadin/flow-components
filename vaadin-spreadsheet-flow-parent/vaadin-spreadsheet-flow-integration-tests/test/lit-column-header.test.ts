@@ -474,3 +474,53 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         cleanup(el);
     });
 });
+
+describe('SpreadsheetColumnHeader — the documented border colour', () => {
+    it('draws its borders in --vaadin-spreadsheet-header-border-color', async () => {
+        // The documented property used to be declared and read by nothing:
+        // the headers took an undocumented name with a different default,
+        // so setting the documented one did nothing and header borders came
+        // out a different grey from the cell borders beside them.
+        const el = await attachWithState(
+            buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 2,
+                firstColumnPosition: 0,
+                colX: [0, 50],
+                colWidths: [50, 50],
+                headerHeight: 20,
+            })
+        );
+        el.style.setProperty(
+            '--vaadin-spreadsheet-header-border-color',
+            'rgb(9, 8, 7)'
+        );
+
+        const cell = el.shadowRoot!.querySelector('.col-header-cell')!;
+        expect(getComputedStyle(cell).borderRightColor).to.equal(
+            'rgb(9, 8, 7)'
+        );
+
+        cleanup(el);
+    });
+
+    it('defaults to the same grey the cell borders use', async () => {
+        const el = await attachWithState(
+            buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 2,
+                firstColumnPosition: 0,
+                colX: [0, 50],
+                colWidths: [50, 50],
+                headerHeight: 20,
+            })
+        );
+
+        const cell = el.shadowRoot!.querySelector('.col-header-cell')!;
+        expect(getComputedStyle(cell).borderRightColor).to.equal(
+            'rgb(199, 199, 199)'
+        );
+
+        cleanup(el);
+    });
+});
