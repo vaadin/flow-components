@@ -2086,3 +2086,50 @@ describe('SpreadsheetCellGrid — a value too wide for its column', () => {
         cleanup(el);
     });
 });
+
+describe('SpreadsheetCellGrid — selecting a cell that is already coloured', () => {
+    it('tints the cell rather than repainting it', async () => {
+        // A background would hide a conditional format's fill for as long
+        // as the cell is selected. Excel shows the fill through the
+        // selection, so the tint goes on top as an inset shadow.
+        const a1 = makeCellData(1, 1, 'x');
+        const el = await attachWithState({
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 2,
+                lastColumnPosition: 100,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 1,
+                lastRowPosition: 20,
+            },
+            cellData: new Map<string, CellData>([
+                ['col1 row1', { ...a1, cellStyle: 'cs7' }],
+            ]),
+            colX: [0, 50],
+            rowY: [0],
+            colWidths: [50, 50],
+            rowHeights: [20],
+            cellStyleToCSSStyle: { 7: 'background:rgb(255, 199, 206);' },
+            selection: {
+                activeCell: { col: 2, row: 1 },
+                activeRange: { c1: 1, c2: 2, r1: 1, r2: 1 },
+                auxRanges: [],
+            },
+        });
+
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.cell')!;
+        expect(cell.classList.contains('cell-range')).to.be.true;
+        const style = getComputedStyle(cell);
+        expect(style.backgroundColor, 'the fill is still there').to.equal(
+            'rgb(255, 199, 206)'
+        );
+        expect(style.boxShadow, 'and the selection tint sits over it').to.contain(
+            'inset'
+        );
+
+        cleanup(el);
+    });
+});

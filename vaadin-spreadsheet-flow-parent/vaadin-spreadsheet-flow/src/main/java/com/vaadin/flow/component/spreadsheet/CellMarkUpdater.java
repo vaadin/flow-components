@@ -100,6 +100,12 @@ final class CellMarkUpdater implements Serializable {
         spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
         spreadsheet.getConditionalFormattingEvaluator().clearAllCachedValues();
         spreadsheet.getCellValueManager().clearCachedContent();
+        // The rules themselves, not just their cached results: a full
+        // refresh follows things that add and remove formattings - loading a
+        // workbook, undoing a row delete - and the cell data built below
+        // asks this table which rules a cell matches. Leaving it stale sends
+        // every one of those cells without its formatting.
+        spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
 
         // only reload if the cells have been loaded once previously
         if (spreadsheet.getFirstColumn() == -1) {

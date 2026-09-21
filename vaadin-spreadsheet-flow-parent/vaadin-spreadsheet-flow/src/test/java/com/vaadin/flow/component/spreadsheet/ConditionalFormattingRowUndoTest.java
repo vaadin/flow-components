@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,13 +32,12 @@ import com.vaadin.flow.component.spreadsheet.command.RowInsertOrDeleteCommand;
  * is undone.
  *
  * <p>
- * Undo does not bring back a conditional formatting that lived only on the
- * deleted row - the open issue
+ * POI drops a formatting whose only row is removed, and shifting the rows back
+ * does not bring it back. Remembering the {@link ConditionalFormatting} object
+ * across the delete does not work either - POI disconnects the removed rule's
+ * XML - so what is remembered is the XML itself. That was
  * <a href="https://github.com/vaadin/spreadsheet/issues/331">spreadsheet
- * #331</a>, which keeps
- * {@code UndoRedoIT.undo_conditionalFormattedCellsRemovedAndUndo_cellsAreStillConditionallyFormatted}
- * skipped. These tests pin where it goes and why the obvious repair does not
- * work, so whoever picks the issue up starts from facts.
+ * #331</a>.
  */
 class ConditionalFormattingRowUndoTest {
 
@@ -66,24 +66,37 @@ class ConditionalFormattingRowUndoTest {
     }
 
     @Test
-    void firstRowDeletedAndUndone_theOthersComeBack_theDroppedOneDoesNot() {
+    void firstRowDeletedAndUndone_everyFormattingComesBack() {
         RowInsertOrDeleteCommand command = deleteFirstRow();
 
         command.execute();
 
-        // A3 and A5 are back where they started. A1:B1 is not, and nothing
-        // in the undo path knows it ever existed - this is issue #331.
-        assertArrayEquals(new String[] { "A3", "A5" }, ranges());
+        List<String> back = List.of(ranges());
+        assertEquals(3, back.size(), "all three are back, was " + back);
+        assertTrue(back.contains("A1:B1"),
+                "the one that lived only on the deleted row is back too");
+        assertTrue(back.contains("A3") && back.contains("A5"),
+                "and the others are where they started");
+    }
+
+    @Test
+    void firstRowDeletedAndUndone_theRestoredRuleStillCarriesItsCondition() {
+        // The XML is copied rather than the rule rebuilt field by field, so
+        // the condition survives exactly - along with everything a rebuild
+        // would have had to know about.
+        RowInsertOrDeleteCommand command = deleteFirstRow();
+
+        command.execute();
+
+        ConditionalFormattingRule restored = ruleForRange("A1:B1");
+        assertEquals("\"AAAAA\"", restored.getFormula1());
     }
 
     @Test
     void droppedFormattingsRule_readAfterTheDelete_throws() {
-        // Why the obvious repair - remember the ConditionalFormatting before
-        // the delete and add it back afterwards - does not work: POI
-        // disconnects the removed rule's XML, so the remembered object is
-        // dead by the time the undo runs. Putting the formatting back means
-        // copying every rule's condition and styling out while it is still
-        // alive, which loses whatever a copy does not cover.
+        // Why the formatting is remembered as XML and not as the object:
+        // POI disconnects the removed rule, so the object is dead by the
+        // time the undo runs.
         ConditionalFormattingRule rule = formattings()
                 .getConditionalFormattingAt(0).getRule(0);
         assertEquals("\"AAAAA\"", rule.getFormula1());
@@ -91,6 +104,21 @@ class ConditionalFormattingRowUndoTest {
         deleteFirstRow();
 
         assertThrows(RuntimeException.class, rule::getFormula1);
+    }
+
+    /** The first rule of the formatting covering exactly {@code range}. */
+    private ConditionalFormattingRule ruleForRange(String range) {
+        SheetConditionalFormatting all = formattings();
+        for (int i = 0; i < all.getNumConditionalFormattings(); i++) {
+            ConditionalFormatting formatting = all
+                    .getConditionalFormattingAt(i);
+            for (CellRangeAddress address : formatting.getFormattingRanges()) {
+                if (range.equals(address.formatAsString())) {
+                    return formatting.getRule(0);
+                }
+            }
+        }
+        throw new AssertionError("no formatting covers " + range);
     }
 
     private SheetConditionalFormatting formattings() {

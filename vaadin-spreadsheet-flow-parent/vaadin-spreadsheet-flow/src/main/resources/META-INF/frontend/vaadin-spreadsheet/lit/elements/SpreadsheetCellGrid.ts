@@ -230,8 +230,20 @@ export class SpreadsheetCellGrid extends LitElement {
     /* Cells inside the active range get a subtle background
            highlight by default; matches the previous selected-cell-
            highlight affordance. */
-    .cell.cell-range,
-    [part~='cell-range'] {
+    /* The selection tint over a cell has to sit on top of whatever the
+       cell is already painted, not replace it: a background would hide a
+       conditional format's fill for as long as the cell is selected, and
+       Excel shows the fill through the selection. An inset shadow spread
+       over the whole box tints instead of replacing. */
+    .cell.cell-range {
+      box-shadow: inset 0 0 0 9999px var(--vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1));
+    }
+
+    /* The active range's overlay has nothing of its own underneath, so it
+       paints the tint directly. Matched by class rather than by part: the
+       cells carry part="cell cell-range" as well, and a background on them
+       is what hid their fill. */
+    .sheet-selection {
       background: var(--vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1));
     }
 

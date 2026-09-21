@@ -40,6 +40,7 @@ class RowData implements Serializable {
     private final List<CellData> cellsData = new ArrayList<CellData>();
     private final List<CommentData> commentsWithoutCell = new ArrayList<CommentData>();
     private final List<CellRangeAddress> mergedCells = new ArrayList<CellRangeAddress>();
+    private ConditionalFormattingSnapshot conditionalFormatting = null;
     private boolean isCopied;
     private int maxCol;
     private Spreadsheet spreadsheet;
@@ -75,6 +76,8 @@ class RowData implements Serializable {
             }
         }
 
+        conditionalFormatting = ConditionalFormattingSnapshot.ofRow(sheet,
+                rowIndex);
     }
 
     private void copyCellsData(Row row) {
@@ -124,6 +127,10 @@ class RowData implements Serializable {
 
         for (CellRangeAddress mergedRegion : mergedCells) {
             spreadsheet.addMergedRegion(mergedRegion);
+        }
+
+        if (conditionalFormatting != null) {
+            conditionalFormatting.restoreTo(row.getSheet());
         }
 
         if (height != null) {
