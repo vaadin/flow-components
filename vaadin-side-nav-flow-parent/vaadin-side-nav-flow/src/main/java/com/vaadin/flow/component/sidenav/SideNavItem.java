@@ -294,7 +294,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
      * @param path
      *            The path to link to. Set to null to disable navigation for
      *            this item.
-     * @since 25.2
+     * @since 25.1.10
      */
     public void setUnsafePath(String path) {
         doSetPath(path);
