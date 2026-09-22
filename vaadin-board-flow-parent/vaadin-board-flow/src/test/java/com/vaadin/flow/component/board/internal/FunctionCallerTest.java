@@ -21,6 +21,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.JsFunctionCallUtil;
 
 public class FunctionCallerTest {
 
@@ -34,7 +35,7 @@ public class FunctionCallerTest {
         UI ui = createUI();
         ui.add(html);
 
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
     }
 
     @Test
@@ -46,7 +47,7 @@ public class FunctionCallerTest {
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
     }
 
     @Test
@@ -60,7 +61,7 @@ public class FunctionCallerTest {
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
     }
 
     @Test
@@ -72,7 +73,7 @@ public class FunctionCallerTest {
 
         String trackingProperty = "CALLONCE_foo";
         Assertions.assertTrue(html.getElement().hasProperty(trackingProperty));
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
         Assertions.assertFalse(html.getElement().hasProperty(trackingProperty));
     }
 
@@ -88,7 +89,7 @@ public class FunctionCallerTest {
         return ui;
     }
 
-    public static void assertPendingInvocations(UI ui, String expectedJS)
+    public static void assertPendingFunctionCall(UI ui, String expectedFunction)
             throws Exception {
         UIInternals internals = ui.getInternals();
         internals.getStateTree().runExecutionsBeforeClientResponse();
@@ -99,8 +100,8 @@ public class FunctionCallerTest {
                 .invoke(internals);
         List<PendingJavaScriptInvocation> invocations = pendingJS.toList();
         Assertions.assertEquals(1, invocations.size());
-        Assertions.assertEquals(expectedJS,
-                invocations.get(0).getInvocation().getExpression());
+        Assertions.assertEquals(expectedFunction, JsFunctionCallUtil
+                .getFunctionName(invocations.get(0).getInvocation()));
 
     }
 }
