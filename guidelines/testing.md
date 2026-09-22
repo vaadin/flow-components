@@ -20,7 +20,9 @@ client-side state, split coverage by what varies:
 
 - Use unit tests that dump and assert the UI's pending JavaScript invocations
   to cover the full scenario matrix — whether an invocation happens at all,
-  and with which arguments.
+  and with which arguments. A call scheduled with `Element.callJsFunction` does
+  not name the function in the invocation expression, so match it by the called
+  function instead, with `JsFunctionCallUtil`.
 - Keep a single integration test as a smoke test per distinct client
   operation, to prove the JS reaches the client and produces a real effect.
 
