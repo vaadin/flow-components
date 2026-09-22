@@ -76,7 +76,7 @@ import tools.jackson.databind.node.ObjectNode;
  * fails if the chart model sources cannot be found, so the published jar never
  * silently ships without the schemas.
  * 
- * @since 25.2
+ * @since 25.3
  */
 public final class PlotOptionsSchemaGenerator {
 

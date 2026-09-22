@@ -466,7 +466,7 @@ public class Button extends Component
      * @throws IllegalStateException
      *             if the enabled state is already bound to a signal
      * @see #setDisableOnClick(boolean)
-     * @since 25.3
+     * @since 25.4
      */
     public void setDisableOnClick(DisableOnClickMode mode) {
         Objects.requireNonNull(mode, "DisableOnClickMode must not be null");
@@ -502,7 +502,7 @@ public class Button extends Component
      * default.
      *
      * @return the disable on click mode, not {@code null}
-     * @since 25.3
+     * @since 25.4
      */
     public DisableOnClickMode getDisableOnClickMode() {
         return disableOnClickController.getDisableOnClickMode();

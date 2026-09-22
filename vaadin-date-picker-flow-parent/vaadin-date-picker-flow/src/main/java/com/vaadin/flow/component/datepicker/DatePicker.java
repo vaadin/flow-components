@@ -920,6 +920,8 @@ public class DatePicker
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
+     * 
+     * @since 25.3
      */
     @Override
     public void setAriaDescribedBy(String ariaDescribedBy) {
