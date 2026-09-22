@@ -225,4 +225,22 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         Assert.assertEquals("foo", combo.getSelectedText());
     }
 
+    @Test
+    public void getOptions_popupRemainsClosed() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("combo");
+
+        Assert.assertEquals(List.of("foo", "bar"), combo.getOptions());
+        Assert.assertFalse("the popup should be closed again",
+                combo.isPopupOpen());
+    }
+
+    @Test
+    public void openPopup_getOptions_popupRemainsOpen() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("combo");
+        combo.openPopup();
+
+        Assert.assertEquals(List.of("foo", "bar"), combo.getOptions());
+        Assert.assertTrue("the popup should stay open", combo.isPopupOpen());
+    }
+
 }

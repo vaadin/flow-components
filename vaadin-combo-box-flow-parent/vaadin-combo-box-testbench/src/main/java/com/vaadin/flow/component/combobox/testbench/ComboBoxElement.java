@@ -129,15 +129,24 @@ public class ComboBoxElement extends TestBenchElement
 
     /**
      * Gets a list of all available options.
+     * <p>
+     * The popup is opened to load the options, and closed again afterwards
+     * unless it was already open.
      *
      * @return a list of the options (visible text)
      */
     @SuppressWarnings("unchecked")
     public List<String> getOptions() {
+        boolean popupWasOpen = isPopupOpen();
         openPopup();
-        return (List<String>) executeScript("var combobox=arguments[0];" //
-                + "return combobox.filteredItems.map(function(item) { return combobox._getItemLabel(item);});",
+        List<String> options = (List<String>) executeScript(
+                "var combobox=arguments[0];" //
+                        + "return combobox.filteredItems.map(function(item) { return combobox._getItemLabel(item);});",
                 this);
+        if (!popupWasOpen) {
+            closePopup();
+        }
+        return options;
     }
 
     /**

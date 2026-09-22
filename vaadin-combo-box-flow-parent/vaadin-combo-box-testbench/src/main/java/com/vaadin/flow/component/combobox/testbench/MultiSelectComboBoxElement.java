@@ -64,13 +64,16 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
     }
 
     /**
-     * Opens the popup, and gets the labels of the items that are currently
-     * loaded in the popup
+     * Gets the labels of the items that are currently loaded in the popup.
+     * <p>
+     * The popup is opened to load the items, and closed again afterwards unless
+     * it was already open.
      *
      * @return labels of the items that are loaded in the popup
      */
     @SuppressWarnings("unchecked")
     public List<String> getOptions() {
+        boolean popupWasOpen = isPopupOpen();
         openPopup();
         waitForLoadingFinished();
         //@formatter:off
@@ -78,7 +81,11 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
                 "const comboBox=arguments[0];" +
                 "return comboBox.filteredItems.map(item => item.label || '')";
         //@formatter:on
-        return (List<String>) executeScript(script, this);
+        List<String> options = (List<String>) executeScript(script, this);
+        if (!popupWasOpen) {
+            closePopup();
+        }
+        return options;
     }
 
     /**
