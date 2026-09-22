@@ -292,6 +292,45 @@ public class FormLayout extends Component
     }
 
     /**
+     * Enum for describing the text alignment of labels in a {@link FormItem}
+     * when the labels are positioned aside the fields.
+     *
+     * @since 25.4
+     */
+    public enum LabelTextAlign {
+
+        /**
+         * Aligns the label to the start of the label area, which is the left
+         * side in left-to-right and the right side in right-to-left layout
+         * direction.
+         */
+        START,
+
+        /**
+         * Aligns the label to the center of the label area.
+         */
+        CENTER,
+
+        /**
+         * Aligns the label to the end of the label area, which is the right
+         * side in left-to-right and the left side in right-to-left layout
+         * direction.
+         */
+        END;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase(Locale.ENGLISH);
+        }
+
+        private static LabelTextAlign fromStyleValue(String styleValue) {
+            return Arrays.stream(values()).filter(
+                    textAlign -> textAlign.toString().equals(styleValue))
+                    .findFirst().orElse(null);
+        }
+    }
+
+    /**
      * Server-side component for the {@code <vaadin-form-item>} element. Used to
      * wrap components for display in a {@link FormLayout}.
      *
@@ -781,6 +820,34 @@ public class FormLayout extends Component
     }
 
     /**
+     * Gets the text alignment of labels which is used when labels are
+     * positioned aside.
+     *
+     * @return the text alignment of labels, or {@code null} if not set
+     * @see #setLabelTextAlign(LabelTextAlign)
+     * @since 25.4
+     */
+    public LabelTextAlign getLabelTextAlign() {
+        return LabelTextAlign.fromStyleValue(
+                getStyle().get("--vaadin-form-layout-label-text-align"));
+    }
+
+    /**
+     * Sets the text alignment of labels which is used when labels are
+     * positioned aside. Setting {@code null} restores the default alignment,
+     * which is {@link LabelTextAlign#START}.
+     *
+     * @param labelTextAlign
+     *            the text alignment of labels, or {@code null} to restore the
+     *            default alignment
+     * @since 25.4
+     */
+    public void setLabelTextAlign(LabelTextAlign labelTextAlign) {
+        getStyle().set("--vaadin-form-layout-label-text-align",
+                labelTextAlign != null ? labelTextAlign.toString() : null);
+    }
+
+    /**
      * Sets the gap between the columns. The value must be provided in CSS
      * length units, e.g. {@code 1em}.
      *
@@ -1125,12 +1192,14 @@ public class FormLayout extends Component
      * <ul>
      * <li>{@link #setLabelWidth(String)}</li>
      * <li>{@link #setLabelSpacing(String)}</li>
+     * <li>{@link #setLabelTextAlign(LabelTextAlign)}</li>
      * </ul>
      * <p>
      * Alternatively, you can use the following CSS custom properties:
      * <ul>
      * <li>{@code --vaadin-form-layout-label-width}</li>
      * <li>{@code --vaadin-form-layout-label-spacing}</li>
+     * <li>{@code --vaadin-form-layout-label-text-align}</li>
      * </ul>
      *
      * @param labelsAside
