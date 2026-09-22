@@ -3274,6 +3274,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * @deprecated internal method, will be removed without a replacement.
+     * @since 1.1
      */
     @Deprecated(since = "25.3", forRemoval = true)
     protected void updateSelectionModeOnClient() {

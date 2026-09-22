@@ -19,7 +19,7 @@ package com.vaadin.flow.component.shared;
  * Defines how long a component stays disabled after it has been disabled on
  * click.
  *
- * @since 25.3
+ * @since 25.4
  */
 public enum DisableOnClickMode {
 

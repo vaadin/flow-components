@@ -27,7 +27,7 @@ import com.vaadin.flow.component.charts.model.Series;
  *
  * @author Vaadin Ltd
  * @see DefaultDataConverter
- * @since 25.2
+ * @since 25.3
  */
 public interface DataConverter extends Serializable {
 

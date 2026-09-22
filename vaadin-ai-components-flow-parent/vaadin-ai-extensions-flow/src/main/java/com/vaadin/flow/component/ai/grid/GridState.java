@@ -18,7 +18,7 @@ import java.io.Serializable;
  * @param query
  *            the SQL query that populates the grid
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public record GridState(String query) implements Serializable {
 }
