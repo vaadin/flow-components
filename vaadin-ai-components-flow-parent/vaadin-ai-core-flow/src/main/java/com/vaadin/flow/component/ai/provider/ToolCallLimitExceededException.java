@@ -41,7 +41,7 @@ package com.vaadin.flow.component.ai.provider;
  * enforced it.
  *
  * @author Vaadin Ltd
- * @since 25.3.0
+ * @since 25.3
  */
 public class ToolCallLimitExceededException extends RuntimeException {
 

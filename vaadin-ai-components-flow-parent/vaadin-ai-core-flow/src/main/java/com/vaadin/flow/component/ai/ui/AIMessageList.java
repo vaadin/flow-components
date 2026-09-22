@@ -73,7 +73,6 @@ public interface AIMessageList extends Serializable {
      *
      * @param userName
      *            the name of the participant, not {@code null}
-     * @since 25.3.0
      */
     default void showTypingIndicator(String userName) {
         // Optional for implementations that cannot show an indication
@@ -87,7 +86,6 @@ public interface AIMessageList extends Serializable {
      *
      * @param userName
      *            the name of the participant, not {@code null}
-     * @since 25.3.0
      */
     default void hideTypingIndicator(String userName) {
         // Optional for implementations that cannot show an indication
