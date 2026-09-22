@@ -120,6 +120,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
      * @param mode
      *            the disable on click mode, not {@code null}
      * @see #setDisableOnClick(boolean)
+     * @since 25.4
      */
     public void setDisableOnClick(DisableOnClickMode mode) {
         this.disableOnClickMode = Objects.requireNonNull(mode,
@@ -132,6 +133,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
      * it has been disabled on click.
      *
      * @return the disable on click mode, not {@code null}
+     * @since 25.4
      */
     public DisableOnClickMode getDisableOnClickMode() {
         return disableOnClickMode;
@@ -146,6 +148,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
      * This method should be called from the component's
      * {@link HasEnabled#setEnabled} method, after the enabled state has been
      * updated.
+     * 
+     * @since 25.2.7
      */
     public void onSetEnabled() {
         if (!updatingEnabled) {

@@ -19,7 +19,7 @@ import java.io.Serializable;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public final class ConfigurationKeys implements Serializable {
 

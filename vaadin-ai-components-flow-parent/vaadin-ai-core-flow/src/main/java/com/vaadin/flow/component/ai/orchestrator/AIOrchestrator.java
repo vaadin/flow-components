@@ -133,7 +133,7 @@ import tools.jackson.databind.json.JsonMapper;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.1
+ * @since 25.3
  */
 public class AIOrchestrator implements Serializable {
 
@@ -317,7 +317,6 @@ public class AIOrchestrator implements Serializable {
      *             if no UI context is available, or if the orchestrator needs
      *             to be reconnected after deserialization (see
      *             {@link #reconnect(LLMProvider)})
-     * @since 25.2
      */
     public void prompt(String userMessage, List<AIAttachment> attachments) {
         Objects.requireNonNull(attachments, "attachments cannot be null");
@@ -1026,7 +1025,6 @@ public class AIOrchestrator implements Serializable {
          * @return this reconnector
          * @throws IllegalArgumentException
          *             if any tool name or parameters schema is invalid
-         * @since 25.2
          */
         public Reconnector withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
@@ -1350,7 +1348,6 @@ public class AIOrchestrator implements Serializable {
          *             if controller is {@code null}
          * @throws IllegalArgumentException
          *             if any tool name or parameters schema is invalid
-         * @since 25.2
          */
         public Builder withController(AIController controller) {
             Objects.requireNonNull(controller, "Controller cannot be null");
@@ -1415,7 +1412,6 @@ public class AIOrchestrator implements Serializable {
          * @param requestInterceptor
          *            the interceptor to call on each prompt
          * @return this builder
-         * @since 25.3
          */
         public Builder withRequestInterceptor(
                 RequestInterceptor requestInterceptor) {
@@ -1441,7 +1437,6 @@ public class AIOrchestrator implements Serializable {
          * @param listener
          *            the listener to call on each prompt
          * @return this builder
-         * @since 25.2
          */
         public Builder withRequestListener(RequestListener listener) {
             warnIfAlreadySet(this.requestListener, "Request listener");
@@ -1507,7 +1502,6 @@ public class AIOrchestrator implements Serializable {
          * @param listener
          *            the listener to call after each exchange
          * @return this builder
-         * @since 25.2
          */
         public Builder withResponseListener(ResponseListener listener) {
             warnIfAlreadySet(this.responseListener, "Response listener");
@@ -1555,7 +1549,6 @@ public class AIOrchestrator implements Serializable {
          *            supplier of the per-turn context string, or {@code null}
          *            to disable session context entirely
          * @return this builder
-         * @since 25.2
          */
         public Builder withMetadata(
                 SerializableSupplier<String> contextSupplier) {

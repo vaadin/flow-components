@@ -113,7 +113,7 @@ import com.vaadin.flow.component.charts.util.Util;
  *
  * @author Vaadin Ltd
  * @see ColumnNames
- * @since 25.2
+ * @since 25.3
  */
 public class DefaultDataConverter implements DataConverter {
 

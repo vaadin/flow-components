@@ -202,7 +202,7 @@ public class Exporting extends AbstractConfigurationObject {
      * @param libURL
      *            the path where Highcharts will look for export module
      *            dependencies
-     * @since 25.2
+     * @since 25.1.10
      */
     public void setUnsafeLibURL(String libURL) {
         this.libURL = libURL;
@@ -368,7 +368,7 @@ public class Exporting extends AbstractConfigurationObject {
      * @param url
      *            the URL for the server module converting the SVG string to an
      *            image format
-     * @since 25.2
+     * @since 25.1.10
      */
     public void setUnsafeUrl(String url) {
         this.url = url;
