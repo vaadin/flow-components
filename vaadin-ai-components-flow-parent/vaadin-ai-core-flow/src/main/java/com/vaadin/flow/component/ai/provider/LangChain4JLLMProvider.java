@@ -266,7 +266,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *
      * @return the maximum number of calls per tool, or {@code 0} if there is no
      *         limit
-     * @since 25.3.0
      */
     public int getMaxCallsPerTool() {
         return maxCallsPerTool;
@@ -295,7 +294,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *            {@code 0} to remove the limit
      * @throws IllegalArgumentException
      *             if the value is negative
-     * @since 25.3.0
      */
     public void setMaxCallsPerTool(int maxCallsPerTool) {
         if (maxCallsPerTool < 0) {
@@ -311,7 +309,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *
      * @return the maximum number of tool calls per turn, or {@code 0} if there
      *         is no limit
-     * @since 25.3.0
      */
     public int getMaxTotalToolCalls() {
         return maxTotalToolCalls;
@@ -338,7 +335,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *            to remove the limit
      * @throws IllegalArgumentException
      *             if the value is negative
-     * @since 25.3.0
      */
     public void setMaxTotalToolCalls(int maxTotalToolCalls) {
         if (maxTotalToolCalls < 0) {
