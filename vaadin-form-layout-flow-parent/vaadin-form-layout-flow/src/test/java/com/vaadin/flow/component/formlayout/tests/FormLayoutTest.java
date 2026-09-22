@@ -324,6 +324,32 @@ class FormLayoutTest {
     }
 
     @Test
+    void addFormItemWithoutLabel() {
+        FormLayout formLayout = new FormLayout();
+        FormItem item = formLayout.addFormItem(new Input());
+        Assertions.assertEquals(formLayout.getElement(),
+                item.getElement().getParent());
+        Assertions.assertEquals(1, item.getElement().getChildCount());
+
+        Element input = item.getElement().getChild(0);
+        Assertions.assertEquals("input", input.getTag());
+        Assertions.assertNull(input.getAttribute("slot"));
+    }
+
+    @Test
+    void formRow_addFormItemWithoutLabel() {
+        FormRow row = new FormRow();
+        FormItem item = row.addFormItem(new Input());
+        Assertions.assertEquals(row.getElement(),
+                item.getElement().getParent());
+        Assertions.assertEquals(1, item.getElement().getChildCount());
+
+        Element input = item.getElement().getChild(0);
+        Assertions.assertEquals("input", input.getTag());
+        Assertions.assertNull(input.getAttribute("slot"));
+    }
+
+    @Test
     void formRow_addFormItem() {
         FormRow row = new FormRow();
         FormItem item = row.addFormItem(new Input(), "custom label");
