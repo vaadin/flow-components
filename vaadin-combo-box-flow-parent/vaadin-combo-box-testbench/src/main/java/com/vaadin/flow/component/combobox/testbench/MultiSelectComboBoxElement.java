@@ -66,9 +66,9 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
     /**
      * Gets the labels of the items that are currently loaded in the popup.
      * <p>
-     * The popup is opened to load the items, and closed again afterwards unless
-     * it was already open. As with closing the popup in any other way, this
-     * clears the filter unless the component keeps it.
+     * The popup is opened to load the items, and closed again afterwards. It is
+     * left open if it was already open, or if a filter has been typed into the
+     * field, as closing the popup would clear that filter.
      *
      * @return labels of the items that are loaded in the popup
      */
@@ -83,10 +83,19 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
                 "return comboBox.filteredItems.map(item => item.label || '')";
         //@formatter:on
         List<String> options = (List<String>) executeScript(script, this);
-        if (!popupWasOpen) {
+        if (!popupWasOpen && !hasFilterText()) {
             closePopup();
         }
         return options;
+    }
+
+    /**
+     * Checks whether a filter has been typed into the field, in which case
+     * closing the popup would clear it.
+     */
+    private boolean hasFilterText() {
+        String inputValue = getInputElementValue();
+        return inputValue != null && !inputValue.isEmpty();
     }
 
     /**

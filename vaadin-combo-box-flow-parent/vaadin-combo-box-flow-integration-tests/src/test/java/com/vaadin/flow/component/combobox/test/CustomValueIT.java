@@ -152,6 +152,23 @@ public class CustomValueIT extends AbstractComboBoxIT {
         assertValueChanges("bar", "foo", "foobaz", "null");
     }
 
+    @Test
+    public void autoOpenDisabled_inputKeys_getOptions_noCustomValueChanges() {
+        ComboBoxElement autoOpenDisabledCombo = $(ComboBoxElement.class)
+                .id("auto-open-disabled");
+        autoOpenDisabledCombo.sendKeys("f");
+        autoOpenDisabledCombo.getOptions();
+
+        Assert.assertTrue("no custom value event should have been fired",
+                $(TestBenchElement.class).id("auto-open-disabled-messages")
+                        .$("p").all().isEmpty());
+        Assert.assertEquals("f", autoOpenDisabledCombo.getInputElementValue());
+        Assert.assertTrue(
+                "the popup should stay open while the field holds"
+                        + " text that closing it would commit",
+                autoOpenDisabledCombo.isPopupOpen());
+    }
+
     private void assertCustomValueChanges(String... expected) {
         assertMessages(true, expected);
     }

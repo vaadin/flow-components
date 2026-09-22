@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.testbench;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.openqa.selenium.By;
 
@@ -130,10 +131,10 @@ public class ComboBoxElement extends TestBenchElement
     /**
      * Gets a list of all available options.
      * <p>
-     * The popup is opened to load the options, and closed again afterwards
-     * unless it was already open. As with closing the popup in any other way,
-     * this commits text that has been typed into the combo box and clears the
-     * filter.
+     * The popup is opened to load the options, and closed again afterwards. It
+     * is left open if it was already open, or if the field contains text that
+     * has not been committed, as closing the popup would commit that text and
+     * clear the filter.
      *
      * @return a list of the options (visible text)
      */
@@ -145,10 +146,20 @@ public class ComboBoxElement extends TestBenchElement
                 "var combobox=arguments[0];" //
                         + "return combobox.filteredItems.map(function(item) { return combobox._getItemLabel(item);});",
                 this);
-        if (!popupWasOpen) {
+        if (!popupWasOpen && !hasUncommittedInput()) {
             closePopup();
         }
         return options;
+    }
+
+    /**
+     * Checks whether the field shows text that differs from the label of the
+     * selected item, in which case closing the popup would commit that text.
+     */
+    private boolean hasUncommittedInput() {
+        String inputValue = getInputElementValue();
+        return !Objects.equals(inputValue == null ? "" : inputValue,
+                getSelectedText());
     }
 
     /**

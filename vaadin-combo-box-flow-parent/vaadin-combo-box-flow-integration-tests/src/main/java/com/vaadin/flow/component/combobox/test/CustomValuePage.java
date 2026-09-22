@@ -48,6 +48,20 @@ public class CustomValuePage extends Div {
         add(combo, new H3("custom value changes:"), customValueMessages,
                 new H3("combo box value changes:"), valueMessages);
 
+        Div autoOpenDisabledMessages = new Div();
+        autoOpenDisabledMessages.setId("auto-open-disabled-messages");
+
+        ComboBox<String> autoOpenDisabledCombo = new ComboBox<>();
+        autoOpenDisabledCombo.setId("auto-open-disabled");
+        autoOpenDisabledCombo.setItems(items);
+        autoOpenDisabledCombo.setAutoOpen(false);
+        autoOpenDisabledCombo
+                .addCustomValueSetListener(e -> autoOpenDisabledMessages
+                        .add(new Paragraph(e.getDetail())));
+
+        add(new H3("auto open disabled:"), autoOpenDisabledCombo,
+                autoOpenDisabledMessages);
+
         // Allow configuring common use cases
         NativeButton button1 = new NativeButton(
                 "set custom value as combo box value",
