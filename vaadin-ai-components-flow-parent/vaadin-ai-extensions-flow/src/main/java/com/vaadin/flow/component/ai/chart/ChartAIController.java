@@ -107,7 +107,7 @@ import tools.jackson.databind.JsonNode;
  * @see ChartState
  * @see DataConverter
  * @see DatabaseProviderAITools
- * @since 25.2
+ * @since 25.3
  */
 public class ChartAIController implements AIController {
 

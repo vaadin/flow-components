@@ -105,6 +105,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
      * This method should be called from the component's
      * {@link HasEnabled#setEnabled} method, after the enabled state has been
      * updated.
+     * 
+     * @since 25.2.7
      */
     public void onSetEnabled() {
         // If the component is disabled and re-enabled during the same round
