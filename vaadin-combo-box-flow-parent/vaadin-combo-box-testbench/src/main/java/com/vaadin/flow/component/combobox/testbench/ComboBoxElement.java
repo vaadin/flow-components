@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.combobox.testbench;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 import org.openqa.selenium.By;
 
@@ -132,9 +132,9 @@ public class ComboBoxElement extends TestBenchElement
      * Gets a list of all available options.
      * <p>
      * The popup is opened to load the options, and closed again afterwards. It
-     * is left open if it was already open, or if the field contains text that
-     * has not been committed, as closing the popup would commit that text and
-     * clear the filter.
+     * is left open if it was already open, or if the field text differs from
+     * the label of the selected item, as closing the popup would commit that
+     * difference.
      *
      * @return a list of the options (visible text)
      */
@@ -142,24 +142,17 @@ public class ComboBoxElement extends TestBenchElement
     public List<String> getOptions() {
         boolean popupWasOpen = isPopupOpen();
         openPopup();
-        List<String> options = (List<String>) executeScript(
+        Map<String, Object> result = (Map<String, Object>) executeScript(
                 "var combobox=arguments[0];" //
-                        + "return combobox.filteredItems.map(function(item) { return combobox._getItemLabel(item);});",
+                        + "return {" //
+                        + "  options: combobox.filteredItems.map(function(item) { return combobox._getItemLabel(item);})," //
+                        + "  inputMatchesSelection: (combobox._inputElementValue || '') === (combobox.selectedItem ? combobox._getItemLabel(combobox.selectedItem) : '')" //
+                        + "};",
                 this);
-        if (!popupWasOpen && !hasUncommittedInput()) {
+        if (!popupWasOpen && (boolean) result.get("inputMatchesSelection")) {
             closePopup();
         }
-        return options;
-    }
-
-    /**
-     * Checks whether the field shows text that differs from the label of the
-     * selected item, in which case closing the popup would commit that text.
-     */
-    private boolean hasUncommittedInput() {
-        String inputValue = getInputElementValue();
-        return !Objects.equals(inputValue == null ? "" : inputValue,
-                getSelectedText());
+        return (List<String>) result.get("options");
     }
 
     /**

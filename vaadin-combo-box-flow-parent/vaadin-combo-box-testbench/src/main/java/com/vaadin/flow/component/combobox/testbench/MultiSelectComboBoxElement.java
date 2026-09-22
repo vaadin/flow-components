@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.testbench;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.By;
 
@@ -80,22 +81,17 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
         //@formatter:off
         String script =
                 "const comboBox=arguments[0];" +
-                "return comboBox.filteredItems.map(item => item.label || '')";
+                "return {" +
+                "  options: comboBox.filteredItems.map(item => item.label || '')," +
+                "  hasFilterText: !!comboBox._inputElementValue" +
+                "}";
         //@formatter:on
-        List<String> options = (List<String>) executeScript(script, this);
-        if (!popupWasOpen && !hasFilterText()) {
+        Map<String, Object> result = (Map<String, Object>) executeScript(script,
+                this);
+        if (!popupWasOpen && !(boolean) result.get("hasFilterText")) {
             closePopup();
         }
-        return options;
-    }
-
-    /**
-     * Checks whether a filter has been typed into the field, in which case
-     * closing the popup would clear it.
-     */
-    private boolean hasFilterText() {
-        String inputValue = getInputElementValue();
-        return inputValue != null && !inputValue.isEmpty();
+        return (List<String>) result.get("options");
     }
 
     /**

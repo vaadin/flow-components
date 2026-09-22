@@ -54,6 +54,21 @@ public class MultiSelectComboBoxClientSideFilteringIT
     }
 
     @Test
+    public void autoOpenDisabled_typeFilter_getOptions_popupRemainsOpen() {
+        MultiSelectComboBoxElement autoOpenDisabledComboBox = $(
+                MultiSelectComboBoxElement.class).id("auto-open-disabled");
+        autoOpenDisabledComboBox.sendKeys("Item 1");
+
+        autoOpenDisabledComboBox.getOptions();
+
+        Assert.assertEquals("Item 1",
+                autoOpenDisabledComboBox.getInputElementValue());
+        Assert.assertEquals("Item 1", autoOpenDisabledComboBox.getFilter());
+        Assert.assertTrue("the popup should stay open while a filter is typed",
+                autoOpenDisabledComboBox.isPopupOpen());
+    }
+
+    @Test
     public void openPopup_getOptions_popupRemainsOpen() {
         comboBox.openPopup();
 

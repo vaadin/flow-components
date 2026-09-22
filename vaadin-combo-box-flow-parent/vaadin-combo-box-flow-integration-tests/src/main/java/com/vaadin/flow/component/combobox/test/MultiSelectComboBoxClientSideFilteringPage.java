@@ -33,6 +33,12 @@ public class MultiSelectComboBoxClientSideFilteringPage extends Div {
                 .mapToObj(i -> "Item " + (i + 1)).toList();
         comboBox.setItems(items);
 
-        add(comboBox);
+        MultiSelectComboBox<String> autoOpenDisabledComboBox = new MultiSelectComboBox<>(
+                "Items, auto open disabled");
+        autoOpenDisabledComboBox.setId("auto-open-disabled");
+        autoOpenDisabledComboBox.setItems(items);
+        autoOpenDisabledComboBox.setAutoOpen(false);
+
+        add(comboBox, autoOpenDisabledComboBox);
     }
 }
