@@ -48,6 +48,7 @@ import org.slf4j.event.Level;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.UIDetachedException;
+import com.vaadin.flow.component.ai.AIComponentsExperimentalFeatureException;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -3575,6 +3576,142 @@ class AIOrchestratorTest {
         var base64Data = dataUrl.substring(dataUrl.indexOf(",") + 1);
         var imageBytes = Base64.getDecoder().decode(base64Data);
         return ImageIO.read(new ByteArrayInputStream(imageBytes));
+    }
+
+    @Test
+    void builder_withFlowMessageListCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(new MessageList());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withMessageList(new MessageList());
+        assertBuilderWarning("messageList");
+    }
+
+    @Test
+    void builder_withFlowMessageInputCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withInput(new MessageInput());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withInput(new MessageInput());
+        assertBuilderWarning("input");
+    }
+
+    @Test
+    void builder_withFileReceiverCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(mockFileReceiver);
+        assertNoBuilderWarning();
+        orchestratorBuilder
+                .withFileReceiver(Mockito.mock(AIFileReceiver.class));
+        assertBuilderWarning("fileReceiver");
+    }
+
+    @Test
+    void builder_withUploadManagerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(new UploadManager(new Div()));
+        assertNoBuilderWarning();
+        orchestratorBuilder.withFileReceiver(new UploadManager(new Div()));
+        assertBuilderWarning("fileReceiver");
+    }
+
+    @Test
+    void builder_withUploadCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withFileReceiver(new Upload());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withFileReceiver(new Upload());
+        assertBuilderWarning("fileReceiver");
+    }
+
+    @Test
+    void builder_withRequestInterceptorCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withRequestInterceptor(event -> {
+                    // no interception needed, the warning is the subject
+                });
+        assertNoBuilderWarning();
+        orchestratorBuilder.withRequestInterceptor(event -> {
+            // no interception needed, the warning is the subject
+        });
+        assertBuilderWarning("requestInterceptor");
+    }
+
+    @Test
+    void builder_withRequestListenerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withRequestListener(event -> {
+                    // no handling needed, the warning is the subject
+                });
+        assertNoBuilderWarning();
+        orchestratorBuilder.withRequestListener(event -> {
+            // no handling needed, the warning is the subject
+        });
+        assertBuilderWarning("requestListener");
+    }
+
+    @Test
+    void builder_withHistoryCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withHistory(List.of(), Map.of());
+        assertNoBuilderWarning();
+        orchestratorBuilder.withHistory(List.of(), Map.of());
+        assertBuilderWarning("history");
+    }
+
+    @Test
+    void builder_withAttachmentClickListenerCalledTwice_logsWarning() {
+        var orchestratorBuilder = AIOrchestrator.builder(mockProvider, null)
+                .withAttachmentClickListener(event -> {
+                    // no handling needed, the warning is the subject
+                });
+        assertNoBuilderWarning();
+        orchestratorBuilder.withAttachmentClickListener(event -> {
+            // no handling needed, the warning is the subject
+        });
+        assertBuilderWarning("attachmentClickListener");
+    }
+
+    @Test
+    void prompt_withFeatureFlagDisabled_throwsExperimentalFeatureException() {
+        featureFlagExtension.disableFeature();
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+
+        Assertions.assertThrows(AIComponentsExperimentalFeatureException.class,
+                () -> orchestrator.prompt("Hello"));
+    }
+
+    @Test
+    void prompt_featureFlagIsCheckedOncePerOrchestrator() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+        orchestrator.prompt("Hello");
+
+        featureFlagExtension.disableFeature();
+
+        Assertions.assertDoesNotThrow(() -> orchestrator.prompt("Again"),
+                "The feature flag is checked once, not on every prompt");
+    }
+
+    @Test
+    void responseListener_thatThrows_isReportedAsAnError() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    throw new IllegalStateException("listener failed");
+                }).build();
+
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .anyMatch(event -> event.getLevel() == Level.ERROR),
+                "A response listener that throws must be reported, "
+                        + "not swallowed silently");
     }
 
     private void assertBuilderWarning(String fieldName) {
