@@ -559,7 +559,7 @@ class GroupingUtil implements Serializable {
      *         given level. 0-based.
      */
     public static long findEndOfRowGroup(Spreadsheet sheet, int rowindex,
-            XSSFRow row, short level) {
+            short level) {
 
         while (rowindex < sheet.getRows()) {
             XSSFRow r = (XSSFRow) sheet.getActiveSheet().getRow(rowindex);

@@ -107,29 +107,7 @@ public class GroupingIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void grouping_rowGroupEndsOnLastRow_groupingElementSpansGroup() {
-        SpreadsheetElement spreadsheetElement = loadGroupAtLastRowFile();
-
-        WebElement rowGrouping = findElementInShadowRoot(
-                By.cssSelector(".row-group-pane .grouping.minus"));
-        int rowHeight = spreadsheetElement.getRowHeader(LAST_ROW).getSize()
-                .getHeight();
-        Assert.assertTrue("Row grouping height",
-                rowGrouping.getSize().getHeight() >= GROUPED_ROWS * rowHeight);
-    }
-
-    @Test
-    public void grouping_rowGroupEndsOnLastRow_collapseRowGroup_rowsHidden() {
-        SpreadsheetElement spreadsheetElement = loadGroupAtLastRowFile();
-
-        collapseRow(spreadsheetElement);
-
-        waitUntil(driver -> !spreadsheetElement.getRowHeader(LAST_ROW)
-                .isDisplayed());
-    }
-
-    // HELPERS
-    private SpreadsheetElement loadGroupAtLastRowFile() {
+    public void grouping_rowGroupEndsOnLastRow_groupSpansRowsAndCollapses() {
         loadFile("row_group_at_last_row.xlsx");
         SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class)
                 .first();
@@ -137,9 +115,20 @@ public class GroupingIT extends AbstractSpreadsheetIT {
         spreadsheetElement.scroll(100000);
         waitUntil(driver -> !findElementsInShadowRoot(
                 By.cssSelector(".rh.row" + LAST_ROW)).isEmpty());
-        return spreadsheetElement;
+
+        WebElement rowGrouping = findElementInShadowRoot(
+                By.cssSelector(".row-group-pane .grouping.minus"));
+        int rowHeight = spreadsheetElement.getRowHeader(LAST_ROW).getSize()
+                .getHeight();
+        Assert.assertTrue("Row grouping height",
+                rowGrouping.getSize().getHeight() >= GROUPED_ROWS * rowHeight);
+
+        rowGrouping.click();
+        waitUntil(driver -> !spreadsheetElement.getRowHeader(LAST_ROW)
+                .isDisplayed());
     }
 
+    // HELPERS
     private SpreadsheetElement loadImageFile() {
         loadFile("group_image.xlsx");
         return $(SpreadsheetElement.class).first();

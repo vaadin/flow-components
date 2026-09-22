@@ -16,9 +16,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
-import com.vaadin.flow.internal.JacksonUtils;
-
-import tools.jackson.core.JacksonException;
 
 class GroupingTest {
 
@@ -349,23 +346,6 @@ class GroupingTest {
     }
 
     @Test
-    void groupEndingOnLastRow_collapseRow_rowHidden() {
-        spreadsheet = createSpreadsheetWithGroupEndingOnLastRow();
-
-        collapseRow(getRowGroupUniqueIndex());
-        Assertions.assertTrue(spreadsheet.isRowHidden(ROW_COUNT - 1));
-    }
-
-    @Test
-    void groupEndingOnLastRow_collapseRow_expandRow_rowVisible() {
-        spreadsheet = createSpreadsheetWithGroupEndingOnLastRow();
-
-        collapseRow(getRowGroupUniqueIndex());
-        expandRow(getRowGroupUniqueIndex());
-        Assertions.assertFalse(spreadsheet.isRowHidden(ROW_COUNT - 1));
-    }
-
-    @Test
     void groupEndingOnLastRow_clickRowLevelHeaders_rowHiddenAndVisibleAgain() {
         spreadsheet = createSpreadsheetWithGroupEndingOnLastRow();
 
@@ -392,20 +372,6 @@ class GroupingTest {
         result.setWorkbook(workbook);
         TestHelper.fireClientEvent(result, "onSheetScroll", "[1, 1, 1, 1]");
         return result;
-    }
-
-    /**
-     * @return the unique index the client uses to collapse or expand the first
-     *         row group, as sent to the client.
-     */
-    private int getRowGroupUniqueIndex() {
-        try {
-            var groupingData = JacksonUtils.getMapper().readTree(
-                    spreadsheet.getElement().getProperty("rowGroupingData"));
-            return groupingData.get(0).get("uniqueIndex").asInt();
-        } catch (JacksonException e) {
-            throw new RuntimeException("Failed to parse JSON", e);
-        }
     }
 
     private void setActiveSheet(int sheetIndex) {
