@@ -74,7 +74,7 @@ import tools.jackson.databind.node.ObjectNode;
  * Invoked automatically during the Maven build via {@code exec-maven-plugin}.
  * The output is consumed by {@link PlotOptionsSchema} at runtime.
  * 
- * @since 25.2
+ * @since 25.3
  */
 public final class PlotOptionsSchemaGenerator {
 

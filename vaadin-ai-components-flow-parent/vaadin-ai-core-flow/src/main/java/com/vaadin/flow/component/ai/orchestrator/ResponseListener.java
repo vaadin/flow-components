@@ -66,7 +66,7 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * the application's own thread. To update Vaadin UI components from this
  * listener, use {@code ui.access()}.
  * 
- * @since 25.2
+ * @since 25.3
  */
 @FunctionalInterface
 public interface ResponseListener extends Serializable {

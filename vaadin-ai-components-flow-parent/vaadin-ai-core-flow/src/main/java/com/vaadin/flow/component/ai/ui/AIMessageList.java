@@ -27,7 +27,7 @@ import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
  *
  * @author Vaadin Ltd
  * @see AIMessage
- * @since 25.1
+ * @since 25.3
  */
 public interface AIMessageList extends Serializable {
 
@@ -73,6 +73,7 @@ public interface AIMessageList extends Serializable {
      *
      * @param userName
      *            the name of the participant, not {@code null}
+     * @since 25.3.0
      */
     default void showTypingIndicator(String userName) {
         // Optional for implementations that cannot show an indication
@@ -86,6 +87,7 @@ public interface AIMessageList extends Serializable {
      *
      * @param userName
      *            the name of the participant, not {@code null}
+     * @since 25.3.0
      */
     default void hideTypingIndicator(String userName) {
         // Optional for implementations that cannot show an indication
