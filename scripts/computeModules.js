@@ -22,15 +22,7 @@
 
 const fs = require('fs');
 const { parseArgs } = require('util');
-const { readComponentPoms } = require('./lib/modules.js');
-
-// Read component parent modules from the root pom.xml
-function readParentModules() {
-  const rootPom = fs.readFileSync('pom.xml', 'utf8');
-  return [...rootPom.matchAll(/<module>([^<]+)<\/module>/g)]
-    .map((match) => match[1])
-    .filter((module) => /^vaadin-.*-flow-parent$/.test(module));
-}
+const { readParentModules, readComponentPoms } = require('./lib/modules.js');
 
 // Check whether a pom declares a dependency on com.vaadin:<artifactId>
 function dependsOn(pomXml, artifactId) {

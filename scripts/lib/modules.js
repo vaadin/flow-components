@@ -5,6 +5,14 @@
 
 const fs = require('fs');
 
+// Read component parent modules from the root pom.xml
+function readParentModules() {
+  const rootPom = fs.readFileSync('pom.xml', 'utf8');
+  return [...rootPom.matchAll(/<module>([^<]+)<\/module>/g)]
+    .map((match) => match[1])
+    .filter((module) => /^vaadin-.*-flow-parent$/.test(module));
+}
+
 // Collect the published component module poms of a parent module: the main
 // `-flow` module and any additional ones, such as `vaadin-ai-core-flow` and
 // `vaadin-ai-extensions-flow` in `vaadin-ai-components-flow-parent`
@@ -17,4 +25,4 @@ function readComponentPoms(parentModule) {
     .sort();
 }
 
-module.exports = { readComponentPoms };
+module.exports = { readParentModules, readComponentPoms };

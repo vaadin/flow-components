@@ -53,3 +53,6 @@ dev-bundle
 .claude/*.local.*
 CLAUDE.local.md
 .playwright-cli/
+
+# @since reconciliation indexes
+.since-index*/
