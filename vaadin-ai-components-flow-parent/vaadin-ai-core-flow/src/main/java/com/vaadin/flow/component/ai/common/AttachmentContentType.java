@@ -20,7 +20,7 @@ package com.vaadin.flow.component.ai.common;
  * <p>
  * Intended only for internal use and can be removed in the future.
  * 
- * @since 25.1
+ * @since 25.3
  */
 public enum AttachmentContentType {
     /** Image content types (image/*). */

@@ -13,37 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.customfield;
+package com.vaadin.flow.component.slider;
+
+import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * The set of theme variants applicable to the {@code vaadin-custom-field}
- * component.
- * 
- * @since 23.1
+ * Set of theme variants applicable for the slider components.
+ *
+ * @since 25.4
  */
-public enum CustomFieldVariant {
-
-    LUMO_SMALL("small"),
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    LUMO_WHITESPACE("whitespace"),
+public enum SliderVariant implements ThemeVariant {
     /**
-     * @deprecated Use {@link #HELPER_ABOVE} instead.
-     * @since 25.0
+     * Places the helper text above the slider instead of below it.
      */
-    @Deprecated
-    AURA_HELPER_ABOVE_FIELD("helper-above-field"),
     HELPER_ABOVE("helper-above-field"),
     /**
-     * Places the label next to the field content instead of above it.
-     *
-     * @since 25.4
+     * Places the label next to the slider instead of above it.
      */
-    LABEL_ASIDE("label-aside"),
-    SMALL("small");
+    LABEL_ASIDE("label-aside");
 
     private final String variant;
 
-    CustomFieldVariant(String variant) {
+    SliderVariant(String variant) {
         this.variant = variant;
     }
 
@@ -52,6 +43,7 @@ public enum CustomFieldVariant {
      *
      * @return variant name
      */
+    @Override
     public String getVariantName() {
         return variant;
     }

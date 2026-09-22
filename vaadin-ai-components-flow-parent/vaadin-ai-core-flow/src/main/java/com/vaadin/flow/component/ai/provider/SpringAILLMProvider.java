@@ -122,7 +122,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.1
+ * @since 25.3
  */
 public class SpringAILLMProvider implements LLMProvider {
 
@@ -212,7 +212,6 @@ public class SpringAILLMProvider implements LLMProvider {
      * Gets whether streaming mode is used.
      *
      * @return {@code true} if streaming mode is used, {@code false} otherwise
-     * @since 25.3
      */
     public boolean isStreaming() {
         return isStreaming;
@@ -234,7 +233,6 @@ public class SpringAILLMProvider implements LLMProvider {
      *
      * @return {@code true} if the call runs on a background thread,
      *         {@code false} if it runs on the thread that asks for the response
-     * @since 25.3
      */
     public boolean isBackgroundExecution() {
         return backgroundExecution.isEnabled();
@@ -289,7 +287,6 @@ public class SpringAILLMProvider implements LLMProvider {
      *            {@code true} to run the call on a background thread,
      *            {@code false} to run it on the thread that asks for the
      *            response
-     * @since 25.3
      */
     public void setBackgroundExecution(boolean backgroundExecution) {
         this.backgroundExecution.setEnabled(backgroundExecution);

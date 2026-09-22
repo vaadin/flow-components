@@ -211,7 +211,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public class FormAIController implements AIController {
 
@@ -743,7 +743,6 @@ public class FormAIController implements AIController {
      *
      * @return {@code true} when source tracking is on, {@code false} otherwise
      * @see #setSourceTrackingEnabled(boolean)
-     * @since 25.3
      */
     public boolean isSourceTrackingEnabled() {
         return sourceTrackingEnabled;
@@ -782,7 +781,6 @@ public class FormAIController implements AIController {
      * @param sourceTrackingEnabled
      *            {@code true} to ask the LLM for sources, {@code false} to not
      * @return this controller, for chaining
-     * @since 25.3
      */
     public FormAIController setSourceTrackingEnabled(
             boolean sourceTrackingEnabled) {
@@ -803,7 +801,6 @@ public class FormAIController implements AIController {
      * @param description
      *            the meaning the LLM sees for the level, not {@code null}
      * @return this controller, for chaining
-     * @since 25.3
      */
     public FormAIController describeConfidenceLevel(ConfidenceLevel level,
             String description) {
@@ -833,7 +830,6 @@ public class FormAIController implements AIController {
      *         none applies
      * @throws NullPointerException
      *             if {@code field} is {@code null}
-     * @since 25.3
      */
     public Optional<ValueSource> getFieldSource(HasValue<?, ?> field) {
         Objects.requireNonNull(field, "Field must not be null");
@@ -1015,7 +1011,6 @@ public class FormAIController implements AIController {
      * @return the content provider, or {@code null} when the popover shows only
      *         its built-in parts
      * @see #setFieldMarkerPopoverContentProvider(FieldMarkerPopoverContentProvider)
-     * @since 25.3
      */
     public FieldMarkerPopoverContentProvider getFieldMarkerPopoverContentProvider() {
         return fieldMarkerPopoverContentProvider;
@@ -1048,7 +1043,6 @@ public class FormAIController implements AIController {
      * @param fieldMarkerPopoverContentProvider
      *            the provider to use, or {@code null} to show no extra content
      * @return this controller, for chaining
-     * @since 25.3
      */
     public FormAIController setFieldMarkerPopoverContentProvider(
             FieldMarkerPopoverContentProvider fieldMarkerPopoverContentProvider) {
