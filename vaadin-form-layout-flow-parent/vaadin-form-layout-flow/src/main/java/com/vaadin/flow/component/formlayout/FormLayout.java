@@ -470,6 +470,22 @@ public class FormLayout extends Component
         }
 
         /**
+         * Creates a new {@link FormItem} with the given field and no label, and
+         * adds it to the form row.
+         *
+         * @param field
+         *            the field component to be wrapped in a form item
+         *
+         * @return the created form item
+         * @since 25.4
+         */
+        public FormItem addFormItem(Component field) {
+            FormItem formItem = new FormItem(field);
+            add(formItem);
+            return formItem;
+        }
+
+        /**
          * Creates a new {@link FormItem} with the given component and the label
          * string, and adds it to the form row. The label is inserted into the
          * form item as a {@link NativeLabel}.
@@ -497,9 +513,8 @@ public class FormLayout extends Component
          * @return the created form item
          */
         public FormItem addFormItem(Component field, Component label) {
-            FormItem formItem = new FormItem(field);
+            FormItem formItem = addFormItem(field);
             formItem.addToLabel(label);
-            add(formItem);
             return formItem;
         }
     }
@@ -645,6 +660,21 @@ public class FormLayout extends Component
 
     /**
      * Convenience method for creating and adding a new FormItem to this layout
+     * that wraps the given field without a label.
+     *
+     * @param field
+     *            the field component to wrap
+     * @return the created form item
+     * @since 25.4
+     */
+    public FormItem addFormItem(Component field) {
+        FormItem formItem = new FormItem(field);
+        add(formItem);
+        return formItem;
+    }
+
+    /**
+     * Convenience method for creating and adding a new FormItem to this layout
      * that wraps the given field with a label. Shorthand for
      * {@code addFormItem(field, new Label(label))}.
      *
@@ -671,9 +701,8 @@ public class FormLayout extends Component
      * @return the created form item
      */
     public FormItem addFormItem(Component field, Component label) {
-        FormItem formItem = new FormItem(field);
+        FormItem formItem = addFormItem(field);
         formItem.addToLabel(label);
-        add(formItem);
         return formItem;
     }
 
