@@ -2,7 +2,7 @@ import type {} from '@web/test-runner-mocha';
 import '../frontend/generated/jar-resources/flow-component-renderer.js';
 import { render, html, LitElement } from 'lit';
 import { expect } from 'chai';
-import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
+import { fixtureSync, nextFrame, nextUpdate } from '@vaadin/testing-helpers';
 import sinon from 'sinon';
 
 type Vaadin = {
@@ -64,14 +64,12 @@ describe('flow-component-renderer', () => {
     elements = {};
   });
 
-  it('should get lazily added node', async () => {
+  it('should render node', async () => {
     const container = fixtureSync<HTMLDivElement>(`<div></div>`);
-
-    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
-    await nextFrame();
-
     const element = document.createElement('div');
     elements[0] = element;
+
+    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
     await nextFrame();
 
     expect(container.firstElementChild).to.equal(element);
@@ -144,67 +142,54 @@ describe('flow-component-renderer', () => {
     expect(component.firstElementChild).to.equal(elements[1]);
   });
 
-  it('should not replace new synchronous node with the old lazily added node', async () => {
-    const component = fixtureSync<TestComponent>(`<test-component></test-component>`);
+  describe('node that is not in the registry', () => {
+    // Flow sends the nodes of a response before the JavaScript that renders
+    // them, so a node id that does not resolve belongs to a component the
+    // server has discarded, and it never arrives
 
-    // Try to render a lazily added node (not added to the Flow's registry yet)
-    component.nodeId = 0;
-    await nextFrame();
+    it('should look the node up only once', async () => {
+      const { getByNodeId } = window.Vaadin.Flow.clients.ROOT;
+      const container = fixtureSync<HTMLDivElement>(`<div></div>`);
 
-    // Add and render a new node synchronously
-    elements[1] = document.createElement('button');
-    component.nodeId = 1;
-    await nextFrame();
+      getByNodeId.resetHistory();
+      render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
+      await nextFrame();
+      await nextFrame();
 
-    // Add the lazy node to the Flow's registry
-    elements[0] = document.createElement('button');
-    await nextFrame();
+      expect(getByNodeId).to.have.been.calledOnceWith(0);
+    });
 
-    // The new node should still be rendered
-    expect(component.firstElementChild).to.equal(elements[1]);
-    expect(component.contains(elements[0])).to.be.false;
-  });
+    it('should keep the content rendered before', async () => {
+      const component = fixtureSync<TestComponent>(`<test-component></test-component>`);
 
-  it('should not try to re-render an old node after disconnect', async () => {
-    const { getByNodeId } = window.Vaadin.Flow.clients.ROOT;
-    const component = fixtureSync<TestComponent>(`<test-component></test-component>`);
+      const element = document.createElement('div');
+      elements[0] = element;
+      component.nodeId = 0;
+      await nextUpdate(component);
 
-    // Try to render a lazily added node
-    component.nodeId = 0;
-    await nextFrame();
+      // The server discards the component, and the row is rendered again from
+      // the client cache before the new row data arrives
+      delete elements[0];
+      component.requestUpdate();
+      await nextUpdate(component);
 
-    // Disconnect
-    getByNodeId.resetHistory();
-    component.remove();
-    await nextFrame();
+      expect(component.firstElementChild).to.equal(element);
+    });
 
-    expect(getByNodeId).to.not.have.been.called;
-  });
+    it('should render the node once it is rendered again with a new id', async () => {
+      const component = fixtureSync<TestComponent>(`<test-component></test-component>`);
 
-  it('should not end up in an update loop', async () => {
-    const container = fixtureSync<HTMLDivElement>(`<div></div>`);
+      component.nodeId = 0;
+      await nextUpdate(component);
+      expect(component.firstElementChild).to.equal(null);
 
-    // Try to render with node id 0 without there being an element for it
-    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
-    await nextFrame();
+      // The server sends new row data, and the cell renders the new component
+      const element = document.createElement('div');
+      elements[1] = element;
+      component.nodeId = 1;
+      await nextUpdate(component);
 
-    // Manually clear the container (simulate Grid's editor in EditorRenderer.java)
-    container.innerHTML = '';
-    delete (container as any)._$litPart$;
-
-    // Render once again with a different node id
-    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 1)}`, container);
-    await nextFrame();
-
-    // Supply an element for the new node id
-    const element = document.createElement('div');
-    elements[1] = element;
-    await nextFrame();
-
-    // Verify that the flow component directive is not in an update loop
-    const { getByNodeId } = window.Vaadin.Flow.clients.ROOT;
-    getByNodeId.resetHistory();
-    await nextFrame();
-    expect(getByNodeId).to.not.have.been.called;
+      expect(component.firstElementChild).to.equal(element);
+    });
   });
 });
