@@ -82,7 +82,12 @@ jobs:
           #    empty index would re-date its whole API to the target version);
           #  - test-support artifacts are skipped as well: they are published, but
           #    carry no @since tags at all today, so reconciling them would
-          #    mass-create tags instead of correcting them.
+          #    mass-create tags instead of correcting them;
+          #  - vaadin-spreadsheet-flow-client is skipped too: it is the GWT module
+          #    compiled to JavaScript, its jar ships only META-INF/**, and it has
+          #    never attached a -sources.jar (it has no with-docs profile). None of
+          #    its ~116 releases can be indexed, so the action fails the shard on
+          #    the first one, and it carries no public Flow API to tag anyway.
           # Build the matrix with jq (never string-concatenate JSON).
           group_path="${GROUP_ID//.//}"
           : > entries.jsonl
@@ -90,7 +95,10 @@ jobs:
             mod="${pom%/pom.xml}"
             src="$mod/src/main/java"
             [ -d "$src" ] || continue
-            case "$mod" in *-testbench|*-test-util) continue ;; esac
+            case "$mod" in
+              *-testbench|*-test-util) continue ;;
+              */vaadin-spreadsheet-flow-client) continue ;;
+            esac
             art=$(awk 'BEGIN { p = 1 }
                        /<parent>/ { p = 0 }
                        /<\/parent>/ { p = 1; next }
