@@ -37,8 +37,7 @@ on:
         required: false
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 concurrency:
   group: since-tags-${{ inputs.branch }}
@@ -211,6 +210,11 @@ jobs:
   open-pr:
     needs: [discover, reconcile]
     runs-on: ubuntu-latest
+    # Only this job writes: it pushes the branch and opens the PR. Reconciling
+    # needs nothing beyond the read access inherited from the workflow.
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v6
         with:
