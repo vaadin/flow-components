@@ -1,0 +1,263 @@
+name: Update @since tags
+
+# Reconcile Javadoc @since tags for a branch against the published release history
+# and open a PR with the result. The reconciliation engine, its Maven Central
+# download/index caching and the formatting of the files it touches all live in the
+# shared vaadin/github-actions/reconcile-since-tags action, which vaadin/flow uses
+# the same way.
+#
+# This repository is different from flow in one way that matters: it publishes ~55
+# SEPARATELY-VERSIONED artifacts. vaadin-button-flow starts at 1.0.0,
+# vaadin-charts-flow at 6.0.1, vaadin-spreadsheet-flow at 23.1.0,
+# vaadin-popover-flow at 24.5.0, vaadin-breadcrumbs-flow only at 25.2.0 -- and even
+# artifacts that start on the same version differ patch by patch (596 releases of
+# vaadin-grid-flow against 542 of vaadin-button-flow). The action derives @since as
+# the start of the unbroken "present" streak that reaches the latest release on its
+# index axis, which is only correct while every artifact on that axis shares one
+# release timeline. Pooling these would make a type look absent at every version
+# some other component happens to lack, break the streak and silently mis-date the
+# tag.
+#
+# So each artifact gets its own matrix shard: one artifact per action invocation
+# means each index axis holds exactly that artifact's releases, with no shared
+# index. Each shard uploads its Java diff as a patch, and a final job applies them
+# all -- the patches touch disjoint module directories, so they never conflict --
+# and opens a single PR. The artifact list is discovered from the repository layout
+# at run time, so nothing here needs editing when components come or go.
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to reconcile (the PR is opened against it)
+        required: true
+        default: main
+      dev:
+        description: Target version override (blank = derive major.minor from pom)
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: since-tags-${{ inputs.branch }}
+  cancel-in-progress: false
+
+env:
+  GROUP_ID: com.vaadin
+
+jobs:
+  # Discover the publishable modules from the repository layout and resolve the
+  # target version once, so neither the matrix nor the PR title needs a hardcoded
+  # list of components.
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+      count: ${{ steps.gen.outputs.count }}
+      version: ${{ steps.gen.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - id: gen
+        env:
+          DEV: ${{ inputs.dev }}
+        run: |
+          set -euo pipefail
+          # A module is reconciled when it has Java sources and publishes them:
+          #  - the artifactId comes from the module's own pom, because the directory
+          #    name is not always the published id (vaadin-aura-theme-flow publishes
+          #    vaadin-aura-theme, vaadin-lumo-theme-flow publishes vaadin-lumo-theme);
+          #  - a module with no artifact on Central is skipped -- integration tests,
+          #    the checkstyle rules, and a component that has not been released yet
+          #    (with no release there is no history to reconcile against, and an
+          #    empty index would re-date its whole API to the target version);
+          #  - test-support artifacts are skipped as well: they are published, but
+          #    carry no @since tags at all today, so reconciling them would
+          #    mass-create tags instead of correcting them.
+          # Build the matrix with jq (never string-concatenate JSON).
+          group_path="${GROUP_ID//.//}"
+          : > entries.jsonl
+          for pom in */*/pom.xml; do
+            mod="${pom%/pom.xml}"
+            src="$mod/src/main/java"
+            [ -d "$src" ] || continue
+            case "$mod" in *-testbench|*-test-util) continue ;; esac
+            art=$(awk 'BEGIN { p = 1 }
+                       /<parent>/ { p = 0 }
+                       /<\/parent>/ { p = 1; next }
+                       p && /<artifactId>/ {
+                         gsub(/^[ \t]*<artifactId>|<\/artifactId>[ \t]*$/, "")
+                         print; exit
+                       }' "$pom")
+            if [ -z "$art" ]; then
+              echo "::error::no artifactId found in $pom"
+              exit 1
+            fi
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 60 \
+                     --retry 3 --retry-delay 2 --retry-all-errors \
+                     "https://repo1.maven.org/maven2/$group_path/$art/maven-metadata.xml")
+            case "$code" in
+              200) jq -nc --arg a "$art" --arg s "$src" \
+                     '{artifact: $a, src: $s}' >> entries.jsonl ;;
+              404) echo "skip $art ($mod): not published" ;;
+              *)   echo "::error::unexpected HTTP $code for $art metadata"; exit 1 ;;
+            esac
+          done
+          count=$(wc -l < entries.jsonl | tr -d ' ')
+          [ "$count" -gt 0 ] || { echo "::error::no publishable modules discovered"; exit 1; }
+          {
+            echo "matrix=$(jq -sc '{include: .}' entries.jsonl)"
+            echo "count=$count"
+          } >> "$GITHUB_OUTPUT"
+          echo "Discovered $count publishable modules"
+
+          V="$DEV"
+          if [ -z "$V" ]; then
+            V=$(mvn -q -B -ntp help:evaluate -Dexpression=project.version -DforceStdout \
+                  | sed 's/-SNAPSHOT//' | awk -F. '{print $1"."$2}')
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Target version: $V"
+
+  # One shard per artifact. Because each shard passes a single artifact, the action's
+  # index axis contains only that artifact's release timeline.
+  reconcile:
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Disable git hooks (husky isn't set up in CI)
+        run: git config core.hooksPath /dev/null
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      # Same action vaadin/flow reconciles with; @main matches how this repository
+      # already references the org's shared actions.
+      - uses: vaadin/github-actions/reconcile-since-tags@main
+        with:
+          group-id: ${{ env.GROUP_ID }}
+          # Resolved once in discover, so the shards don't each run Maven for it.
+          version: ${{ needs.discover.outputs.version }}
+          artifacts: ${{ matrix.artifact }}=${{ matrix.src }}
+
+      # An index with no entries would mean "this API was never released" for every
+      # type in the module, which re-dates the whole module to the target version.
+      # The action fails on an unfetchable release, but an artifact that publishes no
+      # usable -sources.jar at all would still get here.
+      - name: Check the index is not empty
+        env:
+          ARTIFACT: ${{ matrix.artifact }}
+        run: |
+          set -euo pipefail
+          tsv=".since-index/$ARTIFACT.tsv"
+          if [ ! -s "$tsv" ]; then
+            echo "::error::empty release index for $ARTIFACT -- nothing was indexed"
+            exit 1
+          fi
+          echo "$ARTIFACT: $(wc -l < "$tsv" | tr -d ' ') indexed API elements"
+
+      - id: diff
+        env:
+          ARTIFACT: ${{ matrix.artifact }}
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/$ARTIFACT.patch"
+          git diff -- '*.java' > "$out"
+          if [ -s "$out" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "patch=$out" >> "$GITHUB_OUTPUT"
+            echo "$ARTIFACT:$(git diff --shortstat -- '*.java')"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "$ARTIFACT: no @since changes"
+          fi
+
+      - if: steps.diff.outputs.changed == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: since-patch-${{ matrix.artifact }}
+          path: ${{ steps.diff.outputs.patch }}
+          if-no-files-found: error
+          retention-days: 1
+
+  # Collect every shard's patch and open one PR. The patches touch disjoint module
+  # directories, so they apply cleanly in any order.
+  #
+  # This job deliberately has no `if:`, so a failed shard leaves the run without a
+  # PR: its component would simply be missing from the result, and a PR that quietly
+  # covers only part of the repository is worse than no PR. Re-run the failed jobs
+  # instead -- the shards that succeeded keep their uploaded patches.
+  open-pr:
+    needs: [discover, reconcile]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Disable git hooks (husky isn't set up in CI)
+        run: git config core.hooksPath /dev/null
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: since-patch-*
+          path: patches
+          merge-multiple: true
+
+      - name: Apply patches
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          n=0
+          for p in patches/*.patch; do
+            [ -s "$p" ] || continue
+            echo "Applying $p"
+            git apply --whitespace=nowarn "$p"
+            n=$((n + 1))
+          done
+          echo "Applied $n patch(es) of ${{ needs.discover.outputs.count }} module(s)"
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        with:
+          # The default token cannot trigger workflows, so a PR opened with it gets
+          # no validation run. The bot token is used for the same reason in
+          # vaadin/flow's dependency-update PRs.
+          token: ${{ secrets.VAADIN_BOT_TOKEN || github.token }}
+          base: ${{ inputs.branch }}
+          branch: since-tags/${{ inputs.branch }}
+          add-paths: "**/*.java"
+          title: "docs: reconcile @since tags (${{ needs.discover.outputs.version }})"
+          commit-message: |
+            docs: reconcile @since tags
+
+            Automated reconciliation against the published release history:
+            add missing tags, correct wrong ones, create minimal @since javadoc
+            for undocumented types, and remove redundant tags.
+          body: |
+            Automated `@since` reconciliation for `${{ inputs.branch }}` (version `${{ needs.discover.outputs.version }}`), one matrix shard per published artifact so that every component reconciles against its own release timeline.
+
+            Generated via [`vaadin/github-actions/reconcile-since-tags`](https://github.com/vaadin/github-actions/tree/main/reconcile-since-tags). Each shard's job summary lists what it changed.
+          delete-branch: true
