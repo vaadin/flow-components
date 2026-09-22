@@ -131,7 +131,9 @@ public class ComboBoxElement extends TestBenchElement
      * Gets a list of all available options.
      * <p>
      * The popup is opened to load the options, and closed again afterwards
-     * unless it was already open.
+     * unless it was already open. As with closing the popup in any other way,
+     * this commits text that has been typed into the combo box and clears the
+     * filter.
      *
      * @return a list of the options (visible text)
      */

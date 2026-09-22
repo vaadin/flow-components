@@ -67,7 +67,8 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
      * Gets the labels of the items that are currently loaded in the popup.
      * <p>
      * The popup is opened to load the items, and closed again afterwards unless
-     * it was already open.
+     * it was already open. As with closing the popup in any other way, this
+     * clears the filter unless the component keeps it.
      *
      * @return labels of the items that are loaded in the popup
      */

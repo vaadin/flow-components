@@ -43,7 +43,6 @@ public class MultiSelectComboBoxClientSideFilteringIT
 
         List<String> options = comboBox.getOptions();
         Assert.assertEquals(10, options.size());
-        Assert.assertTrue("the popup should stay open", comboBox.isPopupOpen());
     }
 
     @Test
@@ -52,6 +51,15 @@ public class MultiSelectComboBoxClientSideFilteringIT
         Assert.assertEquals(10, options.size());
         Assert.assertFalse("the popup should be closed again",
                 comboBox.isPopupOpen());
+    }
+
+    @Test
+    public void openPopup_getOptions_popupRemainsOpen() {
+        comboBox.openPopup();
+
+        List<String> options = comboBox.getOptions();
+        Assert.assertEquals(10, options.size());
+        Assert.assertTrue("the popup should stay open", comboBox.isPopupOpen());
     }
 
     @Test

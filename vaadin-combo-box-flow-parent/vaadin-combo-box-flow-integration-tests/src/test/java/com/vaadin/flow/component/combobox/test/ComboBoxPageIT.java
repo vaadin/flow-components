@@ -235,6 +235,19 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void setValue_getOptions_valueUnchanged() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("updatable-combo");
+        WebElement message = findElement(By.id("updatable-combo-message"));
+        findElement(By.id("updatable-combo-button")).click();
+
+        Assert.assertEquals(List.of("Item 1", "Item 2", "Item 3"),
+                combo.getOptions());
+        Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
+        Assert.assertEquals("Value: Item 2 isFromClient: false",
+                message.getText());
+    }
+
+    @Test
     public void openPopup_getOptions_popupRemainsOpen() {
         ComboBoxElement combo = $(ComboBoxElement.class).id("combo");
         combo.openPopup();
