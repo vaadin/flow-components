@@ -11,6 +11,11 @@
     <name>Vaadin Charts SVG Generator API</name>
     <properties>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+        <!-- The npm tests below are a test run like any other, so -DskipTests
+             leaves them out, while skipSvgChartsBuild leaves out the whole npm
+             install/build/test chain. Defaults to skipSvgChartsBuild, so a
+             build that skips the chain skips the tests with it. -->
+        <skipSvgChartsTests>${skipSvgChartsBuild}</skipSvgChartsTests>
     </properties>
     <dependencies>
         <dependency>
@@ -89,7 +94,7 @@
                             <arguments>
                                 <argument>test</argument>
                             </arguments>
-                            <skip>${skipSvgChartsBuild}</skip>
+                            <skip>${skipSvgChartsTests}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -98,6 +103,18 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>skip-svg-charts-tests</id>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <skipSvgChartsTests>true</skipSvgChartsTests>
+            </properties>
+        </profile>
         <profile>
             <id>attach-docs</id>
             <activation>

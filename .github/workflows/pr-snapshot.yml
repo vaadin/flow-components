@@ -136,15 +136,18 @@ jobs:
       - name: Set the snapshot version
         env:
           VERSION: ${{ steps.version.outputs.version }}
-        # Rewrites every pom of the reactor, flow-components-bom included: it
-        # carries a version of its own instead of inheriting the root one, and
-        # the versions plugin covers aggregated modules like it either way.
+        # processAllModules is what reaches flow-components-bom: it declares
+        # neither the root artifactId nor the root as its parent, and without
+        # the flag the plugin leaves such a module at the version it has. The
+        # root pom sets the property for the same reason, and passing it here
+        # too keeps this step working whichever branch it is run on.
+        #
         # The backup poms are only in the way here, the checkout is thrown away
         # at the end of the job.
         run: |
           echo "Building $VERSION" | tee -a $GITHUB_STEP_SUMMARY
           mvn -q -B -ntp org.codehaus.mojo:versions-maven-plugin:2.22.0:set \
-            -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+            -DnewVersion="$VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
 
       - name: Build and deploy the snapshot
         id: deploy
@@ -159,6 +162,10 @@ jobs:
         #
         # The flow.version of the branch is left as committed, so a snapshot
         # resolves the same Flow version the branch itself builds against.
+        #
+        # -DskipTests covers the charts SVG generator's npm tests as well, but
+        # not its npm build: what that writes under src/main/resources is
+        # generated rather than committed, and it ships in the published jar.
         #
         # deployAtEnd holds every upload back until the whole reactor has built.
         # A push cancels the run in progress, and a cancel between two modules
