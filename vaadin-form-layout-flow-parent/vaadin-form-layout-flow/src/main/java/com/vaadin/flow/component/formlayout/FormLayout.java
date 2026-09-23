@@ -292,8 +292,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Enum for describing the text alignment that is applied to labels when they
-     * are positioned next to the fields.
+     * Enum for describing the text alignment that is applied to labels when
+     * they are positioned next to the fields.
      *
      * @since 25.4
      */
