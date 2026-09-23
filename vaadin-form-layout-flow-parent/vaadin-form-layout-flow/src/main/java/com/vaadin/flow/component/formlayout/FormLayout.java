@@ -189,7 +189,7 @@ import tools.jackson.databind.node.ObjectNode;
  * <p>
  * Write custom CSS. When labels are rendered next to fields, Form Layout sets
  * the {@code has-labels-aside} attribute on its host element and the
- * {@code data-form-layout-has-labels-aside} attribute on fields. You can rely
+ * {@code data-form-layout-has-labels-aside} attribute on children. You can rely
  * on these attributes to adapt your components to label-aside mode.</li>
  * </ol>
  *
