@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.FormRow;
+import com.vaadin.flow.component.formlayout.FormLayout.LabelTextAlign;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
@@ -150,6 +151,28 @@ class FormLayoutTest {
         Assertions.assertFalse(formLayout.getStyle()
                 .has("--vaadin-form-layout-label-spacing"));
         Assertions.assertNull(formLayout.getLabelSpacing());
+    }
+
+    @Test
+    void setLabelTextAlign_getLabelTextAlign() {
+        FormLayout formLayout = new FormLayout();
+        Assertions.assertFalse(formLayout.getStyle()
+                .has("--vaadin-form-layout-label-text-align"));
+        Assertions.assertEquals(LabelTextAlign.START,
+                formLayout.getLabelTextAlign());
+
+        formLayout.setLabelTextAlign(LabelTextAlign.END);
+        Assertions.assertEquals("end", formLayout.getStyle()
+                .get("--vaadin-form-layout-label-text-align"));
+        Assertions.assertEquals(LabelTextAlign.END,
+                formLayout.getLabelTextAlign());
+    }
+
+    @Test
+    void setLabelTextAlignNull_throws() {
+        FormLayout formLayout = new FormLayout();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> formLayout.setLabelTextAlign(null));
     }
 
     @Test
