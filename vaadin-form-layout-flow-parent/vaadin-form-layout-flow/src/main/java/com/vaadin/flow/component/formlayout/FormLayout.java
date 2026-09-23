@@ -164,17 +164,21 @@ import tools.jackson.databind.node.ObjectNode;
  * When there isn't enough space for side labels, Form Layout returns the labels
  * to the default position above the fields.
  * <p>
- * All Vaadin field components placed directly in the Form Layout support
- * rendering their label next to the field out of the box. Any other components,
- * such as buttons or custom components, are just placed at the start of the
- * label column. How they should be laid out in this mode is left to the
- * developer and can be handled in one of two ways:
+ * All Vaadin input field components placed directly in the Form Layout support
+ * labels-aside mode out of the box, showing their label next to the field.
+ * Checkable fields, such as {@code Checkbox}, work differently: their label
+ * remains in place, and Form Layout only indents such fields so they align with
+ * the input column.
+ * <p>
+ * Any other components, such as buttons or custom components, are just placed
+ * at the start of the label column. How they should be laid out in this mode is
+ * left to the developer and can be handled in one of two ways:
  * <ol>
  * <li>
  * <p>
- * Wrap the component in a {@link FormItem}, with or without providing a label.
- * The Form Item reserves space for the label, so the component ends up in the
- * input column, aligned with the other fields:
+ * Wrap the component in a {@link FormItem}, with or without a label. The Form
+ * Item reserves space for the label, so the component ends up in the input
+ * column, aligned with the other fields:
  *
  * <pre>
  * var nameInput = new Input();
@@ -189,7 +193,19 @@ import tools.jackson.databind.node.ObjectNode;
  * Write custom CSS. When labels are rendered next to fields, Form Layout sets
  * the {@code has-labels-aside} attribute on its host element and the
  * {@code data-form-layout-has-labels-aside} attribute on children. You can rely
- * on these attributes to adapt your components to label-aside mode.</li>
+ * on these attributes to adapt your components to label-aside mode, for
+ * example:
+ *
+ * <pre>
+ * vaadin-button[data-form-layout-has-labels-aside] {
+ *     margin-inline-start: calc(
+ *         var(--vaadin-form-layout-label-width) +
+ *         var(--vaadin-form-layout-label-spacing)
+ *     );
+ * }
+ * </pre>
+ *
+ * </li>
  * </ol>
  *
  * @author Vaadin Ltd
