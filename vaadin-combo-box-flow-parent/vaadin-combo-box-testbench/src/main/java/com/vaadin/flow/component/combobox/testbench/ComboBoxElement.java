@@ -128,9 +128,13 @@ public class ComboBoxElement extends TestBenchElement
     }
 
     /**
-     * Gets a list of all available options.
+     * Gets the labels of the items that are currently loaded in the popup.
+     * Opens the popup if it is not open.
+     * <p>
+     * With a data provider, only the loaded pages have labels. Items outside
+     * them are placeholders with an empty label.
      *
-     * @return a list of the options (visible text)
+     * @return labels of the items that are loaded in the popup
      */
     @SuppressWarnings("unchecked")
     public List<String> getOptions() {
