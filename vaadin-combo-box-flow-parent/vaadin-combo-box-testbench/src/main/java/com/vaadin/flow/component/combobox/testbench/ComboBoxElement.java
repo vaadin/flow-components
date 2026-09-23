@@ -131,8 +131,8 @@ public class ComboBoxElement extends TestBenchElement
      * Gets the labels of the items that are currently loaded in the popup.
      * Opens the popup if it is not open.
      * <p>
-     * With a data provider, only the loaded pages have labels. Items outside
-     * them are placeholders with an empty label.
+     * The popup only holds the pages that are loaded so far. Items outside them
+     * are placeholders with an empty label.
      *
      * @return labels of the items that are loaded in the popup
      */
