@@ -58,7 +58,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.3.0")
+@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha1")
 public class MessageList extends Component implements HasStyle, HasSize,
         LocaleChangeObserver, HasThemeVariant<MessageListVariant> {
 
@@ -680,7 +680,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * Note: This event listens to the {@code attachment-click-flow} event
      * dispatched by the connector, which enriches the web component's
      * {@code attachment-click} event with item and attachment indexes.
-     * 
+     *
      * @since 25.1
      */
     @DomEvent("attachment-click-flow")

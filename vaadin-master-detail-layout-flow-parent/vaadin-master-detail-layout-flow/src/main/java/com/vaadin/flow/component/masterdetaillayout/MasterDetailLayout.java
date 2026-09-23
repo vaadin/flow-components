@@ -48,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 24.8
  */
 @Tag("vaadin-master-detail-layout")
-@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.3.0")
+@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.4.0-alpha1")
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
 public class MasterDetailLayout extends Component
         implements HasSize, RouterLayout {
@@ -69,7 +69,7 @@ public class MasterDetailLayout extends Component
 
     /**
      * Supported overlay containment values for {@link MasterDetailLayout}.
-     * 
+     *
      * @since 25.2
      */
     public enum OverlayContainment {

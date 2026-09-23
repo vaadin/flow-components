@@ -105,7 +105,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "25.3.0")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.4.0-alpha1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -683,7 +683,7 @@ public class RadioButtonGroup<T>
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
-     * 
+     *
      * @since 25.3
      */
     @Override

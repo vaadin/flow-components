@@ -143,7 +143,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.3.0")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.4.0-alpha1")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./vaadin-date-picker/datepickerConnector.ts")
 @NpmPackage(value = "date-fns", version = "4.4.0")
@@ -432,7 +432,7 @@ public class DatePicker
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -920,7 +920,7 @@ public class DatePicker
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
-     * 
+     *
      * @since 25.3
      */
     @Override
@@ -1507,7 +1507,7 @@ public class DatePicker
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 2.0.5
      */
     protected void validate() {
@@ -1517,7 +1517,7 @@ public class DatePicker
     /**
      * {@code opened-changed} event is sent when the calendar overlay opened
      * state changes.
-     * 
+     *
      * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<DatePicker> {
@@ -1548,7 +1548,7 @@ public class DatePicker
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
-     * 
+     *
      * @since 23.3
      */
     public static class InvalidChangeEvent extends ComponentEvent<DatePicker> {

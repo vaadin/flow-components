@@ -89,7 +89,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.3.0")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.4.0-alpha1")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-combo-box/comboBoxConnector.ts")
@@ -129,7 +129,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * Predicate to check {@link ComboBox} items against user typed strings.
-     * 
+     *
      * @since 2.0
      */
     @FunctionalInterface
@@ -510,7 +510,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * The internationalization properties for {@link ComboBox}.
-     * 
+     *
      * @since 24.5
      */
     public static class ComboBoxI18n implements ComboBoxBaseI18n {

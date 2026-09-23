@@ -60,7 +60,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.3.0")
+@NpmPackage(value = "@vaadin/button", version = "25.4.0-alpha1")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -363,7 +363,7 @@ public class Button extends Component
     /**
      * Executes a click on this button at the client-side. Calling this method
      * behaves the same as if the user would have clicked on the button.
-     * 
+     *
      * @since 1.3
      */
     public void clickInClient() {
@@ -527,7 +527,7 @@ public class Button extends Component
      *
      * This feature flag will also enable focus events and focus shortcuts for
      * disabled buttons.
-     * 
+     *
      * @since 24.3.8
      */
     @Override
@@ -574,7 +574,7 @@ public class Button extends Component
      *
      * This feature flag will enable focus events and focus shortcuts for
      * disabled buttons.
-     * 
+     *
      * @since 24.7
      */
     @Override
@@ -601,7 +601,7 @@ public class Button extends Component
      *
      * This feature flag will enable focus events and focus shortcuts for
      * disabled buttons.
-     * 
+     *
      * @since 24.7
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -628,7 +628,7 @@ public class Button extends Component
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
      * </pre>
-     * 
+     *
      * @since 24.7
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })

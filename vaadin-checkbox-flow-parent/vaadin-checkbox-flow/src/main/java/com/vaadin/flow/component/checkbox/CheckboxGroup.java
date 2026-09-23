@@ -113,7 +113,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 1.1
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.3.0")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "25.4.0-alpha1")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -669,7 +669,7 @@ public class CheckboxGroup<T>
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
-     * 
+     *
      * @since 25.3
      */
     @Override
