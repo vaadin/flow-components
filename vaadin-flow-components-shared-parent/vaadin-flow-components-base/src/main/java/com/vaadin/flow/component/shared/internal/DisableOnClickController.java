@@ -25,8 +25,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
-import com.vaadin.flow.function.SerializableRunnable;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * An internal controller for handling disabling a component when it is clicked.
@@ -171,59 +169,6 @@ public class DisableOnClickController<C extends Component & HasEnabled>
             component.setEnabled(enabled);
         } finally {
             updatingEnabled = false;
-        }
-    }
-
-    /**
-     * Runs an action once before the client response, even if the component is
-     * detached and attached again in between, possibly to another UI.
-     * <p>
-     * {@link UI#beforeClientResponse} is bound to the UI the component is
-     * attached to when the action is registered, and the action is dropped if
-     * the component is not attached to that same UI when the response is sent.
-     * This class instead registers the action whenever the component is
-     * attached, removes the registration whenever it is detached, and stops
-     * doing so once the action has run or has been cancelled.
-     */
-    private static class BeforeClientResponseAction implements Serializable {
-
-        private final Component component;
-        private final SerializableRunnable action;
-        private Registration attachRegistration;
-
-        BeforeClientResponseAction(Component component,
-                SerializableRunnable action) {
-            this.component = component;
-            this.action = action;
-        }
-
-        /**
-         * Schedules the action to run before the next client response while the
-         * component is attached. Does nothing if the action is already
-         * scheduled.
-         */
-        void schedule() {
-            if (attachRegistration != null) {
-                return;
-            }
-            attachRegistration = component.whenAttached(
-                    ui -> ui.beforeClientResponse(component, context -> {
-                        cancel();
-                        action.run();
-                    }));
-        }
-
-        /**
-         * Cancels the scheduled action. Does nothing if the action is not
-         * scheduled.
-         */
-        void cancel() {
-            if (attachRegistration == null) {
-                return;
-            }
-            Registration registration = attachRegistration;
-            attachRegistration = null;
-            registration.remove();
         }
     }
 }

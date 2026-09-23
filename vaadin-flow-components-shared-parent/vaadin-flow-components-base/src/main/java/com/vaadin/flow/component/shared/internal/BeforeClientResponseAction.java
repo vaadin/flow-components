@@ -1,0 +1,94 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.shared.internal;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.shared.Registration;
+
+/**
+ * Runs an action for a component once before the next client response.
+ * <p>
+ * Use this to defer an update to the end of the round trip, for example when
+ * several changes in the same round trip affect the same client-side state and
+ * the update should only run once, with the final state. Scheduling the action
+ * again before it has run has no effect, and you can cancel a scheduled action.
+ * <p>
+ * Compared to registering the action directly with
+ * {@link UI#beforeClientResponse}, the action also runs if the component is
+ * detached and attached again before the response, also to a different UI.
+ * <p>
+ * For internal use only. May be renamed or removed in a future release.
+ *
+ * @since 25.4
+ */
+public class BeforeClientResponseAction implements Serializable {
+
+    private final Component component;
+    private final SerializableRunnable action;
+    private Registration attachRegistration;
+
+    /**
+     * Creates a new action for the given component. The action is not scheduled
+     * until you call {@link #schedule()}.
+     *
+     * @param component
+     *            the component whose client response the action runs before,
+     *            not {@code null}
+     * @param action
+     *            the action to run, not {@code null}
+     */
+    public BeforeClientResponseAction(Component component,
+            SerializableRunnable action) {
+        this.component = Objects.requireNonNull(component,
+                "Component must not be null");
+        this.action = Objects.requireNonNull(action, "Action must not be null");
+    }
+
+    /**
+     * Schedules the action to run before the next client response while the
+     * component is attached. If the component is not attached, the action runs
+     * before the first response after the component has been attached. Does
+     * nothing if the action is already scheduled.
+     */
+    public void schedule() {
+        if (attachRegistration != null) {
+            return;
+        }
+        attachRegistration = component.whenAttached(
+                ui -> ui.beforeClientResponse(component, context -> {
+                    cancel();
+                    action.run();
+                }));
+    }
+
+    /**
+     * Cancels the scheduled action. Does nothing if the action is not
+     * scheduled.
+     */
+    public void cancel() {
+        if (attachRegistration == null) {
+            return;
+        }
+        Registration registration = attachRegistration;
+        attachRegistration = null;
+        registration.remove();
+    }
+}
