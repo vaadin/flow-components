@@ -300,9 +300,8 @@ public class FormLayout extends Component
     public enum LabelTextAlign {
 
         /**
-         * Aligns the label to the start of the label area, which is the left
-         * side in left-to-right and the right side in right-to-left layout
-         * direction.
+         * Aligns the label to the start of the label area (left in LTR, right
+         * in RTL).
          */
         START,
 
@@ -312,9 +311,8 @@ public class FormLayout extends Component
         CENTER,
 
         /**
-         * Aligns the label to the end of the label area, which is the right
-         * side in left-to-right and the left side in right-to-left layout
-         * direction.
+         * Aligns the label to the end of the label area (right in LTR, left in
+         * RTL).
          */
         END;
 
