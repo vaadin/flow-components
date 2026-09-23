@@ -129,7 +129,7 @@ public class ComboBoxElement extends TestBenchElement
 
     /**
      * Gets the labels of the items that are currently loaded in the popup.
-     * Opens the popup if it is not open.
+     * Opens the popup if it is not open, and waits until loading has finished.
      * <p>
      * The popup only holds the pages that are loaded so far. Items outside them
      * are placeholders with an empty label.
@@ -139,6 +139,7 @@ public class ComboBoxElement extends TestBenchElement
     @SuppressWarnings("unchecked")
     public List<String> getOptions() {
         openPopup();
+        waitForLoadingFinished();
         return (List<String>) executeScript("var combobox=arguments[0];" //
                 + "return combobox.filteredItems.map(function(item) { return combobox._getItemLabel(item);});",
                 this);
