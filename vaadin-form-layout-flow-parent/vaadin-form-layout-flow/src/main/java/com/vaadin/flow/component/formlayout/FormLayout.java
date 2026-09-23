@@ -144,10 +144,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * <h3>Customizing Label Position</h3>
  * <p>
- * By default, Form Layout displays labels above the fields. To position labels
- * beside fields, you need to wrap each field in a {@link FormItem} element and
- * define its labels on the wrapper. Then, you can enable the
- * {@link #setLabelsAside(boolean) labelsAside} property:
+ * By default, Form Layout displays labels above fields. To put labels next to
+ * fields, enable the {@link #setLabelsAside(boolean) labelsAside} property:
  *
  * <pre>
  * FormLayout formLayout = new FormLayout();
@@ -155,18 +153,60 @@ import tools.jackson.databind.node.ObjectNode;
  * formLayout.setLabelsAside(true);
  *
  * FormRow firstRow = new FormRow();
- * firstRow.addFormItem(new TextField(), "First Name");
- * firstRow.addFormItem(new TextField(), "Last Name");
+ * firstRow.add(new TextField("First Name"), new TextField("Last Name"));
  *
  * FormRow secondRow = new FormRow();
- * FormItem addressField = secondRow.addFormItem(new TextArea(), "Address");
- * secondRow.setColspan(addressField, 2);
+ * secondRow.add(new TextArea("Address"), 2); // colspan 2
  *
  * formLayout.add(firstRow, secondRow);
  * </pre>
  * <p>
- * With this, FormLayout will display labels beside fields, falling back to the
- * default position above the fields only when there isn't enough space.
+ * When there isn't enough space for side labels, Form Layout returns the labels
+ * to the default position above the fields.
+ * <p>
+ * All Vaadin input field components placed directly in the Form Layout support
+ * labels-aside mode out of the box, showing their label next to the field.
+ * Checkable fields, such as {@code Checkbox}, work differently: their label
+ * remains in place, and Form Layout only indents such fields so they align with
+ * the input column.
+ * <p>
+ * Any other components, such as buttons or custom components, are just placed
+ * at the start of the label column. How they should be laid out in this mode is
+ * left to the developer and can be handled in one of two ways:
+ * <ol>
+ * <li>
+ * <p>
+ * Wrap the component in a {@link FormItem}, with or without a label. The Form
+ * Item reserves space for the label, so the component ends up in the input
+ * column, aligned with the other fields:
+ *
+ * <pre>
+ * var nameInput = new Input();
+ * formLayout.addFormItem(nameInput, "Name");
+ *
+ * var saveButton = new Button("Save");
+ * formLayout.addFormItem(saveButton);
+ * </pre>
+ *
+ * <li>
+ * <p>
+ * Write custom CSS. When labels are rendered next to fields, Form Layout sets
+ * the {@code has-labels-aside} attribute on its host element and the
+ * {@code data-form-layout-has-labels-aside} attribute on children. You can rely
+ * on these attributes to adapt your components to label-aside mode, for
+ * example:
+ *
+ * <pre>
+ * vaadin-button[data-form-layout-has-labels-aside] {
+ *     margin-inline-start: calc(
+ *         var(--vaadin-form-layout-label-width) +
+ *         var(--vaadin-form-layout-label-spacing)
+ *     );
+ * }
+ * </pre>
+ *
+ * </li>
+ * </ol>
  *
  * @author Vaadin Ltd
  * @since 1.0
@@ -293,7 +333,7 @@ public class FormLayout extends Component
 
     /**
      * Enum for describing the text alignment that is applied to labels when
-     * they are positioned next to the fields.
+     * they are positioned next to fields.
      *
      * @since 25.4
      */
@@ -784,13 +824,14 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets the width of side-positioned label.
+     * Sets the width that labels have when they are positioned next to fields.
      *
      * @param width
      *            the value and CSS unit as a string
      * @see <a href=
      *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label
      *      position</a>
+     * @see #setLabelsAside(boolean)
      * @since 24.5
      */
     public void setLabelWidth(String width) {
@@ -798,13 +839,14 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets the width of side-positioned label.
+     * Sets the width that labels have when they are positioned next to fields.
      *
      * @param width
      *            the value of the width
      * @param unit
      *            the CSS unit of the width
      * @see #setLabelWidth(String)
+     * @see #setLabelsAside(boolean)
      * @since 24.8
      */
     public void setLabelWidth(float width, Unit unit) {
@@ -813,12 +855,13 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets the width of side-positioned label.
+     * Gets the width that labels have when they are positioned next to fields.
      *
      * @return the value and CSS unit as a string
      * @see <a href=
      *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label
      *      position</a>
+     * @see #setLabelsAside(boolean)
      * @since 24.5
      */
     public String getLabelWidth() {
@@ -826,13 +869,14 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets the gap between the label and the field which is used when labels
-     * are positioned aside. The value must be provided in CSS length units,
-     * e.g. {@code 1em}.
+     * Sets the gap between the label and the field when labels are positioned
+     * next to fields. The value must be provided in CSS length units, e.g.
+     * {@code 1em}.
      *
      * @param labelSpacing
      *            the gap between the label and the field
      * @see #setLabelSpacing(float, Unit)
+     * @see #setLabelsAside(boolean)
      * @since 24.8
      */
     public void setLabelSpacing(String labelSpacing) {
@@ -840,15 +884,16 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets the gap between the label and the field which is used when labels
-     * are positioned aside. The value must be provided with a {@link Unit},
-     * e.g., {@code 1} and {@link Unit#EM}.
+     * Sets the gap between the label and the field when labels are positioned
+     * next to fields. The value must be provided with a {@link Unit}, e.g.,
+     * {@code 1} and {@link Unit#EM}.
      *
      * @param labelSpacing
      *            the gap between the label and the field
      * @param unit
      *            the CSS unit of the gap
      * @see #setLabelSpacing(String)
+     * @see #setLabelsAside(boolean)
      * @since 24.8
      */
     public void setLabelSpacing(float labelSpacing, Unit unit) {
@@ -857,12 +902,13 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets the gap between the label and the field which is used when labels
-     * are positioned aside.
+     * Gets the gap between the label and the field when labels are positioned
+     * next to fields.
      *
      * @return the value and CSS unit as a string
      * @see #setLabelSpacing(String)
      * @see #setLabelSpacing(float, Unit)
+     * @see #setLabelsAside(boolean)
      * @since 24.8
      */
     public String getLabelSpacing() {
@@ -870,9 +916,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets the text alignment that is applied to labels when they are
-     * positioned next to the fields. The default value is
-     * {@link LabelTextAlign#START}.
+     * Sets the text alignment of labels when they are positioned next to
+     * fields. The default value is {@link LabelTextAlign#START}.
      *
      * @param labelTextAlign
      *            the text alignment of labels, not {@code null}
@@ -887,9 +932,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets the text alignment that is applied to labels when they are
-     * positioned next to the fields. The default value is
-     * {@link LabelTextAlign#START}.
+     * Gets the text alignment of labels when they are positioned next to
+     * fields. The default value is {@link LabelTextAlign#START}.
      *
      * @return the text alignment of labels, never {@code null}
      * @see #setLabelsAside(boolean)
@@ -1232,31 +1276,19 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets whether {@link FormItem} should prefer positioning labels beside the
-     * fields. If the layout is too narrow to fit a single column with a side
-     * label, labels will automatically switch to their default position above
-     * the fields until the layout gets wide again.
+     * Sets whether the layout should put labels next to fields. If the layout
+     * is too narrow for a single column with a side label, the labels
+     * automatically return to their default position above the fields.
      * <p>
      * This setting only applies when {@link #setAutoResponsive(boolean)} is
      * enabled.
-     * <p>
-     * To customize the label width and the gap between the label and the field,
-     * use the following methods:
-     * <ul>
-     * <li>{@link #setLabelWidth(String)}</li>
-     * <li>{@link #setLabelSpacing(String)}</li>
-     * <li>{@link #setLabelTextAlign(LabelTextAlign)}</li>
-     * </ul>
-     * <p>
-     * Alternatively, you can use the following CSS custom properties:
-     * <ul>
-     * <li>{@code --vaadin-form-layout-label-width}</li>
-     * <li>{@code --vaadin-form-layout-label-spacing}</li>
-     * <li>{@code --vaadin-form-layout-label-text-align}</li>
-     * </ul>
      *
      * @param labelsAside
-     *            {@code true} to position labels aside, {@code false} otherwise
+     *            {@code true} to put labels next to fields, {@code false}
+     *            otherwise
+     * @see #setLabelWidth(String)
+     * @see #setLabelSpacing(String)
+     * @see #setLabelTextAlign(LabelTextAlign)
      * @since 24.8
      */
     public void setLabelsAside(boolean labelsAside) {
@@ -1264,12 +1296,15 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets whether {@link FormItem} is configured to prefer positioning labels
-     * beside the fields when {@link #setAutoResponsive(boolean)} is enabled.
+     * Gets whether the layout is configured to put labels next to fields when
+     * {@link #setAutoResponsive(boolean)} is enabled.
      *
-     * @return {@code true} if labels are positioned aside, {@code false}
+     * @return {@code true} if labels are put next to fields, {@code false}
      *         otherwise
      * @see #setLabelsAside(boolean)
+     * @see #setLabelWidth(String)
+     * @see #setLabelSpacing(String)
+     * @see #setLabelTextAlign(LabelTextAlign)
      * @since 24.8
      */
     public boolean isLabelsAside() {
