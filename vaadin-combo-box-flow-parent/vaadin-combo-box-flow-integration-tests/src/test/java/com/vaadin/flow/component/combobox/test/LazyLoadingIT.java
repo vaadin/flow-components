@@ -111,7 +111,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertMessage("Item 10");
         Assert.assertEquals(
                 "The selected value should be displayed in the ComboBox's TextField",
-                "Item 10", getTextFieldValue(stringBox));
+                "Item 10", stringBox.getInputElementValue());
         stringBox.openPopup();
         assertItemSelected(stringBox, "Item 10");
     }
@@ -122,7 +122,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertMessage("Item 10");
         Assert.assertEquals(
                 "The selected value should be displayed in the ComboBox's TextField",
-                "Item 10", getTextFieldValue(stringBox));
+                "Item 10", stringBox.getInputElementValue());
         stringBox.openPopup();
         // Make sure the item is in the viewport / rendered
         scrollToItem(stringBox, 10);
@@ -216,7 +216,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertRendered(beanBox, "Born 3");
 
         getItemElements(beanBox).get(5).click();
-        Assert.assertEquals("Born 5", getTextFieldValue(beanBox));
+        Assert.assertEquals("Born 5", beanBox.getInputElementValue());
 
         assertLoadedItemsCount("Only the first page should be loaded.", 50,
                 beanBox);
@@ -250,7 +250,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         assertComponentRendered(beanBox, "<h4>Person 4</h4>");
         getItemElements(beanBox).get(7).click();
-        Assert.assertEquals("Born 7", getTextFieldValue(beanBox));
+        Assert.assertEquals("Born 7", beanBox.getInputElementValue());
 
     }
 
@@ -396,7 +396,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         clickButton("set-current-value");
 
         assertMessage(item);
-        Assert.assertEquals(item, getSelectedItemLabel(stringBox));
+        Assert.assertEquals(item, stringBox.getSelectedText());
     }
 
     @Test
@@ -407,8 +407,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntil(driver -> getNonEmptyOverlayContents(stringBox).size() == 1);
         stringBoxAutoOpenDisabled.selectByText(item);
         assertMessage(item);
-        Assert.assertEquals(item,
-                getSelectedItemLabel(stringBoxAutoOpenDisabled));
+        Assert.assertEquals(item, stringBoxAutoOpenDisabled.getSelectedText());
         Assert.assertFalse(stringBoxAutoOpenDisabled.isAutoOpen());
     }
 
@@ -514,11 +513,11 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         lazyWithSmallCustomPageSize.selectByText(item);
         lazyWithSmallCustomPageSize.setFilter(item);
         Assert.assertEquals(item,
-                getSelectedItemLabel(lazyWithSmallCustomPageSize));
+                lazyWithSmallCustomPageSize.getSelectedText());
 
         lazyWithSmallCustomPageSize.closePopup();
         Assert.assertEquals(item,
-                getSelectedItemLabel(lazyWithSmallCustomPageSize));
+                lazyWithSmallCustomPageSize.getSelectedText());
 
         lazyWithSmallCustomPageSize.click();
         assertLoadingStateResolved(lazyWithSmallCustomPageSize);

@@ -119,8 +119,9 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
 
     @Test
     public void presetValue() {
-        WebElement combo = findElement(By.id("titles-with-preset-value"));
-        String value = getSelectedItemLabel(combo);
+        ComboBoxElement combo = $(ComboBoxElement.class)
+                .id("titles-with-preset-value");
+        String value = combo.getSelectedText();
         Assert.assertEquals("MRS", value);
     }
 
@@ -143,13 +144,13 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
 
     @Test
     public void setValue_changeDataProvider_valueIsReset() {
-        WebElement combo = findElement(By.id("combo"));
+        ComboBoxElement combo = $(ComboBoxElement.class).id("combo");
 
         findElement(By.id("update-provider")).click();
         waitUntil(driver -> "baz".equals(getItemLabel(getItems(combo), 0)));
 
         findElement(By.id("update-value")).click();
-        String value = getSelectedItemLabel(combo);
+        String value = combo.getSelectedText();
         Assert.assertEquals("baz", value);
 
         findElement(By.id("update-provider")).click();
@@ -159,14 +160,15 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
 
     @Test
     public void setValueProgrammatically() {
-        WebElement combo = findElement(By.id("external-selected-item"));
-        Assert.assertEquals("foo", getSelectedItemLabel(combo));
+        ComboBoxElement combo = $(ComboBoxElement.class)
+                .id("external-selected-item");
+        Assert.assertEquals("foo", combo.getSelectedText());
 
         findElement(By.id("toggle-selected-item")).click();
-        Assert.assertEquals("bar", getSelectedItemLabel(combo));
+        Assert.assertEquals("bar", combo.getSelectedText());
 
         findElement(By.id("toggle-selected-item")).click();
-        Assert.assertEquals("foo", getSelectedItemLabel(combo));
+        Assert.assertEquals("foo", combo.getSelectedText());
     }
 
     @Test
@@ -176,22 +178,22 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         WebElement message = findElement(By.id("updatable-combo-message"));
         WebElement button = findElement(By.id("updatable-combo-button"));
 
-        Assert.assertEquals("", getSelectedItemLabel(combo));
+        Assert.assertEquals("", combo.getSelectedText());
 
         button.click();
-        Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
+        Assert.assertEquals("Item 2", combo.getSelectedText());
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
 
         executeScript(
                 "arguments[0].selectedItem = arguments[0].filteredItems[0]",
                 combo);
-        Assert.assertEquals("Item 1", getSelectedItemLabel(combo));
+        Assert.assertEquals("Item 1", combo.getSelectedText());
         Assert.assertEquals("Value: Item 1 isFromClient: true",
                 message.getText());
 
         button.click();
-        Assert.assertEquals("Item 2", getSelectedItemLabel(combo));
+        Assert.assertEquals("Item 2", combo.getSelectedText());
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
     }
