@@ -158,18 +158,21 @@ class FormLayoutTest {
         FormLayout formLayout = new FormLayout();
         Assertions.assertFalse(formLayout.getStyle()
                 .has("--vaadin-form-layout-label-text-align"));
-        Assertions.assertNull(formLayout.getLabelTextAlign());
+        Assertions.assertEquals(LabelTextAlign.START,
+                formLayout.getLabelTextAlign());
 
         formLayout.setLabelTextAlign(LabelTextAlign.END);
         Assertions.assertEquals("end", formLayout.getStyle()
                 .get("--vaadin-form-layout-label-text-align"));
         Assertions.assertEquals(LabelTextAlign.END,
                 formLayout.getLabelTextAlign());
+    }
 
-        formLayout.setLabelTextAlign(null);
-        Assertions.assertFalse(formLayout.getStyle()
-                .has("--vaadin-form-layout-label-text-align"));
-        Assertions.assertNull(formLayout.getLabelTextAlign());
+    @Test
+    void setLabelTextAlignNull_throws() {
+        FormLayout formLayout = new FormLayout();
+        Assertions.assertThrows(NullPointerException.class,
+                () -> formLayout.setLabelTextAlign(null));
     }
 
     @Test

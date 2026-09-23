@@ -292,8 +292,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Enum for describing the text alignment of labels in a {@link FormItem}
-     * when the labels are positioned aside the fields.
+     * Enum for describing the text alignment that is applied to labels when they
+     * are positioned next to the fields.
      *
      * @since 25.4
      */
@@ -303,28 +303,51 @@ public class FormLayout extends Component
          * Aligns the label to the start of the label area (left in LTR, right
          * in RTL).
          */
-        START,
+        START("start"),
 
         /**
          * Aligns the label to the center of the label area.
          */
-        CENTER,
+        CENTER("center"),
 
         /**
          * Aligns the label to the end of the label area (right in LTR, left in
          * RTL).
          */
-        END;
+        END("end");
 
-        @Override
-        public String toString() {
-            return name().toLowerCase(Locale.ENGLISH);
+        private final String propertyValue;
+
+        private LabelTextAlign(String propertyValue) {
+            this.propertyValue = propertyValue;
         }
 
-        private static LabelTextAlign fromStyleValue(String styleValue) {
-            return Arrays.stream(values()).filter(
-                    textAlign -> textAlign.toString().equals(styleValue))
-                    .findFirst().orElse(null);
+        /**
+         * Converts the String property value to the corresponding enum value.
+         * Values that don't match any constant (including {@code null}) fall
+         * back to {@link LabelTextAlign#START}.
+         *
+         * @param propertyValue
+         *            the value of the label text align custom property
+         * @return the enum value corresponding to the property value, not
+         *         {@code null}
+         */
+        private static LabelTextAlign fromPropertyValue(String propertyValue) {
+            for (LabelTextAlign textAlign : values()) {
+                if (textAlign.getPropertyValue().equals(propertyValue)) {
+                    return textAlign;
+                }
+            }
+            return START;
+        }
+
+        /**
+         * Gets the custom property value for this text alignment.
+         *
+         * @return the property value
+         */
+        private String getPropertyValue() {
+            return propertyValue;
         }
     }
 
@@ -818,31 +841,34 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets the text alignment of labels which is used when labels are
-     * positioned aside.
-     *
-     * @return the text alignment of labels, or {@code null} if not set
-     * @see #setLabelTextAlign(LabelTextAlign)
-     * @since 25.4
-     */
-    public LabelTextAlign getLabelTextAlign() {
-        return LabelTextAlign.fromStyleValue(
-                getStyle().get("--vaadin-form-layout-label-text-align"));
-    }
-
-    /**
-     * Sets the text alignment of labels which is used when labels are
-     * positioned aside. Setting {@code null} restores the default alignment,
-     * which is {@link LabelTextAlign#START}.
+     * Sets the text alignment that is applied to labels when they are
+     * positioned next to the fields. The default value is
+     * {@link LabelTextAlign#START}.
      *
      * @param labelTextAlign
-     *            the text alignment of labels, or {@code null} to restore the
-     *            default alignment
+     *            the text alignment of labels, not {@code null}
+     * @see #setLabelsAside(boolean)
      * @since 25.4
      */
     public void setLabelTextAlign(LabelTextAlign labelTextAlign) {
+        Objects.requireNonNull(labelTextAlign,
+                "Label text align cannot be null");
         getStyle().set("--vaadin-form-layout-label-text-align",
-                labelTextAlign != null ? labelTextAlign.toString() : null);
+                labelTextAlign.getPropertyValue());
+    }
+
+    /**
+     * Gets the text alignment that is applied to labels when they are
+     * positioned next to the fields. The default value is
+     * {@link LabelTextAlign#START}.
+     *
+     * @return the text alignment of labels, never {@code null}
+     * @see #setLabelsAside(boolean)
+     * @since 25.4
+     */
+    public LabelTextAlign getLabelTextAlign() {
+        return LabelTextAlign.fromPropertyValue(
+                getStyle().get("--vaadin-form-layout-label-text-align"));
     }
 
     /**
