@@ -209,7 +209,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
     protected void assertLoadingStateResolved(ComboBoxElement combo) {
         try {
-            waitUntil(driver -> !combo.getPropertyBoolean("loading"));
+            combo.waitForLoadingFinished();
         } catch (TimeoutException e) {
             Assert.fail("ComboBox was left in a loading state");
         }
