@@ -153,7 +153,7 @@ public class ComboBoxElement extends TestBenchElement
     public void setFilter(String filter) {
         openPopup();
         setProperty("filter", filter);
-        waitUntil(driver -> !getPropertyBoolean("loading"));
+        waitForLoadingFinished();
     }
 
     /**
@@ -163,6 +163,14 @@ public class ComboBoxElement extends TestBenchElement
      */
     public String getFilter() {
         return getPropertyString("filter");
+    }
+
+    /**
+     * Waits until the combo box has finished loading items to show in the
+     * popup.
+     */
+    public void waitForLoadingFinished() {
+        waitUntil(driver -> !getPropertyBoolean("loading"));
     }
 
     /**
