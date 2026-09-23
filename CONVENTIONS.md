@@ -104,6 +104,8 @@ Use unit tests to cover the component reacting to client-side events fired by th
 
 When a component invokes custom JavaScript from the server to modify client-side state, split test coverage by what varies: use unit tests that dump and assert pending JavaScript invocations from the UI to cover the full scenario matrix (e.g. whether invocation happens or not, different arguments to the invocation). Use a single integration test as smoke test per distinct client operation to prove the JS reaches the client and produces a real effect.
 
+Use `JsFunctionCallUtil` to assert on invocations that a component schedules with `Element.callJsFunction`. Such an invocation does not name the called function in its expression, so matching it by expression text never finds it.
+
 For coverage of JavaScript connectors, prefer web-test-runner tests under `vaadin-{component}-flow-integration-tests/test/*.test.ts` to cover the full scenario matrix. As above, integration tests should exist for the general case to verify integration of server component, web component and connector.
 
 Do not add tests that cover behavior of mixin interfaces in each component that use them. Keep only a test to verify the mixin interface is implemented. The exception is when methods are overridden to add custom logic.
