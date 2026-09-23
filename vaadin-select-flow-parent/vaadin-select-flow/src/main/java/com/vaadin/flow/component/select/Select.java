@@ -110,7 +110,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/select", version = "25.3.0")
+@NpmPackage(value = "@vaadin/select", version = "25.4.0-alpha1")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaDescription, HasAriaLabel,
@@ -584,7 +584,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
-     * 
+     *
      * @since 25.3
      */
     @Override

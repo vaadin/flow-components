@@ -98,7 +98,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 23.2
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.3.0")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.4.0-alpha1")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-combo-box/comboBoxConnector.ts")
@@ -449,7 +449,7 @@ public class MultiSelectComboBox<TItem>
     /**
      * Defines possible behavior of the component when not all selected items
      * can be displayed as chips within the current field width.
-     * 
+     *
      * @since 24.3
      */
     public enum AutoExpandMode {

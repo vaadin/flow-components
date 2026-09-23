@@ -56,7 +56,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.3.0")
+@NpmPackage(value = "@vaadin/notification", version = "25.4.0-alpha1")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -491,7 +491,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * {@code opened-changed} event is sent when the notification opened state
      * changes.
-     * 
+     *
      * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<Notification> {
