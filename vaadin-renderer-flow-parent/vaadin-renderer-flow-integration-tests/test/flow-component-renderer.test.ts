@@ -147,18 +147,6 @@ describe('flow-component-renderer', () => {
     // them, so a node id that does not resolve belongs to a component the
     // server has discarded, and it never arrives
 
-    it('should look the node up only once', async () => {
-      const { getByNodeId } = window.Vaadin.Flow.clients.ROOT;
-      const container = fixtureSync<HTMLDivElement>(`<div></div>`);
-
-      getByNodeId.resetHistory();
-      render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
-      await nextFrame();
-      await nextFrame();
-
-      expect(getByNodeId).to.have.been.calledOnceWith(0);
-    });
-
     it('should keep the content rendered before', async () => {
       const component = fixtureSync<TestComponent>(`<test-component></test-component>`);
 

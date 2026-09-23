@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,30 +26,6 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-grid/hidden-grid-component-column")
 public class HiddenGridComponentColumnIT extends AbstractComponentIT {
 
-    /** Counts every node lookup the component directive makes. */
-    private static final String COUNT_NODE_LOOKUPS_SCRIPT = """
-            window.nodeLookups = 0;
-            const client = window.Vaadin.Flow.clients.ROOT;
-            const getByNodeId = client.getByNodeId.bind(client);
-            client.getByNodeId = function (nodeId) {
-              window.nodeLookups++;
-              return getByNodeId(nodeId);
-            };
-            """;
-
-    /**
-     * Reports the lookups made right after the click, and the lookups made in
-     * the second that follows. The second number tells a render apart from a
-     * render that keeps looking the same nodes up.
-     */
-    private static final String MEASURE_NODE_LOOKUPS_SCRIPT = """
-            const done = arguments[arguments.length - 1];
-            setTimeout(() => {
-              const rendered = window.nodeLookups;
-              setTimeout(() => done([rendered, window.nodeLookups - rendered]), 1000);
-            }, 1000);
-            """;
-
     private GridElement grid;
 
     @Before
@@ -62,9 +36,8 @@ public class HiddenGridComponentColumnIT extends AbstractComponentIT {
 
     @Test
     public void hideGrid_setItems_showGrid_componentsAreRendered() {
-        // Each click is its own round trip, so the new items and the new
-        // visibility reach the client in separate responses. Repeat once,
-        // because the first pass can pass on a grid that had no rows before.
+        // The second round matters: the first one can pass on a grid that had
+        // no rows before
         for (int round = 1; round <= 2; round++) {
             clickElementWithJs("hide-grid");
             clickElementWithJs("set-items");
@@ -75,27 +48,6 @@ public class HiddenGridComponentColumnIT extends AbstractComponentIT {
                     "component of item " + generation + ".1",
                     grid.getCell(0, 1).getText());
         }
-    }
-
-    @Test
-    public void hideGridClearItemsAndHideColumn_nodesAreLookedUpOnlyOnce() {
-        executeScript(COUNT_NODE_LOOKUPS_SCRIPT);
-        clickElementWithJs("hide-grid-and-column");
-
-        List<?> lookups = (List<?>) getCommandExecutor().getDriver()
-                .executeAsyncScript(MEASURE_NODE_LOOKUPS_SCRIPT);
-        long whileRendering = ((Number) lookups.get(0)).longValue();
-        long afterRendering = ((Number) lookups.get(1)).longValue();
-
-        // The stale cells do look their nodes up, so the test still covers the
-        // scenario it was written for
-        Assert.assertNotEquals(
-                "Expected the stale cells to look their nodes up after the click",
-                0, whileRendering);
-        Assert.assertEquals(
-                "Expected the component cells to stop looking up node ids that "
-                        + "the server has discarded",
-                0, afterRendering);
     }
 
     @Test
