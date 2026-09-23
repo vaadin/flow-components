@@ -48,148 +48,118 @@ class ChartAIControllerBenchmark {
 
     @Test
     void stackedColumnByRegion() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.regionalSales()) {
-                var chart = new Chart();
-                var controller = new ChartAIController(chart, db);
-                try (var conversation = bench.conversation(chart, controller)) {
-                    conversation.say("""
-                            Stacked column chart of revenue per month, months \
-                            in calendar order, with the two regions stacked \
-                            on top of each other.""");
-                }
-                Assertions.assertEquals(ChartType.COLUMN, chartType(chart),
-                        () -> "chart type, with " + queries(controller));
-                var byName = seriesByName(chart);
-                Assertions.assertEquals(Set.of("North", "South"),
-                        byName.keySet());
-                Assertions.assertEquals(MONTHS,
-                        categories(byName.get("North")));
-                Assertions
-                        .assertEquals(
-                                List.of(10000.0, 12000.0, 14000.0, 16000.0,
-                                        18000.0, 20000.0),
-                                values(byName.get("North")));
-                Assertions.assertTrue(isStacked(chart),
-                        "column stacking is not enabled");
-            }
-        });
+        var db = BenchmarkDatabase.regionalSales();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        bench.conversation(chart, controller).say("""
+                Stacked column chart of revenue per month, months \
+                in calendar order, with the two regions stacked \
+                on top of each other.""");
+        Assertions.assertEquals(ChartType.COLUMN, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        var byName = seriesByName(chart);
+        Assertions.assertEquals(Set.of("North", "South"), byName.keySet());
+        Assertions.assertEquals(MONTHS, categories(byName.get("North")));
+        Assertions.assertEquals(
+                List.of(10000.0, 12000.0, 14000.0, 16000.0, 18000.0, 20000.0),
+                values(byName.get("North")));
+        Assertions.assertTrue(isStacked(chart),
+                "column stacking is not enabled");
     }
 
     @Test
     void scatterSalaryAgainstAgePerDepartment() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.employees()) {
-                var chart = new Chart();
-                var controller = new ChartAIController(chart, db);
-                try (var conversation = bench.conversation(chart, controller)) {
-                    conversation.say("""
-                            Scatter plot of salary against age, age on the \
-                            x axis, one series per department.""");
-                }
-                Assertions.assertEquals(ChartType.SCATTER, chartType(chart),
-                        () -> "chart type, with " + queries(controller));
-                var byName = seriesByName(chart);
-                Assertions.assertEquals(
-                        Set.of("Engineering", "Sales", "Marketing"),
-                        byName.keySet());
-                var points = new HashSet<List<Double>>();
-                byName.values().forEach(series -> series.getData().forEach(
+        var db = BenchmarkDatabase.employees();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        bench.conversation(chart, controller).say("""
+                Scatter plot of salary against age, age on the \
+                x axis, one series per department.""");
+        Assertions.assertEquals(ChartType.SCATTER, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        var byName = seriesByName(chart);
+        Assertions.assertEquals(Set.of("Engineering", "Sales", "Marketing"),
+                byName.keySet());
+        var points = new HashSet<List<Double>>();
+        byName.values()
+                .forEach(series -> series.getData().forEach(
                         item -> points.add(List.of(item.getX().doubleValue(),
                                 item.getY().doubleValue()))));
-                Assertions.assertEquals(
-                        Set.of(List.of(34.0, 72000.0), List.of(42.0, 88000.0),
-                                List.of(28.0, 54000.0), List.of(39.0, 67000.0),
-                                List.of(26.0, 49000.0), List.of(45.0, 61000.0)),
-                        points);
-            }
-        });
+        Assertions.assertEquals(
+                Set.of(List.of(34.0, 72000.0), List.of(42.0, 88000.0),
+                        List.of(28.0, 54000.0), List.of(39.0, 67000.0),
+                        List.of(26.0, 49000.0), List.of(45.0, 61000.0)),
+                points);
     }
 
     @Test
     void heatmapOfTrafficByDayAndHour() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.traffic()) {
-                var chart = new Chart();
-                var controller = new ChartAIController(chart, db);
-                try (var conversation = bench.conversation(chart, controller)) {
-                    conversation.say("""
-                            Heatmap of visitors with the weekday on one axis \
-                            and the hour of day on the other.""");
-                }
-                Assertions.assertEquals(ChartType.HEATMAP, chartType(chart),
-                        () -> "chart type, with " + queries(controller));
-                var series = chart.getConfiguration().getSeries();
-                Assertions.assertEquals(1, series.size(),
-                        () -> "expected one heat series, got " + series.size());
-                Assertions.assertInstanceOf(HeatSeries.class,
-                        series.getFirst());
-                var points = ((HeatSeries) series.getFirst()).getData();
-                Assertions.assertNotNull(points,
-                        () -> "heat series has no points; the converter needs numeric x and y, "
-                                + queries(controller));
-                Assertions.assertEquals(20, points.length,
-                        "one heat point per day and hour");
-            }
-        });
+        var db = BenchmarkDatabase.traffic();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        bench.conversation(chart, controller).say("""
+                Heatmap of visitors with the weekday on one axis \
+                and the hour of day on the other.""");
+        Assertions.assertEquals(ChartType.HEATMAP, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        var series = chart.getConfiguration().getSeries();
+        Assertions.assertEquals(1, series.size(),
+                () -> "expected one heat series, got " + series.size());
+        Assertions.assertInstanceOf(HeatSeries.class, series.getFirst());
+        var points = ((HeatSeries) series.getFirst()).getData();
+        Assertions.assertNotNull(points,
+                () -> "heat series has no points; the converter needs numeric x and y, "
+                        + queries(controller));
+        Assertions.assertEquals(20, points.length,
+                "one heat point per day and hour");
     }
 
     @Test
     void changesOneSeriesToSplineKeepingTheOther() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.regionalSales()) {
-                var chart = new Chart();
-                var controller = new ChartAIController(chart, db);
-                try (var conversation = bench.conversation(chart, controller)) {
-                    conversation.say("""
-                            Column chart of monthly revenue with one series \
-                            per region, months in calendar order.""");
-                    conversation.say("""
-                            Draw the South series as a smooth spline line \
-                            instead, but keep North as columns.""");
-                }
-                Assertions.assertEquals(ChartType.COLUMN, chartType(chart),
-                        () -> "chart type, with " + queries(controller));
-                var byName = seriesByName(chart);
-                Assertions.assertEquals(Set.of("North", "South"),
-                        byName.keySet());
-                Assertions.assertEquals(ChartType.SPLINE,
-                        seriesType(byName.get("South")),
-                        "South should be a spline series");
-                Assertions.assertNotEquals(ChartType.SPLINE,
-                        seriesType(byName.get("North")),
-                        "North should still be drawn as columns");
-                Assertions.assertEquals(MONTHS,
-                        categories(byName.get("South")));
-            }
-        });
+        var db = BenchmarkDatabase.regionalSales();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        var conversation = bench.conversation(chart, controller);
+        conversation.say("""
+                Column chart of monthly revenue with one series \
+                per region, months in calendar order.""");
+        conversation.say("""
+                Draw the South series as a smooth spline line \
+                instead, but keep North as columns.""");
+        Assertions.assertEquals(ChartType.COLUMN, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        var byName = seriesByName(chart);
+        Assertions.assertEquals(Set.of("North", "South"), byName.keySet());
+        Assertions.assertEquals(ChartType.SPLINE,
+                seriesType(byName.get("South")),
+                "South should be a spline series");
+        Assertions.assertNotEquals(ChartType.SPLINE,
+                seriesType(byName.get("North")),
+                "North should still be drawn as columns");
+        Assertions.assertEquals(MONTHS, categories(byName.get("South")));
     }
 
     @Test
     void swapsToBarKeepingTitles() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.regionalSales()) {
-                var chart = new Chart();
-                var controller = new ChartAIController(chart, db);
-                try (var conversation = bench.conversation(chart, controller)) {
-                    conversation.say("""
-                            Stacked area chart of monthly revenue per region. \
-                            Title it "Regional Revenue" and label the value \
-                            axis "Revenue (EUR)".""");
-                    conversation.say("Turn it into a horizontal bar chart");
-                }
-                var config = chart.getConfiguration();
-                Assertions.assertEquals(ChartType.BAR, chartType(chart),
-                        () -> "chart type, with " + queries(controller));
-                Assertions.assertEquals("Regional Revenue",
-                        config.getTitle().getText(), "title was lost");
-                Assertions.assertEquals("Revenue (EUR)",
-                        config.getyAxis().getTitle().getText(),
-                        "value axis title was lost");
-                Assertions.assertEquals(Set.of("North", "South"),
-                        seriesByName(chart).keySet());
-            }
-        });
+        var db = BenchmarkDatabase.regionalSales();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        var conversation = bench.conversation(chart, controller);
+        conversation.say("""
+                Stacked area chart of monthly revenue per region. \
+                Title it "Regional Revenue" and label the value \
+                axis "Revenue (EUR)".""");
+        conversation.say("Turn it into a horizontal bar chart");
+        var config = chart.getConfiguration();
+        Assertions.assertEquals(ChartType.BAR, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        Assertions.assertEquals("Regional Revenue", config.getTitle().getText(),
+                "title was lost");
+        Assertions.assertEquals("Revenue (EUR)",
+                config.getyAxis().getTitle().getText(),
+                "value axis title was lost");
+        Assertions.assertEquals(Set.of("North", "South"),
+                seriesByName(chart).keySet());
     }
 
     /** The state is {@code null} until the first successful render. */

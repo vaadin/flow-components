@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.ai.benchmark;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,9 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.InvocationInterceptor;
+import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
+import org.junit.platform.commons.support.ReflectionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.model.ChatModel;
@@ -49,6 +53,11 @@ import com.vaadin.tests.MockUIExtension;
 /**
  * JUnit extension that drives an {@link AIController} through a real LLM and
  * scores repeated attempts of a scenario.
+ * <p>
+ * Each test method is a scenario and its body is one attempt: the extension
+ * invokes the method once per attempt and fails the test when the pass rate
+ * falls below the configured minimum. The attempts share the test instance, so
+ * keep the components and controller of an attempt in local variables.
  * <p>
  * Register it with {@code @RegisterExtension} and gate the test class with
  * {@code @EnabledIfEnvironmentVariable(named = AIBenchmark.MODEL_VARIABLE,
@@ -76,7 +85,7 @@ import com.vaadin.tests.MockUIExtension;
  * statically registered extensions.
  */
 public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
-        AfterEachCallback, AfterAllCallback {
+        AfterEachCallback, AfterAllCallback, InvocationInterceptor {
 
     /** Environment variable naming the model to benchmark. */
     public static final String MODEL_VARIABLE = "AI_BENCHMARK_MODEL";
@@ -125,15 +134,6 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
     private long classInputTokens;
     private long classOutputTokens;
 
-    /**
-     * One attempt of a scenario: builds fresh components, runs the
-     * conversation, and asserts on the resulting state.
-     */
-    @FunctionalInterface
-    public interface Attempt {
-        void run() throws Exception;
-    }
-
     @Override
     public void beforeAll(ExtensionContext context) {
         // Closed once the whole test plan is done, which is the only point at
@@ -181,15 +181,24 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
         }
     }
 
+    @Override
+    public void interceptTestMethod(Invocation<Void> invocation,
+            ReflectiveInvocationContext<Method> invocationContext,
+            ExtensionContext extensionContext) {
+        // Each attempt is one invocation of the method, so the extension
+        // invokes it itself instead of letting JUnit invoke it once
+        invocation.skip();
+        score(() -> ReflectionSupport.invokeMethod(
+                invocationContext.getExecutable(),
+                invocationContext.getTarget().orElse(null),
+                invocationContext.getArguments().toArray()));
+    }
+
     /**
      * Runs the attempt the configured number of times and fails the test when
-     * the pass rate falls below the configured minimum. Each attempt must build
-     * its own components and controller so attempts do not share state.
-     *
-     * @param attempt
-     *            the scenario to score
+     * the pass rate falls below the configured minimum.
      */
-    public void score(Attempt attempt) {
+    private void score(Runnable attempt) {
         var runs = intVariable(RUNS_VARIABLE, 3);
         var minPassRate = doubleVariable(MIN_PASS_RATE_VARIABLE, 0.6);
         var failures = new ArrayList<String>();
@@ -202,6 +211,10 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
                 failures.add("run " + run + ": " + e.getMessage());
                 LOGGER.info("{} run {} failed: {}", scenario, run,
                         e.getMessage());
+            } finally {
+                // Detaches what the attempt's conversations attached, so the
+                // next attempt starts from an empty UI
+                ui.removeAll();
             }
         }
         var passed = runs - failures.size();
@@ -225,34 +238,32 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
 
     /**
      * Starts a conversation with an orchestrator that has the given controller
-     * registered. The root component is attached to the mock UI for the
-     * duration of the conversation and detached on {@link Conversation#close}.
+     * registered. The root component is attached to the mock UI until the
+     * attempt ends.
      *
      * @param root
      *            the component tree the controller works on
      * @param controller
      *            the controller under test
-     * @return the conversation, to be closed after the last turn
+     * @return the conversation
      */
     public Conversation conversation(Component root, AIController controller) {
         ui.add(root);
-        return new Conversation(root, controller);
+        return new Conversation(controller);
     }
 
     /**
      * A multi-turn conversation with one orchestrator. Each {@link #say} blocks
      * until the turn has ended and fails if the turn ended with an error.
      */
-    public final class Conversation implements AutoCloseable {
-        private final Component root;
+    public final class Conversation {
         private final AIOrchestrator orchestrator;
         private final AtomicReference<CountDownLatch> turnEnded = new AtomicReference<>();
         private final AtomicReference<CountDownLatch> requestSent = new AtomicReference<>(
                 new CountDownLatch(0));
         private final AtomicReference<ResponseListener.ResponseEvent> lastEvent = new AtomicReference<>();
 
-        private Conversation(Component root, AIController controller) {
-            this.root = root;
+        private Conversation(AIController controller) {
             // The orchestrator notifies the response listener before it
             // lets the controller apply its staged state, so the turn is
             // only over once the controller's onResponse has returned.
@@ -271,10 +282,21 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
          * @param message
          *            the user message
          * @return the assistant's response text
-         * @throws InterruptedException
-         *             if interrupted while waiting for the turn
          */
-        public String say(String message) throws InterruptedException {
+        public String say(String message) {
+            try {
+                return takeTurn(message);
+            } catch (InterruptedException e) {
+                // Failed like a turn that timed out, so the scenarios need
+                // not declare the exception. Restoring the flag keeps the
+                // interrupt visible to whoever sent it.
+                Thread.currentThread().interrupt();
+                throw new AssertionError(
+                        "Interrupted while waiting for the turn", e);
+            }
+        }
+
+        private String takeTurn(String message) throws InterruptedException {
             var latch = new CountDownLatch(1);
             turnEnded.set(latch);
             promptUntilAccepted(message);
@@ -336,11 +358,6 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
                 }
                 Thread.sleep(25);
             }
-        }
-
-        @Override
-        public void close() {
-            root.removeFromParent();
         }
     }
 

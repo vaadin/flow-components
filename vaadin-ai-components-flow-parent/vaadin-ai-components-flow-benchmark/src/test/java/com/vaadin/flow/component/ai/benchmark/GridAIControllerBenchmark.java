@@ -34,81 +34,60 @@ class GridAIControllerBenchmark {
 
     @Test
     void followUpNarrowsThePreviousResult() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.customers()) {
-                var grid = new Grid<AIDataRow>();
-                var controller = new GridAIController(grid, db);
-                try (var conversation = bench.conversation(grid, controller)) {
-                    conversation.say(
-                            "Show only the European customers, highest revenue first");
-                    conversation.say("Only keep the top two");
-                }
-                Assertions.assertEquals(
-                        List.of("Nordic Traders", "Alpine Foods"),
-                        names(db, controller));
-            }
-        });
+        var db = BenchmarkDatabase.customers();
+        var grid = new Grid<AIDataRow>();
+        var controller = new GridAIController(grid, db);
+        var conversation = bench.conversation(grid, controller);
+        conversation
+                .say("Show only the European customers, highest revenue first");
+        conversation.say("Only keep the top two");
+        Assertions.assertEquals(List.of("Nordic Traders", "Alpine Foods"),
+                names(db, controller));
     }
 
     @Test
     void aggregatesRegionsAboveThreshold() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.customers()) {
-                var grid = new Grid<AIDataRow>();
-                var controller = new GridAIController(grid, db);
-                try (var conversation = bench.conversation(grid, controller)) {
-                    conversation.say("""
-                            Which regions have a combined customer revenue \
-                            above one million? Show the region and its total, \
-                            largest total first.""");
-                }
-                var rows = rows(db, controller);
-                Assertions.assertEquals(List.of("North America", "Europe"),
-                        BenchmarkDatabase.column(rows, "region"));
-                Assertions.assertEquals(List.of(1_600_000.0, 1_400_000.0),
-                        numbers(rows, "total"));
-            }
-        });
+        var db = BenchmarkDatabase.customers();
+        var grid = new Grid<AIDataRow>();
+        var controller = new GridAIController(grid, db);
+        bench.conversation(grid, controller).say("""
+                Which regions have a combined customer revenue \
+                above one million? Show the region and its total, \
+                largest total first.""");
+        var rows = rows(db, controller);
+        Assertions.assertEquals(List.of("North America", "Europe"),
+                BenchmarkDatabase.column(rows, "region"));
+        Assertions.assertEquals(List.of(1_600_000.0, 1_400_000.0),
+                numbers(rows, "total"));
     }
 
     @Test
     void findsCustomersWithoutRecentOrders() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.customers()) {
-                var grid = new Grid<AIDataRow>();
-                var controller = new GridAIController(grid, db);
-                try (var conversation = bench.conversation(grid, controller)) {
-                    conversation.say(
-                            "List the customers that have not placed any order in 2026");
-                }
-                Assertions.assertEquals(
-                        Set.of("Iberia Textiles", "Sakura Robotics"),
-                        new HashSet<>(names(db, controller)));
-            }
-        });
+        var db = BenchmarkDatabase.customers();
+        var grid = new Grid<AIDataRow>();
+        var controller = new GridAIController(grid, db);
+        bench.conversation(grid, controller).say(
+                "List the customers that have not placed any order in 2026");
+        Assertions.assertEquals(Set.of("Iberia Textiles", "Sakura Robotics"),
+                new HashSet<>(names(db, controller)));
     }
 
     @Test
     void groupsContactColumnsUnderHeading() {
-        bench.score(() -> {
-            try (var db = BenchmarkDatabase.customers()) {
-                var grid = new Grid<AIDataRow>();
-                var controller = new GridAIController(grid, db);
-                try (var conversation = bench.conversation(grid, controller)) {
-                    conversation.say("""
-                            Show every customer's name, email and phone. Put \
-                            the email and phone columns under a shared \
-                            column group called Contact.""");
-                }
-                var rows = rows(db, controller);
-                Assertions.assertEquals(6, rows.size());
-                var grouped = rows.getFirst().keySet().stream()
-                        .filter(label -> label.startsWith("contact.")).toList();
-                Assertions.assertEquals(2, grouped.size(),
-                        () -> "expected two Contact.* columns, got "
-                                + rows.getFirst().keySet());
-            }
-        });
+        var db = BenchmarkDatabase.customers();
+        var grid = new Grid<AIDataRow>();
+        var controller = new GridAIController(grid, db);
+        bench.conversation(grid, controller).say("""
+                Show every customer's name, email and phone. Put \
+                the email and phone columns under a shared \
+                column group called Contact.""");
+        var rows = rows(db, controller);
+        Assertions.assertEquals(6, rows.size());
+        var grouped = rows.getFirst().keySet().stream()
+                .filter(label -> label.startsWith("contact.")).toList();
+        Assertions.assertEquals(2, grouped.size(),
+                () -> "expected two Contact.* columns, got "
+                        + rows.getFirst().keySet());
     }
 
     private static List<Map<String, Object>> rows(BenchmarkDatabase db,

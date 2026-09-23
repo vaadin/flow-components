@@ -131,29 +131,29 @@ endpoint.
 
 ## Writing a scenario
 
-A scenario is a plain `@Test` that hands one attempt to `AIBenchmark.score`.
-The attempt builds fresh components and a controller, opens a conversation,
-sends one or more user messages, and asserts on the resulting server-side
-state. Scoring is deterministic: field values, the rows the produced SQL
-returns, the chart type and series data. `BenchmarkDatabase` provides small
-H2 data sets for grid and chart scenarios.
+A scenario is a plain `@Test` whose body is one attempt: `AIBenchmark`
+invokes the method once per attempt and scores the pass rate. The attempt
+builds fresh components and a controller, opens a conversation, sends one or
+more user messages, and asserts on the resulting server-side state. The
+attempts share the test instance, so keep the components and the controller
+in local variables.
+Scoring is deterministic: field values, the rows the produced SQL returns, the
+chart type and series data. `BenchmarkDatabase` provides small H2 data sets
+for grid and chart scenarios.
 
 ```java
 @Test
 void aggregatesRegionsAboveThreshold() {
-    bench.score(() -> {
-        try (var db = BenchmarkDatabase.customers()) {
-            var grid = new Grid<AIDataRow>();
-            var controller = new GridAIController(grid, db);
-            try (var conversation = bench.conversation(grid, controller)) {
-                conversation.say("Which regions have a combined customer revenue above one million? "
-                        + "Show the region and its total, largest total first.");
-            }
-            var rows = db.executeQuery(controller.getState().query());
-            Assertions.assertEquals(List.of("North America", "Europe"),
-                    BenchmarkDatabase.column(rows, "region"));
-        }
-    });
+    var db = BenchmarkDatabase.customers();
+    var grid = new Grid<AIDataRow>();
+    var controller = new GridAIController(grid, db);
+    bench.conversation(grid, controller).say("""
+            Which regions have a combined customer revenue \
+            above one million? Show the region and its total, \
+            largest total first.""");
+    var rows = db.executeQuery(controller.getState().query());
+    Assertions.assertEquals(List.of("North America", "Europe"),
+            BenchmarkDatabase.column(rows, "region"));
 }
 ```
 

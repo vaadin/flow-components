@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.ai.benchmark;
 
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,28 +23,27 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
  * chart scenarios can be scored by running the query the LLM produced and
  * comparing the rows instead of the SQL text.
  */
-final class BenchmarkDatabase implements DatabaseProvider, AutoCloseable {
+final class BenchmarkDatabase implements DatabaseProvider {
 
+    private final String url;
     private final String schema;
-    private final transient Connection connection;
 
     private BenchmarkDatabase(List<String> schemaStatements,
             List<String> dataStatements) {
         schema = String.join("\n", schemaStatements);
-        try {
-            // PostgreSQL mode, and VALUE as a plain identifier, so SQL the
-            // model writes for a typical production database is not rejected
-            // by H2-only keyword rules.
-            connection = DriverManager.getConnection("jdbc:h2:mem:"
-                    + UUID.randomUUID()
-                    + ";DB_CLOSE_DELAY=-1;MODE=PostgreSQL;NON_KEYWORDS=VALUE");
-            try (var statement = connection.createStatement()) {
-                for (var sql : schemaStatements) {
-                    statement.execute(sql);
-                }
-                for (var sql : dataStatements) {
-                    statement.execute(sql);
-                }
+        // PostgreSQL mode, and VALUE as a plain identifier, so SQL the model
+        // writes for a typical production database is not rejected by H2-only
+        // keyword rules. DB_CLOSE_DELAY keeps the data between the per-query
+        // connections until the JVM exits, so there is nothing to close.
+        url = "jdbc:h2:mem:" + UUID.randomUUID()
+                + ";DB_CLOSE_DELAY=-1;MODE=PostgreSQL;NON_KEYWORDS=VALUE";
+        try (var connection = DriverManager.getConnection(url);
+                var statement = connection.createStatement()) {
+            for (var sql : schemaStatements) {
+                statement.execute(sql);
+            }
+            for (var sql : dataStatements) {
+                statement.execute(sql);
             }
         } catch (SQLException e) {
             throw new IllegalStateException(
@@ -179,7 +177,8 @@ final class BenchmarkDatabase implements DatabaseProvider, AutoCloseable {
     @Override
     public List<Map<String, Object>> executeQuery(String sql) {
         var rows = new ArrayList<Map<String, Object>>();
-        try (var statement = connection.createStatement();
+        try (var connection = DriverManager.getConnection(url);
+                var statement = connection.createStatement();
                 var resultSet = statement.executeQuery(sql)) {
             var metaData = resultSet.getMetaData();
             while (resultSet.next()) {
@@ -221,14 +220,5 @@ final class BenchmarkDatabase implements DatabaseProvider, AutoCloseable {
             values.add(row.get(key));
         }
         return values;
-    }
-
-    @Override
-    public void close() {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            throw new IllegalStateException("Could not close H2 database", e);
-        }
     }
 }
