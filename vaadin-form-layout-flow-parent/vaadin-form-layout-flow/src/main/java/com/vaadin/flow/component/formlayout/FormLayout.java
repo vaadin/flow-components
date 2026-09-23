@@ -144,10 +144,9 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * <h3>Customizing Label Position</h3>
  * <p>
- * By default, Form Layout displays labels above the fields. To position labels
- * beside fields, you need to wrap each field in a {@link FormItem} element and
- * define its labels on the wrapper. Then, you can enable the
- * {@link #setLabelsAside(boolean) labelsAside} property:
+ * By default, Form Layout displays labels above the fields. To put labels next
+ * to the fields, enable the {@link #setLabelsAside(boolean) labelsAside}
+ * property:
  *
  * <pre>
  * FormLayout formLayout = new FormLayout();
@@ -155,18 +154,44 @@ import tools.jackson.databind.node.ObjectNode;
  * formLayout.setLabelsAside(true);
  *
  * FormRow firstRow = new FormRow();
- * firstRow.addFormItem(new TextField(), "First Name");
- * firstRow.addFormItem(new TextField(), "Last Name");
+ * firstRow.add(new TextField("First Name"), new TextField("Last Name"));
  *
  * FormRow secondRow = new FormRow();
- * FormItem addressField = secondRow.addFormItem(new TextArea(), "Address");
- * secondRow.setColspan(addressField, 2);
+ * secondRow.add(new TextArea("Address"), 2); // colspan 2
  *
  * formLayout.add(firstRow, secondRow);
  * </pre>
  * <p>
- * With this, FormLayout will display labels beside fields, falling back to the
- * default position above the fields only when there isn't enough space.
+ * When there isn't enough space for side labels, Form Layout returns the labels
+ * to the default position above the fields.
+ * <p>
+ * All Vaadin field components placed directly in the Form Layout support
+ * rendering their label next to the field out of the box. Any other components,
+ * such as buttons or custom components, are just placed at the start of the
+ * label column. How they should be laid out in this mode is left to the
+ * developer and can be handled in one of two ways:
+ * <ol>
+ * <li>
+ * <p>
+ * Wrap the component in a {@link FormItem}, with or without providing a label.
+ * The Form Item reserves space for the label, so the component ends up in the
+ * input column, aligned with the other fields:
+ *
+ * <pre>
+ * var nameInput = new Input();
+ * formLayout.addFormItem(nameInput, "Name");
+ *
+ * var saveButton = new Button("Save");
+ * formLayout.addFormItem(saveButton);
+ * </pre>
+ *
+ * <li>
+ * <p>
+ * Write custom CSS. When labels are rendered next to fields, Form Layout sets
+ * the {@code has-labels-aside} attribute on its host element and the
+ * {@code data-form-layout-has-labels-aside} attribute on fields. You can rely
+ * on these attributes to adapt your components to label-aside mode.</li>
+ * </ol>
  *
  * @author Vaadin Ltd
  * @since 1.0
@@ -1232,10 +1257,9 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets whether {@link FormItem} should prefer positioning labels beside the
-     * fields. If the layout is too narrow to fit a single column with a side
-     * label, labels will automatically switch to their default position above
-     * the fields until the layout gets wide again.
+     * Sets whether the layout should put labels next to the fields. If the
+     * layout is too narrow for a single column with a side label, the labels
+     * automatically return to their default position above the fields.
      * <p>
      * This setting only applies when {@link #setAutoResponsive(boolean)} is
      * enabled.
@@ -1256,7 +1280,8 @@ public class FormLayout extends Component
      * </ul>
      *
      * @param labelsAside
-     *            {@code true} to position labels aside, {@code false} otherwise
+     *            {@code true} to put labels next to the fields, {@code false}
+     *            otherwise
      * @since 24.8
      */
     public void setLabelsAside(boolean labelsAside) {
@@ -1264,10 +1289,10 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets whether {@link FormItem} is configured to prefer positioning labels
-     * beside the fields when {@link #setAutoResponsive(boolean)} is enabled.
+     * Gets whether the layout is configured to put labels next to the fields
+     * when {@link #setAutoResponsive(boolean)} is enabled.
      *
-     * @return {@code true} if labels are positioned aside, {@code false}
+     * @return {@code true} if labels are put next to the fields, {@code false}
      *         otherwise
      * @see #setLabelsAside(boolean)
      * @since 24.8
