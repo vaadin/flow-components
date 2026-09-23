@@ -17,10 +17,11 @@ import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -97,7 +98,6 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
     private static final String MAX_TOKENS_VARIABLE = "AI_BENCHMARK_MAX_TOKENS";
     private static final String TEAMCITY_VARIABLE = "TEAMCITY_VERSION";
     private static final Path REPORT = Path.of("target", "ai-benchmark.jsonl");
-    private static final String TOTALS_KEY = "ai-benchmark-run-totals";
     private static final Duration TURN_TIMEOUT = Duration.ofMinutes(3);
     private static final Duration PROMPT_ACCEPT_TIMEOUT = Duration
             .ofSeconds(10);
@@ -116,46 +116,33 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
 
     private static ChatModel chatModel;
 
-    private static long totalRuns;
-    private static long totalPassed;
-    private static long totalInputTokens;
-    private static long totalOutputTokens;
-
     private final MockUIExtension ui = new MockUIExtension();
     private final EnableFeatureFlagExtension featureFlag = new EnableFeatureFlagExtension(
             AIComponentsFeatureFlagProvider.AI_COMPONENTS);
 
     private String subject;
-    private String scenario;
-    private int classRuns;
-    private int classPassed;
-    private long scenarioInputTokens;
-    private long scenarioOutputTokens;
-    private long classInputTokens;
-    private long classOutputTokens;
+    private Tally runTally;
+    private Tally classTally;
+    private Tally scenarioTally;
 
     @Override
     public void beforeAll(ExtensionContext context) {
         // Closed once the whole test plan is done, which is the only point at
         // which the totals over all controllers are complete
-        context.getStore(ExtensionContext.StoreScope.EXECUTION_REQUEST,
-                ExtensionContext.Namespace.GLOBAL)
-                .getOrComputeIfAbsent(TOTALS_KEY,
-                        key -> (AutoCloseable) AIBenchmark::reportRunTotals);
+        runTally = context
+                .getStore(ExtensionContext.StoreScope.EXECUTION_REQUEST,
+                        ExtensionContext.Namespace.GLOBAL)
+                .computeIfAbsent(RunTally.class);
         // "FormAIControllerBenchmark" reports as "FormAIController"
         subject = context.getRequiredTestClass().getSimpleName()
                 .replaceAll("Benchmark$", "");
-        classRuns = 0;
-        classPassed = 0;
-        classInputTokens = 0;
-        classOutputTokens = 0;
+        classTally = new Tally();
     }
 
     @Override
     public void beforeEach(ExtensionContext context) {
         featureFlag.beforeEach(context);
         ui.beforeEach(context);
-        scenario = subject + "." + context.getRequiredTestMethod().getName();
     }
 
     @Override
@@ -166,18 +153,12 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
 
     @Override
     public void afterAll(ExtensionContext context) {
-        if (classRuns > 0) {
-            reportStatistic(subject, classPassed / (double) classRuns);
-            // Token totals catch a prompt change that quietly doubles the
-            // cost of a run, which the pass rate alone would never show.
-            reportStatistic(subject + ".inputTokens", classInputTokens);
-            reportStatistic(subject + ".outputTokens", classOutputTokens);
+        if (classTally.runs > 0) {
+            classTally.report(subject);
             LOGGER.info("{}: {} input and {} output tokens over {} runs",
-                    subject, classInputTokens, classOutputTokens, classRuns);
-            totalRuns += classRuns;
-            totalPassed += classPassed;
-            totalInputTokens += classInputTokens;
-            totalOutputTokens += classOutputTokens;
+                    subject, classTally.inputTokens, classTally.outputTokens,
+                    classTally.runs);
+            runTally.add(classTally);
         }
     }
 
@@ -188,22 +169,22 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
         // Each attempt is one invocation of the method, so the extension
         // invokes it itself instead of letting JUnit invoke it once
         invocation.skip();
-        score(() -> ReflectionSupport.invokeMethod(
-                invocationContext.getExecutable(),
-                invocationContext.getTarget().orElse(null),
-                invocationContext.getArguments().toArray()));
+        var method = invocationContext.getExecutable();
+        score(subject + "." + method.getName(),
+                () -> ReflectionSupport.invokeMethod(method,
+                        invocationContext.getTarget().orElse(null),
+                        invocationContext.getArguments().toArray()));
     }
 
     /**
      * Runs the attempt the configured number of times and fails the test when
      * the pass rate falls below the configured minimum.
      */
-    private void score(Runnable attempt) {
+    private void score(String scenario, Runnable attempt) {
         var runs = intVariable(RUNS_VARIABLE, 3);
         var minPassRate = doubleVariable(MIN_PASS_RATE_VARIABLE, 0.6);
         var failures = new ArrayList<String>();
-        scenarioInputTokens = 0;
-        scenarioOutputTokens = 0;
+        scenarioTally = new Tally();
         for (var run = 1; run <= runs; run++) {
             try {
                 attempt.run();
@@ -217,21 +198,18 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
                 ui.removeAll();
             }
         }
-        var passed = runs - failures.size();
-        var passRate = passed / (double) runs;
-        classRuns += runs;
-        classPassed += passed;
-        classInputTokens += scenarioInputTokens;
-        classOutputTokens += scenarioOutputTokens;
+        scenarioTally.runs = runs;
+        scenarioTally.passed = runs - failures.size();
+        classTally.add(scenarioTally);
         LOGGER.info("{}: {}/{} runs passed, {} input and {} output tokens",
-                scenario, passed, runs, scenarioInputTokens,
-                scenarioOutputTokens);
-        appendReport(runs, passed, failures);
-        reportStatistic(scenario, passRate);
-        if (passRate < minPassRate) {
+                scenario, scenarioTally.passed, runs, scenarioTally.inputTokens,
+                scenarioTally.outputTokens);
+        appendReport(scenario, scenarioTally, failures);
+        reportStatistic(scenario, scenarioTally.passRate());
+        if (scenarioTally.passRate() < minPassRate) {
             Assertions.fail(String.format(
                     "%s passed %d/%d runs, below the minimum pass rate %.2f%n%s",
-                    scenario, passed, runs, minPassRate,
+                    scenario, scenarioTally.passed, runs, minPassRate,
                     String.join("\n", failures)));
         }
     }
@@ -257,23 +235,15 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
      * until the turn has ended and fails if the turn ended with an error.
      */
     public final class Conversation {
+        private final TurnTracker tracker;
         private final AIOrchestrator orchestrator;
-        private final AtomicReference<CountDownLatch> turnEnded = new AtomicReference<>();
-        private final AtomicReference<CountDownLatch> requestSent = new AtomicReference<>(
-                new CountDownLatch(0));
-        private final AtomicReference<ResponseListener.ResponseEvent> lastEvent = new AtomicReference<>();
 
         private Conversation(AIController controller) {
-            // The orchestrator notifies the response listener before it
-            // lets the controller apply its staged state, so the turn is
-            // only over once the controller's onResponse has returned.
+            tracker = new TurnTracker(controller);
             orchestrator = AIOrchestrator
                     .builder(new SpringAILLMProvider(chatModel()),
                             SYSTEM_PROMPT)
-                    .withController(new TurnTracker(controller,
-                            () -> turnEnded.get().countDown()))
-                    .withRequestListener(event -> requestSent.get().countDown())
-                    .withResponseListener(lastEvent::set).build();
+                    .withController(tracker).build();
         }
 
         /**
@@ -297,8 +267,6 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
         }
 
         private String takeTurn(String message) throws InterruptedException {
-            var latch = new CountDownLatch(1);
-            turnEnded.set(latch);
             promptUntilAccepted(message);
             // MockUIExtension keeps the session locked on the test thread.
             // A provider that finishes the turn on a worker thread has to
@@ -307,25 +275,21 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
             // between requests, and take it back before the assertions.
             var sessionLock = ui.getSession().getLockInstance();
             sessionLock.unlock();
-            boolean ended;
+            ResponseListener.ResponseEvent event;
             try {
-                ended = latch.await(TURN_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
+                event = tracker.responses.poll(TURN_TIMEOUT.toSeconds(),
+                        TimeUnit.SECONDS);
             } finally {
                 sessionLock.lock();
             }
-            if (!ended) {
+            if (event == null) {
                 throw new AssertionError(
                         "Turn did not end within " + TURN_TIMEOUT);
             }
-            var event = lastEvent.get();
             // The provider accumulates usage across the tool rounds of a
             // turn, so the final metadata is the whole turn's cost.
             event.getMetadata().map(ResponseMetadata::tokenUsage)
-                    .ifPresent(usage -> {
-                        scenarioInputTokens += zeroIfNull(usage.inputTokens());
-                        scenarioOutputTokens += zeroIfNull(
-                                usage.outputTokens());
-                    });
+                    .ifPresent(scenarioTally::addUsage);
             event.getError().ifPresent(error -> {
                 throw new AssertionError("Turn failed: " + error, error);
             });
@@ -334,21 +298,20 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
 
         /**
          * Sends the prompt, retrying briefly while the orchestrator still
-         * reports the previous turn as in progress. The orchestrator notifies
-         * listeners that a turn has ended before it clears its own busy flag,
-         * so a prompt sent right after the previous turn can be dropped as
-         * overlapping. An accepted prompt fires the request listener
+         * reports the previous turn as in progress. The orchestrator ends a
+         * turn with the controller's onResponse before it clears its own busy
+         * flag, so a prompt sent right after the previous turn can be dropped
+         * as overlapping. An accepted prompt calls the controller's onRequest
          * synchronously inside {@code prompt()}, which is how acceptance is
          * detected.
          */
         private void promptUntilAccepted(String message)
                 throws InterruptedException {
             var deadline = System.nanoTime() + PROMPT_ACCEPT_TIMEOUT.toNanos();
+            tracker.requested = false;
             while (true) {
-                var accepted = new CountDownLatch(1);
-                requestSent.set(accepted);
                 orchestrator.prompt(message);
-                if (accepted.getCount() == 0) {
+                if (tracker.requested) {
                     return;
                 }
                 if (System.nanoTime() > deadline) {
@@ -362,16 +325,18 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
     }
 
     /**
-     * Delegates to the real controller and signals the end of the turn after
-     * the controller has applied its state.
+     * Delegates to the real controller and records the turns: whether a prompt
+     * started one, and the response once the controller has applied the state
+     * it staged during the turn. The orchestrator's response listener would be
+     * too early, as it runs before the controller's onResponse.
      */
     private static final class TurnTracker implements AIController {
         private final AIController delegate;
-        private final Runnable turnEnded;
+        private final BlockingQueue<ResponseListener.ResponseEvent> responses = new LinkedBlockingQueue<>();
+        private volatile boolean requested;
 
-        private TurnTracker(AIController delegate, Runnable turnEnded) {
+        private TurnTracker(AIController delegate) {
             this.delegate = delegate;
-            this.turnEnded = turnEnded;
         }
 
         @Override
@@ -381,6 +346,7 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
 
         @Override
         public void onRequest(RequestListener.RequestEvent event) {
+            requested = true;
             delegate.onRequest(event);
         }
 
@@ -389,7 +355,61 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
             try {
                 delegate.onResponse(event);
             } finally {
-                turnEnded.run();
+                responses.add(event);
+            }
+        }
+    }
+
+    /**
+     * Runs, passed runs and token usage, summed over a scenario, a test class
+     * or the whole run.
+     */
+    private static class Tally {
+        int runs;
+        int passed;
+        long inputTokens;
+        long outputTokens;
+
+        void add(Tally other) {
+            runs += other.runs;
+            passed += other.passed;
+            inputTokens += other.inputTokens;
+            outputTokens += other.outputTokens;
+        }
+
+        void addUsage(ResponseMetadata.TokenUsage usage) {
+            inputTokens += Objects.requireNonNullElse(usage.inputTokens(), 0);
+            outputTokens += Objects.requireNonNullElse(usage.outputTokens(), 0);
+        }
+
+        double passRate() {
+            return passed / (double) runs;
+        }
+
+        /**
+         * Reports the pass rate and the token counts. The token counts catch a
+         * prompt change that quietly doubles the cost of a run, which the pass
+         * rate alone would never show.
+         */
+        void report(String key) {
+            reportStatistic(key, passRate());
+            reportStatistic(key + ".inputTokens", inputTokens);
+            reportStatistic(key + ".outputTokens", outputTokens);
+        }
+    }
+
+    /**
+     * The totals over every controller. Each controller is benchmarked in its
+     * own class, so these are the only values that describe the run as a whole:
+     * one pass rate to graph and to hang a build failure condition on, plus the
+     * token counts that price the run. JUnit closes the tally once the test
+     * plan is done.
+     */
+    private static final class RunTally extends Tally implements AutoCloseable {
+        @Override
+        public void close() {
+            if (runs > 0) {
+                report("AIControllers");
             }
         }
     }
@@ -401,19 +421,21 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
                             MODEL_VARIABLE + " not set"));
             var baseUrl = variable(BASE_URL_VARIABLE);
             var apiKey = variable(API_KEY_VARIABLE)
-                    .or(() -> variable("OPENAI_API_KEY"))
-                    .orElseGet(() -> baseUrl.map(url -> "unused")
-                            .orElseThrow(() -> new IllegalStateException(
-                                    API_KEY_VARIABLE + " not set and no "
-                                            + BASE_URL_VARIABLE + " given")));
+                    .or(() -> variable("OPENAI_API_KEY"));
+            if (apiKey.isEmpty() && baseUrl.isEmpty()) {
+                throw new IllegalStateException(API_KEY_VARIABLE
+                        + " not set and no " + BASE_URL_VARIABLE + " given");
+            }
             // Spring AI, the framework the documentation teaches, driven the
             // way a non-Boot application would: connection settings on the
             // options, the HTTP timeout through Spring AI's own client.
             // streamUsage asks OpenAI-compatible endpoints to report token
             // usage on the stream; without it a streamed turn costs nothing
-            // on paper.
-            var options = OpenAiChatOptions.builder().apiKey(apiKey)
-                    .model(model).streamUsage(true);
+            // on paper. A local server needs no key, but the client still
+            // sends one.
+            var options = OpenAiChatOptions.builder()
+                    .apiKey(apiKey.orElse("unused")).model(model)
+                    .streamUsage(true);
             baseUrl.ifPresent(options::baseUrl);
             // Some hosts behind OpenAI-compatible endpoints treat a missing
             // completion cap as the whole context window and reject the
@@ -432,21 +454,6 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
     }
 
     /**
-     * Reports the totals over every controller once the test plan is done. Each
-     * controller is benchmarked in its own class, so these are the only values
-     * that describe the run as a whole: one pass rate to graph and to hang a
-     * build failure condition on, plus the token counts that price the run.
-     */
-    private static void reportRunTotals() {
-        if (totalRuns == 0) {
-            return;
-        }
-        reportStatistic("AIControllers", totalPassed / (double) totalRuns);
-        reportStatistic("AIControllers.inputTokens", totalInputTokens);
-        reportStatistic("AIControllers.outputTokens", totalOutputTokens);
-    }
-
-    /**
      * Prints a TeamCity build statistic so the value is graphed over builds.
      * The key carries the model so each benchmarked model gets its own series.
      * Silent outside TeamCity.
@@ -458,29 +465,25 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
         // A model name can carry a provider prefix, as in
         // "qwen/qwen3-235b-a22b-2507", and TeamCity addresses a statistic by
         // its key in REST paths, so anything outside the key charset goes.
-        var model = variable(MODEL_VARIABLE).orElse("unknown")
+        // That also leaves nothing to escape in the service message.
+        var fullKey = (key + "." + variable(MODEL_VARIABLE).orElse("unknown"))
                 .replaceAll("[^A-Za-z0-9._-]", "_");
-        var fullKey = key + "." + model;
         // Service messages are read from the build log by TeamCity, so they
         // must go to stdout as-is rather than through the logger.
         System.out.printf(
                 "##teamcity[buildStatisticValue key='%s' value='%.3f']%n",
-                escapeServiceMessage(fullKey), value);
+                fullKey, value);
     }
 
-    private static String escapeServiceMessage(String value) {
-        return value.replace("|", "||").replace("'", "|'").replace("[", "|[")
-                .replace("]", "|]").replace("\n", "|n").replace("\r", "|r");
-    }
-
-    private void appendReport(int runs, int passed, List<String> failures) {
+    private static void appendReport(String scenario, Tally tally,
+            List<String> failures) {
         var line = JacksonUtils.createObjectNode();
         line.put("scenario", scenario);
         line.put("model", variable(MODEL_VARIABLE).orElse(null));
-        line.put("runs", runs);
-        line.put("passed", passed);
-        line.put("inputTokens", scenarioInputTokens);
-        line.put("outputTokens", scenarioOutputTokens);
+        line.put("runs", tally.runs);
+        line.put("passed", tally.passed);
+        line.put("inputTokens", tally.inputTokens);
+        line.put("outputTokens", tally.outputTokens);
         var failureNode = line.putArray("failures");
         failures.forEach(failureNode::add);
         try {
@@ -491,10 +494,6 @@ public final class AIBenchmark implements BeforeAllCallback, BeforeEachCallback,
         } catch (IOException e) {
             LOGGER.warn("Could not write benchmark report to {}", REPORT, e);
         }
-    }
-
-    private static long zeroIfNull(Integer value) {
-        return value == null ? 0 : value;
     }
 
     private static Optional<String> variable(String name) {
