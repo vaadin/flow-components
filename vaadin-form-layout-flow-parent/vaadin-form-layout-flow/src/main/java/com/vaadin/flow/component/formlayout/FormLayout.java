@@ -144,9 +144,8 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * <h3>Customizing Label Position</h3>
  * <p>
- * By default, Form Layout displays labels above the fields. To put labels next
- * to the fields, enable the {@link #setLabelsAside(boolean) labelsAside}
- * property:
+ * By default, Form Layout displays labels above fields. To put labels next to
+ * fields, enable the {@link #setLabelsAside(boolean) labelsAside} property:
  *
  * <pre>
  * FormLayout formLayout = new FormLayout();
