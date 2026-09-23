@@ -51,11 +51,6 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 true, itemElement.get().getProperty("selected"));
     }
 
-    protected String getTextFieldValue(ComboBoxElement comboBox) {
-        return (String) executeScript("return arguments[0].inputElement.value",
-                comboBox);
-    }
-
     protected void assertLoadedItemsCount(String message, int expectedCount,
             ComboBoxElement comboBox) {
         Assert.assertEquals(message, expectedCount,
@@ -179,12 +174,6 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     protected String getItemLabel(List<?> items, int index) {
         Map<?, ?> map = (Map<?, ?>) items.get(index);
         return (String) map.get("label");
-    }
-
-    protected String getSelectedItemLabel(WebElement combo) {
-        return String.valueOf(executeScript(
-                "return arguments[0].selectedItem ? arguments[0].selectedItem.label : \"\"",
-                combo));
     }
 
     protected void assertLoadingStateResolved(ComboBoxElement combo) {
