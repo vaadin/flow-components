@@ -126,12 +126,11 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         findElement(By.id(SelectListDataViewPage.SORT_BUTTON)).click();
 
         Assert.assertEquals("Unexpected sort order", "John,Mike,Paul",
-                select.$(SelectElement.ItemElement.class).all().stream()
-                        .map(SelectElement.ItemElement::getText)
+                select.getItemsStream().map(SelectElement.ItemElement::getText)
                         .collect(Collectors.joining(",")));
 
         Assert.assertEquals("Unexpected sort order", "John,Paul,Mike",
-                otherSelect.$(SelectElement.ItemElement.class).all().stream()
+                otherSelect.getItemsStream()
                         .map(SelectElement.ItemElement::getText)
                         .collect(Collectors.joining(",")));
     }
@@ -141,15 +140,15 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         findElement(By.id(SelectListDataViewPage.FILTER_BUTTON)).click();
 
         Assert.assertEquals("Unexpected filtered items count", 1,
-                select.$(SelectElement.ItemElement.class).all().size());
-        Assert.assertEquals("Unexpected filtered item", "Paul", select
-                .$(SelectElement.ItemElement.class).all().get(0).getText());
+                select.getItems().size());
+        Assert.assertEquals("Unexpected filtered item", "Paul",
+                select.getItems().get(0).getText());
 
         Assert.assertEquals("No filter expected", 3,
-                otherSelect.$(SelectElement.ItemElement.class).all().size());
+                otherSelect.getItems().size());
         Assert.assertArrayEquals("No filter expected",
                 new String[] { "John", "Paul", "Mike" },
-                otherSelect.$(SelectElement.ItemElement.class).all().stream()
+                otherSelect.getItemsStream()
                         .map(SelectElement.ItemElement::getText).toArray());
     }
 }
