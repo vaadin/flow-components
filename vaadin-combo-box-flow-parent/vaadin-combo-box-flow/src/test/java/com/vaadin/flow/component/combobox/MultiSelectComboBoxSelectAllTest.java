@@ -662,10 +662,6 @@ class MultiSelectComboBoxSelectAllTest {
         return getAllSelectedProperty(comboBox);
     }
 
-    /**
-     * Returns the value of the {@code _allSelected} property, or {@code null}
-     * if the property is not set.
-     */
     private Boolean getAllSelectedProperty(MultiSelectComboBox<?> target) {
         if (!target.getElement().hasProperty("_allSelected")) {
             return null;
