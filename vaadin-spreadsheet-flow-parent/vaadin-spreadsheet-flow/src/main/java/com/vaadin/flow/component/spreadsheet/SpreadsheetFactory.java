@@ -800,7 +800,7 @@ public class SpreadsheetFactory implements Serializable {
                     lastlevel++;
 
                     int end = (int) GroupingUtil.findEndOfRowGroup(spreadsheet,
-                            i, row, lastlevel);
+                            i, lastlevel);
                     long uniqueIndex = GroupingUtil
                             .findUniqueRowIndex(spreadsheet, i, end, lastlevel);
 
