@@ -881,6 +881,36 @@ class ChartConfigurationParserTest {
         }
 
         @Test
+        void seriesEntryForExistingSeries_updatesItsSettings() {
+            var config = parse("{\"series\":[{\"name\":\"Volume\","
+                    + "\"type\":\"area\",\"yAxis\":1,"
+                    + "\"plotOptions\":{\"fillOpacity\":0.5}}]}");
+            ChartConfigurationParser.merge("{\"series\":[{\"name\":\"Volume\","
+                    + "\"plotOptions\":{\"lineWidth\":3}}]}", config);
+
+            Assertions.assertEquals(1, config.getSeries().size(),
+                    "the entry must update the series, not add a second one");
+            var volume = findSeries(config, "Volume");
+            Assertions.assertEquals(1, volume.getyAxis(), "axis binding kept");
+            var options = (PlotOptionsArea) volume.getPlotOptions();
+            Assertions.assertEquals(0.5, options.getFillOpacity());
+            Assertions.assertEquals(3, options.getLineWidth());
+        }
+
+        @Test
+        void seriesEntryWithNewType_replacesOptionsButKeepsAxis() {
+            var config = parse("{\"series\":[{\"name\":\"Volume\","
+                    + "\"type\":\"area\",\"yAxis\":1}]}");
+            ChartConfigurationParser.merge("{\"series\":[{\"name\":\"Volume\","
+                    + "\"type\":\"column\"}]}", config);
+
+            var volume = findSeries(config, "Volume");
+            Assertions.assertInstanceOf(PlotOptionsColumn.class,
+                    volume.getPlotOptions());
+            Assertions.assertEquals(1, volume.getyAxis());
+        }
+
+        @Test
         void unknownFlatSeriesOption_ignored() {
             var config = parse("{\"series\":[{\"name\":\"North\","
                     + "\"type\":\"column\",\"noSuchOption\":1,"

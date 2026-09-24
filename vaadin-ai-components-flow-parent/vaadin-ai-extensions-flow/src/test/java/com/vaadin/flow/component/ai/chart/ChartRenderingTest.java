@@ -31,6 +31,8 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.model.PlotOptionsArea;
+import com.vaadin.flow.component.charts.model.PlotOptionsCandlestick;
 import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -879,6 +881,138 @@ class ChartRenderingTest {
             Assertions.assertEquals(2, series.size());
             Assertions.assertEquals("Series A", series.get(0).getName());
             Assertions.assertEquals("Series B", series.get(1).getName());
+        }
+    }
+
+    @Nested
+    class PositionalTemplates {
+
+        /**
+         * Rows for an OHLC query and for a volume query, so the default
+         * converter builds an unnamed candlestick series and an unnamed plain
+         * series.
+         */
+        @BeforeEach
+        void useOhlcAndVolumeDatabase() {
+            var db = new DatabaseProvider() {
+                @Override
+                public String getSchema() {
+                    return "stock_prices";
+                }
+
+                @Override
+                public List<Map<String, Object>> executeQuery(String sql) {
+                    if (sql.contains("volume")) {
+                        return List.of(row(ColumnNames.X, 1704067200000L,
+                                ColumnNames.Y, 52000));
+                    }
+                    return List.of(row(ColumnNames.X, 1704067200000L,
+                            ColumnNames.OPEN, 142.5, ColumnNames.HIGH, 148.2,
+                            ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+                }
+            };
+            controller = new ChartAIController(chart, db);
+            tools = controller.getTools();
+        }
+
+        @Test
+        void addedSeries_getsItsTemplateDespiteThePreviousRendersSeries() {
+            // The first render names its only series after the title. That
+            // series carries no settings, so on the next render it must not
+            // take a template slot away from the new, unnamed series.
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"},"
+                    + "\"title\":{\"text\":\"ACME\"}}");
+            updateData("SELECT ohlc");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("""
+                    {"yAxis":[{"title":{"text":"Price"}},
+                              {"title":{"text":"Volume"},"opposite":true}],
+                     "series":[{"name":"Prices","type":"candlestick","yAxis":0},
+                               {"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+            var volume = (AbstractSeries) series.get(1);
+            Assertions.assertEquals("Volume", volume.getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    volume.getPlotOptions());
+            Assertions.assertEquals(1, volume.getyAxis());
+        }
+
+        @Test
+        void unnamedSeries_keepsItsEarlierNameWhenNoTemplateTargetsIt() {
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"},"
+                    + "\"title\":{\"text\":\"ACME\"}}");
+            updateData("SELECT ohlc");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("""
+                    {"series":[{"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals("ACME", series.get(0).getName(),
+                    "the candlesticks should keep the name of the first render");
+            Assertions.assertEquals("Volume", series.get(1).getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    ((AbstractSeries) series.get(1)).getPlotOptions());
+        }
+
+        @Test
+        void changingOneEarlierSeries_keepsTheOtherOneInPlace() {
+            updateConfiguration("""
+                    {"chart":{"type":"candlestick"},
+                     "series":[{"name":"Prices","type":"candlestick"},
+                               {"name":"Volume","type":"column","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            // Both data series come back unnamed; the template is meant for
+            // the series that was Volume before
+            updateConfiguration("""
+                    {"series":[{"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals("Prices", series.get(0).getName());
+            Assertions.assertInstanceOf(PlotOptionsCandlestick.class,
+                    ((AbstractSeries) series.get(0)).getPlotOptions());
+            Assertions.assertEquals("Volume", series.get(1).getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    ((AbstractSeries) series.get(1)).getPlotOptions());
+        }
+
+        @Test
+        void fewerTemplatesThanSeries_describeTheAddedSeries() {
+            updateConfiguration("""
+                    {"chart":{"type":"candlestick"},
+                     "series":[{"name":"Prices","type":"candlestick"}]}
+                    """);
+            updateData("SELECT ohlc");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("""
+                    {"series":[{"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals("Prices", series.get(0).getName());
+            Assertions.assertInstanceOf(PlotOptionsCandlestick.class,
+                    ((AbstractSeries) series.get(0)).getPlotOptions());
+            Assertions.assertEquals("Volume", series.get(1).getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    ((AbstractSeries) series.get(1)).getPlotOptions());
         }
     }
 

@@ -564,7 +564,10 @@ public final class ChartAITools {
             public String getDescription() {
                 return resolveColumnNames(
                         """
-                                Updates the chart data using SQL SELECT queries (one per series).
+                                Updates the chart data using SQL SELECT queries (one per series). \
+                                The queries replace all current series of the chart: to add a series, pass \
+                                the current queries from get_chart_state together with the new one; to remove \
+                                a series, leave its query out.
 
                                 IMPORTANT: Column names control how data is mapped to series. \
                                 Use the exact aliases below (prefixed with '{PREFIX}') in your SELECT statements.
@@ -599,10 +602,10 @@ public final class ChartAITools {
                                 OHLC/Candlestick:
                                 - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
                                 - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
-                                - When adding a volume series alongside OHLC/candlestick data, use a separate query \
-                                with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, 'Volume' AS {SERIES} \
-                                FROM stock_prices). The {SERIES} alias names the series so it can be configured via \
-                                update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
+                                - When adding a volume series alongside OHLC/candlestick data, pass the OHLC query and a \
+                                second query with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, \
+                                'Volume' AS {SERIES} FROM stock_prices). The {SERIES} alias names the series so it can be \
+                                configured via update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
 
                                 Sankey diagram:
                                 - 3 columns: {FROM}, {TO}, {WEIGHT}
@@ -645,7 +648,7 @@ public final class ChartAITools {
 
                                 Parameters:
                                 - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
-                                - queries (array of strings, required): SQL SELECT queries, one per series
+                                - queries (array of strings, required): SQL SELECT queries, one per series, replacing the current ones
 
                                 Changes are applied when the request completes.""");
             }

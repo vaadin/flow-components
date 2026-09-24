@@ -324,22 +324,33 @@ public final class ChartRenderer implements Serializable {
      * Applies previously extracted series configuration to the data series.
      * Matches by name first, then falls back to positional matching for
      * unmatched series — copying the template's name, plot options, and y-axis
-     * binding.
+     * binding. When the templates of this turn cover every unmatched data
+     * series, the series of the previous render take no position, so they
+     * cannot shift the templates onto the wrong series.
      */
     private static void applySeriesConfig(List<Series> allSeries,
             Map<String, AbstractSeries> seriesConfig) {
         // Pre-scan: which template names have a matching data series?
         var nameMatched = new HashSet<String>();
+        var unmatchedSeries = 0;
         for (var s : allSeries) {
-            if (s instanceof AbstractSeries as
-                    && seriesConfig.containsKey(as.getName())) {
+            if (!(s instanceof AbstractSeries as)) {
+                continue;
+            }
+            if (seriesConfig.containsKey(as.getName())) {
                 nameMatched.add(as.getName());
+            } else {
+                unmatchedSeries++;
             }
         }
 
         // Templates without a name match feed the positional fallback.
-        var positional = seriesConfig.values().stream()
-                .filter(t -> !nameMatched.contains(t.getName())).iterator();
+        var unmatched = seriesConfig.values().stream()
+                .filter(t -> !nameMatched.contains(t.getName())).toList();
+        var fresh = unmatched.stream().filter(ChartRenderer::isTemplate)
+                .toList();
+        var positional = (fresh.size() >= unmatchedSeries ? fresh : unmatched)
+                .iterator();
 
         for (var s : allSeries) {
             if (!(s instanceof AbstractSeries as)) {
@@ -354,6 +365,14 @@ public final class ChartRenderer implements Serializable {
                 applyTemplate(as, tpl);
             }
         }
+    }
+
+    /**
+     * A series the parser created from this turn's configuration JSON, as
+     * opposed to a data series of the previous render.
+     */
+    private static boolean isTemplate(AbstractSeries series) {
+        return series instanceof DataSeries data && data.getData().isEmpty();
     }
 
     private static void applyTemplate(AbstractSeries target,

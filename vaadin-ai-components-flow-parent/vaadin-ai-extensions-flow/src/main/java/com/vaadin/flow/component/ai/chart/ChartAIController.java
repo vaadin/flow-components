@@ -136,7 +136,8 @@ public class ChartAIController implements AIController {
             as needed — they can be called independently
 
             Data and configuration are separate concerns:
-            - update_chart_data_source() populates chart series from SQL queries
+            - update_chart_data_source() populates chart series from SQL queries; each call \
+            replaces all series, so pass every query the chart should keep
             - update_chart_configuration() controls visual appearance (type, styling, axes, etc.)
             - NEVER include series data in configuration — data comes only from queries
             - When changing chart type, ensure the query column aliases match the new type

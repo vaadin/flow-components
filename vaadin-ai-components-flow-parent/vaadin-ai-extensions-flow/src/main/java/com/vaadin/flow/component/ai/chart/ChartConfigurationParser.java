@@ -21,6 +21,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
+import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -353,7 +354,9 @@ public final class ChartConfigurationParser implements Serializable {
      * Parses series entries from the JSON array and adds them to the
      * configuration as {@link DataSeries} with name, plot options, and y-axis
      * binding set (but no data). These act as configuration templates that the
-     * renderer applies to data series matched by name.
+     * renderer applies to data series matched by name. An entry naming a series
+     * the configuration already has updates that series instead, keeping what
+     * the entry does not mention.
      */
     private static void applySeriesConfig(Configuration config,
             JsonNode seriesArray) {
@@ -366,8 +369,12 @@ public final class ChartConfigurationParser implements Serializable {
                 continue;
             }
 
-            var series = new DataSeries();
-            series.setName(seriesName);
+            var series = findSeries(config, seriesName);
+            if (series == null) {
+                series = new DataSeries();
+                series.setName(seriesName);
+                config.addSeries(series);
+            }
 
             String type = entryNode.has(TYPE) && entryNode.get(TYPE).isString()
                     ? entryNode.get(TYPE).asString()
@@ -378,16 +385,34 @@ public final class ChartConfigurationParser implements Serializable {
             }
 
             var plotOptionsNode = seriesPlotOptionsNode(entryNode);
-            if (type != null || !plotOptionsNode.isEmpty()) {
+            var existing = series.getPlotOptions();
+            if (existing != null
+                    && (type == null || existing.getClass() == PlotOptionsSchema
+                            .getPlotOptionsClass(
+                                    type.toLowerCase(Locale.ENGLISH)))) {
+                // Same type as before: the entry adds to the options
+                if (!plotOptionsNode.isEmpty()) {
+                    mergeInto(existing, plotOptionsNode);
+                }
+            } else if (type != null || !plotOptionsNode.isEmpty()) {
                 AbstractPlotOptions plotOptions = deserializePlotOptions(type,
                         plotOptionsNode);
                 if (plotOptions != null) {
                     series.setPlotOptions(plotOptions);
                 }
             }
-
-            config.addSeries(series);
         }
+    }
+
+    private static AbstractSeries findSeries(Configuration config,
+            String name) {
+        for (var series : config.getSeries()) {
+            if (series instanceof AbstractSeries as
+                    && name.equals(as.getName())) {
+                return as;
+            }
+        }
+        return null;
     }
 
     /**

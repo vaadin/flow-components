@@ -460,6 +460,26 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void seriesEntryWithoutAxis_keepsTheAxisSetBefore() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"}, \"series\":"
+                    + " [{\"name\": \"North\", \"type\": \"area\", \"yAxis\": 1}]}");
+            completeTurn("{\"series\": [{\"name\": \"North\","
+                    + " \"type\": \"column\"}]}");
+
+            var north = (DataSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(ChartType.COLUMN,
+                    north.getPlotOptions().getChartType());
+            Assertions.assertEquals(1, north.getyAxis(),
+                    "the axis binding was not mentioned, so it must stay");
+            var state = chartState();
+            Assertions.assertTrue(state.contains("\"yAxis\" : 1")
+                    || state.contains("\"yAxis\":1"), state);
+        }
+
+        @Test
         void failedRender_keepsPreviousConfiguration() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
