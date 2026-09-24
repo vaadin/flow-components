@@ -149,7 +149,6 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
             Assert.assertEquals("Invalid options selected from popup",
                     expectedItemText,
                     selectElement.getSelectedOptionItem().getText());
-            selectElement.closePopup();
         }
 
         void placeholderSelected(String expectedItemText) {
