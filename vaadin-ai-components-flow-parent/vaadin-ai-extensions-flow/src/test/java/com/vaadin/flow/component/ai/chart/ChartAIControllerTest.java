@@ -85,12 +85,25 @@ class ChartAIControllerTest {
             Assertions.assertTrue(names.contains("get_chart_state"));
             Assertions.assertTrue(names.contains("update_chart_configuration"));
             Assertions.assertTrue(names.contains("update_chart_data_source"));
+            Assertions.assertTrue(names.contains("get_plot_options_schema"));
         }
 
         @Test
         void instructionsToolIsFirst() {
             Assertions.assertEquals("get_chart_instructions",
                     controller.getTools().get(0).getName());
+        }
+
+        @Test
+        void plotOptionsSchemaTool_returnsGeneratedSchema() {
+            var tool = findTool(controller.getTools(),
+                    "get_plot_options_schema");
+            var result = tool.execute(json("{\"chartType\":\"column\"}"));
+            Assertions.assertFalse(result.startsWith("Error"), result);
+            var schema = json(result);
+            Assertions.assertEquals("object", schema.get("type").asString());
+            Assertions.assertTrue(schema.get("properties").has("stacking"),
+                    "Column schema should expose plot option properties");
         }
     }
 
