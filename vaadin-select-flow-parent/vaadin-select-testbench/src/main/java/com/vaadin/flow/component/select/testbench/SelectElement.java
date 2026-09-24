@@ -64,15 +64,33 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
         setProperty("opened", false);
     }
 
+    /**
+     * Checks whether the popup with options is open.
+     *
+     * @return {@code true} if the popup is open, {@code false} otherwise
+     */
     public boolean isOpened() {
         return getPropertyBoolean("opened");
     }
 
+    /**
+     * Selects the item with the given index by clicking it in the popup. Opens
+     * the popup if it is not open. Clicking the item closes the popup.
+     *
+     * @param index
+     *            the index of the item to select
+     */
     public void selectItemByIndex(int index) {
         openPopup();
         getItems().get(index).click();
     }
 
+    /**
+     * Gets the items in the popup as a stream. Opens the popup if it is not
+     * open, and leaves it open.
+     *
+     * @return a stream of the items in the popup
+     */
     public Stream<ItemElement> getItemsStream() {
         openPopup();
         List<WebElement> elements = getPropertyElement("_menuElement")
@@ -84,10 +102,25 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
                 .map(item -> new ItemElement(item, getCommandExecutor()));
     }
 
+    /**
+     * Gets the items in the popup. Opens the popup if it is not open, and
+     * leaves it open.
+     *
+     * @return the items in the popup
+     */
     public List<ItemElement> getItems() {
         return getItemsStream().toList();
     }
 
+    /**
+     * Selects the item with the given text by clicking it in the popup. Opens
+     * the popup if it is not open. Clicking the item closes the popup.
+     *
+     * @param text
+     *            the text of the item to select
+     * @throws NoSuchElementException
+     *             if no item has the given text
+     */
     @Override
     public void selectByText(String text) {
         getItemsStream()
@@ -102,6 +135,14 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
         return selectedItem == null ? "" : selectedItem.getText();
     }
 
+    /**
+     * Gets the selected item in the popup. Opens the popup if it is not open,
+     * and leaves it open.
+     *
+     * @return the selected item in the popup
+     * @throws NoSuchElementException
+     *             if no item is selected
+     */
     public ItemElement getSelectedOptionItem() {
         return getItemsStream()
                 .filter(element -> element.hasAttribute("selected")).findAny()
