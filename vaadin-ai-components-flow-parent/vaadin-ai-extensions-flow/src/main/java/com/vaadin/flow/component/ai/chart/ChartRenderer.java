@@ -80,10 +80,18 @@ public final class ChartRenderer implements Serializable {
             allSeries.addAll(dataConverter.convertToSeries(results));
         }
 
+        // A JSON that changes the chart type replaces the configuration, so
+        // the JSONs before the last such change have no effect and are
+        // skipped. This also leaves the previous configuration untouched for
+        // the rollback below.
         Configuration previous = chart.getConfiguration();
-        Configuration config = previous;
-        for (var configJson : configJsons) {
-            config = applyConfiguration(config, configJson);
+        int lastTypeChange = lastTypeChange(previous, configJsons);
+        Configuration config = lastTypeChange < 0 ? previous
+                : ChartConfigurationParser
+                        .parse(configJsons.get(lastTypeChange));
+        for (var configJson : configJsons.subList(lastTypeChange + 1,
+                configJsons.size())) {
+            ChartConfigurationParser.merge(configJson, config);
         }
         if (config != previous) {
             chart.setConfiguration(config);
@@ -135,6 +143,28 @@ public final class ChartRenderer implements Serializable {
         }
         ChartConfigurationParser.merge(configJson, current);
         return current;
+    }
+
+    /**
+     * Returns the index of the last configuration JSON that changes the chart
+     * type when the JSONs are applied in order to the given configuration, or
+     * {@code -1} if none does.
+     */
+    private static int lastTypeChange(Configuration current,
+            List<String> configJsons) {
+        var type = current.getChart().getType();
+        var last = -1;
+        for (var i = 0; i < configJsons.size(); i++) {
+            var newType = ChartConfigurationParser.parse(configJsons.get(i))
+                    .getChart().getType();
+            if (newType != null && !newType.equals(type)) {
+                last = i;
+            }
+            if (newType != null) {
+                type = newType;
+            }
+        }
+        return last;
     }
 
     /**

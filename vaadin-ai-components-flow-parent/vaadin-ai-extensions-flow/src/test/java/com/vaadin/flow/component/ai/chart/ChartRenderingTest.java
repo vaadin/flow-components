@@ -257,6 +257,32 @@ class ChartRenderingTest {
         }
 
         @Test
+        void drawFailure_dropsTheMergesOfTheSameCall() {
+            chart.setTimeline(true);
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            var converter = new DefaultDataConverter();
+            var queries = List.of("SELECT 1");
+            ChartRenderer.renderChart(chart, databaseProvider, converter,
+                    queries,
+                    "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Revenue\"}}");
+
+            // The subtitle merges into the live configuration before the
+            // type change makes the chart reject the call
+            var configJsons = List.of("{\"subtitle\":{\"text\":\"Q1\"}}",
+                    "{\"chart\":{\"type\":\"pie\"}}");
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ChartRenderer.renderChart(chart, databaseProvider,
+                            converter, queries, configJsons));
+
+            Assertions.assertEquals(ChartType.LINE,
+                    chart.getConfiguration().getChart().getType());
+            Assertions.assertNull(
+                    chart.getConfiguration().getSubTitle().getText(),
+                    "a merge of the failed call must not survive");
+        }
+
+        @Test
         void drawsWithFullReset() {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
@@ -856,6 +882,27 @@ class ChartRenderingTest {
 
     @Nested
     class ConfigurationReset {
+
+        @Test
+        void typeChangeRepeatedInOneTurn_keepsEarlierUpdate() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"title\":{\"text\":\"Revenue\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"subtitle\":{\"text\":\"2025\"}}");
+            controller.onResponse(AITurnEvents.success());
+
+            var config = chart.getConfiguration();
+            Assertions.assertEquals(ChartType.COLUMN,
+                    config.getChart().getType());
+            Assertions.assertEquals("Revenue", config.getTitle().getText());
+            Assertions.assertEquals("2025", config.getSubTitle().getText());
+        }
 
         @Test
         void resetDoesNotSetEmptyCategoriesArray() {
