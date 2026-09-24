@@ -61,6 +61,10 @@ class MultiSelectComboBoxI18nTest {
                 .setSelected("Selected")
                 .setDeselected("Deselected")
                 .setTotal("{count} total")
+                .setSelectAll("Select all")
+                .setDeselectAll("Deselect all")
+                .setSelectFiltered("Select filtered")
+                .setDeselectFiltered("Deselect filtered")
                 .setRequiredErrorMessage("Required"));
         //@formatter:on
 
@@ -70,6 +74,10 @@ class MultiSelectComboBoxI18nTest {
         expected.put("selected", "Selected");
         expected.put("deselected", "Deselected");
         expected.put("total", "{count} total");
+        expected.put("selectAll", "Select all");
+        expected.put("deselectAll", "Deselect all");
+        expected.put("selectFiltered", "Select filtered");
+        expected.put("deselectFiltered", "Deselect filtered");
         Assertions.assertEquals(expected,
                 comboBox.getElement().getPropertyRaw("i18n"));
     }
