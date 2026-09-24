@@ -45,7 +45,7 @@ public class MultiSelectComboBoxSelectAllIT extends AbstractComponentIT {
     public void serverSide_selectAll_selectsAllItems() {
         clickSelectAll(serverSideComboBox);
 
-        waitForSelectedCount(serverSideComboBox, 100);
+        assertSelectedCount(serverSideComboBox, 100);
         assertValueChangeEvent("server-side", 1, 100);
 
         // Items must be sent with the labels the server generates for them
@@ -53,7 +53,7 @@ public class MultiSelectComboBoxSelectAllIT extends AbstractComponentIT {
         Assert.assertEquals("Item 1", selectedTexts.get(0));
         Assert.assertEquals("Item 100", selectedTexts.get(99));
 
-        waitForSelectAllLabel(serverSideComboBox, "Deselect All");
+        assertSelectAllLabel(serverSideComboBox, "Deselect All");
     }
 
     @Test
@@ -66,43 +66,43 @@ public class MultiSelectComboBoxSelectAllIT extends AbstractComponentIT {
     @Test
     public void serverSide_selectAll_deselectAll_clearsSelection() {
         clickSelectAll(serverSideComboBox);
-        waitForSelectedCount(serverSideComboBox, 100);
-        waitForSelectAllLabel(serverSideComboBox, "Deselect All");
+        assertSelectedCount(serverSideComboBox, 100);
+        assertSelectAllLabel(serverSideComboBox, "Deselect All");
 
         clickSelectAll(serverSideComboBox);
 
-        waitForSelectedCount(serverSideComboBox, 0);
+        assertSelectedCount(serverSideComboBox, 0);
         assertValueChangeEvent("server-side", 2, 0);
-        waitForSelectAllLabel(serverSideComboBox, "Select All");
+        assertSelectAllLabel(serverSideComboBox, "Select All");
         waitForAnnouncement("Selection cleared");
     }
 
     @Test
     public void serverSide_filter_selectFiltered_selectsMatchingItems() {
         serverSideComboBox.setFilter("Item 10");
-        waitForSelectAllLabel(serverSideComboBox, "Select Filtered");
+        assertSelectAllLabel(serverSideComboBox, "Select Filtered");
 
         clickSelectAll(serverSideComboBox);
 
-        waitForSelectedCount(serverSideComboBox, 2);
+        assertSelectedCount(serverSideComboBox, 2);
         assertValueChangeEvent("server-side", 1, 2);
         List<String> selectedTexts = serverSideComboBox.getSelectedTexts();
         Assert.assertTrue(selectedTexts.contains("Item 10"));
         Assert.assertTrue(selectedTexts.contains("Item 100"));
-        waitForSelectAllLabel(serverSideComboBox, "Deselect Filtered");
+        assertSelectAllLabel(serverSideComboBox, "Deselect Filtered");
     }
 
     @Test
     public void serverSide_selectAll_filter_deselectFiltered_keepsOtherItems() {
         clickSelectAll(serverSideComboBox);
-        waitForSelectedCount(serverSideComboBox, 100);
+        assertSelectedCount(serverSideComboBox, 100);
 
         serverSideComboBox.setFilter("Item 10");
-        waitForSelectAllLabel(serverSideComboBox, "Deselect Filtered");
+        assertSelectAllLabel(serverSideComboBox, "Deselect Filtered");
 
         clickSelectAll(serverSideComboBox);
 
-        waitForSelectedCount(serverSideComboBox, 98);
+        assertSelectedCount(serverSideComboBox, 98);
         assertValueChangeEvent("server-side", 2, 98);
         List<String> selectedTexts = serverSideComboBox.getSelectedTexts();
         Assert.assertFalse(selectedTexts.contains("Item 10"));
@@ -114,32 +114,32 @@ public class MultiSelectComboBoxSelectAllIT extends AbstractComponentIT {
     public void clientSide_selectAll_selectsAllItems() {
         clickSelectAll(clientSideComboBox);
 
-        waitForSelectedCount(clientSideComboBox, 10);
+        assertSelectedCount(clientSideComboBox, 10);
         assertValueChangeEvent("client-side", 1, 10);
-        waitForSelectAllLabel(clientSideComboBox, "Deselect All");
+        assertSelectAllLabel(clientSideComboBox, "Deselect All");
     }
 
     @Test
     public void clientSide_selectAll_deselectAll_clearsSelection() {
         clickSelectAll(clientSideComboBox);
-        waitForSelectedCount(clientSideComboBox, 10);
-        waitForSelectAllLabel(clientSideComboBox, "Deselect All");
+        assertSelectedCount(clientSideComboBox, 10);
+        assertSelectAllLabel(clientSideComboBox, "Deselect All");
 
         clickSelectAll(clientSideComboBox);
 
-        waitForSelectedCount(clientSideComboBox, 0);
+        assertSelectedCount(clientSideComboBox, 0);
         assertValueChangeEvent("client-side", 2, 0);
-        waitForSelectAllLabel(clientSideComboBox, "Select All");
+        assertSelectAllLabel(clientSideComboBox, "Select All");
     }
 
     @Test
     public void clientSide_filter_selectFiltered_selectsMatchingItems() {
         clientSideComboBox.setFilter("Item 1");
-        waitForSelectAllLabel(clientSideComboBox, "Select Filtered");
+        assertSelectAllLabel(clientSideComboBox, "Select Filtered");
 
         clickSelectAll(clientSideComboBox);
 
-        waitForSelectedCount(clientSideComboBox, 2);
+        assertSelectedCount(clientSideComboBox, 2);
         assertValueChangeEvent("client-side", 1, 2);
         List<String> selectedTexts = clientSideComboBox.getSelectedTexts();
         Assert.assertTrue(selectedTexts.contains("Item 1"));
@@ -152,9 +152,9 @@ public class MultiSelectComboBoxSelectAllIT extends AbstractComponentIT {
 
         clickSelectAll(serverSideComboBox);
 
-        waitForSelectedCount(serverSideComboBox, 10);
+        assertSelectedCount(serverSideComboBox, 10);
         assertValueChangeEvent("server-side", 1, 10);
-        waitForSelectAllLabel(serverSideComboBox, "Deselect All");
+        assertSelectAllLabel(serverSideComboBox, "Deselect All");
     }
 
     private TestBenchElement getSelectAllButton(
@@ -162,22 +162,21 @@ public class MultiSelectComboBoxSelectAllIT extends AbstractComponentIT {
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();
         return comboBox.$("vaadin-multi-select-combo-box-select-all-button")
-                .waitForFirst();
+                .single();
     }
 
     private void clickSelectAll(MultiSelectComboBoxElement comboBox) {
         getSelectAllButton(comboBox).click();
     }
 
-    private void waitForSelectAllLabel(MultiSelectComboBoxElement comboBox,
+    private void assertSelectAllLabel(MultiSelectComboBoxElement comboBox,
             String label) {
-        TestBenchElement button = getSelectAllButton(comboBox);
-        waitUntil(driver -> label.equals(button.getText()));
+        Assert.assertEquals(label, getSelectAllButton(comboBox).getText());
     }
 
-    private void waitForSelectedCount(MultiSelectComboBoxElement comboBox,
+    private void assertSelectedCount(MultiSelectComboBoxElement comboBox,
             int count) {
-        waitUntil(driver -> comboBox.getSelectedTexts().size() == count);
+        Assert.assertEquals(count, comboBox.getSelectedTexts().size());
     }
 
     private void assertValueChangeEvent(String id, int expectedEventCount,
