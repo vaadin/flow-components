@@ -99,7 +99,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     /**
-     * Gets the items in the popup as a stream. Does not open the popup.
+     * Gets the items in the popup as a stream.
      *
      * @return a stream of the items in the popup
      */
@@ -114,7 +114,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     /**
-     * Gets the items in the popup. Does not open the popup.
+     * Gets the items in the popup.
      *
      * @return the items in the popup
      */
@@ -145,7 +145,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     /**
-     * Gets the selected item in the popup. Does not open the popup.
+     * Gets the selected item in the popup.
      *
      * @return the selected item in the popup
      * @throws NoSuchElementException
