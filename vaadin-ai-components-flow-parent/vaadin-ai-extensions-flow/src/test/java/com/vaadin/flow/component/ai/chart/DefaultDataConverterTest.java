@@ -142,6 +142,24 @@ class DefaultDataConverterTest {
         }
 
         @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(
+                    row(X, 1, OPEN, null, HIGH, null, LOW, null, CLOSE, null),
+                    row(X, 2, OPEN, 12, HIGH, 18, LOW, 8, CLOSE, 16));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals(2, result.getData().getFirst().getX());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(X, 1, OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12,
+                    COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
+        }
+
+        @Test
         void withoutXColumn_usesRowIndexAsX() {
             var data = List.of(row(OPEN, 10, HIGH, 15, LOW, 5, CLOSE, 12),
                     row(OPEN, 12, HIGH, 18, LOW, 8, CLOSE, 16));
@@ -177,6 +195,26 @@ class DefaultDataConverterTest {
             var result = (DataSeries) convertSingle(data);
             Assertions.assertInstanceOf(BoxPlotItem.class,
                     result.getData().getFirst());
+        }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(
+                    row(LOW, null, Q1, null, MEDIAN, null, Q3, null, HIGH,
+                            null),
+                    row(LOW, 1, Q1, 3, MEDIAN, 5, Q3, 7, HIGH, 9));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals(5,
+                    ((BoxPlotItem) result.getData().getFirst()).getMedian());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(LOW, 1, Q1, 3, MEDIAN, 5, Q3, 7, HIGH, 9,
+                    COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
         }
     }
 
@@ -299,6 +337,53 @@ class DefaultDataConverterTest {
             var result = convertSingle(data);
             Assertions.assertInstanceOf(DataSeries.class, result);
         }
+
+        @Test
+        void setsStartAndEnd() {
+            var start = Instant.parse("2024-01-01T00:00:00Z");
+            var end = Instant.parse("2024-02-01T00:00:00Z");
+            var data = List.of(row(NAME, "Task 1", START, start, END, end));
+            var gs = (GanttSeries) convertSingle(data);
+            Assertions.assertEquals(start.toEpochMilli(),
+                    gs.get(0).getStart().longValue());
+            Assertions.assertEquals(end.toEpochMilli(),
+                    gs.get(0).getEnd().longValue());
+        }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(row(NAME, null, START, null, END, null),
+                    row(NAME, "Task", START,
+                            Instant.parse("2024-01-01T00:00:00Z"), END,
+                            Instant.parse("2024-02-01T00:00:00Z")));
+            var gs = (GanttSeries) convertSingle(data);
+            Assertions.assertEquals(1, gs.size());
+            Assertions.assertEquals("Task", gs.get(0).getName());
+        }
+
+        @Test
+        void startAndEndWithoutName_doesNotMatchGantt() {
+            var data = List.of(row(START, Instant.parse("2024-01-01T00:00:00Z"),
+                    END, Instant.parse("2024-02-01T00:00:00Z")));
+            var result = convertSingle(data);
+            Assertions.assertInstanceOf(DataSeries.class, result);
+        }
+
+        @Test
+        void temporalStartWithStringEnd_matchesGantt() {
+            var data = List.of(row(NAME, "Task", START,
+                    Instant.parse("2024-01-01T00:00:00Z"), END, "Z"));
+            var result = convertSingle(data);
+            Assertions.assertInstanceOf(GanttSeries.class, result);
+        }
+
+        @Test
+        void stringStartWithTemporalEnd_matchesGantt() {
+            var data = List.of(row(NAME, "Task", START, "A", END,
+                    Instant.parse("2024-02-01T00:00:00Z")));
+            var result = convertSingle(data);
+            Assertions.assertInstanceOf(GanttSeries.class, result);
+        }
     }
 
     // --- Treemap ---
@@ -326,6 +411,24 @@ class DefaultDataConverterTest {
             Assertions.assertEquals("Root", item.getName());
             Assertions.assertEquals(0.5, item.getColorValue());
         }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(row(ID, null, PARENT, null, VALUE, null),
+                    row(ID, "root", PARENT, null, VALUE, 100));
+            var ts = (TreeSeries) convertSingle(data);
+            Assertions.assertEquals(1, ts.getData().size());
+        }
+
+        @Test
+        void setsIdParentAndValue() {
+            var data = List.of(row(ID, "child", PARENT, "root", VALUE, 60));
+            var ts = (TreeSeries) convertSingle(data);
+            var item = ts.getData().iterator().next();
+            Assertions.assertEquals("child", item.getId());
+            Assertions.assertEquals("root", item.getParent());
+            Assertions.assertEquals(60, item.getValue());
+        }
     }
 
     // --- Sankey ---
@@ -343,6 +446,25 @@ class DefaultDataConverterTest {
             Assertions.assertEquals("A", item.getFrom());
             Assertions.assertEquals("B", item.getTo());
             Assertions.assertEquals(10, item.getWeight());
+        }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(row(FROM, null, TO, null, WEIGHT, null),
+                    row(FROM, "A", TO, "B", WEIGHT, 10));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals("A",
+                    ((DataSeriesItemSankey) result.getData().getFirst())
+                            .getFrom());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List
+                    .of(row(FROM, "A", TO, "B", WEIGHT, 10, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
         }
     }
 
@@ -395,6 +517,24 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(10, item.getX2());
             Assertions.assertEquals(1, item.getY());
         }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(row(X, null, X2, null, Y, null),
+                    row(X, 0, X2, 10, Y, 1));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals(10,
+                    ((DataSeriesItemXrange) result.getData().getFirst())
+                            .getX2());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(X, 0, X2, 10, Y, 1, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
+        }
     }
 
     // --- Timeline ---
@@ -425,6 +565,24 @@ class DefaultDataConverterTest {
             var item = (DataSeriesItemTimeline) result.getData().getFirst();
             Assertions.assertEquals(1000, item.getX());
         }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(row(NAME, null, LABEL, null, DESCRIPTION, null),
+                    row(NAME, "Event", LABEL, "E", DESCRIPTION, "Desc"));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals("Event",
+                    result.getData().getFirst().getName());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(NAME, "Event", LABEL, "E", DESCRIPTION,
+                    "Desc", COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
+        }
     }
 
     // --- Bubble ---
@@ -440,6 +598,13 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(1, item.getX());
             Assertions.assertEquals(2, item.getY());
             Assertions.assertEquals(3, item.getZ());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(X, 1, Y, 2, Z, 3, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
         }
     }
 
@@ -574,6 +739,13 @@ class DefaultDataConverterTest {
         }
 
         @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(X, 100, TITLE, "Flag 1", COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
+        }
+
+        @Test
         void withoutXColumn_usesRowIndexAsX() {
             var data = List.of(row(TITLE, "Flag 1"), row(TITLE, "Flag 2"));
             var result = (DataSeries) convertSingle(data);
@@ -597,6 +769,22 @@ class DefaultDataConverterTest {
             Assertions.assertEquals(1, item.getX());
             Assertions.assertEquals(5, item.getLow());
             Assertions.assertEquals(15, item.getHigh());
+        }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(row(X, 1, LOW, null, HIGH, null),
+                    row(X, 2, LOW, 5, HIGH, 15));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals(2, result.getData().getFirst().getX());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(X, 1, LOW, 5, HIGH, 15, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
         }
 
         @Test
@@ -628,6 +816,22 @@ class DefaultDataConverterTest {
             var result = (DataSeries) convertSingle(data);
             var item = (DataSeriesItemBullet) result.getData().getFirst();
             Assertions.assertEquals(0, item.getX());
+        }
+
+        @Test
+        void allNullValues_skipsRow() {
+            var data = List.of(row(Y, null, TARGET, null),
+                    row(Y, 275, TARGET, 250));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals(275, result.getData().getFirst().getY());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(Y, 275, TARGET, 250, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
         }
     }
 
@@ -687,6 +891,34 @@ class DefaultDataConverterTest {
             Assertions.assertFalse(
                     result.getData().getFirst() instanceof WaterFallSum);
         }
+
+        @Test
+        void nullNameAndValue_skipsRow() {
+            var data = List.of(row(NAME, null, Y, null, WATERFALL_TYPE, null),
+                    row(NAME, "Revenue", Y, 100, WATERFALL_TYPE, null));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(1, result.getData().size());
+            Assertions.assertEquals("Revenue",
+                    result.getData().getFirst().getName());
+        }
+
+        @Test
+        void colorColumn_setsItemColor() {
+            var data = List.of(row(NAME, "Revenue", Y, 100, WATERFALL_TYPE,
+                    null, COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            assertColor("#FF0000", result.getData().getFirst().getColor());
+        }
+
+        @Test
+        void sumWithColorColumn_setsItemColor() {
+            var data = List.of(row(NAME, "Total", Y, null, WATERFALL_TYPE,
+                    "sum", COLOR, "#FF0000"));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertInstanceOf(WaterFallSum.class,
+                    result.getData().getFirst());
+            assertColor("#FF0000", result.getData().getFirst().getColor());
+        }
     }
 
     // --- Fallback ---
@@ -736,6 +968,15 @@ class DefaultDataConverterTest {
             var result = (DataSeries) convertSingle(data);
             Assertions.assertEquals(1.5, result.getData().getFirst().getX());
             Assertions.assertEquals(2.5, result.getData().getFirst().getY());
+        }
+
+        @Test
+        void allNumericColumns_allNullRowSkipped() {
+            var data = List.of(row("a", 1, "b", 2), row("a", null, "b", null),
+                    row("a", 3, "b", 4));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(2, result.getData().size());
+            Assertions.assertEquals(3, result.getData().get(1).getX());
         }
 
         @Test
@@ -903,6 +1144,26 @@ class DefaultDataConverterTest {
                     1706745600000L));
             var gs = (GanttSeries) convertSingle(data);
             Assertions.assertEquals(1, gs.size());
+        }
+
+        @Test
+        void utilDateXValue_convertedToHighchartsTimestamp() {
+            var millis = Instant.parse("2024-01-15T12:00:00Z").toEpochMilli();
+            var data = List.of(row(X, new java.util.Date(millis), Y, 10));
+            var result = (DataSeries) convertSingle(data);
+            Assertions.assertEquals(millis,
+                    result.getData().getFirst().getX().longValue());
+        }
+
+        @Test
+        void ganttWithNumericMillisStartEnd_setsStartAndEnd() {
+            var data = List.of(row(NAME, "Task", START, 1704067200000L, END,
+                    1706745600000L));
+            var gs = (GanttSeries) convertSingle(data);
+            Assertions.assertEquals(1704067200000L,
+                    gs.get(0).getStart().longValue());
+            Assertions.assertEquals(1706745600000L,
+                    gs.get(0).getEnd().longValue());
         }
     }
 
