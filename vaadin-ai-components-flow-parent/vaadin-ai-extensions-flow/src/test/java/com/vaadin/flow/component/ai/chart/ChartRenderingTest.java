@@ -237,6 +237,46 @@ class ChartRenderingTest {
         }
 
         @Test
+        void drawFailure_keepsPreviousConfiguration() {
+            chart.setTimeline(true);
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            ChartRenderer.renderChart(chart, databaseProvider,
+                    new DefaultDataConverter(), List.of("SELECT 1"),
+                    "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Revenue\"}}");
+
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ChartRenderer.renderChart(chart, databaseProvider,
+                            new DefaultDataConverter(), List.of("SELECT 1"),
+                            "{\"chart\":{\"type\":\"pie\"}}"));
+
+            Assertions.assertEquals(ChartType.LINE,
+                    chart.getConfiguration().getChart().getType());
+            Assertions.assertEquals("Revenue",
+                    chart.getConfiguration().getTitle().getText());
+        }
+
+        @Test
+        void drawsWithFullReset() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            // Drop the draw the chart schedules on attach
+            ui.dumpPendingJavaScriptInvocations();
+
+            updateData("SELECT category, value FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            // callJsFunction passes the function name, then its arguments
+            var resetFlags = ui.dumpPendingJavaScriptInvocations().stream()
+                    .map(invocation -> invocation.getInvocation()
+                            .getParameters())
+                    .filter(parameters -> "updateConfiguration"
+                            .equals(parameters.getFirst()))
+                    .map(parameters -> parameters.get(2)).toList();
+            Assertions.assertEquals(List.of(true), resetFlags);
+        }
+
+        @Test
         void singleConfigJsonIsApplied() {
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));

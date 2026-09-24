@@ -80,11 +80,12 @@ public final class ChartRenderer implements Serializable {
             allSeries.addAll(dataConverter.convertToSeries(results));
         }
 
-        Configuration config = chart.getConfiguration();
+        Configuration previous = chart.getConfiguration();
+        Configuration config = previous;
         for (var configJson : configJsons) {
             config = applyConfiguration(config, configJson);
         }
-        if (config != chart.getConfiguration()) {
+        if (config != previous) {
             chart.setConfiguration(config);
         }
 
@@ -110,7 +111,16 @@ public final class ChartRenderer implements Serializable {
         // Full reset required. Without it, axis categories are
         // lost when the chart is rendered via async Push (see
         // DashboardChartControllerIT).
-        chart.drawChart(true);
+        try {
+            chart.drawChart(true);
+        } catch (RuntimeException e) {
+            // The chart rejects some configurations, such as an unsupported
+            // type in timeline mode. Keep the one it last accepted.
+            if (config != previous) {
+                chart.setConfiguration(previous);
+            }
+            throw e;
+        }
     }
 
     /**
