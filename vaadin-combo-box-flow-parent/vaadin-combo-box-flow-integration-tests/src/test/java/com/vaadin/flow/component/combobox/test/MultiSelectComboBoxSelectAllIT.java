@@ -157,12 +157,23 @@ public class MultiSelectComboBoxSelectAllIT extends AbstractComponentIT {
         assertSelectAllLabel(serverSideComboBox, "Deselect All");
     }
 
+    @Test
+    public void getSelectAllButton_popupClosed_throws() {
+        Assert.assertThrows(IllegalStateException.class,
+                () -> serverSideComboBox.getSelectAllButton());
+    }
+
+    @Test
+    public void getSelectAllButton_noMatchingItems_returnsNull() {
+        serverSideComboBox.setFilter("foo");
+
+        Assert.assertNull(serverSideComboBox.getSelectAllButton());
+    }
+
     private TestBenchElement getSelectAllButton(
             MultiSelectComboBoxElement comboBox) {
         comboBox.openPopup();
-        comboBox.waitForLoadingFinished();
-        return comboBox.$("vaadin-multi-select-combo-box-select-all-button")
-                .single();
+        return comboBox.getSelectAllButton();
     }
 
     private void clickSelectAll(MultiSelectComboBoxElement comboBox) {
