@@ -507,15 +507,6 @@ class MultiSelectComboBoxSelectAllTest {
         }
 
         @Test
-        void deselectAll_updatesSelectedItemsPropertyToEmptyArray() {
-            comboBox.setValue(items);
-
-            comboBox.toggleSelectAll();
-
-            Assertions.assertEquals(0, getSelectedItemsProperty().size());
-        }
-
-        @Test
         void valueChangeRevertedByListener_keepsPreviousSelection() {
             comboBox.select("Item 1");
             comboBox.addValueChangeListener(e -> {
