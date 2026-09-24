@@ -69,6 +69,20 @@ class MultiSelectComboBoxSelectionWithIdProviderTest {
     }
 
     @Test
+    void select_deselectDuplicate_nothingSelected() {
+        // Select "Amelia"
+        comboBox.select(new Person(2, "Amelia"));
+        // Deselect "amelia", but with same ID
+        comboBox.deselect(new Person(2, "amelia"));
+
+        // Should be deselected
+        Assertions.assertEquals(0, comboBox.getSelectedItems().size());
+        // Change listener triggered for select and deselect
+        Mockito.verify(selectionListenerSpy, Mockito.times(2))
+                .selectionChange(Mockito.any());
+    }
+
+    @Test
     void selectMultiple_ignoresDuplicates() {
         // Select 3 duplicates of the same person
         comboBox.select(new Person(2, "Amelia"), new Person(2, "amelia"),
