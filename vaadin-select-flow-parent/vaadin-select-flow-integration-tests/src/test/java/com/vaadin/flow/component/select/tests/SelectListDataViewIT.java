@@ -24,7 +24,6 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-select-list-data-view")
@@ -127,13 +126,13 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         findElement(By.id(SelectListDataViewPage.SORT_BUTTON)).click();
 
         Assert.assertEquals("Unexpected sort order", "John,Mike,Paul",
-                select.$("vaadin-select-item").all().stream()
-                        .map(SelectListDataViewIT::getItemText)
+                select.$(SelectElement.ItemElement.class).all().stream()
+                        .map(SelectElement.ItemElement::getText)
                         .collect(Collectors.joining(",")));
 
         Assert.assertEquals("Unexpected sort order", "John,Paul,Mike",
-                otherSelect.$("vaadin-select-item").all().stream()
-                        .map(SelectListDataViewIT::getItemText)
+                otherSelect.$(SelectElement.ItemElement.class).all().stream()
+                        .map(SelectElement.ItemElement::getText)
                         .collect(Collectors.joining(",")));
     }
 
@@ -142,24 +141,15 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         findElement(By.id(SelectListDataViewPage.FILTER_BUTTON)).click();
 
         Assert.assertEquals("Unexpected filtered items count", 1,
-                select.$("vaadin-select-item").all().size());
-        Assert.assertEquals("Unexpected filtered item", "Paul",
-                getItemText(select.$("vaadin-select-item").all().get(0)));
+                select.$(SelectElement.ItemElement.class).all().size());
+        Assert.assertEquals("Unexpected filtered item", "Paul", select
+                .$(SelectElement.ItemElement.class).all().get(0).getText());
 
         Assert.assertEquals("No filter expected", 3,
-                otherSelect.$("vaadin-select-item").all().size());
+                otherSelect.$(SelectElement.ItemElement.class).all().size());
         Assert.assertArrayEquals("No filter expected",
                 new String[] { "John", "Paul", "Mike" },
-                otherSelect.$("vaadin-select-item").all().stream()
-                        .map(SelectListDataViewIT::getItemText).toArray());
-    }
-
-    /*
-     * Reads the item's text content instead of using getText(), which only
-     * returns text of rendered elements. The items are projected into the
-     * select's overlay, which is not rendered while the dropdown is closed.
-     */
-    private static String getItemText(TestBenchElement item) {
-        return item.getPropertyString("textContent").trim();
+                otherSelect.$(SelectElement.ItemElement.class).all().stream()
+                        .map(SelectElement.ItemElement::getText).toArray());
     }
 }
