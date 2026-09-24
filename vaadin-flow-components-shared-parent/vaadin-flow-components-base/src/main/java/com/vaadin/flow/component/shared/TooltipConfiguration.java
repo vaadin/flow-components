@@ -28,7 +28,7 @@ import com.vaadin.flow.server.VaadinService;
  * @author Vaadin Ltd
  * @since 23.3
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "25.2.12")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.2.13")
 @JsModule("./tooltip.ts")
 public class TooltipConfiguration implements Serializable {
 
