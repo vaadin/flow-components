@@ -70,15 +70,17 @@ public final class ChartAITools {
     public interface Callbacks extends Serializable {
 
         /**
-         * Returns the current state of a chart including its Highcharts
-         * configuration and SQL queries. The returned JSON string should
-         * contain the chart configuration and the SQL queries used to populate
-         * the chart series. Should throw if the chart is not found.
+         * Returns the current state of a chart as a JSON string holding the
+         * Highcharts configuration the LLM has set and the SQL queries used to
+         * populate the chart series. The LLM gets the state as is, so the
+         * configuration must not include values from the query results, such as
+         * series names, axis categories or points. Should throw if the chart is
+         * not found.
          *
          * @param chartId
          *            the chart ID
-         * @return the chart state as a JSON string containing the Highcharts
-         *         configuration and SQL queries
+         * @return the chart state as a JSON string containing the configuration
+         *         the LLM has set and the SQL queries
          */
         String getState(String chartId);
 
@@ -246,10 +248,14 @@ public final class ChartAITools {
 
             @Override
             public String getDescription() {
-                return "Gets the current state of a chart including its "
-                        + "Highcharts configuration and SQL queries. Returns "
-                        + "the chart configuration as JSON and the SQL "
-                        + "queries used to populate the chart series.";
+                return "Gets the current state of a chart: the configuration "
+                        + "set through update_chart_configuration and the SQL "
+                        + "queries that populate its series. Values from the "
+                        + "query results, such as series names, axis "
+                        + "categories and points, are never included, even "
+                        + "though the chart shows them. To change what the "
+                        + "chart shows, such as its sorting or filtering, "
+                        + "change the queries.";
             }
 
             @Override

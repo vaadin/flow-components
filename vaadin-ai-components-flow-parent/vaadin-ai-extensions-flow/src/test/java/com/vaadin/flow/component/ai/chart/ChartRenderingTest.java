@@ -235,6 +235,20 @@ class ChartRenderingTest {
             Assertions.assertEquals(2,
                     chart.getConfiguration().getSeries().size());
         }
+
+        @Test
+        void singleConfigJsonIsApplied() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+
+            ChartRenderer.renderChart(chart, databaseProvider,
+                    new DefaultDataConverter(),
+                    List.of("SELECT category, value FROM t"),
+                    "{\"title\":{\"text\":\"Sales\"}}");
+
+            Assertions.assertEquals("Sales",
+                    chart.getConfiguration().getTitle().getText());
+        }
     }
 
     @Nested

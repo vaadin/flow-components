@@ -62,6 +62,18 @@ public final class ChartRenderer implements Serializable {
     public static void renderChart(Chart chart,
             DatabaseProvider databaseProvider, DataConverter dataConverter,
             List<String> queries, String configJson) {
+        renderChart(chart, databaseProvider, dataConverter, queries,
+                configJson == null ? List.of() : List.of(configJson));
+    }
+
+    /**
+     * Renders a chart like
+     * {@link #renderChart(Chart, DatabaseProvider, DataConverter, List, String)},
+     * applying each of the configuration JSON strings in order.
+     */
+    static void renderChart(Chart chart, DatabaseProvider databaseProvider,
+            DataConverter dataConverter, List<String> queries,
+            List<String> configJsons) {
         List<Series> allSeries = new ArrayList<>();
         for (String query : queries) {
             var results = databaseProvider.executeQuery(query);
@@ -69,14 +81,11 @@ public final class ChartRenderer implements Serializable {
         }
 
         Configuration config = chart.getConfiguration();
-        if (configJson != null) {
-            var parsed = ChartConfigurationParser.parse(configJson);
-            if (chartTypeChanged(config, parsed)) {
-                config = parsed;
-                chart.setConfiguration(config);
-            } else {
-                ChartConfigurationParser.merge(configJson, config);
-            }
+        for (var configJson : configJsons) {
+            config = applyConfiguration(config, configJson);
+        }
+        if (config != chart.getConfiguration()) {
+            chart.setConfiguration(config);
         }
 
         // Extract per-series config (plotOptions, yAxis) from the
@@ -102,6 +111,20 @@ public final class ChartRenderer implements Serializable {
         // lost when the chart is rendered via async Push (see
         // DashboardChartControllerIT).
         chart.drawChart(true);
+    }
+
+    /**
+     * Applies configuration JSON from the LLM and returns the result: a new
+     * chart type replaces the configuration, anything else is merged into it.
+     */
+    static Configuration applyConfiguration(Configuration current,
+            String configJson) {
+        var parsed = ChartConfigurationParser.parse(configJson);
+        if (chartTypeChanged(current, parsed)) {
+            return parsed;
+        }
+        ChartConfigurationParser.merge(configJson, current);
+        return current;
     }
 
     /**
@@ -246,7 +269,7 @@ public final class ChartRenderer implements Serializable {
      * configuration's current series, keyed by series name. These are
      * "template" series set by the parser that carry config but no data.
      */
-    private static Map<String, AbstractSeries> extractSeriesConfig(
+    static Map<String, AbstractSeries> extractSeriesConfig(
             Configuration config) {
         var result = new LinkedHashMap<String, AbstractSeries>();
         for (var series : config.getSeries()) {

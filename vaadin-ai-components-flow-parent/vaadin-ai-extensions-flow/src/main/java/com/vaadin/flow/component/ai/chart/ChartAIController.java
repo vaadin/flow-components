@@ -66,6 +66,15 @@ import tools.jackson.databind.JsonNode;
  * last successfully-rendered state.
  * </p>
  * <p>
+ * The controller sends the LLM nothing from the query results: when it reads
+ * the chart state, it gets the SQL queries and the configuration it has set
+ * itself, not the series, axis categories or other values the chart builds from
+ * the rows. Only the schema description your {@link DatabaseProvider} returns
+ * from {@link DatabaseProvider#getSchema()} and the message of a
+ * {@link ToolException} it throws reach the LLM as is, so keep row values out
+ * of both.
+ * </p>
+ * <p>
  * Data conversion from SQL query results to chart series is handled by a
  * {@link DataConverter}. A default implementation is used unless overridden via
  * {@link #setDataConverter(DataConverter)}.
@@ -201,7 +210,7 @@ public class ChartAIController implements AIController {
                     throw new ToolException(e.getMessage(), e);
                 }
                 ChartEntry.getOrCreate(chart, chartId)
-                        .setPendingConfigurationJson(configJson);
+                        .addPendingConfigurationJson(configJson);
             }
 
             @Override
@@ -259,8 +268,9 @@ public class ChartAIController implements AIController {
     }
 
     /**
-     * Returns the current chart state, including the SQL queries and
-     * configuration. Returns {@code null} if the chart has no data queries.
+     * Returns the current chart state, including the SQL queries, the chart
+     * configuration and the part of it the LLM has set. Returns {@code null} if
+     * the chart has no data queries.
      *
      * @return the current state, or {@code null}
      */
@@ -270,7 +280,8 @@ public class ChartAIController implements AIController {
             return null;
         }
         return new ChartState(entry.getQueries(),
-                copyConfiguration(chart.getConfiguration()));
+                copyConfiguration(chart.getConfiguration()),
+                copyConfiguration(entry.getLlmConfiguration()));
     }
 
     /**
@@ -288,8 +299,9 @@ public class ChartAIController implements AIController {
         chart.setConfiguration(copyConfiguration(state.configuration()));
         ChartEntry entry = ChartEntry.getOrCreate(chart, CHART_ID);
         entry.setQueries(state.queries());
+        entry.setLlmConfiguration(copyConfiguration(state.llmConfiguration()));
         try {
-            render(entry, state.queries(), null, false);
+            render(entry, state.queries(), List.of(), false);
         } catch (Exception e) {
             LOGGER.error("Rendering failed during state restore", e);
         }
@@ -338,25 +350,33 @@ public class ChartAIController implements AIController {
 
         if (queriesToRender.isEmpty()) {
             // Nothing to render. Consume any empty pending queries (rare:
-            // LLM staged an empty list) but keep pendingConfigurationJson
-            // so it applies when data arrives in a later request.
+            // LLM staged an empty list) but keep the configuration updates
+            // so they apply when data arrives in a later request.
             entry.setPendingQueries(null);
             return;
         }
 
-        String configJson = entry.getPendingConfigurationJson();
+        // Every configuration update of the turn applies, in order, so a
+        // later update does not undo an earlier one
+        var configJsons = List.copyOf(entry.getPendingConfigurationJsons());
         // Render synchronously so exceptions propagate to the orchestrator,
         // which runs this on the UI thread under session lock. Attachment
         // is not required: Configuration is server-side state and any JS
         // calls are queued by Flow until the chart attaches.
-        render(entry, queriesToRender, configJson, true);
+        render(entry, queriesToRender, configJsons, true);
     }
 
     private void render(ChartEntry entry, List<String> queries,
-            String configJson, boolean fireListeners) {
+            List<String> configJsons, boolean fireListeners) {
         try {
+            // The application may set the chart type itself. The LLM's
+            // configuration follows it, so a type change in the JSON is
+            // decided the same way for both.
+            entry.getLlmConfiguration().getChart()
+                    .setType(chart.getConfiguration().getChart().getType());
             ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
-                    queries, configJson);
+                    queries, configJsons);
+            configJsons.forEach(entry::applyLlmConfiguration);
             entry.setQueries(queries);
             if (fireListeners) {
                 fireStateChangeListeners();
