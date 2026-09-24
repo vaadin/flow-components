@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
@@ -30,6 +33,7 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -109,6 +113,8 @@ public class MultiSelectComboBox<TItem>
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
     private AutoExpandMode autoExpand;
+    private boolean selectAllButtonVisible;
+    private final BeforeClientResponseAction allSelectedUpdate;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -146,11 +152,14 @@ public class MultiSelectComboBox<TItem>
         // actually have a different identity in the data provider.
         selectionModel = new MultiSelectComboBoxSelectionModel<>(
                 item -> getDataProvider().getId(item));
+        allSelectedUpdate = new BeforeClientResponseAction(this,
+                this::updateAllSelectedProperty);
         addValueChangeListener(e -> {
             // Synchronize selection if value is updated from client
             if (e.isFromClient()) {
                 selectionModel.setSelectedItems(e.getValue());
             }
+            allSelectedUpdate.schedule();
         });
         // Pass identifier provider to selection model when it is changed
         // through a data view
@@ -158,6 +167,16 @@ public class MultiSelectComboBox<TItem>
                 .setIdentityProvider(e.getIdentifierProvider());
         ComponentUtil.addListener(this, IdentifierProviderChangeEvent.class,
                 (ComponentEventListener) listener);
+        getDataController().setDataProviderChangeListener(() -> {
+            updateSelectAllButtonVisibleProperty();
+            allSelectedUpdate.schedule();
+        });
+        getDataController().setDataUpdateListener(() -> {
+            // A data reset requests a flush, which can change the filter mode.
+            // Schedule the update again to run it after the flush.
+            allSelectedUpdate.cancel();
+            allSelectedUpdate.schedule();
+        });
         // Initialize page size and data provider
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
@@ -604,6 +623,106 @@ public class MultiSelectComboBox<TItem>
      */
     public void setKeepFilter(boolean keepFilter) {
         getElement().setProperty("keepFilter", keepFilter);
+    }
+
+    /**
+     * Gets whether the select all button is visible. {@code false} by default.
+     * <p>
+     * Note that this method simply returns the value set with
+     * {@link #setSelectAllButtonVisible(boolean)}. It does not report effective
+     * visibility, for example when the button is hidden because a lazy data
+     * provider is used.
+     *
+     * @return {@code true} if the select all button is visible, {@code false}
+     *         otherwise
+     * @see #setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public boolean isSelectAllButtonVisible() {
+        return selectAllButtonVisible;
+    }
+
+    /**
+     * Sets whether to show a button above the dropdown items for selecting or
+     * deselecting all items that match the current filter at once. Items that
+     * do not match the filter keep their selection state. The button is hidden
+     * while the field is read-only or the dropdown has no items to show.
+     * <p>
+     * The button is only supported with in-memory data providers, for example
+     * items set with {@link #setItems(Collection)}. While a lazy data provider
+     * is used, the button is hidden.
+     *
+     * @param selectAllButtonVisible
+     *            {@code true} to show the select all button, {@code false} to
+     *            hide it
+     * @since 25.4
+     */
+    public void setSelectAllButtonVisible(boolean selectAllButtonVisible) {
+        this.selectAllButtonVisible = selectAllButtonVisible;
+        updateSelectAllButtonVisibleProperty();
+        allSelectedUpdate.schedule();
+    }
+
+    private boolean isSelectAllButtonEffectivelyVisible() {
+        return selectAllButtonVisible && getDataProvider().isInMemory();
+    }
+
+    private boolean isSelectAllHandledByServer() {
+        // With client-side filtering, only the web component knows the filter
+        return isSelectAllButtonEffectivelyVisible()
+                && !getDataController().isClientSideFilter();
+    }
+
+    private void updateSelectAllButtonVisibleProperty() {
+        boolean effectivelyVisible = isSelectAllButtonEffectivelyVisible();
+        if (selectAllButtonVisible && !effectivelyVisible) {
+            LoggerFactory.getLogger(MultiSelectComboBox.class).warn(
+                    "The select all button is only supported with in-memory data providers. The button is hidden while a lazy data provider is used.");
+        }
+        getElement().setProperty("selectAllButtonVisible", effectivelyVisible);
+    }
+
+    private void updateAllSelectedProperty() {
+        // While the property is set, the web component uses it for the button
+        // label and calls the server to toggle the selection. Without it, the
+        // web component handles the button itself.
+        if (isSelectAllHandledByServer()) {
+            getElement().setProperty("_allSelected",
+                    areAllSelected(fetchFilteredItems()));
+        } else {
+            getElement().removeProperty("_allSelected");
+        }
+    }
+
+    private boolean areAllSelected(Collection<TItem> items) {
+        return !items.isEmpty() && items.stream().allMatch(this::isSelected);
+    }
+
+    /**
+     * Called by the connector when the user clicks the select all button.
+     */
+    @ClientCallable
+    void toggleSelectAll() {
+        if (!isSelectAllHandledByServer() || isReadOnly()) {
+            return;
+        }
+        Set<TItem> items = new LinkedHashSet<>(fetchFilteredItems());
+        if (areAllSelected(items)) {
+            selectionModel.updateSelection(Collections.emptySet(), items);
+        } else {
+            selectionModel.updateSelection(items, Collections.emptySet());
+        }
+        setModelValue(selectionModel.getSelectedItems(), true);
+        // Still need to sync the new value to the client, which setModelValue
+        // doesn't cover. Use the current value, as value change listeners could
+        // theoretically change it.
+        setPresentationValue(getValue());
+    }
+
+    private List<TItem> fetchFilteredItems() {
+        return getDataProvider()
+                .fetch(getDataCommunicator().buildQuery(0, Integer.MAX_VALUE))
+                .toList();
     }
 
     /**

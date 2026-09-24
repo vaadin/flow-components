@@ -5,7 +5,7 @@ import type {
   ComboBoxDataProviderCallback,
   ComboBoxDataProviderParams
 } from '@vaadin/combo-box/src/vaadin-combo-box-data-provider-mixin.js';
-import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js';
+import type { FlowComboBox, FlowMultiSelectComboBox, Item, ItemRange } from './vaadin-combo-box-types.js';
 
 /**
  * comboBoxConnector is a communication layer between ComboBox's flow component
@@ -29,6 +29,10 @@ export class ComboBoxConnector {
     comboBox.addEventListener('custom-value-set', (e) => e.preventDefault());
 
     comboBox.itemClassNameGenerator = (item) => item.className || '';
+
+    if (isMultiSelectComboBox(comboBox)) {
+      comboBox._toggleSelectAllHandler = () => comboBox.$server.toggleSelectAll();
+    }
 
     // Assign last: setting the data provider can synchronously trigger a first
     // page load that calls back into the connector.
@@ -273,6 +277,10 @@ export class ComboBoxConnector {
 
     callback(filteredItems, filteredItems.length);
   }
+}
+
+function isMultiSelectComboBox(comboBox: FlowComboBox): comboBox is FlowMultiSelectComboBox {
+  return comboBox.localName === 'vaadin-multi-select-combo-box';
 }
 
 function initLazy(comboBox: FlowComboBox): void {
