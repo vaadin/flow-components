@@ -41,7 +41,7 @@ public class EmptySelectionItemIT extends AbstractSelectIT {
             Assert.assertEquals("invalid key", i + "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", "Item-" + (i - 1),
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
 
         // initial select doesn't change value, so no event

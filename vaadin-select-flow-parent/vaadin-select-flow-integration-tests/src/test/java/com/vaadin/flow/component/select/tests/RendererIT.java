@@ -46,7 +46,7 @@ public class RendererIT extends AbstractSelectIT {
             Assert.assertEquals("invalid key", i + 1 + "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", "Item-" + i + "-UPDATED",
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
 
     }

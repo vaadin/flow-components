@@ -92,12 +92,12 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected item count after adding a new item in"
                 + " first select", 4, select.getItems().size());
         Assert.assertEquals("Wrong name for added person in first select",
-                "Peter", select.getItems().get(3).getText());
+                "Peter", getItemText(select.getItems().get(3)));
 
         Assert.assertEquals("Unexpected item count after adding a new item in"
                 + " second select", 4, otherSelect.getItems().size());
         Assert.assertEquals("Wrong name for added person in second select",
-                "Peter", otherSelect.getItems().get(3).getText());
+                "Peter", getItemText(otherSelect.getItems().get(3)));
     }
 
     @Test
@@ -105,10 +105,10 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         findElement(By.id(SelectListDataViewPage.UPDATE_ITEM)).click();
 
         Assert.assertEquals("Wrong name for updated person", "Jack",
-                select.getItems().get(0).getText());
+                getItemText(select.getItems().get(0)));
 
         Assert.assertEquals("Wrong name for updated person", "Jack",
-                otherSelect.getItems().get(0).getText());
+                getItemText(otherSelect.getItems().get(0)));
     }
 
     @Test

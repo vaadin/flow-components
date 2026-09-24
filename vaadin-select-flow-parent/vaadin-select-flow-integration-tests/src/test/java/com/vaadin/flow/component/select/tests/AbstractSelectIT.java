@@ -148,7 +148,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
                     expectedItemLabel, selectElement.getSelectedText());
             Assert.assertEquals("Invalid options selected from popup",
                     expectedItemText,
-                    selectElement.getSelectedOptionItem().getText());
+                    getItemText(selectElement.getSelectedOptionItem()));
             selectElement.closePopup();
         }
 
@@ -258,7 +258,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
             Assert.assertEquals("invalid key", "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", emptySelectionItemCaption,
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
 
         public void helperTextVisible() {

@@ -41,7 +41,7 @@ public class DataProviderIT extends AbstractSelectIT {
             Assert.assertEquals("invalid key", i + 1 + "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", "Item-" + i,
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
     }
 
@@ -56,7 +56,7 @@ public class DataProviderIT extends AbstractSelectIT {
             Assert.assertEquals("invalid key", (i + 20 + 1) + "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", "Item-" + (i + 20),
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
 
         page.clickResetNItems(2);
@@ -68,7 +68,7 @@ public class DataProviderIT extends AbstractSelectIT {
             Assert.assertEquals("invalid key", (i + 20 + 5 + 1) + "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", "Item-" + (i + 20 + 5),
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
     }
 
@@ -91,7 +91,7 @@ public class DataProviderIT extends AbstractSelectIT {
             Assert.assertEquals("invalid key", (i + 1) + "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", "Item-" + i,
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
 
         page.clickResetNItems(0);
@@ -114,7 +114,7 @@ public class DataProviderIT extends AbstractSelectIT {
             Assert.assertEquals("invalid key", i + 1 + 20 + "",
                     itemElement.getPropertyString("value"));
             Assert.assertEquals("invalid text", "Item-" + i + "-UPDATED",
-                    itemElement.getText());
+                    getItemText(itemElement));
         }
 
     }
@@ -127,7 +127,7 @@ public class DataProviderIT extends AbstractSelectIT {
         Assert.assertEquals("invalid key", 1 + "",
                 itemElement.getPropertyString("value"));
         Assert.assertEquals("invalid text", "Item-0-UPDATED",
-                itemElement.getText());
+                getItemText(itemElement));
 
         page.clickRefreshItem(2);
 
@@ -135,7 +135,7 @@ public class DataProviderIT extends AbstractSelectIT {
         Assert.assertEquals("invalid key", 3 + "",
                 itemElement.getPropertyString("value"));
         Assert.assertEquals("invalid text", "Item-2-UPDATED",
-                itemElement.getText());
+                getItemText(itemElement));
 
         page.clickRefreshItem(2);
 
@@ -143,7 +143,7 @@ public class DataProviderIT extends AbstractSelectIT {
         Assert.assertEquals("invalid key", 3 + "",
                 itemElement.getPropertyString("value"));
         Assert.assertEquals("invalid text", "Item-2-UPDATED-UPDATED",
-                itemElement.getText());
+                getItemText(itemElement));
 
         page.clickRefreshItem(10);
 
@@ -151,7 +151,7 @@ public class DataProviderIT extends AbstractSelectIT {
         Assert.assertEquals("invalid key", 11 + "",
                 itemElement.getPropertyString("value"));
         Assert.assertEquals("invalid text", "Item-10-UPDATED",
-                itemElement.getText());
+                getItemText(itemElement));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class DataProviderIT extends AbstractSelectIT {
         SelectElement.ItemElement itemElement = selectElement.getItems().get(2);
         Assert.assertEquals("invalid key", 3 + "",
                 itemElement.getPropertyString("value"));
-        Assert.assertEquals("invalid text", "Item-2", itemElement.getText());
+        Assert.assertEquals("invalid text", "Item-2", getItemText(itemElement));
 
         selectElement.selectItemByIndex(2);
 
