@@ -20,7 +20,9 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -43,7 +45,7 @@ public class BeforeClientResponseAction implements Serializable {
 
     private final Component component;
     private final SerializableRunnable action;
-    private Registration attachRegistration;
+    private ScheduledRun scheduledRun;
 
     /**
      * Creates a new action for the given component. The action is not scheduled
@@ -71,21 +73,15 @@ public class BeforeClientResponseAction implements Serializable {
      * component is attached. If the component is not attached, the action runs
      * before the first response after the component has been attached. Does
      * nothing if the action is already scheduled.
+     * <p>
+     * The action only runs while the component is attached.
      */
     public void schedule() {
-        if (attachRegistration != null) {
+        if (scheduledRun != null) {
             return;
         }
-        // The lambdas must only capture this instance and access the action
-        // through the field. If they captured the action lambda directly,
-        // deserialization could assign an unresolved SerializedLambda to the
-        // action field, see
-        // https://github.com/vaadin/flow-components/issues/6555
-        attachRegistration = component.whenAttached(
-                ui -> ui.beforeClientResponse(component, context -> {
-                    cancel();
-                    action.run();
-                }));
+        scheduledRun = new ScheduledRun();
+        scheduledRun.register();
     }
 
     /**
@@ -93,11 +89,50 @@ public class BeforeClientResponseAction implements Serializable {
      * scheduled.
      */
     public void cancel() {
-        if (attachRegistration == null) {
+        if (scheduledRun == null) {
             return;
         }
-        Registration registration = attachRegistration;
-        attachRegistration = null;
-        registration.remove();
+        ScheduledRun run = scheduledRun;
+        scheduledRun = null;
+        run.cancel();
+    }
+
+    /**
+     * One scheduling of the action. Flow can still run an entry that it
+     * collected before an earlier callback in the same flush cancelled the
+     * action or detached the component, so the entry checks both before it runs
+     * the action.
+     * <p>
+     * Always read the action from the {@code action} field when it runs. Do not
+     * copy it to a local variable, and do not pass it to a lambda or to another
+     * object. Otherwise the component can fail to deserialize, see
+     * https://github.com/vaadin/flow-components/issues/6555
+     */
+    private final class ScheduledRun
+            implements SerializableConsumer<ExecutionContext> {
+
+        private Registration attachRegistration;
+        private boolean cancelled;
+
+        private void register() {
+            attachRegistration = component.whenAttached(
+                    ui -> ui.beforeClientResponse(component, this));
+        }
+
+        @Override
+        public void accept(ExecutionContext context) {
+            if (cancelled || !component.isAttached()) {
+                // When detached, whenAttached registers this run again on the
+                // next attach
+                return;
+            }
+            BeforeClientResponseAction.this.cancel();
+            action.run();
+        }
+
+        private void cancel() {
+            cancelled = true;
+            attachRegistration.remove();
+        }
     }
 }

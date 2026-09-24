@@ -181,6 +181,84 @@ class BeforeClientResponseActionTest {
     }
 
     @Test
+    void schedule_detachedByEarlierCallbackInSameFlush_actionRunsAfterAttach() {
+        TestComponent other = new TestComponent();
+        ui.add(other);
+        ui.getUI().beforeClientResponse(other, context -> ui.remove(component));
+        action.schedule();
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(), runs);
+
+        ui.add(component);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(ui.getUI()), runs);
+    }
+
+    @Test
+    void schedule_reattachedByEarlierCallbackInSameFlush_actionRunsOnce() {
+        TestComponent other = new TestComponent();
+        ui.add(other);
+        ui.getUI().beforeClientResponse(other, context -> {
+            ui.remove(component);
+            ui.add(component);
+        });
+        action.schedule();
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(ui.getUI()), runs);
+
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(ui.getUI()), runs);
+    }
+
+    @Test
+    void schedule_detachedByEarlierAndReattachedByLaterCallbackInSameFlush_actionRunsOnce() {
+        TestComponent other = new TestComponent();
+        ui.add(other);
+        ui.getUI().beforeClientResponse(other, context -> ui.remove(component));
+        action.schedule();
+        ui.getUI().beforeClientResponse(other, context -> ui.add(component));
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(ui.getUI()), runs);
+
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(ui.getUI()), runs);
+    }
+
+    @Test
+    void schedule_cancelledByEarlierCallbackInSameFlush_actionDoesNotRun() {
+        TestComponent other = new TestComponent();
+        ui.add(other);
+        ui.getUI().beforeClientResponse(other, context -> action.cancel());
+        action.schedule();
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(), runs);
+
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(List.of(), runs);
+    }
+
+    @Test
+    void schedule_rescheduledByEarlierCallbackInSameFlush_actionRunsAfterCallbackQueuedBefore() {
+        List<String> events = new ArrayList<>();
+        var action = new BeforeClientResponseAction(component,
+                () -> events.add("action"));
+        TestComponent other = new TestComponent();
+        ui.add(other);
+        // A callback queues another callback, then schedules the action again
+        // so that it runs after the queued callback
+        ui.getUI().beforeClientResponse(other, context -> {
+            ui.getUI().beforeClientResponse(other,
+                    queued -> events.add("queued callback"));
+            action.cancel();
+            action.schedule();
+        });
+        action.schedule();
+        ui.fakeClientCommunication();
+
+        Assertions.assertEquals(List.of("queued callback", "action"), events);
+    }
+
+    @Test
     void schedule_movedToDifferentUiBeforeResponse_actionRunsInNewUi() {
         action.schedule();
 
