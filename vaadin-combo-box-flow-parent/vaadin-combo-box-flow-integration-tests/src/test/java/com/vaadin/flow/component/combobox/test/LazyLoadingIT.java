@@ -461,10 +461,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.sendKeys("11");
         waitUntilTextInContent(beanBox, "Person 111");
 
-        String filterText = (String) executeScript(
-                "return arguments[0].focusElement.value", beanBox);
         Assert.assertEquals("The ComboBox filter text got modified",
-                "Person 111", filterText);
+                "Person 111", beanBox.getInputElementValue());
     }
 
     @Test
