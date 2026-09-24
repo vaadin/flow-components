@@ -48,6 +48,10 @@ public class BeforeClientResponseAction implements Serializable {
     /**
      * Creates a new action for the given component. The action is not scheduled
      * until you call {@link #schedule()}.
+     * <p>
+     * If the action is a lambda or a method reference, do not store it in
+     * another field and do not capture it in another lambda. Otherwise the
+     * component can fail to deserialize.
      *
      * @param component
      *            the component whose client response the action runs before,
@@ -72,6 +76,11 @@ public class BeforeClientResponseAction implements Serializable {
         if (attachRegistration != null) {
             return;
         }
+        // The lambdas must only capture this instance and access the action
+        // through the field. If they captured the action lambda directly,
+        // deserialization could assign an unresolved SerializedLambda to the
+        // action field, see
+        // https://github.com/vaadin/flow-components/issues/6555
         attachRegistration = component.whenAttached(
                 ui -> ui.beforeClientResponse(component, context -> {
                     cancel();

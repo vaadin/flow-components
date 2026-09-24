@@ -33,12 +33,12 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -58,7 +58,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -89,7 +88,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
 
     private int lastNotifiedDataSize = -1;
     private volatile int lastFetchedDataSize = -1;
-    private SerializableConsumer<UI> sizeRequest;
+    private final BeforeClientResponseAction sizeEventAction = new BeforeClientResponseAction(
+            this, this::fireSizeEvent);
 
     <P> ListBoxBase(String propertyName, Class<P> elementPropertyType,
             VALUE defaultValue,
@@ -300,17 +300,9 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             });
             lastFetchedDataSize = itemCounter.get();
 
-            // Ignore new size requests unless the last one has been executed
-            // so as to avoid multiple beforeClientResponses.
-            if (sizeRequest == null) {
-                sizeRequest = ui -> {
-                    fireSizeEvent();
-                    sizeRequest = null;
-                };
-                // Size event is fired before client response so as to avoid
-                // multiple size change events during server round trips
-                runBeforeClientResponse(sizeRequest);
-            }
+            // Size event is fired before client response so as to avoid
+            // multiple size change events during server round trips
+            sizeEventAction.schedule();
         }
     }
 
@@ -461,11 +453,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     @Override
     public ListBoxDataView<ITEM> getGenericDataView() {
         return new ListBoxDataView<>(this::getDataProvider, this);
-    }
-
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     private void fireSizeEvent() {

@@ -37,7 +37,6 @@ import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -48,6 +47,7 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -69,7 +69,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -145,7 +144,8 @@ public class CheckboxGroup<T>
 
     private volatile int lastFetchedDataSize = -1;
 
-    private SerializableConsumer<UI> sizeRequest;
+    private final BeforeClientResponseAction sizeEventAction = new BeforeClientResponseAction(
+            this, this::fireSizeEvent);
 
     private CheckboxGroupI18n i18n;
 
@@ -866,17 +866,9 @@ public class CheckboxGroup<T>
                     });
             lastFetchedDataSize = itemCounter.get();
 
-            // Ignore new size requests unless the last one has been executed
-            // so as to avoid multiple beforeClientResponses.
-            if (sizeRequest == null) {
-                sizeRequest = ui -> {
-                    fireSizeEvent();
-                    sizeRequest = null;
-                };
-                // Size event is fired before client response so as to avoid
-                // multiple size change events during server round trips
-                runBeforeClientResponse(sizeRequest);
-            }
+            // Size event is fired before client response so as to avoid
+            // multiple size change events during server round trips
+            sizeEventAction.schedule();
         }
     }
 
@@ -959,11 +951,6 @@ public class CheckboxGroup<T>
 
     private Object getItemId(T item) {
         return getIdentifierProvider().apply(item);
-    }
-
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     private void fireSizeEvent() {

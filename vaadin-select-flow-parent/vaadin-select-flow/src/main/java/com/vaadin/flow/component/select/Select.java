@@ -39,7 +39,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -50,6 +49,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -70,7 +70,6 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -137,7 +136,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private Registration dataProviderListenerRegistration;
 
-    private boolean contentUpdateScheduled;
+    private final BeforeClientResponseAction contentUpdate = new BeforeClientResponseAction(
+            this, () -> getElement().callJsFunction("requestContentUpdate"));
 
     private boolean emptySelectionAllowed;
 
@@ -151,7 +151,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private volatile int lastFetchedDataSize = -1;
 
-    private SerializableConsumer<UI> sizeRequest;
+    private final BeforeClientResponseAction sizeEventAction = new BeforeClientResponseAction(
+            this, this::fireSizeEvent);
 
     private SelectI18n i18n;
 
@@ -1026,7 +1027,13 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         }
         updateItemEnabled(vaadinItem);
 
-        scheduleContentUpdate();
+        // Request the web component to refresh the selected item's visual
+        // representation. Adding or removing items is picked up natively via
+        // the list-box {@code items-changed} event, but mutating an existing
+        // item's content does not fire it, so the selected value button must be
+        // refreshed explicitly. Multiple requests are coalesced into a single
+        // client call.
+        contentUpdate.schedule();
     }
 
     private void updateItemEnabled(VaadinItem<T> item) {
@@ -1071,35 +1078,9 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
                     });
             lastFetchedDataSize = itemCounter.get();
 
-            // Ignore new size requests unless the last one has been executed
-            // so as to avoid multiple beforeClientResponses.
-            if (sizeRequest == null) {
-                sizeRequest = ui -> {
-                    fireSizeEvent();
-                    sizeRequest = null;
-                };
-                // Size event is fired before client response so as to avoid
-                // multiple size change events during server round trips
-                runBeforeClientResponse(sizeRequest);
-            }
-        }
-    }
-
-    /**
-     * Requests the web component to refresh the selected item's visual
-     * representation. Adding or removing items is picked up natively via the
-     * list-box {@code items-changed} event, but mutating an existing item's
-     * content does not fire it, so the selected value button must be refreshed
-     * explicitly. Multiple requests are coalesced into a single client call.
-     */
-    private void scheduleContentUpdate() {
-        if (!contentUpdateScheduled) {
-            contentUpdateScheduled = true;
-            runBeforeClientResponse(ui -> {
-                ui.getPage().executeJs("$0.requestContentUpdate();",
-                        getElement());
-                contentUpdateScheduled = false;
-            });
+            // Size event is fired before client response so as to avoid
+            // multiple size change events during server round trips
+            sizeEventAction.schedule();
         }
     }
 
@@ -1139,11 +1120,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             listBox.remove(emptySelectionItem);
         }
         emptySelectionItem = null;
-    }
-
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     private void fireSizeEvent() {
