@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.ai.benchmark;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.HeatSeries;
+import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
@@ -242,6 +244,43 @@ class ChartAIControllerBenchmark {
         Assertions.assertNotEquals(ChartType.COLUMN,
                 seriesType(byName.get("Olivia Park")),
                 "Olivia Park should still be drawn as a line");
+    }
+
+    @Test
+    void retitlesOrgChartKeepingStructure() {
+        var db = BenchmarkDatabase.staff();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        var conversation = bench.conversation(chart, controller);
+        conversation.say("""
+                Organization chart of who reports to whom, showing \
+                each person's job title.""");
+        conversation.say("Title the chart \"Team structure\".");
+        Assertions.assertEquals(ChartType.ORGANIZATION, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        Assertions.assertEquals("Team structure",
+                chart.getConfiguration().getTitle().getText(),
+                "title was not set");
+        var series = chart.getConfiguration().getSeries();
+        Assertions.assertEquals(1, series.size(),
+                () -> "expected one series, got " + series.size());
+        var org = Assertions.assertInstanceOf(NodeSeries.class,
+                series.getFirst());
+        var titles = new HashMap<String, String>();
+        org.getNodes()
+                .forEach(node -> titles.put(node.getName(), node.getTitle()));
+        Assertions.assertEquals(Map.of("Liisa Kallio", "Managing Director",
+                "Tomas Novak", "Head of Engineering", "Priya Nair",
+                "Head of Sales", "Jonas Weber", "Developer", "Sofia Rossi",
+                "Developer", "Kenji Mori", "Account Manager"), titles);
+        var links = new HashSet<List<String>>();
+        org.getData().forEach(link -> links.add(
+                List.of(link.getFrom().getName(), link.getTo().getName())));
+        Assertions.assertEquals(Set.of(List.of("Liisa Kallio", "Tomas Novak"),
+                List.of("Liisa Kallio", "Priya Nair"),
+                List.of("Tomas Novak", "Jonas Weber"),
+                List.of("Tomas Novak", "Sofia Rossi"),
+                List.of("Priya Nair", "Kenji Mori")), links);
     }
 
     /** The state is {@code null} until the first successful render. */

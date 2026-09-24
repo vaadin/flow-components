@@ -172,6 +172,31 @@ final class BenchmarkDatabase implements DatabaseProvider {
     }
 
     /**
+     * Six staff members and their reporting lines. The schema does not list the
+     * names or job titles, so they are only in the data.
+     *
+     * @return the database
+     */
+    static BenchmarkDatabase staff() {
+        return new BenchmarkDatabase(
+                List.of("""
+                        CREATE TABLE staff (
+                          id INT PRIMARY KEY,
+                          full_name VARCHAR(100) NOT NULL,
+                          job_title VARCHAR(100) NOT NULL,
+                          manager_id INT -- id of the manager, NULL for the managing director
+                        )"""),
+                List.of("""
+                        INSERT INTO staff VALUES
+                          (1, 'Liisa Kallio', 'Managing Director', NULL),
+                          (2, 'Tomas Novak', 'Head of Engineering', 1),
+                          (3, 'Priya Nair', 'Head of Sales', 1),
+                          (4, 'Jonas Weber', 'Developer', 2),
+                          (5, 'Sofia Rossi', 'Developer', 2),
+                          (6, 'Kenji Mori', 'Account Manager', 3)"""));
+    }
+
+    /**
      * Website visitors per weekday and hour: 5 days times 4 hours.
      *
      * @return the database
