@@ -16,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -64,7 +65,8 @@ public final class ChartConfigurationParser implements Serializable {
      *            the Highcharts JSON configuration string to parse
      * @return a new {@link Configuration} populated with the parsed values
      * @throws IllegalArgumentException
-     *             if the JSON string is invalid or not an object
+     *             if the JSON string is invalid, not an object, or holds a
+     *             value that does not fit its property
      */
     public static Configuration parse(String configJson) {
         Configuration config = new Configuration();
@@ -83,11 +85,20 @@ public final class ChartConfigurationParser implements Serializable {
      *            the existing {@link Configuration} to merge the parsed values
      *            into
      * @throws IllegalArgumentException
-     *             if the JSON string is invalid or not an object
+     *             if the JSON string is invalid, not an object, or holds a
+     *             value that does not fit its property
      */
     public static void merge(String configJson, Configuration config) {
         ObjectNode configNode = parseJsonToNode(configJson);
+        try {
+            merge(configNode, config);
+        } catch (JacksonException e) {
+            throw new IllegalArgumentException(
+                    "Invalid chart configuration value: " + e.getMessage(), e);
+        }
+    }
 
+    private static void merge(ObjectNode configNode, Configuration config) {
         String chartType = null;
         if (configNode.has(TYPE)) {
             chartType = configNode.get(TYPE).asString();
@@ -360,16 +371,10 @@ public final class ChartConfigurationParser implements Serializable {
                 series.setyAxis(entryNode.get(Y_AXIS).asInt());
             }
 
-            if (entryNode.has(PLOT_OPTIONS)
-                    && entryNode.get(PLOT_OPTIONS).isObject()) {
+            var plotOptionsNode = seriesPlotOptionsNode(entryNode);
+            if (type != null || !plotOptionsNode.isEmpty()) {
                 AbstractPlotOptions plotOptions = deserializePlotOptions(type,
-                        (ObjectNode) entryNode.get(PLOT_OPTIONS));
-                if (plotOptions != null) {
-                    series.setPlotOptions(plotOptions);
-                }
-            } else if (type != null) {
-                AbstractPlotOptions plotOptions = deserializePlotOptions(type,
-                        JacksonUtils.createObjectNode());
+                        plotOptionsNode);
                 if (plotOptions != null) {
                     series.setPlotOptions(plotOptions);
                 }
@@ -377,6 +382,31 @@ public final class ChartConfigurationParser implements Serializable {
 
             config.addSeries(series);
         }
+    }
+
+    /**
+     * Keys of a series entry that are not plot options.
+     */
+    private static final Set<String> SERIES_ENTRY_KEYS = Set.of(NAME, TYPE,
+            Y_AXIS, PLOT_OPTIONS, DATA);
+
+    /**
+     * Collects the plot options of a series entry: the properties of its
+     * {@code plotOptions} object and the options given flat on the entry
+     * itself, the way Highcharts and the chart serializer write them. An option
+     * given both ways keeps the {@code plotOptions} value.
+     */
+    private static ObjectNode seriesPlotOptionsNode(JsonNode entryNode) {
+        var result = JacksonUtils.createObjectNode();
+        for (var property : entryNode.properties()) {
+            if (!SERIES_ENTRY_KEYS.contains(property.getKey())) {
+                result.set(property.getKey(), property.getValue());
+            }
+        }
+        if (entryNode.get(PLOT_OPTIONS) instanceof ObjectNode nested) {
+            result.setAll(nested);
+        }
+        return result;
     }
 
     private static AbstractPlotOptions deserializePlotOptions(String type,

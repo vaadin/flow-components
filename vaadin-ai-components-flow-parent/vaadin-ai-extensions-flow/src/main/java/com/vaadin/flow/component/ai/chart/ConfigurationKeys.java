@@ -46,6 +46,7 @@ public final class ConfigurationKeys implements Serializable {
 
     public static final String NAME = "name";
     public static final String TYPE = "type";
+    public static final String DATA = "data";
     public static final String TEXT = "text";
     public static final String ENABLED = "enabled";
     public static final String MIN = "min";
