@@ -6128,8 +6128,7 @@ public class Spreadsheet extends Component
 
                     // group starts here
 
-                    int end = (int) GroupingUtil.findEndOfRowGroup(this, i, row,
-                            l);
+                    int end = (int) GroupingUtil.findEndOfRowGroup(this, i, l);
                     long uniqueIndex = GroupingUtil.findUniqueRowIndex(this, i,
                             end, l);
 

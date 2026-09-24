@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -332,6 +334,46 @@ public class GroupingTest {
         Assert.assertFalse(spreadsheet.isColumnHidden(4));
     }
 
+    @Test
+    public void groupEndingOnLastRow_groupSpansToLastRow() {
+        spreadsheet = createSpreadsheetWithGroupEndingOnLastRow();
+
+        Assert.assertEquals(
+                "[{\"startIndex\":" + LAST_ROW_GROUP + ",\"endIndex\":"
+                        + (ROW_COUNT - 1) + ",\"level\":1,\"uniqueIndex\":"
+                        + LAST_ROW_GROUP + "}]",
+                spreadsheet.getElement().getProperty("rowGroupingData"));
+    }
+
+    @Test
+    public void groupEndingOnLastRow_clickRowLevelHeaders_rowHiddenAndVisibleAgain() {
+        spreadsheet = createSpreadsheetWithGroupEndingOnLastRow();
+
+        clickRowLevelHeader(1);
+        Assert.assertTrue(spreadsheet.isRowHidden(ROW_COUNT - 1));
+        clickRowLevelHeader(2);
+        Assert.assertFalse(spreadsheet.isRowHidden(ROW_COUNT - 1));
+    }
+
+    /**
+     * Creates a spreadsheet with a single row group that ends on the last row
+     * of the sheet, which is also the last row of the component.
+     */
+    private Spreadsheet createSpreadsheetWithGroupEndingOnLastRow() {
+        var workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        for (int i = 0; i < ROW_COUNT; i++) {
+            sheet.createRow(i).createCell(0).setCellValue("Row " + (i + 1));
+        }
+        sheet.groupRow(LAST_ROW_GROUP, ROW_COUNT - 1);
+
+        // no empty rows are added after the last row of the sheet
+        var result = new Spreadsheet(ROW_COUNT, COLUMN_COUNT);
+        result.setWorkbook(workbook);
+        TestHelper.fireClientEvent(result, "onSheetScroll", "[1, 1, 1, 1]");
+        return result;
+    }
+
     private void setActiveSheet(int sheetIndex) {
         spreadsheet.setActiveSheetIndex(sheetIndex);
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
@@ -391,5 +433,9 @@ public class GroupingTest {
     private final int SHEET9_ROW = 3;
     private final int SHEET9_COLUMN_GROUP = 1;
     private final int SHEET9_COLUMN = 3;
+
+    private final int ROW_COUNT = 10;
+    private final int COLUMN_COUNT = 5;
+    private final int LAST_ROW_GROUP = ROW_COUNT - 4;
 
 }
