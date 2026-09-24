@@ -107,7 +107,7 @@ public class GroupingIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void grouping_rowGroupEndsOnLastRow_groupSpansRowsAndCollapses() {
+    public void grouping_rowGroupEndsOnLastRow_groupSpansRowsCollapsesAndExpands() {
         loadFile("row_group_at_last_row.xlsx");
         SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class)
                 .first();
@@ -123,8 +123,21 @@ public class GroupingIT extends AbstractSpreadsheetIT {
         Assert.assertTrue("Row grouping height",
                 rowGrouping.getSize().getHeight() >= GROUPED_ROWS * rowHeight);
 
-        rowGrouping.click();
+        // the collapse icon is at the end of the group, not at its start
+        WebElement collapseIcon = rowGrouping
+                .findElement(By.cssSelector(".expand"));
+        Assert.assertTrue("Collapse icon position",
+                collapseIcon.getLocation().getY() >= spreadsheetElement
+                        .getRowHeader(LAST_ROW).getLocation().getY());
+
+        collapseIcon.click();
         waitUntil(driver -> !spreadsheetElement.getRowHeader(LAST_ROW)
+                .isDisplayed());
+
+        findElementInShadowRoot(
+                By.cssSelector(".row-group-pane .grouping.plus .expand"))
+                .click();
+        waitUntil(driver -> spreadsheetElement.getRowHeader(LAST_ROW)
                 .isDisplayed());
     }
 
