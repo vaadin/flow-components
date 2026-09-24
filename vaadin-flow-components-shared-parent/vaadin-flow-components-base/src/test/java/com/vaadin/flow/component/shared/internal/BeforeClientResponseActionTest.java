@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.shared.internal;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -208,7 +213,55 @@ class BeforeClientResponseActionTest {
         Assertions.assertEquals(List.of(newUi), runs);
     }
 
+    @Test
+    void scheduleAndDetach_serializeAndDeserialize_actionRunsAfterAttach()
+            throws Exception {
+        // Use a UI without a session, as the mocked session is not
+        // serializable. Removing the session from a UI detaches the UI.
+        var serializableUi = new UI();
+        var component = new SerializableTestComponent();
+        serializableUi.add(component);
+        component.update.schedule();
+        // After the detach, the UI does not have the component as a child, so
+        // deserialization reaches the component through the lambdas of the
+        // scheduled action. This is the order that caused
+        // https://github.com/vaadin/flow-components/issues/6555
+        serializableUi.remove(component);
+
+        Object[] copies = serializeAndDeserialize(serializableUi, component);
+        UI uiCopy = (UI) copies[0];
+        var componentCopy = (SerializableTestComponent) copies[1];
+        uiCopy.add(componentCopy);
+        uiCopy.getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
+
+        Assertions.assertEquals(1, componentCopy.updateCount);
+    }
+
+    private static Object[] serializeAndDeserialize(Object... objects)
+            throws IOException, ClassNotFoundException {
+        var bytes = new ByteArrayOutputStream();
+        try (var out = new ObjectOutputStream(bytes)) {
+            out.writeObject(objects);
+        }
+        try (var in = new ObjectInputStream(
+                new ByteArrayInputStream(bytes.toByteArray()))) {
+            return (Object[]) in.readObject();
+        }
+    }
+
     @Tag("test")
     private static class TestComponent extends Component {
+    }
+
+    @Tag("test")
+    private static class SerializableTestComponent extends Component {
+        private final BeforeClientResponseAction update = new BeforeClientResponseAction(
+                this, this::update);
+        private int updateCount;
+
+        private void update() {
+            updateCount++;
+        }
     }
 }

@@ -35,7 +35,6 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
@@ -46,6 +45,7 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -66,7 +66,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.SignalBinding;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -134,7 +133,8 @@ public class RadioButtonGroup<T>
 
     private volatile int lastFetchedDataSize = -1;
 
-    private SerializableConsumer<UI> sizeRequest;
+    private final BeforeClientResponseAction sizeEventAction = new BeforeClientResponseAction(
+            this, this::fireSizeEvent);
 
     private RadioButtonGroupI18n i18n;
 
@@ -715,29 +715,10 @@ public class RadioButtonGroup<T>
                     });
             lastFetchedDataSize = itemCounter.get();
 
-            // Ignore new size requests unless the last one has been executed
-            // so as to avoid multiple beforeClientResponses.
-            if (sizeRequest == null) {
-                // Using anonymous class to fix serialization issue:
-                // https://github.com/vaadin/flow-components/issues/6555
-                // Do not replace with lambda
-                sizeRequest = new SerializableConsumer<>() {
-                    @Override
-                    public void accept(UI ui) {
-                        fireSizeEvent();
-                        sizeRequest = null;
-                    }
-                };
-                // Size event is fired before client response so as to avoid
-                // multiple size change events during server round trips
-                runBeforeClientResponse(sizeRequest);
-            }
+            // Size event is fired before client response so as to avoid
+            // multiple size change events during server round trips
+            sizeEventAction.schedule();
         }
-    }
-
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     private void fireSizeEvent() {

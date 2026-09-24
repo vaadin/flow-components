@@ -15,9 +15,14 @@
  */
 package com.vaadin.flow.component.radiobutton.tests;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 import com.vaadin.tests.MockUIExtension;
@@ -27,14 +32,30 @@ class RadioButtonSerializableTest extends ClassesSerializableTest {
     final MockUIExtension ui = new MockUIExtension();
 
     @Test
-    void setItems_addToUI_radioButtonGroupIsSerializable() throws Throwable {
-        var group = new RadioButtonGroup<>();
+    @SuppressWarnings("unchecked")
+    void setItems_addToUI_serializeAndDeserialize_itemCountChangeEventFiresOnCopy()
+            throws Throwable {
+        // Use a UI without a session, as the mocked session is not
+        // serializable. Removing the session from a UI detaches the UI, and a
+        // detached UI hides
+        // https://github.com/vaadin/flow-components/issues/6555
+        var serializableUi = new UI();
+        var group = new RadioButtonGroup<String>();
         group.setItems("Item 1", "Item 2");
+        serializableUi.add(group);
 
-        // Serializing session requires more setup, not necessary for this test
-        ui.getUI().getInternals().setSession(null);
-        ui.add(group);
+        Object[] copies = serializeAndDeserialize(
+                new Object[] { serializableUi, group });
+        var uiCopy = (UI) copies[0];
+        var groupCopy = (RadioButtonGroup<String>) copies[1];
+        // Running the pending event needs a session
+        uiCopy.getInternals().setSession(ui.getSession());
+        List<Integer> itemCounts = new ArrayList<>();
+        groupCopy.getGenericDataView().addItemCountChangeListener(
+                event -> itemCounts.add(event.getItemCount()));
+        uiCopy.getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
 
-        serializeAndDeserialize(ui.getUI());
+        Assertions.assertEquals(List.of(2), itemCounts);
     }
 }
