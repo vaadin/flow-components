@@ -60,6 +60,8 @@ public class RendererIT extends AbstractSelectIT {
         for (int i = 0; i < items.size(); i++) {
             SelectElement.ItemElement item = items.get(i);
 
+            // Clicking a button inside an item closes the popup
+            selectElement.openPopup();
             TestBenchElement span = item.findElement(By.tagName("span"));
             List<WebElement> buttons = item.findElements(By.tagName("button"));
 
@@ -78,7 +80,9 @@ public class RendererIT extends AbstractSelectIT {
             }, 200);
 
             // update click causes refreshItem which renders item again
+            selectElement.openPopup();
             buttons.get(0).click();
+            selectElement.openPopup();
             final String expected = "Item-" + i + "-UPDATED";
             waitUntil(e -> {
                 TestBenchElement elm = item.findElement(By.tagName("span"));

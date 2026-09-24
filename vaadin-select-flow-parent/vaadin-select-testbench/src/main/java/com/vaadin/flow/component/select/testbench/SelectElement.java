@@ -99,13 +99,11 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     /**
-     * Gets the items in the popup as a stream. Opens the popup if it is not
-     * open, and leaves it open.
+     * Gets the items in the popup as a stream.
      *
      * @return a stream of the items in the popup
      */
     public Stream<ItemElement> getItemsStream() {
-        openPopup();
         List<WebElement> elements = getPropertyElement("_menuElement")
                 .findElements(By.tagName("vaadin-select-item"));
         if (elements.size() == 0) {
@@ -116,8 +114,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     /**
-     * Gets the items in the popup. Opens the popup if it is not open, and
-     * leaves it open.
+     * Gets the items in the popup.
      *
      * @return the items in the popup
      */
@@ -136,6 +133,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
      */
     @Override
     public void selectByText(String text) {
+        openPopup();
         getItemsStream().filter(item -> text.equals(item.getText())).findFirst()
                 .get().click();
     }
@@ -147,8 +145,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
     }
 
     /**
-     * Gets the selected item in the popup. Opens the popup if it is not open,
-     * and leaves it open.
+     * Gets the selected item in the popup.
      *
      * @return the selected item in the popup
      * @throws NoSuchElementException
