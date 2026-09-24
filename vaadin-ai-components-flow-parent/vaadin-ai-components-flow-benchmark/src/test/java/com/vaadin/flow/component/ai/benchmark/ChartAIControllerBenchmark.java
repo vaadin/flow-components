@@ -162,6 +162,32 @@ class ChartAIControllerBenchmark {
                 seriesByName(chart).keySet());
     }
 
+    @Test
+    void keepsSeriesTypeThroughLaterChanges() {
+        var db = BenchmarkDatabase.regionalSales();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        var conversation = bench.conversation(chart, controller);
+        conversation.say("""
+                Column chart of monthly revenue with one series \
+                per region, months in calendar order.""");
+        conversation.say("""
+                Draw the South series as a smooth spline line \
+                instead, but keep North as columns.""");
+        conversation.say("Title the chart \"Revenue by region\".");
+        Assertions.assertEquals("Revenue by region",
+                chart.getConfiguration().getTitle().getText(),
+                "title was not set");
+        var byName = seriesByName(chart);
+        Assertions.assertEquals(Set.of("North", "South"), byName.keySet());
+        Assertions.assertEquals(ChartType.SPLINE,
+                seriesType(byName.get("South")), "South lost its spline type");
+        Assertions.assertNotEquals(ChartType.SPLINE,
+                seriesType(byName.get("North")),
+                "North should still be drawn as columns");
+        Assertions.assertEquals(MONTHS, categories(byName.get("South")));
+    }
+
     /** The state is {@code null} until the first successful render. */
     private static String queries(ChartAIController controller) {
         var state = controller.getState();
