@@ -190,6 +190,27 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
     }
 
     /**
+     * Gets the select all button in the popup. Waits until the combo box has
+     * finished loading items before looking for the button.
+     * <p>
+     * The popup must be open, for example by using {@link #openPopup()} or
+     * {@link #setFilter(String)}.
+     *
+     * @return the select all button, or {@code null} if the button is not shown
+     * @throws IllegalStateException
+     *             if the popup is not open
+     */
+    public TestBenchElement getSelectAllButton() {
+        if (!isPopupOpen()) {
+            throw new IllegalStateException(
+                    "The popup must be open to get the select all button");
+        }
+        waitForLoadingFinished();
+        return $("vaadin-multi-select-combo-box-select-all-button").all()
+                .stream().findFirst().orElse(null);
+    }
+
+    /**
      * Gets whether dropdown will open automatically or not.
      *
      * @return {@code true} if enabled, {@code false} otherwise
