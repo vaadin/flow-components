@@ -48,6 +48,19 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
         ItemElement(WebElement item, TestBenchCommandExecutor commandExecutor) {
             super(item, commandExecutor);
         }
+
+        /**
+         * Gets the text content of the item. The text is available while the
+         * popup is closed.
+         *
+         * @return the text content of the item, trimmed
+         */
+        @Override
+        public String getText() {
+            // Items are in the DOM while the popup is closed, but the default
+            // implementation returns only visible text
+            return getPropertyString("textContent").trim();
+        }
     }
 
     /**
@@ -123,10 +136,8 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
      */
     @Override
     public void selectByText(String text) {
-        getItemsStream()
-                .filter(item -> text
-                        .equals(item.getPropertyString("textContent").trim()))
-                .findFirst().get().click();
+        getItemsStream().filter(item -> text.equals(item.getText())).findFirst()
+                .get().click();
     }
 
     @Override
