@@ -27,6 +27,7 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.HeatSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
+import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Stacking;
@@ -188,6 +189,30 @@ class ChartAIControllerBenchmark {
         Assertions.assertEquals(MONTHS, categories(byName.get("South")));
     }
 
+    @Test
+    void sortsBarsAndAddsLabelsInFollowUp() {
+        var db = BenchmarkDatabase.employees();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        var conversation = bench.conversation(chart, controller);
+        conversation
+                .say("Horizontal bar chart of the salary of each employee.");
+        conversation.say("""
+                Sort the bars from the highest salary to the \
+                lowest and show each salary as a data label.""");
+        Assertions.assertEquals(ChartType.BAR, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        var series = chart.getConfiguration().getSeries();
+        Assertions.assertEquals(1, series.size(),
+                () -> "expected one series, got " + series.size());
+        var bars = (DataSeries) series.getFirst();
+        Assertions.assertEquals(
+                List.of("Bram", "Aino", "Dana", "Fatima", "Chen", "Emil"),
+                categories(bars),
+                () -> "bar order, with " + queries(controller));
+        Assertions.assertTrue(showsDataLabels(chart), "data labels are off");
+    }
+
     /** The state is {@code null} until the first successful render. */
     private static String queries(ChartAIController controller) {
         var state = controller.getState();
@@ -239,6 +264,31 @@ class ChartAIControllerBenchmark {
         return config.getSeries().stream()
                 .anyMatch(series -> series instanceof AbstractSeries s
                         && stacked(s.getPlotOptions()));
+    }
+
+    /**
+     * Data labels may be switched on chart-wide under {@code plotOptions} or on
+     * the individual series.
+     */
+    private static boolean showsDataLabels(Chart chart) {
+        var config = chart.getConfiguration();
+        if (config.getPlotOptions().stream()
+                .anyMatch(ChartAIControllerBenchmark::labelled)) {
+            return true;
+        }
+        return config.getSeries().stream()
+                .anyMatch(series -> series instanceof AbstractSeries s
+                        && labelled(s.getPlotOptions()));
+    }
+
+    private static boolean labelled(AbstractPlotOptions options) {
+        var labels = switch (options) {
+        case PlotOptionsBar bar -> bar.getDataLabels();
+        case PlotOptionsColumn column -> column.getDataLabels();
+        case PlotOptionsSeries any -> any.getDataLabels();
+        case null, default -> null;
+        };
+        return labels != null && Boolean.TRUE.equals(labels.getEnabled());
     }
 
     private static boolean stacked(AbstractPlotOptions options) {
