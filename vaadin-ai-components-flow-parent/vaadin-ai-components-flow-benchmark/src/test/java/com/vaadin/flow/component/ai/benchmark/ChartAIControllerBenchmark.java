@@ -213,6 +213,37 @@ class ChartAIControllerBenchmark {
         Assertions.assertTrue(showsDataLabels(chart), "data labels are off");
     }
 
+    @Test
+    void changesOneRepsSeriesTypeByName() {
+        var db = BenchmarkDatabase.salesReps();
+        var chart = new Chart();
+        var controller = new ChartAIController(chart, db);
+        var conversation = bench.conversation(chart, controller);
+        conversation.say("""
+                Line chart of the deal amount per quarter, one \
+                line per sales rep, quarters in order.""");
+        conversation.say("""
+                Draw Hanna Berg's series as columns and keep the \
+                other reps as lines.""");
+        Assertions.assertEquals(ChartType.LINE, chartType(chart),
+                () -> "chart type, with " + queries(controller));
+        var byName = seriesByName(chart);
+        Assertions.assertEquals(
+                Set.of("Hanna Berg", "Mateo Ruiz", "Olivia Park"),
+                byName.keySet());
+        Assertions.assertEquals(List.of("Q1", "Q2", "Q3", "Q4"),
+                categories(byName.get("Hanna Berg")));
+        Assertions.assertEquals(ChartType.COLUMN,
+                seriesType(byName.get("Hanna Berg")),
+                "Hanna Berg should be a column series");
+        Assertions.assertNotEquals(ChartType.COLUMN,
+                seriesType(byName.get("Mateo Ruiz")),
+                "Mateo Ruiz should still be drawn as a line");
+        Assertions.assertNotEquals(ChartType.COLUMN,
+                seriesType(byName.get("Olivia Park")),
+                "Olivia Park should still be drawn as a line");
+    }
+
     /** The state is {@code null} until the first successful render. */
     private static String queries(ChartAIController controller) {
         var state = controller.getState();

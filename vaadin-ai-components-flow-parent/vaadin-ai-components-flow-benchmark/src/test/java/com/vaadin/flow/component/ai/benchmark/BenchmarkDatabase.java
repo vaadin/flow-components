@@ -146,6 +146,32 @@ final class BenchmarkDatabase implements DatabaseProvider {
     }
 
     /**
+     * Deal amounts per sales rep and quarter, inserted out of quarter order.
+     * The schema does not list the rep names, so they are only in the data.
+     *
+     * @return the database
+     */
+    static BenchmarkDatabase salesReps() {
+        return new BenchmarkDatabase(
+                List.of("""
+                        CREATE TABLE deals (
+                          id INT PRIMARY KEY,
+                          rep_name VARCHAR(100) NOT NULL, -- the sales rep who closed the deals
+                          quarter_name VARCHAR(2) NOT NULL, -- 'Q1'..'Q4'
+                          quarter_order INT NOT NULL, -- 1 = Q1
+                          amount INT NOT NULL -- EUR
+                        )"""),
+                List.of("""
+                        INSERT INTO deals VALUES
+                          (1, 'Mateo Ruiz', 'Q3', 3, 47000), (2, 'Hanna Berg', 'Q1', 1, 38000),
+                          (3, 'Olivia Park', 'Q2', 2, 52000), (4, 'Hanna Berg', 'Q4', 4, 61000),
+                          (5, 'Mateo Ruiz', 'Q1', 1, 29000), (6, 'Olivia Park', 'Q4', 4, 58000),
+                          (7, 'Hanna Berg', 'Q2', 2, 44000), (8, 'Mateo Ruiz', 'Q4', 4, 53000),
+                          (9, 'Olivia Park', 'Q1', 1, 41000), (10, 'Hanna Berg', 'Q3', 3, 49000),
+                          (11, 'Mateo Ruiz', 'Q2', 2, 35000), (12, 'Olivia Park', 'Q3', 3, 55000)"""));
+    }
+
+    /**
      * Website visitors per weekday and hour: 5 days times 4 hours.
      *
      * @return the database
