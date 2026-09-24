@@ -19,6 +19,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
+
 class MultiSelectComboBoxI18nTest {
 
     MultiSelectComboBox<String> comboBox;
@@ -29,18 +33,45 @@ class MultiSelectComboBoxI18nTest {
     }
 
     @Test
-    void setI18n() {
+    void getI18n_returnsNullByDefault() {
+        Assertions.assertNull(comboBox.getI18n());
+    }
+
+    @Test
+    void setI18n_getI18n_returnsSameInstance() {
         MultiSelectComboBoxI18n i18n = new MultiSelectComboBoxI18n()
                 .setCleared("All entries removed");
         comboBox.setI18n(i18n);
 
-        Assertions.assertEquals(i18n, comboBox.getI18n());
+        Assertions.assertSame(i18n, comboBox.getI18n());
     }
 
     @Test
     void setI18nToNull_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> comboBox.setI18n(null));
+    }
+
+    @Test
+    void setI18n_allProperties_setsElementProperty() {
+        //@formatter:off
+        comboBox.setI18n(new MultiSelectComboBoxI18n()
+                .setCleared("Cleared")
+                .setFocused("Focused")
+                .setSelected("Selected")
+                .setDeselected("Deselected")
+                .setTotal("{count} total")
+                .setRequiredErrorMessage("Required"));
+        //@formatter:on
+
+        ObjectNode expected = JacksonUtils.createObjectNode();
+        expected.put("cleared", "Cleared");
+        expected.put("focused", "Focused");
+        expected.put("selected", "Selected");
+        expected.put("deselected", "Deselected");
+        expected.put("total", "{count} total");
+        Assertions.assertEquals(expected,
+                comboBox.getElement().getPropertyRaw("i18n"));
     }
 
     @Test
