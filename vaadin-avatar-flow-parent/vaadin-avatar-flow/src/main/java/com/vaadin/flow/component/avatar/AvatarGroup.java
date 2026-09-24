@@ -42,6 +42,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.NodeOwner;
@@ -158,7 +159,7 @@ public class AvatarGroup extends Component
         public void setName(String name) {
             this.name = name;
             if (getHost() != null) {
-                getHost().setClientItems();
+                getHost().clientItemsUpdate.schedule();
             }
         }
 
@@ -184,7 +185,7 @@ public class AvatarGroup extends Component
         public void setAbbreviation(String abbr) {
             this.abbr = abbr;
             if (getHost() != null) {
-                getHost().setClientItems();
+                getHost().clientItemsUpdate.schedule();
             }
         }
 
@@ -226,7 +227,7 @@ public class AvatarGroup extends Component
 
             this.img = url;
             if (getHost() != null) {
-                getHost().setClientItems();
+                getHost().clientItemsUpdate.schedule();
             }
         }
 
@@ -293,7 +294,7 @@ public class AvatarGroup extends Component
                 deferRegistration(resource);
             }
             if (getHost() != null) {
-                getHost().setClientItems();
+                getHost().clientItemsUpdate.schedule();
             }
         }
 
@@ -407,7 +408,7 @@ public class AvatarGroup extends Component
         public void setColorIndex(Integer colorIndex) {
             this.colorIndex = colorIndex;
             if (getHost() != null) {
-                getHost().setClientItems();
+                getHost().clientItemsUpdate.schedule();
             }
         }
 
@@ -422,7 +423,7 @@ public class AvatarGroup extends Component
         public void addClassNames(String... classNames) {
             this.classNames.addAll(Arrays.asList(classNames));
             if (getHost() != null) {
-                getHost().setClientItems();
+                getHost().clientItemsUpdate.schedule();
             }
         }
 
@@ -437,7 +438,7 @@ public class AvatarGroup extends Component
         public void removeClassNames(String... classNames) {
             this.classNames.removeAll(Arrays.asList(classNames));
             if (getHost() != null) {
-                getHost().setClientItems();
+                getHost().clientItemsUpdate.schedule();
             }
         }
 
@@ -561,7 +562,8 @@ public class AvatarGroup extends Component
             .create(this, this::updateItems);
 
     private List<AvatarGroupItem> items = Collections.emptyList();
-    private boolean pendingUpdate = false;
+    private final BeforeClientResponseAction clientItemsUpdate = new BeforeClientResponseAction(
+            this, this::updateClientItems);
 
     private AvatarGroupI18n i18n;
 
@@ -635,21 +637,13 @@ public class AvatarGroup extends Component
         this.items.forEach(item -> item.setHost(null));
         this.items = new ArrayList<>(items);
         this.items.forEach(item -> item.setHost(this));
-        setClientItems();
+        clientItemsUpdate.schedule();
     }
 
-    private void setClientItems() {
-        if (!pendingUpdate) {
-            pendingUpdate = true;
-            getElement().getNode().runWhenAttached(
-                    ui -> ui.beforeClientResponse(this, ctx -> {
-                        ArrayNode jsonItems = items.stream()
-                                .map(JacksonUtils::beanToJson)
-                                .collect(JacksonUtils.asArray());
-                        getElement().setPropertyJson("items", jsonItems);
-                        pendingUpdate = false;
-                    }));
-        }
+    private void updateClientItems() {
+        ArrayNode jsonItems = items.stream().map(JacksonUtils::beanToJson)
+                .collect(JacksonUtils.asArray());
+        getElement().setPropertyJson("items", jsonItems);
     }
 
     /**

@@ -28,15 +28,14 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.PropertyChangeListener;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
@@ -74,7 +73,9 @@ public class RichTextEditor
     private AsHtml asHtml;
     private AsDelta asDelta;
 
-    private boolean pendingPresentationUpdate = false;
+    private final BeforeClientResponseAction presentationUpdate = new BeforeClientResponseAction(
+            this, () -> getElement().callJsFunction("dangerouslySetHtmlValue",
+                    getElement().getProperty("htmlValue")));
 
     /**
      * Gets the internationalization object previously set for this component.
@@ -99,11 +100,6 @@ public class RichTextEditor
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
         getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
-    }
-
-    void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     /**
@@ -213,14 +209,7 @@ public class RichTextEditor
         getElement().setProperty("htmlValue", presentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
-        if (!pendingPresentationUpdate) {
-            pendingPresentationUpdate = true;
-            runBeforeClientResponse(ui -> {
-                getElement().callJsFunction("dangerouslySetHtmlValue",
-                        getElement().getProperty("htmlValue"));
-                pendingPresentationUpdate = false;
-            });
-        }
+        presentationUpdate.schedule();
     }
 
     private static String presentationToModel(String htmlValue) {
