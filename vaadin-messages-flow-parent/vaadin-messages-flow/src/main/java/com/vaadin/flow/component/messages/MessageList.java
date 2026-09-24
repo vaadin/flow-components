@@ -256,14 +256,13 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * Updates the client with the current state of the message list items.
      */
     private void updateClient() {
-        UI ui = getUI().orElseThrow();
         if (pendingUpdate) {
-            handleFullUpdate(ui);
+            handleFullUpdate();
         } else {
             // Incremental updates
 
             // Check if we need to add new items
-            handleAddItemsUpdate(ui);
+            handleAddItemsUpdate();
 
             // Check for text updates if not a full update
             handleTextUpdates();
@@ -276,17 +275,14 @@ public class MessageList extends Component implements HasStyle, HasSize,
 
     /**
      * Handles a full update of the message list items.
-     *
-     * @param ui
-     *            the UI the component is attached to
      */
-    private void handleFullUpdate(UI ui) {
+    private void handleFullUpdate() {
         // Sync clientText for items
         items.forEach(item -> item.clientText = item.getText());
 
         var itemsJson = JacksonUtils.listToJson(items);
         getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
-                itemsJson, ui.getLocale().toLanguageTag());
+                itemsJson, getLocale().toLanguageTag());
     }
 
     /**
@@ -319,7 +315,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
         });
     }
 
-    private void handleAddItemsUpdate(UI ui) {
+    private void handleAddItemsUpdate() {
         if (pendingAddItemsIndex == null) {
             return;
         }
@@ -332,7 +328,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
         var newItemsJson = JacksonUtils.listToJson(newItems);
         // Call the connector function to add items
         getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
-                newItemsJson, ui.getLocale().toLanguageTag());
+                newItemsJson, getLocale().toLanguageTag());
     }
 
     @Override
