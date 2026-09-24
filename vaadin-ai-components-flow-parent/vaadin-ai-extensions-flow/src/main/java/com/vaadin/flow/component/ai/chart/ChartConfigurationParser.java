@@ -54,6 +54,12 @@ import tools.jackson.databind.node.ObjectNode;
  */
 public final class ChartConfigurationParser implements Serializable {
 
+    /**
+     * Keys of a series entry that are not plot options.
+     */
+    private static final Set<String> SERIES_ENTRY_KEYS = Set.of(NAME, TYPE,
+            Y_AXIS, PLOT_OPTIONS, DATA);
+
     private ChartConfigurationParser() {
     }
 
@@ -383,12 +389,6 @@ public final class ChartConfigurationParser implements Serializable {
             config.addSeries(series);
         }
     }
-
-    /**
-     * Keys of a series entry that are not plot options.
-     */
-    private static final Set<String> SERIES_ENTRY_KEYS = Set.of(NAME, TYPE,
-            Y_AXIS, PLOT_OPTIONS, DATA);
 
     /**
      * Collects the plot options of a series entry: the properties of its

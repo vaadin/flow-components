@@ -241,14 +241,16 @@ class ChartRenderingTest {
             chart.setTimeline(true);
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
-            ChartRenderer.renderChart(chart, databaseProvider,
-                    new DefaultDataConverter(), List.of("SELECT 1"),
+            var converter = new DefaultDataConverter();
+            var queries = List.of("SELECT 1");
+            ChartRenderer.renderChart(chart, databaseProvider, converter,
+                    queries,
                     "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Revenue\"}}");
 
+            var pie = "{\"chart\":{\"type\":\"pie\"}}";
             Assertions.assertThrows(IllegalArgumentException.class,
                     () -> ChartRenderer.renderChart(chart, databaseProvider,
-                            new DefaultDataConverter(), List.of("SELECT 1"),
-                            "{\"chart\":{\"type\":\"pie\"}}"));
+                            converter, queries, pie));
 
             Assertions.assertEquals(ChartType.LINE,
                     chart.getConfiguration().getChart().getType());
