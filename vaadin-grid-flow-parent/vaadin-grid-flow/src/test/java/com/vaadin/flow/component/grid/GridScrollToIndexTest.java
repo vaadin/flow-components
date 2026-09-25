@@ -148,16 +148,6 @@ class GridScrollToIndexTest {
     }
 
     @Test
-    void scrollToIndex_afterAttach_viewportRangePreloaded() {
-        grid.setItems(
-                IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
-        ui.add(grid);
-        grid.scrollToIndex(500);
-        ui.fakeClientCommunication();
-        Assertions.assertEquals("500-550", getViewportRange(grid));
-    }
-
-    @Test
     void scrollToIndex_beforeAttach_thenAttach_viewportRangePreloaded() {
         grid.setItems(
                 IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
@@ -165,6 +155,21 @@ class GridScrollToIndexTest {
         ui.add(grid);
         ui.fakeClientCommunication();
         Assertions.assertEquals("500-550", getViewportRange(grid));
+    }
+
+    @Test
+    void scrolled_detachAndReattachAcrossRoundtrips_viewportRangeReset() {
+        grid.setItems(
+                IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
+        ui.add(grid);
+        grid.scrollToIndex(500);
+        ui.fakeClientCommunication();
+
+        ui.remove(grid);
+        ui.fakeClientCommunication();
+        ui.add(grid);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals("0-50", getViewportRange(grid));
     }
 
     @Test

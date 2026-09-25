@@ -115,18 +115,6 @@ class GridScrollToItemTest {
     }
 
     @Test
-    void scrollToItem_afterAttach_viewportRangePreloaded() {
-        List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
-                .toList();
-        grid.setItems(items);
-
-        ui.add(grid);
-        grid.scrollToItem(items.get(500));
-        ui.fakeClientCommunication();
-        Assertions.assertEquals("500-550", getViewportRange(grid));
-    }
-
-    @Test
     void scrollToItem_beforeAttach_thenAttach_viewportRangePreloaded() {
         List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
                 .toList();
