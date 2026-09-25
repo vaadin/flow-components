@@ -144,6 +144,8 @@ When adding new published Maven modules to the project (a `-flow` or `-testbench
 
 A module declaring `@NpmPackage` annotations pins the npm versions of those packages in its own jar. To do so, declare `org.codehaus.mojo:exec-maven-plugin` in its build, without any configuration of its own: the root POM configures the execution that generates `META-INF/VAADIN/versions/<artifactId>-versions.json` from the annotations.
 
+Every published component module ships a Jandex index of its own classes in `META-INF/jandex.idx`, which is where the Vaadin Quarkus extension reads it from. To do so, declare `io.smallrye:jandex-maven-plugin` in its build, without any configuration of its own: the root POM configures the execution that generates the index. Integration test and TestBench modules do not declare it.
+
 Every published component module declares a dependency on `vaadin-flow-components-base`, even when it uses none of its classes. That jar pins the npm versions of the base packages the web components share.
 
 Keep POM dependencies minimal, only add what is really needed by the respective module. Do not simply copy dependencies from existing modules or add the whole range of Flow framework dependencies.
