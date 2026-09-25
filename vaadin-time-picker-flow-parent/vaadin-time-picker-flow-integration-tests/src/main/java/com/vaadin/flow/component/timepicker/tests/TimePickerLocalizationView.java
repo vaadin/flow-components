@@ -142,12 +142,10 @@ public class TimePickerLocalizationView extends Div
             }
             String format = LocalDateTime.of(LocalDate.now(), localTime)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            StringBuilder tag = new StringBuilder(locale.getLanguage());
-            if (!locale.getCountry().isEmpty()) {
-                tag.append("-").append(locale.getCountry());
-            }
+            String tag = Locale.of(locale.getLanguage(), locale.getCountry())
+                    .toLanguageTag();
             String expression = "$0['innerText'] = new Date('" + format
-                    + "').toLocaleTimeString('" + tag.toString()
+                    + "').toLocaleTimeString('" + tag
                     + "', {hour: 'numeric', minute: 'numeric'"
                     + (step.getSeconds() < 60 ? ", second: 'numeric'" : "")
                     + "})";
