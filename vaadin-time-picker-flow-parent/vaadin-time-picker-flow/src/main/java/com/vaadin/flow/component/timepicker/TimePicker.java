@@ -730,8 +730,8 @@ public class TimePicker
      * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleTimeString">Date.toLocaleTimeString()</a>
      * function.
      * <p>
-     * If for some reason the browser doesn't support the given locale, the
-     * en-US locale is used.
+     * If the given locale is ill-formed or the browser doesn't support it, the
+     * browser's default locale is used.
      * <p>
      * <em>NOTE: only the language + country/region codes are used</em>. This
      * means that the script and variant information is not used and supported.
@@ -789,14 +789,14 @@ public class TimePicker
         Locale appliedLocale = getLocale();
         // we could support script & variant, but that requires more work on
         // client side to detect the different
-        // number characters for other scripts (current only Arabic there)
-        StringBuilder bcp47LanguageTag = new StringBuilder(
-                appliedLocale.getLanguage());
-        if (!appliedLocale.getCountry().isEmpty()) {
-            bcp47LanguageTag.append("-").append(appliedLocale.getCountry());
-        }
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
-                "$connector.setLocale", bcp47LanguageTag.toString()));
+        // number characters for other scripts (current only Arabic there).
+        // toLanguageTag() drops ill-formed subtags so the browser never
+        // rejects the tag, e.g. "en_GB" used as a language becomes "und"
+        String languageTag = Locale
+                .of(appliedLocale.getLanguage(), appliedLocale.getCountry())
+                .toLanguageTag();
+        runBeforeClientResponse(ui -> getElement()
+                .callJsFunction("$connector.setLocale", languageTag));
     }
 
     /**
