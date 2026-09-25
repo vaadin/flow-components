@@ -12,11 +12,6 @@
     <description>Vaadin Combo Box Integration Tests</description>
     <dependencies>
         <dependency>
-            <groupId>com.github.javafaker</groupId>
-            <artifactId>javafaker</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
         </dependency>
