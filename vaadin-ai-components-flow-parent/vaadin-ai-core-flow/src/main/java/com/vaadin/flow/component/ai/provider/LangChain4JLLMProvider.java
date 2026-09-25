@@ -103,7 +103,9 @@ import tools.jackson.databind.JsonNode;
  * history across components, reuse the same provider instance. The memory holds
  * the user messages and the assistant's final answer of each turn; tool calls
  * and their results are sent to the model only within the turn they belong to
- * and are not replayed on later turns.
+ * and are not replayed on later turns. A final answer without text, which a
+ * model may give once a tool call has done what was asked, is not stored
+ * either, so that the turn leaves only its user message in the memory.
  * </p>
  * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
@@ -632,10 +634,32 @@ public class LangChain4JLLMProvider implements LLMProvider {
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
-            context.getChatMemory().add(aiMessage);
+            rememberAnswer(aiMessage, context);
             warnOnMissingFinishReason(response);
             context.getSink().complete();
         }
+    }
+
+    /**
+     * Adds the answer that ends the turn to the chat memory, unless it has no
+     * text. A turn may end that way: once a tool call has done what the user
+     * asked, a model may have nothing left to say, and LangChain4j hands such
+     * an answer over as an {@link AiMessage} whose text is {@code null}. Stored
+     * in the chat memory it would be replayed on every later turn as an
+     * assistant message with neither content nor tool calls, which the OpenAI
+     * Chat Completions API rejects, so the conversation would fail from then
+     * on. Skipping it leaves only the user message of the turn in the memory,
+     * as a response without any AI message does.
+     */
+    private static void rememberAnswer(AiMessage aiMessage,
+            ChatExecutionContext context) {
+        var text = aiMessage.text();
+        if (text == null || text.isEmpty()) {
+            LOGGER.debug("The turn ended with an answer without text, which "
+                    + "is not added to the chat memory");
+            return;
+        }
+        context.getChatMemory().add(aiMessage);
     }
 
     /**

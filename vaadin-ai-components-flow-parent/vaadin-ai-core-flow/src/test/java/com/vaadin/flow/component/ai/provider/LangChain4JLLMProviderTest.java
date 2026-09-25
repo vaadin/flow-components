@@ -34,6 +34,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -1872,6 +1874,82 @@ class LangChain4JLLMProviderTest {
                         .map(AiMessage.class::cast)
                         .noneMatch(AiMessage::hasToolExecutionRequests),
                 "Tool calls must not be replayed on a later turn");
+    }
+
+    @Test
+    void stream_toolTurnEndsWithoutText_leavesAnswerOutOfChatMemory() {
+        // A model that has done what was asked with a tool call may have
+        // nothing left to say. LangChain4j hands such an answer over as an
+        // AiMessage without text, and one replayed from the chat memory makes
+        // the OpenAI Chat Completions API reject every later request.
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> "tool result");
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        Mockito.doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponseWithTool("myTool"));
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onCompleteResponse(mockSimpleResponse(null));
+            return null;
+        }).doAnswer(invocation -> {
+            StreamingChatResponseHandler handler = invocation.getArgument(1);
+            handler.onPartialResponse("second");
+            handler.onCompleteResponse(mockSimpleResponse("second"));
+            return null;
+        }).when(mockStreamingChatModel).chat(Mockito.any(ChatRequest.class),
+                Mockito.any(StreamingChatResponseHandler.class));
+
+        streamingProvider.stream(request).collectList().block(TURN_TIMEOUT);
+        var results = streamingProvider
+                .stream(createSimpleRequest("Next question")).collectList()
+                .block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("second"), results);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockStreamingChatModel, Mockito.times(3)).chat(
+                captor.capture(),
+                Mockito.any(StreamingChatResponseHandler.class));
+        var secondTurnRequest = captor.getAllValues().get(2);
+        Assertions.assertTrue(
+                secondTurnRequest.messages().stream()
+                        .noneMatch(AiMessage.class::isInstance),
+                "An answer without text must not be replayed on a later "
+                        + "turn, got: " + secondTurnRequest.messages());
+        var userTexts = getUserMessageContents(secondTurnRequest,
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("Call tool", "Next question"),
+                userTexts, "Both user turns should still be in chat memory");
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void stream_answerWithoutText_leavesAnswerOutOfChatMemory(String text) {
+        var answerWithoutText = mockSimpleResponse(text);
+        var secondTurnResponse = mockSimpleResponse("second");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(answerWithoutText, secondTurnResponse);
+
+        provider.stream(createSimpleRequest("First")).collectList()
+                .block(TURN_TIMEOUT);
+        var results = provider.stream(createSimpleRequest("Next question"))
+                .collectList().block(TURN_TIMEOUT);
+
+        Assertions.assertEquals(List.of("second"), results);
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var secondTurnRequest = captor.getAllValues().get(1);
+        Assertions.assertTrue(
+                secondTurnRequest.messages().stream()
+                        .noneMatch(AiMessage.class::isInstance),
+                "An answer without text must not be replayed on a later "
+                        + "turn, got: " + secondTurnRequest.messages());
+        var userTexts = getUserMessageContents(secondTurnRequest,
+                TextContent.class).stream().map(TextContent::text).toList();
+        Assertions.assertEquals(List.of("First", "Next question"), userTexts,
+                "Both user turns should still be in chat memory");
     }
 
     private static LLMProvider.ToolSpec createExplicitTool(String name,
