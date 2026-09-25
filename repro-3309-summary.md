@@ -11,7 +11,7 @@
 - **Reproduced on:** flow-components @ `main` (25.4-SNAPSHOT, 5c881d1a0c)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![Pickers with valid and ill-formed locales](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-3309.png)
+- **Screenshot** (static bug): ![Pickers with valid and ill-formed locales](https://raw.githubusercontent.com/vaadin/flow-components/bd5607a3c304ae58c0b5d0cdaf4c19e860dcbb9a/repro-3309.png)
 
 ## Observed behavior
 
