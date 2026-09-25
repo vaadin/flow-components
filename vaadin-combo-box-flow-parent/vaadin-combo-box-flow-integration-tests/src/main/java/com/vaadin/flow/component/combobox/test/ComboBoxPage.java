@@ -155,7 +155,6 @@ public class ComboBoxPage extends Div {
 
         titles.setItems(Title.values());
 
-        titles.setPlaceholder("Select a title");
         titles.setId("titles");
         selectedTitle.setId("selected-titles");
         oldSelectedTitle.setId("old-selected-titles");

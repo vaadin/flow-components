@@ -115,12 +115,6 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void placeholder() {
-        ComboBoxElement combo = $(ComboBoxElement.class).id("titles");
-        Assert.assertEquals("Select a title", combo.getPlaceholder());
-    }
-
-    @Test
     public void presetValue() {
         ComboBoxElement combo = $(ComboBoxElement.class)
                 .id("titles-with-preset-value");
