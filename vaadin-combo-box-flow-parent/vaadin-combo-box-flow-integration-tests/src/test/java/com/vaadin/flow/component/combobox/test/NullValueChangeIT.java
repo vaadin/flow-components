@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,14 +35,12 @@ public class NullValueChangeIT extends AbstractComponentIT {
 
     @Test
     public void setValue_selectionTextShouldBeEmpty() {
-        open();
         ComboBoxElement comboBox = $(ComboBoxElement.class).first();
 
         comboBox.openPopup();
 
-        List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
-                "return arguments[0].filteredItems", comboBox);
-
+        // Not using selectByText(), as closing the popup with the filter set
+        // would select the item again after the server resets the value
         executeScript(
                 "arguments[0].selectedItem = arguments[0].filteredItems[1]",
                 comboBox);
