@@ -789,11 +789,19 @@ public class TimePicker
         Locale appliedLocale = getLocale();
         // we could support script & variant, but that requires more work on
         // client side to detect the different
-        // number characters for other scripts (current only Arabic there).
-        // toLanguageTag() drops ill-formed subtags so the browser never
-        // rejects the tag, e.g. "en_GB" used as a language becomes "und"
+        // number characters for other scripts (current only Arabic there)
+        StringBuilder bcp47LanguageTag = new StringBuilder(
+                appliedLocale.getLanguage());
+        if (!appliedLocale.getCountry().isEmpty()) {
+            bcp47LanguageTag.append("-").append(appliedLocale.getCountry());
+        }
+        // Parsing keeps the well-formed part of the tag so the browser never
+        // rejects it, e.g. new Locale("en-CA") gives "en-CA" and
+        // new Locale("en_GB") gives "und"
+        Locale parsedLocale = Locale
+                .forLanguageTag(bcp47LanguageTag.toString());
         String languageTag = Locale
-                .of(appliedLocale.getLanguage(), appliedLocale.getCountry())
+                .of(parsedLocale.getLanguage(), parsedLocale.getCountry())
                 .toLanguageTag();
         runBeforeClientResponse(ui -> getElement()
                 .callJsFunction("$connector.setLocale", languageTag));

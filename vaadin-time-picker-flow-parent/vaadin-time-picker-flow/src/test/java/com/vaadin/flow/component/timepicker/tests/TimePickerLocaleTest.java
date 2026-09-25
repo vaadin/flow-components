@@ -68,6 +68,11 @@ class TimePickerLocaleTest {
     }
 
     @Test
+    void setLocaleWithLanguageTagAsLanguage_sendsLanguageAndCountryTag() {
+        assertLocaleTag(new Locale("en-CA"), "en-CA");
+    }
+
+    @Test
     void setLocaleWithIllFormedLanguage_sendsUndeterminedTag() {
         assertLocaleTag(Locale.of("en_GB"), "und");
     }
