@@ -88,6 +88,9 @@
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <exec.maven.plugin.version>3.6.4</exec.maven.plugin.version>
+        <!-- Must match the jandex-maven-plugin version used by Flow, so that the
+            component indexes use the same index format as the Flow ones -->
+        <jandex.plugin.version>3.6.0</jandex.plugin.version>
         <spotless.plugin.version>3.10.2</spotless.plugin.version>
         <checkstyle.version>14.1.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
@@ -574,6 +577,23 @@
                                     <argument>${project.build.outputDirectory}/META-INF/VAADIN/versions/${project.artifactId}-versions.json</argument>
                                 </arguments>
                             </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- Indexes a module's own classes into META-INF/jandex.idx, which
+                    is where the Quarkus extension reads them from. A published
+                    component module opts in by declaring this plugin in its own
+                    build, with no configuration of its own. -->
+                <plugin>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>jandex-maven-plugin</artifactId>
+                    <version>${jandex.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>make-index</id>
+                            <goals>
+                                <goal>jandex</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
