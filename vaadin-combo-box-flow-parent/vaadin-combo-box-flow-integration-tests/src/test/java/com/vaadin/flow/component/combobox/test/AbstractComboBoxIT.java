@@ -38,17 +38,18 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void assertItemSelected(ComboBoxElement combo, String label) {
-        Optional<TestBenchElement> itemElement = getItemElements(combo).stream()
-                .filter(element -> getItemLabel(element).equals(label))
+        Optional<Map<String, ?>> item = getRenderedItems(combo).stream()
+                .filter(rendered -> stripComments((String) rendered.get("html"))
+                        .equals(label))
                 .findFirst();
         Assert.assertTrue(
                 "Could not find the item with label '" + label
                         + "' which was expected to be selected.",
-                itemElement.isPresent());
+                item.isPresent());
         Assert.assertEquals(
                 "Expected item element with label '" + label
                         + "' to have 'selected' attribute.",
-                true, itemElement.get().getProperty("selected"));
+                true, item.get().get("selected"));
     }
 
     protected void assertLoadedItemsCount(String message, int expectedCount,
@@ -126,27 +127,27 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
-    @SuppressWarnings("unchecked")
     protected List<String> getOverlayContents(ComboBoxElement comboBox) {
-        // Read all rendered items in one script to avoid a WebDriver round
-        // trip per item
-        List<String> contents = (List<String>) executeScript("""
-                return [...arguments[0]._scroller.querySelectorAll(
-                    'vaadin-combo-box-item:not([hidden])')]
-                    .map(item => item.innerHTML);""", comboBox);
-        return contents.stream().map(AbstractComboBoxIT::stripComments)
-                .toList();
+        return getRenderedItems(comboBox).stream()
+                .map(item -> stripComments((String) item.get("html"))).toList();
+    }
+
+    // Reads the innerHTML and selected state of the rendered items in one
+    // script to avoid a WebDriver round trip per item
+    @SuppressWarnings("unchecked")
+    private List<Map<String, ?>> getRenderedItems(ComboBoxElement comboBox) {
+        return (List<Map<String, ?>>) executeScript(
+                """
+                        return [...arguments[0]._scroller.querySelectorAll(
+                            'vaadin-combo-box-item:not([hidden])')]
+                            .map(item => ({ html: item.innerHTML, selected: item.selected }));""",
+                comboBox);
     }
 
     protected List<String> getNonEmptyOverlayContents(
             ComboBoxElement comboBox) {
         return getOverlayContents(comboBox).stream()
                 .filter(rendered -> !rendered.isEmpty()).toList();
-    }
-
-    protected String getItemLabel(TestBenchElement itemElement) {
-        String innerHtml = itemElement.getPropertyString("innerHTML");
-        return stripComments(innerHtml);
     }
 
     protected List<TestBenchElement> getItemElements(ComboBoxElement comboBox) {
