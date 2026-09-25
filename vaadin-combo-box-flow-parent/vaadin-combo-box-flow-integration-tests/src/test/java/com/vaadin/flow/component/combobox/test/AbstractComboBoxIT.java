@@ -126,8 +126,15 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
+    @SuppressWarnings("unchecked")
     protected List<String> getOverlayContents(ComboBoxElement comboBox) {
-        return getItemElements(comboBox).stream().map(this::getItemLabel)
+        // Read all rendered items in one script to avoid a WebDriver round
+        // trip per item
+        List<String> contents = (List<String>) executeScript("""
+                return [...arguments[0]._scroller.querySelectorAll(
+                    'vaadin-combo-box-item:not([hidden])')]
+                    .map(item => item.innerHTML);""", comboBox);
+        return contents.stream().map(AbstractComboBoxIT::stripComments)
                 .toList();
     }
 
