@@ -105,10 +105,19 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         combo.selectByText("MR");
 
         WebElement selectionInfo = findElement(By.id("selected-titles"));
+        WebElement oldSelectionInfo = findElement(By.id("old-selected-titles"));
         Assert.assertEquals("MR", selectionInfo.getText());
+        Assert.assertEquals("", oldSelectionInfo.getText());
 
         combo.selectByText("MRS");
         Assert.assertEquals("MRS", selectionInfo.getText());
+        Assert.assertEquals("MR", oldSelectionInfo.getText());
+    }
+
+    @Test
+    public void placeholder() {
+        ComboBoxElement combo = $(ComboBoxElement.class).id("titles");
+        Assert.assertEquals("Select a title", combo.getPlaceholder());
     }
 
     @Test

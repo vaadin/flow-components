@@ -50,6 +50,8 @@ public class ComboBoxPage extends Div {
 
     private Span selectedTitle = new Span();
 
+    private Span oldSelectedTitle = new Span();
+
     /**
      * Creates a new instance.
      */
@@ -153,10 +155,16 @@ public class ComboBoxPage extends Div {
 
         titles.setItems(Title.values());
 
+        titles.setPlaceholder("Select a title");
         titles.setId("titles");
         selectedTitle.setId("selected-titles");
-        titles.addValueChangeListener(event -> handleSelection(titles));
-        add(titles, selectedTitle);
+        oldSelectedTitle.setId("old-selected-titles");
+        titles.addValueChangeListener(event -> {
+            handleSelection(titles);
+            oldSelectedTitle.setText(Optional.ofNullable(event.getOldValue())
+                    .map(Enum::name).orElse(""));
+        });
+        add(titles, selectedTitle, oldSelectedTitle);
     }
 
     private void createWithPresetValue() {
