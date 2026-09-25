@@ -143,8 +143,8 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected List<TestBenchElement> getItemElements(ComboBoxElement comboBox) {
-        return getScroller(comboBox).$("vaadin-combo-box-item").all().stream()
-                .filter(element -> !element.hasAttribute("hidden")).toList();
+        return getScroller(comboBox).$("vaadin-combo-box-item")
+                .withoutAttribute("hidden").all();
     }
 
     protected void scrollToItem(ComboBoxElement comboBox, int index) {
