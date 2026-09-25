@@ -32,7 +32,7 @@ import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.shared.Registration;
 
 import tools.jackson.databind.node.BaseJsonNode;
@@ -51,7 +51,8 @@ public abstract class MapBase extends Component
     private final Configuration configuration;
     private transient MapSerializer serializer;
 
-    private StateTree.ExecutionRegistration pendingConfigurationSync;
+    private final BeforeClientResponseAction configurationSyncAction = new BeforeClientResponseAction(
+            this, this::synchronizeConfiguration);
 
     protected MapBase() {
         this.configuration = new Configuration();
@@ -93,21 +94,7 @@ public abstract class MapBase extends Component
         // Ensure the full configuration is synced when (re-)attaching the
         // component
         configuration.deepMarkAsDirty();
-        requestConfigurationSync();
-    }
-
-    /**
-     * Schedules a configuration sync, if there isn't a scheduled sync already
-     */
-    private void requestConfigurationSync() {
-        if (pendingConfigurationSync != null) {
-            return;
-        }
-        getUI().ifPresent(ui -> pendingConfigurationSync = ui
-                .beforeClientResponse(this, context -> {
-                    pendingConfigurationSync = null;
-                    synchronizeConfiguration();
-                }));
+        configurationSyncAction.schedule();
     }
 
     /**
@@ -128,7 +115,7 @@ public abstract class MapBase extends Component
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {
-        this.requestConfigurationSync();
+        configurationSyncAction.schedule();
     }
 
     private void registerEventListeners() {
