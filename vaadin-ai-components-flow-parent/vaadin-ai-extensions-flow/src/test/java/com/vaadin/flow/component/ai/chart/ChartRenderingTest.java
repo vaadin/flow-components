@@ -288,22 +288,25 @@ class ChartRenderingTest {
 
         @Test
         void drawsWithFullReset() {
+            // Recorded on the chart itself: the form in which Flow queues the
+            // call to the client differs between Flow versions
+            var resets = new ArrayList<Boolean>();
+            var chart = new Chart() {
+                @Override
+                public void drawChart(boolean resetConfiguration) {
+                    resets.add(resetConfiguration);
+                    super.drawChart(resetConfiguration);
+                }
+            };
+            ui.add(chart);
             databaseProvider.results = List
                     .of(row("category", "A", "value", 10));
-            // Drop the draw the chart schedules on attach
-            ui.dumpPendingJavaScriptInvocations();
 
-            updateData("SELECT category, value FROM t");
-            controller.onResponse(AITurnEvents.success());
+            ChartRenderer.renderChart(chart, databaseProvider,
+                    new DefaultDataConverter(),
+                    List.of("SELECT category, value FROM t"), "{}");
 
-            // callJsFunction passes the function name, then its arguments
-            var resetFlags = ui.dumpPendingJavaScriptInvocations().stream()
-                    .map(invocation -> invocation.getInvocation()
-                            .getParameters())
-                    .filter(parameters -> "updateConfiguration"
-                            .equals(parameters.getFirst()))
-                    .map(parameters -> parameters.get(2)).toList();
-            Assertions.assertEquals(List.of(true), resetFlags);
+            Assertions.assertEquals(List.of(true), resets);
         }
 
         @Test
