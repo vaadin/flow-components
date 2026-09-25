@@ -21,6 +21,7 @@ import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
@@ -39,7 +40,8 @@ public class EditColumnConfigurator<T> implements Serializable {
     private final EditColumn<T> column;
     private Registration attachRegistration;
 
-    private boolean editModeRendererRequested = false;
+    private final BeforeClientResponseAction editModeRendererUpdate;
+    private HasValueAndElement<?, ?> pendingEditModeRendererComponent;
 
     /**
      * Creates a new configurator for the given column.
@@ -52,6 +54,8 @@ public class EditColumnConfigurator<T> implements Serializable {
         assert column != null;
         this.column = column;
         this.column.setValueProvider(valueProvider);
+        editModeRendererUpdate = new BeforeClientResponseAction(column,
+                this::updateEditModeRenderer);
     }
 
     private Column<T> configureColumn(ItemUpdater<T, String> itemUpdater,
@@ -172,21 +176,18 @@ public class EditColumnConfigurator<T> implements Serializable {
     }
 
     private <V> void setEditModeRenderer(HasValueAndElement<?, V> component) {
-        if (editModeRendererRequested) {
-            return;
+        if (pendingEditModeRendererComponent == null) {
+            pendingEditModeRendererComponent = component;
         }
-        editModeRendererRequested = true;
-        column.getElement().getNode().runWhenAttached(ui -> {
-            ui.beforeClientResponse(column, context -> {
-                if (!editModeRendererRequested) {
-                    return;
-                }
-                ui.getPage().executeJs(
-                        "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
-                        column.getElement(), component.getElement());
-                editModeRendererRequested = false;
-            });
-        });
+        editModeRendererUpdate.schedule();
+    }
+
+    private void updateEditModeRenderer() {
+        HasValueAndElement<?, ?> component = pendingEditModeRendererComponent;
+        pendingEditModeRendererComponent = null;
+        UI.getCurrentOrThrow().getPage().executeJs(
+                "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
+                column.getElement(), component.getElement());
     }
 
     /**

@@ -14,11 +14,22 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.MockUIExtension;
 
 class GridProEditColumnConfiguratorTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
+    GridPro<Person> grid;
     EditColumnConfigurator<Person> configurator;
     ItemUpdater testItemUpdater;
     List<String> listOptions;
@@ -26,7 +37,7 @@ class GridProEditColumnConfiguratorTest {
 
     @BeforeEach
     void setup() {
-        GridPro<Person> grid = new GridPro<>();
+        grid = new GridPro<>();
         configurator = grid.addEditColumn(value -> value);
         column = (EditColumn<Person>) configurator.getColumn();
 
@@ -118,6 +129,68 @@ class GridProEditColumnConfiguratorTest {
                 EditorType.SELECT.getTypeName());
         Assertions.assertEquals(column.getOptions(), listOptions);
         column.getItemUpdater().accept(initialItem, initialValue);
+    }
+
+    @Test
+    void customEditor_attach_setsEditModeRendererOnce() {
+        TestEditor editor = new TestEditor();
+        configurator.custom(editor, (item, value) -> {
+        });
+        ui.add(grid);
+
+        List<List<Object>> invocations = getSetEditModeRendererParameters();
+        Assertions.assertEquals(1, invocations.size());
+        Assertions.assertEquals(
+                List.of(column.getElement(), editor.getElement()),
+                invocations.get(0));
+    }
+
+    @Test
+    void customEditor_changeEditorInLaterRoundTrip_setsNewEditModeRenderer() {
+        ui.add(grid);
+        configurator.custom(new TestEditor(), (item, value) -> {
+        });
+        ui.dumpPendingJavaScriptInvocations();
+
+        TestEditor newEditor = new TestEditor();
+        configurator.custom(newEditor, (item, value) -> {
+        });
+
+        List<List<Object>> invocations = getSetEditModeRendererParameters();
+        Assertions.assertEquals(1, invocations.size());
+        Assertions.assertEquals(
+                List.of(column.getElement(), newEditor.getElement()),
+                invocations.get(0));
+    }
+
+    private List<List<Object>> getSetEditModeRendererParameters() {
+        return ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("gridProConnector.setEditModeRenderer("))
+                .map(invocation -> invocation.getParameters()).toList();
+    }
+
+    @Tag("test-editor")
+    private static class TestEditor extends Component implements
+            HasValueAndElement<HasValue.ValueChangeEvent<String>, String> {
+        private String value;
+
+        @Override
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                HasValue.ValueChangeListener<? super HasValue.ValueChangeEvent<String>> listener) {
+            return null;
+        }
     }
 
     private enum TestEnum {

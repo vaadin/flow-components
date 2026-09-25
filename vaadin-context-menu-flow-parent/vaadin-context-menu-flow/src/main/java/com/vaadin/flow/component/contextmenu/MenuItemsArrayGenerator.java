@@ -20,8 +20,8 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableConsumer;
 
 /**
  * A class which is utilized internally by components such as context menu and
@@ -37,11 +37,12 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
 
     private Component menu;
 
-    private boolean updateScheduled = false;
+    private final BeforeClientResponseAction itemsUpdate;
     private final Element container;
 
     public MenuItemsArrayGenerator(Component menu) {
         this.menu = menu;
+        itemsUpdate = new BeforeClientResponseAction(menu, this::updateItems);
         container = new Element("div");
         getElement().appendVirtualChild(container);
 
@@ -54,20 +55,16 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
      * menu and its sub menus.
      */
     public void generate() {
-        if (updateScheduled) {
-            return;
-        }
-        updateScheduled = true;
-        runBeforeClientResponse(ui -> {
-            container.removeAllChildren();
-            getItems().forEach(this::resetContainers);
+        itemsUpdate.schedule();
+    }
 
-            int containerNodeId = createNewContainer(menu.getChildren());
-            getElement().callJsFunction("$connector.generateItems",
-                    containerNodeId);
+    private void updateItems() {
+        container.removeAllChildren();
+        getItems().forEach(this::resetContainers);
 
-            updateScheduled = false;
-        });
+        int containerNodeId = createNewContainer(menu.getChildren());
+        getElement().callJsFunction("$connector.generateItems",
+                containerNodeId);
     }
 
     private void resetContainers(MenuItemBase<?, I, ?> menuItem) {
@@ -95,11 +92,6 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
     private Stream<MenuItemBase> getItems() {
         return menu.getChildren().filter(MenuItemBase.class::isInstance)
                 .map(MenuItemBase.class::cast);
-    }
-
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(menu, context -> command.accept(ui)));
     }
 
     private Element getElement() {
