@@ -88,6 +88,8 @@
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <exec.maven.plugin.version>3.6.4</exec.maven.plugin.version>
+        <!-- Must match the jandex-maven-plugin version used by Flow, so that the
+            component indexes use the same index format as the Flow ones -->
         <jandex.plugin.version>3.6.0</jandex.plugin.version>
         <spotless.plugin.version>3.10.2</spotless.plugin.version>
         <checkstyle.version>14.1.0</checkstyle.version>

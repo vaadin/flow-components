@@ -9,3 +9,6 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    ignore:
+      # Kept in sync with the version used by Flow, bumped together with it
+      - dependency-name: "io.smallrye:jandex-maven-plugin"
