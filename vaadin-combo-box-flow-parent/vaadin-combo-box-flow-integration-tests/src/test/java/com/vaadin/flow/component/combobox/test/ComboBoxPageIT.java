@@ -102,18 +102,12 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
     @Test
     public void selectedValue() {
         ComboBoxElement combo = $(ComboBoxElement.class).id("titles");
-        combo.openPopup();
-
-        executeScript(
-                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
-                combo);
+        combo.selectByText("MR");
 
         WebElement selectionInfo = findElement(By.id("selected-titles"));
         Assert.assertEquals("MR", selectionInfo.getText());
 
-        executeScript(
-                "arguments[0].selectedItem = arguments[0].filteredItems[1]",
-                combo);
+        combo.selectByText("MRS");
         Assert.assertEquals("MRS", selectionInfo.getText());
     }
 
@@ -154,8 +148,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         Assert.assertEquals("baz", value);
 
         findElement(By.id("update-provider")).click();
-        Assert.assertNull(
-                executeScript("return arguments[0].selectedItem", combo));
+        Assert.assertEquals("", combo.getSelectedText());
     }
 
     @Test
@@ -185,9 +178,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         Assert.assertEquals("Value: Item 2 isFromClient: false",
                 message.getText());
 
-        executeScript(
-                "arguments[0].selectedItem = arguments[0].filteredItems[0]",
-                combo);
+        combo.selectByText("Item 1");
         Assert.assertEquals("Item 1", combo.getSelectedText());
         Assert.assertEquals("Value: Item 1 isFromClient: true",
                 message.getText());
