@@ -1510,7 +1510,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @Override
         public void initialize() {
-            setViewportRange(0, getPageSize());
+            // The client-side grid is created with the scroll position at the
+            // top, so reset the viewport range to the first page. Skip the
+            // reset when a scroll is pending: it has already set the range to
+            // preload the rows around its target and runs after this flush in
+            // the same response.
+            if (pendingScrollRegistration == null) {
+                setViewportRange(0, getPageSize());
+            }
         }
     }
 
