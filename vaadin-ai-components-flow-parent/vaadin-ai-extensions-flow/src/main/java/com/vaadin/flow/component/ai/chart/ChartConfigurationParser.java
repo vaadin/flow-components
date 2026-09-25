@@ -16,10 +16,12 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
+import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -53,6 +55,12 @@ import tools.jackson.databind.node.ObjectNode;
  */
 public final class ChartConfigurationParser implements Serializable {
 
+    /**
+     * Keys of a series entry that are not plot options.
+     */
+    private static final Set<String> SERIES_ENTRY_KEYS = Set.of(NAME, TYPE,
+            Y_AXIS, PLOT_OPTIONS, DATA);
+
     private ChartConfigurationParser() {
     }
 
@@ -64,7 +72,8 @@ public final class ChartConfigurationParser implements Serializable {
      *            the Highcharts JSON configuration string to parse
      * @return a new {@link Configuration} populated with the parsed values
      * @throws IllegalArgumentException
-     *             if the JSON string is invalid or not an object
+     *             if the JSON string is invalid, not an object, or holds a
+     *             value that does not fit its property
      */
     public static Configuration parse(String configJson) {
         Configuration config = new Configuration();
@@ -83,11 +92,20 @@ public final class ChartConfigurationParser implements Serializable {
      *            the existing {@link Configuration} to merge the parsed values
      *            into
      * @throws IllegalArgumentException
-     *             if the JSON string is invalid or not an object
+     *             if the JSON string is invalid, not an object, or holds a
+     *             value that does not fit its property
      */
     public static void merge(String configJson, Configuration config) {
         ObjectNode configNode = parseJsonToNode(configJson);
+        try {
+            merge(configNode, config);
+        } catch (JacksonException e) {
+            throw new IllegalArgumentException(
+                    "Invalid chart configuration value: " + e.getMessage(), e);
+        }
+    }
 
+    private static void merge(ObjectNode configNode, Configuration config) {
         String chartType = null;
         if (configNode.has(TYPE)) {
             chartType = configNode.get(TYPE).asString();
@@ -336,7 +354,9 @@ public final class ChartConfigurationParser implements Serializable {
      * Parses series entries from the JSON array and adds them to the
      * configuration as {@link DataSeries} with name, plot options, and y-axis
      * binding set (but no data). These act as configuration templates that the
-     * renderer applies to data series matched by name.
+     * renderer applies to data series matched by name. An entry naming a series
+     * the configuration already has updates that series instead, keeping what
+     * the entry does not mention.
      */
     private static void applySeriesConfig(Configuration config,
             JsonNode seriesArray) {
@@ -349,8 +369,12 @@ public final class ChartConfigurationParser implements Serializable {
                 continue;
             }
 
-            var series = new DataSeries();
-            series.setName(seriesName);
+            var series = findSeries(config, seriesName);
+            if (series == null) {
+                series = new DataSeries();
+                series.setName(seriesName);
+                config.addSeries(series);
+            }
 
             String type = entryNode.has(TYPE) && entryNode.get(TYPE).isString()
                     ? entryNode.get(TYPE).asString()
@@ -360,23 +384,54 @@ public final class ChartConfigurationParser implements Serializable {
                 series.setyAxis(entryNode.get(Y_AXIS).asInt());
             }
 
-            if (entryNode.has(PLOT_OPTIONS)
-                    && entryNode.get(PLOT_OPTIONS).isObject()) {
-                AbstractPlotOptions plotOptions = deserializePlotOptions(type,
-                        (ObjectNode) entryNode.get(PLOT_OPTIONS));
-                if (plotOptions != null) {
-                    series.setPlotOptions(plotOptions);
+            var plotOptionsNode = seriesPlotOptionsNode(entryNode);
+            var existing = series.getPlotOptions();
+            if (existing != null
+                    && (type == null || existing.getClass() == PlotOptionsSchema
+                            .getPlotOptionsClass(
+                                    type.toLowerCase(Locale.ENGLISH)))) {
+                // Same type as before: the entry adds to the options
+                if (!plotOptionsNode.isEmpty()) {
+                    mergeInto(existing, plotOptionsNode);
                 }
-            } else if (type != null) {
+            } else if (type != null || !plotOptionsNode.isEmpty()) {
                 AbstractPlotOptions plotOptions = deserializePlotOptions(type,
-                        JacksonUtils.createObjectNode());
+                        plotOptionsNode);
                 if (plotOptions != null) {
                     series.setPlotOptions(plotOptions);
                 }
             }
-
-            config.addSeries(series);
         }
+    }
+
+    private static AbstractSeries findSeries(Configuration config,
+            String name) {
+        for (var series : config.getSeries()) {
+            if (series instanceof AbstractSeries as
+                    && name.equals(as.getName())) {
+                return as;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Collects the plot options of a series entry: the properties of its
+     * {@code plotOptions} object and the options given flat on the entry
+     * itself, the way Highcharts and the chart serializer write them. An option
+     * given both ways keeps the {@code plotOptions} value.
+     */
+    private static ObjectNode seriesPlotOptionsNode(JsonNode entryNode) {
+        var result = JacksonUtils.createObjectNode();
+        for (var property : entryNode.properties()) {
+            if (!SERIES_ENTRY_KEYS.contains(property.getKey())) {
+                result.set(property.getKey(), property.getValue());
+            }
+        }
+        if (entryNode.get(PLOT_OPTIONS) instanceof ObjectNode nested) {
+            result.setAll(nested);
+        }
+        return result;
     }
 
     private static AbstractPlotOptions deserializePlotOptions(String type,

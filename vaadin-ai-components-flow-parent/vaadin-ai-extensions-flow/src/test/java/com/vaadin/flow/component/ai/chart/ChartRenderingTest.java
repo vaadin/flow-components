@@ -31,6 +31,8 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+import com.vaadin.flow.component.charts.model.PlotOptionsArea;
+import com.vaadin.flow.component.charts.model.PlotOptionsCandlestick;
 import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -234,6 +236,88 @@ class ChartRenderingTest {
 
             Assertions.assertEquals(2,
                     chart.getConfiguration().getSeries().size());
+        }
+
+        @Test
+        void drawFailure_keepsPreviousConfiguration() {
+            chart.setTimeline(true);
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            var converter = new DefaultDataConverter();
+            var queries = List.of("SELECT 1");
+            ChartRenderer.renderChart(chart, databaseProvider, converter,
+                    queries,
+                    "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Revenue\"}}");
+
+            var pie = "{\"chart\":{\"type\":\"pie\"}}";
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ChartRenderer.renderChart(chart, databaseProvider,
+                            converter, queries, pie));
+
+            Assertions.assertEquals(ChartType.LINE,
+                    chart.getConfiguration().getChart().getType());
+            Assertions.assertEquals("Revenue",
+                    chart.getConfiguration().getTitle().getText());
+        }
+
+        @Test
+        void drawFailure_dropsTheMergesOfTheSameCall() {
+            chart.setTimeline(true);
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            var converter = new DefaultDataConverter();
+            var queries = List.of("SELECT 1");
+            ChartRenderer.renderChart(chart, databaseProvider, converter,
+                    queries,
+                    "{\"chart\":{\"type\":\"line\"},\"title\":{\"text\":\"Revenue\"}}");
+
+            // The subtitle merges into the live configuration before the
+            // type change makes the chart reject the call
+            var configJsons = List.of("{\"subtitle\":{\"text\":\"Q1\"}}",
+                    "{\"chart\":{\"type\":\"pie\"}}");
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ChartRenderer.renderChart(chart, databaseProvider,
+                            converter, queries, configJsons));
+
+            Assertions.assertEquals(ChartType.LINE,
+                    chart.getConfiguration().getChart().getType());
+            Assertions.assertNull(
+                    chart.getConfiguration().getSubTitle().getText(),
+                    "a merge of the failed call must not survive");
+        }
+
+        @Test
+        void drawsWithFullReset() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            // Drop the draw the chart schedules on attach
+            ui.dumpPendingJavaScriptInvocations();
+
+            updateData("SELECT category, value FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            // callJsFunction passes the function name, then its arguments
+            var resetFlags = ui.dumpPendingJavaScriptInvocations().stream()
+                    .map(invocation -> invocation.getInvocation()
+                            .getParameters())
+                    .filter(parameters -> "updateConfiguration"
+                            .equals(parameters.getFirst()))
+                    .map(parameters -> parameters.get(2)).toList();
+            Assertions.assertEquals(List.of(true), resetFlags);
+        }
+
+        @Test
+        void singleConfigJsonIsApplied() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+
+            ChartRenderer.renderChart(chart, databaseProvider,
+                    new DefaultDataConverter(),
+                    List.of("SELECT category, value FROM t"),
+                    "{\"title\":{\"text\":\"Sales\"}}");
+
+            Assertions.assertEquals("Sales",
+                    chart.getConfiguration().getTitle().getText());
         }
     }
 
@@ -801,7 +885,160 @@ class ChartRenderingTest {
     }
 
     @Nested
+    class PositionalTemplates {
+
+        /**
+         * Rows for an OHLC query and for a volume query, so the default
+         * converter builds an unnamed candlestick series and an unnamed plain
+         * series.
+         */
+        @BeforeEach
+        void useOhlcAndVolumeDatabase() {
+            var db = new DatabaseProvider() {
+                @Override
+                public String getSchema() {
+                    return "stock_prices";
+                }
+
+                @Override
+                public List<Map<String, Object>> executeQuery(String sql) {
+                    if (sql.contains("volume")) {
+                        return List.of(row(ColumnNames.X, 1704067200000L,
+                                ColumnNames.Y, 52000));
+                    }
+                    return List.of(row(ColumnNames.X, 1704067200000L,
+                            ColumnNames.OPEN, 142.5, ColumnNames.HIGH, 148.2,
+                            ColumnNames.LOW, 141.0, ColumnNames.CLOSE, 147.8));
+                }
+            };
+            controller = new ChartAIController(chart, db);
+            tools = controller.getTools();
+        }
+
+        @Test
+        void addedSeries_getsItsTemplateDespiteThePreviousRendersSeries() {
+            // The first render names its only series after the title. That
+            // series carries no settings, so on the next render it must not
+            // take a template slot away from the new, unnamed series.
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"},"
+                    + "\"title\":{\"text\":\"ACME\"}}");
+            updateData("SELECT ohlc");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("""
+                    {"yAxis":[{"title":{"text":"Price"}},
+                              {"title":{"text":"Volume"},"opposite":true}],
+                     "series":[{"name":"Prices","type":"candlestick","yAxis":0},
+                               {"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals(2, series.size());
+            var volume = (AbstractSeries) series.get(1);
+            Assertions.assertEquals("Volume", volume.getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    volume.getPlotOptions());
+            Assertions.assertEquals(1, volume.getyAxis());
+        }
+
+        @Test
+        void unnamedSeries_keepsItsEarlierNameWhenNoTemplateTargetsIt() {
+            updateConfiguration("{\"chart\":{\"type\":\"candlestick\"},"
+                    + "\"title\":{\"text\":\"ACME\"}}");
+            updateData("SELECT ohlc");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("""
+                    {"series":[{"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals("ACME", series.get(0).getName(),
+                    "the candlesticks should keep the name of the first render");
+            Assertions.assertEquals("Volume", series.get(1).getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    ((AbstractSeries) series.get(1)).getPlotOptions());
+        }
+
+        @Test
+        void changingOneEarlierSeries_keepsTheOtherOneInPlace() {
+            updateConfiguration("""
+                    {"chart":{"type":"candlestick"},
+                     "series":[{"name":"Prices","type":"candlestick"},
+                               {"name":"Volume","type":"column","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            // Both data series come back unnamed; the template is meant for
+            // the series that was Volume before
+            updateConfiguration("""
+                    {"series":[{"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals("Prices", series.get(0).getName());
+            Assertions.assertInstanceOf(PlotOptionsCandlestick.class,
+                    ((AbstractSeries) series.get(0)).getPlotOptions());
+            Assertions.assertEquals("Volume", series.get(1).getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    ((AbstractSeries) series.get(1)).getPlotOptions());
+        }
+
+        @Test
+        void fewerTemplatesThanSeries_describeTheAddedSeries() {
+            updateConfiguration("""
+                    {"chart":{"type":"candlestick"},
+                     "series":[{"name":"Prices","type":"candlestick"}]}
+                    """);
+            updateData("SELECT ohlc");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("""
+                    {"series":[{"name":"Volume","type":"area","yAxis":1}]}
+                    """);
+            updateData("SELECT ohlc", "SELECT volume");
+            controller.onResponse(AITurnEvents.success());
+
+            var series = chart.getConfiguration().getSeries();
+            Assertions.assertEquals("Prices", series.get(0).getName());
+            Assertions.assertInstanceOf(PlotOptionsCandlestick.class,
+                    ((AbstractSeries) series.get(0)).getPlotOptions());
+            Assertions.assertEquals("Volume", series.get(1).getName());
+            Assertions.assertInstanceOf(PlotOptionsArea.class,
+                    ((AbstractSeries) series.get(1)).getPlotOptions());
+        }
+    }
+
+    @Nested
     class ConfigurationReset {
+
+        @Test
+        void typeChangeRepeatedInOneTurn_keepsEarlierUpdate() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT category, value FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"title\":{\"text\":\"Revenue\"}}");
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"subtitle\":{\"text\":\"2025\"}}");
+            controller.onResponse(AITurnEvents.success());
+
+            var config = chart.getConfiguration();
+            Assertions.assertEquals(ChartType.COLUMN,
+                    config.getChart().getType());
+            Assertions.assertEquals("Revenue", config.getTitle().getText());
+            Assertions.assertEquals("2025", config.getSubTitle().getText());
+        }
 
         @Test
         void resetDoesNotSetEmptyCategoriesArray() {

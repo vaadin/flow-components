@@ -32,7 +32,9 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -286,6 +288,33 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void configurationUpdatesInOneTurn_allApply() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"}}");
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration")
+                    .execute(json("{\"configuration\": {\"series\":"
+                            + " [{\"name\": \"North\", \"type\": \"spline\"}]}}"));
+            findTool(tools, "update_chart_configuration")
+                    .execute(json("{\"configuration\": {\"chart\":"
+                            + " {\"type\": \"column\"},"
+                            + " \"title\": {\"text\": \"Revenue\"}}}"));
+            controller.onResponse(AITurnEvents.success());
+
+            var north = (DataSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(ChartType.SPLINE,
+                    north.getPlotOptions().getChartType());
+            Assertions.assertEquals("Revenue",
+                    chart.getConfiguration().getTitle().getText());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("spline"), state);
+            Assertions.assertTrue(state.contains("Revenue"), state);
+        }
+
+        @Test
         void updateData_stagesQueriesAppliedOnResponseComplete() {
             databaseProvider.results = List.of(Map.of("x", 1, "y", 2));
 
@@ -301,6 +330,164 @@ class ChartAIControllerTest {
             String state = findTool(tools, "get_chart_state")
                     .execute(json("{}"));
             Assertions.assertTrue(state.contains("SELECT 1"));
+        }
+    }
+
+    @Nested
+    class ChartStateContent {
+
+        @Test
+        void excludesCategoriesFromQueryResults() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "Secret Customer", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"bar\"},"
+                    + " \"title\": {\"text\": \"Revenue\"}}");
+
+            Assertions.assertArrayEquals(new String[] { "Secret Customer" },
+                    chart.getConfiguration().getxAxis().getCategories());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertFalse(state.contains("Secret Customer"), state);
+        }
+
+        @Test
+        void excludesSeriesNamesFromQueryResults() {
+            databaseProvider.results = List.of(Map.of("_series", "Secret Rep",
+                    "category", "Q1", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"line\"}}");
+
+            Assertions.assertEquals("Secret Rep",
+                    chart.getConfiguration().getSeries().getFirst().getName());
+            Assertions.assertFalse(chartState().contains("Secret Rep"));
+        }
+
+        @Test
+        void excludesOrganizationNodesFromQueryResults() {
+            databaseProvider.results = List.of(
+                    Map.of("_id", "1", "_name", "Secret Boss", "_parent", "0",
+                            "_title", "Secret Title"),
+                    Map.of("_id", "2", "_name", "Secret Report", "_parent", "1",
+                            "_title", "Secret Role"));
+
+            completeTurn("{\"chart\": {\"type\": \"organization\"}}");
+
+            var series = (NodeSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(2, series.getNodes().size());
+            Assertions.assertFalse(chartState().contains("Secret"));
+        }
+
+        @Test
+        void keepsConfigurationFromEarlierTurns() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"First\"}}");
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"subtitle\": {\"text\": \"Second\"}}");
+
+            var state = chartState();
+            Assertions.assertTrue(state.contains("First"), state);
+            Assertions.assertTrue(state.contains("Second"), state);
+        }
+
+        @Test
+        void chartTypeChange_startsOverLikeTheChart() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"First\"}}");
+            completeTurn("{\"chart\": {\"type\": \"bar\"}}");
+
+            Assertions
+                    .assertNull(chart.getConfiguration().getTitle().getText());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("\"bar\""), state);
+            Assertions.assertFalse(state.contains("First"), state);
+        }
+
+        @Test
+        void chartTypeSetByApplication_keepsEarlierLlmConfiguration() {
+            chart.getConfiguration().getChart().setType(ChartType.COLUMN);
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"title\": {\"text\": \"Revenue\"}}");
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"subtitle\": {\"text\": \"2025\"}}");
+
+            Assertions.assertEquals("Revenue",
+                    chart.getConfiguration().getTitle().getText());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertTrue(state.contains("2025"), state);
+        }
+
+        @Test
+        void seriesSettingsSentTwice_keepsTheLatest() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"series\": [{\"name\": \"North\", \"type\": \"spline\"}]}");
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"series\": [{\"name\": \"North\", \"type\": \"line\"}]}");
+
+            var series = JacksonUtils.readTree(chartState())
+                    .get("configuration").get("series");
+            Assertions.assertEquals(1, series.size(), series.toString());
+            Assertions.assertEquals("North",
+                    series.get(0).get("name").asString());
+            Assertions.assertEquals("line",
+                    series.get(0).get("type").asString());
+        }
+
+        @Test
+        void seriesEntryWithoutAxis_keepsTheAxisSetBefore() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"}, \"series\":"
+                    + " [{\"name\": \"North\", \"type\": \"area\", \"yAxis\": 1}]}");
+            completeTurn("{\"series\": [{\"name\": \"North\","
+                    + " \"type\": \"column\"}]}");
+
+            var north = (DataSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(ChartType.COLUMN,
+                    north.getPlotOptions().getChartType());
+            Assertions.assertEquals(1, north.getyAxis(),
+                    "the axis binding was not mentioned, so it must stay");
+            var state = chartState();
+            Assertions.assertTrue(state.contains("\"yAxis\" : 1")
+                    || state.contains("\"yAxis\":1"), state);
+        }
+
+        @Test
+        void failedRender_keepsPreviousConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"Kept\"}}");
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration")
+                    .execute(json("{\"configuration\": {\"chart\":"
+                            + " {\"type\": \"column\"},"
+                            + " \"title\": {\"text\": \"Dropped\"}}}"));
+            findTool(tools, "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 2\"]}"));
+            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            var event = AITurnEvents.success();
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> controller.onResponse(event));
+
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Kept"), state);
+            Assertions.assertFalse(state.contains("Dropped"), state);
         }
     }
 
@@ -421,7 +608,9 @@ class ChartAIControllerTest {
         void chartState_isSerializable() throws Exception {
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
-            var state = new ChartState(List.of("SELECT 1"), config);
+            Configuration llmConfig = new Configuration();
+            llmConfig.setTitle("Revenue");
+            var state = new ChartState(List.of("SELECT 1"), config, llmConfig);
             var baos = new ByteArrayOutputStream();
             try (var oos = new ObjectOutputStream(baos)) {
                 oos.writeObject(state);
@@ -433,6 +622,8 @@ class ChartAIControllerTest {
                         deserialized.queries());
                 Assertions.assertEquals(ChartType.COLUMN,
                         deserialized.configuration().getChart().getType());
+                Assertions.assertEquals("Revenue",
+                        deserialized.llmConfiguration().getTitle().getText());
             }
         }
     }
@@ -459,6 +650,71 @@ class ChartAIControllerTest {
             ChartEntry entry = ChartEntry.get(chart);
             Assertions.assertNotNull(entry);
             Assertions.assertEquals(List.of("SELECT 1"), entry.getQueries());
+        }
+
+        @Test
+        void savedState_keepsWhatTheLlmSees() {
+            databaseProvider.results = List.of(Map.of("_series", "North",
+                    "category", "Secret Customer", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"Revenue\"}, \"series\":"
+                    + " [{\"name\": \"North\", \"type\": \"spline\"}]}");
+            var saved = controller.getState();
+
+            chart = new Chart();
+            ui.add(chart);
+            controller = new ChartAIController(chart, databaseProvider);
+            controller.restoreState(saved);
+
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertTrue(state.contains("spline"), state);
+            Assertions.assertFalse(state.contains("Secret"), state);
+        }
+
+        @Test
+        void stateWithoutLlmConfiguration_hidesSeriesNamesAndCategoriesFromLlm() {
+            databaseProvider.results = List.of(Map.of("_series", "Secret Rep",
+                    "category", "Secret Customer", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"Revenue\"}}");
+            var saved = controller.getState();
+
+            chart = new Chart();
+            ui.add(chart);
+            controller = new ChartAIController(chart, databaseProvider);
+            controller.restoreState(
+                    new ChartState(saved.queries(), saved.configuration()));
+
+            Assertions.assertEquals("Secret Rep",
+                    chart.getConfiguration().getSeries().getFirst().getName());
+            Assertions.assertArrayEquals(new String[] { "Secret Customer" },
+                    chart.getConfiguration().getxAxis().getCategories());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertFalse(state.contains("Secret"), state);
+            Assertions.assertFalse(state.contains("categories"), state);
+        }
+
+        @Test
+        void perSeriesSettings_surviveRepeatedSaveAndRestore() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"}, \"series\":"
+                    + " [{\"name\": \"North\", \"type\": \"spline\","
+                    + " \"plotOptions\": {\"dataLabels\": {\"enabled\": true}}}]}");
+
+            controller.restoreState(controller.getState());
+            controller.restoreState(controller.getState());
+
+            var north = (DataSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(ChartType.SPLINE,
+                    north.getPlotOptions().getChartType());
+            Assertions.assertTrue(((PlotOptionsSpline) north.getPlotOptions())
+                    .getDataLabels().getEnabled());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("dataLabels"), state);
         }
 
         @Test
@@ -814,6 +1070,21 @@ class ChartAIControllerTest {
     }
 
     // --- Helpers ---
+
+    /** Runs one successful turn that sets the configuration and a query. */
+    private void completeTurn(String configuration) {
+        var tools = controller.getTools();
+        findTool(tools, "update_chart_configuration")
+                .execute(json("{\"configuration\": " + configuration + "}"));
+        findTool(tools, "update_chart_data_source")
+                .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+        controller.onResponse(AITurnEvents.success());
+    }
+
+    private String chartState() {
+        return findTool(controller.getTools(), "get_chart_state")
+                .execute(json("{}"));
+    }
 
     private static LLMProvider.ToolSpec findTool(
             List<LLMProvider.ToolSpec> tools, String name) {
