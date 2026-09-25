@@ -187,6 +187,22 @@ class GridScrollToIndexTest {
     }
 
     @Test
+    void scrollToEnd_detachAndReattachAcrossRoundtrips_viewportRangeReset() {
+        grid.setItems(
+                IntStream.range(0, 1000).mapToObj(i -> "Item " + i).toList());
+        ui.add(grid);
+        grid.scrollToIndex(500);
+        ui.fakeClientCommunication();
+
+        ui.remove(grid);
+        ui.fakeClientCommunication();
+        ui.add(grid);
+        grid.scrollToEnd();
+        ui.fakeClientCommunication();
+        Assertions.assertEquals("0-50", getViewportRange(grid));
+    }
+
+    @Test
     void onlyLastScrollInvocationExecuted() {
         grid.setItems("Item 0", "Item 1");
         ui.add(grid);

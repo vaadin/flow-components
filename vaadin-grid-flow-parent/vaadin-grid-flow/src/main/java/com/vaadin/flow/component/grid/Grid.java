@@ -73,6 +73,7 @@ import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -1510,14 +1511,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         @Override
         public void initialize() {
-            // The client-side grid is created with the scroll position at the
-            // top, so reset the viewport range to the first page. Skip the
-            // reset when a scroll is pending: it has already set the range to
-            // preload the rows around its target and runs after this flush in
-            // the same response.
-            if (pendingScrollRegistration == null) {
-                setViewportRange(0, getPageSize());
-            }
+            // NO-OP: the viewport range reset for a newly created client-side
+            // grid is scheduled on attach, see viewportRangeReset. Resetting
+            // here would overwrite a range preloaded by a scroll call in the
+            // same response.
         }
     }
 
@@ -1582,6 +1579,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private String emptyStateText;
 
     private StateTree.ExecutionRegistration pendingScrollRegistration;
+
+    /**
+     * Resets the viewport range to the first page when the client-side grid is
+     * created from scratch. A new client-side grid starts scrolled to the top,
+     * so the range requested by the previous client-side grid would only cause
+     * an extra request for the first page. Scheduled on attach and cancelled by
+     * {@link #setViewportRangeByIndex(int)} so that a range preloaded by a
+     * scroll call in the same response is kept.
+     */
+    private final BeforeClientResponseAction viewportRangeReset = new BeforeClientResponseAction(
+            this, context -> {
+                if (!context.isClientSideInitialized()) {
+                    setViewportRange(0, getPageSize());
+                }
+            });
 
     /**
      * Creates a new instance, with page size of 50.
@@ -1829,6 +1841,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
         gridDataGenerator.addDataGenerator(this::generateSelectableData);
+
+        // Scheduled from a node attach listener registered before the data
+        // communicator is created, so that the reset runs before the data
+        // communicator's flush: Flow runs node attach listeners, and
+        // before-client-response callbacks, in registration order.
+        getElement().getNode().addAttachListener(viewportRangeReset::schedule);
 
         dataCommunicator = createDataCommunicator();
 
@@ -5315,8 +5333,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // Preloaded items count
         int preloadedItemsCount = lastIndexPageEndIndex - targetPageStartIndex
                 + 1;
-        // Preload the items
-        setViewportRange(targetPageStartIndex, preloadedItemsCount);
+        // Preload the items. Applied on attach so that a scroll call made
+        // before the grid is attached still cancels the viewport range reset
+        // scheduled on attach.
+        getElement().getNode().runWhenAttached(ui -> {
+            setViewportRange(targetPageStartIndex, preloadedItemsCount);
+            viewportRangeReset.cancel();
+        });
     }
 
     /**

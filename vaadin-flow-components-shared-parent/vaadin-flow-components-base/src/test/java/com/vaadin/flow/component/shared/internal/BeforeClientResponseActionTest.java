@@ -31,6 +31,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.tests.MockUIExtension;
 
 class BeforeClientResponseActionTest {
@@ -60,7 +63,29 @@ class BeforeClientResponseActionTest {
                 () -> new BeforeClientResponseAction(null, () -> {
                 }));
         Assertions.assertThrows(NullPointerException.class,
-                () -> new BeforeClientResponseAction(component, null));
+                () -> new BeforeClientResponseAction(component,
+                        (SerializableRunnable) null));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new BeforeClientResponseAction(component,
+                        (SerializableConsumer<ExecutionContext>) null));
+    }
+
+    @Test
+    void contextAction_receivesClientSideInitializedState() {
+        List<Boolean> initialized = new ArrayList<>();
+        TestComponent freshComponent = new TestComponent();
+        BeforeClientResponseAction contextAction = new BeforeClientResponseAction(
+                freshComponent,
+                context -> initialized.add(context.isClientSideInitialized()));
+
+        ui.add(freshComponent);
+        contextAction.schedule();
+        ui.fakeClientCommunication();
+
+        contextAction.schedule();
+        ui.fakeClientCommunication();
+
+        Assertions.assertEquals(List.of(false, true), initialized);
     }
 
     @Test

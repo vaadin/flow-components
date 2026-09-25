@@ -20,7 +20,9 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -42,7 +44,7 @@ import com.vaadin.flow.shared.Registration;
 public class BeforeClientResponseAction implements Serializable {
 
     private final Component component;
-    private final SerializableRunnable action;
+    private final SerializableConsumer<ExecutionContext> action;
     private Registration attachRegistration;
 
     /**
@@ -61,6 +63,27 @@ public class BeforeClientResponseAction implements Serializable {
      */
     public BeforeClientResponseAction(Component component,
             SerializableRunnable action) {
+        this(component, new RunnableAction(action));
+    }
+
+    /**
+     * Creates a new action for the given component that receives the
+     * {@link ExecutionContext} of the response it runs before, for example to
+     * check whether the component's client side is already initialized. The
+     * action is not scheduled until you call {@link #schedule()}.
+     * <p>
+     * If the action is a lambda or a method reference, do not store it in
+     * another field and do not capture it in another lambda. Otherwise the
+     * component can fail to deserialize.
+     *
+     * @param component
+     *            the component whose client response the action runs before,
+     *            not {@code null}
+     * @param action
+     *            the action to run, not {@code null}
+     */
+    public BeforeClientResponseAction(Component component,
+            SerializableConsumer<ExecutionContext> action) {
         this.component = Objects.requireNonNull(component,
                 "Component must not be null");
         this.action = Objects.requireNonNull(action, "Action must not be null");
@@ -84,7 +107,7 @@ public class BeforeClientResponseAction implements Serializable {
         attachRegistration = component.whenAttached(
                 ui -> ui.beforeClientResponse(component, context -> {
                     cancel();
-                    action.run();
+                    action.accept(context);
                 }));
     }
 
@@ -99,5 +122,26 @@ public class BeforeClientResponseAction implements Serializable {
         Registration registration = attachRegistration;
         attachRegistration = null;
         registration.remove();
+    }
+
+    /**
+     * Adapts a runnable to an action that ignores the execution context. A
+     * class instead of a lambda, so that the runnable is held in a field and
+     * not captured by another lambda, see the note in {@link #schedule()}.
+     */
+    private static final class RunnableAction
+            implements SerializableConsumer<ExecutionContext> {
+
+        private final SerializableRunnable runnable;
+
+        RunnableAction(SerializableRunnable runnable) {
+            this.runnable = Objects.requireNonNull(runnable,
+                    "Action must not be null");
+        }
+
+        @Override
+        public void accept(ExecutionContext context) {
+            runnable.run();
+        }
     }
 }
