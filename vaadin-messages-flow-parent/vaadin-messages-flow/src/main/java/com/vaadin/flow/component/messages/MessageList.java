@@ -37,6 +37,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.shared.internal.SignalBindingUtil;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
@@ -73,8 +74,9 @@ public class MessageList extends Component implements HasStyle, HasSize,
     private static final String AI_COMPONENTS_FEATURE_FLAG_ID = "aiComponents";
 
     private List<MessageListItem> items = new ArrayList<>();
+    private final BeforeClientResponseAction clientUpdate = new BeforeClientResponseAction(
+            this, this::updateClient);
     private boolean pendingUpdate = false;
-    private boolean pendingTextUpdate = false;
     private Integer pendingAddItemsIndex;
     private boolean typingIndicatorUsed = false;
     private MessageListI18n i18n;
@@ -232,81 +234,55 @@ public class MessageList extends Component implements HasStyle, HasSize,
      * Schedules an incremental update of the message list items' text content.
      */
     void scheduleItemsTextUpdate() {
-        scheduleUpdate();
-        // Avoid multiple updateClient() calls even though all but the first one
-        // are NOPs (untestable flag)
-        pendingTextUpdate = true;
+        clientUpdate.schedule();
     }
 
     void scheduleAddItemsUpdate() {
-        scheduleUpdate();
         if (pendingAddItemsIndex == null) {
             pendingAddItemsIndex = items.size() - 1;
         }
+        clientUpdate.schedule();
     }
 
     /**
      * Schedules a full update of the message list items.
      */
     void scheduleItemsUpdate() {
-        scheduleUpdate();
         pendingUpdate = true;
-    }
-
-    /**
-     * Schedules a client sync of the message list items to be run before the
-     * next client response.
-     */
-    private void scheduleUpdate() {
-        if (pendingUpdate || pendingTextUpdate
-                || pendingAddItemsIndex != null) {
-            // Already scheduled
-            return;
-        }
-
-        // Schedule update before the next client response
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, ctx -> updateClient(ui)));
+        clientUpdate.schedule();
     }
 
     /**
      * Updates the client with the current state of the message list items.
-     *
-     * @param ui
-     *            the UI the component is attached to
      */
-    private void updateClient(UI ui) {
+    private void updateClient() {
         if (pendingUpdate) {
-            handleFullUpdate(ui);
+            handleFullUpdate();
         } else {
             // Incremental updates
 
             // Check if we need to add new items
-            handleAddItemsUpdate(ui);
+            handleAddItemsUpdate();
 
             // Check for text updates if not a full update
             handleTextUpdates();
         }
 
         // Reset flags for the next update cycle
-        pendingTextUpdate = false;
         pendingUpdate = false;
         pendingAddItemsIndex = null;
     }
 
     /**
      * Handles a full update of the message list items.
-     *
-     * @param ui
-     *            the UI the component is attached to
      */
-    private void handleFullUpdate(UI ui) {
+    private void handleFullUpdate() {
         // Sync clientText for items
         items.forEach(item -> item.clientText = item.getText());
 
         var itemsJson = JacksonUtils.listToJson(items);
         getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
-                itemsJson, ui.getLocale().toLanguageTag());
+                itemsJson, getLocale().toLanguageTag());
     }
 
     /**
@@ -339,7 +315,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
         });
     }
 
-    private void handleAddItemsUpdate(UI ui) {
+    private void handleAddItemsUpdate() {
         if (pendingAddItemsIndex == null) {
             return;
         }
@@ -352,7 +328,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
         var newItemsJson = JacksonUtils.listToJson(newItems);
         // Call the connector function to add items
         getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
-                newItemsJson, ui.getLocale().toLanguageTag());
+                newItemsJson, getLocale().toLanguageTag());
     }
 
     @Override
