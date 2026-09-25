@@ -23,9 +23,6 @@ import java.io.Serializable;
  */
 public final class ConfigurationKeys implements Serializable {
 
-    private ConfigurationKeys() {
-    }
-
     // --- Top-level configuration sections ---
 
     public static final String CHART = "chart";
@@ -46,6 +43,7 @@ public final class ConfigurationKeys implements Serializable {
 
     public static final String NAME = "name";
     public static final String TYPE = "type";
+    public static final String DATA = "data";
     public static final String TEXT = "text";
     public static final String ENABLED = "enabled";
     public static final String MIN = "min";
@@ -121,4 +119,7 @@ public final class ConfigurationKeys implements Serializable {
     public static final String END_ANGLE = "endAngle";
     public static final String CENTER = "center";
     public static final String SIZE = "size";
+
+    private ConfigurationKeys() {
+    }
 }
