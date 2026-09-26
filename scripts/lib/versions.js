@@ -4,6 +4,7 @@ const fs = require('fs');
 const exec = require('util').promisify(require('child_process').exec);
 const cachedBowerVersions = {};
 const cachedNpmVersions = {};
+const cachedPublishedVersions = {};
 
 async function run(cmd) {
   const { stdout, stderr } = await exec(cmd);
@@ -142,7 +143,32 @@ async function getLatestBowerVersion(package, version, major, minor) {
   return cachedBowerVersions[package];
 }
 
-async function computeVersionToUpdate(data) {
+// Whether the package publishes the given exact version. Cached per
+// package@version so the many repeated annotations only trigger one
+// `npm view` each.
+async function packagePublishesVersion(package, version) {
+  const key = `${package}@${version}`;
+  if (!(key in cachedPublishedVersions)) {
+    try {
+      const found = (await run(`npm view ${package}@${version} version`)).trim();
+      cachedPublishedVersions[key] = found.length > 0;
+    } catch (e) {
+      // No such package/version on the registry -> not part of this snapshot.
+      cachedPublishedVersions[key] = false;
+    }
+  }
+  return cachedPublishedVersions[key];
+}
+
+// Resolve the version to write into an annotation. Without a fixedVersion the
+// latest published npm version for the package's major.minor is used. With a
+// fixedVersion (e.g. a feature snapshot) that exact version is used, but only
+// for packages that actually publish it - others resolve to '' and are skipped.
+async function computeVersionToUpdate(data, fixedVersion) {
+  if (fixedVersion) {
+    const publishes = await packagePublishesVersion(data.package, fixedVersion);
+    return (data['updatedVersion'] = publishes ? fixedVersion : '');
+  }
   return (data['updatedVersion'] = await getLatestNpmVersion(data.package, data.version, data.major, data.minor));
 }
 
@@ -151,6 +177,7 @@ module.exports = {
   getVersionsCsv,
   getVersionsJson,
   computeVersionToUpdate,
+  packagePublishesVersion,
   getLatestNpmVersion,
   getAnnotations,
   checkoutPlatorm,

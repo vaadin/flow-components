@@ -32,7 +32,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @since 25.2
  */
 @Tag("vaadin-slider")
-@NpmPackage(value = "@vaadin/slider", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/slider", version = "25.4.0-dev.55bb86e155")
 @JsModule("@vaadin/slider/src/vaadin-slider.js")
 public class DecimalSlider extends NumberSlider<DecimalSlider, Double> {
     /**
