@@ -39,8 +39,16 @@ public class GridTooltipIT extends AbstractComponentIT {
 
     @Test
     public void tooltipGenerator_shouldNotProduceErrors() {
-        checkLogsForErrors(
-                msg -> !msg.contains("Cannot read properties of undefined"));
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void hoverOverColumnHeader_shouldNotProduceErrors() {
+        scrollToElement(grid);
+        // Header cells have no item in their event context, which used to make
+        // the tooltip generator throw (see issue #10247)
+        showTooltip(grid.getHeaderCell(0));
+        checkLogsForErrors();
     }
 
     @Test
