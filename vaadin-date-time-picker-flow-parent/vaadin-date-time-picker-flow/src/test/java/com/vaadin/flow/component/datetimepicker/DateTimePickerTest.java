@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,10 +33,14 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.StateNode;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -190,6 +195,46 @@ class DateTimePickerTest {
 
         picker.setDatePickerI18n(i18n);
         assertEquals(i18n, picker.getDatePickerI18n());
+    }
+
+    @Test
+    void setTimePickerI18n() {
+        DateTimePicker picker = new DateTimePicker();
+        Assertions.assertNull(picker.getTimePickerI18n());
+
+        TimePicker.TimePickerI18n i18n = new TimePicker.TimePickerI18n()
+                .setTimeFormat("HH:mm");
+        picker.setTimePickerI18n(i18n);
+        Assertions.assertSame(i18n, picker.getTimePickerI18n());
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> picker.setTimePickerI18n(null));
+    }
+
+    @Test
+    void setTimePickerI18n_innerTimePickerSendsTimeFormats() {
+        DateTimePicker picker = new DateTimePicker();
+        ui.add(picker);
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        picker.setTimePickerI18n(
+                new TimePicker.TimePickerI18n().setTimeFormats("HH:mm", "Hmm"));
+        ui.fakeClientCommunication();
+
+        StateNode timePickerNode = picker.getElement().getChildren()
+                .filter(child -> "vaadin-time-picker".equals(child.getTag()))
+                .findFirst().orElseThrow().getNode();
+        List<List<Object>> calls = ui.dumpPendingJavaScriptInvocations()
+                .stream()
+                .filter(invocation -> invocation.getOwner() == timePickerNode)
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> "$connector.updateI18n"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
+                .map(JsFunctionCallUtil::getArguments).toList();
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals("{\"timeFormats\":[\"HH:mm\",\"Hmm\"]}",
+                calls.get(0).get(1).toString());
     }
 
     @Test

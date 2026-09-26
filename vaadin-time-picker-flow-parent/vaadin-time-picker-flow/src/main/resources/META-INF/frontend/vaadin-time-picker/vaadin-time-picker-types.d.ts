@@ -17,6 +17,11 @@ export interface FlowTimePickerTime {
   milliseconds?: number;
 }
 
+/** The i18n object the server sends to the connector */
+export interface FlowTimePickerServerI18n {
+  timeFormats?: string[];
+}
+
 /**
  * The i18n object the connector assigns to the web component. Unlike the
  * public API contract, `formatTime` returns `undefined` for an undefined time.
