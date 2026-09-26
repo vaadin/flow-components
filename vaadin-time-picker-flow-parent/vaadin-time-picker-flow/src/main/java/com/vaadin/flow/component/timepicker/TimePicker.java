@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,6 +27,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -59,9 +62,12 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Time Picker is an input field for entering or selecting a specific time. The
@@ -114,6 +120,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Tag("vaadin-time-picker")
 @NpmPackage(value = "@vaadin/time-picker", version = "25.4.0-alpha1")
+@NpmPackage(value = "date-fns", version = "4.4.0")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.ts")
 public class TimePicker
@@ -733,6 +740,10 @@ public class TimePicker
      * If the given locale is ill-formed or the browser doesn't support it, the
      * browser's default locale is used.
      * <p>
+     * If the i18n object has custom time formats, they override the locale for
+     * formatting and parsing the time. See
+     * {@link TimePickerI18n#setTimeFormat(String)}.
+     * <p>
      * <em>NOTE: only the language + country/region codes are used</em>. This
      * means that the script and variant information is not used and supported.
      * <em>NOTE: timezone related data is not supported.</em> <em>NOTE: changing
@@ -803,8 +814,12 @@ public class TimePicker
         String languageTag = Locale
                 .of(parsedLocale.getLanguage(), parsedLocale.getCountry())
                 .toLanguageTag();
-        runBeforeClientResponse(ui -> getElement()
-                .callJsFunction("$connector.setLocale", languageTag));
+        runBeforeClientResponse(ui -> {
+            ObjectNode i18nJson = i18n == null ? null
+                    : JacksonUtils.beanToJson(i18n);
+            getElement().callJsFunction("$connector.updateI18n", languageTag,
+                    i18nJson);
+        });
     }
 
     /**
@@ -967,6 +982,7 @@ public class TimePicker
     public void setI18n(TimePickerI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
+        requestLocaleUpdate();
     }
 
     private String getI18nErrorMessage(
@@ -979,12 +995,149 @@ public class TimePicker
      *
      * @since 24.5
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class TimePickerI18n implements Serializable {
 
+        private List<String> timeFormats;
         private String badInputErrorMessage;
         private String requiredErrorMessage;
         private String minErrorMessage;
         private String maxErrorMessage;
+
+        /**
+         * Gets the custom time formats that are used for formatting the time
+         * displayed in the text field, and for parsing the user input. The
+         * first format is the primary format.
+         * <p>
+         * The default is {@code null}, which means that the time picker uses
+         * the locale for formatting and parsing.
+         * <p>
+         * Unlike {@code DatePickerI18n#getDateFormats()}, the returned list is
+         * unmodifiable. To change the formats, call
+         * {@link #setTimeFormats(String, String...)} again.
+         *
+         * @return an unmodifiable list of time patterns, or {@code null} if not
+         *         set
+         * @since 25.4
+         */
+        public List<String> getTimeFormats() {
+            return timeFormats;
+        }
+
+        /**
+         * Sets a custom time format for the time picker. The format is used for
+         * formatting the time displayed in the text field, and for parsing the
+         * user input.
+         * <p>
+         * The format is a pattern of symbols that specify how and where the
+         * time parts are displayed. You can use the following symbols:
+         * <ul>
+         * <li>{@code H}, {@code HH}: hour of day (0-23), as 1 or 2 digits, or
+         * padded to 2 digits
+         * <li>{@code h}, {@code hh}: hour of AM/PM (1-12)
+         * <li>{@code K}, {@code KK}: hour of AM/PM (0-11)
+         * <li>{@code k}, {@code kk}: hour of day (1-24). For example,
+         * {@code k:mm} shows midnight as {@code 24:05}.
+         * <li>{@code m}, {@code mm}: minutes
+         * <li>{@code s}, {@code ss}: seconds
+         * <li>{@code S}, {@code SS}, {@code SSS}: fraction of a second with 1,
+         * 2 or 3 digits
+         * <li>{@code a}, {@code aaa}, {@code aaaa}: AM/PM marker, such as
+         * {@code PM}, {@code pm} or {@code p.m.}
+         * <li>{@code 'text'}: a literal text, and {@code ''} for a single quote
+         * </ul>
+         * <p>
+         * The client rejects {@code h} and {@code K} patterns without an AM/PM
+         * marker, because they lose the PM hour. It also rejects {@code H} and
+         * {@code k} patterns with an AM/PM marker.
+         * <p>
+         * For example, {@code HH.mm} formats 1:05 PM as {@code 13.05}.
+         * <p>
+         * Parsing is strict about the symbols in the pattern:
+         * <ul>
+         * <li>{@code HHmm} requires 4 digits. This is the recommended pattern
+         * for numpad entry.
+         * <li>{@code Hmm} accepts {@code 930} and {@code 1430}. It reads
+         * ambiguous input greedily: {@code 130} as 13:00 and {@code 245} as
+         * 02:45. Use it only as an additional parsing format, because the
+         * client rejects it as the primary format.
+         * <li>{@code h:mm a} requires the AM/PM marker.
+         * </ul>
+         * <p>
+         * A primary hour-only pattern such as {@code HH} displays whole hours.
+         * If you edit the text, the minutes are dropped.
+         * <p>
+         * The AM/PM marker is always in English, and the time picker accepts
+         * only ASCII digits. A custom format therefore loses the AM/PM and
+         * digit localization of the locale. If you only need a 24-hour clock,
+         * consider {@link TimePicker#setLocale(Locale)} with a locale that uses
+         * it instead.
+         * <p>
+         * The format controls only how the time is displayed. The step controls
+         * the precision of the value. Keep the format consistent with the step:
+         * a format with seconds and a step of 60 seconds or more shows
+         * {@code :00}, and a format without seconds and a step below 60 seconds
+         * hides the seconds.
+         * <p>
+         * Using a custom time format overrides the locale set in the time
+         * picker. The client ignores an invalid pattern and logs a warning.
+         * <p>
+         * Setting the format to {@code null} reverts the time picker to use the
+         * locale for formatting and parsing.
+         *
+         * @param timeFormat
+         *            a time format pattern, or {@code null} to remove the
+         *            previous custom format
+         * @return this instance for method chaining
+         * @since 25.4
+         */
+        public TimePickerI18n setTimeFormat(String timeFormat) {
+            return setTimeFormats(timeFormat);
+        }
+
+        /**
+         * Sets custom time formats for the time picker. The primary format is
+         * used for formatting the time displayed in the text field, and for
+         * parsing the user input. You can specify additional parsing formats to
+         * support entering times in multiple formats. The time picker first
+         * tries to parse the user input with the primary format, then with the
+         * additional formats in the order that you specified them. The
+         * additional formats are never used for formatting. A time entered in
+         * an additional format is still displayed in the primary format.
+         * <p>
+         * See {@link #setTimeFormat(String)} on how time patterns are
+         * structured.
+         * <p>
+         * Using custom time formats overrides the locale set in the time
+         * picker. The client ignores an invalid additional format and logs a
+         * warning. An invalid primary format disables all custom formats.
+         * <p>
+         * Setting the primary format to {@code null} reverts the time picker to
+         * use the locale for formatting and parsing.
+         *
+         * @param primaryFormat
+         *            a time format pattern, or {@code null} to remove the
+         *            previous custom formats
+         * @param additionalParsingFormats
+         *            additional time format patterns for parsing, not
+         *            {@code null}
+         * @return this instance for method chaining
+         * @since 25.4
+         */
+        public TimePickerI18n setTimeFormats(String primaryFormat,
+                String... additionalParsingFormats) {
+            Objects.requireNonNull(additionalParsingFormats,
+                    "Additional parsing formats must not be null");
+
+            if (primaryFormat == null) {
+                timeFormats = null;
+            } else {
+                timeFormats = Stream.concat(Stream.of(primaryFormat), Stream
+                        .of(additionalParsingFormats).filter(Objects::nonNull))
+                        .toList();
+            }
+            return this;
+        }
 
         /**
          * Gets the error message displayed when the field contains user input
@@ -992,6 +1145,7 @@ public class TimePicker
          *
          * @return the error message or {@code null} if not set
          */
+        @JsonIgnore // Not used in client side
         public String getBadInputErrorMessage() {
             return badInputErrorMessage;
         }
@@ -1021,6 +1175,7 @@ public class TimePicker
          * @see TimePicker#isRequiredIndicatorVisible()
          * @see TimePicker#setRequiredIndicatorVisible(boolean)
          */
+        @JsonIgnore // Not used in client side
         public String getRequiredErrorMessage() {
             return requiredErrorMessage;
         }
@@ -1052,6 +1207,7 @@ public class TimePicker
          * @see TimePicker#getMin()
          * @see TimePicker#setMin(LocalTime)
          */
+        @JsonIgnore // Not used in client side
         public String getMinErrorMessage() {
             return minErrorMessage;
         }
@@ -1083,6 +1239,7 @@ public class TimePicker
          * @see TimePicker#getMax()
          * @see TimePicker#setMax(LocalTime)
          */
+        @JsonIgnore // Not used in client side
         public String getMaxErrorMessage() {
             return maxErrorMessage;
         }
