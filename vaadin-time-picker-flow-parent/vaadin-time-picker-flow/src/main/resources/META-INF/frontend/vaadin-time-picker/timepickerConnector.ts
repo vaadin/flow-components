@@ -1,3 +1,6 @@
+import { format as dateFnsFormat } from 'date-fns/format';
+import { parse as dateFnsParse } from 'date-fns/parse';
+import { isValid as dateFnsIsValid } from 'date-fns/isValid';
 import {
   TEST_PM_TIME,
   escapeRegExp,
@@ -9,7 +12,20 @@ import {
   getSeparator,
   searchAmOrPmToken
 } from './helpers.ts';
-import type { FlowTimePicker, FlowTimePickerTime } from './vaadin-time-picker-types.js';
+import type { FlowTimePicker, FlowTimePickerServerI18n, FlowTimePickerTime } from './vaadin-time-picker-types.js';
+
+// The day custom formats format and parse on, fixed to avoid DST shifts
+const REFERENCE_DATE = new Date(1970, 0, 1);
+
+// Probe times for the round-trip check of a custom format: a PM time, a
+// single-digit hour and midnight. Additional formats are only used for
+// parsing, so they need to round-trip the PM time only.
+const PRIMARY_FORMAT_PROBES: FlowTimePickerTime[] = [
+  { hours: 13, minutes: 5, seconds: 7, milliseconds: 45 },
+  { hours: 1, minutes: 5, seconds: 7, milliseconds: 45 },
+  { hours: 0, minutes: 5, seconds: 0, milliseconds: 0 }
+];
+const ADDITIONAL_FORMAT_PROBES = PRIMARY_FORMAT_PROBES.slice(0, 1);
 
 /**
  * timepickerConnector is a communication layer between TimePicker's flow
@@ -18,12 +34,16 @@ import type { FlowTimePicker, FlowTimePickerTime } from './vaadin-time-picker-ty
 export class TimePickerConnector {
   readonly #timePicker: FlowTimePicker;
 
-  // Locale and the values derived from it, assigned by `setLocale`
+  // Locale and the values derived from it, assigned by `updateI18n`
   #locale?: string;
   #amString: string | null = null;
   #pmString: string | null = null;
   #separator: string | null = null;
   #escapedSeparator = '';
+
+  // Validated custom formats, the first one is used for formatting. When
+  // unset, the time is formatted and parsed based on the locale.
+  #timeFormats?: string[];
 
   // The result of the last successful parse, reused when the same string is
   // parsed again
@@ -34,7 +54,7 @@ export class TimePickerConnector {
     this.#timePicker = timePicker;
   }
 
-  setLocale(locale: string): void {
+  updateI18n(locale: string, i18n: FlowTimePickerServerI18n | null): void {
     try {
       // Check whether the locale is supported by the browser or not
       TEST_PM_TIME.toLocaleTimeString(locale);
@@ -53,6 +73,8 @@ export class TimePickerConnector {
     this.#separator = getSeparator(locale);
     // The separator can be a regexp special character, such as the dot used by fi-FI
     this.#escapedSeparator = escapeRegExp(this.#separator || '');
+
+    this.#timeFormats = validateTimeFormats(i18n?.timeFormats);
 
     // A cached result was parsed with the previous locale, so it no longer applies
     this.#cachedTimeString = undefined;
@@ -76,6 +98,10 @@ export class TimePickerConnector {
   #formatTime(timeObject: FlowTimePickerTime | undefined): string | undefined {
     if (!timeObject) return undefined;
 
+    if (this.#timeFormats) {
+      return dateFnsFormat(toDate(timeObject), this.#timeFormats[0]);
+    }
+
     const timeToBeFormatted = new Date();
     timeToBeFormatted.setHours(timeObject.hours);
     timeToBeFormatted.setMinutes(timeObject.minutes);
@@ -98,6 +124,16 @@ export class TimePickerConnector {
   }
 
   #parseTime(timeString: string): FlowTimePickerTime | undefined {
+    if (this.#timeFormats) {
+      const text = timeString.trim();
+      // The first format that matches the text wins
+      for (const timeFormat of this.#timeFormats) {
+        const time = parseWithFormat(text, timeFormat);
+        if (time) return time;
+      }
+      return undefined;
+    }
+
     if (timeString && timeString === this.#cachedTimeString && this.#cachedTimeObject) {
       return this.#cachedTimeObject;
     }
@@ -157,6 +193,82 @@ export class TimePickerConnector {
     }
     return undefined;
   }
+}
+
+function toDate(time: FlowTimePickerTime): Date {
+  const date = new Date(REFERENCE_DATE);
+  date.setHours(time.hours, time.minutes, time.seconds ?? 0, time.milliseconds ?? 0);
+  return date;
+}
+
+function parseWithFormat(text: string, timeFormat: string): FlowTimePickerTime | undefined {
+  const date = dateFnsParse(text, timeFormat, REFERENCE_DATE);
+  if (!dateFnsIsValid(date)) return undefined;
+  return {
+    hours: date.getHours(),
+    minutes: date.getMinutes(),
+    seconds: date.getSeconds(),
+    milliseconds: date.getMilliseconds()
+  };
+}
+
+/**
+ * Returns whether each probe time survives formatting and parsing back with
+ * the format. Only the fields that the format contains are compared, with
+ * milliseconds compared at the precision of the format.
+ */
+function isValidTimeFormat(timeFormat: string, probes: FlowTimePickerTime[]): boolean {
+  // Remove escaped quotes and quoted literals to keep only the tokens
+  const tokens = timeFormat.replace(/''/g, '').replace(/'[^']*'/g, '');
+  // Reject date tokens and letters that date-fns does not know
+  if (/[a-z]/i.test(tokens.replace(/[HhKkmsSa]/g, ''))) {
+    return false;
+  }
+
+  const millisecondDigits = tokens.split('S').length - 1;
+  const millisecondDivisor = 10 ** (3 - millisecondDigits);
+  const isSameTime = (a: FlowTimePickerTime, b: FlowTimePickerTime) =>
+    a.hours === b.hours &&
+    (!tokens.includes('m') || a.minutes === b.minutes) &&
+    (!tokens.includes('s') || a.seconds === b.seconds) &&
+    (!millisecondDigits ||
+      Math.floor(a.milliseconds! / millisecondDivisor) === Math.floor(b.milliseconds! / millisecondDivisor));
+
+  try {
+    return probes.every((probe) => {
+      const parsed = parseWithFormat(dateFnsFormat(toDate(probe), timeFormat), timeFormat);
+      return !!parsed && isSameTime(probe, parsed);
+    });
+  } catch (e) {
+    // date-fns throws for invalid formats
+    return false;
+  }
+}
+
+/**
+ * Returns the formats that pass validation, or `undefined` to use the locale.
+ * An invalid primary format disables all custom formats, while an invalid
+ * additional format is dropped alone.
+ */
+function validateTimeFormats(timeFormats: string[] | undefined): string[] | undefined {
+  if (!timeFormats?.length) return undefined;
+
+  const [primaryFormat, ...additionalFormats] = timeFormats;
+  if (!isValidTimeFormat(primaryFormat, PRIMARY_FORMAT_PROBES)) {
+    console.warn(`vaadin-time-picker: The time format "${primaryFormat}" is not supported, using the locale instead.`);
+    return undefined;
+  }
+
+  return [
+    primaryFormat,
+    ...additionalFormats.filter((timeFormat) => {
+      const isValid = isValidTimeFormat(timeFormat, ADDITIONAL_FORMAT_PROBES);
+      if (!isValid) {
+        console.warn(`vaadin-time-picker: The time format "${timeFormat}" is not supported, ignoring it.`);
+      }
+      return isValid;
+    })
+  ];
 }
 
 function initLazy(timePicker: FlowTimePicker): void {

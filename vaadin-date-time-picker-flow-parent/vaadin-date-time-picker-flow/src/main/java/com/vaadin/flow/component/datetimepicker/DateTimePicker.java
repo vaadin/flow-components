@@ -49,6 +49,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.component.timepicker.StepsUtil;
+import com.vaadin.flow.component.timepicker.TimePicker.TimePickerI18n;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -116,6 +117,7 @@ public class DateTimePicker
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
     private DatePickerI18n datePickerI18n;
+    private TimePickerI18n timePickerI18n;
 
     private DateTimePickerI18n i18n;
     private Locale locale;
@@ -1213,6 +1215,40 @@ public class DateTimePicker
         this.datePickerI18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
         datePicker.setI18n(i18n);
+    }
+
+    /**
+     * Gets the internationalization object previously set for the time picker
+     * inside this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link DateTimePicker#setTimePickerI18n(TimePickerI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     * @since 25.4
+     */
+    public TimePickerI18n getTimePickerI18n() {
+        return timePickerI18n;
+    }
+
+    /**
+     * Sets the internationalization properties for the time picker inside this
+     * component.
+     * <p>
+     * Only the time formats apply, see
+     * {@link TimePickerI18n#setTimeFormats(String, String...)}. The error
+     * messages of the given object are ignored. Use
+     * {@link #setI18n(DateTimePickerI18n)} to set error messages instead.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     * @since 25.4
+     */
+    public void setTimePickerI18n(TimePickerI18n i18n) {
+        this.timePickerI18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        timePicker.setI18n(i18n);
     }
 
     /**
