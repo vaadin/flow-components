@@ -417,6 +417,7 @@ export class GridConnector {
 
     // Check visibility before the grid replays a deferred scrollToItem. A newer
     // scroll call replaces the pending indexes, which the grid replays as usual.
+    // The grid stores a copy of the indexes, so compare by reference.
     grid.__scrollToPendingIndexes = () => {
       const pending = this.#pendingScrollToItem;
       if (pending && pending.indexes === grid.__pendingScrollToIndexes) {
