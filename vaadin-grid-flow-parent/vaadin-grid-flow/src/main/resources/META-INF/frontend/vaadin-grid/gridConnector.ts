@@ -368,6 +368,11 @@ export class GridConnector {
     column.footerRenderer = (root) => renderContent(root, content);
   }
 
+  /**
+   * Scrolls to the item unless its row is already fully visible. The check uses
+   * the item key, because the web component can only map `indexes` to a row
+   * after loading the data around it.
+   */
   scrollToItem(itemKey: string, ...indexes: number[]): void {
     const grid = this.#grid;
     this.#pendingScrollToItem = null;
@@ -377,7 +382,8 @@ export class GridConnector {
 
     grid.scrollToIndex(...indexes);
 
-    // The grid defers the scroll until it is ready, re-check visibility then
+    // Before the first render, the grid defers the scroll and has no rows to
+    // check yet. Remember the item to check it when the grid replays the scroll.
     this.#pendingScrollToItem = grid.__pendingScrollToIndexes
       ? { itemKey, indexes: grid.__pendingScrollToIndexes }
       : null;
@@ -409,6 +415,8 @@ export class GridConnector {
       }
     };
 
+    // Check visibility before the grid replays a deferred scrollToItem. A newer
+    // scroll call replaces the pending indexes, which the grid replays as usual.
     grid.__scrollToPendingIndexes = () => {
       const pending = this.#pendingScrollToItem;
       if (pending && pending.indexes === grid.__pendingScrollToIndexes) {
@@ -724,11 +732,9 @@ export class GridConnector {
   #isItemFullyInViewport(itemKey: string): boolean {
     const grid = this.#grid;
     const row = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
-    return !!row && this.#isRowFullyInViewport(row);
-  }
-
-  #isRowFullyInViewport(row: HTMLElement): boolean {
-    const grid = this.#grid;
+    if (!row) {
+      return false;
+    }
     const rowRect = row.getBoundingClientRect();
     const tableRect = grid.$.table.getBoundingClientRect();
     const headerRect = grid.$.header.getBoundingClientRect();

@@ -105,7 +105,6 @@ export type FlowGrid = FlowGridInternals & Grid<Item>;
  * tree grid connector relies on, in addition to the grid connector's.
  */
 export interface FlowTreeGridInternals {
-  __pendingScrollToIndexes?: number[];
   __getRowLevel(row: FlowGridRow): number;
   _isExpanded(item: Item | undefined): boolean;
   _scrollToFlatIndex(flatIndex: number): void;
