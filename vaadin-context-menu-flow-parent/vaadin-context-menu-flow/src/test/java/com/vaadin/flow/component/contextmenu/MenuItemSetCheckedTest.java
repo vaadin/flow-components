@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class MenuItemSetCheckedTest {
@@ -114,9 +113,8 @@ class MenuItemSetCheckedTest {
     private static PendingJavaScriptInvocation getGenerateItemsInvocation(
             List<PendingJavaScriptInvocation> invocations) {
         return invocations.stream()
-                .filter(invocation -> "$connector.generateItems"
-                        .equals(JsFunctionCallUtil
-                                .getFunctionName(invocation.getInvocation())))
+                .filter(invocation -> invocation.getInvocation().getExpression()
+                        .contains("$connector.generateItems"))
                 .findFirst().orElseThrow();
     }
 
