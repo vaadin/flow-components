@@ -43,6 +43,8 @@ export class GridConnector {
 
   #preventRowUpdatesActive = 0;
 
+  #pendingScrollToItem: { itemKey: string; indexes: number[] } | null = null;
+
   constructor(grid: FlowGrid) {
     this.#grid = grid;
     this.#dataProviderController = grid._dataProviderController;
@@ -366,26 +368,19 @@ export class GridConnector {
     column.footerRenderer = (root) => renderContent(root, content);
   }
 
-  scrollToItem(itemKey: string, ...args: number[]): void {
-    this.#scrollToItem(itemKey, args, 10);
-  }
-
-  #scrollToItem(itemKey: string, indexes: number[], remainingFrames: number): void {
+  scrollToItem(itemKey: string, ...indexes: number[]): void {
     const grid = this.#grid;
-    const rows = grid._getRenderedRows();
-
-    // Wait for the first render to check visibility
-    if (rows.length === 0 && remainingFrames > 0) {
-      requestAnimationFrame(() => this.#scrollToItem(itemKey, indexes, remainingFrames - 1));
-      return;
-    }
-
-    const targetRow = rows.find((row) => row._item && grid.getItemId(row._item) === itemKey);
-    if (targetRow && this.#isRowFullyInViewport(targetRow)) {
+    this.#pendingScrollToItem = null;
+    if (this.#isItemFullyInViewport(itemKey)) {
       return;
     }
 
     grid.scrollToIndex(...indexes);
+
+    // The grid defers the scroll until it is ready, re-check visibility then
+    this.#pendingScrollToItem = grid.__pendingScrollToIndexes
+      ? { itemKey, indexes: grid.__pendingScrollToIndexes }
+      : null;
   }
 
   /**
@@ -411,6 +406,16 @@ export class GridConnector {
         const fetchRange = this.getFetchRange();
         this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
         this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
+      }
+    };
+
+    grid.__scrollToPendingIndexes = () => {
+      const pending = this.#pendingScrollToItem;
+      if (pending && pending.indexes === grid.__pendingScrollToIndexes) {
+        delete grid.__pendingScrollToIndexes;
+        this.scrollToItem(pending.itemKey, ...pending.indexes);
+      } else {
+        Object.getPrototypeOf(grid).__scrollToPendingIndexes.call(grid);
       }
     };
 
@@ -714,6 +719,12 @@ export class GridConnector {
     } finally {
       this.#preventRowUpdatesActive--;
     }
+  }
+
+  #isItemFullyInViewport(itemKey: string): boolean {
+    const grid = this.#grid;
+    const row = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
+    return !!row && this.#isRowFullyInViewport(row);
   }
 
   #isRowFullyInViewport(row: HTMLElement): boolean {

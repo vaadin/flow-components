@@ -40,6 +40,38 @@ describe('grid connector - scroll to item', () => {
       await nextFrame();
       expect(getBodyCell(grid, 100, 0)).to.exist;
     });
+
+    it('should not override a newer scroll call', async () => {
+      grid.$connector.scrollToItem('100', 100);
+      grid.scrollToIndex(50);
+      await nextFrame();
+      await nextFrame();
+      expect(getBodyCell(grid, 50, 0)).to.exist;
+      expect(getBodyCell(grid, 100, 0)).to.not.exist;
+    });
+
+    it('should not scroll when the item is fully in viewport once a hidden grid is shown', async () => {
+      grid.hidden = true;
+      grid.$connector.scrollToItem('5', 5);
+      // Stay hidden for longer than the grid needs for the first render
+      for (let i = 0; i < 12; i++) {
+        await nextFrame();
+      }
+      grid.hidden = false;
+      await nextFrame();
+      await nextFrame();
+      expect(table.scrollTop).to.equal(0);
+    });
+
+    it('should scroll to an item outside the viewport once a hidden grid is shown', async () => {
+      grid.hidden = true;
+      grid.$connector.scrollToItem('100', 100);
+      await nextFrame();
+      grid.hidden = false;
+      await nextFrame();
+      await nextFrame();
+      expect(getBodyCell(grid, 100, 0)).to.exist;
+    });
   });
 
   describe('after first render', () => {
