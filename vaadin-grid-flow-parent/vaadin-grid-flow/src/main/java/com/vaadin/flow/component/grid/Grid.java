@@ -5129,7 +5129,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             tooltipElement.executeJs(
                     """
                             this.generator = ({ item, column }) => {
-                                const { gridtooltips } = item;
+                                const { gridtooltips } = item ?? {};
                                 if (gridtooltips) {
                                     return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
                                 }
