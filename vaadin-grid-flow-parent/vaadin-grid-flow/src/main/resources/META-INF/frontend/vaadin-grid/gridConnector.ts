@@ -43,6 +43,8 @@ export class GridConnector {
 
   #preventRowUpdatesActive = 0;
 
+  #pendingScrollToItem: { itemKey: string; indexes: number[] } | null = null;
+
   constructor(grid: FlowGrid) {
     this.#grid = grid;
     this.#dataProviderController = grid._dataProviderController;
@@ -367,15 +369,25 @@ export class GridConnector {
     column.footerRenderer = (root) => renderContent(root, content);
   }
 
-  scrollToItem(itemKey: string, ...args: number[]): void {
+  /**
+   * Scrolls to the item unless its row is already fully visible. The check uses
+   * the item key, because the web component can only map `indexes` to a row
+   * after loading the data around it.
+   */
+  scrollToItem(itemKey: string, ...indexes: number[]): void {
     const grid = this.#grid;
-
-    const targetRow = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
-    if (targetRow && this.#isRowFullyInViewport(targetRow)) {
+    this.#pendingScrollToItem = null;
+    if (this.#isItemFullyInViewport(itemKey)) {
       return;
     }
 
-    grid.scrollToIndex(...args);
+    grid.scrollToIndex(...indexes);
+
+    // Before the first render, the grid defers the scroll and has no rows to
+    // check yet. Remember the item to check it when the grid replays the scroll.
+    this.#pendingScrollToItem = grid.__pendingScrollToIndexes
+      ? { itemKey, indexes: grid.__pendingScrollToIndexes }
+      : null;
   }
 
   /**
@@ -401,6 +413,19 @@ export class GridConnector {
         const fetchRange = this.getFetchRange();
         this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
         this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
+      }
+    };
+
+    // Check visibility before the grid replays a deferred scrollToItem. A newer
+    // scroll call replaces the pending indexes, which the grid replays as usual.
+    // The grid stores a copy of the indexes, so compare by reference.
+    grid.__scrollToPendingIndexes = () => {
+      const pending = this.#pendingScrollToItem;
+      if (pending && pending.indexes === grid.__pendingScrollToIndexes) {
+        delete grid.__pendingScrollToIndexes;
+        this.scrollToItem(pending.itemKey, ...pending.indexes);
+      } else {
+        Object.getPrototypeOf(grid).__scrollToPendingIndexes.call(grid);
       }
     };
 
@@ -706,8 +731,12 @@ export class GridConnector {
     }
   }
 
-  #isRowFullyInViewport(row: HTMLElement): boolean {
+  #isItemFullyInViewport(itemKey: string): boolean {
     const grid = this.#grid;
+    const row = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
+    if (!row) {
+      return false;
+    }
     const rowRect = row.getBoundingClientRect();
     const tableRect = grid.$.table.getBoundingClientRect();
     const headerRect = grid.$.header.getBoundingClientRect();

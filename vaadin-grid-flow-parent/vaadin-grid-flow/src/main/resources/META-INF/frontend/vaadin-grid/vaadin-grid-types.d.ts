@@ -82,6 +82,8 @@ export interface FlowGridInternals {
   _shouldLoadAllRenderedRowsAfterPageLoad: boolean;
   _sorters: GridSorter[];
   __a11yUpdateRowSelected(row: HTMLElement, selected: boolean): void;
+  __pendingScrollToIndexes?: number[];
+  __scrollToPendingIndexes(): void;
   __applySorters(...args: unknown[]): void;
   __updateRow(row: HTMLElement, ...args: unknown[]): void;
   __updateVirtualizerElement(...args: unknown[]): void;
@@ -103,7 +105,6 @@ export type FlowGrid = Grid<Item> & FlowGridInternals;
  * tree grid connector relies on, in addition to the grid connector's.
  */
 export interface FlowTreeGridInternals {
-  __pendingScrollToIndexes?: number[];
   __getRowLevel(row: FlowGridRow): number;
   _isExpanded(item: Item | undefined): boolean;
   _scrollToFlatIndex(flatIndex: number): void;
