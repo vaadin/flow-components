@@ -10,6 +10,7 @@
 import { LitElement, html } from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
+let ExportedSpreadsheet = Spreadsheet;
 
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -172,7 +173,7 @@ export class VaadinSpreadsheet extends LitElement {
       this._overlays.slot = 'overlays';
       this.appendChild(this._overlays);
 
-      this.api = new Spreadsheet(this, this.renderRoot, this._overlays);
+      this.api = new ExportedSpreadsheet(this, this.renderRoot, this._overlays);
       this.api.setHeight('100%');
       this.api.setWidth('100%');
       this.createCallbacks();
@@ -496,4 +497,40 @@ export class VaadinSpreadsheet extends LitElement {
   }
 }
 
-window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);
+const defineElement = () => window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);
+
+// A workaround for using the GWT SuperDevMode server when running at localhost
+// - First we check that the application is running in localhost
+// - Second we try to contact SDM with a timeout of 200ms
+// - Finally we load the exported spreadsheet from the SDM instead of from local
+if (/localhost|127.0.0.1/.test(location.hostname)) {
+  window.Vaadin = window.Vaadin || {};
+  const sdmUrl = `http://${location.hostname}:9876/SpreadsheetApi/SpreadsheetApi.nocache.js`;
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), 200);
+  fetch(sdmUrl, { signal: controller.signal })
+    .then((response) => {
+      if (response.status != 200) {
+        throw new Error();
+      }
+      // spreadsheet is exported to window.Vaadin.Spreadsheet
+      delete window.Vaadin.Spreadsheet;
+      const s = document.createElement('script');
+      s.src = sdmUrl;
+      document.head.prepend(s);
+      const id = setInterval(() => {
+        if (window.Vaadin.Spreadsheet) {
+          clearInterval(id);
+          ExportedSpreadsheet = Vaadin.Spreadsheet.Api;
+          defineElement();
+          console.warn(`Spreadsheet is using GWT SDM at ${sdmUrl}`);
+          console.warn(`For recompiling GWT install the bookmark from http://${location.hostname}:9876/`);
+        }
+      }, 200);
+    })
+    .catch(() => {
+      defineElement();
+    });
+} else {
+  defineElement();
+}
