@@ -11,7 +11,7 @@
 - **Reproduced on:** flow-components @ `main` (25.4-SNAPSHOT, 31c6ca7718)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (playwright-cli)
-- **Screenshot** (static bug): ![Cold load of ?focus=10 — Item 10 parked at the top](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-10245.png)
+- **Screenshot** (static bug): ![Cold load of ?focus=10 — Item 10 parked at the top](https://raw.githubusercontent.com/vaadin/flow-components/bb55f8cab593a53bdf8ecd2e93cc9315253e509f/repro-10245.png)
 
 ## Observed behavior
 
