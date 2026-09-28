@@ -45,6 +45,39 @@ describe('grid connector - scroll to item', () => {
     expect(table.scrollTop).to.equal(scrollTopBefore);
   });
 
+  it('should not scroll when the item is already fully in viewport on the first render', async () => {
+    // Fresh grid whose rows have not been rendered yet, mimicking a cold page
+    // load where scrollToItem runs (e.g. from beforeEnter) before the first
+    // render, so _getRenderedRows() is still empty.
+    const freshGrid: FlowGrid = fixtureSync(`
+      <vaadin-grid style="height: 600px">
+        <vaadin-grid-column path="name"></vaadin-grid-column>
+      </vaadin-grid>
+      <style>
+        vaadin-grid::part(cell) {
+          min-height: 36px;
+        }
+      </style>
+    `);
+    init(freshGrid);
+    const items = Array.from({ length: 200 }, (_, i) => ({ key: `${i}`, name: `name-${i}` }));
+    setRootItems(freshGrid.$connector, items);
+
+    expect(freshGrid._getRenderedRows().length).to.equal(0);
+
+    // "name-10" is fully visible at scroll position 0 in a 600px tall grid
+    freshGrid.$connector.scrollToItem('10', 10);
+
+    // Give the grid time to render and the deferred check to run
+    for (let i = 0; i < 5; i++) {
+      await nextFrame();
+    }
+
+    const freshTable = freshGrid.shadowRoot!.querySelector('#table')!;
+    expect(freshTable.scrollTop).to.equal(0);
+    expect(getBodyCell(freshGrid, 10, 0)).to.exist;
+  });
+
   it('should scroll to an item that is rendered but not fully in viewport', async () => {
     grid.scrollToIndex(20);
     await nextFrame();

@@ -369,12 +369,34 @@ export class GridConnector {
   scrollToItem(itemKey: string, ...args: number[]): void {
     const grid = this.#grid;
 
-    const targetRow = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
-    if (targetRow && this.#isRowFullyInViewport(targetRow)) {
+    const scrollToItemIfNotVisible = () => {
+      const targetRow = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
+      if (targetRow && this.#isRowFullyInViewport(targetRow)) {
+        return;
+      }
+
+      grid.scrollToIndex(...args);
+    };
+
+    // On a cold page load, scrollToItem can run before the grid has rendered
+    // any rows, e.g. when a deep link resolves the target item in beforeEnter.
+    // _getRenderedRows() is then empty, so the "already fully visible" guard
+    // cannot fire and the item would be scrolled to the top even though it is
+    // already visible. Wait for the first render before deciding in that case.
+    if (grid._getRenderedRows().length > 0) {
+      scrollToItemIfNotVisible();
       return;
     }
 
-    grid.scrollToIndex(...args);
+    let remainingFrames = 10;
+    const waitForRender = () => {
+      if (grid._getRenderedRows().length > 0 || remainingFrames-- <= 0) {
+        scrollToItemIfNotVisible();
+      } else {
+        requestAnimationFrame(waitForRender);
+      }
+    };
+    requestAnimationFrame(waitForRender);
   }
 
   /**
