@@ -97,7 +97,7 @@ import java.util.Map;
  * </pre>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public interface DatabaseProvider extends Serializable {
 
@@ -121,6 +121,13 @@ public interface DatabaseProvider extends Serializable {
      * represented as a map from column name to column value.
      * <p>
      * Implementations should ensure that only read-only queries are executed.
+     * </p>
+     * <p>
+     * When a query fails (e.g. references an unknown column), throw a
+     * {@link ToolException} whose message describes the problem in terms safe
+     * to expose — the message is passed to the LLM so it can correct the query
+     * instead of retrying it unchanged. Any other exception is replaced with a
+     * generic error message before reaching the LLM.
      * </p>
      *
      * @param sql

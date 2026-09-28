@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
-        <version>25.3-SNAPSHOT</version>
+        <version>25.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-date-time-picker-flow</artifactId>
     <packaging>jar</packaging>
@@ -32,6 +32,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-date-picker-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -73,6 +78,11 @@
     </dependencies>
     <build>
         <plugins>
+            <!-- Pins the npm versions this module ships, see the root pom. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>

@@ -19,13 +19,13 @@ import type {
   FlowContextMenuItemComponent
 } from './vaadin-context-menu-types.js';
 
-function getContainer(appId: string, nodeId: number): Element | undefined {
+function getContainer(appId: string, nodeId: number): Element | null {
   try {
     return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
   } catch (error) {
     console.error('Could not get node %s from app %s', nodeId, appId);
     console.error(error);
-    return undefined;
+    return null;
   }
 }
 

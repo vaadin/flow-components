@@ -158,12 +158,12 @@ class RowTest {
 
     @Test
     void redrawCallsRedraw() throws Exception {
-        UI ui = new UI();
+        UI ui = FunctionCallerTest.createUI();
         Board board = new Board();
         ui.add(board);
 
         board.redraw();
-        FunctionCallerTest.assertPendingInvocations(ui, "return $0.redraw()");
+        FunctionCallerTest.assertPendingFunctionCall(ui, "redraw");
     }
 
 }

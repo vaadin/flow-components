@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 
 import tools.jackson.databind.JsonNode;
 
@@ -39,9 +40,21 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public final class ChartAITools {
+
+    /**
+     * Tail of the error a tool returns when it failed for a reason the LLM was
+     * given no detail about, because the cause was not a {@link ToolException}
+     * and so is not safe to pass on. Repeating the call unchanged can only fail
+     * the same way, which is what the LLM did without this; a rewritten attempt
+     * is still worth one try, since the cause is often something the LLM can
+     * avoid by itself, such as an identifier the database reserves.
+     */
+    private static final String RETRY_ONCE = " No details about the cause are "
+            + "available. Do not repeat the same %s: change it and try once "
+            + "more, or report the failure if you cannot.";
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAITools.class);
@@ -49,19 +62,25 @@ public final class ChartAITools {
     /**
      * Callback interface that chart tool consumers must implement to provide
      * chart state access and mutation operations.
+     * <p>
+     * A {@link ToolException} thrown from a callback relays its message to the
+     * LLM so it can correct its next attempt; any other exception is replaced
+     * with a generic error message.
      */
     public interface Callbacks extends Serializable {
 
         /**
-         * Returns the current state of a chart including its Highcharts
-         * configuration and SQL queries. The returned JSON string should
-         * contain the chart configuration and the SQL queries used to populate
-         * the chart series. Should throw if the chart is not found.
+         * Returns the current state of a chart as a JSON string holding the
+         * Highcharts configuration the LLM has set and the SQL queries used to
+         * populate the chart series. The LLM gets the state as is, so the
+         * configuration must not include values from the query results, such as
+         * series names, axis categories or points. Should throw if the chart is
+         * not found.
          *
          * @param chartId
          *            the chart ID
-         * @return the chart state as a JSON string containing the Highcharts
-         *         configuration and SQL queries
+         * @return the chart state as a JSON string containing the configuration
+         *         the LLM has set and the SQL queries
          */
         String getState(String chartId);
 
@@ -183,18 +202,6 @@ public final class ChartAITools {
     }
 
     /**
-     * Signals a validation failure whose message is safe to pass back to the
-     * LLM. Unexpected runtime exceptions, by contrast, may carry internal
-     * detail (SQL fragments, schema names, file paths) and must be replaced
-     * with a generic message before being returned.
-     */
-    private static final class ValidationException extends RuntimeException {
-        ValidationException(String message) {
-            super(message);
-        }
-    }
-
-    /**
      * Resolves the chart ID from the tool arguments. If {@code chartId} is not
      * provided and there is exactly one chart, that chart's ID is used as the
      * default.
@@ -202,7 +209,7 @@ public final class ChartAITools {
     private static String resolveChartId(JsonNode args, Callbacks callbacks) {
         var ids = callbacks.getChartIds();
         if (ids.isEmpty()) {
-            throw new ValidationException("No charts available.");
+            throw new ToolException("No charts available.");
         }
         if (ids.size() == 1) {
             return ids.iterator().next();
@@ -211,7 +218,7 @@ public final class ChartAITools {
         if (idNode != null && ids.contains(idNode.asString())) {
             return idNode.asString();
         }
-        throw new ValidationException(
+        throw new ToolException(
                 "chartId is required when multiple charts exist. "
                         + "Available chart IDs: " + ids);
     }
@@ -241,10 +248,14 @@ public final class ChartAITools {
 
             @Override
             public String getDescription() {
-                return "Gets the current state of a chart including its "
-                        + "Highcharts configuration and SQL queries. Returns "
-                        + "the chart configuration as JSON and the SQL "
-                        + "queries used to populate the chart series.";
+                return "Gets the current state of a chart: the configuration "
+                        + "set through update_chart_configuration and the SQL "
+                        + "queries that populate its series. Values from the "
+                        + "query results, such as series names, axis "
+                        + "categories and points, are never included, even "
+                        + "though the chart shows them. To change what the "
+                        + "chart shows, such as its sorting or filtering, "
+                        + "change the queries.";
             }
 
             @Override
@@ -267,7 +278,7 @@ public final class ChartAITools {
                     LOGGER.info("get_chart_state called");
                     String chartId = resolveChartId(arguments, callbacks);
                     return callbacks.getState(chartId);
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("get_chart_state validation failed", e);
                     return "Error getting chart state: " + e.getMessage();
                 } catch (Exception e) {
@@ -528,14 +539,15 @@ public final class ChartAITools {
 
                     return "Chart '" + chartId
                             + "' configuration updated. Changes will be applied when the request completes.";
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("update_chart_configuration validation failed",
                             e);
                     return "Error updating chart configuration: "
                             + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_configuration failed", e);
-                    return "Error updating chart configuration.";
+                    return "Error updating chart configuration."
+                            + RETRY_ONCE.formatted("configuration");
                 }
             }
         };
@@ -552,7 +564,10 @@ public final class ChartAITools {
             public String getDescription() {
                 return resolveColumnNames(
                         """
-                                Updates the chart data using SQL SELECT queries (one per series).
+                                Updates the chart data using SQL SELECT queries (one per series). \
+                                The queries replace all current series of the chart: to add a series, pass \
+                                the current queries from get_chart_state together with the new one; to remove \
+                                a series, leave its query out.
 
                                 IMPORTANT: Column names control how data is mapped to series. \
                                 Use the exact aliases below (prefixed with '{PREFIX}') in your SELECT statements.
@@ -587,10 +602,10 @@ public final class ChartAITools {
                                 OHLC/Candlestick:
                                 - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
                                 - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
-                                - When adding a volume series alongside OHLC/candlestick data, use a separate query \
-                                with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, 'Volume' AS {SERIES} \
-                                FROM stock_prices). The {SERIES} alias names the series so it can be configured via \
-                                update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
+                                - When adding a volume series alongside OHLC/candlestick data, pass the OHLC query and a \
+                                second query with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, \
+                                'Volume' AS {SERIES} FROM stock_prices). The {SERIES} alias names the series so it can be \
+                                configured via update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
 
                                 Sankey diagram:
                                 - 3 columns: {FROM}, {TO}, {WEIGHT}
@@ -633,7 +648,7 @@ public final class ChartAITools {
 
                                 Parameters:
                                 - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
-                                - queries (array of strings, required): SQL SELECT queries, one per series
+                                - queries (array of strings, required): SQL SELECT queries, one per series, replacing the current ones
 
                                 Changes are applied when the request completes.""");
             }
@@ -679,13 +694,14 @@ public final class ChartAITools {
 
                     return "Chart '" + chartId
                             + "' data source updated. Changes will be applied when the request completes.";
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("update_chart_data_source validation failed",
                             e);
                     return "Error updating chart data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_data_source failed", e);
-                    return "Error updating chart data.";
+                    return "Error updating chart data."
+                            + RETRY_ONCE.formatted("queries");
                 }
             }
         };

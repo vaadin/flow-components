@@ -25,6 +25,8 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
  * module.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
+ * 
+ * @since 25.3
  */
 public final class AIExtensionsLicense {
 

@@ -26,6 +26,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.messages.testbench.MessageElement;
 import com.vaadin.flow.component.messages.testbench.MessageListElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-messages/message-list-test")
@@ -340,6 +341,234 @@ public class MessageListIT extends AbstractComponentIT {
         // Event includes item's userName, attachment name, and mime type
         Assert.assertEquals("User | chart.svg | image/svg+xml",
                 clickedAttachment.getText());
+    }
+
+    @Test
+    public void showTyping_typingIndicatorRendered() {
+        clickElementWithJs("showTyping");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Alice"),
+                messageList.getTypingUserNames());
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("Typing"));
+    }
+
+    @Test
+    public void showTyping_typingIndicatorNotIncludedInMessages() {
+        clickElementWithJs("showTyping");
+
+        Assert.assertEquals("Typing indicator must not be listed as a message",
+                2, messageList.getMessageElements().size());
+    }
+
+    @Test
+    public void showTwoTyping_bothTypingUsersRendered() {
+        clickElementWithJs("showTwoTyping");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Alice", "Bob"),
+                messageList.getTypingUserNames());
+    }
+
+    @Test
+    public void hideTyping_typingIndicatorRemoved() {
+        clickElementWithJs("showTyping");
+        Assert.assertNotNull(getTypingIndicator());
+
+        clickElementWithJs("hideTyping");
+
+        Assert.assertNull("Expected no typing indicator", getTypingIndicator());
+        Assert.assertTrue(messageList.getTypingUserNames().isEmpty());
+    }
+
+    @Test
+    public void setI18n_showTyping_typingIndicatorTextTranslated() {
+        clickElementWithJs("setI18n");
+        clickElementWithJs("showTyping");
+
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("is thinking"));
+    }
+
+    @Test
+    public void showTyping_setI18n_visibleTypingIndicatorTextTranslated() {
+        clickElementWithJs("showTyping");
+        Assert.assertTrue("Expected the default text",
+                getTypingIndicatorText().contains("Typing"));
+
+        clickElementWithJs("setI18n");
+
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("is thinking"));
+    }
+
+    @Test
+    public void showTyping_setEllipsisType_visibleTypingIndicatorUpdated() {
+        clickElementWithJs("showTyping");
+        Assert.assertEquals("Expected the default type", "",
+                getTypingIndicatorType());
+
+        clickElementWithJs("setEllipsisTypingIndicator");
+        Assert.assertEquals("Unexpected typing indicator type", "ellipsis",
+                getTypingIndicatorType());
+
+        clickElementWithJs("setDefaultTypingIndicator");
+        Assert.assertEquals("Expected the default type", "",
+                getTypingIndicatorType());
+    }
+
+    @Test
+    public void showTypingWithImageHandler_avatarImageLoaded() {
+        clickElementWithJs("showTypingWithImageHandler");
+        var avatar = getTypingUserAvatar();
+
+        var imageUrl = avatar.getPropertyString("img");
+        Assert.assertNotNull("Expected an avatar image URL", imageUrl);
+        Assert.assertTrue(
+                "Image URL should start with 'VAADIN/dynamic', was " + imageUrl,
+                imageUrl.startsWith("VAADIN/dynamic"));
+
+        // The image only decodes if the download handler is actually served
+        waitUntil(driver -> isAvatarImageLoaded(avatar));
+    }
+
+    @Test
+    public void showTypingWithUserProperties_userPropertiesRenderedOnAvatar() {
+        clickElementWithJs("showTypingWithUserProperties");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Carol"),
+                messageList.getTypingUserNames());
+
+        var avatar = getTypingUserAvatar();
+        Assert.assertEquals("Unexpected avatar name", "Carol",
+                avatar.getPropertyString("name"));
+        Assert.assertEquals("Unexpected avatar abbreviation", "CA",
+                avatar.getPropertyString("abbr"));
+        Assert.assertEquals("Unexpected avatar image",
+                MessageListPage.TYPING_USER_IMAGE,
+                avatar.getPropertyString("img"));
+        Assert.assertEquals("Unexpected avatar color index", Integer.valueOf(4),
+                avatar.getPropertyInteger("colorIndex"));
+        Assert.assertTrue("Expected the class names of the user on the avatar",
+                avatar.getClassNames().containsAll(List.of("carol", "typing")));
+
+        waitUntil(driver -> isAvatarImageLoaded(avatar));
+    }
+
+    @Test
+    public void showTypingWithUserProperties_updateUser_avatarUpdated() {
+        clickElementWithJs("showTypingWithUserProperties");
+
+        clickElementWithJs("updateTypingUserProperties");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Carol Carter"),
+                messageList.getTypingUserNames());
+
+        var avatar = getTypingUserAvatar();
+        Assert.assertEquals("Unexpected avatar name", "Carol Carter",
+                avatar.getPropertyString("name"));
+        Assert.assertEquals("Unexpected avatar abbreviation", "CC",
+                avatar.getPropertyString("abbr"));
+        Assert.assertFalse("Expected the avatar image to be removed",
+                isAvatarImageVisible(avatar));
+        Assert.assertEquals("Unexpected avatar color index", Integer.valueOf(5),
+                avatar.getPropertyInteger("colorIndex"));
+        Assert.assertTrue("Expected the remaining class name on the avatar",
+                avatar.hasClassName("carol"));
+        Assert.assertFalse("Expected the removed class name to be gone",
+                avatar.hasClassName("typing"));
+    }
+
+    @Test
+    public void showTypingWithImageUrl_nameAndImageRenderedOnAvatar() {
+        clickElementWithJs("showTypingWithImageUrl");
+
+        Assert.assertEquals("Unexpected typing users", List.of("Dave"),
+                messageList.getTypingUserNames());
+
+        var avatar = getTypingUserAvatar();
+        Assert.assertEquals("Unexpected avatar name", "Dave",
+                avatar.getPropertyString("name"));
+        Assert.assertEquals("Unexpected avatar image",
+                MessageListPage.TYPING_USER_IMAGE,
+                avatar.getPropertyString("img"));
+
+        waitUntil(driver -> isAvatarImageLoaded(avatar));
+    }
+
+    @Test
+    public void showTypingWithAbbreviationOnly_abbreviationShownAsName() {
+        clickElementWithJs("showTypingWithAbbreviationOnly");
+
+        Assert.assertEquals("Unexpected typing users", List.of("EV"),
+                messageList.getTypingUserNames());
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("EV"));
+    }
+
+    @Test
+    public void showTwoTyping_changeLocale_typingIndicatorRetained() {
+        clickElementWithJs("showTwoTyping");
+
+        clickElementWithJs("setLocale");
+
+        // The locale change re-renders the messages, which must not drop the
+        // typing indicator that is rendered along with them
+        Assert.assertTrue(
+                "Expected the messages to be rendered in the new " + "locale",
+                getFirstMessage(messageList).getTime()
+                        .matches("1 gen 2021, [0-9]+:[0-9]+"));
+        Assert.assertEquals("Unexpected typing users", List.of("Alice", "Bob"),
+                messageList.getTypingUserNames());
+        Assert.assertTrue("Unexpected typing indicator text",
+                getTypingIndicatorText().contains("Typing"));
+    }
+
+    @Test
+    public void showTyping_reattachList_typingIndicatorRestored() {
+        clickElementWithJs("showTyping");
+        clickElementWithJs("detachList");
+        clickElementWithJs("attachList");
+
+        messageList = $(MessageListElement.class).first();
+        Assert.assertEquals("Expected the typing indicator to be restored",
+                List.of("Alice"), messageList.getTypingUserNames());
+    }
+
+    /**
+     * Gets the element rendered as the typing indicator, or {@code null} if no
+     * user is typing. Intentionally relies on how the web component renders the
+     * indicator, as the public TestBench API only exposes the user names.
+     */
+    private TestBenchElement getTypingIndicator() {
+        var indicators = messageList.$(MessageElement.class)
+                .withAttribute("slot", "typing-indicator").all();
+        return indicators.isEmpty() ? null : indicators.get(0);
+    }
+
+    private TestBenchElement getTypingUserAvatar() {
+        return getTypingIndicator().$("vaadin-avatar").first();
+    }
+
+    private boolean isAvatarImageVisible(TestBenchElement avatar) {
+        return (Boolean) executeScript("""
+                const img = arguments[0].shadowRoot.querySelector('img');
+                return !!img && !img.hidden;
+                """, avatar);
+    }
+
+    private boolean isAvatarImageLoaded(TestBenchElement avatar) {
+        return (Boolean) executeScript("""
+                const img = arguments[0].shadowRoot.querySelector('img');
+                return !!(img && img.complete && img.naturalWidth > 0);
+                """, avatar);
+    }
+
+    private String getTypingIndicatorText() {
+        return getTypingIndicator().getPropertyString("textContent");
+    }
+
+    private String getTypingIndicatorType() {
+        return getTypingIndicator().getDomAttribute("typing-indicator");
     }
 
     private MessageElement getFirstMessage(MessageListElement list) {

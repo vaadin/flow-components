@@ -65,6 +65,37 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- Provider chat memory holds the user messages and the assistant's final
+  answer of each turn. Tool calls and results are sent to the model only
+  within their own turn, with both built-in providers, so a controller must
+  not rely on the model remembering a previous turn's tool result; the
+  instruction tools already tell the model to read the state again each
+  turn. `LangChain4JLLMProvider` also leaves a final answer without text out
+  of the memory. A model may answer that way once a tool call has done the
+  work, LangChain4j hands the answer over as an `AiMessage` with a `null`
+  text, and OpenAI's Chat Completions API rejects a replayed assistant
+  message that has neither content nor tool calls, which would fail every
+  later turn of the conversation.
+- The response stream carries text only; everything else the model said
+  about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
+  A provider publishes whenever it learns more — each publish carries the
+  state of the turn so far and replaces the previous one, so a turn that
+  fails midway has still reported what was observed. Finish reasons are
+  relayed as the underlying framework words them and are never mapped to a
+  Vaadin enum: every vendor words them differently and keeps adding values
+  (the same truncation is `length` on OpenAI and `max_tokens` on Anthropic),
+  so any fixed set of our own would go stale. LangChain4j shows what mapping
+  costs — it collapses the vendor's word onto a five-constant enum before we
+  see it, per integration and losing what it does not recognize, so an
+  unrecognized value arrives as `null` from its OpenAI integration and as
+  `OTHER` from its Anthropic one. Framework code therefore never branches on
+  the content of a finish reason: checks that must tell a completed turn from
+  a truncated one use structure instead — a missing finish reason, or tool
+  calls still pending. The one exception is Spring AI's
+  `ToolCallLimitExceededException.FINISH_REASON`: not a vendor's word but a
+  constant Spring AI defines for the reply it synthesizes itself when its
+  tool call limit is hit, so `SpringAILLMProvider` compares against that
+  constant to turn the reply back into a failed turn.
 
 ## Threading
 
@@ -93,23 +124,55 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 
 ## LLM tools
 
-- Tool names are `snake_case` and must match `^[a-zA-Z0-9_-]{1,64}$`
-  (validated on registration).
+- Tool names are `snake_case` and must match `^[a-zA-Z0-9_-]{1,64}$`, and a
+  declared parameters schema must be a JSON object (both validated on
+  registration, so a broken definition fails fast and names the tool).
 - Each controller keeps its tool definitions in a sibling `XxxAITools`
   factory class with a nested `Callbacks` interface implemented by the
   controller, keeping tool JSON and descriptions decoupled from the
   component type.
 - Instructions the model must always see go into a tool's *description*
-  (the `get_*_instructions` and session-context tools), with `execute()`
-  returning the same text — the model reads the manifest without a call.
+  (the `get_*_instructions` tools), with `execute()` returning the same
+  text — the model reads the manifest without a call.
+- Keep tool definitions identical from turn to turn. LLM providers cache the
+  prompt prefix in the order tools, system prompt, messages, and any change
+  to a tool name, description or schema invalidates all of it. Per-turn
+  content therefore never goes into a tool description or the system
+  prompt: the session context (`Builder.withMetadata`) travels in
+  `LLMRequest.sessionContext()` and the providers append it to the user
+  message, at the very end of the prompt.
 - Tools validate their input eagerly so errors round-trip to the LLM within
   the turn, but stage the result and apply it once in `onResponse(null)`;
   `onResponse(error)` discards the pending state and keeps the last good
   render.
-- Error hygiene toward the model: forward only deliberately-safe validation
-  messages verbatim; replace any other exception with a generic string so
-  SQL, schema names, or paths never leak. Tool failures are returned as
-  strings to the model, never thrown.
+- Error hygiene toward the model: only the message of a
+  `ToolException` (public, in `com.vaadin.flow.component.ai.provider`) is
+  forwarded verbatim — throw it, from built-in tool code or an application's
+  `DatabaseProvider`/`ToolSpec`, only with deliberately-safe text. Any other
+  exception is caught, logged, and replaced with a generic string so SQL,
+  schema names, or paths never leak. Tool failures are returned as strings
+  to the model, never thrown. This contract covers only framework-agnostic
+  `ToolSpec` tools; vendor-annotated tools (LangChain4j/Spring AI `@Tool`)
+  are executed by the vendor framework, whose default error handling relays
+  the raw message of any exception to the model — they are deliberately out
+  of scope, so route error-sensitive tools through `ToolSpec`.
+- The tool-calling loop is bounded where it is driven, never by the
+  orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
+  against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
+  the same as Spring AI's) and fails the turn with the public
+  `ToolCallLimitExceededException`. The check runs before any tool of that
+  round runs, and the tool traffic of the failed turn is discarded with it, so
+  the next turn continues from the chat memory as the last completed turn
+  left it; a cancelled turn likewise stops calling the model and the tools.
+  `SpringAILLMProvider` adds no cap of its own: Spring AI bounds the loop
+  itself and hands back a synthesized reply carrying its
+  `ToolCallLimitExceededException.FINISH_REASON`, which the provider turns
+  into the same exception with Spring AI's message, so both providers fail
+  such a turn the same way. The exception carries no structured detail on
+  purpose: Spring AI's tool name and limit only exist in its message wording,
+  which is not ours to depend on. Spring AI's reply may remain in the chat
+  memory with either constructor; the provider does not rewrite what Spring
+  AI's advisors stored.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 

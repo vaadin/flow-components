@@ -16,7 +16,8 @@
  * Prints the resulting component names (e.g. "grid crud grid-pro") to
  * stdout. Prints nothing when everything should be validated: when the
  * change touches files outside component modules, or when there is no
- * input.
+ * input. Files that cannot affect any test, such as the agent guidelines
+ * in guidelines/, are ignored.
  */
 
 const fs = require('fs');
@@ -52,11 +53,18 @@ function readComponentArtifactIds(component) {
   );
 }
 
+// Paths whose changes cannot affect any test and are therefore ignored when
+// deciding what to validate
+const IGNORED_PATHS = [/^guidelines\//];
+
 // Map changed file paths to component names. Returns null (= full
 // validation) if any file is outside a component parent module.
 function componentsFromChangedFiles(changedFiles) {
   const components = new Set();
   for (const file of changedFiles) {
+    if (IGNORED_PATHS.some((pattern) => pattern.test(file))) {
+      continue;
+    }
     const match = file.match(/^vaadin-(.+)-flow-parent\//);
     if (!match) {
       return null;

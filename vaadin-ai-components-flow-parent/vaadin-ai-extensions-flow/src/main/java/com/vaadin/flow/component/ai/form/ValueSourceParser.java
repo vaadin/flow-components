@@ -24,20 +24,19 @@ import com.vaadin.flow.component.ai.common.ValueSource;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Parses the source-tracking envelope a {@code fill_form} value may arrive in
- * when source tracking is on:
+ * Parses one entry of the {@code sources} map a {@code fill_form} call carries
+ * when source tracking is on, keyed by the same field id as the value it
+ * describes:
  *
  * <pre>
- * {"value": ..., "confidence": "high", "extracts": [
+ * {"confidence": "high", "extracts": [
  *   {"text": "...", "location": {"type": "page-region", "page": 2,
  *    "rect": [0.12, 0.34, 0.25, 0.04]}}]}
  * </pre>
  *
  * Parsing is best effort: source data exists to help review a fill, so it must
  * never block one. A malformed confidence level, extract, or location is
- * dropped and logged while the value is still written. Only a missing
- * {@code value} key rejects the write, which the caller handles by never
- * unwrapping such an object as an envelope.
+ * dropped and logged while the value is still written.
  *
  * @author Vaadin Ltd
  */
@@ -52,37 +51,28 @@ final class ValueSourceParser {
     }
 
     /**
-     * Whether the given {@code fill_form} value is a source-tracking envelope —
-     * a JSON object carrying the required {@code value} key. Only called when
-     * source tracking is on; plain values and every other shape pass through
-     * the regular conversion untouched.
-     */
-    static boolean isEnvelope(JsonNode value) {
-        return value != null && value.isObject() && value.has("value");
-    }
-
-    /**
-     * Returns the plain value wrapped inside the envelope. Call only when
-     * {@link #isEnvelope} returned {@code true}.
-     */
-    static JsonNode unwrapValue(JsonNode envelope) {
-        return envelope.get("value");
-    }
-
-    /**
-     * Extracts the source data from the envelope. Bad parts are dropped and
+     * Parses the source reported for one field. Bad parts are dropped and
      * logged rather than failing the parse.
      *
-     * @param envelope
-     *            the envelope object, with {@link #isEnvelope} already checked
+     * @param source
+     *            the field's entry in the {@code sources} map; a missing or
+     *            {@code null} node means no source was reported
      * @param fieldId
      *            the target field's id, used for log context only
-     * @return the reported source, or {@code null} when the envelope carries no
+     * @return the reported source, or {@code null} when the entry carries no
      *         usable source data
      */
-    static ValueSource parse(JsonNode envelope, String fieldId) {
-        var confidence = parseConfidence(envelope.get("confidence"), fieldId);
-        var extracts = parseExtracts(envelope.get("extracts"), fieldId);
+    static ValueSource parse(JsonNode source, String fieldId) {
+        if (source == null || source.isMissingNode() || source.isNull()) {
+            return null;
+        }
+        if (!source.isObject()) {
+            LOGGER.debug("Dropping non-object source reported for field {}",
+                    fieldId);
+            return null;
+        }
+        var confidence = parseConfidence(source.get("confidence"), fieldId);
+        var extracts = parseExtracts(source.get("extracts"), fieldId);
         if (confidence == null && extracts.isEmpty()) {
             return null;
         }

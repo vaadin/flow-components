@@ -5,6 +5,7 @@ import type {
   ComboBoxConnector as ConnectorComboBoxConnector,
   ComboBoxServer as ConnectorComboBoxServer,
   FlowComboBox as ConnectorFlowComboBox,
+  FlowMultiSelectComboBoxInternals as ConnectorFlowMultiSelectComboBoxInternals,
   Item as ConnectorItem
 } from '../frontend/generated/jar-resources/vaadin-combo-box/vaadin-combo-box-types.js';
 
@@ -27,6 +28,8 @@ export type FlowComboBox = ConnectorFlowComboBox & {
   $connector: ComboBoxConnector;
   $server: ComboBoxServer;
 };
+
+export type FlowMultiSelectComboBox = FlowComboBox & ConnectorFlowMultiSelectComboBoxInternals;
 
 export const comboBoxConnector = window.Vaadin.Flow.comboBoxConnector;
 

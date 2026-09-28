@@ -13,9 +13,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -30,8 +32,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -135,6 +139,25 @@ class GridAIControllerTest {
     }
 
     @Test
+    void updateDataTool_providerThrowsToolException_relaysMessage() {
+        dbProvider.executeException = new ToolException("Unknown column 'foo'");
+        var tool = findTool("update_grid_data");
+        var result = tool.execute(json("{\"query\": \"SELECT foo FROM t\"}"));
+        Assertions.assertEquals(
+                "Error updating grid data: Unknown column 'foo'", result);
+    }
+
+    @Test
+    void updateDataTool_providerThrowsUnexpectedException_returnsGenericError() {
+        dbProvider.executeException = new RuntimeException("internal detail");
+        var tool = findTool("update_grid_data");
+        var result = tool.execute(json("{\"query\": \"SELECT foo FROM t\"}"));
+        Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
+        Assertions.assertFalse(result.contains("internal detail"),
+                "The cause must not reach the LLM, got: " + result);
+    }
+
+    @Test
     void updateDataTool_missingQuery_returnsError() {
         var tool = controller.getTools().stream()
                 .filter(t -> t.getName().equals("update_grid_data")).findFirst()
@@ -176,8 +199,9 @@ class GridAIControllerTest {
                 .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
         dbProvider.throwOnExecute = true;
+        var event = AITurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponse(null));
+                () -> controller.onResponse(event));
 
         Assertions.assertNull(controller.getState());
     }
@@ -198,7 +222,7 @@ class GridAIControllerTest {
     void onResponse_noPending_doesNotChangeGrid() {
         // No pending query — should be a no-op
         var columnsBefore = grid.getColumns().size();
-        controller.onResponse(null);
+        controller.onResponse(AITurnEvents.success());
         Assertions.assertEquals(columnsBefore, grid.getColumns().size());
         Assertions.assertNull(controller.getState());
     }
@@ -209,7 +233,7 @@ class GridAIControllerTest {
         simulateUpdate("SELECT a FROM t");
 
         // Second call — no pending query
-        controller.onResponse(null);
+        controller.onResponse(AITurnEvents.success());
 
         // State should still reflect the first update
         var stateTool = findTool("get_grid_state");
@@ -229,12 +253,13 @@ class GridAIControllerTest {
             // A second turn stages a query, then fails before completion.
             findTool("update_grid_data")
                     .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
-            controller.onResponse(new RuntimeException("stream error"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("stream error")));
 
             // A third turn fires onResponseComplete without staging anything
             // (LLM responded conversationally). The bad query must not be
             // rendered.
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals("SELECT a FROM good",
                     controller.getState().query());
@@ -246,9 +271,10 @@ class GridAIControllerTest {
             dbProvider.queryResults = List.of(row("a", 1));
             findTool("update_grid_data")
                     .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
-            controller.onResponse(new RuntimeException("stream error"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("stream error")));
 
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(controller.getState());
         }
@@ -352,8 +378,9 @@ class GridAIControllerTest {
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"SELECT a FROM bad\"}"));
         dbProvider.throwOnExecute = true;
+        var event = AITurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponse(null));
+                () -> controller.onResponse(event));
 
         // Previous successful query should be retained
         Assertions.assertEquals("SELECT a FROM good",
@@ -393,8 +420,9 @@ class GridAIControllerTest {
                 .execute(json("{\"query\": \"SELECT a FROM t\"}"));
 
         dbProvider.throwOnExecute = true;
+        var event = AITurnEvents.success();
         Assertions.assertThrows(RuntimeException.class,
-                () -> controller.onResponse(null));
+                () -> controller.onResponse(event));
 
         Assertions.assertNull(captured.get());
     }
@@ -430,7 +458,7 @@ class GridAIControllerTest {
         var states = new ArrayList<GridState>();
         controller.addStateChangeListener(states::add);
 
-        controller.onResponse(null);
+        controller.onResponse(AITurnEvents.success());
 
         Assertions.assertTrue(states.isEmpty(),
                 "Second onResponseComplete should not fire listeners");
@@ -528,6 +556,14 @@ class GridAIControllerTest {
         var result = findTool("get_grid_instructions").execute(null);
         Assertions.assertFalse(result.isBlank());
         Assertions.assertTrue(result.contains("get_grid_state"));
+    }
+
+    @Test
+    void instructionsTool_declaresNoParameters() {
+        // A null schema tells the provider the tool takes no parameters; the
+        // provider substitutes its placeholder schema in the LLM request.
+        Assertions.assertNull(
+                findTool("get_grid_instructions").getParametersSchema());
     }
 
     // --- stripGroupPrefix ---
@@ -762,6 +798,18 @@ class GridAIControllerTest {
         }
 
         @Test
+        void sqlTime() {
+            Assertions.assertEquals("14:30",
+                    GridFormatting.formatValue(Time.valueOf("14:30:00")));
+        }
+
+        @Test
+        void localTime() {
+            Assertions.assertEquals("14:30",
+                    GridFormatting.formatValue(LocalTime.of(14, 30, 15)));
+        }
+
+        @Test
         void instant() {
             var instant = LocalDateTime.of(2024, 1, 15, 12, 30)
                     .atZone(ZoneId.systemDefault()).toInstant();
@@ -970,7 +1018,7 @@ class GridAIControllerTest {
     private void simulateUpdate(String query) {
         findTool("update_grid_data")
                 .execute(json("{\"query\": \"" + query + "\"}"));
-        controller.onResponse(null);
+        controller.onResponse(AITurnEvents.success());
     }
 
     private static Map<String, Object> row(Object... keysAndValues) {
@@ -989,6 +1037,7 @@ class GridAIControllerTest {
         private String schema = "test schema";
         private List<Map<String, Object>> queryResults = List.of();
         private boolean throwOnExecute = false;
+        private RuntimeException executeException;
         private final List<String> executedQueries = new ArrayList<>();
 
         @Override
@@ -999,6 +1048,9 @@ class GridAIControllerTest {
         @Override
         public List<Map<String, Object>> executeQuery(String sql) {
             executedQueries.add(sql);
+            if (executeException != null) {
+                throw executeException;
+            }
             if (throwOnExecute) {
                 throw new RuntimeException("Query execution failed");
             }

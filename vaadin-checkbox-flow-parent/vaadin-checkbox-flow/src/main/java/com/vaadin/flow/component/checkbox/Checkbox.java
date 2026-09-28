@@ -83,7 +83,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/checkbox", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/checkbox", version = "25.4.0-alpha1")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>,
@@ -329,6 +329,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
+     *
+     * @since 25.3
      */
     @Override
     public void setAriaDescribedBy(String ariaDescribedBy) {
@@ -436,7 +438,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 24.4
      */
     protected void validate() {
@@ -494,7 +496,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
 
     /**
      * The internationalization properties for {@link Checkbox}.
-     * 
+     *
      * @since 24.5
      */
     public static class CheckboxI18n implements Serializable {

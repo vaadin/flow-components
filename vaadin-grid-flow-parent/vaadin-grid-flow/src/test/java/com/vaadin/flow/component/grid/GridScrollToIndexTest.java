@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -85,7 +86,7 @@ class GridScrollToIndexTest {
         grid.scrollToIndex(5);
         grid.scrollToIndex(5);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
+        assertSingleJavaScriptScrollCall("scrollToIndex", 5);
     }
 
     @Test
@@ -94,7 +95,7 @@ class GridScrollToIndexTest {
         grid.scrollToIndex(5);
         ui.add(grid);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
+        assertSingleJavaScriptScrollCall("scrollToIndex", 5);
     }
 
     @Test
@@ -103,7 +104,7 @@ class GridScrollToIndexTest {
         grid.scrollToStart();
         grid.scrollToStart();
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex", 0);
+        assertSingleJavaScriptScrollCall("scrollToIndex", 0);
     }
 
     @Test
@@ -112,7 +113,7 @@ class GridScrollToIndexTest {
         grid.scrollToStart();
         ui.add(grid);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex", 0);
+        assertSingleJavaScriptScrollCall("scrollToIndex", 0);
     }
 
     @Test
@@ -146,27 +147,46 @@ class GridScrollToIndexTest {
         assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
     }
 
+    private void assertSingleJavaScriptScrollCall(String expectedFunction,
+            Object... expectedArguments) {
+        var invocation = getSingleJavaScriptScrollInvocation();
+
+        Assertions.assertEquals(expectedFunction,
+                JsFunctionCallUtil.getFunctionName(invocation));
+        Assertions.assertEquals(List.of(expectedArguments),
+                JsFunctionCallUtil.getArguments(invocation));
+    }
+
     private void assertSingleJavaScriptScrollInvocation(
-            String expectedExpression, Object... expectedParams) {
+            String expectedExpression) {
+        var invocation = getSingleJavaScriptScrollInvocation();
+
+        Assertions.assertTrue(
+                invocation.getExpression().contains(expectedExpression));
+    }
+
+    private JavaScriptInvocation getSingleJavaScriptScrollInvocation() {
         var invocations = getJavaScriptScrollInvocations();
         Assertions.assertEquals(1, invocations.size());
 
-        var invocation = invocations.get(0);
-        Assertions.assertTrue(
-                invocation.getExpression().contains(expectedExpression));
-
-        var params = invocation.getParameters();
-        for (int i = 1; i < expectedParams.length; i++) {
-            Assertions.assertEquals(expectedParams[i], params.get(i));
-        }
+        return invocations.get(0);
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("scroll"))
-                .toList();
+                .filter(GridScrollToIndexTest::isScrollInvocation).toList();
+    }
+
+    /**
+     * Scrolling is either a call of a function named after it, or, for
+     * scrolling to the end, an expression that reads the size of the grid
+     * before scrolling.
+     */
+    private static boolean isScrollInvocation(JavaScriptInvocation invocation) {
+        var functionName = JsFunctionCallUtil.getFunctionName(invocation);
+        return functionName != null ? functionName.contains("scroll")
+                : invocation.getExpression().contains("scroll");
     }
 
     private String getViewportRange(Grid<String> grid) {

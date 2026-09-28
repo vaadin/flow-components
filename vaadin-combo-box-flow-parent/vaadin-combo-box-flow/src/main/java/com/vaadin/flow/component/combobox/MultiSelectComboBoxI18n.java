@@ -30,6 +30,10 @@ public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
     private String selected;
     private String deselected;
     private String total;
+    private String selectAll;
+    private String deselectAll;
+    private String selectFiltered;
+    private String deselectFiltered;
     private String requiredErrorMessage;
 
     /**
@@ -217,6 +221,137 @@ public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
                     "Text must contain a {count} placeholder");
         }
         this.total = total;
+        return this;
+    }
+
+    /**
+     * The text of the select all button when no filter is set.
+     * <p>
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
+     *
+     * @return the text of the select all button when no filter is set, or
+     *         {@code null} if the default value of the web component is used
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public String getSelectAll() {
+        return selectAll;
+    }
+
+    /**
+     * Sets the text of the select all button when no filter is set.
+     *
+     * @param selectAll
+     *            the text of the select all button when no filter is set, or
+     *            {@code null} if the default value of the web component should
+     *            be used
+     * @return this instance for method chaining
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public MultiSelectComboBoxI18n setSelectAll(String selectAll) {
+        this.selectAll = selectAll;
+        return this;
+    }
+
+    /**
+     * The text of the select all button when no filter is set and all items are
+     * selected.
+     * <p>
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
+     *
+     * @return the text of the select all button when no filter is set and all
+     *         items are selected, or {@code null} if the default value of the
+     *         web component is used
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public String getDeselectAll() {
+        return deselectAll;
+    }
+
+    /**
+     * Sets the text of the select all button when no filter is set and all
+     * items are selected.
+     *
+     * @param deselectAll
+     *            the text of the select all button when no filter is set and
+     *            all items are selected, or {@code null} if the default value
+     *            of the web component should be used
+     * @return this instance for method chaining
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public MultiSelectComboBoxI18n setDeselectAll(String deselectAll) {
+        this.deselectAll = deselectAll;
+        return this;
+    }
+
+    /**
+     * The text of the select all button when a filter is set.
+     * <p>
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
+     *
+     * @return the text of the select all button when a filter is set, or
+     *         {@code null} if the default value of the web component is used
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public String getSelectFiltered() {
+        return selectFiltered;
+    }
+
+    /**
+     * Sets the text of the select all button when a filter is set.
+     *
+     * @param selectFiltered
+     *            the text of the select all button when a filter is set, or
+     *            {@code null} if the default value of the web component should
+     *            be used
+     * @return this instance for method chaining
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public MultiSelectComboBoxI18n setSelectFiltered(String selectFiltered) {
+        this.selectFiltered = selectFiltered;
+        return this;
+    }
+
+    /**
+     * The text of the select all button when a filter is set and all items that
+     * match the filter are selected.
+     * <p>
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
+     *
+     * @return the text of the select all button when a filter is set and all
+     *         items that match the filter are selected, or {@code null} if the
+     *         default value of the web component is used
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public String getDeselectFiltered() {
+        return deselectFiltered;
+    }
+
+    /**
+     * Sets the text of the select all button when a filter is set and all items
+     * that match the filter are selected.
+     *
+     * @param deselectFiltered
+     *            the text of the select all button when a filter is set and all
+     *            items that match the filter are selected, or {@code null} if
+     *            the default value of the web component should be used
+     * @return this instance for method chaining
+     * @see MultiSelectComboBox#setSelectAllButtonVisible(boolean)
+     * @since 25.4
+     */
+    public MultiSelectComboBoxI18n setDeselectFiltered(
+            String deselectFiltered) {
+        this.deselectFiltered = deselectFiltered;
         return this;
     }
 }

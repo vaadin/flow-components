@@ -146,7 +146,7 @@ export class DatePickerConnector {
   }
 
   #formatDate(dateParts: DatePickerDate, format: string): string {
-    const date = parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
+    const date = createDate(dateParts.year, dateParts.month, dateParts.day);
 
     return dateFnsFormat(date, format);
   }
@@ -208,7 +208,7 @@ export class DatePickerConnector {
     // Update century if this is the first parse after overlay open.
     const currentValue = parseDate(this.#datePicker.value);
     if (
-      dateFnsIsValid(currentValue) &&
+      currentValue &&
       currentValue.getDate() === date.getDate() &&
       currentValue.getMonth() === date.getMonth() &&
       currentValue.getFullYear() % 100 === date.getFullYear() % 100

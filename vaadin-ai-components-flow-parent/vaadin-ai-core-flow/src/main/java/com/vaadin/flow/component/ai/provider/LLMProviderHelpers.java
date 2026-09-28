@@ -23,6 +23,11 @@ import java.util.Base64;
 import java.util.Objects;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Utility methods for LLM provider implementations.
@@ -30,6 +35,74 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
  * Intended only for internal use and can be removed in the future.
  */
 final class LLMProviderHelpers {
+
+    /**
+     * JSON Schema substituted when a tool declares no parameters, i.e.
+     * {@link LLMProvider.ToolSpec#getParametersSchema()} returns {@code null}
+     * or blank. Declares a single optional {@code reason} property so the LLM
+     * always has a well-formed, non-empty object to send as arguments: without
+     * a declared property, models disagree on what to send — some send an empty
+     * string — and at least Anthropic models on Amazon Bedrock reject the
+     * request that replays such a tool call.
+     * <p>
+     * The placeholder never reaches a tool: whenever a provider sends this
+     * schema in place of the tool's own — including the LangChain4j fallback
+     * for a declared schema that fails to parse — it skips argument parsing and
+     * invokes {@link LLMProvider.ToolSpec#execute} with an empty object,
+     * whatever the model sent. The property declared here is therefore free to
+     * change.
+     */
+    public static final String NO_PARAMETERS_SCHEMA = """
+            {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string",
+                  "description": "Optional note on why this tool is being called. Ignored by the tool."
+                }
+              }
+            }""";
+
+    /**
+     * Opening tag of the block that carries the per-turn session context at the
+     * end of the user message text, see
+     * {@link #withSessionContext(String, String)}.
+     */
+    static final String SESSION_CONTEXT_OPEN = "<session_context>";
+
+    /**
+     * Closing tag of the session context block.
+     */
+    static final String SESSION_CONTEXT_CLOSE = "</session_context>";
+
+    /**
+     * Note at the start of the session context block. It tells the model that
+     * the block is application-supplied rather than the user's words and, since
+     * the default context is the current date and time, how to use it: models
+     * otherwise tend to leave relative dates such as "tomorrow" or "next
+     * Friday" unresolved.
+     */
+    static final String SESSION_CONTEXT_NOTE = "Context supplied by the "
+            + "application when this message was sent, not written by the "
+            + "user. If it includes a date or time, resolve relative phrases "
+            + "in the message (\"today\", \"tomorrow\", \"yesterday\", "
+            + "\"next Friday\", \"in two weeks\", \"end of next month\") "
+            + "against it, into ISO date, date-time or time strings.";
+
+    /**
+     * Tells whether a tool declares parameters. A tool whose schema is
+     * {@code null} or blank takes none: the provider declares
+     * {@link #NO_PARAMETERS_SCHEMA} to the LLM in its place and passes an empty
+     * arguments object to the tool.
+     *
+     * @param tool
+     *            the tool to check
+     * @return {@code true} if the tool declares a parameters schema
+     */
+    public static boolean hasParameters(LLMProvider.ToolSpec tool) {
+        var schema = tool.getParametersSchema();
+        return schema != null && !schema.isBlank();
+    }
 
     /**
      * Decodes byte array as UTF-8 text.
@@ -67,6 +140,30 @@ final class LLMProviderHelpers {
     }
 
     /**
+     * Appends the session context of the turn, if any, to the user message text
+     * in a delimited block. The block ends the user message text, which comes
+     * after everything that stays the same from turn to turn (tool definitions,
+     * system prompt, conversation history), so that a provider caching the
+     * prompt prefix keeps hitting its cache even though the context changes on
+     * every turn.
+     *
+     * @param userMessage
+     *            the user's message text, not {@code null}
+     * @param sessionContext
+     *            the context of the turn, {@code null} or blank for none
+     * @return the text to send as the user message
+     */
+    public static String withSessionContext(String userMessage,
+            String sessionContext) {
+        if (sessionContext == null || sessionContext.isBlank()) {
+            return userMessage;
+        }
+        return userMessage + "\n\n" + SESSION_CONTEXT_OPEN + "\n"
+                + SESSION_CONTEXT_NOTE + "\n" + sessionContext.strip() + "\n"
+                + SESSION_CONTEXT_CLOSE;
+    }
+
+    /**
      * Formats text content as an attachment block.
      *
      * @param fileName
@@ -95,5 +192,46 @@ final class LLMProviderHelpers {
                 "Attachment content type must not be null");
         Objects.requireNonNull(attachment.data(),
                 "Attachment data must not be null");
+    }
+
+    /**
+     * Parses the arguments a model sent for a tool call into the object a
+     * {@link LLMProvider.ToolSpec} expects.
+     * <p>
+     * Missing arguments become an empty object, so a tool that takes no
+     * parameters is callable whether or not the model sends anything. Anything
+     * else must parse as a JSON object: a model that has nothing to fill
+     * sometimes sends a bare value such as {@code ""} instead, which is valid
+     * JSON but carries no arguments.
+     *
+     * @param arguments
+     *            the raw argument JSON from the model, may be {@code null} or
+     *            blank
+     * @return the parsed arguments, never {@code null}
+     * @throws IllegalArgumentException
+     *             if the arguments are not valid JSON or parse to something
+     *             other than a JSON object
+     */
+    public static ObjectNode parseToolArguments(String arguments) {
+        if (arguments == null || arguments.isBlank()) {
+            return JacksonUtils.createObjectNode();
+        }
+        JsonNode parsed;
+        try {
+            parsed = JacksonUtils.getMapper().readTree(arguments);
+        } catch (JacksonException e) {
+            // The message that goes back to the model keeps the parser
+            // diagnostic it can repair from, but not the location suffix
+            // full of Java library internals.
+            throw new IllegalArgumentException(e.getOriginalMessage(), e);
+        }
+        if (!parsed.isObject()) {
+            // Reported instead of letting the ObjectNode cast fail, so the
+            // message that goes back to the model names the shape it should
+            // send rather than a Java class cast.
+            throw new IllegalArgumentException(
+                    "expected a JSON object, but got " + parsed.getNodeType());
+        }
+        return (ObjectNode) parsed;
     }
 }

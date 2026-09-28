@@ -18,6 +18,9 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.io.Serializable;
 import java.util.Optional;
 
+import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ResponseMetadata;
+
 /**
  * Listener for LLM response events.
  * <p>
@@ -26,7 +29,8 @@ import java.util.Optional;
  * the turn fails before a stream ever opens. It fires at most once per prompt:
  * a prompt rejected by the {@link RequestInterceptor} and a postponed prompt
  * abandoned because its UI was detached end without firing it. The same
- * lifecycle moment as {@link AIController#onResponse(Throwable)}. Use it to
+ * lifecycle moment as
+ * {@link AIController#onResponse(ResponseListener.ResponseEvent)}. Use it to
  * persist conversation state (via {@link AIOrchestrator#getHistory()}), trigger
  * follow-up actions, or surface errors to the user.
  * <p>
@@ -37,13 +41,16 @@ import java.util.Optional;
  * <i>not</i> appended to {@link AIOrchestrator#getHistory()}.
  * <p>
  * On failure {@link ResponseEvent#getError()} carries the cause (timeout,
- * stream error, any throw between {@link AIController#onRequest()} and the
- * start of the stream, or a {@link RequestInterceptor} failure — a throw, a
+ * stream error, a provider's tool call limit as a
+ * {@link com.vaadin.flow.component.ai.provider.ToolCallLimitExceededException},
+ * any throw between
+ * {@link AIController#onRequest(RequestListener.RequestEvent)} and the start of
+ * the stream, or a {@link RequestInterceptor} failure — a throw, a
  * {@link RequestInterceptor.RequestContinuation#fail(Throwable) fail}, or an
- * interception timeout); the response text is either empty or a partial stream
- * that was received before the failure. An interceptor failure fires the
- * listener without a preceding {@link AIController#onRequest()}, so an error
- * does not imply that per-turn setup has happened.
+ * interception timeout); the response text is empty — text received before the
+ * failure is not passed on. An interceptor failure fires the listener without a
+ * preceding {@link AIController#onRequest(RequestListener.RequestEvent)}, so an
+ * error does not imply that per-turn setup has happened.
  * <p>
  * The listener is <b>not</b> called when history is restored via
  * {@code Builder.withHistory()}.
@@ -59,7 +66,7 @@ import java.util.Optional;
  * the application's own thread. To update Vaadin UI components from this
  * listener, use {@code ui.access()}.
  * 
- * @since 25.2
+ * @since 25.3
  */
 @FunctionalInterface
 public interface ResponseListener extends Serializable {
@@ -79,17 +86,34 @@ public interface ResponseListener extends Serializable {
     class ResponseEvent implements Serializable {
         private final String response;
         private final Throwable error;
+        private final ResponseMetadata metadata;
 
-        ResponseEvent(String response, Throwable error) {
+        /**
+         * Creates a turn-outcome event. The orchestrator builds this for every
+         * turn; it is public so an application can construct one when unit
+         * testing an {@link AIController} implementation.
+         *
+         * @param response
+         *            the assistant's response text, not {@code null}
+         * @param error
+         *            the cause of failure, or {@code null} on success
+         * @param metadata
+         *            the provider's metadata for the turn, or {@code null} when
+         *            none was reported
+         * @since 25.3
+         */
+        public ResponseEvent(String response, Throwable error,
+                ResponseMetadata metadata) {
             this.response = response;
             this.error = error;
+            this.metadata = metadata;
         }
 
         /**
          * Gets the assistant's response text. On success this is the full text
-         * (may be empty when the model emitted only tool calls); on failure
-         * this is whatever partial stream was received before the error,
-         * possibly empty.
+         * (may be empty when the model emitted only tool calls); on failure the
+         * orchestrator passes an empty string, even if text was received before
+         * the error.
          *
          * @return the response text, never {@code null}
          */
@@ -105,6 +129,21 @@ public interface ResponseListener extends Serializable {
          */
         public Optional<Throwable> getError() {
             return Optional.ofNullable(error);
+        }
+
+        /**
+         * Gets the metadata the provider reported for this turn, such as the
+         * finish reason and token usage. On a failed turn this is what was
+         * observed before the failure. Returns an empty optional when the
+         * provider reported none — a custom {@link LLMProvider} that does not
+         * publish metadata, or a turn that failed before any was observed.
+         *
+         * @return the response metadata, or empty when the provider reported
+         *         none
+         * @since 25.3
+         */
+        public Optional<ResponseMetadata> getMetadata() {
+            return Optional.ofNullable(metadata);
         }
     }
 }

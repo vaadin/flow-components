@@ -58,21 +58,27 @@ public class GridNoneSelectionModel<T> implements GridSelectionModel<T> {
 
     @Override
     public void selectFromClient(T item) {
-        throw new IllegalStateException("Client tried to update selection"
-                + " even though selection mode is currently set to NONE.");
+        throw new IllegalStateException("""
+                Client tried to update selection \
+                even though selection mode is currently set to NONE.\
+                """);
     }
 
     @Override
     public void deselectFromClient(T item) {
-        throw new IllegalStateException("Client tried to update selection"
-                + " even though selection mode is currently set to NONE.");
+        throw new IllegalStateException("""
+                Client tried to update selection \
+                even though selection mode is currently set to NONE.\
+                """);
     }
 
     @Override
     public Registration addSelectionListener(
             SelectionListener<Grid<T>, T> listener) {
         throw new UnsupportedOperationException(
-                "This selection model doesn't allow selection, cannot add selection listeners to it. "
-                        + "Please set suitable selection mode with grid.setSelectionMode");
+                """
+                        This selection model doesn't allow selection, cannot add selection listeners to it. \
+                        Please set suitable selection mode with grid.setSelectionMode\
+                        """);
     }
 }

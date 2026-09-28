@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -34,6 +35,11 @@ abstract class AbstractRangeSliderTest<TComponent extends NumberRangeSlider<TCom
     @BeforeEach
     void setup() {
         slider = createSlider();
+    }
+
+    @Test
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(slider instanceof HasThemeVariant<SliderVariant>);
     }
 
     @Test

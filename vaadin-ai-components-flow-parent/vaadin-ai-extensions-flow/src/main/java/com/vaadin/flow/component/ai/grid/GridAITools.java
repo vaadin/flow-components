@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 
 import tools.jackson.databind.JsonNode;
 
@@ -34,26 +35,26 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public final class GridAITools {
+
+    /**
+     * Tail of the error a tool returns when it failed for a reason the LLM was
+     * given no detail about, because the cause was not a {@link ToolException}
+     * and so is not safe to pass on. Repeating the call unchanged can only fail
+     * the same way, which is what the LLM did without this; a rewritten attempt
+     * is still worth one try, since the cause is often something the LLM can
+     * avoid by itself, such as an identifier the database reserves.
+     */
+    private static final String RETRY_ONCE = " No details about the cause are "
+            + "available. Do not repeat the same query: change it and try "
+            + "once more, or report the failure if you cannot.";
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAITools.class);
 
     private GridAITools() {
-    }
-
-    /**
-     * Signals a validation failure whose message is safe to pass back to the
-     * LLM. Unexpected runtime exceptions, by contrast, may carry internal
-     * detail (SQL fragments, schema names, file paths) and must be replaced
-     * with a generic message before being returned.
-     */
-    private static final class ValidationException extends RuntimeException {
-        ValidationException(String message) {
-            super(message);
-        }
     }
 
     /**
@@ -74,7 +75,10 @@ public final class GridAITools {
         /**
          * Handles a SQL query for the given grid. Implementations should
          * validate the query and store it for deferred rendering. Should throw
-         * if the grid is not found or the query is invalid.
+         * if the grid is not found or the query is invalid: a
+         * {@link ToolException} relays its message to the LLM so it can correct
+         * the query, any other exception is replaced with a generic error
+         * message.
          *
          * @param gridId
          *            the grid ID
@@ -105,11 +109,10 @@ public final class GridAITools {
             return ids.iterator().next();
         }
         if (ids.isEmpty()) {
-            throw new ValidationException("No grids available.");
+            throw new ToolException("No grids available.");
         }
-        throw new ValidationException(
-                "gridId is required when multiple grids exist. "
-                        + "Available grid IDs: " + ids);
+        throw new ToolException("gridId is required when multiple grids exist. "
+                + "Available grid IDs: " + ids);
     }
 
     /**
@@ -153,7 +156,7 @@ public final class GridAITools {
                     LOGGER.info("get_grid_state called");
                     var gridId = resolveGridId(arguments, callbacks);
                     return callbacks.getState(gridId);
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("get_grid_state validation failed", e);
                     return "Error getting grid state: " + e.getMessage();
                 } catch (Exception e) {
@@ -166,7 +169,8 @@ public final class GridAITools {
 
     /**
      * Creates a tool that updates the grid data with a SQL query. If the
-     * handler throws, the error is returned to the LLM.
+     * handler throws a {@link ToolException}, its message is returned to the
+     * LLM; any other exception is replaced with a generic error.
      *
      * @param callbacks
      *            the callbacks for grid mutation, not {@code null}
@@ -191,16 +195,18 @@ public final class GridAITools {
                         - ALWAYS give every column a human-readable AS alias
                         - Do NOT use LIMIT or OFFSET — the grid handles pagination
                         - Use double quotes for aliases with spaces or dots
-                        Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
+                        - Use ONLY tables and columns from get_database_schema()
+                        Shape (placeholders, not real names):
+                        SELECT ColumnA AS "Readable A", ColumnB AS "Readable B" FROM TableName
 
                         COLUMN GROUPING (only when the user asks for grouping):
                         When the user mentions "grouped under X" in their request:
                         1. Select ONLY the columns mentioned for grouping
                         2. Alias each column as "X.ReadableName" (with the group prefix and a dot)
                         3. Do NOT include columns that are not part of a group
-                        Example request: "product and category grouped under Product"
-                        Correct SQL: SELECT product AS "Product.Name", category AS "Product.Category" FROM sales
-                        Result: A "Product" header spanning both columns.
+                        Example request: "ColumnA and ColumnB grouped under GroupName"
+                        Correct SQL: SELECT ColumnA AS "GroupName.Readable A", ColumnB AS "GroupName.Readable B" FROM TableName
+                        Result: A "GroupName" header spanning both columns.
                         Do NOT use "X.Name" format unless the user asks for grouping.
                         """;
             }
@@ -235,12 +241,12 @@ public final class GridAITools {
                     callbacks.updateData(gridId, query);
                     return "Grid '" + gridId
                             + "' data update queued successfully";
-                } catch (ValidationException e) {
+                } catch (ToolException e) {
                     LOGGER.warn("update_grid_data validation failed", e);
                     return "Error updating grid data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_grid_data failed", e);
-                    return "Error updating grid data.";
+                    return "Error updating grid data." + RETRY_ONCE;
                 }
             }
         };

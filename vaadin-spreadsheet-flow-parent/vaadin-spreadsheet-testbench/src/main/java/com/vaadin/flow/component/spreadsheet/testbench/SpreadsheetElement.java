@@ -60,7 +60,10 @@ public class SpreadsheetElement extends TestBenchElement {
      *             if the cell at (row, column) is not found.
      */
     public SheetCellElement getCellAt(int row, int column) {
-        String selector = String.format(".col%d.row%d.cell", column, row);
+        // Cells are divs, while the inline editor is an input that carries
+        // the same col/row/cell class names as the cell being edited. The
+        // div prefix keeps the editor from being matched as a second cell.
+        String selector = String.format("div.col%d.row%d.cell", column, row);
         String mergedSelector = selector + ".merged-cell";
         // Single async JS call to find the cell, preferring merged cell
         // when multiple matches exist. Polls to handle cases where the

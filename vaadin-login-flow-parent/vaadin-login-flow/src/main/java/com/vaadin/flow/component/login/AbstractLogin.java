@@ -148,7 +148,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @param action
      *            the action URL, or {@code null} to remove the action and
      *            restore the default login listener handling
-     * @since 25.2
+     * @since 25.1.10
      */
     public void setUnsafeAction(String action) {
         doSetAction(action);

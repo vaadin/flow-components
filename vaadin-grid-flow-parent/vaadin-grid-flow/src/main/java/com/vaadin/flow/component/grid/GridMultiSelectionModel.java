@@ -40,26 +40,25 @@ public interface GridMultiSelectionModel<T>
      * State for showing the select all checkbox in the grid's default header
      * row for the selection column.
      * <p>
-     * Default value is {@link #DEFAULT}, which means that the select all is
-     * only visible if an in-memory data is used.
+     * Default value is {@link #DEFAULT}, which means that the select all
+     * checkbox is only visible for in-memory data.
      */
     public enum SelectAllCheckboxVisibility {
 
         /**
-         * Shows the select all checkbox, if in-memory data is used.
+         * Shows the select all checkbox for in-memory data, and for lazy data
+         * with a known item count, for example when a count callback is
+         * provided. For lazy data with unknown item count, the checkbox is
+         * never shown.
          * <p>
-         * For lazy data, the checkbox is only shown when a count callback has
-         * been provided. For lazy data with unknown count, the checkbox will
-         * never be shown.
-         * <p>
-         * <b>For lazy data, selecting all will result in to all rows being
-         * fetched from backend to application memory!</b>
+         * <b>For lazy data, selecting all fetches all rows from the backend
+         * into application memory!</b>
          */
         VISIBLE,
 
         /**
-         * Never shows the select all checkbox, regardless of data is in-memory
-         * or not (lazy).
+         * Never shows the select all checkbox, regardless of whether the data
+         * is in-memory or lazy.
          */
         HIDDEN,
 

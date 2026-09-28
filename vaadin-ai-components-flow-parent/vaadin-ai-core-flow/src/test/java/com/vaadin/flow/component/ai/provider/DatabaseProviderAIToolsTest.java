@@ -65,7 +65,9 @@ class DatabaseProviderAIToolsTest {
     }
 
     @Test
-    void getDatabaseSchema_returnsToolWithNullParametersSchema() {
+    void getDatabaseSchema_declaresNoParameters() {
+        // A null schema tells the provider the tool takes no parameters; the
+        // provider substitutes its placeholder schema in the LLM request.
         var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         Assertions.assertNull(tool.getParametersSchema());
     }
@@ -75,6 +77,14 @@ class DatabaseProviderAIToolsTest {
         var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         Assertions.assertEquals(SCHEMA,
                 tool.execute(JacksonUtils.createObjectNode()));
+    }
+
+    @Test
+    void getDatabaseSchema_executeIgnoresUnexpectedArguments() {
+        var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
+        var args = JacksonUtils.createObjectNode();
+        args.put("unexpected", "ignored");
+        Assertions.assertEquals(SCHEMA, tool.execute(args));
     }
 
     @Test

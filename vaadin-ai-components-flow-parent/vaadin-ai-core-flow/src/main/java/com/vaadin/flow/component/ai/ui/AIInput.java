@@ -23,7 +23,7 @@ import com.vaadin.flow.function.SerializableConsumer;
  * Interface for input components that are used in an AI conversation.
  *
  * @author Vaadin Ltd
- * @since 25.1
+ * @since 25.3
  */
 public interface AIInput extends Serializable {
 

@@ -32,7 +32,13 @@ public enum CheckboxGroupVariant implements ThemeVariant {
     @Deprecated
     AURA_HELPER_ABOVE_FIELD("helper-above-field"),
     AURA_HORIZONTAL("horizontal"),
-    HELPER_ABOVE("helper-above-field");
+    HELPER_ABOVE("helper-above-field"),
+    /**
+     * Places the label next to the group items instead of above them.
+     *
+     * @since 25.4
+     */
+    LABEL_ASIDE("label-aside");
 
     private final String variant;
 

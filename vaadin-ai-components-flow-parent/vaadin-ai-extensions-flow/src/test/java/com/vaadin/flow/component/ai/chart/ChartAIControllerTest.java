@@ -23,14 +23,18 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -83,12 +87,25 @@ class ChartAIControllerTest {
             Assertions.assertTrue(names.contains("get_chart_state"));
             Assertions.assertTrue(names.contains("update_chart_configuration"));
             Assertions.assertTrue(names.contains("update_chart_data_source"));
+            Assertions.assertTrue(names.contains("get_plot_options_schema"));
         }
 
         @Test
         void instructionsToolIsFirst() {
             Assertions.assertEquals("get_chart_instructions",
                     controller.getTools().get(0).getName());
+        }
+
+        @Test
+        void plotOptionsSchemaTool_returnsGeneratedSchema() {
+            var tool = findTool(controller.getTools(),
+                    "get_plot_options_schema");
+            var result = tool.execute(json("{\"chartType\":\"column\"}"));
+            Assertions.assertFalse(result.startsWith("Error"), result);
+            var schema = json(result);
+            Assertions.assertEquals("object", schema.get("type").asString());
+            Assertions.assertTrue(schema.get("properties").has("stacking"),
+                    "Column schema should expose plot option properties");
         }
     }
 
@@ -112,6 +129,16 @@ class ChartAIControllerTest {
             Assertions.assertFalse(result.isEmpty());
             Assertions.assertTrue(result.contains("get_chart_state"));
         }
+
+        @Test
+        void declaresNoParameters() {
+            // A null schema tells the provider the tool takes no parameters;
+            // the provider substitutes its placeholder schema in the LLM
+            // request.
+            Assertions.assertNull(
+                    findTool(controller.getTools(), "get_chart_instructions")
+                            .getParametersSchema());
+        }
     }
 
     @Nested
@@ -127,7 +154,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             String state = findTool(tools, "get_chart_state")
                     .execute(json("{}"));
@@ -148,7 +175,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             ChartEntry entry = ChartEntry.get(chart);
             Assertions.assertNotNull(entry);
@@ -169,6 +196,19 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateConfiguration_invalidConfigJson_relaysParseError() {
+            var tool = findTool(controller.getTools(),
+                    "update_chart_configuration");
+
+            String result = tool.execute(
+                    json("{\"configuration\": \"not a json object\"}"));
+            Assertions.assertTrue(
+                    result.contains("Invalid chart configuration JSON"),
+                    "The parse failure reason should reach the model: "
+                            + result);
+        }
+
+        @Test
         void updateData_validatesQueriesEagerly() {
             databaseProvider.throwOnExecute = new RuntimeException("Bad SQL");
 
@@ -179,6 +219,35 @@ class ChartAIControllerTest {
             String result = tool
                     .execute(json("{\"queries\": [\"SELECT invalid\"]}"));
             Assertions.assertTrue(result.contains("Error"));
+        }
+
+        @Test
+        void updateData_providerThrowsToolException_relaysMessage() {
+            databaseProvider.throwOnExecute = new ToolException(
+                    "Unknown column 'foo'");
+
+            var tool = findTool(controller.getTools(),
+                    "update_chart_data_source");
+
+            String result = tool
+                    .execute(json("{\"queries\": [\"SELECT foo\"]}"));
+            Assertions.assertEquals(
+                    "Error updating chart data: Unknown column 'foo'", result);
+        }
+
+        @Test
+        void updateData_providerThrowsUnexpectedException_returnsGenericError() {
+            databaseProvider.throwOnExecute = new RuntimeException(
+                    "internal detail");
+
+            var tool = findTool(controller.getTools(),
+                    "update_chart_data_source");
+
+            String result = tool
+                    .execute(json("{\"queries\": [\"SELECT foo\"]}"));
+            Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
+            Assertions.assertFalse(result.contains("internal detail"),
+                    "The cause must not reach the LLM, got: " + result);
         }
 
         @Test
@@ -193,8 +262,9 @@ class ChartAIControllerTest {
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
 
+            var event = AITurnEvents.success();
             var ex = Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(null));
+                    () -> controller.onResponse(event));
             Assertions.assertEquals("Render failure", ex.getMessage());
         }
 
@@ -218,7 +288,7 @@ class ChartAIControllerTest {
                             + ChartSerialization.toJSON(configuration) + "}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             // Verify plot options were applied to the chart
             var applied = (PlotOptionsColumn) chart.getConfiguration()
@@ -228,6 +298,33 @@ class ChartAIControllerTest {
             Assertions.assertEquals(5, applied.getBorderRadius().intValue());
             Assertions.assertTrue(applied.getColorByPoint());
             Assertions.assertTrue(applied.getDataLabels().getEnabled());
+        }
+
+        @Test
+        void configurationUpdatesInOneTurn_allApply() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"}}");
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration")
+                    .execute(json("{\"configuration\": {\"series\":"
+                            + " [{\"name\": \"North\", \"type\": \"spline\"}]}}"));
+            findTool(tools, "update_chart_configuration")
+                    .execute(json("{\"configuration\": {\"chart\":"
+                            + " {\"type\": \"column\"},"
+                            + " \"title\": {\"text\": \"Revenue\"}}}"));
+            controller.onResponse(AITurnEvents.success());
+
+            var north = (DataSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(ChartType.SPLINE,
+                    north.getPlotOptions().getChartType());
+            Assertions.assertEquals("Revenue",
+                    chart.getConfiguration().getTitle().getText());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("spline"), state);
+            Assertions.assertTrue(state.contains("Revenue"), state);
         }
 
         @Test
@@ -241,11 +338,169 @@ class ChartAIControllerTest {
 
             // Queries are committed only after onResponseComplete; before
             // that, get_chart_state returns the previously-committed view.
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             String state = findTool(tools, "get_chart_state")
                     .execute(json("{}"));
             Assertions.assertTrue(state.contains("SELECT 1"));
+        }
+    }
+
+    @Nested
+    class ChartStateContent {
+
+        @Test
+        void excludesCategoriesFromQueryResults() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "Secret Customer", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"bar\"},"
+                    + " \"title\": {\"text\": \"Revenue\"}}");
+
+            Assertions.assertArrayEquals(new String[] { "Secret Customer" },
+                    chart.getConfiguration().getxAxis().getCategories());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertFalse(state.contains("Secret Customer"), state);
+        }
+
+        @Test
+        void excludesSeriesNamesFromQueryResults() {
+            databaseProvider.results = List.of(Map.of("_series", "Secret Rep",
+                    "category", "Q1", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"line\"}}");
+
+            Assertions.assertEquals("Secret Rep",
+                    chart.getConfiguration().getSeries().getFirst().getName());
+            Assertions.assertFalse(chartState().contains("Secret Rep"));
+        }
+
+        @Test
+        void excludesOrganizationNodesFromQueryResults() {
+            databaseProvider.results = List.of(
+                    Map.of("_id", "1", "_name", "Secret Boss", "_parent", "0",
+                            "_title", "Secret Title"),
+                    Map.of("_id", "2", "_name", "Secret Report", "_parent", "1",
+                            "_title", "Secret Role"));
+
+            completeTurn("{\"chart\": {\"type\": \"organization\"}}");
+
+            var series = (NodeSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(2, series.getNodes().size());
+            Assertions.assertFalse(chartState().contains("Secret"));
+        }
+
+        @Test
+        void keepsConfigurationFromEarlierTurns() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"First\"}}");
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"subtitle\": {\"text\": \"Second\"}}");
+
+            var state = chartState();
+            Assertions.assertTrue(state.contains("First"), state);
+            Assertions.assertTrue(state.contains("Second"), state);
+        }
+
+        @Test
+        void chartTypeChange_startsOverLikeTheChart() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"First\"}}");
+            completeTurn("{\"chart\": {\"type\": \"bar\"}}");
+
+            Assertions
+                    .assertNull(chart.getConfiguration().getTitle().getText());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("\"bar\""), state);
+            Assertions.assertFalse(state.contains("First"), state);
+        }
+
+        @Test
+        void chartTypeSetByApplication_keepsEarlierLlmConfiguration() {
+            chart.getConfiguration().getChart().setType(ChartType.COLUMN);
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"title\": {\"text\": \"Revenue\"}}");
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"subtitle\": {\"text\": \"2025\"}}");
+
+            Assertions.assertEquals("Revenue",
+                    chart.getConfiguration().getTitle().getText());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertTrue(state.contains("2025"), state);
+        }
+
+        @Test
+        void seriesSettingsSentTwice_keepsTheLatest() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"series\": [{\"name\": \"North\", \"type\": \"spline\"}]}");
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"series\": [{\"name\": \"North\", \"type\": \"line\"}]}");
+
+            var series = JacksonUtils.readTree(chartState())
+                    .get("configuration").get("series");
+            Assertions.assertEquals(1, series.size(), series.toString());
+            Assertions.assertEquals("North",
+                    series.get(0).get("name").asString());
+            Assertions.assertEquals("line",
+                    series.get(0).get("type").asString());
+        }
+
+        @Test
+        void seriesEntryWithoutAxis_keepsTheAxisSetBefore() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"}, \"series\":"
+                    + " [{\"name\": \"North\", \"type\": \"area\", \"yAxis\": 1}]}");
+            completeTurn("{\"series\": [{\"name\": \"North\","
+                    + " \"type\": \"column\"}]}");
+
+            var north = (DataSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(ChartType.COLUMN,
+                    north.getPlotOptions().getChartType());
+            Assertions.assertEquals(1, north.getyAxis(),
+                    "the axis binding was not mentioned, so it must stay");
+            var state = chartState();
+            Assertions.assertTrue(state.contains("\"yAxis\" : 1")
+                    || state.contains("\"yAxis\":1"), state);
+        }
+
+        @Test
+        void failedRender_keepsPreviousConfiguration() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"Kept\"}}");
+
+            var tools = controller.getTools();
+            findTool(tools, "update_chart_configuration")
+                    .execute(json("{\"configuration\": {\"chart\":"
+                            + " {\"type\": \"column\"},"
+                            + " \"title\": {\"text\": \"Dropped\"}}}"));
+            findTool(tools, "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 2\"]}"));
+            databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            var event = AITurnEvents.success();
+            Assertions.assertThrows(RuntimeException.class,
+                    () -> controller.onResponse(event));
+
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Kept"), state);
+            Assertions.assertFalse(state.contains("Dropped"), state);
         }
     }
 
@@ -275,7 +530,7 @@ class ChartAIControllerTest {
                     .findFirst().get()
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var series = chart.getConfiguration().getSeries();
             Assertions.assertEquals(1, series.size());
@@ -305,7 +560,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             ChartState state = controller.getState();
             Assertions.assertNotNull(state);
@@ -327,8 +582,9 @@ class ChartAIControllerTest {
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
 
             databaseProvider.throwOnExecute = new RuntimeException("DB error");
+            var event = AITurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(null));
+                    () -> controller.onResponse(event));
 
             // Render threw before setQueries could commit, so the chart
             // stays in its previous (uninitialized) state.
@@ -345,7 +601,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"column\"}, \"title\": {\"text\": \"Original\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             ChartState savedState = controller.getState();
 
@@ -365,7 +621,9 @@ class ChartAIControllerTest {
         void chartState_isSerializable() throws Exception {
             Configuration config = new Configuration();
             config.getChart().setType(ChartType.COLUMN);
-            var state = new ChartState(List.of("SELECT 1"), config);
+            Configuration llmConfig = new Configuration();
+            llmConfig.setTitle("Revenue");
+            var state = new ChartState(List.of("SELECT 1"), config, llmConfig);
             var baos = new ByteArrayOutputStream();
             try (var oos = new ObjectOutputStream(baos)) {
                 oos.writeObject(state);
@@ -377,6 +635,8 @@ class ChartAIControllerTest {
                         deserialized.queries());
                 Assertions.assertEquals(ChartType.COLUMN,
                         deserialized.configuration().getChart().getType());
+                Assertions.assertEquals("Revenue",
+                        deserialized.llmConfiguration().getTitle().getText());
             }
         }
     }
@@ -403,6 +663,71 @@ class ChartAIControllerTest {
             ChartEntry entry = ChartEntry.get(chart);
             Assertions.assertNotNull(entry);
             Assertions.assertEquals(List.of("SELECT 1"), entry.getQueries());
+        }
+
+        @Test
+        void savedState_keepsWhatTheLlmSees() {
+            databaseProvider.results = List.of(Map.of("_series", "North",
+                    "category", "Secret Customer", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"Revenue\"}, \"series\":"
+                    + " [{\"name\": \"North\", \"type\": \"spline\"}]}");
+            var saved = controller.getState();
+
+            chart = new Chart();
+            ui.add(chart);
+            controller = new ChartAIController(chart, databaseProvider);
+            controller.restoreState(saved);
+
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertTrue(state.contains("spline"), state);
+            Assertions.assertFalse(state.contains("Secret"), state);
+        }
+
+        @Test
+        void stateWithoutLlmConfiguration_hidesSeriesNamesAndCategoriesFromLlm() {
+            databaseProvider.results = List.of(Map.of("_series", "Secret Rep",
+                    "category", "Secret Customer", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"title\": {\"text\": \"Revenue\"}}");
+            var saved = controller.getState();
+
+            chart = new Chart();
+            ui.add(chart);
+            controller = new ChartAIController(chart, databaseProvider);
+            controller.restoreState(
+                    new ChartState(saved.queries(), saved.configuration()));
+
+            Assertions.assertEquals("Secret Rep",
+                    chart.getConfiguration().getSeries().getFirst().getName());
+            Assertions.assertArrayEquals(new String[] { "Secret Customer" },
+                    chart.getConfiguration().getxAxis().getCategories());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("Revenue"), state);
+            Assertions.assertFalse(state.contains("Secret"), state);
+            Assertions.assertFalse(state.contains("categories"), state);
+        }
+
+        @Test
+        void perSeriesSettings_surviveRepeatedSaveAndRestore() {
+            databaseProvider.results = List.of(
+                    Map.of("_series", "North", "category", "Jan", "value", 10));
+            completeTurn("{\"chart\": {\"type\": \"column\"}, \"series\":"
+                    + " [{\"name\": \"North\", \"type\": \"spline\","
+                    + " \"plotOptions\": {\"dataLabels\": {\"enabled\": true}}}]}");
+
+            controller.restoreState(controller.getState());
+            controller.restoreState(controller.getState());
+
+            var north = (DataSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(ChartType.SPLINE,
+                    north.getPlotOptions().getChartType());
+            Assertions.assertTrue(((PlotOptionsSpline) north.getPlotOptions())
+                    .getDataLabels().getEnabled());
+            var state = chartState();
+            Assertions.assertTrue(state.contains("dataLabels"), state);
         }
 
         @Test
@@ -504,7 +829,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNotNull(captured.get());
             Assertions.assertEquals(List.of("SELECT 1"),
@@ -531,8 +856,9 @@ class ChartAIControllerTest {
 
             databaseProvider.throwOnExecute = new RuntimeException(
                     "Render failure");
+            var event = AITurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(null));
+                    () -> controller.onResponse(event));
 
             Assertions.assertNull(captured.get());
         }
@@ -551,7 +877,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(captured.get());
         }
@@ -566,12 +892,12 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             List<ChartState> states = new ArrayList<>();
             controller.addStateChangeListener(states::add);
 
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertTrue(states.isEmpty(),
                     "Second onResponseComplete should not fire listeners "
@@ -595,7 +921,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNotNull(secondListenerState.get(),
                     "Second listener should still fire even if the "
@@ -610,7 +936,7 @@ class ChartAIControllerTest {
             var tools = controller.getTools();
             findTool(tools, "update_chart_configuration").execute(json(
                     "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(captured.get());
         }
@@ -629,11 +955,12 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(new RuntimeException("stream error"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("stream error")));
 
             // Subsequent successful turn with no tool calls must not pick
             // up the failed turn's staged configuration or queries.
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertNull(controller.getState());
         }
@@ -647,17 +974,18 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var baselineType = chart.getConfiguration().getChart().getType();
 
             findTool(tools, "update_chart_configuration").execute(json(
                     "{\"configuration\": {\"chart\": {\"type\": \"pie\"}}}"));
-            controller.onResponse(new RuntimeException("stream error"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("stream error")));
 
             // Subsequent successful turn with no tool calls — the failed
             // turn's pending chart type must not be applied.
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             Assertions.assertEquals(baselineType,
                     chart.getConfiguration().getChart().getType());
@@ -671,15 +999,16 @@ class ChartAIControllerTest {
 
             findTool(tools, "update_chart_data_source").execute(
                     json("{\"queries\": [\"SELECT good FROM baseline\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             findTool(tools, "update_chart_data_source").execute(
                     json("{\"queries\": [\"SELECT bad FROM half_baked\"]}"));
-            controller.onResponse(new RuntimeException("stream error"));
+            controller.onResponse(
+                    AITurnEvents.failure(new RuntimeException("stream error")));
 
             // Subsequent successful turn with no tool calls — the failed
             // turn's staged queries must not bleed through.
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             var state = controller.getState();
             Assertions.assertNotNull(state);
@@ -709,7 +1038,7 @@ class ChartAIControllerTest {
                     "{\"configuration\": {\"chart\": {\"type\": \"bar\"}}}"));
             findTool(tools, "update_chart_data_source")
                     .execute(json("{\"queries\": [\"SELECT 1\"]}"));
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
 
             // Attachment does not gate the controller: configuration
             // lives on the server side and Flow queues any JS calls
@@ -733,8 +1062,9 @@ class ChartAIControllerTest {
 
             // Errors propagate regardless of attach state so the
             // orchestrator can still surface them in the chat UI.
+            var event = AITurnEvents.success();
             Assertions.assertThrows(RuntimeException.class,
-                    () -> controller.onResponse(null));
+                    () -> controller.onResponse(event));
         }
 
         @Test
@@ -753,6 +1083,21 @@ class ChartAIControllerTest {
     }
 
     // --- Helpers ---
+
+    /** Runs one successful turn that sets the configuration and a query. */
+    private void completeTurn(String configuration) {
+        var tools = controller.getTools();
+        findTool(tools, "update_chart_configuration")
+                .execute(json("{\"configuration\": " + configuration + "}"));
+        findTool(tools, "update_chart_data_source")
+                .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+        controller.onResponse(AITurnEvents.success());
+    }
+
+    private String chartState() {
+        return findTool(controller.getTools(), "get_chart_state")
+                .execute(json("{}"));
+    }
 
     private static LLMProvider.ToolSpec findTool(
             List<LLMProvider.ToolSpec> tools, String name) {

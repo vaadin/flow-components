@@ -38,6 +38,7 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
@@ -47,6 +48,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class SelectTest {
@@ -982,6 +984,55 @@ class SelectTest {
         Assertions.assertEquals("updated", select.getValue().name);
     }
 
+    @Test
+    void refreshMultipleItems_requestsContentUpdateOnce() {
+        ui.add(select);
+        SelectListDataView<String> dataView = select.setItems("foo", "bar",
+                "baz");
+        ui.dumpPendingJavaScriptInvocations();
+
+        dataView.refreshItem("foo");
+        dataView.refreshItem("bar");
+        dataView.refreshItem("baz");
+
+        Assertions.assertEquals(1, countContentUpdateRequests());
+    }
+
+    @Test
+    void refreshItem_nextRoundTrip_requestsContentUpdateAgain() {
+        ui.add(select);
+        SelectListDataView<String> dataView = select.setItems("foo", "bar");
+        ui.dumpPendingJavaScriptInvocations();
+
+        dataView.refreshItem("foo");
+        Assertions.assertEquals(1, countContentUpdateRequests());
+
+        dataView.refreshItem("bar");
+        Assertions.assertEquals(1, countContentUpdateRequests());
+    }
+
+    @Test
+    void noItemChange_noContentUpdateRequest() {
+        ui.add(select);
+        select.setItems("foo", "bar");
+        ui.dumpPendingJavaScriptInvocations();
+
+        select.setLabel("label");
+
+        Assertions.assertEquals(0, countContentUpdateRequests());
+    }
+
+    @Test
+    void refreshItem_detached_requestsContentUpdateAfterAttach() {
+        SelectListDataView<String> dataView = select.setItems("foo", "bar");
+        dataView.refreshItem("foo");
+        Assertions.assertEquals(0, countContentUpdateRequests());
+
+        ui.add(select);
+
+        Assertions.assertEquals(1, countContentUpdateRequests());
+    }
+
     private void validateItem(int index, String textContent, String label,
             boolean enabled) {
         Element item = getListBoxChild(index);
@@ -991,6 +1042,14 @@ class SelectTest {
                 "Invalid label for item " + index);
         Assertions.assertEquals(enabled, item.isEnabled(),
                 "Invalid enabled state for item " + index);
+    }
+
+    private long countContentUpdateRequests() {
+        return ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> "requestContentUpdate"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
+                .count();
     }
 
     private Element getListBoxChild(int index) {

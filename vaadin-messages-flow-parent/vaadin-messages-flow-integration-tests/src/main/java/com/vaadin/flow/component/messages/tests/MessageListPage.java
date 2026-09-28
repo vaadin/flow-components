@@ -23,7 +23,10 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListI18n;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.messages.MessageListTypingIndicatorType;
+import com.vaadin.flow.component.messages.MessageListUser;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResource;
@@ -31,6 +34,11 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 
 @Route("vaadin-messages/message-list-test")
 public class MessageListPage extends Div {
+
+    // A 1x1 transparent GIF, so that the avatar image loads without the test
+    // depending on a served resource
+    static final String TYPING_USER_IMAGE = "data:image/gif;base64,"
+            + "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
     public MessageListPage() {
         UI.getCurrent().setLocale(Locale.ENGLISH);
@@ -109,6 +117,57 @@ public class MessageListPage extends Div {
             foo.addAttachment(new MessageListItem.Attachment("agenda.pdf",
                     "#agenda.pdf", "application/pdf"));
         });
+
+        var alice = new MessageListUser("Alice");
+        alice.setColorIndex(2);
+        var bob = new MessageListUser("Bob");
+        bob.setColorIndex(3);
+
+        addButton("showTyping", () -> messageList.setTypingUsers(alice));
+        addButton("showTwoTyping",
+                () -> messageList.setTypingUsers(alice, bob));
+        addButton("hideTyping", () -> messageList.setTypingUsers());
+        addButton("setI18n", () -> messageList.setI18n(
+                new MessageListI18n().setTypingIndicatorText("is thinking")));
+        addButton("setEllipsisTypingIndicator",
+                () -> messageList.setTypingIndicatorType(
+                        MessageListTypingIndicatorType.ELLIPSIS));
+        addButton("setDefaultTypingIndicator",
+                () -> messageList.setTypingIndicatorType(
+                        MessageListTypingIndicatorType.DEFAULT));
+        addButton("showTypingWithImageHandler", () -> {
+            alice.setImageHandler(DownloadHandler.forClassResource(getClass(),
+                    "/META-INF/resources/images/avatar.png",
+                    "typing-user-img"));
+            messageList.setTypingUsers(alice);
+        });
+
+        var carol = new MessageListUser();
+        carol.setName("Carol");
+        carol.setAbbreviation("CA");
+        carol.setImage(TYPING_USER_IMAGE);
+        carol.setColorIndex(4);
+        carol.addClassNames("carol", "typing");
+
+        var dave = new MessageListUser("Dave", TYPING_USER_IMAGE);
+
+        addButton("showTypingWithUserProperties",
+                () -> messageList.setTypingUsers(carol));
+        addButton("updateTypingUserProperties", () -> {
+            carol.setName("Carol Carter");
+            carol.setAbbreviation("CC");
+            carol.setImage(null);
+            carol.setColorIndex(5);
+            carol.removeClassNames("typing");
+        });
+        addButton("showTypingWithImageUrl",
+                () -> messageList.setTypingUsers(dave));
+
+        var eve = new MessageListUser();
+        eve.setAbbreviation("EV");
+
+        addButton("showTypingWithAbbreviationOnly",
+                () -> messageList.setTypingUsers(eve));
 
         // Output section for test verification
         Div outputSection = new Div();

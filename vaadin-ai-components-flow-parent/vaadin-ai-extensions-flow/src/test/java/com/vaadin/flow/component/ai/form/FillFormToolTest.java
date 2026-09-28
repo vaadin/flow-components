@@ -11,6 +11,7 @@ package com.vaadin.flow.component.ai.form;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.executeQueryFieldOptions;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.findTool;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
+import static com.vaadin.flow.component.ai.form.FormTestSupport.requestEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,16 +19,22 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;
@@ -40,13 +47,14 @@ import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.ValidatedField;
+import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.startup.ApplicationConfiguration;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -66,6 +74,18 @@ class FillFormToolTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @Test
+    void fillWritesIntoFieldInsideComposite() {
+        var inner = new TestField();
+        var controller = newController(new FieldGroup(inner));
+        controller.onRequest(requestEvent());
+
+        var result = fillFormResult(controller, payload(inner, "\"filled\""));
+
+        Assertions.assertTrue(success(result), "Result: " + result);
+        Assertions.assertEquals("filled", inner.getValue());
+    }
 
     @Test
     void fillForm_responseFieldsBlockMirrorsGetFormStateForAllVisibleFields() {
@@ -401,6 +421,32 @@ class FillFormToolTest {
         var reason = rejectionReason(result, idOf(readOnly));
         Assertions.assertTrue(reason.contains("read-only"),
                 "Reason must say the field is read-only; got: " + reason);
+    }
+
+    @Test
+    void fillForm_refusedWriteToReadOnlyFieldIsNotValidatedAsWritten() {
+        // A refused write is not a write. Validating the read-only field as
+        // if this turn had written it would report the field twice: once for
+        // refusing the write, once for the value it already held.
+        var readOnly = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(readOnly)
+                .withValidator(v -> v != null && v.length() >= 3,
+                        "Name must be at least 3 characters")
+                .bind("name");
+        readOnly.setValue("X");
+        readOnly.setReadOnly(true);
+        var controller = controllerForBound(binder, readOnly);
+
+        var result = fillFormResult(controller, payload(readOnly, "\"Acme\""));
+
+        Assertions.assertEquals(List.of(idOf(readOnly)), rejectedIds(result),
+                "The refused write must be reported once, and the field's "
+                        + "own invalid value must not be reported as this "
+                        + "turn's rejection, got: " + result);
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(readOnly)).contains("read-only"),
+                "The one reason must be the refused write");
     }
 
     @Test
@@ -778,7 +824,6 @@ class FillFormToolTest {
         // enough — some rules only make sense across multiple fields (e.g.
         // "if format=Lightning, length<=10"). The rejection is keyed on a
         // sentinel id since the rule isn't bound to one specific field.
-        stubVaadinContext();
         var formatField = new LabeledStringField();
         var lengthField = new IntField();
         var binder = new Binder<>(TwoFieldBean.class);
@@ -827,7 +872,6 @@ class FillFormToolTest {
         // bean-level read). A field's binding-level validation status handler
         // is exactly what the binder calls to light up that field, so a
         // handler that never fires proves the field was not marked.
-        stubVaadinContext();
         var formatField = new LabeledStringField();
         var lengthField = new IntField();
         var untouchedField = new LabeledStringField();
@@ -875,7 +919,6 @@ class FillFormToolTest {
     void fillForm_binderLevelCrossFieldValidatorPassDoesNotEmitRejection() {
         // Symmetric guard: when the cross-field validator passes, no sentinel
         // rejection appears in the response.
-        stubVaadinContext();
         var formatField = new LabeledStringField();
         var lengthField = new IntField();
         var binder = new Binder<>(TwoFieldBean.class);
@@ -1064,7 +1107,6 @@ class FillFormToolTest {
         // post-write pass: beanErrors must swallow the throw and return an
         // empty (never null) list so doFill can still format a response for
         // the rest of the turn.
-        stubVaadinContext();
         var field = new LabeledStringField();
         var binder = new Binder<>(TwoFieldBean.class);
         binder.forField(field).bind("format");
@@ -1252,9 +1294,8 @@ class FillFormToolTest {
         // message is allowed to leak into the response (callers must scrub
         // it themselves before throwing). Pins the ToolException catch in
         // FormAITools.fillForm.execute().
-        var tool = FormAITools
-                .fillForm(throwingCallbacks(new FormAITools.ToolException(
-                        "field 'foo' is no longer addressable")));
+        var tool = FormAITools.fillForm(throwingCallbacks(
+                new ToolException("field 'foo' is no longer addressable")));
 
         var result = tool.execute(wrappedValues());
 
@@ -1290,7 +1331,7 @@ class FillFormToolTest {
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options(List.of("Premium", "Basic"))
                 .itemLabelGenerator(s -> s.substring(0, 1)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"P\""));
 
@@ -1310,7 +1351,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1414,7 +1455,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Unknown\""));
 
@@ -1439,7 +1480,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo, vega)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller,
                 payload(field, "[\"Apollo\", \"Vega\"]"));
@@ -1538,7 +1579,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(existing)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "[]"));
 
@@ -1559,7 +1600,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1585,7 +1626,7 @@ class FillFormToolTest {
                 ValueOptions.forField(field).options(List.of(first)));
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(second)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "", 10);
 
         var result = fillFormResult(controller, payload(field, "[\"Second\"]"));
@@ -1608,7 +1649,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(first, dup)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1628,14 +1669,14 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         fillFormResult(controller, payload(field, "\"Apollo\""));
         Assertions.assertEquals(apollo, field.getValue(),
                 "Turn 1 must resolve via Project::name");
 
         field.setValue(null);
         field.setItemLabelGenerator(Project::code);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         var result = fillFormResult(controller, payload(field, "\"APL\""));
 
         Assertions.assertEquals(apollo, field.getValue(),
@@ -1654,7 +1695,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
@@ -1681,7 +1722,7 @@ class FillFormToolTest {
                         .filter(p -> p.name().toLowerCase()
                                 .contains(filter.toLowerCase()))
                         .limit(limit).toList()));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "Apo", 10);
         executeQueryFieldOptions(controller, field, "Veg", 10);
 
@@ -1704,14 +1745,14 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(apollo)));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "", 10);
         fillFormResult(controller, payload(field, "\"Apollo\""));
         Assertions.assertEquals(apollo, field.getValue(),
                 "Turn 1 must fill after the query populates the cache");
 
         field.setValue(null);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         var result = fillFormResult(controller, payload(field, "\"Apollo\""));
 
         Assertions.assertNull(field.getValue(),
@@ -1736,7 +1777,7 @@ class FillFormToolTest {
         var controller = newController(field);
         controller.fieldValueOptions(ValueOptions.forField(field)
                 .options((filter, limit) -> List.of(versions.get())));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         executeQueryFieldOptions(controller, field, "", 10);
         versions.set(second);
         executeQueryFieldOptions(controller, field, "", 10);
@@ -1761,7 +1802,7 @@ class FillFormToolTest {
         controller.fieldValueOptions(
                 ValueOptions.forField(field).options(List.of(1, 10))
                         .itemLabelGenerator(v -> v == 1 ? "low" : "high"));
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var result = fillFormResult(controller, payload(field, "\"high\""));
 
@@ -1819,7 +1860,7 @@ class FillFormToolTest {
         var detachedForm = new Div(field);
         // No ui.add(detachedForm) — form is intentionally detached.
         var controller = new FormAIController(detachedForm);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
 
         var raw = fillFormPayload(controller, payload(field, "\"Acme\""));
 
@@ -1828,6 +1869,105 @@ class FillFormToolTest {
                         + "error; got: " + raw);
         Assertions.assertEquals("", field.getValue(),
                 "Detached form must not be written to");
+    }
+
+    @Test
+    @Timeout(20)
+    void fillForm_calledOnTheThreadHoldingTheSessionLockFillsInline() {
+        // A provider that answers synchronously calls the tool on the very
+        // thread it was handed — the one still inside prompt(), holding the
+        // session lock. Real ui.access() only queues the fill until that lock
+        // is ultimately released, which cannot happen before the tool call
+        // returns, so waiting for the queued command would wait for this call
+        // itself. The tool has to notice it already holds the lock and fill
+        // inline.
+        var field = new TestField();
+        var controller = controllerFor(field);
+        var queued = queueAccessCommands();
+
+        var result = fillFormResult(controller,
+                payload(field, "\"Ana Torres\""));
+
+        Assertions.assertTrue(success(result),
+                "Fill on the lock-holding thread must succeed, got: " + result);
+        Assertions.assertEquals("Ana Torres", field.getValue(),
+                "Fill on the lock-holding thread must write the field");
+        Assertions.assertTrue(queued.isEmpty(),
+                "The fill must run inline rather than be queued for a lock "
+                        + "release that cannot come before the tool returns");
+    }
+
+    @Test
+    @Timeout(30)
+    void fillForm_calledOffTheLockHoldingThreadWaitsForTheQueuedFill()
+            throws Exception {
+        // The streaming path: the provider calls the tool from its own
+        // thread while the UI thread holds the lock. The fill must go through
+        // ui.access() and the tool must not answer before the command runs,
+        // so the LLM sees the post-write state.
+        var field = new TestField();
+        var controller = controllerFor(field);
+        var queued = queueAccessCommands();
+
+        var toolResult = CompletableFuture
+                .supplyAsync(() -> fillFormPayload(controller,
+                        payload(field, "\"Ana Torres\"")));
+
+        var command = awaitQueuedCommand(queued);
+        Assertions.assertEquals("", field.getValue(),
+                "The fill must wait for the lock holder rather than write "
+                        + "from the calling thread");
+        // What VaadinSession.unlock() does for the queue on ultimate release,
+        // on the thread that holds the lock — here, the test thread.
+        command.execute();
+
+        var result = parseResult(toolResult.get(20, TimeUnit.SECONDS));
+        Assertions.assertTrue(success(result),
+                "Queued fill must succeed, got: " + result);
+        Assertions.assertEquals("Ana Torres", field.getValue(),
+                "Queued fill must write the field");
+    }
+
+    @Test
+    @Timeout(30)
+    void fillForm_onALockHoldingThreadBindsTheThreadLocalsForTheWrite()
+            throws Exception {
+        // Holding the session lock does not imply the Vaadin thread locals
+        // are bound: a provider can take the lock on its own thread — with
+        // session.lock() or an outer accessSynchronously — and call the tool
+        // from there. Writing the fields straight from that thread would run
+        // every value-change listener the fill triggers with
+        // UI.getCurrent() == null, which is what the ui.access() hop existed
+        // to prevent in the first place. accessSynchronously keeps that
+        // guarantee for the inline path.
+        var field = new CurrentInstanceCapturingField();
+        var controller = controllerFor(field);
+        var session = ui.getSession();
+
+        // Hand the lock over the way a request that has finished would, so
+        // the provider's thread can take it.
+        session.unlock();
+        try {
+            var raw = CompletableFuture.supplyAsync(() -> {
+                session.lock();
+                try {
+                    return fillFormPayload(controller,
+                            payload(field, "\"Ana Torres\""));
+                } finally {
+                    session.unlock();
+                }
+            }).get(20, TimeUnit.SECONDS);
+
+            Assertions.assertTrue(success(parseResult(raw)),
+                    "Fill from a lock-holding provider thread must succeed, "
+                            + "got: " + raw);
+            Assertions.assertSame(ui.getUI(), field.uiDuringWrite,
+                    "The write must see the UI bound as the current one");
+            Assertions.assertSame(session, field.sessionDuringWrite,
+                    "The write must see the session bound as the current one");
+        } finally {
+            session.lock();
+        }
     }
 
     @Test
@@ -2008,13 +2148,41 @@ class FillFormToolTest {
         }
     }
 
+    /**
+     * Field that records the Vaadin thread locals in force while its value is
+     * written, so a test can tell whether the fill ran with them bound.
+     */
+    @com.vaadin.flow.component.Tag("current-instance-capturing-field")
+    private static class CurrentInstanceCapturingField extends
+            com.vaadin.flow.component.AbstractField<CurrentInstanceCapturingField, String> {
+
+        private transient UI uiDuringWrite;
+        private transient VaadinSession sessionDuringWrite;
+
+        CurrentInstanceCapturingField() {
+            super("");
+        }
+
+        @Override
+        public void setValue(String value) {
+            uiDuringWrite = UI.getCurrent();
+            sessionDuringWrite = VaadinSession.getCurrent();
+            super.setValue(value);
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
     // --- helpers ---
 
     private FormAIController controllerFor(Component... fields) {
         var controller = newController(fields);
         // Drive onRequest() so each discovered field has its UUID id
         // stamped — payload helpers use idOf() to look the id up.
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         return controller;
     }
 
@@ -2025,6 +2193,13 @@ class FillFormToolTest {
      * required: {@code executeFill} throws {@link IllegalStateException} on a
      * detached form, matching the production contract.
      */
+    /** Reusable group of fields built the recommended way. */
+    private static class FieldGroup extends Composite<Div> {
+        FieldGroup(Component... children) {
+            getContent().add(children);
+        }
+    }
+
     private FormAIController newController(Component... fields) {
         var form = new Div(fields);
         ui.add(form);
@@ -2036,29 +2211,8 @@ class FillFormToolTest {
         var form = new Div(fields);
         ui.add(form);
         var controller = new FormAIController(form, binder);
-        controller.onRequest();
+        controller.onRequest(requestEvent());
         return controller;
-    }
-
-    /**
-     * Stubs {@code service.getContext()} and the
-     * {@link ApplicationConfiguration} attribute on the
-     * {@link MockUIExtension}'s mocked {@code VaadinService} so
-     * {@code Binder.setBean(...)} can resolve its I18N / production-mode
-     * lookups without tripping over Mockito's default {@code null} return. Only
-     * the cross-field-validator tests that call {@code setBean} need this.
-     */
-    private void stubVaadinContext() {
-        var context = Mockito.mock(VaadinContext.class);
-        var appConfig = Mockito.mock(ApplicationConfiguration.class);
-        Mockito.when(appConfig.isProductionMode()).thenReturn(false);
-        // ApplicationConfiguration.get(context) uses the (Class, Supplier)
-        // getAttribute overload internally — match that exact shape, otherwise
-        // the mock returns null and DefaultBindingExceptionHandler NPEs.
-        Mockito.when(context.getAttribute(
-                ArgumentMatchers.eq(ApplicationConfiguration.class),
-                ArgumentMatchers.any())).thenReturn(appConfig);
-        Mockito.when(ui.getService().getContext()).thenReturn(context);
     }
 
     private static JsonNode payload(HasValue<?, ?> field, String jsonValue) {
@@ -2180,10 +2334,55 @@ class FillFormToolTest {
             }
 
             @Override
+            public boolean isSourceTrackingEnabled() {
+                return false;
+            }
+
+            @Override
             public String executeFill(JsonNode arguments) {
                 throw toThrow;
             }
         };
+    }
+
+    /**
+     * Replaces the mock session's {@code access()} — which runs the command
+     * inline — with the contract a real
+     * {@link com.vaadin.flow.server.VaadinSession} has: the command is queued
+     * and runs only when the session lock is ultimately released, never on the
+     * thread that already holds it. The mock session is locked by the test
+     * thread for the whole test, so that thread stands in for a UI thread
+     * inside {@code prompt()}.
+     *
+     * @return the queue the fills land in, for the test to assert on and to
+     *         drain where a real purge would
+     */
+    private Queue<Command> queueAccessCommands() {
+        var queued = new ConcurrentLinkedQueue<Command>();
+        Mockito.doAnswer(invocation -> {
+            queued.add(invocation.getArgument(0));
+            // Never completed: the caller learns the command ran from the
+            // command itself, exactly as with a real deferred access.
+            return new CompletableFuture<Void>();
+        }).when(ui.getSession()).access(Mockito.any());
+        return queued;
+    }
+
+    /**
+     * Waits for a fill to be queued with {@code ui.access()} by a background
+     * thread and returns it.
+     */
+    private static Command awaitQueuedCommand(Queue<Command> queued)
+            throws InterruptedException {
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (queued.isEmpty() && System.nanoTime() < deadline) {
+            Thread.sleep(5);
+        }
+        var command = queued.poll();
+        Assertions.assertNotNull(command,
+                "fill_form must queue the fill with ui.access() when the "
+                        + "calling thread does not hold the session lock");
+        return command;
     }
 
     /** Minimal valid {@code fill_form} arguments — an empty values object. */

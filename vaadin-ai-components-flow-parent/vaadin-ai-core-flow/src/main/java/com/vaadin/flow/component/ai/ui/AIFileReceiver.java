@@ -24,7 +24,7 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
  * Interface for file upload components that are used in an AI conversation.
  *
  * @author Vaadin Ltd
- * @since 25.1
+ * @since 25.3
  */
 public interface AIFileReceiver extends Serializable {
 

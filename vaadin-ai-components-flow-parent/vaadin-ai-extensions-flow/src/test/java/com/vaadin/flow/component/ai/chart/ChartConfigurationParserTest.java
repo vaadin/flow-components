@@ -18,6 +18,8 @@ import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DashStyle;
+import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.Frame;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
@@ -687,6 +689,12 @@ class ChartConfigurationParserTest {
         }
 
         @Test
+        void valueOfWrongType_throws() {
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> parse("{\"chart\":{\"borderWidth\":\"thick\"}}"));
+        }
+
+        @Test
         void emptyObject_producesDefaultConfig() {
             var config = parse("{}");
             Assertions.assertNull(config.getTitle().getText());
@@ -807,6 +815,109 @@ class ChartConfigurationParserTest {
             Assertions.assertNotNull(series);
             Assertions.assertInstanceOf(PlotOptionsSeries.class,
                     series.getPlotOptions());
+        }
+
+        @Test
+        void seriesOptionsGivenFlat_appliedAsPlotOptions() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"North\"," + "\"type\":\"column\","
+                            + "\"dataLabels\":{\"enabled\":true}}]}");
+            var columnOptions = (PlotOptionsColumn) findSeries(config, "North")
+                    .getPlotOptions();
+            Assertions.assertTrue(columnOptions.getDataLabels().getEnabled());
+        }
+
+        @Test
+        void seriesOptionsGivenFlatWithoutType_appliedAsSeriesPlotOptions() {
+            var config = parse("{\"series\":[{\"name\":\"North\","
+                    + "\"dashStyle\":\"Dash\"}]}");
+            var series = findSeries(config, "North");
+            Assertions.assertInstanceOf(PlotOptionsSeries.class,
+                    series.getPlotOptions());
+            Assertions.assertEquals(DashStyle.DASH,
+                    ((PlotOptionsSeries) series.getPlotOptions())
+                            .getDashStyle());
+        }
+
+        @Test
+        void seriesOptionGivenBothWays_plotOptionsValueWins() {
+            var config = parse("{\"series\":[{\"name\":\"North\","
+                    + "\"type\":\"line\",\"lineWidth\":1,"
+                    + "\"plotOptions\":{\"lineWidth\":3}}]}");
+            var lineOptions = (PlotOptionsLine) findSeries(config, "North")
+                    .getPlotOptions();
+            Assertions.assertEquals(3, lineOptions.getLineWidth());
+        }
+
+        @Test
+        void seriesData_notRead() {
+            var config = parse("{\"series\":[{\"name\":\"North\","
+                    + "\"type\":\"column\",\"data\":[1,2]}]}");
+            var series = (DataSeries) findSeries(config, "North");
+            Assertions.assertTrue(series.getData().isEmpty());
+            Assertions.assertInstanceOf(PlotOptionsColumn.class,
+                    series.getPlotOptions());
+        }
+
+        @Test
+        void seriesDataWithoutType_noPlotOptions() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"North\",\"data\":[1,2]}]}");
+            Assertions.assertNull(findSeries(config, "North").getPlotOptions());
+        }
+
+        @Test
+        void emptyPlotOptionsWithoutType_noPlotOptions() {
+            var config = parse(
+                    "{\"series\":[{\"name\":\"North\",\"plotOptions\":{}}]}");
+            Assertions.assertNull(findSeries(config, "North").getPlotOptions());
+        }
+
+        @Test
+        void seriesOptionOfWrongType_throws() {
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> parse("{\"series\":[{\"name\":\"North\","
+                            + "\"type\":\"column\",\"borderRadius\":\"50%\"}]}"));
+        }
+
+        @Test
+        void seriesEntryForExistingSeries_updatesItsSettings() {
+            var config = parse("{\"series\":[{\"name\":\"Volume\","
+                    + "\"type\":\"area\",\"yAxis\":1,"
+                    + "\"plotOptions\":{\"fillOpacity\":0.5}}]}");
+            ChartConfigurationParser.merge("{\"series\":[{\"name\":\"Volume\","
+                    + "\"plotOptions\":{\"lineWidth\":3}}]}", config);
+
+            Assertions.assertEquals(1, config.getSeries().size(),
+                    "the entry must update the series, not add a second one");
+            var volume = findSeries(config, "Volume");
+            Assertions.assertEquals(1, volume.getyAxis(), "axis binding kept");
+            var options = (PlotOptionsArea) volume.getPlotOptions();
+            Assertions.assertEquals(0.5, options.getFillOpacity());
+            Assertions.assertEquals(3, options.getLineWidth());
+        }
+
+        @Test
+        void seriesEntryWithNewType_replacesOptionsButKeepsAxis() {
+            var config = parse("{\"series\":[{\"name\":\"Volume\","
+                    + "\"type\":\"area\",\"yAxis\":1}]}");
+            ChartConfigurationParser.merge("{\"series\":[{\"name\":\"Volume\","
+                    + "\"type\":\"column\"}]}", config);
+
+            var volume = findSeries(config, "Volume");
+            Assertions.assertInstanceOf(PlotOptionsColumn.class,
+                    volume.getPlotOptions());
+            Assertions.assertEquals(1, volume.getyAxis());
+        }
+
+        @Test
+        void unknownFlatSeriesOption_ignored() {
+            var config = parse("{\"series\":[{\"name\":\"North\","
+                    + "\"type\":\"column\",\"noSuchOption\":1,"
+                    + "\"dataLabels\":{\"enabled\":true}}]}");
+            var columnOptions = (PlotOptionsColumn) findSeries(config, "North")
+                    .getPlotOptions();
+            Assertions.assertTrue(columnOptions.getDataLabels().getEnabled());
         }
 
     }

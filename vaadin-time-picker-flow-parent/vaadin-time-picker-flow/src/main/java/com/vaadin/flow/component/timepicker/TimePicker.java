@@ -113,7 +113,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.4.0-alpha1")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.ts")
 public class TimePicker
@@ -334,7 +334,7 @@ public class TimePicker
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -459,6 +459,8 @@ public class TimePicker
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
+     *
+     * @since 25.3
      */
     @Override
     public void setAriaDescribedBy(String ariaDescribedBy) {
@@ -652,7 +654,7 @@ public class TimePicker
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
-     * 
+     *
      * @since 23.3
      */
     public static class InvalidChangeEvent extends ComponentEvent<TimePicker> {
@@ -694,7 +696,7 @@ public class TimePicker
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 2.0.3
      */
     protected void validate() {
@@ -728,8 +730,8 @@ public class TimePicker
      * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toLocaleTimeString">Date.toLocaleTimeString()</a>
      * function.
      * <p>
-     * If for some reason the browser doesn't support the given locale, the
-     * en-US locale is used.
+     * If the given locale is ill-formed or the browser doesn't support it, the
+     * browser's default locale is used.
      * <p>
      * <em>NOTE: only the language + country/region codes are used</em>. This
      * means that the script and variant information is not used and supported.
@@ -793,8 +795,16 @@ public class TimePicker
         if (!appliedLocale.getCountry().isEmpty()) {
             bcp47LanguageTag.append("-").append(appliedLocale.getCountry());
         }
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
-                "$connector.setLocale", bcp47LanguageTag.toString()));
+        // Parsing keeps the well-formed part of the tag so the browser never
+        // rejects it, e.g. new Locale("en-CA") gives "en-CA" and
+        // new Locale("en_GB") gives "und"
+        Locale parsedLocale = Locale
+                .forLanguageTag(bcp47LanguageTag.toString());
+        String languageTag = Locale
+                .of(parsedLocale.getLanguage(), parsedLocale.getCountry())
+                .toLanguageTag();
+        runBeforeClientResponse(ui -> getElement()
+                .callJsFunction("$connector.setLocale", languageTag));
     }
 
     /**
@@ -966,7 +976,7 @@ public class TimePicker
 
     /**
      * The internationalization properties for {@link TimePicker}.
-     * 
+     *
      * @since 24.5
      */
     public static class TimePickerI18n implements Serializable {

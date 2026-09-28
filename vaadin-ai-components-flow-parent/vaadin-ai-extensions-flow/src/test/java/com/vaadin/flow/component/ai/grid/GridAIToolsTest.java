@@ -72,6 +72,24 @@ class GridAIToolsTest {
         };
     }
 
+    private static GridAITools.Callbacks noGridCallbacks() {
+        return new GridAITools.Callbacks() {
+            @Override
+            public String getState(String gridId) {
+                return "{\"gridId\":\"" + gridId + "\",\"status\":\"empty\"}";
+            }
+
+            @Override
+            public void updateData(String gridId, String query) {
+            }
+
+            @Override
+            public Set<String> getGridIds() {
+                return Set.of();
+            }
+        };
+    }
+
     // --- getGridState ---
 
     @Test
@@ -116,6 +134,14 @@ class GridAIToolsTest {
         var result = tool.execute(json("{}"));
         Assertions.assertTrue(result.contains("Error"));
         Assertions.assertTrue(result.contains("gridId is required"));
+    }
+
+    @Test
+    void getGridState_noGrids_returnsError() {
+        var tool = GridAITools.getGridState(noGridCallbacks());
+        var result = tool.execute(json("{}"));
+        Assertions.assertTrue(result.contains("Error"));
+        Assertions.assertTrue(result.contains("No grids available"));
     }
 
     @Test

@@ -104,6 +104,8 @@ Use unit tests to cover the component reacting to client-side events fired by th
 
 When a component invokes custom JavaScript from the server to modify client-side state, split test coverage by what varies: use unit tests that dump and assert pending JavaScript invocations from the UI to cover the full scenario matrix (e.g. whether invocation happens or not, different arguments to the invocation). Use a single integration test as smoke test per distinct client operation to prove the JS reaches the client and produces a real effect.
 
+Use `JsFunctionCallUtil` to assert on invocations that a component schedules with `Element.callJsFunction`. Such an invocation does not name the called function in its expression, so matching it by expression text never finds it.
+
 For coverage of JavaScript connectors, prefer web-test-runner tests under `vaadin-{component}-flow-integration-tests/test/*.test.ts` to cover the full scenario matrix. As above, integration tests should exist for the general case to verify integration of server component, web component and connector.
 
 Do not add tests that cover behavior of mixin interfaces in each component that use them. Keep only a test to verify the mixin interface is implemented. The exception is when methods are overridden to add custom logic.
@@ -139,6 +141,12 @@ Loggers should be created by passing the class reference, not by passing the cla
 When adding a dependency to a module POM, do not use inline versions. Instead, declare the version in the root POM's dependency management section using a property, similar to how other dependencies are managed there. Flow framework dependency versions are managed through the Flow BOM.
 
 When adding new published Maven modules to the project (a `-flow` or `-testbench` module), register them with a matching dependency in the BOM under `flow-components-bom/pom.xml`.
+
+A module declaring `@NpmPackage` annotations pins the npm versions of those packages in its own jar. To do so, declare `org.codehaus.mojo:exec-maven-plugin` in its build, without any configuration of its own: the root POM configures the execution that generates `META-INF/VAADIN/versions/<artifactId>-versions.json` from the annotations.
+
+Every published component module declares a dependency on `vaadin-flow-components-base`, even when it uses none of its classes. That jar pins the npm versions of the base packages the web components share.
+
+The base module also declares the npm packages of the React components in a `REACT_COMPONENTS` map, listing the web component packages each of them brings, which a React application installs through them rather than one by one. Nothing derives those lists, so a new component has to be added to the one of the React components that brings it.
 
 Keep POM dependencies minimal, only add what is really needed by the respective module. Do not simply copy dependencies from existing modules or add the whole range of Flow framework dependencies.
 

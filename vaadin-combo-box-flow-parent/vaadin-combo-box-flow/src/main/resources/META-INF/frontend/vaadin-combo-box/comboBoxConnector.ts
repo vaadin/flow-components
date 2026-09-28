@@ -5,7 +5,7 @@ import type {
   ComboBoxDataProviderCallback,
   ComboBoxDataProviderParams
 } from '@vaadin/combo-box/src/vaadin-combo-box-data-provider-mixin.js';
-import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js';
+import type { FlowComboBox, FlowMultiSelectComboBox, Item, ItemRange } from './vaadin-combo-box-types.js';
 
 /**
  * comboBoxConnector is a communication layer between ComboBox's flow component
@@ -13,7 +13,7 @@ import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js'
  */
 export class ComboBoxConnector {
   readonly #comboBox: FlowComboBox;
-  readonly #placeholder = new window.Vaadin.ComboBoxPlaceholder();
+  readonly #placeholder = new ComboBoxPlaceholder();
 
   #cache: Record<number, Item[]> = {};
 
@@ -29,6 +29,10 @@ export class ComboBoxConnector {
     comboBox.addEventListener('custom-value-set', (e) => e.preventDefault());
 
     comboBox.itemClassNameGenerator = (item) => item.className || '';
+
+    if (isMultiSelectComboBox(comboBox)) {
+      comboBox._toggleSelectAllHandler = () => comboBox.$server.toggleSelectAll();
+    }
 
     // Assign last: setting the data provider can synchronously trigger a first
     // page load that calls back into the connector.
@@ -48,8 +52,9 @@ export class ComboBoxConnector {
     const filteredItems = comboBox.filteredItems ?? [];
     for (let index = firstPage * pageSize; index < lastPage * pageSize; index++) {
       if (filteredItems[index]) {
-        // The placeholder stands in for an item that is being loaded
-        filteredItems[index] = this.#placeholder as Item;
+        // The placeholder stands in for an item that is being loaded. It is not
+        // an Item, but the combo box expects placeholders in the items array.
+        filteredItems[index] = this.#placeholder as unknown as Item;
       }
     }
   }
@@ -272,6 +277,10 @@ export class ComboBoxConnector {
 
     callback(filteredItems, filteredItems.length);
   }
+}
+
+function isMultiSelectComboBox(comboBox: FlowComboBox): comboBox is FlowMultiSelectComboBox {
+  return comboBox.localName === 'vaadin-multi-select-combo-box';
 }
 
 function initLazy(comboBox: FlowComboBox): void {

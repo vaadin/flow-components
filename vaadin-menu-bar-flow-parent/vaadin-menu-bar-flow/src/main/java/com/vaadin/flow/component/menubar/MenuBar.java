@@ -28,7 +28,6 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuItemsArrayGenerator;
@@ -38,8 +37,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -54,8 +53,8 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("./vaadin-menu-bar/menubarConnector.ts")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.3.0-alpha13")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha1")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 
@@ -64,7 +63,13 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     private MenuBarI18n i18n;
 
-    private boolean updateScheduled = false;
+    // When calling `generateItems` without providing a node id, it will use
+    // the previously generated items tree, re-filtering hidden items and
+    // re-rendering the root items = the menu bar buttons, which snapshot the
+    // item properties on render.
+    private final BeforeClientResponseAction buttonsUpdate = new BeforeClientResponseAction(
+            this,
+            () -> getElement().executeJs("this.$connector.generateItems()"));
 
     /**
      * Creates an empty menu bar component.
@@ -452,18 +457,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     }
 
     void updateButtons() {
-        if (updateScheduled) {
-            return;
-        }
-        runBeforeClientResponse(ui -> {
-            // When calling `generateItems` without providing a node id, it
-            // will use the previously generated items tree, re-filtering
-            // hidden items and re-rendering the root items = the menu bar
-            // buttons, which snapshot the item properties on render.
-            getElement().executeJs("this.$connector.generateItems()");
-            updateScheduled = false;
-        });
-        updateScheduled = true;
+        buttonsUpdate.schedule();
     }
 
     private void initConnector(String appId) {
@@ -472,14 +466,9 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
                 appId);
     }
 
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
-    }
-
     /**
      * The internationalization properties for {@link MenuBar}
-     * 
+     *
      * @since 22.0
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -512,7 +501,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     /**
      * Closes the current submenu.
-     * 
+     *
      * @since 24.4
      */
     public void close() {

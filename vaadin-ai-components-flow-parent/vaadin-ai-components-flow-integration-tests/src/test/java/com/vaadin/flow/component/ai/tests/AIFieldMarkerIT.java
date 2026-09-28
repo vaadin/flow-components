@@ -28,8 +28,9 @@ import com.vaadin.tests.AbstractComponentIT;
  * Smoke tests proving that the AI field marker a {@code FormAIController}
  * applies to the fields it filled reaches the browser and works there: the
  * {@code vaadin-ai-field-marker} module is loaded, the marker renders the texts
- * the server sent, the "AI is working" state reaches the field, and reverting
- * from the marker's popover restores the field's value on the server.
+ * the server sent, the popover renders the content supplied by the field-marker
+ * popover content provider, the "AI is working" state reaches the field, and
+ * reverting from the marker's popover restores the field's value on the server.
  * <p>
  * The scenario matrix around marking — which fields get marked, when a mark is
  * cleared, what a revert restores — is covered by {@code FormAIControllerTest}
@@ -70,6 +71,44 @@ public class AIFieldMarkerIT extends AbstractComponentIT {
                 textContentOf(marker.$("p").withClassName("message").first()));
         Assert.assertEquals(AIFieldMarkerPage.REVERT,
                 textContentOf(revertButtonOf(marker)));
+    }
+
+    @Test
+    public void runTurn_popoverRendersContentSuppliedByProvider() {
+        // The content travels in a wrapper element sent as a virtual child,
+        // so the only way it can appear in the DOM at all is through the
+        // marker's `content` property — its presence inside the popover
+        // proves the whole chain.
+        runTurn();
+
+        var marker = waitForMarker(name);
+        var content = marker.$("vaadin-popover").first().$("span")
+                .id(AIFieldMarkerPage.CONTENT_ID);
+        Assert.assertEquals(AIFieldMarkerPage.CONTENT_TEXT,
+                textContentOf(content));
+
+        var companyMarker = waitForMarker(company);
+        Assert.assertTrue(
+                "A field whose change the provider returned no content for "
+                        + "must keep the popover's default parts",
+                companyMarker.$("span")
+                        .withAttribute("id", AIFieldMarkerPage.CONTENT_ID).all()
+                        .isEmpty());
+    }
+
+    @Test
+    public void runTurn_popoverRendersPlainTextContent() {
+        // A Text component is a bare text node with no element of its own —
+        // only the marker's content wrapper can carry it to the client, so
+        // its text appearing in the popover proves the wrapper mechanism.
+        runTurn();
+
+        var marker = waitForMarker(confident);
+        Assert.assertTrue(
+                "The popover must render the plain text supplied by the "
+                        + "provider",
+                textContentOf(marker.$("vaadin-popover").first())
+                        .contains(AIFieldMarkerPage.TEXT_CONTENT));
     }
 
     @Test

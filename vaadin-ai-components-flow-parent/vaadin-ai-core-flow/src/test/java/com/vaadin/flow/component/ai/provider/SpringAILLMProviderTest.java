@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +26,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
@@ -35,12 +39,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.DefaultUsage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
@@ -53,6 +64,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
 import com.vaadin.flow.component.ai.provider.LLMProvider.LLMRequest;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.tests.MockUIExtension;
 
@@ -174,6 +186,21 @@ class SpringAILLMProviderTest {
                 .thenThrow(new RuntimeException("API error"));
         Assertions.assertThrows(RuntimeException.class,
                 () -> provider.stream(request).blockFirst());
+    }
+
+    @Test
+    void stream_nonStreamingChatModelThrowsException_propagatesError() {
+        provider.setStreaming(false);
+        var request = createSimpleRequest("Hello");
+        var originalError = new RuntimeException("API error");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenThrow(originalError);
+        // Bounded block: a swallowed error would leave the sink open
+        // forever instead of failing the test
+        var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request)
+                        .blockFirst(Duration.ofSeconds(5)));
+        Assertions.assertSame(originalError, thrown);
     }
 
     @Test
@@ -344,6 +371,30 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals("Summary", result);
 
         Mockito.verify(mockChatModel).call(Mockito.any(Prompt.class));
+    }
+
+    @Test
+    void stream_withInvalidUtf8TextAttachment_replacesInvalidSequences() {
+        provider.setStreaming(false);
+        // Lone continuation byte: not decodable as UTF-8. Text attachments
+        // are decoded leniently, so it is replaced instead of rejected.
+        var attachment = new AIAttachment("broken.txt", "text/plain",
+                new byte[] { 0x41, (byte) 0x80, 0x42 });
+        var request = new TestLLMRequest("Summarize this", null,
+                List.of(attachment), new Object[0]);
+
+        mockSimpleChat("Summary");
+
+        var result = provider.stream(request).blockFirst();
+        Assertions.assertEquals("Summary", result);
+
+        var userMessage = capturePrompt().getInstructions().stream()
+                .filter(UserMessage.class::isInstance)
+                .map(UserMessage.class::cast).findFirst().orElseThrow();
+        Assertions.assertEquals(1, userMessage.getMedia().size());
+        var text = String.valueOf(userMessage.getMedia().getFirst().getData());
+        Assertions.assertTrue(text.contains("A\uFFFDB"),
+                "Invalid UTF-8 should be replaced, but got: " + text);
     }
 
     @Test
@@ -875,6 +926,29 @@ class SpringAILLMProviderTest {
     }
 
     @Test
+    void setHistory_withNullHistory_keepsExistingHistory() {
+        provider.setStreaming(false);
+        provider.setHistory(
+                List.of(new ChatMessage(ChatMessage.Role.USER,
+                        "Previous question", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> provider.setHistory(null, Collections.emptyMap()));
+
+        mockSimpleChat("Response");
+        provider.stream(createSimpleRequest("Follow-up")).blockFirst();
+
+        var messages = capturePrompt().getInstructions();
+        Assertions.assertTrue(
+                messages.stream()
+                        .anyMatch(msg -> msg instanceof UserMessage && Objects
+                                .equals(msg.getText(), "Previous question")),
+                "A rejected history must not clear the existing one, but got: "
+                        + messages);
+    }
+
+    @Test
     void setHistory_exceedingMaxMessages_evictsOldest() {
         provider.setStreaming(false);
         var history = new ArrayList<ChatMessage>();
@@ -913,13 +987,212 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void setHistory_withChatClientConstructor_throwsUnsupportedOperationException() {
+    void setHistory_withChatClientConstructor_isNoOp() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientProvider = new SpringAILLMProvider(chatClient);
-        var history = new ArrayList<ChatMessage>();
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> chatClientProvider.setHistory(history,
+        chatClientProvider.setStreaming(false);
+        var history = List.of(
+                new ChatMessage(ChatMessage.Role.USER, "Old message", null,
+                        null),
+                new ChatMessage(ChatMessage.Role.ASSISTANT, "Old answer", null,
+                        null));
+
+        Assertions.assertDoesNotThrow(() -> chatClientProvider
+                .setHistory(history, Collections.emptyMap()));
+
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockSimpleChatResponse("Response"));
+        chatClientProvider.stream(createSimpleRequest("New question"))
+                .blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        Assertions.assertFalse(messages.stream()
+                .anyMatch(msg -> Objects.equals(msg.getText(), "Old message")));
+    }
+
+    @Test
+    void chatClientConstructor_withPreloadedChatMemory_sendsHistoryToModel() {
+        var chatMemory = MessageWindowChatMemory.builder().build();
+        chatMemory.add("conv-1", List.of(new UserMessage("Old message"),
+                new AssistantMessage("Old answer")));
+        var chatClient = ChatClient.builder(mockChatModel)
+                .defaultAdvisors(a -> a
+                        .advisors(MessageChatMemoryAdvisor.builder(chatMemory)
+                                .build())
+                        .param(ChatMemory.CONVERSATION_ID, "conv-1"))
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockSimpleChatResponse("Response"));
+        chatClientProvider.stream(createSimpleRequest("New question"))
+                .blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var messages = captor.getValue().getInstructions();
+        Assertions.assertTrue(messages.stream()
+                .anyMatch(msg -> Objects.equals(msg.getText(), "Old message")));
+        Assertions.assertTrue(messages.stream()
+                .anyMatch(msg -> Objects.equals(msg.getText(), "Old answer")));
+        Assertions.assertTrue(messages.stream().anyMatch(
+                msg -> Objects.equals(msg.getText(), "New question")));
+    }
+
+    @Test
+    void setHistory_chatClientWithoutMemoryAdvisor_warns() {
+        var chatClientProvider = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel).build());
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(1, warningCount("no chat memory advisor"));
+        Assertions.assertEquals(1, warningCount(""),
+                "Expected the missing-advisor warning to be the only one");
+    }
+
+    @Test
+    void setHistory_chatClientWithoutConversationId_warns() {
+        var chatMemory = MessageWindowChatMemory.builder().build();
+        var chatClientProvider = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel)
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .build());
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(1, warningCount("conversation to read"));
+        Assertions.assertEquals(0, debugCount("Skipping history restoration"),
+                "Expected the warning to replace the debug line, not precede it");
+    }
+
+    @Test
+    void setHistory_chatClientWithConfiguredMemory_doesNotWarn() {
+        var chatMemory = MessageWindowChatMemory.builder().build();
+        var chatClientProvider = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel)
+                .defaultAdvisors(a -> a
+                        .advisors(MessageChatMemoryAdvisor.builder(chatMemory)
+                                .build())
+                        .param(ChatMemory.CONVERSATION_ID, "conv-1"))
+                .build());
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(0, warningCount(""));
+    }
+
+    @Test
+    void setHistory_chatClientNotInspectable_logsDebugOnly() {
+        var chatClientProvider = new SpringAILLMProvider(
+                uninspectableClient(ChatClient.builder(mockChatModel).build()));
+
+        chatClientProvider.setHistory(List
+                .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
+                Collections.emptyMap());
+
+        Assertions.assertEquals(0, warningCount(""));
+        Assertions.assertEquals(1,
+                debugCount("provider was created with a ChatClient"));
+        Assertions.assertEquals(1, debugCount("cannot be inspected"));
+    }
+
+    @Test
+    void setHistory_chatClientRejectingPrompt_doesNotThrowAndDoesNotWarn() {
+        var chatClientProvider = new SpringAILLMProvider(
+                clientRejectingPrompt());
+
+        Assertions
+                .assertDoesNotThrow(
+                        () -> chatClientProvider.setHistory(
+                                List.of(new ChatMessage(ChatMessage.Role.USER,
+                                        "Hi", null, null)),
+                                Collections.emptyMap()));
+
+        Assertions.assertEquals(0, warningCount(""));
+        Assertions.assertEquals(1,
+                debugCount("provider was created with a ChatClient"));
+        Assertions.assertEquals(1,
+                debugCount("did not accept a bare prompt()"));
+        Assertions.assertEquals(1, debugCount(""),
+                "Expected the rejected inspection to be reported once");
+    }
+
+    /**
+     * A client that refuses the bare {@code prompt()} the inspection uses. Only
+     * {@code prompt} throws, so logging and equality on the proxy still work.
+     */
+    private static ChatClient clientRejectingPrompt() {
+        return (ChatClient) Proxy.newProxyInstance(
+                ChatClient.class.getClassLoader(),
+                new Class<?>[] { ChatClient.class }, (proxy, method, args) -> {
+                    if (method.getName().equals("prompt")) {
+                        throw new UnsupportedOperationException(
+                                "prompt() requires an explicit prompt");
+                    }
+                    return null;
+                });
+    }
+
+    /**
+     * Wraps a client so that its request spec is no longer Spring AI's own
+     * implementation, which is how an application-provided ChatClient looks to
+     * the provider. The spec has too many methods to delegate by hand, so a
+     * proxy stands in for a hand-written implementation.
+     */
+    private static ChatClient uninspectableClient(ChatClient delegate) {
+        return (ChatClient) Proxy.newProxyInstance(
+                ChatClient.class.getClassLoader(),
+                new Class<?>[] { ChatClient.class }, (proxy, method, args) -> {
+                    var result = method.invoke(delegate, args);
+                    if (result instanceof ChatClient.ChatClientRequestSpec spec) {
+                        return uninspectableSpec(spec);
+                    }
+                    return result;
+                });
+    }
+
+    private static ChatClient.ChatClientRequestSpec uninspectableSpec(
+            ChatClient.ChatClientRequestSpec delegate) {
+        return (ChatClient.ChatClientRequestSpec) Proxy.newProxyInstance(
+                ChatClient.class.getClassLoader(),
+                new Class<?>[] { ChatClient.ChatClientRequestSpec.class },
+                (proxy, method, args) -> method.invoke(delegate, args));
+    }
+
+    private long debugCount(String phrase) {
+        return countEvents(Level.DEBUG, phrase);
+    }
+
+    private long warningCount(String phrase) {
+        return countEvents(Level.WARN, phrase);
+    }
+
+    private long countEvents(Level level, String phrase) {
+        return logger.getLoggingEvents().stream()
+                .filter(event -> event.getLevel() == level)
+                .filter(event -> event.getMessage().contains(phrase)).count();
+    }
+
+    @Test
+    void setHistory_withChatClientConstructor_nullHistoryStillThrows() {
+        var chatClient = ChatClient.builder(mockChatModel).build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        Assertions.assertThrows(NullPointerException.class,
+                () -> chatClientProvider.setHistory(null,
                         Collections.emptyMap()));
+        Assertions.assertThrows(NullPointerException.class,
+                () -> chatClientProvider.setHistory(List.of(), null));
     }
 
     @Test
@@ -1270,6 +1543,71 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(originalError, thrown);
     }
 
+    @Test
+    void stream_nonStreamingEndsWithPendingToolCalls_logsWarning() {
+        // The turn stopped between asking for a tool and answering with its
+        // result — the silent truncation that is otherwise invisible. Needs a
+        // client whose own tool execution is disabled, since the default one
+        // would run the tool and ask for another round.
+        var toolAdvisorBuilder = ToolCallingAdvisor.builder()
+                .toolExecutionEligibilityChecker(response -> false);
+        var chatClient = ChatClient.builder(mockChatModel,
+                ObservationRegistry.NOOP, null, null, toolAdvisorBuilder)
+                .build();
+        var chatClientProvider = new SpringAILLMProvider(chatClient);
+        chatClientProvider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponseWithPendingToolCall());
+
+        chatClientProvider.stream(createSimpleRequest("invoke tool"))
+                .collectList().block();
+
+        assertWarningLogged("tool calls still pending");
+    }
+
+    @Test
+    void stream_nonStreamingWithoutFinishReason_logsWarning() {
+        provider.setStreaming(false);
+        mockSimpleChatWithoutFinishReason("Done");
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        assertWarningLogged("without a finish reason");
+    }
+
+    @Test
+    void stream_nonStreamingWithFinishReason_noAbnormalWarning() {
+        provider.setStreaming(false);
+        mockSimpleChat("Done");
+
+        provider.stream(createSimpleRequest("Hello")).collectList().block();
+
+        assertNoWarningLogged("tool calls still pending");
+        assertNoWarningLogged("without a finish reason");
+    }
+
+    private void mockSimpleChatWithoutFinishReason(String responseText) {
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse(responseText, null));
+    }
+
+    private void assertWarningLogged(String phrase) {
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.WARN)
+                .filter(event -> event.getMessage().contains(phrase))
+                .findFirst();
+        Assertions.assertTrue(warning.isPresent(),
+                "Expected a warning containing: " + phrase);
+    }
+
+    private void assertNoWarningLogged(String phrase) {
+        var warning = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getMessage().contains(phrase))
+                .findFirst();
+        Assertions.assertFalse(warning.isPresent(),
+                "Expected no warning containing: " + phrase);
+    }
+
     private void assertAbnormalTerminationWarningLogged() {
         // The warning is emitted from a Reactor scheduler thread (Spring
         // AI's chatResponse pipeline), so we have to query across all
@@ -1316,17 +1654,50 @@ class SpringAILLMProviderTest {
     }
 
     private static ChatResponse mockChatResponseWithPendingToolCall() {
+        return mockChatResponseWithPendingToolCall("doSomething");
+    }
+
+    private static ChatResponse mockChatResponseWithPendingToolCall(
+            String toolName) {
         // Mirrors what a real backend emits at the end of a tool-using
         // round-trip: empty text, a tool call attached to the assistant
         // message, and a finish_reason set.
         var toolCall = new AssistantMessage.ToolCall("call_1", "function",
-                "doSomething", "{}");
+                toolName, "{}");
         var assistantMessage = AssistantMessage.builder().content("")
                 .toolCalls(List.of(toolCall)).build();
         var metadata = ChatGenerationMetadata.builder().finishReason("STOP")
                 .build();
         return new ChatResponse(
                 List.of(new Generation(assistantMessage, metadata)));
+    }
+
+    @Test
+    void stream_withSessionContext_appendsContextToUserMessageText() {
+        provider.setStreaming(false);
+        var request = new TestLLMRequestWithSessionContext("Hello",
+                "Tenant: acme");
+        mockSimpleChat("Hi");
+
+        provider.stream(request).blockFirst();
+
+        var userMessage = (UserMessage) capturePrompt().getInstructions()
+                .getFirst();
+        Assertions.assertEquals(
+                LLMProviderHelpers.withSessionContext("Hello", "Tenant: acme"),
+                userMessage.getText());
+    }
+
+    @Test
+    void stream_withoutSessionContext_sendsUserMessageTextAsIs() {
+        provider.setStreaming(false);
+        mockSimpleChat("Hi");
+
+        provider.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var userMessage = (UserMessage) capturePrompt().getInstructions()
+                .getFirst();
+        Assertions.assertEquals("Hello", userMessage.getText());
     }
 
     private static LLMRequest createSimpleRequest(String message) {
@@ -1447,11 +1818,669 @@ class SpringAILLMProviderTest {
         var result = toolCallbacks.getFirst().call("Not json");
 
         Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        assertNoJavaInternals(result);
         Assertions.assertEquals(0, receivedArgs.size());
     }
 
     @Test
-    void stream_withExplicitToolNullSchema_usesEmptySchema() {
+    void stream_withExplicitTool_nonObjectJsonArguments_reportsExpectedShape() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        // An empty string is valid JSON, so it parses, but it is not the
+        // object a tool with declared parameters expects.
+        var result = toolCallbacks.getFirst().call("\"\"");
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertTrue(result.contains("JSON object"),
+                "The model should be told what shape to send, but got: "
+                        + result);
+        assertNoJavaInternals(result);
+        Assertions.assertEquals(0, receivedArgs.size());
+    }
+
+    @Test
+    void stream_withExplicitTool_jsonArrayArguments_reportsExpectedShape() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                "{\"type\":\"object\",\"properties\":{\"city\":{\"type\":\"string\"}}}",
+                args -> "ok");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("[1, 2]");
+
+        Assertions.assertTrue(result.startsWith("Error executing tool:"));
+        Assertions.assertTrue(result.contains("JSON object"),
+                "The model should be told what shape to send, but got: "
+                        + result);
+        assertNoJavaInternals(result);
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_malformedArgumentsStillExecute() {
+        // A model that has nothing to fill sometimes sends an empty string —
+        // the very case the placeholder schema works around. A tool that
+        // declared no parameters ignores its arguments by contract, so it
+        // must run rather than bounce an error back to the model.
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("\"\"");
+
+        Assertions.assertEquals("done", result);
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
+    }
+
+    /**
+     * Asserts that a tool result carries nothing from the Java runtime. Such a
+     * result goes straight back to the model, so a raw exception message would
+     * both waste tokens and leak internals.
+     */
+    private static void assertNoJavaInternals(String result) {
+        for (var leak : List.of("tools.jackson", "cannot be cast",
+                "ClassLoader", "java.lang.", "[Source:")) {
+            Assertions.assertFalse(result.contains(leak),
+                    "Tool result relayed to the model must not contain '" + leak
+                            + "', but got: " + result);
+        }
+    }
+
+    // --- Tool call limit tests ---
+
+    @Test
+    void stream_nonStreamingToolCallLimitExceeded_failsTurnNamingTheTool() {
+        provider.setStreaming(false);
+        var toolCalls = new AtomicInteger();
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = toolRequestWithMetadataSink(toolCalls, collected);
+        // Far more tool rounds than the limit allows, then a plain reply: a
+        // Spring AI that no longer stops the loop ends the turn there and
+        // fails the assertions below instead of looping forever.
+        var rounds = new AtomicInteger();
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenAnswer(invocation -> rounds.getAndIncrement() < 200
+                        ? mockChatResponseWithPendingToolCall()
+                        : mockSimpleChatResponse("done"));
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList().block());
+
+        Assertions.assertTrue(error.getMessage().contains("'doSomething'"),
+                "Spring AI's own message about the limit is the message: "
+                        + error.getMessage());
+        Assertions.assertEquals(40, toolCalls.get());
+        Assertions.assertEquals("toolCallLimitExceeded",
+                collected.getLast().finishReason());
+        Mockito.verify(mockChatModel, Mockito.times(41))
+                .call(Mockito.any(Prompt.class));
+    }
+
+    @Test
+    void stream_streamingToolCallLimitExceeded_failsTurnWithoutEmittingSpringAIReply() {
+        var toolCalls = new AtomicInteger();
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = toolRequestWithMetadataSink(toolCalls, collected);
+        var rounds = new AtomicInteger();
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenAnswer(
+                        invocation -> Flux.just(rounds.getAndIncrement() < 200
+                                ? mockChatResponseWithPendingToolCall()
+                                : mockSimpleChatResponse("done")));
+        var emitted = new ArrayList<String>();
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class, () -> provider
+                        .stream(request).doOnNext(emitted::add).blockLast());
+
+        Assertions.assertTrue(error.getMessage().contains("'doSomething'"),
+                error.getMessage());
+        Assertions.assertEquals(List.of(), emitted,
+                "Spring AI's own message about the limit is not the reply");
+        Assertions.assertEquals(40, toolCalls.get());
+        Assertions.assertEquals("toolCallLimitExceeded",
+                collected.getLast().finishReason());
+    }
+
+    @Test
+    void stream_totalToolCallLimitExceeded_failsTurnWithoutToolName() {
+        provider.setStreaming(false);
+        var toolNames = List.of("toolA", "toolB", "toolC", "toolD");
+        var toolCalls = new AtomicInteger();
+        var request = toolRequestWithMetadataSink(toolNames, toolCalls,
+                new ArrayList<>());
+        // Spread over four tools, no single tool reaches 40 before the total
+        // reaches 150
+        var rounds = new AtomicInteger();
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenAnswer(invocation -> {
+                    var round = rounds.getAndIncrement();
+                    return round < 200
+                            ? mockChatResponseWithPendingToolCall(
+                                    toolNames.get(round % toolNames.size()))
+                            : mockSimpleChatResponse("done");
+                });
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(request).collectList().block());
+
+        Assertions.assertTrue(error.getMessage().contains("(150)"),
+                error.getMessage());
+        Assertions.assertEquals(150, toolCalls.get());
+    }
+
+    @Test
+    void stream_toolCallLimitReason_failsTurnWithSpringAIMessage() {
+        // The finish reason is what the provider acts on; the reply's text
+        // becomes the exception's message as it came
+        provider.setStreaming(false);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse("Limits reached, in new words",
+                        "toolCallLimitExceeded"));
+
+        var error = Assertions.assertThrows(
+                ToolCallLimitExceededException.class,
+                () -> provider.stream(createSimpleRequest("Hello"))
+                        .collectList().block());
+
+        Assertions.assertEquals("Limits reached, in new words",
+                error.getMessage());
+    }
+
+    /**
+     * A request registering the tool that
+     * {@link #mockChatResponseWithPendingToolCall()} calls, counting its
+     * executions, and collecting the published metadata.
+     */
+    private LLMRequest toolRequestWithMetadataSink(AtomicInteger toolCalls,
+            List<ResponseMetadata> collected) {
+        return toolRequestWithMetadataSink(List.of("doSomething"), toolCalls,
+                collected);
+    }
+
+    private LLMRequest toolRequestWithMetadataSink(List<String> toolNames,
+            AtomicInteger toolCalls, List<ResponseMetadata> collected) {
+        var tools = toolNames.stream().map(
+                name -> createExplicitTool(name, "A test tool", null, args -> {
+                    toolCalls.incrementAndGet();
+                    return "tool result";
+                })).toList();
+        return new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return "invoke tool";
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public List<LLMProvider.ToolSpec> explicitTools() {
+                return tools;
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return collected::add;
+            }
+        };
+    }
+
+    // --- Response metadata tests ---
+
+    @Test
+    void stream_nonStreamingWithFinishReasonAndUsage_publishesMetadata() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(chatResponseWithMetadata("Let me load the",
+                        "max_tokens", 1200, 8));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Let me load the"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("max_tokens", metadata.finishReason());
+        Assertions.assertEquals(1200, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(8, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(1208, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingWithTerminalChunkMetadata_publishesMetadata() {
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(mockChatResponse("Hel", null),
+                        chatResponseWithMetadata("lo", "stop", 100, 20)));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("Hel", "lo"), results);
+        Assertions.assertEquals(1, collected.size(),
+                "Provider should publish the response metadata once");
+        var metadata = collected.getFirst();
+        Assertions.assertEquals("stop", metadata.finishReason());
+        Assertions.assertEquals(120, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingWithFinishReasonButNoUsage_publishesReasonOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                ChatResponse.builder().generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder().usage(null)
+                                .build())
+                        .build());
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(1, collected.size(),
+                "A reported finish reason alone is worth publishing");
+        Assertions.assertEquals("stop", collected.getFirst().finishReason());
+        Assertions.assertNull(collected.getFirst().tokenUsage());
+    }
+
+    @Test
+    void stream_nonStreamingWithoutMetadata_sinkNotCalled() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(mockChatResponse("plain", null));
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertTrue(collected.isEmpty(),
+                "No finish reason and no usage means nothing to publish");
+    }
+
+    @Test
+    void stream_streamingErrorsAfterMetadataChunk_metadataStillPublished() {
+        // The failed turn was still billed for what ran before the error; the
+        // sink must have received everything observed up to that point.
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux
+                        .just(chatResponseWithMetadata("Hi", "tool_use", 40,
+                                10))
+                        .concatWith(Flux.error(
+                                new RuntimeException("network broken"))));
+
+        var response = provider.stream(request).collectList();
+        Assertions.assertThrows(RuntimeException.class, response::block);
+
+        var metadata = collected.getLast();
+        Assertions.assertEquals("tool_use", metadata.finishReason());
+        Assertions.assertEquals(50, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutTotal_totalDerivedFromComponents() {
+        // A backend that reports prompt and completion counts but no total
+        // still reported the usage; it must not be discarded.
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(ChatResponse.builder()
+                        .generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder()
+                                .usage(new DefaultUsage(100, 20, null)).build())
+                        .build());
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(100, usage.inputTokens());
+        Assertions.assertEquals(20, usage.outputTokens());
+        Assertions.assertEquals(120, usage.totalTokens());
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithZeroTotal_totalDerivedFromComponents() {
+        // A backend that reports the components but leaves the total at zero
+        // still reported the usage; the total must be derived, not dropped.
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(100, 20, 0));
+
+        provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(120,
+                collected.getLast().tokenUsage().totalTokens(),
+                "An unreported total must be derived from the components");
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutInputTokens_publishesOutputTokensOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(0, 20, 0));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertNull(usage.inputTokens());
+        Assertions.assertEquals(20, usage.outputTokens());
+        Assertions.assertNull(usage.totalTokens(),
+                "A total cannot be derived without the input count");
+    }
+
+    @Test
+    void stream_nonStreamingUsageWithoutOutputTokens_publishesInputTokensOnly() {
+        provider.setStreaming(false);
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        mockCallWithUsage(new DefaultUsage(100, 0, 0));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(100, usage.inputTokens());
+        Assertions.assertNull(usage.outputTokens());
+        Assertions.assertNull(usage.totalTokens(),
+                "A total cannot be derived without the output count");
+    }
+
+    @Test
+    void stream_streamingAcrossToolRoundTrips_publishesCumulativeUsage() {
+        // The default ChatClient consumes the tool-call round trip internally
+        // and re-emits the follow-up round with usage already accumulated
+        // across the round trips, so the last observed usage covers the whole
+        // turn. This test pins that behavior — the collector's last-wins
+        // accounting depends on it.
+        var collected = new ArrayList<ResponseMetadata>();
+        var tool = createExplicitTool("doSomething", "A test tool", null,
+                args -> "tool result");
+        var request = requestWithMetadataSink("invoke tool", List.of(tool),
+                collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(Flux.just(toolCallResponseWithUsage(30, 10)))
+                .thenReturn(Flux.just(
+                        chatResponseWithMetadata("done", "stop", 50, 20)));
+
+        var results = provider.stream(request).collectList().block();
+
+        Assertions.assertEquals(List.of("done"), results);
+        var metadata = collected.getLast();
+        Assertions.assertEquals("stop", metadata.finishReason());
+        Assertions.assertEquals(80, metadata.tokenUsage().inputTokens());
+        Assertions.assertEquals(30, metadata.tokenUsage().outputTokens());
+        Assertions.assertEquals(110, metadata.tokenUsage().totalTokens());
+    }
+
+    @Test
+    void stream_streamingResendsGrowingUsageTally_lastValueWins() {
+        // Some backends resend a growing cumulative tally on every chunk
+        // instead of reporting the counts once at the end; the published
+        // usage must be the final tally, not a sum of the resends.
+        var collected = new ArrayList<ResponseMetadata>();
+        var request = requestWithMetadataSink("Hello", collected);
+        Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))
+                .thenReturn(
+                        Flux.just(chatResponseWithMetadata("Hel", null, 30, 4),
+                                chatResponseWithMetadata("lo", null, 30, 9),
+                                chatResponseWithMetadata("!", "stop", 30, 12)));
+
+        provider.stream(request).collectList().block();
+
+        var usage = collected.getLast().tokenUsage();
+        Assertions.assertEquals(30, usage.inputTokens());
+        Assertions.assertEquals(12, usage.outputTokens());
+        Assertions.assertEquals(42, usage.totalTokens());
+    }
+
+    @Test
+    void metadataSink_notOverridden_returnsNoOpConsumer() {
+        var request = createSimpleRequest("Hello");
+
+        Assertions.assertNotNull(request.metadataSink());
+        Assertions
+                .assertDoesNotThrow(() -> request.metadataSink().accept(null));
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<ResponseMetadata> collected) {
+        return requestWithMetadataSink(message, List.of(), collected);
+    }
+
+    private static LLMRequest requestWithMetadataSink(String message,
+            List<LLMProvider.ToolSpec> explicitTools,
+            List<ResponseMetadata> collected) {
+        return new LLMRequest() {
+            @Override
+            public String userMessage() {
+                return message;
+            }
+
+            @Override
+            public List<AIAttachment> attachments() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String systemPrompt() {
+                return null;
+            }
+
+            @Override
+            public Object[] tools() {
+                return new Object[0];
+            }
+
+            @Override
+            public List<LLMProvider.ToolSpec> explicitTools() {
+                return explicitTools;
+            }
+
+            @Override
+            public Consumer<ResponseMetadata> metadataSink() {
+                return collected::add;
+            }
+        };
+    }
+
+    private void mockCallWithUsage(Usage usage) {
+        var generation = new Generation(new AssistantMessage("Done"),
+                ChatGenerationMetadata.builder().finishReason("stop").build());
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class))).thenReturn(
+                ChatResponse.builder().generations(List.of(generation))
+                        .metadata(ChatResponseMetadata.builder().usage(usage)
+                                .build())
+                        .build());
+    }
+
+    private static ChatResponse chatResponseWithMetadata(String text,
+            String finishReason, int inputTokens, int outputTokens) {
+        var generationMetadata = finishReason == null
+                ? ChatGenerationMetadata.NULL
+                : ChatGenerationMetadata.builder().finishReason(finishReason)
+                        .build();
+        var generation = new Generation(new AssistantMessage(text),
+                generationMetadata);
+        return ChatResponse.builder().generations(List.of(generation))
+                .metadata(ChatResponseMetadata.builder()
+                        .usage(new DefaultUsage(inputTokens, outputTokens))
+                        .build())
+                .build();
+    }
+
+    private static ChatResponse toolCallResponseWithUsage(int inputTokens,
+            int outputTokens) {
+        var response = mockChatResponseWithPendingToolCall();
+        return ChatResponse.builder().generations(response.getResults())
+                .metadata(ChatResponseMetadata.builder()
+                        .usage(new DefaultUsage(inputTokens, outputTokens))
+                        .build())
+                .build();
+    }
+
+    @Test
+    void stream_withExplicitTool_nullOrBlankArguments_passesEmptyObject() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    receivedArgs.add(args);
+                    return "ok";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var callback = toolCallbacks.getFirst();
+
+        Assertions.assertEquals("ok", callback.call(null));
+        Assertions.assertEquals("ok", callback.call("  "));
+        Assertions.assertEquals(2, receivedArgs.size());
+        var allEmptyObjects = receivedArgs.stream().allMatch(
+                args -> args.isObject() && args.propertyNames().isEmpty());
+        Assertions.assertTrue(allEmptyObjects,
+                "Missing arguments should be parsed as an empty object");
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingToolException_relaysMessage() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new ToolException("Unknown column 'foo'");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("{}");
+
+        Assertions.assertEquals("Error executing tool: Unknown column 'foo'",
+                result);
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_returnsGenericError() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw new RuntimeException("internal detail");
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        var result = toolCallbacks.getFirst().call("{}");
+
+        Assertions.assertEquals("Error executing tool.", result);
+    }
+
+    @Test
+    void stream_withExplicitToolThrowingUnexpectedException_logsError() {
+        provider.setStreaming(false);
+        var toolFailure = new RuntimeException("internal detail");
+        var explicitTool = createExplicitTool("myTool", "A test tool", null,
+                args -> {
+                    throw toolFailure;
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("Done");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        toolCallbacks.getFirst().call("{}");
+
+        // The generic result hides the failure from the LLM, so the log is
+        // the only place where the actual error is visible.
+        var error = logger.getAllLoggingEvents().stream()
+                .filter(event -> event.getLevel() == Level.ERROR
+                        && event.getThrowable().orElse(null) == toolFailure)
+                .findFirst();
+        Assertions.assertTrue(error.isPresent(),
+                "Expected the tool failure to be logged");
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_substitutesNoParametersSchema() {
         provider.setStreaming(false);
         var explicitTool = createExplicitTool("simpleTool", "A simple tool",
                 null, args -> "done");
@@ -1470,8 +2499,114 @@ class SpringAILLMProviderTest {
         var toolDef = toolCallbacks.getFirst().getToolDefinition();
         Assertions.assertEquals("simpleTool", toolDef.name());
         Assertions.assertEquals("A simple tool", toolDef.description());
-        // Should have a default empty schema
-        Assertions.assertNotNull(toolDef.inputSchema());
+        assertNoParametersSchema(toolDef.inputSchema());
+    }
+
+    @Test
+    void stream_withExplicitToolBlankSchema_substitutesNoParametersSchema() {
+        provider.setStreaming(false);
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                "   ", args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        assertNoParametersSchema(
+                toolCallbacks.getFirst().getToolDefinition().inputSchema());
+    }
+
+    @Test
+    void stream_withExplicitToolNullSchema_executeReceivesEmptyArguments() {
+        provider.setStreaming(false);
+        var receivedArgs = new ArrayList<JsonNode>();
+        var explicitTool = createExplicitTool("simpleTool", "A simple tool",
+                null, args -> {
+                    receivedArgs.add(args);
+                    return "done";
+                });
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        // The model may fill the placeholder schema that was substituted for
+        // the missing one; a tool that declared no parameters must not see
+        // that.
+        var result = toolCallbacks.getFirst()
+                .call("{\"reason\":\"checking the form\"}");
+
+        Assertions.assertEquals("done", result);
+        Assertions.assertEquals(1, receivedArgs.size());
+        Assertions.assertTrue(receivedArgs.getFirst().isEmpty(),
+                "A tool that declared no parameters must receive an empty "
+                        + "arguments object, got: " + receivedArgs.getFirst());
+    }
+
+    @Test
+    void stream_withExplicitToolSchema_passesSchemaThroughVerbatim() {
+        provider.setStreaming(false);
+        var userSchema = "{\"type\":\"object\",\"properties\":{\"city\":"
+                + "{\"type\":\"string\"}},\"required\":[\"city\"]}";
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                userSchema, args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        Assertions.assertEquals(userSchema,
+                toolCallbacks.getFirst().getToolDefinition().inputSchema(),
+                "A declared schema must reach the tool definition unmodified");
+    }
+
+    @Test
+    void stream_withExplicitToolEmptyPropertiesSchema_passesSchemaThroughVerbatim() {
+        // Substitution is limited to null/blank schemas: a syntactically
+        // valid schema authored by the user is passed through as-is, even
+        // when its properties object is empty.
+        provider.setStreaming(false);
+        var userSchema = "{\"type\":\"object\",\"properties\":{}}";
+        var explicitTool = createExplicitTool("myTool", "A test tool",
+                userSchema, args -> "done");
+
+        var request = new TestLLMRequestWithExplicitTools("Call tool", null,
+                Collections.emptyList(), new Object[0], List.of(explicitTool));
+        mockSimpleChat("OK");
+
+        provider.stream(request).blockFirst();
+
+        var toolCallbacks = ((ToolCallingChatOptions) capturePrompt()
+                .getOptions()).getToolCallbacks();
+        Assertions.assertEquals(userSchema,
+                toolCallbacks.getFirst().getToolDefinition().inputSchema());
+    }
+
+    /**
+     * Asserts the schema is the non-empty no-parameters shape: an object with
+     * at least one property, all of them optional. A tool without a declared
+     * property makes models disagree on what to send as arguments, and some LLM
+     * APIs reject the request that replays such a tool call.
+     */
+    private static void assertNoParametersSchema(String inputSchema) {
+        var schema = JacksonUtils.readTree(inputSchema);
+        Assertions.assertEquals("object", schema.path("type").asString());
+        Assertions.assertTrue(schema.path("properties").size() > 0,
+                "Schema must declare at least one property, got: " + schema);
+        Assertions.assertEquals(0, schema.path("required").size(),
+                "All declared properties must be optional, got: " + schema);
     }
 
     private static LLMProvider.ToolSpec createExplicitTool(String name,
@@ -1519,6 +2654,24 @@ class SpringAILLMProviderTest {
     private record TestLLMRequestWithExplicitTools(String userMessage,
             String systemPrompt, List<AIAttachment> attachments, Object[] tools,
             List<LLMProvider.ToolSpec> explicitTools) implements LLMRequest {
+    }
+
+    private record TestLLMRequestWithSessionContext(String userMessage,
+            String sessionContext) implements LLMRequest {
+        @Override
+        public List<AIAttachment> attachments() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public String systemPrompt() {
+            return null;
+        }
+
+        @Override
+        public Object[] tools() {
+            return new Object[0];
+        }
     }
 
     private static class SampleToolsClass {

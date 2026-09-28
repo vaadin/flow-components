@@ -4,13 +4,18 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-charts-flow-parent</artifactId>
-        <version>25.3-SNAPSHOT</version>
+        <version>25.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-charts-flow-svg-generator</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Charts SVG Generator API</name>
     <properties>
         <surefire.argLine>-javaagent:${org.mockito:mockito-core:jar}</surefire.argLine>
+        <!-- The npm tests below are a test run like any other, so -DskipTests
+             leaves them out, while skipSvgChartsBuild leaves out the whole npm
+             install/build/test chain. Defaults to skipSvgChartsBuild, so a
+             build that skips the chain skips the tests with it. -->
+        <skipSvgChartsTests>${skipSvgChartsBuild}</skipSvgChartsTests>
     </properties>
     <dependencies>
         <dependency>
@@ -48,7 +53,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.6.3</version>
                 <executions>
                     <execution>
                         <id>npm-install</id>
@@ -90,7 +94,7 @@
                             <arguments>
                                 <argument>test</argument>
                             </arguments>
-                            <skip>${skipSvgChartsBuild}</skip>
+                            <skip>${skipSvgChartsTests}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -99,6 +103,18 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>skip-svg-charts-tests</id>
+            <activation>
+                <property>
+                    <name>skipTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <skipSvgChartsTests>true</skipSvgChartsTests>
+            </properties>
+        </profile>
         <profile>
             <id>attach-docs</id>
             <activation>

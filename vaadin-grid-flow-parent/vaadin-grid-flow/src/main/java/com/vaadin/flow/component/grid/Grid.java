@@ -214,8 +214,8 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.3.0-alpha13")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -622,7 +622,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Sets the width of this column as a CSS-string.
+         * Sets the width of this column as a CSS-string. The default width is
+         * {@code 100px}.
+         * <p>
+         * When the {@link #setFlexGrow(int) flex grow} of this column is above
+         * {@code 0}, this width is both the starting width and the minimum
+         * width of the column. The column grows into the available space, but
+         * never becomes narrower than this width. When the sum of the column
+         * widths exceeds the width of the grid, the grid scrolls horizontally
+         * instead of shrinking the columns. When flex grow is {@code 0}, the
+         * column keeps exactly this width.
+         * <p>
+         * When {@link #setAutoWidth(boolean) auto width} is enabled, the client
+         * replaces this width with the width calculated from the column
+         * contents. {@link #getWidth()} reflects the calculated width only
+         * after the user resizes a column.
          * <p>
          * Please note that using the {@code em} length unit is discouraged as
          * it might lead to misalignment issues if the header, body, and footer
@@ -630,6 +644,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * a length unit relative to the font size.
          *
          * @see #setFlexGrow(int)
+         * @see #setAutoWidth(boolean)
          *
          * @param width
          *            the width to set this column to, as a CSS-string, not
@@ -643,10 +658,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         /**
          * Gets the width of this column as a CSS-string.
+         * <p>
+         * Returns the width set with {@link #setWidth(String)}, or {@code null}
+         * if none was set. After the user resizes any column, returns the
+         * current client-side width of this column, including widths calculated
+         * by {@link #setAutoWidth(boolean) auto width}.
          *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          *
-         * @return the width of this column as a CSS-string
+         * @return the width of this column as a CSS-string, or {@code null}
          */
         @Synchronize("column-drag-resize")
         public String getWidth() {
@@ -654,10 +674,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Sets the flex grow ratio for this column. When set to 0, column width
-         * is fixed.
+         * Sets the flex grow ratio for this column. The default is {@code 1}.
+         * <p>
+         * When set to {@code 0}, the column keeps exactly the width set with
+         * {@link #setWidth(String)}. When above {@code 0}, the column starts
+         * from that width and grows into the available space in proportion to
+         * the flex grow ratios of the other columns. The column never becomes
+         * narrower than its width, so the width also acts as a minimum width.
+         * <p>
+         * When the user resizes a column, the flex grow of the resized column
+         * and of all columns before it is set to {@code 0}, and their widths
+         * are set to their current pixel widths.
          *
          * @see #setWidth(String)
+         * @see #setAutoWidth(boolean)
          *
          * @param flexGrow
          *            the flex grow ratio
@@ -669,11 +699,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Gets the flex grow value, by default 1.
+         * Gets the flex grow value, by default {@code 1}.
+         * <p>
+         * After the user resizes any column, returns the current client-side
+         * flex grow of this column.
          *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          *
-         * @return the flex grow value, by default 1
+         * @return the flex grow value, by default {@code 1}
          */
         @Synchronize("column-drag-resize")
         public int getFlexGrow() {
@@ -681,10 +714,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Enables or disables automatic width for this column.
+         * Enables or disables automatic width for this column. The default is
+         * {@code false}.
          * <p>
          * Automatically sets the width of the column based on the column
-         * contents when this is set to {@code true}.
+         * contents when this is set to {@code true}. The calculated width
+         * replaces the width set with {@link #setWidth(String)} on the client.
+         * {@link #getWidth()} reflects it only after the user resizes a column.
          * <p>
          * For performance reasons the column width is calculated automatically
          * only once when the grid items are rendered for the first time and the
@@ -701,10 +737,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * {@link Grid#recalculateColumnWidths()}.
          * <p>
          * The column width may still grow larger when {@code flexGrow} is not
-         * 0.
+         * {@code 0}.
          *
          * @see Grid#recalculateColumnWidths()
-         * @see Column#setFlexGrow
+         * @see Column#setFlexGrow(int)
+         * @see Column#setWidth(String)
          *
          * @param autoWidth
          *            whether to enable or disable automatic width on this
@@ -2420,9 +2457,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void checkForBeanGrid() {
         if (propertySet == null) {
             throw new UnsupportedOperationException(
-                    "This method can't be used for a Grid that isn't constructed from a bean type. "
-                            + "To construct Grid from a bean type, please provide a beanType argument"
-                            + "to the constructor: Grid<Person> grid = new Grid<>(Person.class)");
+                    """
+                            This method can't be used for a Grid that isn't constructed from a bean type. \
+                            To construct Grid from a bean type, please provide a beanType argument\
+                            to the constructor: Grid<Person> grid = new Grid<>(Person.class)\
+                            """);
         }
     }
 
@@ -3235,6 +3274,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * @deprecated internal method, will be removed without a replacement.
+     * @since 1.1
      */
     @Deprecated(since = "25.3", forRemoval = true)
     protected void updateSelectionModeOnClient() {
@@ -3355,11 +3395,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public SingleSelect<Grid<T>, T> asSingleSelect() {
         GridSelectionModel<T> model = getSelectionModel();
         if (!(model instanceof GridSingleSelectionModel)) {
-            throw new IllegalStateException(
-                    "Grid is not in single select mode, "
-                            + "it needs to be explicitly set to such with "
-                            + "setSelectionMode(SelectionMode.SINGLE) before "
-                            + "being able to use single selection features.");
+            throw new IllegalStateException("""
+                    Grid is not in single select mode, \
+                    it needs to be explicitly set to such with \
+                    setSelectionMode(SelectionMode.SINGLE) before \
+                    being able to use single selection features.\
+                    """);
         }
         return ((GridSingleSelectionModel<T>) model).asSingleSelect();
     }
@@ -3377,10 +3418,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public MultiSelect<Grid<T>, T> asMultiSelect() {
         GridSelectionModel<T> model = getSelectionModel();
         if (!(model instanceof GridMultiSelectionModel)) {
-            throw new IllegalStateException("Grid is not in multi select mode, "
-                    + "it needs to be explicitly set to such with "
-                    + "setSelectionMode(SelectionMode.MULTI) before "
-                    + "being able to use multi selection features.");
+            throw new IllegalStateException("""
+                    Grid is not in multi select mode, \
+                    it needs to be explicitly set to such with \
+                    setSelectionMode(SelectionMode.MULTI) before \
+                    being able to use multi selection features.\
+                    """);
         }
         return ((GridMultiSelectionModel<T>) model).asMultiSelect();
     }
@@ -4014,13 +4057,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void setViewportRange(int start, int length) {
         if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
             throw new IllegalArgumentException(
-                    "Attempted to fetch more items from server than allowed in one go. "
-                            + "Maximum allowed page count is 10. Consider not using setAllRowsVisible(true) "
-                            + "when you have a large amount of items (not only to cover this issue but also "
-                            + "to avoid performance bottlenecks resulting from transferring the full item data "
-                            + "set at once and then rendering an excess amount of DOM elements). If for some "
-                            + "reason this is not an option, increase the page size of the grid so that rendering "
-                            + "every item at once doesn't result in a request for over 10 pages.");
+                    """
+                            Attempted to fetch more items from server than allowed in one go. \
+                            Maximum allowed page count is 10. Consider not using setAllRowsVisible(true) \
+                            when you have a large amount of items (not only to cover this issue but also \
+                            to avoid performance bottlenecks resulting from transferring the full item data \
+                            set at once and then rendering an excess amount of DOM elements). If for some \
+                            reason this is not an option, increase the page size of the grid so that rendering \
+                            every item at once doesn't result in a request for over 10 pages.\
+                            """);
         }
         getDataCommunicator().setViewportRange(start, length);
     }
@@ -5091,7 +5136,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             tooltipElement.executeJs(
                     """
                             this.generator = ({ item, column }) => {
-                                const { gridtooltips } = item;
+                                const { gridtooltips } = item ?? {};
                                 if (gridtooltips) {
                                     return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
                                 }

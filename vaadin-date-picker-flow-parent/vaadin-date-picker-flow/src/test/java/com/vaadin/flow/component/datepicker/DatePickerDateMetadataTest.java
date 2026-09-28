@@ -33,8 +33,8 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -44,7 +44,7 @@ import tools.jackson.databind.node.ArrayNode;
 @NotThreadSafe
 class DatePickerDateMetadataTest {
 
-    private static final String SET_CONFIG = "setDateMetadataConfig";
+    private static final String SET_CONFIG = "$connector.setDateMetadataConfig";
 
     private static final String CLEAR_CACHE = "clearCache";
 
@@ -88,9 +88,9 @@ class DatePickerDateMetadataTest {
 
         // The queue is drained on dump, so capture it once and compare the
         // positions within that single list
-        List<String> expressions = dumpInvocationExpressions();
-        int configIndex = indexOfExpression(expressions, SET_CONFIG);
-        int clearCacheIndex = indexOfExpression(expressions, CLEAR_CACHE);
+        List<String> functions = dumpCalledFunctions();
+        int configIndex = functions.indexOf(SET_CONFIG);
+        int clearCacheIndex = functions.indexOf(CLEAR_CACHE);
 
         Assertions.assertNotEquals(-1, configIndex);
         Assertions.assertNotEquals(-1, clearCacheIndex);
@@ -106,9 +106,8 @@ class DatePickerDateMetadataTest {
 
         picker.refreshDateMetadata();
 
-        List<String> expressions = dumpInvocationExpressions();
-        Assertions.assertNotEquals(-1,
-                indexOfExpression(expressions, CLEAR_CACHE));
+        List<String> functions = dumpCalledFunctions();
+        Assertions.assertNotEquals(-1, functions.indexOf(CLEAR_CACHE));
     }
 
     @Test
@@ -122,10 +121,9 @@ class DatePickerDateMetadataTest {
 
         // A refresh does not change the config, so re-sending it would only
         // repeat a payload that grows with the number of disabled dates
-        List<String> expressions = dumpInvocationExpressions();
-        Assertions.assertEquals(-1, indexOfExpression(expressions, SET_CONFIG));
-        Assertions.assertNotEquals(-1,
-                indexOfExpression(expressions, CLEAR_CACHE));
+        List<String> functions = dumpCalledFunctions();
+        Assertions.assertEquals(-1, functions.indexOf(SET_CONFIG));
+        Assertions.assertNotEquals(-1, functions.indexOf(CLEAR_CACHE));
     }
 
     @Test
@@ -139,9 +137,9 @@ class DatePickerDateMetadataTest {
         picker.setDisabledDates(List.of(LocalDate.of(2023, 1, 10)));
         picker.refreshDateMetadata();
 
-        List<String> expressions = dumpInvocationExpressions();
-        int configIndex = indexOfExpression(expressions, SET_CONFIG);
-        int clearCacheIndex = indexOfExpression(expressions, CLEAR_CACHE);
+        List<String> functions = dumpCalledFunctions();
+        int configIndex = functions.indexOf(SET_CONFIG);
+        int clearCacheIndex = functions.indexOf(CLEAR_CACHE);
 
         Assertions.assertNotEquals(-1, configIndex);
         Assertions.assertNotEquals(-1, clearCacheIndex);
@@ -156,10 +154,9 @@ class DatePickerDateMetadataTest {
 
         picker.refreshDateMetadata();
 
-        List<String> expressions = dumpInvocationExpressions();
-        Assertions.assertEquals(-1, indexOfExpression(expressions, SET_CONFIG));
-        Assertions.assertEquals(-1,
-                indexOfExpression(expressions, CLEAR_CACHE));
+        List<String> functions = dumpCalledFunctions();
+        Assertions.assertEquals(-1, functions.indexOf(SET_CONFIG));
+        Assertions.assertEquals(-1, functions.indexOf(CLEAR_CACHE));
     }
 
     @Test
@@ -170,11 +167,9 @@ class DatePickerDateMetadataTest {
         picker.setDisabledDates(List.of(LocalDate.of(2023, 1, 10)));
         picker.setDisabledWeekdays(Set.of(DayOfWeek.SUNDAY));
 
-        List<String> expressions = dumpInvocationExpressions();
-        Assertions.assertNotEquals(-1,
-                indexOfExpression(expressions, SET_CONFIG));
-        Assertions.assertEquals(-1,
-                indexOfExpression(expressions, CLEAR_CACHE));
+        List<String> functions = dumpCalledFunctions();
+        Assertions.assertNotEquals(-1, functions.indexOf(SET_CONFIG));
+        Assertions.assertEquals(-1, functions.indexOf(CLEAR_CACHE));
     }
 
     @Test
@@ -183,11 +178,9 @@ class DatePickerDateMetadataTest {
         ui.add(picker);
 
         // A freshly created client element has an empty cache already
-        List<String> expressions = dumpInvocationExpressions();
-        Assertions.assertNotEquals(-1,
-                indexOfExpression(expressions, SET_CONFIG));
-        Assertions.assertEquals(-1,
-                indexOfExpression(expressions, CLEAR_CACHE));
+        List<String> functions = dumpCalledFunctions();
+        Assertions.assertNotEquals(-1, functions.indexOf(SET_CONFIG));
+        Assertions.assertEquals(-1, functions.indexOf(CLEAR_CACHE));
     }
 
     @Test
@@ -520,18 +513,9 @@ class DatePickerDateMetadataTest {
         Assertions.assertFalse(picker.isInvalid());
     }
 
-    private List<String> dumpInvocationExpressions() {
+    private List<String> dumpCalledFunctions() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .map(JavaScriptInvocation::getExpression).toList();
-    }
-
-    private int indexOfExpression(List<String> expressions, String function) {
-        for (int i = 0; i < expressions.size(); i++) {
-            if (expressions.get(i).contains(function)) {
-                return i;
-            }
-        }
-        return -1;
+                .map(JsFunctionCallUtil::getFunctionName).toList();
     }
 }

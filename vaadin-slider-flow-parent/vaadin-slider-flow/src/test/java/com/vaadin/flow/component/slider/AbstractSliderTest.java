@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -38,6 +39,11 @@ abstract class AbstractSliderTest<TComponent extends NumberSlider<TComponent, TV
     @Test
     void implementsHasAriaLabel() {
         Assertions.assertTrue(slider instanceof HasAriaLabel);
+    }
+
+    @Test
+    void implementsHasThemeVariant() {
+        Assertions.assertTrue(slider instanceof HasThemeVariant<SliderVariant>);
     }
 
     @Test

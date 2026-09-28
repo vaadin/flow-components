@@ -445,19 +445,11 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     private void performKeyboardTestsToCell(String column) {
         final String cellAddress = column + "2";
 
-        // A click on the cell can get lost while the spreadsheet is still
-        // re-rendering (e.g. right after adding a freeze pane), so click
-        // again until the editor shows up.
-        waitUntil(driver -> {
-            try {
-                clickCell(cellAddress);
-                return getInputInCustomEditorFromCell(cellAddress).isPresent();
-            } catch (StaleElementReferenceException e) {
-                return false;
-            }
-        });
+        clickCell(cellAddress);
+        var maybeEditor = getInputInCustomEditorFromCell(cellAddress);
+        Assert.assertTrue(maybeEditor.isPresent());
 
-        var editor = getInputInCustomEditorFromCell(cellAddress).orElseThrow();
+        var editor = maybeEditor.get();
 
         // Test Esc with arrow keys persistence on cell
         editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);

@@ -24,7 +24,6 @@ node_modules
 package*json
 pnpm*
 .pnpm*
-!**/.pnpmfile.cjs
 error-screenshots
 
 **/frontend/generated

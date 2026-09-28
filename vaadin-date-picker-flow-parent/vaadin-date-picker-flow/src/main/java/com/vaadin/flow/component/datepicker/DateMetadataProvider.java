@@ -82,7 +82,6 @@ public interface DateMetadataProvider extends Serializable {
      *            the function that returns the metadata for a single date, or
      *            {@code null} for a date that has none, not {@code null}
      * @return a provider backed by the given function
-     * @since 25.3
      */
     static DateMetadataProvider perDate(
             SerializableFunction<LocalDate, DateMetadata> generator) {

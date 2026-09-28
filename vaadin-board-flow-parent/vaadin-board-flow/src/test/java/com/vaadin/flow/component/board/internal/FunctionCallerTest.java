@@ -21,6 +21,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.tests.JsFunctionCallUtil;
 
 public class FunctionCallerTest {
 
@@ -31,22 +32,22 @@ public class FunctionCallerTest {
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
 
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
     }
 
     @Test
     void callsFunctionAfterAttach_invokedOnce() throws Exception {
         Html html = new Html("<div>foo</div>");
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
     }
 
     @Test
@@ -55,32 +56,42 @@ public class FunctionCallerTest {
         Html html = new Html("<div>foo</div>");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
         FunctionCaller.callOnceOnClientReponse(html, "foo");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
 
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
     }
 
     @Test
     void trackingPropertyRemoved() throws Exception {
         Html html = new Html("<div>foo</div>");
         FunctionCaller.callOnceOnClientReponse(html, "foo");
-        UI ui = new UI();
+        UI ui = createUI();
         ui.add(html);
 
         String trackingProperty = "CALLONCE_foo";
         Assertions.assertTrue(html.getElement().hasProperty(trackingProperty));
-        assertPendingInvocations(ui, "return $0.foo()");
+        assertPendingFunctionCall(ui, "foo");
         Assertions.assertFalse(html.getElement().hasProperty(trackingProperty));
     }
 
-    public static void assertPendingInvocations(UI ui, String expectedJS)
+    /**
+     * Creates a UI with a mocked session. Scheduling a JavaScript invocation on
+     * an attached element requires the owning UI to have a session.
+     *
+     * @return the UI
+     */
+    public static UI createUI() {
+        UI ui = new UI();
+        ui.getInternals().setSession(Mockito.mock(VaadinSession.class));
+        return ui;
+    }
+
+    public static void assertPendingFunctionCall(UI ui, String expectedFunction)
             throws Exception {
         UIInternals internals = ui.getInternals();
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        internals.setSession(session);
         internals.getStateTree().runExecutionsBeforeClientResponse();
         Method method = UIInternals.class
                 .getDeclaredMethod("getPendingJavaScriptInvocations");
@@ -89,8 +100,8 @@ public class FunctionCallerTest {
                 .invoke(internals);
         List<PendingJavaScriptInvocation> invocations = pendingJS.toList();
         Assertions.assertEquals(1, invocations.size());
-        Assertions.assertEquals(expectedJS,
-                invocations.get(0).getInvocation().getExpression());
+        Assertions.assertEquals(expectedFunction, JsFunctionCallUtil
+                .getFunctionName(invocations.get(0).getInvocation()));
 
     }
 }

@@ -64,8 +64,11 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
     }
 
     /**
-     * Opens the popup, and gets the labels of the items that are currently
-     * loaded in the popup
+     * Gets the labels of the items that are currently loaded in the popup.
+     * Opens the popup if it is not open, and waits until loading finishes.
+     * <p>
+     * The popup only holds the pages that are loaded so far. Items outside them
+     * are placeholders with an empty label.
      *
      * @return labels of the items that are loaded in the popup
      */
@@ -184,6 +187,27 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
      */
     public void waitForLoadingFinished() {
         waitUntil(driver -> !getPropertyBoolean("loading"));
+    }
+
+    /**
+     * Gets the select all button in the popup. Waits until the combo box has
+     * finished loading items before looking for the button.
+     * <p>
+     * The popup must be open, for example by using {@link #openPopup()} or
+     * {@link #setFilter(String)}.
+     *
+     * @return the select all button, or {@code null} if the button is not shown
+     * @throws IllegalStateException
+     *             if the popup is not open
+     */
+    public TestBenchElement getSelectAllButton() {
+        if (!isPopupOpen()) {
+            throw new IllegalStateException(
+                    "The popup must be open to get the select all button");
+        }
+        waitForLoadingFinished();
+        return $("vaadin-multi-select-combo-box-select-all-button").all()
+                .stream().findFirst().orElse(null);
     }
 
     /**

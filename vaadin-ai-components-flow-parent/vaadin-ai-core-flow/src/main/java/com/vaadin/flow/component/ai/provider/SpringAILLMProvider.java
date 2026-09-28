@@ -15,21 +15,27 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import static org.springframework.ai.model.tool.ToolCallLimitExceededException.FINISH_REASON;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.DefaultChatClient.DefaultChatClientRequestSpec;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.MemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.content.Media;
@@ -73,12 +79,41 @@ import tools.jackson.databind.JsonNode;
  * user's message renders while the LLM works.
  * </p>
  * <p>
- * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance. History
- * restoration (via {@link #setHistory(List, Map)}) is only supported when using
- * the {@link #SpringAILLMProvider(ChatModel)} constructor; the
- * {@link #SpringAILLMProvider(ChatClient)} constructor does not provide access
- * to the internal chat memory.
+ * <b>Tool call limits:</b> Spring AI runs the tool-calling loop itself and
+ * bounds it: once the model has requested more than {@code 40} calls to any one
+ * tool, or more than {@code 150} tool calls in total, within a turn, Spring AI
+ * stops the loop and replies with its own message about the exceeded limit. The
+ * provider does not pass that reply on. It fails the turn with a
+ * {@link ToolCallLimitExceededException} instead, the same way
+ * {@link LangChain4JLLMProvider} does, so you receive the exception as the
+ * error of the turn whichever provider runs it. The finish reason
+ * {@code toolCallLimitExceeded} is still published in the
+ * {@link ResponseMetadata response metadata}, and Spring AI's reply may remain
+ * in the chat memory with either constructor, since the provider does not
+ * rewrite what Spring AI's advisors stored. The limits belong to the
+ * {@code ToolCallingAdvisor} of the {@link ChatClient}: a provider created from
+ * a {@link ChatModel} builds its own client and keeps Spring AI's defaults. To
+ * change them, build the client yourself, passing {@code ChatClient.builder} a
+ * {@code ToolCallingAdvisor.Builder} that carries a
+ * {@code DefaultToolCallingManager} with your limits, and create the provider
+ * from that client. Its {@code maxCallsPerTool} and {@code maxTotalToolCalls}
+ * set a limit, {@code unlimitedCallsPerTool()} and
+ * {@code unlimitedTotalToolCalls()} remove one. In a Spring Boot application
+ * the {@code spring.ai.tools.limits} properties configure the same limits on
+ * the auto-configured {@code ChatClient.Builder}, so passing that client to
+ * {@link #SpringAILLMProvider(ChatClient)} needs no builder code.
+ * </p>
+ * <p>
+ * With the {@link #SpringAILLMProvider(ChatModel)} constructor the provider
+ * maintains its own chat memory, and {@link #setHistory(List, Map)} restores a
+ * saved conversation into it. To share conversation history across components,
+ * reuse the same provider instance. With the
+ * {@link #SpringAILLMProvider(ChatClient)} constructor the application owns the
+ * chat memory, so giving the LLM its context is up to the application and
+ * {@link #setHistory(List, Map)} does nothing. Restoring a conversation through
+ * {@code AIOrchestrator.Builder.withHistory(List, Map)} still matters on that
+ * path: the message list the user sees and the orchestrator's own conversation
+ * history are restored by the orchestrator, not by the provider.
  * </p>
  * <p>
  * <b>Note:</b> SpringAILLMProvider is not serializable. If your application
@@ -87,7 +122,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.1
+ * @since 25.3
  */
 public class SpringAILLMProvider implements LLMProvider {
 
@@ -96,6 +131,18 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private static final int MAX_MESSAGES = 30;
     private static final String CONVERSATION_ID = "default";
+
+    /**
+     * The finish reason Spring AI puts on the reply it synthesizes when its
+     * tool call limit is hit. Spring AI's own exception never reaches this
+     * provider: the {@code ToolCallingAdvisor} of the {@link ChatClient}
+     * catches it and returns the breach as a normal reply carrying this reason.
+     * Not a vendor's wording but a constant Spring AI defines for that reply,
+     * so comparing against it is the one finish-reason check this provider
+     * makes. Spring AI's exception shares its simple name with ours, hence the
+     * static import of the constant alone.
+     */
+    private static final String TOOL_CALL_LIMIT_FINISH_REASON = FINISH_REASON;
 
     private final transient ChatClient chatClient;
     private final transient MessageWindowChatMemory chatMemory;
@@ -124,9 +171,17 @@ public class SpringAILLMProvider implements LLMProvider {
     }
 
     /**
-     * Constructor with a chat client. Note: When using this constructor,
-     * conversation memory must be configured externally in the
-     * {@link ChatClient}.
+     * Constructor with a chat client. Conversation memory must be configured on
+     * the {@link ChatClient} itself, for example with a
+     * {@link MessageChatMemoryAdvisor} and a default
+     * {@link ChatMemory#CONVERSATION_ID} advisor parameter.
+     * <p>
+     * The application owns that memory, so {@link #setHistory(List, Map)} does
+     * nothing on a provider created this way. A conversation loaded from
+     * external storage must be written into the {@link ChatMemory} before the
+     * client is passed here. Passing the same conversation to
+     * {@code AIOrchestrator.Builder.withHistory(List, Map)} still restores the
+     * message list and the orchestrator's own history snapshot.
      *
      * @param chatClient
      *            the chat client, not {@code null}
@@ -157,7 +212,6 @@ public class SpringAILLMProvider implements LLMProvider {
      * Gets whether streaming mode is used.
      *
      * @return {@code true} if streaming mode is used, {@code false} otherwise
-     * @since 25.3
      */
     public boolean isStreaming() {
         return isStreaming;
@@ -179,7 +233,6 @@ public class SpringAILLMProvider implements LLMProvider {
      *
      * @return {@code true} if the call runs on a background thread,
      *         {@code false} if it runs on the thread that asks for the response
-     * @since 25.3
      */
     public boolean isBackgroundExecution() {
         return backgroundExecution.isEnabled();
@@ -197,10 +250,9 @@ public class SpringAILLMProvider implements LLMProvider {
      * so nothing the turn produces reaches the browser and the application
      * appears frozen. Set this to {@code true} to run the call on a background
      * thread instead: the request completes immediately, the user's message and
-     * the assistant placeholder render, and the response is added when it
-     * arrives.
+     * the typing indicator render, and the response is added when it arrives.
      * <p>
-     * This requires three things from the application:
+     * This requires the following from the application:
      * <ul>
      * <li><b>A way to deliver the response.</b> Annotate the application shell
      * or UI class with {@code @Push}, or enable polling with
@@ -212,20 +264,18 @@ public class SpringAILLMProvider implements LLMProvider {
      * Security's {@code SecurityContext} are not bound, and UI components must
      * not be accessed directly. Wrap component access in {@code ui.access()},
      * or capture what you need in
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()},
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest},
      * which still runs on the UI thread. This is the same requirement streaming
      * mode already has.</li>
-     *
-     * <li><b>A gated input.</b> The orchestrator processes one prompt at a
-     * time. Without background execution, a message submitted while a turn is
-     * running waits for the session lock and is processed when the turn ends;
-     * with it, the submit is rejected and dropped with a warning — and a
-     * connected input has already cleared its text. Disable the input while a
-     * turn is running, for example from
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
-     * and
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(Throwable)}.</li>
      * </ul>
+     *
+     * <p>
+     * The orchestrator processes one prompt at a time. Without background
+     * execution, a message submitted while a turn is running waits for the
+     * session lock and is processed when the turn ends; with it, the submit is
+     * rejected and dropped with a warning — and a connected input has already
+     * cleared its text.
+     * </p>
      *
      * <p>
      * Like the streaming mode, the setting is not preserved when the session is
@@ -237,12 +287,26 @@ public class SpringAILLMProvider implements LLMProvider {
      *            {@code true} to run the call on a background thread,
      *            {@code false} to run it on the thread that asks for the
      *            response
-     * @since 25.3
      */
     public void setBackgroundExecution(boolean backgroundExecution) {
         this.backgroundExecution.setEnabled(backgroundExecution);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Restores the conversation into the provider's own chat memory. Does
+     * nothing when the provider was created with the
+     * {@link #SpringAILLMProvider(ChatClient) ChatClient} constructor, because
+     * the application owns the chat memory in that case and is expected to have
+     * populated it before passing the client in. A warning is logged when that
+     * client is missing the chat memory configuration the conversation would
+     * need. Whether the memory actually holds the conversation is not visible
+     * to the provider, so a client configured correctly but never loaded is
+     * indistinguishable from one that was. Doing nothing here does not reduce
+     * what the caller restores: an orchestrator rebuilds the message list and
+     * its own conversation history itself.
+     */
     @Override
     public void setHistory(List<ChatMessage> history,
             Map<String, List<AIAttachment>> attachmentsByMessageId) {
@@ -250,9 +314,8 @@ public class SpringAILLMProvider implements LLMProvider {
         Objects.requireNonNull(attachmentsByMessageId,
                 "Attachments map must not be null");
         if (!hasManagedMemory) {
-            throw new UnsupportedOperationException(
-                    "Chat history restoration is not supported when using the ChatClient constructor. "
-                            + "Use the ChatModel constructor instead.");
+            warnIfClientMemoryUnusable();
+            return;
         }
         chatMemory.clear(CONVERSATION_ID);
         var messages = history.stream().map(message -> {
@@ -263,6 +326,89 @@ public class SpringAILLMProvider implements LLMProvider {
             return toVendorMessage(message, attachments);
         }).toList();
         chatMemory.add(CONVERSATION_ID, messages);
+    }
+
+    /**
+     * Reports a client that cannot hold the conversation the application asked
+     * to restore. The provider cannot populate an application-owned chat
+     * memory, but it can tell that a client carrying no memory advisor, or one
+     * whose memory has no conversation to read, is very likely to never see the
+     * restored messages -- the first case forgets every turn, the second fails
+     * each prompt inside the standard advisor. Both are worth a warning at the
+     * point where the application asks for a restore that cannot happen.
+     * Neither is certain, since a client can carry the conversation in ways
+     * this check cannot see, so both messages say what was observed rather than
+     * promising the outcome.
+     * <p>
+     * Only clients built by {@link ChatClient#builder(ChatModel)} can be
+     * inspected. Anything else is left alone, since a custom implementation may
+     * carry the conversation in its own way.
+     */
+    private void warnIfClientMemoryUnusable() {
+        var requestSpec = inspectableRequestSpec();
+        if (requestSpec == null) {
+            // inspectableRequestSpec() logged why it could not be read
+            return;
+        }
+        if (requestSpec.getAdvisors().stream()
+                .noneMatch(MemoryAdvisor.class::isInstance)) {
+            LOGGER.warn("History restoration was requested, but no chat "
+                    + "memory advisor was found on the ChatClient given to "
+                    + "this provider. Unless that client keeps the "
+                    + "conversation some other way, the LLM will see neither "
+                    + "the restored conversation nor the turns that follow. "
+                    + "Add for example a MessageChatMemoryAdvisor to the "
+                    + "client, and load the restored conversation into its "
+                    + "ChatMemory before passing the client to the provider.");
+            return;
+        }
+        if (requestSpec.getAdvisorParams()
+                .get(ChatMemory.CONVERSATION_ID) == null) {
+            LOGGER.warn("History restoration was requested, but the "
+                    + "ChatClient given to this provider has no default "
+                    + "{} advisor parameter. Unless something sets it per "
+                    + "request, its memory advisor has no conversation to "
+                    + "read and every prompt will fail. Set the parameter on "
+                    + "the client, for example with "
+                    + "ChatClient.Builder.defaultAdvisors(advisors -> "
+                    + "advisors.param(ChatMemory.CONVERSATION_ID, id)).",
+                    ChatMemory.CONVERSATION_ID);
+            return;
+        }
+        LOGGER.debug("Skipping history restoration: the provider was created "
+                + "with a ChatClient whose chat memory the application owns. "
+                + "Populate that memory before passing the client to the "
+                + "provider.");
+    }
+
+    /**
+     * Returns the client's request spec when it is Spring AI's own
+     * implementation, or {@code null} -- after logging why -- when the client
+     * cannot be read. Inspection is only a diagnostic, so a client that rejects
+     * a bare {@link ChatClient#prompt()} must not break the restore it is being
+     * asked about.
+     *
+     * @return the request spec to inspect, or {@code null} if there is none to
+     *         read
+     */
+    private DefaultChatClientRequestSpec inspectableRequestSpec() {
+        try {
+            if (chatClient
+                    .prompt() instanceof DefaultChatClientRequestSpec spec) {
+                return spec;
+            }
+        } catch (RuntimeException e) {
+            LOGGER.debug("Skipping history restoration: the provider was "
+                    + "created with a ChatClient whose chat memory the "
+                    + "application owns, and which did not accept a bare "
+                    + "prompt() for inspection.", e);
+            return null;
+        }
+        LOGGER.debug("Skipping history restoration: the provider was "
+                + "created with a ChatClient whose chat memory the "
+                + "application owns, and whose configuration cannot be "
+                + "inspected.");
+        return null;
     }
 
     private static org.springframework.ai.chat.messages.Message toVendorMessage(
@@ -282,7 +428,17 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private Flux<String> executeStreamingChat(LLMRequest request) {
         try {
-            var chatResponses = getPromptSpec(request).stream().chatResponse();
+            var collector = new ResponseMetadataCollector(
+                    request.metadataSink());
+            var chatResponses = getPromptSpec(request).stream().chatResponse()
+                    .doOnNext(collector::observe)
+                    .<ChatResponse> handle((response, sink) -> {
+                        if (isToolCallLimitBreach(response)) {
+                            sink.error(toolCallLimitExceeded(response));
+                        } else {
+                            sink.next(response);
+                        }
+                    });
             return warnOnMissingFinishReason(chatResponses)
                     .map(SpringAILLMProvider::getAssistantText)
                     .filter(text -> !text.isEmpty());
@@ -349,6 +505,24 @@ public class SpringAILLMProvider implements LLMProvider {
         return text != null ? text : "";
     }
 
+    private static boolean isToolCallLimitBreach(ChatResponse response) {
+        return TOOL_CALL_LIMIT_FINISH_REASON
+                .equals(ResponseMetadataCollector.getFinishReason(response));
+    }
+
+    /**
+     * Turns the reply Spring AI synthesized for an exceeded tool call limit
+     * into the exception both providers fail such a turn with. Spring AI's
+     * message names the limit and the tool, so it becomes the exception's.
+     */
+    private static ToolCallLimitExceededException toolCallLimitExceeded(
+            ChatResponse response) {
+        var message = getAssistantText(response);
+        return new ToolCallLimitExceededException(message.isEmpty()
+                ? "Spring AI stopped the turn at its tool call limit"
+                : message);
+    }
+
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
         if (hasManagedMemory) {
@@ -356,7 +530,8 @@ public class SpringAILLMProvider implements LLMProvider {
                     a -> a.param(ChatMemory.CONVERSATION_ID, CONVERSATION_ID));
         }
         promptSpec = promptSpec.user(userSpec -> {
-            userSpec.text(request.userMessage());
+            userSpec.text(LLMProviderHelpers.withSessionContext(
+                    request.userMessage(), request.sessionContext()));
             var media = buildMedia(request);
             if (media.length != 0) {
                 userSpec.media(media);
@@ -384,15 +559,121 @@ public class SpringAILLMProvider implements LLMProvider {
         return Flux.create(sink -> {
             try {
                 var promptSpec = getPromptSpec(request);
-                var response = promptSpec.call().content();
-                if (response != null && !response.isEmpty()) {
-                    sink.next(response);
+                var response = promptSpec.call().chatResponse();
+                if (response == null) {
+                    LOGGER.warn("LLM call returned no response at all, which "
+                            + "may indicate an upstream error swallowed by "
+                            + "the client.");
+                } else {
+                    new ResponseMetadataCollector(request.metadataSink())
+                            .observe(response);
+                    if (isToolCallLimitBreach(response)) {
+                        sink.error(toolCallLimitExceeded(response));
+                        return;
+                    }
+                    warnOnAbnormalCompletion(response);
+                    var text = getAssistantText(response);
+                    if (!text.isEmpty()) {
+                        sink.next(text);
+                    }
                 }
                 sink.complete();
             } catch (Exception e) {
                 sink.error(e);
             }
         });
+    }
+
+    /**
+     * Warns when a non-streaming turn did not end in a state a completed turn
+     * can end in. Spring AI runs the tool-calling loop inside its own call and
+     * hands back only the final response, so tool calls still pending on it
+     * mean the loop stopped before the model produced its answer. The streaming
+     * path has the same checks built into
+     * {@link #warnOnMissingFinishReason(Flux)}.
+     */
+    private static void warnOnAbnormalCompletion(ChatResponse response) {
+        var finishReason = ResponseMetadataCollector.getFinishReason(response);
+        if (response.hasToolCalls()) {
+            LOGGER.warn("LLM call ended with tool calls still pending "
+                    + "(finish reason: {}). The tool-calling loop stopped "
+                    + "before the model produced its answer, so the response "
+                    + "is incomplete.", finishReason);
+        } else if (finishReason == null) {
+            LOGGER.warn("LLM call ended without a finish reason. This may "
+                    + "indicate a silent abnormal termination such as an "
+                    + "upstream error; if the response appears truncated "
+                    + "this warning is the signal.");
+        }
+    }
+
+    /**
+     * Collects response metadata across the chunks of a turn and passes each
+     * new state of knowledge to the metadata sink right away, so that a turn
+     * that fails or times out midway has still reported what was observed
+     * before the failure. The last reported finish reason and token usage win:
+     * the terminal chunk carries the reason that ended the turn, and frameworks
+     * that report usage do so cumulatively on the final chunk that carries it.
+     */
+    private static class ResponseMetadataCollector {
+
+        private final Consumer<ResponseMetadata> metadataSink;
+        private String finishReason;
+        private ResponseMetadata.TokenUsage tokenUsage;
+
+        ResponseMetadataCollector(Consumer<ResponseMetadata> metadataSink) {
+            this.metadataSink = metadataSink;
+        }
+
+        void observe(ChatResponse response) {
+            var reason = getFinishReason(response);
+            var usage = getTokenUsage(response);
+            if (reason == null && usage == null) {
+                // Nothing new on this chunk, nothing to re-publish.
+                return;
+            }
+            if (reason != null) {
+                finishReason = reason;
+            }
+            if (usage != null) {
+                tokenUsage = usage;
+            }
+            metadataSink.accept(new ResponseMetadata(finishReason, tokenUsage));
+        }
+
+        private static String getFinishReason(ChatResponse response) {
+            var result = response.getResult();
+            if (result == null) {
+                return null;
+            }
+            var reason = result.getMetadata().getFinishReason();
+            return reason == null || reason.isBlank() ? null : reason;
+        }
+
+        private static ResponseMetadata.TokenUsage getTokenUsage(
+                ChatResponse response) {
+            // Read through an Optional rather than dereferencing: a model
+            // reports either no usage object at all or one that leaves the
+            // counts it does not know at zero, and both mean the same thing
+            // here. Spring AI's own models always attach a usage object, but
+            // an application's ChatModel is free not to.
+            var usage = Optional.ofNullable(response.getMetadata().getUsage());
+            var input = usage.map(Usage::getPromptTokens)
+                    .filter(count -> count > 0).orElse(null);
+            var output = usage.map(Usage::getCompletionTokens)
+                    .filter(count -> count > 0).orElse(null);
+            var total = usage.map(Usage::getTotalTokens)
+                    .filter(count -> count > 0).orElse(null);
+            if (total == null && input != null && output != null) {
+                // A backend that reports the components but no total still
+                // reported the usage; derive rather than discard it.
+                total = input + output;
+            }
+            if (input == null && output == null && total == null) {
+                return null;
+            }
+            return new ResponseMetadata.TokenUsage(input, output, total);
+        }
     }
 
     private Media[] buildMedia(LLMRequest request) {
@@ -435,29 +716,53 @@ public class SpringAILLMProvider implements LLMProvider {
         return new ToolCallback() {
             @Override
             public ToolDefinition getToolDefinition() {
-                var schema = tool.getParametersSchema();
+                // A tool without a declared schema breaks some LLM APIs —
+                // see LLMProviderHelpers.NO_PARAMETERS_SCHEMA.
                 return DefaultToolDefinition.builder().name(tool.getName())
                         .description(tool.getDescription())
-                        .inputSchema(schema != null ? schema
-                                : "{\"type\":\"object\",\"properties\":{}}")
+                        .inputSchema(LLMProviderHelpers.hasParameters(tool)
+                                ? tool.getParametersSchema()
+                                : LLMProviderHelpers.NO_PARAMETERS_SCHEMA)
                         .build();
             }
 
             @Override
             public String call(String arguments) {
+                JsonNode parsed;
+                if (!LLMProviderHelpers.hasParameters(tool)) {
+                    // The model saw the placeholder schema; the tool declared
+                    // no parameters, so it receives none. Decided before
+                    // parsing, so the tool stays callable even on the
+                    // malformed arguments — an empty string, say — that the
+                    // placeholder schema exists to work around.
+                    parsed = JacksonUtils.createObjectNode();
+                } else {
+                    try {
+                        parsed = LLMProviderHelpers
+                                .parseToolArguments(arguments);
+                    } catch (Exception e) {
+                        // The bad arguments came from the model itself, so
+                        // the message is safe to relay and lets the model
+                        // repair its next attempt.
+                        LOGGER.warn(
+                                "Tool '{}' received malformed JSON arguments",
+                                tool.getName(), e);
+                        return "Error executing tool: invalid JSON arguments: "
+                                + e.getMessage();
+                    }
+                }
                 try {
-                    return tool.execute(parseArguments(arguments));
-                } catch (Exception e) {
+                    return tool.execute(parsed);
+                } catch (ToolException e) {
+                    LOGGER.warn("Tool '{}' failed: {}", tool.getName(),
+                            e.getMessage(), e);
                     return "Error executing tool: " + e.getMessage();
+                } catch (Exception e) {
+                    LOGGER.error("Tool '{}' failed", tool.getName(), e);
+                    return "Error executing tool.";
                 }
             }
         };
     }
 
-    private static JsonNode parseArguments(String arguments) {
-        if (arguments == null || arguments.isBlank()) {
-            return JacksonUtils.createObjectNode();
-        }
-        return JacksonUtils.readTree(arguments);
-    }
 }

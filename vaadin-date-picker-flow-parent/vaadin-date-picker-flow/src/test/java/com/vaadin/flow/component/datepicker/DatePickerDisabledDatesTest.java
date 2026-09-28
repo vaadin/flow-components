@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -305,8 +306,8 @@ class DatePickerDisabledDatesTest {
     private List<JavaScriptInvocation> getDateMetadataConfigInvocations() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("setDateMetadataConfig"))
+                .filter(invocation -> "$connector.setDateMetadataConfig"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
                 .toList();
     }
 }

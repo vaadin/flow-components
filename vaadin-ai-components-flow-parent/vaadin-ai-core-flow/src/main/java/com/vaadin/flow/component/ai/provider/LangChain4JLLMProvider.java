@@ -57,6 +57,8 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.output.FinishReason;
+import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
 import reactor.core.publisher.Flux;
@@ -88,8 +90,22 @@ import tools.jackson.databind.JsonNode;
  * so the request completes and the user's message renders while the LLM works.
  * </p>
  * <p>
+ * <b>Tool call limits:</b> a model that keeps requesting tool calls instead of
+ * answering would never end its turn, and each round costs another model call.
+ * The provider ends such a turn with a {@link ToolCallLimitExceededException}
+ * once the model has requested more than {@code 40} calls to any one tool, or
+ * more than {@code 150} tool calls in total, within the turn. Adjust or remove
+ * them with {@link #setMaxCallsPerTool(int)} and
+ * {@link #setMaxTotalToolCalls(int)}.
+ * </p>
+ * <p>
  * Each provider instance maintains its own chat memory. To share conversation
- * history across components, reuse the same provider instance.
+ * history across components, reuse the same provider instance. The memory holds
+ * the user messages and the assistant's final answer of each turn; tool calls
+ * and their results are sent to the model only within the turn they belong to
+ * and are not replayed on later turns. A final answer without text, which a
+ * model may give once a tool call has done what was asked, is not stored
+ * either, so that the turn leaves only its user message in the memory.
  * </p>
  * <p>
  * <b>Note:</b> LangChain4JLLMProvider is not serializable. If your application
@@ -98,7 +114,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.1
+ * @since 25.3
  */
 public class LangChain4JLLMProvider implements LLMProvider {
 
@@ -106,12 +122,16 @@ public class LangChain4JLLMProvider implements LLMProvider {
             .getLogger(LangChain4JLLMProvider.class);
 
     private static final int MAX_MESSAGES = 30;
+    private static final int DEFAULT_MAX_CALLS_PER_TOOL = 40;
+    private static final int DEFAULT_MAX_TOTAL_TOOL_CALLS = 150;
 
     private final transient StreamingChatModel streamingChatModel;
     private final transient ChatModel nonStreamingChatModel;
     private final transient ChatMemory chatMemory;
     private final BackgroundExecution backgroundExecution = new BackgroundExecution(
             LangChain4JLLMProvider.class);
+    private int maxCallsPerTool = DEFAULT_MAX_CALLS_PER_TOOL;
+    private int maxTotalToolCalls = DEFAULT_MAX_TOTAL_TOOL_CALLS;
 
     /**
      * Constructor with a streaming chat model.
@@ -153,12 +173,20 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 "User message must not be null");
         var response = Flux.<String> create(sink -> {
             try {
+                if (sink.isCancelled()) {
+                    // Checked before the question is recorded: a turn
+                    // abandoned before it started must leave the conversation
+                    // as it was, not a question the next turn would repeat.
+                    LOGGER.debug("The turn was cancelled before it started");
+                    return;
+                }
                 var userMessage = buildUserMessage(request);
                 chatMemory.add(userMessage);
                 var toolContext = new ToolContext(prepareToolExecutors(request),
                         prepareToolSpecifications(request));
                 var context = new ChatExecutionContext(request, sink,
-                        chatMemory, toolContext);
+                        chatMemory, toolContext,
+                        new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls));
                 executeChat(context);
             } catch (Exception e) {
                 sink.error(e);
@@ -174,7 +202,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *
      * @return {@code true} if the call runs on a background thread,
      *         {@code false} if it runs on the thread that asks for the response
-     * @since 25.3
      */
     public boolean isBackgroundExecution() {
         return backgroundExecution.isEnabled();
@@ -192,10 +219,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * turn ends, so nothing the turn produces reaches the browser and the
      * application appears frozen. Set this to {@code true} to run the call on a
      * background thread instead: the request completes immediately, the user's
-     * message and the assistant placeholder render, and the response is added
-     * when it arrives.
+     * message and the typing indicator render, and the response is added when
+     * it arrives.
      * <p>
-     * This requires three things from the application:
+     * This requires the following from the application:
      * <ul>
      * <li><b>A way to deliver the response.</b> Annotate the application shell
      * or UI class with {@code @Push}, or enable polling with
@@ -207,20 +234,18 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * Security's {@code SecurityContext} are not bound, and UI components must
      * not be accessed directly. Wrap component access in {@code ui.access()},
      * or capture what you need in
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()},
+     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest},
      * which still runs on the UI thread. This is the same requirement a
      * {@link StreamingChatModel} already has.</li>
-     *
-     * <li><b>A gated input.</b> The orchestrator processes one prompt at a
-     * time. Without background execution, a message submitted while a turn is
-     * running waits for the session lock and is processed when the turn ends;
-     * with it, the submit is rejected and dropped with a warning — and a
-     * connected input has already cleared its text. Disable the input while a
-     * turn is running, for example from
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}
-     * and
-     * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onResponse(Throwable)}.</li>
      * </ul>
+     *
+     * <p>
+     * The orchestrator processes one prompt at a time. Without background
+     * execution, a message submitted while a turn is running waits for the
+     * session lock and is processed when the turn ends; with it, the submit is
+     * rejected and dropped with a warning — and a connected input has already
+     * cleared its text.
+     * </p>
      *
      * <p>
      * Like the streaming mode, the setting is not preserved when the session is
@@ -232,10 +257,97 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *            {@code true} to run the call on a background thread,
      *            {@code false} to run it on the thread that asks for the
      *            response
-     * @since 25.3
      */
     public void setBackgroundExecution(boolean backgroundExecution) {
         this.backgroundExecution.setEnabled(backgroundExecution);
+    }
+
+    /**
+     * Gets the maximum number of times the model may call any one tool during a
+     * turn.
+     *
+     * @return the maximum number of calls per tool, or {@code 0} if there is no
+     *         limit
+     * @since 25.4
+     */
+    public int getMaxCallsPerTool() {
+        return maxCallsPerTool;
+    }
+
+    /**
+     * Sets the maximum number of times the model may call any one tool during a
+     * turn. The default is {@code 40}.
+     * <p>
+     * A model that keeps calling the same tool instead of answering, for
+     * example to look for something the application does not have, would
+     * otherwise never end its turn. Once a call would exceed the limit, the
+     * turn fails with a {@link ToolCallLimitExceededException} that names the
+     * tool: none of the tool calls of that round are executed, the model is not
+     * called again, and you receive the exception as the error of the turn. The
+     * conversation stays usable: the failed turn leaves only its prompt in the
+     * chat memory, and the next prompt continues from there.
+     * <p>
+     * The limit applies to each tool separately. See
+     * {@link #setMaxTotalToolCalls(int)} for the limit on all tool calls of a
+     * turn together. The value is read when a turn starts, so a change applies
+     * from the next prompt on.
+     *
+     * @param maxCallsPerTool
+     *            the maximum number of calls per tool during a turn, or
+     *            {@code 0} to remove the limit
+     * @throws IllegalArgumentException
+     *             if the value is negative
+     * @since 25.4
+     */
+    public void setMaxCallsPerTool(int maxCallsPerTool) {
+        if (maxCallsPerTool < 0) {
+            throw new IllegalArgumentException(
+                    "maxCallsPerTool must not be negative, 0 removes the limit");
+        }
+        this.maxCallsPerTool = maxCallsPerTool;
+    }
+
+    /**
+     * Gets the maximum number of tool calls the model may make during a turn,
+     * all tools together.
+     *
+     * @return the maximum number of tool calls per turn, or {@code 0} if there
+     *         is no limit
+     * @since 25.4
+     */
+    public int getMaxTotalToolCalls() {
+        return maxTotalToolCalls;
+    }
+
+    /**
+     * Sets the maximum number of tool calls the model may make during a turn,
+     * all tools together. The default is {@code 150}.
+     * <p>
+     * This bounds a turn that {@link #setMaxCallsPerTool(int)} does not catch
+     * because the model spreads its calls over several tools. Once a call would
+     * exceed the limit, the turn fails with a
+     * {@link ToolCallLimitExceededException}: none of the tool calls of that
+     * round are executed, the model is not called again, and you receive the
+     * exception as the error of the turn. The conversation stays usable: the
+     * failed turn leaves only its prompt in the chat memory, and the next
+     * prompt continues from there.
+     * <p>
+     * The value is read when a turn starts, so a change applies from the next
+     * prompt on.
+     *
+     * @param maxTotalToolCalls
+     *            the maximum number of tool calls during a turn, or {@code 0}
+     *            to remove the limit
+     * @throws IllegalArgumentException
+     *             if the value is negative
+     * @since 25.4
+     */
+    public void setMaxTotalToolCalls(int maxTotalToolCalls) {
+        if (maxTotalToolCalls < 0) {
+            throw new IllegalArgumentException(
+                    "maxTotalToolCalls must not be negative, 0 removes the limit");
+        }
+        this.maxTotalToolCalls = maxTotalToolCalls;
     }
 
     @Override
@@ -296,10 +408,45 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
         // Add explicit (framework-agnostic) tools
         for (var tool : explicitTools) {
-            toolExecutors.put(tool.getName(), (execReq, memoryId) -> tool
-                    .execute(parseArguments(execReq.arguments())));
+            var placeholderSchema = usesPlaceholderSchema(tool);
+            toolExecutors.put(tool.getName(), (execReq, memoryId) -> {
+                if (placeholderSchema) {
+                    // The model saw the placeholder schema; the tool did not
+                    // declare a usable one, so it receives no arguments.
+                    // Decided before parsing, so the tool stays callable even
+                    // on the malformed arguments — an empty string, say —
+                    // that the placeholder schema exists to work around.
+                    return tool.execute(JacksonUtils.createObjectNode());
+                }
+                return tool.execute(
+                        parseExplicitToolArguments(execReq.arguments()));
+            });
         }
         return toolExecutors;
+    }
+
+    /**
+     * Whether the schema sent to the LLM for this tool is
+     * {@link LLMProviderHelpers#NO_PARAMETERS_SCHEMA} rather than the tool's
+     * own: the tool declares no schema, or declares one that does not parse.
+     * Every such tool gets an empty arguments object at execution time, so
+     * whatever the model filled the placeholder with never reaches a tool.
+     */
+    private static boolean usesPlaceholderSchema(LLMProvider.ToolSpec tool) {
+        return !LLMProviderHelpers.hasParameters(tool)
+                || parseParametersSchemaOrNull(
+                        tool.getParametersSchema()) == null;
+    }
+
+    private static JsonNode parseExplicitToolArguments(String arguments) {
+        try {
+            return LLMProviderHelpers.parseToolArguments(arguments);
+        } catch (Exception e) {
+            // The bad arguments came from the model itself, so the message is
+            // safe to relay and lets the model repair its next attempt.
+            throw new ToolException("invalid JSON arguments: " + e.getMessage(),
+                    e);
+        }
     }
 
     private ToolExecutor getToolExecutor(Object toolObject, Method method) {
@@ -325,21 +472,37 @@ public class LangChain4JLLMProvider implements LLMProvider {
             LLMProvider.ToolSpec tool) {
         var builder = ToolSpecification.builder().name(tool.getName())
                 .description(tool.getDescription());
-        var schema = tool.getParametersSchema();
-        if (schema != null && !schema.isBlank()) {
-            builder.parameters(parseParametersSchema(schema));
+        JsonObjectSchema parameters = null;
+        if (LLMProviderHelpers.hasParameters(tool)) {
+            parameters = parseParametersSchemaOrNull(
+                    tool.getParametersSchema());
+            if (parameters == null) {
+                LOGGER.warn(
+                        "Failed to parse the parameters schema of tool '{}', "
+                                + "using the no-parameters schema",
+                        tool.getName());
+            }
         }
+        if (parameters == null) {
+            // A tool without a usable schema breaks some LLM APIs —
+            // see LLMProviderHelpers.NO_PARAMETERS_SCHEMA. The constant is a
+            // well-formed literal, so this parse cannot return null.
+            parameters = parseParametersSchemaOrNull(
+                    LLMProviderHelpers.NO_PARAMETERS_SCHEMA);
+        }
+        builder.parameters(parameters);
         return builder.build();
     }
 
-    private static JsonNode parseArguments(String arguments) {
-        if (arguments == null || arguments.isBlank()) {
-            return JacksonUtils.createObjectNode();
-        }
-        return JacksonUtils.readTree(arguments);
-    }
-
-    private static JsonObjectSchema parseParametersSchema(String schemaJson) {
+    /**
+     * Parses a JSON Schema string into the LangChain4j schema object, or
+     * returns {@code null} when the string does not parse. Logs nothing: the
+     * caller decides whether a failure is worth a warning, since the check runs
+     * both when building the tool specification and when deciding the arguments
+     * handed to the executor.
+     */
+    private static JsonObjectSchema parseParametersSchemaOrNull(
+            String schemaJson) {
         try {
             JsonNode root = JacksonUtils.readTree(schemaJson);
             var schemaBuilder = JsonObjectSchema.builder();
@@ -358,15 +521,21 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
             return schemaBuilder.build();
         } catch (Exception e) {
-            LOGGER.warn("Failed to parse tool parameters schema, "
-                    + "using empty schema", e);
-            return JsonObjectSchema.builder().build();
+            LOGGER.debug("Tool parameters schema failed to parse", e);
+            return null;
         }
     }
 
     private void executeChat(ChatExecutionContext context) {
+        if (context.getSink().isCancelled()) {
+            // The subscriber is gone, typically because the orchestrator's
+            // timeout fired. Another model call would only cost money for a
+            // result nobody receives.
+            LOGGER.debug("The turn was cancelled, skipping the model call");
+            return;
+        }
         var messages = buildMessages(context.getRequest(),
-                context.getChatMemory());
+                context.getChatMemory(), context.getTurnMessages());
         if (streamingChatModel != null) {
             executeStreamingChat(messages, context);
         } else {
@@ -410,7 +579,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
             var toolExecutor = context.getToolContext().executors()
                     .get(toolExecRequest.name());
             var result = executeToolRequest(toolExecutor, toolExecRequest);
-            context.getChatMemory().add(result);
+            context.addTurnMessage(result);
         }
     }
 
@@ -432,24 +601,97 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     private void handleResponse(ChatExecutionContext context,
             ChatResponse response) {
+        context.observeMetadata(response);
         var aiMessage = response.aiMessage();
         if (aiMessage == null) {
+            warnOnMissingFinishReason(response);
             context.getSink().complete();
             return;
         }
-        context.getChatMemory().add(aiMessage);
+        var hasToolRequests = aiMessage.hasToolExecutionRequests();
+        if (hasToolRequests
+                && !context.admitToolCalls(aiMessage.toolExecutionRequests())) {
+            // Decided before any tool of this round runs. A turn that ends
+            // here leaves nothing behind: its tool traffic is discarded with
+            // it, so the next turn continues from the chat memory as the last
+            // completed turn left it.
+            return;
+        }
         if (!isStreaming()) {
             var text = aiMessage.text();
             if (text != null && !text.isEmpty()) {
                 context.getSink().next(text);
             }
         }
-        if (aiMessage.hasToolExecutionRequests()) {
+        if (hasToolRequests) {
+            // Tool calls and their results stay within the turn: the
+            // follow-up round trips of this turn need them, but on later
+            // turns they would only be replayed as stale copies of state the
+            // model is told to fetch again, at the cost of every past tool
+            // result on every request. Only the user message and the final
+            // answer enter the chat memory, as with SpringAILLMProvider.
+            context.addTurnMessage(aiMessage);
             executeToolRequests(aiMessage, context);
             executeChat(context);
         } else {
+            rememberAnswer(aiMessage, context);
+            warnOnMissingFinishReason(response);
             context.getSink().complete();
         }
+    }
+
+    /**
+     * Adds the answer that ends the turn to the chat memory, unless it has no
+     * text. A turn may end that way: once a tool call has done what the user
+     * asked, a model may have nothing left to say, and LangChain4j hands such
+     * an answer over as an {@link AiMessage} whose text is {@code null}. Stored
+     * in the chat memory it would be replayed on every later turn as an
+     * assistant message with neither content nor tool calls, which the OpenAI
+     * Chat Completions API rejects, so the conversation would fail from then
+     * on. Skipping it leaves only the user message of the turn in the memory,
+     * as a response without any AI message does.
+     */
+    private static void rememberAnswer(AiMessage aiMessage,
+            ChatExecutionContext context) {
+        var text = aiMessage.text();
+        if (text == null || text.isEmpty()) {
+            LOGGER.debug("The turn ended with an answer without text, which "
+                    + "is not added to the chat memory");
+            return;
+        }
+        context.getChatMemory().add(aiMessage);
+    }
+
+    /**
+     * Warns when the round trip that ends the turn carries no finish reason.
+     * <p>
+     * Only that round trip counts. A reason reported by an earlier round trip
+     * describes why <i>that</i> round trip stopped — {@code TOOL_EXECUTION},
+     * typically — and says nothing about how the turn ended, so it must not
+     * silence the warning. This mirrors {@code SpringAILLMProvider}, whose
+     * terminal-chunk check likewise ignores a reason that arrives with tool
+     * calls still pending. Called only from the points where the turn ends with
+     * the model's own answer, so the response passed in is by construction the
+     * terminal one. A turn ended by a tool call limit or by a cancelled sink
+     * does not pass through here, since neither is a normal completion.
+     * <p>
+     * This provider drives the tool-calling loop itself, so unlike
+     * {@code SpringAILLMProvider} a turn cannot end with tool calls still
+     * pending; a missing finish reason is the one terminal state left that may
+     * indicate a silent abnormal termination. It does not prove the model
+     * reported nothing: LangChain4j also leaves the reason unset when its
+     * integration does not recognize the value the model sent.
+     */
+    private static void warnOnMissingFinishReason(ChatResponse response) {
+        if (response.finishReason() != null) {
+            return;
+        }
+        LOGGER.warn("LLM turn ended with no finish reason for its final "
+                + "round trip. Either the model reported none, which may "
+                + "indicate a silent abnormal termination such as an upstream "
+                + "error, or LangChain4j dropped a value its integration does "
+                + "not recognize; if the response appears truncated this "
+                + "warning is the signal.");
     }
 
     private static ToolExecutionResultMessage executeToolRequest(
@@ -460,15 +702,21 @@ public class LangChain4JLLMProvider implements LLMProvider {
         } else {
             try {
                 result = toolExecutor.execute(toolExecRequest, null);
-            } catch (Exception e) {
+            } catch (ToolException e) {
+                LOGGER.warn("Tool '{}' failed: {}", toolExecRequest.name(),
+                        e.getMessage(), e);
                 result = "Error executing tool: " + e.getMessage();
+            } catch (Exception e) {
+                LOGGER.error("Tool '{}' failed", toolExecRequest.name(), e);
+                result = "Error executing tool.";
             }
         }
         return ToolExecutionResultMessage.from(toolExecRequest, result);
     }
 
     private List<dev.langchain4j.data.message.ChatMessage> buildMessages(
-            LLMRequest request, ChatMemory chatMemory) {
+            LLMRequest request, ChatMemory chatMemory,
+            List<dev.langchain4j.data.message.ChatMessage> turnMessages) {
         var messages = new ArrayList<dev.langchain4j.data.message.ChatMessage>();
         if (request.systemPrompt() != null) {
             var systemPrompt = request.systemPrompt().trim();
@@ -477,12 +725,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
         }
         messages.addAll(chatMemory.messages());
+        messages.addAll(turnMessages);
         return messages;
     }
 
     private UserMessage buildUserMessage(LLMRequest request) {
         var contents = new ArrayList<Content>();
-        contents.add(TextContent.from(request.userMessage()));
+        contents.add(TextContent.from(LLMProviderHelpers.withSessionContext(
+                request.userMessage(), request.sessionContext())));
         var attachments = request.attachments();
         if (attachments != null) {
             attachments.stream()
@@ -551,6 +801,54 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
+     * The tool call limits of one turn, and the calls counted against them so
+     * far. The per-tool limit is checked before the total, and the call that
+     * takes a count past its limit is the one refused. The whole round is
+     * screened before anything runs, so a round containing a refused call
+     * executes none of its calls.
+     */
+    private static final class ToolCallLimits {
+        private final int maxCallsPerTool;
+        private final int maxTotalToolCalls;
+        private final Map<String, Integer> callsPerTool = new HashMap<>();
+        private int totalToolCalls;
+
+        ToolCallLimits(int maxCallsPerTool, int maxTotalToolCalls) {
+            this.maxCallsPerTool = maxCallsPerTool;
+            this.maxTotalToolCalls = maxTotalToolCalls;
+        }
+
+        /**
+         * Counts one requested tool call against the limits.
+         *
+         * @param requestedToolName
+         *            the name of the tool the model requested, possibly
+         *            {@code null}
+         * @return the exception describing the limit the call exceeds, or empty
+         *         if the call is within the limits
+         */
+        Optional<ToolCallLimitExceededException> countAndCheck(
+                String requestedToolName) {
+            // LangChain4j does not guard the name, so it can be null; such
+            // requests are counted together under "".
+            var toolName = Objects.toString(requestedToolName, "");
+            totalToolCalls++;
+            var callsToTool = callsPerTool.merge(toolName, 1, Integer::sum);
+            if (maxCallsPerTool > 0 && callsToTool > maxCallsPerTool) {
+                return Optional.of(new ToolCallLimitExceededException(
+                        "Tool call limit (" + maxCallsPerTool
+                                + ") exceeded for tool '" + toolName + "'"));
+            }
+            if (maxTotalToolCalls > 0 && totalToolCalls > maxTotalToolCalls) {
+                return Optional.of(new ToolCallLimitExceededException(
+                        "Total tool call limit (" + maxTotalToolCalls
+                                + ") exceeded for this turn"));
+            }
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Encapsulates execution state for a chat stream.
      */
     private static class ChatExecutionContext {
@@ -558,13 +856,92 @@ public class LangChain4JLLMProvider implements LLMProvider {
         private final FluxSink<String> sink;
         private final ChatMemory chatMemory;
         private final ToolContext toolContext;
+        private final ToolCallLimits toolCallLimits;
+        /**
+         * Tool calls and tool results of this turn, in order. Sent after the
+         * chat memory on every round trip of the turn and discarded with it.
+         */
+        private final List<dev.langchain4j.data.message.ChatMessage> turnMessages = new ArrayList<>();
+        private FinishReason lastFinishReason;
+        private TokenUsage accumulatedUsage;
 
         ChatExecutionContext(LLMRequest request, FluxSink<String> sink,
-                ChatMemory chatMemory, ToolContext toolContext) {
+                ChatMemory chatMemory, ToolContext toolContext,
+                ToolCallLimits toolCallLimits) {
             this.request = request;
             this.sink = sink;
             this.chatMemory = chatMemory;
             this.toolContext = toolContext;
+            this.toolCallLimits = toolCallLimits;
+        }
+
+        /**
+         * Decides whether the tool calls the model requested in this round may
+         * run. Nothing runs for a turn whose subscriber has cancelled, and
+         * nothing runs once a call exceeds a tool call limit; the turn then
+         * fails with the exception describing the limit.
+         *
+         * @param requests
+         *            the tool calls the model requested in this round
+         * @return {@code true} if the calls may run, {@code false} if the turn
+         *         has ended instead
+         */
+        boolean admitToolCalls(List<ToolExecutionRequest> requests) {
+            if (sink.isCancelled()) {
+                LOGGER.debug("The turn was cancelled, skipping the tool "
+                        + "calls the model requested");
+                return false;
+            }
+            for (var request : requests) {
+                var exceededLimit = toolCallLimits
+                        .countAndCheck(request.name());
+                if (exceededLimit.isPresent()) {
+                    sink.error(exceededLimit.get());
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Records the metadata of one model round trip and passes the state
+         * known so far to the metadata sink right away, so that a turn whose
+         * later round trip fails has still reported what the earlier ones cost.
+         * The reason that ends the turn wins; token usage accumulates across
+         * the round trips.
+         */
+        void observeMetadata(ChatResponse response) {
+            if (response.finishReason() == null
+                    && response.tokenUsage() == null) {
+                // Nothing new in this round trip, nothing to re-publish.
+                return;
+            }
+            if (response.finishReason() != null) {
+                lastFinishReason = response.finishReason();
+            }
+            var usage = response.tokenUsage();
+            if (usage != null) {
+                accumulatedUsage = accumulatedUsage == null ? usage
+                        : accumulatedUsage.add(usage);
+            }
+            publishMetadata();
+        }
+
+        private void publishMetadata() {
+            // LangChain4j collapses the model's own word onto its
+            // FinishReason enum before handing the response over — per
+            // integration, and losing whatever it does not recognize — so the
+            // constant name is the most faithful value left to publish. See
+            // ResponseMetadata, which documents what that costs.
+            var finishReason = lastFinishReason == null ? null
+                    : lastFinishReason.name();
+            var tokenUsage = accumulatedUsage == null ? null
+                    : new ResponseMetadata.TokenUsage(
+                            accumulatedUsage.inputTokenCount(),
+                            accumulatedUsage.outputTokenCount(),
+                            accumulatedUsage.totalTokenCount());
+            request.metadataSink()
+                    .accept(new ResponseMetadata(finishReason, tokenUsage));
         }
 
         LLMRequest getRequest() {
@@ -577,6 +954,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
         ChatMemory getChatMemory() {
             return chatMemory;
+        }
+
+        List<dev.langchain4j.data.message.ChatMessage> getTurnMessages() {
+            return turnMessages;
+        }
+
+        void addTurnMessage(dev.langchain4j.data.message.ChatMessage message) {
+            turnMessages.add(message);
         }
 
         ToolContext getToolContext() {

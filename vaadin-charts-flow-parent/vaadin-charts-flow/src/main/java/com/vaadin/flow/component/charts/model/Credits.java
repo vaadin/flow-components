@@ -89,7 +89,7 @@ public class Credits extends AbstractConfigurationObject {
      *
      * @param href
      *            the URL for the credits label
-     * @since 25.2
+     * @since 25.1.10
      */
     public void setUnsafeHref(String href) {
         this.href = href;

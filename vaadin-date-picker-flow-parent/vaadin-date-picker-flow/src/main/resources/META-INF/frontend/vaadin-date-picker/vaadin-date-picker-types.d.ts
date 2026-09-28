@@ -59,10 +59,14 @@ export type FlowDatePicker = Omit<DatePicker, 'i18n' | 'isDateDisabled'> & FlowD
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connector
+  // with the Flow namespace used by the connector. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
-    Flow: {
-      datepickerConnector: { initLazy(datePicker: FlowDatePicker): void };
-    };
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    datepickerConnector: { initLazy(datePicker: FlowDatePicker): void };
   }
 }

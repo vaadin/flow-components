@@ -171,7 +171,7 @@ public class DataProviderIT extends AbstractSelectIT {
         Assert.assertEquals("invalid key", 3 + "",
                 itemElement.getPropertyString("value"));
         Assert.assertEquals("invalid text", "Item-2-UPDATED",
-                getItemText(itemElement));
+                itemElement.getText());
         verify.selectedItem("Item-2-UPDATED");
     }
 }

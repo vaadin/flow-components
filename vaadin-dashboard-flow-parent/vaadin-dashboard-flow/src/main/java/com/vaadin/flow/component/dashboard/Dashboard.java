@@ -31,6 +31,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
@@ -62,7 +63,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.3.0-alpha13")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.4.0-alpha1")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
@@ -77,7 +78,8 @@ public class Dashboard extends Component
 
     private DashboardItemRemoveHandler itemRemoveHandler;
 
-    private boolean pendingUpdate = false;
+    private final BeforeClientResponseAction clientUpdate = new BeforeClientResponseAction(
+            this, this::doUpdateClient);
 
     /**
      * Creates an empty dashboard.
@@ -707,15 +709,10 @@ public class Dashboard extends Component
     }
 
     void updateClient() {
-        if (suppressClientUpdates.get() || pendingUpdate) {
+        if (suppressClientUpdates.get()) {
             return;
         }
-        pendingUpdate = true;
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
-                    doUpdateClient();
-                    pendingUpdate = false;
-                }));
+        clientUpdate.schedule();
     }
 
     private void doUpdateClient() {
