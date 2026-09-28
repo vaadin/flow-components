@@ -15,13 +15,13 @@ which is git-ignored. The flow jar ships that bundle.
 Iterate on client changes with GWT SuperDevMode (SDM). Recompiling takes
 about 3 s, compared with about 45 s for a Maven rebuild plus Jetty restart.
 It also serves the Java sources for source maps. SDM lives only on the
-`origin/sdm` branch, as one commit on top of `main`. Apply it locally as an
-uncommitted patch:
+`origin/sdm` branch, as a single commit on top of `main`. Apply that commit
+locally as an uncommitted patch:
 
 1. Apply it:
    ```sh
    git fetch origin sdm
-   git diff origin/main...origin/sdm | git apply
+   git diff origin/sdm~1 origin/sdm | git apply
    ```
    Done when `SpreadsheetApiXSI.gwt.xml` exists in the client's `src/main/resources`.
 2. Install the flow module so its jar contains the SDM loader:
@@ -48,7 +48,7 @@ Stop the code server with `kill $(lsof -tiTCP:9876 -sTCP:LISTEN)`.
 
 1. Revert SDM:
    ```sh
-   git diff origin/main...origin/sdm | git apply -R
+   git diff origin/sdm~1 origin/sdm | git apply -R
    ```
    Done when `git status` lists no `SpreadsheetApiXSI.gwt.xml`, and the diffs
    of the client `pom.xml`, `SpreadsheetApi.gwt.xml` and
@@ -68,5 +68,6 @@ Stop the code server with `kill $(lsof -tiTCP:9876 -sTCP:LISTEN)`.
 
 The patch conflicts when `main` changes the client `pom.xml`,
 `SpreadsheetApi.gwt.xml` or `vaadin-spreadsheet.js`. Rebase `origin/sdm`
-onto `main`, resolve the conflicts, and force-push it. It is a shared branch,
-so get the maintainer's approval before pushing.
+onto `main`, resolve the conflicts, and force-push it as a single commit,
+since the apply step diffs only that commit. It is a shared branch, so get
+the maintainer's approval before pushing.

@@ -16,33 +16,12 @@ This module depends on the Vaadin Framework v8, but it's used only during the co
 
 ### Debugging
 
-GWT provides a code-server for serving the generated JS with their source-maps as well as for recompiling the module on demand once you do changes in java code, also known as Super Dev Mode.
+GWT provides a code server that serves the compiled JS with source maps and recompiles the module on demand after you change Java code, also known as Super Dev Mode (SDM).
 
-To enable debugging for GWT, first apply the Git patch in `./patches/gwt-sdm-debugging.patch`.
-The patch must be applied from the repository root.
-As the patch is not continuously maintained, merge conflicts must be resolved.
-**Changes from the patch must not be added to commits / PRs.**
+SDM lives only on the `sdm` branch, as a single commit that is never merged. To apply it, run it with the IT module, and revert it before committing, follow [`.claude/rules/spreadsheet-client.md`](../../.claude/rules/spreadsheet-client.md).
 
-After applying the patch, for debugging the GWT code you have two options:
+**Changes from the `sdm` branch must not be added to commits / PRs.**
 
-**Running the IT module:**
+To recompile from the browser instead of with `curl`, open http://localhost:9876 once and install the 'Dev Mode On' bookmark, then click it after each change.
 
-- Run the following commands from the repository root:
-  ```sh
-  # Install the spreadsheet-flow module
-  mvn -B -q -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow -DskipTests install
-  # Start the GWT SuperDevMode code server (in a separate terminal)
-  mvn -B -q -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client -Psdm
-  # Start the Jetty server for integration tests
-  mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -B -q -DskipTests -pl vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-integration-tests
-  ```
-- If not already, you need to install the bookmark as it is indicated in the next block
-
-**Running any Vaadin app with a spreadsheet:**
-
-- run `mvn -Psdm` from this folder
-- open this module in your favourite java IDE
-- open the url http://localhost:9876 and install the 'Dev Mode On' bookmark in your browser (this only need to be performed once)
-- run your application containing the `vaadin-spreadsheet` in localhost
-- visit your application in localhost e.g. http://localhost:8080
-- perform changes in Java code, and push the bookmark when ready.
+SDM also works with any Vaadin app that contains a spreadsheet and runs on localhost: apply the `sdm` commit, install the `vaadin-spreadsheet-flow` module, run `mvn -Psdm` from this folder, and start your app.
