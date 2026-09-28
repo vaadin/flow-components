@@ -37,5 +37,6 @@ public class BadgeBasicIT extends AbstractComponentIT {
         Assert.assertEquals("messages", badge.getText());
         Assert.assertEquals((Integer) 5, badge.getNumber());
         Assert.assertNotNull(badge.getIcon());
+        Assert.assertTrue(badge.hasAttribute("has-content"));
     }
 }
