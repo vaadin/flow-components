@@ -3517,36 +3517,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     void doClientSideSelection(Set<T> items) {
-        callSelectionFunctionForItems("doSelection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doSelection", jsonArray,
+                false);
     }
 
     void doClientSideDeselection(Set<T> items) {
-        callSelectionFunctionForItems("doDeselection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doDeselection",
+                jsonArray, false);
     }
 
     boolean isInActiveRange(T item) {
         return getDataCommunicator().getKeyMapper().has(item);
     }
 
-    private void callSelectionFunctionForItems(String function, Set<T> items) {
-        if (items.isEmpty()) {
-            return;
+    private JsonNode generateItemSelectionJson(T item) {
+        if (item == null) {
+            return JacksonUtils.nullNode();
         }
-        ArrayNode jsonArray = JacksonUtils.createArrayNode();
-        for (T item : items) {
-            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
-                    : null;
-            jsonArray.add(jsonObject);
-        }
-
-        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
-                false);
-    }
-
-    private JsonNode generateJsonForSelection(T item) {
-        ObjectNode json = JacksonUtils.createObjectNode();
-        json.put("key", getDataCommunicator().getKeyMapper().key(item));
-        return json;
+        ObjectNode jsonObject = JacksonUtils.createObjectNode();
+        jsonObject.put("key", getDataCommunicator().getKeyMapper().key(item));
+        return jsonObject;
     }
 
     private void callJsFunctionBeforeClientResponse(String functionName,
