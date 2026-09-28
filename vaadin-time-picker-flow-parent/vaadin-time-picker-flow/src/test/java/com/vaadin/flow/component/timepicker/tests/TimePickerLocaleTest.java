@@ -24,7 +24,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -90,10 +89,11 @@ class TimePickerLocaleTest {
 
         List<Object> arguments = ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> "$connector.setLocale"
-                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
-                .map(JsFunctionCallUtil::getArguments).reduce((a, b) -> b)
-                .orElseThrow();
+                .filter(invocation -> invocation.getExpression()
+                        .contains("$connector.setLocale"))
+                .map(invocation -> invocation.getParameters().subList(1,
+                        invocation.getParameters().size()))
+                .reduce((a, b) -> b).orElseThrow();
         Assertions.assertEquals(List.of(expectedTag), arguments);
     }
 }
