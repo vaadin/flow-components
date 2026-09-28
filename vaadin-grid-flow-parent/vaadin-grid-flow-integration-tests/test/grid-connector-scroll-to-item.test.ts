@@ -78,6 +78,25 @@ describe('grid connector - scroll to item', () => {
     expect(getBodyCell(freshGrid, 10, 0)).to.exist;
   });
 
+  it('should scroll to an item outside the viewport on the first render', async () => {
+    const freshGrid: FlowGrid = fixtureSync(`
+      <vaadin-grid style="height: 600px">
+        <vaadin-grid-column path="name"></vaadin-grid-column>
+      </vaadin-grid>
+    `);
+    init(freshGrid);
+    setRootItems(freshGrid.$connector, Array.from({ length: 200 }, (_, i) => ({ key: `${i}`, name: `name-${i}` })));
+    expect(freshGrid._getRenderedRows().length).to.equal(0);
+
+    freshGrid.$connector.scrollToItem('100', 100);
+    for (let i = 0; i < 5; i++) {
+      await nextFrame();
+    }
+
+    expect(freshGrid.shadowRoot!.querySelector('#table')!.scrollTop).to.be.greaterThan(0);
+    expect(getBodyCell(freshGrid, 100, 0)).to.exist;
+  });
+
   it('should scroll to an item that is rendered but not fully in viewport', async () => {
     grid.scrollToIndex(20);
     await nextFrame();
