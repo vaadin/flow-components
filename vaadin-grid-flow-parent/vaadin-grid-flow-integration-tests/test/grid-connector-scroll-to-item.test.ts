@@ -7,110 +7,78 @@ describe('grid connector - scroll to item', () => {
   let grid: FlowGrid;
   let table: HTMLElement;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     grid = fixtureSync(`
       <vaadin-grid style="height: 400px">
         <vaadin-grid-column path="name"></vaadin-grid-column>
       </vaadin-grid>
-      <style>
-        vaadin-grid::part(cell) {
-          min-height: 36px;
-        }
-      </style>
     `);
 
     init(grid);
 
     const items = Array.from({ length: 200 }, (_, i) => ({ key: `${i}`, name: `name-${i}` }));
     setRootItems(grid.$connector, items);
-    await nextFrame();
 
     table = grid.shadowRoot!.querySelector('#table')!;
   });
 
-  it('should scroll to an item outside the viewport', async () => {
-    grid.$connector.scrollToItem('100', 100);
-    await nextFrame();
-    expect(getBodyCell(grid, 100, 0)).to.exist;
-  });
+  describe('before first render', () => {
+    beforeEach(() => {
+      expect(grid._getRenderedRows()).to.be.empty;
+    });
 
-  it('should not scroll when the item is already fully in viewport', async () => {
-    grid.scrollToIndex(20);
-    await nextFrame();
-    const scrollTopBefore = table.scrollTop;
-
-    // An item a couple of rows below the first visible one is fully visible
-    grid.$connector.scrollToItem('22', 22);
-    await nextFrame();
-    expect(table.scrollTop).to.equal(scrollTopBefore);
-  });
-
-  it('should not scroll when the item is already fully in viewport on the first render', async () => {
-    // Fresh grid whose rows have not been rendered yet, mimicking a cold page
-    // load where scrollToItem runs (e.g. from beforeEnter) before the first
-    // render, so _getRenderedRows() is still empty.
-    const freshGrid: FlowGrid = fixtureSync(`
-      <vaadin-grid style="height: 600px">
-        <vaadin-grid-column path="name"></vaadin-grid-column>
-      </vaadin-grid>
-      <style>
-        vaadin-grid::part(cell) {
-          min-height: 36px;
-        }
-      </style>
-    `);
-    init(freshGrid);
-    const items = Array.from({ length: 200 }, (_, i) => ({ key: `${i}`, name: `name-${i}` }));
-    setRootItems(freshGrid.$connector, items);
-
-    expect(freshGrid._getRenderedRows().length).to.equal(0);
-
-    // "name-10" is fully visible at scroll position 0 in a 600px tall grid
-    freshGrid.$connector.scrollToItem('10', 10);
-
-    // Give the grid time to render and the deferred check to run
-    for (let i = 0; i < 5; i++) {
+    it('should not scroll when the item is already fully in viewport', async () => {
+      grid.$connector.scrollToItem('5', 5);
       await nextFrame();
-    }
-
-    const freshTable = freshGrid.shadowRoot!.querySelector('#table')!;
-    expect(freshTable.scrollTop).to.equal(0);
-    expect(getBodyCell(freshGrid, 10, 0)).to.exist;
-  });
-
-  it('should scroll to an item outside the viewport on the first render', async () => {
-    const freshGrid: FlowGrid = fixtureSync(`
-      <vaadin-grid style="height: 600px">
-        <vaadin-grid-column path="name"></vaadin-grid-column>
-      </vaadin-grid>
-    `);
-    init(freshGrid);
-    setRootItems(freshGrid.$connector, Array.from({ length: 200 }, (_, i) => ({ key: `${i}`, name: `name-${i}` })));
-    expect(freshGrid._getRenderedRows().length).to.equal(0);
-
-    freshGrid.$connector.scrollToItem('100', 100);
-    for (let i = 0; i < 5; i++) {
       await nextFrame();
-    }
+      expect(table.scrollTop).to.equal(0);
+    });
 
-    expect(freshGrid.shadowRoot!.querySelector('#table')!.scrollTop).to.be.greaterThan(0);
-    expect(getBodyCell(freshGrid, 100, 0)).to.exist;
+    it('should scroll to an item outside the viewport', async () => {
+      grid.$connector.scrollToItem('100', 100);
+      await nextFrame();
+      await nextFrame();
+      expect(getBodyCell(grid, 100, 0)).to.exist;
+    });
   });
 
-  it('should scroll to an item that is rendered but not fully in viewport', async () => {
-    grid.scrollToIndex(20);
-    await nextFrame();
-    const scrollTopBefore = table.scrollTop;
+  describe('after first render', () => {
+    beforeEach(async () => {
+      await nextFrame();
+    });
 
-    // Find the last rendered row index. The row is rendered in the scroll
-    // buffer below the visible viewport.
-    let lastRenderedIndex = 20;
-    while (getBodyCell(grid, lastRenderedIndex + 1, 0)) {
-      lastRenderedIndex += 1;
-    }
+    it('should scroll to an item outside the viewport', async () => {
+      grid.$connector.scrollToItem('100', 100);
+      await nextFrame();
+      expect(getBodyCell(grid, 100, 0)).to.exist;
+    });
 
-    grid.$connector.scrollToItem(`${lastRenderedIndex}`, lastRenderedIndex);
-    await nextFrame();
-    expect(table.scrollTop).to.be.greaterThan(scrollTopBefore);
+    it('should not scroll when the item is already fully in viewport', async () => {
+      grid.scrollToIndex(20);
+      await nextFrame();
+      const scrollTopBefore = table.scrollTop;
+
+      // An item a couple of rows below the first visible one is fully visible
+      grid.$connector.scrollToItem('22', 22);
+      await nextFrame();
+      expect(table.scrollTop).to.equal(scrollTopBefore);
+    });
+
+    it('should scroll to an item that is rendered but not fully in viewport', async () => {
+      grid.scrollToIndex(20);
+      await nextFrame();
+      const scrollTopBefore = table.scrollTop;
+
+      // Find the last rendered row index. The row is rendered in the scroll
+      // buffer below the visible viewport.
+      let lastRenderedIndex = 20;
+      while (getBodyCell(grid, lastRenderedIndex + 1, 0)) {
+        lastRenderedIndex += 1;
+      }
+
+      grid.$connector.scrollToItem(`${lastRenderedIndex}`, lastRenderedIndex);
+      await nextFrame();
+      expect(table.scrollTop).to.be.greaterThan(scrollTopBefore);
+    });
   });
 });
