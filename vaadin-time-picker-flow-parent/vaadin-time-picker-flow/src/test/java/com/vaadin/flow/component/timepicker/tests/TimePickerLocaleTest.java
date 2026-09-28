@@ -15,12 +15,14 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.tests.MockUIExtension;
 
@@ -47,5 +49,51 @@ class TimePickerLocaleTest {
         TimePicker timePicker = new TimePicker();
         timePicker.setLocale(usLocale);
         Assertions.assertEquals(usLocale, timePicker.getLocale());
+    }
+
+    @Test
+    void setLocale_sendsLanguageAndCountryTag() {
+        assertLocaleTag(Locale.UK, "en-GB");
+    }
+
+    @Test
+    void setLocaleWithoutCountry_sendsLanguageTag() {
+        assertLocaleTag(Locale.of("fi"), "fi");
+    }
+
+    @Test
+    void setLocaleWithScriptAndVariant_sendsLanguageAndCountryTag() {
+        assertLocaleTag(Locale.forLanguageTag("sr-Latn-RS-1994"), "sr-RS");
+    }
+
+    @Test
+    void setLocaleWithLanguageTagAsLanguage_sendsLanguageAndCountryTag() {
+        assertLocaleTag(new Locale("en-CA"), "en-CA");
+    }
+
+    @Test
+    void setLocaleWithIllFormedLanguage_sendsUndeterminedTag() {
+        assertLocaleTag(Locale.of("en_GB"), "und");
+    }
+
+    @Test
+    void setLocaleWithIllFormedCountry_sendsLanguageTag() {
+        assertLocaleTag(Locale.of("en", "GB_X"), "en");
+    }
+
+    private void assertLocaleTag(Locale locale, String expectedTag) {
+        TimePicker timePicker = new TimePicker();
+        ui.add(timePicker);
+        timePicker.setLocale(locale);
+        ui.fakeClientCommunication();
+
+        List<Object> arguments = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> invocation.getExpression()
+                        .contains("$connector.setLocale"))
+                .map(invocation -> invocation.getParameters().subList(1,
+                        invocation.getParameters().size()))
+                .reduce((a, b) -> b).orElseThrow();
+        Assertions.assertEquals(List.of(expectedTag), arguments);
     }
 }
