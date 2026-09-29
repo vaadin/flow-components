@@ -178,29 +178,30 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * Gets the context menus that have the given component as their target, in
-     * the order their target was set. A component can have several context
-     * menus, for example one opened by a right click and another opened by a
-     * left click.
-     *
-     * <pre>{@code
-     * new ContextMenu(button).addItem("Delete");
-     * // elsewhere, e.g. in a browserless test:
-     * ContextMenuBase.getContextMenus(button).get(0).getItems();
-     * }</pre>
+     * Gets the context menus of the given type that have the given component as
+     * their target, in the order their target was set.
+     * <p>
+     * For internal use only. May be renamed or removed in a future release.
      *
      * @param target
      *            the target component
-     * @return an unmodifiable snapshot of the context menus targeting the
-     *         component, empty if there are none
-     * @see #setTarget(Component)
-     * @since 25.4
+     * @param menuType
+     *            only menus that are instances of this type are returned
+     * @param <M>
+     *            the context menu type
+     * @return an unmodifiable snapshot of the matching context menus, empty if
+     *         there are none
      */
-    public static List<ContextMenuBase<?, ?, ?>> getContextMenus(
-            Component target) {
+    @SuppressWarnings("unchecked")
+    protected static <M extends ContextMenuBase<?, ?, ?>> List<M> getContextMenus(
+            Component target, Class<? super M> menuType) {
         Objects.requireNonNull(target, "Target must not be null");
         var menus = getTargetContextMenus(target);
-        return menus == null ? List.of() : List.copyOf(menus);
+        if (menus == null) {
+            return List.of();
+        }
+        return menus.stream().filter(menuType::isInstance).map(menu -> (M) menu)
+                .toList();
     }
 
     @SuppressWarnings("unchecked")

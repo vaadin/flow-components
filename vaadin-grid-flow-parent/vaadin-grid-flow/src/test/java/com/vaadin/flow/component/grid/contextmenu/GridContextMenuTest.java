@@ -111,6 +111,18 @@ class GridContextMenuTest {
         GridContextMenu<Object> second = new GridContextMenu<>(grid);
 
         Assertions.assertEquals(List.of(first, second), grid.getContextMenus());
+        Assertions.assertEquals(List.of(first, second),
+                GridContextMenu.getContextMenus(grid));
+    }
+
+    @Test
+    void addContextMenu_contextMenuGetContextMenusReturnsPlainContextMenusOnly() {
+        Grid<Object> grid = new Grid<>();
+        grid.addContextMenu();
+        ContextMenu plain = new ContextMenu(grid);
+
+        Assertions.assertEquals(List.of(plain),
+                ContextMenu.getContextMenus(grid));
     }
 
     @Test

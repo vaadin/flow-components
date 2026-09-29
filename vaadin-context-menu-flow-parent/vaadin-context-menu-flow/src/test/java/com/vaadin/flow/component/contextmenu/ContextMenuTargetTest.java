@@ -99,7 +99,7 @@ class ContextMenuTargetTest {
     @Test
     void noContextMenu_getContextMenusIsEmpty() {
         Assertions.assertEquals(List.of(),
-                ContextMenuBase.getContextMenus(new Div()));
+                ContextMenu.getContextMenus(new Div()));
     }
 
     @Test
@@ -109,7 +109,7 @@ class ContextMenuTargetTest {
         var secondMenu = new ContextMenu(target);
 
         Assertions.assertEquals(List.of(menu, secondMenu),
-                ContextMenuBase.getContextMenus(target));
+                ContextMenu.getContextMenus(target));
     }
 
     @Test
@@ -122,7 +122,7 @@ class ContextMenuTargetTest {
         secondMenu.setTarget(null);
 
         Assertions.assertEquals(List.of(menu, thirdMenu),
-                ContextMenuBase.getContextMenus(target));
+                ContextMenu.getContextMenus(target));
     }
 
     @Test
@@ -136,9 +136,9 @@ class ContextMenuTargetTest {
         menu.setTarget(newTarget);
 
         Assertions.assertEquals(List.of(secondMenu),
-                ContextMenuBase.getContextMenus(target));
+                ContextMenu.getContextMenus(target));
         Assertions.assertEquals(List.of(newTargetMenu, menu),
-                ContextMenuBase.getContextMenus(newTarget));
+                ContextMenu.getContextMenus(newTarget));
     }
 
     @Test
@@ -150,7 +150,7 @@ class ContextMenuTargetTest {
         menu.setTarget(target);
 
         Assertions.assertEquals(List.of(secondMenu, menu),
-                ContextMenuBase.getContextMenus(target));
+                ContextMenu.getContextMenus(target));
     }
 
     @Test
@@ -162,8 +162,7 @@ class ContextMenuTargetTest {
         menu.setTarget(null);
         secondMenu.setTarget(null);
 
-        Assertions.assertEquals(List.of(),
-                ContextMenuBase.getContextMenus(target));
+        Assertions.assertEquals(List.of(), ContextMenu.getContextMenus(target));
     }
 
     @Test
@@ -173,8 +172,7 @@ class ContextMenuTargetTest {
 
         menu.setTarget(null);
 
-        Assertions.assertEquals(List.of(),
-                ContextMenuBase.getContextMenus(target));
+        Assertions.assertEquals(List.of(), ContextMenu.getContextMenus(target));
     }
 
     @Test
@@ -185,10 +183,9 @@ class ContextMenuTargetTest {
 
         menu.setTarget(newTarget);
 
-        Assertions.assertEquals(List.of(),
-                ContextMenuBase.getContextMenus(target));
+        Assertions.assertEquals(List.of(), ContextMenu.getContextMenus(target));
         Assertions.assertEquals(List.of(menu),
-                ContextMenuBase.getContextMenus(newTarget));
+                ContextMenu.getContextMenus(newTarget));
     }
 
     @Test
@@ -199,7 +196,7 @@ class ContextMenuTargetTest {
         menu.setTarget(target);
 
         Assertions.assertEquals(List.of(menu),
-                ContextMenuBase.getContextMenus(target));
+                ContextMenu.getContextMenus(target));
     }
 
     @Test
@@ -207,7 +204,7 @@ class ContextMenuTargetTest {
         var target = new Div();
         menu.setTarget(target);
 
-        var menus = ContextMenuBase.getContextMenus(target);
+        var menus = ContextMenu.getContextMenus(target);
         new ContextMenu(target);
 
         Assertions.assertEquals(List.of(menu), menus);
@@ -218,7 +215,7 @@ class ContextMenuTargetTest {
     @Test
     void getContextMenusOfNull_throws() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> ContextMenuBase.getContextMenus(null));
+                () -> ContextMenu.getContextMenus(null));
     }
 
     private void assertTargetConnectorInit(
