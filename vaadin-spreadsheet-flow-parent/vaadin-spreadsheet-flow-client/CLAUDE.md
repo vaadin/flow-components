@@ -1,9 +1,3 @@
----
-paths:
-  - "vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/**"
-  - "vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/**"
----
-
 # Spreadsheet client (GWT)
 
 The Spreadsheet client is GWT Java. Its `package` phase compiles it and
@@ -14,14 +8,13 @@ which is git-ignored. The flow jar ships that bundle.
 
 Iterate on client changes with GWT SuperDevMode (SDM). Recompiling takes
 about 3 s, compared with about 45 s for a Maven rebuild plus Jetty restart.
-It also serves the Java sources for source maps. SDM lives only on the
-`origin/sdm` branch, as a single commit on top of `main`. Apply that commit
-locally as an uncommitted patch:
+It also serves the Java sources for source maps. SDM is never merged: it
+lives in `patches/gwt-sdm-debugging.patch`, which you apply locally and revert
+before committing. Run the `git apply` commands from the repository root.
 
 1. Apply it:
    ```sh
-   git fetch origin sdm
-   git diff origin/sdm~1 origin/sdm | git apply
+   git apply vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/patches/gwt-sdm-debugging.patch
    ```
    Done when `SpreadsheetApiXSI.gwt.xml` exists in the client's `src/main/resources`.
 2. Install the flow module so its jar contains the SDM loader:
@@ -31,7 +24,7 @@ locally as an uncommitted patch:
 3. Start the code server in the background from the client module:
    `mvn -B -Psdm`. Done when the log prints `The code server is ready`.
    Its `[ERROR] ... INFO` lines are logging on stderr, not failures.
-4. Start the IT Jetty server as described in `CLAUDE.md`. On a localhost
+4. Start the IT Jetty server as described in the root `CLAUDE.md`. On a localhost
    page the browser console warns `Spreadsheet is using GWT SDM`; that warning
    confirms the client is served from port 9876.
 5. After each client edit, recompile and reload the page:
@@ -48,7 +41,7 @@ Stop the code server with `kill $(lsof -tiTCP:9876 -sTCP:LISTEN)`.
 
 1. Revert SDM:
    ```sh
-   git diff origin/sdm~1 origin/sdm | git apply -R
+   git apply -R vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/patches/gwt-sdm-debugging.patch
    ```
    Done when `git status` lists no `SpreadsheetApiXSI.gwt.xml`, and the diffs
    of the client `pom.xml`, `SpreadsheetApi.gwt.xml` and
@@ -64,10 +57,20 @@ Stop the code server with `kill $(lsof -tiTCP:9876 -sTCP:LISTEN)`.
 3. Run the unit tests and ITs against this bundle. A change that only worked
    under SDM is unverified.
 
-## When `origin/sdm` no longer applies
+## When the patch no longer applies
 
 The patch conflicts when `main` changes the client `pom.xml`,
-`SpreadsheetApi.gwt.xml` or `vaadin-spreadsheet.js`. Rebase `origin/sdm`
-onto `main`, resolve the conflicts, and force-push it as a single commit,
-since the apply step diffs only that commit. It is a shared branch, so get
-the maintainer's approval before pushing.
+`SpreadsheetApi.gwt.xml` or `vaadin-spreadsheet.js`. Refresh it on a new
+branch from `main`, starting with no other staged changes:
+
+```sh
+P=vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/patches/gwt-sdm-debugging.patch
+git apply --3way "$P"
+# resolve the conflicts and `git add` the resolved files, then:
+git diff --cached > /tmp/sdm.patch
+git apply -R --index /tmp/sdm.patch
+cp /tmp/sdm.patch "$P"
+```
+
+Check that `git apply --check "$P"` passes, then commit only the patch file
+in its own PR.
