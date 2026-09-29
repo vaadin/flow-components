@@ -161,12 +161,24 @@ class NotificationTest {
     }
 
     @Test
+    void setText_getText() {
+        Notification notification = new Notification();
+        Assertions.assertEquals("", notification.getText());
+
+        notification.setText("foo");
+        Assertions.assertEquals("foo", notification.getText());
+        Assertions.assertEquals("foo",
+                notification.getElement().getProperty("text"));
+    }
+
+    @Test
     void addComponent_setText_notificationHasText() {
         Notification notification = new Notification();
 
         notification.add(new Div());
         notification.setText("foo");
 
+        Assertions.assertEquals("foo", notification.getText());
         Assertions.assertEquals("foo",
                 notification.getElement().getProperty("text"));
     }
@@ -178,6 +190,7 @@ class NotificationTest {
         notification.setText("foo");
         notification.add(new Div());
 
+        Assertions.assertEquals("", notification.getText());
         Assertions.assertEquals(null,
                 notification.getElement().getProperty("text"));
     }
@@ -189,48 +202,9 @@ class NotificationTest {
         notification.setText("foo");
         notification.setText(null);
 
+        Assertions.assertEquals("", notification.getText());
         Assertions.assertEquals(null,
                 notification.getElement().getProperty("text"));
-    }
-
-    @Test
-    void getText_defaultsToEmptyString() {
-        Assertions.assertEquals("", new Notification().getText());
-    }
-
-    @Test
-    void setText_getText() {
-        Notification notification = new Notification();
-        notification.setText("foo");
-
-        Assertions.assertEquals("foo", notification.getText());
-        Assertions.assertEquals("foo",
-                notification.getElement().getProperty("text"));
-    }
-
-    @Test
-    void textConstructor_getTextReturnsText() {
-        Assertions.assertEquals("foo", new Notification("foo").getText());
-    }
-
-    @Test
-    void setText_setTextNull_getTextReturnsEmptyString() {
-        Notification notification = new Notification();
-
-        notification.setText("foo");
-        notification.setText(null);
-
-        Assertions.assertEquals("", notification.getText());
-    }
-
-    @Test
-    void setText_addComponent_getTextReturnsEmptyString() {
-        Notification notification = new Notification();
-
-        notification.setText("foo");
-        notification.add(new Div());
-
-        Assertions.assertEquals("", notification.getText());
     }
 
     @Test
