@@ -53,6 +53,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.contextmenu.ContextMenuBase;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
@@ -3999,6 +4000,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public GridContextMenu<T> addContextMenu() {
         return new GridContextMenu<T>(this);
+    }
+
+    /**
+     * Gets the grid context menus that have this grid as their target, in the
+     * order their target was set. This includes the menus created with
+     * {@link #addContextMenu()}, but not plain {@code ContextMenu} instances
+     * targeting this grid.
+     *
+     * @return an unmodifiable snapshot of the context menus targeting this
+     *         grid, empty if there are none
+     * @see ContextMenuBase#getContextMenus(Component)
+     * @since 25.4
+     */
+    @SuppressWarnings("unchecked")
+    public List<GridContextMenu<T>> getContextMenus() {
+        return ContextMenuBase.getContextMenus(this).stream()
+                .filter(GridContextMenu.class::isInstance)
+                .map(menu -> (GridContextMenu<T>) menu).toList();
     }
 
     private List<Column<T>> fetchChildColumns(ColumnGroup columnGroup) {

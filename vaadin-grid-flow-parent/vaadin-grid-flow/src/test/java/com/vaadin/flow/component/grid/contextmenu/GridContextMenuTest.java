@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -94,5 +96,20 @@ class GridContextMenuTest {
         gridContextMenu.setTarget(grid);
 
         Assertions.assertEquals(grid, gridContextMenu.getTarget());
+    }
+
+    @Test
+    void noContextMenu_getContextMenusIsEmpty() {
+        Assertions.assertEquals(List.of(), new Grid<>().getContextMenus());
+    }
+
+    @Test
+    void addContextMenu_getContextMenusReturnsGridContextMenusOnly() {
+        Grid<Object> grid = new Grid<>();
+        GridContextMenu<Object> first = grid.addContextMenu();
+        new ContextMenu(grid);
+        GridContextMenu<Object> second = new GridContextMenu<>(grid);
+
+        Assertions.assertEquals(List.of(first, second), grid.getContextMenus());
     }
 }

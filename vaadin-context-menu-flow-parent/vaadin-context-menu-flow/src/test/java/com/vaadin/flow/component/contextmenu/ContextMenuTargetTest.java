@@ -96,6 +96,77 @@ class ContextMenuTargetTest {
         assertTargetConnectorRemove(invocations, target);
     }
 
+    @Test
+    void noContextMenu_getContextMenusIsEmpty() {
+        Assertions.assertEquals(List.of(),
+                ContextMenuBase.getContextMenus(new Div()));
+    }
+
+    @Test
+    void setTarget_getContextMenusReturnsMenusInOrder() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+
+        Assertions.assertEquals(List.of(menu, secondMenu),
+                ContextMenuBase.getContextMenus(target));
+    }
+
+    @Test
+    void clearTarget_getContextMenusIsEmpty() {
+        var target = new Div();
+        menu.setTarget(target);
+
+        menu.setTarget(null);
+
+        Assertions.assertEquals(List.of(),
+                ContextMenuBase.getContextMenus(target));
+    }
+
+    @Test
+    void replaceTarget_getContextMenusMovesMenuToNewTarget() {
+        var target = new Div();
+        menu.setTarget(target);
+        var newTarget = new Div();
+
+        menu.setTarget(newTarget);
+
+        Assertions.assertEquals(List.of(),
+                ContextMenuBase.getContextMenus(target));
+        Assertions.assertEquals(List.of(menu),
+                ContextMenuBase.getContextMenus(newTarget));
+    }
+
+    @Test
+    void setSameTargetTwice_getContextMenusContainsMenuOnce() {
+        var target = new Div();
+        menu.setTarget(target);
+
+        menu.setTarget(target);
+
+        Assertions.assertEquals(List.of(menu),
+                ContextMenuBase.getContextMenus(target));
+    }
+
+    @Test
+    void getContextMenus_isUnmodifiableSnapshot() {
+        var target = new Div();
+        menu.setTarget(target);
+
+        var menus = ContextMenuBase.getContextMenus(target);
+        new ContextMenu(target);
+
+        Assertions.assertEquals(List.of(menu), menus);
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                menus::clear);
+    }
+
+    @Test
+    void getContextMenusOfNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> ContextMenuBase.getContextMenus(null));
+    }
+
     private void assertTargetConnectorInit(
             List<PendingJavaScriptInvocation> invocations, Component target) {
         var initInvocations = filterTargetConnectorInitInvocations(invocations);
