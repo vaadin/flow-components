@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -243,27 +244,29 @@ final class BenchmarkDatabase implements DatabaseProvider {
     }
 
     /**
-     * Reads one column from the rows. The lookup matches any label that
-     * contains the column name, ignoring case, so the assertion does not depend
-     * on how the LLM aliased the column ({@code name}, {@code customers.name},
-     * {@code "Customer name"}).
+     * Reads the customer names from the rows. The column is found by its
+     * values, not its label: the first one that holds a customer name in every
+     * row. That way the assertion does not depend on how the LLM aliased the
+     * column ({@code name}, {@code "Customer name"}, {@code "Customer"}).
      *
      * @param rows
      *            the query result
-     * @param column
-     *            the column name
-     * @return the column values in row order
+     * @return the customer names in row order, empty when there are no rows
      */
-    static List<Object> column(List<Map<String, Object>> rows, String column) {
-        var values = new ArrayList<Object>();
-        for (var row : rows) {
-            var key = row.keySet().stream()
-                    .filter(k -> k.toLowerCase().contains(column.toLowerCase()))
-                    .findFirst().orElseThrow(
-                            () -> new AssertionError("Result has no column "
-                                    + column + ", only " + row.keySet()));
-            values.add(row.get(key));
+    List<Object> customerNames(List<Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            return List.of();
         }
-        return values;
+        var names = executeQuery("SELECT name FROM customers").stream()
+                .map(row -> row.get("name")).collect(Collectors.toSet());
+        var labels = rows.getFirst().keySet();
+        var column = labels.stream()
+                .filter(label -> rows.stream()
+                        .allMatch(row -> names.contains(row.get(label))))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Result has no column of customer names, only "
+                                + labels));
+        return rows.stream().map(row -> row.get(column)).toList();
     }
 }

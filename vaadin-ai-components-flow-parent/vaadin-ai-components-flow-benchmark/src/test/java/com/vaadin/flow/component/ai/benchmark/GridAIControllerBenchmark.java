@@ -54,7 +54,7 @@ class GridAIControllerBenchmark {
         var rows = rows();
         Assertions.assertEquals(
                 List.of("Nordic Traders", "Alpine Foods", "Iberia Textiles"),
-                BenchmarkDatabase.column(rows, "name"),
+                db.customerNames(rows),
                 "the filter and the order of the first turn have to survive");
         var emailColumn = rows.getFirst().keySet().stream().filter(
                 label -> label.toLowerCase(Locale.ROOT).contains("mail"))
@@ -125,6 +125,6 @@ class GridAIControllerBenchmark {
     }
 
     private List<Object> names() {
-        return BenchmarkDatabase.column(rows(), "name");
+        return db.customerNames(rows());
     }
 }

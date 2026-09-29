@@ -130,7 +130,7 @@ void findsCustomersWithoutRecentOrders() {
             "List the customers that have not placed any order in 2026");
     var rows = db.executeQuery(controller.getState().query());
     Assertions.assertEquals(Set.of("Iberia Textiles", "Sakura Robotics"),
-            new HashSet<>(BenchmarkDatabase.column(rows, "name")));
+            new HashSet<>(db.customerNames(rows)));
 }
 ```
 
