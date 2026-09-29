@@ -217,8 +217,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     }
 
     /**
-     * Removes all tabs together with their content. After this, none of the
-     * tabs is selected.
+     * Removes all tabs together with their content and clears the selection.
      *
      * @since 25.4
      */
