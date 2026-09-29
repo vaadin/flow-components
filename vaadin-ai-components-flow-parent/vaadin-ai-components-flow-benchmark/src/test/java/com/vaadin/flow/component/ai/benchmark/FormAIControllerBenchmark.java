@@ -773,13 +773,13 @@ class FormAIControllerBenchmark {
                 form.purpose.getValue().toLowerCase(Locale.ROOT)
                         .contains("workshop"),
                 () -> "purpose was " + form.purpose.getValue());
-        // Where invoice.html places each line, as a fraction of its page
-        assertReadFrom(form.controller, form.merchant, "merchant",
-                "Hotel Aurora Tampere", 1, 0.084);
-        assertReadFrom(form.controller, form.receiptNumber, "receipt number",
-                "INV-2026-0815", 1, 0.232);
-        assertReadFrom(form.controller, form.total, "total", "439.50", 2,
-                0.148);
+        // Only the image scenario checks where a value was read: some hosts
+        // pass a PDF to the model as its extracted text, which has no positions
+        assertCopiedFrom(form.controller, form.merchant, "merchant",
+                "Hotel Aurora Tampere");
+        assertCopiedFrom(form.controller, form.receiptNumber, "receipt number",
+                "INV-2026-0815");
+        assertCopiedFrom(form.controller, form.total, "total", "439.50");
         Assertions.assertTrue(
                 form.controller.getFieldSource(form.purpose).isEmpty(),
                 "the purpose came from the prompt, so it has no source");
@@ -946,6 +946,15 @@ class FormAIControllerBenchmark {
         var rect = region.rect();
         Assertions.assertEquals(lineCenter, rect.y() + rect.height() / 2,
                 LINE_TOLERANCE, () -> what + " extract box " + rect);
+    }
+
+    /**
+     * Asserts that the field's value was copied from the snippet with high
+     * confidence, with or without a location.
+     */
+    private static void assertCopiedFrom(FormAIController controller,
+            HasValue<?, ?> field, String what, String snippet) {
+        copiedExtract(controller, field, what, snippet);
     }
 
     /**

@@ -48,10 +48,10 @@ module, the same path the documentation teaches, so the numbers reflect what
 a Spring application sees. Any OpenAI-compatible endpoint works through
 `AI_BENCHMARK_BASE_URL`.
 
-The form scenarios attach a receipt image, so the model has to read images.
-The PDF scenario also needs a model that reads PDFs natively: from the
-extracted text of a PDF alone, a model cannot tell where on a page it read a
-value.
+The form scenarios attach a receipt image and a PDF invoice, so the model has
+to read images and accept PDFs. Only the image scenario checks where the model
+says it read a value: some hosts, OpenAI among them, pass a PDF to the model
+as its extracted text, which has no positions.
 
 The controllers are commercial, but they only check the license inside a
 running Vaadin application, so the run needs no Vaadin license.
@@ -145,10 +145,11 @@ instructions to it, through `conversation(root, controller, instructions)`.
 
 The files the form scenarios attach live in
 `src/test/resources/com/vaadin/flow/component/ai/benchmark`. `receipt.png` and
-`invoice.pdf` are rendered from the HTML next to them, which places every line
-at a fixed position, so a scenario can check where the model says it read a
-value. After changing the HTML, render the files again with headless Chromium
-and update the positions the scenarios expect:
+`invoice.pdf` are rendered from the HTML next to them. `receipt.html` places
+every line at a fixed position, so the image scenario can check where the
+model says it read a value. After changing the HTML, render the files again
+with headless Chromium, and after changing `receipt.html`, update the
+positions the image scenario expects:
 
 ```sh
 cd src/test/resources/com/vaadin/flow/component/ai/benchmark
