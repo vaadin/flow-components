@@ -3667,6 +3667,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Gets the column that uses the given sort property.
+     *
+     * @param sortProperty
+     *            the sort property to get the column for, can be null
+     * @return the column matching the sort property, or {@code null} if no such
+     *         column exists or if {@code sortProperty} is null
+     */
+    public Column<T> getColumnBySortProperty(String sortProperty) {
+        if (sortProperty == null) {
+            return null;
+        }
+        return getColumns().stream()
+                .filter(column -> column.getSortOrder(SortDirection.ASCENDING)
+                        .anyMatch(order -> sortProperty
+                                .equals(order.getSorted())))
+                .findFirst().orElse(null);
+    }
+
+    /**
      * Gets a {@link Column} of this grid by its key.
      *
      * @see Column#setKey(String)

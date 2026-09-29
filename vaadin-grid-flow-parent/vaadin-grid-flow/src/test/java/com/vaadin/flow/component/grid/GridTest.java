@@ -20,7 +20,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -32,6 +34,43 @@ import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 class GridTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    private Grid<Person> grid;
+
+    @BeforeEach
+    void setUp() {
+        grid = new Grid<>();
+    }
+
+    @Test
+    void getColumnBySortProperty_columnExists_returnsColumn() {
+        Grid.Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setSortProperty("firstName");
+
+        Grid.Column<Person> foundColumn = grid
+                .getColumnBySortProperty("firstName");
+
+        Assert.assertEquals(nameColumn, foundColumn);
+    }
+
+    @Test
+    void getColumnBySortProperty_multipleProperties_returnsColumn() {
+        Grid.Column<Person> nameColumn = grid.addColumn(Person::getName)
+                .setSortProperty("firstName", "lastName");
+
+        Grid.Column<Person> foundColumn = grid
+                .getColumnBySortProperty("lastName");
+
+        Assert.assertEquals(nameColumn, foundColumn);
+    }
+
+    @Test
+    void getColumnBySortProperty_nonExistingProperty_returnsNull() {
+        grid.addColumn(Person::getName).setSortProperty("name");
+
+        Assert.assertNull(grid.getColumnBySortProperty("unknownProperty"));
+        Assert.assertNull(grid.getColumnBySortProperty(null));
+    }
 
     @Test
     void dataViewForFaultyDataProvider_throwsException() {
