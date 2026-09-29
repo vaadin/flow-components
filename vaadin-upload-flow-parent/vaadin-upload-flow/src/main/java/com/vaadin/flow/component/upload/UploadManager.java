@@ -75,6 +75,7 @@ public class UploadManager implements Serializable {
 
     // Upload state tracking
     private final AtomicInteger activeUploads = new AtomicInteger(0);
+    private volatile boolean uploadReceivedSinceAllFinished;
 
     // Accepted file type restrictions (used for both client hints and
     // server-side validation)
@@ -148,11 +149,17 @@ public class UploadManager implements Serializable {
 
         // Listen for all-finished event from client (triggered when all
         // uploads are complete, including success, error, or abort). An
-        // upload keeps going when a modal component makes the owner inert.
-        connector.getElement()
-                .addEventListener("all-finished", event -> ComponentUtil
-                        .fireEvent(owner, new AllFinishedEvent(owner)))
-                .allowInert();
+        // upload started before a modal component made the owner inert keeps
+        // going, so its end is reported for an inert owner too. An upload
+        // started while inert is only reported if the upload handler
+        // received it, since otherwise its request is rejected.
+        connector.getElement().addEventListener("all-finished", event -> {
+            if (!event.getSource().getNode().isInert()
+                    || uploadReceivedSinceAllFinished) {
+                ComponentUtil.fireEvent(owner, new AllFinishedEvent(owner));
+            }
+            uploadReceivedSinceAllFinished = false;
+        }).allowInert();
 
         // Register internal listeners for upload state tracking
         ComponentUtil.addListener(connector, UploadStartEvent.class,
@@ -428,6 +435,7 @@ public class UploadManager implements Serializable {
                     "Maximum supported amount of uploads already started");
         }
         activeUploads.incrementAndGet();
+        uploadReceivedSinceAllFinished = true;
     }
 
     /**

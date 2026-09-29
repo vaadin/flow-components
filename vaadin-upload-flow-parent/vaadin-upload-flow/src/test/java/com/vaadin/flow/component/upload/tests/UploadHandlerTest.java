@@ -254,8 +254,20 @@ class UploadHandlerTest {
                 "AllFinished should fire for an inert upload");
     }
 
-    @Test
-    void uploadStartsWhileModalIsOpen_allFinishedEventNotFired() {
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void uploadStartsWhileModalIsOpen_allFinishedEventFiredIfHandlerAllowsInert(
+            boolean allowInert) {
+        upload.setUploadHandler(new UploadHandler() {
+            @Override
+            public void handleUploadRequest(UploadEvent event) {
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return allowInert;
+            }
+        });
         AtomicBoolean allFinished = new AtomicBoolean();
         upload.addAllFinishedListener(event -> allFinished.set(true));
         openModal();
@@ -263,8 +275,7 @@ class UploadHandlerTest {
         fireUploadDomEvent("upload-start", true);
         fireUploadDomEvent("upload-success", false);
 
-        Assertions.assertFalse(allFinished.get(),
-                "An upload started while inert should not be tracked");
+        Assertions.assertEquals(allowInert, allFinished.get());
     }
 
     private void openModal() {

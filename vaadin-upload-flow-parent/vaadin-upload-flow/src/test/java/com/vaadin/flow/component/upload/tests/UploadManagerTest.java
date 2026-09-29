@@ -581,19 +581,38 @@ class UploadManagerTest {
     }
 
     @Test
-    void allFinishedEvent_firedWhileModalIsOpen() {
+    void allFinishedEvent_uploadReceivedBeforeModal_firedWhileModalIsOpen() {
         AtomicInteger finishedCount = new AtomicInteger(0);
         manager.addAllFinishedListener(
                 event -> finishedCount.incrementAndGet());
-        Div modal = new Div();
-        ui.add(modal);
-        ui.getUI().setChildComponentModal(modal, true);
-        ui.fakeClientCommunication();
+        simulateUploadStart(manager);
+        openModal();
+        simulateUploadComplete(manager);
 
         simulateAllFinishedDomEvent(manager);
 
         Assertions.assertEquals(1, finishedCount.get(),
                 "AllFinished should fire for an inert owner");
+    }
+
+    @Test
+    void allFinishedEvent_noUploadReceived_notFiredWhileModalIsOpen() {
+        AtomicInteger finishedCount = new AtomicInteger(0);
+        manager.addAllFinishedListener(
+                event -> finishedCount.incrementAndGet());
+        openModal();
+
+        simulateAllFinishedDomEvent(manager);
+
+        Assertions.assertEquals(0, finishedCount.get(),
+                "AllFinished should not fire for uploads rejected while inert");
+    }
+
+    private void openModal() {
+        Div modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
     }
 
     // --- Wrapper delegation of ElementRequestHandler defaults ---
