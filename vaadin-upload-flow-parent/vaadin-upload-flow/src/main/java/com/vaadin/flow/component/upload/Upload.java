@@ -146,9 +146,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         };
 
         // An upload started before a modal component made the upload inert
-        // keeps going, so its end is tracked for an inert upload too. An
-        // upload started while inert is only tracked if the upload handler
-        // receives it, since otherwise its request is rejected.
+        // is allowed to finish: the requests of its queued files are received
+        // while it is in progress, and its end is tracked for an inert upload
+        // too. An upload can not be started while inert, unless the upload
+        // handler allows it.
         getElement().addEventListener("upload-start", e -> {
             if (!getElement().getNode().isInert() || uploadHandlerAllowsInert) {
                 this.uploading = true;
@@ -965,7 +966,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     public void setUploadHandler(UploadHandler handler, String targetName) {
         var elementStreamResource = UploadHelper.createTargetResource(handler,
                 getElement(), targetName, () -> acceptedMimeTypes,
-                () -> acceptedFileExtensions);
+                () -> acceptedFileExtensions, () -> uploading);
         uploadHandlerAllowsInert = handler.isAllowInert();
         var failFast = handler instanceof UploadHelper.FailFastUploadHandler;
         if (!failFast) {

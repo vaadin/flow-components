@@ -241,23 +241,30 @@ class UploadHandlerTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "upload-success", "upload-error", "upload-abort" })
-    void uploadFinishesWhileModalIsOpen_allFinishedEventFired(
-            String finishEvent) {
+    void uploadStartedBeforeModal_allowedToFinishWhileModalIsOpen(
+            String finishEvent) throws URISyntaxException {
+        upload.setUploadHandler(event -> {
+        });
         AtomicBoolean allFinished = new AtomicBoolean();
         upload.addAllFinishedListener(event -> allFinished.set(true));
         fireUploadDomEvent("upload-start", true);
         openModal();
 
+        Assertions.assertTrue(getUploadHandler().isAllowInert(),
+                "Queued files should be received for an inert upload");
+
         fireUploadDomEvent(finishEvent, false);
 
         Assertions.assertTrue(allFinished.get(),
                 "AllFinished should fire for an inert upload");
+        Assertions.assertFalse(getUploadHandler().isAllowInert(),
+                "A finished upload should not allow further uploads");
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void uploadStartsWhileModalIsOpen_allFinishedEventFiredIfHandlerAllowsInert(
-            boolean allowInert) {
+    void uploadStartsWhileModalIsOpen_allowedOnlyIfHandlerAllowsInert(
+            boolean allowInert) throws URISyntaxException {
         upload.setUploadHandler(new UploadHandler() {
             @Override
             public void handleUploadRequest(UploadEvent event) {
@@ -273,6 +280,7 @@ class UploadHandlerTest {
         openModal();
 
         fireUploadDomEvent("upload-start", true);
+        Assertions.assertEquals(allowInert, getUploadHandler().isAllowInert());
         fireUploadDomEvent("upload-success", false);
 
         Assertions.assertEquals(allowInert, allFinished.get());
