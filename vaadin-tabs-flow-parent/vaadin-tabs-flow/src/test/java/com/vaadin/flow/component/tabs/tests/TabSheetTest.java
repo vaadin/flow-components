@@ -535,11 +535,26 @@ class TabSheetTest {
     }
 
     @Test
-    void findTabContaining_removedTab_returnsNull() {
+    void findTabContaining_removedTabOfNestedTabSheet_returnsNull() {
         var field = new Span("Field");
-        var tab = tabSheet.add("Tab 0", new Div(field));
-        tabSheet.remove(tab);
+        var innerTabSheet = new TabSheet();
+        var innerTab = innerTabSheet.add("Inner tab", new Div(field));
+        tabSheet.add("Tab 0", new Div(innerTabSheet));
+        innerTabSheet.remove(innerTab);
 
+        Assertions.assertNull(innerTabSheet.findTabContaining(field));
+        Assertions.assertNull(tabSheet.findTabContaining(field));
+    }
+
+    @Test
+    void findTabContaining_replacedContentOfNestedTabSheet_returnsNull() {
+        var field = new Span("Field");
+        var innerTabSheet = new TabSheet();
+        var innerTab = innerTabSheet.add("Inner tab", new Div(field));
+        tabSheet.add("Tab 0", new Div(innerTabSheet));
+        innerTabSheet.add(innerTab, new Span("New content"));
+
+        Assertions.assertNull(innerTabSheet.findTabContaining(field));
         Assertions.assertNull(tabSheet.findTabContaining(field));
     }
 
