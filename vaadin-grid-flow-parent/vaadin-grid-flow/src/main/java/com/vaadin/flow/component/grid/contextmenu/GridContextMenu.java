@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -151,6 +152,24 @@ public class GridContextMenu<T> extends
     public GridContextMenu(Grid<T> target) {
         this();
         setTarget(target);
+    }
+
+    /**
+     * Gets the grid context menus that have the given grid as their target, in
+     * the order their target was set. Plain {@code ContextMenu} instances
+     * targeting the grid are not included.
+     *
+     * @param grid
+     *            the target grid
+     * @param <T>
+     *            the grid bean type
+     * @return an unmodifiable snapshot of the grid context menus targeting the
+     *         grid, empty if there are none
+     * @see Grid#getContextMenus()
+     * @since 25.4
+     */
+    public static <T> List<GridContextMenu<T>> getContextMenus(Grid<T> grid) {
+        return getContextMenus(grid, GridContextMenu.class);
     }
 
     /**

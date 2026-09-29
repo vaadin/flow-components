@@ -4001,6 +4001,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return new GridContextMenu<T>(this);
     }
 
+    /**
+     * Gets the grid context menus that have this grid as their target, in the
+     * order their target was set. This includes the menus created with
+     * {@link #addContextMenu()}, but not plain {@code ContextMenu} instances
+     * targeting this grid.
+     *
+     * @return an unmodifiable snapshot of the context menus targeting this
+     *         grid, empty if there are none
+     * @see GridContextMenu#getContextMenus(Grid)
+     * @since 25.4
+     */
+    public List<GridContextMenu<T>> getContextMenus() {
+        return GridContextMenu.getContextMenus(this);
+    }
+
     private List<Column<T>> fetchChildColumns(ColumnGroup columnGroup) {
         List<Column<T>> ret = new ArrayList<>();
         columnGroup.getChildColumns()
