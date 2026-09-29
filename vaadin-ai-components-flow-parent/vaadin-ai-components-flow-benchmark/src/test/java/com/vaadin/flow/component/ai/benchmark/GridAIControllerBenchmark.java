@@ -94,7 +94,7 @@ class GridAIControllerBenchmark {
     void showsAllRowsWithReadableColumns() {
         conversation.say("Show all the orders.");
         var rows = rows();
-        var query = controller.getState().query();
+        var query = currentQuery();
         Assertions.assertEquals(8, rows.size(),
                 () -> "every order, with " + query);
         Assertions.assertFalse(
@@ -112,11 +112,16 @@ class GridAIControllerBenchmark {
                 () -> "column groups nobody asked for: " + labels);
     }
 
-    private List<Map<String, Object>> rows() {
-        var query = controller.getState().query();
-        Assertions.assertNotNull(query,
+    /** The state is {@code null} until the model has given the grid a query. */
+    private String currentQuery() {
+        var state = controller.getState();
+        Assertions.assertNotNull(state,
                 "the model never called update_grid_data");
-        return db.executeQuery(query);
+        return state.query();
+    }
+
+    private List<Map<String, Object>> rows() {
+        return db.executeQuery(currentQuery());
     }
 
     private List<Object> names() {
