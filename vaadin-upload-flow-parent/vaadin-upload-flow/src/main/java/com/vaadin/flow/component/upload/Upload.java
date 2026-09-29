@@ -144,11 +144,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             this.uploading = isUploading;
         };
 
-        // An upload keeps going when a modal component makes the upload
-        // inert, so its progress is tracked for an inert upload too
-        getElement()
-                .addEventListener("upload-start", e -> this.uploading = true)
-                .allowInert();
+        // An upload started before a modal component made the upload inert
+        // keeps going, so its end is tracked for an inert upload too. An
+        // upload started while inert is not tracked.
+        getElement().addEventListener("upload-start",
+                e -> this.uploading = true);
 
         getElement().addEventListener("upload-success", allFinishedListener)
                 .addEventData(filesUploading).allowInert();

@@ -241,19 +241,37 @@ class UploadHandlerTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "upload-success", "upload-error", "upload-abort" })
-    void uploadWhileModalIsOpen_allFinishedEventFired(String finishEvent) {
+    void uploadFinishesWhileModalIsOpen_allFinishedEventFired(
+            String finishEvent) {
         AtomicBoolean allFinished = new AtomicBoolean();
         upload.addAllFinishedListener(event -> allFinished.set(true));
-        Div modal = new Div();
-        ui.add(modal);
-        ui.getUI().setChildComponentModal(modal, true);
-        ui.fakeClientCommunication();
-
         fireUploadDomEvent("upload-start", true);
+        openModal();
+
         fireUploadDomEvent(finishEvent, false);
 
         Assertions.assertTrue(allFinished.get(),
                 "AllFinished should fire for an inert upload");
+    }
+
+    @Test
+    void uploadStartsWhileModalIsOpen_allFinishedEventNotFired() {
+        AtomicBoolean allFinished = new AtomicBoolean();
+        upload.addAllFinishedListener(event -> allFinished.set(true));
+        openModal();
+
+        fireUploadDomEvent("upload-start", true);
+        fireUploadDomEvent("upload-success", false);
+
+        Assertions.assertFalse(allFinished.get(),
+                "An upload started while inert should not be tracked");
+    }
+
+    private void openModal() {
+        Div modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
     }
 
     private void fireUploadDomEvent(String eventType, boolean filesUploading) {
