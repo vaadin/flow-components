@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--
+  Source of receipt.png. Every line is absolutely positioned on a 600x900
+  page, so FormAIControllerBenchmark knows where each value sits. Regenerate
+  with the command in the module README after changing it.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Receipt</title>
+<style>
+  html, body {
+    margin: 0;
+    width: 600px;
+    height: 900px;
+    background: #ffffff;
+    color: #111111;
+    font-family: "DejaVu Sans Mono", monospace;
+    font-size: 18px;
+  }
+  body > div {
+    position: absolute;
+    left: 60px;
+    width: 480px;
+    height: 24px;
+    line-height: 24px;
+    white-space: pre;
+  }
+  .center { text-align: center; }
+  .row { display: flex; justify-content: space-between; }
+  .merchant { height: 40px; line-height: 40px; font-size: 34px; font-weight: bold; }
+  .total { height: 32px; line-height: 32px; font-size: 26px; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="merchant center" style="top: 40px">NORDIC BISTRO</div>
+<div class="center" style="top: 92px">Esplanadi 12, 00130 Helsinki</div>
+<div class="center" style="top: 118px">VAT ID FI12345678</div>
+<div style="top: 176px">Receipt 4711-0932</div>
+<div style="top: 202px">Date 12.09.2026  19:42</div>
+<div class="row" style="top: 262px"><span>2 x Salmon soup</span><span>37.00</span></div>
+<div class="row" style="top: 288px"><span>2 x Sparkling water</span><span>9.00</span></div>
+<div class="row" style="top: 314px"><span>2 x Coffee</span><span>7.60</span></div>
+<div style="top: 350px">--------------------------------------------</div>
+<div class="row total" style="top: 380px"><span>TOTAL EUR</span><span>53.60</span></div>
+<div class="row" style="top: 424px"><span>incl. VAT 14%</span><span>6.58</span></div>
+<div style="top: 480px">Paid by card  **** 4417</div>
+<div class="center" style="top: 560px">Thank you for your visit!</div>
+</body>
+</html>
