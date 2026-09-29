@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.html.Div;
@@ -237,17 +239,18 @@ class UploadHandlerTest {
         Assertions.assertNull(upload.getElement().getProperty("maxFiles"));
     }
 
-    @Test
-    void uploadFinishesWhileModalIsOpen_allFinishedEventFired() {
+    @ParameterizedTest
+    @ValueSource(strings = { "upload-success", "upload-error", "upload-abort" })
+    void uploadWhileModalIsOpen_allFinishedEventFired(String finishEvent) {
         AtomicBoolean allFinished = new AtomicBoolean();
         upload.addAllFinishedListener(event -> allFinished.set(true));
-        fireUploadDomEvent("upload-start", false);
         Div modal = new Div();
         ui.add(modal);
         ui.getUI().setChildComponentModal(modal, true);
         ui.fakeClientCommunication();
 
-        fireUploadDomEvent("upload-success", false);
+        fireUploadDomEvent("upload-start", true);
+        fireUploadDomEvent(finishEvent, false);
 
         Assertions.assertTrue(allFinished.get(),
                 "AllFinished should fire for an inert upload");
