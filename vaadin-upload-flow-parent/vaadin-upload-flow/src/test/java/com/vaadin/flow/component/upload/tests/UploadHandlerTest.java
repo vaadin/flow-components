@@ -249,9 +249,16 @@ class UploadHandlerTest {
         upload.addAllFinishedListener(event -> allFinished.set(true));
         fireUploadDomEvent("upload-start", true);
         openModal();
+        // The first file finishes and the next queued file starts. Queued
+        // files count as uploading on the client, so this holds even when
+        // only one file is uploaded at a time.
+        fireUploadDomEvent("upload-success", true);
+        fireUploadDomEvent("upload-start", true);
 
         Assertions.assertTrue(getUploadHandler().isAllowInert(),
                 "Queued files should be received for an inert upload");
+        Assertions.assertFalse(allFinished.get(),
+                "AllFinished should not fire while files are queued");
 
         fireUploadDomEvent(finishEvent, false);
 
