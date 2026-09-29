@@ -217,6 +217,18 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     }
 
     /**
+     * Removes all tabs together with their content. After this, none of the
+     * tabs is selected.
+     *
+     * @since 25.4
+     */
+    public void removeAll() {
+        tabToContent.values().forEach(Element::removeFromParent);
+        tabToContent.clear();
+        tabs.removeAll();
+    }
+
+    /**
      * Gets the zero-based index of the currently selected tab.
      *
      * @return the zero-based index of the selected tab, or -1 if none of the

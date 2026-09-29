@@ -293,6 +293,58 @@ class TabSheetTest {
     }
 
     @Test
+    void removeAll_removesTabsAndContent() {
+        var content0 = new Span("Content 0");
+        var content1 = new Span("Content 1");
+        var tab0 = tabSheet.add("Tab 0", content0);
+        var tab1 = tabSheet.add("Tab 1", content1);
+        tabSheet.setSelectedTab(tab1);
+        ui.fakeClientCommunication();
+
+        tabSheet.removeAll();
+        ui.fakeClientCommunication();
+
+        Assertions.assertEquals(0, tabSheet.getTabCount());
+        Assertions.assertFalse(tab0.getParent().isPresent());
+        Assertions.assertFalse(tab1.getParent().isPresent());
+        Assertions.assertFalse(content0.getParent().isPresent());
+        Assertions.assertFalse(content1.getParent().isPresent());
+        Assertions.assertNull(tabSheet.getComponent(tab0));
+        Assertions.assertNull(tabSheet.getTab(content1));
+    }
+
+    @Test
+    void removeAll_clearsSelection() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.add("Tab 1", new Span("Content 1"));
+        var events = new AtomicInteger();
+        tabSheet.addSelectedChangeListener(event -> {
+            events.incrementAndGet();
+            Assertions.assertNull(event.getSelectedTab());
+        });
+
+        tabSheet.removeAll();
+
+        Assertions.assertEquals(-1, tabSheet.getSelectedIndex());
+        Assertions.assertNull(tabSheet.getSelectedTab());
+        Assertions.assertEquals(1, events.get());
+    }
+
+    @Test
+    void removeAll_addTab_contentAdded() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.removeAll();
+
+        var content = new Span("New content");
+        var tab = tabSheet.add("New tab", content);
+        ui.fakeClientCommunication();
+
+        Assertions.assertEquals(1, tabSheet.getTabCount());
+        Assertions.assertEquals(tab, tabSheet.getSelectedTab());
+        Assertions.assertEquals(tabSheet, content.getParent().get());
+    }
+
+    @Test
     void addTab_initialSelection() {
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
         Assertions.assertEquals(0, tabSheet.getSelectedIndex());
