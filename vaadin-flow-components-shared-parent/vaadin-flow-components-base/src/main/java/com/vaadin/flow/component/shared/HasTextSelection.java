@@ -109,7 +109,7 @@ public interface HasTextSelection extends HasElement {
                   try {
                     this.autoselect = false;
                     this._nextFocusIsFromClient = false;
-                    i.focus();
+                    this.focus();
                   } finally {
                     this.autoselect = autoselect;
                     this._nextFocusIsFromClient = true;

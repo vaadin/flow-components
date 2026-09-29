@@ -127,5 +127,7 @@ public class TextSelectionPageIT extends AbstractComponentIT {
                 "return document.activeElement === arguments[0].inputElement;",
                 field);
         Assert.assertEquals("Field should be focused", true, focused);
+        Assert.assertTrue("Field should have focus-ring",
+                field.hasAttribute("focus-ring"));
     }
 }
