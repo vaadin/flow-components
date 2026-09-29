@@ -150,6 +150,63 @@ describe('jsdom-exporter', () => {
   });
 });
 
+describe('option values', () => {
+  // eslint-disable-next-line no-script-url
+  const UNSUPPORTED_URL = 'javascript:void(0)';
+
+  const Highcharts = jsdomExporter.__get__('Highcharts');
+
+  beforeEach(() => mock());
+
+  afterEach(() => {
+    mock.restore();
+    delete Object.prototype.custom;
+  });
+
+  function createChart(options) {
+    const container = exporterDom.window.document.createElement('div');
+    return Highcharts.chart(container, options);
+  }
+
+  it('should set nested point keys', async () => {
+    const chart = createChart({ series: [{ keys: ['y', 'custom.value'], data: [[1, 'a']] }] });
+    expect(chart.series[0].points[0].custom.value).to.equal('a');
+  });
+
+  it('should ignore reserved segments in point keys', async () => {
+    const result = await jsdomExporter({
+      chartConfiguration: {
+        series: [{ keys: ['y', '__proto__.custom', 'constructor.prototype.custom'], data: [[1, 'a', 'b']] }]
+      }
+    });
+    expect({}.custom).to.be.undefined;
+    expect(parseSVG(result.svgString).querySelector('.highcharts-series')).to.be.not.null;
+  });
+
+  it('should ignore reserved option names in point objects', async () => {
+    const result = await jsdomExporter({
+      chartConfiguration: {
+        series: [{ data: JSON.parse('[{ "y": 1, "__proto__": { "custom": "a" }, "constructor": { "custom": "b" } }]') }]
+      }
+    });
+    expect(parseSVG(result.svgString).querySelectorAll('.highcharts-series-group .highcharts-point')).to.have.lengthOf(1);
+  });
+
+  ['https://vaadin.com', 'about.html', 'tel:+123'].forEach((href) => {
+    it(`should keep supported credits links: ${href}`, () => {
+      const chart = createChart({ credits: { enabled: true, href } });
+      expect(chart.options.credits.href).to.equal(href);
+    });
+  });
+
+  [UNSUPPORTED_URL, ` JAVASCRIPT:void(0)`, 'data:text/html,Text'].forEach((href) => {
+    it(`should ignore credits links that use an unsupported URL scheme: ${JSON.stringify(href)}`, () => {
+      const chart = createChart({ credits: { enabled: true, href } });
+      expect(chart.options.credits.href).to.be.undefined;
+    });
+  });
+});
+
 describe('timeline', () => {
   beforeEach(() => mock());
 
