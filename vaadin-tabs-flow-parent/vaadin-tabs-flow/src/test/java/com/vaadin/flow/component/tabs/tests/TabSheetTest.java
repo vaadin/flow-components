@@ -298,8 +298,11 @@ class TabSheetTest {
         var content1 = new Span("Content 1");
         var tab0 = tabSheet.add("Tab 0", content0);
         var tab1 = tabSheet.add("Tab 1", content1);
+        ui.fakeClientCommunication();
         tabSheet.setSelectedTab(tab1);
         ui.fakeClientCommunication();
+        Assertions.assertEquals(tabSheet, content0.getParent().get());
+        Assertions.assertEquals(tabSheet, content1.getParent().get());
 
         tabSheet.removeAll();
         ui.fakeClientCommunication();
