@@ -136,8 +136,10 @@ public interface DatabaseProvider extends Serializable {
      *         {@code null} but may be empty
      * @throws NullPointerException
      *             if the query is {@code null}
-     * @throws IllegalArgumentException
-     *             if the query is invalid
+     * @throws ToolException
+     *             if the query fails and the implementation chooses to tell the
+     *             LLM why; any other exception is reported to the LLM as a
+     *             generic error
      */
     List<Map<String, Object>> executeQuery(String sql);
 }
