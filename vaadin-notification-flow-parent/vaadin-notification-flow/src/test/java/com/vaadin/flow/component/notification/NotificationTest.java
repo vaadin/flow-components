@@ -194,6 +194,46 @@ class NotificationTest {
     }
 
     @Test
+    void getText_defaultsToEmptyString() {
+        Assertions.assertEquals("", new Notification().getText());
+    }
+
+    @Test
+    void setText_getText() {
+        Notification notification = new Notification();
+        notification.setText("foo");
+
+        Assertions.assertEquals("foo", notification.getText());
+        Assertions.assertEquals("foo",
+                notification.getElement().getProperty("text"));
+    }
+
+    @Test
+    void textConstructor_getTextReturnsText() {
+        Assertions.assertEquals("foo", new Notification("foo").getText());
+    }
+
+    @Test
+    void setText_setTextNull_getTextReturnsEmptyString() {
+        Notification notification = new Notification();
+
+        notification.setText("foo");
+        notification.setText(null);
+
+        Assertions.assertEquals("", notification.getText());
+    }
+
+    @Test
+    void setText_addComponent_getTextReturnsEmptyString() {
+        Notification notification = new Notification();
+
+        notification.setText("foo");
+        notification.add(new Div());
+
+        Assertions.assertEquals("", notification.getText());
+    }
+
+    @Test
     void addComponentAtIndex_negativeIndex() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> addDivAtIndex(-1));
