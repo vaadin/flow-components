@@ -112,4 +112,16 @@ class GridContextMenuTest {
 
         Assertions.assertEquals(List.of(first, second), grid.getContextMenus());
     }
+
+    @Test
+    void multipleContextMenus_clearTargetOfOne_getContextMenusKeepsOthers() {
+        Grid<Object> grid = new Grid<>();
+        GridContextMenu<Object> first = grid.addContextMenu();
+        GridContextMenu<Object> second = grid.addContextMenu();
+        GridContextMenu<Object> third = grid.addContextMenu();
+
+        second.setTarget(null);
+
+        Assertions.assertEquals(List.of(first, third), grid.getContextMenus());
+    }
 }

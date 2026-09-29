@@ -113,6 +113,60 @@ class ContextMenuTargetTest {
     }
 
     @Test
+    void multipleMenus_clearTargetOfOne_getContextMenusKeepsOthers() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+        var thirdMenu = new ContextMenu(target);
+
+        secondMenu.setTarget(null);
+
+        Assertions.assertEquals(List.of(menu, thirdMenu),
+                ContextMenuBase.getContextMenus(target));
+    }
+
+    @Test
+    void multipleMenus_replaceTargetOfOne_getContextMenusMovesOnlyThatMenu() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+        var newTarget = new Div();
+        var newTargetMenu = new ContextMenu(newTarget);
+
+        menu.setTarget(newTarget);
+
+        Assertions.assertEquals(List.of(secondMenu),
+                ContextMenuBase.getContextMenus(target));
+        Assertions.assertEquals(List.of(newTargetMenu, menu),
+                ContextMenuBase.getContextMenus(newTarget));
+    }
+
+    @Test
+    void multipleMenus_setSameTargetAgain_getContextMenusMovesMenuToEnd() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+
+        menu.setTarget(target);
+
+        Assertions.assertEquals(List.of(secondMenu, menu),
+                ContextMenuBase.getContextMenus(target));
+    }
+
+    @Test
+    void multipleMenus_clearAllTargets_getContextMenusIsEmpty() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+
+        menu.setTarget(null);
+        secondMenu.setTarget(null);
+
+        Assertions.assertEquals(List.of(),
+                ContextMenuBase.getContextMenus(target));
+    }
+
+    @Test
     void clearTarget_getContextMenusIsEmpty() {
         var target = new Div();
         menu.setTarget(target);
