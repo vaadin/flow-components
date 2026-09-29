@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
@@ -88,7 +89,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 @NpmPackage(value = "@vaadin/text-area", version = "25.4.0-alpha1")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
-        implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
+        implements HasAllowedCharPattern, HasTextSelection,
+        HasThemeVariant<TextAreaVariant> {
 
     private TextAreaI18n i18n;
 

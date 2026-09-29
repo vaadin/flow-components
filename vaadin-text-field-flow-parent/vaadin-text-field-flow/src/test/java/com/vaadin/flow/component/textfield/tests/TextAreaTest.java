@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
@@ -277,5 +278,11 @@ class TextAreaTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(TextArea.class));
+    }
+
+    @Test
+    void implementsHasTextSelection() {
+        Assertions.assertTrue(
+                HasTextSelection.class.isAssignableFrom(TextArea.class));
     }
 }

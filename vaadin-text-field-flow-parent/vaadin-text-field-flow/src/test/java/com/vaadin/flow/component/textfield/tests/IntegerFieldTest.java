@@ -29,6 +29,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -280,5 +281,19 @@ class IntegerFieldTest extends TextFieldTest {
         IntegerField field = new IntegerField();
         Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<IntegerField, Integer>, Integer>);
+    }
+
+    @Override
+    @Test
+    void implementsHasTextSelection() {
+        // Skip the check inherited from TextFieldTest, IntegerField does not
+        // implement HasTextSelection, see doesNotImplementHasTextSelection
+    }
+
+    @Test
+    void doesNotImplementHasTextSelection() {
+        // Browsers do not support text selection for inputs of type number
+        Assertions.assertFalse(
+                HasTextSelection.class.isAssignableFrom(IntegerField.class));
     }
 }

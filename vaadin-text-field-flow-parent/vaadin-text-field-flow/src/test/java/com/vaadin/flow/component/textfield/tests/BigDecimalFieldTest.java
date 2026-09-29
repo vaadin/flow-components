@@ -30,6 +30,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.BigDecimalField;
@@ -221,5 +222,12 @@ class BigDecimalFieldTest extends TextFieldTest {
         BigDecimalField field = new BigDecimalField();
         Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<BigDecimalField, BigDecimal>, BigDecimal>);
+    }
+
+    @Test
+    @Override
+    void implementsHasTextSelection() {
+        Assertions.assertTrue(
+                HasTextSelection.class.isAssignableFrom(BigDecimalField.class));
     }
 }

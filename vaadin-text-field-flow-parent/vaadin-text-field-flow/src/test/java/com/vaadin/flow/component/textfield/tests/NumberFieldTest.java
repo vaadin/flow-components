@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
@@ -334,5 +335,19 @@ class NumberFieldTest extends TextFieldTest {
                 .setStepErrorMessage("Step error");
         textField.setI18n(i18n);
         Assertions.assertEquals(i18n, textField.getI18n());
+    }
+
+    @Override
+    @Test
+    void implementsHasTextSelection() {
+        // Skip the check inherited from TextFieldTest, NumberField does not
+        // implement HasTextSelection, see doesNotImplementHasTextSelection
+    }
+
+    @Test
+    void doesNotImplementHasTextSelection() {
+        // Browsers do not support text selection for inputs of type number
+        Assertions.assertFalse(
+                HasTextSelection.class.isAssignableFrom(NumberField.class));
     }
 }
