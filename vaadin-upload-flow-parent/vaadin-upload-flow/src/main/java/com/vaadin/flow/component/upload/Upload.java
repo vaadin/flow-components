@@ -127,8 +127,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         }).addEventData(eventDetailFileName);
 
         // If client aborts upload mark upload as interrupted on server also
-        getElement().addEventListener("upload-abort",
-                event -> interruptUpload());
+        getElement()
+                .addEventListener("upload-abort", event -> interruptUpload())
+                .allowInert();
 
         setUploadHandler(new UploadHelper.FailFastUploadHandler());
 
@@ -143,15 +144,18 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             this.uploading = isUploading;
         };
 
-        getElement().addEventListener("upload-start",
-                e -> this.uploading = true);
+        // An upload keeps going when a modal component makes the upload
+        // inert, so its progress is tracked for an inert upload too
+        getElement()
+                .addEventListener("upload-start", e -> this.uploading = true)
+                .allowInert();
 
         getElement().addEventListener("upload-success", allFinishedListener)
-                .addEventData(filesUploading);
+                .addEventData(filesUploading).allowInert();
         getElement().addEventListener("upload-error", allFinishedListener)
-                .addEventData(filesUploading);
+                .addEventData(filesUploading).allowInert();
         getElement().addEventListener("upload-abort", allFinishedListener)
-                .addEventData(filesUploading);
+                .addEventData(filesUploading).allowInert();
 
         defaultUploadButton = new Button();
         // Ensure the flag is set before the element is added to the slot

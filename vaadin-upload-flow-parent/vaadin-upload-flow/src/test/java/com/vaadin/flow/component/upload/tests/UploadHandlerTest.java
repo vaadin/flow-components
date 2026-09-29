@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +28,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinRequest;
@@ -229,6 +235,31 @@ class UploadHandlerTest {
         upload.setUploadHandler(event -> {
         });
         Assertions.assertNull(upload.getElement().getProperty("maxFiles"));
+    }
+
+    @Test
+    void uploadFinishesWhileModalIsOpen_allFinishedEventFired() {
+        AtomicBoolean allFinished = new AtomicBoolean();
+        upload.addAllFinishedListener(event -> allFinished.set(true));
+        fireUploadDomEvent("upload-start", false);
+        Div modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
+
+        fireUploadDomEvent("upload-success", false);
+
+        Assertions.assertTrue(allFinished.get(),
+                "AllFinished should fire for an inert upload");
+    }
+
+    private void fireUploadDomEvent(String eventType, boolean filesUploading) {
+        Element element = upload.getElement();
+        DomEvent event = new DomEvent(element, eventType,
+                JacksonUtils.createObjectNode().put(
+                        "element.files.some(file => file.uploading)",
+                        filesUploading));
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 
     private void simulateUpload() throws IOException, URISyntaxException {

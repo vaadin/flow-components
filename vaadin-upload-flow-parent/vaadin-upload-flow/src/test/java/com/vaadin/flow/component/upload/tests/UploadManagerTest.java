@@ -580,6 +580,22 @@ class UploadManagerTest {
                 "AllFinished should fire twice");
     }
 
+    @Test
+    void allFinishedEvent_firedWhileModalIsOpen() {
+        AtomicInteger finishedCount = new AtomicInteger(0);
+        manager.addAllFinishedListener(
+                event -> finishedCount.incrementAndGet());
+        Div modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
+
+        simulateAllFinishedDomEvent(manager);
+
+        Assertions.assertEquals(1, finishedCount.get(),
+                "AllFinished should fire for an inert owner");
+    }
+
     // --- Wrapper delegation of ElementRequestHandler defaults ---
     //
     // These tests verify that the file-type-validation wrapper created
