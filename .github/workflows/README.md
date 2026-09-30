@@ -48,3 +48,36 @@ Configuration:
 
 The `snapshot build` label has to exist in the repository for it to be
 selectable.
+
+## Cherry picks
+
+`cherry-pick.yml` cherry-picks merged pull requests to maintenance branches
+through the
+[`cherry-pick`](https://github.com/vaadin/github-actions/tree/main/cherry-pick)
+action of vaadin/github-actions. Add a `target/<branch>` label to a pull
+request, for example `target/25.3`, and once it is merged the change is picked
+onto that branch and a pull request titled `<title> (#<number>) (CP: <branch>)`
+is opened for it. The original pull request is then labeled
+`cherry-picked-<branch>`.
+
+It runs on every push to main and every three hours. The schedule is what picks
+up pull requests merged into a maintenance branch, and labels added after the
+merge. Every run looks at all pull requests merged in the last 30 days, into
+any branch, and skips targets that already have `cherry-picked-<branch>` or
+`need to pick manually <branch>`, so it can run as often as needed.
+
+Merge conflicts are handed to Claude Code, which resolves them, runs the unit
+tests of the affected modules and `mvn spotless:apply`, and commits. Pull
+requests picked that way say so in their description and are labeled
+`ai-resolved-conflict`; review them with that in mind. A pick that cannot be
+completed is labeled `need to pick manually <branch>` and is left to a human.
+
+The workflow is currently in dry-run mode: it only logs what it would pick,
+while the existing cherry-pick job keeps doing the picking.
+
+Configuration:
+
+| Name | Kind | Purpose |
+|---|---|---|
+| `GHTK` | organization secret | Token used to read the cherry-pick script from vaadin/platform-build-script, push the pick branches, open the pull requests and label them. The workflow token is not enough: pull requests it opens do not trigger the validation workflow. |
+| `ANTHROPIC_API_KEY` | secret | Used by Claude Code to resolve conflicts, shared with `claude.yml`. |
