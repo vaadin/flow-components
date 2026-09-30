@@ -45,6 +45,7 @@ public class Button extends Component
 | `HasClearButton`                  | clear button on input fields                                         |
 | `HasAutoOpen`                     | `setAutoOpen` for auto-opening overlays                              |
 | `HasAllowedCharPattern`           | input character filter                                               |
+| `HasTextSelection`                | `setSelectionRange` / `selectAll` / `setCursorPosition` for inputs   |
 | `HasValidationProperties`         | `setErrorMessage` / `setInvalid` via element properties              |
 | `InputField<E,V>`                 | aggregate: enabled + helper + label + size + style + tooltip + value |
 | `SelectionPreservationHandler<T>` | preserve selection across data-provider refreshes                    |

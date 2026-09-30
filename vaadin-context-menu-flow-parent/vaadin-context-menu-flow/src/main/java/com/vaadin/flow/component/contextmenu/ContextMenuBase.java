@@ -15,13 +15,16 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
@@ -68,6 +71,9 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         extends Component implements HasStyle {
 
     public static final String EVENT_DETAIL = "event.detail";
+
+    private static final String TARGET_CONTEXT_MENUS_KEY = ContextMenuBase.class
+            .getName() + ".contextMenus";
 
     private Component target;
     private MenuManager<C, I, S> menuManager;
@@ -121,6 +127,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public void setTarget(Component target) {
         if (getTarget() != null) {
+            unregisterFromTarget(getTarget());
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
             targetDetachRegistration.remove();
@@ -135,6 +142,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         if (target == null) {
             return;
         }
+
+        registerToTarget(target);
 
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
@@ -166,6 +175,59 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public Component getTarget() {
         return target;
+    }
+
+    /**
+     * Gets the context menus of the given type that have the given component as
+     * their target, in the order their target was set.
+     * <p>
+     * For internal use only. May be renamed or removed in a future release.
+     *
+     * @param target
+     *            the target component
+     * @param menuType
+     *            only menus that are instances of this type are returned
+     * @param <M>
+     *            the context menu type
+     * @return an unmodifiable snapshot of the matching context menus, empty if
+     *         there are none
+     */
+    @SuppressWarnings("unchecked")
+    protected static <M extends ContextMenuBase<?, ?, ?>> List<M> getContextMenus(
+            Component target, Class<? super M> menuType) {
+        Objects.requireNonNull(target, "Target must not be null");
+        var menus = getTargetContextMenus(target);
+        if (menus == null) {
+            return List.of();
+        }
+        return menus.stream().filter(menuType::isInstance).map(menu -> (M) menu)
+                .toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<ContextMenuBase<?, ?, ?>> getTargetContextMenus(
+            Component target) {
+        return (List<ContextMenuBase<?, ?, ?>>) ComponentUtil.getData(target,
+                TARGET_CONTEXT_MENUS_KEY);
+    }
+
+    private void registerToTarget(Component target) {
+        var menus = getTargetContextMenus(target);
+        if (menus == null) {
+            menus = new ArrayList<>();
+            ComponentUtil.setData(target, TARGET_CONTEXT_MENUS_KEY, menus);
+        }
+        menus.add(this);
+    }
+
+    private void unregisterFromTarget(Component target) {
+        var menus = getTargetContextMenus(target);
+        if (menus != null) {
+            menus.remove(this);
+            if (menus.isEmpty()) {
+                ComponentUtil.setData(target, TARGET_CONTEXT_MENUS_KEY, null);
+            }
+        }
     }
 
     /**

@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
@@ -216,5 +217,11 @@ class PasswordFieldTest {
         PasswordField field = new PasswordField();
         Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>);
+    }
+
+    @Test
+    void implementsHasTextSelection() {
+        Assertions.assertTrue(
+                HasTextSelection.class.isAssignableFrom(PasswordField.class));
     }
 }

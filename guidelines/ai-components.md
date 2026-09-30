@@ -70,7 +70,12 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   within their own turn, with both built-in providers, so a controller must
   not rely on the model remembering a previous turn's tool result; the
   instruction tools already tell the model to read the state again each
-  turn.
+  turn. `LangChain4JLLMProvider` also leaves a final answer without text out
+  of the memory. A model may answer that way once a tool call has done the
+  work, LangChain4j hands the answer over as an `AiMessage` with a `null`
+  text, and OpenAI's Chat Completions API rejects a replayed assistant
+  message that has neither content nor tool calls, which would fail every
+  later turn of the conversation.
 - The response stream carries text only; everything else the model said
   about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
   A provider publishes whenever it learns more — each publish carries the

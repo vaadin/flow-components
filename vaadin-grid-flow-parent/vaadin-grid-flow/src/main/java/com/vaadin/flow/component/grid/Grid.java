@@ -3517,36 +3517,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     void doClientSideSelection(Set<T> items) {
-        callSelectionFunctionForItems("doSelection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doSelection", jsonArray,
+                false);
     }
 
     void doClientSideDeselection(Set<T> items) {
-        callSelectionFunctionForItems("doDeselection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doDeselection",
+                jsonArray, false);
     }
 
     boolean isInActiveRange(T item) {
         return getDataCommunicator().getKeyMapper().has(item);
     }
 
-    private void callSelectionFunctionForItems(String function, Set<T> items) {
-        if (items.isEmpty()) {
-            return;
+    private JsonNode generateItemSelectionJson(T item) {
+        if (item == null) {
+            return JacksonUtils.nullNode();
         }
-        ArrayNode jsonArray = JacksonUtils.createArrayNode();
-        for (T item : items) {
-            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
-                    : null;
-            jsonArray.add(jsonObject);
-        }
-
-        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
-                false);
-    }
-
-    private JsonNode generateJsonForSelection(T item) {
-        ObjectNode json = JacksonUtils.createObjectNode();
-        json.put("key", getDataCommunicator().getKeyMapper().key(item));
-        return json;
+        ObjectNode jsonObject = JacksonUtils.createObjectNode();
+        jsonObject.put("key", getDataCommunicator().getKeyMapper().key(item));
+        return jsonObject;
     }
 
     private void callJsFunctionBeforeClientResponse(String functionName,
@@ -4003,6 +3999,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public GridContextMenu<T> addContextMenu() {
         return new GridContextMenu<T>(this);
+    }
+
+    /**
+     * Gets the grid context menus that have this grid as their target, in the
+     * order their target was set. This includes the menus created with
+     * {@link #addContextMenu()}, but not plain {@code ContextMenu} instances
+     * targeting this grid.
+     *
+     * @return an unmodifiable snapshot of the context menus targeting this
+     *         grid, empty if there are none
+     * @see GridContextMenu#getContextMenus(Grid)
+     * @since 25.4
+     */
+    public List<GridContextMenu<T>> getContextMenus() {
+        return GridContextMenu.getContextMenus(this);
     }
 
     private List<Column<T>> fetchChildColumns(ColumnGroup columnGroup) {
@@ -5136,7 +5147,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             tooltipElement.executeJs(
                     """
                             this.generator = ({ item, column }) => {
-                                const { gridtooltips } = item;
+                                const { gridtooltips } = item ?? {};
                                 if (gridtooltips) {
                                     return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
                                 }
