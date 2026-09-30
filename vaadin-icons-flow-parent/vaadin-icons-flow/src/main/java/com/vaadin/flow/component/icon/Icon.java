@@ -30,7 +30,7 @@ import com.vaadin.flow.signals.Signal;
  * @see VaadinIcon
  * @since 1.0
  */
-@NpmPackage(value = "@vaadin/icons", version = "25.4.0-dev.55bb86e155")
+@NpmPackage(value = "@vaadin/icons", version = "25.4.0-dev.c9532cd333")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 public class Icon extends AbstractIcon<Icon> {
 

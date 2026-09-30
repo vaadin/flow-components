@@ -59,7 +59,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 25.2
  */
 @Tag("vaadin-breadcrumbs")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.4.0-dev.55bb86e155")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.4.0-dev.c9532cd333")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs.js")
 public class Breadcrumbs extends Component implements HasSize, HasStyle,
         HasAriaLabel, HasComponentsOfType<BreadcrumbsItem>,

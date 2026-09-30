@@ -75,7 +75,7 @@ import com.vaadin.flow.data.binder.Validator;
  * @since 25.3
  */
 @Tag("vaadin-switch")
-@NpmPackage(value = "@vaadin/switch", version = "25.4.0-dev.55bb86e155")
+@NpmPackage(value = "@vaadin/switch", version = "25.4.0-dev.c9532cd333")
 @JsModule("@vaadin/switch/src/vaadin-switch.js")
 public class Switch extends AbstractSinglePropertyField<Switch, Boolean>
         implements ClickNotifier<Switch>, Focusable<Switch>, HasAriaDescription,
