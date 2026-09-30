@@ -48,6 +48,7 @@ require("highcharts/modules/timeline")(Highcharts);
 require("highcharts/modules/organization")(Highcharts);
 require("highcharts/modules/xrange")(Highcharts);
 require("highcharts/modules/bullet")(Highcharts);
+require('./highcharts-patches.js')(Highcharts);
 
 win.Date = Date;
 
