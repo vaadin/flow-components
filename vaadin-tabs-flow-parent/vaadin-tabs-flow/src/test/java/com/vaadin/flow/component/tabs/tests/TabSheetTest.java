@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.tabs.Tab;
@@ -540,6 +541,82 @@ class TabSheetTest {
 
         Assertions.assertThrows(NullPointerException.class,
                 () -> tabSheet.getTab(null));
+    }
+
+    @Test
+    void findTabContaining_content_returnsTab() {
+        var content = new Span("Content 0");
+        var tab = tabSheet.add("Tab 0", content);
+
+        Assertions.assertEquals(tab, tabSheet.findTabContaining(content));
+    }
+
+    @Test
+    void findTabContaining_nestedComponent_returnsTab() {
+        var field0 = new Span("Field 0");
+        var field1 = new Span("Field 1");
+        var tab0 = tabSheet.add("Tab 0", new Div(new Div(field0)));
+        var tab1 = tabSheet.add("Tab 1", new Div(new Div(field1)));
+
+        Assertions.assertEquals(tab0, tabSheet.findTabContaining(field0));
+        Assertions.assertEquals(tab1, tabSheet.findTabContaining(field1));
+    }
+
+    @Test
+    void findTabContaining_nestedTabSheet_returnsTabOfEachTabSheet() {
+        var field = new Span("Field");
+        var innerTabSheet = new TabSheet();
+        var innerTab = innerTabSheet.add("Inner tab", new Div(field));
+        var outerTab = tabSheet.add("Tab 0", new Div(innerTabSheet));
+
+        Assertions.assertEquals(innerTab,
+                innerTabSheet.findTabContaining(field));
+        Assertions.assertEquals(outerTab, tabSheet.findTabContaining(field));
+    }
+
+    @Test
+    void findTabContaining_unknownComponent_returnsNull() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        Assertions.assertNull(
+                tabSheet.findTabContaining(new Div(new Span("Unknown"))));
+    }
+
+    @Test
+    void findTabContaining_tab_returnsNull() {
+        var tab = tabSheet.add("Tab 0", new Span("Content 0"));
+
+        Assertions.assertNull(tabSheet.findTabContaining(tab));
+    }
+
+    @Test
+    void findTabContaining_removedTabOfNestedTabSheet_returnsNull() {
+        var field = new Span("Field");
+        var innerTabSheet = new TabSheet();
+        var innerTab = innerTabSheet.add("Inner tab", new Div(field));
+        tabSheet.add("Tab 0", new Div(innerTabSheet));
+        innerTabSheet.remove(innerTab);
+
+        Assertions.assertNull(innerTabSheet.findTabContaining(field));
+        Assertions.assertNull(tabSheet.findTabContaining(field));
+    }
+
+    @Test
+    void findTabContaining_replacedContentOfNestedTabSheet_returnsNull() {
+        var field = new Span("Field");
+        var innerTabSheet = new TabSheet();
+        var innerTab = innerTabSheet.add("Inner tab", new Div(field));
+        tabSheet.add("Tab 0", new Div(innerTabSheet));
+        innerTabSheet.add(innerTab, new Span("New content"));
+
+        Assertions.assertNull(innerTabSheet.findTabContaining(field));
+        Assertions.assertNull(tabSheet.findTabContaining(field));
+    }
+
+    @Test
+    void findTabContaining_nullComponent_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> tabSheet.findTabContaining(null));
     }
 
     @Test
