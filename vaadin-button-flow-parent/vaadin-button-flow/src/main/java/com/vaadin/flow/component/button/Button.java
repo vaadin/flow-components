@@ -38,6 +38,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.download.Download;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -49,6 +50,7 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -72,6 +74,8 @@ public class Button extends Component
     private boolean iconAfterText;
     private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
+    private DownloadHandler downloadHandler;
+    private Registration downloadRegistration;
 
     private final SignalPropertySupport<String> textSupport = SignalPropertySupport
             .create(this, this::textChangeHandler);
@@ -368,6 +372,64 @@ public class Button extends Component
      */
     public void clickInClient() {
         getElement().callJsFunction("click");
+    }
+
+    /**
+     * Gets the handler that produces the file downloaded when the button is
+     * clicked.
+     *
+     * @return the download handler, or {@code null} if clicking the button does
+     *         not start a download
+     * @see #setDownloadHandler(DownloadHandler)
+     * @since 25.4
+     */
+    public DownloadHandler getDownloadHandler() {
+        return downloadHandler;
+    }
+
+    /**
+     * Sets a handler that produces a file to download when the button is
+     * clicked. The download starts in the browser as part of the click, and
+     * click listeners still run as usual. Setting a new handler replaces the
+     * previous one, and {@code null} stops the button from starting a download.
+     * <p>
+     * The handler runs only when the browser requests the file, once per click,
+     * so you can create the content, file name and response headers at that
+     * point. If the handler fails, the browser reports a failed download
+     * instead of saving an empty file. Use the transfer callbacks of the
+     * handler, for example
+     * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler#whenComplete(com.vaadin.flow.function.SerializableConsumer)
+     * whenComplete}, to react on the server when the transfer has finished or
+     * failed.
+     * <p>
+     * The file is only served while the button is enabled. When you combine
+     * this with {@link #setDisableOnClick(boolean) disable on click}, the
+     * button can be disabled before the browser requests the file. Pass
+     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()} to serve
+     * the file in that case.
+     *
+     * <pre>{@code
+     * Button export = new Button("Export");
+     * export.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+     * export.setDownloadHandler(DownloadHandler
+     *         .fromInputStream(event -> createReport()).allowDisabled());
+     * }</pre>
+     *
+     * @param downloadHandler
+     *            the handler that produces the file, or {@code null} to not
+     *            start a download on click
+     * @since 25.4
+     */
+    public void setDownloadHandler(DownloadHandler downloadHandler) {
+        if (downloadRegistration != null) {
+            downloadRegistration.remove();
+            downloadRegistration = null;
+        }
+        this.downloadHandler = downloadHandler;
+        if (downloadHandler != null) {
+            downloadRegistration = Download.onClick(this)
+                    .start(downloadHandler);
+        }
     }
 
     /**
