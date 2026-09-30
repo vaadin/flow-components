@@ -49,7 +49,7 @@ jobs:
         env:
           MAVEN_ARGS: -ntp -B
         with:
-          github-token: ${{ secrets.GHTK }}
+          github-token: ${{ secrets.CHERRY_PICK_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           # Rollout: only log what would be picked while the existing
           # cherry-pick job is still active.
