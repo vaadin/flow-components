@@ -31,8 +31,9 @@ public class DownloadHandlerButtonPage extends Div {
     static final String BODY = "button-download-body";
 
     public DownloadHandlerButtonPage() {
-        Button download = Button.forDownload("Download", createHandler());
+        Button download = new Button("Download");
         download.setId("download");
+        download.setDownloadHandler(createHandler());
 
         Button disableOnClick = new Button("Download and disable");
         disableOnClick.setId("download-disable-on-click");

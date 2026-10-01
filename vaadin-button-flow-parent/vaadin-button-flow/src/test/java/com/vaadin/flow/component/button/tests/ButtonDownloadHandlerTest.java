@@ -65,15 +65,6 @@ class ButtonDownloadHandlerTest {
         Assertions.assertEquals(0, countDownloadResources());
     }
 
-    @Test
-    void forDownload_createsButtonWithTextAndHandler() {
-        DownloadHandler handler = createHandler();
-        Button download = Button.forDownload("Export", handler);
-
-        Assertions.assertEquals("Export", download.getText());
-        Assertions.assertSame(handler, download.getDownloadHandler());
-    }
-
     private static DownloadHandler createHandler() {
         return event -> event.getOutputStream().write(1);
     }
