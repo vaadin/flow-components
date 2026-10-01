@@ -10,5 +10,5 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      # Kept in sync with the version used by Flow, bumped together with it
+      # Owned by Flow, the version is copied from the Flow root POM
       - dependency-name: "io.smallrye:jandex-maven-plugin"
