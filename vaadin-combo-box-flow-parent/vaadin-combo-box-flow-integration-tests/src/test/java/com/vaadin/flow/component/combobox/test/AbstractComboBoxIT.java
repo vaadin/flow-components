@@ -38,17 +38,17 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void assertItemSelected(ComboBoxElement combo, String label) {
-        Optional<TestBenchElement> itemElement = getItemElements(combo).stream()
-                .filter(element -> getItemLabel(element).equals(label))
+        Optional<Map<String, ?>> item = getRenderedItems(combo).stream().filter(
+                rendered -> ((String) rendered.get("content")).equals(label))
                 .findFirst();
         Assert.assertTrue(
                 "Could not find the item with label '" + label
                         + "' which was expected to be selected.",
-                itemElement.isPresent());
+                item.isPresent());
         Assert.assertEquals(
                 "Expected item element with label '" + label
                         + "' to have 'selected' attribute.",
-                true, itemElement.get().getProperty("selected"));
+                true, item.get().get("selected"));
     }
 
     protected void assertLoadedItemsCount(String message, int expectedCount,
@@ -127,8 +127,21 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
     protected List<String> getOverlayContents(ComboBoxElement comboBox) {
-        return getItemElements(comboBox).stream().map(this::getItemLabel)
-                .toList();
+        return getRenderedItems(comboBox).stream()
+                .map(item -> (String) item.get("content")).toList();
+    }
+
+    // Reads the content and selected state of the rendered items in one
+    // script to avoid a WebDriver round trip per item
+    @SuppressWarnings("unchecked")
+    private List<Map<String, ?>> getRenderedItems(ComboBoxElement comboBox) {
+        return (List<Map<String, ?>>) executeScript("""
+                return [...arguments[0]._scroller.querySelectorAll(
+                    'vaadin-combo-box-item:not([hidden])')]
+                    .map(item => ({
+                        content: item.innerHTML.replace(/<!--.*?-->/g, ''),
+                        selected: item.selected,
+                    }));""", comboBox);
     }
 
     protected List<String> getNonEmptyOverlayContents(
@@ -137,14 +150,9 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 .filter(rendered -> !rendered.isEmpty()).toList();
     }
 
-    protected String getItemLabel(TestBenchElement itemElement) {
-        String innerHtml = itemElement.getPropertyString("innerHTML");
-        return stripComments(innerHtml);
-    }
-
     protected List<TestBenchElement> getItemElements(ComboBoxElement comboBox) {
-        return getScroller(comboBox).$("vaadin-combo-box-item").all().stream()
-                .filter(element -> !element.hasAttribute("hidden")).toList();
+        return getScroller(comboBox).$("vaadin-combo-box-item")
+                .withoutAttribute("hidden").all();
     }
 
     protected void scrollToItem(ComboBoxElement comboBox, int index) {
@@ -222,16 +230,5 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
             return condition.apply(comboItems);
         });
-    }
-
-    /**
-     * Strips comments from the given HTML string.
-     *
-     * @param html
-     *            the html String
-     * @return the stripped html
-     */
-    private static String stripComments(String html) {
-        return html.replaceAll("<!--.*?-->", "");
     }
 }

@@ -96,6 +96,128 @@ class ContextMenuTargetTest {
         assertTargetConnectorRemove(invocations, target);
     }
 
+    @Test
+    void noContextMenu_getContextMenusIsEmpty() {
+        Assertions.assertEquals(List.of(),
+                ContextMenu.getContextMenus(new Div()));
+    }
+
+    @Test
+    void setTarget_getContextMenusReturnsMenusInOrder() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+
+        Assertions.assertEquals(List.of(menu, secondMenu),
+                ContextMenu.getContextMenus(target));
+    }
+
+    @Test
+    void multipleMenus_clearTargetOfOne_getContextMenusKeepsOthers() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+        var thirdMenu = new ContextMenu(target);
+
+        secondMenu.setTarget(null);
+
+        Assertions.assertEquals(List.of(menu, thirdMenu),
+                ContextMenu.getContextMenus(target));
+    }
+
+    @Test
+    void multipleMenus_replaceTargetOfOne_getContextMenusMovesOnlyThatMenu() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+        var newTarget = new Div();
+        var newTargetMenu = new ContextMenu(newTarget);
+
+        menu.setTarget(newTarget);
+
+        Assertions.assertEquals(List.of(secondMenu),
+                ContextMenu.getContextMenus(target));
+        Assertions.assertEquals(List.of(newTargetMenu, menu),
+                ContextMenu.getContextMenus(newTarget));
+    }
+
+    @Test
+    void multipleMenus_setSameTargetAgain_getContextMenusMovesMenuToEnd() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+
+        menu.setTarget(target);
+
+        Assertions.assertEquals(List.of(secondMenu, menu),
+                ContextMenu.getContextMenus(target));
+    }
+
+    @Test
+    void multipleMenus_clearAllTargets_getContextMenusIsEmpty() {
+        var target = new Div();
+        menu.setTarget(target);
+        var secondMenu = new ContextMenu(target);
+
+        menu.setTarget(null);
+        secondMenu.setTarget(null);
+
+        Assertions.assertEquals(List.of(), ContextMenu.getContextMenus(target));
+    }
+
+    @Test
+    void clearTarget_getContextMenusIsEmpty() {
+        var target = new Div();
+        menu.setTarget(target);
+
+        menu.setTarget(null);
+
+        Assertions.assertEquals(List.of(), ContextMenu.getContextMenus(target));
+    }
+
+    @Test
+    void replaceTarget_getContextMenusMovesMenuToNewTarget() {
+        var target = new Div();
+        menu.setTarget(target);
+        var newTarget = new Div();
+
+        menu.setTarget(newTarget);
+
+        Assertions.assertEquals(List.of(), ContextMenu.getContextMenus(target));
+        Assertions.assertEquals(List.of(menu),
+                ContextMenu.getContextMenus(newTarget));
+    }
+
+    @Test
+    void setSameTargetTwice_getContextMenusContainsMenuOnce() {
+        var target = new Div();
+        menu.setTarget(target);
+
+        menu.setTarget(target);
+
+        Assertions.assertEquals(List.of(menu),
+                ContextMenu.getContextMenus(target));
+    }
+
+    @Test
+    void getContextMenus_isUnmodifiableSnapshot() {
+        var target = new Div();
+        menu.setTarget(target);
+
+        var menus = ContextMenu.getContextMenus(target);
+        new ContextMenu(target);
+
+        Assertions.assertEquals(List.of(menu), menus);
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                menus::clear);
+    }
+
+    @Test
+    void getContextMenusOfNull_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> ContextMenu.getContextMenus(null));
+    }
+
     private void assertTargetConnectorInit(
             List<PendingJavaScriptInvocation> invocations, Component target) {
         var initInvocations = filterTargetConnectorInitInvocations(invocations);

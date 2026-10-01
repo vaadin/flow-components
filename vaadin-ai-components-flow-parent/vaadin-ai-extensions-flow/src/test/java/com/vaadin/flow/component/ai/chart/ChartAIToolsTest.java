@@ -78,6 +78,14 @@ class ChartAIToolsTest {
         }
 
         @Test
+        void description_referencesConfigurationTool() {
+            var configurationTool = ChartAITools
+                    .updateChartConfiguration(callbacks);
+            Assertions.assertTrue(tool.getDescription()
+                    .contains(configurationTool.getName()));
+        }
+
+        @Test
         void parametersSchema_isValidJson() {
             Assertions.assertTrue(tool.getParametersSchema()
                     .contains("\"type\": \"object\""));

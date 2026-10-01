@@ -3517,36 +3517,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     void doClientSideSelection(Set<T> items) {
-        callSelectionFunctionForItems("doSelection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doSelection", jsonArray,
+                false);
     }
 
     void doClientSideDeselection(Set<T> items) {
-        callSelectionFunctionForItems("doDeselection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doDeselection",
+                jsonArray, false);
     }
 
     boolean isInActiveRange(T item) {
         return getDataCommunicator().getKeyMapper().has(item);
     }
 
-    private void callSelectionFunctionForItems(String function, Set<T> items) {
-        if (items.isEmpty()) {
-            return;
+    private JsonNode generateItemSelectionJson(T item) {
+        if (item == null) {
+            return JacksonUtils.nullNode();
         }
-        ArrayNode jsonArray = JacksonUtils.createArrayNode();
-        for (T item : items) {
-            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
-                    : null;
-            jsonArray.add(jsonObject);
-        }
-
-        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
-                false);
-    }
-
-    private JsonNode generateJsonForSelection(T item) {
-        ObjectNode json = JacksonUtils.createObjectNode();
-        json.put("key", getDataCommunicator().getKeyMapper().key(item));
-        return json;
+        ObjectNode jsonObject = JacksonUtils.createObjectNode();
+        jsonObject.put("key", getDataCommunicator().getKeyMapper().key(item));
+        return jsonObject;
     }
 
     private void callJsFunctionBeforeClientResponse(String functionName,
@@ -3682,6 +3678,51 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Column<T> getColumnByKey(String columnKey) {
         return keyToColumnMap.get(columnKey);
+    }
+
+    /**
+     * Gets a {@link Column} of this grid by one of its sort properties. You can
+     * use this to find the column for a sort property that a lazy data provider
+     * receives through {@link Query#getSortOrders()}.
+     * <p>
+     * A column's sort properties are the properties set with
+     * {@link Column#setSortProperty(String...)}, the properties returned by a
+     * custom {@link Column#setSortOrderProvider(SortOrderProvider) sort order
+     * provider}, or the column's key if neither is set. The column matches when
+     * any of its sort properties is equal to the given sort property.
+     * <p>
+     * Note the following limitations:
+     * <ul>
+     * <li>Unlike column keys, sort properties do not have to be unique. If more
+     * than one column uses the given sort property, this method returns the
+     * first one in the order of {@link #getColumns()}.</li>
+     * <li>This method matches against the sort orders that a column returns for
+     * {@link SortDirection#ASCENDING}. If a custom sort order provider returns
+     * different properties per direction, the properties for
+     * {@link SortDirection#DESCENDING} are not matched.</li>
+     * <li>The column does not have to be sortable. For example, a column with a
+     * key that is not sortable still matches its key.</li>
+     * </ul>
+     *
+     * @see Column#setSortProperty(String...)
+     * @see Column#setSortOrderProvider(SortOrderProvider)
+     *
+     * @param sortProperty
+     *            the sort property of the column to get
+     * @return the first column that uses the given sort property, or
+     *         {@code null} if no column uses it or if {@code sortProperty} is
+     *         {@code null}
+     * @since 25.4
+     */
+    public Column<T> getColumnBySortProperty(String sortProperty) {
+        if (sortProperty == null) {
+            return null;
+        }
+        return getColumns().stream()
+                .filter(column -> column.getSortOrder(SortDirection.ASCENDING)
+                        .anyMatch(order -> sortProperty
+                                .equals(order.getSorted())))
+                .findFirst().orElse(null);
     }
 
     /**
@@ -4003,6 +4044,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public GridContextMenu<T> addContextMenu() {
         return new GridContextMenu<T>(this);
+    }
+
+    /**
+     * Gets the grid context menus that have this grid as their target, in the
+     * order their target was set. This includes the menus created with
+     * {@link #addContextMenu()}, but not plain {@code ContextMenu} instances
+     * targeting this grid.
+     *
+     * @return an unmodifiable snapshot of the context menus targeting this
+     *         grid, empty if there are none
+     * @see GridContextMenu#getContextMenus(Grid)
+     * @since 25.4
+     */
+    public List<GridContextMenu<T>> getContextMenus() {
+        return GridContextMenu.getContextMenus(this);
     }
 
     private List<Column<T>> fetchChildColumns(ColumnGroup columnGroup) {
@@ -5136,7 +5192,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             tooltipElement.executeJs(
                     """
                             this.generator = ({ item, column }) => {
-                                const { gridtooltips } = item;
+                                const { gridtooltips } = item ?? {};
                                 if (gridtooltips) {
                                     return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
                                 }

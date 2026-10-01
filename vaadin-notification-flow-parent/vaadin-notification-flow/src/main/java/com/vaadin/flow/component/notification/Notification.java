@@ -338,6 +338,20 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
+     * Gets the text of the notification.
+     * <p>
+     * Adding components to the notification clears the text, so this returns an
+     * empty string when the notification shows components.
+     *
+     * @return the text set with {@link #setText(String)}, or an empty string if
+     *         no text is set; never {@code null}
+     * @since 25.4
+     */
+    public String getText() {
+        return getElement().getProperty("text", "");
+    }
+
+    /**
      * Set the text of the notification with given String
      * <p>
      * NOTE: When mixing this method with {@link #Notification()} and

@@ -62,21 +62,39 @@ public final class ChartRenderer implements Serializable {
     public static void renderChart(Chart chart,
             DatabaseProvider databaseProvider, DataConverter dataConverter,
             List<String> queries, String configJson) {
+        renderChart(chart, databaseProvider, dataConverter, queries,
+                configJson == null ? List.of() : List.of(configJson));
+    }
+
+    /**
+     * Renders a chart like
+     * {@link #renderChart(Chart, DatabaseProvider, DataConverter, List, String)},
+     * applying each of the configuration JSON strings in order.
+     */
+    static void renderChart(Chart chart, DatabaseProvider databaseProvider,
+            DataConverter dataConverter, List<String> queries,
+            List<String> configJsons) {
         List<Series> allSeries = new ArrayList<>();
         for (String query : queries) {
             var results = databaseProvider.executeQuery(query);
             allSeries.addAll(dataConverter.convertToSeries(results));
         }
 
-        Configuration config = chart.getConfiguration();
-        if (configJson != null) {
-            var parsed = ChartConfigurationParser.parse(configJson);
-            if (chartTypeChanged(config, parsed)) {
-                config = parsed;
-                chart.setConfiguration(config);
-            } else {
-                ChartConfigurationParser.merge(configJson, config);
-            }
+        // A JSON that changes the chart type replaces the configuration, so
+        // the JSONs before the last such change have no effect and are
+        // skipped. This also leaves the previous configuration untouched for
+        // the rollback below.
+        Configuration previous = chart.getConfiguration();
+        int lastTypeChange = lastTypeChange(previous, configJsons);
+        Configuration config = lastTypeChange < 0 ? previous
+                : ChartConfigurationParser
+                        .parse(configJsons.get(lastTypeChange));
+        for (var configJson : configJsons.subList(lastTypeChange + 1,
+                configJsons.size())) {
+            ChartConfigurationParser.merge(configJson, config);
+        }
+        if (config != previous) {
+            chart.setConfiguration(config);
         }
 
         // Extract per-series config (plotOptions, yAxis) from the
@@ -101,7 +119,52 @@ public final class ChartRenderer implements Serializable {
         // Full reset required. Without it, axis categories are
         // lost when the chart is rendered via async Push (see
         // DashboardChartControllerIT).
-        chart.drawChart(true);
+        try {
+            chart.drawChart(true);
+        } catch (RuntimeException e) {
+            // The chart rejects some configurations, such as an unsupported
+            // type in timeline mode. Keep the one it last accepted.
+            if (config != previous) {
+                chart.setConfiguration(previous);
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Applies configuration JSON from the LLM and returns the result: a new
+     * chart type replaces the configuration, anything else is merged into it.
+     */
+    static Configuration applyConfiguration(Configuration current,
+            String configJson) {
+        var parsed = ChartConfigurationParser.parse(configJson);
+        if (chartTypeChanged(current, parsed)) {
+            return parsed;
+        }
+        ChartConfigurationParser.merge(configJson, current);
+        return current;
+    }
+
+    /**
+     * Returns the index of the last configuration JSON that changes the chart
+     * type when the JSONs are applied in order to the given configuration, or
+     * {@code -1} if none does.
+     */
+    private static int lastTypeChange(Configuration current,
+            List<String> configJsons) {
+        var type = current.getChart().getType();
+        var last = -1;
+        for (var i = 0; i < configJsons.size(); i++) {
+            var newType = ChartConfigurationParser.parse(configJsons.get(i))
+                    .getChart().getType();
+            if (newType != null && !newType.equals(type)) {
+                last = i;
+            }
+            if (newType != null) {
+                type = newType;
+            }
+        }
+        return last;
     }
 
     /**
@@ -246,7 +309,7 @@ public final class ChartRenderer implements Serializable {
      * configuration's current series, keyed by series name. These are
      * "template" series set by the parser that carry config but no data.
      */
-    private static Map<String, AbstractSeries> extractSeriesConfig(
+    static Map<String, AbstractSeries> extractSeriesConfig(
             Configuration config) {
         var result = new LinkedHashMap<String, AbstractSeries>();
         for (var series : config.getSeries()) {
@@ -261,22 +324,33 @@ public final class ChartRenderer implements Serializable {
      * Applies previously extracted series configuration to the data series.
      * Matches by name first, then falls back to positional matching for
      * unmatched series — copying the template's name, plot options, and y-axis
-     * binding.
+     * binding. When the templates of this turn cover every unmatched data
+     * series, the series of the previous render take no position, so they
+     * cannot shift the templates onto the wrong series.
      */
     private static void applySeriesConfig(List<Series> allSeries,
             Map<String, AbstractSeries> seriesConfig) {
         // Pre-scan: which template names have a matching data series?
         var nameMatched = new HashSet<String>();
+        var unmatchedSeries = 0;
         for (var s : allSeries) {
-            if (s instanceof AbstractSeries as
-                    && seriesConfig.containsKey(as.getName())) {
+            if (!(s instanceof AbstractSeries as)) {
+                continue;
+            }
+            if (seriesConfig.containsKey(as.getName())) {
                 nameMatched.add(as.getName());
+            } else {
+                unmatchedSeries++;
             }
         }
 
         // Templates without a name match feed the positional fallback.
-        var positional = seriesConfig.values().stream()
-                .filter(t -> !nameMatched.contains(t.getName())).iterator();
+        var unmatched = seriesConfig.values().stream()
+                .filter(t -> !nameMatched.contains(t.getName())).toList();
+        var fresh = unmatched.stream().filter(ChartRenderer::isTemplate)
+                .toList();
+        var positional = (fresh.size() >= unmatchedSeries ? fresh : unmatched)
+                .iterator();
 
         for (var s : allSeries) {
             if (!(s instanceof AbstractSeries as)) {
@@ -291,6 +365,14 @@ public final class ChartRenderer implements Serializable {
                 applyTemplate(as, tpl);
             }
         }
+    }
+
+    /**
+     * A series the parser created from this turn's configuration JSON, as
+     * opposed to a data series of the previous render.
+     */
+    private static boolean isTemplate(AbstractSeries series) {
+        return series instanceof DataSeries data && data.getData().isEmpty();
     }
 
     private static void applyTemplate(AbstractSeries target,
