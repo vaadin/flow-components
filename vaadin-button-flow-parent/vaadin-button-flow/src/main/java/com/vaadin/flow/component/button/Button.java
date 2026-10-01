@@ -88,6 +88,9 @@ public class Button extends Component
 
     /**
      * Creates a button with a text inside.
+     * <p>
+     * To create a button that downloads a file when clicked, use
+     * {@link #forDownload(String, DownloadHandler)}.
      *
      * @param text
      *            the text inside the button
