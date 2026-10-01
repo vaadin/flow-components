@@ -9,6 +9,3 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
-    ignore:
-      # Owned by Flow, the version is copied from the Flow root POM
-      - dependency-name: "io.smallrye:jandex-maven-plugin"
