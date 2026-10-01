@@ -65,15 +65,13 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.impl.values.XmlValueDisconnectedException;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
@@ -6031,6 +6029,170 @@ public class Spreadsheet extends Component
     }
 
     /**
+     * Groups the given columns of the active sheet. Grouping a range inside an
+     * existing group creates a nested group. Groups can be nested at most 7
+     * levels deep. Only supported for XLSX workbooks.
+     *
+     * @param firstColumn
+     *            the first column of the group, 0-based
+     * @param lastColumn
+     *            the last column of the group, 0-based, inclusive
+     */
+    public void addColumnGroup(int firstColumn, int lastColumn) {
+        ColumnOutline.group(getActiveXSSFSheet(), firstColumn, lastColumn);
+        refreshGrouping();
+    }
+
+    /**
+     * Removes one grouping level from the given columns of the active sheet,
+     * like "Ungroup" in Excel.
+     *
+     * @param firstColumn
+     *            the first column, 0-based
+     * @param lastColumn
+     *            the last column, 0-based, inclusive
+     */
+    public void removeColumnGroup(int firstColumn, int lastColumn) {
+        ColumnOutline.ungroup(getActiveXSSFSheet(), firstColumn, lastColumn);
+        refreshGrouping();
+    }
+
+    /**
+     * Removes all column groups of the active sheet and shows the columns that
+     * were hidden by collapsed groups.
+     */
+    public void clearColumnGroups() {
+        ColumnOutline.clear(getActiveXSSFSheet());
+        refreshGrouping();
+    }
+
+    /**
+     * Returns all column groups of the active sheet, including nested groups
+     * and groups inside a collapsed parent group.
+     *
+     * @return the column groups, sorted by first column and then by level
+     */
+    public List<ColumnGroup> getColumnGroups() {
+        if (!(getActiveSheet() instanceof XSSFSheet sheet)) {
+            return List.of();
+        }
+        return ColumnOutline.getGroups(sheet);
+    }
+
+    /**
+     * Collapses or expands a column group of the active sheet. Nested groups
+     * keep their own collapsed state, so a set of states read with
+     * {@link #getColumnGroups()} can be restored in any order.
+     *
+     * @param group
+     *            the group, as returned by {@link #getColumnGroups()}
+     * @param collapsed
+     *            whether the group should be collapsed
+     */
+    public void setColumnGroupCollapsed(ColumnGroup group, boolean collapsed) {
+        ColumnGroup current = ColumnOutline.findGroup(getActiveXSSFSheet(),
+                group.firstColumn(), group.level());
+        if (current == null || !current.sameRange(group)) {
+            throw new IllegalArgumentException("No such column group");
+        }
+        doSetColumnGroupCollapsed(current, collapsed, false);
+    }
+
+    /**
+     * Sends the grouping state of the active sheet to the client again. Needed
+     * only after changing column or row outlines directly through the POI API.
+     */
+    public void refreshGrouping() {
+        Sheet sheet = getActiveSheet();
+        int cols = getCols();
+        SpreadsheetFactory.calculateSheetSizes(this, sheet);
+        // keep a column count set with setMaxColumns
+        setCols(cols);
+        SpreadsheetFactory.loadGrouping(this);
+        reloadActiveSheetStyles();
+        if (hasSheetOverlays()) {
+            reloadImageSizesFromPOI = true;
+            loadOrUpdateOverlays();
+        }
+        updateMarkedCells();
+    }
+
+    /**
+     * Adds a listener for when a column group is collapsed or expanded.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a {@link Registration} for removing the listener
+     */
+    public Registration addColumnGroupToggleListener(
+            ComponentEventListener<ColumnGroupToggleEvent> listener) {
+        return addListener(ColumnGroupToggleEvent.class, listener);
+    }
+
+    /**
+     * Fired when a column group is collapsed or expanded, either by the user or
+     * through {@link #setColumnGroupCollapsed(ColumnGroup, boolean)}.
+     */
+    public static class ColumnGroupToggleEvent
+            extends ComponentEvent<Spreadsheet> {
+        private final ColumnGroup group;
+
+        public ColumnGroupToggleEvent(Spreadsheet source, boolean fromClient,
+                ColumnGroup group) {
+            super(source, fromClient);
+            this.group = group;
+        }
+
+        /**
+         * @return the group with its new collapsed state
+         */
+        public ColumnGroup getGroup() {
+            return group;
+        }
+
+        /**
+         * @return whether the group was collapsed, {@code false} if expanded
+         */
+        public boolean isCollapsed() {
+            return group.collapsed();
+        }
+    }
+
+    private void doSetColumnGroupCollapsed(ColumnGroup group, boolean collapsed,
+            boolean fromClient) {
+        XSSFSheet sheet = getActiveXSSFSheet();
+        ColumnOutline.setCollapsed(sheet, group, collapsed);
+        if (!collapsed) {
+            markColumnsForUpdate(sheet, group.firstColumn(),
+                    group.lastColumn());
+        }
+        refreshGrouping();
+        fireEvent(new ColumnGroupToggleEvent(this, fromClient,
+                new ColumnGroup(group.firstColumn(), group.lastColumn(),
+                        group.level(), collapsed)));
+    }
+
+    private void markColumnsForUpdate(Sheet sheet, int firstColumn,
+            int lastColumn) {
+        for (Row row : sheet) {
+            for (int c = firstColumn; c <= lastColumn; c++) {
+                Cell cell = row.getCell(c);
+                if (cell != null) {
+                    valueManager.markCellForUpdate(cell);
+                }
+            }
+        }
+    }
+
+    private XSSFSheet getActiveXSSFSheet() {
+        if (getActiveSheet() instanceof XSSFSheet sheet) {
+            return sheet;
+        }
+        throw new UnsupportedOperationException(
+                "Column grouping is only supported for XLSX workbooks");
+    }
+
+    /**
      * Controls if a column group is collapsed or not.
      *
      * @param isCols
@@ -6046,13 +6208,20 @@ public class Spreadsheet extends Component
 
         XSSFSheet activeSheet = (XSSFSheet) getActiveSheet();
         if (isCols) {
-            if (collapsed) {
-                GroupingUtil.collapseColumn(activeSheet, index);
-            } else {
-                short expandLevel = GroupingUtil.expandColumn(activeSheet,
-                        index);
-                updateExpandedRegion(activeSheet, index, expandLevel);
+            // index is the unique index of a group rendered on the client
+            GroupingData data = getColGroupingData().stream()
+                    .filter(d -> d.uniqueIndex == index).findFirst()
+                    .orElse(null);
+            ColumnGroup group = data == null ? null
+                    : ColumnOutline.findGroup(activeSheet, data.startIndex,
+                            data.level);
+            if (group == null) {
+                // resend the state so the client drops its optimistic toggle
+                refreshGrouping();
+                return;
             }
+            doSetColumnGroupCollapsed(group, collapsed, true);
+            return;
         } else {
             if (collapsed) {
                 GroupingUtil.collapseRow(activeSheet, index);
@@ -6123,28 +6292,11 @@ public class Spreadsheet extends Component
         }
 
         XSSFSheet xsheet = (XSSFSheet) getActiveSheet();
-        CTWorksheet ctWorksheet = xsheet.getCTWorksheet();
 
         if (isCols) {
-
-            CTCols ctCols = ctWorksheet.getColsList().get(0);
-            List<CTCol> colList = ctCols.getColList();
-            for (CTCol col : colList) {
-                short l = col.getOutlineLevel();
-
-                // It's a lot easier to not call expand/collapse
-
-                if (l >= 0 && l < level) {
-                    // expand
-                    if (col.isSetHidden()) {
-                        col.unsetHidden();
-                    }
-                } else {
-                    // collapse
-                    col.setHidden(true);
-                }
-            }
-
+            ColumnOutline.collapseToLevel(xsheet, level);
+            refreshGrouping();
+            return;
         } else {
 
             /*

@@ -367,6 +367,14 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     || stateChangeEvent.hasPropertyChanged("rowH")
                     || stateChangeEvent.hasPropertyChanged("rows")
                     || stateChangeEvent.hasPropertyChanged("cols")
+                    || stateChangeEvent.hasPropertyChanged("colGroupingData")
+                    || stateChangeEvent.hasPropertyChanged("rowGroupingData")
+                    || stateChangeEvent.hasPropertyChanged("colGroupingMax")
+                    || stateChangeEvent.hasPropertyChanged("rowGroupingMax")
+                    || stateChangeEvent
+                            .hasPropertyChanged("colGroupingInversed")
+                    || stateChangeEvent
+                            .hasPropertyChanged("rowGroupingInversed")
                     || stateChangeEvent
                             .hasPropertyChanged("verticalSplitPosition")
                     || stateChangeEvent

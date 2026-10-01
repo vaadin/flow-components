@@ -12,7 +12,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
@@ -208,7 +207,6 @@ class GroupingTest {
         Assertions.assertTrue(spreadsheet.isColumnHidden(SHEET6_COLUMN));
     }
 
-    @Disabled("bug in GroupingUtil, collapsing and expanding parent column should not result with collapsed child columns")
     @Test
     void collapseParentColumn_expandParentColumn_columnVisible() {
         setActiveSheet(SHEET6);
@@ -271,7 +269,6 @@ class GroupingTest {
     }
 
     @Test
-    @Disabled("bug in GroupingUtil, collapsing and expanding parent column should not result with collapsed child columns")
     void inverted_collapseParentColumn_expandParentColumn_columnVisible() {
         setActiveSheet(SHEET7);
 

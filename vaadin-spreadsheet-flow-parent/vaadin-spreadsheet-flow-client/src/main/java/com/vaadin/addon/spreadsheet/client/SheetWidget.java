@@ -6728,7 +6728,13 @@ public class SheetWidget extends Panel {
 
                 } else {
 
-                    if (useCol) {
+                    // a group ending on the last column/row has no next one to
+                    // put the button on, so keep the marker inside the sheet
+                    int max = useCol ? actionHandler.getMaxColumns()
+                            : actionHandler.getMaxRows();
+                    if (data.endIndex + 2 > max) {
+                        length -= START_PADDING;
+                    } else if (useCol) {
                         length += getColumnWidth(data.endIndex + 2) / 2d;
                     } else {
                         length += getRowHeight(data.endIndex + 2) / 2d;
