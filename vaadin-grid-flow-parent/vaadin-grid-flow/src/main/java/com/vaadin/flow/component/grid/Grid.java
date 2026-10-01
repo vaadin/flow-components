@@ -3681,6 +3681,51 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Gets a {@link Column} of this grid by one of its sort properties. You can
+     * use this to find the column for a sort property that a lazy data provider
+     * receives through {@link Query#getSortOrders()}.
+     * <p>
+     * A column's sort properties are the properties set with
+     * {@link Column#setSortProperty(String...)}, the properties returned by a
+     * custom {@link Column#setSortOrderProvider(SortOrderProvider) sort order
+     * provider}, or the column's key if neither is set. The column matches when
+     * any of its sort properties is equal to the given sort property.
+     * <p>
+     * Note the following limitations:
+     * <ul>
+     * <li>Unlike column keys, sort properties do not have to be unique. If more
+     * than one column uses the given sort property, this method returns the
+     * first one in the order of {@link #getColumns()}.</li>
+     * <li>This method matches against the sort orders that a column returns for
+     * {@link SortDirection#ASCENDING}. If a custom sort order provider returns
+     * different properties per direction, the properties for
+     * {@link SortDirection#DESCENDING} are not matched.</li>
+     * <li>The column does not have to be sortable. For example, a column with a
+     * key that is not sortable still matches its key.</li>
+     * </ul>
+     *
+     * @see Column#setSortProperty(String...)
+     * @see Column#setSortOrderProvider(SortOrderProvider)
+     *
+     * @param sortProperty
+     *            the sort property of the column to get
+     * @return the first column that uses the given sort property, or
+     *         {@code null} if no column uses it or if {@code sortProperty} is
+     *         {@code null}
+     * @since 25.4
+     */
+    public Column<T> getColumnBySortProperty(String sortProperty) {
+        if (sortProperty == null) {
+            return null;
+        }
+        return getColumns().stream()
+                .filter(column -> column.getSortOrder(SortDirection.ASCENDING)
+                        .anyMatch(order -> sortProperty
+                                .equals(order.getSorted())))
+                .findFirst().orElse(null);
+    }
+
+    /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
      * Intended only for internal use and can be removed in the future.
      *
