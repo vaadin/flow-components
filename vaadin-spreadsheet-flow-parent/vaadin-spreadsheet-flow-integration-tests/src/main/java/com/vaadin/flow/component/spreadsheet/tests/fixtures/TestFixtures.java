@@ -39,6 +39,7 @@ public enum TestFixtures {
     CustomEditor(SimpleCustomEditorFixture.class),
     Styles(StylesFixture.class),
     LockCell(LockCellFixture.class),
+    LockSheet(LockSheetFixture.class),
     CustomComponent(CustomComponentFixture.class),
     Action(ActionFixture.class),
     InsertRow(InsertRowFixture.class),
