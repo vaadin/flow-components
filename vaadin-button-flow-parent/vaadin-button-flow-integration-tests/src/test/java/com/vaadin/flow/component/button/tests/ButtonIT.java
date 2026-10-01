@@ -468,4 +468,25 @@ public class ButtonIT extends AbstractComponentIT {
     protected String getTestPath() {
         return ("/vaadin-button");
     }
+
+    @Test
+    public void clickDownloadButton_downloadsFileFromHandler() {
+        // Replace the client-side download helper with a shim that fetches
+        // the URL right away, like the browser does, without a save dialog
+        executeScript("""
+                window.__download = null;
+                window.Vaadin.Flow.download.start = url => {
+                  fetch(url).then(r => r.text().then(t => {
+                    window.__download = r.status + '|' + t;
+                  }));
+                };
+                """);
+        ButtonElement button = layout.$(ButtonElement.class)
+                .id("download-button");
+        scrollToElement(button);
+        button.click();
+
+        Assert.assertEquals("200|" + ButtonView.DOWNLOAD_BODY, waitUntil(
+                driver -> executeScript("return window.__download;")));
+    }
 }

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Text;
@@ -27,8 +28,12 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.tests.MockUIExtension;
 
 class ButtonTest {
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Button button;
     private Icon icon;
@@ -322,6 +327,32 @@ class ButtonTest {
         button = new Button();
         Assertions.assertThrows(NullPointerException.class,
                 () -> button.setDisableOnClick((DisableOnClickMode) null));
+    }
+
+    @Test
+    void setDownloadHandler_replaceAndClear_keepsOnlyCurrentHandlerRegistered() {
+        button = new Button();
+        ui.add(button);
+        button.setDownloadHandler(event -> event.getOutputStream().write(1));
+        DownloadHandler replacement = event -> event.getOutputStream().write(2);
+        button.setDownloadHandler(replacement);
+
+        Assertions.assertSame(replacement, button.getDownloadHandler());
+        Assertions.assertEquals(1, countDownloadResources());
+
+        button.setDownloadHandler(null);
+
+        Assertions.assertNull(button.getDownloadHandler());
+        Assertions.assertEquals(0, countDownloadResources());
+    }
+
+    // Each registered download handler is kept as a stream resource attribute
+    // on the button element, so counting those tells how many handlers the
+    // browser can still download from.
+    private long countDownloadResources() {
+        ui.fakeClientCommunication();
+        return button.getElement().getAttributeNames()
+                .filter(name -> name.startsWith("data-flow-download-")).count();
     }
 
     @Test
