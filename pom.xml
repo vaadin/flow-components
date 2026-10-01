@@ -93,7 +93,7 @@
             same index format as the Flow ones. Do not change it on its own. -->
         <jandex.plugin.version>3.6.0</jandex.plugin.version>
         <spotless.plugin.version>3.10.3</spotless.plugin.version>
-        <checkstyle.version>14.1.0</checkstyle.version>
+        <checkstyle.version>14.3.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
