@@ -375,6 +375,32 @@ public class Button extends Component
     }
 
     /**
+     * Creates a button with a text that downloads the file produced by the
+     * given handler when clicked.
+     *
+     * <pre>{@code
+     * Button export = Button.forDownload("Export",
+     *         DownloadHandler.fromInputStream(event -> createReport()));
+     * }</pre>
+     *
+     * @param text
+     *            the text inside the button
+     * @param downloadHandler
+     *            the handler that produces the file, not {@code null}
+     * @return the new button
+     * @see #setDownloadHandler(DownloadHandler)
+     * @since 25.4
+     */
+    public static Button forDownload(String text,
+            DownloadHandler downloadHandler) {
+        Objects.requireNonNull(downloadHandler,
+                "downloadHandler must not be null");
+        Button button = new Button(text);
+        button.setDownloadHandler(downloadHandler);
+        return button;
+    }
+
+    /**
      * Gets the handler that produces the file downloaded when the button is
      * clicked.
      *
@@ -427,8 +453,7 @@ public class Button extends Component
         }
         this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
-            downloadRegistration = Download.onClick(this)
-                    .start(downloadHandler);
+            downloadRegistration = Download.onClick(this, downloadHandler);
         }
     }
 
