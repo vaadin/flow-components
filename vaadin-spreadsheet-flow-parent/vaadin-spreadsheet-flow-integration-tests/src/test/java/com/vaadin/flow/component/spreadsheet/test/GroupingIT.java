@@ -42,17 +42,15 @@ public class GroupingIT extends AbstractSpreadsheetIT {
             throws Exception {
         loadFile("grouping_without_headers.xlsx");
 
-        // The outline spans the cells it groups. The GWT client drew
-        // one element per group that carried the +/- glyph as well, so
-        // its size included the button and its padding and the numbers
-        // to check against were fixed; the Lit client draws a line over
-        // the range and a button beside it, so the size to check is the
-        // range itself.
-        Assert.assertEquals("Column outline should span the grouped columns",
-                spanOfColumns(1, 4),
-                outlineSize(".col-grouping-line", "width"));
-        Assert.assertEquals("Row outline should span the grouped rows",
-                spanOfRows(1, 5), outlineSize(".row-grouping-line", "height"));
+        // The brackets, as long as the GWT client drew them: from just
+        // inside the first grouped header to the middle of the summary one.
+        WebElement colGrouping = findElementInShadowRoot(
+                By.cssSelector(".col-grouping-line"));
+        WebElement rowGrouping = findElementInShadowRoot(
+                By.cssSelector(".row-grouping-line"));
+        Assert.assertTrue(colGrouping.getSize().getWidth() > 270);
+        Assert.assertTrue(colGrouping.getSize().getWidth() <= 280);
+        Assert.assertEquals(110, rowGrouping.getSize().getHeight());
     }
 
     @Test
@@ -181,52 +179,5 @@ public class GroupingIT extends AbstractSpreadsheetIT {
                 (By.cssSelector(IMAGE_CSS_SELECTOR)));
         Assert.assertFalse("Can not find image overlay", overlayDivs.isEmpty());
         return overlayDivs.get(0);
-    }
-
-    /** Width or height of the first grouping outline, rounded to a pixel. */
-    private int outlineSize(String selector, String dimension) {
-        return ((Number) executeScript("""
-                const host = arguments[0];
-                for (const strip of ['column', 'row']) {
-                    const el = host.shadowRoot.querySelector(
-                        'vaadin-spreadsheet-internal-' + strip + '-header');
-                    const line = el && el.shadowRoot
-                        ? el.shadowRoot.querySelector(arguments[1]) : null;
-                    if (line) {
-                        const r = line.getBoundingClientRect();
-                        return Math.round(
-                            arguments[2] === 'width' ? r.width : r.height);
-                    }
-                }
-                return -1;
-                """, getSpreadsheet(), selector, dimension)).intValue();
-    }
-
-    /** How wide columns first..last are together, measured from the cells. */
-    private int spanOfColumns(int first, int last) {
-        return ((Number) executeScript(
-                """
-                        const g = arguments[0].shadowRoot.querySelector(
-                            'vaadin-spreadsheet-internal-cell-grid');
-                        const a = g.shadowRoot.querySelector('.col' + arguments[1] + '.row1');
-                        const b = g.shadowRoot.querySelector('.col' + arguments[2] + '.row1');
-                        return Math.round(b.getBoundingClientRect().right
-                            - a.getBoundingClientRect().left);
-                        """,
-                getSpreadsheet(), first, last)).intValue();
-    }
-
-    /** How tall rows first..last are together, measured from the cells. */
-    private int spanOfRows(int first, int last) {
-        return ((Number) executeScript(
-                """
-                        const g = arguments[0].shadowRoot.querySelector(
-                            'vaadin-spreadsheet-internal-cell-grid');
-                        const a = g.shadowRoot.querySelector('.col1.row' + arguments[1]);
-                        const b = g.shadowRoot.querySelector('.col1.row' + arguments[2]);
-                        return Math.round(b.getBoundingClientRect().bottom
-                            - a.getBoundingClientRect().top);
-                        """,
-                getSpreadsheet(), first, last)).intValue();
     }
 }

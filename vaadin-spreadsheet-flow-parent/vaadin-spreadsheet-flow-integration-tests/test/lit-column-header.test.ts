@@ -597,8 +597,10 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
         const style = getComputedStyle(line);
         expect(`${style.borderTopWidth} ${style.borderLeftWidth} ${style.borderRightStyle}`).to.equal('2px 2px none');
         expect(style.borderTopColor).to.equal('rgb(199, 199, 199)');
-        // Level 1, 9px down the gutter; its border sits outside the width.
-        expect(`${line.style.left} ${line.style.top} ${line.style.width}`).to.equal('55px 9px 118px');
+        // Level 1, 9px down the gutter; the tick's border comes on top of
+        // the width.
+        expect(`${line.style.left} ${line.style.top} ${line.style.width}`).to.equal('55px 9px 120px');
+        expect(line.getBoundingClientRect().width).to.equal(122);
         cleanup(el);
     });
 

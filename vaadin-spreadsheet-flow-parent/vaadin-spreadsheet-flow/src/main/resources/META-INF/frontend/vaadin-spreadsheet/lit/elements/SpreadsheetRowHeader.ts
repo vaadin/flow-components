@@ -489,8 +489,9 @@ export class SpreadsheetRowHeader extends LitElement {
       const lineLeft = 6 + (g.level - 1) * ROW_GROUPING_LEVEL_PX;
       // A collapsed group keeps only its button, showing "+".
       if (!g.collapsed) {
-        // The border at one end is outside the height.
-        const lineStyle = `left:${lineLeft}px;top:${g.startPx}px;height:${Math.max(0, g.endPx - g.startPx - 2)}px;`;
+        // The tick's border comes on top of the height, so the bracket
+        // reaches just past the button's centre, as the GWT client's did.
+        const lineStyle = `left:${lineLeft}px;top:${g.startPx}px;height:${Math.max(0, g.endPx - g.startPx)}px;`;
         const lineClass = rowGroupingInversed ? 'row-grouping-line inversed' : 'row-grouping-line';
         groupingEls.push(html`<div class=${lineClass} style=${lineStyle}></div>`);
       }
