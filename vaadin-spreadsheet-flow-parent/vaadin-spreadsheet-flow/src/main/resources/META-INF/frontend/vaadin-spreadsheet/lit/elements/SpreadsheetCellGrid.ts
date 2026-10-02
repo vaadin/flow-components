@@ -815,7 +815,7 @@ export class SpreadsheetCellGrid extends LitElement {
     // Emitted as direct children of the cell-grid so cells sit at
     // their virtual coordinates and scroll naturally with the
     // scroll container.
-    const mainCells = renderQuadrant({
+    const mainOpts: QuadrantRenderOpts = {
       state: this.measuredState(),
       quadrantName: 'main',
       colStart: viewport.firstColumnIndex,
@@ -826,7 +826,12 @@ export class SpreadsheetCellGrid extends LitElement {
       getColWidth: (col) => this.renderState.colWidths[col - viewport.firstColumnIndex] ?? 0,
       getRowTop: (row) => this.renderState.rowY[row - viewport.firstRowIndex] ?? 0,
       getRowHeight: (row) => this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0
-    });
+    };
+    const mainCells = renderQuadrant(mainOpts);
+    // Straight after the cells they cover, so the frozen quadrants, which
+    // come later at the same z-index, stay on top of a merge scrolling
+    // under them.
+    const mainMerged = buildMergedCellOverlays(mainOpts);
 
     // Frozen quadrants live inside transform-translated wrappers
     // so their cells visually stay pinned as the user scrolls
@@ -849,7 +854,7 @@ export class SpreadsheetCellGrid extends LitElement {
 
     let topQuadrant: TemplateResult | string = '';
     if (verticalSplitPosition > 0) {
-      const topCells = renderQuadrant({
+      const topOpts: QuadrantRenderOpts = {
         state: this.measuredState(),
         quadrantName: 'top',
         colStart: viewport.firstColumnIndex,
@@ -860,17 +865,19 @@ export class SpreadsheetCellGrid extends LitElement {
         getColWidth: (col) => this.renderState.colWidths[col - viewport.firstColumnIndex] ?? 0,
         getRowTop: (row) => this.renderState.frozenRowY[row - 1] ?? 0,
         getRowHeight: (row) => this.renderState.frozenRowHeights[row - 1] ?? 0
-      });
+      };
+      const topCells = renderQuadrant(topOpts);
+      const topMerged = buildMergedCellOverlays(topOpts);
       const transform = `transform:translateY(${scrollTop}px);`;
       const line = freezeLine('rows', frozenHeight, this.renderState.totalGridWidthPx);
       topQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}>${topCells}${line}</div>
+        <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}>${topCells}${topMerged}${line}</div>
       `;
     }
 
     let leftQuadrant: TemplateResult | string = '';
     if (horizontalSplitPosition > 0) {
-      const leftCells = renderQuadrant({
+      const leftOpts: QuadrantRenderOpts = {
         state: this.measuredState(),
         quadrantName: 'left',
         colStart: 1,
@@ -881,17 +888,19 @@ export class SpreadsheetCellGrid extends LitElement {
         getColWidth: (col) => this.renderState.frozenColWidths[col - 1] ?? 0,
         getRowTop: (row) => this.renderState.rowY[row - viewport.firstRowIndex] ?? 0,
         getRowHeight: (row) => this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0
-      });
+      };
+      const leftCells = renderQuadrant(leftOpts);
+      const leftMerged = buildMergedCellOverlays(leftOpts);
       const transform = `transform:translateX(${scrollLeft}px);`;
       const line = freezeLine('columns', frozenWidth, this.renderState.totalGridHeightPx);
       leftQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}>${leftCells}${line}</div>
+        <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}>${leftCells}${leftMerged}${line}</div>
       `;
     }
 
     let cornerQuadrant: TemplateResult | string = '';
     if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
-      const cornerCells = renderQuadrant({
+      const cornerOpts: QuadrantRenderOpts = {
         state: this.measuredState(),
         quadrantName: 'corner',
         colStart: 1,
@@ -902,7 +911,9 @@ export class SpreadsheetCellGrid extends LitElement {
         getColWidth: (col) => this.renderState.frozenColWidths[col - 1] ?? 0,
         getRowTop: (row) => this.renderState.frozenRowY[row - 1] ?? 0,
         getRowHeight: (row) => this.renderState.frozenRowHeights[row - 1] ?? 0
-      });
+      };
+      const cornerCells = renderQuadrant(cornerOpts);
+      const cornerMerged = buildMergedCellOverlays(cornerOpts);
       const transform = `transform:translate(${scrollLeft}px, ${scrollTop}px);`;
       // The left pane's cells cover the top pane's line where the frozen
       // columns are, and the top pane's cover the left pane's; the corner
@@ -913,19 +924,20 @@ export class SpreadsheetCellGrid extends LitElement {
         frozenHeight + 1
       )}`;
       cornerQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-corner" style=${transform}>${cornerCells}${lines}</div>
+        <div class="quadrant-wrapper quadrant-wrapper-corner" style=${transform}>
+          ${cornerCells}${cornerMerged}${lines}
+        </div>
       `;
     }
 
     const styleBlock = buildCellStyleBlock(this.renderState);
-    const mergedOverlays = buildMergedCellOverlays(this.renderState);
     const selectionOverlay = buildSelectionOverlay(this.renderState);
     const editor = buildCellEditorOverlay(this.renderState);
     const sheetOverlays = buildSheetOverlays(this.renderState);
     const popupButtons = buildPopupButtons(this.renderState);
     const paintOutline = buildPaintOutline(this.renderState);
     const commentOverlays = buildCommentOverlays(this.renderState, this.hoveredKey);
-    return html`${styleBlock}${mainCells}${topQuadrant}${leftQuadrant}${cornerQuadrant}${mergedOverlays}${selectionOverlay}${paintOutline}${sheetOverlays}${popupButtons}${commentOverlays}${editor}`;
+    return html`${styleBlock}${mainCells}${mainMerged}${topQuadrant}${leftQuadrant}${cornerQuadrant}${selectionOverlay}${paintOutline}${sheetOverlays}${popupButtons}${commentOverlays}${editor}`;
   }
 }
 
@@ -1135,55 +1147,44 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
 }
 
 /**
- * Build merged-cell overlay divs for every {@link MergedRegion}
- * whose top-left coordinate falls inside the visible viewport. Each
- * overlay is a single div positioned at the merge's top-left cell,
- * sized to span the full region (sum of column widths × sum of row
- * heights).
+ * Build merged-cell overlay divs for every {@link MergedRegion} whose
+ * top-left cell lies in one quadrant, placed with that quadrant's
+ * geometry. Each overlay is a single div positioned at the merge's
+ * top-left cell, sized to span the region as far as the quadrant shows it.
  *
  * The CSS class list includes {@code cell col<C1> row<R1> merged-cell}
  * — the {@code merged-cell} class is the TestBench-side contract
  * (see {@code AbstractSpreadsheetIT.mergedCell:567-575}).
  *
- * Skips merges whose top-left is outside the visible viewport — the
- * connector / scroll handler is responsible for keeping the viewport
- * aligned. Per-cell styling, selection state, and cellData lookup
- * use the top-left cell's data; the merged overlay is treated as a
- * single rendered cell.
+ * Every quadrant draws its own: a frozen quadrant's overlays go in its
+ * wrapper, so they stay put with its cells. Drawn for the scrolling
+ * quadrant alone, a merge in the frozen rows - the title across the top of
+ * a report - never appeared, and its first cell showed through instead,
+ * clipped at its own column. Merges whose top-left is outside the quadrant
+ * are still skipped. Per-cell styling, selection state, and cellData lookup
+ * use the top-left cell's data; the merged overlay is treated as a single
+ * rendered cell.
  */
-function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
-  const { viewport, cellData, colX, rowY, colWidths, rowHeights, cellStyleToCSSStyle, mergedRegions, selection } =
-    state;
-  void cellStyleToCSSStyle; // styling slice 135 emits rules globally; we just attach the class
+function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
+  const { state, colStart, colEnd, rowStart, rowEnd, getColLeft, getColWidth, getRowTop, getRowHeight } = opts;
+  const { cellData, mergedRegions, selection } = state;
 
   const overlays: TemplateResult[] = [];
   for (const region of mergedRegions) {
-    // Only render overlays whose top-left is in the viewport.
-    if (
-      region.col1 < viewport.firstColumnIndex ||
-      region.col1 > viewport.lastColumnIndex ||
-      region.row1 < viewport.firstRowIndex ||
-      region.row1 > viewport.lastRowIndex
-    ) {
+    if (region.col1 < colStart || region.col1 > colEnd || region.row1 < rowStart || region.row1 > rowEnd) {
       continue;
     }
 
-    const colStartIdx = region.col1 - viewport.firstColumnIndex;
-    const rowStartIdx = region.row1 - viewport.firstRowIndex;
-    const left = colX[colStartIdx] ?? 0;
-    const top = rowY[rowStartIdx] ?? 0;
-
-    // Sum widths from col1 to min(col2, lastColumnIndex).
+    const left = getColLeft(region.col1);
+    const top = getRowTop(region.row1);
+    // As far as the quadrant shows the region.
     let width = 0;
-    const colEnd = Math.min(region.col2, viewport.lastColumnIndex);
-    for (let col = region.col1; col <= colEnd; col++) {
-      width += colWidths[col - viewport.firstColumnIndex] ?? 0;
+    for (let col = region.col1; col <= Math.min(region.col2, colEnd); col++) {
+      width += getColWidth(col);
     }
-    // Sum heights from row1 to min(row2, lastRowIndex).
     let height = 0;
-    const rowEnd = Math.min(region.row2, viewport.lastRowIndex);
-    for (let row = region.row1; row <= rowEnd; row++) {
-      height += rowHeights[row - viewport.firstRowIndex] ?? 0;
+    for (let row = region.row1; row <= Math.min(region.row2, rowEnd); row++) {
+      height += getRowHeight(row);
     }
 
     const key = toKey(region.col1, region.row1);

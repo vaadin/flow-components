@@ -2679,3 +2679,113 @@ describe('SpreadsheetCellGrid — gridlines turned off', () => {
         cleanup(el);
     });
 });
+
+/**
+ * Merged cells in the frozen rows and columns.
+ *
+ * Only the scrolling quadrant drew its merges, so a merge in the frozen
+ * rows - the title across the top of a report, a centred heading over the
+ * months - never appeared, and its first cell showed through instead, left
+ * aligned and clipped at its own column.
+ */
+describe('SpreadsheetCellGrid — merged cells in a freeze', () => {
+    // Rows 1-2 frozen at 20px, columns 1-2 frozen at 50px; rows 3-4 and
+    // columns 3-4 scroll.
+    function freezeWithMerges(
+        merges: Array<{ col1: number; col2: number; row1: number; row2: number }>,
+        scrollTop = 0
+    ): CellGridRenderState {
+        const cellData = new Map<string, CellData>();
+        for (const m of merges) {
+            cellData.set(`col${m.col1} row${m.row1}`, makeCellData(m.col1, m.row1, 'Heading'));
+        }
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 3,
+                firstColumnPosition: 100,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 3,
+                firstRowPosition: 40,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            cellData,
+            colX: [100, 150],
+            rowY: [40, 60],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+            frozenColX: [0, 50],
+            frozenColWidths: [50, 50],
+            frozenRowY: [0, 20],
+            frozenRowHeights: [20, 20],
+            totalGridWidthPx: 1000,
+            totalGridHeightPx: 500,
+            scrollTop,
+            mergedRegions: merges.map((m, id) => ({ ...m, id })),
+        };
+    }
+
+    function merged(el: SpreadsheetCellGrid, pane: string): HTMLElement | null {
+        return el.shadowRoot!.querySelector<HTMLElement>(`.quadrant-wrapper-${pane} .merged-cell`);
+    }
+
+    it('draws a merge in the frozen rows, in their pane', async () => {
+        const el = await attachWithState(freezeWithMerges([{ col1: 3, col2: 4, row1: 1, row2: 1 }]));
+
+        const cell = merged(el, 'top');
+        expect(cell, 'a merged cell among the frozen rows').to.exist;
+        expect(cell!.textContent!.trim()).to.equal('Heading');
+        expect(cell!.style.width).to.equal('100px');
+        expect(cell!.style.top).to.equal('0px');
+
+        cleanup(el);
+    });
+
+    it('draws a merge in the frozen columns, in their pane', async () => {
+        const el = await attachWithState(freezeWithMerges([{ col1: 1, col2: 1, row1: 3, row2: 4 }]));
+
+        const cell = merged(el, 'left');
+        expect(cell, 'a merged cell among the frozen columns').to.exist;
+        expect(cell!.style.height).to.equal('40px');
+        expect(cell!.style.left).to.equal('0px');
+
+        cleanup(el);
+    });
+
+    it('draws a merge where frozen rows and columns meet, in the corner', async () => {
+        const el = await attachWithState(freezeWithMerges([{ col1: 1, col2: 2, row1: 1, row2: 2 }]));
+
+        const cell = merged(el, 'corner');
+        expect(cell, 'a merged cell in the corner').to.exist;
+        expect(`${cell!.style.width} ${cell!.style.height}`).to.equal('100px 40px');
+
+        cleanup(el);
+    });
+
+    it('still draws a merge among the scrolling cells, once', async () => {
+        const el = await attachWithState(freezeWithMerges([{ col1: 3, col2: 4, row1: 3, row2: 3 }]));
+
+        const all = el.shadowRoot!.querySelectorAll('.merged-cell');
+        expect(all).to.have.length(1);
+        expect(all[0].closest('.quadrant-wrapper'), 'outside the frozen panes').to.be.null;
+
+        cleanup(el);
+    });
+
+    it('keeps a merge that scrolls under the frozen rows beneath them', async () => {
+        // Scrolled down 40px, the frozen rows sit where rows 3-4 are, so a
+        // merge in row 3 passes underneath them - it must not cover them.
+        const el = await attachWithState(freezeWithMerges([{ col1: 3, col2: 4, row1: 3, row2: 3 }], 40));
+        el.style.height = '300px';
+
+        const origin = el.getBoundingClientRect();
+        const top = el.shadowRoot!.elementFromPoint(origin.left + 120, origin.top + 50) as HTMLElement;
+        expect(top.closest('.quadrant-wrapper-top'), 'a frozen cell is on top').to.not.be.null;
+
+        cleanup(el);
+    });
+});
