@@ -83,9 +83,9 @@ export class SpreadsheetFormulaBar extends LitElement {
       display: flex;
       align-items: stretch;
       box-sizing: border-box;
-      height: var(--vaadin-spreadsheet-formulabar-height, 24px);
+      height: var(--vaadin-spreadsheet-formulabar-height, 30px);
       background: var(--vaadin-spreadsheet-formulabar-bg, #fff);
-      border-bottom: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c0c0c0);
+      border-bottom: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-formulabar-font, inherit);
       font-size: var(--vaadin-spreadsheet-formulabar-font-size, inherit);
     }
@@ -94,7 +94,7 @@ export class SpreadsheetFormulaBar extends LitElement {
       flex: 0 0 auto;
       box-sizing: border-box;
       height: 100%;
-      padding: 0 4px;
+      padding: 0 0 0 5px;
       border: 0;
       outline: none;
       background: transparent;
@@ -102,9 +102,21 @@ export class SpreadsheetFormulaBar extends LitElement {
       color: inherit;
     }
 
+    /* The address field's panel, laid out as the GWT client's: wide
+       enough for a long range or a named one, on its own ground. */
+    .address-panel {
+      position: relative;
+      flex: 0 0 auto;
+      box-sizing: border-box;
+      width: 176px;
+      height: 100%;
+      border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c7c7c7);
+      background: #fafafa;
+    }
+
     .address {
-      width: 80px;
-      border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c0c0c0);
+      width: 100%;
+      text-align: center;
     }
 
     .formula {
@@ -112,15 +124,31 @@ export class SpreadsheetFormulaBar extends LitElement {
       min-width: 0;
     }
 
+    /* The named-range picker, as the GWT client drew it: an arrow at the
+       right end of the address field, over a select that cannot be seen
+       but opens the list of names. */
     .namedrangebox {
-      flex: 0 0 auto;
-      box-sizing: border-box;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 15px;
       height: 100%;
-      border: 0;
-      border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c0c0c0);
-      background: transparent;
-      font: inherit;
-      color: inherit;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .namedrange-arrow {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 15px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: x-small;
+      pointer-events: none;
     }
   `;
 
@@ -286,12 +314,15 @@ export class SpreadsheetFormulaBar extends LitElement {
       namedRanges.length === 0
         ? ''
         : html`<select class="namedrangebox" part="named-range-box" @change=${this.handleNamedRangeChange}>
-            <option value=""></option>
-            ${namedRanges.map((name) => html`<option value=${name}>${name}</option>`)}
-          </select>`;
+              <option value=""></option>
+              ${namedRanges.map((name) => html`<option value=${name}>${name}</option>`)}
+            </select>
+            <span class="namedrange-arrow">▼</span>`;
     return html`
-      <input class="address" part="address-field" .value=${address} />
-      ${namedRangeBox}
+      <div class="address-panel">
+        <input class="address" part="address-field" .value=${address} />
+        ${namedRangeBox}
+      </div>
       <input class="formula" part="formula-field" .value=${formula} />
     `;
   }
