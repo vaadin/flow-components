@@ -15,6 +15,7 @@ import {
     type CellGridRenderState,
     emptyCellGridRenderState,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/types.js';
+import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
  * Slice 152 — cell editor.
@@ -258,6 +259,230 @@ describe('SpreadsheetCellGrid — cell editor render (slice 152)', () => {
 
         el.remove();
     });
+});
+
+/**
+ * The editor looks like the cell it edits.
+ *
+ * The GWT client gave the input the edited cell's own classes, so the user
+ * typed in the cell's font, colour, fill and alignment. Without them the
+ * editor wrote in the page's font on white, and a bold red value turned
+ * plain black the moment it was opened.
+ */
+describe('SpreadsheetCellGrid — the editor looks like the cell it edits', () => {
+    // The workbook default in the shape the server writes it.
+    const DEFAULT_STYLE =
+        'background-color: rgb(255, 255, 255); color: rgb(0, 0, 0); ' +
+        'font-family: var(--default-font-family); --default-font-family: Georgia; ' +
+        'font-size: var(--default-font-size); --default-font-size: 20px;';
+
+    function editing(
+        cellStyle: string | undefined,
+        overrides: Partial<CellGridRenderState> = {}
+    ): CellGridRenderState {
+        const cellData = new Map<string, CellData>();
+        if (cellStyle !== undefined) {
+            cellData.set('col2 row2', {
+                col: 2,
+                row: 2,
+                value: 'x',
+                cellStyle,
+                locked: false,
+                needsMeasure: false,
+                isPercentage: false,
+            });
+        }
+        return {
+            ...buildEditorState({ col: 2, row: 2, initialValue: 'x' }),
+            cellData,
+            cellStyleToCSSStyle: { 0: DEFAULT_STYLE },
+            ...overrides,
+        };
+    }
+
+    function editorStyle(el: SpreadsheetCellGrid): CSSStyleDeclaration {
+        return getComputedStyle(el.shadowRoot!.querySelector('.cell-editor')!);
+    }
+
+    it('writes in the workbook font when the cell has no style of its own', async () => {
+        const el = await attachCellGridWithState(editing(undefined));
+
+        const style = editorStyle(el);
+        expect(style.fontFamily).to.equal('Georgia');
+        expect(style.fontSize).to.equal('20px');
+        expect(style.color).to.equal('rgb(0, 0, 0)');
+
+        el.remove();
+    });
+
+    it("takes the font and colour of the cell's own style", async () => {
+        const el = await attachCellGridWithState(
+            editing('cs1', {
+                cellStyleToCSSStyle: {
+                    0: DEFAULT_STYLE,
+                    1:
+                        'color: rgb(255, 0, 0); font-weight: bold; font-style: italic; ' +
+                        'font-family: var(--default-font-family); --default-font-family: Verdana;',
+                },
+            })
+        );
+
+        const style = editorStyle(el);
+        expect(style.color).to.equal('rgb(255, 0, 0)');
+        expect(style.fontWeight).to.equal('700');
+        expect(style.fontStyle).to.equal('italic');
+        expect(style.fontFamily).to.equal('Verdana');
+
+        el.remove();
+    });
+
+    it("wears the cell's fill", async () => {
+        const el = await attachCellGridWithState(
+            editing('cs1', {
+                cellStyleToCSSStyle: { 0: DEFAULT_STYLE, 1: 'background-color: rgb(255, 255, 0);' },
+            })
+        );
+
+        expect(editorStyle(el).backgroundColor).to.equal('rgb(255, 255, 0)');
+
+        el.remove();
+    });
+
+    it('right-aligns a number, as the cell does', async () => {
+        const el = await attachCellGridWithState(editing('cs0 r'));
+
+        expect(editorStyle(el).textAlign).to.equal('right');
+
+        el.remove();
+    });
+
+    it('follows an alignment the workbook sets', async () => {
+        const el = await attachCellGridWithState(
+            editing('cs1', {
+                cellStyleToCSSStyle: { 0: DEFAULT_STYLE, 1: 'text-align: center;' },
+            })
+        );
+
+        expect(editorStyle(el).textAlign).to.equal('center');
+
+        el.remove();
+    });
+
+    it('takes the style of a formatted row when the cell has none', async () => {
+        const el = await attachCellGridWithState(
+            editing('cs0', {
+                cellStyleToCSSStyle: { 0: DEFAULT_STYLE, 1: 'color: rgb(0, 128, 0);' },
+                rowIndexToStyleIndex: { 2: 1 },
+            })
+        );
+
+        expect(editorStyle(el).color).to.equal('rgb(0, 128, 0)');
+
+        el.remove();
+    });
+
+    it('shows a conditional format the cell matches', async () => {
+        const el = await attachCellGridWithState(
+            editing('cs1 cf3', {
+                cellStyleToCSSStyle: { 0: DEFAULT_STYLE, 1: 'color: rgb(255, 0, 0);' },
+                conditionalFormattingStyles: { 3: 'color: rgb(0, 0, 255);' },
+            })
+        );
+
+        expect(editorStyle(el).color).to.equal('rgb(0, 0, 255)');
+
+        el.remove();
+    });
+
+    it("keeps its own border and padding whatever the cell's style says", async () => {
+        // The cell's borders, indent and wrapping are the cell's box, not
+        // its text. Worn by the editor, they replaced its border and pushed
+        // the caret along.
+        const el = await attachCellGridWithState(
+            editing('cs1', {
+                cellStyleToCSSStyle: {
+                    0: DEFAULT_STYLE,
+                    1:
+                        'border-right: 5px solid rgb(0, 128, 0); border-bottom: 5px solid rgb(0, 128, 0); ' +
+                        'padding-left: 3em; overflow:hidden;white-space:normal;word-wrap:break-word;',
+                },
+            })
+        );
+
+        const style = editorStyle(el);
+        expect(style.borderRightWidth).to.equal('2px');
+        expect(style.borderBottomColor).to.equal('rgb(25, 118, 210)');
+        expect(style.paddingLeft).to.equal('2px');
+
+        el.remove();
+    });
+
+    it('lets an application set the font through the documented property', async () => {
+        const el = await attachCellGridWithState(editing(undefined));
+        el.style.setProperty('--vaadin-spreadsheet-cell-font', 'monospace');
+        await el.updateComplete;
+
+        expect(editorStyle(el).fontFamily).to.equal('monospace');
+
+        el.remove();
+    });
+
+    // The editor's style is gathered apart from the rules that style the
+    // cells, so the two must agree: whatever the cell under it looks like,
+    // the editor looks the same.
+    const CASES: Array<[string, string | undefined, Partial<CellGridRenderState>]> = [
+        ['a cell the server sent nothing for', undefined, {}],
+        ['a cell with a style of its own', 'cs1', {}],
+        ['an unstyled cell in a formatted row', 'cs0', { rowIndexToStyleIndex: { 2: 1 } }],
+        ['an unstyled cell in a formatted column', 'cs0', { columnIndexToStyleIndex: { 2: 2 } }],
+        [
+            'an unstyled cell where a formatted row meets a formatted column',
+            'cs0',
+            { rowIndexToStyleIndex: { 2: 2 }, columnIndexToStyleIndex: { 2: 1 } },
+        ],
+        ['a styled cell a conditional format matches', 'cs1 cf0', {}],
+        [
+            'an unstyled cell in a formatted row that a conditional format matches',
+            'cs0 cf0',
+            { rowIndexToStyleIndex: { 2: 1 } },
+        ],
+        ['a number', 'cs0 r', {}],
+        ['a number in a formatted row', 'cs0 r', { rowIndexToStyleIndex: { 2: 2 } }],
+    ];
+    const PROPERTIES = [
+        'color',
+        'backgroundColor',
+        'fontFamily',
+        'fontSize',
+        'fontWeight',
+        'fontStyle',
+        'textAlign',
+    ] as const;
+
+    for (const [name, cellStyle, overrides] of CASES) {
+        it(`matches the cell under it: ${name}`, async () => {
+            const el = await attachCellGridWithState(
+                editing(cellStyle, {
+                    cellStyleToCSSStyle: {
+                        0: DEFAULT_STYLE,
+                        1: 'color: rgb(255, 0, 0); font-weight: bold; background-color: rgb(255, 255, 0);',
+                        2: 'font-style: italic; text-align: center; color: rgb(0, 128, 0); ' +
+                            'font-family: var(--default-font-family); --default-font-family: Verdana;',
+                    },
+                    conditionalFormattingStyles: { 0: 'color: rgb(0, 0, 255);' },
+                    ...overrides,
+                })
+            );
+
+            const cell = getComputedStyle(el.shadowRoot!.querySelector('.cell.col2.row2')!);
+            const editor = editorStyle(el);
+            for (const property of PROPERTIES) {
+                expect(editor[property], property).to.equal(cell[property]);
+            }
+
+            el.remove();
+        });
+    }
 });
 
 describe('SpreadsheetCellGrid — double-click delegation (slice 152)', () => {

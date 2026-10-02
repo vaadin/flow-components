@@ -1486,6 +1486,83 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
 }
 
 /**
+ * What of a cell's style the editor over it wears: how its text looks, and
+ * its fill, so typing over a yellow cell stays on yellow. Not its borders,
+ * indent or wrapping - those are the cell's box, and the editor keeps a box
+ * of its own.
+ */
+const EDITOR_PROPERTIES: ReadonlySet<string> = new Set([
+  'background-color',
+  'color',
+  'font-family',
+  'font-size',
+  'font-style',
+  'font-weight',
+  'text-align',
+  'text-decoration',
+  '--default-font-family',
+  '--default-font-size',
+]);
+
+/** The declarations of a style body the editor wears, in order. */
+function editorDeclarations(body: string | undefined): string[] {
+  const out: string[] = [];
+  for (const declaration of (body ?? '').split(';')) {
+    const colon = declaration.indexOf(':');
+    if (colon > 0 && EDITOR_PROPERTIES.has(declaration.slice(0, colon).trim())) {
+      out.push(declaration.trim());
+    }
+  }
+  return out;
+}
+
+/**
+ * Inline style that dresses the editor as the cell it edits.
+ *
+ * The GWT client gave the input the cell's own classes, so the user typed
+ * in the cell's font, colour, fill and alignment. Classes would bring the
+ * cell's borders and indent too, and holding those off would take
+ * `!important` - which no `::part(cell-input)` rule of an application could
+ * then override. So the styles are gathered here instead, in the order the
+ * rules of {@link buildCellStyleBlock} and the element's `.cell.r` resolve
+ * for the cell: the default, its own style, the conditional formats it
+ * matches, the right alignment of a number, and - for a cell with no style
+ * of its own - its row or column style, whose rule is the most specific.
+ */
+function editorCellStyle(state: CellGridRenderState, col: number, row: number): string {
+  const classes = (state.cellData.get(toKey(col, row))?.cellStyle ?? 'cs0').split(/\s+/);
+  const styles = state.cellStyleToCSSStyle;
+  const indexes = (prefix: string): number[] =>
+    classes
+      .filter((c) => new RegExp(`^${prefix}\\d+$`).test(c))
+      .map((c) => Number(c.slice(prefix.length)))
+      .sort((a, b) => a - b);
+
+  // The default's font reaches the editor through the documented
+  // properties its own rule reads, as the default rule does for a cell.
+  const declarations = editorDeclarations(styles[0]).filter(
+    (d) => !/^font-(family|size)\s*:/.test(d)
+  );
+  const own = indexes('cs')[0] ?? 0;
+  if (own !== 0) {
+    declarations.push(...editorDeclarations(styles[own]));
+  }
+  for (const index of indexes('cf')) {
+    declarations.push(...editorDeclarations(state.conditionalFormattingStyles?.[index]));
+  }
+  if (classes.includes('r')) {
+    declarations.push('text-align: right');
+  }
+  if (own === 0) {
+    const lines = [state.rowIndexToStyleIndex?.[row], state.columnIndexToStyleIndex?.[col]];
+    for (const index of lines.filter((i): i is number => !!i).sort((a, b) => a - b)) {
+      declarations.push(...editorDeclarations(styles[index]));
+    }
+  }
+  return declarations.map((d) => `${d};`).join('');
+}
+
+/**
  * Build the cell-editor overlay {@code <input>} when {@code state
  * .editor} is non-null (slice 152). The input is sized to match
  * the cell's pixel box using the appropriate quadrant arrays:
@@ -1554,7 +1631,8 @@ function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | st
     return '';
   }
 
-  const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;`;
+  const style =
+    `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + editorCellStyle(state, col, row);
 
   const dispatchEditorEvent = (
     target: EventTarget,
