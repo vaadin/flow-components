@@ -83,6 +83,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -194,6 +195,9 @@ public class Spreadsheet extends Component
 
     /** should the sheet be reloaded on client side */
     private boolean reload;
+
+    private final BeforeClientResponseAction reloadStateUpdateAction = new BeforeClientResponseAction(
+            this, this::updateReloadState);
 
     /** 1-based */
     private int sheetIndex = 1;
@@ -3770,14 +3774,7 @@ public class Spreadsheet extends Component
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
-            ui.beforeClientResponse(this, e -> {
-                if (reload) {
-                    this.updateReloadState();
-                }
-            });
-        });
-
+        reloadStateUpdateAction.schedule();
         reload = true;
 
         setSheetIndex(
@@ -4005,20 +4002,15 @@ public class Spreadsheet extends Component
     }
 
     private void updateReloadState() {
-        if (reload) {
-            setReload(reload);
-            reload = false;
-            if (initialSheetSelection == null) {
-                if (sheetState
-                        .getSelectedCellsOnSheet(getActiveSheet()) == null) {
-                    initialSheetSelection = "A1";
-                } else {
-                    initialSheetSelection = sheetState
-                            .getSelectedCellsOnSheet(getActiveSheet());
-                }
+        setReload(reload);
+        reload = false;
+        if (initialSheetSelection == null) {
+            if (sheetState.getSelectedCellsOnSheet(getActiveSheet()) == null) {
+                initialSheetSelection = "A1";
+            } else {
+                initialSheetSelection = sheetState
+                        .getSelectedCellsOnSheet(getActiveSheet());
             }
-        } else {
-            setReload(reload);
         }
     }
 
