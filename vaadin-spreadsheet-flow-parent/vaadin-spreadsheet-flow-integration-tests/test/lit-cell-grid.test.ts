@@ -2444,3 +2444,127 @@ describe('SpreadsheetCellGrid — the workbook default style and row/column styl
         cleanup(el);
     });
 });
+
+/**
+ * The line along a freeze.
+ *
+ * The GWT client drew a dark line under the last frozen row and beside the
+ * last frozen column - the border of its frozen panes - so the user could
+ * see where the sheet stops scrolling. The Lit client drew nothing, and a
+ * frozen sheet read as an ordinary one until it was scrolled.
+ */
+describe('SpreadsheetCellGrid — the line along a freeze', () => {
+    // Rows 1-2 frozen at 20px each, columns 1-2 frozen at 50px each; rows
+    // 3-4 and columns 3-4 scroll.
+    function freezeState(rows: number, columns: number): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 3,
+                firstColumnPosition: 100,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 3,
+                firstRowPosition: 40,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            colX: [100, 150],
+            rowY: [40, 60],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            verticalSplitPosition: rows,
+            horizontalSplitPosition: columns,
+            frozenColX: columns > 0 ? [0, 50] : [],
+            frozenColWidths: columns > 0 ? [50, 50] : [],
+            frozenRowY: rows > 0 ? [0, 20] : [],
+            frozenRowHeights: rows > 0 ? [20, 20] : [],
+            totalGridWidthPx: 1000,
+            totalGridHeightPx: 500,
+        };
+    }
+
+    function lines(el: SpreadsheetCellGrid, pane: string): HTMLElement[] {
+        return Array.from(
+            el.shadowRoot!.querySelectorAll<HTMLElement>(`.quadrant-wrapper-${pane} .freeze-line`)
+        );
+    }
+
+    /** A box relative to the grid's own top-left corner. */
+    function box(el: SpreadsheetCellGrid, line: HTMLElement): { x: number; y: number; w: number; h: number } {
+        const origin = el.getBoundingClientRect();
+        const r = line.getBoundingClientRect();
+        return { x: r.left - origin.left, y: r.top - origin.top, w: r.width, h: r.height };
+    }
+
+    it('draws no line when nothing is frozen', async () => {
+        const el = await attachWithState(freezeState(0, 0));
+
+        expect(el.shadowRoot!.querySelectorAll('.freeze-line')).to.have.length(0);
+
+        cleanup(el);
+    });
+
+    it('draws a dark line under the frozen rows, across the sheet', async () => {
+        const el = await attachWithState(freezeState(2, 0));
+
+        const [line] = lines(el, 'top');
+        expect(line, 'a line in the frozen rows pane').to.exist;
+        // One pixel below the last frozen row, where GWT drew it: over the
+        // first scrolling row, leaving the frozen row's own gridline alone.
+        expect(box(el, line)).to.deep.equal({ x: 0, y: 40, w: 1000, h: 1 });
+        expect(getComputedStyle(line).backgroundColor).to.equal('rgb(106, 106, 106)');
+
+        cleanup(el);
+    });
+
+    it('draws a dark line beside the frozen columns, down the sheet', async () => {
+        const el = await attachWithState(freezeState(0, 2));
+
+        const [line] = lines(el, 'left');
+        expect(line, 'a line in the frozen columns pane').to.exist;
+        expect(box(el, line)).to.deep.equal({ x: 100, y: 0, w: 1, h: 500 });
+
+        cleanup(el);
+    });
+
+    it('draws the pieces the panes hide where frozen rows and columns meet', async () => {
+        // The frozen columns' cells cover the rows' line where they cross
+        // it, and the frozen rows' cells cover the columns' line. The
+        // corner sits above both.
+        const el = await attachWithState(freezeState(2, 2));
+
+        const corner = lines(el, 'corner').map((line) => box(el, line));
+        expect(corner).to.deep.include({ x: 0, y: 40, w: 101, h: 1 });
+        expect(corner).to.deep.include({ x: 100, y: 0, w: 1, h: 41 });
+
+        cleanup(el);
+    });
+
+    it('stays on top of the cells that scroll under it', async () => {
+        const state = freezeState(2, 0);
+        state.cellData = new Map<string, CellData>([['col3 row3', makeCellData(3, 3, 'under')]]);
+        const el = await attachWithState(state);
+        // The grid clips to its own box, which a sized sheet gives it.
+        el.style.height = '200px';
+
+        const [line] = lines(el, 'top');
+        // Hit-testable only for this check, to ask what is on top there.
+        line.style.pointerEvents = 'auto';
+        const origin = el.getBoundingClientRect();
+        const top = el.shadowRoot!.elementFromPoint(origin.left + 120, origin.top + 40);
+        expect(top).to.equal(line);
+
+        cleanup(el);
+    });
+
+    it('lets a click through to the cell under it', async () => {
+        const el = await attachWithState(freezeState(2, 2));
+
+        for (const line of el.shadowRoot!.querySelectorAll<HTMLElement>('.freeze-line')) {
+            expect(getComputedStyle(line).pointerEvents).to.equal('none');
+        }
+
+        cleanup(el);
+    });
+});

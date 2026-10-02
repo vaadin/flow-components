@@ -290,6 +290,16 @@ export class SpreadsheetCellGrid extends LitElement {
       z-index: 3;
     }
 
+    /* The line along a freeze, in the frozen pane's wrapper so it stays
+       put while the cells scroll under it. Above the wrapper's own cells,
+       and out of the way of a click on the cell beneath. */
+    .freeze-line {
+      position: absolute;
+      z-index: 4;
+      background: #6a6a6a;
+      pointer-events: none;
+    }
+
     /* Per-cell z-index for the unwrapped main quadrant. Frozen
            quadrants inherit z-index from their wrapper (each wrapper
            is its own stacking context via the transform property),
@@ -826,6 +836,17 @@ export class SpreadsheetCellGrid extends LitElement {
     // origin. CSS z-index on the wrappers stacks corner > top +
     // left > main.
 
+    const frozenHeight = frozenExtent(
+      this.renderState.frozenRowY,
+      this.renderState.frozenRowHeights,
+      verticalSplitPosition
+    );
+    const frozenWidth = frozenExtent(
+      this.renderState.frozenColX,
+      this.renderState.frozenColWidths,
+      horizontalSplitPosition
+    );
+
     let topQuadrant: TemplateResult | string = '';
     if (verticalSplitPosition > 0) {
       const topCells = renderQuadrant({
@@ -841,7 +862,10 @@ export class SpreadsheetCellGrid extends LitElement {
         getRowHeight: (row) => this.renderState.frozenRowHeights[row - 1] ?? 0
       });
       const transform = `transform:translateY(${scrollTop}px);`;
-      topQuadrant = html` <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}> ${topCells} </div> `;
+      const line = freezeLine('rows', frozenHeight, this.renderState.totalGridWidthPx);
+      topQuadrant = html`
+        <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}>${topCells}${line}</div>
+      `;
     }
 
     let leftQuadrant: TemplateResult | string = '';
@@ -859,8 +883,9 @@ export class SpreadsheetCellGrid extends LitElement {
         getRowHeight: (row) => this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0
       });
       const transform = `transform:translateX(${scrollLeft}px);`;
+      const line = freezeLine('columns', frozenWidth, this.renderState.totalGridHeightPx);
       leftQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}> ${leftCells} </div>
+        <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}>${leftCells}${line}</div>
       `;
     }
 
@@ -879,8 +904,16 @@ export class SpreadsheetCellGrid extends LitElement {
         getRowHeight: (row) => this.renderState.frozenRowHeights[row - 1] ?? 0
       });
       const transform = `transform:translate(${scrollLeft}px, ${scrollTop}px);`;
+      // The left pane's cells cover the top pane's line where the frozen
+      // columns are, and the top pane's cover the left pane's; the corner
+      // sits above both and draws the two pieces they hide.
+      const lines = html`${freezeLine('rows', frozenHeight, frozenWidth + 1)}${freezeLine(
+        'columns',
+        frozenWidth,
+        frozenHeight + 1
+      )}`;
       cornerQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-corner" style=${transform}> ${cornerCells} </div>
+        <div class="quadrant-wrapper quadrant-wrapper-corner" style=${transform}>${cornerCells}${lines}</div>
       `;
     }
 
@@ -907,6 +940,23 @@ interface QuadrantRenderOpts {
   getColWidth: (col: number) => number;
   getRowTop: (row: number) => number;
   getRowHeight: (row: number) => number;
+}
+
+/** Where the frozen rows or columns end: the far edge of the last one. */
+function frozenExtent(starts: ReadonlyArray<number>, sizes: ReadonlyArray<number>, count: number): number {
+  return count > 0 ? (starts[count - 1] ?? 0) + (sizes[count - 1] ?? 0) : 0;
+}
+
+/**
+ * The line along a freeze, as the GWT client drew it: the dark border of a
+ * frozen pane, one pixel past the last frozen row or column. It lies over the
+ * first pixel of the scrolling cells, where GWT's border pushed them along a
+ * pixel instead, so no cell moves for it.
+ */
+function freezeLine(along: 'rows' | 'columns', at: number, length: number): TemplateResult {
+  const style =
+    along === 'rows' ? `top:${at}px;left:0;width:${length}px;height:1px;` : `left:${at}px;top:0;width:1px;height:${length}px;`;
+  return html`<div class="freeze-line" style=${style}></div>`;
 }
 
 /** Rows or columns by the style index they are formatted with. */
