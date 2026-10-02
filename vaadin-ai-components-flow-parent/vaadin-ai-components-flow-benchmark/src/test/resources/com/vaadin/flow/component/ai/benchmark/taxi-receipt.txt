@@ -1,0 +1,8 @@
+CITY TAXI HELSINKI
+Receipt no. T-88213
+Date: 21.09.2026 08:15
+From: Helsinki Airport
+To: Kamppi, Helsinki
+Fare: 42.30 EUR
+VAT 10%: 3.85 EUR
+Paid by card
