@@ -2789,3 +2789,83 @@ describe('SpreadsheetCellGrid — merged cells in a freeze', () => {
         cleanup(el);
     });
 });
+
+/**
+ * Merged cells drawn from the boxes the connector works out.
+ *
+ * A merge used to be drawn only while its top-left cell was on screen and
+ * only as far as its own quadrant reached, so a tall merge vanished as soon
+ * as its first row scrolled away, and one starting in the frozen rows was
+ * cut off at the split.
+ */
+describe('SpreadsheetCellGrid — merged cells drawn from their boxes', () => {
+    // Rows 1-2 frozen at 20px; the scrolling rows on screen are 5-6.
+    function withBoxes(
+        regions: Array<{ col1: number; col2: number; row1: number; row2: number }>,
+        boxes: Array<{ left: number; top: number; width: number; height: number }>
+    ): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 5,
+                firstRowPosition: 40,
+                lastRowIndex: 6,
+                lastRowPosition: 80,
+            },
+            cellData: new Map<string, CellData>(
+                regions.map((r) => [`col${r.col1} row${r.row1}`, makeCellData(r.col1, r.row1, 'Merged')])
+            ),
+            colX: [0, 50, 100, 150],
+            rowY: [80, 100],
+            colWidths: [50, 50, 50, 50],
+            rowHeights: [20, 20],
+            verticalSplitPosition: 2,
+            frozenRowY: [0, 20],
+            frozenRowHeights: [20, 20],
+            totalGridWidthPx: 1000,
+            totalGridHeightPx: 1000,
+            mergedRegions: regions.map((r, id) => ({ ...r, id })),
+            mergedRegionBoxes: boxes,
+        };
+    }
+
+    it('draws a merge whose first rows have scrolled out of view', async () => {
+        // Rows 3-6 merged; rows 3 and 4 are above what is on screen.
+        const el = await attachWithState(
+            withBoxes([{ col1: 2, col2: 3, row1: 3, row2: 6 }], [{ left: 50, top: 40, width: 100, height: 80 }])
+        );
+
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.merged-cell');
+        expect(cell, 'still drawn').to.exist;
+        expect(cell!.closest('.quadrant-wrapper'), 'with the scrolling cells').to.be.null;
+        expect(`${cell!.style.top} ${cell!.style.height}`).to.equal('40px 80px');
+
+        cleanup(el);
+    });
+
+    it('draws a merge that runs past the frozen rows at its whole size', async () => {
+        const el = await attachWithState(
+            withBoxes([{ col1: 1, col2: 2, row1: 2, row2: 4 }], [{ left: 0, top: 20, width: 100, height: 60 }])
+        );
+
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.quadrant-wrapper-top .merged-cell');
+        expect(cell, 'pinned with the frozen rows').to.exist;
+        expect(cell!.style.height).to.equal('60px');
+
+        cleanup(el);
+    });
+
+    it('leaves out a merge with nothing in view', async () => {
+        const el = await attachWithState(
+            withBoxes([{ col1: 1, col2: 2, row1: 40, row2: 45 }], [{ left: 0, top: 780, width: 100, height: 120 }])
+        );
+
+        expect(el.shadowRoot!.querySelector('.merged-cell')).to.be.null;
+
+        cleanup(el);
+    });
+});

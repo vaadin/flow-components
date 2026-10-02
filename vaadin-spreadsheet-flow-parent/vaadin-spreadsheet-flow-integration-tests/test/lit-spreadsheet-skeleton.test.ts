@@ -351,6 +351,29 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         expect(state.viewport.lastRowIndex).to.be.greaterThanOrEqual(4);
     });
 
+    it('buildRenderState gives every merged region a box', () => {
+        // Rows 1-2 frozen, scrolled 10px: a merge from row 2 to row 4 is
+        // pinned with the frozen rows and shortened by the scroll.
+        const sheet = makeSheet();
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15)); // 20px
+        sheet.setVerticalSplitPosition(2);
+        sheet.setMergedRegions([{ id: 0, col1: 3, col2: 4, row1: 2, row2: 4 }]);
+
+        const state = sheet.buildRenderState({
+            scrollLeft: 0,
+            scrollTop: 10,
+            viewportWidth: 200,
+            viewportHeight: 80,
+        });
+
+        expect(state.mergedRegionBoxes).to.deep.equal([
+            { left: 100, top: 20, width: 100, height: 20 + 30 },
+        ]);
+    });
+
     it('buildRenderState populates colX, rowY, widths, heights arrays for visible range', () => {
         const sheet = makeSheet();
         sheet.setRows(5);

@@ -33,7 +33,12 @@ import type {
   RowSelectedData,
   SpreadsheetEvent
 } from './types/rpc-client-to-server.js';
-import type { CellEditorState, PositionedOverlay, PositionedPopupButton } from './elements/types.js';
+import type {
+  CellEditorState,
+  MergedRegionBox,
+  PositionedOverlay,
+  PositionedPopupButton
+} from './elements/types.js';
 import {
   computeTotalGridSize,
   computeViewportBounds,
@@ -2922,6 +2927,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
       ppi
     );
 
+    const mergedRegionBoxes = computeMergedRegionBoxes(
+      this.mergedRegions,
+      { rows: this.verticalSplitPosition, cols: this.horizontalSplitPosition },
+      { left: opts.scrollLeft, top: opts.scrollTop },
+      colWidthForIndex,
+      rowHeightForIndex
+    );
+
     // Compute positioned popup buttons (slice 161). Each
     // button anchors at its cell's bottom-right corner.
     const positionedPopupButtons = computePositionedPopupButtons(
@@ -2947,6 +2960,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       conditionalFormattingStyles: this.conditionalFormattingStyles,
       shiftedCellBorderStyles: this.shiftedCellBorderStyles,
       mergedRegions: this.mergedRegions,
+      mergedRegionBoxes,
       selection: this.selection,
       verticalSplitPosition: this.verticalSplitPosition,
       horizontalSplitPosition: this.horizontalSplitPosition,
@@ -4845,6 +4859,58 @@ export function isCellInSelection(col: number, row: number, selection: Selection
     }
   }
   return false;
+}
+
+/**
+ * Where each merged region is drawn: its box in the sheet's own pixel
+ * coordinates, frozen rows and columns included.
+ *
+ * Every region gets one, not only those whose top-left cell is on screen: a
+ * merge whose first rows have scrolled away is still showing the rest. A
+ * region that starts among the frozen rows or columns and runs past the split
+ * is drawn pinned with them, as the GWT client drew it, the part beyond the
+ * split shortened by how far the sheet has scrolled underneath.
+ *
+ * @param split the number of frozen rows and columns
+ * @param scroll how far the sheet has scrolled
+ */
+export function computeMergedRegionBoxes(
+  regions: ReadonlyArray<MergedRegion>,
+  split: { rows: number; cols: number },
+  scroll: { left: number; top: number },
+  colWidthAt: (col: number) => number,
+  rowHeightAt: (row: number) => number
+): MergedRegionBox[] {
+  let lastCol = split.cols;
+  let lastRow = split.rows;
+  for (const region of regions) {
+    lastCol = Math.max(lastCol, region.col2);
+    lastRow = Math.max(lastRow, region.row2);
+  }
+  // starts[n] is where row or column n begins; starts[1] is 0.
+  const startsOf = (last: number, sizeAt: (index: number) => number): Float64Array => {
+    const starts = new Float64Array(last + 2);
+    for (let index = 1; index <= last; index++) {
+      starts[index + 1] = starts[index] + sizeAt(index);
+    }
+    return starts;
+  };
+  const colStarts = startsOf(lastCol, colWidthAt);
+  const rowStarts = startsOf(lastRow, rowHeightAt);
+  const extent = (starts: Float64Array, from: number, to: number, frozen: number, scrolled: number): number => {
+    const whole = starts[to + 1] - starts[from];
+    if (from > frozen || to <= frozen) {
+      return whole;
+    }
+    const pinned = starts[frozen + 1] - starts[from];
+    return pinned + Math.max(0, whole - pinned - scrolled);
+  };
+  return regions.map((region) => ({
+    left: colStarts[region.col1],
+    top: rowStarts[region.row1],
+    width: extent(colStarts, region.col1, region.col2, split.cols, scroll.left),
+    height: extent(rowStarts, region.row1, region.row2, split.rows, scroll.top)
+  }));
 }
 
 /**

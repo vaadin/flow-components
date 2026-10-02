@@ -967,6 +967,16 @@ interface QuadrantRenderOpts {
   getRowHeight: (row: number) => number;
 }
 
+/** The quadrant a cell is drawn in, by which side of each split it lies. */
+function quadrantOf(col: number, row: number, frozenCols: number, frozenRows: number): QuadrantRenderOpts['quadrantName'] {
+  const top = row <= frozenRows;
+  const left = col <= frozenCols;
+  if (top) {
+    return left ? 'corner' : 'top';
+  }
+  return left ? 'left' : 'main';
+}
+
 /** Where the frozen rows or columns end: the far edge of the last one. */
 function frozenExtent(starts: ReadonlyArray<number>, sizes: ReadonlyArray<number>, count: number): number {
   return count > 0 ? (starts[count - 1] ?? 0) + (sizes[count - 1] ?? 0) : 0;
@@ -1179,25 +1189,40 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
  * rendered cell.
  */
 function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
-  const { state, colStart, colEnd, rowStart, rowEnd, getColLeft, getColWidth, getRowTop, getRowHeight } = opts;
-  const { cellData, mergedRegions, selection } = state;
+  const { state, quadrantName, colStart, colEnd, rowStart, rowEnd } = opts;
+  const { getColLeft, getColWidth, getRowTop, getRowHeight } = opts;
+  const { cellData, mergedRegions, mergedRegionBoxes, selection } = state;
 
   const overlays: TemplateResult[] = [];
-  for (const region of mergedRegions) {
-    if (region.col1 < colStart || region.col1 > colEnd || region.row1 < rowStart || region.row1 > rowEnd) {
-      continue;
-    }
-
-    const left = getColLeft(region.col1);
-    const top = getRowTop(region.row1);
-    // As far as the quadrant shows the region.
+  for (let index = 0; index < mergedRegions.length; index++) {
+    const region = mergedRegions[index];
+    const box = mergedRegionBoxes?.[index];
+    let left: number;
+    let top: number;
     let width = 0;
-    for (let col = region.col1; col <= Math.min(region.col2, colEnd); col++) {
-      width += getColWidth(col);
-    }
     let height = 0;
-    for (let row = region.row1; row <= Math.min(region.row2, rowEnd); row++) {
-      height += getRowHeight(row);
+    if (box) {
+      // Drawn in the quadrant of its top-left cell, as far as it reaches,
+      // for as long as any of it is in view.
+      const owner = quadrantOf(region.col1, region.row1, state.horizontalSplitPosition, state.verticalSplitPosition);
+      const inView = region.col2 >= colStart && region.col1 <= colEnd && region.row2 >= rowStart && region.row1 <= rowEnd;
+      if (owner !== quadrantName || !inView) {
+        continue;
+      }
+      ({ left, top, width, height } = box);
+    } else {
+      if (region.col1 < colStart || region.col1 > colEnd || region.row1 < rowStart || region.row1 > rowEnd) {
+        continue;
+      }
+      left = getColLeft(region.col1);
+      top = getRowTop(region.row1);
+      // As far as the quadrant shows the region.
+      for (let col = region.col1; col <= Math.min(region.col2, colEnd); col++) {
+        width += getColWidth(col);
+      }
+      for (let row = region.row1; row <= Math.min(region.row2, rowEnd); row++) {
+        height += getRowHeight(row);
+      }
     }
 
     const key = toKey(region.col1, region.row1);

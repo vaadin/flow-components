@@ -130,12 +130,15 @@ export interface CellGridRenderState {
    */
   shiftedCellBorderStyles: ReadonlyArray<string>;
 
-  /**
-   * Merged regions that overlap the visible viewport. Slice 137 will
-   * render these as larger cells overlaying the underlying single-
-   * cell grid; slice 132's minimal render ignores them.
-   */
+  /** The sheet's merged regions, each drawn as one cell over those it spans. */
   mergedRegions: ReadonlyArray<MergedRegion>;
+
+  /**
+   * Where each of {@link mergedRegions} is drawn, by the same index. Absent,
+   * a region is drawn only as far as its own quadrant shows it, and only
+   * while its top-left cell is on screen.
+   */
+  mergedRegionBoxes?: ReadonlyArray<MergedRegionBox>;
 
   /**
    * Current selection state. Slice 136 will render selection
@@ -333,6 +336,18 @@ export interface CellEditorState {
  * coordinates — it doesn't know about anchor cells or offsets.
  * Slice 160.
  */
+/**
+ * A merged region's box in the sheet's own pixel coordinates - the distance
+ * from its top-left corner, frozen rows and columns included - which every
+ * quadrant of the cell grid places its cells by.
+ */
+export interface MergedRegionBox {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
 export interface PositionedOverlay {
   /** Identifier from the server's `setOverlays` map. */
   id: string;

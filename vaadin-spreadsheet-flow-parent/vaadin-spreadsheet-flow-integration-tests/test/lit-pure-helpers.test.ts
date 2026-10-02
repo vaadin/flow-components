@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 import {
   commitStep,
+  computeMergedRegionBoxes,
   computePositionedColGroupings,
   isCellInSelection,
   overlayComponentAppId,
@@ -234,4 +235,98 @@ describe('commitStep — direction of the post-commit move', () => {
         expect(commitStep(undefined, false)).to.be.null;
         expect(commitStep('a', false)).to.be.null;
     });
+});
+
+/**
+ * Where merged regions are drawn.
+ *
+ * Every region gets a box, wherever its top-left cell is: a merge drawn only
+ * while its first cell was on screen vanished as soon as that row scrolled
+ * away, and one drawn only as far as its own quadrant cut off where it ran
+ * past a freeze.
+ */
+describe('computeMergedRegionBoxes', () => {
+  // 50px columns and 20px rows throughout.
+  const col = (): number => 50;
+  const row = (): number => 20;
+  const none = { rows: 0, cols: 0 };
+  const unscrolled = { left: 0, top: 0 };
+
+  it('places a region by the sheet\'s own coordinates', () => {
+    const [box] = computeMergedRegionBoxes(
+      [{ id: 0, col1: 3, col2: 4, row1: 2, row2: 4 }],
+      none,
+      unscrolled,
+      col,
+      row
+    );
+
+    expect(box).to.deep.equal({ left: 100, top: 20, width: 100, height: 60 });
+  });
+
+  it('keeps the whole of a region however far the sheet scrolls', () => {
+    // Without a freeze the region scrolls with the sheet: nothing pinned,
+    // nothing to shorten.
+    const [box] = computeMergedRegionBoxes(
+      [{ id: 0, col1: 1, col2: 2, row1: 1, row2: 5 }],
+      none,
+      { left: 30, top: 50 },
+      col,
+      row
+    );
+
+    expect(box).to.deep.equal({ left: 0, top: 0, width: 100, height: 100 });
+  });
+
+  it('pins a region that runs past the frozen rows, shortened by the scroll', () => {
+    // Rows 1-2 frozen; the region runs from row 2 to row 4, 40px past the
+    // split. Scrolled 15px, 25px of that part is still out from under the
+    // frozen rows.
+    const regions = [{ id: 0, col1: 3, col2: 4, row1: 2, row2: 4 }];
+    const frozen = { rows: 2, cols: 0 };
+
+    const [still] = computeMergedRegionBoxes(regions, frozen, unscrolled, col, row);
+    const [scrolled] = computeMergedRegionBoxes(regions, frozen, { left: 0, top: 15 }, col, row);
+    const [gone] = computeMergedRegionBoxes(regions, frozen, { left: 0, top: 500 }, col, row);
+
+    expect(still.height).to.equal(60);
+    expect(scrolled.height).to.equal(20 + 25);
+    expect(gone.height, 'never shorter than its frozen part').to.equal(20);
+  });
+
+  it('pins a region that runs past both splits on both axes', () => {
+    const [box] = computeMergedRegionBoxes(
+      [{ id: 0, col1: 1, col2: 3, row1: 1, row2: 3 }],
+      { rows: 1, cols: 1 },
+      { left: 60, top: 10 },
+      col,
+      row
+    );
+
+    expect(box).to.deep.equal({ left: 0, top: 0, width: 50 + 40, height: 20 + 30 });
+  });
+
+  it('does not shorten a region that starts past the split', () => {
+    const [box] = computeMergedRegionBoxes(
+      [{ id: 0, col1: 3, col2: 4, row1: 5, row2: 8 }],
+      { rows: 2, cols: 2 },
+      { left: 70, top: 30 },
+      col,
+      row
+    );
+
+    expect(box).to.deep.equal({ left: 100, top: 80, width: 100, height: 80 });
+  });
+
+  it('gives hidden rows and columns no size', () => {
+    const [box] = computeMergedRegionBoxes(
+      [{ id: 0, col1: 1, col2: 3, row1: 1, row2: 3 }],
+      none,
+      unscrolled,
+      (c) => (c === 2 ? 0 : 50),
+      (r) => (r === 2 ? 0 : 20)
+    );
+
+    expect(box).to.deep.equal({ left: 0, top: 0, width: 100, height: 40 });
+  });
 });
