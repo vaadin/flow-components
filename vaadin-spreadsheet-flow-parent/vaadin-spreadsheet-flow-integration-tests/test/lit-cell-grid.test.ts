@@ -2169,3 +2169,97 @@ describe('SpreadsheetCellGrid — selecting a cell that is already coloured', ()
         cleanup(el);
     });
 });
+
+describe('SpreadsheetCellGrid — where text sits in a tall row', () => {
+    function tallState(cellStyleToCSSStyle: Record<number, string>): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 1,
+                lastColumnPosition: 100,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 1,
+                lastRowPosition: 80,
+            },
+            cellData: new Map<string, CellData>([
+                ['col1 row1', { ...makeCellData(1, 1, 'text'), cellStyle: 'cs1' }],
+            ]),
+            colX: [0],
+            rowY: [0],
+            colWidths: [100],
+            rowHeights: [80],
+            cellStyleToCSSStyle,
+        };
+    }
+
+    /** How far the text's line box sits from the top of the cell. */
+    function textOffsetFromTop(el: SpreadsheetCellGrid): number {
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.cell')!;
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        return range.getBoundingClientRect().top - cell.getBoundingClientRect().top;
+    }
+
+    it('puts text at the bottom by default, as Excel does', async () => {
+        // A block cell put every value at the top of its row. The GWT
+        // client made cells bottom-justified flex columns, which is also
+        // what the server's alignment rules assume.
+        const el = await attachWithState(tallState({ 1: '' }));
+
+        expect(textOffsetFromTop(el)).to.be.greaterThan(40);
+
+        cleanup(el);
+    });
+
+    it('follows a top alignment the workbook asks for', async () => {
+        // The server says "top" with justify-content, which did nothing
+        // while the cell was a block.
+        const el = await attachWithState(tallState({ 1: 'justify-content:flex-start;' }));
+
+        expect(textOffsetFromTop(el)).to.be.lessThan(10);
+
+        cleanup(el);
+    });
+
+    it('follows a centre alignment the workbook asks for', async () => {
+        const el = await attachWithState(tallState({ 1: 'justify-content:center;' }));
+
+        const offset = textOffsetFromTop(el);
+        expect(offset).to.be.greaterThan(15);
+        expect(offset).to.be.lessThan(45);
+
+        cleanup(el);
+    });
+
+    it('does not inherit the page line height', async () => {
+        // A Vaadin page sets 1.625, which pushed a wrapped cell's second
+        // line out of its row.
+        const wrapper = document.createElement('div');
+        wrapper.style.lineHeight = '1.625';
+        document.body.appendChild(wrapper);
+        const el = document.createElement(
+            'vaadin-spreadsheet-internal-cell-grid'
+        ) as SpreadsheetCellGrid;
+        el.renderState = tallState({ 1: '' });
+        wrapper.appendChild(el);
+        await el.updateComplete;
+
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.cell')!;
+        expect(getComputedStyle(cell).lineHeight).to.equal('normal');
+
+        wrapper.remove();
+    });
+
+    it('keeps two pixels either side, which the fit check assumes', async () => {
+        const el = await attachWithState(tallState({ 1: '' }));
+
+        const style = getComputedStyle(el.shadowRoot!.querySelector('.cell')!);
+        expect(style.paddingLeft).to.equal('2px');
+        expect(style.paddingRight).to.equal('2px');
+
+        cleanup(el);
+    });
+});

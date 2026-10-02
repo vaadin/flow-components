@@ -79,6 +79,22 @@ export class SpreadsheetCellGrid extends LitElement {
       box-sizing: border-box;
       overflow: hidden;
       white-space: nowrap;
+      /* A column flexbox with its content at the bottom, as the GWT client
+         laid cells out. Excel's default vertical alignment is the bottom of
+         the row, and the server's per-style rules say otherwise through
+         justify-content - which only means anything here because the cell
+         is a flex container. As a block, every cell put its text at the
+         top, and top/centre/bottom alignment from a workbook did nothing. */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      /* Pinned rather than inherited: a Vaadin page sets a body line height
+         of 1.625, which spaced wrapped text so far apart that the second
+         line of a cell fell out of its row. */
+      line-height: normal;
+      /* The two pixels either side that the server's fit check assumes
+         when it decides whether a value fits its column. */
+      padding: 0 2px;
       /* A cell is a surface, not a window: it has a ground of its own,
          so a conditional format that stops matching leaves the cell
          white rather than transparent, and a cell under a merge or an
