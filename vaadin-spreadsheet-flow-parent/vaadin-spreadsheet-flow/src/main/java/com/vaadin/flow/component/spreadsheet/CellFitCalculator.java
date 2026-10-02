@@ -37,11 +37,20 @@ final class CellFitCalculator implements Serializable {
     CellFitCalculator() {
     }
 
-    void onWidthRatioUpdate(HashMap<Integer, Float> ratios) {
+    /**
+     * Replaces the width ratios with the ones the client measured.
+     *
+     * @return whether they differ from the ones held before, which is when the
+     *         cells judged against them need rebuilding
+     */
+    boolean onWidthRatioUpdate(HashMap<Integer, Float> ratios) {
         // Replace, don't merge — matches the original CellValueManager
         // behavior (the field was reassigned, not putAll'd). Callers expect a
         // full overwrite per ratio-update payload from the client.
+        boolean changed = !java.util.Objects.equals(cellStyleWidthRatioMap,
+                ratios);
         cellStyleWidthRatioMap = ratios;
+        return changed;
     }
 
     /**

@@ -1037,7 +1037,18 @@ public class CellValueManager implements Serializable {
      */
     public void onCellStyleWidthRatioUpdate(
             HashMap<Integer, Float> cellStyleWidthRatioMap) {
-        fitCalculator.onWidthRatioUpdate(cellStyleWidthRatioMap);
+        boolean changed = fitCalculator
+                .onWidthRatioUpdate(cellStyleWidthRatioMap);
+        if (changed) {
+            // Whether a value fits its column - and so whether it is
+            // shortened, spills into its neighbours or shows hashes - is
+            // judged against these ratios, and the client can only measure
+            // them once the styles have arrived. That is after the first
+            // batch of cells was built, so those cells went out judged
+            // against nothing: a freshly loaded workbook never spilled its
+            // text. Rebuild them now that there is something to judge by.
+            spreadsheet.refreshAllCellValues();
+        }
     }
 
     /**
