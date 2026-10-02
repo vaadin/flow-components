@@ -955,7 +955,9 @@ function frozenExtent(starts: ReadonlyArray<number>, sizes: ReadonlyArray<number
  */
 function freezeLine(along: 'rows' | 'columns', at: number, length: number): TemplateResult {
   const style =
-    along === 'rows' ? `top:${at}px;left:0;width:${length}px;height:1px;` : `left:${at}px;top:0;width:1px;height:${length}px;`;
+    along === 'rows'
+      ? `top:${at}px;left:0;width:${length}px;height:1px;`
+      : `left:${at}px;top:0;width:1px;height:${length}px;`;
   return html`<div class="freeze-line" style=${style}></div>`;
 }
 
@@ -1478,6 +1480,13 @@ function textColorDeclaration(data: CellData | undefined): string {
 function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | string {
   const rules: string[] = [];
   const styles = state.cellStyleToCSSStyle;
+  // A sheet with its gridlines turned off, as the GWT client's nogrid rule
+  // did it. First, and no more specific than the style rules, so the
+  // borders the workbook gives its cells - in their styles, conditional
+  // formats and the borders shifted onto a neighbour - still draw.
+  if (state.displayGridlines === false) {
+    rules.push('.cell.cell { border-right: 0; border-bottom: 0; }');
+  }
   // The workbook's default style under every cell, as the GWT client laid
   // it. A style is sent with only what it changes from the default, so a
   // cell styled cs5 whose font colour is automatic carries no colour of its

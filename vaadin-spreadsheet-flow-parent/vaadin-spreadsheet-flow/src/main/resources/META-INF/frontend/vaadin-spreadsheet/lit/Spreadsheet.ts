@@ -2918,6 +2918,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       colWidths,
       rowHeights,
       cellStyleToCSSStyle: this.cellStyleToCSSStyle,
+      displayGridlines: this.displayGridlines,
       rowIndexToStyleIndex: this.rowIndexToStyleIndex,
       columnIndexToStyleIndex: this.columnIndexToStyleIndex,
       cellSlots: Object.fromEntries(
@@ -4053,6 +4054,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   // Display flags
   setDisplayGridlines(visible: boolean): void {
     this.displayGridlines = visible;
+    // Turned off or on from the server on its own, with no cell data to
+    // carry a repaint along.
+    this.scheduleRender();
   }
   setDisplayRowColHeadings(visible: boolean): void {
     this.displayRowColHeadings = visible;

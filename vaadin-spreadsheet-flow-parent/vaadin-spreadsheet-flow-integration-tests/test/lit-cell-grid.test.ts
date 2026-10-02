@@ -2568,3 +2568,114 @@ describe('SpreadsheetCellGrid — the line along a freeze', () => {
         cleanup(el);
     });
 });
+
+/**
+ * A sheet with its gridlines turned off.
+ *
+ * The server sent the flag and the Lit client stored it, but nothing read
+ * it: every sheet drew its grid, including the ones a workbook - or an
+ * application calling setGridlinesVisible(false) - had turned it off for.
+ */
+describe('SpreadsheetCellGrid — gridlines turned off', () => {
+    function gridState(
+        displayGridlines: boolean | undefined,
+        overrides: Partial<CellGridRenderState> = {}
+    ): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 2,
+                lastColumnPosition: 100,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 2,
+                lastRowPosition: 40,
+            },
+            colX: [0, 50],
+            rowY: [0, 20],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            displayGridlines,
+            ...overrides,
+        };
+    }
+
+    function borders(el: SpreadsheetCellGrid, selector: string): string {
+        const style = getComputedStyle(el.shadowRoot!.querySelector(selector)!);
+        return `${style.borderRightWidth} ${style.borderBottomWidth}`;
+    }
+
+    it('draws the grid when nothing says otherwise', async () => {
+        const el = await attachWithState(gridState(undefined));
+
+        expect(borders(el, '.cell.col1.row1')).to.equal('1px 1px');
+
+        cleanup(el);
+    });
+
+    it('drops the grid when the sheet turns it off', async () => {
+        const el = await attachWithState(gridState(false));
+
+        expect(borders(el, '.cell.col1.row1')).to.equal('0px 0px');
+        expect(borders(el, '.cell.col2.row2')).to.equal('0px 0px');
+
+        cleanup(el);
+    });
+
+    it('keeps a border the workbook gives a cell', async () => {
+        const el = await attachWithState(
+            gridState(false, {
+                cellData: new Map<string, CellData>([
+                    ['col1 row1', { ...makeCellData(1, 1, 'x'), cellStyle: 'cs1' }],
+                ]),
+                cellStyleToCSSStyle: { 1: 'border-right: 2px solid rgb(0, 0, 255);' },
+            })
+        );
+
+        expect(borders(el, '.cell.col1.row1')).to.equal('2px 0px');
+
+        cleanup(el);
+    });
+
+    it('keeps a border a conditional format gives a cell', async () => {
+        const el = await attachWithState(
+            gridState(false, {
+                cellData: new Map<string, CellData>([
+                    ['col1 row1', { ...makeCellData(1, 1, 'x'), cellStyle: 'cs0 cf2' }],
+                ]),
+                conditionalFormattingStyles: { 2: 'border-bottom: 3px solid rgb(255, 0, 0);' },
+            })
+        );
+
+        expect(borders(el, '.cell.col1.row1')).to.equal('0px 3px');
+
+        cleanup(el);
+    });
+
+    it('keeps a border shifted onto the neighbour of a cell', async () => {
+        // A cell's left border is drawn as its left neighbour's right one.
+        const el = await attachWithState(
+            gridState(false, {
+                shiftedCellBorderStyles: ['.col1.row2 { border-right: 1px solid rgb(0, 128, 0); }'],
+            })
+        );
+
+        expect(borders(el, '.cell.col1.row2')).to.equal('1px 0px');
+
+        cleanup(el);
+    });
+
+    it('drops the grid from merged cells too', async () => {
+        const el = await attachWithState(
+            gridState(false, {
+                mergedRegions: [{ col1: 1, col2: 2, row1: 1, row2: 1, id: 1 }],
+            })
+        );
+
+        expect(borders(el, '.merged-cell')).to.equal('0px 0px');
+
+        cleanup(el);
+    });
+});

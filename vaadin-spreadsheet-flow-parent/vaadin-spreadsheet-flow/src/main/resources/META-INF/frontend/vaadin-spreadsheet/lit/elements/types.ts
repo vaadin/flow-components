@@ -88,6 +88,12 @@ export interface CellGridRenderState {
   cellStyleToCSSStyle: Readonly<Record<number, string>>;
 
   /**
+   * Whether the sheet shows its gridlines. Turned off, the cells lose the
+   * grid's borders but keep any the workbook gives them. Absent means shown.
+   */
+  displayGridlines?: boolean;
+
+  /**
    * Style index a whole row is formatted with, by 1-based row. A cell of
    * that row that has no style of its own takes the row's, as it does in
    * Excel - a row filled yellow is yellow in its empty cells too.

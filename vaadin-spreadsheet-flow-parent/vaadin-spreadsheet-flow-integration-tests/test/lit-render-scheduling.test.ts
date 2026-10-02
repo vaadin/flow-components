@@ -143,6 +143,15 @@ describe('Spreadsheet render scheduling — server pushes repaint', () => {
         expect(ctx.paints()).to.equal(1);
     });
 
+    it('setDisplayGridlines repaints', async () => {
+        // Turned off from the server on its own, with no cell data to carry
+        // a repaint along - an application's setGridlinesVisible(false).
+        ctx.sheet.setDisplayGridlines(false);
+        await afterFrame();
+
+        expect(ctx.paints()).to.equal(1);
+    });
+
     it('setReload(false) does not repaint', async () => {
         ctx.sheet.setReload(false);
         await afterFrame();
