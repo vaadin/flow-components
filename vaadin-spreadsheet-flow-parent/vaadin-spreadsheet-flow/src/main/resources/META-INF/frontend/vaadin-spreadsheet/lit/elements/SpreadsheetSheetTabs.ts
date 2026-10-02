@@ -119,17 +119,57 @@ export class SpreadsheetSheetTabs extends LitElement {
       overflow: hidden;
     }
 
+    /* The scroll and add-sheet buttons. Each is an icon painted in the
+       button's text colour through a mask, as the GWT client drew them -
+       a bare filled box says nothing about what it does, and five of them
+       in a row read as decoration. */
     .sheet-tabsheet-options > div {
-      width: 14px;
-      height: 14px;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      background: var(--vaadin-spreadsheet-tab-button-bg, #808080);
+      color: var(--vaadin-spreadsheet-tab-button-bg, #464646);
+    }
+
+    .sheet-tabsheet-options > div::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      background: currentColor;
+      -webkit-mask-image: var(--_tab-button-icon);
+      mask-image: var(--_tab-button-icon);
+    }
+
+    .sheet-tabsheet-options > div:hover {
+      color: var(--vaadin-spreadsheet-tabs-active-fg, #1976d2);
     }
 
     /* Kept in the DOM so a stylesheet can reach it, but inert. */
     .sheet-tabsheet-options > div.hidden {
-      opacity: 0.3;
+      color: #d6d6d6;
       cursor: default;
+    }
+
+    .scroll-tabs-beginning {
+      --_tab-button-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>');
+    }
+
+    .scroll-tabs-left {
+      --_tab-button-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>');
+    }
+
+    .scroll-tabs-right {
+      --_tab-button-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>');
+    }
+
+    .scroll-tabs-end {
+      --_tab-button-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/><path fill-rule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>');
+    }
+
+    .add-new-tab {
+      --_tab-button-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>');
     }
 
     :host {

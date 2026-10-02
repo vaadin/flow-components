@@ -629,3 +629,54 @@ describe('Spreadsheet — focus after a sheet switch', () => {
         cleanup();
     });
 });
+
+describe('SpreadsheetSheetTabs — the strip buttons', () => {
+    const BUTTONS = [
+        'scroll-tabs-beginning',
+        'scroll-tabs-left',
+        'scroll-tabs-right',
+        'scroll-tabs-end',
+        'add-new-tab',
+    ];
+
+    it('draws an icon in each button rather than a filled box', async () => {
+        // The Lit client kept the GWT client's five buttons but not their
+        // icons, so they rendered as five grey squares that said nothing
+        // about what they did.
+        const el = await attachWithState({
+            ...emptySheetTabsRenderState(),
+            sheetNames: ['One', 'Two'],
+            activeIndex: 1,
+        });
+
+        for (const cls of BUTTONS) {
+            const button = el.shadowRoot!.querySelector<HTMLElement>('.' + cls)!;
+            expect(button, cls).to.not.be.null;
+            const icon = getComputedStyle(button, '::before');
+            const mask =
+                icon.getPropertyValue('mask-image') ||
+                icon.getPropertyValue('-webkit-mask-image');
+            expect(mask, cls + ' carries an icon').to.contain('data:image/svg+xml');
+            expect(
+                getComputedStyle(button).backgroundColor,
+                cls + ' is not a filled box'
+            ).to.equal('rgba(0, 0, 0, 0)');
+        }
+
+        el.remove();
+    });
+
+    it('greys out a button that has nowhere to scroll', async () => {
+        const el = await attachWithState({
+            ...emptySheetTabsRenderState(),
+            sheetNames: ['One'],
+            activeIndex: 1,
+        });
+
+        const start = el.shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-beginning')!;
+        expect(start.classList.contains('hidden')).to.be.true;
+        expect(getComputedStyle(start).color).to.equal('rgb(214, 214, 214)');
+
+        el.remove();
+    });
+});
