@@ -735,6 +735,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs.addEventListener('sheet-tab-rename', this.handleSheetRename as EventListener);
     this.sheetTabs.addEventListener('sheet-tab-rename-cancel', this.handleSheetRenameCancel);
     this.scrollContainer.addEventListener('scroll', this.handleScroll);
+    this.scrollContainer.addEventListener('focusin', this.handleSheetFocusChange);
+    this.scrollContainer.addEventListener('focusout', this.handleSheetFocusChange);
     // Clipboard integration (slice 163). The browser routes
     // copy/cut/paste events to the focused element when the
     // user presses Ctrl+C / Ctrl+X / Ctrl+V. The scroll
@@ -2278,6 +2280,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   dispose(): void {
     this.renderQueued = false;
     this.scrollContainer.removeEventListener('scroll', this.handleScroll);
+    this.scrollContainer.removeEventListener('focusin', this.handleSheetFocusChange);
+    this.scrollContainer.removeEventListener('focusout', this.handleSheetFocusChange);
     this.scrollContainer.removeEventListener('keydown', this.handleKeyDown as EventListener);
     this.scrollContainer.removeEventListener('pointerdown', this.handleHostedEditorPointerDown);
     this.scrollContainer.removeEventListener('copy', this.handleCopy as EventListener);
@@ -2385,6 +2389,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /** Test-only accessor: the scroll container element. */
+  /**
+   * Tells the cell grid whether the sheet has the keyboard, which it shows
+   * by dimming the selection when it does not - as the GWT client did, so
+   * a sheet left for another field does not look like it still takes the
+   * typing. Read once the focus has settled: moving between the sheet and
+   * its own cell editor fires a focusout and a focusin, and only the
+   * outcome matters.
+   */
+  private readonly handleSheetFocusChange = (): void => {
+    queueMicrotask(() => {
+      this.cellGrid.toggleAttribute('sheet-focused', this.scrollContainer.matches(':focus-within'));
+    });
+  };
+
   getScrollContainer(): HTMLElement {
     return this.scrollContainer;
   }

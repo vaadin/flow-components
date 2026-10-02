@@ -282,3 +282,76 @@ describe('Spreadsheet — dragging the fill handle', () => {
       .to.be.true;
   });
 });
+
+/**
+ * The selection while the sheet does not have the keyboard.
+ *
+ * The GWT client dimmed the selection whenever the sheet lost focus, so a
+ * sheet the user had left for another field did not look like it still
+ * took the typing. The Lit client drew it at full strength throughout.
+ */
+describe('Spreadsheet — the selection while the sheet is not focused', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(async () => {
+    ctx = attachSheet();
+    ctx.sheet.setSelectedCellAndRange('B3', 2, 3, 2, 3, 2, 3, false);
+    await ctx.sheet.getCellGrid().updateComplete;
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  /** How strongly the outline and the handle are drawn. */
+  function opacity(): string {
+    const root = ctx.sheet.getCellGrid().shadowRoot!;
+    const outline = getComputedStyle(root.querySelector('.sheet-selection .s-top')!).opacity;
+    const handle = getComputedStyle(root.querySelector('.sheet-selection .selection-corner')!).opacity;
+    expect(handle, 'the handle with the outline').to.equal(outline);
+    return outline;
+  }
+
+  /** Long enough for the focus change to be read. */
+  function settle(): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, 0));
+  }
+
+  it('dims the selection until the sheet has the keyboard', async () => {
+    expect(opacity()).to.equal('0.6');
+
+    ctx.sheet.getScrollContainer().focus();
+    await settle();
+
+    expect(opacity()).to.equal('1');
+  });
+
+  it('dims it again when the keyboard goes elsewhere', async () => {
+    const elsewhere = document.createElement('input');
+    document.body.appendChild(elsewhere);
+    ctx.sheet.getScrollContainer().focus();
+    await settle();
+
+    elsewhere.focus();
+    await settle();
+
+    expect(opacity()).to.equal('0.6');
+    elsewhere.remove();
+  });
+
+  it('keeps it bright while the sheet\'s own cell editor has the keyboard', async () => {
+    ctx.sheet.getScrollContainer().focus();
+    await settle();
+
+    ctx.sheet.getCellGrid().dispatchEvent(
+      new CustomEvent('cell-doubleclick', { detail: { col: 2, row: 3 }, bubbles: true, composed: true })
+    );
+    await ctx.sheet.getCellGrid().updateComplete;
+    await settle();
+
+    const editor = ctx.sheet.getCellGrid().shadowRoot!.querySelector('.cell-editor');
+    expect(editor, 'the editor opened').to.not.be.null;
+    expect(ctx.sheet.getCellGrid().shadowRoot!.activeElement).to.equal(editor);
+    expect(opacity()).to.equal('1');
+  });
+});

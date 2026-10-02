@@ -186,6 +186,13 @@ export class SpreadsheetCellGrid extends LitElement {
       background: rgba(235, 247, 233, 0.8);
       z-index: 3;
     }
+    /* Dimmed while the sheet does not have the keyboard, as the GWT
+       client did; the connector sets the attribute. The outline and the
+       handle rather than the overlay: opacity on the overlay would make it
+       a stacking context, and the cells would cover the handle. */
+    :host(:not([sheet-focused])) .sheet-selection > * {
+      opacity: 0.6;
+    }
     .sheet-selection .s-top {
       position: absolute;
       top: 0;
