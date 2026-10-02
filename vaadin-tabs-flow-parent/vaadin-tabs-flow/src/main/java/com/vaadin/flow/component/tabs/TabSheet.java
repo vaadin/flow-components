@@ -35,6 +35,7 @@ import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -64,7 +65,8 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
     private Map<Tab, Element> tabToContent = new HashMap<>();
 
-    private Registration deferredUpdateContent = null;
+    private final BeforeClientResponseAction contentAttachAction = new BeforeClientResponseAction(
+            this, this::ensureSelectedTabContentAttached);
 
     /**
      * The default constructor.
@@ -436,15 +438,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
             }
         }
 
-        getElement().getNode().runWhenAttached(ui -> {
-            if (deferredUpdateContent != null) {
-                deferredUpdateContent.remove();
-            }
-
-            deferredUpdateContent = ui.beforeClientResponse(this, context -> {
-                ensureSelectedTabContentAttached();
-            });
-        });
+        contentAttachAction.schedule();
     }
 
     private void ensureSelectedTabContentAttached() {
