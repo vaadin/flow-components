@@ -559,18 +559,19 @@ class GroupingUtil implements Serializable {
      *         given level. 0-based.
      */
     public static long findEndOfRowGroup(Spreadsheet sheet, int rowindex,
-            XSSFRow row, short level) {
+            short level) {
 
         while (rowindex < sheet.getRows()) {
             XSSFRow r = (XSSFRow) sheet.getActiveSheet().getRow(rowindex);
             if (r == null || r.getCTRow().getOutlineLevel() < level) {
-                // end
-                return rowindex - 1l;
+                break;
             }
 
             rowindex++;
         }
-        return -1l;
+        // the group ends on the row before the first row that is not part of
+        // it, or on the last row of the sheet
+        return rowindex - 1l;
     }
 
     /**

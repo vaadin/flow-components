@@ -25,6 +25,13 @@ public class GroupingIT extends AbstractSpreadsheetIT {
 
     private static final String IMAGE_CSS_SELECTOR = "div.sheet-image";
 
+    /**
+     * The last row of row_group_at_last_row.xlsx, which is also the last row of
+     * the row group in that file, 1-based.
+     */
+    private static final int LAST_ROW = 205;
+    private static final int GROUPED_ROWS = 4;
+
     @Before
     public void init() {
         open();
@@ -101,6 +108,42 @@ public class GroupingIT extends AbstractSpreadsheetIT {
         String height = overlay.getCssValue("height").replace("px", "");
 
         Assert.assertTrue("Image height", Float.parseFloat(height) > 300);
+    }
+
+    @Test
+    public void grouping_rowGroupEndsOnLastRow_groupSpansRowsCollapsesAndExpands() {
+        loadFile("row_group_at_last_row.xlsx");
+        SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class)
+                .first();
+        // the group is at the end of the sheet, scroll it into view
+        spreadsheetElement.scroll(100000);
+        waitUntil(driver -> !findElementsInShadowRoot(
+                By.cssSelector(".rh.row" + LAST_ROW)).isEmpty());
+
+        // The Lit gutter draws the group's bracket and its button as
+        // separate elements; the bracket is what spans the rows.
+        WebElement bracket = findElementInShadowRoot(
+                By.cssSelector(".row-grouping-line"));
+        int rowHeight = spreadsheetElement.getRowHeader(LAST_ROW).getSize()
+                .getHeight();
+        Assert.assertTrue("Row grouping height",
+                bracket.getSize().getHeight() >= GROUPED_ROWS * rowHeight);
+
+        // the collapse icon is at the end of the group, not at its start
+        WebElement collapseIcon = findElementInShadowRoot(
+                By.cssSelector(".row-group-pane .grouping.minus"));
+        Assert.assertTrue("Collapse icon position",
+                collapseIcon.getLocation().getY() >= spreadsheetElement
+                        .getRowHeader(LAST_ROW).getLocation().getY());
+
+        collapseIcon.click();
+        waitUntil(driver -> !spreadsheetElement.getRowHeader(LAST_ROW)
+                .isDisplayed());
+
+        findElementInShadowRoot(
+                By.cssSelector(".row-group-pane .grouping.plus")).click();
+        waitUntil(driver -> spreadsheetElement.getRowHeader(LAST_ROW)
+                .isDisplayed());
     }
 
     // HELPERS
