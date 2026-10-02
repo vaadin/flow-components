@@ -2918,6 +2918,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       colWidths,
       rowHeights,
       cellStyleToCSSStyle: this.cellStyleToCSSStyle,
+      rowIndexToStyleIndex: this.rowIndexToStyleIndex,
+      columnIndexToStyleIndex: this.columnIndexToStyleIndex,
       cellSlots: Object.fromEntries(
         Object.entries(this.cellSlotAssignments()).map(([cellKey, a]) => [cellKey, a.slot])
       ),

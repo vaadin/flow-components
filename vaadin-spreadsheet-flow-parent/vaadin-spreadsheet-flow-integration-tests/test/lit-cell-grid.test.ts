@@ -567,7 +567,10 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
         );
         expect(ourStyles).to.have.length.greaterThanOrEqual(1);
         const cssText = ourStyles.map((s) => s.textContent ?? '').join('\n');
-        expect(cssText).to.include('.cell.cs0 { font-weight: bold; }');
+        // The default style is laid under every cell rather than scoped to
+        // .cs0, as the GWT client did, so styles that only state what they
+        // change still get everything else from it.
+        expect(cssText).to.include('.cell.cell { font-weight: bold;');
         expect(cssText).to.include('.cell.cs3 { color: red; }');
 
         cleanup(el);
@@ -600,16 +603,19 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
         cleanup(el);
     });
 
-    it('omits the cellStyle class when cellData has none', async () => {
-        // Cell at (1,1) has no cellData entry.
+    it('gives a cell the server sent nothing for the default style', async () => {
+        // Cell at (1,1) has no cellData entry. It still wears cs0, the
+        // workbook's default style, as every cell did in the GWT client.
+        // Without it the cell fell through to the host's Helvetica 14px in
+        // grey rather than the sheet's Calibri 11pt in black.
         const el = await attachWithState(
             build1x1State(new Map(), { 0: 'font-weight: bold;' })
         );
 
         const cell = el.shadowRoot!.querySelector('.col1.row1') as HTMLElement;
-        // Should have "cell col1 row1" but NOT any "cs<N>" class.
         const csClasses = Array.from(cell.classList).filter((c) => c.startsWith('cs'));
-        expect(csClasses).to.have.length(0);
+        expect(csClasses).to.deep.equal(['cs0']);
+        expect(getComputedStyle(cell).fontWeight).to.equal('700');
 
         cleanup(el);
     });
@@ -2259,6 +2265,138 @@ describe('SpreadsheetCellGrid — where text sits in a tall row', () => {
         const style = getComputedStyle(el.shadowRoot!.querySelector('.cell')!);
         expect(style.paddingLeft).to.equal('2px');
         expect(style.paddingRight).to.equal('2px');
+
+        cleanup(el);
+    });
+});
+
+describe('SpreadsheetCellGrid — the workbook default style and row/column styles', () => {
+    const DEFAULT = '--default-font-family:Calibri;font-family:var(--default-font-family);--default-font-size:11pt;font-size:var(--default-font-size);color:rgb(0, 0, 0);';
+
+    function grid(opts: {
+        cells: [string, CellData][];
+        styles: Record<number, string>;
+        rows?: Record<number, number>;
+        cols?: Record<number, number>;
+    }): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 3,
+                lastColumnPosition: 150,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 3,
+                lastRowPosition: 60,
+            },
+            cellData: new Map<string, CellData>(opts.cells),
+            colX: [0, 50, 100],
+            rowY: [0, 20, 40],
+            colWidths: [50, 50, 50],
+            rowHeights: [20, 20, 20],
+            cellStyleToCSSStyle: opts.styles,
+            rowIndexToStyleIndex: opts.rows,
+            columnIndexToStyleIndex: opts.cols,
+        };
+    }
+
+    function cellAt(el: SpreadsheetCellGrid, col: number, row: number): HTMLElement {
+        return el.shadowRoot!.querySelector<HTMLElement>(`.cell.col${col}.row${row}`)!;
+    }
+
+    it('gives a styled cell the default colour it does not set itself', async () => {
+        // A style is sent with only what it changes from the default, so
+        // cs5 here - bold, automatic colour - says nothing about colour. The
+        // default had to reach it; scoped to .cs0 alone it did not, and the
+        // cell came out the host's grey instead of black.
+        const el = await attachWithState(
+            grid({
+                cells: [['col1 row1', { ...makeCellData(1, 1, 'x'), cellStyle: 'cs5' }]],
+                styles: { 0: DEFAULT, 5: 'font-weight:bold;' },
+            })
+        );
+
+        const style = getComputedStyle(cellAt(el, 1, 1));
+        expect(style.color).to.equal('rgb(0, 0, 0)');
+        expect(style.fontWeight).to.equal('700');
+        expect(style.fontFamily).to.contain('Calibri');
+
+        cleanup(el);
+    });
+
+    it('styles the empty cells of a formatted column', async () => {
+        const el = await attachWithState(
+            grid({
+                cells: [],
+                styles: { 0: DEFAULT, 7: 'background-color:rgb(255, 255, 0);' },
+                cols: { 2: 7 },
+            })
+        );
+
+        expect(getComputedStyle(cellAt(el, 2, 1)).backgroundColor).to.equal('rgb(255, 255, 0)');
+        expect(getComputedStyle(cellAt(el, 2, 3)).backgroundColor).to.equal('rgb(255, 255, 0)');
+        expect(getComputedStyle(cellAt(el, 1, 1)).backgroundColor).to.not.equal('rgb(255, 255, 0)');
+
+        cleanup(el);
+    });
+
+    it('styles the empty cells of a formatted row', async () => {
+        const el = await attachWithState(
+            grid({
+                cells: [],
+                styles: { 0: DEFAULT, 8: 'font-style:italic;' },
+                rows: { 3: 8 },
+            })
+        );
+
+        expect(getComputedStyle(cellAt(el, 1, 3)).fontStyle).to.equal('italic');
+        expect(getComputedStyle(cellAt(el, 1, 2)).fontStyle).to.equal('normal');
+
+        cleanup(el);
+    });
+
+    it('lets a cell with its own style keep it inside a formatted column', async () => {
+        const el = await attachWithState(
+            grid({
+                cells: [['col2 row1', { ...makeCellData(2, 1, 'x'), cellStyle: 'cs9' }]],
+                styles: {
+                    0: DEFAULT,
+                    7: 'background-color:rgb(255, 255, 0);',
+                    9: 'background-color:rgb(0, 128, 0);',
+                },
+                cols: { 2: 7 },
+            })
+        );
+
+        expect(getComputedStyle(cellAt(el, 2, 1)).backgroundColor).to.equal('rgb(0, 128, 0)');
+
+        cleanup(el);
+    });
+
+    it('lets an application set the cell font over the workbook default', async () => {
+        const el = await attachWithState(
+            grid({ cells: [], styles: { 0: DEFAULT } })
+        );
+        el.style.setProperty('--vaadin-spreadsheet-cell-font', 'monospace');
+        el.style.setProperty('--vaadin-spreadsheet-cell-font-size', '20px');
+
+        const style = getComputedStyle(cellAt(el, 1, 1));
+        expect(style.fontFamily).to.equal('monospace');
+        expect(style.fontSize).to.equal('20px');
+
+        cleanup(el);
+    });
+
+    it('uses the workbook font when the application sets none', async () => {
+        const el = await attachWithState(
+            grid({ cells: [], styles: { 0: DEFAULT } })
+        );
+
+        const style = getComputedStyle(cellAt(el, 1, 1));
+        expect(style.fontFamily).to.contain('Calibri');
+        expect(style.fontSize).to.equal('14.6667px');
 
         cleanup(el);
     });

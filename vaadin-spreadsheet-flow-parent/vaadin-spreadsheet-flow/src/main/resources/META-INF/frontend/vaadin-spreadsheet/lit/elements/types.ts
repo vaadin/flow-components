@@ -88,6 +88,16 @@ export interface CellGridRenderState {
   cellStyleToCSSStyle: Readonly<Record<number, string>>;
 
   /**
+   * Style index a whole row is formatted with, by 1-based row. A cell of
+   * that row that has no style of its own takes the row's, as it does in
+   * Excel - a row filled yellow is yellow in its empty cells too.
+   */
+  rowIndexToStyleIndex?: Readonly<Record<number, number>>;
+
+  /** Same as {@link rowIndexToStyleIndex}, by 1-based column. */
+  columnIndexToStyleIndex?: Readonly<Record<number, number>>;
+
+  /**
    * Conditional-formatting rule bodies, keyed by rule index. A cell that
    * a rule matches carries {@code "cf<index>"} in its {@code cellStyle}.
    * Emitted after the {@code cs<N>} rules so a matching rule wins over the

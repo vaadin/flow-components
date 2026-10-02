@@ -108,11 +108,13 @@ describe('Spreadsheet — cell-style width ratios', () => {
   });
 
   it('re-measures when the styles change', async () => {
-    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    // The default style's size in the shape the server writes it: through
+    // --default-font-size, which is what the cell grid's base rule reads.
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size: var(--default-font-size);--default-font-size:10px;' });
     await settle(ctx.sheet);
     const first = ratioReport(ctx.sent)!.data.ratios as number[];
 
-    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:30px;' });
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size: var(--default-font-size);--default-font-size:30px;' });
     await settle(ctx.sheet);
     const second = ratioReport(ctx.sent)!.data.ratios as number[];
 

@@ -103,8 +103,11 @@ export class SpreadsheetCellGrid extends LitElement {
       background: var(--vaadin-spreadsheet-cell-background, #fff);
       border-right: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
       border-bottom: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
-      font-family: var(--vaadin-spreadsheet-cell-font, inherit);
-      font-size: var(--vaadin-spreadsheet-cell-font-size, inherit);
+      /* Unset, the workbook's default font, which its default style
+         declares on every cell. Until the styles arrive nothing declares
+         it, and the cell inherits the host's font. */
+      font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
+      font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
     }
 
     /* The server appends an "r" to a cell's class list when the value is
@@ -402,8 +405,8 @@ export class SpreadsheetCellGrid extends LitElement {
       z-index: 10;
       border: 2px solid var(--vaadin-spreadsheet-editor-border, #1976d2);
       outline: none;
-      font-family: var(--vaadin-spreadsheet-cell-font, inherit);
-      font-size: var(--vaadin-spreadsheet-cell-font-size, inherit);
+      font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
+      font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
       padding: 0 2px;
     }
   `;
@@ -906,23 +909,17 @@ interface QuadrantRenderOpts {
   getRowHeight: (row: number) => number;
 }
 
-/**
- * Render the cells of a single quadrant. Each cell carries a
- * {@code quadrant-<name>} class so CSS can apply z-index stacking
- * (corner > top, left > main). The per-cell position comes from the
- * caller's {@code getColLeft/getRowTop/getColWidth/getRowHeight}
- * closures — different quadrants use different position arrays
- * (frozen arrays vs main arrays).
- */
-/**
- * Every coordinate a merged region covers, its anchor included.
- *
- * These cells are still rendered — an application, and the tests, ask
- * about a cell by its coordinates whether or not a merge sits over it —
- * but the merge owns the region's content, so they render their text and
- * nothing else. A second slot of the same name underneath would capture
- * the component and hide it below the merge.
- */
+/** Rows or columns by the style index they are formatted with. */
+function groupByStyle(byIndex: Readonly<Record<number, number>>): Map<number, number[]> {
+  const out = new Map<number, number[]>();
+  for (const [where, style] of Object.entries(byIndex)) {
+    const list = out.get(style) ?? [];
+    list.push(Number(where));
+    out.set(style, list);
+  }
+  return out;
+}
+
 /** Whether two key sets hold the same keys. */
 function sameKeys(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
   if (a.size !== b.size) {
@@ -936,6 +933,15 @@ function sameKeys(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
   return true;
 }
 
+/**
+ * Every coordinate a merged region covers, its anchor included.
+ *
+ * These cells are still rendered — an application, and the tests, ask
+ * about a cell by its coordinates whether or not a merge sits over it —
+ * but the merge owns the region's content, so they render their text and
+ * nothing else. A second slot of the same name underneath would capture
+ * the component and hide it below the merge.
+ */
 function coveredByMergeCoords(
   mergedRegions: ReadonlyArray<{ col1: number; col2: number; row1: number; row2: number }>
 ): Set<string> {
@@ -950,6 +956,14 @@ function coveredByMergeCoords(
   return covered;
 }
 
+/**
+ * Render the cells of a single quadrant. Each cell carries a
+ * {@code quadrant-<name>} class so CSS can apply z-index stacking
+ * (corner > top, left > main). The per-cell position comes from the
+ * caller's {@code getColLeft/getRowTop/getColWidth/getRowHeight}
+ * closures — different quadrants use different position arrays
+ * (frozen arrays vs main arrays).
+ */
 function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
   const { state, quadrantName, colStart, colEnd, rowStart, rowEnd, getColLeft, getColWidth, getRowTop, getRowHeight } =
     opts;
@@ -987,7 +1001,12 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       const spill = slotName === undefined && !underMerge ? data?.overflowWidth ?? 0 : 0;
       const overflowing = spill > width;
       const text = overflowing ? html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>` : rawText;
-      const cellStyleClass = data?.cellStyle ?? '';
+      // A cell the server sent nothing for still wears the workbook's
+      // default style. Without it the cell falls through to the host's own
+      // font and colour - Helvetica 14px in grey - instead of the sheet's
+      // default, Calibri 11pt in black, which is what the GWT client gave
+      // every cell before anything else applied.
+      const cellStyleClass = data?.cellStyle ?? 'cs0';
       const inSelection = isCellSelected(selection, col, row);
       const isActive = isActiveCell(selection, col, row);
       const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
@@ -1113,7 +1132,8 @@ function buildMergedCellOverlays(state: CellGridRenderState): TemplateResult[] {
     // slot — the cells underneath deliberately leave it out.
     const slotName = (state.cellSlots ?? {})[key];
     const text = slotName === undefined ? data?.value ?? '' : html`<slot name=${slotName}></slot>`;
-    const cellStyleClass = data?.cellStyle ?? '';
+    // Same default as an ordinary cell - see buildCells.
+    const cellStyleClass = data?.cellStyle ?? 'cs0';
 
     // Selection: a merged cell carries cell-range if its top-left
     // is in the selected range (excluding active cell). Matches
@@ -1398,8 +1418,43 @@ function textColorDeclaration(data: CellData | undefined): string {
  */
 function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | string {
   const rules: string[] = [];
-  for (const [index, body] of Object.entries(state.cellStyleToCSSStyle)) {
-    rules.push(`.cell.cs${index} { ${body} }`);
+  const styles = state.cellStyleToCSSStyle;
+  // The workbook's default style under every cell, as the GWT client laid
+  // it. A style is sent with only what it changes from the default, so a
+  // cell styled cs5 whose font colour is automatic carries no colour of its
+  // own: scoped to .cs0 alone, the default reached none of those cells and
+  // they fell through to the host's grey. Two classes, so it beats the
+  // element's own .cell rule and loses to every cs<N> rule below it.
+  //
+  // The font goes through the documented properties so an application can
+  // still set the cell font, which the workbook's default would otherwise
+  // override on every cell. Unset, they resolve to the workbook's own font.
+  if (styles[0] !== undefined) {
+    rules.push(
+      `.cell.cell { ${styles[0]} ` +
+        'font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family)); ' +
+        'font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size)); }'
+    );
+  }
+  // A whole row or column formatted in the workbook styles those of its
+  // cells that have no style of their own - which wear cs0.
+  const rowsByStyle = groupByStyle(state.rowIndexToStyleIndex ?? {});
+  const colsByStyle = groupByStyle(state.columnIndexToStyleIndex ?? {});
+  for (const [key, body] of Object.entries(styles)) {
+    const index = Number(key);
+    if (index === 0) {
+      // Already laid under every cell above. A second .cs0 rule would come
+      // later and set the font directly, past the documented properties.
+      continue;
+    }
+    const selectors = [`.cell.cs${index}`];
+    for (const row of rowsByStyle.get(index) ?? []) {
+      selectors.push(`.cell.row${row}.cs0`);
+    }
+    for (const col of colsByStyle.get(index) ?? []) {
+      selectors.push(`.cell.col${col}.cs0`);
+    }
+    rules.push(`${selectors.join(', ')} { ${body} }`);
   }
   // Conditional formatting after the per-cell styles, and in ascending
   // key order: a rule that matches beats the cell's own style, and a
