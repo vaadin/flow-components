@@ -104,8 +104,8 @@ export class SpreadsheetCellGrid extends LitElement {
       border-right: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
       border-bottom: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
       /* Unset, the workbook's default font, which its default style
-         declares on every cell. Until the styles arrive nothing declares
-         it, and the cell inherits the host's font. */
+         declares on every cell - and until the styles arrive, the default
+         the host declares for it. */
       font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
       font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
     }
