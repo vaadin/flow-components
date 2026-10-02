@@ -53,8 +53,10 @@ export interface CellData {
   /** Hint to the renderer that this cell needs a width measurement. */
   needsMeasure: boolean;
   /**
-   * Width in pixels to draw this cell's text at so it runs into the empty
-   * cells to its right, absent when it fits inside its own column.
+   * Width in pixels to draw this cell's text at when it is too wide for its
+   * column, absent when it fits. It covers the cell's own column and the
+   * empty ones the text runs into - only its own when it has nowhere to go -
+   * and what still does not fit ends in an ellipsis.
    *
    * The server settles how far, because it is the side that knows what the
    * neighbouring cells hold. Absent rather than `0` on the wire: the

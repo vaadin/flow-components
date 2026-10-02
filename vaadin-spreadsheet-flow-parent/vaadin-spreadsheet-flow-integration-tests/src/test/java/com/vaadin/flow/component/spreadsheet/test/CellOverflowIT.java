@@ -81,6 +81,25 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void longText_nextCellTaken_isCutShortWithAnEllipsis() {
+        getSpreadsheet().getCellAt("B1").setValue("in the way");
+        getSpreadsheet().getCellAt("A1")
+                .setValue("a value far too wide for one column");
+
+        // The GWT client read "a value f..." here. Clipped plainly, the
+        // text ends mid-letter and nothing says there is more of it.
+        SheetCellElement a1 = getSpreadsheet().getCellAt("A1");
+        Object textOverflow = ((JavascriptExecutor) getDriver()).executeScript(
+                "const held = arguments[0].querySelector('.cell-spill');"
+                        + "return held ? getComputedStyle(held).textOverflow"
+                        + " : null;",
+                a1);
+        Assert.assertEquals("ellipsis", textOverflow);
+        Assert.assertTrue("The ellipsis has to fall inside the cell",
+                renderedTextWidth(a1) < a1.getSize().getWidth());
+    }
+
+    @Test
     public void verticalOverflowCells_noOverflow() {
         loadWrapTextTest();
 

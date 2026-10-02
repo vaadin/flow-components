@@ -72,7 +72,9 @@ class CellOverflowWireTest {
         Cell a1 = spreadsheet.createCell(0, 0, "a value far too wide");
         spreadsheet.createCell(0, 1, "in the way");
 
-        assertEquals(0, dataFor(a1).overflowWidth);
+        // Its own column's width: the client still knows to cut it short
+        // with an ellipsis rather than clip it mid-letter.
+        assertEquals(spreadsheet.getColW()[0], dataFor(a1).overflowWidth);
     }
 
     @Test

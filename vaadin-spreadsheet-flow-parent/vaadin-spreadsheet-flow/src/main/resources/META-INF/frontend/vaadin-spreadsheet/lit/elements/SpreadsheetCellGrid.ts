@@ -310,10 +310,10 @@ export class SpreadsheetCellGrid extends LitElement {
       z-index: 2;
     }
 
-    /* Holds the text at the width the server worked out, so the browser
-       does the clipping at the far end of the spill instead of at the
-       cell's own edge. */
-    .cell.overflowing .cell-spill {
+    /* Holds text too wide for its column, so the browser cuts it short
+       with an ellipsis: at the width the server worked out when the text
+       spills, at the cell's own edge when it has nowhere to go. */
+    .cell-spill {
       overflow: hidden;
       text-overflow: ellipsis;
       pointer-events: none;
@@ -994,13 +994,22 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       const tooNarrow = data?.needsMeasure === true && (state.tooNarrowCells?.has(key) ?? false);
       const cellText = tooNarrow ? '###' : data?.value ?? '';
       const rawText = slotName === undefined ? cellText : html`<slot name=${slotName}></slot>`;
-      // Text too wide for its column runs into the empty cells beside it.
-      // The server settles how far, because it is the side that knows what
-      // the neighbours hold; a cell showing a component or sitting under a
-      // merge keeps to itself.
+      // Text too wide for its column runs into the empty cells beside it,
+      // and what still does not fit ends in an ellipsis. The server settles
+      // how far, because it is the side that knows what the neighbours hold;
+      // a cell showing a component or sitting under a merge keeps to itself.
       const spill = slotName === undefined && !underMerge ? data?.overflowWidth ?? 0 : 0;
       const overflowing = spill > width;
-      const text = overflowing ? html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>` : rawText;
+      // With nowhere to go the text is cut short inside its own cell, so the
+      // holder fills the cell instead of taking the width: at the column's
+      // full width it would reach past the padding, and the cell would clip
+      // the ellipsis away with it.
+      const text =
+        spill === 0
+          ? rawText
+          : overflowing
+          ? html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>`
+          : html`<div class="cell-spill">${rawText}</div>`;
       // A cell the server sent nothing for still wears the workbook's
       // default style. Without it the cell falls through to the host's own
       // font and colour - Helvetica 14px in grey - instead of the sheet's
@@ -1501,7 +1510,7 @@ const EDITOR_PROPERTIES: ReadonlySet<string> = new Set([
   'text-align',
   'text-decoration',
   '--default-font-family',
-  '--default-font-size',
+  '--default-font-size'
 ]);
 
 /** The declarations of a style body the editor wears, in order. */
@@ -1540,9 +1549,7 @@ function editorCellStyle(state: CellGridRenderState, col: number, row: number): 
 
   // The default's font reaches the editor through the documented
   // properties its own rule reads, as the default rule does for a cell.
-  const declarations = editorDeclarations(styles[0]).filter(
-    (d) => !/^font-(family|size)\s*:/.test(d)
-  );
+  const declarations = editorDeclarations(styles[0]).filter((d) => !/^font-(family|size)\s*:/.test(d));
   const own = indexes('cs')[0] ?? 0;
   if (own !== 0) {
     declarations.push(...editorDeclarations(styles[own]));
@@ -1631,8 +1638,7 @@ function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | st
     return '';
   }
 
-  const style =
-    `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + editorCellStyle(state, col, row);
+  const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + editorCellStyle(state, col, row);
 
   const dispatchEditorEvent = (
     target: EventTarget,

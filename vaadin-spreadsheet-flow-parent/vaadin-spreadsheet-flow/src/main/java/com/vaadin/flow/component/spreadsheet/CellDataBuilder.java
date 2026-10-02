@@ -231,8 +231,10 @@ final class CellDataBuilder implements Serializable {
     }
 
     /**
-     * How wide this cell's text may be drawn so it runs into the empty cells to
-     * its right, or {@code 0} when it has nowhere to go.
+     * How wide this cell's text is drawn: its own column and the empty cells to
+     * its right that it runs into, or its own column alone when it has nowhere
+     * to go. {@code 0} when no width can be estimated yet or the cell is
+     * merged.
      *
      * @param cell
      *            the cell whose text does not fit its column
@@ -240,7 +242,7 @@ final class CellDataBuilder implements Serializable {
      *            the text as it will be displayed
      * @param rightAligned
      *            whether the cell is right-aligned, which keeps it put
-     * @return the width in pixels, or {@code 0} for no spill
+     * @return the width in pixels, or {@code 0} to draw the cell as it is
      */
     private int spillWidth(Cell cell, String value, boolean rightAligned) {
         Spreadsheet spreadsheet = manager.spreadsheet;

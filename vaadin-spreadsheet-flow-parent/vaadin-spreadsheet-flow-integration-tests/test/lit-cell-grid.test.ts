@@ -2036,10 +2036,53 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
     });
 
     it('stays put when the width is no wider than the column', async () => {
-        // A server that reports the cell's own width is saying "no spill".
+        // A server that reports the cell's own width is saying the text has
+        // nowhere to go: the neighbour holds a value, or the sheet ends.
         const el = await attachWithState(stateWithSpill(50));
 
         expect(firstCell(el).classList.contains('overflowing')).to.be.false;
+        expect(getComputedStyle(firstCell(el)).overflow).to.equal('hidden');
+
+        cleanup(el);
+    });
+
+    it('cuts text with nowhere to go short with an ellipsis', async () => {
+        // The GWT client read "Wednesd..." where a neighbour blocked the
+        // text. Clipped plainly, it read "Wednesda" with half a letter.
+        const el = await attachWithState(stateWithSpill(50));
+
+        const cell = firstCell(el);
+        const held = cell.querySelector<HTMLElement>('.cell-spill')!;
+        expect(held, 'the text is held so it can be cut short').to.not.be.null;
+        expect(getComputedStyle(held).textOverflow).to.equal('ellipsis');
+        expect(held.scrollWidth, 'and it really is too wide').to.be.greaterThan(
+            held.clientWidth
+        );
+
+        cleanup(el);
+    });
+
+    it('puts that ellipsis inside the cell, where it can be seen', async () => {
+        // At the column's full width the holder would reach past the
+        // padding, and the cell - which clips - would cut the ellipsis off.
+        const el = await attachWithState(stateWithSpill(50));
+
+        const cell = firstCell(el);
+        const held = cell.querySelector<HTMLElement>('.cell-spill')!;
+        expect(held.style.width).to.equal('');
+        expect(held.getBoundingClientRect().right).to.be.at.most(
+            cell.getBoundingClientRect().right - 2
+        );
+
+        cleanup(el);
+    });
+
+    it('ends spilled text that still does not fit in an ellipsis', async () => {
+        const el = await attachWithState(stateWithSpill(100));
+
+        const held = firstCell(el).querySelector<HTMLElement>('.cell-spill')!;
+        expect(getComputedStyle(held).textOverflow).to.equal('ellipsis');
+        expect(getComputedStyle(held).overflow).to.equal('hidden');
 
         cleanup(el);
     });

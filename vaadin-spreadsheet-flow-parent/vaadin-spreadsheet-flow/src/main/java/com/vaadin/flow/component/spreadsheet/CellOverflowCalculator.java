@@ -30,6 +30,8 @@ import java.util.function.IntPredicate;
  * separate quadrants, so text crossing the split would be cut by the quadrant
  * edge and reappear in the wrong place as soon as the sheet scrolled.</li>
  * <li>The text stops at the last column of the sheet.</li>
+ * <li>Text still too wide where it stops is cut short with an ellipsis. With
+ * nowhere to go at all, that happens inside its own column: "Wednesd...".</li>
  * </ul>
  *
  * <p>
@@ -58,7 +60,8 @@ final class CellOverflowCalculator implements Serializable {
     }
 
     /**
-     * Width to give the cell's text so it runs into the empty cells beside it.
+     * Width to draw the cell's text at: its own column and the empty ones
+     * beside it that it runs into.
      *
      * @param columnIndex
      *            the cell's column, 0-based
@@ -74,8 +77,8 @@ final class CellOverflowCalculator implements Serializable {
      * @param occupied
      *            whether the given 0-based column of this row holds a value
      * @return the width covering the cell's own column and every empty column
-     *         the text reaches into, or {@code 0} when the text fits or has
-     *         nowhere to go
+     *         the text reaches into - only its own when it has nowhere to go -
+     *         or {@code 0} when the text fits or is right-aligned
      */
     static int spillWidth(int columnIndex, int textWidth, boolean rightAligned,
             int[] columnWidths, int horizontalSplitPosition,
@@ -108,11 +111,10 @@ final class CellOverflowCalculator implements Serializable {
             reached = next;
         }
 
-        if (reached == columnIndex) {
-            // Nowhere to go: the neighbour holds a value, sits on the other
-            // side of the split, or does not exist.
-            return 0;
-        }
+        // With nowhere to go - the neighbour holds a value, sits on the other
+        // side of the split, or does not exist - this is the cell's own
+        // width: still too wide, so still cut short with an ellipsis rather
+        // than clipped mid-letter.
         return columnWidth + gained;
     }
 

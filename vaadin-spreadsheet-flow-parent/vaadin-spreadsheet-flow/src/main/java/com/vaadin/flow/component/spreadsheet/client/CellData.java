@@ -28,13 +28,15 @@ public class CellData implements Serializable {
     public boolean locked = false;
     public boolean needsMeasure;
     /**
-     * Width in pixels to give this cell's text so it runs into the empty cells
-     * to its right, or {@code 0} when it fits inside its own column.
+     * Width in pixels to draw this cell's text at when it is too wide for its
+     * column, or {@code 0} when it fits.
      * <p>
      * A spreadsheet does not clip text at the column edge; it carries on across
-     * empty neighbours and stops at the first one holding a value. The server
-     * works out how far because it is the side that knows what the neighbours
-     * hold. See {@code CellOverflowCalculator}.
+     * empty neighbours and stops at the first one holding a value, and what
+     * still does not fit there ends in an ellipsis. The width covers the cell's
+     * own column and the empty ones it runs into - only its own when it has
+     * nowhere to go. The server works out how far because it is the side that
+     * knows what the neighbours hold. See {@code CellOverflowCalculator}.
      */
     public int overflowWidth;
     public boolean isPercentage;

@@ -56,9 +56,11 @@ class CellOverflowCalculatorTest {
     }
 
     @Test
-    void textDoesNotSpillWhenTheNextColumnIsTaken() {
-        assertEquals(0, CellOverflowCalculator.spillWidth(0, 120, false, WIDTHS,
-                0, occupied(1)));
+    void textBlockedByTheNextColumn_keepsToItsOwn() {
+        // Still too wide, so still drawn clipped with an ellipsis - in the
+        // one column it has. The GWT client read "Wednesd..." here.
+        assertEquals(50, CellOverflowCalculator.spillWidth(0, 120, false,
+                WIDTHS, 0, occupied(1)));
     }
 
     @Test
@@ -73,8 +75,8 @@ class CellOverflowCalculatorTest {
     void textStopsAtTheFrozenSplit() {
         // Two frozen columns, so column index 1 is the last frozen one. Its
         // text must not run into column 2, which scrolls away underneath.
-        assertEquals(0, CellOverflowCalculator.spillWidth(1, 120, false, WIDTHS,
-                2, NOTHING_BESIDE_IT));
+        assertEquals(50, CellOverflowCalculator.spillWidth(1, 120, false,
+                WIDTHS, 2, NOTHING_BESIDE_IT));
     }
 
     @Test
@@ -96,9 +98,9 @@ class CellOverflowCalculatorTest {
     }
 
     @Test
-    void textInTheLastColumnDoesNotSpill() {
-        assertEquals(0, CellOverflowCalculator.spillWidth(3, 200, false, WIDTHS,
-                0, NOTHING_BESIDE_IT));
+    void textInTheLastColumn_keepsToItsOwn() {
+        assertEquals(50, CellOverflowCalculator.spillWidth(3, 200, false,
+                WIDTHS, 0, NOTHING_BESIDE_IT));
     }
 
     @Test
