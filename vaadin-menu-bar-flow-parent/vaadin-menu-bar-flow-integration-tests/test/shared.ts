@@ -10,7 +10,7 @@ import type {
 
 export type { FlowMenuBar, FlowMenuBarItemComponent };
 
-const APP_ID = 'test-app';
+export const APP_ID = 'test-app';
 
 const menubarConnector = window.Vaadin.Flow.menubarConnector;
 
@@ -51,7 +51,7 @@ export function createItem(text: string, state: Partial<FlowMenuBarItemComponent
 
 /** Initializes the connector for the menu bar, the way the Flow component does */
 export function init(menuBar: FlowMenuBar): void {
-  menubarConnector.initLazy(menuBar, APP_ID);
+  menubarConnector.initLazy(menuBar);
 }
 
 /** The text of the buttons the menu bar renders for its items */

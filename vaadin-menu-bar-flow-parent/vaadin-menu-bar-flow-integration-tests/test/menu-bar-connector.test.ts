@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
-import { createContainer, createItem, getButtonTexts, init, initFlowClient } from './shared.js';
+import { APP_ID, createContainer, createItem, getButtonTexts, init, initFlowClient } from './shared.js';
 import type { FlowMenuBar, FlowMenuBarItemComponent } from './shared.js';
 
 describe('menu bar connector', () => {
@@ -24,7 +24,7 @@ describe('menu bar connector', () => {
   it('should assign the generated items to the menu bar', () => {
     const nodeId = createContainer(createItem('Item 1'), createItem('Item 2'));
 
-    menuBar.$connector.generateItems(nodeId);
+    menuBar.$connector.generateItems(APP_ID, nodeId);
 
     expect(menuBar.items).to.have.lengthOf(2);
   });
@@ -32,7 +32,7 @@ describe('menu bar connector', () => {
   it('should render a button for each item', async () => {
     const nodeId = createContainer(createItem('Item 1'), createItem('Item 2'));
 
-    menuBar.$connector.generateItems(nodeId);
+    menuBar.$connector.generateItems(APP_ID, nodeId);
     await nextFrame();
 
     expect(getButtonTexts(menuBar)).to.eql(['Item 1', 'Item 2']);
@@ -44,7 +44,7 @@ describe('menu bar connector', () => {
     beforeEach(async () => {
       hiddenItem = createItem('Item 2', { hidden: true });
       const nodeId = createContainer(createItem('Item 1'), hiddenItem);
-      menuBar.$connector.generateItems(nodeId);
+      menuBar.$connector.generateItems(APP_ID, nodeId);
       await nextFrame();
     });
 
@@ -82,7 +82,7 @@ describe('menu bar connector', () => {
   describe('sub menu', () => {
     it('should give a button with a sub menu the popup role', async () => {
       const item = createItem('Item', { _containerNodeId: createContainer(createItem('Sub item')) });
-      menuBar.$connector.generateItems(createContainer(item));
+      menuBar.$connector.generateItems(APP_ID, createContainer(item));
       await nextFrame();
 
       const button = menuBar.querySelector('vaadin-menu-bar-button')!;
@@ -91,7 +91,7 @@ describe('menu bar connector', () => {
 
     it('should give a button a sub menu for a container node id set after generating', async () => {
       const item = createItem('Item');
-      menuBar.$connector.generateItems(createContainer(item));
+      menuBar.$connector.generateItems(APP_ID, createContainer(item));
       await nextFrame();
       expect(menuBar.querySelector('vaadin-menu-bar-button')!.getAttribute('aria-haspopup')).to.be.null;
 
@@ -108,7 +108,7 @@ describe('menu bar connector', () => {
   describe('disabled items', () => {
     it('should disable the button of a disabled item', async () => {
       const item = createItem('Item', { disabled: true });
-      menuBar.$connector.generateItems(createContainer(item));
+      menuBar.$connector.generateItems(APP_ID, createContainer(item));
       await nextFrame();
 
       const button = menuBar.querySelector('vaadin-menu-bar-button')!;
@@ -117,7 +117,7 @@ describe('menu bar connector', () => {
 
     it('should disable the button when Flow disables the item', async () => {
       const item = createItem('Item');
-      menuBar.$connector.generateItems(createContainer(item));
+      menuBar.$connector.generateItems(APP_ID, createContainer(item));
       await nextFrame();
 
       item.toggleAttribute('disabled', true);

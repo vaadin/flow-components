@@ -63,7 +63,7 @@ export type FlowContextMenu = Omit<ContextMenu, 'items'> & FlowContextMenuIntern
 
 /** The context menu connector API registered on the Flow namespace */
 export interface ContextMenuConnectorApi {
-  initLazy(contextMenu: FlowContextMenu, appId: string): void;
+  initLazy(contextMenu: FlowContextMenu): void;
   generateItemsTree(appId: string, nodeId: number): FlowContextMenuItem[] | undefined;
   setChecked(component: FlowContextMenuItemComponent, checked: boolean): void;
 }

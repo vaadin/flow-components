@@ -35,24 +35,22 @@ function getContainer(appId: string, nodeId: number): Element | null {
  */
 export class ContextMenuConnector {
   readonly #contextMenu: FlowContextMenu;
-  readonly #appId: string;
 
-  constructor(contextMenu: FlowContextMenu, appId: string) {
+  constructor(contextMenu: FlowContextMenu) {
     this.#contextMenu = contextMenu;
-    this.#appId = appId;
   }
 
   /**
    * Generates and assigns the items to the context menu.
    */
-  generateItems(nodeId: number): void {
-    this.#contextMenu.items = generateItemsTree(this.#appId, nodeId);
+  generateItems(appId: string, nodeId: number): void {
+    this.#contextMenu.items = generateItemsTree(appId, nodeId);
   }
 }
 
-function initLazy(contextMenu: FlowContextMenu, appId: string): void {
+function initLazy(contextMenu: FlowContextMenu): void {
   // Init the connector only once for the context menu
-  contextMenu.$connector ??= new ContextMenuConnector(contextMenu, appId);
+  contextMenu.$connector ??= new ContextMenuConnector(contextMenu);
 }
 
 /**
