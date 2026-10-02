@@ -175,13 +175,15 @@ export class SpreadsheetCellGrid extends LitElement {
       font-weight: bold;
     }
 
-    /* The fill handle's drag outline. Dashed, so it reads as a preview
-       rather than a second selection. */
+    /* The fill handle's drag outline, as the GWT client drew it: the
+       fill colour around a pale green ground, so it reads as what the
+       drag will fill rather than as a second selection. */
     .paintmode {
       position: absolute;
       pointer-events: none;
       box-sizing: border-box;
-      border: 1px dashed var(--vaadin-spreadsheet-selection-border-color, #217346);
+      border: 2px solid var(--vaadin-spreadsheet-selection-border-color, #40b527);
+      background: rgba(235, 247, 233, 0.8);
       z-index: 3;
     }
     .sheet-selection .s-top {
@@ -190,7 +192,7 @@ export class SpreadsheetCellGrid extends LitElement {
       left: 0;
       width: 100%;
       height: 2px;
-      background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      background: var(--vaadin-spreadsheet-selection-color, #197de1);
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
@@ -202,7 +204,7 @@ export class SpreadsheetCellGrid extends LitElement {
       left: 0;
       width: 100%;
       height: 2px;
-      background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      background: var(--vaadin-spreadsheet-selection-color, #197de1);
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
@@ -214,7 +216,7 @@ export class SpreadsheetCellGrid extends LitElement {
       left: 0;
       width: 2px;
       height: 100%;
-      background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      background: var(--vaadin-spreadsheet-selection-color, #197de1);
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
@@ -226,19 +228,23 @@ export class SpreadsheetCellGrid extends LitElement {
       right: 0;
       width: 2px;
       height: 100%;
-      background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      background: var(--vaadin-spreadsheet-selection-color, #197de1);
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
       z-index: 3;
     }
+    /* The fill handle, in the fill colour the drag preview uses - the
+       GWT client's green square, ringed in white so it stands off the
+       outline. */
     .sheet-selection .selection-corner {
       position: absolute;
       right: -3px;
       bottom: -3px;
-      width: 7px;
-      height: 7px;
-      background: var(--vaadin-spreadsheet-selection-color, #1976d2);
+      width: 6px;
+      height: 6px;
+      background: var(--vaadin-spreadsheet-selection-border-color, #40b527);
+      outline: 2px solid #fff;
       cursor: crosshair;
       pointer-events: auto;
       /* Above the cells, which carry z-index 1. Without this the handle

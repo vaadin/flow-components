@@ -230,6 +230,39 @@ describe('Spreadsheet — dragging the fill handle', () => {
     expect(ctx.sheet.getCellGrid().shadowRoot!.querySelector('.paintmode')).to.not.be.null;
   });
 
+  it('draws the outline, the handle and the drag preview in the GWT client\'s colours', async () => {
+    // Blue for what is selected; green for what a drag will fill - the
+    // handle and its preview share it.
+    const root = ctx.sheet.getCellGrid().shadowRoot!;
+    expect(getComputedStyle(root.querySelector('.sheet-selection .s-top')!).backgroundColor).to.equal(
+      'rgb(25, 125, 225)'
+    );
+    const handle = getComputedStyle(root.querySelector('.selection-corner')!);
+    expect(handle.backgroundColor).to.equal('rgb(64, 181, 39)');
+    expect(`${handle.width} ${handle.height}`).to.equal('6px 6px');
+    expect(`${handle.outlineWidth} ${handle.outlineStyle} ${handle.outlineColor}`).to.equal(
+      '2px solid rgb(255, 255, 255)'
+    );
+
+    grabHandle();
+    dragOver(4, 9);
+    await ctx.sheet.getCellGrid().updateComplete;
+    const preview = getComputedStyle(root.querySelector('.paintmode')!);
+    expect(`${preview.borderTopWidth} ${preview.borderTopStyle} ${preview.borderTopColor}`).to.equal(
+      '2px solid rgb(64, 181, 39)'
+    );
+    expect(preview.backgroundColor).to.equal('rgba(235, 247, 233, 0.8)');
+    release();
+  });
+
+  it('colours the handle with the fill colour property', () => {
+    const grid = ctx.sheet.getCellGrid();
+    grid.style.setProperty('--vaadin-spreadsheet-selection-border-color', 'rgb(1, 2, 3)');
+
+    const handle = grid.shadowRoot!.querySelector<HTMLElement>('.selection-corner')!;
+    expect(getComputedStyle(handle).backgroundColor).to.equal('rgb(1, 2, 3)');
+  });
+
   it('puts the handle where a pointer actually lands on it', () => {
     // A hit test, not a DOM query. The handle rendered and could be found
     // by a selector while the cell beneath it won every real click: cells
