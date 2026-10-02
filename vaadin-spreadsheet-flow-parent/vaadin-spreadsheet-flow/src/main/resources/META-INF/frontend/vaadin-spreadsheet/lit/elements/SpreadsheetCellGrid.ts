@@ -968,7 +968,12 @@ interface QuadrantRenderOpts {
 }
 
 /** The quadrant a cell is drawn in, by which side of each split it lies. */
-function quadrantOf(col: number, row: number, frozenCols: number, frozenRows: number): QuadrantRenderOpts['quadrantName'] {
+function quadrantOf(
+  col: number,
+  row: number,
+  frozenCols: number,
+  frozenRows: number
+): QuadrantRenderOpts['quadrantName'] {
   const top = row <= frozenRows;
   const left = col <= frozenCols;
   if (top) {
@@ -1205,7 +1210,8 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
       // Drawn in the quadrant of its top-left cell, as far as it reaches,
       // for as long as any of it is in view.
       const owner = quadrantOf(region.col1, region.row1, state.horizontalSplitPosition, state.verticalSplitPosition);
-      const inView = region.col2 >= colStart && region.col1 <= colEnd && region.row2 >= rowStart && region.row1 <= rowEnd;
+      const inView =
+        region.col2 >= colStart && region.col1 <= colEnd && region.row2 >= rowStart && region.row1 <= rowEnd;
       if (owner !== quadrantName || !inView) {
         continue;
       }
