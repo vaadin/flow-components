@@ -254,7 +254,12 @@ public class ConditionalFormatter implements Serializable {
 
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell == null) {
-                        cell = spreadsheet.createCell(row, col, "");
+                        // A blank cell, to hang the format on. An empty
+                        // string would be a value: a formula reading this
+                        // cell would see text where it saw nothing, and a
+                        // rule comparing against it would stop matching the
+                        // next time the rules are built.
+                        cell = spreadsheet.createCell(row, col, null);
                     }
                     if (matches(cell, rule, col - firstColumn,
                             row - firstRow)) {
@@ -277,7 +282,7 @@ public class ConditionalFormatter implements Serializable {
                                         col - 1);
                                 if (cellToLeft == null) {
                                     cellToLeft = spreadsheet.createCell(row,
-                                            col - 1, "");
+                                            col - 1, null);
                                 }
                                 list = cellToIndex
                                         .get(SpreadsheetUtil.toKey(cellToLeft));
@@ -299,7 +304,7 @@ public class ConditionalFormatter implements Serializable {
                                         col);
                                 if (cellOnTop == null) {
                                     cellOnTop = spreadsheet.createCell(row - 1,
-                                            col, "");
+                                            col, null);
                                 }
                                 list = cellToIndex
                                         .get(SpreadsheetUtil.toKey(cellOnTop));
