@@ -547,3 +547,96 @@ describe('SpreadsheetColumnHeader — the documented border colour', () => {
         cleanup(el);
     });
 });
+
+/**
+ * The column outline, drawn as the GWT client drew it.
+ *
+ * The Lit gutter drew a hairline and a square "-" box before each group,
+ * in 16px levels with no room for the level that expands everything. The
+ * GWT client drew a bracket over the group - a line with a tick where it
+ * starts - and a round grey button over its summary column, in 18px levels
+ * divided by dotted lines.
+ */
+describe('SpreadsheetColumnHeader — the outline gutter', () => {
+    function withGroups(groups: Array<{ level: number; collapsed?: boolean }>, inversed = false): ColumnHeaderRenderState {
+        return {
+            ...buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 4,
+                firstColumnPosition: 0,
+                colX: [0, 50, 100, 150],
+                colWidths: [50, 50, 50, 50],
+                headerHeight: 27,
+                totalGridWidthPx: 400,
+            }),
+            colGroupingMax: Math.max(...groups.map((g) => g.level)),
+            colGroupingInversed: inversed,
+            colGroupings: groups.map((g, i) => ({
+                uniqueIndex: i + 1,
+                level: g.level,
+                startPx: 55,
+                endPx: 175,
+                buttonPx: 175,
+                collapsed: g.collapsed ?? false,
+            })),
+        };
+    }
+
+    it('puts the letters under a gutter of 18px levels and one more', async () => {
+        const el = await attachWithState(withGroups([{ level: 1 }, { level: 2 }]));
+
+        const letter = el.shadowRoot!.querySelector<HTMLElement>('.col-header-cell')!;
+        expect(letter.style.top).to.equal(`${3 + 3 * 18}px`);
+        cleanup(el);
+    });
+
+    it('draws a bracket over the group, its tick where the group starts', async () => {
+        const el = await attachWithState(withGroups([{ level: 1 }]));
+
+        const line = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-line')!;
+        const style = getComputedStyle(line);
+        expect(`${style.borderTopWidth} ${style.borderLeftWidth} ${style.borderRightStyle}`).to.equal('2px 2px none');
+        expect(style.borderTopColor).to.equal('rgb(199, 199, 199)');
+        // Level 1, 9px down the gutter; its border sits outside the width.
+        expect(`${line.style.left} ${line.style.top} ${line.style.width}`).to.equal('55px 9px 118px');
+        cleanup(el);
+    });
+
+    it('turns the tick to the far end when inversed', async () => {
+        const el = await attachWithState(withGroups([{ level: 1 }], true));
+
+        const style = getComputedStyle(el.shadowRoot!.querySelector('.col-grouping-line')!);
+        expect(`${style.borderLeftStyle} ${style.borderRightWidth}`).to.equal('none 2px');
+        cleanup(el);
+    });
+
+    it('draws a round grey button centred on the line at the summary column', async () => {
+        const el = await attachWithState(withGroups([{ level: 2 }]));
+
+        const button = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-toggle')!;
+        const style = getComputedStyle(button);
+        expect(`${style.width} ${style.height} ${style.borderRadius}`).to.equal('12px 12px 50%');
+        expect(style.backgroundColor).to.equal('rgb(199, 199, 199)');
+        expect(style.color).to.equal('rgb(255, 255, 255)');
+        // Level 2's line is at 9 + 18; the button's centre sits on it.
+        expect(`${button.style.left} ${button.style.top}`).to.equal(`${175 - 6}px ${9 + 18 + 1 - 6}px`);
+        cleanup(el);
+    });
+
+    it('keeps only the button of a collapsed group', async () => {
+        const el = await attachWithState(withGroups([{ level: 1, collapsed: true }]));
+
+        expect(el.shadowRoot!.querySelector('.col-grouping-line')).to.be.null;
+        expect(el.shadowRoot!.querySelector('.col-grouping-toggle')!.textContent!.trim()).to.equal('+');
+        cleanup(el);
+    });
+
+    it('divides the levels with dotted lines', async () => {
+        const el = await attachWithState(withGroups([{ level: 1 }, { level: 2 }]));
+
+        const dividers = el.shadowRoot!.querySelectorAll<HTMLElement>('.col-grouping-separator');
+        expect(Array.from(dividers).map((d) => d.style.top)).to.deep.equal(['18px', '36px']);
+        expect(getComputedStyle(dividers[0]).borderBottomStyle).to.equal('dotted');
+        cleanup(el);
+    });
+});

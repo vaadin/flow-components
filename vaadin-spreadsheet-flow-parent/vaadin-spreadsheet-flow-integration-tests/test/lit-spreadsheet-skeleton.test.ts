@@ -2960,7 +2960,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column grouping: gutter rows above letters move the letter row down by colGroupingMax * 16 px (slice 167)', async () => {
+    it('column grouping: the gutter above the letters moves the letter row down, in the GWT client\'s sizes', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2976,12 +2976,13 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             '.col-header-cell'
         ) as HTMLElement;
         expect(firstLetter).to.not.be.null;
-        // Default (non-inversed): gutter on top → letter row at colGroupingMax * 16 = 32px.
-        expect(firstLetter.style.top).to.equal('32px');
+        // Two levels and the one more for "expand everything", 18px each,
+        // after a 3px margin.
+        expect(firstLetter.style.top).to.equal(`${3 + 3 * 18}px`);
         cleanup();
     });
 
-    it('column grouping: inversed mode puts gutter BELOW letters and button at END (slice 167)', async () => {
+    it('column grouping: inversed keeps the gutter on top and puts the button before the group', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2999,13 +3000,14 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         const firstLetter = sheet.getColumnHeader().shadowRoot!.querySelector(
             '.col-header-cell'
         ) as HTMLElement;
-        // Inversed: letter row stays at top (0).
-        expect(firstLetter.style.top).to.equal('0px');
-        // Button is at endPx (end of column 4 = 4 * 50 = 200).
+        // The gutter stays above the letters, as in the GWT client.
+        expect(firstLetter.style.top).to.equal(`${3 + 2 * 18}px`);
+        // The summary column comes before the group: the 12px button is
+        // centred over the middle of column A.
         const toggle = sheet.getColumnHeader().shadowRoot!.querySelector(
             '.col-grouping-toggle'
         ) as HTMLButtonElement;
-        expect(toggle.style.left).to.equal('200px');
+        expect(toggle.style.left).to.equal(`${50 / 2 - 6}px`);
         cleanup();
     });
 
@@ -3609,7 +3611,8 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.cleanup();
     });
 
-    it('draws one button per column outline level', async () => {
+    it('draws one button per column outline level, and one more', async () => {
+        // As the GWT client and Excel do: the last opens every group.
         const ctx = attach();
         ctx.sheet.setColGroupingMax(2);
         ctx.sheet.recomputeViewport();
@@ -3617,7 +3620,42 @@ describe('Spreadsheet — outline level buttons', () => {
         const labels = (await buttons(ctx.sheet)).map((b) =>
             b.textContent!.trim()
         );
-        expect(labels).to.eql(['1', '2']);
+        expect(labels).to.eql(['1', '2', '3']);
+        ctx.cleanup();
+    });
+
+    it('asks for the level past the deepest from the last button', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(2);
+        ctx.sheet.recomputeViewport();
+        const all = await buttons(ctx.sheet);
+        ctx.events.length = 0;
+
+        all[all.length - 1].click();
+
+        expect(ctx.events[0].data).to.eql({ cols: true, level: 3 });
+        ctx.cleanup();
+    });
+
+    it('draws the buttons as plain numbers, as the GWT client did', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(1);
+        ctx.sheet.recomputeViewport();
+
+        const style = getComputedStyle((await buttons(ctx.sheet))[0]);
+        expect(style.borderTopStyle).to.equal('none');
+        expect(style.backgroundColor).to.equal('rgba(0, 0, 0, 0)');
+        expect(`${style.fontSize} ${style.color}`).to.equal('11px rgb(72, 72, 72)');
+        ctx.cleanup();
+    });
+
+    it('draws no buttons while the headings are hidden', async () => {
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(2);
+        ctx.sheet.setDisplayRowColHeadings(false);
+        ctx.sheet.recomputeViewport();
+
+        expect(await buttons(ctx.sheet)).to.be.empty;
         ctx.cleanup();
     });
 
@@ -3628,7 +3666,7 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.sheet.recomputeViewport();
 
         const all = await buttons(ctx.sheet);
-        expect(all.map((b) => b.dataset.axis)).to.eql(['cols', 'rows', 'rows']);
+        expect(all.map((b) => b.dataset.axis)).to.eql(['cols', 'cols', 'rows', 'rows', 'rows']);
         ctx.cleanup();
     });
 
@@ -3638,8 +3676,7 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.sheet.recomputeViewport();
 
         const all = await buttons(ctx.sheet);
-        expect(all[0].style.top).to.equal('0px');
-        expect(all[1].style.top).to.equal('16px');
+        expect(all.map((b) => b.style.top)).to.eql(['0px', '18px', '36px']);
         ctx.cleanup();
     });
 
@@ -3677,10 +3714,11 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.sheet.setRowGroupingMax(1);
         ctx.sheet.recomputeViewport();
 
-        // 40px row header + one 16px gutter column; 20px column header
-        // + two 16px gutter rows.
-        expect(ctx.sheet.getHeaderCorner().style.width).to.equal('56px');
-        expect(ctx.sheet.getHeaderCorner().style.height).to.equal('52px');
+        // The GWT client's gutters: a 15px column per row level and one
+        // more, after a pixel; an 18px row per column level and one more,
+        // after three.
+        expect(ctx.sheet.getHeaderCorner().style.width).to.equal(`${40 + 1 + 2 * 15}px`);
+        expect(ctx.sheet.getHeaderCorner().style.height).to.equal(`${20 + 3 + 3 * 18}px`);
         ctx.cleanup();
     });
 });

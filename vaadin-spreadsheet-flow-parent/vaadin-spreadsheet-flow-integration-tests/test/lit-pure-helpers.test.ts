@@ -17,7 +17,6 @@ import {
   selectedColumnSet,
   selectedRowSet
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
-import { GROUPING_BUTTON_SIZE_PX } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetColumnHeader.js';
 import {
   cellComponentSlotName,
   cellEditorSlotName,
@@ -96,7 +95,16 @@ describe('isCellInSelection', () => {
   });
 });
 
+/**
+ * Where a group's bracket and button go, as the GWT client laid them out.
+ *
+ * The button sits over the group's summary column - after the group by
+ * default, before it when the outline is inversed - and the bracket runs to
+ * it. The Lit client had the button on the wrong side: before the group
+ * by default.
+ */
 describe('computePositionedColGroupings', () => {
+  // Columns A-D; the group is B:C, at 50..180.
   const widths = [50, 60, 70, 80];
   const grouping = (over: Partial<any> = {}) => ({
     uniqueIndex: 1,
@@ -107,27 +115,35 @@ describe('computePositionedColGroupings', () => {
     ...over
   });
 
-  it('starts the line at the first grouped column', () => {
+  it('starts the bracket a few pixels into the first grouped column', () => {
     // Indices are 0-based on the wire, so startIndex 1 is the second
-    // column and the line starts after the first one's 50px.
-    const [g] = computePositionedColGroupings([grouping()], widths, false, 100);
-    expect(g.startPx).to.equal(50);
+    // column, which starts after the first one's 50px.
+    const [g] = computePositionedColGroupings([grouping()], widths, false, 100, 5);
+    expect(g.startPx).to.equal(50 + 5);
   });
 
-  it('ends the line after the last grouped column', () => {
-    const [g] = computePositionedColGroupings([grouping()], widths, false, 100);
+  it('runs the bracket to the middle of the summary column after the group', () => {
+    const [g] = computePositionedColGroupings([grouping()], widths, false, 100, 5);
+    expect(g.endPx).to.equal(50 + 60 + 70 + 80 / 2);
+  });
+
+  it('puts the button over the summary column after the group by default', () => {
+    // Excel's default: summary columns to the right of their detail.
+    const [g] = computePositionedColGroupings([grouping()], widths, false, 100, 5);
+    expect(g.buttonPx).to.equal(50 + 60 + 70 + 80 / 2);
+  });
+
+  it('puts the button over the summary column before the group when inversed', () => {
+    // The bracket then runs from that button to the group's end.
+    const [g] = computePositionedColGroupings([grouping()], widths, true, 100, 5);
+    expect(g.buttonPx).to.equal(50 / 2);
+    expect(g.startPx).to.equal(50 / 2);
     expect(g.endPx).to.equal(50 + 60 + 70);
   });
 
-  it('puts the button before the group by default', () => {
-    const [g] = computePositionedColGroupings([grouping()], widths, false, 100);
-    expect(g.buttonPx).to.equal(50 - GROUPING_BUTTON_SIZE_PX);
-  });
-
-  it('puts the button after the group when the outline is inversed', () => {
-    // Excel can put the summary column on either side of its group.
-    const [g] = computePositionedColGroupings([grouping()], widths, true, 100);
-    expect(g.buttonPx).to.equal(50 + 60 + 70);
+  it('starts an inversed group in the first column at the sheet\'s edge', () => {
+    const [g] = computePositionedColGroupings([grouping({ startIndex: 0, endIndex: 1 })], widths, true, 100, 5);
+    expect(g.buttonPx).to.equal(0);
   });
 
   it('falls back to the default width past the measured columns', () => {
@@ -137,9 +153,10 @@ describe('computePositionedColGroupings', () => {
       false,
       100
     );
-    // 4 measured columns then one default-width column.
+    // 4 measured columns then one default-width column, and the summary
+    // column after it is default width too.
     expect(g.startPx).to.equal(50 + 60 + 70 + 80 + 100);
-    expect(g.endPx).to.equal(g.startPx + 100);
+    expect(g.endPx).to.equal(g.startPx + 100 + 100 / 2);
   });
 
   it('carries level and collapsed through untouched', () => {

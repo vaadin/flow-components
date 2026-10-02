@@ -9,7 +9,12 @@
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
 
-import type { PositionedGrouping } from './SpreadsheetColumnHeader.js';
+import {
+  GROUPING_BUTTON_SIZE_PX,
+  type PositionedGrouping,
+  ROW_GROUPING_LEVEL_PX,
+  rowGroupingGutterPx
+} from './SpreadsheetColumnHeader.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
 
 /**
@@ -125,9 +130,6 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
  * Same render-state-driven contract + same no-decorator pattern as
  * the cell-grid + column-header. Slice 144.
  */
-/** Width of one grouping level in the gutter, in pixels. */
-const GROUPING_LEVEL_WIDTH_PX = 16;
-
 export class SpreadsheetRowHeader extends LitElement {
   /**
    * Parts this element re-exports to the tree above it.
@@ -146,35 +148,49 @@ export class SpreadsheetRowHeader extends LitElement {
   };
 
   static styles = css`
-    /* Grouping outline gutter, mirroring the column header's but
-       rotated: one COLUMN per level beside the row numbers. Each
-       grouping renders one .row-grouping-line spanning
-       startPx..endPx plus one .row-grouping-toggle button. */
+    /* The outline gutter beside the numbers, as the GWT client drew it:
+       a bracket down each group - a line with a tick where the group
+       starts - and a round button beside its summary row, which sits
+       below the group or, inversed, above it. */
     .row-grouping-line {
       position: absolute;
-      width: 1px;
-      background: var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      width: 8px;
+      border-top: 2px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      border-left: 2px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       pointer-events: none;
+    }
+
+    .row-grouping-line.inversed {
+      border-top: none;
+      border-bottom: 2px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
     }
 
     .row-grouping-toggle {
       position: absolute;
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       box-sizing: border-box;
       padding: 0;
       margin: 0;
-      line-height: 1;
+      border: 1px solid var(--vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7);
+      border-radius: 50%;
+      background: var(--vaadin-spreadsheet-grouping-toggle-bg, #c7c7c7);
+      color: #fff;
       font: inherit;
-      font-size: 10px;
+      font-size: 12px;
+      line-height: 10px;
       text-align: center;
       cursor: pointer;
-      background: var(--vaadin-spreadsheet-grouping-toggle-bg, #fff);
-      border: 1px solid var(--vaadin-spreadsheet-grouping-toggle-border-color, #888);
+      z-index: 2;
     }
 
-    .row-grouping-toggle:hover {
-      background: #e8e8e8;
+    /* Divides one outline level from the next. */
+    .row-grouping-separator {
+      position: absolute;
+      top: 0;
+      width: 0;
+      border-right: 1px dotted var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      pointer-events: none;
     }
 
     :host {
@@ -389,6 +405,7 @@ export class SpreadsheetRowHeader extends LitElement {
       rowY,
       rowHeights,
       headerWidth,
+      totalGridHeightPx,
       selectedRows = new Set<number>(),
       rowGroupings = [],
       rowGroupingMax = 0,
@@ -405,10 +422,11 @@ export class SpreadsheetRowHeader extends LitElement {
       return html``;
     }
 
-    // The gutter takes a fixed slice of the header's width; the numbers
-    // occupy the rest, offset when the gutter is on the left.
-    const gutterWidth = rowGroupingMax * GROUPING_LEVEL_WIDTH_PX;
-    const numbersLeft = rowGroupingInversed ? 0 : gutterWidth;
+    // The gutter takes a fixed slice of the header's width, on the left
+    // whichever side a group's summary row is on, as in the GWT client;
+    // the numbers occupy the rest.
+    const gutterWidth = rowGroupingGutterPx(rowGroupingMax);
+    const numbersLeft = gutterWidth;
     const numbersWidth = Math.max(0, headerWidth - gutterWidth);
 
     const cells: TemplateResult[] = [];
@@ -462,18 +480,23 @@ export class SpreadsheetRowHeader extends LitElement {
       `;
     }
 
-    // One vertical line per grouping plus its +/- toggle, laid out by
-    // level across the gutter.
     const groupingEls: TemplateResult[] = [];
+    for (let level = 1; level <= rowGroupingMax; level++) {
+      const style = `left:${level * ROW_GROUPING_LEVEL_PX}px;height:${totalGridHeightPx}px;`;
+      groupingEls.push(html`<div class="row-grouping-separator" style=${style}></div>`);
+    }
     for (const g of rowGroupings) {
-      const levelLeft = rowGroupingInversed
-        ? numbersWidth + (g.level - 1) * GROUPING_LEVEL_WIDTH_PX
-        : (g.level - 1) * GROUPING_LEVEL_WIDTH_PX;
-      const lineStyle =
-        `left:${levelLeft + GROUPING_LEVEL_WIDTH_PX / 2}px;` +
-        `top:${g.startPx}px;height:${Math.max(0, g.endPx - g.startPx)}px;`;
-      groupingEls.push(html` <div class="row-grouping-line" style=${lineStyle}></div> `);
-      const btnStyle = `left:${levelLeft}px;top:${g.buttonPx}px;`;
+      const lineLeft = 6 + (g.level - 1) * ROW_GROUPING_LEVEL_PX;
+      // A collapsed group keeps only its button, showing "+".
+      if (!g.collapsed) {
+        // The border at one end is outside the height.
+        const lineStyle = `left:${lineLeft}px;top:${g.startPx}px;height:${Math.max(0, g.endPx - g.startPx - 2)}px;`;
+        const lineClass = rowGroupingInversed ? 'row-grouping-line inversed' : 'row-grouping-line';
+        groupingEls.push(html`<div class=${lineClass} style=${lineStyle}></div>`);
+      }
+      // Centred on the bracket's line, at the summary row.
+      const half = GROUPING_BUTTON_SIZE_PX / 2;
+      const btnStyle = `left:${lineLeft + 1 - half}px;top:${g.buttonPx - half}px;`;
       groupingEls.push(html`
         <button
           class="row-grouping-toggle"

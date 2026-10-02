@@ -376,7 +376,9 @@ describe('Row header — grouping outline', () => {
             },
             rowY: [0, 20, 40, 60],
             rowHeights: [20, 20, 20, 20],
-            headerWidth: 40 + opts.max * 16,
+            // The row numbers' 50px, past the gutter: a 15px level per
+            // depth and one more, as the GWT client had it.
+            headerWidth: 50 + (opts.max > 0 ? 1 + (opts.max + 1) * 15 : 0),
             totalGridHeightPx: 80,
             rowGroupings: opts.groupings,
             rowGroupingMax: opts.max,
@@ -427,20 +429,66 @@ describe('Row header — grouping outline', () => {
     });
 
     it('offsets the row numbers past the gutter', async () => {
+        // Two levels and the one more: 1 + 3 x 15px.
         const el = await attachWithState(stateWithGroupings({ max: 2, groupings: oneGroup }));
 
         const cell = el.shadowRoot!.querySelector<HTMLElement>('.row-header-cell')!;
-        expect(cell.style.left).to.equal('32px');
+        expect(cell.style.left).to.equal('46px');
         cleanup(el);
     });
 
-    it('puts the gutter on the right when inversed', async () => {
+    it('keeps the gutter on the left when inversed, as the GWT client did', async () => {
+        // Inversed only moves a group's button to the row above it.
         const el = await attachWithState(stateWithGroupings({
             max: 1, inversed: true, groupings: oneGroup,
         }));
 
         const cell = el.shadowRoot!.querySelector<HTMLElement>('.row-header-cell')!;
-        expect(cell.style.left).to.equal('0px');
+        expect(cell.style.left).to.equal('31px');
+        cleanup(el);
+    });
+
+    it('draws a bracket down the group and a round button at its summary row', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+
+        const line = getComputedStyle(el.shadowRoot!.querySelector('.row-grouping-line')!);
+        expect(`${line.borderLeftWidth} ${line.borderTopWidth}`).to.equal('2px 2px');
+        expect(line.borderLeftColor).to.equal('rgb(199, 199, 199)');
+        const button = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-toggle')!;
+        const style = getComputedStyle(button);
+        expect(`${style.width} ${style.height} ${style.borderRadius}`).to.equal('12px 12px 50%');
+        expect(style.backgroundColor).to.equal('rgb(199, 199, 199)');
+        expect(style.color).to.equal('rgb(255, 255, 255)');
+        // Centred on the summary row's position.
+        expect(button.style.top).to.equal(`${4 - 6}px`);
+        cleanup(el);
+    });
+
+    it('turns the tick to the far end when inversed', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 1, inversed: true, groupings: oneGroup }));
+
+        const line = getComputedStyle(el.shadowRoot!.querySelector('.row-grouping-line')!);
+        expect(`${line.borderTopStyle} ${line.borderBottomWidth}`).to.equal('none 2px');
+        cleanup(el);
+    });
+
+    it('keeps only the button of a collapsed group', async () => {
+        const el = await attachWithState(stateWithGroupings({
+            max: 1,
+            groupings: [{ ...oneGroup[0], collapsed: true }],
+        }));
+
+        expect(el.shadowRoot!.querySelector('.row-grouping-line')).to.be.null;
+        expect(el.shadowRoot!.querySelector('.row-grouping-toggle')).to.not.be.null;
+        cleanup(el);
+    });
+
+    it('divides the levels with dotted lines', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 2, groupings: oneGroup }));
+
+        const dividers = el.shadowRoot!.querySelectorAll<HTMLElement>('.row-grouping-separator');
+        expect(Array.from(dividers).map((d) => d.style.left)).to.deep.equal(['15px', '30px']);
+        expect(getComputedStyle(dividers[0]).borderRightStyle).to.equal('dotted');
         cleanup(el);
     });
 

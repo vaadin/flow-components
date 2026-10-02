@@ -33,12 +33,7 @@ import type {
   RowSelectedData,
   SpreadsheetEvent
 } from './types/rpc-client-to-server.js';
-import type {
-  CellEditorState,
-  MergedRegionBox,
-  PositionedOverlay,
-  PositionedPopupButton
-} from './elements/types.js';
+import type { CellEditorState, MergedRegionBox, PositionedOverlay, PositionedPopupButton } from './elements/types.js';
 import {
   computeTotalGridSize,
   computeViewportBounds,
@@ -73,10 +68,10 @@ import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import {
-  SpreadsheetColumnHeader,
-  GROUPING_BUTTON_SIZE_PX,
+  columnGroupingGutterPx,
   type PositionedGrouping,
-  GROUPING_LEVEL_HEIGHT_PX
+  rowGroupingGutterPx,
+  SpreadsheetColumnHeader
 } from './elements/SpreadsheetColumnHeader.js';
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetHeaderCorner } from './elements/SpreadsheetHeaderCorner.js';
@@ -2694,9 +2689,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.colGroupingData,
         this.colWidths,
         this.colGroupingInversed,
-        this.defColWidth
+        this.defColWidth,
+        5
       );
-      const gutterPx = this.colGroupingMax * 16;
+      const gutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
       this.columnHeader.style.height = `${this.headerRowHeight + gutterPx}px`;
       this.columnHeader.renderState = {
@@ -2737,9 +2733,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.rowGroupingData,
         rowHeightsPx,
         this.rowGroupingInversed,
-        defaultRowHeightPx
+        defaultRowHeightPx,
+        2
       );
-      const rowGutterPx = this.rowGroupingMax * 16;
+      const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax);
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
       this.rowHeader.renderState = {
@@ -2772,8 +2769,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // The outline gutters are part of the strips beside it, so the corner
     // covers them too - otherwise a grouped sheet has an empty notch where
     // the two gutters meet, and the level buttons have nowhere to sit.
-    const rowGutterPx = this.rowGroupingMax * GROUPING_LEVEL_HEIGHT_PX;
-    const colGutterPx = this.colGroupingMax * GROUPING_LEVEL_HEIGHT_PX;
+    const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax);
+    const colGutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
     const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
     const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
     this.headerCorner.style.width = `${cornerWidth}px`;
@@ -4915,45 +4912,54 @@ export function computeMergedRegionBoxes(
 
 /**
  * Pure helper: convert {@link GroupingData} entries into
- * {@link PositionedGrouping} entries with pre-computed pixel
- * positions. Slice 167.
+ * {@link PositionedGrouping} entries - where each group's bracket runs and
+ * where its button sits, along the axis the sizes are for - as the GWT client
+ * laid them out.
  *
- * - {@code startPx}: pixel x-position of column {@code startIndex}
- *   (sum of widths of columns 1..startIndex-1).
- * - {@code endPx}: pixel x-position of the column AFTER
- *   {@code endIndex} (so the line spans the full data range).
- * - {@code buttonPx}: when {@code !inversed}, button is at
- *   {@code startPx - GROUPING_BUTTON_SIZE_PX}; when {@code inversed},
- *   button is at {@code endPx}.
+ * A group's summary row or column holds its button: by default the one after
+ * the group, so the bracket runs from just inside the group's first header
+ * ({@code startPaddingPx} in) to the middle of the next one, where the button
+ * is. Inversed, the summary is the one before: the bracket runs from the
+ * middle of that header to the group's end, and the button sits at its start.
  *
  * Both indices are 0-based in the wire format (server-side
  * `GroupingData.startIndex`/`endIndex` use POI's 0-based row/col
  * indices). The connector's `colWidths` array is 0-indexed too.
+ *
+ * @param startPaddingPx how far into its first header a group's bracket
+ *            starts - the GWT client's 5px for columns, 2px for rows
  */
 export function computePositionedColGroupings(
   groupings: ReadonlyArray<GroupingData>,
   colWidths: ReadonlyArray<number>,
   inversed: boolean,
-  defColWidthPx: number
+  defColWidthPx: number,
+  startPaddingPx = 0
 ): PositionedGrouping[] {
-  const widthAt = (col0: number): number => (col0 < colWidths.length ? colWidths[col0] : defColWidthPx);
+  const widthAt = (col0: number): number => {
+    if (col0 < 0) {
+      return 0;
+    }
+    return col0 < colWidths.length ? colWidths[col0] : defColWidthPx;
+  };
   const positions: PositionedGrouping[] = [];
   for (const g of groupings) {
-    let startPx = 0;
+    let groupStart = 0;
     for (let i = 0; i < g.startIndex; i++) {
-      startPx += widthAt(i);
+      groupStart += widthAt(i);
     }
-    let endPx = startPx;
+    let groupEnd = groupStart;
     for (let i = g.startIndex; i <= g.endIndex; i++) {
-      endPx += widthAt(i);
+      groupEnd += widthAt(i);
     }
-    const buttonPx = inversed ? endPx : startPx - GROUPING_BUTTON_SIZE_PX;
+    const summaryBefore = groupStart - widthAt(g.startIndex - 1) / 2;
+    const summaryAfter = groupEnd + widthAt(g.endIndex + 1) / 2;
     positions.push({
       uniqueIndex: g.uniqueIndex,
       level: g.level,
-      startPx,
-      endPx,
-      buttonPx,
+      startPx: inversed ? summaryBefore : groupStart + startPaddingPx,
+      endPx: inversed ? groupEnd : summaryAfter,
+      buttonPx: inversed ? summaryBefore : summaryAfter,
       collapsed: g.collapsed
     });
   }

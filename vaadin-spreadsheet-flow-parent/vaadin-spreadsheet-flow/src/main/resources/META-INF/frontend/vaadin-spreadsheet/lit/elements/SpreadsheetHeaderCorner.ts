@@ -12,7 +12,12 @@ import type { TemplateResult } from 'lit';
 
 // One row (or column) of outline gutter. Shared with the header strips so
 // the buttons stay in line with the gutters they belong to.
-import { GROUPING_LEVEL_HEIGHT_PX as GROUPING_LEVEL_SIZE_PX } from './SpreadsheetColumnHeader.js';
+import {
+  COLUMN_GROUPING_LEVEL_PX,
+  columnGroupingGutterPx,
+  ROW_GROUPING_LEVEL_PX,
+  rowGroupingGutterPx
+} from './SpreadsheetColumnHeader.js';
 
 export interface HeaderCornerRenderState {
   /** Width of the row-header column, 0 when the headers are hidden. */
@@ -44,10 +49,10 @@ export function emptyHeaderCornerRenderState(): HeaderCornerRenderState {
  * along the gutter columns, each button sitting in line with the gutter
  * it belongs to.
  *
- * The GWT client drew one button more than there are levels, the last
- * meaning "expand everything". That one has no gutter row to sit in, and
- * inventing a row for it would put the corner out of line with the strips
- * beside it; the +/- toggles on the groups expand them.
+ * As in the GWT client and Excel there is one button more than there are
+ * levels, the last opening every group; the gutters have a level for it.
+ * Without headings there is nowhere for the buttons, and the GWT client
+ * showed none.
  */
 export class SpreadsheetHeaderCorner extends LitElement {
   static readonly EXPORTED_PARTS = 'header-corner,outline-level-button';
@@ -66,25 +71,22 @@ export class SpreadsheetHeaderCorner extends LitElement {
       border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
     }
 
+    /* Plain numbers, as the GWT client drew them. */
     .level-header {
       position: absolute;
       box-sizing: border-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 11px;
+      height: 18px;
       padding: 0;
       margin: 0;
-      border: 1px solid var(--vaadin-spreadsheet-grouping-toggle-border-color, #888);
-      background: var(--vaadin-spreadsheet-grouping-toggle-bg, #fff);
-      color: inherit;
+      border: 0;
+      background: none;
+      color: #484848;
       font: inherit;
-      font-size: 10px;
-      line-height: 1;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
       cursor: pointer;
-    }
-
-    .level-header:hover {
-      background: var(--vaadin-spreadsheet-header-hover-bg, #e8e8e8);
     }
   `;
 
@@ -129,17 +131,17 @@ export class SpreadsheetHeaderCorner extends LitElement {
 
   render(): TemplateResult | typeof nothing {
     const { headerWidth, headerHeight, colGroupingMax, rowGroupingMax } = this.renderState;
-    if (colGroupingMax === 0 && rowGroupingMax === 0) {
+    if ((colGroupingMax === 0 && rowGroupingMax === 0) || headerWidth === 0 || headerHeight === 0) {
       return nothing;
     }
-    const rowGutterPx = rowGroupingMax * GROUPING_LEVEL_SIZE_PX;
-    const colGutterPx = colGroupingMax * GROUPING_LEVEL_SIZE_PX;
+    const rowGutterPx = rowGroupingGutterPx(rowGroupingMax);
+    const colGutterPx = columnGroupingGutterPx(colGroupingMax, true);
 
     const buttons: TemplateResult[] = [];
-    for (let level = 1; level <= colGroupingMax; level++) {
-      const style =
-        `left:${rowGutterPx}px;top:${(level - 1) * GROUPING_LEVEL_SIZE_PX}px;` +
-        `width:${headerWidth}px;height:${GROUPING_LEVEL_SIZE_PX}px;`;
+    // One per column level, down the gutter above the row numbers, at its
+    // right-hand end.
+    for (let level = 1; colGroupingMax > 0 && level <= colGroupingMax + 1; level++) {
+      const style = `left:${rowGutterPx + headerWidth - 4 - 11}px;top:${(level - 1) * COLUMN_GROUPING_LEVEL_PX}px;`;
       buttons.push(html`
         <button
           class="level-header"
@@ -153,10 +155,9 @@ export class SpreadsheetHeaderCorner extends LitElement {
         </button>
       `);
     }
-    for (let level = 1; level <= rowGroupingMax; level++) {
-      const style =
-        `left:${(level - 1) * GROUPING_LEVEL_SIZE_PX}px;top:${colGutterPx}px;` +
-        `width:${GROUPING_LEVEL_SIZE_PX}px;height:${headerHeight}px;`;
+    // One per row level, along the gutter beside the column letters.
+    for (let level = 1; rowGroupingMax > 0 && level <= rowGroupingMax + 1; level++) {
+      const style = `left:${4 + (level - 1) * ROW_GROUPING_LEVEL_PX}px;top:${colGutterPx}px;`;
       buttons.push(html`
         <button
           class="level-header"
