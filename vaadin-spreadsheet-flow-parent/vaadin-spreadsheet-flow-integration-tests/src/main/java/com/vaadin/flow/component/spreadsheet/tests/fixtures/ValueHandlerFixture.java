@@ -63,6 +63,10 @@ public class ValueHandlerFixture implements SpreadsheetFixture {
         });
 
         spreadsheet.createCell(0, 2, "Dates");
+        // Room for the dates. "15-Mar-00" only just fits the default width,
+        // and whether it does depends on the font the browser puts in for
+        // Calibri: where it does not, the cell rightly shows ### instead.
+        spreadsheet.setColumnWidth(2, 100);
         Cell c3 = spreadsheet.createCell(2, 2, "");
         final CellStyle dateStyle = c3.getSheet().getWorkbook()
                 .createCellStyle();
