@@ -105,8 +105,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
         addAttachListener(event -> {
-            String appId = event.getUI().getInternals().getAppId();
-            initConnector(appId);
+            initConnector();
             resetContent();
             updateListenOn();
         });
@@ -582,10 +581,9 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         }
     }
 
-    private void initConnector(String appId) {
+    private void initConnector() {
         getElement().executeJs(
-                "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)",
-                appId);
+                "window.Vaadin.Flow.contextMenuConnector.initLazy(this)");
     }
 
     void ensureTooltipElement() {
