@@ -90,10 +90,12 @@ export class SpreadsheetSheetTabs extends LitElement {
 
   static styles = css`
     /* The buttons sit before the tabs, as the GWT strip had them. */
+    /* The strip buttons, side by side in the GWT client's 130px. */
     .sheet-tabsheet-options {
       display: inline-flex;
+      flex: none;
       align-items: center;
-      gap: 2px;
+      height: 28px;
     }
 
     /*
@@ -115,7 +117,8 @@ export class SpreadsheetSheetTabs extends LitElement {
 
     .sheet-tabsheet-container {
       display: inline-flex;
-      align-items: center;
+      align-items: flex-start;
+      min-width: 0;
       overflow: hidden;
     }
 
@@ -143,7 +146,7 @@ export class SpreadsheetSheetTabs extends LitElement {
     }
 
     .sheet-tabsheet-options > div:hover {
-      color: var(--vaadin-spreadsheet-tabs-active-fg, #1976d2);
+      color: var(--vaadin-spreadsheet-tabs-active-fg, #2584e2);
     }
 
     /* Kept in the DOM so a stylesheet can reach it, but inert. */
@@ -172,37 +175,55 @@ export class SpreadsheetSheetTabs extends LitElement {
       --_tab-button-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>');
     }
 
+    /* The GWT client's strip: 28px under a one-pixel border, with the
+       tabs hanging from that border. Tabs past its end are cut off; the
+       buttons scroll to them. */
     :host {
       display: flex;
       flex-direction: row;
-      align-items: stretch;
+      align-items: flex-start;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-tabs-bg, #f4f4f4);
-      border-top: 1px solid var(--vaadin-spreadsheet-tabs-border, #c0c0c0);
+      height: 29px;
+      background: var(--vaadin-spreadsheet-tabs-bg, #fafafa);
+      border-top: 1px solid var(--vaadin-spreadsheet-tabs-border, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-tabs-font, inherit);
       font-size: var(--vaadin-spreadsheet-tabs-font-size, inherit);
-      overflow-x: auto;
-      overflow-y: hidden;
-      min-height: 24px;
+      overflow: hidden;
     }
 
+    /* A tab as the GWT client drew one: a folder tab hanging from the
+       strip's top border, its name in light type, cut short with an
+       ellipsis past 200px. */
     .sheet-tab {
-      padding: 4px 12px;
-      border-right: 1px solid var(--vaadin-spreadsheet-tabs-border, #c0c0c0);
+      flex: none;
+      box-sizing: content-box;
+      height: 20px;
+      min-width: 50px;
+      max-width: 200px;
+      margin-left: 5px;
+      padding: 2px 6px;
+      border: 1px solid var(--vaadin-spreadsheet-tabs-border, #c7c7c7);
+      border-top: none;
+      border-radius: 0 0 5px 5px;
       cursor: pointer;
       user-select: none;
-      background: var(--vaadin-spreadsheet-tabs-bg, #f4f4f4);
-      color: var(--vaadin-spreadsheet-tabs-fg, #333);
+      background: var(--vaadin-spreadsheet-tabs-bg, #fafafa);
+      color: var(--vaadin-spreadsheet-tabs-fg, #6a6a6a);
+      font-weight: 300;
+      line-height: 20px;
+      text-align: center;
       white-space: nowrap;
-      display: flex;
-      align-items: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
+    /* The active tab joins the sheet above it: white, in the accent
+       colour, and as wide as its name needs. */
     .sheet-tab.active {
+      max-width: none;
       background: var(--vaadin-spreadsheet-tabs-active-bg, #fff);
-      color: var(--vaadin-spreadsheet-tabs-active-fg, #1976d2);
-      border-bottom: 2px solid var(--vaadin-spreadsheet-tabs-active-fg, #1976d2);
-      font-weight: 500;
+      color: var(--vaadin-spreadsheet-tabs-active-fg, #2584e2);
+      cursor: default;
     }
 
     .sheet-tab:hover:not(.active) {

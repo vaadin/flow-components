@@ -320,6 +320,89 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
     });
 });
 
+/**
+ * The strip, drawn as the GWT client drew it.
+ *
+ * The Lit strip was 34px tall with flat tabs stretched to its height and
+ * the active one underlined, so it took more room from the sheet than it
+ * used to and looked nothing like the strip users knew: folder tabs hanging
+ * from the top border, the active one white with its name in blue.
+ */
+describe('SpreadsheetSheetTabs — drawn as the GWT client drew it', () => {
+    const LONG = 'A sheet name far too long to show whole in a tab';
+
+    async function strip(): Promise<SpreadsheetSheetTabs> {
+        const el = await attachWithState({
+            ...emptySheetTabsRenderState(),
+            sheetNames: ['Sheet1', 'Sheet2', LONG],
+            activeIndex: 1,
+        });
+        el.style.width = '900px';
+        await el.updateComplete;
+        return el;
+    }
+
+    function tab(el: SpreadsheetSheetTabs, index: number): HTMLElement {
+        return el.shadowRoot!.querySelectorAll<HTMLElement>('.sheet-tab')[index];
+    }
+
+    it('is 29px tall, its top border included', async () => {
+        const el = await strip();
+
+        expect(el.getBoundingClientRect().height).to.equal(29);
+
+        cleanup(el);
+    });
+
+    it('hangs each tab from the top border, 25px tall with rounded corners', async () => {
+        const el = await strip();
+
+        const sheet2 = tab(el, 1);
+        const box = sheet2.getBoundingClientRect();
+        expect(box.top - el.getBoundingClientRect().top, 'right under the border').to.equal(1);
+        expect(box.height).to.equal(25);
+        const style = getComputedStyle(sheet2);
+        expect(style.borderTopStyle).to.equal('none');
+        expect(style.borderBottomLeftRadius).to.equal('5px');
+
+        cleanup(el);
+    });
+
+    it('starts the tabs after the 130px of buttons', async () => {
+        const el = await strip();
+
+        const left = tab(el, 0).getBoundingClientRect().left - el.getBoundingClientRect().left;
+        expect(left).to.equal(130 + 5);
+
+        cleanup(el);
+    });
+
+    it('writes the other names in light grey, the active one in blue on white', async () => {
+        const el = await strip();
+
+        const other = getComputedStyle(tab(el, 1));
+        expect(other.color).to.equal('rgb(106, 106, 106)');
+        expect(other.fontWeight).to.equal('300');
+        const active = getComputedStyle(tab(el, 0));
+        expect(active.color).to.equal('rgb(37, 132, 226)');
+        expect(active.backgroundColor).to.equal('rgb(255, 255, 255)');
+        expect(active.borderBottomWidth, 'no underline').to.equal('1px');
+
+        cleanup(el);
+    });
+
+    it('cuts a long name short with an ellipsis', async () => {
+        const el = await strip();
+
+        const long = tab(el, 2);
+        expect(long.getBoundingClientRect().width).to.equal(200 + 2 * 6 + 2);
+        expect(getComputedStyle(long).textOverflow).to.equal('ellipsis');
+        expect(long.scrollWidth).to.be.greaterThan(long.clientWidth);
+
+        cleanup(el);
+    });
+});
+
 describe('Spreadsheet — sheet tabs lifecycle through the connector (slice 154)', () => {
     it('connector creates a SpreadsheetSheetTabs element below the scroll container', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
