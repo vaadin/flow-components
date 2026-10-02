@@ -445,6 +445,29 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         cleanup(el);
     });
 
+    it('marks the selected column along the edge facing the cells', async () => {
+        // The GWT client's two-pixel blue edge under the tint.
+        const el = await attachWithSelection(new Set([2]));
+
+        const cells = el.shadowRoot!.querySelectorAll('.col-header-cell');
+        expect(getComputedStyle(cells[1]).boxShadow).to.equal(
+            'rgb(99, 177, 255) 0px -2px 0px 0px inset'
+        );
+        expect(getComputedStyle(cells[0]).boxShadow).to.equal('none');
+
+        cleanup(el);
+    });
+
+    it('writes the letters in 13px on #fafafa, as the GWT client did', async () => {
+        const el = await attachWithSelection(new Set());
+
+        const style = getComputedStyle(el);
+        expect(style.fontSize).to.equal('13px');
+        expect(style.backgroundColor).to.equal('rgb(250, 250, 250)');
+
+        cleanup(el);
+    });
+
     it('takes the tint from --vaadin-spreadsheet-header-selected-bg', async () => {
         const el = await attachWithSelection(new Set([2]));
         el.style.setProperty(

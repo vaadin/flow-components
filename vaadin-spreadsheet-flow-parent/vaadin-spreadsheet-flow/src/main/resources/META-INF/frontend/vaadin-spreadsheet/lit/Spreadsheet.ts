@@ -163,6 +163,18 @@ export function inSelectionWalkDirection(key: string | undefined, shiftKey: bool
  */
 const WIDTH_PROBE_TEXT = '5555555555';
 
+/**
+ * Height of the column headers, in pixels: the GWT client's 27, so a sheet
+ * starts its first row where it always did.
+ */
+const DEFAULT_HEADER_ROW_HEIGHT = 27;
+
+/**
+ * Width of the row headers, in pixels: the GWT client's 50, which also fits
+ * a six-digit row number.
+ */
+const DEFAULT_HEADER_COLUMN_WIDTH = 50;
+
 export class Spreadsheet implements SpreadsheetClientApi {
   // ====================================================================
   // Internal state — placeholder fields. The real Phase 3.2+ class
@@ -527,27 +539,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private hostClassObserver: MutationObserver | null = null;
 
   /**
-   * Height of the column-header strip in pixels. {@code 0}
-   * (default) means no header strip is rendered. The host opts
-   * in by calling {@link setHeaderRowHeight}; matches Excel's
-   * 18-22px range. Slice 143.
+   * Height of the column-header strip in pixels, its bottom border
+   * included. {@code 0} when the sheet hides its headings, which
+   * collapses the strip.
    */
-  /**
-   * Slice 180: defaults to 20 (matching the GWT-era visual)
-   * because {@link displayRowColHeadings} defaults to true.
-   * Setting {@code displayRowColHeadings = false} collapses to 0.
-   */
-  private headerRowHeight = 20;
+  private headerRowHeight = DEFAULT_HEADER_ROW_HEIGHT;
 
   /**
-   * Width of the row-header strip in pixels. {@code 0} (default)
-   * means no row-header is rendered. The host opts in via
-   * {@link setHeaderColumnWidth}; Excel uses 30-40px (wider
-   * accommodates the largest row numbers without truncation).
-   * Slice 144.
+   * Width of the row-header strip in pixels, its right border included.
+   * {@code 0} when the sheet hides its headings.
    */
-  /** Slice 180: defaults to 40, symmetric with {@link headerRowHeight}. */
-  private headerColumnWidth = 40;
+  private headerColumnWidth = DEFAULT_HEADER_COLUMN_WIDTH;
 
   /**
    * The scroll surface — wraps the cell-grid and provides the
@@ -3298,10 +3300,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Set the column-header strip's height in pixels. {@code 0}
-   * (default) means no header is rendered — useful for headless
-   * use cases and as a clean default. Excel's typical header is
-   * 18-22 px. Slice 143.
+   * Set the column-header strip's height in pixels; {@code 0} hides the
+   * strip. Slice 143.
    */
   setHeaderRowHeight(pixels: number): void {
     this.headerRowHeight = pixels;
@@ -3313,10 +3313,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Set the row-header strip's width in pixels. {@code 0}
-   * (default) disables the strip. Excel uses 30-40px; wider
-   * accommodates the largest row numbers without truncation.
-   * Slice 144.
+   * Set the row-header strip's width in pixels; {@code 0} hides the
+   * strip. Slice 144.
    */
   setHeaderColumnWidth(pixels: number): void {
     this.headerColumnWidth = pixels;
@@ -4060,19 +4058,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
   setDisplayRowColHeadings(visible: boolean): void {
     this.displayRowColHeadings = visible;
-    // Slice 180: the server doesn't push explicit
-    // headerRowHeight / headerColumnWidth — only this boolean.
-    // When headings should be visible, give the header strips
-    // sensible defaults so they actually render. When hidden,
-    // collapse them. These match the GWT-era defaults
-    // (~20 px tall, ~40 px wide) and can be customized via
-    // the CSS custom properties on the host.
+    // The server sends only this boolean, never the strips' sizes: shown,
+    // they get their default sizes back; hidden, they collapse.
     if (visible) {
       if (this.headerRowHeight === 0) {
-        this.headerRowHeight = 20;
+        this.headerRowHeight = DEFAULT_HEADER_ROW_HEIGHT;
       }
       if (this.headerColumnWidth === 0) {
-        this.headerColumnWidth = 40;
+        this.headerColumnWidth = DEFAULT_HEADER_COLUMN_WIDTH;
       }
     } else {
       this.headerRowHeight = 0;

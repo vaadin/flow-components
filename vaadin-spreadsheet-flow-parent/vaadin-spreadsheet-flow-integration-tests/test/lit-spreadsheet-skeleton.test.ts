@@ -934,8 +934,8 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setColW([50, 50, 50]);
         sheet.setRowH([15, 18, 15, 12, 15]); // varying row heights
 
-        // Slice 180: default header column width is 40.
-        expect(sheet.getHeaderColumnWidth()).to.equal(40);
+        // The GWT client's 50: a sheet's first column starts where it did.
+        expect(sheet.getHeaderColumnWidth()).to.equal(50);
 
         sheet.setHeaderColumnWidth(40);
         expect(sheet.getHeaderColumnWidth()).to.equal(40);
@@ -966,10 +966,8 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setColW([50, 60, 40]);
         sheet.setRowH([15, 15, 15, 15, 15]);
 
-        // Slice 180: default header row height is 20 (was 0 before
-        // slice 180 — display-row-col-headings defaults to true, so
-        // the headers need a non-zero size to actually render).
-        expect(sheet.getHeaderRowHeight()).to.equal(20);
+        // The GWT client's 27: a sheet's first row starts where it did.
+        expect(sheet.getHeaderRowHeight()).to.equal(27);
 
         sheet.setHeaderRowHeight(24);
         expect(sheet.getHeaderRowHeight()).to.equal(24);

@@ -183,10 +183,10 @@ export class SpreadsheetRowHeader extends LitElement {
       left: 0;
       z-index: 4;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, #f4f4f4);
+      background: var(--vaadin-spreadsheet-header-bg, #fafafa);
       border-right: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-header-font, inherit);
-      font-size: var(--vaadin-spreadsheet-header-font-size, inherit);
+      font-size: var(--vaadin-spreadsheet-header-font-size, 13px);
     }
 
     /* Frozen rows are drawn in their own strip, translated to cancel
@@ -216,6 +216,8 @@ export class SpreadsheetRowHeader extends LitElement {
        ::part(header-selected) for consumers who want another one. */
     .row-header-cell[part~='header-selected'] {
       background: var(--vaadin-spreadsheet-header-selected-bg, #e6edf4);
+      /* The GWT client's marker along the edge that faces the cells. */
+      box-shadow: inset -2px 0 0 #63b1ff;
     }
 
     /* Resize handle on the bottom edge of each row header

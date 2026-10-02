@@ -61,7 +61,7 @@ export class SpreadsheetHeaderCorner extends LitElement {
       display: block;
       position: relative;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, #f4f4f4);
+      background: var(--vaadin-spreadsheet-header-bg, #fafafa);
       border-right: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
     }

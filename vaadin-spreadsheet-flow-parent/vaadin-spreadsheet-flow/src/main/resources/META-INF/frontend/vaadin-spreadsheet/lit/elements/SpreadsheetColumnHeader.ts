@@ -197,10 +197,10 @@ export class SpreadsheetColumnHeader extends LitElement {
       top: 0;
       z-index: 5;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, #f4f4f4);
+      background: var(--vaadin-spreadsheet-header-bg, #fafafa);
       border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
       font-family: var(--vaadin-spreadsheet-header-font, inherit);
-      font-size: var(--vaadin-spreadsheet-header-font-size, inherit);
+      font-size: var(--vaadin-spreadsheet-header-font-size, 13px);
     }
 
     /* Frozen columns are drawn in their own strip, translated to
@@ -231,6 +231,8 @@ export class SpreadsheetColumnHeader extends LitElement {
        ::part(header-selected) for consumers who want another one. */
     .col-header-cell[part~='header-selected'] {
       background: var(--vaadin-spreadsheet-header-selected-bg, #e6edf4);
+      /* The GWT client's marker along the edge that faces the cells. */
+      box-shadow: inset 0 -2px 0 #63b1ff;
     }
 
     /* Resize handle on the right edge of each column header
