@@ -310,6 +310,7 @@ public class SpreadsheetElement extends TestBenchElement {
     @Override
     public void scroll(int scrollTop) {
         scrollContainer().scroll(scrollTop);
+        waitUntilDrawnAtScrollPosition();
     }
 
     /*
@@ -320,6 +321,40 @@ public class SpreadsheetElement extends TestBenchElement {
     @Override
     public void scrollLeft(int scrollLeft) {
         scrollContainer().scrollLeft(scrollLeft);
+        waitUntilDrawnAtScrollPosition();
+    }
+
+    /**
+     * Waits until the sheet has drawn itself at its new scroll position.
+     * <p>
+     * The cells are drawn a frame after the scroll, and the cell elements are
+     * reused for whichever cells the new position shows. A cell found and
+     * clicked in between can turn out to be another cell by the time the click
+     * lands, so a scroll is not over until the sheet has caught up.
+     */
+    private void waitUntilDrawnAtScrollPosition() {
+        ((JavascriptExecutor) getCommandExecutor().getDriver())
+                .executeAsyncScript(
+                        """
+                                const host = arguments[0];
+                                const done = arguments[arguments.length - 1];
+                                const root = host.shadowRoot;
+                                const container = root.querySelector('div[style*="overflow"]');
+                                const grid = root.querySelector('vaadin-spreadsheet-internal-cell-grid');
+                                let tries = 0;
+                                const check = () => {
+                                    const state = grid && grid.renderState;
+                                    const caughtUp = !state || (state.scrollLeft === container.scrollLeft
+                                        && state.scrollTop === container.scrollTop);
+                                    if (caughtUp || ++tries > 100) {
+                                        requestAnimationFrame(() => requestAnimationFrame(() => done(null)));
+                                    } else {
+                                        setTimeout(check, 20);
+                                    }
+                                };
+                                check();
+                                """,
+                        this);
     }
 
     /**
