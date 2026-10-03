@@ -2918,3 +2918,72 @@ describe('SpreadsheetCellGrid — the comment marker', () => {
         cleanup(el);
     });
 });
+
+/**
+ * Hyperlink cells.
+ *
+ * The GWT client only gave a link the pointer: its colour and underline were
+ * whatever the workbook styled it with. The Lit client painted every link
+ * its own blue and underlined it, over the workbook's style.
+ */
+describe('SpreadsheetCellGrid — hyperlink cells', () => {
+    function withLink(cellStyle: string, styles: Record<number, string>): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1, firstColumnPosition: 0,
+                lastColumnIndex: 1, lastColumnPosition: 100,
+                firstRowIndex: 1, firstRowPosition: 0,
+                lastRowIndex: 1, lastRowPosition: 20,
+            },
+            cellData: new Map<string, CellData>([['col1 row1', { ...makeCellData(1, 1, 'vaadin.com'), cellStyle }]]),
+            colX: [0],
+            rowY: [0],
+            colWidths: [100],
+            rowHeights: [20],
+            cellStyleToCSSStyle: styles,
+            hyperlinkCells: new Set(['col1 row1']),
+        };
+    }
+
+    function link(el: SpreadsheetCellGrid): CSSStyleDeclaration {
+        return getComputedStyle(el.shadowRoot!.querySelector('.cell.link-cell')!);
+    }
+
+    it('keeps the colour the workbook gives a link', async () => {
+        const el = await attachWithState(
+            withLink('cs1', { 0: 'color: rgb(51, 51, 51);', 1: 'color: rgb(5, 99, 193); text-decoration: underline;' })
+        );
+
+        expect(link(el).color).to.equal('rgb(5, 99, 193)');
+        expect(link(el).textDecorationLine).to.equal('underline');
+
+        cleanup(el);
+    });
+
+    it('shows an unstyled link in the default colour, not underlined', async () => {
+        const el = await attachWithState(withLink('cs0', { 0: 'color: rgb(51, 51, 51);' }));
+
+        expect(link(el).color).to.equal('rgb(51, 51, 51)');
+        expect(link(el).textDecorationLine).to.equal('none');
+
+        cleanup(el);
+    });
+
+    it('colours unstyled links when the application sets the property', async () => {
+        const el = await attachWithState(withLink('cs0', { 0: 'color: rgb(51, 51, 51);' }));
+        el.style.setProperty('--vaadin-spreadsheet-link-fg', 'rgb(1, 2, 3)');
+
+        expect(link(el).color).to.equal('rgb(1, 2, 3)');
+
+        cleanup(el);
+    });
+
+    it('points at a link', async () => {
+        const el = await attachWithState(withLink('cs0', { 0: 'color: rgb(51, 51, 51);' }));
+
+        expect(link(el).cursor).to.equal('pointer');
+
+        cleanup(el);
+    });
+});

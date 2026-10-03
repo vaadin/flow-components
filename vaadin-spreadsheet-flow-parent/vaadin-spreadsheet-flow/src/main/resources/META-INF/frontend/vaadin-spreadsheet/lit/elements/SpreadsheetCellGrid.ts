@@ -395,9 +395,10 @@ export class SpreadsheetCellGrid extends LitElement {
     /* Hyperlink cells get a visual underline + color hint
            (slice 165). The actual click handling lives in the
            connector; this style just matches the Excel convention. */
+    /* A link looks however its workbook styles it, as in the GWT client;
+       the colour an application may give links is laid among the cell
+       styles - see buildCellStyleBlock. */
     .cell.link-cell {
-      color: var(--vaadin-spreadsheet-link-fg, #1976d2);
-      text-decoration: underline;
       cursor: pointer;
     }
 
@@ -1016,6 +1017,18 @@ function freezeLine(along: 'rows' | 'columns', at: number, length: number): Temp
   return html`<div class="freeze-line" style=${style}></div>`;
 }
 
+/** The value a style body gives a property last, if it gives one. */
+function lastValueOf(body: string | undefined, property: string): string | undefined {
+  let value: string | undefined;
+  for (const declaration of (body ?? '').split(';')) {
+    const colon = declaration.indexOf(':');
+    if (colon > 0 && declaration.slice(0, colon).trim() === property) {
+      value = declaration.slice(colon + 1).trim();
+    }
+  }
+  return value;
+}
+
 /** Rows or columns by the style index they are formatted with. */
 function groupByStyle(byIndex: Readonly<Record<number, number>>): Map<number, number[]> {
   const out = new Map<number, number[]>();
@@ -1564,6 +1577,15 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
         'font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size)); }'
     );
   }
+  // Links: --vaadin-spreadsheet-link-fg when an application sets it, for a
+  // link whose own style sets no colour. Unset, the default style's colour,
+  // as the GWT client showed every link. After the default rule, before the
+  // cell styles, so a workbook's styled link keeps its own colour.
+  rules.push(
+    `.cell.link-cell { color: var(--vaadin-spreadsheet-link-fg, ${
+      lastValueOf(styles[0], 'color') ?? 'var(--default-color)'
+    }); }`
+  );
   // A whole row or column formatted in the workbook styles those of its
   // cells that have no style of their own - which wear cs0.
   const rowsByStyle = groupByStyle(state.rowIndexToStyleIndex ?? {});
