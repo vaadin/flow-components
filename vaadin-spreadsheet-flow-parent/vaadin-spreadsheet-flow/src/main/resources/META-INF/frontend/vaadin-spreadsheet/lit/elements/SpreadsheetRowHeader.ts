@@ -81,11 +81,17 @@ export interface RowHeaderRenderState {
   /** Number of grouping levels. {@code 0} renders no gutter. */
   rowGroupingMax: number;
   /**
-   * When {@code true} the gutter renders to the RIGHT of the row numbers and
-   * each +/- button sits at the END of its range. Excel's "summary columns to
-   * the right" toggle.
+   * Whether a group's summary row is the one above it - Excel's summary rows
+   * above their detail - which puts the group's button there and turns its
+   * bracket's tick to the far end. The gutter stays beside the numbers
+   * either way.
    */
   rowGroupingInversed: boolean;
+  /**
+   * Whether the headings show, which gives the gutter its extra level for
+   * the button that opens every group. Absent means they do.
+   */
+  rowGroupingHeadings?: boolean;
 }
 
 /** Helper: build an empty row-header render state. */
@@ -410,6 +416,7 @@ export class SpreadsheetRowHeader extends LitElement {
       rowGroupings = [],
       rowGroupingMax = 0,
       rowGroupingInversed = false,
+      rowGroupingHeadings = true,
       verticalSplitPosition = 0,
       frozenRowY = [],
       frozenRowHeights = [],
@@ -425,7 +432,7 @@ export class SpreadsheetRowHeader extends LitElement {
     // The gutter takes a fixed slice of the header's width, on the left
     // whichever side a group's summary row is on, as in the GWT client;
     // the numbers occupy the rest.
-    const gutterWidth = rowGroupingGutterPx(rowGroupingMax);
+    const gutterWidth = rowGroupingGutterPx(rowGroupingMax, rowGroupingHeadings);
     const numbersLeft = gutterWidth;
     const numbersWidth = Math.max(0, headerWidth - gutterWidth);
 
@@ -481,7 +488,8 @@ export class SpreadsheetRowHeader extends LitElement {
     }
 
     const groupingEls: TemplateResult[] = [];
-    for (let level = 1; level <= rowGroupingMax; level++) {
+    const levels = Math.round((gutterWidth - 1) / ROW_GROUPING_LEVEL_PX);
+    for (let level = 1; level < levels; level++) {
       const style = `left:${level * ROW_GROUPING_LEVEL_PX}px;height:${totalGridHeightPx}px;`;
       groupingEls.push(html`<div class="row-grouping-separator" style=${style}></div>`);
     }

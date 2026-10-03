@@ -79,12 +79,10 @@ export interface ColumnHeaderRenderState {
    */
   colGroupingMax: number;
   /**
-   * When {@code true}, the grouping gutter renders BELOW the
-   * letter cells (and the +/- button is at the END of each
-   * grouping range — the column just after the data). When
-   * {@code false} (default), the gutter is ABOVE and the
-   * button is at the START. Matches Excel's "summary rows
-   * above/below" toggle.
+   * Whether a group's summary column is the one before it - Excel's summary
+   * columns to the left of their detail - which puts the group's button
+   * there and turns its bracket's tick to the far end. The gutter stays
+   * above the letters either way.
    */
   colGroupingInversed: boolean;
   /**
@@ -165,9 +163,9 @@ export function columnGroupingGutterPx(maxLevel: number, headings: boolean): num
   return maxLevel <= 0 ? 0 : 3 + (maxLevel + (headings ? 1 : 0)) * COLUMN_GROUPING_LEVEL_PX;
 }
 
-/** Width of the row outline gutter, likewise - the GWT client always added the extra level. */
-export function rowGroupingGutterPx(maxLevel: number): number {
-  return maxLevel <= 0 ? 0 : 1 + (maxLevel + 1) * ROW_GROUPING_LEVEL_PX;
+/** Width of the row outline gutter, likewise. */
+export function rowGroupingGutterPx(maxLevel: number, headings: boolean): number {
+  return maxLevel <= 0 ? 0 : 1 + (maxLevel + (headings ? 1 : 0)) * ROW_GROUPING_LEVEL_PX;
 }
 
 /**

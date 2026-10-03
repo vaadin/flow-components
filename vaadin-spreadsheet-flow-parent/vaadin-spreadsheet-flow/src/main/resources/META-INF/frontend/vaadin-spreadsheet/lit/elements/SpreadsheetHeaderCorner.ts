@@ -134,7 +134,7 @@ export class SpreadsheetHeaderCorner extends LitElement {
     if ((colGroupingMax === 0 && rowGroupingMax === 0) || headerWidth === 0 || headerHeight === 0) {
       return nothing;
     }
-    const rowGutterPx = rowGroupingGutterPx(rowGroupingMax);
+    const rowGutterPx = rowGroupingGutterPx(rowGroupingMax, true);
     const colGutterPx = columnGroupingGutterPx(colGroupingMax, true);
 
     const buttons: TemplateResult[] = [];

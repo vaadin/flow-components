@@ -3649,6 +3649,20 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.cleanup();
     });
 
+    it('leaves the extra level out of the gutters while the headings are hidden', async () => {
+        // As the GWT client did: with nowhere to put the button that opens
+        // every group, there is no level for it either.
+        const ctx = attach();
+        ctx.sheet.setColGroupingMax(1);
+        ctx.sheet.setRowGroupingMax(1);
+        ctx.sheet.setDisplayRowColHeadings(false);
+        ctx.sheet.recomputeViewport();
+
+        expect(ctx.sheet.getRowHeader().style.width).to.equal(`${1 + 15}px`);
+        expect(ctx.sheet.getColumnHeader().style.height).to.equal(`${3 + 18}px`);
+        ctx.cleanup();
+    });
+
     it('draws no buttons while the headings are hidden', async () => {
         const ctx = attach();
         ctx.sheet.setColGroupingMax(2);

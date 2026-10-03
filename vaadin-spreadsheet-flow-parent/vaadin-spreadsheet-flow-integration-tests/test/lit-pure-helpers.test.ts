@@ -18,6 +18,10 @@ import {
   selectedRowSet
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import {
+  columnGroupingGutterPx,
+  rowGroupingGutterPx
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetColumnHeader.js';
+import {
   cellComponentSlotName,
   cellEditorSlotName,
   overlayComponentSlotName
@@ -345,5 +349,27 @@ describe('computeMergedRegionBoxes', () => {
     );
 
     expect(box).to.deep.equal({ left: 0, top: 0, width: 100, height: 40 });
+  });
+});
+
+/**
+ * The outline gutters, in the GWT client's sizes: 18px column levels after a
+ * 3px margin, 15px row levels after a pixel, and one level more for the
+ * button that opens every group - while the headings show.
+ */
+describe('outline gutter sizes', () => {
+  it('is nothing for a sheet without groups', () => {
+    expect(columnGroupingGutterPx(0, true)).to.equal(0);
+    expect(rowGroupingGutterPx(0, true)).to.equal(0);
+  });
+
+  it('has a level per depth and one more with headings', () => {
+    expect(columnGroupingGutterPx(2, true)).to.equal(3 + 3 * 18);
+    expect(rowGroupingGutterPx(2, true)).to.equal(1 + 3 * 15);
+  });
+
+  it('has a level per depth only without headings', () => {
+    expect(columnGroupingGutterPx(2, false)).to.equal(3 + 2 * 18);
+    expect(rowGroupingGutterPx(2, false)).to.equal(1 + 2 * 15);
   });
 });

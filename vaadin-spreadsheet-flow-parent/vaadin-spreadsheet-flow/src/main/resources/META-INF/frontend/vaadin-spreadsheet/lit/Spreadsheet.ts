@@ -2736,7 +2736,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         defaultRowHeightPx,
         2
       );
-      const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax);
+      const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax, this.headerColumnWidth > 0);
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
       this.rowHeader.renderState = {
@@ -2753,6 +2753,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         rowGroupings,
         rowGroupingMax: this.rowGroupingMax,
         rowGroupingInversed: this.rowGroupingInversed,
+        rowGroupingHeadings: this.headerColumnWidth > 0,
         // Frozen rows stay on screen whatever the scroll position, so
         // their headers travel with them.
         verticalSplitPosition: state.verticalSplitPosition,
@@ -2769,7 +2770,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // The outline gutters are part of the strips beside it, so the corner
     // covers them too - otherwise a grouped sheet has an empty notch where
     // the two gutters meet, and the level buttons have nowhere to sit.
-    const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax);
+    const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax, this.headerColumnWidth > 0);
     const colGutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
     const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
     const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
