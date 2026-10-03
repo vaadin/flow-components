@@ -135,13 +135,20 @@ public class GroupingIT extends AbstractSpreadsheetIT {
                         .getRowHeader(LAST_ROW).getLocation().getY());
 
         collapseIcon.click();
-        waitUntil(driver -> !spreadsheetElement.getRowHeader(LAST_ROW)
-                .isDisplayed());
+        waitUntil(driver -> !isRowHeaderShown(LAST_ROW));
 
         findElementInShadowRoot(
                 By.cssSelector(".row-group-pane .grouping.plus")).click();
-        waitUntil(driver -> spreadsheetElement.getRowHeader(LAST_ROW)
-                .isDisplayed());
+        waitUntil(driver -> isRowHeaderShown(LAST_ROW));
+    }
+
+    /**
+     * Whether the row's header is on screen. The Lit header draws nothing for a
+     * hidden row, where the GWT client kept a hidden element.
+     */
+    private boolean isRowHeaderShown(int row) {
+        return findElementsInShadowRoot(By.cssSelector(".rh.row" + row))
+                .stream().anyMatch(WebElement::isDisplayed);
     }
 
     // HELPERS
