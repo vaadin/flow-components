@@ -71,13 +71,16 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void longText_nextCellTaken_textStaysInItsColumn() {
+    public void longText_nextCellTaken_isHeldAtItsColumnsWidth() {
         getSpreadsheet().getCellAt("B1").setValue("in the way");
         getSpreadsheet().getCellAt("A1")
                 .setValue("a value far too wide for one column");
 
-        Assert.assertEquals("hidden",
-                getSpreadsheet().getCellAt("A1").getCssValue("overflow"));
+        // As the GWT client held it: as wide as the column, from the padding
+        // on, so it reaches past the cell's edge and under the neighbour.
+        SheetCellElement a1 = getSpreadsheet().getCellAt("A1");
+        Assert.assertEquals(a1.getSize().getWidth(), renderedTextWidth(a1));
+        Assert.assertEquals("visible", a1.getCssValue("overflow"));
     }
 
     @Test
@@ -95,8 +98,24 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
                         + " : null;",
                 a1);
         Assert.assertEquals("ellipsis", textOverflow);
-        Assert.assertTrue("The ellipsis has to fall inside the cell",
-                renderedTextWidth(a1) < a1.getSize().getWidth());
+    }
+
+    @Test
+    public void longText_nextCellTaken_staysUnderTheNeighbour() {
+        getSpreadsheet().getCellAt("B1").setValue("in the way");
+        getSpreadsheet().getCellAt("A1")
+                .setValue("a value far too wide for one column");
+
+        // The neighbour comes later and covers what reaches past the edge;
+        // raised above it, the text would run on over "in the way".
+        SheetCellElement a1 = getSpreadsheet().getCellAt("A1");
+        SheetCellElement b1 = getSpreadsheet().getCellAt("B1");
+        Assert.assertTrue(zIndex(a1) <= zIndex(b1));
+    }
+
+    private static int zIndex(SheetCellElement cell) {
+        String z = cell.getCssValue("z-index");
+        return "auto".equals(z) ? 0 : Integer.parseInt(z);
     }
 
     @Test
