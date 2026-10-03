@@ -3194,7 +3194,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('selection overlay renders with part="cell-range" + selection-corner child has part="selection-corner" (slice 173)', async () => {
+    it('selection overlay carries no part + selection-corner child has part="selection-corner" (slice 173)', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3207,7 +3207,8 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             '.sheet-selection'
         ) as HTMLElement;
         expect(selection).to.not.be.null;
-        expect(selection.getAttribute('part')).to.equal('cell-range');
+        // cell-range is the range's cells' part, as in the GWT client.
+        expect(selection.hasAttribute('part')).to.be.false;
         const corner = selection.querySelector('.selection-corner') as HTMLElement;
         expect(corner).to.not.be.null;
         expect(corner.getAttribute('part')).to.equal('selection-corner');

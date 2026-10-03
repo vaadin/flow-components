@@ -819,6 +819,28 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         cleanup(el);
     });
 
+    it('leaves the cell-range part to the cells, as the GWT client did', async () => {
+        // The documented part names the cells of the selected range other
+        // than the active one. The overlay carried it too, so a rule meant
+        // for those cells also outlined or shadowed the whole range, the
+        // active cell included.
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 2, row: 2 },
+            activeRange: { c1: 2, c2: 3, r1: 2, r2: 3 },
+            auxRanges: [],
+        }));
+
+        const ranged = [...el.shadowRoot!.querySelectorAll('[part~="cell-range"]')];
+        expect(ranged.map((node) => node.className.split(' ').slice(0, 3).join(' '))).to.have.members([
+            'cell col3 row2',
+            'cell col2 row3',
+            'cell col3 row3',
+        ]);
+        expect(el.shadowRoot!.querySelector('.sheet-selection')!.hasAttribute('part')).to.be.false;
+
+        cleanup(el);
+    });
+
     it('renders the .sheet-selection overlay with 4 border children', async () => {
         const el = await attachWithState(buildOverlayState({
             activeCell: { col: 2, row: 2 },

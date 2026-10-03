@@ -1518,17 +1518,17 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
   // an unselected one — so this is the only way to read "where is the
   // selection" from outside.
   //
-  // Slice 173: the selection overlay carries `part="cell-range"`
-  // so the documented selector
-  // `vaadin-spreadsheet::part(cell-range)` can target it. The
-  // selection corner handle (drag affordance in the bottom-right)
-  // carries `part="selection-corner"`. Border divs are internal
-  // (s-* names are GWT-era; here we keep them only as internal
-  // class names — no part attribute since they aren't documented).
+  // The overlay carries no part. The documented `cell-range` part names
+  // the cells of the range other than the active one, as the GWT client
+  // had it; on the overlay too, a rule meant for those cells drew around
+  // the whole range, the active cell included. The selection corner
+  // handle (drag affordance in the bottom-right) carries
+  // `part="selection-corner"`. Border divs are internal (s-* names are
+  // GWT-era; here we keep them only as internal class names — no part
+  // attribute since they aren't documented).
   return html`
     <div
       class="sheet-selection"
-      part="cell-range"
       data-col=${selection.activeCell.col}
       data-row=${selection.activeCell.row}
       style=${overlayStyle}
