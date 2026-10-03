@@ -163,6 +163,12 @@ export function inSelectionWalkDirection(key: string | undefined, shiftKey: bool
  */
 const WIDTH_PROBE_TEXT = '5555555555';
 
+/** The style index a cell's class list names - "cs5 r cf2" is 5 - or null. */
+function styleIndexOf(cellStyle: string | undefined): number | null {
+  const match = /(?:^|\s)cs(\d+)(?:\s|$)/.exec(cellStyle ?? '');
+  return match ? Number(match[1]) : null;
+}
+
 /**
  * Height of the column headers, in pixels: the GWT client's 27, so a sheet
  * starts its first row where it always did.
@@ -471,6 +477,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Whether the cell styles have changed since the last width measurement. */
   private styleWidthRatiosStale = false;
+  /** The style indexes last reported to the server with a width ratio. */
+  private measuredStyleIndexes: ReadonlySet<number> = new Set();
 
   /** The viewport bounds last reported to the server, as "r1,c1,r2,c2". */
   private announcedBounds = '';
@@ -2217,9 +2225,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * arithmetic keeps its meaning.
    */
   private reportCellStyleWidthRatios(): void {
-    const styleIndexes = Object.keys(this.cellStyleToCSSStyle)
-      .map(Number)
-      .filter((index) => Number.isFinite(index));
+    // Every style a cell wears, not only those the style map holds: a style
+    // set on a cell straight through POI never reaches the map, and without
+    // a ratio the server judges every value in it as fitting. Unstyled, it
+    // measures as the default does.
+    const styleIndexes = [
+      ...new Set([...Object.keys(this.cellStyleToCSSStyle).map(Number), ...this.styleIndexesInUse()])
+    ]
+      .filter((index) => Number.isFinite(index))
+      .sort((a, b) => a - b);
     const root = this.cellGrid.shadowRoot;
     if (styleIndexes.length === 0 || root === null) {
       return;
@@ -2246,6 +2260,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
 
+    this.measuredStyleIndexes = new Set(styleIndexes);
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
@@ -2256,6 +2271,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
         composed: true
       })
     );
+  }
+
+  /** The style indexes the cells loaded so far wear, from their cs<N> class. */
+  private styleIndexesInUse(): Set<number> {
+    const indexes = new Set<number>();
+    for (const cell of this.cellDataByKey.values()) {
+      const index = styleIndexOf(cell.cellStyle);
+      if (index !== null) {
+        indexes.add(index);
+      }
+    }
+    return indexes;
   }
 
   recomputeViewport(): void {
@@ -3489,6 +3516,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // "colundefined rowundefined" and drops every value on the sheet.
     for (const cell of coerceArray<CellData>(cellData)) {
       this.cellDataByKey.set(toKey(cell.col, cell.row), cell);
+      // A style no ratio has been measured for yet: measure again after
+      // the next render.
+      const index = styleIndexOf(cell.cellStyle);
+      if (index !== null && !this.measuredStyleIndexes.has(index)) {
+        this.styleWidthRatiosStale = true;
+      }
     }
   }
   updateFormulaBar(possibleName: string | null, col: number, row: number): void {

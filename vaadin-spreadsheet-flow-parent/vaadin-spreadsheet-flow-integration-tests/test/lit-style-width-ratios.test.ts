@@ -131,6 +131,38 @@ describe('Spreadsheet — cell-style width ratios', () => {
     expect(ctx.sent.filter((e) => e.type === 'setCellStyleWidthRatios')).to.have.length(before);
   });
 
+  it('also measures a style a cell wears that came with no rule of its own', async () => {
+    // A style set on a cell straight through POI never reaches the style
+    // map, and the server then judged every value in it as fitting: a date
+    // too wide for its column was clipped instead of running on. The GWT
+    // client measured the overflow itself; this client measures the style.
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    ctx.sheet.cellsUpdated([
+      { row: 2, col: 3, value: '1999-03-19', cellStyle: 'cs1 r', locked: false, needsMeasure: false, isPercentage: false } as any,
+    ]);
+    await settle(ctx.sheet);
+
+    const report = ratioReport(ctx.sent);
+    expect(report!.data.styleIndexes).to.eql([0, 1]);
+    // Unstyled, it measures as the default does.
+    expect(report!.data.ratios[1]).to.equal(report!.data.ratios[0]);
+  });
+
+  it('measures again when a cell brings a style not yet measured', async () => {
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    await settle(ctx.sheet);
+    const before = ctx.sent.filter((e) => e.type === 'setCellStyleWidthRatios').length;
+
+    ctx.sheet.cellsUpdated([
+      { row: 1, col: 1, value: 'x', cellStyle: 'cs4', locked: false, needsMeasure: false, isPercentage: false } as any,
+    ]);
+    await settle(ctx.sheet);
+
+    const reports = ctx.sent.filter((e) => e.type === 'setCellStyleWidthRatios');
+    expect(reports).to.have.length(before + 1);
+    expect(reports.at(-1)!.data.styleIndexes).to.eql([0, 4]);
+  });
+
   it('leaves the sheet undisturbed — the probe is removed', async () => {
     ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
     await settle(ctx.sheet);
