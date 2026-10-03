@@ -400,6 +400,13 @@ export class SpreadsheetCellGrid extends LitElement {
       pointer-events: none;
     }
 
+    /* A right-aligned value running on: from the cell's left edge, cut off
+       plainly where a neighbour begins. */
+    .cell-spill.runs-right {
+      text-align: left;
+      text-overflow: clip;
+    }
+
     /* Sheet overlays — images, charts, and embedded
            components positioned at absolute pixel coordinates on
            the sheet, each in the pane of its anchor cell. Slice 160.
@@ -1312,7 +1319,19 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // how far, because it is the side that knows what the neighbours hold;
       // a cell showing a component or sitting under a merge keeps to itself.
       const spill = slotName === undefined && !underMerge ? data?.overflowWidth ?? 0 : 0;
-      const overflowing = spill > width;
+      // A cell the server sent nothing for still wears the workbook's
+      // default style. Without it the cell falls through to the host's own
+      // font and colour - Helvetica 14px in grey - instead of the sheet's
+      // default, Calibri 11pt in black, which is what the GWT client gave
+      // every cell before anything else applied.
+      const cellStyleClass = data?.cellStyle ?? 'cs0';
+      // A right-aligned value too wide for its cell - a date, a number in
+      // scientific notation - overflowed it in the GWT client as any value
+      // did: it starts at the cell's left edge and runs on to the right, over
+      // its own padding and border too, until a neighbour holding a value
+      // cuts it off, without an ellipsis.
+      const runsRight = spill > 0 && cellStyleClass.split(/\s+/).includes('r');
+      const overflowing = runsRight || spill > width;
       // With nowhere to go the text is cut short inside its own cell, so the
       // holder fills the cell instead of taking the width: at the column's
       // full width it would reach past the padding, and the cell would clip
@@ -1320,15 +1339,11 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       const text =
         spill === 0
           ? rawText
+          : runsRight
+          ? html`<div class="cell-spill runs-right" style="width:${spill - 2}px">${rawText}</div>`
           : overflowing
           ? html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>`
           : html`<div class="cell-spill">${rawText}</div>`;
-      // A cell the server sent nothing for still wears the workbook's
-      // default style. Without it the cell falls through to the host's own
-      // font and colour - Helvetica 14px in grey - instead of the sheet's
-      // default, Calibri 11pt in black, which is what the GWT client gave
-      // every cell before anything else applied.
-      const cellStyleClass = data?.cellStyle ?? 'cs0';
       const inSelection = isCellSelected(selection, col, row);
       const isActive = isActiveCell(selection, col, row);
       const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';

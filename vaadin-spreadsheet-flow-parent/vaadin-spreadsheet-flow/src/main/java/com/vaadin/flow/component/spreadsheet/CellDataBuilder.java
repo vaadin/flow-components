@@ -177,11 +177,13 @@ final class CellDataBuilder implements Serializable {
                             valueOverflows = true;
                         }
                     }
-                } else if (!cellStyle.getWrapText() && runsOnAsText(cell)
+                } else if (!cellStyle.getWrapText()
+                        && (runsOnAsText(cell)
+                                || SpreadsheetUtil.cellContainsDate(cell))
                         && !manager.doesValueFit(cell, formattedCellValue)) {
-                    // A link's label, TRUE or FALSE, an error: never
+                    // A link's label, TRUE or FALSE, an error, a date: never
                     // shortened or hashed the way a number is, and the GWT
-                    // client let them run on like any text.
+                    // client let them run on into the empty cells beside them.
                     valueOverflows = true;
                 }
 
@@ -202,8 +204,7 @@ final class CellDataBuilder implements Serializable {
 
                 if (valueOverflows) {
                     cellData.overflowWidth = spillWidth(cell,
-                            formattedCellValue,
-                            cellData.cellStyle.endsWith(" r"));
+                            formattedCellValue);
                 }
             }
 
@@ -258,11 +259,9 @@ final class CellDataBuilder implements Serializable {
      *            the cell whose text does not fit its column
      * @param value
      *            the text as it will be displayed
-     * @param rightAligned
-     *            whether the cell is right-aligned, which keeps it put
      * @return the width in pixels, or {@code 0} to draw the cell as it is
      */
-    private int spillWidth(Cell cell, String value, boolean rightAligned) {
+    private int spillWidth(Cell cell, String value) {
         Spreadsheet spreadsheet = manager.spreadsheet;
         int textWidth = manager.fitCalculator.estimateWidth(cell, value);
         if (textWidth < 0) {
@@ -279,7 +278,7 @@ final class CellDataBuilder implements Serializable {
         }
         Row row = cell.getRow();
         return CellOverflowCalculator.spillWidth(cell.getColumnIndex(),
-                textWidth, rightAligned, spreadsheet.getColW(),
+                textWidth, spreadsheet.getColW(),
                 spreadsheet.getLastFrozenColumn(),
                 column -> holdsValue(row, column));
     }

@@ -2055,6 +2055,46 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         return el.shadowRoot!.querySelector<HTMLElement>('.cell')!;
     }
 
+    function rightAligned(state: CellGridRenderState): CellGridRenderState {
+        const a1 = state.cellData.get('col1 row1')!;
+        return { ...state, cellData: new Map([['col1 row1', { ...a1, cellStyle: 'cs0 r' }]]) };
+    }
+
+    it('starts a right-aligned value too wide for its cell at the left edge and runs it on', async () => {
+        // A date or a number in scientific notation: the GWT client let it
+        // overflow its cell whatever the alignment, so it began at the
+        // cell's left edge and ran on into the empty cells to the right,
+        // cut off without an ellipsis where a neighbour held a value.
+        const el = await attachWithState(rightAligned(stateWithSpill(150)));
+
+        const cell = firstCell(el);
+        expect(cell.classList.contains('overflowing')).to.be.true;
+        const spill = cell.querySelector<HTMLElement>('.cell-spill')!;
+        // From the content edge, two pixels in, to where the spill ends.
+        expect(spill.style.width).to.equal('148px');
+        const style = getComputedStyle(spill);
+        expect(style.textAlign).to.equal('left');
+        expect(style.textOverflow).to.equal('clip');
+        expect(spill.getBoundingClientRect().left - cell.getBoundingClientRect().left).to.equal(2);
+
+        cleanup(el);
+    });
+
+    it('lets a blocked right-aligned value cover its own right edge, as the GWT client did', async () => {
+        // With the neighbour holding a value, the server sends the cell's
+        // own width. The GWT client's text still overflowed the padding and
+        // the border; the neighbour, drawn later, cut it off.
+        const el = await attachWithState(rightAligned(stateWithSpill(50)));
+
+        const cell = firstCell(el);
+        expect(cell.classList.contains('overflowing')).to.be.true;
+        const spill = cell.querySelector<HTMLElement>('.cell-spill')!;
+        expect(spill.getBoundingClientRect().right).to.equal(cell.getBoundingClientRect().right);
+        expect(getComputedStyle(spill).textOverflow).to.equal('clip');
+
+        cleanup(el);
+    });
+
     it('leaves a cell that fits alone', async () => {
         const el = await attachWithState(stateWithSpill(0));
 

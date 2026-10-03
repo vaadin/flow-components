@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -97,11 +98,49 @@ class CellOverflowWireTest {
     }
 
     @Test
-    void rightAlignedText_getsNoSpillWidth() {
+    void rightAlignedText_runsOnToTheRightToo() {
+        // The GWT client let a value too wide for its column overflow its
+        // cell whatever the alignment.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0, "a value far too wide");
         CellStyle style = spreadsheet.getWorkbook().createCellStyle();
         style.setAlignment(HorizontalAlignment.RIGHT);
+        a1.setCellStyle(style);
+
+        assertTrue(dataFor(a1).overflowWidth > spreadsheet.getColW()[0],
+                "The text should be given room past its own column");
+    }
+
+    @Test
+    void dateTooWideForItsColumn_runsOn() {
+        // A date is never hashed the way a number is: the GWT client let one
+        // too wide for its column run on into the empty cells beside it.
+        // The server left dates out of every width check, so the Lit client
+        // clipped them mid-digit.
+        reportWidthRatios(WIDE);
+        Cell a1 = spreadsheet.createCell(0, 0,
+                new GregorianCalendar(1999, 2, 19).getTime());
+        CellStyle style = spreadsheet.getWorkbook().createCellStyle();
+        style.setDataFormat(spreadsheet.getWorkbook().createDataFormat()
+                .getFormat("yyyy-mm-dd"));
+        a1.setCellStyle(style);
+
+        CellData data = dataFor(a1);
+
+        assertEquals("1999-03-19", data.value);
+        assertTrue(data.overflowWidth > spreadsheet.getColW()[0],
+                "The date should be given room past its own column, was "
+                        + data.overflowWidth);
+    }
+
+    @Test
+    void dateThatFits_getsNoSpillWidth() {
+        reportWidthRatios(1f);
+        Cell a1 = spreadsheet.createCell(0, 0,
+                new GregorianCalendar(1999, 2, 19).getTime());
+        CellStyle style = spreadsheet.getWorkbook().createCellStyle();
+        style.setDataFormat(spreadsheet.getWorkbook().createDataFormat()
+                .getFormat("yyyy-mm-dd"));
         a1.setCellStyle(style);
 
         assertEquals(0, dataFor(a1).overflowWidth);
@@ -132,13 +171,20 @@ class CellOverflowWireTest {
     }
 
     @Test
-    void numbersDoNotSpill() {
-        // Excel shortens or hashes a number too wide for its column. Only
-        // text runs into the cells beside it.
+    void aNumberShownInScientificNotation_runsOnLikeTheGwtClientsDid() {
+        // Excel would hash it. The GWT client showed "1.23457E+14" and let it
+        // overflow its right-aligned cell into the empty one beside it, which
+        // is what this branch matches; the Lit client used to clip it.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0, 123456789012345d);
 
-        assertEquals(0, dataFor(a1).overflowWidth);
+        CellData data = dataFor(a1);
+
+        // The decimal separator is the locale's.
+        assertTrue(data.value.endsWith("E+14"), data.value);
+        assertTrue(data.overflowWidth > spreadsheet.getColW()[0],
+                "The number should be given room past its own column, was "
+                        + data.overflowWidth);
     }
 
     @Test

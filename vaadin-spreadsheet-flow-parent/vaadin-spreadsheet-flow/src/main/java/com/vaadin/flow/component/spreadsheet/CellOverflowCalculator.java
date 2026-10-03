@@ -67,8 +67,6 @@ final class CellOverflowCalculator implements Serializable {
      *            the cell's column, 0-based
      * @param textWidth
      *            what the text needs, in pixels
-     * @param rightAligned
-     *            whether the cell is right-aligned
      * @param columnWidths
      *            pixel width per column, indexed by 0-based column
      * @param horizontalSplitPosition
@@ -78,13 +76,14 @@ final class CellOverflowCalculator implements Serializable {
      *            whether the given 0-based column of this row holds a value
      * @return the width covering the cell's own column and every empty column
      *         the text reaches into - only its own when it has nowhere to go -
-     *         or {@code 0} when the text fits or is right-aligned
+     *         or {@code 0} when the text fits
      */
-    static int spillWidth(int columnIndex, int textWidth, boolean rightAligned,
-            int[] columnWidths, int horizontalSplitPosition,
-            IntPredicate occupied) {
-        if (rightAligned || columnIndex < 0
-                || columnIndex >= columnWidths.length) {
+    static int spillWidth(int columnIndex, int textWidth, int[] columnWidths,
+            int horizontalSplitPosition, IntPredicate occupied) {
+        // Right-aligned text runs on to the right as well: the GWT client
+        // let a value too wide for its column overflow its cell whatever its
+        // alignment, and the text then starts at the cell's left edge.
+        if (columnIndex < 0 || columnIndex >= columnWidths.length) {
             return 0;
         }
         int columnWidth = columnWidths[columnIndex];
