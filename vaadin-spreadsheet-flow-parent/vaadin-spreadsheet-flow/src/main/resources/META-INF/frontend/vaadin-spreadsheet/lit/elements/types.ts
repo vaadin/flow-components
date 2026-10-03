@@ -74,6 +74,14 @@ export interface CellGridRenderState {
   tooNarrowCells?: ReadonlySet<string>;
 
   /**
+   * Cells the server gave a run-on width whose value, measured, fits its
+   * column after all, by key. Not wire state: the server guesses by
+   * character count, and the GWT client measured the text itself, so these
+   * are drawn as ordinary cells - a right-aligned number stays right.
+   */
+  fittingSpills?: ReadonlySet<string>;
+
+  /**
    * Style-index → CSS-rule-body lookup. Each rendered cell carries
    * its style class (e.g. {@code "cs0"}) on its element; the
    * cell-grid emits a {@code <style>} block in its shadow DOM with

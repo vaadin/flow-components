@@ -2187,6 +2187,54 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         cleanup(el);
     });
 
+    it('draws a value the server only guessed too wide as an ordinary cell, as the GWT client measured it', async () => {
+        // The server judges by character count; "1" fits a 50px column
+        // whatever it guessed, and right-aligned it stays right-aligned.
+        const state = stateWithSpill(150);
+        const a1 = state.cellData.get('col1 row1')!;
+        const el = await attachWithState({
+            ...state,
+            cellData: new Map([['col1 row1', { ...a1, value: '1', cellStyle: 'cs0 r' }]]),
+        });
+        await el.updateComplete;
+
+        const cell = firstCell(el);
+        expect(cell.querySelector('.cell-spill'), 'no holder').to.be.null;
+        expect(cell.classList.contains('overflowing')).to.be.false;
+
+        cleanup(el);
+    });
+
+    it('measures a value in a frozen column too', async () => {
+        const state = stateWithSpill(150);
+        const a1 = state.cellData.get('col1 row1')!;
+        const el = await attachWithState({
+            ...state,
+            horizontalSplitPosition: 1,
+            frozenColX: [0],
+            frozenColWidths: [50],
+            viewport: { ...state.viewport, firstColumnIndex: 2, firstColumnPosition: 50 },
+            colX: [50, 100],
+            colWidths: [50, 50],
+            cellData: new Map([['col1 row1', { ...a1, value: '1', cellStyle: 'cs0 r' }]]),
+        });
+        await el.updateComplete;
+
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.cell.col1.row1')!;
+        expect(cell.querySelector('.cell-spill'), 'no holder').to.be.null;
+
+        cleanup(el);
+    });
+
+    it('keeps the run of a value that really is too wide', async () => {
+        const el = await attachWithState(stateWithSpill(150));
+        await el.updateComplete;
+
+        expect(firstCell(el).querySelector('.cell-spill')).to.not.be.null;
+
+        cleanup(el);
+    });
+
     it('ends spilled text that still does not fit in an ellipsis', async () => {
         const el = await attachWithState(stateWithSpill(100));
 

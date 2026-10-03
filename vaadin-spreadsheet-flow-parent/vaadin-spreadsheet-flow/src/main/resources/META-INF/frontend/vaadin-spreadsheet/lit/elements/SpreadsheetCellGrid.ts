@@ -65,6 +65,7 @@ export class SpreadsheetCellGrid extends LitElement {
   static properties = {
     renderState: { attribute: false },
     tooNarrowCells: { attribute: false },
+    fittingSpills: { attribute: false },
     theme: { type: String }
   };
 
@@ -691,6 +692,8 @@ export class SpreadsheetCellGrid extends LitElement {
    * replaced with hashes, which is what the GWT client did too.
    */
   declare tooNarrowCells: ReadonlySet<string>;
+  /** Cells given a run-on width whose value fits after all - see remeasureSpills. */
+  declare fittingSpills: ReadonlySet<string>;
   /**
    * The theme variant the connector copies from the host. A property, not
    * only an attribute the stylesheet reads, because the editor's inline
@@ -704,6 +707,7 @@ export class SpreadsheetCellGrid extends LitElement {
     super();
     this.renderState = emptyCellGridRenderState();
     this.tooNarrowCells = new Set();
+    this.fittingSpills = new Set();
   }
 
   connectedCallback(): void {
@@ -797,7 +801,7 @@ export class SpreadsheetCellGrid extends LitElement {
    * The render state with this element's own measurements folded in.
    */
   private measuredState(): CellGridRenderState {
-    return { ...this.renderState, tooNarrowCells: this.tooNarrowCells };
+    return { ...this.renderState, tooNarrowCells: this.tooNarrowCells, fittingSpills: this.fittingSpills };
   }
 
   /**
@@ -811,19 +815,43 @@ export class SpreadsheetCellGrid extends LitElement {
    * already showing hashes measures as narrow and would flip back.
    */
   private remeasureTooNarrowCells(): void {
-    const { cellData, viewport, colWidths } = this.renderState;
     const measured = new Set<string>();
-    for (const [key, data] of cellData) {
+    for (const [key, data] of this.renderState.cellData) {
       if (data.needsMeasure !== true) {
         continue;
       }
-      const width = colWidths[data.col - viewport.firstColumnIndex] ?? 0;
+      const width = columnWidthOf(this.renderState, data.col);
       if (width > 0 && this.measureValue(data.cellStyle, data.value ?? '') > width) {
         measured.add(key);
       }
     }
     if (!sameKeys(measured, this.tooNarrowCells)) {
       this.tooNarrowCells = measured;
+    }
+  }
+
+  /**
+   * Measures the cells the server gave a run-on width.
+   * <p>
+   * The server guesses a value's width from its character count, and a
+   * guess that is too wide draws a right-aligned number from the cell's
+   * left edge as though it ran on. The GWT client measured the text, so the
+   * ones that fit their column - the probe has the cell's padding, as the
+   * GWT client's scroll width had - are drawn as ordinary cells.
+   */
+  private remeasureSpills(): void {
+    const fitting = new Set<string>();
+    for (const [key, data] of this.renderState.cellData) {
+      if (!(data.overflowWidth > 0)) {
+        continue;
+      }
+      const width = columnWidthOf(this.renderState, data.col);
+      if (width > 0 && this.measureValue(data.cellStyle, data.value ?? '') <= width) {
+        fitting.add(key);
+      }
+    }
+    if (!sameKeys(fitting, this.fittingSpills)) {
+      this.fittingSpills = fitting;
     }
   }
 
@@ -867,6 +895,7 @@ export class SpreadsheetCellGrid extends LitElement {
   updated(changedProps: Map<string, unknown>): void {
     if (changedProps.has('renderState')) {
       this.remeasureTooNarrowCells();
+      this.remeasureSpills();
     }
     this.placeCommentOverlays();
     const note = this.shadowRoot!.querySelector('.comment-overlay-edit') as HTMLTextAreaElement | null;
@@ -1476,7 +1505,8 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // and what still does not fit ends in an ellipsis. The server settles
       // how far, because it is the side that knows what the neighbours hold;
       // a cell showing a component or sitting under a merge keeps to itself.
-      const spill = slotName === undefined && !underMerge ? data?.overflowWidth ?? 0 : 0;
+      const fitsAfterAll = state.fittingSpills?.has(key) ?? false;
+      const spill = slotName === undefined && !underMerge && !fitsAfterAll ? data?.overflowWidth ?? 0 : 0;
       // A cell the server sent nothing for still wears the workbook's
       // default style. Without it the cell falls through to the host's own
       // font and colour - Helvetica 14px in grey - instead of the sheet's
@@ -1831,6 +1861,14 @@ function cellBoxOnGrid(
     return null;
   }
   return { left, top, width, height };
+}
+
+/** A drawn column's width, frozen ones included; 0 when it is not drawn. */
+function columnWidthOf(state: CellGridRenderState, col: number): number {
+  if (col >= 1 && col <= state.horizontalSplitPosition) {
+    return state.frozenColWidths[col - 1] ?? 0;
+  }
+  return state.colWidths[col - state.viewport.firstColumnIndex] ?? 0;
 }
 
 /**
