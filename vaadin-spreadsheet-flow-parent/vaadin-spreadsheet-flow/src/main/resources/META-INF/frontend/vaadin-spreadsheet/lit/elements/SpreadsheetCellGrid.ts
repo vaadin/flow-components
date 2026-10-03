@@ -400,22 +400,32 @@ export class SpreadsheetCellGrid extends LitElement {
            of a cell that opens a popup on click (slice 161). The
            popup itself is provided by the Flow wrapper via slot;
            this is just the click target + visual indicator. */
+    /* The filter button, as the GWT client drew it: a small white box with
+       a grey arrow, tucked into the bottom-right corner of its cell inside
+       the cell's borders. Placed at that corner and pulled back over it. */
     .popup-button {
       position: absolute;
-      width: 12px;
-      height: 12px;
-      transform: translate(-100%, -100%);
-      background: var(--vaadin-spreadsheet-popup-button-bg, #1976d2);
-      color: var(--vaadin-spreadsheet-popup-button-fg, #fff);
+      box-sizing: border-box;
+      width: 13px;
+      height: 13px;
+      transform: translate(calc(-100% - 2px), calc(-100% - 1px));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #d3d3d3;
+      border-radius: 2px;
+      background: var(--vaadin-spreadsheet-popup-button-bg, #fff);
+      color: var(--vaadin-spreadsheet-popup-button-fg, #808080);
       cursor: pointer;
-      font-size: 8px;
-      text-align: center;
-      line-height: 12px;
+      font-size: 9px;
+      line-height: 1;
       z-index: 6;
       user-select: none;
     }
+    /* A filter in use, marked along the top. */
     .popup-button.active {
-      background: var(--vaadin-spreadsheet-popup-button-active-bg, #0d47a1);
+      background: var(--vaadin-spreadsheet-popup-button-active-bg, #fff);
+      box-shadow: inset 0 2px 0 0 rgb(0, 171, 238);
     }
 
     /* Cell editor input — absolutely positioned over the cell

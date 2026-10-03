@@ -843,6 +843,43 @@ describe('Spreadsheet — popup (filter) buttons', () => {
         ];
     }
 
+    it('draws the button as the GWT client did: a white box with a grey arrow', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3) as any);
+
+        const [b] = await buttons(sheet);
+        const style = getComputedStyle(b);
+        expect(`${style.width} ${style.height}`).to.equal('13px 13px');
+        expect(style.backgroundColor).to.equal('rgb(255, 255, 255)');
+        expect(style.color).to.equal('rgb(128, 128, 128)');
+        expect(`${style.borderTopWidth} ${style.borderTopStyle} ${style.borderTopColor}`).to.equal(
+            '1px solid rgb(211, 211, 211)'
+        );
+        expect(style.borderTopLeftRadius).to.equal('2px');
+        cleanup();
+    });
+
+    it('tucks it into the corner of its cell, inside the borders', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3) as any);
+
+        const [b] = await buttons(sheet);
+        const cell = sheet.getCellGrid().shadowRoot!.querySelector('.cell.col2.row3')!.getBoundingClientRect();
+        const box = b.getBoundingClientRect();
+        expect(box.right).to.equal(cell.right - 2);
+        expect(box.bottom).to.equal(cell.bottom - 1);
+        cleanup();
+    });
+
+    it('marks a filter in use with a blue line along its top', async () => {
+        const { sheet, cleanup } = attachSheet();
+        sheet.addPopupButton(button(2, 3, { active: true }) as any);
+
+        const [b] = await buttons(sheet);
+        expect(getComputedStyle(b).boxShadow).to.equal('rgb(0, 171, 238) 0px 2px 0px 0px inset');
+        cleanup();
+    });
+
     it('renders a button that was added', async () => {
         const { sheet, cleanup } = attachSheet();
         sheet.addPopupButton(button(2, 3) as any);
