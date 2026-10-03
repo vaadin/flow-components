@@ -93,36 +93,46 @@ export class SpreadsheetContextMenu extends LitElement {
       display: none;
     }
 
+    /* The menu as the GWT client drew it: a white card with a soft
+       shadow, its items in 27px rows. */
     .menu {
       position: absolute;
-      min-width: 160px;
-      padding: 4px 0;
+      padding: 4px;
       box-sizing: border-box;
       background: var(--vaadin-spreadsheet-contextmenu-bg, #fff);
-      border: 1px solid var(--vaadin-spreadsheet-contextmenu-border, #c0c0c0);
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09));
+      border-radius: 4px;
+      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
       font: inherit;
-      color: inherit;
+      color: #474747;
     }
 
     .item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       width: 100%;
-      padding: 4px 12px;
+      box-sizing: border-box;
+      padding: 0 20px 0 10px;
       border: 0;
+      border-radius: 3px;
       background: transparent;
       font: inherit;
+      font-weight: 400;
+      line-height: 27px;
       color: inherit;
       text-align: left;
       cursor: pointer;
       white-space: nowrap;
     }
 
+    /* The item under the pointer on the GWT client's blue, in light type.
+       A stylesheet that gives it a lighter ground through the property
+       sets its text through ::part(context-menu-item). */
     .item:hover,
     .item:focus {
-      background: var(--vaadin-spreadsheet-contextmenu-hover-bg, #e8e8e8);
+      background: var(--vaadin-spreadsheet-contextmenu-hover-bg, linear-gradient(to bottom, #1b87e3 2%, #166ed6 98%));
+      color: #ecf2f8;
       outline: none;
     }
   `;

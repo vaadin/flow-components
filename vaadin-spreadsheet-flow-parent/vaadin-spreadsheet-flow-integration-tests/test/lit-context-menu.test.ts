@@ -430,3 +430,49 @@ describe('Spreadsheet — context-menu action icons', () => {
     ).to.have.length(1);
   });
 });
+
+/**
+ * The menu, as the GWT client drew it: a white card with a soft shadow,
+ * items in 27px rows, the one under the pointer on blue with light type.
+ * The Lit menu had a plain grey border and a grey highlight.
+ */
+describe('Spreadsheet context menu — how it looks', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('is a white card with rounded corners and a soft shadow', async () => {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    await items(ctx.sheet);
+
+    const menu = getComputedStyle(ctx.sheet.getContextMenu().shadowRoot!.querySelector('.menu')!);
+    expect(`${menu.borderTopLeftRadius} ${menu.paddingTop} ${menu.color}`).to.equal('4px 4px rgb(71, 71, 71)');
+    expect(menu.boxShadow).to.contain('rgba(0, 0, 0, 0.1) 0px 4px 10px 0px');
+  });
+
+  it('sets its items in 27px rows', async () => {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    const [item] = await items(ctx.sheet);
+
+    const style = getComputedStyle(item);
+    expect(style.lineHeight).to.equal('27px');
+    expect(`${style.paddingLeft} ${style.paddingRight}`).to.equal('10px 20px');
+  });
+
+  it('puts the item in hand on blue, in light type', async () => {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    const [item] = await items(ctx.sheet);
+
+    item.focus();
+
+    const style = getComputedStyle(item);
+    expect(style.backgroundImage).to.contain('linear-gradient');
+    expect(style.color).to.equal('rgb(236, 242, 248)');
+  });
+});
