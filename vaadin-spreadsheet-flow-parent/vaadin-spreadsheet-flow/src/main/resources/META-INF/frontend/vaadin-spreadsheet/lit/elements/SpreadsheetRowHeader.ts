@@ -233,14 +233,18 @@ export class SpreadsheetRowHeader extends LitElement {
       pointer-events: auto;
     }
 
-    /* The GWT client's pointer over a number: an arrow along the row a
-       click selects. */
+    /* A number as the GWT client drew it, over a border of its own along
+       the cells - which the active row's marker replaces, and so does an
+       application's ::part(row-header) border. The pointer is an arrow
+       along the row a click selects. */
     .row-header-cell {
       position: absolute;
       box-sizing: border-box;
       overflow: hidden;
       text-align: center;
       border-bottom: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-right: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       cursor: e-resize;
     }
@@ -252,7 +256,7 @@ export class SpreadsheetRowHeader extends LitElement {
     .row-header-cell[part~='header-selected'] {
       background: var(--vaadin-spreadsheet-header-selected-bg, var(--_vaadin-spreadsheet-header-selected-bg, #e6edf4));
       /* The GWT client's marker along the edge that faces the cells. */
-      box-shadow: inset -2px 0 0 #63b1ff;
+      border-right: 2px solid #63b1ff;
     }
 
     /* Resize handle on the bottom edge of each row header
@@ -274,7 +278,7 @@ export class SpreadsheetRowHeader extends LitElement {
 
     :host([theme~='lumo']) .row-header-cell[part~='header-selected'] {
       background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
-      box-shadow: inset -2px 0 0 var(--lumo-primary-color-50pct);
+      border-right-color: var(--lumo-primary-color-50pct);
     }
 
     :host([theme~='lumo']) .row-grouping-toggle {
@@ -470,6 +474,11 @@ export class SpreadsheetRowHeader extends LitElement {
     const cells: TemplateResult[] = [];
     const handles: TemplateResult[] = [];
     const buildRow = (row: number, top: number, height: number): void => {
+      // Headings hidden, the outline still drawn: no numbers at all, as in
+      // the GWT client. A number of no width still draws its border.
+      if (numbersWidth <= 0) {
+        return;
+      }
       const style =
         `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;` + `line-height:${height}px;`;
       // Slice 173: `part="row-header"` (+ `header-selected`

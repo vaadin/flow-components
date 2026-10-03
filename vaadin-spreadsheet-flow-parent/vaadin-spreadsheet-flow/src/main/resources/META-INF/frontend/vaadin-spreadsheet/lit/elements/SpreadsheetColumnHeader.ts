@@ -231,8 +231,11 @@ export class SpreadsheetColumnHeader extends LitElement {
       pointer-events: auto;
     }
 
-    /* The GWT client's pointer over a letter: an arrow down the column a
-       click selects. */
+    /* A letter as the GWT client drew it: on a gradient from the header
+       colour down to a shade darker, over a border of its own along the
+       cells - which the active column's marker replaces, and so does an
+       application's ::part(column-header) border. The pointer is an arrow
+       down the column a click selects. */
     .col-header-cell {
       position: absolute;
       box-sizing: border-box;
@@ -240,6 +243,14 @@ export class SpreadsheetColumnHeader extends LitElement {
       text-align: center;
       border-right: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      background: linear-gradient(
+        to bottom,
+        var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 2%,
+        color-mix(in srgb, var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 96%, #000)
+          98%
+      );
       cursor: s-resize;
     }
 
@@ -250,7 +261,7 @@ export class SpreadsheetColumnHeader extends LitElement {
     .col-header-cell[part~='header-selected'] {
       background: var(--vaadin-spreadsheet-header-selected-bg, var(--_vaadin-spreadsheet-header-selected-bg, #e6edf4));
       /* The GWT client's marker along the edge that faces the cells. */
-      box-shadow: inset 0 -2px 0 #63b1ff;
+      border-bottom: 2px solid #63b1ff;
     }
 
     /* Resize handle on the right edge of each column header
@@ -324,9 +335,14 @@ export class SpreadsheetColumnHeader extends LitElement {
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
 
+    /* The strip's tint shows through: the letters have no gradient. */
+    :host([theme~='lumo']) .col-header-cell {
+      background-image: none;
+    }
+
     :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {
       background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
-      box-shadow: inset 0 -2px 0 var(--lumo-primary-color-50pct);
+      border-bottom-color: var(--lumo-primary-color-50pct);
     }
 
     :host([theme~='lumo']) .col-grouping-toggle {
@@ -526,6 +542,11 @@ export class SpreadsheetColumnHeader extends LitElement {
     const cells: TemplateResult[] = [];
     const handles: TemplateResult[] = [];
     const buildColumn = (col: number, left: number, width: number): void => {
+      // Headings hidden, the outline still drawn: no letters at all, as in
+      // the GWT client. A letter of no height still draws its border.
+      if (headerHeight <= 0) {
+        return;
+      }
       const letter = columnIndexToLetters(col);
       const style =
         `left:${left}px;top:${letterTop}px;width:${width}px;` +

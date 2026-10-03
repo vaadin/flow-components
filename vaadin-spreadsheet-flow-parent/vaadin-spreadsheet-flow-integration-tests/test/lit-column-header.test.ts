@@ -456,15 +456,49 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
     });
 
     it('marks the selected column along the edge facing the cells', async () => {
-        // The GWT client's two-pixel blue edge under the tint.
+        // The GWT client's two-pixel blue edge under the tint: a border, in
+        // place of the letter's own grey one.
         const el = await attachWithSelection(new Set([2]));
 
         const cells = el.shadowRoot!.querySelectorAll('.col-header-cell');
-        expect(getComputedStyle(cells[1]).boxShadow).to.equal(
-            'rgb(99, 177, 255) 0px -2px 0px 0px inset'
+        const selected = getComputedStyle(cells[1]);
+        expect(`${selected.borderBottomWidth} ${selected.borderBottomStyle} ${selected.borderBottomColor}`).to.equal(
+            '2px solid rgb(99, 177, 255)'
         );
-        expect(getComputedStyle(cells[0]).boxShadow).to.equal('none');
+        expect(selected.boxShadow).to.equal('none');
+        const plain = getComputedStyle(cells[0]);
+        expect(`${plain.borderBottomWidth} ${plain.borderBottomColor}`).to.equal('1px rgb(199, 199, 199)');
 
+        cleanup(el);
+    });
+
+    it('draws a letter on the GWT client\'s gradient, down to a shade darker', async () => {
+        const el = await attachWithSelection(new Set());
+
+        const image = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell')!).backgroundImage;
+        expect(image).to.match(/^linear-gradient\(rgb\(250, 250, 250\) 2%, .+ 98%\)$/);
+        // #fafafa four parts in a hundred towards black is #f0f0f0.
+        const probe = document.createElement('div');
+        probe.style.color = image.replace(/^linear-gradient\(rgb\(250, 250, 250\) 2%, (.+) 98%\)$/, '$1');
+        document.body.appendChild(probe);
+        expect(getComputedStyle(probe).color).to.match(/^(rgb\(240, 240, 240\)|color\(srgb 0\.94\d* 0\.94\d* 0\.94\d*\))$/);
+        probe.remove();
+
+        cleanup(el);
+    });
+
+    it('lets an application\'s part border replace the marker, as it did the GWT client\'s', async () => {
+        const style = document.createElement('style');
+        style.textContent =
+            'vaadin-spreadsheet-internal-column-header::part(header-selected) { border-bottom: 2px solid rgb(0, 0, 255); }';
+        document.head.appendChild(style);
+        const el = await attachWithSelection(new Set([2]));
+
+        const selected = getComputedStyle(el.shadowRoot!.querySelectorAll('.col-header-cell')[1]);
+        expect(selected.borderBottomColor).to.equal('rgb(0, 0, 255)');
+        expect(selected.boxShadow).to.equal('none');
+
+        style.remove();
         cleanup(el);
     });
 

@@ -618,14 +618,18 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
     });
 
     it('marks the selected row along the edge facing the cells', async () => {
-        // The GWT client's two-pixel blue edge beside the tint.
+        // The GWT client's two-pixel blue edge beside the tint: a border, in
+        // place of the number's own grey one.
         const el = await attachWithSelection(new Set([2]));
 
         const cells = el.shadowRoot!.querySelectorAll('.row-header-cell');
-        expect(getComputedStyle(cells[1]).boxShadow).to.equal(
-            'rgb(99, 177, 255) -2px 0px 0px 0px inset'
+        const selected = getComputedStyle(cells[1]);
+        expect(`${selected.borderRightWidth} ${selected.borderRightStyle} ${selected.borderRightColor}`).to.equal(
+            '2px solid rgb(99, 177, 255)'
         );
-        expect(getComputedStyle(cells[0]).boxShadow).to.equal('none');
+        expect(selected.boxShadow).to.equal('none');
+        const plain = getComputedStyle(cells[0]);
+        expect(`${plain.borderRightWidth} ${plain.borderRightColor}`).to.equal('1px rgb(199, 199, 199)');
 
         cleanup(el);
     });

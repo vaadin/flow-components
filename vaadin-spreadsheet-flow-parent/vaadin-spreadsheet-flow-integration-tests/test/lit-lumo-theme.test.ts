@@ -600,7 +600,7 @@ describe('Lumo theme — the headers', () => {
         const selected = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell.col2')!);
         expect(selected.backgroundColor).to.equal(BASE);
         expect(selected.backgroundImage).to.equal('linear-gradient(rgba(0, 0, 200, 0.1), rgba(0, 0, 200, 0.1))');
-        expect(selected.boxShadow).to.equal('rgba(0, 0, 200, 0.5) 0px -2px 0px 0px inset');
+        expect(`${selected.borderBottomWidth} ${selected.borderBottomColor}`).to.equal('2px rgba(0, 0, 200, 0.5)');
 
         cleanup();
     });
@@ -610,7 +610,7 @@ describe('Lumo theme — the headers', () => {
 
         const selected = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell.col2')!);
         expect(selected.backgroundColor).to.equal('rgb(230, 237, 244)');
-        expect(selected.boxShadow).to.equal('rgb(99, 177, 255) 0px -2px 0px 0px inset');
+        expect(`${selected.borderBottomWidth} ${selected.borderBottomColor}`).to.equal('2px rgb(99, 177, 255)');
 
         cleanup();
     });
@@ -635,7 +635,7 @@ describe('Lumo theme — the headers', () => {
         expect(style.borderRightColor).to.equal(CONTRAST_20);
         const selected = getComputedStyle(el.shadowRoot!.querySelector('.row-header-cell.row2')!);
         expect(selected.backgroundImage).to.equal('linear-gradient(rgba(0, 0, 200, 0.1), rgba(0, 0, 200, 0.1))');
-        expect(selected.boxShadow).to.equal('rgba(0, 0, 200, 0.5) -2px 0px 0px 0px inset');
+        expect(`${selected.borderRightWidth} ${selected.borderRightColor}`).to.equal('2px rgba(0, 0, 200, 0.5)');
         expect(getComputedStyle(el.shadowRoot!.querySelector('.row-grouping-toggle')!).fontSize).to.equal('11px');
 
         cleanup();
