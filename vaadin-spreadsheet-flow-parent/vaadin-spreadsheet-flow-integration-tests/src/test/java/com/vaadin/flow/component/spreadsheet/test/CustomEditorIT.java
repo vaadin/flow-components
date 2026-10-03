@@ -452,11 +452,16 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         final String cellAddress = column + "2";
 
         clickCell(cellAddress);
-        var maybeEditor = getInputInCustomEditorFromCell(cellAddress);
-        Assert.assertTrue("No custom editor in cell '" + cellAddress + "'",
-                maybeEditor.isPresent());
+        // The editor is put in the cell once the server has answered the
+        // click and the sheet has drawn again - a beat later under load.
+        try {
+            waitUntil(driver -> getInputInCustomEditorFromCell(cellAddress)
+                    .isPresent());
+        } catch (org.openqa.selenium.TimeoutException e) {
+            Assert.fail("No custom editor in cell '" + cellAddress + "'");
+        }
 
-        var editor = maybeEditor.get();
+        var editor = getInputInCustomEditorFromCell(cellAddress).get();
 
         // Test Esc with arrow keys persistence on cell
         editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
