@@ -26,6 +26,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.upload.UploadButton;
+import com.vaadin.flow.component.upload.UploadCapture;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.tests.MockUIExtension;
 
@@ -68,6 +69,27 @@ class UploadButtonTest {
 
         Assertions.assertEquals("Upload", button.getText());
         Assertions.assertSame(manager, button.getUploadManager());
+    }
+
+    @Test
+    void capture() {
+        UploadButton button = new UploadButton();
+        Assertions.assertNull(button.getCapture());
+        Assertions.assertFalse(button.getElement().hasProperty("capture"));
+
+        button.setCapture(UploadCapture.ENVIRONMENT);
+        Assertions.assertEquals(UploadCapture.ENVIRONMENT, button.getCapture());
+        Assertions.assertEquals("environment",
+                button.getElement().getProperty("capture"));
+
+        button.setCapture(UploadCapture.USER);
+        Assertions.assertEquals(UploadCapture.USER, button.getCapture());
+        Assertions.assertEquals("user",
+                button.getElement().getProperty("capture"));
+
+        button.setCapture(null);
+        Assertions.assertNull(button.getCapture());
+        Assertions.assertFalse(button.getElement().hasProperty("capture"));
     }
 
     @Test
