@@ -338,8 +338,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private hasActions = false;
   private workbookChangeToggle = false;
 
-  /** Display content. */
-  private infoLabelValue = '';
+  /** Display content. The status label, or null while there is none. */
+  private infoLabelValue: string | null = null;
   private elementId = '';
   private elementClass = '';
 
@@ -3051,7 +3051,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeIndex: this.sheetIndex,
       firstVisibleTab: this.firstVisibleTab,
       readOnly: this.workbookProtected,
-      renamingIndex: this.renamingSheetIndex
+      renamingIndex: this.renamingSheetIndex,
+      infoLabel: this.infoLabelValue
     };
   }
 
@@ -3069,16 +3070,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * new index, but the Flow server has no counterpart for it, so which
    * tab is leftmost is the client's business alone. Scrolling the strip
    * does not change the sheet.
+   *
+   * The end button goes to the leftmost tab that still shows the last
+   * one, which the strip measured: as far as the strip can scroll
+   * without showing empty space after the last tab.
    */
   private readonly handleSheetTabsScroll = (
-    e: CustomEvent<{ direction: 'start' | 'backward' | 'forward' | 'end' }>
+    e: CustomEvent<{ direction: 'start' | 'backward' | 'forward' | 'end'; lastFirstTab?: number }>
   ): void => {
     const last = Math.max(0, this.sheetNames.length - 1);
     const moved = {
       start: 0,
       backward: this.firstVisibleTab - 1,
       forward: this.firstVisibleTab + 1,
-      end: last
+      end: e.detail.lastFirstTab ?? last
     }[e.detail.direction];
     const next = Math.min(last, Math.max(0, moved));
     if (next === this.firstVisibleTab) {
@@ -4119,8 +4124,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   // Display content
-  setInfoLabelValue(label: string): void {
-    this.infoLabelValue = label;
+  /**
+   * The status label at the right end of the sheet tabs. The server
+   * clears the property for no label, which reaches here as null or
+   * undefined; an empty string is a label with nothing in it.
+   */
+  setInfoLabelValue(label: string | null | undefined): void {
+    this.infoLabelValue = label ?? null;
+    this.syncSheetTabs();
   }
   setHyperlinksTooltips(tooltips: Record<string, string>): void {
     this.hyperlinksTooltips = coerceObject(tooltips);

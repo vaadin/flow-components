@@ -7,7 +7,7 @@
  * license.
  */
 
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 
 /**
  * Input state for the {@link SpreadsheetSheetTabs} element
@@ -42,6 +42,12 @@ export interface SheetTabsRenderState {
    * one that is not active does first: it makes it active.
    */
   renamingIndex?: number;
+  /**
+   * What `Spreadsheet.setStatusLabelValue` shows at the right end of the
+   * strip, or null for no label at all. An empty string still shows the
+   * label, empty, as the GWT client did.
+   */
+  infoLabel?: string | null;
 }
 
 /** Helper: build the empty state for tests + initial render. */
@@ -51,8 +57,15 @@ export function emptySheetTabsRenderState(): SheetTabsRenderState {
     activeIndex: 0,
     firstVisibleTab: 0,
     readOnly: false,
-    renamingIndex: 0
+    renamingIndex: 0,
+    infoLabel: null
   };
+}
+
+/** How much of the strip a tab takes, its margins included. */
+function tabWidth(tab: HTMLElement): number {
+  const style = getComputedStyle(tab);
+  return tab.getBoundingClientRect().width + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
 }
 
 /**
@@ -179,6 +192,7 @@ export class SpreadsheetSheetTabs extends LitElement {
        tabs hanging from that border. Tabs past its end are cut off; the
        buttons scroll to them. */
     :host {
+      position: relative;
       display: flex;
       flex-direction: row;
       align-items: flex-start;
@@ -229,9 +243,46 @@ export class SpreadsheetSheetTabs extends LitElement {
     .sheet-tab:hover:not(.active) {
       background: var(--vaadin-spreadsheet-tabs-hover-bg, #e8e8e8);
     }
+
+    /* The status label: 200px at the right end of the strip, over the
+       tabs' last stretch, which keep out from under it. */
+    .sheet-tabsheet-infolabel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      box-sizing: content-box;
+      width: 200px;
+      height: 100%;
+      padding: 0 5px;
+      border-left: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      background: var(--vaadin-spreadsheet-tabs-bg, #fafafa);
+      font-weight: bold;
+      font-size: 11px;
+      line-height: 29px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sheet-tabsheet-container.beside-infolabel {
+      margin-right: 206px;
+    }
   `;
 
   declare renderState: SheetTabsRenderState;
+
+  /**
+   * The leftmost tab that still shows the last one, as the GWT client
+   * worked it out: from the last tab back, as many as fit beside the
+   * buttons and the status label. Scrolling forward stops there and the
+   * end button goes straight to it, so the strip never scrolls into empty
+   * space - and with every tab in view, neither button does anything.
+   * Measured after each render: only the browser knows how wide the tabs
+   * came out.
+   */
+  private lastFirstTab = 0;
+
+  private readonly resizeObserver = new ResizeObserver(() => this.measureLastFirstTab());
 
   constructor() {
     super();
@@ -243,6 +294,41 @@ export class SpreadsheetSheetTabs extends LitElement {
     // Set on attach rather than in the constructor: a custom element
     // may not have attributes when it is created.
     this.setAttribute('exportparts', SpreadsheetSheetTabs.EXPORTED_PARTS);
+    this.resizeObserver.observe(this);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.resizeObserver.disconnect();
+  }
+
+  /**
+   * Work out {@link lastFirstTab} from the tabs as rendered, and render
+   * again when it moved. The tabs before the first visible one are not
+   * rendered, so the count stops there - which only matters when every
+   * rendered tab fits, and then nothing scrolls forward either way.
+   */
+  private measureLastFirstTab(): void {
+    const root = this.shadowRoot;
+    const options = root?.querySelector<HTMLElement>('.sheet-tabsheet-options');
+    const tabs = Array.from(root?.querySelectorAll<HTMLElement>('.sheet-tab') ?? []);
+    const first = this.renderState.firstVisibleTab ?? 0;
+    let lastFirstTab = first;
+    if (options && tabs.length > 0) {
+      const label = root!.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
+      let room = this.offsetWidth - options.offsetWidth - (label?.offsetWidth ?? 0);
+      let index = tabs.length - 1;
+      room -= tabWidth(tabs[index]);
+      while (index > 0 && room - tabWidth(tabs[index - 1]) > 0) {
+        index--;
+        room -= tabWidth(tabs[index]);
+      }
+      lastFirstTab = first + index;
+    }
+    if (lastFirstTab !== this.lastFirstTab) {
+      this.lastFirstTab = lastFirstTab;
+      this.requestUpdate();
+    }
   }
 
   /**
@@ -335,13 +421,17 @@ export class SpreadsheetSheetTabs extends LitElement {
     );
   }
 
-  /** Put the caret in the rename input as soon as it appears. */
+  /**
+   * Put the caret in the rename input as soon as it appears, and see
+   * whether the tabs still fit.
+   */
   updated(): void {
     const input = this.shadowRoot?.querySelector<HTMLInputElement>('.sheet-tab-rename');
     if (input !== null && input !== undefined && this.shadowRoot!.activeElement !== input) {
       input.focus();
       input.select();
     }
+    this.measureLastFirstTab();
   }
 
   private readonly handleShadowClick = (e: Event): void => {
@@ -352,12 +442,14 @@ export class SpreadsheetSheetTabs extends LitElement {
 
     // A disabled scroll button carries the `hidden` class; it is still
     // in the DOM so a stylesheet can style it, but it does nothing.
+    // The end button carries where it goes: the strip is the one that
+    // knows how many tabs fit.
     const scroll = target.closest<HTMLElement>('[data-scroll]');
     if (scroll) {
       if (!scroll.classList.contains('hidden')) {
         this.dispatchEvent(
           new CustomEvent('sheet-tabs-scroll', {
-            detail: { direction: scroll.dataset.scroll },
+            detail: { direction: scroll.dataset.scroll, lastFirstTab: this.lastFirstTab },
             bubbles: true,
             composed: true
           })
@@ -433,12 +525,12 @@ export class SpreadsheetSheetTabs extends LitElement {
   }
 
   render(): TemplateResult {
-    const { sheetNames, activeIndex, firstVisibleTab = 0, renamingIndex = 0 } = this.renderState;
+    const { sheetNames, activeIndex, firstVisibleTab = 0, renamingIndex = 0, infoLabel = null } = this.renderState;
     if (sheetNames.length === 0) {
       return html``;
     }
     const canScrollBack = firstVisibleTab > 0;
-    const canScrollForward = firstVisibleTab < sheetNames.length - 1;
+    const canScrollForward = firstVisibleTab < this.lastFirstTab;
     const tabs = sheetNames.map((name, i) => {
       const oneBasedIndex = i + 1;
       const isActive = oneBasedIndex === activeIndex;
@@ -468,9 +560,13 @@ export class SpreadsheetSheetTabs extends LitElement {
     });
     // The tabs scroll by whole tabs; hiding the ones before
     // firstVisibleTab is enough and needs no width arithmetic.
+    const hasLabel = infoLabel !== null && infoLabel !== undefined;
     return html`
       ${this.renderStripButtons(canScrollBack, canScrollForward)}
-      <div class="sheet-tabsheet-container"> ${tabs.slice(firstVisibleTab)} </div>
+      <div class=${hasLabel ? 'sheet-tabsheet-container beside-infolabel' : 'sheet-tabsheet-container'}>
+        ${tabs.slice(firstVisibleTab)}
+      </div>
+      ${hasLabel ? html`<div class="sheet-tabsheet-infolabel">${infoLabel}</div>` : nothing}
     `;
   }
 }

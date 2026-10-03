@@ -292,14 +292,15 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Gets the info label. Currently no equivalent in the Lit-based Spreadsheet
-     * — preserved as a public API stub returning {@code null}. Existing
-     * TestBench callers that null-check the result continue to work; tests that
-     * asserted on the label text should be deferred until the info-label
-     * feature is reintroduced.
+     * Gets the info label: the status label at the right end of the sheet tabs,
+     * which {@code Spreadsheet.setStatusLabelValue} sets.
+     *
+     * @return the label, or {@code null} while no status label is set
      */
     public TestBenchElement getInfoLabel() {
-        return null;
+        WebElement el = findInSheetTabs(".sheet-tabsheet-infolabel");
+        return el == null ? null
+                : (TestBenchElement) wrapElement(el, getCommandExecutor());
     }
 
     /*

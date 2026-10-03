@@ -200,8 +200,11 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
      * parts. None of them existed in the Lit DOM: with more sheets than
      * fit, there was no way to reach the ones off the end.
      */
-    async function strip(names: string[], firstVisibleTab = 0) {
+    // 200px leaves 70px beside the 130px of buttons: room for one 69px tab,
+    // so these tabs run past the strip and the forward buttons have work.
+    async function strip(names: string[], firstVisibleTab = 0, width = 200) {
         const el = document.createElement('vaadin-spreadsheet-internal-sheet-tabs') as SpreadsheetSheetTabs;
+        el.style.width = `${width}px`;
         document.body.appendChild(el);
         el.renderState = {
             sheetNames: names,
@@ -209,6 +212,8 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
             firstVisibleTab,
             readOnly: false,
         };
+        await el.updateComplete;
+        // Measured after rendering; the buttons follow in a second pass.
         await el.updateComplete;
         return el;
     }
@@ -316,6 +321,202 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
         el.shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-right')!.click();
 
         expect(tabClicks).to.deep.equal([]);
+        el.remove();
+    });
+});
+
+/**
+ * Scrolling forward only while there is something to scroll to.
+ *
+ * The GWT client enabled the forward buttons only while tabs ran past the
+ * end of the strip, and stopped them at the leftmost tab that still showed
+ * the last one. The Lit strip enabled them whenever the first tab shown was
+ * not the last tab: two sheets that fitted easily still offered to scroll,
+ * and the end button scrolled every tab but the last out of view.
+ */
+describe('SpreadsheetSheetTabs — scrolling forward only into tabs', () => {
+    const FIVE = ['One', 'Two', 'Three', 'Four', 'Five'];
+
+    // Each tab is 69px with its margin: a 50px minimum, 12px of padding,
+    // 2px of border and 5px to its left.
+    async function strip(
+        names: string[],
+        width: number,
+        firstVisibleTab = 0,
+        infoLabel: string | null = null
+    ): Promise<SpreadsheetSheetTabs> {
+        const el = document.createElement('vaadin-spreadsheet-internal-sheet-tabs') as SpreadsheetSheetTabs;
+        el.style.width = `${width}px`;
+        document.body.appendChild(el);
+        el.renderState = {
+            ...emptySheetTabsRenderState(),
+            sheetNames: names,
+            activeIndex: 1,
+            firstVisibleTab,
+            infoLabel,
+        };
+        await el.updateComplete;
+        // The strip measures the tabs after it renders them, and renders
+        // the buttons again if that changed anything.
+        await el.updateComplete;
+        return el;
+    }
+
+    function forwardDisabled(el: SpreadsheetSheetTabs): boolean[] {
+        return ['scroll-tabs-right', 'scroll-tabs-end'].map((cls) => {
+            const button = el.shadowRoot!.querySelector(`.${cls}`)!;
+            const disabled = button.getAttribute('part')!.includes('scroll-tabs-button-disabled');
+            expect(button.classList.contains('hidden'), cls).to.equal(disabled);
+            return disabled;
+        });
+    }
+
+    it('leaves them disabled while every tab fits', async () => {
+        const el = await strip(['One', 'Two', 'Three'], 800);
+
+        expect(forwardDisabled(el)).to.deep.equal([true, true]);
+
+        el.remove();
+    });
+
+    it('enables them once the tabs run past the strip', async () => {
+        // 300px leaves 170px: two tabs.
+        const el = await strip(FIVE, 300);
+
+        expect(forwardDisabled(el)).to.deep.equal([false, false]);
+
+        el.remove();
+    });
+
+    it('stops them at the leftmost tab that still shows the last one', async () => {
+        // Two tabs fit, so from the fourth tab the fifth is in view.
+        const el = await strip(FIVE, 300, 3);
+
+        expect(forwardDisabled(el)).to.deep.equal([true, true]);
+        const shown = [...el.shadowRoot!.querySelectorAll('.sheet-tab')].map((t) => t.textContent!.trim());
+        expect(shown).to.deep.equal(['Four', 'Five']);
+
+        el.remove();
+    });
+
+    it('sends the end button to that tab rather than to the last', async () => {
+        const el = await strip(FIVE, 300);
+        let detail: { direction: string; lastFirstTab: number } | undefined;
+        el.addEventListener('sheet-tabs-scroll', (e) => (detail = (e as CustomEvent).detail));
+
+        el.shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-end')!.click();
+
+        expect(detail).to.deep.equal({ direction: 'end', lastFirstTab: 3 });
+
+        el.remove();
+    });
+
+    it('counts the status label out of the room', async () => {
+        // 420px leaves 290px, room for four tabs - until the 211px label
+        // takes all but one tab's worth of it.
+        const without = await strip(['One', 'Two', 'Three', 'Four'], 420);
+        expect(forwardDisabled(without)).to.deep.equal([true, true]);
+        without.remove();
+
+        const withLabel = await strip(['One', 'Two', 'Three', 'Four'], 420, 0, 'Sum: 10');
+        expect(forwardDisabled(withLabel)).to.deep.equal([false, false]);
+        withLabel.remove();
+    });
+
+    it('looks again when the strip is resized', async () => {
+        const el = await strip(['One', 'Two', 'Three'], 800);
+        expect(forwardDisabled(el)).to.deep.equal([true, true]);
+
+        el.style.width = '200px';
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await el.updateComplete;
+
+        expect(forwardDisabled(el)).to.deep.equal([false, false]);
+
+        el.remove();
+    });
+});
+
+/**
+ * The status label.
+ *
+ * `Spreadsheet.setStatusLabelValue` puts a label at the right end of the
+ * sheet tabs. The Lit client kept the value and showed nothing, and the
+ * TestBench element's `getInfoLabel()` returned null.
+ */
+describe('SpreadsheetSheetTabs — the status label', () => {
+    async function strip(infoLabel: string | null | undefined): Promise<SpreadsheetSheetTabs> {
+        const el = document.createElement('vaadin-spreadsheet-internal-sheet-tabs') as SpreadsheetSheetTabs;
+        el.style.width = '800px';
+        document.body.appendChild(el);
+        el.renderState = {
+            ...emptySheetTabsRenderState(),
+            sheetNames: ['One', 'Two'],
+            activeIndex: 1,
+            infoLabel,
+        };
+        await el.updateComplete;
+        return el;
+    }
+
+    function label(el: SpreadsheetSheetTabs): HTMLElement | null {
+        return el.shadowRoot!.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
+    }
+
+    it('shows none until one is set', async () => {
+        for (const value of [null, undefined]) {
+            const el = await strip(value);
+            expect(label(el), String(value)).to.be.null;
+            expect(getComputedStyle(el.shadowRoot!.querySelector('.sheet-tabsheet-container')!).marginRight).to.equal(
+                '0px'
+            );
+            el.remove();
+        }
+    });
+
+    it('draws it at the right end as the GWT client did', async () => {
+        const el = await strip('Sum: 42');
+
+        const box = label(el)!.getBoundingClientRect();
+        const host = el.getBoundingClientRect();
+        expect(label(el)!.textContent).to.equal('Sum: 42');
+        // 200px of text, 5px of padding either side and a 1px border, the
+        // strip's height under its top border.
+        expect(box.width).to.equal(211);
+        expect(box.height).to.equal(28);
+        expect(box.right).to.equal(host.right);
+        expect(box.top).to.equal(host.top + 1);
+        const style = getComputedStyle(label(el)!);
+        expect(style.fontWeight).to.equal('700');
+        expect(style.fontSize).to.equal('11px');
+        expect(style.lineHeight).to.equal('29px');
+        expect(style.backgroundColor).to.equal('rgb(250, 250, 250)');
+        expect(style.borderLeft).to.equal('1px solid rgb(199, 199, 199)');
+        // The tabs keep out from under it.
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.sheet-tabsheet-container')!).marginRight).to.equal(
+            '206px'
+        );
+
+        el.remove();
+    });
+
+    it('shows an empty label for an empty string', async () => {
+        const el = await strip('');
+
+        expect(label(el)).to.not.be.null;
+        expect(label(el)!.getBoundingClientRect().width).to.equal(211);
+
+        el.remove();
+    });
+
+    it('cuts a long one short with an ellipsis', async () => {
+        const el = await strip('A status far too long to fit in two hundred pixels of bold eleven point type');
+
+        const style = getComputedStyle(label(el)!);
+        expect(style.textOverflow).to.equal('ellipsis');
+        expect(style.whiteSpace).to.equal('nowrap');
+        expect(label(el)!.scrollWidth).to.be.greaterThan(label(el)!.clientWidth);
+
         el.remove();
     });
 });
@@ -633,6 +834,73 @@ describe('Spreadsheet — scrolling the tab strip', () => {
         );
 
         expect(events).to.not.include('sheetCreated');
+        cleanup();
+    });
+
+    it('ends at the leftmost tab that still shows the last one', async () => {
+        // 400px leaves 270px beside the buttons: three 69px tabs. The end
+        // button used to scroll all but the last tab out of view.
+        const { sheet, cleanup } = attach(['One', 'Two', 'Three', 'Four', 'Five']);
+        const tabs = sheet.getSheetTabs();
+        await tabs.updateComplete;
+        await tabs.updateComplete;
+
+        tabs.shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-end')!.click();
+        await tabs.updateComplete;
+        await tabs.updateComplete;
+
+        expect(tabs.renderState.firstVisibleTab).to.equal(2);
+        expect(tabs.shadowRoot!.querySelector('.scroll-tabs-right')!.classList.contains('hidden')).to.be.true;
+        cleanup();
+    });
+});
+
+describe('Spreadsheet — the status label', () => {
+    function attach(): { sheet: Spreadsheet; cleanup: () => void } {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:600px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        sheet.setSheetNames(['One']);
+        sheet.setSheetIndex(1);
+        return {
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    async function shownLabel(sheet: Spreadsheet): Promise<string | null> {
+        const tabs = sheet.getSheetTabs();
+        await tabs.updateComplete;
+        return tabs.shadowRoot!.querySelector('.sheet-tabsheet-infolabel')?.textContent ?? null;
+    }
+
+    it('shows none until the server sets one', async () => {
+        const { sheet, cleanup } = attach();
+
+        expect(await shownLabel(sheet)).to.be.null;
+
+        cleanup();
+    });
+
+    it('shows what the server sets, and hides it when the server clears it', async () => {
+        const { sheet, cleanup } = attach();
+
+        sheet.setInfoLabelValue('Sum: 42');
+        expect(await shownLabel(sheet)).to.equal('Sum: 42');
+
+        sheet.setInfoLabelValue(null);
+        expect(await shownLabel(sheet)).to.be.null;
+
+        sheet.setInfoLabelValue('');
+        expect(await shownLabel(sheet)).to.equal('');
+
+        sheet.setInfoLabelValue(undefined);
+        expect(await shownLabel(sheet)).to.be.null;
+
         cleanup();
     });
 });
