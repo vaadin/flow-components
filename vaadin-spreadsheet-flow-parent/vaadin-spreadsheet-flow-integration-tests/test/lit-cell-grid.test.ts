@@ -2139,13 +2139,16 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         cleanup(el);
     });
 
-    it('stays put when the width is no wider than the column', async () => {
+    it('keeps text with nowhere to go below its neighbours', async () => {
         // A server that reports the cell's own width is saying the text has
         // nowhere to go: the neighbour holds a value, or the sheet ends.
         const el = await attachWithState(stateWithSpill(50));
 
-        expect(firstCell(el).classList.contains('overflowing')).to.be.false;
-        expect(getComputedStyle(firstCell(el)).overflow).to.equal('hidden');
+        const cells = el.shadowRoot!.querySelectorAll<HTMLElement>('.cell');
+        expect(cells[0].classList.contains('overflowing')).to.be.false;
+        expect(Number(getComputedStyle(cells[0]).zIndex) || 0).to.be.at.most(
+            Number(getComputedStyle(cells[1]).zIndex) || 0
+        );
 
         cleanup(el);
     });
@@ -2166,17 +2169,20 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         cleanup(el);
     });
 
-    it('puts that ellipsis inside the cell, where it can be seen', async () => {
-        // At the column's full width the holder would reach past the
-        // padding, and the cell - which clips - would cut the ellipsis off.
+    it("gives text with nowhere to go the column's width from its padding on, as the GWT client did", async () => {
+        // The GWT client's holder was as wide as the column and began after
+        // the padding, so it reached past the cell's right edge, where the
+        // neighbour - drawn later, on a ground of its own - covered it.
+        // Held inside the padding instead, "Cell Types" read "Cell Ty...".
         const el = await attachWithState(stateWithSpill(50));
 
         const cell = firstCell(el);
         const held = cell.querySelector<HTMLElement>('.cell-spill')!;
-        expect(held.style.width).to.equal('');
-        expect(held.getBoundingClientRect().right).to.be.at.most(
-            cell.getBoundingClientRect().right - 2
-        );
+        expect(held.style.width).to.equal('50px');
+        const box = cell.getBoundingClientRect();
+        expect(held.getBoundingClientRect().left - box.left).to.equal(2);
+        expect(held.getBoundingClientRect().right - box.right).to.equal(2);
+        expect(getComputedStyle(cell).overflow).to.equal('visible');
 
         cleanup(el);
     });

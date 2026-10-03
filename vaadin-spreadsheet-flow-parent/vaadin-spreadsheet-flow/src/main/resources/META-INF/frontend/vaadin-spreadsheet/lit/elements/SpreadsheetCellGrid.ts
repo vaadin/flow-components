@@ -408,9 +408,16 @@ export class SpreadsheetCellGrid extends LitElement {
       z-index: 2;
     }
 
+    /* Text too wide for its column with nowhere to go: its holder reaches
+       past the cell's edge, as the GWT client's did, and the neighbour
+       covers what is past it. Not raised, unlike a cell running on. */
+    .cell.cut-short {
+      overflow: visible;
+    }
+
     /* Holds text too wide for its column, so the browser cuts it short
-       with an ellipsis: at the width the server worked out when the text
-       spills, at the cell's own edge when it has nowhere to go. */
+       with an ellipsis: at the width the server worked out - the column's
+       own when the text has nowhere to go. */
     .cell-spill {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1421,18 +1428,17 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // cuts it off, without an ellipsis.
       const runsRight = spill > 0 && cellStyleClass.split(/\s+/).includes('r');
       const overflowing = runsRight || spill > width;
-      // With nowhere to go the text is cut short inside its own cell, so the
-      // holder fills the cell instead of taking the width: at the column's
-      // full width it would reach past the padding, and the cell would clip
-      // the ellipsis away with it.
+      // With nowhere to go the text is still held at the column's width from
+      // the padding on, as in the GWT client: it reaches past the cell's
+      // right edge, under the neighbour, which is drawn later on a ground of
+      // its own - see .cut-short.
+      const cutShort = spill > 0 && !overflowing;
       const text =
         spill === 0
           ? rawText
           : runsRight
           ? html`<div class="cell-spill runs-right" style="width:${spill - 2}px">${rawText}</div>`
-          : overflowing
-          ? html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>`
-          : html`<div class="cell-spill">${rawText}</div>`;
+          : html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>`;
       const inSelection = isCellSelected(selection, col, row);
       const isActive = isActiveCell(selection, col, row);
       const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
@@ -1452,7 +1458,8 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
         (cellStyleClass ? ` ${cellStyleClass}` : '') +
         cellRangeClass +
         linkClass +
-        (overflowing ? ' overflowing' : '');
+        (overflowing ? ' overflowing' : '') +
+        (cutShort ? ' cut-short' : '');
       const style =
         `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
         collapsedDeclaration(width, height) +
