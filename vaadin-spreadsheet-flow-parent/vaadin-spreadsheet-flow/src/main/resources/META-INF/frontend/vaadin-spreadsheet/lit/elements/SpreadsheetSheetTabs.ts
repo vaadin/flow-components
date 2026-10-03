@@ -200,8 +200,8 @@ export class SpreadsheetSheetTabs extends LitElement {
       height: 29px;
       background: var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa));
       border-top: 1px solid var(--vaadin-spreadsheet-tabs-border, var(--_vaadin-spreadsheet-tabs-border, #c7c7c7));
-      font-family: var(--vaadin-spreadsheet-tabs-font, var(--_vaadin-spreadsheet-tabs-font, inherit));
-      font-size: var(--vaadin-spreadsheet-tabs-font-size, var(--_vaadin-spreadsheet-tabs-font-size, inherit));
+      font-family: var(--vaadin-spreadsheet-tabs-font, var(--_vaadin-spreadsheet-tabs-font, Helvetica));
+      font-size: var(--vaadin-spreadsheet-tabs-font-size, var(--_vaadin-spreadsheet-tabs-font-size, 14px));
       overflow: hidden;
     }
 

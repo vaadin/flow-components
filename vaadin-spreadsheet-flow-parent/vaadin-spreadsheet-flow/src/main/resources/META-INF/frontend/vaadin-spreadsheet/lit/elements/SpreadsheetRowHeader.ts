@@ -216,7 +216,7 @@ export class SpreadsheetRowHeader extends LitElement {
       background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
       border-right: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, inherit));
+      font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, Helvetica));
       font-size: var(--vaadin-spreadsheet-header-font-size, var(--_vaadin-spreadsheet-header-font-size, 13px));
     }
 

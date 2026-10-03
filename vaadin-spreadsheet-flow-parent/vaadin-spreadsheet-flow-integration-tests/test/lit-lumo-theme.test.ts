@@ -239,13 +239,15 @@ describe('Lumo theme — the host passes the theme to its parts', () => {
         themed.cleanup();
     });
 
-    it('draws the host on Lumo\'s ground, in its font, framed in its contrast', () => {
+    it('draws the host on Lumo\'s ground, framed in its contrast, in the page\'s font', () => {
+        // The GWT client set Lumo's font on the sheet's parts, not on the
+        // host: its notes, menu and pop-ups were drawn in the page's font.
         const { themed, sheet } = mount('lumo');
 
         const style = getComputedStyle(themed.host);
         expect(style.backgroundColor).to.equal(BASE);
-        expect(style.fontFamily).to.equal('monospace');
-        expect(style.fontSize).to.equal('15px');
+        expect(style.fontFamily).to.equal(getComputedStyle(themed.wrapper).fontFamily);
+        expect(style.fontSize).to.equal(getComputedStyle(themed.wrapper).fontSize);
         expect(style.color).to.equal(BODY_TEXT);
         expect(getComputedStyle(sheet.getRoot()).borderTopColor).to.equal(CONTRAST_20);
 
@@ -769,15 +771,21 @@ describe('Lumo theme — the sheet tabs', () => {
 });
 
 describe('Lumo theme — the context menu', () => {
+    // A Lumo page's own font size, which the menu is drawn in.
     async function menu() {
-        return inHost<SpreadsheetContextMenu>('vaadin-spreadsheet-internal-context-menu', 'lumo', (el) => {
-            el.renderState = {
-                open: true,
-                x: 10,
-                y: 10,
-                actions: [{ caption: 'Cut', key: '1', type: 0, iconNodeId: 0 }],
-            };
-        });
+        return inHost<SpreadsheetContextMenu>(
+            'vaadin-spreadsheet-internal-context-menu',
+            'lumo',
+            (el) => {
+                el.renderState = {
+                    open: true,
+                    x: 10,
+                    y: 10,
+                    actions: [{ caption: 'Cut', key: '1', type: 0, iconNodeId: 0 }],
+                };
+            },
+            'font-size: 15px'
+        );
     }
 
     it('is Lumo\'s card', async () => {
@@ -800,7 +808,7 @@ describe('Lumo theme — the context menu', () => {
         const item = el.shadowRoot!.querySelector<HTMLElement>('.item')!;
         const style = getComputedStyle(item);
         expect(`${style.paddingLeft} ${style.paddingRight}`).to.equal('15px 23px');
-        // One and a half of Lumo's line height, at the host's 15px.
+        // One and a half of Lumo's line height, at the page's 15px.
         expect(style.lineHeight).to.equal('33.75px');
         item.focus();
         const focused = getComputedStyle(item);

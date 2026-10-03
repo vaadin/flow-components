@@ -75,8 +75,9 @@ export const spreadsheetStyles = css`
     --default-font-family: Helvetica;
     --default-font-size: 11pt;
     color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
-    font-family: Helvetica;
-    font-size: 14px;
+    /* No font here. The GWT client set its own font on the sheet's parts
+       and left the rest to the page: a comment, the context menu and a
+       pop-up are drawn in the page's font, as they were then. */
     box-sizing: border-box;
     overflow: hidden;
     position: relative;
@@ -143,8 +144,6 @@ export const spreadsheetStyles = css`
     --default-background-color: var(--lumo-base-color);
     --default-color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
     background-color: var(--lumo-base-color);
-    font-family: var(--lumo-font-family);
-    font-size: var(--lumo-font-size-m);
   }
 
   /* Spreadsheet.HIDE_FUNCTION_BAR_STYLE — public Java constant

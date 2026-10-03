@@ -71,6 +71,8 @@ export class SpreadsheetHeaderCorner extends LitElement {
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       border-bottom: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      /* The headers' font, for the outline level numbers. */
+      font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, Helvetica));
     }
 
     /* Plain numbers, as the GWT client drew them. */

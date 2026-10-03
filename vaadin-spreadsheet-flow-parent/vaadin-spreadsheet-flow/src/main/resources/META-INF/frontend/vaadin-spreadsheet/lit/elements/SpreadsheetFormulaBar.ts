@@ -87,11 +87,8 @@ export class SpreadsheetFormulaBar extends LitElement {
       background: var(--vaadin-spreadsheet-formulabar-bg, var(--_vaadin-spreadsheet-formulabar-bg, #fff));
       border-bottom: 1px solid
         var(--vaadin-spreadsheet-formulabar-border, var(--_vaadin-spreadsheet-formulabar-border, #c7c7c7));
-      font-family: var(--vaadin-spreadsheet-formulabar-font, var(--_vaadin-spreadsheet-formulabar-font, inherit));
-      font-size: var(
-        --vaadin-spreadsheet-formulabar-font-size,
-        var(--_vaadin-spreadsheet-formulabar-font-size, inherit)
-      );
+      font-family: var(--vaadin-spreadsheet-formulabar-font, var(--_vaadin-spreadsheet-formulabar-font, Helvetica));
+      font-size: var(--vaadin-spreadsheet-formulabar-font-size, var(--_vaadin-spreadsheet-formulabar-font-size, 14px));
     }
 
     input {
