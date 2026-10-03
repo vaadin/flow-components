@@ -11,7 +11,6 @@ package com.vaadin.flow.component.spreadsheet.testbench;
 import java.util.List;
 import java.util.Optional;
 
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
@@ -494,13 +493,6 @@ public class SpreadsheetElement extends TestBenchElement {
 
     }
 
-    // Current selection
-    private WebElement sTop;
-    private WebElement sBottom;
-    private WebElement sRight;
-    private Point sLocation;
-    private Dimension sSize;
-
     boolean isElementSelected(WebElement element) {
         // Cheapest first: a cell inside the selection but outside the active
         // range says so on itself, and needs no outline.
@@ -513,15 +505,36 @@ public class SpreadsheetElement extends TestBenchElement {
         if (!findSelectionOutline()) {
             return false;
         }
-        updateSelectionLocationAndSize();
-        Point location = element.getLocation();
-        int centerX = location.x + element.getSize().getWidth() / 2;
-        int centerY = location.y + element.getSize().getHeight() / 2;
-        return isInSelection(centerX, centerY);
+        // A range across a freeze is drawn a piece per pane, so the range is
+        // every piece together. Measured in the browser, the cell too, so
+        // both are in the same coordinates.
+        return Boolean.TRUE
+                .equals(((JavascriptExecutor) getCommandExecutor().getDriver())
+                        .executeScript(
+                                """
+                                        const [host, cell] = arguments;
+                                        const grid = host.shadowRoot
+                                            .querySelector('vaadin-spreadsheet-internal-cell-grid');
+                                        const pieces = Array.from(grid.shadowRoot
+                                            .querySelectorAll('.sheet-selection'))
+                                            .map((piece) => piece.getBoundingClientRect());
+                                        if (pieces.length === 0) {
+                                            return false;
+                                        }
+                                        const left = Math.min(...pieces.map((r) => r.left));
+                                        const top = Math.min(...pieces.map((r) => r.top));
+                                        const right = Math.max(...pieces.map((r) => r.right));
+                                        const bottom = Math.max(...pieces.map((r) => r.bottom));
+                                        const box = cell.getBoundingClientRect();
+                                        const x = box.left + box.width / 2;
+                                        const y = box.top + box.height / 2;
+                                        return x >= left && x <= right && y >= top && y <= bottom;
+                                        """,
+                                this, element));
     }
 
     /**
-     * Reads the four border elements of the selection outline.
+     * Whether the client is drawing a selection outline.
      *
      * @return {@code false} when the client is not drawing an outline
      */
@@ -531,15 +544,9 @@ public class SpreadsheetElement extends TestBenchElement {
         try {
             waitUntil(e -> findInCellGrid(".s-top") != null);
         } catch (TimeoutException e) {
-            sTop = null;
             return false;
         }
-        sTop = findInCellGrid(".s-top");
-        sBottom = findInCellGrid(".s-bottom");
-        // Just to make sure the left element is present
-        findInCellGrid(".s-left");
-        sRight = findInCellGrid(".s-right");
-        return sTop != null;
+        return true;
     }
 
     private boolean isNonCoherentlySelected(WebElement element) {
@@ -551,30 +558,6 @@ public class SpreadsheetElement extends TestBenchElement {
                 .orElse("");
         return partAttr.contains("cell-range")
                 || "solid".equals(element.getCssValue("outline-style"));
-    }
-
-    private void updateSelectionLocationAndSize() {
-        sLocation = sTop.getLocation();
-        int bottomY = sBottom.getLocation().getY();
-        int bottomH = sBottom.getSize().getHeight();
-        int rightX = sRight.getLocation().getX();
-        int rightW = sRight.getSize().getWidth();
-        sSize = new Dimension(rightX + rightW - sLocation.getX(),
-                bottomY + bottomH - sLocation.getY());
-    }
-
-    private boolean isInSelection(int locationX, int locationY) {
-        // Test top left corner
-        if (locationX < sLocation.getX() || locationY < sLocation.getY()) {
-            return false;
-        }
-        // Test lower right corner
-        if (locationX - sLocation.getX() > sSize.getWidth()
-                || locationY - sLocation.getY() > sSize.getHeight()) {
-            return false;
-        }
-        // Everything is inside the selection
-        return true;
     }
 
     /**

@@ -2882,6 +2882,199 @@ describe('SpreadsheetCellGrid — gridlines turned off', () => {
  * months - never appeared, and its first cell showed through instead, left
  * aligned and clipped at its own column.
  */
+/**
+ * What is drawn over the cells of a frozen pane.
+ *
+ * The GWT client drew the selection, the fill outline, the filter buttons
+ * and the pictures in the pane of their cells. The Lit grid drew them all
+ * in the scrolling quadrant's coordinates: a selection in a frozen pane was
+ * never outlined, a note on a frozen cell never showed, a filter button in a
+ * frozen header row scrolled away from its row, and the scrolling
+ * quadrant's selection painted over the frozen panes it scrolled under.
+ */
+describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
+    // Rows 1-2 frozen at 20px each, columns 1-2 frozen at 50px each; rows
+    // 3-4 and columns 3-4 scroll, at the sheet's own coordinates.
+    function frozen(extra: Partial<CellGridRenderState> = {}): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 3,
+                firstColumnPosition: 100,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 3,
+                firstRowPosition: 40,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            colX: [100, 150],
+            rowY: [40, 60],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 2,
+            frozenColX: [0, 50],
+            frozenColWidths: [50, 50],
+            frozenRowY: [0, 20],
+            frozenRowHeights: [20, 20],
+            totalGridWidthPx: 1000,
+            totalGridHeightPx: 500,
+            ...extra,
+        };
+    }
+
+    function selecting(c1: number, r1: number, c2 = c1, r2 = r1): Partial<CellGridRenderState> {
+        return { selection: { activeCell: { col: c1, row: r1 }, activeRange: { c1, c2, r1, r2 }, auxRanges: [] } };
+    }
+
+    function pane(piece: Element): string {
+        const wrapper = piece.closest('.quadrant-wrapper');
+        return wrapper ? wrapper.className.replace('quadrant-wrapper quadrant-wrapper-', '') : 'main';
+    }
+
+    function sides(piece: Element): string[] {
+        return ['s-top', 's-left', 's-right', 's-bottom'].filter((side) => !piece.querySelector(`.${side}`)!.classList.contains('cut'));
+    }
+
+    it('outlines a selection in the frozen corner', async () => {
+        const el = await attachWithState(frozen(selecting(1, 1)));
+
+        const pieces = Array.from(el.shadowRoot!.querySelectorAll('.sheet-selection'));
+        expect(pieces.map(pane)).to.deep.equal(['corner']);
+        expect(sides(pieces[0])).to.deep.equal(['s-top', 's-left', 's-right', 's-bottom']);
+        expect(pieces[0].querySelector('.selection-corner')).to.not.be.null;
+
+        cleanup(el);
+    });
+
+    it('draws a range across both freezes a piece per pane, edged where the range is', async () => {
+        // B2:C3 has a cell in each pane.
+        const el = await attachWithState(frozen(selecting(2, 2, 3, 3)));
+
+        const pieces = Array.from(el.shadowRoot!.querySelectorAll('.sheet-selection'));
+        const byPane = Object.fromEntries(pieces.map((piece) => [pane(piece), sides(piece)]));
+        expect(byPane).to.deep.equal({
+            main: ['s-right', 's-bottom'],
+            top: ['s-top', 's-right'],
+            left: ['s-left', 's-bottom'],
+            corner: ['s-top', 's-left'],
+        });
+        // One handle, at the range's last cell.
+        const handles = Array.from(el.shadowRoot!.querySelectorAll('.selection-corner'));
+        expect(handles.map((h) => pane(h))).to.deep.equal(['main']);
+
+        cleanup(el);
+    });
+
+    it('lets a frozen pane cover the selection that scrolls under it', async () => {
+        // Scrolled 30px down: the frozen rows now cover sheet y 30-70, and
+        // row 3 (y 40-60) is under them.
+        const el = await attachWithState(frozen({ ...selecting(3, 3), scrollTop: 30 }));
+        el.style.cssText = 'display:block;position:relative;width:1000px;height:500px;';
+        await el.updateComplete;
+
+        // The outline takes no pointer events, so the hit test would pass
+        // it by whatever its stacking; given them, the hit test follows the
+        // painting order.
+        el.shadowRoot!.querySelector<HTMLElement>('.sheet-selection .s-top')!.style.pointerEvents = 'auto';
+        const origin = el.getBoundingClientRect();
+        // The middle of the selection's top side, on row 3's top gridline.
+        const hit = el.shadowRoot!.elementFromPoint(origin.left + 125, origin.top + 40)!;
+        expect(hit.classList.contains('s-top'), hit.className).to.be.false;
+        expect(hit.closest('.quadrant-wrapper-top'), hit.className).to.not.be.null;
+
+        cleanup(el);
+    });
+
+    it('keeps a filter button in a frozen row with its row', async () => {
+        const el = await attachWithState(
+            frozen({
+                popupButtons: [
+                    { col: 3, row: 2, leftPx: 150, topPx: 40, cellHeightPx: 20, active: false },
+                    { col: 3, row: 4, leftPx: 150, topPx: 80, cellHeightPx: 20, active: false },
+                ],
+            })
+        );
+
+        const buttons = Array.from(el.shadowRoot!.querySelectorAll('.popup-button'));
+        expect(buttons.map((b) => `${(b as HTMLElement).dataset.row}:${pane(b)}`)).to.deep.equal(['4:main', '2:top']);
+
+        cleanup(el);
+    });
+
+    it('keeps a picture anchored in a frozen pane in that pane', async () => {
+        const el = await attachWithState(
+            frozen({
+                overlays: [
+                    {
+                        id: 'pic',
+                        col: 1,
+                        row: 1,
+                        type: 'IMAGE',
+                        src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
+                        leftPx: 5,
+                        topPx: 5,
+                        widthPx: 10,
+                        heightPx: 10,
+                    },
+                ],
+            })
+        );
+
+        expect(pane(el.shadowRoot!.querySelector('.sheet-overlay')!)).to.equal('corner');
+
+        cleanup(el);
+    });
+
+    it('hangs a note off a frozen cell where the cell is on screen', async () => {
+        const el = await attachWithState(
+            frozen({
+                scrollLeft: 200,
+                scrollTop: 300,
+                commentCells: new Set(['col1 row1']),
+                commentText: { 'col1 row1': 'A note' },
+                visibleCommentKeys: ['col1 row1'],
+            })
+        );
+
+        const note = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+        // A1's top-right corner, carried along with the frozen pane.
+        expect([note.style.left, note.style.top]).to.deep.equal(['250px', '300px']);
+
+        cleanup(el);
+    });
+
+    it('opens the editor over a frozen cell after a scroll', async () => {
+        const el = await attachWithState(
+            frozen({ scrollLeft: 200, scrollTop: 300, editor: { col: 2, row: 1, initialValue: 'x' } })
+        );
+
+        const editor = el.shadowRoot!.querySelector<HTMLElement>('.cell-editor')!;
+        expect([editor.style.left, editor.style.top]).to.deep.equal(['250px', '300px']);
+
+        cleanup(el);
+    });
+
+    it('draws the fill outline a piece per pane, bordered where the drag ends', async () => {
+        const el = await attachWithState(frozen({ ...selecting(2, 2), paintRect: { c1: 2, c2: 3, r1: 2, r2: 2 } }));
+
+        const pieces = Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.paintmode'));
+        const widths = Object.fromEntries(
+            pieces.map((piece) => {
+                const style = getComputedStyle(piece);
+                return [
+                    pane(piece),
+                    [style.borderTopWidth, style.borderLeftWidth, style.borderRightWidth, style.borderBottomWidth].join(' '),
+                ];
+            })
+        );
+        expect(widths).to.deep.equal({ top: '2px 0px 2px 2px', corner: '2px 2px 0px 2px' });
+
+        cleanup(el);
+    });
+});
+
 describe('SpreadsheetCellGrid — merged cells in a freeze', () => {
     // Rows 1-2 frozen at 20px, columns 1-2 frozen at 50px; rows 3-4 and
     // columns 3-4 scroll.

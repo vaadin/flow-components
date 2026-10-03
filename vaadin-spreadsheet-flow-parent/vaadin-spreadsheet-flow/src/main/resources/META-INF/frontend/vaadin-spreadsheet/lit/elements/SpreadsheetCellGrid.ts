@@ -221,7 +221,7 @@ export class SpreadsheetCellGrid extends LitElement {
       border: 2px solid
         var(--vaadin-spreadsheet-selection-border-color, var(--_vaadin-spreadsheet-selection-border-color, #40b527));
       background: rgba(235, 247, 233, 0.8);
-      z-index: 3;
+      z-index: 2;
     }
     /* Dimmed while the sheet does not have the keyboard, as the GWT
        client did; the connector sets the attribute. The outline and the
@@ -239,8 +239,10 @@ export class SpreadsheetCellGrid extends LitElement {
       background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
-         correctly sized, and invisible - every cell covers it. */
-      z-index: 3;
+         correctly sized, and invisible - every cell covers it. No
+         higher: a frozen pane, at 2 and later in the tree, covers the
+         piece of the selection that scrolls under it. */
+      z-index: 2;
     }
     .sheet-selection .s-bottom {
       position: absolute;
@@ -251,8 +253,10 @@ export class SpreadsheetCellGrid extends LitElement {
       background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
-         correctly sized, and invisible - every cell covers it. */
-      z-index: 3;
+         correctly sized, and invisible - every cell covers it. No
+         higher: a frozen pane, at 2 and later in the tree, covers the
+         piece of the selection that scrolls under it. */
+      z-index: 2;
     }
     .sheet-selection .s-left {
       position: absolute;
@@ -263,8 +267,10 @@ export class SpreadsheetCellGrid extends LitElement {
       background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
-         correctly sized, and invisible - every cell covers it. */
-      z-index: 3;
+         correctly sized, and invisible - every cell covers it. No
+         higher: a frozen pane, at 2 and later in the tree, covers the
+         piece of the selection that scrolls under it. */
+      z-index: 2;
     }
     .sheet-selection .s-right {
       position: absolute;
@@ -275,8 +281,10 @@ export class SpreadsheetCellGrid extends LitElement {
       background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
-         correctly sized, and invisible - every cell covers it. */
-      z-index: 3;
+         correctly sized, and invisible - every cell covers it. No
+         higher: a frozen pane, at 2 and later in the tree, covers the
+         piece of the selection that scrolls under it. */
+      z-index: 2;
     }
     /* The fill handle, in the fill colour the drag preview uses - the
        GWT client's green square, ringed in white so it stands off the
@@ -299,7 +307,12 @@ export class SpreadsheetCellGrid extends LitElement {
          paints and can be found in the DOM but the cell under it wins
          every hit test, so a real drag selects cells instead of filling
          them. The border divs above are raised for the same reason. */
-      z-index: 3;
+      z-index: 2;
+    }
+
+    /* A side the range runs on past, into the next pane or out of view. */
+    .sheet-selection .cut {
+      visibility: hidden;
     }
     /* Cells inside the active range get a subtle background
            highlight by default; matches the previous selected-cell-
@@ -372,7 +385,7 @@ export class SpreadsheetCellGrid extends LitElement {
        reaches into - they come later in the DOM and have a ground of
        their own, so at equal z-index they would cover the text. Comes
        after the rule above, which is equally specific. Still below the
-       selection outline at 3. */
+       selection outline, which comes later in the tree. */
     .cell.overflowing {
       overflow: visible;
       z-index: 2;
@@ -389,11 +402,13 @@ export class SpreadsheetCellGrid extends LitElement {
 
     /* Sheet overlays — images, charts, and embedded
            components positioned at absolute pixel coordinates on
-           the sheet. Slice 160. z-index above cells but below
-           the cell editor (which is 10). */
+           the sheet, each in the pane of its anchor cell. Slice 160.
+           Above the cells and below the editor and the notes; in the
+           scrolling quadrant no higher than the frozen panes, which
+           cover what scrolls under them. */
     .sheet-overlay {
       position: absolute;
-      z-index: 4;
+      z-index: 2;
       box-sizing: border-box;
       pointer-events: auto;
     }
@@ -470,7 +485,7 @@ export class SpreadsheetCellGrid extends LitElement {
       cursor: pointer;
       font-size: 9px;
       line-height: 1;
-      z-index: 6;
+      z-index: 2;
       user-select: none;
     }
     /* A filter in use, marked along the top. */
@@ -1018,8 +1033,12 @@ export class SpreadsheetCellGrid extends LitElement {
     const mainCells = renderQuadrant(mainOpts);
     // Straight after the cells they cover, so the frozen quadrants, which
     // come later at the same z-index, stay on top of a merge scrolling
-    // under them.
+    // under them. The selection, the fill outline, the pictures and the
+    // filter buttons of the scrolling quadrant go there too, for the same
+    // reason: under a frozen pane they scroll out of sight, as in the GWT
+    // client, instead of painting over it.
     const mainMerged = buildMergedCellOverlays(mainOpts);
+    const mainOverlays = this.quadrantOverlays(mainOpts);
 
     // Frozen quadrants live inside transform-translated wrappers
     // so their cells visually stay pinned as the user scrolls
@@ -1059,7 +1078,9 @@ export class SpreadsheetCellGrid extends LitElement {
       const transform = `transform:translateY(${scrollTop}px);`;
       const line = freezeLine('rows', frozenHeight, this.renderState.totalGridWidthPx);
       topQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}>${topCells}${topMerged}${line}</div>
+        <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}>
+          ${topCells}${topMerged}${line}${this.quadrantOverlays(topOpts)}
+        </div>
       `;
     }
 
@@ -1082,7 +1103,9 @@ export class SpreadsheetCellGrid extends LitElement {
       const transform = `transform:translateX(${scrollLeft}px);`;
       const line = freezeLine('columns', frozenWidth, this.renderState.totalGridHeightPx);
       leftQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}>${leftCells}${leftMerged}${line}</div>
+        <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}>
+          ${leftCells}${leftMerged}${line}${this.quadrantOverlays(leftOpts)}
+        </div>
       `;
     }
 
@@ -1113,19 +1136,30 @@ export class SpreadsheetCellGrid extends LitElement {
       )}`;
       cornerQuadrant = html`
         <div class="quadrant-wrapper quadrant-wrapper-corner" style=${transform}>
-          ${cornerCells}${cornerMerged}${lines}
+          ${cornerCells}${cornerMerged}${lines}${this.quadrantOverlays(cornerOpts)}
         </div>
       `;
     }
 
     const styleBlock = buildCellStyleBlock(this.renderState);
-    const selectionOverlay = buildSelectionOverlay(this.renderState);
+    // The notes and the editor float above every pane, so they stay at
+    // grid level, placed where their cell is on screen.
     const editor = buildCellEditorOverlay(this.renderState, isLumo(this.theme));
-    const sheetOverlays = buildSheetOverlays(this.renderState);
-    const popupButtons = buildPopupButtons(this.renderState);
-    const paintOutline = buildPaintOutline(this.renderState);
     const commentOverlays = buildCommentOverlays(this.renderState, this.hoveredKey);
-    return html`${styleBlock}${mainCells}${mainMerged}${topQuadrant}${leftQuadrant}${cornerQuadrant}${selectionOverlay}${paintOutline}${sheetOverlays}${popupButtons}${commentOverlays}${editor}`;
+    return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${topQuadrant}${leftQuadrant}${cornerQuadrant}${commentOverlays}${editor}`;
+  }
+
+  /**
+   * What a quadrant draws over its cells: its piece of the selection and
+   * of the fill outline, and the pictures and filter buttons anchored in
+   * it - each in its own pane, as the GWT client had them.
+   */
+  private quadrantOverlays(opts: QuadrantRenderOpts): TemplateResult {
+    const state = opts.state;
+    return html`${buildSelectionOverlay(opts)}${buildPaintOutline(opts)}${buildSheetOverlays(
+      state,
+      opts.quadrantName
+    )}${buildPopupButtons(state, opts.quadrantName)}`;
   }
 }
 
@@ -1486,17 +1520,27 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
  * element in the tree means an observer can ask whether it is showing
  * rather than whether it exists.
  */
-function buildPaintOutline(state: CellGridRenderState): TemplateResult {
+function buildPaintOutline(opts: QuadrantRenderOpts): TemplateResult | string {
   // `?? null` rather than `=== null`: a hand-built render state may leave
   // the field off entirely, and a missing outline is not a crash.
-  const rect = state.paintRect ?? null;
-  const geometry = rect === null ? null : rectGeometry(state, rect);
+  const rect = opts.state.paintRect ?? null;
+  if (rect === null) {
+    // Kept in the tree, hidden, while nothing is painted: the scrolling
+    // quadrant always has one.
+    return opts.quadrantName === 'main' ? html`<div class="paintmode" style="display:none;"></div>` : '';
+  }
+  const piece = rangePiece(opts, rect);
+  if (piece === null) {
+    return '';
+  }
+  // Only the sides the drag ends at: a side that runs on into the next
+  // pane, or out of view, has no border.
   const style =
-    geometry === null
-      ? 'display:none;'
-      : `left:${geometry.left}px;top:${geometry.top}px;` +
-        `width:${geometry.width}px;height:${geometry.height}px;` +
-        'position:absolute;pointer-events:none;';
+    pieceBox(piece) +
+    (piece.hasTop ? '' : 'border-top-width:0;') +
+    (piece.hasLeft ? '' : 'border-left-width:0;') +
+    (piece.hasRight ? '' : 'border-right-width:0;') +
+    (piece.hasBottom ? '' : 'border-bottom-width:0;');
   // Deliberately not also `.sheet-selection`, which GWT put on it: that
   // class is how the selection overlay is found, and two elements
   // answering to it makes every such lookup order-dependent.
@@ -1508,35 +1552,96 @@ function buildPaintOutline(state: CellGridRenderState): TemplateResult {
 }
 
 /**
- * Pixel box of a cell rectangle inside the visible viewport, or null when
- * it falls entirely outside it.
+ * The part of a cell rectangle one quadrant shows, in that quadrant's own
+ * coordinates, and which of the rectangle's sides it holds. A rectangle
+ * that crosses a freeze is drawn a piece per pane, as the GWT client drew
+ * it, and a side it runs on past - into the next pane, or out of view - is
+ * not an edge of the piece.
  */
-function rectGeometry(
-  state: CellGridRenderState,
+interface RangePiece {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  hasTop: boolean;
+  hasLeft: boolean;
+  hasRight: boolean;
+  hasBottom: boolean;
+}
+
+function rangePiece(
+  opts: QuadrantRenderOpts,
   rect: { c1: number; c2: number; r1: number; r2: number }
-): { left: number; top: number; width: number; height: number } | null {
-  const { viewport, colX, rowY, colWidths, rowHeights } = state;
-  const leftCol = Math.max(rect.c1, viewport.firstColumnIndex);
-  const rightCol = Math.min(rect.c2, viewport.lastColumnIndex);
-  const topRow = Math.max(rect.r1, viewport.firstRowIndex);
-  const bottomRow = Math.min(rect.r2, viewport.lastRowIndex);
-  if (leftCol > rightCol || topRow > bottomRow) {
+): RangePiece | null {
+  const c1 = Math.max(rect.c1, opts.colStart);
+  const c2 = Math.min(rect.c2, opts.colEnd);
+  const r1 = Math.max(rect.r1, opts.rowStart);
+  const r2 = Math.min(rect.r2, opts.rowEnd);
+  if (c1 > c2 || r1 > r2) {
     return null;
   }
-  const leftIndex = leftCol - viewport.firstColumnIndex;
-  const rightIndex = rightCol - viewport.firstColumnIndex;
-  const topIndex = topRow - viewport.firstRowIndex;
-  const bottomIndex = bottomRow - viewport.firstRowIndex;
-  const left = colX[leftIndex] ?? 0;
-  const top = rowY[topIndex] ?? 0;
-  const right = (colX[rightIndex] ?? 0) + (colWidths[rightIndex] ?? 0);
-  const bottom = (rowY[bottomIndex] ?? 0) + (rowHeights[bottomIndex] ?? 0);
   return {
-    left,
-    top,
-    width: Math.max(0, right - left),
-    height: Math.max(0, bottom - top)
+    left: opts.getColLeft(c1),
+    top: opts.getRowTop(r1),
+    right: opts.getColLeft(c2) + opts.getColWidth(c2),
+    bottom: opts.getRowTop(r2) + opts.getRowHeight(r2),
+    hasTop: r1 === rect.r1,
+    hasLeft: c1 === rect.c1,
+    hasRight: c2 === rect.c2,
+    hasBottom: r2 === rect.r2
   };
+}
+
+/**
+ * The box a piece's outline is drawn in. One pixel up and left of the
+ * cells where the rectangle's own top and left sides are, as the GWT client
+ * drew it: each side of the outline then lies on a gridline. A cell draws
+ * only its right and bottom borders, so the gridlines above and to the left
+ * of a range belong to the cells next to it.
+ */
+function pieceBox(piece: RangePiece): string {
+  const left = piece.left - (piece.hasLeft ? 1 : 0);
+  const top = piece.top - (piece.hasTop ? 1 : 0);
+  const width = Math.max(0, piece.right - left);
+  const height = Math.max(0, piece.bottom - top);
+  return `left:${left}px;top:${top}px;width:${width}px;height:${height}px;position:absolute;pointer-events:none;`;
+}
+
+/**
+ * Where a cell is on screen, in the grid's own coordinates, or null when it
+ * is not drawn. A frozen cell sits in its pane's wrapper, which the scroll
+ * offset moves along with the view, so its box moves with it: something at
+ * grid level placed by the frozen arrays alone is left behind on a scroll.
+ */
+function cellBoxOnGrid(
+  state: CellGridRenderState,
+  col: number,
+  row: number
+): { left: number; top: number; width: number; height: number } | null {
+  const { viewport, horizontalSplitPosition, verticalSplitPosition } = state;
+  let left: number;
+  let width: number;
+  if (col >= 1 && col <= horizontalSplitPosition) {
+    left = (state.frozenColX[col - 1] ?? 0) + state.scrollLeft;
+    width = state.frozenColWidths[col - 1] ?? 0;
+  } else if (col >= viewport.firstColumnIndex && col <= viewport.lastColumnIndex) {
+    left = state.colX[col - viewport.firstColumnIndex] ?? 0;
+    width = state.colWidths[col - viewport.firstColumnIndex] ?? 0;
+  } else {
+    return null;
+  }
+  let top: number;
+  let height: number;
+  if (row >= 1 && row <= verticalSplitPosition) {
+    top = (state.frozenRowY[row - 1] ?? 0) + state.scrollTop;
+    height = state.frozenRowHeights[row - 1] ?? 0;
+  } else if (row >= viewport.firstRowIndex && row <= viewport.lastRowIndex) {
+    top = state.rowY[row - viewport.firstRowIndex] ?? 0;
+    height = state.rowHeights[row - viewport.firstRowIndex] ?? 0;
+  } else {
+    return null;
+  }
+  return { left, top, width, height };
 }
 
 /**
@@ -1582,12 +1687,9 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     if (!showsError && !editing && comment === undefined) {
       continue;
     }
-    const geometry = rectGeometry(state, {
-      c1: coord.col,
-      c2: coord.col,
-      r1: coord.row,
-      r2: coord.row
-    });
+    // On screen, frozen panes included: the note floats above every pane,
+    // so it is drawn at grid level wherever its cell is.
+    const geometry = cellBoxOnGrid(state, coord.col, coord.row);
     if (geometry === null) {
       continue;
     }
@@ -1618,41 +1720,14 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
   return overlays;
 }
 
-function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | string {
-  const { viewport, selection, colX, rowY, colWidths, rowHeights } = state;
+function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | string {
+  const { selection } = opts.state;
   const range = selection.activeRange;
-
-  // Clamp the range to the visible viewport.
-  const leftCol = Math.max(range.c1, viewport.firstColumnIndex);
-  const rightCol = Math.min(range.c2, viewport.lastColumnIndex);
-  const topRow = Math.max(range.r1, viewport.firstRowIndex);
-  const bottomRow = Math.min(range.r2, viewport.lastRowIndex);
-
-  if (leftCol > rightCol || topRow > bottomRow) {
-    // Active range outside the visible viewport.
+  const piece = rangePiece(opts, range);
+  if (piece === null) {
+    // None of the active range is in this quadrant.
     return '';
   }
-
-  const leftIndex = leftCol - viewport.firstColumnIndex;
-  const rightIndex = rightCol - viewport.firstColumnIndex;
-  const topIndex = topRow - viewport.firstRowIndex;
-  const bottomIndex = bottomRow - viewport.firstRowIndex;
-
-  const left = colX[leftIndex] ?? 0;
-  const top = rowY[topIndex] ?? 0;
-  const right = (colX[rightIndex] ?? 0) + (colWidths[rightIndex] ?? 0);
-  const bottom = (rowY[bottomIndex] ?? 0) + (rowHeights[bottomIndex] ?? 0);
-
-  // One pixel up and left of the range, as the GWT client drew it: each
-  // side of the outline then lies on a gridline. A cell draws only its
-  // right and bottom borders, so the gridlines above and to the left of
-  // the range belong to the cells next to it, and an outline starting at
-  // the range's own edge sat a pixel inside on those two sides.
-  const width = Math.max(0, right - left) + 1;
-  const height = Math.max(0, bottom - top) + 1;
-  const overlayStyle =
-    `left:${left - 1}px;top:${top - 1}px;width:${width}px;height:${height}px;` +
-    'position:absolute;pointer-events:none;';
 
   // The active cell's coordinates ride on the overlay as data-col /
   // data-row (slice 188). Nothing else in the DOM identifies the active
@@ -1668,18 +1743,24 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
   // `part="selection-corner"`. Border divs are internal (s-* names are
   // GWT-era; here we keep them only as internal class names — no part
   // attribute since they aren't documented).
+  //
+  // A side the range runs on past is kept, hidden, so every piece has all
+  // four; the handle is only where the range's last cell is.
+  const side = (name: string, real: boolean): TemplateResult => html`<div class=${real ? name : `${name} cut`}></div>`;
   return html`
     <div
       class="sheet-selection"
       data-col=${selection.activeCell.col}
       data-row=${selection.activeCell.row}
-      style=${overlayStyle}
+      style=${pieceBox(piece)}
     >
-      <div class="s-top"></div>
-      <div class="s-left"></div>
-      <div class="s-right"></div>
-      <div class="s-bottom"></div>
-      <div class="selection-corner" part="selection-corner"></div>
+      ${side('s-top', piece.hasTop)}${side('s-left', piece.hasLeft)}${side('s-right', piece.hasRight)}${side(
+        's-bottom',
+        piece.hasBottom
+      )}
+      ${piece.hasRight && piece.hasBottom
+        ? html`<div class="selection-corner" part="selection-corner"></div>`
+        : nothing}
     </div>
   `;
 }
@@ -1948,38 +2029,15 @@ function buildCellEditorOverlay(state: CellGridRenderState, lumo = false): Templ
     return '';
   }
   const { col, row, initialValue } = editor;
-  const { viewport, colX, colWidths, rowY, rowHeights } = state;
-  const { frozenColX, frozenColWidths, frozenRowY, frozenRowHeights } = state;
 
-  let left = 0;
-  let width = 0;
-  if (col >= viewport.firstColumnIndex && col <= viewport.lastColumnIndex) {
-    const i = col - viewport.firstColumnIndex;
-    left = colX[i] ?? 0;
-    width = colWidths[i] ?? 0;
-  } else if (col >= 1 && col <= frozenColX.length) {
-    left = frozenColX[col - 1] ?? 0;
-    width = frozenColWidths[col - 1] ?? 0;
-  } else {
+  // Over the cell where it is on screen: a frozen cell moves with the view,
+  // and an editor placed by the frozen arrays alone was left behind as soon
+  // as the sheet scrolled.
+  const box = cellBoxOnGrid(state, col, row);
+  if (box === null || box.width === 0 || box.height === 0) {
     return '';
   }
-
-  let top = 0;
-  let height = 0;
-  if (row >= viewport.firstRowIndex && row <= viewport.lastRowIndex) {
-    const i = row - viewport.firstRowIndex;
-    top = rowY[i] ?? 0;
-    height = rowHeights[i] ?? 0;
-  } else if (row >= 1 && row <= frozenRowY.length) {
-    top = frozenRowY[row - 1] ?? 0;
-    height = frozenRowHeights[row - 1] ?? 0;
-  } else {
-    return '';
-  }
-
-  if (width === 0 || height === 0) {
-    return '';
-  }
+  const { left, top, width, height } = box;
 
   // The Lumo theme puts every cell in its own font, which the cell's
   // styles would undo here: they reach the editor inline, past anything a
@@ -2076,11 +2134,19 @@ function buildCellEditorOverlay(state: CellGridRenderState, lumo = false): Templ
  * so every image re-downloads and flickers even though nothing about it
  * changed. Keyed, Lit moves the existing elements instead.
  */
-function buildSheetOverlays(state: CellGridRenderState): DirectiveResult {
+function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRenderOpts['quadrantName']): DirectiveResult {
   // Defensive default — some older test fixtures may not
   // declare the overlays array yet (slice 160 introduced it).
   // Real connector pushes always populate the field.
-  const overlays = state.overlays ?? [];
+  //
+  // Each in the pane its anchor cell is in, as the GWT client placed them,
+  // so a picture anchored in a frozen row stays with that row. The frozen
+  // panes' coordinates start where the sheet does, so the position the
+  // connector worked out serves in any pane.
+  const overlays = (state.overlays ?? []).filter(
+    (overlay) =>
+      quadrantOf(overlay.col, overlay.row, state.horizontalSplitPosition, state.verticalSplitPosition) === quadrant
+  );
   return repeat(
     overlays,
     (overlay) => overlay.id,
@@ -2127,8 +2193,12 @@ function buildSheetOverlays(state: CellGridRenderState): DirectiveResult {
  * which the connector translates to a `popupButtonClick`
  * spreadsheet-event for the server.
  */
-function buildPopupButtons(state: CellGridRenderState): TemplateResult[] {
-  const buttons = state.popupButtons ?? [];
+function buildPopupButtons(state: CellGridRenderState, quadrant: QuadrantRenderOpts['quadrantName']): TemplateResult[] {
+  // In the pane of the cell each belongs to, like the sheet overlays: a
+  // filter button in a frozen header row stays in that row on a scroll.
+  const buttons = (state.popupButtons ?? []).filter(
+    (b) => quadrantOf(b.col, b.row, state.horizontalSplitPosition, state.verticalSplitPosition) === quadrant
+  );
   return buttons.map((b) => {
     const className = b.active ? 'popup-button active' : 'popup-button';
     // The row's height rides along for a theme whose button is as tall as
