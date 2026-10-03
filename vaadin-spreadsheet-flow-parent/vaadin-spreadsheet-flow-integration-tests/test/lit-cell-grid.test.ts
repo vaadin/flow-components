@@ -859,6 +859,33 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         cleanup(el);
     });
 
+    it('lays each side of the outline on a gridline, as the GWT client did', async () => {
+        // A cell draws only its right and bottom borders. The outline used to
+        // start at the range's own edge, so its top and left sides sat a
+        // pixel inside the range, off the gridlines the cells beside it draw.
+        const el = await attachWithState(buildOverlayState({
+            activeCell: { col: 2, row: 2 },
+            activeRange: { c1: 2, c2: 3, r1: 2, r2: 3 },
+            auxRanges: [],
+        }));
+
+        const origin = el.getBoundingClientRect();
+        const box = (selector: string) => {
+            const r = el.shadowRoot!.querySelector(selector)!.getBoundingClientRect();
+            return [r.left - origin.left, r.top - origin.top, r.width, r.height];
+        };
+        // The range is x 50-150, y 20-60; its gridlines are x 49 and 149,
+        // y 19 and 59.
+        expect(box('.s-top')).to.deep.equal([49, 19, 101, 2]);
+        expect(box('.s-left')).to.deep.equal([49, 19, 2, 41]);
+        expect(box('.s-right')).to.deep.equal([148, 19, 2, 41]);
+        expect(box('.s-bottom')).to.deep.equal([49, 58, 101, 2]);
+        // The handle hangs from the foot of the right side, two pixels past.
+        expect(box('.selection-corner')).to.deep.equal([146, 55, 6, 6]);
+
+        cleanup(el);
+    });
+
     it('positions the overlay over the active range bounds', async () => {
         const el = await attachWithState(buildOverlayState({
             activeCell: { col: 2, row: 2 },
@@ -869,10 +896,11 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         const overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
         // Range cols 2-3 → left = colX[1] = 50, right = colX[2] + colWidths[2] = 100 + 50 = 150
         // Range rows 2-3 → top = rowY[1] = 20, bottom = rowY[2] + rowHeights[2] = 40 + 20 = 60
-        expect(overlay.style.left).to.equal('50px');
-        expect(overlay.style.top).to.equal('20px');
-        expect(overlay.style.width).to.equal('100px');
-        expect(overlay.style.height).to.equal('40px');
+        // One pixel up and left of that, onto the gridlines there.
+        expect(overlay.style.left).to.equal('49px');
+        expect(overlay.style.top).to.equal('19px');
+        expect(overlay.style.width).to.equal('101px');
+        expect(overlay.style.height).to.equal('41px');
 
         cleanup(el);
     });
@@ -885,10 +913,10 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         }));
 
         const overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
-        expect(overlay.style.left).to.equal('0px');
-        expect(overlay.style.top).to.equal('0px');
-        expect(overlay.style.width).to.equal('50px');
-        expect(overlay.style.height).to.equal('20px');
+        expect(overlay.style.left).to.equal('-1px');
+        expect(overlay.style.top).to.equal('-1px');
+        expect(overlay.style.width).to.equal('51px');
+        expect(overlay.style.height).to.equal('21px');
 
         cleanup(el);
     });
@@ -906,10 +934,10 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         // Clamps to (3, 3)..(4, 4):
         // left = colX[2] = 100, right = colX[3] + colWidths[3] = 150 + 50 = 200
         // top = rowY[2] = 40, bottom = rowY[3] + rowHeights[3] = 60 + 20 = 80
-        expect(overlay.style.left).to.equal('100px');
-        expect(overlay.style.width).to.equal('100px');
-        expect(overlay.style.top).to.equal('40px');
-        expect(overlay.style.height).to.equal('40px');
+        expect(overlay.style.left).to.equal('99px');
+        expect(overlay.style.width).to.equal('101px');
+        expect(overlay.style.top).to.equal('39px');
+        expect(overlay.style.height).to.equal('41px');
 
         cleanup(el);
     });
@@ -935,10 +963,10 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
             auxRanges: [],
         }));
 
-        // Initial: 50px wide overlay at (0, 0).
+        // Initial: around the 50px cell at (0, 0).
         let overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
-        expect(overlay.style.left).to.equal('0px');
-        expect(overlay.style.width).to.equal('50px');
+        expect(overlay.style.left).to.equal('-1px');
+        expect(overlay.style.width).to.equal('51px');
 
         // Re-assign with extended range (1..3, 1..2).
         el.renderState = {
@@ -954,8 +982,8 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         overlay = el.shadowRoot!.querySelector('.sheet-selection') as HTMLElement;
         // left = 0, right = colX[2] + colWidths[2] = 100 + 50 = 150
         // top = 0, bottom = rowY[1] + rowHeights[1] = 20 + 20 = 40
-        expect(overlay.style.width).to.equal('150px');
-        expect(overlay.style.height).to.equal('40px');
+        expect(overlay.style.width).to.equal('151px');
+        expect(overlay.style.height).to.equal('41px');
 
         cleanup(el);
     });

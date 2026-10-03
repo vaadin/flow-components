@@ -66,9 +66,11 @@ export class SpreadsheetHeaderCorner extends LitElement {
       display: block;
       position: relative;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, #fafafa);
-      border-right: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
-      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
+      border-right: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
     }
 
     /* Plain numbers, as the GWT client drew them. */
@@ -87,6 +89,17 @@ export class SpreadsheetHeaderCorner extends LitElement {
       line-height: 18px;
       text-align: center;
       cursor: pointer;
+    }
+
+    /* SpreadsheetTheme.LUMO, as the GWT client drew it. */
+    :host([theme~='lumo']) {
+      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+    }
+
+    :host([theme~='lumo']) .level-header {
+      color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
+      font-size: var(--lumo-font-size-s);
+      cursor: var(--lumo-clickable-cursor);
     }
   `;
 

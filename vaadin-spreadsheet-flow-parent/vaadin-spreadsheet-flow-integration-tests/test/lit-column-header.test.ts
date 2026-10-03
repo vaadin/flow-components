@@ -416,6 +416,16 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         );
     }
 
+    it('shows the GWT client\'s select-the-column pointer over a letter', async () => {
+        // A downward arrow: clicking a letter selects its column.
+        const el = await attachWithSelection(new Set());
+
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell')!).cursor).to.equal('s-resize');
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.col-resize-handle')!).cursor).to.equal('col-resize');
+
+        cleanup(el);
+    });
+
     it('marks only the selected column with the header-selected part', async () => {
         const el = await attachWithSelection(new Set([2]));
 

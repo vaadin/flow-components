@@ -292,6 +292,11 @@ export interface PositionedPopupButton {
   leftPx: number;
   /** Pixel top of the anchor cell's bottom-right corner. */
   topPx: number;
+  /**
+   * Height of the anchor cell's row: the Lumo theme draws the button as
+   * tall as its cell, as the GWT client did.
+   */
+  cellHeightPx?: number;
   /** True when the popup is currently shown — affects the indicator style. */
   active: boolean;
 }

@@ -99,8 +99,9 @@ export class SpreadsheetContextMenu extends LitElement {
       position: absolute;
       padding: 4px;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-contextmenu-bg, #fff);
-      border: 1px solid var(--vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09));
+      background: var(--vaadin-spreadsheet-contextmenu-bg, var(--_vaadin-spreadsheet-contextmenu-bg, #fff));
+      border: 1px solid
+        var(--vaadin-spreadsheet-contextmenu-border, var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09)));
       border-radius: 4px;
       box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
       font: inherit;
@@ -131,9 +132,34 @@ export class SpreadsheetContextMenu extends LitElement {
        sets its text through ::part(context-menu-item). */
     .item:hover,
     .item:focus {
-      background: var(--vaadin-spreadsheet-contextmenu-hover-bg, linear-gradient(to bottom, #1b87e3 2%, #166ed6 98%));
+      background: var(
+        --vaadin-spreadsheet-contextmenu-hover-bg,
+        var(--_vaadin-spreadsheet-contextmenu-hover-bg, linear-gradient(to bottom, #1b87e3 2%, #166ed6 98%))
+      );
       color: #ecf2f8;
       outline: none;
+    }
+
+    /* SpreadsheetTheme.LUMO, as the GWT client drew it: Lumo's card and
+       spacing, and the item under the pointer in the primary tint. */
+    :host([theme~='lumo']) .menu {
+      padding: var(--lumo-space-xs);
+      border-radius: var(--lumo-border-radius-s);
+      color: var(--lumo-body-text-color);
+      box-shadow: var(--lumo-box-shadow-s);
+    }
+
+    :host([theme~='lumo']) .item {
+      gap: var(--lumo-space-xs);
+      padding: 0 var(--lumo-space-l) 0 var(--lumo-space-m);
+      border-radius: var(--lumo-border-radius-s);
+      line-height: calc(1.5 * var(--lumo-line-height-m));
+      cursor: var(--lumo-clickable-cursor);
+    }
+
+    :host([theme~='lumo']) .item:hover,
+    :host([theme~='lumo']) .item:focus {
+      color: var(--lumo-body-text-color);
     }
   `;
 

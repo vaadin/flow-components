@@ -83,11 +83,15 @@ export class SpreadsheetFormulaBar extends LitElement {
       display: flex;
       align-items: stretch;
       box-sizing: border-box;
-      height: var(--vaadin-spreadsheet-formulabar-height, 30px);
-      background: var(--vaadin-spreadsheet-formulabar-bg, #fff);
-      border-bottom: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c7c7c7);
-      font-family: var(--vaadin-spreadsheet-formulabar-font, inherit);
-      font-size: var(--vaadin-spreadsheet-formulabar-font-size, inherit);
+      height: var(--vaadin-spreadsheet-formulabar-height, var(--_vaadin-spreadsheet-formulabar-height, 30px));
+      background: var(--vaadin-spreadsheet-formulabar-bg, var(--_vaadin-spreadsheet-formulabar-bg, #fff));
+      border-bottom: 1px solid
+        var(--vaadin-spreadsheet-formulabar-border, var(--_vaadin-spreadsheet-formulabar-border, #c7c7c7));
+      font-family: var(--vaadin-spreadsheet-formulabar-font, var(--_vaadin-spreadsheet-formulabar-font, inherit));
+      font-size: var(
+        --vaadin-spreadsheet-formulabar-font-size,
+        var(--_vaadin-spreadsheet-formulabar-font-size, inherit)
+      );
     }
 
     input {
@@ -110,7 +114,8 @@ export class SpreadsheetFormulaBar extends LitElement {
       box-sizing: border-box;
       width: 176px;
       height: 100%;
-      border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, #c7c7c7);
+      border-right: 1px solid
+        var(--vaadin-spreadsheet-formulabar-border, var(--_vaadin-spreadsheet-formulabar-border, #c7c7c7));
       background: #fafafa;
     }
 
@@ -149,6 +154,24 @@ export class SpreadsheetFormulaBar extends LitElement {
       justify-content: center;
       font-size: x-small;
       pointer-events: none;
+    }
+
+    /* SpreadsheetTheme.LUMO, as the GWT client drew it: the address on a
+       tinted panel, both fields indented by Lumo's spacing. */
+    :host([theme~='lumo']) input {
+      padding-left: var(--lumo-space-s);
+    }
+
+    :host([theme~='lumo']) .formula {
+      padding-right: var(--lumo-space-xs);
+    }
+
+    :host([theme~='lumo']) .address-panel {
+      background: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct)) var(--lumo-base-color);
+    }
+
+    :host([theme~='lumo']) .namedrange-arrow {
+      font-size: var(--lumo-font-size-xs);
     }
   `;
 

@@ -146,7 +146,7 @@ export class SpreadsheetSheetTabs extends LitElement {
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: var(--vaadin-spreadsheet-tab-button-bg, #464646);
+      color: var(--vaadin-spreadsheet-tab-button-bg, var(--_vaadin-spreadsheet-tab-button-bg, #464646));
     }
 
     .sheet-tabsheet-options > div::before {
@@ -159,7 +159,7 @@ export class SpreadsheetSheetTabs extends LitElement {
     }
 
     .sheet-tabsheet-options > div:hover {
-      color: var(--vaadin-spreadsheet-tabs-active-fg, #2584e2);
+      color: var(--vaadin-spreadsheet-tabs-active-fg, var(--_vaadin-spreadsheet-tabs-active-fg, #2584e2));
     }
 
     /* Kept in the DOM so a stylesheet can reach it, but inert. */
@@ -198,10 +198,10 @@ export class SpreadsheetSheetTabs extends LitElement {
       align-items: flex-start;
       box-sizing: border-box;
       height: 29px;
-      background: var(--vaadin-spreadsheet-tabs-bg, #fafafa);
-      border-top: 1px solid var(--vaadin-spreadsheet-tabs-border, #c7c7c7);
-      font-family: var(--vaadin-spreadsheet-tabs-font, inherit);
-      font-size: var(--vaadin-spreadsheet-tabs-font-size, inherit);
+      background: var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa));
+      border-top: 1px solid var(--vaadin-spreadsheet-tabs-border, var(--_vaadin-spreadsheet-tabs-border, #c7c7c7));
+      font-family: var(--vaadin-spreadsheet-tabs-font, var(--_vaadin-spreadsheet-tabs-font, inherit));
+      font-size: var(--vaadin-spreadsheet-tabs-font-size, var(--_vaadin-spreadsheet-tabs-font-size, inherit));
       overflow: hidden;
     }
 
@@ -216,13 +216,13 @@ export class SpreadsheetSheetTabs extends LitElement {
       max-width: 200px;
       margin-left: 5px;
       padding: 2px 6px;
-      border: 1px solid var(--vaadin-spreadsheet-tabs-border, #c7c7c7);
+      border: 1px solid var(--vaadin-spreadsheet-tabs-border, var(--_vaadin-spreadsheet-tabs-border, #c7c7c7));
       border-top: none;
       border-radius: 0 0 5px 5px;
       cursor: pointer;
       user-select: none;
-      background: var(--vaadin-spreadsheet-tabs-bg, #fafafa);
-      color: var(--vaadin-spreadsheet-tabs-fg, #6a6a6a);
+      background: var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa));
+      color: var(--vaadin-spreadsheet-tabs-fg, var(--_vaadin-spreadsheet-tabs-fg, #6a6a6a));
       font-weight: 300;
       line-height: 20px;
       text-align: center;
@@ -235,13 +235,13 @@ export class SpreadsheetSheetTabs extends LitElement {
        colour, and as wide as its name needs. */
     .sheet-tab.active {
       max-width: none;
-      background: var(--vaadin-spreadsheet-tabs-active-bg, #fff);
-      color: var(--vaadin-spreadsheet-tabs-active-fg, #2584e2);
+      background: var(--vaadin-spreadsheet-tabs-active-bg, var(--_vaadin-spreadsheet-tabs-active-bg, #fff));
+      color: var(--vaadin-spreadsheet-tabs-active-fg, var(--_vaadin-spreadsheet-tabs-active-fg, #2584e2));
       cursor: default;
     }
 
     .sheet-tab:hover:not(.active) {
-      background: var(--vaadin-spreadsheet-tabs-hover-bg, #e8e8e8);
+      background: var(--vaadin-spreadsheet-tabs-hover-bg, var(--_vaadin-spreadsheet-tabs-hover-bg, #e8e8e8));
     }
 
     /* The status label: 200px at the right end of the strip, over the
@@ -254,8 +254,9 @@ export class SpreadsheetSheetTabs extends LitElement {
       width: 200px;
       height: 100%;
       padding: 0 5px;
-      border-left: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
-      background: var(--vaadin-spreadsheet-tabs-bg, #fafafa);
+      border-left: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      background: var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa));
       font-weight: bold;
       font-size: 11px;
       line-height: 29px;
@@ -266,6 +267,57 @@ export class SpreadsheetSheetTabs extends LitElement {
 
     .sheet-tabsheet-container.beside-infolabel {
       margin-right: 206px;
+    }
+
+    /* SpreadsheetTheme.LUMO, as the GWT client drew it: tinted folder tabs
+       in regular weight, the active one lifted off the strip, and buttons
+       that light up in the primary tint. */
+    :host([theme~='lumo']) {
+      height: calc(var(--lumo-font-size-s) + 15px);
+    }
+
+    :host([theme~='lumo']) .sheet-tabsheet-options > div {
+      cursor: var(--lumo-clickable-cursor);
+    }
+
+    :host([theme~='lumo']) .sheet-tabsheet-options > div:hover {
+      color: var(--vaadin-spreadsheet-tab-button-bg, var(--_vaadin-spreadsheet-tab-button-bg, #464646));
+      background: var(--lumo-primary-color-10pct);
+    }
+
+    :host([theme~='lumo']) .sheet-tabsheet-options > div.hidden {
+      color: var(--lumo-contrast-20pct);
+    }
+
+    :host([theme~='lumo']) .sheet-tab {
+      height: calc(var(--lumo-font-size-s) + 4px);
+      margin-left: var(--lumo-space-s);
+      padding: var(--lumo-space-xs);
+      border-radius: 0 0 var(--lumo-border-radius-m) var(--lumo-border-radius-m);
+      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+      font-weight: 400;
+      cursor: var(--lumo-clickable-cursor);
+    }
+
+    /* The GWT client's Lumo tabs did not change under the pointer. */
+    :host([theme~='lumo']) .sheet-tab:hover:not(.active) {
+      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+    }
+
+    :host([theme~='lumo']) .sheet-tab.active {
+      background-image: none;
+      box-shadow: var(--lumo-box-shadow-xs);
+    }
+
+    :host([theme~='lumo']) .sheet-tab-rename {
+      font-size: var(--lumo-font-size-s);
+      color: var(--lumo-primary-text-color);
+    }
+
+    :host([theme~='lumo']) .sheet-tabsheet-infolabel {
+      background: var(--lumo-contrast-5pct);
+      font-size: var(--lumo-font-size-s);
+      padding: 0 var(--lumo-space-xs);
     }
   `;
 

@@ -49,9 +49,31 @@ public class DeclaredCssVariableContractTest {
     private static final Path CLIENT = Path.of("src", "main", "resources",
             "META-INF", "frontend", "vaadin-spreadsheet");
 
-    /** A declaration: {@code --name:} at the start of a line. */
+    /**
+     * A declaration: {@code --name:} at the start of a line, of a documented
+     * property or of a theme's default for one.
+     */
     private static final Pattern DECLARATION = Pattern
-            .compile("^\\s*(--vaadin-spreadsheet-[a-zA-Z0-9-]+)\\s*:");
+            .compile("^\\s*(--_?vaadin-spreadsheet-[a-zA-Z0-9-]+)\\s*:");
+
+    /**
+     * The stylesheet only reads the documented properties. A declaration on the
+     * host hides the value an application sets on an ancestor - its theme's
+     * {@code html} rule, a layout around the sheet - and the four the GWT
+     * client documented were declared that way for the whole of the Lit
+     * rewrite, so setting them anywhere but on the element did nothing.
+     */
+    @Test
+    public void noDocumentedProperty_isDeclaredByTheComponent()
+            throws IOException {
+        List<String> declared = declaredProperties().stream()
+                .filter(name -> name.startsWith("--vaadin-spreadsheet-"))
+                .toList();
+
+        assertTrue(declared.isEmpty(),
+                "Declared on the host, so an ancestor's value never reaches"
+                        + " the sheet: " + declared);
+    }
 
     @Test
     public void everyDeclaredProperty_isReadBySomething() throws IOException {

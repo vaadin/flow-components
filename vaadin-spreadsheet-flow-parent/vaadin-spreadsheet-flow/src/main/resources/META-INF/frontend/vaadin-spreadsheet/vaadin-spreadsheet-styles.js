@@ -21,15 +21,22 @@ import { css } from 'lit';
  *      the internal Lit sub-elements' shadow DOM via the {@code part}
  *      attribute. Each internal element owns its own default styles
  *      for these parts; this outer stylesheet does not touch them.
- *   2. {@code --vaadin-spreadsheet-*} CSS custom properties —
- *      declared here with default values so consumer CSS can
- *      override at any cascade level.
+ *   2. {@code --vaadin-spreadsheet-*} CSS custom properties — read,
+ *      never declared, so a value an application sets on any
+ *      ancestor reaches the sheet. Each read falls back to a
+ *      {@code --_vaadin-spreadsheet-*} theme default and then to the
+ *      GWT client's own value.
  *   3. {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
  *      + {@code Spreadsheet.HIDE_TABSHEET_STYLE} ("hidetabsheet")
  *      Java constants — applied to the host's class list and
  *      handled by CSS selectors below (defense-in-depth — the
  *      Lit connector also toggles display via a MutationObserver,
  *      slice 174-175).
+ *   4. {@code Spreadsheet.setTheme(SpreadsheetTheme.LUMO)} — the
+ *      host's {@code theme="lumo"}, which the connector copies onto
+ *      each internal element. The theme defaults below give every
+ *      documented property its Lumo value; each element draws the
+ *      rest of the Lumo look under {@code :host([theme~='lumo'])}.
  *
  * GWT-era selectors (.s-top, .sheet-tabsheet, .ch.col1, .rh.row1,
  * .addressfield, .functionfield, .bottom-right-pane, .v-spreadsheet,
@@ -39,13 +46,10 @@ import { css } from 'lit';
  */
 export const spreadsheetStyles = css`
   :host {
-    /* Documented CSS custom properties. Defaults match the GWT-era
-       visual baseline so consumers see equivalent appearance out of
-       the box. */
-    --vaadin-spreadsheet-border-color: #c7c7c7;
-    --vaadin-spreadsheet-cell-border-color: #c7c7c7;
-    --vaadin-spreadsheet-header-border-color: #c7c7c7;
-    --vaadin-spreadsheet-text-color: #474747;
+    /* No documented property is declared here. A declaration on the
+       host would hide whatever an application sets on an ancestor -
+       its theme's html rule, a layout around the sheet - as the GWT
+       client never did. */
 
     /* A flex column so the root fills a host that has been given a
        height. Declared here rather than written onto the host inline,
@@ -70,7 +74,7 @@ export const spreadsheetStyles = css`
     --default-color: #000;
     --default-font-family: Helvetica;
     --default-font-size: 11pt;
-    color: var(--vaadin-spreadsheet-text-color);
+    color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
     font-family: Helvetica;
     font-size: 14px;
     box-sizing: border-box;
@@ -89,7 +93,58 @@ export const spreadsheetStyles = css`
      root div was. The root's sizing is set on the element itself; only
      the theming lives here. */
   .spreadsheet-root {
-    border: 1px solid var(--vaadin-spreadsheet-border-color);
+    border: 1px solid var(--vaadin-spreadsheet-border-color, var(--_vaadin-spreadsheet-border-color, #c7c7c7));
+  }
+
+  /* SpreadsheetTheme.LUMO, as the GWT client drew it: the Lumo value of
+     every documented property the application leaves unset. Lumo's
+     tokens come from the application's Lumo theme. */
+  :host([theme~='lumo']) {
+    --_vaadin-spreadsheet-border-color: var(--lumo-contrast-20pct);
+    --_vaadin-spreadsheet-cell-border-color: var(--lumo-contrast-20pct);
+    --_vaadin-spreadsheet-header-border-color: var(--lumo-contrast-20pct);
+    --_vaadin-spreadsheet-text-color: var(--lumo-body-text-color);
+    --_vaadin-spreadsheet-cell-background: var(--lumo-base-color);
+    --_vaadin-spreadsheet-cell-range-bg: var(--lumo-primary-color-10pct);
+    --_vaadin-spreadsheet-selection-color: var(--lumo-primary-color);
+    --_vaadin-spreadsheet-selection-border-color: var(--lumo-success-color);
+    --_vaadin-spreadsheet-editor-border: var(--lumo-primary-color);
+    --_vaadin-spreadsheet-header-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-header-selected-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-header-font: var(--lumo-font-family);
+    --_vaadin-spreadsheet-header-font-size: var(--lumo-font-size-s);
+    --_vaadin-spreadsheet-grouping-toggle-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-grouping-toggle-border-color: transparent;
+    --_vaadin-spreadsheet-comment-bg: var(--lumo-warning-color);
+    --_vaadin-spreadsheet-invalidformula-bg: var(--lumo-error-color);
+    --_vaadin-spreadsheet-comment-overlay-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-comment-overlay-border-color: var(--lumo-contrast-20pct);
+    --_vaadin-spreadsheet-formulabar-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-formulabar-border: var(--lumo-contrast-20pct);
+    --_vaadin-spreadsheet-formulabar-font: var(--lumo-font-family);
+    --_vaadin-spreadsheet-formulabar-font-size: var(--lumo-font-size-s);
+    --_vaadin-spreadsheet-tabs-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-tabs-fg: var(--lumo-body-text-color);
+    --_vaadin-spreadsheet-tabs-border: var(--lumo-contrast-20pct);
+    --_vaadin-spreadsheet-tabs-hover-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-tabs-active-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-tabs-active-fg: var(--lumo-primary-text-color);
+    --_vaadin-spreadsheet-tabs-font: var(--lumo-font-family);
+    --_vaadin-spreadsheet-tabs-font-size: var(--lumo-font-size-s);
+    --_vaadin-spreadsheet-tab-button-bg: var(--lumo-primary-text-color);
+    --_vaadin-spreadsheet-contextmenu-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-contextmenu-border: transparent;
+    --_vaadin-spreadsheet-contextmenu-hover-bg: var(--lumo-primary-color-10pct);
+    --_vaadin-spreadsheet-popup-background: var(--lumo-base-color);
+    --_vaadin-spreadsheet-popup-border-color: var(--lumo-contrast-20pct);
+    --_vaadin-spreadsheet-popup-button-bg: var(--lumo-base-color);
+    --_vaadin-spreadsheet-popup-button-fg: var(--lumo-body-text-color);
+    --_vaadin-spreadsheet-popup-button-active-bg: var(--lumo-base-color);
+    --default-background-color: var(--lumo-base-color);
+    --default-color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
+    background-color: var(--lumo-base-color);
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-m);
   }
 
   /* Spreadsheet.HIDE_FUNCTION_BAR_STYLE — public Java constant
@@ -111,11 +166,37 @@ export const spreadsheetStyles = css`
 `;
 
 /**
- * Document-level overlay styles. Slice 176 reduces this to an empty
- * export — the Lit path uses Vaadin's standard tooltip and
- * context-menu components, which carry their own styles. The export
- * is preserved so the existing import in vaadin-spreadsheet.js
- * doesn't break; consumers who relied on .v-tooltip / .v-errormessage
- * selectors should migrate to Vaadin's documented overlay parts.
+ * Document-level overlay styles, for what the spreadsheet shows from its
+ * light DOM: the filter popup's content. Injected into the document head,
+ * and into the enclosing shadow root when the spreadsheet is nested in one.
+ * The menu, comments and popup card are drawn in the component's own
+ * shadow tree and styled there.
  */
-export const spreadsheetOverlayStyles = css``;
+export const spreadsheetOverlayStyles = css`
+  /* The filter popup's content, laid out as the GWT client laid it out:
+     the column's own controls above its values, the values in a column
+     that scrolls past 275px. The content is the application's components,
+     in the host's light DOM, so these rules live at the document level. */
+  vaadin-spreadsheet .spreadsheet-filter-table-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  vaadin-spreadsheet .spreadsheet-item-filter-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 275px;
+    overflow-y: auto;
+  }
+
+  vaadin-spreadsheet[theme~='lumo'] .spreadsheet-filter-table-content {
+    gap: var(--lumo-space-xs);
+  }
+
+  vaadin-spreadsheet[theme~='lumo'] .spreadsheet-item-filter-layout {
+    gap: var(--lumo-space-xs);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  }
+`;

@@ -578,6 +578,16 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
         );
     }
 
+    it('shows the GWT client\'s select-the-row pointer over a number', async () => {
+        // An arrow pointing into the row: clicking a number selects it.
+        const el = await attachWithSelection(new Set());
+
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.row-header-cell')!).cursor).to.equal('e-resize');
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.row-resize-handle')!).cursor).to.equal('row-resize');
+
+        cleanup(el);
+    });
+
     it('marks only the selected row with the header-selected part', async () => {
         const el = await attachWithSelection(new Set([2]));
 

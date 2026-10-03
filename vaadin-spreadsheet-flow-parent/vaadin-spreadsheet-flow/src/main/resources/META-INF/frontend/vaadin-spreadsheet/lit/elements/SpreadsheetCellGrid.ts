@@ -64,7 +64,8 @@ export class SpreadsheetCellGrid extends LitElement {
 
   static properties = {
     renderState: { attribute: false },
-    tooNarrowCells: { attribute: false }
+    tooNarrowCells: { attribute: false },
+    theme: { type: String }
   };
 
   static styles = css`
@@ -100,14 +101,22 @@ export class SpreadsheetCellGrid extends LitElement {
          white rather than transparent, and a cell under a merge or an
          overlay does not show what is behind the sheet. A cs<N> or
          cf<N> rule wins over this, being the more specific selector. */
-      background: var(--vaadin-spreadsheet-cell-background, #fff);
-      border-right: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
-      border-bottom: 1px solid var(--vaadin-spreadsheet-cell-border-color, #c7c7c7);
+      background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
+      border-right: 1px solid
+        var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
+      border-bottom: 1px solid
+        var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
       /* Unset, the workbook's default font, which its default style
          declares on every cell - and until the styles arrive, the default
          the host declares for it. */
-      font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
-      font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
+      font-family: var(
+        --vaadin-spreadsheet-cell-font,
+        var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
+      );
+      font-size: var(
+        --vaadin-spreadsheet-cell-font-size,
+        var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
+      );
     }
 
     /* The server appends an "r" to a cell's class list when the value is
@@ -136,7 +145,7 @@ export class SpreadsheetCellGrid extends LitElement {
        rule wins over this, being the more specific selector, so a styled
        merge keeps its own background. */
     .merged-cell {
-      background: var(--vaadin-spreadsheet-cell-background, #fff);
+      background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
     }
 
     /* Comment notes. Anchored at the cell's top-right and above every
@@ -149,8 +158,12 @@ export class SpreadsheetCellGrid extends LitElement {
       box-sizing: border-box;
       pointer-events: none;
       color: #474747;
-      background: var(--vaadin-spreadsheet-comment-overlay-bg, #fff);
-      border: 1px solid var(--vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09));
+      background: var(--vaadin-spreadsheet-comment-overlay-bg, var(--_vaadin-spreadsheet-comment-overlay-bg, #fff));
+      border: 1px solid
+        var(
+          --vaadin-spreadsheet-comment-overlay-border-color,
+          var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
+        );
       border-radius: 4px;
       box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
     }
@@ -205,7 +218,8 @@ export class SpreadsheetCellGrid extends LitElement {
       position: absolute;
       pointer-events: none;
       box-sizing: border-box;
-      border: 2px solid var(--vaadin-spreadsheet-selection-border-color, #40b527);
+      border: 2px solid
+        var(--vaadin-spreadsheet-selection-border-color, var(--_vaadin-spreadsheet-selection-border-color, #40b527));
       background: rgba(235, 247, 233, 0.8);
       z-index: 3;
     }
@@ -222,7 +236,7 @@ export class SpreadsheetCellGrid extends LitElement {
       left: 0;
       width: 100%;
       height: 2px;
-      background: var(--vaadin-spreadsheet-selection-color, #197de1);
+      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
@@ -234,7 +248,7 @@ export class SpreadsheetCellGrid extends LitElement {
       left: 0;
       width: 100%;
       height: 2px;
-      background: var(--vaadin-spreadsheet-selection-color, #197de1);
+      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
@@ -246,7 +260,7 @@ export class SpreadsheetCellGrid extends LitElement {
       left: 0;
       width: 2px;
       height: 100%;
-      background: var(--vaadin-spreadsheet-selection-color, #197de1);
+      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
@@ -258,7 +272,7 @@ export class SpreadsheetCellGrid extends LitElement {
       right: 0;
       width: 2px;
       height: 100%;
-      background: var(--vaadin-spreadsheet-selection-color, #197de1);
+      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
       /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. */
@@ -266,14 +280,18 @@ export class SpreadsheetCellGrid extends LitElement {
     }
     /* The fill handle, in the fill colour the drag preview uses - the
        GWT client's green square, ringed in white so it stands off the
-       outline. */
+       outline. Where the GWT client put it: hung from the foot of the
+       right side, two pixels past it. */
     .sheet-selection .selection-corner {
       position: absolute;
-      right: -3px;
-      bottom: -3px;
+      right: -2px;
+      bottom: -1px;
       width: 6px;
       height: 6px;
-      background: var(--vaadin-spreadsheet-selection-border-color, #40b527);
+      background: var(
+        --vaadin-spreadsheet-selection-border-color,
+        var(--_vaadin-spreadsheet-selection-border-color, #40b527)
+      );
       outline: 2px solid #fff;
       cursor: crosshair;
       pointer-events: auto;
@@ -292,7 +310,8 @@ export class SpreadsheetCellGrid extends LitElement {
        Excel shows the fill through the selection. An inset shadow spread
        over the whole box tints instead of replacing. */
     .cell.cell-range {
-      box-shadow: inset 0 0 0 9999px var(--vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1));
+      box-shadow: inset 0 0 0 9999px
+        var(--vaadin-spreadsheet-cell-range-bg, var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1)));
     }
 
     /* The active range's overlay has nothing of its own underneath, so it
@@ -300,7 +319,10 @@ export class SpreadsheetCellGrid extends LitElement {
        cells carry part="cell cell-range" as well, and a background on them
        is what hid their fill. */
     .sheet-selection {
-      background: var(--vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1));
+      background: var(
+        --vaadin-spreadsheet-cell-range-bg,
+        var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1))
+      );
     }
 
     /* Frozen-pane wrappers (slice 141). Each frozen quadrant lives
@@ -396,7 +418,7 @@ export class SpreadsheetCellGrid extends LitElement {
       top: 0;
       width: 9px;
       height: 9px;
-      background: var(--vaadin-spreadsheet-invalidformula-bg, #ed473b);
+      background: var(--vaadin-spreadsheet-invalidformula-bg, var(--_vaadin-spreadsheet-invalidformula-bg, #ed473b));
       clip-path: polygon(0 0, 100% 0, 100% 100%);
       z-index: 5;
       pointer-events: none;
@@ -409,7 +431,7 @@ export class SpreadsheetCellGrid extends LitElement {
       width: 9px;
       height: 9px;
       transform: translate(calc(-100% - 1px), 0);
-      background: var(--vaadin-spreadsheet-comment-bg, #ffcf16);
+      background: var(--vaadin-spreadsheet-comment-bg, var(--_vaadin-spreadsheet-comment-bg, #ffcf16));
       clip-path: polygon(0 0, 100% 0, 100% 100%);
       z-index: 5;
       pointer-events: none;
@@ -443,8 +465,8 @@ export class SpreadsheetCellGrid extends LitElement {
       justify-content: center;
       border: 1px solid #d3d3d3;
       border-radius: 2px;
-      background: var(--vaadin-spreadsheet-popup-button-bg, #fff);
-      color: var(--vaadin-spreadsheet-popup-button-fg, #808080);
+      background: var(--vaadin-spreadsheet-popup-button-bg, var(--_vaadin-spreadsheet-popup-button-bg, #fff));
+      color: var(--vaadin-spreadsheet-popup-button-fg, var(--_vaadin-spreadsheet-popup-button-fg, #808080));
       cursor: pointer;
       font-size: 9px;
       line-height: 1;
@@ -453,7 +475,10 @@ export class SpreadsheetCellGrid extends LitElement {
     }
     /* A filter in use, marked along the top. */
     .popup-button.active {
-      background: var(--vaadin-spreadsheet-popup-button-active-bg, #fff);
+      background: var(
+        --vaadin-spreadsheet-popup-button-active-bg,
+        var(--_vaadin-spreadsheet-popup-button-active-bg, #fff)
+      );
       box-shadow: inset 0 2px 0 0 rgb(0, 171, 238);
     }
 
@@ -465,11 +490,116 @@ export class SpreadsheetCellGrid extends LitElement {
       position: absolute;
       box-sizing: border-box;
       z-index: 10;
-      border: 2px solid var(--vaadin-spreadsheet-editor-border, #1976d2);
+      border: 2px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
       outline: none;
-      font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
-      font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
+      font-family: var(
+        --vaadin-spreadsheet-cell-font,
+        var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
+      );
+      font-size: var(
+        --vaadin-spreadsheet-cell-font-size,
+        var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
+      );
       padding: 0 2px;
+    }
+
+    /* The filter arrow, drawn after the button's content as the GWT client
+       drew it, so a theme can swap the glyph. */
+    .popup-button::after {
+      content: '▼';
+    }
+
+    /*
+     * SpreadsheetTheme.LUMO, as the GWT client drew it. The colours come
+     * from the documented properties' Lumo defaults on the host; the rest
+     * of the look is here.
+     */
+
+    /* The Lumo font on every cell - the workbook's own fonts too, as the
+       GWT client had it - and Lumo's small size where the workbook leaves
+       the size to its default. Every style rule sets these on the cells it
+       styles; this is more specific than any of them. */
+    :host([theme~='lumo']) .cell {
+      --default-font-family: var(--lumo-font-family);
+      --default-font-size: var(--lumo-font-size-s);
+    }
+
+    /* No more specific than the cell's own rule, so a workbook's indent
+       still wins. */
+    :where(:host([theme~='lumo'])) .cell {
+      padding: 0 var(--lumo-space-xs);
+    }
+
+    /* Borderless, ringed in the editor colour and lifted off the sheet,
+       one pixel up and left of the cell it covers. */
+    :host([theme~='lumo']) .cell-editor {
+      border: 0;
+      outline: 1px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
+      box-shadow: var(--lumo-box-shadow-s);
+      margin: -1px 0 0 -1px;
+      padding: 0;
+    }
+
+    :host([theme~='lumo']) .selection-corner {
+      outline-color: var(--lumo-base-color);
+    }
+
+    :host([theme~='lumo']) .paintmode {
+      background: var(--lumo-success-color-10pct);
+    }
+
+    :host([theme~='lumo']) .freeze-line {
+      background: var(--lumo-contrast-50pct);
+    }
+
+    /* A square as tall as its cell, tinted like the headers, with Lumo's
+       chevron for an arrow. The row height arrives as --_cell-height. */
+    :host([theme~='lumo']) .popup-button {
+      width: calc(var(--_cell-height, 20px) + 1px);
+      height: calc(var(--_cell-height, 20px) + 1px);
+      border-color: var(
+        --vaadin-spreadsheet-header-border-color,
+        var(--_vaadin-spreadsheet-header-border-color, #c7c7c7)
+      );
+      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+      border-radius: var(--lumo-border-radius-s);
+      font-size: var(--lumo-font-size-s);
+      cursor: var(--lumo-clickable-cursor);
+    }
+
+    :host([theme~='lumo']) .popup-button::after {
+      content: var(--lumo-icons-angle-down);
+      font-family: 'lumo-icons';
+      font-size: var(--lumo-font-size-xs);
+    }
+
+    :host([theme~='lumo']) .popup-button.active {
+      box-shadow: var(--lumo-box-shadow-xs) inset;
+    }
+
+    :host([theme~='lumo']) .v-spreadsheet-comment-overlay {
+      padding: var(--lumo-space-s);
+      border-radius: var(--lumo-border-radius-m);
+      color: var(--lumo-body-text-color);
+      box-shadow: var(--lumo-box-shadow-m);
+    }
+
+    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-author {
+      padding-bottom: var(--lumo-space-s);
+      font-size: var(--lumo-font-size-xs);
+    }
+
+    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+      color: var(--lumo-error-color);
+    }
+
+    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-edit {
+      font-family: var(--lumo-font-family);
+      font-size: var(--lumo-font-size-s);
+    }
+
+    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-separator {
+      border-bottom-color: var(--lumo-contrast-20pct);
     }
   `;
 
@@ -494,6 +624,12 @@ export class SpreadsheetCellGrid extends LitElement {
    * replaced with hashes, which is what the GWT client did too.
    */
   declare tooNarrowCells: ReadonlySet<string>;
+  /**
+   * The theme variant the connector copies from the host. A property, not
+   * only an attribute the stylesheet reads, because the editor's inline
+   * style follows it too.
+   */
+  declare theme: string | null;
   /** Hidden span the measuring is done in. */
   private valueProbe: HTMLSpanElement | null = null;
 
@@ -984,7 +1120,7 @@ export class SpreadsheetCellGrid extends LitElement {
 
     const styleBlock = buildCellStyleBlock(this.renderState);
     const selectionOverlay = buildSelectionOverlay(this.renderState);
-    const editor = buildCellEditorOverlay(this.renderState);
+    const editor = buildCellEditorOverlay(this.renderState, isLumo(this.theme));
     const sheetOverlays = buildSheetOverlays(this.renderState);
     const popupButtons = buildPopupButtons(this.renderState);
     const paintOutline = buildPaintOutline(this.renderState);
@@ -1507,10 +1643,16 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
   const right = (colX[rightIndex] ?? 0) + (colWidths[rightIndex] ?? 0);
   const bottom = (rowY[bottomIndex] ?? 0) + (rowHeights[bottomIndex] ?? 0);
 
-  const width = Math.max(0, right - left);
-  const height = Math.max(0, bottom - top);
+  // One pixel up and left of the range, as the GWT client drew it: each
+  // side of the outline then lies on a gridline. A cell draws only its
+  // right and bottom borders, so the gridlines above and to the left of
+  // the range belong to the cells next to it, and an outline starting at
+  // the range's own edge sat a pixel inside on those two sides.
+  const width = Math.max(0, right - left) + 1;
+  const height = Math.max(0, bottom - top) + 1;
   const overlayStyle =
-    `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + 'position:absolute;pointer-events:none;';
+    `left:${left - 1}px;top:${top - 1}px;width:${width}px;height:${height}px;` +
+    'position:absolute;pointer-events:none;';
 
   // The active cell's coordinates ride on the overlay as data-col /
   // data-row (slice 188). Nothing else in the DOM identifies the active
@@ -1558,6 +1700,11 @@ function buildSelectionOverlay(state: CellGridRenderState): TemplateResult | str
  * paints its borders, still answers a hit test on its edge, and still
  * reports itself as laid out. Hidden means gone.
  */
+/** Whether a theme attribute's value names the Lumo variant. */
+function isLumo(theme: string | null | undefined): boolean {
+  return (theme ?? '').split(/\s+/).includes('lumo');
+}
+
 function collapsedDeclaration(width: number, height: number): string {
   return width === 0 || height === 0 ? 'display:none;' : '';
 }
@@ -1620,8 +1767,8 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
   if (styles[0] !== undefined) {
     rules.push(
       `.cell.cell { ${styles[0]} ` +
-        'font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family)); ' +
-        'font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size)); }'
+        'font-family: var(--vaadin-spreadsheet-cell-font, var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))); ' +
+        'font-size: var(--vaadin-spreadsheet-cell-font-size, var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))); }'
     );
   }
   // Links: --vaadin-spreadsheet-link-fg when an application sets it, for a
@@ -1629,9 +1776,9 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
   // as the GWT client showed every link. After the default rule, before the
   // cell styles, so a workbook's styled link keeps its own colour.
   rules.push(
-    `.cell.link-cell { color: var(--vaadin-spreadsheet-link-fg, ${
+    `.cell.link-cell { color: var(--vaadin-spreadsheet-link-fg, var(--_vaadin-spreadsheet-link-fg, ${
       lastValueOf(styles[0], 'color') ?? 'var(--default-color)'
-    }); }`
+    })); }`
   );
   // A whole row or column formatted in the workbook styles those of its
   // cells that have no style of their own - which wear cs0.
@@ -1795,7 +1942,7 @@ function editorCellStyle(state: CellGridRenderState, col: number, row: number): 
  * connector can route the value to the correct cell without
  * re-querying its state.
  */
-function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | string {
+function buildCellEditorOverlay(state: CellGridRenderState, lumo = false): TemplateResult | string {
   const editor = state.editor;
   if (!editor) {
     return '';
@@ -1834,7 +1981,13 @@ function buildCellEditorOverlay(state: CellGridRenderState): TemplateResult | st
     return '';
   }
 
-  const style = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` + editorCellStyle(state, col, row);
+  // The Lumo theme puts every cell in its own font, which the cell's
+  // styles would undo here: they reach the editor inline, past anything a
+  // stylesheet says. So the theme's font goes last.
+  const style =
+    `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
+    editorCellStyle(state, col, row) +
+    (lumo ? '--default-font-family:var(--lumo-font-family);--default-font-size:var(--lumo-font-size-s);' : '');
 
   const dispatchEditorEvent = (
     target: EventTarget,
@@ -1978,7 +2131,9 @@ function buildPopupButtons(state: CellGridRenderState): TemplateResult[] {
   const buttons = state.popupButtons ?? [];
   return buttons.map((b) => {
     const className = b.active ? 'popup-button active' : 'popup-button';
-    const style = `left:${b.leftPx}px;top:${b.topPx}px;`;
+    // The row's height rides along for a theme whose button is as tall as
+    // its cell.
+    const style = `left:${b.leftPx}px;top:${b.topPx}px;--_cell-height:${b.cellHeightPx ?? 20}px;`;
     const onClick = (e: Event) => {
       e.stopPropagation();
       (e.currentTarget as Element).dispatchEvent(
@@ -1990,9 +2145,14 @@ function buildPopupButtons(state: CellGridRenderState): TemplateResult[] {
       );
     };
     return html`
-      <div class=${className} part="popup-button" style=${style} data-col=${b.col} data-row=${b.row} @click=${onClick}
-        >▼</div
-      >
+      <div
+        class=${className}
+        part="popup-button"
+        style=${style}
+        data-col=${b.col}
+        data-row=${b.row}
+        @click=${onClick}
+      ></div>
     `;
   });
 }

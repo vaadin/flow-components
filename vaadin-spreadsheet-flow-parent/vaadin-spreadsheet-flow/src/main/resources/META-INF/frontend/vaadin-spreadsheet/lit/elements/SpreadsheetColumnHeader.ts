@@ -210,10 +210,11 @@ export class SpreadsheetColumnHeader extends LitElement {
       top: 0;
       z-index: 5;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, #fafafa);
-      border-bottom: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
-      font-family: var(--vaadin-spreadsheet-header-font, inherit);
-      font-size: var(--vaadin-spreadsheet-header-font-size, 13px);
+      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
+      border-bottom: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, inherit));
+      font-size: var(--vaadin-spreadsheet-header-font-size, var(--_vaadin-spreadsheet-header-font-size, 13px));
     }
 
     /* Frozen columns are drawn in their own strip, translated to
@@ -230,12 +231,16 @@ export class SpreadsheetColumnHeader extends LitElement {
       pointer-events: auto;
     }
 
+    /* The GWT client's pointer over a letter: an arrow down the column a
+       click selects. */
     .col-header-cell {
       position: absolute;
       box-sizing: border-box;
       overflow: hidden;
       text-align: center;
-      border-right: 1px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      border-right: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      cursor: s-resize;
     }
 
     /* The active cell's headers are tinted so the cursor's row and
@@ -243,7 +248,7 @@ export class SpreadsheetColumnHeader extends LitElement {
        client painted; the cell also carries the documented
        ::part(header-selected) for consumers who want another one. */
     .col-header-cell[part~='header-selected'] {
-      background: var(--vaadin-spreadsheet-header-selected-bg, #e6edf4);
+      background: var(--vaadin-spreadsheet-header-selected-bg, var(--_vaadin-spreadsheet-header-selected-bg, #e6edf4));
       /* The GWT client's marker along the edge that faces the cells. */
       box-shadow: inset 0 -2px 0 #63b1ff;
     }
@@ -266,14 +271,17 @@ export class SpreadsheetColumnHeader extends LitElement {
     .col-grouping-line {
       position: absolute;
       height: 7px;
-      border-top: 2px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
-      border-left: 2px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      border-top: 2px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-left: 2px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       pointer-events: none;
     }
 
     .col-grouping-line.inversed {
       border-left: none;
-      border-right: 2px solid var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      border-right: 2px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
     }
 
     .col-grouping-toggle {
@@ -283,9 +291,13 @@ export class SpreadsheetColumnHeader extends LitElement {
       box-sizing: border-box;
       padding: 0;
       margin: 0;
-      border: 1px solid var(--vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7);
+      border: 1px solid
+        var(
+          --vaadin-spreadsheet-grouping-toggle-border-color,
+          var(--_vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7)
+        );
       border-radius: 50%;
-      background: var(--vaadin-spreadsheet-grouping-toggle-bg, #c7c7c7);
+      background: var(--vaadin-spreadsheet-grouping-toggle-bg, var(--_vaadin-spreadsheet-grouping-toggle-bg, #c7c7c7));
       color: #fff;
       font: inherit;
       font-size: 12px;
@@ -300,8 +312,27 @@ export class SpreadsheetColumnHeader extends LitElement {
       position: absolute;
       left: 0;
       height: 0;
-      border-bottom: 1px dotted var(--vaadin-spreadsheet-header-border-color, #c7c7c7);
+      border-bottom: 1px dotted
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       pointer-events: none;
+    }
+
+    /* SpreadsheetTheme.LUMO, as the GWT client drew it: the strip and its
+       outline gutter tinted over the Lumo ground, the active cell's column
+       in the primary tint with its marker below. */
+    :host([theme~='lumo']) {
+      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+    }
+
+    :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {
+      background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
+      box-shadow: inset 0 -2px 0 var(--lumo-primary-color-50pct);
+    }
+
+    :host([theme~='lumo']) .col-grouping-toggle {
+      background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
+      font-size: var(--lumo-font-size-s);
+      cursor: var(--lumo-clickable-cursor);
     }
   `;
 

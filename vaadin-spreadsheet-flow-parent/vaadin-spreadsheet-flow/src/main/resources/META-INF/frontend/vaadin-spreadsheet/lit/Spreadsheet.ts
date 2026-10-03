@@ -619,12 +619,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popupOverlay.className = 'popup-overlay';
     this.popupOverlay.setAttribute('part', 'popup-overlay');
     this.popupOverlay.hidden = true;
-    // The GWT client's card: white, rounded, softly shadowed.
-    this.popupOverlay.style.cssText =
-      'position:absolute;z-index:20;box-sizing:border-box;padding:4px;border-radius:4px;color:#474747;' +
-      'background:var(--vaadin-spreadsheet-popup-background, #fff);' +
-      'border:1px solid var(--vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09));' +
-      'box-shadow:0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);';
+    // Placed inline; drawn by the rules the overlay carries - see
+    // popupOverlayRules.
+    this.popupOverlay.style.cssText = 'position:absolute;z-index:20;box-sizing:border-box;';
     this.actionIcons = new SlottedVirtualChildren(host, this.contextMenu, resolveVirtualChild, actionIconSlotName);
     this.popupContents = new SlottedVirtualChildren(host, this.popupOverlay, resolveVirtualChild, popupContentSlotName);
     // A flex column holding the formula bar, the sheet, and the tabs.
@@ -723,10 +720,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // MutationObserver — the wrapper element is light DOM, so
     // CSS in our shadow root can't `:host-context()` it.
     this.applyHostHideClasses();
-    this.hostClassObserver = new MutationObserver(() => this.applyHostHideClasses());
+    this.applyHostTheme();
+    this.hostClassObserver = new MutationObserver(() => {
+      this.applyHostHideClasses();
+      this.applyHostTheme();
+    });
     this.hostClassObserver.observe(this.host, {
       attributes: true,
-      attributeFilter: ['class']
+      attributeFilter: ['class', 'theme']
     });
     // Sheet tab click → switch active sheet via spreadsheet-event
     // (slice 154).
@@ -2359,6 +2360,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs.style.display = tabsHidden ? 'none' : '';
     const barHidden = this.host.classList.contains('hidefunctionbar');
     this.formulaBar.style.display = barHidden ? 'none' : '';
+  }
+
+  /**
+   * The host's theme variant, on every internal element as well.
+   *
+   * `Spreadsheet.setTheme(SpreadsheetTheme.LUMO)` sets `theme="lumo"` on
+   * the host. Each internal element draws in its own shadow root, where no
+   * selector can see the host's attributes, so each carries the attribute
+   * itself and draws its theme under `:host([theme~='lumo'])`.
+   */
+  private applyHostTheme(): void {
+    const theme = this.host.getAttribute('theme');
+    const themed = [
+      this.formulaBar,
+      this.contextMenu,
+      this.headerCorner,
+      this.columnHeader,
+      this.rowHeader,
+      this.cellGrid,
+      this.sheetTabs
+    ];
+    for (const element of themed) {
+      if (theme === null) {
+        element.removeAttribute('theme');
+      } else if (element.getAttribute('theme') !== theme) {
+        element.setAttribute('theme', theme);
+      }
+    }
   }
 
   /**
@@ -4315,7 +4344,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popupContents.setResolver(flowVirtualChildResolver(appId));
     this.popupContents.sync([nodeId]);
     const state = this.popupButtonStates.find((b) => b.row === row && b.col === column);
-    const parts: Node[] = [];
+    const parts: Node[] = [popupOverlayRules()];
     if (!state?.headerHidden) {
       parts.push(this.buildPopupHeader());
     }
@@ -4334,28 +4363,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * has to be dismissed by clicking away from it.
    */
   private buildPopupHeader(): HTMLElement {
-    // The GWT client's header: an 18px strip with the close box at its
-    // left, grey until pointed at.
     const header = document.createElement('div');
     header.className = 'popup-header';
     header.setAttribute('part', 'popup-header');
-    header.style.cssText = 'position:relative;height:18px;padding-bottom:7px;';
     const close = document.createElement('button');
     close.type = 'button';
     close.className = 'popup-close';
     close.setAttribute('part', 'popup-close');
     close.setAttribute('aria-label', 'Close');
-    close.textContent = '\u00d7';
-    close.style.cssText =
-      'position:absolute;left:0;top:0;width:18px;height:18px;padding:0;border:0;background:transparent;' +
-      'cursor:pointer;font-family:inherit;font-size:21px;line-height:18px;';
     close.addEventListener('click', () => this.dismissPopup());
-    // An inline style cannot say "on hover", and the popup sits in the
-    // sheet's own tree where no element stylesheet reaches; a rule carried
-    // in the header itself can. The colours live here so the hover one wins.
-    const rules = document.createElement('style');
-    rules.textContent = '.popup-close { color: #999; } .popup-close:hover { color: #197de1; }';
-    header.append(rules, close);
+    header.append(close);
     return header;
   }
 
@@ -4522,6 +4539,84 @@ export class Spreadsheet implements SpreadsheetClientApi {
 }
 
 /**
+ * The popup's card, header and close box, as rules the popup carries.
+ *
+ * The overlay is the connector's own element in the host's tree, where no
+ * internal element's stylesheet reaches, and a rule says what an inline
+ * style cannot: "on hover", and "under the Lumo theme". The GWT client's
+ * card is white, rounded and softly shadowed, with an 18px header whose
+ * close box sits at its left, grey until pointed at; its Lumo popup put
+ * the close box at the right, under a rule, as Lumo's cross.
+ */
+function popupOverlayRules(): HTMLStyleElement {
+  const rules = document.createElement('style');
+  rules.textContent = `
+    .popup-overlay {
+      padding: 4px;
+      border-radius: 4px;
+      color: #474747;
+      background: var(--vaadin-spreadsheet-popup-background, var(--_vaadin-spreadsheet-popup-background, #fff));
+      border: 1px solid var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
+      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
+    }
+    .popup-header {
+      position: relative;
+      height: 18px;
+      padding-bottom: 7px;
+    }
+    .popup-close {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 21px;
+      line-height: 18px;
+      color: #999;
+    }
+    .popup-close::before {
+      content: '\\00d7';
+    }
+    .popup-close:hover {
+      color: #197de1;
+    }
+    :host([theme~='lumo']) .popup-overlay {
+      padding: var(--lumo-space-xs);
+      border-radius: var(--lumo-border-radius-m);
+      color: var(--lumo-body-text-color);
+      box-shadow: var(--lumo-box-shadow-s);
+    }
+    :host([theme~='lumo']) .popup-header {
+      padding-bottom: var(--lumo-space-xs);
+      border-bottom: 1px solid var(--lumo-contrast-20pct);
+      margin-bottom: var(--lumo-space-xs);
+    }
+    :host([theme~='lumo']) .popup-close {
+      left: auto;
+      right: 0;
+      padding-right: var(--lumo-space-xs);
+      border-radius: 0 var(--lumo-border-radius-m) 0 var(--lumo-border-radius-m);
+      font-size: var(--lumo-font-size-xl);
+      color: var(--lumo-contrast-50pct);
+      cursor: var(--lumo-clickable-cursor);
+    }
+    :host([theme~='lumo']) .popup-close::before {
+      content: var(--lumo-icons-cross);
+      font-family: 'lumo-icons';
+    }
+    :host([theme~='lumo']) .popup-close:hover {
+      color: var(--lumo-primary-color);
+    }
+  `;
+  return rules;
+}
+
+/**
  * Pure helper: build the positioned-popup-button list from the
  * server-pushed `PopupButtonState` list. Each button anchors at
  * the bottom-right corner of its target cell — pixel position =
@@ -4547,6 +4642,7 @@ export function computePositionedPopupButtons(
       row: state.row,
       leftPx: left,
       topPx: top,
+      cellHeightPx: rowHeight(state.row),
       active: state.active
     };
   });
