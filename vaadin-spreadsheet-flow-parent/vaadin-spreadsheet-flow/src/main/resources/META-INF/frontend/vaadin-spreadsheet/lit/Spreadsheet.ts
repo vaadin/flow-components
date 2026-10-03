@@ -2080,30 +2080,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /**
    * Scroll-event handler: recompute the visible viewport from the
    * scroll container's current state + push a fresh render state
-   * to the cell-grid. Also dispatches `onSheetScroll` to the
-   * server so it can prefetch cell values for the newly-visible
-   * range (slice 157). Bound as an arrow function so the
-   * listener binding survives without explicit
+   * to the cell-grid. The recompute tells the server about a visible
+   * range that changed, so it can load the cells newly in view - once
+   * per change: the GWT client asked only when the view had moved on, and
+   * the same range twice is the same load twice. Bound as an arrow
+   * function so the listener binding survives without explicit
    * {@code .bind(this)}.
    */
   private readonly handleScroll = (): void => {
     this.recomputeViewport();
     // The GWT client moved an open popup along with its cell.
     this.positionPopupOverlay();
-    this.dispatchSheetScrollEvent();
   };
 
-  /**
-   * Dispatch `onSheetScroll` carrying the current viewport
-   * bounds (firstRow/firstColumn/lastRow/lastColumn). The
-   * server's `SpreadsheetHandler.onSheetScroll` uses these to
-   * decide which cell values to push. Slice 157.
-   *
-   * No debouncing — scroll events naturally throttle via the
-   * browser's scroll-tick coalescing (usually one per
-   * requestAnimationFrame). If profiling reveals server-side
-   * pressure, add a debounce here.
-   */
   /**
    * Complete the startup handshake, once the viewport is known.
    *
@@ -2162,6 +2151,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.dispatchSheetScrollEvent();
   }
 
+  /**
+   * Dispatch `onSheetScroll` carrying the current viewport
+   * bounds (firstRow/firstColumn/lastRow/lastColumn). The
+   * server's `SpreadsheetHandler.onSheetScroll` uses these to
+   * decide which cell values to push. Slice 157.
+   */
   private dispatchSheetScrollEvent(): void {
     const viewport = this.cellGrid.renderState.viewport;
     this.host.dispatchEvent(

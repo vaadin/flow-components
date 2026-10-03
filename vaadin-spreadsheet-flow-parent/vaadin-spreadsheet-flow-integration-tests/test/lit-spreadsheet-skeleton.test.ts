@@ -2099,6 +2099,37 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
+    it('reports each change of the visible range to the server once', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(50);
+        sheet.setCols(20);
+        sheet.setColW(new Array(20).fill(50));
+        sheet.setRowH(new Array(50).fill(15));
+        sheet.setRowBufferSize(0);
+        sheet.setColumnBufferSize(0);
+        // The startup handshake, so what follows is plain scrolling.
+        sheet.recomputeViewport();
+
+        const scrolls: unknown[] = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail.type === 'onSheetScroll') {
+                scrolls.push(detail.data);
+            }
+        });
+
+        const scroller = sheet.getScrollContainer();
+        scroller.scrollTop = 200;
+        scroller.dispatchEvent(new Event('scroll'));
+        // Another scroll event at the same place: there is nothing new for
+        // the server to load. The GWT client asked only once the view had
+        // moved on.
+        scroller.dispatchEvent(new Event('scroll'));
+
+        expect(scrolls).to.have.length(1);
+        cleanup();
+    });
+
     it('Ctrl+A selects the entire sheet (slice 159)', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(20);
