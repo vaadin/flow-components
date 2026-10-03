@@ -15,7 +15,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
 import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
-import { overlayComponentSlotName } from '../dom/VirtualChildren.js';
+import { isCellEditorSlot, overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 
@@ -408,6 +408,12 @@ export class SpreadsheetCellGrid extends LitElement {
       z-index: 2;
     }
 
+    /* A cell showing a custom editor, padded on every side as the GWT
+       client padded it; a plain cell pads only its sides. */
+    .cell.custom-editor-cell {
+      padding: 2px;
+    }
+
     /* Text too wide for its column with nowhere to go: its holder reaches
        past the cell's edge, as the GWT client's did, and the neighbour
        covers what is past it. Not raised, unlike a cell running on. */
@@ -574,6 +580,10 @@ export class SpreadsheetCellGrid extends LitElement {
        still wins. */
     :where(:host([theme~='lumo'])) .cell {
       padding: 0 var(--lumo-space-xs);
+    }
+
+    :host([theme~='lumo']) .cell.custom-editor-cell {
+      padding: var(--lumo-space-xs);
     }
 
     /* Borderless, ringed in the editor colour and lifted off the sheet,
@@ -1459,7 +1469,8 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
         cellRangeClass +
         linkClass +
         (overflowing ? ' overflowing' : '') +
-        (cutShort ? ' cut-short' : '');
+        (cutShort ? ' cut-short' : '') +
+        (slotName !== undefined && isCellEditorSlot(slotName) ? ' custom-editor-cell' : '');
       const style =
         `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
         collapsedDeclaration(width, height) +

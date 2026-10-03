@@ -24,6 +24,7 @@ import {
 import {
   cellComponentSlotName,
   cellEditorSlotName,
+  isCellEditorSlot,
   overlayComponentSlotName
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/VirtualChildren.js';
 import {
@@ -209,6 +210,12 @@ describe('slot names — the contract between the connector and the grid', () =>
     expect(overlayComponentSlotName('7')).to.equal('overlay-component-7');
     expect(cellComponentSlotName('7')).to.equal('custom-component-7');
     expect(cellEditorSlotName('7')).to.equal('custom-editor-7');
+  });
+
+  it('tells an editor slot from the other kinds', () => {
+    expect(isCellEditorSlot(cellEditorSlotName('7'))).to.be.true;
+    expect(isCellEditorSlot(cellComponentSlotName('7'))).to.be.false;
+    expect(isCellEditorSlot(overlayComponentSlotName('7'))).to.be.false;
   });
 });
 

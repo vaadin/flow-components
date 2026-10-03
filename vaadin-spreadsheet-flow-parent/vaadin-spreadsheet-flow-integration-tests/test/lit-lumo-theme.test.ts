@@ -345,6 +345,14 @@ describe('Lumo theme — cells', () => {
         cleanup();
     });
 
+    it('pads a cell showing a custom editor by Lumo\'s smallest space all round', async () => {
+        const { el, cleanup } = await grid('lumo', { cellSlots: { 'col1 row2': 'custom-editor-77' } });
+
+        expect(getComputedStyle(inGrid(el, '.cell.col1.row2')).padding).to.equal('3px');
+
+        cleanup();
+    });
+
     it('draws the comment and invalid-formula markers in Lumo\'s warning and error colours', async () => {
         const { el, cleanup } = await grid('lumo', {
             commentCells: new Set(['col1 row2']),

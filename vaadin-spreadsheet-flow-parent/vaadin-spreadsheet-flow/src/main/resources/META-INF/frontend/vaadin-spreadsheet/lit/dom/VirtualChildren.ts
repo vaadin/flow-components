@@ -61,6 +61,11 @@ export function cellEditorSlotName(nodeId: string): string {
   return `custom-editor-${nodeId}`;
 }
 
+/** Whether a cell's slot is one {@link cellEditorSlotName} named. */
+export function isCellEditorSlot(slotName: string): boolean {
+  return slotName.startsWith('custom-editor-');
+}
+
 /**
  * Name of the slot a popup button's content is projected through.
  *

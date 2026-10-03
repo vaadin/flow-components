@@ -484,6 +484,33 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('pads a cell showing a custom editor all round, as the GWT client did', async () => {
+    // The GWT client gave the cell a class of its own, with two pixels of
+    // padding on every side; the editor sat two pixels higher than in a
+    // plain cell, which pads only its sides.
+    const { sheet, cleanup } = attachSheet({ '77': field() });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const editorCell = cell(sheet, '.cell.col2.row2')!;
+    expect(editorCell.classList.contains('custom-editor-cell')).to.be.true;
+    expect(getComputedStyle(editorCell).padding).to.equal('2px');
+    cleanup();
+  });
+
+  it('leaves the padding of a cell showing a component alone', async () => {
+    const { sheet, cleanup } = attachSheet({ '31': document.createElement('span') });
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    const componentCell = cell(sheet, '.cell.col2.row2')!;
+    expect(componentCell.classList.contains('custom-editor-cell')).to.be.false;
+    expect(getComputedStyle(componentCell).padding).to.equal('0px 2px');
+    cleanup();
+  });
+
   it('holds the editor back until the cell is selected on focus mode', async () => {
     const editor = field();
     const { host, sheet, cleanup } = attachSheet({ '77': editor });
