@@ -43,20 +43,20 @@ public class SpreadsheetInShadowRootIT extends AbstractComponentIT {
                 return !!overlay && !overlay.hidden;
                 """)));
 
-        String border = (String) executeScript(
+        String borderRadius = (String) executeScript(
                 """
                         const sheet = document.getElementById('shadow-host')
                             .shadowRoot.querySelector('vaadin-spreadsheet');
                         const overlay = sheet.shadowRoot.querySelector('.popup-overlay');
-                        return getComputedStyle(overlay).borderTopStyle;
+                        return getComputedStyle(overlay).borderTopLeftRadius;
                         """);
 
         // The component styles its own overlay from inside its shadow
-        // root, so nesting cannot cut them off. An unstyled div reports
-        // "none" here.
-        Assert.assertEquals(
+        // root, so nesting cannot cut them off. Unstyled, the overlay is a
+        // popover with the browser's square corners.
+        Assert.assertNotEquals(
                 "Overlay styles should reach the overlay even when the "
                         + "spreadsheet is nested in a shadow root",
-                "solid", border);
+                "0px", borderRadius);
     }
 }

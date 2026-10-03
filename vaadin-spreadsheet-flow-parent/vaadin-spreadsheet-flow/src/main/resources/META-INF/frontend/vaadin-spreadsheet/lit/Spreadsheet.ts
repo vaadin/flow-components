@@ -475,6 +475,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The popup that is open, or null when none is. */
   private openPopup: { row: number; col: number; nodeId: string } | null = null;
 
+  /**
+   * Places the open popup again when its size changes: its content is
+   * Flow's components, which render after they are attached, so the size
+   * the popup opens at is seldom the one it settles at.
+   */
+  private readonly popupResizeObserver: ResizeObserver;
+
   /** Whether the cell styles have changed since the last width measurement. */
   private styleWidthRatiosStale = false;
   /** The style indexes last reported to the server with a width ratio. */
@@ -627,9 +634,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popupOverlay.className = 'popup-overlay';
     this.popupOverlay.setAttribute('part', 'popup-overlay');
     this.popupOverlay.hidden = true;
-    // Placed inline; drawn by the rules the overlay carries - see
-    // popupOverlayRules.
-    this.popupOverlay.style.cssText = 'position:absolute;z-index:20;box-sizing:border-box;';
+    // In the top layer while open, as the GWT client's popover was: no
+    // edge of the sheet or of the page around it cuts it off. Absolutely
+    // placed there, so in page coordinates and moving with the page. The
+    // inset, margin and overflow undo the browser's popover defaults, as
+    // the GWT client's overlay did: content taller than a set height shows
+    // past it rather than scrolling. Drawn by the rules the overlay carries
+    // - see popupOverlayRules.
+    this.popupOverlay.popover = 'manual';
+    this.popupOverlay.style.cssText = 'position:absolute;inset:auto;margin:0;overflow:visible;box-sizing:border-box;';
+    this.popupResizeObserver = new ResizeObserver(() => this.positionPopupOverlay());
     this.actionIcons = new SlottedVirtualChildren(host, this.contextMenu, resolveVirtualChild, actionIconSlotName);
     this.popupContents = new SlottedVirtualChildren(host, this.popupOverlay, resolveVirtualChild, popupContentSlotName);
     // A flex column holding the formula bar, the sheet, and the tabs.
@@ -718,9 +732,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // never grow / shrink based on content.
     this.sheetTabs.style.flex = '0 0 auto';
     this.root.appendChild(this.sheetTabs);
-    // Inside the scroll container so it scrolls with the sheet and is
-    // clipped by it, the way the button it belongs to is.
-    this.scrollContainer.appendChild(this.popupOverlay);
+    // Outside the scroll container, as the GWT client's popup was outside
+    // the sheet: the keys typed into a filter's fields and the clicks on
+    // its check boxes are the popup's, not the sheet's shortcuts. Beside
+    // the context menu, the other overlay.
+    this.contextMenu.after(this.popupOverlay);
     this.renderTarget.appendChild(this.root);
     // Slice 174: honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
@@ -2071,10 +2087,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@code .bind(this)}.
    */
   private readonly handleScroll = (): void => {
-    // Excel drops an open filter popup as soon as the sheet moves under
-    // it; keeping it would leave it pointing at the wrong cell.
-    this.dismissPopup();
     this.recomputeViewport();
+    // The GWT client moved an open popup along with its cell.
+    this.positionPopupOverlay();
     this.dispatchSheetScrollEvent();
   };
 
@@ -2358,6 +2373,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.columnHeader.removeEventListener('column-autofit', this.handleColumnAutofit as EventListener);
     this.rowHeader.removeEventListener('row-autofit', this.handleRowAutofit as EventListener);
     this.resizeObserver.disconnect();
+    this.popupResizeObserver.disconnect();
+    hideFromTopLayer(this.popupOverlay);
     if (this.hostClassObserver) {
       this.hostClassObserver.disconnect();
       this.hostClassObserver = null;
@@ -4379,23 +4396,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const state = this.popupButtonStates.find((b) => b.row === row && b.col === column);
     const parts: Node[] = [popupOverlayRules()];
     if (!state?.headerHidden) {
-      parts.push(this.buildPopupHeader());
+      parts.push(this.buildPopupHeader(this.cellDataByKey.get(toKey(column, row))?.value ?? ''));
     }
     parts.push(namedSlot(popupContentSlotName(nodeId)));
     this.popupOverlay.replaceChildren(...parts);
     this.popupOverlay.hidden = false;
+    showInTopLayer(this.popupOverlay);
     this.positionPopupOverlay();
+    this.popupResizeObserver.observe(this.popupOverlay);
     this.scheduleRender();
   }
 
   /**
-   * The popup's header strip and its close box.
+   * The popup's header strip: its close box and, as in the GWT client, the
+   * text of the cell the button is on - a filter's column title.
    *
    * Shown unless the button asked for {@code headerHidden}, which is what
    * {@code PopupButton.setHeaderHidden(true)} sets: a popup with no header
    * has to be dismissed by clicking away from it.
    */
-  private buildPopupHeader(): HTMLElement {
+  private buildPopupHeader(caption: string): HTMLElement {
     const header = document.createElement('div');
     header.className = 'popup-header';
     header.setAttribute('part', 'popup-header');
@@ -4405,7 +4425,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     close.setAttribute('part', 'popup-close');
     close.setAttribute('aria-label', 'Close');
     close.addEventListener('click', () => this.dismissPopup());
-    header.append(close);
+    const text = document.createElement('div');
+    text.className = 'header-caption';
+    text.setAttribute('part', 'popup-caption');
+    text.textContent = caption;
+    header.append(close, text);
     return header;
   }
 
@@ -4448,9 +4472,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Hide the overlay and release its content, without telling the server. */
   private hidePopup(): void {
     this.openPopup = null;
+    this.popupResizeObserver.unobserve(this.popupOverlay);
     this.popupContents.clear();
     this.popupOverlay.replaceChildren();
     this.popupOverlay.hidden = true;
+    hideFromTopLayer(this.popupOverlay);
     this.scheduleRender();
   }
 
@@ -4493,28 +4519,49 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Seat the overlay under its button, in the scroll container's
-   * coordinates — the same space the buttons themselves are positioned in,
-   * so it tracks the sheet as it scrolls.
+   * Place the overlay at its button by the GWT client's rule - see
+   * {@link popupPlacement} - against the cell as it is drawn now and the
+   * scrolling pane around it.
+   *
+   * While the cell is outside the rendered range the overlay stays where it
+   * is, as the GWT client's did.
    */
   private positionPopupOverlay(): void {
     if (this.openPopup === null) {
       return;
     }
     const { row, col } = this.openPopup;
-    let left = 0;
-    for (let c = 1; c < col; c++) {
-      left += this.colWidthPx(c);
-    }
-    let top = 0;
-    for (let r = 1; r <= row; r++) {
-      top += this.rowHeightPx(r);
-    }
     const state = this.popupButtonStates.find((b) => b.row === row && b.col === col);
-    this.popupOverlay.style.left = `${left}px`;
-    this.popupOverlay.style.top = `${top}px`;
-    this.popupOverlay.style.width = state?.popupWidth ?? '';
-    this.popupOverlay.style.height = state?.popupHeight ?? '';
+    const overlay = this.popupOverlay;
+    overlay.style.width = state?.popupWidth ?? '';
+    overlay.style.height = state?.popupHeight ?? '';
+    const cell = this.cellGrid.cellClientRect(col, row);
+    if (cell === null) {
+      return;
+    }
+    // Measured at the page's corner, where nothing squeezes it: next to the
+    // right edge of the page an overlay of no set width wraps to fit.
+    overlay.style.left = '0px';
+    overlay.style.top = '0px';
+    const place = popupPlacement(cell, this.scrollingPaneClientRect(), overlay.offsetWidth, overlay.offsetHeight);
+    overlay.style.left = `${place.left + window.scrollX}px`;
+    overlay.style.top = `${place.top + window.scrollY}px`;
+  }
+
+  /**
+   * The scrolling pane on screen: the cells under the column letters and
+   * right of the row numbers, past the frozen rows and columns. The GWT
+   * client's popups kept to this, its bottom-right pane, whose bottom is the
+   * sheet's own.
+   */
+  private scrollingPaneClientRect(): { left: number; top: number; bottom: number } {
+    const box = this.scrollContainer.getBoundingClientRect();
+    const frozen = this.cellGrid.frozenExtent();
+    return {
+      left: box.left + this.scrollContainer.clientLeft + this.cellGrid.offsetLeft + frozen.width,
+      top: box.top + this.scrollContainer.clientTop + this.cellGrid.offsetTop + frozen.height,
+      bottom: box.bottom
+    };
   }
   /**
    * A popup (filter) button was attached to a cell.
@@ -4533,11 +4580,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scheduleRender();
   }
 
-  /** The button's cell is what identifies it; the rest of the state may differ. */
+  /**
+   * The button's cell is what identifies it; the rest of the state may
+   * differ.
+   *
+   * The server takes a button away once its cell has scrolled out of view,
+   * and when the sheet changes. The GWT client's popup closed with its
+   * button and told the server it had.
+   */
   removePopupButton(rawState: PopupButtonState | string): void {
     const state = coerceObject<unknown>(rawState) as unknown as PopupButtonState;
     if (state === null || typeof state.col !== 'number') {
       return;
+    }
+    if (this.openPopup !== null && this.openPopup.row === state.row && this.openPopup.col === state.col) {
+      this.dismissPopup();
     }
     this.popupButtonStates = this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state));
     this.scheduleRender();
@@ -4572,25 +4629,83 @@ export class Spreadsheet implements SpreadsheetClientApi {
 }
 
 /**
+ * Where a popup goes, by the GWT client's rule, in screen coordinates.
+ *
+ * Under the button's cell, its right edge on the cell's right edge - or
+ * starting at that edge instead, when ending there would take it past the
+ * left side of the scrolling pane. Above the cell when it runs past the
+ * pane's bottom, and never above the pane's top: a popup too tall for
+ * either side hangs from the top and runs past the bottom.
+ */
+export function popupPlacement(
+  cell: { readonly top: number; readonly right: number; readonly bottom: number },
+  pane: { readonly left: number; readonly top: number; readonly bottom: number },
+  width: number,
+  height: number
+): { left: number; top: number } {
+  let left = cell.right - width;
+  if (left < pane.left) {
+    left = cell.right;
+  }
+  let top = cell.bottom;
+  if (top + height > pane.bottom) {
+    top = cell.top - height;
+  }
+  if (top < pane.top) {
+    top = pane.top;
+  }
+  return { left, top };
+}
+
+/**
+ * Put a popover in the top layer. A no-op for one already there, or one
+ * the browser cannot show - not in the document, or no popover support -
+ * which then stays where the page puts it.
+ */
+function showInTopLayer(el: HTMLElement): void {
+  try {
+    if (el.isConnected && !el.matches(':popover-open')) {
+      el.showPopover();
+    }
+  } catch {
+    // Shown in place instead.
+  }
+}
+
+/** Take a popover out of the top layer, if it is there. */
+function hideFromTopLayer(el: HTMLElement): void {
+  try {
+    if (el.matches(':popover-open')) {
+      el.hidePopover();
+    }
+  } catch {
+    // Not in the top layer.
+  }
+}
+
+/**
  * The popup's card, header and close box, as rules the popup carries.
  *
  * The overlay is the connector's own element in the host's tree, where no
  * internal element's stylesheet reaches, and a rule says what an inline
  * style cannot: "on hover", and "under the Lumo theme". The GWT client's
  * card is white, rounded and softly shadowed, with an 18px header whose
- * close box sits at its left, grey until pointed at; its Lumo popup put
- * the close box at the right, under a rule, as Lumo's cross.
+ * close box sits at its left, grey until pointed at, and whose caption is
+ * centred; its Lumo popup put the close box at the right, under a rule, as
+ * Lumo's cross, and the caption at the left in bold.
  */
 function popupOverlayRules(): HTMLStyleElement {
   const rules = document.createElement('style');
   rules.textContent = `
     .popup-overlay {
       padding: 4px;
+      border: 0;
       border-radius: 4px;
       color: #474747;
       background: var(--vaadin-spreadsheet-popup-background, var(--_vaadin-spreadsheet-popup-background, #fff));
-      border: 1px solid var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
-      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
+      /* The edge is the last shadow, a hairline that takes no room. */
+      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
+        0 0 0 1px var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
     }
     .popup-header {
       position: relative;
@@ -4601,15 +4716,18 @@ function popupOverlayRules(): HTMLStyleElement {
       position: absolute;
       left: 0;
       top: 0;
+      box-sizing: border-box;
       width: 18px;
       height: 18px;
-      padding: 0;
+      padding: 0 4px 0 0;
       border: 0;
+      border-radius: 0 4px 0 4px;
       background: transparent;
       cursor: pointer;
       font-family: inherit;
       font-size: 21px;
       line-height: 18px;
+      text-align: center;
       color: #999;
     }
     .popup-close::before {
@@ -4618,11 +4736,24 @@ function popupOverlayRules(): HTMLStyleElement {
     .popup-close:hover {
       color: #197de1;
     }
+    .header-caption {
+      margin: 0 18px;
+      height: 18px;
+      line-height: 18px;
+      text-align: center;
+      color: var(--lumo-body-text-color);
+    }
     :host([theme~='lumo']) .popup-overlay {
       padding: var(--lumo-space-xs);
+      border: 1px solid var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
       border-radius: var(--lumo-border-radius-m);
       color: var(--lumo-body-text-color);
       box-shadow: var(--lumo-box-shadow-s);
+    }
+    :host([theme~='lumo']) .header-caption {
+      margin-left: var(--lumo-space-xs);
+      font-weight: bold;
+      text-align: left;
     }
     :host([theme~='lumo']) .popup-header {
       padding-bottom: var(--lumo-space-xs);

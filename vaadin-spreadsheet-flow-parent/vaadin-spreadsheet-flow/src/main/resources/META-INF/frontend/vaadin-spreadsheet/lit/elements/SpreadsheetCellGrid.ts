@@ -817,6 +817,29 @@ export class SpreadsheetCellGrid extends LitElement {
     return this.valueProbe.clientWidth;
   }
 
+  /**
+   * Where a cell is drawn on screen, frozen panes included - what the GWT
+   * client read off the cell's element. Null while the cell is outside the
+   * rendered range.
+   */
+  cellClientRect(col: number, row: number): DOMRect | null {
+    const box = cellBoxOnGrid(this.renderState, col, row);
+    if (box === null) {
+      return null;
+    }
+    const grid = this.getBoundingClientRect();
+    return new DOMRect(grid.left + box.left, grid.top + box.top, box.width, box.height);
+  }
+
+  /** How far the frozen columns reach across and the frozen rows down. */
+  frozenExtent(): { width: number; height: number } {
+    const state = this.renderState;
+    return {
+      width: frozenExtent(state.frozenColX, state.frozenColWidths, state.horizontalSplitPosition),
+      height: frozenExtent(state.frozenRowY, state.frozenRowHeights, state.verticalSplitPosition)
+    };
+  }
+
   updated(changedProps: Map<string, unknown>): void {
     if (changedProps.has('renderState')) {
       this.remeasureTooNarrowCells();

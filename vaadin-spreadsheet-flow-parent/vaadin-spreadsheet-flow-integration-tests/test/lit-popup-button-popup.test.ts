@@ -8,7 +8,14 @@
  */
 
 import { expect } from 'chai';
-import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import {
+  popupPlacement,
+  Spreadsheet
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import type {
+  CellData,
+  PopupButtonState
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
  * Opening a popup button's popup.
@@ -75,6 +82,70 @@ function content(text: string): HTMLElement {
   return el;
 }
 
+function buttonState(
+  col: number,
+  row: number,
+  size: { popupWidth?: string; popupHeight?: string } = {}
+): PopupButtonState {
+  return {
+    col,
+    row,
+    active: false,
+    headerHidden: false,
+    popupWidth: size.popupWidth ?? null,
+    popupHeight: size.popupHeight ?? null,
+    sheet: 'Sheet1'
+  };
+}
+
+function cellData(col: number, row: number, value: string): CellData {
+  return { col, row, value, cellStyle: 'cs0', locked: false, needsMeasure: false, isPercentage: false };
+}
+
+/**
+ * Where a cell is on screen: the sheet's columns are 50px and its rows
+ * 20px, counted from the cell grid's corner.
+ */
+function cellBox(sheet: Spreadsheet, col: number, row: number): { left: number; right: number; top: number; bottom: number } {
+  const grid = sheet.getCellGrid().getBoundingClientRect();
+  return {
+    left: grid.left + (col - 1) * 50,
+    right: grid.left + col * 50,
+    top: grid.top + (row - 1) * 20,
+    bottom: grid.top + row * 20
+  };
+}
+
+/** The top of the scrolling pane: under the column letters. */
+function paneTop(sheet: Spreadsheet): number {
+  return sheet.getColumnHeader().getBoundingClientRect().bottom;
+}
+
+/** The last row whose bottom edge is inside the scroll container. */
+function lastWholeRow(sheet: Spreadsheet): number {
+  const bottom = sheet.getScrollContainer().getBoundingClientRect().bottom;
+  return Math.floor((bottom - sheet.getCellGrid().getBoundingClientRect().top) / 20);
+}
+
+function scrollSheet(sheet: Spreadsheet, top: number): void {
+  const container = sheet.getScrollContainer();
+  container.scrollTop = top;
+  container.dispatchEvent(new Event('scroll'));
+}
+
+function frames(count: number): Promise<void> {
+  return new Promise((resolve) => {
+    const step = (left: number): void => {
+      if (left === 0) {
+        resolve();
+      } else {
+        requestAnimationFrame(() => step(left - 1));
+      }
+    };
+    step(count);
+  });
+}
+
 describe('Spreadsheet — popup-button popup', () => {
   let ctx: ReturnType<typeof attachSheet>;
   const originalVaadin = (window as any).Vaadin;
@@ -124,16 +195,101 @@ describe('Spreadsheet — popup-button popup', () => {
     ]);
   });
 
-  it('seats the overlay under its anchor cell', () => {
+  it("hangs below its cell with its right edge on the cell's right edge, as the GWT client did", () => {
     withFlowClient({ 42: content('filter') });
+    ctx.sheet.setPopupButtons([buttonState(4, 1, { popupWidth: '120px' })]);
 
-    // Column 4 starts after three 50px columns; the overlay hangs below
-    // row 1, which is 20px tall.
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 
+    const overlay = ctx.sheet.getPopupOverlay().getBoundingClientRect();
+    const cell = cellBox(ctx.sheet, 4, 1);
+    expect(overlay.right).to.be.closeTo(cell.right, 0.5);
+    expect(overlay.top).to.be.closeTo(cell.bottom, 0.5);
+  });
+
+  it("starts at the cell's right edge when it would reach past the sheet's left side", () => {
+    withFlowClient({ 42: content('filter') });
+    // Column 1 is 50px wide, so a 120px popup ending at its right edge
+    // would start under the row numbers.
+    ctx.sheet.setPopupButtons([buttonState(1, 1, { popupWidth: '120px' })]);
+
+    ctx.sheet.onPopupButtonOpen(1, 1, '42', APP);
+
+    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().left).to.be.closeTo(cellBox(ctx.sheet, 1, 1).right, 0.5);
+  });
+
+  it("measures the sheet's left side from the frozen columns, not the row numbers", () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.recomputeViewport();
+    // Column 3 ends 150px in; 120px back from there is inside the two
+    // frozen columns, and the GWT client's scrolling pane starts after them.
+    ctx.sheet.setPopupButtons([buttonState(3, 1, { popupWidth: '120px' })]);
+
+    ctx.sheet.onPopupButtonOpen(1, 3, '42', APP);
+
+    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().left).to.be.closeTo(cellBox(ctx.sheet, 3, 1).right, 0.5);
+  });
+
+  it('opens above its cell when there is no room below it', () => {
+    withFlowClient({ 42: content('filter') });
+    const row = lastWholeRow(ctx.sheet);
+    ctx.sheet.setPopupButtons([buttonState(4, row, { popupWidth: '120px', popupHeight: '100px' })]);
+
+    ctx.sheet.onPopupButtonOpen(row, 4, '42', APP);
+
+    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().bottom).to.be.closeTo(
+      cellBox(ctx.sheet, 4, row).top,
+      0.5
+    );
+  });
+
+  it('never rises above the top of the scrolling pane', () => {
+    withFlowClient({ 42: content('filter') });
+    // Taller than the room on either side of row 2.
+    ctx.sheet.setPopupButtons([buttonState(4, 2, { popupWidth: '120px', popupHeight: '400px' })]);
+
+    ctx.sheet.onPopupButtonOpen(2, 4, '42', APP);
+
+    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
+  });
+
+  it("is drawn in the top layer, as the GWT client's popover was, so the sheet's edges cannot cut it off", () => {
+    withFlowClient({ 42: content('filter') });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    expect(ctx.sheet.getPopupOverlay().matches(':popover-open'), 'open').to.be.true;
+
+    ctx.sheet.closePopup(1, 4);
+    expect(ctx.sheet.getPopupOverlay().matches(':popover-open'), 'closed').to.be.false;
+  });
+
+  it('places itself again when its content grows after it opened', async () => {
+    const popup = content('filter');
+    withFlowClient({ 42: popup });
+    const row = lastWholeRow(ctx.sheet) - 4;
+    ctx.sheet.setPopupButtons([buttonState(4, row, { popupWidth: '120px' })]);
+    ctx.sheet.onPopupButtonOpen(row, 4, '42', APP);
+    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().top, 'below at first').to.be.closeTo(
+      cellBox(ctx.sheet, 4, row).bottom,
+      0.5
+    );
+
+    // Flow components render after they are attached, so the popup's
+    // real size arrives a moment after it opened. Grown just past the room
+    // below the cell, it has to go above it.
     const overlay = ctx.sheet.getPopupOverlay();
-    expect(overlay.style.left).to.equal('150px');
-    expect(overlay.style.top).to.equal('20px');
+    const cell = cellBox(ctx.sheet, 4, row);
+    const chrome = overlay.getBoundingClientRect().height - popup.getBoundingClientRect().height;
+    const grown = ctx.sheet.getScrollContainer().getBoundingClientRect().bottom - cell.bottom + 5;
+    expect(grown, 'room above').to.be.at.most(cell.top - paneTop(ctx.sheet));
+    popup.style.height = `${grown - chrome}px`;
+    await frames(2);
+
+    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().bottom).to.be.closeTo(
+      cellBox(ctx.sheet, 4, row).top,
+      0.5
+    );
   });
 
   it('sizes the overlay from the button state when the server gave one', () => {
@@ -155,6 +311,21 @@ describe('Spreadsheet — popup-button popup', () => {
     const overlay = ctx.sheet.getPopupOverlay();
     expect(overlay.style.width).to.equal('220px');
     expect(overlay.style.height).to.equal('180px');
+  });
+
+  it("shows content taller than the height the server set past it, as the GWT client's overlay did", () => {
+    const popup = content('filter');
+    popup.style.height = '300px';
+    withFlowClient({ 42: popup });
+    ctx.sheet.setPopupButtons([buttonState(4, 1, { popupWidth: '120px', popupHeight: '100px' })]);
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    // A popover scrolls its overflow unless told otherwise; the GWT
+    // client's overlay set it visible.
+    const overlay = ctx.sheet.getPopupOverlay();
+    expect(getComputedStyle(overlay).overflowY).to.equal('visible');
+    expect(popup.getBoundingClientRect().bottom).to.be.greaterThan(overlay.getBoundingClientRect().bottom);
   });
 
   it('closes on the server request for that cell', () => {
@@ -198,6 +369,19 @@ describe('Spreadsheet — popup-button popup', () => {
     ]);
   });
 
+  it('keeps the keys typed inside it away from the sheet, as the GWT client did', () => {
+    const field = document.createElement('input');
+    withFlowClient({ 42: field });
+    ctx.sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    // An arrow key in a filter's search field or on one of its check
+    // boxes is the popup's, not a move of the sheet's selection.
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, composed: true }));
+
+    expect(ctx.sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+  });
+
   it('stays open when the click lands inside it', () => {
     const popup = content('filter');
     withFlowClient({ 42: popup });
@@ -219,14 +403,57 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sent.some((e) => e.type === 'popupClose')).to.be.true;
   });
 
-  it('closes when the sheet scrolls out from under it', () => {
+  it('follows its cell as the sheet scrolls and stays open, as the GWT client did', () => {
     withFlowClient({ 42: content('filter') });
-    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    ctx.sheet.setPopupButtons([buttonState(4, 6, { popupWidth: '120px', popupHeight: '60px' })]);
+    ctx.sheet.onPopupButtonOpen(6, 4, '42', APP);
+    ctx.sent.length = 0;
 
-    ctx.sheet.getScrollContainer().scrollTop = 400;
-    ctx.sheet.getScrollContainer().dispatchEvent(new Event('scroll'));
+    scrollSheet(ctx.sheet, 40);
+
+    const overlay = ctx.sheet.getPopupOverlay();
+    expect(overlay.hidden).to.be.false;
+    expect(overlay.getBoundingClientRect().top).to.be.closeTo(cellBox(ctx.sheet, 4, 6).bottom, 0.5);
+    expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.be.empty;
+  });
+
+  it('closes and reports when the server takes its button away, as the GWT client did', () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.addPopupButton(buttonState(4, 1));
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    ctx.sent.length = 0;
+
+    // What the server does once the button's cell has scrolled out of
+    // view, or the sheet has changed. The GWT client's popup closed with
+    // its button and said so.
+    ctx.sheet.removePopupButton(buttonState(4, 1));
 
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.true;
+    expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.eql([
+      { type: 'popupClose', data: { row: 1, column: 4 } }
+    ]);
+  });
+
+  it("keeps the open popup when the server takes another cell's button away", () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.addPopupButton(buttonState(4, 1));
+    ctx.sheet.addPopupButton(buttonState(5, 1));
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    ctx.sheet.removePopupButton(buttonState(5, 1));
+
+    expect(ctx.sheet.getPopupOverlay().hidden).to.be.false;
+  });
+
+  it('waits at the top of the pane while its cell scrolls up out of sight', () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.setPopupButtons([buttonState(4, 3, { popupWidth: '120px', popupHeight: '60px' })]);
+    ctx.sheet.onPopupButtonOpen(3, 4, '42', APP);
+
+    // Row 3 ends 60px down, so 100px of scrolling takes it above the pane.
+    scrollSheet(ctx.sheet, 100);
+
+    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
   });
 
   it('releases the content when it closes, so reopening another button is clean', () => {
@@ -264,6 +491,48 @@ describe('Spreadsheet — popup-button popup', () => {
     const style = getComputedStyle(ctx.sheet.getPopupOverlay());
     expect(`${style.borderTopLeftRadius} ${style.paddingTop} ${style.color}`).to.equal('4px 4px rgb(71, 71, 71)');
     expect(style.boxShadow).to.contain('rgba(0, 0, 0, 0.1) 0px 4px 10px 0px');
+  });
+
+  it('edges the card with a hairline of shadow rather than a border, which took no room', () => {
+    withFlowClient({ 42: content('filter') });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    const style = getComputedStyle(ctx.sheet.getPopupOverlay());
+    expect(style.borderTopWidth).to.equal('0px');
+    expect(style.boxShadow).to.contain('rgba(0, 0, 0, 0.09) 0px 0px 0px 1px');
+  });
+
+  it("captions the header with the text of the button's cell, as the GWT client did", () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.cellsUpdated([cellData(4, 1, 'Column 1')]);
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    const caption = ctx.sheet.getPopupOverlay().querySelector<HTMLElement>('.popup-header .header-caption');
+    expect(caption, 'no caption').to.not.be.null;
+    expect(caption!.textContent).to.equal('Column 1');
+    expect(caption!.getAttribute('part')).to.equal('popup-caption');
+  });
+
+  it('centres the caption between 18px margins on an 18px line', () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.cellsUpdated([cellData(4, 1, 'Column 1')]);
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    const style = getComputedStyle(ctx.sheet.getPopupOverlay().querySelector('.header-caption')!);
+    expect(`${style.marginLeft} ${style.marginRight} ${style.height} ${style.lineHeight} ${style.textAlign}`).to.equal(
+      '18px 18px 18px 18px center'
+    );
+  });
+
+  it('leaves the caption empty for a cell with no value', () => {
+    withFlowClient({ 42: content('filter') });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    expect(ctx.sheet.getPopupOverlay().querySelector('.header-caption')!.textContent).to.equal('');
   });
 
   it('puts the close box at the left of an 18px header, in grey', () => {
@@ -320,5 +589,33 @@ describe('Spreadsheet — popup-button popup', () => {
     const overlay = ctx.sheet.getPopupOverlay();
     expect(overlay.hidden).to.be.false;
     expect(overlay.querySelector('slot')!.assignedElements({ flatten: true })).to.be.empty;
+  });
+});
+
+describe("popupPlacement — the GWT client's rule", () => {
+  const pane = { left: 100, top: 50, bottom: 400 };
+
+  it('hangs under the cell with the right edges together', () => {
+    expect(popupPlacement({ top: 100, right: 300, bottom: 120 }, pane, 150, 80)).to.deep.equal({ left: 150, top: 120 });
+  });
+
+  it("starts at the cell's right edge when ending there would cross the pane's left side", () => {
+    expect(popupPlacement({ top: 100, right: 200, bottom: 120 }, pane, 150, 80)).to.deep.equal({ left: 200, top: 120 });
+  });
+
+  it("keeps the right edges together when it starts exactly on the pane's left side", () => {
+    expect(popupPlacement({ top: 100, right: 250, bottom: 120 }, pane, 150, 80)).to.deep.equal({ left: 100, top: 120 });
+  });
+
+  it("goes above the cell when it would run past the pane's bottom", () => {
+    expect(popupPlacement({ top: 350, right: 300, bottom: 370 }, pane, 150, 80)).to.deep.equal({ left: 150, top: 270 });
+  });
+
+  it("stays below when it ends exactly on the pane's bottom", () => {
+    expect(popupPlacement({ top: 100, right: 300, bottom: 120 }, pane, 150, 280)).to.deep.equal({ left: 150, top: 120 });
+  });
+
+  it("hangs from the pane's top when it fits neither below nor above", () => {
+    expect(popupPlacement({ top: 150, right: 300, bottom: 170 }, pane, 150, 300)).to.deep.equal({ left: 150, top: 50 });
   });
 });

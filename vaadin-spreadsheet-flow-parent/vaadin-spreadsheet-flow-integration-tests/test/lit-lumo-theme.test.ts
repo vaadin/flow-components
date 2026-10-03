@@ -871,6 +871,17 @@ describe('Lumo theme — the popup', () => {
         themed.cleanup();
     });
 
+    it('captions the header at the left in bold, as the GWT client\'s Lumo popup did', () => {
+        const { themed, sheet } = open('lumo');
+
+        const caption = getComputedStyle(sheet.getPopupOverlay().querySelector('.header-caption')!);
+        expect(`${caption.marginLeft} ${caption.fontWeight} ${caption.textAlign}`).to.equal('3px 700 left');
+        expect(caption.color).to.equal(BODY_TEXT);
+
+        sheet.dispose();
+        themed.cleanup();
+    });
+
     it('keeps the GWT client\'s card and close box without the theme', () => {
         const { themed, sheet } = open(null);
 

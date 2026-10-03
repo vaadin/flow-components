@@ -303,27 +303,28 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         const root = sheet.getRoot();
         expect(host.firstElementChild).to.equal(root);
 
-        // Root has 4 children: formula bar + context menu + scroll
-        // container + sheet tabs.
-        expect(root.children).to.have.length(4);
+        // Root has 5 children: formula bar + context menu + scroll
+        // container + sheet tabs + the popup overlay, which is outside the
+        // scroll container so the keys typed into a popup are not the
+        // sheet's.
+        expect(root.children).to.have.length(5);
         const rootKids = Array.from(root.children);
         expect(rootKids.includes(sheet.getFormulaBar())).to.be.true;
         expect(rootKids.includes(sheet.getContextMenu())).to.be.true;
         expect(rootKids.includes(sheet.getScrollContainer())).to.be.true;
         expect(rootKids.includes(sheet.getSheetTabs())).to.be.true;
+        expect(rootKids.includes(sheet.getPopupOverlay())).to.be.true;
 
         const scroller = sheet.getScrollContainer();
-        // Five scroll-container children: header-corner, column-header,
-        // row-header, cell-grid, and the popup overlay, which sits here so
-        // it tracks the sheet as it scrolls. (Identity checks via `===` to
-        // avoid chai serializing LitElements with cyclic renderState.)
-        expect(scroller.children).to.have.length(5);
+        // Four scroll-container children: header-corner, column-header,
+        // row-header, cell-grid. (Identity checks via `===` to avoid chai
+        // serializing LitElements with cyclic renderState.)
+        expect(scroller.children).to.have.length(4);
         const kids = Array.from(scroller.children);
         expect(kids.includes(sheet.getColumnHeader())).to.be.true;
         expect(kids.includes(sheet.getRowHeader())).to.be.true;
         expect(kids.includes(sheet.getCellGrid())).to.be.true;
         expect(kids.includes(sheet.getHeaderCorner())).to.be.true;
-        expect(kids.includes(sheet.getPopupOverlay())).to.be.true;
     });
 
     it('buildRenderState returns a viewport that covers the visible range', () => {
@@ -596,10 +597,9 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         expect(scroller.style.overflow).to.equal('auto');
         const computed = getComputedStyle(scroller);
         expect(computed.display).to.equal('grid');
-        // Five children: header-corner + column-header + row-header
-        // + cell-grid (CSS-grid layout, slice 144+145), plus the
-        // popup overlay, which scrolls with the sheet.
-        expect(scroller.children).to.have.length(5);
+        // Four children: header-corner + column-header + row-header
+        // + cell-grid (CSS-grid layout, slice 144+145).
+        expect(scroller.children).to.have.length(4);
 
         cleanup();
     });
@@ -2287,7 +2287,8 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         // under its own root element, not into the light DOM.
         expect(shadow.children.length).to.equal(1);
         expect(shadow.firstElementChild).to.equal(sheet.getRoot());
-        expect(sheet.getRoot().children.length).to.equal(4);
+        // Formula bar, context menu, popup overlay, scroll container, tabs.
+        expect(sheet.getRoot().children.length).to.equal(5);
         expect(host.children.length).to.equal(0);
         // The host belongs to the application: the component must not
         // write a layout onto it. An inline style would beat any

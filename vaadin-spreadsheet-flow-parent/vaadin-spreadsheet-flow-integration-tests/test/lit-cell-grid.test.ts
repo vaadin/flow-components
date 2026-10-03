@@ -2977,6 +2977,40 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
         return ['s-top', 's-left', 's-right', 's-bottom'].filter((side) => !piece.querySelector(`.${side}`)!.classList.contains('cut'));
     }
 
+    it('reports where a cell is on screen, a frozen one where it is pinned', async () => {
+        const el = await attachWithState(frozen({ scrollLeft: 30, scrollTop: 10 }));
+        const grid = el.getBoundingClientRect();
+
+        const scrolling = el.cellClientRect(3, 3)!;
+        expect([scrolling.left - grid.left, scrolling.top - grid.top, scrolling.width, scrolling.height]).to.deep.equal([
+            100, 40, 50, 20,
+        ]);
+        // The frozen corner moves along the grid by the scroll, which keeps
+        // it still on screen.
+        const pinned = el.cellClientRect(1, 1)!;
+        expect([pinned.left - grid.left, pinned.top - grid.top, pinned.width, pinned.height]).to.deep.equal([
+            30, 10, 50, 20,
+        ]);
+
+        cleanup(el);
+    });
+
+    it('reports no box for a cell outside the rendered range', async () => {
+        const el = await attachWithState(frozen());
+
+        expect(el.cellClientRect(9, 9)).to.be.null;
+
+        cleanup(el);
+    });
+
+    it('reports how far the frozen columns and rows reach', async () => {
+        const el = await attachWithState(frozen());
+
+        expect(el.frozenExtent()).to.deep.equal({ width: 100, height: 40 });
+
+        cleanup(el);
+    });
+
     it('outlines a selection in the frozen corner', async () => {
         const el = await attachWithState(frozen(selecting(1, 1)));
 

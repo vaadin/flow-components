@@ -339,7 +339,7 @@ public class SpreadsheetElement extends TestBenchElement {
                                 const host = arguments[0];
                                 const done = arguments[arguments.length - 1];
                                 const root = host.shadowRoot;
-                                const container = root.querySelector('div[style*="overflow"]');
+                                const container = root.querySelector('.sheet-scroll');
                                 const grid = root.querySelector('vaadin-spreadsheet-internal-cell-grid');
                                 let tries = 0;
                                 const check = () => {
@@ -361,14 +361,15 @@ public class SpreadsheetElement extends TestBenchElement {
      * The Lit Spreadsheet's scroll container — a {@code <div>} inside the
      * host's shadow root that wraps the cell grid and its sticky-positioned
      * header strips. Lit equivalent of the legacy {@code .bottom-right-pane}.
+     * Found by its own class: it is not the only element with an inline
+     * overflow.
      */
     private TestBenchElement scrollContainer() {
         WebElement el = (WebElement) ((JavascriptExecutor) getCommandExecutor()
                 .getDriver()).executeScript("""
                         const host = arguments[0];
                         return host.shadowRoot
-                            ? host.shadowRoot.querySelector(
-                                'div[style*="overflow"]')
+                            ? host.shadowRoot.querySelector('.sheet-scroll')
                             : null;
                         """, this);
         if (el == null) {
@@ -607,9 +608,9 @@ public class SpreadsheetElement extends TestBenchElement {
      * Determine if the pop-up of PopupButton is currently visible.
      * <p>
      * The Lit client shows it in its own overlay inside the spreadsheet's
-     * shadow root, positioned in the scroll container so it tracks the sheet,
-     * rather than in the GWT-era {@code .v-spreadsheet-popupbutton-overlay}
-     * floating div.
+     * shadow root, drawn in the top layer as the GWT client's popover was,
+     * rather than in the GWT-era {@code .v-spreadsheet-popupbutton-overlay} div
+     * in the light DOM.
      */
     public boolean isPopupButtonPopupVisible() {
         Object visible = ((JavascriptExecutor) getCommandExecutor().getDriver())
