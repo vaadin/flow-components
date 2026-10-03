@@ -150,25 +150,34 @@ final class CellDataBuilder implements Serializable {
                                         && !cell.getCellFormula()
                                                 .startsWith("HYPERLINK")))) {
                     if (!manager.doesValueFit(cell, formattedCellValue)) {
+                        // A number is shortened or hashed only in a style the
+                        // GWT client had CSS for, the only styles it measured;
+                        // in any other it was shown as it was. Text runs on
+                        // whatever its style: the GWT client measured that
+                        // itself, cell by cell.
+                        boolean measuredForNumbers = manager.hasStyleCss(cell);
                         if (manager.numericFormatter
                                 .valueContainsOnlyNumbers(formattedCellValue)
                                 && manager.numericFormatter
                                         .isGeneralCell(cell)) {
-                            cellData.value = manager.numericFormatter
-                                    .getCellValueFormatter()
-                                    .getScientificNotationStringForNumericCell(
-                                            cell.getNumericCellValue(),
-                                            formattedCellValue,
-                                            manager.fitCalculator
-                                                    .getRatioForStyleIndex(
-                                                            (int) cell
-                                                                    .getCellStyle()
-                                                                    .getIndex()),
-                                            manager.getCellWidth(cell) - 10);
+                            if (measuredForNumbers) {
+                                cellData.value = manager.numericFormatter
+                                        .getCellValueFormatter()
+                                        .getScientificNotationStringForNumericCell(
+                                                cell.getNumericCellValue(),
+                                                formattedCellValue,
+                                                manager.fitCalculator
+                                                        .getRatioForStyleIndex(
+                                                                (int) cell
+                                                                        .getCellStyle()
+                                                                        .getIndex()),
+                                                manager.getCellWidth(cell)
+                                                        - 10);
+                            }
                         } else if (cell.getCellType() != CellType.STRING
                                 && (cell.getCellType() == CellType.FORMULA
                                         && cell.getCachedFormulaResultType() != CellType.STRING)) {
-                            cellData.needsMeasure = true;
+                            cellData.needsMeasure = measuredForNumbers;
                         } else {
                             // Text. A number too wide for its column is
                             // shortened or measured; text runs on into the

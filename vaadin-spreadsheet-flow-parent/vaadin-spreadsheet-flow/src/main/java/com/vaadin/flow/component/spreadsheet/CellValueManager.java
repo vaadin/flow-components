@@ -179,6 +179,20 @@ public class CellValueManager implements Serializable {
     }
 
     /**
+     * Whether the cell's style has CSS on the client.
+     * <p>
+     * A style set on a cell through POI has none until the workbook styles are
+     * loaded again. The GWT client measured a character's width only for the
+     * styles it had CSS for, so this is also whether it could tell that a
+     * number did not fit.
+     */
+    boolean hasStyleCss(Cell cell) {
+        HashMap<Integer, String> css = spreadsheet.getCellStyleToCSSStyle();
+        return css != null
+                && css.containsKey((int) cell.getCellStyle().getIndex());
+    }
+
+    /**
      * Calculate cell width, accounting for merged cells (see #655)
      *
      * @param cell

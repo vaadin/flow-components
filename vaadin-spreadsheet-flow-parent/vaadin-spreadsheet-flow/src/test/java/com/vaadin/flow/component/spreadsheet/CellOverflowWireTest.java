@@ -9,10 +9,13 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -216,6 +219,72 @@ class CellOverflowWireTest {
         Cell a1 = spreadsheet.createCell(0, 0, Boolean.FALSE);
 
         assertTrue(dataFor(a1).overflowWidth > spreadsheet.getColW()[0]);
+    }
+
+    @Test
+    void aGeneralNumberInAStyleWithoutCss_keepsAllItsDigits() {
+        // A style set on a cell through POI has no CSS until the styles are
+        // reloaded. The GWT client measured a character's width only for
+        // the styles it had CSS for, so a number in any other style was
+        // shown as it was, never shortened. The Lit client measures every
+        // style its cells wear, for the text that runs on, and the server
+        // shortened the number with that width too.
+        spreadsheet.setLocale(Locale.US);
+        reportWidthRatios(WIDE);
+        Cell a1 = spreadsheet.createCell(0, 0, 38247.12269d);
+        a1.setCellStyle(spreadsheet.getWorkbook().createCellStyle());
+
+        assertEquals("38247.12269", dataFor(a1).value);
+    }
+
+    @Test
+    void aGeneralNumberInAStyleWithCss_isShortenedToFit() {
+        reportWidthRatios(WIDE);
+        Cell a1 = spreadsheet.createCell(0, 0, 38247.12269d);
+        a1.setCellStyle(spreadsheet.getWorkbook().createCellStyle());
+        spreadsheet.getSpreadsheetStyleFactory().reloadWorkbookStyles();
+
+        assertNotEquals("38247.12269", dataFor(a1).value);
+    }
+
+    @Test
+    void aNumericFormulaInAStyleWithoutCss_isNotSentForMeasuring() {
+        // The client hashes a value it is told to measure that does not
+        // fit; the GWT client was never told to for a style it had no CSS
+        // for.
+        reportWidthRatios(WIDE);
+        Cell a1 = spreadsheet.createFormulaCell(0, 0, "1/3");
+        CellStyle style = spreadsheet.getWorkbook().createCellStyle();
+        style.setDataFormat(spreadsheet.getWorkbook().createDataFormat()
+                .getFormat("0.0000000000"));
+        a1.setCellStyle(style);
+
+        assertFalse(dataFor(a1).needsMeasure);
+    }
+
+    @Test
+    void aNumericFormulaInAStyleWithCss_isSentForMeasuring() {
+        reportWidthRatios(WIDE);
+        Cell a1 = spreadsheet.createFormulaCell(0, 0, "1/3");
+        CellStyle style = spreadsheet.getWorkbook().createCellStyle();
+        style.setDataFormat(spreadsheet.getWorkbook().createDataFormat()
+                .getFormat("0.0000000000"));
+        a1.setCellStyle(style);
+        spreadsheet.getSpreadsheetStyleFactory().reloadWorkbookStyles();
+
+        assertTrue(dataFor(a1).needsMeasure);
+    }
+
+    @Test
+    void textInAStyleWithoutCss_stillRunsOn() {
+        // Run-on is the GWT client's own measurement of every cell, so a
+        // style without CSS takes part in it.
+        reportWidthRatios(WIDE);
+        Cell a1 = spreadsheet.createCell(0, 0, "a value far too wide");
+        a1.setCellStyle(spreadsheet.getWorkbook().createCellStyle());
+
+        assertTrue(dataFor(a1).overflowWidth > spreadsheet.getColW()[0],
+                "The text should be given room past its own column");
     }
 
     @Test
