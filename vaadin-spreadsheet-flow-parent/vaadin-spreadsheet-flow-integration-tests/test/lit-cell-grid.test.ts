@@ -3107,6 +3107,38 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
         cleanup(el);
     });
 
+    it('draws the selection over a picture in the same pane, as the GWT client did', async () => {
+        // The GWT client put pictures under the selection and above the
+        // cells; a logo anchored on the selected cell hid the selection.
+        const el = await attachWithState(
+            frozen({
+                ...selecting(1, 1),
+                overlays: [
+                    {
+                        id: 'pic',
+                        col: 1,
+                        row: 1,
+                        type: 'IMAGE',
+                        src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
+                        leftPx: 0,
+                        topPx: 0,
+                        widthPx: 100,
+                        heightPx: 60,
+                    },
+                ],
+            })
+        );
+
+        el.shadowRoot!.querySelector<HTMLElement>('.sheet-selection .s-top')!.style.pointerEvents = 'auto';
+        el.shadowRoot!.querySelector<HTMLElement>('.sheet-overlay')!.style.pointerEvents = 'auto';
+        const origin = el.getBoundingClientRect();
+        // The middle of A1's top side, over the picture.
+        const hit = el.shadowRoot!.elementFromPoint(origin.left + 25, origin.top)!;
+        expect(hit.classList.contains('s-top'), hit.className).to.be.true;
+
+        cleanup(el);
+    });
+
     it('hangs a note off a frozen cell where the cell is on screen', async () => {
         // In a sheet big enough that the note needs no moving.
         const pane = document.createElement('div');

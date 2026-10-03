@@ -1263,15 +1263,17 @@ export class SpreadsheetCellGrid extends LitElement {
   }
 
   /**
-   * What a quadrant draws over its cells: its piece of the selection and
-   * of the fill outline, and the pictures and filter buttons anchored in
-   * it - each in its own pane, as the GWT client had them.
+   * What a quadrant draws over its cells: the pictures anchored in it, its
+   * piece of the selection and of the fill outline, and its filter buttons
+   * - each in its own pane, as the GWT client had them.
+   *
+   * All on the same level, so the order is the stacking: the GWT client
+   * put the selection over the pictures.
    */
   private quadrantOverlays(opts: QuadrantRenderOpts): TemplateResult {
     const state = opts.state;
-    return html`${buildSelectionOverlay(opts)}${buildPaintOutline(opts)}${buildSheetOverlays(
-      state,
-      opts.quadrantName
+    return html`${buildSheetOverlays(state, opts.quadrantName)}${buildSelectionOverlay(opts)}${buildPaintOutline(
+      opts
     )}${buildPopupButtons(state, opts.quadrantName)}`;
   }
 }
