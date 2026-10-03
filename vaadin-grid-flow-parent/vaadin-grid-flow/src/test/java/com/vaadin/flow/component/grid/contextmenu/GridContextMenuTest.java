@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.contextmenu;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,13 +26,17 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.ContextMenuBase;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 class GridContextMenuTest {
 
@@ -135,5 +140,37 @@ class GridContextMenuTest {
         second.setTarget(null);
 
         Assertions.assertEquals(List.of(first, third), grid.getContextMenus());
+    }
+
+    @Test
+    void dynamicContentHandler_targetColumnIdIsUpdatedBeforeHandlerRuns() {
+        Grid<String> grid = new Grid<>();
+        grid.addColumn(item -> item).setId("first");
+        grid.addColumn(item -> item).setId("second");
+        GridContextMenu<String> contextMenu = grid.addContextMenu();
+
+        AtomicReference<String> columnIdInHandler = new AtomicReference<>();
+        contextMenu.setDynamicContentHandler(item -> {
+            columnIdInHandler.set(grid.getElement()
+                    .getProperty("_contextMenuTargetColumnId"));
+            return false;
+        });
+
+        fireBeforeOpenEvent(grid, "second");
+        Assertions.assertEquals("second", columnIdInHandler.get());
+
+        fireBeforeOpenEvent(grid, "first");
+        Assertions.assertEquals("first", columnIdInHandler.get());
+    }
+
+    private static void fireBeforeOpenEvent(Grid<?> grid, String columnId) {
+        var detail = JacksonUtils.createObjectNode();
+        detail.put("key", "");
+        detail.put("columnId", columnId);
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.set(ContextMenuBase.EVENT_DETAIL, detail);
+        grid.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(grid.getElement(),
+                        "vaadin-context-menu-before-open", eventData));
     }
 }
