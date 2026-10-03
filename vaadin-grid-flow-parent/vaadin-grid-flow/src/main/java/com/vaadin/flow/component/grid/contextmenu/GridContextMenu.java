@@ -25,6 +25,7 @@ import com.vaadin.flow.component.contextmenu.ContextMenuBase;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
@@ -44,6 +45,7 @@ public class GridContextMenu<T> extends
         implements HasGridMenuItems<T> {
 
     private SerializablePredicate<T> dynamicContentHandler;
+    private SerializableBiPredicate<T, Grid.Column<T>> columnDynamicContentHandler;
 
     /**
      * Event that is fired when a {@link GridMenuItem} is clicked inside a
@@ -247,7 +249,9 @@ public class GridContextMenu<T> extends
      * </p>
      *
      * @return the callback function that is executed before opening the context
-     *         menu, or {@code null} if not specified.
+     *         menu, or {@code null} if not specified or if a handler that also
+     *         receives the column was set with
+     *         {@link #setDynamicContentHandler(SerializableBiPredicate)}.
      * @since 4.1
      */
     public SerializablePredicate<T> getDynamicContentHandler() {
@@ -267,6 +271,10 @@ public class GridContextMenu<T> extends
      * The boolean return value of this callback specifies if the context menu
      * will be opened.
      * </p>
+     * <p>
+     * Replaces any handler set with
+     * {@link #setDynamicContentHandler(SerializableBiPredicate)}.
+     * </p>
      *
      * @param dynamicContentHandler
      *            the callback function that will be executed before opening the
@@ -276,6 +284,50 @@ public class GridContextMenu<T> extends
     public void setDynamicContentHandler(
             SerializablePredicate<T> dynamicContentHandler) {
         this.dynamicContentHandler = dynamicContentHandler;
+        this.columnDynamicContentHandler = null;
+    }
+
+    /**
+     * Sets a callback that is executed before the context menu is opened, and
+     * that receives both the clicked item and the clicked column.
+     *
+     * <p>
+     * Use this to build context menus whose contents depend on the column that
+     * was clicked, for example:
+     * </p>
+     *
+     * <pre>
+     * contextMenu.setDynamicContentHandler((person, column) -&gt; {
+     *     contextMenu.removeAll();
+     *     if (column == nameColumn) {
+     *         contextMenu.addItem("Call", e -&gt; call(person));
+     *     } else if (column == addressColumn) {
+     *         contextMenu.addItem("Show on map", e -&gt; showOnMap(person));
+     *     }
+     *     return true;
+     * });
+     * </pre>
+     *
+     * <p>
+     * The item is {@code null} if the context-click didn't target an item (eg.
+     * a header). The column is {@code null} if the context-click didn't target
+     * an application column (eg. the selection column). The boolean return
+     * value of this callback specifies if the context menu will be opened.
+     * </p>
+     * <p>
+     * Replaces any handler set with
+     * {@link #setDynamicContentHandler(SerializablePredicate)}.
+     * </p>
+     *
+     * @param dynamicContentHandler
+     *            the callback function that will be executed before opening the
+     *            context menu, or {@code null} to remove it
+     * @since 25.4
+     */
+    public void setDynamicContentHandler(
+            SerializableBiPredicate<T, Grid.Column<T>> dynamicContentHandler) {
+        this.columnDynamicContentHandler = dynamicContentHandler;
+        this.dynamicContentHandler = null;
     }
 
     /**
@@ -287,6 +339,20 @@ public class GridContextMenu<T> extends
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         Grid<T> grid = (Grid<T>) getTarget();
         String key = eventDetail.get("key").asString();
+        String columnId = eventDetail.get("columnId").asString();
+
+        // The grid connector also reports the target with a separate server
+        // call, which is processed after this event. Update the target here so
+        // that it is up to date in the dynamic content handlers.
+        grid.getElement().setProperty("_contextMenuTargetItemKey", key);
+        grid.getElement().setProperty("_contextMenuTargetColumnId", columnId);
+
+        if (columnDynamicContentHandler != null) {
+            final T item = grid.getDataCommunicator().getKeyMapper().get(key);
+            final Grid.Column<T> column = getColumnByInternalId(grid,
+                    eventDetail.get("internalColumnId").asString());
+            return columnDynamicContentHandler.test(item, column);
+        }
 
         if (getDynamicContentHandler() != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
@@ -294,5 +360,13 @@ public class GridContextMenu<T> extends
         }
 
         return super.onBeforeOpenMenu(eventDetail);
+    }
+
+    private static <T> Grid.Column<T> getColumnByInternalId(Grid<T> grid,
+            String internalId) {
+        return grid.getColumns().stream()
+                .filter(column -> internalId
+                        .equals(column.getElement().getProperty("_flowId")))
+                .findFirst().orElse(null);
     }
 }

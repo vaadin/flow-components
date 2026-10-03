@@ -23,6 +23,7 @@ describe('grid connector - context menu', () => {
 
     column = grid.querySelector('vaadin-grid-column')!;
     column.id = 'name-column';
+    column._flowId = 'col0';
 
     setRootItems(grid.$connector, [
       { key: '0', name: 'foo' },
@@ -41,14 +42,14 @@ describe('grid connector - context menu', () => {
   });
 
   it('should return item key and column id in before-open detail', () => {
-    let detail: { key: string, columnId: string };
+    let detail: { key: string; columnId: string; internalColumnId: string };
     // The detail is resolved while the source event is still being dispatched
     grid.addEventListener('contextmenu', (e) => {
       detail = grid.getContextMenuBeforeOpenDetail(new CustomEvent('contextmenu', { detail: { sourceEvent: e } }));
     });
     getBodyCellContent(grid, 0, 1)!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, composed: true }));
 
-    expect(detail!).to.deep.equal({ key: '0', columnId: 'name-column' });
+    expect(detail!).to.deep.equal({ key: '0', columnId: 'name-column', internalColumnId: 'col0' });
   });
 
   it('should prevent context menu on selection column left click', () => {

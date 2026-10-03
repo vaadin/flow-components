@@ -36,7 +36,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        grid = $(GridElement.class).first();
+        grid = $(GridElement.class).id("grid-with-dynamic-context-menu");
         verifyClosed();
     }
 
@@ -73,6 +73,25 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
         verifyOpened();
         Assert.assertEquals("Person 40",
+                getContextMenu().getDomProperty("innerText"));
+    }
+
+    @Test
+    public void columnDynamicContentHandler_menuContentDependsOnClickedColumn() {
+        GridElement columnGrid = $(GridElement.class)
+                .id("grid-with-column-dynamic-context-menu");
+
+        columnGrid.getCell(5, 1).contextClick();
+        verifyOpened();
+        Assert.assertEquals("Age 5",
+                getContextMenu().getDomProperty("innerText"));
+
+        $("body").first().click();
+        verifyClosed();
+
+        columnGrid.getCell(5, 0).contextClick();
+        verifyOpened();
+        Assert.assertEquals("Call Person 5",
                 getContextMenu().getDomProperty("innerText"));
     }
 

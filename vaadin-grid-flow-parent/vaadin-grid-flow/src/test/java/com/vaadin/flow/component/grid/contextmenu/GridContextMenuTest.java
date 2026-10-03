@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.contextmenu;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,13 +26,17 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.ContextMenuBase;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 class GridContextMenuTest {
 
@@ -135,5 +140,97 @@ class GridContextMenuTest {
         second.setTarget(null);
 
         Assertions.assertEquals(List.of(first, third), grid.getContextMenus());
+    }
+
+    @Test
+    void dynamicContentHandler_targetColumnIdIsUpdatedBeforeHandlerRuns() {
+        Grid<String> grid = new Grid<>();
+        grid.addColumn(item -> item).setId("first");
+        grid.addColumn(item -> item).setId("second");
+        GridContextMenu<String> contextMenu = grid.addContextMenu();
+
+        AtomicReference<String> columnIdInHandler = new AtomicReference<>();
+        contextMenu.setDynamicContentHandler(item -> {
+            columnIdInHandler.set(grid.getElement()
+                    .getProperty("_contextMenuTargetColumnId"));
+            return false;
+        });
+
+        fireBeforeOpenEvent(grid, "second");
+        Assertions.assertEquals("second", columnIdInHandler.get());
+
+        fireBeforeOpenEvent(grid, "first");
+        Assertions.assertEquals("first", columnIdInHandler.get());
+    }
+
+    @Test
+    void columnDynamicContentHandler_receivesClickedItemAndColumn() {
+        Grid<String> grid = new Grid<>();
+        grid.setItems("foo", "bar");
+        Grid.Column<String> first = grid.addColumn(item -> item);
+        Grid.Column<String> second = grid.addColumn(item -> item);
+        GridContextMenu<String> contextMenu = grid.addContextMenu();
+
+        AtomicReference<String> itemInHandler = new AtomicReference<>();
+        AtomicReference<Grid.Column<String>> columnInHandler = new AtomicReference<>();
+        contextMenu.setDynamicContentHandler((item, column) -> {
+            itemInHandler.set(item);
+            columnInHandler.set(column);
+            return false;
+        });
+
+        String barKey = grid.getDataCommunicator().getKeyMapper().key("bar");
+        fireBeforeOpenEvent(grid, barKey, "", getInternalId(second));
+        Assertions.assertEquals("bar", itemInHandler.get());
+        Assertions.assertSame(second, columnInHandler.get());
+
+        fireBeforeOpenEvent(grid, "", "", getInternalId(first));
+        Assertions.assertNull(itemInHandler.get());
+        Assertions.assertSame(first, columnInHandler.get());
+
+        // Not an application column, e.g. the selection column
+        fireBeforeOpenEvent(grid, barKey, "", "");
+        Assertions.assertEquals("bar", itemInHandler.get());
+        Assertions.assertNull(columnInHandler.get());
+    }
+
+    @Test
+    void setDynamicContentHandler_replacesHandlerOfOtherType() {
+        GridContextMenu<String> contextMenu = new Grid<String>()
+                .addContextMenu();
+
+        contextMenu.setDynamicContentHandler(item -> true);
+        contextMenu.setDynamicContentHandler((item, column) -> true);
+        Assertions.assertNull(contextMenu.getDynamicContentHandler());
+
+        AtomicReference<Boolean> called = new AtomicReference<>(false);
+        contextMenu.setDynamicContentHandler((item, column) -> {
+            called.set(true);
+            return false;
+        });
+        contextMenu.setDynamicContentHandler(item -> false);
+        fireBeforeOpenEvent((Grid<?>) contextMenu.getTarget(), "", "", "");
+        Assertions.assertFalse(called.get());
+    }
+
+    private static String getInternalId(Grid.Column<?> column) {
+        return column.getElement().getProperty("_flowId");
+    }
+
+    private static void fireBeforeOpenEvent(Grid<?> grid, String columnId) {
+        fireBeforeOpenEvent(grid, "", columnId, "");
+    }
+
+    private static void fireBeforeOpenEvent(Grid<?> grid, String key,
+            String columnId, String internalColumnId) {
+        var detail = JacksonUtils.createObjectNode();
+        detail.put("key", key);
+        detail.put("columnId", columnId);
+        detail.put("internalColumnId", internalColumnId);
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.set(ContextMenuBase.EVENT_DETAIL, detail);
+        grid.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(grid.getElement(),
+                        "vaadin-context-menu-before-open", eventData));
     }
 }

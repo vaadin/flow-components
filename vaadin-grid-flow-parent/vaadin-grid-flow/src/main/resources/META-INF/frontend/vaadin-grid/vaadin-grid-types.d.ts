@@ -93,7 +93,11 @@ export interface FlowGridInternals {
   _isDetailsOpened(item: Item | undefined): boolean;
   isItemSelectable(item: Item | null | undefined): boolean;
   _mapSorters(): GridSorterDefinition[];
-  getContextMenuBeforeOpenDetail(event: CustomEvent<{ sourceEvent?: Event }>): { key: string; columnId: string };
+  getContextMenuBeforeOpenDetail(event: CustomEvent<{ sourceEvent?: Event }>): {
+    key: string;
+    columnId: string;
+    internalColumnId: string;
+  };
   preventContextMenu(event: MouseEvent): boolean;
 }
 
