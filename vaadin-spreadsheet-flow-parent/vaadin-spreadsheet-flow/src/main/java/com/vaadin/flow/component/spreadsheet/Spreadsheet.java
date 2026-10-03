@@ -3051,7 +3051,6 @@ public class Spreadsheet extends Component
 
         viewportBounds.update(-1, -1, -1, -1);
         sheetOverlayManager.clear();
-        cellCommentLoader.resetTopLeftLoaded();
 
         clientReloadFlag.markPending(this);
 

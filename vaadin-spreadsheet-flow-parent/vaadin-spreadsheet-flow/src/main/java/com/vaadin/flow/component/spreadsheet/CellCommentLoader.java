@@ -27,16 +27,11 @@ final class CellCommentLoader implements Serializable {
 
     private final Spreadsheet spreadsheet;
     private final CellCommentRangeScanner scanner;
-    private boolean topLeftLoaded;
 
     CellCommentLoader(Spreadsheet spreadsheet,
             CellCommentRangeScanner scanner) {
         this.spreadsheet = spreadsheet;
         this.scanner = scanner;
-    }
-
-    void resetTopLeftLoaded() {
-        this.topLeftLoaded = false;
     }
 
     void load() {
@@ -59,9 +54,11 @@ final class CellCommentLoader implements Serializable {
         int firstColumn = spreadsheet.getFirstColumn();
         int lastColumn = spreadsheet.getLastColumn();
 
-        if (verticalSplit > 0 && horizontalSplit > 0 && !topLeftLoaded) {
+        // The frozen corner every time, like every other pane: the maps were
+        // just emptied, so a corner scanned only once lost its comments on
+        // the next scroll or refresh.
+        if (verticalSplit > 0 && horizontalSplit > 0) {
             scanner.scan(1, 1, verticalSplit, horizontalSplit);
-            topLeftLoaded = true;
         }
         if (verticalSplit > 0) {
             scanner.scan(1, firstColumn, verticalSplit, lastColumn);

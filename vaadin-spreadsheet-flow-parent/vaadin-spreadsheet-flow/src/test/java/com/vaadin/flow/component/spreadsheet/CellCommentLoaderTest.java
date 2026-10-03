@@ -32,9 +32,9 @@ import org.mockito.MockitoAnnotations;
  * <ul>
  * <li>Early-return when {@code getFirstColumn() == -1} (spreadsheet not yet
  * loaded).</li>
- * <li>{@code topLeftLoaded} latch — area 1 (frozen × frozen) is scanned only
- * ONCE per spreadsheet lifecycle (frozen panes don't scroll, so a re-scan would
- * be wasted work). {@code resetTopLeftLoaded} arms it again.</li>
+ * <li>Area 1 (frozen × frozen) is scanned on every load like the others. A
+ * latch that scanned it once lost its comments: every load empties the maps
+ * first.</li>
  * </ul>
  */
 class CellCommentLoaderTest {
@@ -108,46 +108,28 @@ class CellCommentLoaderTest {
 
         loader.load();
 
-        verify(scanner).scan(1, 1, 3, 2); // area 1 (latched)
+        verify(scanner).scan(1, 1, 3, 2); // area 1
         verify(scanner).scan(1, 1, 3, 10); // area 2
         verify(scanner).scan(1, 1, 10, 2); // area 3
         verify(scanner).scan(1, 1, 10, 10); // area 4
     }
 
     @Test
-    void load_bothSplits_secondCall_skipsArea1_dueToLatch() {
-        // Pin the latch: area 1 (frozen × frozen) is scanned at most once
-        // per lifecycle. Second load() skips it. This is the optimization —
-        // frozen rows / cols don't scroll, so their comment state stays
-        // valid across loads.
+    void load_bothSplits_secondCall_scansTheFrozenCornerAgain() {
+        // Every load empties the comment maps before scanning. The refactor
+        // latched area 1 after its first scan, so the second load - any
+        // scroll or refresh - dropped every comment in the frozen corner.
+        // The GWT-era Spreadsheet never set its latch.
         when(spreadsheet.getLastFrozenRow()).thenReturn(3);
         when(spreadsheet.getLastFrozenColumn()).thenReturn(2);
 
-        loader.load(); // first call — area 1 fires
-        loader.load(); // second call — area 1 skipped
+        loader.load();
+        loader.load();
 
-        // Area 1 was called exactly once total.
-        verify(scanner, times(1)).scan(1, 1, 3, 2);
-        // Areas 2, 3, 4 fired twice (once per load).
+        verify(scanner, times(2)).scan(1, 1, 3, 2);
         verify(scanner, times(2)).scan(1, 1, 3, 10);
         verify(scanner, times(2)).scan(1, 1, 10, 2);
         verify(scanner, times(2)).scan(1, 1, 10, 10);
-    }
-
-    @Test
-    void resetTopLeftLoaded_armsTheLatchAgain() {
-        // Pin: resetTopLeftLoaded() resets the latch so the next load()
-        // re-scans area 1. Used by Spreadsheet when a structural change
-        // (e.g. unfreeze + refreeze) invalidates the cached state.
-        when(spreadsheet.getLastFrozenRow()).thenReturn(3);
-        when(spreadsheet.getLastFrozenColumn()).thenReturn(2);
-
-        loader.load(); // arms the latch
-        loader.load(); // skip area 1
-        loader.resetTopLeftLoaded();
-        loader.load(); // area 1 fires again
-
-        verify(scanner, times(2)).scan(1, 1, 3, 2);
     }
 
     @Test
@@ -175,9 +157,8 @@ class CellCommentLoaderTest {
     }
 
     @Test
-    void load_bothSplitsButNoTopLeftLatchYet_area1FiresFirst() {
-        // Pin: area 1 is at the head of the dispatch when the latch is
-        // unset. The latch flip happens AFTER the area 1 scan, not before.
+    void load_bothSplits_area1FiresFirst() {
+        // Pin: area 1 is at the head of the dispatch.
         when(spreadsheet.getLastFrozenRow()).thenReturn(3);
         when(spreadsheet.getLastFrozenColumn()).thenReturn(2);
 
