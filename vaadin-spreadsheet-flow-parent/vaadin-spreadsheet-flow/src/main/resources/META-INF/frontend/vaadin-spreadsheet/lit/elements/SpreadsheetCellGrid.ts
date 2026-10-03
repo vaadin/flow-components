@@ -1568,6 +1568,27 @@ function textColorDeclaration(data: CellData | undefined): string {
 }
 
 /**
+ * The most selectors one rule lists.
+ *
+ * Blink and WebKit keep the index of a selector inside its rule in 13 bits
+ * and silently drop every selector that starts past the 8192nd simple
+ * selector: a rule listing 3432 cells as `.cell.col<N>.row<N>` styled the
+ * first 2731 of them and no more. The GWT client's rules lost their tails
+ * the same way, sooner, its selectors being longer. A thousand selectors of
+ * the three classes these carry stay well inside the limit.
+ */
+const MAX_SELECTORS_PER_RULE = 1000;
+
+/** One rule per {@link MAX_SELECTORS_PER_RULE} selectors, each with the block. */
+function chunkedRules(selectors: readonly string[], block: string): string[] {
+  const rules: string[] = [];
+  for (let start = 0; start < selectors.length; start += MAX_SELECTORS_PER_RULE) {
+    rules.push(`${selectors.slice(start, start + MAX_SELECTORS_PER_RULE).join(', ')} ${block}`);
+  }
+  return rules;
+}
+
+/**
  * Build a {@code <style>} TemplateResult containing one rule per
  * entry in {@code cellStyleToCSSStyle}. Each rule has the form
  * {@code .cell.cs<N> { <body> }}. The body is taken verbatim from
@@ -1630,7 +1651,7 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
     for (const col of colsByStyle.get(index) ?? []) {
       selectors.push(`.cell.col${col}.cs0`);
     }
-    rules.push(`${selectors.join(', ')} { ${body} }`);
+    rules.push(...chunkedRules(selectors, `{ ${body} }`));
   }
   // Conditional formatting after the per-cell styles, and in ascending
   // key order: a rule that matches beats the cell's own style, and a
@@ -1645,7 +1666,15 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
   // `.col<N>.row<N>`; scope them to cells the way the GWT client did,
   // which prefixed them with its sheet id.
   for (const rule of state.shiftedCellBorderStyles ?? []) {
-    rules.push(rule.replace(/\.col/g, '.cell.col'));
+    const open = rule.indexOf('{');
+    if (open < 0) {
+      continue;
+    }
+    const selectors = rule
+      .slice(0, open)
+      .split(',')
+      .map((selector) => selector.trim().replace(/\.col/g, '.cell.col'));
+    rules.push(...chunkedRules(selectors, rule.slice(open)));
   }
   if (rules.length === 0) {
     return '';

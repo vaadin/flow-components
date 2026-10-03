@@ -2460,6 +2460,136 @@ describe('SpreadsheetCellGrid — the workbook default style and row/column styl
 });
 
 /**
+ * Sheets that style thousands of cells the same way.
+ *
+ * Blink keeps the index of a selector inside its rule in 13 bits and
+ * silently drops every selector that starts past the 8192nd simple
+ * selector. One rule listing every row of a formatted block, or every cell
+ * a border is shifted onto, styled the first 2731 of them and no more. The
+ * GWT client's rules lost their tails the same way, sooner, its selectors
+ * being longer: in big_report_sample.xlsx, J10 kept its own solid bottom
+ * border only because the dotted border shifted onto it came too late in
+ * its rule to apply.
+ */
+describe('SpreadsheetCellGrid — rules that list thousands of cells', () => {
+    const LAST = 4000;
+
+    /** A sheet scrolled down to show only A4000. */
+    function scrolledDown(extra: Partial<CellGridRenderState>): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 1,
+                lastColumnPosition: 50,
+                firstRowIndex: LAST,
+                firstRowPosition: 0,
+                lastRowIndex: LAST,
+                lastRowPosition: 20,
+            },
+            colX: [0],
+            rowY: [0],
+            colWidths: [50],
+            rowHeights: [20],
+            ...extra,
+        };
+    }
+
+    function lastCell(el: SpreadsheetCellGrid): HTMLElement {
+        return el.shadowRoot!.querySelector<HTMLElement>(`.cell.col1.row${LAST}`)!;
+    }
+
+    function ruleSelectorCounts(el: SpreadsheetCellGrid): number[] {
+        const counts: number[] = [];
+        for (const sheet of Array.from(el.shadowRoot!.styleSheets)) {
+            for (const rule of Array.from(sheet.cssRules)) {
+                if (rule instanceof CSSStyleRule) {
+                    counts.push(rule.selectorText.split(',').length);
+                }
+            }
+        }
+        return counts;
+    }
+
+    it('styles the last row of a block of 4000 formatted rows', async () => {
+        const rows: Record<number, number> = {};
+        for (let row = 1; row <= LAST; row++) {
+            rows[row] = 8;
+        }
+        const el = await attachWithState(
+            scrolledDown({
+                cellStyleToCSSStyle: {
+                    0: 'color: rgb(0, 0, 0);',
+                    8: 'background-color: rgb(255, 255, 0);',
+                },
+                rowIndexToStyleIndex: rows,
+            })
+        );
+
+        expect(getComputedStyle(lastCell(el)).backgroundColor).to.equal('rgb(255, 255, 0)');
+
+        cleanup(el);
+    });
+
+    it('draws the last of 4000 borders shifted onto cells, over the cell\'s own', async () => {
+        // J10's shape: the cell's own style draws a solid bottom border, and
+        // the cell below shifts its dotted top border onto it. The shifted
+        // one wins, as the GWT client's rule order meant it to.
+        const selectors: string[] = [];
+        for (let row = 1; row <= LAST; row++) {
+            selectors.push(`.col1.row${row}`);
+        }
+        const el = await attachWithState(
+            scrolledDown({
+                cellData: new Map<string, CellData>([
+                    [`col1 row${LAST}`, { ...makeCellData(1, LAST, ''), cellStyle: 'cs5' }],
+                ]),
+                cellStyleToCSSStyle: {
+                    0: 'color: rgb(0, 0, 0);',
+                    5: 'border-bottom: 1px solid rgb(0, 0, 0);',
+                },
+                shiftedCellBorderStyles: [
+                    `${selectors.join(',')}{border-bottom:1px dotted;border-bottom-color:rgb(165, 165, 165);}`,
+                ],
+            })
+        );
+
+        const style = getComputedStyle(lastCell(el));
+        expect(style.borderBottomStyle).to.equal('dotted');
+        expect(style.borderBottomColor).to.equal('rgb(165, 165, 165)');
+
+        cleanup(el);
+    });
+
+    it('lists at most a thousand selectors in any one rule', async () => {
+        // Three classes each, a thousand stay well inside the limit.
+        const rows: Record<number, number> = {};
+        const shifted: string[] = [];
+        for (let row = 1; row <= LAST; row++) {
+            rows[row] = 8;
+            shifted.push(`.col1.row${row}`);
+        }
+        const el = await attachWithState(
+            scrolledDown({
+                cellStyleToCSSStyle: { 0: 'color: rgb(0, 0, 0);', 8: 'font-weight: bold;' },
+                rowIndexToStyleIndex: rows,
+                shiftedCellBorderStyles: [`${shifted.join(',')}{border-right:1px solid;}`],
+            })
+        );
+
+        const counts = ruleSelectorCounts(el);
+        expect(Math.max(...counts)).to.equal(1000);
+        // Every row and every shifted cell still has its selector: the style
+        // rule's own .cs8 and 4000 rows, then the 4000 shifted cells.
+        const total = counts.reduce((sum, count) => sum + count, 0);
+        expect(total).to.be.at.least(1 + LAST + LAST);
+
+        cleanup(el);
+    });
+});
+
+/**
  * The line along a freeze.
  *
  * The GWT client drew a dark line under the last frozen row and beside the
