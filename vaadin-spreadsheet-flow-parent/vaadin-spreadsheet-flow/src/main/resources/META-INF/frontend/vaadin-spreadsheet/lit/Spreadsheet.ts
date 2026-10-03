@@ -778,6 +778,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // event crosses the cell-grid's shadow DOM boundary.
     this.cellGrid.addEventListener('cell-click', this.handleCellClick as EventListener);
     this.contextMenu.addEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
+    this.contextMenu.addEventListener('context-menu-dismiss', this.handleContextMenuDismiss);
     document.addEventListener('pointerdown', this.handleDocumentPointerDown);
     document.addEventListener('keydown', this.handleContextMenuKeyDown);
     // Cell editor lifecycle events (slice 152). The cell-grid
@@ -2334,6 +2335,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popupContents.clear();
     this.actionIcons.clear();
     this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
+    this.contextMenu.removeEventListener('context-menu-dismiss', this.handleContextMenuDismiss);
     document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
     document.removeEventListener('keydown', this.handleContextMenuKeyDown);
     this.cellGrid.removeEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
@@ -3663,10 +3665,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // viewport as soon as an ancestor has a transform - a dialog
     // overlay has one while it animates - and the menu then opens
     // somewhere other than where the user clicked.
+    // From inside the root's border, where the menu's space starts.
     const origin = this.root.getBoundingClientRect();
     this.lastContextMenuPosition = {
-      x: (detail.clientX ?? 0) - origin.left,
-      y: (detail.clientY ?? 0) - origin.top
+      x: (detail.clientX ?? 0) - origin.left - this.root.clientLeft,
+      y: (detail.clientY ?? 0) - origin.top - this.root.clientTop
     };
   }
 
@@ -3677,8 +3680,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (!this.contextMenu.renderState.open) {
       return;
     }
+    // The menu had the keyboard; the GWT client gave it back to where it
+    // had been. A click elsewhere still moves it on, once this is done.
+    const menuHadFocus = this.contextMenu.shadowRoot?.activeElement != null;
     this.contextMenu.renderState = emptyContextMenuRenderState();
     this.actionIcons.clear();
+    if (menuHadFocus) {
+      this.returnFocusToSheet();
+    }
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: { type: 'contextMenuClosed', data: {} },
@@ -3706,6 +3715,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
         composed: true
       })
     );
+  };
+
+  /** Left or Tab in the menu closes it, as in the GWT client. */
+  private readonly handleContextMenuDismiss = (): void => {
+    this.closeContextMenu();
   };
 
   /** Any click outside the menu dismisses it, as a native menu would. */

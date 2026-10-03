@@ -41,8 +41,14 @@ export function emptyContextMenuRenderState(): ContextMenuRenderState {
  * Selecting an item dispatches `context-menu-action` carrying the action's
  * `key` and `type`; the connector turns that into the matching server event
  * (`actionOnCurrentSelection`, `actionOnRowHeader` or `actionOnColumnHeader`).
- * Dismissing it dispatches `context-menu-dismissed`, which the connector
- * reports as `contextMenuClosed`.
+ * Closing it from the keyboard dispatches `context-menu-dismiss`, which the
+ * connector reports as `contextMenuClosed`.
+ *
+ * The keyboard works as the GWT client's menu bar had it: the menu takes
+ * the focus when it opens, with no item in hand; Down and Up take the first
+ * item and then go down or up the list and round, Enter picks the item in
+ * hand, Left and Tab close the menu. The item under the pointer is the one
+ * in hand.
  *
  * Built as an internal element rather than on `@vaadin/context-menu`: the Lit
  * client has no `@vaadin/*` dependency today, and adding one to the
@@ -100,12 +106,18 @@ export class SpreadsheetContextMenu extends LitElement {
       padding: 4px;
       box-sizing: border-box;
       background: var(--vaadin-spreadsheet-contextmenu-bg, var(--_vaadin-spreadsheet-contextmenu-bg, #fff));
-      border: 1px solid
-        var(--vaadin-spreadsheet-contextmenu-border, var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09)));
+      border: 0;
       border-radius: 4px;
-      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
+      /* The edge is the last shadow, a hairline that takes no room. */
+      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
+        0 0 0 1px
+          var(
+            --vaadin-spreadsheet-contextmenu-border,
+            var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
+          );
       font: inherit;
       color: #474747;
+      outline: none;
     }
 
     .item {
@@ -146,7 +158,12 @@ export class SpreadsheetContextMenu extends LitElement {
       padding: var(--lumo-space-xs);
       border-radius: var(--lumo-border-radius-s);
       color: var(--lumo-body-text-color);
-      box-shadow: var(--lumo-box-shadow-s);
+      box-shadow: var(--lumo-box-shadow-s),
+        0 0 0 1px
+          var(
+            --vaadin-spreadsheet-contextmenu-border,
+            var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
+          );
     }
 
     :host([theme~='lumo']) .item {
@@ -185,22 +202,142 @@ export class SpreadsheetContextMenu extends LitElement {
         return;
       }
       const item = target.closest('.item');
-      if (!(item instanceof HTMLElement)) {
-        return;
+      if (item instanceof HTMLElement) {
+        this.pick(item);
       }
-      const key = item.dataset.key;
-      const type = Number(item.dataset.type);
-      if (key === undefined) {
-        return;
-      }
-      this.dispatchEvent(
-        new CustomEvent('context-menu-action', {
-          detail: { key, type },
-          bubbles: true,
-          composed: true
-        })
-      );
     });
+    root.addEventListener('keydown', this.handleKeyDown as EventListener);
+    // The item under the pointer is the one in hand, and none is once the
+    // pointer has left the items.
+    root.addEventListener('pointerover', (e: Event) => {
+      const item = e.target instanceof Element ? e.target.closest('.item') : null;
+      if (item instanceof HTMLElement) {
+        item.focus({ preventScroll: true });
+      }
+    });
+    root.addEventListener('pointerout', (e: Event) => {
+      const to = (e as PointerEvent).relatedTarget;
+      if (!(to instanceof Element && to.closest('.item')) && this.itemInHand() !== null) {
+        this.panel()?.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  updated(changed: Map<string, unknown>): void {
+    if (!changed.has('renderState')) {
+      return;
+    }
+    const panel = this.panel();
+    if (panel === null) {
+      return;
+    }
+    this.place(panel);
+    panel.focus({ preventScroll: true });
+  }
+
+  /**
+   * Where the GWT client put its menu: at the point clicked, to the left of
+   * it when it would cross the right edge of the window, and moved up to
+   * fit when it would cross the bottom - no higher than the top, where it
+   * is as tall as the window.
+   */
+  private place(panel: HTMLElement): void {
+    const { x, y } = this.renderState;
+    // The menu is placed in the sheet's space, which starts where this
+    // element does.
+    const origin = this.getBoundingClientRect();
+    panel.style.maxHeight = '';
+    const width = panel.offsetWidth;
+    const height = panel.offsetHeight;
+    const windowWidth = document.documentElement.clientWidth;
+    const windowHeight = document.documentElement.clientHeight;
+    let left = origin.left + x;
+    let top = origin.top + y;
+    if (left + width > windowWidth) {
+      left = Math.max(0, left - width);
+    }
+    if (top + height > windowHeight) {
+      top = Math.max(0, windowHeight - height);
+    }
+    if (top === 0) {
+      panel.style.maxHeight = `${windowHeight}px`;
+    }
+    panel.style.left = `${left - origin.left}px`;
+    panel.style.top = `${top - origin.top}px`;
+  }
+
+  private readonly handleKeyDown = (e: KeyboardEvent): void => {
+    const items = Array.from(this.shadowRoot!.querySelectorAll<HTMLElement>('.item'));
+    if (items.length === 0) {
+      return;
+    }
+    const inHand = this.itemInHand();
+    const index = inHand === null ? -1 : items.indexOf(inHand);
+    const take = (i: number): void => items[(i + items.length) % items.length].focus({ preventScroll: true });
+    switch (e.key) {
+      case 'ArrowDown':
+        take(index < 0 ? 0 : index + 1);
+        break;
+      case 'ArrowUp':
+        take(index < 0 ? 0 : index - 1);
+        break;
+      case 'ArrowRight':
+        if (index < 0) {
+          take(0);
+        }
+        break;
+      case 'ArrowLeft':
+        if (index < 0) {
+          take(0);
+        } else {
+          this.dismiss();
+        }
+        break;
+      case 'Enter':
+        if (inHand === null) {
+          take(0);
+        } else {
+          this.pick(inHand);
+        }
+        break;
+      case 'Tab':
+        this.dismiss();
+        break;
+      default:
+        return;
+    }
+    // The keys are the menu's: none of them reaches the sheet, and Enter
+    // does not click the button a second time.
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  private panel(): HTMLElement | null {
+    return this.shadowRoot?.querySelector<HTMLElement>('.menu') ?? null;
+  }
+
+  private itemInHand(): HTMLElement | null {
+    const active = this.shadowRoot?.activeElement;
+    return active instanceof HTMLElement && active.classList.contains('item') ? active : null;
+  }
+
+  private pick(item: HTMLElement): void {
+    const key = item.dataset.key;
+    const type = Number(item.dataset.type);
+    if (key === undefined) {
+      return;
+    }
+    this.dispatchEvent(
+      new CustomEvent('context-menu-action', {
+        detail: { key, type },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  private dismiss(): void {
+    this.dispatchEvent(new CustomEvent('context-menu-dismiss', { bubbles: true, composed: true }));
   }
 
   render(): TemplateResult | typeof nothing {
@@ -209,7 +346,7 @@ export class SpreadsheetContextMenu extends LitElement {
       return nothing;
     }
     return html`
-      <div class="menu" part="context-menu" style="left:${x}px;top:${y}px;">
+      <div class="menu" part="context-menu" tabindex="-1" style="left:${x}px;top:${y}px;">
         ${actions.map(
           (action) => html`
             <button class="item" part="context-menu-item" type="button" data-key=${action.key} data-type=${action.type}>

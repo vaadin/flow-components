@@ -70,14 +70,30 @@ async function items(sheet: Spreadsheet): Promise<HTMLElement[]> {
 }
 
 /** Right-click a cell the way the cell-grid reports it. */
-function rightClickCell(sheet: Spreadsheet, col: number, row: number): void {
+function rightClickCell(sheet: Spreadsheet, col: number, row: number, clientX = 120, clientY = 90): void {
   sheet.getCellGrid().dispatchEvent(
     new CustomEvent('cell-contextmenu', {
-      detail: { col, row, clientX: 120, clientY: 90 },
+      detail: { col, row, clientX, clientY },
       bubbles: true,
       composed: true
     })
   );
+}
+
+function menuPanel(sheet: Spreadsheet): HTMLElement {
+  return sheet.getContextMenu().shadowRoot!.querySelector<HTMLElement>('.menu')!;
+}
+
+/** The element of the menu that has the keyboard, if any. */
+function focusedInMenu(sheet: Spreadsheet): Element | null {
+  return sheet.getContextMenu().shadowRoot!.activeElement;
+}
+
+function press(sheet: Spreadsheet, key: string): KeyboardEvent {
+  const target = (focusedInMenu(sheet) as HTMLElement | null) ?? menuPanel(sheet);
+  const event = new KeyboardEvent('keydown', { key, bubbles: true, composed: true, cancelable: true });
+  target.dispatchEvent(event);
+  return event;
 }
 
 describe('Spreadsheet context menu — opening', () => {
@@ -169,6 +185,42 @@ describe('Spreadsheet context menu — where it lands', () => {
     expect(Math.round(rect.y)).to.equal(90);
   });
 
+  it('lands on the point that was clicked when the sheet has a border', async () => {
+    // The menu is placed inside the sheet's root, whose border the
+    // stylesheet draws: measured from the outside of it, the menu landed a
+    // border's width right of and below the click.
+    ctx = attachSheet();
+    ctx.sheet.getRoot().style.border = '5px solid black';
+    rightClickCell(ctx.sheet, 2, 2);
+    ctx.sheet.showActions([action('Test', '1', 0)]);
+
+    const rect = (await panel()).getBoundingClientRect();
+    expect(Math.round(rect.x)).to.equal(120);
+    expect(Math.round(rect.y)).to.equal(90);
+  });
+
+  it('opens to the left of the point when it would cross the right edge of the window, as the GWT client did', async () => {
+    ctx = attachSheet();
+    const x = document.documentElement.clientWidth - 10;
+    rightClickCell(ctx.sheet, 2, 2, x, 90);
+    ctx.sheet.showActions([action('A rather long action caption', '1', 0)]);
+
+    const rect = (await panel()).getBoundingClientRect();
+    expect(Math.round(rect.right)).to.equal(x);
+    expect(Math.round(rect.y)).to.equal(90);
+  });
+
+  it('moves up to fit when it would cross the bottom of the window, as the GWT client did', async () => {
+    ctx = attachSheet();
+    const y = document.documentElement.clientHeight - 5;
+    rightClickCell(ctx.sheet, 2, 2, 120, y);
+    ctx.sheet.showActions([action('One', '1', 0), action('Two', '2', 0)]);
+
+    const rect = (await panel()).getBoundingClientRect();
+    expect(Math.round(rect.bottom)).to.equal(document.documentElement.clientHeight);
+    expect(Math.round(rect.x)).to.equal(120);
+  });
+
   it('lands there inside a transformed ancestor too', async () => {
     // A dialog overlay is transformed, which makes it the containing
     // block for a fixed box. Placing the menu at raw viewport
@@ -230,6 +282,112 @@ describe('Spreadsheet context menu — picking an item', () => {
     (await items(ctx.sheet))[0].click();
 
     expect(await items(ctx.sheet)).to.have.length(0);
+  });
+});
+
+describe("Spreadsheet context menu — the keyboard, as the GWT client's menu had it", () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(async () => {
+    ctx = attachSheet();
+    ctx.sheet.getScrollContainer().focus();
+    rightClickCell(ctx.sheet, 2, 2);
+    ctx.sheet.showActions([action('One', '1', 0), action('Two', '2', 0), action('Three', '3', 0)]);
+    await items(ctx.sheet);
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  function inHand(): string | null {
+    const el = focusedInMenu(ctx.sheet);
+    return el instanceof HTMLElement && el.classList.contains('item') ? el.textContent!.trim() : null;
+  }
+
+  it('takes the keyboard when it opens, with no item in hand yet', () => {
+    expect(focusedInMenu(ctx.sheet)).to.equal(menuPanel(ctx.sheet));
+    expect(inHand()).to.be.null;
+  });
+
+  it('takes the first item on Down, then goes down the list and round', () => {
+    press(ctx.sheet, 'ArrowDown');
+    expect(inHand()).to.equal('One');
+    press(ctx.sheet, 'ArrowDown');
+    press(ctx.sheet, 'ArrowDown');
+    expect(inHand()).to.equal('Three');
+    press(ctx.sheet, 'ArrowDown');
+    expect(inHand()).to.equal('One');
+  });
+
+  it('takes the first item on Up, then goes up the list and round', () => {
+    press(ctx.sheet, 'ArrowUp');
+    expect(inHand()).to.equal('One');
+    press(ctx.sheet, 'ArrowUp');
+    expect(inHand()).to.equal('Three');
+  });
+
+  it('takes the first item on Enter when none is in hand, and picks nothing', () => {
+    ctx.events.length = 0;
+
+    press(ctx.sheet, 'Enter');
+
+    expect(inHand()).to.equal('One');
+    expect(ctx.events.filter((e) => e.type === 'actionOnCurrentSelection')).to.be.empty;
+  });
+
+  it('picks the item in hand on Enter', () => {
+    press(ctx.sheet, 'ArrowDown');
+    press(ctx.sheet, 'ArrowDown');
+    ctx.events.length = 0;
+
+    press(ctx.sheet, 'Enter');
+
+    expect(ctx.events.filter((e) => e.type === 'actionOnCurrentSelection').map((e) => e.data)).to.deep.equal([
+      { actionKey: '2' }
+    ]);
+  });
+
+  it('closes on Left once an item is in hand', async () => {
+    press(ctx.sheet, 'ArrowLeft');
+    expect(inHand(), 'the first Left takes the first item').to.equal('One');
+
+    press(ctx.sheet, 'ArrowLeft');
+
+    expect(await items(ctx.sheet)).to.have.length(0);
+  });
+
+  it('closes on Tab', async () => {
+    press(ctx.sheet, 'Tab');
+
+    expect(await items(ctx.sheet)).to.have.length(0);
+  });
+
+  it('keeps the arrow keys away from the sheet while it is open', () => {
+    const before = ctx.sheet.getSelection().activeCell;
+
+    press(ctx.sheet, 'ArrowDown');
+    press(ctx.sheet, 'ArrowRight');
+
+    expect(ctx.sheet.getSelection().activeCell).to.deep.equal(before);
+  });
+
+  it('hands the keyboard back to the sheet when it closes', async () => {
+    press(ctx.sheet, 'Escape');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await items(ctx.sheet);
+
+    expect(ctx.sheet.getRoot().getRootNode() === document ? document.activeElement : (ctx.sheet.getRoot().getRootNode() as Document).activeElement).to.equal(
+      ctx.sheet.getScrollContainer()
+    );
+  });
+
+  it('takes the item under the pointer in hand, as the GWT client did', async () => {
+    const [, two] = await items(ctx.sheet);
+
+    two.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, composed: true }));
+
+    expect(inHand()).to.equal('Two');
   });
 });
 
@@ -454,6 +612,15 @@ describe('Spreadsheet context menu — how it looks', () => {
     const menu = getComputedStyle(ctx.sheet.getContextMenu().shadowRoot!.querySelector('.menu')!);
     expect(`${menu.borderTopLeftRadius} ${menu.paddingTop} ${menu.color}`).to.equal('4px 4px rgb(71, 71, 71)');
     expect(menu.boxShadow).to.contain('rgba(0, 0, 0, 0.1) 0px 4px 10px 0px');
+  });
+
+  it('edges the card with a hairline of shadow rather than a border, as the GWT client did', async () => {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    await items(ctx.sheet);
+
+    const menu = getComputedStyle(menuPanel(ctx.sheet));
+    expect(menu.borderTopWidth).to.equal('0px');
+    expect(menu.boxShadow).to.contain('rgba(0, 0, 0, 0.09) 0px 0px 0px 1px');
   });
 
   it('sets its items in 27px rows', async () => {

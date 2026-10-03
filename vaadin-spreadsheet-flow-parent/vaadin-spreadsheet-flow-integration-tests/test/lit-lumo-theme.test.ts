@@ -804,8 +804,10 @@ describe('Lumo theme — the context menu', () => {
         expect(card.color).to.equal(BODY_TEXT);
         expect(card.paddingTop).to.equal('3px');
         expect(card.borderTopLeftRadius).to.equal('2px');
-        expect(card.boxShadow).to.equal(SHADOW_S);
-        expect(card.borderTopColor).to.equal('rgba(0, 0, 0, 0)');
+        // Lumo's shadow and no edge, as the GWT client's Lumo menu had: the
+        // documented edge colour is a hairline after the shadow, clear here.
+        expect(card.boxShadow).to.equal(`${SHADOW_S}, rgba(0, 0, 0, 0) 0px 0px 0px 1px`);
+        expect(card.borderTopWidth).to.equal('0px');
 
         cleanup();
     });
