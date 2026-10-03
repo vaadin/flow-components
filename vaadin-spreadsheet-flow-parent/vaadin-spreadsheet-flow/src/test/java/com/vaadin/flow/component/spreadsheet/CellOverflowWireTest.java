@@ -15,6 +15,7 @@ import java.util.HashMap;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -138,6 +139,37 @@ class CellOverflowWireTest {
         Cell a1 = spreadsheet.createCell(0, 0, 123456789012345d);
 
         assertEquals(0, dataFor(a1).overflowWidth);
+    }
+
+    @Test
+    void aLinksLabel_runsOnLikeText() {
+        // The GWT client measured every cell it drew, so a link whose label
+        // was too wide ran on into the empty cells beside it.
+        reportWidthRatios(WIDE);
+        Cell a1 = spreadsheet.createCell(0, 0, null);
+        a1.setCellFormula(
+                "HYPERLINK(\"https://vaadin.com\",\"a link label far too wide\")");
+
+        assertTrue(dataFor(a1).overflowWidth > spreadsheet.getColW()[0]);
+    }
+
+    @Test
+    void anErrorTooWideForItsColumn_runsOnLikeText() {
+        reportWidthRatios(WIDE);
+        spreadsheet.setColumnWidth(0, 40);
+        Cell a1 = spreadsheet.createCell(0, 0, null);
+        a1.setCellErrorValue(FormulaError.DIV0.getCode());
+
+        assertTrue(dataFor(a1).overflowWidth > spreadsheet.getColW()[0]);
+    }
+
+    @Test
+    void aTruthValueTooWideForItsColumn_runsOnLikeText() {
+        reportWidthRatios(WIDE);
+        spreadsheet.setColumnWidth(0, 30);
+        Cell a1 = spreadsheet.createCell(0, 0, Boolean.FALSE);
+
+        assertTrue(dataFor(a1).overflowWidth > spreadsheet.getColW()[0]);
     }
 
     @Test

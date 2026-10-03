@@ -177,6 +177,12 @@ final class CellDataBuilder implements Serializable {
                             valueOverflows = true;
                         }
                     }
+                } else if (!cellStyle.getWrapText() && runsOnAsText(cell)
+                        && !manager.doesValueFit(cell, formattedCellValue)) {
+                    // A link's label, TRUE or FALSE, an error: never
+                    // shortened or hashed the way a number is, and the GWT
+                    // client let them run on like any text.
+                    valueOverflows = true;
                 }
 
                 if (cellStyle.getAlignment() == HorizontalAlignment.RIGHT) {
@@ -228,6 +234,18 @@ final class CellDataBuilder implements Serializable {
         }
 
         return cellData;
+    }
+
+    /**
+     * A value that is not text but reads like it: a link, a truth value, an
+     * error.
+     */
+    private static boolean runsOnAsText(Cell cell) {
+        return switch (cell.getCellType()) {
+        case BOOLEAN, ERROR -> true;
+        case FORMULA -> cell.getCellFormula().startsWith("HYPERLINK");
+        default -> false;
+        };
     }
 
     /**
