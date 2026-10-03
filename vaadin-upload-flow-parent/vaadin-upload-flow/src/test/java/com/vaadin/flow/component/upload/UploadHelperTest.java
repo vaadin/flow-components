@@ -205,8 +205,8 @@ class UploadHelperTest {
     void wrapHandlerWithFileTypeValidation_wrapperOverridesAllInterfaceMethods() {
         UploadHandler handler = UploadHandler.inMemory((metadata, data) -> {
         });
-        UploadHandler wrapper = UploadHelper
-                .wrapHandlerWithFileTypeValidation(handler, List::of, List::of);
+        UploadHandler wrapper = UploadHelper.wrapHandlerWithFileTypeValidation(
+                handler, List::of, List::of, () -> false);
 
         // Collect all non-static methods from UploadHandler and its
         // super-interfaces. These are the methods the wrapper must override

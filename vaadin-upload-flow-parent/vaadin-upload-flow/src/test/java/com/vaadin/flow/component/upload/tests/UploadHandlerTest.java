@@ -20,15 +20,23 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinRequest;
@@ -229,6 +237,76 @@ class UploadHandlerTest {
         upload.setUploadHandler(event -> {
         });
         Assertions.assertNull(upload.getElement().getProperty("maxFiles"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "upload-success", "upload-error", "upload-abort" })
+    void uploadStartedBeforeModal_allowedToFinishWhileModalIsOpen(
+            String finishEvent) throws URISyntaxException {
+        upload.setUploadHandler(event -> {
+        });
+        AtomicBoolean allFinished = new AtomicBoolean();
+        upload.addAllFinishedListener(event -> allFinished.set(true));
+        fireUploadDomEvent("upload-start", true);
+        openModal();
+        // The first file finishes and the next queued file starts. Queued
+        // files count as uploading on the client, so this holds even when
+        // only one file is uploaded at a time.
+        fireUploadDomEvent("upload-success", true);
+        fireUploadDomEvent("upload-start", true);
+
+        Assertions.assertTrue(getUploadHandler().isAllowInert(),
+                "Queued files should be received for an inert upload");
+        Assertions.assertFalse(allFinished.get(),
+                "AllFinished should not fire while files are queued");
+
+        fireUploadDomEvent(finishEvent, false);
+
+        Assertions.assertTrue(allFinished.get(),
+                "AllFinished should fire for an inert upload");
+        Assertions.assertFalse(getUploadHandler().isAllowInert(),
+                "A finished upload should not allow further uploads");
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void uploadStartsWhileModalIsOpen_allowedOnlyIfHandlerAllowsInert(
+            boolean allowInert) throws URISyntaxException {
+        upload.setUploadHandler(new UploadHandler() {
+            @Override
+            public void handleUploadRequest(UploadEvent event) {
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return allowInert;
+            }
+        });
+        AtomicBoolean allFinished = new AtomicBoolean();
+        upload.addAllFinishedListener(event -> allFinished.set(true));
+        openModal();
+
+        fireUploadDomEvent("upload-start", true);
+        Assertions.assertEquals(allowInert, getUploadHandler().isAllowInert());
+        fireUploadDomEvent("upload-success", false);
+
+        Assertions.assertEquals(allowInert, allFinished.get());
+    }
+
+    private void openModal() {
+        Div modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
+    }
+
+    private void fireUploadDomEvent(String eventType, boolean filesUploading) {
+        Element element = upload.getElement();
+        DomEvent event = new DomEvent(element, eventType,
+                JacksonUtils.createObjectNode().put(
+                        "element.files.some(file => file.uploading)",
+                        filesUploading));
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 
     private void simulateUpload() throws IOException, URISyntaxException {
