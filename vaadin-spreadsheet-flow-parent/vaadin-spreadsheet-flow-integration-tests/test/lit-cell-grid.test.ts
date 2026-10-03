@@ -1847,6 +1847,20 @@ describe('Cell grid — invalid-formula indicator', () => {
         el.remove();
     });
 
+    it('is the GWT client\'s red triangle in the top-right corner, inside the border', async () => {
+        const el = await attach(stateWith(['col2 row2']));
+
+        const mark = el.shadowRoot!.querySelector<HTMLElement>('.invalidformula-indicator')!;
+        const style = getComputedStyle(mark);
+        expect(`${style.width} ${style.height}`).to.equal('9px 9px');
+        expect(style.backgroundColor).to.equal('rgb(237, 71, 59)');
+        const cell = mark.closest<HTMLElement>('.cell')!.getBoundingClientRect();
+        const box = mark.getBoundingClientRect();
+        expect(box.right).to.equal(cell.right - 1);
+        expect(box.top).to.equal(cell.top);
+        el.remove();
+    });
+
     it('lives inside the cell it belongs to', async () => {
         // A child rather than a sibling: it scrolls and positions with the
         // cell, and tests can reach it from the cell element.
@@ -2865,6 +2879,41 @@ describe('SpreadsheetCellGrid — merged cells drawn from their boxes', () => {
         );
 
         expect(el.shadowRoot!.querySelector('.merged-cell')).to.be.null;
+
+        cleanup(el);
+    });
+});
+
+/**
+ * The comment marker, as the GWT client drew it: a 9px amber triangle in
+ * the cell's top-right corner, inside its border. The Lit client drew a
+ * smaller red one over the border.
+ */
+describe('SpreadsheetCellGrid — the comment marker', () => {
+    it('is an amber triangle in the top-right corner, inside the border', async () => {
+        const el = await attachWithState({
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1, firstColumnPosition: 0,
+                lastColumnIndex: 2, lastColumnPosition: 100,
+                firstRowIndex: 1, firstRowPosition: 0,
+                lastRowIndex: 2, lastRowPosition: 40,
+            },
+            colX: [0, 50],
+            rowY: [0, 20],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            commentCells: new Set(['col2 row2']),
+        });
+
+        const mark = el.shadowRoot!.querySelector<HTMLElement>('.comment-indicator')!;
+        const style = getComputedStyle(mark);
+        expect(`${style.width} ${style.height}`).to.equal('9px 9px');
+        expect(style.backgroundColor).to.equal('rgb(255, 207, 22)');
+        const cell = el.shadowRoot!.querySelector('.cell.col2.row2')!.getBoundingClientRect();
+        const box = mark.getBoundingClientRect();
+        expect(box.right).to.equal(cell.right - 1);
+        expect(box.top).to.equal(cell.top);
 
         cleanup(el);
     });

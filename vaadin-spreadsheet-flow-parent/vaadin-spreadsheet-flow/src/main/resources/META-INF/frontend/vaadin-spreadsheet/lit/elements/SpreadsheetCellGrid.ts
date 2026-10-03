@@ -364,25 +364,30 @@ export class SpreadsheetCellGrid extends LitElement {
     /* Invalid-formula indicator — Excel draws a small marker in the
        cell's top-LEFT corner when a formula cannot be evaluated,
        mirroring the comment triangle in the top-right. */
+    /* The GWT client's corner markers: 9px triangles in the cell's
+       top-right corner, inside its border - red for a formula that could
+       not be evaluated, amber for a comment. */
     .invalidformula-indicator {
       position: absolute;
-      left: 0;
+      right: 0;
       top: 0;
-      width: 8px;
-      height: 8px;
-      background: var(--vaadin-spreadsheet-invalidformula-bg, #d32f2f);
-      clip-path: polygon(0 0, 0 100%, 100% 0);
+      width: 9px;
+      height: 9px;
+      background: var(--vaadin-spreadsheet-invalidformula-bg, #ed473b);
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
       z-index: 5;
       pointer-events: none;
     }
 
+    /* Placed at the cell's outer top-right corner and pulled back over it,
+       past the border. */
     .comment-indicator {
       position: absolute;
-      width: 8px;
-      height: 8px;
-      transform: translate(-100%, 0);
-      background: var(--vaadin-spreadsheet-comment-bg, #d32f2f);
-      clip-path: polygon(100% 0, 100% 100%, 0 0);
+      width: 9px;
+      height: 9px;
+      transform: translate(calc(-100% - 1px), 0);
+      background: var(--vaadin-spreadsheet-comment-bg, #ffcf16);
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
       z-index: 5;
       pointer-events: none;
     }
