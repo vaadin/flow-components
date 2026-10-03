@@ -199,9 +199,24 @@ export class SpreadsheetCellGrid extends LitElement {
       resize: none;
       border: 0;
       background: transparent;
-      font: inherit;
+      /* The GWT client's note input, in the sheet's own font rather than
+         the page's the note is shown in. */
+      font-family: Helvetica;
+      font-size: 14px;
+      font-weight: 300;
       color: inherit;
       outline: none;
+    }
+
+    /* From a cell's corner to its note, as the GWT client drew it. Under
+       the note, over the cells. */
+    .comment-overlay-line {
+      position: absolute;
+      height: 1px;
+      transform-origin: 0% 50%;
+      background: #a7a7a7;
+      z-index: 19;
+      pointer-events: none;
     }
 
     .v-spreadsheet-comment-overlay .comment-overlay-author {
@@ -623,6 +638,10 @@ export class SpreadsheetCellGrid extends LitElement {
     :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-separator {
       border-bottom-color: var(--lumo-contrast-20pct);
     }
+
+    :host([theme~='lumo']) .comment-overlay-line {
+      background: var(--lumo-contrast-10pct);
+    }
   `;
 
   /**
@@ -800,6 +819,7 @@ export class SpreadsheetCellGrid extends LitElement {
     if (changedProps.has('renderState')) {
       this.remeasureTooNarrowCells();
     }
+    this.placeCommentOverlays();
     const note = this.shadowRoot!.querySelector('.comment-overlay-edit') as HTMLTextAreaElement | null;
     if (note !== null && this.shadowRoot!.activeElement !== note) {
       note.focus();
@@ -815,6 +835,50 @@ export class SpreadsheetCellGrid extends LitElement {
         // sign.
         const caret = caretPosition(input.value);
         input.setSelectionRange(caret, caret);
+      }
+    }
+  }
+
+  /**
+   * Move a note that does not fit the sheet, as the GWT client did once it
+   * knew the note's size: to the left of its cell when it runs past the
+   * sheet's right edge and fits there, up when it runs past the bottom, and
+   * never above the top. The line to it follows. The sheet is what the
+   * grid is shown in, headers included.
+   */
+  private placeCommentOverlays(): void {
+    const notes = this.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay');
+    const pane = this.parentElement?.getBoundingClientRect();
+    if (notes.length === 0 || pane === undefined) {
+      return;
+    }
+    const grid = this.getBoundingClientRect();
+    for (const note of Array.from(notes)) {
+      const cellLeft = Number(note.dataset.cellLeft);
+      const cellRight = Number(note.dataset.cellRight);
+      const cellTop = Number(note.dataset.cellTop);
+      const width = note.offsetWidth;
+      const height = note.offsetHeight;
+      let left = grid.left + cellRight + COMMENT_GAP;
+      if (left + width > pane.right) {
+        const leftOfCell = grid.left + cellLeft - COMMENT_GAP - width;
+        if (pane.left < leftOfCell) {
+          left = leftOfCell;
+        }
+      }
+      let top = grid.top + cellTop - COMMENT_GAP;
+      if (top + height > pane.bottom) {
+        top = Math.max(pane.top, top - (top + height - pane.bottom + 5));
+      } else if (top < pane.top) {
+        top = pane.top;
+      }
+      const noteLeft = left - grid.left;
+      const noteTop = top - grid.top;
+      note.style.left = `${noteLeft}px`;
+      note.style.top = `${noteTop}px`;
+      const line = note.previousElementSibling as HTMLElement | null;
+      if (line !== null && line.classList.contains('comment-overlay-line')) {
+        line.style.cssText = commentLineStyle(cellRight, cellTop, noteLeft, noteTop, width);
       }
     }
   }
@@ -1671,6 +1735,47 @@ function cellBoxOnGrid(
  * `comment-overlay-author`, `comment-overlay-invalidformula`): applications
  * style these today, and renaming them would break that for no gain.
  */
+/** How far from its cell the GWT client hung a note, across and up. */
+const COMMENT_GAP = 15;
+
+/**
+ * The line from a cell's top-right corner to its note, as the GWT client
+ * drew it: to the note's top-left corner when the note is to the right, to
+ * its top-right corner when it had to go to the left, two pixels in for the
+ * rounded corner. A one-pixel bar, turned about its start.
+ */
+function commentLineStyle(
+  cellRight: number,
+  cellTop: number,
+  noteLeft: number,
+  noteTop: number,
+  noteWidth: number
+): string {
+  const targetTop = noteTop + 2;
+  let across: number;
+  let down = cellTop - targetTop;
+  let degrees: number;
+  if (noteLeft > cellRight) {
+    across = noteLeft + 2 - cellRight;
+    if (down > 0) {
+      degrees = -(Math.atan(down / across) * 180) / Math.PI;
+    } else {
+      down = Math.abs(down);
+      degrees = 0;
+    }
+  } else {
+    across = cellRight - (noteLeft + noteWidth);
+    if (down > 0) {
+      degrees = -180 + (Math.atan(down / across) * 180) / Math.PI;
+    } else {
+      down = Math.abs(down);
+      degrees = -180;
+    }
+  }
+  const length = Math.sqrt(across * across + down * down) + 1;
+  return `left:${cellRight}px;top:${cellTop}px;width:${length}px;transform:rotate(${degrees}deg);`;
+}
+
 function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | null): TemplateResult[] {
   const text = state.commentText ?? {};
   const authors = state.commentAuthors ?? {};
@@ -1708,12 +1813,27 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     if (geometry === null) {
       continue;
     }
-    // Anchored at the cell's top-right, the way Excel hangs a note off the
-    // comment triangle.
-    const style = `left:${geometry.left + geometry.width}px;top:${geometry.top}px;` + 'position:absolute;';
+    // Where the GWT client hung a note: 15px right of the cell and 15px
+    // above it, with a line from the cell's corner to the note's. Moved to
+    // the cell's left, or down, once the note's size is known, should it
+    // not fit the sheet - see placeCommentOverlays.
+    const cellRight = geometry.left + geometry.width;
+    const style = `left:${cellRight + COMMENT_GAP}px;top:${geometry.top - COMMENT_GAP}px;position:absolute;`;
+    overlays.push(
+      html`<div
+        class="comment-overlay-line"
+        style=${commentLineStyle(cellRight, geometry.top, cellRight + COMMENT_GAP, geometry.top - COMMENT_GAP, 0)}
+      ></div>`
+    );
     const author = authors[key];
     overlays.push(html`
-      <div class="v-spreadsheet-comment-overlay" style=${style}>
+      <div
+        class="v-spreadsheet-comment-overlay"
+        style=${style}
+        data-cell-left=${geometry.left}
+        data-cell-right=${cellRight}
+        data-cell-top=${geometry.top}
+      >
         ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
         ${showsError && (editing || comment !== undefined)
           ? html`<div class="comment-overlay-separator"></div>`

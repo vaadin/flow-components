@@ -3068,21 +3068,27 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
     });
 
     it('hangs a note off a frozen cell where the cell is on screen', async () => {
-        const el = await attachWithState(
-            frozen({
-                scrollLeft: 200,
-                scrollTop: 300,
-                commentCells: new Set(['col1 row1']),
-                commentText: { 'col1 row1': 'A note' },
-                visibleCommentKeys: ['col1 row1'],
-            })
-        );
+        // In a sheet big enough that the note needs no moving.
+        const pane = document.createElement('div');
+        pane.style.cssText = 'position:relative;width:2000px;height:1000px;';
+        document.body.appendChild(pane);
+        const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
+        el.style.cssText = 'position:absolute;left:0;top:100px;';
+        el.renderState = frozen({
+            scrollLeft: 200,
+            scrollTop: 300,
+            commentCells: new Set(['col1 row1']),
+            commentText: { 'col1 row1': 'A note' },
+            visibleCommentKeys: ['col1 row1'],
+        });
+        pane.appendChild(el);
+        await el.updateComplete;
 
         const note = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
-        // A1's top-right corner, carried along with the frozen pane.
-        expect([note.style.left, note.style.top]).to.deep.equal(['250px', '300px']);
+        // Off A1's top-right corner, carried along with the frozen pane.
+        expect([note.style.left, note.style.top]).to.deep.equal(['265px', '285px']);
 
-        cleanup(el);
+        pane.remove();
     });
 
     it('opens the editor over a frozen cell after a scroll', async () => {
@@ -3302,6 +3308,116 @@ describe('SpreadsheetCellGrid — merged cells drawn from their boxes', () => {
  * the cell's top-right corner, inside its border. The Lit client drew a
  * smaller red one over the border.
  */
+/**
+ * Where a note is hung.
+ *
+ * The GWT client hung a note 15px right of its cell and 15px above it, drew
+ * a line from the cell's corner to the note's, and moved the note to the
+ * cell's left or up when it did not fit the sheet. The Lit client stuck the
+ * note to the cell's corner, covering the cells beside it, with no line.
+ */
+describe('SpreadsheetCellGrid — where a note is hung', () => {
+    function withNote(key: string, extra: Partial<CellGridRenderState> = {}): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            colX: [0, 50, 100, 150],
+            rowY: [0, 20, 40, 60],
+            colWidths: [50, 50, 50, 50],
+            rowHeights: [20, 20, 20, 20],
+            commentCells: new Set([key]),
+            commentText: { [key]: 'A note' },
+            visibleCommentKeys: [key],
+            ...extra,
+        };
+    }
+
+    /**
+     * The grid in a sheet of the given size, `above` pixels below its top
+     * edge the way the cells sit under the column headers.
+     */
+    async function inSheet(state: CellGridRenderState, width: number, height: number, above = 27) {
+        const pane = document.createElement('div');
+        pane.style.cssText = `position:relative;width:${width}px;height:${height}px;font-family:monospace;font-size:17px;`;
+        document.body.appendChild(pane);
+        const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
+        el.style.cssText = `position:absolute;left:0;top:${above}px;`;
+        el.renderState = state;
+        pane.appendChild(el);
+        await el.updateComplete;
+        const note = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+        const line = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay-line')!;
+        return { el, note, line, cleanup: () => pane.remove() };
+    }
+
+    it('hangs a note 15px right of its cell and 15px above it, with a line to it', async () => {
+        // C3 spans x 100-150, y 40-60.
+        const { note, line, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+
+        expect([note.style.left, note.style.top]).to.deep.equal(['165px', '25px']);
+        // From C3's top-right corner to two pixels inside the note's top-left.
+        expect([line.style.left, line.style.top]).to.deep.equal(['150px', '40px']);
+        expect(parseFloat(line.style.width)).to.be.closeTo(Math.sqrt(17 * 17 + 13 * 13) + 1, 0.01);
+        expect(line.style.transform).to.match(/^rotate\(-37\.40\d*deg\)$/);
+        const style = getComputedStyle(line);
+        expect(`${style.height} ${style.backgroundColor}`).to.equal('1px rgb(167, 167, 167)');
+
+        cleanup();
+    });
+
+    it('moves a note to the left of its cell when it runs past the sheet', async () => {
+        // D2 ends at x 200; a sheet 260px wide leaves no room on its right.
+        const { note, line, cleanup } = await inSheet(withNote('col4 row2'), 260, 400);
+
+        const width = note.offsetWidth;
+        expect(note.style.left).to.equal(`${150 - 15 - width}px`);
+        // The line then runs back to the note's top-right corner.
+        expect(line.style.transform).to.match(/^rotate\(-1\d\d(\.\d+)?deg\)$/);
+
+        cleanup();
+    });
+
+    it('lets a note over the headers but no higher than the sheet', async () => {
+        // A1's note would start 15px above row 1: over the 27px of headers,
+        // which are part of the sheet. With only 5px above, it stops at the
+        // sheet's top.
+        const roomy = await inSheet(withNote('col1 row1'), 800, 400, 27);
+        expect(roomy.note.style.top).to.equal('-15px');
+        roomy.cleanup();
+
+        const tight = await inSheet(withNote('col1 row1'), 800, 400, 5);
+        expect(tight.note.style.top).to.equal('-5px');
+        tight.cleanup();
+    });
+
+    it('draws a note in the page\'s font, as the GWT client did', async () => {
+        const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+
+        const style = getComputedStyle(note);
+        expect(`${style.fontFamily} ${style.fontSize}`).to.equal('monospace 17px');
+
+        cleanup();
+    });
+
+    it('takes a note\'s text in the sheet\'s font, as the GWT client\'s input did', async () => {
+        const { el, cleanup } = await inSheet(withNote('col3 row3', { editingCommentKey: 'col3 row3' }), 800, 400);
+
+        const style = getComputedStyle(el.shadowRoot!.querySelector('.comment-overlay-edit')!);
+        expect(`${style.fontFamily} ${style.fontSize} ${style.fontWeight}`).to.equal('Helvetica 14px 300');
+
+        cleanup();
+    });
+});
+
 describe('SpreadsheetCellGrid — the comment marker', () => {
     it('is an amber triangle in the top-right corner, inside the border', async () => {
         const el = await attachWithState({
