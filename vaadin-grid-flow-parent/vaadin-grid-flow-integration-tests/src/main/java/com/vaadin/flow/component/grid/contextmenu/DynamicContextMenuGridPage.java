@@ -27,6 +27,7 @@ public class DynamicContextMenuGridPage extends Div {
 
     public DynamicContextMenuGridPage() {
         gridWithDynamicContextMenu();
+        gridWithColumnDynamicContextMenu();
     }
 
     private void gridWithDynamicContextMenu() {
@@ -51,6 +52,31 @@ public class DynamicContextMenuGridPage extends Div {
         });
 
         grid.setId("grid-with-dynamic-context-menu");
+        add(grid);
+    }
+
+    private void gridWithColumnDynamicContextMenu() {
+        final Grid<Person> grid = new Grid<>();
+        Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        grid.setItems(IntStream.range(0, 50)
+                .mapToObj(i -> new Person("Person " + i, i)).toList());
+
+        GridContextMenu<Person> contextMenu = grid.addContextMenu();
+
+        contextMenu.setDynamicContentHandler((person, column) -> {
+            contextMenu.removeAll();
+            if (person != null) {
+                contextMenu.addItem(
+                        column == nameColumn ? "Call " + person.getFirstName()
+                                : "Age " + person.getAge());
+            }
+            return person != null;
+        });
+
+        grid.setId("grid-with-column-dynamic-context-menu");
         add(grid);
     }
 }
