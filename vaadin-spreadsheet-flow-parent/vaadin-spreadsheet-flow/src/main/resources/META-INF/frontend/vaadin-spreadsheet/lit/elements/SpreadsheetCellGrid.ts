@@ -141,17 +141,37 @@ export class SpreadsheetCellGrid extends LitElement {
 
     /* Comment notes. Anchored at the cell's top-right and above every
        cell, since the point is to be readable over the sheet. */
+    /* A comment as the GWT client showed it: a white card with a soft
+       shadow, the author above the text in small bold type. */
     .v-spreadsheet-comment-overlay {
       z-index: 20;
-      max-width: 260px;
-      padding: 4px 6px;
+      padding: 7px;
       box-sizing: border-box;
       pointer-events: none;
+      color: #474747;
+      background: var(--vaadin-spreadsheet-comment-overlay-bg, #fff);
+      border: 1px solid var(--vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09));
+      border-radius: 4px;
+      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .v-spreadsheet-comment-overlay .comment-overlay-label,
+    .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+      max-width: 168px;
+      max-height: 140px;
+      overflow: hidden;
       white-space: pre-wrap;
-      background: var(--vaadin-spreadsheet-comment-overlay-bg, #ffffe1);
-      border: 1px solid var(--vaadin-spreadsheet-comment-overlay-border-color, #c0c0c0);
-      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-      font-size: 0.9em;
+      overflow-wrap: break-word;
+    }
+
+    .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+      color: #ed473b;
+    }
+
+    /* Between an error and the comment under it. */
+    .v-spreadsheet-comment-overlay .comment-overlay-separator {
+      border-bottom: 1px solid #c7c7c7;
+      margin-bottom: 7px;
     }
 
     /*
@@ -172,7 +192,10 @@ export class SpreadsheetCellGrid extends LitElement {
     }
 
     .v-spreadsheet-comment-overlay .comment-overlay-author {
+      padding-bottom: 7px;
+      font-size: 11px;
       font-weight: bold;
+      white-space: nowrap;
     }
 
     /* The fill handle's drag outline, as the GWT client drew it: the
@@ -1439,6 +1462,9 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     overlays.push(html`
       <div class="v-spreadsheet-comment-overlay" style=${style}>
         ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
+        ${showsError && (editing || comment !== undefined)
+          ? html`<div class="comment-overlay-separator"></div>`
+          : nothing}
         ${author ? html`<div class="comment-overlay-author">${author}</div>` : nothing}
         ${editing
           ? html`<textarea

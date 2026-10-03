@@ -351,3 +351,80 @@ describe('Spreadsheet — writing a cell comment', () => {
     expect(reachedSheet).to.be.false;
   });
 });
+
+/**
+ * The comment card, as the GWT client drew it.
+ *
+ * The Lit client showed comments as yellow Excel-style tooltips. The GWT
+ * client drew a white card with a soft shadow, the author in small bold
+ * type above the text, and a rule between an error and the comment below it.
+ */
+describe('Spreadsheet — the comment card', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(async () => {
+    ctx = attachSheet();
+    await paint(ctx.sheet);
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  function root(): ShadowRoot {
+    return ctx.sheet.getCellGrid().shadowRoot!;
+  }
+
+  it('is a white card with rounded corners and a soft shadow', async () => {
+    ctx.sheet.setCellComments({ [A1]: 'a note' });
+    ctx.sheet.setVisibleCellComments([A1]);
+    await paint(ctx.sheet);
+
+    const style = getComputedStyle(overlays(ctx.sheet)[0]);
+    expect(style.backgroundColor).to.equal('rgb(255, 255, 255)');
+    expect(style.color).to.equal('rgb(71, 71, 71)');
+    expect(`${style.borderTopLeftRadius} ${style.paddingTop}`).to.equal('4px 7px');
+    expect(style.boxShadow).to.contain('rgba(0, 0, 0, 0.1) 0px 4px 10px 0px');
+  });
+
+  it('writes the author small and bold above the text', async () => {
+    ctx.sheet.setCellComments({ [A1]: 'a note' });
+    ctx.sheet.setCellCommentAuthors({ [A1]: 'Ugur' });
+    ctx.sheet.setVisibleCellComments([A1]);
+    await paint(ctx.sheet);
+
+    const author = getComputedStyle(root().querySelector('.comment-overlay-author')!);
+    expect(`${author.fontSize} ${author.fontWeight} ${author.paddingBottom}`).to.equal('11px 700 7px');
+  });
+
+  it('keeps a long comment to 168 by 140 pixels', async () => {
+    ctx.sheet.setCellComments({ [A1]: 'a note' });
+    ctx.sheet.setVisibleCellComments([A1]);
+    await paint(ctx.sheet);
+
+    const label = getComputedStyle(root().querySelector('.comment-overlay-label')!);
+    expect(`${label.maxWidth} ${label.maxHeight}`).to.equal('168px 140px');
+  });
+
+  it('rules an error off from the comment below it, in red', async () => {
+    ctx.sheet.setCellComments({ [A1]: 'a note' });
+    ctx.sheet.setInvalidFormulaCells([A1]);
+    await paint(ctx.sheet);
+
+    await hover(ctx.sheet, 1, 1);
+
+    expect(root().querySelector('.comment-overlay-separator'), 'a rule between them').to.not.be.null;
+    expect(getComputedStyle(root().querySelector('.comment-overlay-invalidformula')!).color).to.equal(
+      'rgb(237, 71, 59)'
+    );
+  });
+
+  it('draws no rule under an error with no comment', async () => {
+    ctx.sheet.setInvalidFormulaCells([A1]);
+    await paint(ctx.sheet);
+
+    await hover(ctx.sheet, 1, 1);
+
+    expect(root().querySelector('.comment-overlay-separator')).to.be.null;
+  });
+});
