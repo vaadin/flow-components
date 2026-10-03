@@ -619,10 +619,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popupOverlay.className = 'popup-overlay';
     this.popupOverlay.setAttribute('part', 'popup-overlay');
     this.popupOverlay.hidden = true;
+    // The GWT client's card: white, rounded, softly shadowed.
     this.popupOverlay.style.cssText =
-      'position:absolute;z-index:20;box-sizing:border-box;' +
+      'position:absolute;z-index:20;box-sizing:border-box;padding:4px;border-radius:4px;color:#474747;' +
       'background:var(--vaadin-spreadsheet-popup-background, #fff);' +
-      'border:1px solid var(--vaadin-spreadsheet-popup-border-color, #c0c0c0);';
+      'border:1px solid var(--vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09));' +
+      'box-shadow:0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);';
     this.actionIcons = new SlottedVirtualChildren(host, this.contextMenu, resolveVirtualChild, actionIconSlotName);
     this.popupContents = new SlottedVirtualChildren(host, this.popupOverlay, resolveVirtualChild, popupContentSlotName);
     // A flex column holding the formula bar, the sheet, and the tabs.
@@ -4321,19 +4323,28 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * has to be dismissed by clicking away from it.
    */
   private buildPopupHeader(): HTMLElement {
+    // The GWT client's header: an 18px strip with the close box at its
+    // left, grey until pointed at.
     const header = document.createElement('div');
     header.className = 'popup-header';
     header.setAttribute('part', 'popup-header');
-    header.style.cssText = 'display:flex;justify-content:flex-end;align-items:center;';
+    header.style.cssText = 'position:relative;height:18px;padding-bottom:7px;';
     const close = document.createElement('button');
     close.type = 'button';
     close.className = 'popup-close';
     close.setAttribute('part', 'popup-close');
     close.setAttribute('aria-label', 'Close');
     close.textContent = '\u00d7';
-    close.style.cssText = 'border:0;background:transparent;cursor:pointer;font:inherit;line-height:1;';
+    close.style.cssText =
+      'position:absolute;left:0;top:0;width:18px;height:18px;padding:0;border:0;background:transparent;' +
+      'cursor:pointer;font-family:inherit;font-size:21px;line-height:18px;';
     close.addEventListener('click', () => this.dismissPopup());
-    header.appendChild(close);
+    // An inline style cannot say "on hover", and the popup sits in the
+    // sheet's own tree where no element stylesheet reaches; a rule carried
+    // in the header itself can. The colours live here so the hover one wins.
+    const rules = document.createElement('style');
+    rules.textContent = '.popup-close { color: #999; } .popup-close:hover { color: #197de1; }';
+    header.append(rules, close);
     return header;
   }
 

@@ -256,6 +256,30 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(close!.getAttribute('part')).to.equal('popup-close');
   });
 
+  it('draws the popup as the GWT client did: a white card with a soft shadow', () => {
+    withFlowClient({ 42: content('filter') });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    const style = getComputedStyle(ctx.sheet.getPopupOverlay());
+    expect(`${style.borderTopLeftRadius} ${style.paddingTop} ${style.color}`).to.equal('4px 4px rgb(71, 71, 71)');
+    expect(style.boxShadow).to.contain('rgba(0, 0, 0, 0.1) 0px 4px 10px 0px');
+  });
+
+  it('puts the close box at the left of an 18px header, in grey', () => {
+    withFlowClient({ 42: content('filter') });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    const overlay = ctx.sheet.getPopupOverlay();
+    const header = overlay.querySelector<HTMLElement>('.popup-header')!;
+    const close = overlay.querySelector<HTMLElement>('.popup-close')!;
+    expect(header.getBoundingClientRect().height).to.equal(18 + 7);
+    expect(close.getBoundingClientRect().left).to.equal(header.getBoundingClientRect().left);
+    expect(getComputedStyle(close).color).to.equal('rgb(153, 153, 153)');
+    expect(getComputedStyle(close).fontSize).to.equal('21px');
+  });
+
   it('closes and reports from the close box', () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
