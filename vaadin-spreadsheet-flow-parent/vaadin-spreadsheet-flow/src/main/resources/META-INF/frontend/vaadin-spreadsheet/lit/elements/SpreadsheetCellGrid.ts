@@ -161,13 +161,15 @@ export class SpreadsheetCellGrid extends LitElement {
       pointer-events: none;
       color: #474747;
       background: var(--vaadin-spreadsheet-comment-overlay-bg, var(--_vaadin-spreadsheet-comment-overlay-bg, #fff));
-      border: 1px solid
-        var(
-          --vaadin-spreadsheet-comment-overlay-border-color,
-          var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
-        );
+      border: 0;
       border-radius: 4px;
-      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05);
+      /* The edge is the last shadow, a hairline that takes no room. */
+      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
+        0 0 0 1px
+          var(
+            --vaadin-spreadsheet-comment-overlay-border-color,
+            var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
+          );
     }
 
     .v-spreadsheet-comment-overlay .comment-overlay-label,
@@ -635,6 +637,11 @@ export class SpreadsheetCellGrid extends LitElement {
 
     :host([theme~='lumo']) .v-spreadsheet-comment-overlay {
       padding: var(--lumo-space-s);
+      border: 1px solid
+        var(
+          --vaadin-spreadsheet-comment-overlay-border-color,
+          var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
+        );
       border-radius: var(--lumo-border-radius-m);
       color: var(--lumo-body-text-color);
       box-shadow: var(--lumo-box-shadow-m);
@@ -882,23 +889,39 @@ export class SpreadsheetCellGrid extends LitElement {
   }
 
   /**
-   * Move a note that does not fit the sheet, as the GWT client did once it
+   * Move a note that does not fit its pane, as the GWT client did once it
    * knew the note's size: to the left of its cell when it runs past the
-   * sheet's right edge and fits there, up when it runs past the bottom, and
-   * never above the top. The line to it follows. The sheet is what the
-   * grid is shown in, headers included.
+   * pane's right edge and fits there, up when it runs past the bottom, and
+   * never above the top. The line to it follows. A workbook's
+   * always-visible note shows only while its cell's top-right corner is in
+   * the pane.
    */
   private placeCommentOverlays(): void {
     const notes = this.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay');
-    const pane = this.parentElement?.getBoundingClientRect();
-    if (notes.length === 0 || pane === undefined) {
+    const container = this.parentElement;
+    if (notes.length === 0 || container === null) {
       return;
     }
+    const panes = this.notePanes(container);
     const grid = this.getBoundingClientRect();
     for (const note of Array.from(notes)) {
+      const pane = panes[(note.dataset.quadrant as QuadrantRenderOpts['quadrantName']) ?? 'main'] ?? panes.main;
       const cellLeft = Number(note.dataset.cellLeft);
       const cellRight = Number(note.dataset.cellRight);
       const cellTop = Number(note.dataset.cellTop);
+      const line = note.previousElementSibling as HTMLElement | null;
+      const cornerX = grid.left + cellRight;
+      const cornerY = grid.top + cellTop;
+      const cornerInPane =
+        cornerX >= pane.left && cornerX < pane.right && cornerY >= pane.top && cornerY <= pane.bottom;
+      const shown = note.dataset.pinned !== 'true' || cornerInPane;
+      note.style.display = shown ? '' : 'none';
+      if (!shown) {
+        if (line !== null && line.classList.contains('comment-overlay-line')) {
+          line.style.display = 'none';
+        }
+        continue;
+      }
       const width = note.offsetWidth;
       const height = note.offsetHeight;
       let left = grid.left + cellRight + COMMENT_GAP;
@@ -918,11 +941,38 @@ export class SpreadsheetCellGrid extends LitElement {
       const noteTop = top - grid.top;
       note.style.left = `${noteLeft}px`;
       note.style.top = `${noteTop}px`;
-      const line = note.previousElementSibling as HTMLElement | null;
       if (line !== null && line.classList.contains('comment-overlay-line')) {
         line.style.cssText = commentLineStyle(cellRight, cellTop, noteLeft, noteTop, width);
       }
     }
+  }
+
+  /**
+   * The panes a note keeps to, on screen, as the GWT client laid them out:
+   * the scrolling pane under the column letters and right of the row
+   * numbers, past the frozen rows and columns; a frozen pane takes in the
+   * headers along its frozen side.
+   */
+  private notePanes(
+    container: HTMLElement
+  ): Record<QuadrantRenderOpts['quadrantName'], { left: number; right: number; top: number; bottom: number }> {
+    const box = container.getBoundingClientRect();
+    const sheetLeft = box.left + container.clientLeft;
+    const sheetTop = box.top + container.clientTop;
+    // The grid sits right of the row numbers and under the column letters.
+    const splitX = sheetLeft + this.offsetLeft + this.frozenExtent().width;
+    const splitY = sheetTop + this.offsetTop + this.frozenExtent().height;
+    const scrollingX = { left: splitX, right: box.right };
+    // The GWT client's frozen pane took the pixel of the freeze line too.
+    const frozenX = { left: sheetLeft, right: splitX + 1 };
+    const scrollingY = { top: splitY, bottom: box.bottom };
+    const frozenY = { top: sheetTop, bottom: splitY };
+    return {
+      main: { ...scrollingX, ...scrollingY },
+      top: { ...scrollingX, ...frozenY },
+      left: { ...frozenX, ...scrollingY },
+      corner: { ...frozenX, ...frozenY }
+    };
   }
 
   /**
@@ -1608,11 +1658,26 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
     // selected at all. `part` for the same reason a plain cell has it:
     // a merged cell is still a cell to a stylesheet.
     const cellPart = inSelection && !isActive ? 'cell cell-range' : 'cell';
+    // The markers go on the merged cell, as the GWT client put them: the
+    // cells underneath leave theirs out.
+    const invalidIndicator = (state.invalidFormulaCells ?? new Set()).has(key)
+      ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
+      : '';
+    const commentIndicator = (state.commentCells ?? new Set()).has(key)
+      ? html`<div
+          class="comment-indicator"
+          part="comment-triangle"
+          data-col=${region.col1}
+          data-row=${region.row1}
+          style="left:${left + width}px;top:${top}px;"
+        ></div>`
+      : '';
 
     overlays.push(html`
       <div class=${classList} part=${cellPart} style=${style} data-col=${region.col1} data-row=${region.row1}>
-        ${text}
+        ${invalidIndicator}${text}
       </div>
+      ${commentIndicator}
     `);
   }
   return overlays;
@@ -1769,6 +1834,25 @@ function cellBoxOnGrid(
 }
 
 /**
+ * The box a note hangs off: its cell's, or the merged cell's when the cell
+ * starts a merge, as the GWT client hung it. In grid coordinates, frozen
+ * panes included; null while the cell is not drawn.
+ */
+function noteAnchorBox(
+  state: CellGridRenderState,
+  col: number,
+  row: number
+): { left: number; top: number; width: number; height: number } | null {
+  const cell = cellBoxOnGrid(state, col, row);
+  if (cell === null) {
+    return null;
+  }
+  const index = state.mergedRegions.findIndex((region) => region.col1 === col && region.row1 === row);
+  const merged = index < 0 ? undefined : state.mergedRegionBoxes?.[index];
+  return merged === undefined ? cell : { left: cell.left, top: cell.top, width: merged.width, height: merged.height };
+}
+
+/**
  * Comment overlays — the little yellow notes.
  *
  * Two things put one on screen: the workbook marking a comment "always
@@ -1854,10 +1938,15 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     }
     // On screen, frozen panes included: the note floats above every pane,
     // so it is drawn at grid level wherever its cell is.
-    const geometry = cellBoxOnGrid(state, coord.col, coord.row);
+    const geometry = noteAnchorBox(state, coord.col, coord.row);
     if (geometry === null) {
       continue;
     }
+    // The pane it keeps to, and whether it is one of the workbook's
+    // always-visible notes, which the GWT client showed only while their
+    // cell's corner was in that pane - see placeCommentOverlays.
+    const quadrant = quadrantOf(coord.col, coord.row, state.horizontalSplitPosition, state.verticalSplitPosition);
+    const pinned = key !== hoveredKey && !editing;
     // Where the GWT client hung a note: 15px right of the cell and 15px
     // above it, with a line from the cell's corner to the note's. Moved to
     // the cell's left, or down, once the note's size is known, should it
@@ -1878,6 +1967,8 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
         data-cell-left=${geometry.left}
         data-cell-right=${cellRight}
         data-cell-top=${geometry.top}
+        data-quadrant=${quadrant}
+        data-pinned=${pinned ? 'true' : 'false'}
       >
         ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
         ${showsError && (editing || comment !== undefined)

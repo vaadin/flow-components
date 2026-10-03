@@ -3458,17 +3458,95 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it('lets a note over the headers but no higher than the sheet', async () => {
-        // A1's note would start 15px above row 1: over the 27px of headers,
-        // which are part of the sheet. With only 5px above, it stops at the
-        // sheet's top.
-        const roomy = await inSheet(withNote('col1 row1'), 800, 400, 27);
-        expect(roomy.note.style.top).to.equal('-15px');
-        roomy.cleanup();
+    it('keeps a note under the column letters, as the GWT client did', async () => {
+        // A1's note would start 15px above row 1. The GWT client kept a note
+        // inside the pane of its cell, and the scrolling pane starts under
+        // the headers.
+        const { note, cleanup } = await inSheet(withNote('col1 row1'), 800, 400, 27);
 
-        const tight = await inSheet(withNote('col1 row1'), 800, 400, 5);
-        expect(tight.note.style.top).to.equal('-5px');
-        tight.cleanup();
+        expect(note.style.top).to.equal('0px');
+
+        cleanup();
+    });
+
+    it("lets a note in a frozen row rise over the column letters, as the GWT client's frozen pane did", async () => {
+        // A frozen pane took in the headers along its frozen side. This one
+        // is 47px tall, headers and all: a note taller than that goes up as
+        // far as it can, to the top of the column letters.
+        const { note, cleanup } = await inSheet(
+            withNote('col2 row1', {
+                verticalSplitPosition: 1,
+                frozenRowY: [0],
+                frozenRowHeights: [20],
+                viewport: {
+                    firstColumnIndex: 1,
+                    firstColumnPosition: 0,
+                    lastColumnIndex: 4,
+                    lastColumnPosition: 200,
+                    firstRowIndex: 2,
+                    firstRowPosition: 20,
+                    lastRowIndex: 4,
+                    lastRowPosition: 80,
+                },
+                rowY: [20, 40, 60],
+                rowHeights: [20, 20, 20],
+            }),
+            800,
+            400,
+            27
+        );
+
+        expect(note.style.top).to.equal('-27px');
+
+        cleanup();
+    });
+
+    it("hangs a note on a merged cell off the merged cell's top-right corner, as the GWT client did", async () => {
+        // B1:C2 ends at x 150, where column B alone ends at 100.
+        const { note, cleanup } = await inSheet(
+            withNote('col2 row2', {
+                mergedRegions: [{ id: 1, col1: 2, row1: 2, col2: 3, row2: 3 }],
+                mergedRegionBoxes: [{ left: 50, top: 20, width: 100, height: 40 }],
+            }),
+            800,
+            400
+        );
+
+        expect([note.style.left, note.style.top]).to.deep.equal(['165px', '5px']);
+
+        cleanup();
+    });
+
+    it("hides a pinned note while its cell's corner is out of its pane, as the GWT client did", async () => {
+        // Column A frozen; B's right edge, scrolled 60px, is under it.
+        const pane = document.createElement('div');
+        pane.style.cssText = 'position:relative;width:400px;height:300px;overflow:auto;display:grid;grid-template-columns:30px auto;grid-template-rows:27px auto;';
+        document.body.appendChild(pane);
+        const spacer = document.createElement('div');
+        spacer.style.cssText = 'grid-column:1;grid-row:1;';
+        pane.appendChild(spacer);
+        const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
+        el.style.cssText = 'grid-column:2;grid-row:2;width:2000px;height:1000px;display:block;';
+        el.renderState = withNote('col2 row2', {
+            horizontalSplitPosition: 1,
+            frozenColX: [0],
+            frozenColWidths: [50],
+            scrollLeft: 60,
+        });
+        pane.appendChild(el);
+        try {
+            pane.scrollLeft = 60;
+            await el.updateComplete;
+            el.requestUpdate();
+            await el.updateComplete;
+
+            const note = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+            const line = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay-line')!;
+            expect(getComputedStyle(note).display).to.equal('none');
+            expect(getComputedStyle(line).display).to.equal('none');
+        } finally {
+            pane.remove();
+        }
     });
 
     it('is not cut off where it hangs over the headers', async () => {
@@ -3482,6 +3560,16 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         const box = note.getBoundingClientRect();
         const hit = el.shadowRoot!.elementFromPoint(box.left + 10, box.top + 3);
         expect(hit && (hit === note || note.contains(hit)), String(hit && hit.className)).to.be.true;
+
+        cleanup();
+    });
+
+    it('edges a note with a hairline of shadow rather than a border, as the GWT client did', async () => {
+        const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+
+        const style = getComputedStyle(note);
+        expect(style.borderTopWidth).to.equal('0px');
+        expect(style.boxShadow).to.contain('rgba(0, 0, 0, 0.09) 0px 0px 0px 1px');
 
         cleanup();
     });
@@ -3599,6 +3687,55 @@ describe('SpreadsheetCellGrid — hyperlink cells', () => {
         const el = await attachWithState(withLink('cs0', { 0: 'color: rgb(51, 51, 51);' }));
 
         expect(link(el).cursor).to.equal('pointer');
+
+        cleanup(el);
+    });
+});
+
+describe('SpreadsheetCellGrid — the markers of a merged cell', () => {
+    function merged(extra: Partial<CellGridRenderState>): CellGridRenderState {
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 4,
+                lastColumnPosition: 200,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 4,
+                lastRowPosition: 80,
+            },
+            colX: [0, 50, 100, 150],
+            rowY: [0, 20, 40, 60],
+            colWidths: [50, 50, 50, 50],
+            rowHeights: [20, 20, 20, 20],
+            // B2:C3, 100px wide from x 50.
+            mergedRegions: [{ id: 1, col1: 2, row1: 2, col2: 3, row2: 3 }],
+            mergedRegionBoxes: [{ left: 50, top: 20, width: 100, height: 40 }],
+            ...extra,
+        };
+    }
+
+    it('marks a comment on a merged cell at the merged cell\'s top-right corner, as the GWT client did', async () => {
+        const el = await attachWithState(merged({ commentCells: new Set(['col2 row2']) }));
+
+        const markers = Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.comment-indicator'));
+        expect(markers, 'one marker').to.have.length(1);
+        const box = el.getBoundingClientRect();
+        const marker = markers[0].getBoundingClientRect();
+        // Pulled back over the corner, past the border, as on a plain cell.
+        expect(marker.right - box.left).to.equal(150 - 1);
+        expect(marker.top - box.top).to.equal(20);
+
+        cleanup(el);
+    });
+
+    it('marks an invalid formula in a merged cell, as the GWT client did', async () => {
+        const el = await attachWithState(merged({ invalidFormulaCells: new Set(['col2 row2']) }));
+
+        const marker = el.shadowRoot!.querySelector<HTMLElement>('.merged-cell .invalidformula-indicator');
+        expect(marker, 'a marker in the merged cell').to.not.be.null;
 
         cleanup(el);
     });
