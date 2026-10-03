@@ -3399,6 +3399,21 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         tight.cleanup();
     });
 
+    it('is not cut off where it hangs over the headers', async () => {
+        // The grid clipped whatever left its box, so a note on the first
+        // row lost its top under the column headers.
+        const { el, note, cleanup } = await inSheet(withNote('col1 row1'), 800, 400, 27);
+        // The note takes no pointer events; given them, the hit test shows
+        // whether that part of it is drawn at all.
+        note.style.pointerEvents = 'auto';
+
+        const box = note.getBoundingClientRect();
+        const hit = el.shadowRoot!.elementFromPoint(box.left + 10, box.top + 3);
+        expect(hit && (hit === note || note.contains(hit)), String(hit && hit.className)).to.be.true;
+
+        cleanup();
+    });
+
     it('draws a note in the page\'s font, as the GWT client did', async () => {
         const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
 

@@ -69,10 +69,12 @@ export class SpreadsheetCellGrid extends LitElement {
   };
 
   static styles = css`
+    /* Not clipped: a note hangs over the headers when its cell is in the
+       first row or column, as the GWT client's did, and it is kept inside
+       the visible sheet, so it never stretches the scroll area. */
     :host {
       display: block;
       position: relative;
-      overflow: hidden;
     }
 
     .cell {
