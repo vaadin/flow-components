@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -197,6 +198,10 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
         clickCell("B1");
         loadTestFixture(TestFixtures.PopupButton);
         clickCell("A1");
+        // A1's popup hangs over A2, as it did in the GWT client, where a
+        // click on A2 closed the popup instead of selecting the cell.
+        new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
+        waitUntil(driver -> !spreadsheet.isPopupButtonPopupVisible());
         clickCell("A2");
 
         insertNewFirstRow(spreadsheet);
