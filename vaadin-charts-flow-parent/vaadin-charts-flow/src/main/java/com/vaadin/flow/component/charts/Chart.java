@@ -22,7 +22,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.events.ChartAddSeriesEvent;
 import com.vaadin.flow.component.charts.events.ChartAfterPrintEvent;
 import com.vaadin.flow.component.charts.events.ChartBeforePrintEvent;
@@ -67,6 +66,7 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
@@ -95,7 +95,10 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private Configuration configuration;
 
-    private Registration configurationUpdateRegistration;
+    private final BeforeClientResponseAction configurationUpdateAction = new BeforeClientResponseAction(
+            this, this::executeConfigurationUpdate);
+
+    private boolean pendingConfigurationReset;
 
     private final ConfigurationChangeListener changeListener = new ProxyChangeForwarder(
             this);
@@ -131,25 +134,21 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        beforeClientResponse(attachEvent.getUI(), false);
+        pendingConfigurationReset = false;
+        configurationUpdateAction.schedule();
     }
 
-    private void beforeClientResponse(UI ui, boolean resetConfiguration) {
-        if (configurationUpdateRegistration != null) {
-            configurationUpdateRegistration.remove();
-        }
-        configurationUpdateRegistration = ui.beforeClientResponse(this,
-                context -> {
-                    drawChart(resetConfiguration);
-                    reportUsage();
+    private void executeConfigurationUpdate() {
+        boolean resetConfiguration = pendingConfigurationReset;
+        pendingConfigurationReset = false;
+        drawChart(resetConfiguration);
+        reportUsage();
 
-                    if (configuration != null) {
-                        // Start listening to data series events once the chart
-                        // has been drawn.
-                        configuration.addChangeListener(changeListener);
-                    }
-                    configurationUpdateRegistration = null;
-                });
+        if (configuration != null) {
+            // Start listening to data series events once the chart
+            // has been drawn.
+            configuration.addChangeListener(changeListener);
+        }
     }
 
     private void reportUsage() {
@@ -267,7 +266,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         }
         this.configuration = configuration;
         if (getElement().getNode().isAttached()) {
-            getUI().ifPresent(ui -> beforeClientResponse(ui, true));
+            pendingConfigurationReset = true;
+            configurationUpdateAction.schedule();
         }
     }
 
