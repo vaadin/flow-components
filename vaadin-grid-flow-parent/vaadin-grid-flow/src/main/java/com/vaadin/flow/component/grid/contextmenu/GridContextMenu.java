@@ -253,10 +253,9 @@ public class GridContextMenu<T> extends
      *         receives the column was set with
      *         {@link #setDynamicContentHandler(SerializableBiPredicate)}.
      * @since 4.1
-     * @deprecated Use
-     *             {@link #setDynamicContentHandler(SerializableBiPredicate)} to
-     *             set a handler that also receives the clicked column. There is
-     *             no replacement for getting the handler.
+     * @deprecated Use {@link #getColumnDynamicContentHandler()} together with
+     *             {@link #setDynamicContentHandler(SerializableBiPredicate)},
+     *             which also receives the clicked column.
      */
     @Deprecated(since = "25.4", forRemoval = true)
     public SerializablePredicate<T> getDynamicContentHandler() {
@@ -337,6 +336,21 @@ public class GridContextMenu<T> extends
             SerializableBiPredicate<T, Grid.Column<T>> dynamicContentHandler) {
         this.columnDynamicContentHandler = dynamicContentHandler;
         this.dynamicContentHandler = null;
+    }
+
+    /**
+     * Gets the callback function that is executed before the context menu is
+     * opened, and that receives both the clicked item and the clicked column.
+     *
+     * @return the callback function that is executed before opening the context
+     *         menu, or {@code null} if not specified or if an item-only handler
+     *         was set with
+     *         {@link #setDynamicContentHandler(SerializablePredicate)}.
+     * @see #setDynamicContentHandler(SerializableBiPredicate)
+     * @since 25.4
+     */
+    public SerializableBiPredicate<T, Grid.Column<T>> getColumnDynamicContentHandler() {
+        return columnDynamicContentHandler;
     }
 
     /**

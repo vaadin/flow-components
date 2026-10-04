@@ -34,6 +34,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.function.SerializableBiPredicate;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
@@ -199,8 +201,18 @@ class GridContextMenuTest {
         GridContextMenu<String> contextMenu = new Grid<String>()
                 .addContextMenu();
 
-        contextMenu.setDynamicContentHandler(item -> true);
-        contextMenu.setDynamicContentHandler((item, column) -> true);
+        SerializablePredicate<String> itemHandler = item -> true;
+        SerializableBiPredicate<String, Grid.Column<String>> columnHandler = (
+                item, column) -> true;
+
+        contextMenu.setDynamicContentHandler(itemHandler);
+        Assertions.assertSame(itemHandler,
+                contextMenu.getDynamicContentHandler());
+        Assertions.assertNull(contextMenu.getColumnDynamicContentHandler());
+
+        contextMenu.setDynamicContentHandler(columnHandler);
+        Assertions.assertSame(columnHandler,
+                contextMenu.getColumnDynamicContentHandler());
         Assertions.assertNull(contextMenu.getDynamicContentHandler());
 
         AtomicReference<Boolean> called = new AtomicReference<>(false);
