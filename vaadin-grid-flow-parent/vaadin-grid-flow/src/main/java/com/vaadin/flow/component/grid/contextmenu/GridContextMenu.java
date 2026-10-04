@@ -253,7 +253,12 @@ public class GridContextMenu<T> extends
      *         receives the column was set with
      *         {@link #setDynamicContentHandler(SerializableBiPredicate)}.
      * @since 4.1
+     * @deprecated Use
+     *             {@link #setDynamicContentHandler(SerializableBiPredicate)} to
+     *             set a handler that also receives the clicked column. There is
+     *             no replacement for getting the handler.
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     public SerializablePredicate<T> getDynamicContentHandler() {
         return dynamicContentHandler;
     }
@@ -280,7 +285,11 @@ public class GridContextMenu<T> extends
      *            the callback function that will be executed before opening the
      *            context menu.
      * @since 4.1
+     * @deprecated Use
+     *             {@link #setDynamicContentHandler(SerializableBiPredicate)}
+     *             instead, which also receives the clicked column.
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     public void setDynamicContentHandler(
             SerializablePredicate<T> dynamicContentHandler) {
         this.dynamicContentHandler = dynamicContentHandler;
@@ -354,9 +363,9 @@ public class GridContextMenu<T> extends
             return columnDynamicContentHandler.test(item, column);
         }
 
-        if (getDynamicContentHandler() != null) {
+        if (dynamicContentHandler != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
-            return getDynamicContentHandler().test(item);
+            return dynamicContentHandler.test(item);
         }
 
         return super.onBeforeOpenMenu(eventDetail);
