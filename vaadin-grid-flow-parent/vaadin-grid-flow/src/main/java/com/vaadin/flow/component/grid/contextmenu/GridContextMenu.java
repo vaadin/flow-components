@@ -344,6 +344,7 @@ public class GridContextMenu<T> extends
      * 
      * @since 25.0
      */
+    @SuppressWarnings("removal")
     @Override
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         Grid<T> grid = (Grid<T>) getTarget();
@@ -363,9 +364,9 @@ public class GridContextMenu<T> extends
             return columnDynamicContentHandler.test(item, column);
         }
 
-        if (dynamicContentHandler != null) {
+        if (getDynamicContentHandler() != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
-            return dynamicContentHandler.test(item);
+            return getDynamicContentHandler().test(item);
         }
 
         return super.onBeforeOpenMenu(eventDetail);
