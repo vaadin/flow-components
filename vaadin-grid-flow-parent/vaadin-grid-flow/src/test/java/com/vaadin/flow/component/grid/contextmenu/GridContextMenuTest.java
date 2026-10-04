@@ -34,7 +34,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu.GridContextMenuItemClickEvent;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -166,61 +165,56 @@ class GridContextMenuTest {
     }
 
     @Test
-    void columnDynamicContentHandler_receivesClickedItemAndColumn() {
+    void dynamicContentProvider_receivesClickedItemAndColumn() {
         Grid<String> grid = new Grid<>();
         grid.setItems("foo", "bar");
         Grid.Column<String> first = grid.addColumn(item -> item);
         Grid.Column<String> second = grid.addColumn(item -> item);
         GridContextMenu<String> contextMenu = grid.addContextMenu();
 
-        AtomicReference<String> itemInHandler = new AtomicReference<>();
-        AtomicReference<Grid.Column<String>> columnInHandler = new AtomicReference<>();
-        contextMenu.setDynamicContentHandler((item, column) -> {
-            itemInHandler.set(item);
-            columnInHandler.set(column);
+        AtomicReference<GridContextMenu.DynamicContentContext<String>> contextInProvider = new AtomicReference<>();
+        contextMenu.setDynamicContentProvider(context -> {
+            contextInProvider.set(context);
             return false;
         });
 
         String barKey = grid.getDataCommunicator().getKeyMapper().key("bar");
         fireBeforeOpenEvent(grid, barKey, "", getInternalId(second));
-        Assertions.assertEquals("bar", itemInHandler.get());
-        Assertions.assertSame(second, columnInHandler.get());
+        Assertions.assertEquals("bar", contextInProvider.get().item());
+        Assertions.assertSame(second, contextInProvider.get().column());
 
         fireBeforeOpenEvent(grid, "", "", getInternalId(first));
-        Assertions.assertNull(itemInHandler.get());
-        Assertions.assertSame(first, columnInHandler.get());
+        Assertions.assertNull(contextInProvider.get().item());
+        Assertions.assertSame(first, contextInProvider.get().column());
 
         // Not an application column, e.g. the selection column
         fireBeforeOpenEvent(grid, barKey, "", "");
-        Assertions.assertEquals("bar", itemInHandler.get());
-        Assertions.assertNull(columnInHandler.get());
+        Assertions.assertEquals("bar", contextInProvider.get().item());
+        Assertions.assertNull(contextInProvider.get().column());
     }
 
     @Test
-    void setDynamicContentHandler_replacesHandlerOfOtherType() {
+    void dynamicContentProviderAndHandler_replaceEachOther() {
         GridContextMenu<String> contextMenu = new Grid<String>()
                 .addContextMenu();
+        SerializablePredicate<String> handler = item -> true;
+        SerializablePredicate<GridContextMenu.DynamicContentContext<String>> provider = context -> true;
 
-        SerializablePredicate<String> itemHandler = item -> true;
-        SerializableBiPredicate<String, Grid.Column<String>> columnHandler = (
-                item, column) -> true;
+        contextMenu.setDynamicContentHandler(handler);
+        Assertions.assertSame(handler, contextMenu.getDynamicContentHandler());
 
-        contextMenu.setDynamicContentHandler(itemHandler);
-        Assertions.assertSame(itemHandler,
-                contextMenu.getDynamicContentHandler());
-
-        contextMenu.setDynamicContentHandler(columnHandler);
-        Assertions.assertSame(columnHandler,
-                contextMenu.getColumnDynamicContentHandler());
+        contextMenu.setDynamicContentProvider(provider);
+        Assertions.assertSame(provider,
+                contextMenu.getDynamicContentProvider());
         Assertions.assertNull(contextMenu.getDynamicContentHandler());
 
         AtomicReference<Boolean> called = new AtomicReference<>(false);
-        contextMenu.setDynamicContentHandler((item, column) -> {
+        contextMenu.setDynamicContentProvider(context -> {
             called.set(true);
             return false;
         });
         contextMenu.setDynamicContentHandler(item -> false);
-        Assertions.assertNull(contextMenu.getColumnDynamicContentHandler());
+        Assertions.assertNull(contextMenu.getDynamicContentProvider());
         fireBeforeOpenEvent((Grid<?>) contextMenu.getTarget(), "", "", "");
         Assertions.assertFalse(called.get());
     }

@@ -77,9 +77,9 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
     }
 
     @Test
-    public void columnDynamicContentHandler_menuContentDependsOnClickedColumn() {
+    public void dynamicContentProvider_menuContentDependsOnClickedColumn() {
         GridElement columnGrid = $(GridElement.class)
-                .id("grid-with-column-dynamic-context-menu");
+                .id("grid-with-dynamic-content-provider");
 
         columnGrid.getCell(5, 1).contextClick();
         verifyOpened();
