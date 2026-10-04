@@ -208,7 +208,6 @@ class GridContextMenuTest {
         contextMenu.setDynamicContentHandler(itemHandler);
         Assertions.assertSame(itemHandler,
                 contextMenu.getDynamicContentHandler());
-        Assertions.assertNull(contextMenu.getColumnDynamicContentHandler());
 
         contextMenu.setDynamicContentHandler(columnHandler);
         Assertions.assertSame(columnHandler,
@@ -221,6 +220,7 @@ class GridContextMenuTest {
             return false;
         });
         contextMenu.setDynamicContentHandler(item -> false);
+        Assertions.assertNull(contextMenu.getColumnDynamicContentHandler());
         fireBeforeOpenEvent((Grid<?>) contextMenu.getTarget(), "", "", "");
         Assertions.assertFalse(called.get());
     }
