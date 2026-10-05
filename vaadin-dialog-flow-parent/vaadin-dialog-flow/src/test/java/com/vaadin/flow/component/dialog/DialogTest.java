@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
@@ -299,6 +300,39 @@ class DialogTest {
     @Test
     void implementsHasAriaRole() {
         Assertions.assertTrue(HasAriaRole.class.isAssignableFrom(Dialog.class));
+    }
+
+    @Test
+    void implementsHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(Dialog.class));
+    }
+
+    @Test
+    void setAriaDescribedBy() {
+        Dialog dialog = new Dialog();
+        dialog.setAriaDescribedBy("description-id");
+
+        Assertions.assertEquals("description-id",
+                dialog.getElement().getAttribute("aria-describedby"));
+        Assertions.assertEquals("description-id",
+                dialog.getAriaDescribedBy().get());
+
+        dialog.setAriaDescribedBy((String) null);
+        Assertions.assertFalse(
+                dialog.getElement().hasAttribute("aria-describedby"));
+        Assertions.assertTrue(dialog.getAriaDescribedBy().isEmpty());
+    }
+
+    @Test
+    void setAriaDescribedByComponent() {
+        Dialog dialog = new Dialog();
+        Span description = new Span("Description");
+        description.setId("description-id");
+        dialog.setAriaDescribedBy(description);
+
+        Assertions.assertEquals("description-id",
+                dialog.getElement().getAttribute("aria-describedby"));
     }
 
     private void addDivAtIndex(int index) {
