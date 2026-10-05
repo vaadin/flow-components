@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
@@ -299,6 +300,12 @@ class DialogTest {
     @Test
     void implementsHasAriaRole() {
         Assertions.assertTrue(HasAriaRole.class.isAssignableFrom(Dialog.class));
+    }
+
+    @Test
+    void implementsHasAriaDescription() {
+        Assertions.assertTrue(
+                HasAriaDescription.class.isAssignableFrom(Dialog.class));
     }
 
     private void addDivAtIndex(int index) {
