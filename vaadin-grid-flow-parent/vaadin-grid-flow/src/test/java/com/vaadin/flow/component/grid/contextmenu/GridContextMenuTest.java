@@ -144,27 +144,6 @@ class GridContextMenuTest {
     }
 
     @Test
-    void dynamicContentHandler_targetColumnIdIsUpdatedBeforeHandlerRuns() {
-        Grid<String> grid = new Grid<>();
-        grid.addColumn(item -> item).setId("first");
-        grid.addColumn(item -> item).setId("second");
-        GridContextMenu<String> contextMenu = grid.addContextMenu();
-
-        AtomicReference<String> columnIdInHandler = new AtomicReference<>();
-        contextMenu.setDynamicContentHandler(item -> {
-            columnIdInHandler.set(grid.getElement()
-                    .getProperty("_contextMenuTargetColumnId"));
-            return false;
-        });
-
-        fireBeforeOpenEvent(grid, "second");
-        Assertions.assertEquals("second", columnIdInHandler.get());
-
-        fireBeforeOpenEvent(grid, "first");
-        Assertions.assertEquals("first", columnIdInHandler.get());
-    }
-
-    @Test
     void dynamicContentProvider_receivesClickedItemAndColumn() {
         Grid<String> grid = new Grid<>();
         grid.setItems("foo", "bar");
@@ -221,10 +200,6 @@ class GridContextMenuTest {
 
     private static String getInternalId(Grid.Column<?> column) {
         return column.getElement().getProperty("_flowId");
-    }
-
-    private static void fireBeforeOpenEvent(Grid<?> grid, String columnId) {
-        fireBeforeOpenEvent(grid, "", columnId, "");
     }
 
     private static void fireBeforeOpenEvent(Grid<?> grid, String key,

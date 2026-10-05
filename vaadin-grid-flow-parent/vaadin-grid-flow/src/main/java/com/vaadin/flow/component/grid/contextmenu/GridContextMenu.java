@@ -382,13 +382,6 @@ public class GridContextMenu<T> extends
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         Grid<T> grid = (Grid<T>) getTarget();
         String key = eventDetail.get("key").asString();
-        String columnId = eventDetail.get("columnId").asString();
-
-        // The grid connector also reports the target with a separate server
-        // call, which is processed after this event. Update the target here so
-        // that it is up to date in the dynamic content handlers.
-        grid.getElement().setProperty("_contextMenuTargetItemKey", key);
-        grid.getElement().setProperty("_contextMenuTargetColumnId", columnId);
 
         if (dynamicContentProvider != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
