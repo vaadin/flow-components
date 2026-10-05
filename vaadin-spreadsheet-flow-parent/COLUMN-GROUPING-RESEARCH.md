@@ -109,6 +109,66 @@ Part of this can be done earlier as prep work, using the bug fixes in
 [section 11](#11-refactors-that-can-land-before-the-feature). That moves about
 2–2.5 days out of the feature and adds about 0.5 day of review overhead.
 
+### Bug fixes and feature
+
+The work items above mix bug fixes with feature work. Sorted by bug instead,
+the estimate splits into three parts:
+
+| Part | Days | Range |
+|---|---|---|
+| A. Bugs the customer reported | 5.25 | 4–7 |
+| B. Bugs found in this research, not reported | 3.5 | 3–4.5 |
+| C. The feature | 13 | 11–15 |
+| **Total** | **21.75** | **18–26.5** |
+
+Both bug groups also affect groups loaded from an XLSX file, with no new API.
+Most of them come from code reading, so each must be reproduced before it's
+fixed; a bug that doesn't reproduce drops out with its time. The bugs are
+described in [section 9](#9-known-bugs).
+
+**A. Bugs the customer reported**
+
+| Bug | Confirmed? | Days | From item |
+|---|---|---|---|
+| Cells missing after expanding a nested group | Code reading | 0.25 | 4 |
+| The control flips before the server answers, so browser and server disagree on visible columns | Code reading | 0.5 | 5 |
+| The control of a group ending at the last column goes outside the sheet | Reproduced, fixed in prototype | 0.25 | none (new) |
+| Controls slide over the row headers while scrolling (group pane not clipped) | Code reading | 1 | 5 |
+| Controls over frozen panes (freeze-pane clone condition) | Code reading | 0.5 | 5 |
+| Stub controls under a collapsed parent group (probably also #3912) | Code reading | 0.5 | 3 |
+| Cached widths come back: a local column resize can skip the next server redraw | Code reading | 0.5 | 5 |
+| Tests, mostly TestBench ITs for scrolling and frozen panes | | 1 | 6 |
+| Review and backport to 25.2 | | 0.75 | 9 |
+| **Total** | | **5.25** | |
+
+**B. Bugs found in this research**
+
+| Bug | Confirmed? | Days | From item |
+|---|---|---|---|
+| Expanding a parent group keeps the columns of nested groups hidden | Reproduced (2 disabled tests in `GroupingTest`) | 0.5 | 3 |
+| Collapsing or expanding resets `setMaxColumns` / `setMaxRows` | Reproduced | 0.5 | 4 |
+| Level buttons: the bar isn't rebuilt, and a click reloads the whole component | Code reading | 0.5 | 3, 5 |
+| Small server bugs: `hidden="0"` reads as collapsed, NPE in `expandColumn`, crash on a saved sheet without `<cols>`, collapse marker past the last column | Marker reproduced in POI, others code reading | 0.5 | 3 |
+| Autofit width for filter buttons lost; groups and hidden columns past `cols` not sent | Code reading | 0.5 | 4 |
+| Tests, mostly unit tests | | 0.5 | 6 |
+| Review and backport to 25.2 | | 0.5 | 9 |
+| **Total** | | **3.5** | |
+
+**C. The feature** is what's left of the work items: 1 (1.5), 2 (3.5),
+2b (1), 2c (1), 3 (0.25: move `loadGrouping` onto the model), 4 (0.75: sheet
+switching and overlays), 6 (2), 7 (0.5), 8 (1.5), 9 (0.75) and 10 (0.25).
+That's 13 days. It includes refreshing the controls when groups change at
+runtime, which is where the customer's "stale or misaligned controls" and most
+of the "cached widths" problem come from. Those aren't bugs: changing groups
+after the first render isn't supported today.
+
+The total is 0.5 day above the 21.25 from the work items, because sizing each
+bug separately came out a little higher: the last-column fix wasn't in any
+item, and the client fixes add up to 0.25 day over item 5.
+
+The row bugs #10207 and #10226 aren't in A or B. They belong to the row work
+(+6–8 days).
+
 **Rows (+6–8 days)** is not a copy of the column work: rows have their own
 reflection path in `GroupingUtil`, rows may not exist yet and must be created,
 the collapsed flag is stored on the row, and the two open Major bugs in this
@@ -338,6 +398,9 @@ Issues in flow-components:
 
 Legacy `vaadin/spreadsheet` add-on (EOL): #249 (frozen pane + grouping), #341
 (client exception on collapse), #398 (nested grouping fails on reopen).
+
+Days to fix each bug, and which ones the customer reported, are in
+[section 3](#bug-fixes-and-feature).
 
 Bugs found during this research. "Reproduced" means seen in a test or the
 browser; "code reading" means not yet reproduced.
