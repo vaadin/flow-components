@@ -476,15 +476,11 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
-    public void clickDownloadButtonDisabledOnClick_downloadRefused() {
-        Assert.assertTrue(clickAndDownload("download-disable-on-click-button")
-                .startsWith("403|"));
-    }
-
-    @Test
-    public void clickDownloadButtonDisabledOnClickAllowDisabled_downloadsFile() {
+    public void clickDownloadButtonDisabledOnClick_downloadsFileWhileDisabled() {
         Assert.assertEquals("200|" + ButtonView.DOWNLOAD_BODY,
-                clickAndDownload("download-allow-disabled-button"));
+                clickAndDownload("download-disable-on-click-button"));
+        Assert.assertFalse(layout.$(ButtonElement.class)
+                .id("download-disable-on-click-button").isEnabled());
     }
 
     /**

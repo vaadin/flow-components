@@ -404,17 +404,19 @@ public class Button extends Component
      * <p>
      * The file is only served while the button is attached, visible and
      * enabled, so hiding or removing the button in a click listener makes the
-     * download fail. When you combine this with
-     * {@link #setDisableOnClick(boolean) disable on click}, the button can be
-     * disabled before the browser requests the file. Pass
-     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()} to serve
-     * the file in that case.
+     * download fail. The exception is a button with
+     * {@link #setDisableOnClick(boolean) disable on click}: it disables itself
+     * before the browser requests the file, so the file is then also served
+     * while the button is disabled, as with
+     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}. This
+     * applies whether disable on click is turned on before or after setting the
+     * handler.
      *
      * <pre>{@code
      * Button export = new Button("Export");
      * export.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
-     * export.setDownloadHandler(DownloadHandler
-     *         .fromInputStream(event -> createReport()).allowDisabled());
+     * export.setDownloadHandler(
+     *         DownloadHandler.fromInputStream(event -> createReport()));
      * }</pre>
      *
      * @param downloadHandler
@@ -423,13 +425,21 @@ public class Button extends Component
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
+        this.downloadHandler = downloadHandler;
+        updateDownloadRegistration();
+    }
+
+    private void updateDownloadRegistration() {
         if (downloadRegistration != null) {
             downloadRegistration.remove();
             downloadRegistration = null;
         }
-        this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
-            downloadRegistration = Download.onClick(this, downloadHandler);
+            // Disable on click disables the button before the browser
+            // requests the file, so the file must be served while disabled
+            downloadRegistration = Download.onClick(this,
+                    isDisableOnClick() ? downloadHandler.allowDisabled()
+                            : downloadHandler);
         }
     }
 
@@ -503,6 +513,7 @@ public class Button extends Component
             checkNoEnabledBinding();
         }
         disableOnClickController.setDisableOnClick(disableOnClick);
+        updateDownloadRegistration();
     }
 
     /**
@@ -535,6 +546,7 @@ public class Button extends Component
         Objects.requireNonNull(mode, "DisableOnClickMode must not be null");
         checkNoEnabledBinding();
         disableOnClickController.setDisableOnClick(mode);
+        updateDownloadRegistration();
     }
 
     private void checkNoEnabledBinding() {

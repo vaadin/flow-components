@@ -311,18 +311,12 @@ public class ButtonView extends Div {
 
         Button disableOnClick = new Button("Download, disable on click");
         disableOnClick.setId("download-disable-on-click-button");
-        disableOnClick.setDisableOnClick(true);
+        // Handler set before disable on click, so turning on disable on click
+        // has to update the existing download registration
         disableOnClick.setDownloadHandler(createDownloadHandler());
+        disableOnClick.setDisableOnClick(true);
 
-        Button allowDisabled = new Button(
-                "Download, disable on click, allow disabled");
-        allowDisabled.setId("download-allow-disabled-button");
-        allowDisabled.setDisableOnClick(true);
-        allowDisabled
-                .setDownloadHandler(createDownloadHandler().allowDisabled());
-
-        addCard("Button with download handler", button, disableOnClick,
-                allowDisabled);
+        addCard("Button with download handler", button, disableOnClick);
     }
 
     private static DownloadHandler createDownloadHandler() {

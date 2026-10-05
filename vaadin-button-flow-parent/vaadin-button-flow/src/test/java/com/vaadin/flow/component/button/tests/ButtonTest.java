@@ -340,6 +340,11 @@ class ButtonTest {
         Assertions.assertSame(replacement, button.getDownloadHandler());
         Assertions.assertEquals(1, countDownloadResources());
 
+        button.setDisableOnClick(true);
+
+        Assertions.assertSame(replacement, button.getDownloadHandler());
+        Assertions.assertEquals(1, countDownloadResources());
+
         button.setDownloadHandler(null);
 
         Assertions.assertNull(button.getDownloadHandler());
