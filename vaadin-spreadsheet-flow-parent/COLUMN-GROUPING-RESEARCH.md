@@ -76,8 +76,9 @@ Questions they asked, with the answers given:
 
 ## 3. Estimate
 
-**21 days (range 18–25) for columns**, including tests, docs, review and the
-backport of the bug fixes. Rows with the same API add **6–8 days**. One
+**21 days (range 18–25.5) for columns**, including tests, docs and review.
+Backporting the bug fixes to 25.2 isn't included (about 0.75 day). Rows with
+the same API add **6–8 days**. One
 developer who knows Flow but not Spreadsheet's internals; focused working
 days, not calendar time. All numbers are judgment and are not calibrated
 against past Vaadin work.
@@ -94,13 +95,13 @@ against past Vaadin work.
 | 6 | Tests | 3.5 | About seven TestBench scenarios at half a day each, plus running and fixing the existing grouping ITs. |
 | 7 | Round-trip in Excel and LibreOffice | 0.5 | Open saved files and check for repair prompts. |
 | 8 | Docs | 1.5 | vaadin/docs article and demo with its own review, plus Javadoc. |
-| 9 | Review rounds and backports | 2 | Review feedback, plus backporting the bug fixes with GWT conflicts across 25.x branches. |
+| 9 | Review rounds | 1.25 | Review feedback on the bug-fix PRs and the feature PR. Backporting the bug fixes to 25.2 isn't counted: about 0.75 day, mostly GWT conflicts across 25.x branches. |
 | 10 | Ramp-up and build friction | 0.25 | SDM is documented on `main`; the traps are written down in [section 17](#17-tooling-and-lessons). |
-| | **Total** | **21.25** | |
+| | **Total** | **20.5** | |
 
 - **18 days** if the client fixes stay local, the spec decisions take the
   simple options, and POI has no more surprises.
-- **25 days** if the client fixes uncover new scroll or frozen-pane layout
+- **25.5 days** if the client fixes uncover new scroll or frozen-pane layout
   problems and the round trip forces a change to how columns are stored.
   Items 5 and 2 carry most of this spread.
 
@@ -116,10 +117,10 @@ the estimate splits into three parts:
 
 | Part | Days | Range |
 |---|---|---|
-| A. Bugs the customer reported | 5.25 | 4–7 |
-| B. Bugs found in this research, not reported | 3.5 | 3–4.5 |
+| A. Bugs the customer reported | 4.75 | 4–6.5 |
+| B. Bugs found in this research, not reported | 3.25 | 3–4 |
 | C. The feature | 13 | 11–15 |
-| **Total** | **21.75** | **18–26.5** |
+| **Total** | **21** | **18–25.5** |
 
 Both bug groups also affect groups loaded from an XLSX file, with no new API.
 Most of them come from code reading, so each must be reproduced before it's
@@ -138,8 +139,8 @@ described in [section 9](#9-known-bugs).
 | Stub controls under a collapsed parent group (probably also #3912) | Code reading | 0.5 | 3 |
 | Cached widths come back: a local column resize can skip the next server redraw | Code reading | 0.5 | 5 |
 | Tests, mostly TestBench ITs for scrolling and frozen panes | | 1 | 6 |
-| Review and backport to 25.2 | | 0.75 | 9 |
-| **Total** | | **5.25** | |
+| Review | | 0.25 | 9 |
+| **Total** | | **4.75** | |
 
 **B. Bugs found in this research**
 
@@ -151,8 +152,21 @@ described in [section 9](#9-known-bugs).
 | Small server bugs: `hidden="0"` reads as collapsed, NPE in `expandColumn`, crash on a saved sheet without `<cols>`, collapse marker past the last column | Marker reproduced in POI, others code reading | 0.5 | 3 |
 | Autofit width for filter buttons lost; groups and hidden columns past `cols` not sent | Code reading | 0.5 | 4 |
 | Tests, mostly unit tests | | 0.5 | 6 |
-| Review and backport to 25.2 | | 0.5 | 9 |
-| **Total** | | **3.5** | |
+| Review | | 0.25 | 9 |
+| **Total** | | **3.25** | |
+
+Every bug in group B breaks something the customer asked for, so it makes
+sense to keep them in the task:
+
+- Nested expand and `hidden="0"` read as collapsed: nested groups and restoring
+  collapsed states.
+- Limits reset and columns past `cols`: the viewport limits.
+- Autofit width lost: column widths and autofit widths.
+- Collapse marker past the last column: groups ending at the final column.
+- NPE and the crash on a sheet without `<cols>`: the new API calls themselves,
+  for example `addColumnGroup` on a saved sheet.
+- Level-button bar and full reload: the reload drops component state, and the
+  toggle event and refresh must also work for level buttons.
 
 **C. The feature** is what's left of the work items: 1 (1.5), 2 (3.5),
 2b (1), 2c (1), 3 (0.25: move `loadGrouping` onto the model), 4 (0.75: sheet
@@ -162,7 +176,10 @@ runtime, which is where the customer's "stale or misaligned controls" and most
 of the "cached widths" problem come from. Those aren't bugs: changing groups
 after the first render isn't supported today.
 
-The total is 0.5 day above the 21.25 from the work items, because sizing each
+Backporting isn't counted in any part. It would add about 0.5 day for group A
+and 0.25 day for group B.
+
+The total is 0.5 day above the 20.5 from the work items, because sizing each
 bug separately came out a little higher: the last-column fix wasn't in any
 item, and the client fixes add up to 0.25 day over item 5.
 
@@ -183,6 +200,7 @@ How the estimate changed:
 | After SDM was set up | 21 (17.5–26) | +5.5–7.5 | Client loop down from about 45 s to about 5 s; mostly lowers the upper end. |
 | After the Excel checks | 21 (17.5–25) | +5.5–7.5 | Hidden-column behaviour follows Excel, so no server-side state is needed. |
 | Posted | 21 (18–25) | +6–8 | Rounded. |
+| Split by bug, backport excluded | 21 (18–25.5) | +6–8 | Per-bug sizing adds 0.5 day; the backport of the bug fixes (0.75 day) is no longer counted. |
 
 ## 4. Proposed API
 
