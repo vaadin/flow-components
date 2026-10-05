@@ -119,6 +119,7 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -131,6 +132,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tools.jackson.databind.JsonNode;
@@ -539,6 +541,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (refreshViewport) {
                 getGrid().refreshViewport();
             }
+        }
+
+        @Override
+        public SignalBinding<Boolean> bindVisible(
+                Signal<Boolean> visibleSignal) {
+            return super.bindVisible(visibleSignal).onChange(ctx -> {
+                if (Boolean.FALSE.equals(ctx.getOldValue())
+                        && Boolean.TRUE.equals(ctx.getNewValue())) {
+                    getGrid().refreshViewport();
+                }
+            });
         }
 
         protected void destroyDataGenerators() {
