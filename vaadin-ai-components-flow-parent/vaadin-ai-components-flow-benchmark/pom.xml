@@ -18,7 +18,7 @@
              the Central Portal publisher and the prerelease deployer. -->
         <skipPublishing>true</skipPublishing>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <benchmark.h2.version>2.3.232</benchmark.h2.version>
+        <benchmark.h2.version>2.5.252</benchmark.h2.version>
         <benchmark.jackson2.version>2.22.3</benchmark.jackson2.version>
         <benchmark.jackson2.annotations.version>2.22</benchmark.jackson2.annotations.version>
     </properties>
