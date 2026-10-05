@@ -72,27 +72,6 @@ class UploadButtonTest {
     }
 
     @Test
-    void capture() {
-        UploadButton button = new UploadButton();
-        Assertions.assertNull(button.getCapture());
-        Assertions.assertFalse(button.getElement().hasProperty("capture"));
-
-        button.setCapture(UploadCapture.ENVIRONMENT);
-        Assertions.assertEquals(UploadCapture.ENVIRONMENT, button.getCapture());
-        Assertions.assertEquals("environment",
-                button.getElement().getProperty("capture"));
-
-        button.setCapture(UploadCapture.USER);
-        Assertions.assertEquals(UploadCapture.USER, button.getCapture());
-        Assertions.assertEquals("user",
-                button.getElement().getProperty("capture"));
-
-        button.setCapture(null);
-        Assertions.assertNull(button.getCapture());
-        Assertions.assertFalse(button.getElement().hasProperty("capture"));
-    }
-
-    @Test
     void constructor_withNull_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> new UploadButton(null));
@@ -164,5 +143,26 @@ class UploadButtonTest {
 
         // Verify that the button is linked to manager2
         Assertions.assertSame(manager2, button.getUploadManager());
+    }
+
+    @Test
+    void capture() {
+        UploadButton button = new UploadButton();
+        Assertions.assertNull(button.getCapture());
+        Assertions.assertFalse(button.getElement().hasProperty("capture"));
+
+        button.setCapture(UploadCapture.ENVIRONMENT);
+        Assertions.assertEquals(UploadCapture.ENVIRONMENT, button.getCapture());
+        Assertions.assertEquals("environment",
+                button.getElement().getProperty("capture"));
+
+        button.setCapture(UploadCapture.USER);
+        Assertions.assertEquals(UploadCapture.USER, button.getCapture());
+        Assertions.assertEquals("user",
+                button.getElement().getProperty("capture"));
+
+        button.setCapture(null);
+        Assertions.assertNull(button.getCapture());
+        Assertions.assertFalse(button.getElement().hasProperty("capture"));
     }
 }
