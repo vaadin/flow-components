@@ -338,6 +338,46 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     }
 
     /**
+     * Gets the device input that is used for capturing a new file.
+     *
+     * @return the device input used for capturing a new file, or {@code null}
+     *         if not set
+     * @see #setCapture(UploadCapture)
+     * @since 25.4
+     */
+    public UploadCapture getCapture() {
+        return UploadCapture.fromValue(getElement().getProperty("capture"));
+    }
+
+    /**
+     * Sets the device input to use for capturing a new file, for example
+     * {@link UploadCapture#ENVIRONMENT} to take a photo with the back camera of
+     * a phone. On devices that support it, selecting files then opens the
+     * camera or microphone directly instead of the file browser. The type of
+     * input is determined by the accepted MIME types, for example
+     * {@code "image/*"} for the camera, see
+     * {@link #setAcceptedMimeTypes(String...)}.
+     * <p>
+     * This is only a hint to the browser. Devices without such an input, for
+     * example desktop browsers, ignore it and open the file browser. It does
+     * not restrict which files can be uploaded.
+     * <p>
+     * The default is {@code null}, which opens the file browser.
+     *
+     * @param capture
+     *            the device input to use for capturing a new file, or
+     *            {@code null} to choose existing files
+     * @since 25.4
+     */
+    public void setCapture(UploadCapture capture) {
+        if (capture == null) {
+            getElement().removeProperty("capture");
+        } else {
+            getElement().setProperty("capture", capture.getValue());
+        }
+    }
+
+    /**
      * Sets the accepted MIME types for uploads. Only files matching these MIME
      * types will be accepted. Wildcard patterns like {@code "image/*"} are
      * supported.
