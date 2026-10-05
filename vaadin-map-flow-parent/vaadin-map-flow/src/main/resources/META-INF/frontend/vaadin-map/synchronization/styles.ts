@@ -11,10 +11,12 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 import Text from 'ol/style/Text';
+import ImageState from 'ol/ImageState';
 import { Icon } from 'ol/style';
 import type { IconOrigin } from 'ol/style/Icon';
 import type { ColorLike } from 'ol/colorlike';
 import type ImageStyle from 'ol/style/Image';
+import type { Size } from 'ol/size';
 import type { MapSyncContext } from '../vaadin-map-types.js';
 import type {
   FillChange,
@@ -24,7 +26,7 @@ import type {
   StyleChange,
   TextStyleChange
 } from './synchronization-types.js';
-import { convertEnumValue, convertToCoordinateArray, convertToSizeArray, createOptions } from './util.ts';
+import { convertEnumValue, convertToCoordinateArray, createOptions } from './util.ts';
 
 export function synchronizeFill(target: Fill | undefined, source: FillChange, context: MapSyncContext): Fill {
   if (!target) {
@@ -69,6 +71,58 @@ function synchronizeImageStyle(
   return target;
 }
 
+/**
+ * The scale that was last requested for icons whose image is still loading,
+ * and which therefore can not be sized yet
+ */
+const pendingIconScales = new WeakMap<Icon, number>();
+
+function calculateIconScale(target: Icon, source: IconChange, scale: number): number | Size {
+  const [imageWidth, imageHeight] = target.getSize();
+  const scaleX = source.width != null ? source.width / imageWidth : source.height! / imageHeight;
+  const scaleY = source.height != null ? source.height / imageHeight : scaleX;
+  return scaleX === scaleY ? scaleX * scale : [scaleX * scale, scaleY * scale];
+}
+
+/**
+ * Applies the icon's width and height by scaling the image to that size, with
+ * the configured scale applied on top. OL's own width and height options can
+ * not be combined with a scale, and only apply when the icon is created.
+ */
+function synchronizeIconScale(target: Icon, source: IconChange, context: MapSyncContext) {
+  if (source.width == null && source.height == null) {
+    return;
+  }
+
+  if (target.getImageState() === ImageState.LOADED) {
+    target.setScale(calculateIconScale(target, source, source.scale));
+    return;
+  }
+
+  // The image size is only known once the image has loaded, so remember the
+  // latest scale and apply it when loading has finished
+  const isLoading = pendingIconScales.has(target);
+  pendingIconScales.set(target, source.scale);
+  if (isLoading) {
+    return;
+  }
+  const onImageChange = () => {
+    const imageState = target.getImageState();
+    if (imageState !== ImageState.LOADED && imageState !== ImageState.ERROR) {
+      return;
+    }
+    target.unlistenImageChange(onImageChange);
+    const scale = pendingIconScales.get(target)!;
+    pendingIconScales.delete(target);
+    if (imageState === ImageState.LOADED) {
+      target.setScale(calculateIconScale(target, source, scale));
+      context.connector.forceRender();
+    }
+  };
+  target.listenImageChange(onImageChange);
+  target.load();
+}
+
 export function synchronizeIcon(target: Icon | undefined, source: IconChange, context: MapSyncContext): Icon {
   if (!target) {
     const src = source.img || source.src;
@@ -77,13 +131,16 @@ export function synchronizeIcon(target: Icon | undefined, source: IconChange, co
         ...source,
         img: undefined,
         src: src ?? undefined,
-        imgSize: source.imgSize ? convertToSizeArray(source.imgSize) : undefined,
+        // Width and height are applied through the scale, see synchronizeIconScale
+        width: undefined,
+        height: undefined,
         anchor: source.anchor ? convertToCoordinateArray(source.anchor) : undefined,
         anchorOrigin: source.anchorOrigin ? (convertEnumValue(source.anchorOrigin) as IconOrigin) : undefined
       })
     );
   }
   synchronizeImageStyle(target, source, context);
+  synchronizeIconScale(target, source, context);
 
   context.connector.forceRender();
 
