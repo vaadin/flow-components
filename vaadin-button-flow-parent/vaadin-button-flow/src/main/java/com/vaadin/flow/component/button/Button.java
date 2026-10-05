@@ -402,9 +402,11 @@ public class Button extends Component
      * whenComplete}, to react on the server when the transfer has finished or
      * failed.
      * <p>
-     * The file is only served while the button is enabled. When you combine
-     * this with {@link #setDisableOnClick(boolean) disable on click}, the
-     * button can be disabled before the browser requests the file. Pass
+     * The file is only served while the button is attached, visible and
+     * enabled, so hiding or removing the button in a click listener makes the
+     * download fail. When you combine this with
+     * {@link #setDisableOnClick(boolean) disable on click}, the button can be
+     * disabled before the browser requests the file. Pass
      * {@link DownloadHandler#allowDisabled() handler.allowDisabled()} to serve
      * the file in that case.
      *

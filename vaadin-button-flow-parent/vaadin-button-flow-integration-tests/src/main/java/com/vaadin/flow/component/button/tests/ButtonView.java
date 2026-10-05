@@ -307,13 +307,29 @@ public class ButtonView extends Div {
     private void createButtonWithDownloadHandler() {
         Button button = new Button("Download");
         button.setId("download-button");
-        button.setDownloadHandler(
-                DownloadHandler.fromInputStream(event -> new DownloadResponse(
-                        new ByteArrayInputStream(
-                                DOWNLOAD_BODY.getBytes(StandardCharsets.UTF_8)),
-                        "button.txt", "text/plain", DOWNLOAD_BODY.length())));
+        button.setDownloadHandler(createDownloadHandler());
 
-        addCard("Button with download handler", button);
+        Button disableOnClick = new Button("Download, disable on click");
+        disableOnClick.setId("download-disable-on-click-button");
+        disableOnClick.setDisableOnClick(true);
+        disableOnClick.setDownloadHandler(createDownloadHandler());
+
+        Button allowDisabled = new Button(
+                "Download, disable on click, allow disabled");
+        allowDisabled.setId("download-allow-disabled-button");
+        allowDisabled.setDisableOnClick(true);
+        allowDisabled
+                .setDownloadHandler(createDownloadHandler().allowDisabled());
+
+        addCard("Button with download handler", button, disableOnClick,
+                allowDisabled);
+    }
+
+    private static DownloadHandler createDownloadHandler() {
+        return DownloadHandler.fromInputStream(event -> new DownloadResponse(
+                new ByteArrayInputStream(
+                        DOWNLOAD_BODY.getBytes(StandardCharsets.UTF_8)),
+                "button.txt", "text/plain", DOWNLOAD_BODY.length()));
     }
 
     private void addCard(String title, Component... components) {

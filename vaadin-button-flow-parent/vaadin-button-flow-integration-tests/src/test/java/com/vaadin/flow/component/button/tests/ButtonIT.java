@@ -471,22 +471,49 @@ public class ButtonIT extends AbstractComponentIT {
 
     @Test
     public void clickDownloadButton_downloadsFileFromHandler() {
-        // Replace the client-side download helper with a shim that fetches
-        // the URL right away, like the browser does, without a save dialog
+        Assert.assertEquals("200|" + ButtonView.DOWNLOAD_BODY,
+                clickAndDownload("download-button"));
+    }
+
+    @Test
+    public void clickDownloadButtonDisabledOnClick_downloadRefused() {
+        Assert.assertTrue(clickAndDownload("download-disable-on-click-button")
+                .startsWith("403|"));
+    }
+
+    @Test
+    public void clickDownloadButtonDisabledOnClickAllowDisabled_downloadsFile() {
+        Assert.assertEquals("200|" + ButtonView.DOWNLOAD_BODY,
+                clickAndDownload("download-allow-disabled-button"));
+    }
+
+    /**
+     * Clicks the button and fetches the URL that the click starts a download
+     * from, returning the response status and body separated by {@code |}.
+     */
+    private String clickAndDownload(String buttonId) {
+        // Replace the client-side download helper with a shim that only
+        // records the URL, so no save dialog opens
         executeScript("""
+                window.__downloadUrl = null;
                 window.__download = null;
                 window.Vaadin.Flow.download.start = url => {
-                  fetch(url).then(r => r.text().then(t => {
-                    window.__download = r.status + '|' + t;
-                  }));
+                  window.__downloadUrl = url;
                 };
                 """);
-        ButtonElement button = layout.$(ButtonElement.class)
-                .id("download-button");
+        ButtonElement button = layout.$(ButtonElement.class).id(buttonId);
         scrollToElement(button);
         button.click();
+        waitUntil(driver -> executeScript("return window.__downloadUrl;"));
 
-        Assert.assertEquals("200|" + ButtonView.DOWNLOAD_BODY, waitUntil(
-                driver -> executeScript("return window.__download;")));
+        // Fetch only now that the click has been handled on the server, so a
+        // button that disables itself on click is reliably disabled
+        executeScript("""
+                fetch(window.__downloadUrl).then(r => r.text().then(t => {
+                  window.__download = r.status + '|' + t;
+                }));
+                """);
+        return (String) waitUntil(
+                driver -> executeScript("return window.__download;"));
     }
 }
