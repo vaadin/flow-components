@@ -94,17 +94,31 @@ class GridHiddenColumnRenderingTest {
     }
 
     @Test
-    void initiallyVisibleColumnWithSignal_columnDataGenerated() {
-        column.bindVisible(new ValueSignal<>(true));
+    void bindVisible_initiallyVisibleColumn_columnDataNotGeneratedOnceHidden() {
+        ValueSignal<Boolean> visibleSignal = new ValueSignal<>(true);
+        column.bindVisible(visibleSignal);
         ui.fakeClientCommunication();
         assertColumnDataGenerated();
+
+        resetColumnDataSpies();
+
+        visibleSignal.set(false);
+        ui.fakeClientCommunication();
+        assertColumnDataNotGenerated();
     }
 
     @Test
-    void initiallyHiddenColumnWithSignal_columnDataNotGenerated() {
-        column.bindVisible(new ValueSignal<>(false));
+    void bindVisible_initiallyHiddenColumn_columnDataGeneratedOnceShown() {
+        ValueSignal<Boolean> visibleSignal = new ValueSignal<>(false);
+        column.bindVisible(visibleSignal);
         ui.fakeClientCommunication();
         assertColumnDataNotGenerated();
+
+        resetColumnDataSpies();
+
+        visibleSignal.set(true);
+        ui.fakeClientCommunication();
+        assertColumnDataGenerated();
     }
 
     @Nested
@@ -206,46 +220,6 @@ class GridHiddenColumnRenderingTest {
             column.setVisible(false);
             ui.fakeClientCommunication();
             assertColumnDataNotGenerated();
-        }
-    }
-
-    @Nested
-    class InitiallyVisibleColumnWithSignalClass {
-        private ValueSignal<Boolean> visibleSignal;
-
-        @BeforeEach
-        void setup() {
-            visibleSignal = new ValueSignal<>(true);
-            column.bindVisible(visibleSignal);
-            ui.fakeClientCommunication();
-            resetColumnDataSpies();
-        }
-
-        @Test
-        void hideColumn_columnDataNotGenerated() {
-            visibleSignal.set(false);
-            ui.fakeClientCommunication();
-            assertColumnDataNotGenerated();
-        }
-    }
-
-    @Nested
-    class InitiallyHiddenColumnWithSignalClass {
-        private ValueSignal<Boolean> visibleSignal;
-
-        @BeforeEach
-        void setup() {
-            visibleSignal = new ValueSignal<>(false);
-            column.bindVisible(visibleSignal);
-            ui.fakeClientCommunication();
-            resetColumnDataSpies();
-        }
-
-        @Test
-        void showColumn_columnDataGenerated() {
-            visibleSignal.set(true);
-            ui.fakeClientCommunication();
-            assertColumnDataGenerated();
         }
     }
 
