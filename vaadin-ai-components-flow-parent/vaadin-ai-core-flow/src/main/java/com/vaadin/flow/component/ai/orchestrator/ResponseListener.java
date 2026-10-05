@@ -76,11 +76,9 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * <p>
  * With an {@link AIController} attached, the listener is called right after
  * {@link AIController#onResponse(ResponseEvent)}, from inside the same
- * {@code ui.access()} call, so that the controller's outcome is part of the
- * event. The session lock is then held while the listener runs, so blocking
- * work in it also blocks the UI for its duration. A UI that is detached when
- * the turn ends skips the controller hook but still fires the listener, on the
- * thread that ends the turn.
+ * {@code ui.access()} call, so the session lock is held while it runs and
+ * blocking work in it blocks the UI for that long. A UI that is detached when
+ * the turn ends skips the controller hook but still fires the listener.
  *
  * @since 25.3
  */

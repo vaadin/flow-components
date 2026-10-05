@@ -875,30 +875,16 @@ public class AIOrchestrator implements Serializable {
             notifyResponseListener(event);
             return;
         }
-        // The controller applies the turn before the listener hears of it,
-        // so that a turn the model completed but the controller could not
-        // apply (a staged grid query that fails when rendered, say) reaches
-        // the listener as the error of the turn. Firing the listener first
-        // would report a success that nothing can follow up on. The listener
-        // therefore runs inside the controller's ui.access() when a
-        // controller is attached; ResponseListener documents this.
-        try {
-            ui.access(() -> {
-                var applyFailure = applyTurnToController(event);
-                notifyResponseListener(applyFailure == null ? event
-                        : new ResponseListener.ResponseEvent("", applyFailure,
-                                metadata));
-            });
-        } catch (UIDetachedException e) {
-            // Same outcome as accessIfAttached for the controller hook, but
-            // the listener still fires: it needs no UI, and an application
-            // persisting history must not lose the turn because the user
-            // navigated away.
+        // The controller applies the turn before the listener hears of it, so
+        // that a turn the controller could not apply reaches the listener as
+        // the turn's error (see ResponseListener). accessLater rather than
+        // access: its detach handler also covers a UI that detaches after the
+        // task is enqueued, and the listener must hear the turn end either way.
+        ui.accessLater(() -> notifyResponseListener(applyTurn(event)), () -> {
             LOGGER.debug(
-                    "Skipped the controller hook of an abandoned turn (UI detached)",
-                    e);
+                    "Skipped the controller hook of an abandoned turn (UI detached)");
             notifyResponseListener(event);
-        }
+        }).run();
     }
 
     private void notifyResponseListener(ResponseListener.ResponseEvent event) {
@@ -913,21 +899,19 @@ public class AIOrchestrator implements Serializable {
     }
 
     /**
-     * Runs the controller's {@code onResponse} hook for the turn. Returns the
-     * exception the hook threw while applying a successful turn, which the
-     * caller reports as the error of the turn; returns {@code null} when the
-     * hook completed, and also when it threw while handling a turn that had
-     * already failed, since the original error is what the turn failed with.
+     * Runs the controller hook and returns the outcome the listener gets: the
+     * turn's own, or a failure carrying the hook's throw when a completed turn
+     * could not be applied.
      */
-    private Throwable applyTurnToController(
+    private ResponseListener.ResponseEvent applyTurn(
             ResponseListener.ResponseEvent event) {
         try {
             controller.onResponse(event);
-            return null;
         } catch (Exception e) {
             LOGGER.error("Error in controller onResponse", e);
             if (event.getError().isPresent()) {
-                return null;
+                // The turn had already failed; that error stands.
+                return event;
             }
             // Append a separate assistant message instead of rewriting the
             // LLM's response. By the time this runs, the response is already
@@ -939,8 +923,10 @@ public class AIOrchestrator implements Serializable {
                 messageList.addMessage("An error occurred. Please try again.",
                         assistantName, Collections.emptyList());
             }
-            return e;
+            return new ResponseListener.ResponseEvent("", e,
+                    event.getMetadata().orElse(null));
         }
+        return event;
     }
 
     /**
@@ -1525,10 +1511,6 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * On failure {@code event.getError()} carries the cause and the
          * response text is empty, even if text was received before the failure.
-         * A throw from
-         * {@link AIController#onResponse(ResponseListener.ResponseEvent)} on a
-         * successful turn counts as a failure: the listener then receives that
-         * exception, since the turn was completed but not applied.
          * <p>
          * The thread the listener runs on depends on the provider: with a
          * streaming provider, or when the provider runs the turn on a
@@ -1538,9 +1520,7 @@ public class AIOrchestrator implements Serializable {
          * whole turn — this listener included — runs on the thread that
          * triggered the prompt, where blocking prolongs the current request. To
          * update Vaadin UI components from this listener, use
-         * {@code ui.access()}. With a controller attached, the listener runs
-         * right after the controller's {@code onResponse}, inside the same
-         * {@code ui.access()} call. See {@link ResponseListener} for the full
+         * {@code ui.access()}. See {@link ResponseListener} for the full
          * threading contract.
          * <p>
          * The listener is not called when history is restored via

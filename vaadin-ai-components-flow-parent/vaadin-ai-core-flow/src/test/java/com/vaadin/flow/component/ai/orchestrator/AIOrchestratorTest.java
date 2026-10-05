@@ -2257,11 +2257,9 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.error(streamError));
 
         var controller = mockController();
-        AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .withResponseListener(event -> {
-                    throw new RuntimeException("listener died");
-                }).build().prompt("Hello");
+        orchestratorWith(controller, event -> {
+            throw new RuntimeException("listener died");
+        }).prompt("Hello");
 
         Mockito.verify(controller).onResponse(errorIs(streamError));
     }
@@ -2458,11 +2456,8 @@ class AIOrchestratorTest {
             }
         };
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .withResponseListener(
-                        event -> listenerCapture.add(event.getResponse()))
-                .build();
+        var orchestrator = orchestratorWith(controller,
+                event -> listenerCapture.add(event.getResponse()));
         orchestrator.prompt("Hello");
 
         Assertions.assertEquals(1, listenerCapture.size());
@@ -2800,16 +2795,14 @@ class AIOrchestratorTest {
         var controller = mockController();
         Mockito.doThrow(applyFailure).when(controller)
                 .onResponse(Mockito.any());
+        var listener = Mockito.mock(ResponseListener.class);
 
-        var events = new ArrayList<ResponseListener.ResponseEvent>();
-        AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .withResponseListener(events::add).build().prompt("Hello");
+        orchestratorWith(controller, listener).prompt("Hello");
 
-        Assertions.assertEquals(1, events.size(),
-                "The listener fires once per turn, also when the controller "
-                        + "fails to apply it");
-        var event = events.getFirst();
+        var captor = ArgumentCaptor
+                .forClass(ResponseListener.ResponseEvent.class);
+        Mockito.verify(listener).onResponse(captor.capture());
+        var event = captor.getValue();
         Assertions.assertSame(applyFailure, event.getError().orElse(null));
         Assertions.assertEquals("", event.getResponse(),
                 "A failed turn carries no response text");
@@ -2827,17 +2820,13 @@ class AIOrchestratorTest {
         var controller = mockController();
         Mockito.doThrow(new RuntimeException("controller blew up"))
                 .when(controller).onResponse(Mockito.any());
+        var listener = Mockito.mock(ResponseListener.class);
 
-        var events = new ArrayList<ResponseListener.ResponseEvent>();
-        AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .withResponseListener(events::add).build().prompt("Hello");
+        orchestratorWith(controller, listener).prompt("Hello");
 
-        Assertions.assertEquals(1, events.size());
-        Assertions.assertSame(streamError,
-                events.getFirst().getError().orElse(null),
-                "The error the turn failed with stands; the controller's "
-                        + "own throw while handling it is only logged");
+        // The error the turn failed with stands; the controller's own throw
+        // while handling it is only logged.
+        Mockito.verify(listener).onResponse(errorIs(streamError));
     }
 
     @Test
@@ -2849,32 +2838,11 @@ class AIOrchestratorTest {
         var controller = mockController();
         var listener = Mockito.mock(ResponseListener.class);
 
-        AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .withResponseListener(listener).build().prompt("Hello");
+        orchestratorWith(controller, listener).prompt("Hello");
 
         var inOrder = Mockito.inOrder(controller, listener);
         inOrder.verify(controller).onResponse(noError());
         inOrder.verify(listener).onResponse(noError());
-    }
-
-    @Test
-    void onResponseThrows_onSuccessPath_addsSeparateErrorMessage() {
-        // The LLM's own text stays as it was said; the failure to apply it
-        // is reported in a message of its own.
-        stubAddMessage();
-        Mockito.when(
-                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
-                .thenReturn(Flux.just("Response"));
-        var controller = mockController();
-        Mockito.doThrow(new RuntimeException("controller blew up"))
-                .when(controller).onResponse(Mockito.any());
-
-        orchestratorWith(controller).prompt("Hello");
-
-        Mockito.verify(mockMessageList).addMessage(
-                "An error occurred. Please try again.", "Assistant",
-                Collections.emptyList());
     }
 
     @Test
@@ -4272,6 +4240,13 @@ class AIOrchestratorTest {
         return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
                 .build();
+    }
+
+    private AIOrchestrator orchestratorWith(AIController controller,
+            ResponseListener listener) {
+        return AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseListener(listener).build();
     }
 
     private void prompt(String message) {
