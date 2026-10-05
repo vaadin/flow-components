@@ -547,7 +547,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         public SignalBinding<Boolean> bindVisible(
                 Signal<Boolean> visibleSignal) {
             return super.bindVisible(visibleSignal).onChange(ctx -> {
-                if (!Boolean.TRUE.equals(ctx.getOldValue())
+                if (Boolean.FALSE.equals(ctx.getOldValue())
                         && Boolean.TRUE.equals(ctx.getNewValue())) {
                     getGrid().refreshViewport();
                 }
