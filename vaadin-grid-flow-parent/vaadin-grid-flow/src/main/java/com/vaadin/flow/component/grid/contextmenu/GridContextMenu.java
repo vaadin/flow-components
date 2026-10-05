@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +45,7 @@ public class GridContextMenu<T> extends
         implements HasGridMenuItems<T> {
 
     private SerializablePredicate<T> dynamicContentHandler;
+    private SerializablePredicate<DynamicContentContext<T>> dynamicContentProvider;
 
     /**
      * Event that is fired when a {@link GridMenuItem} is clicked inside a
@@ -133,6 +135,27 @@ public class GridContextMenu<T> extends
             return columnId;
         }
 
+    }
+
+    /**
+     * The context of a context-click on a {@link Grid}, passed to the
+     * {@link #setDynamicContentProvider(SerializablePredicate) dynamic content
+     * provider}.
+     *
+     * @param item
+     *            the item in the Grid that was the target of the context-click,
+     *            or {@code null} if the context-click didn't target any item
+     *            (eg. if targeting a header)
+     * @param column
+     *            the column in the Grid that was the target of the
+     *            context-click, or {@code null} if the context-click didn't
+     *            target any application column (eg. selection column)
+     * @param <T>
+     *            the grid bean type
+     * @since 25.4
+     */
+    public record DynamicContentContext<T>(T item,
+            Grid.Column<T> column) implements Serializable {
     }
 
     /**
@@ -247,9 +270,15 @@ public class GridContextMenu<T> extends
      * </p>
      *
      * @return the callback function that is executed before opening the context
-     *         menu, or {@code null} if not specified.
+     *         menu, or {@code null} if not specified or if a dynamic content
+     *         provider was set with
+     *         {@link #setDynamicContentProvider(SerializablePredicate)}.
      * @since 4.1
+     * @deprecated Use {@link #getDynamicContentProvider()} together with
+     *             {@link #setDynamicContentProvider(SerializablePredicate)},
+     *             which also receives the clicked column.
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     public SerializablePredicate<T> getDynamicContentHandler() {
         return dynamicContentHandler;
     }
@@ -267,15 +296,80 @@ public class GridContextMenu<T> extends
      * The boolean return value of this callback specifies if the context menu
      * will be opened.
      * </p>
+     * <p>
+     * Replaces any provider set with
+     * {@link #setDynamicContentProvider(SerializablePredicate)}.
+     * </p>
      *
      * @param dynamicContentHandler
      *            the callback function that will be executed before opening the
      *            context menu.
      * @since 4.1
+     * @deprecated Use {@link #setDynamicContentProvider(SerializablePredicate)}
+     *             instead, which also receives the clicked column.
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     public void setDynamicContentHandler(
             SerializablePredicate<T> dynamicContentHandler) {
         this.dynamicContentHandler = dynamicContentHandler;
+        this.dynamicContentProvider = null;
+    }
+
+    /**
+     * Gets the callback function that is executed before the context menu is
+     * opened to dynamically provide its contents.
+     *
+     * @return the callback function that is executed before opening the context
+     *         menu, or {@code null} if not specified or if a handler was set
+     *         with {@link #setDynamicContentHandler(SerializablePredicate)}.
+     * @see #setDynamicContentProvider(SerializablePredicate)
+     * @since 25.4
+     */
+    public SerializablePredicate<DynamicContentContext<T>> getDynamicContentProvider() {
+        return dynamicContentProvider;
+    }
+
+    /**
+     * Sets a callback that is executed before the context menu is opened to
+     * dynamically provide its contents.
+     *
+     * <p>
+     * The callback receives a {@link DynamicContentContext} with the clicked
+     * item and column. This is useful when the context menu items depend on
+     * what was clicked, for example:
+     * </p>
+     *
+     * <pre>
+     * contextMenu.setDynamicContentProvider(context -&gt; {
+     *     contextMenu.removeAll();
+     *     Person person = context.item();
+     *     if (context.column() == nameColumn) {
+     *         contextMenu.addItem("Call", e -&gt; call(person));
+     *     } else if (context.column() == addressColumn) {
+     *         contextMenu.addItem("Show on map", e -&gt; showOnMap(person));
+     *     }
+     *     return true;
+     * });
+     * </pre>
+     *
+     * <p>
+     * The boolean return value of this callback specifies if the context menu
+     * will be opened.
+     * </p>
+     * <p>
+     * Replaces any handler set with
+     * {@link #setDynamicContentHandler(SerializablePredicate)}.
+     * </p>
+     *
+     * @param dynamicContentProvider
+     *            the callback function that will be executed before opening the
+     *            context menu, or {@code null} to remove it
+     * @since 25.4
+     */
+    public void setDynamicContentProvider(
+            SerializablePredicate<DynamicContentContext<T>> dynamicContentProvider) {
+        this.dynamicContentProvider = dynamicContentProvider;
+        this.dynamicContentHandler = null;
     }
 
     /**
@@ -283,10 +377,19 @@ public class GridContextMenu<T> extends
      * 
      * @since 25.0
      */
+    @SuppressWarnings("removal")
     @Override
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         Grid<T> grid = (Grid<T>) getTarget();
         String key = eventDetail.get("key").asString();
+
+        if (dynamicContentProvider != null) {
+            final T item = grid.getDataCommunicator().getKeyMapper().get(key);
+            final Grid.Column<T> column = getColumnByInternalId(grid,
+                    eventDetail.get("internalColumnId").asString());
+            return dynamicContentProvider
+                    .test(new DynamicContentContext<>(item, column));
+        }
 
         if (getDynamicContentHandler() != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
@@ -294,5 +397,13 @@ public class GridContextMenu<T> extends
         }
 
         return super.onBeforeOpenMenu(eventDetail);
+    }
+
+    private static <T> Grid.Column<T> getColumnByInternalId(Grid<T> grid,
+            String internalId) {
+        return grid.getColumns().stream()
+                .filter(column -> internalId
+                        .equals(column.getElement().getProperty("_flowId")))
+                .findFirst().orElse(null);
     }
 }

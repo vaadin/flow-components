@@ -49,6 +49,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -59,7 +60,6 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -137,7 +137,8 @@ public class TimePicker
 
     private Locale locale;
 
-    private StateTree.ExecutionRegistration pendingLocaleUpdate;
+    private final BeforeClientResponseAction localeUpdateAction = new BeforeClientResponseAction(
+            this, this::executeLocaleUpdate);
 
     private String unparsableValue;
 
@@ -707,7 +708,7 @@ public class TimePicker
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        requestLocaleUpdate();
+        localeUpdateAction.schedule();
     }
 
     private void initConnector() {
@@ -752,7 +753,7 @@ public class TimePicker
         }
 
         this.locale = locale;
-        requestLocaleUpdate();
+        localeUpdateAction.schedule();
     }
 
     /**
@@ -771,18 +772,6 @@ public class TimePicker
         } else {
             return super.getLocale();
         }
-    }
-
-    private void requestLocaleUpdate() {
-        getUI().ifPresent(ui -> {
-            if (pendingLocaleUpdate != null) {
-                pendingLocaleUpdate.remove();
-            }
-            pendingLocaleUpdate = ui.beforeClientResponse(this, context -> {
-                pendingLocaleUpdate = null;
-                executeLocaleUpdate();
-            });
-        });
     }
 
     private void executeLocaleUpdate() {

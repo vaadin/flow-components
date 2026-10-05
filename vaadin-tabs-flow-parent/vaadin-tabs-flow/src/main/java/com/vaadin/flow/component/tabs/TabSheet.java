@@ -23,6 +23,7 @@ import java.util.UUID;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -34,6 +35,7 @@ import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -63,7 +65,8 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
     private Map<Tab, Element> tabToContent = new HashMap<>();
 
-    private Registration deferredUpdateContent = null;
+    private final BeforeClientResponseAction contentAttachAction = new BeforeClientResponseAction(
+            this, this::ensureSelectedTabContentAttached);
 
     /**
      * The default constructor.
@@ -145,12 +148,13 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
 
         // Make sure possible old content related to the same tab gets removed
         if (tabToContent.containsKey(tab)) {
-            tabToContent.get(tab).removeFromParent();
+            unlinkContent(tabToContent.get(tab));
         }
 
         linkTabToContent(tab, content);
 
         tabToContent.put(tab, content.getElement());
+        ComponentUtil.setData(content, TabSheet.class, this);
 
         updateContent();
 
@@ -180,8 +184,14 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     public void remove(Tab tab) {
         Objects.requireNonNull(tab, "The tab to be removed cannot be null");
         var content = tabToContent.remove(tab);
-        content.removeFromParent();
+        unlinkContent(content);
         tabs.remove(tab);
+    }
+
+    private static void unlinkContent(Element content) {
+        content.removeFromParent();
+        content.getComponent().ifPresent(component -> ComponentUtil
+                .setData(component, TabSheet.class, null));
     }
 
     /**
@@ -324,6 +334,47 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     }
 
     /**
+     * Returns the {@link Tab} whose content is the given component or one of
+     * its ancestors. Unlike {@link #getTab(Component)}, this also finds the tab
+     * of a component nested deeper in the tab content, for example to select
+     * the tab that holds the first invalid field of a form:
+     *
+     * <pre>{@code
+     * binder.validate().getFieldValidationErrors().stream().findFirst()
+     *         .map(error -> tabSheet
+     *                 .findTabContaining((Component) error.getField()))
+     *         .ifPresent(tabSheet::setSelectedTab);
+     * }</pre>
+     *
+     * @param component
+     *            the component to look up, can not be <code>null</code>
+     * @return the tab whose content contains the component, or
+     *         <code>null</code> if the component is not inside the content of
+     *         any tab of this {@link TabSheet}
+     * @since 25.4
+     */
+    public Tab findTabContaining(Component component) {
+        Objects.requireNonNull(component,
+                "The component to look for the tab cannot be null");
+
+        for (Component c = component; c != null
+                && c != this; c = getParentOrOwningTabSheet(c)) {
+            var tab = getTab(c);
+            if (tab != null) {
+                return tab;
+            }
+        }
+        return null;
+    }
+
+    private static Component getParentOrOwningTabSheet(Component component) {
+        // The content of a tab that was never selected is not attached to its
+        // TabSheet yet, so the TabSheet it was added to must be looked up
+        return component.getParent().orElseGet(
+                () -> ComponentUtil.getData(component, TabSheet.class));
+    }
+
+    /**
      * Returns the {@link Component} instance associated with the given tab.
      *
      * @param tab
@@ -387,15 +438,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
             }
         }
 
-        getElement().getNode().runWhenAttached(ui -> {
-            if (deferredUpdateContent != null) {
-                deferredUpdateContent.remove();
-            }
-
-            deferredUpdateContent = ui.beforeClientResponse(this, context -> {
-                ensureSelectedTabContentAttached();
-            });
-        });
+        contentAttachAction.schedule();
     }
 
     private void ensureSelectedTabContentAttached() {

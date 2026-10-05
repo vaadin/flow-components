@@ -63,7 +63,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     private MenuBarI18n i18n;
 
-    // When calling `generateItems` without providing a node id, it will use
+    // When calling `generateItems` without arguments, it will use
     // the previously generated items tree, re-filtering hidden items and
     // re-rendering the root items = the menu bar buttons, which snapshot the
     // item properties on render.
@@ -89,8 +89,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> {
-            String appId = event.getUI().getInternals().getAppId();
-            initConnector(appId);
+            initConnector();
             resetContent();
         });
     }
@@ -460,10 +459,9 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         buttonsUpdate.schedule();
     }
 
-    private void initConnector(String appId) {
+    private void initConnector() {
         getElement().executeJs(
-                "window.Vaadin.Flow.menubarConnector.initLazy(this, $0)",
-                appId);
+                "window.Vaadin.Flow.menubarConnector.initLazy(this)");
     }
 
     /**

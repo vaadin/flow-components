@@ -119,6 +119,7 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -131,6 +132,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tools.jackson.databind.JsonNode;
@@ -539,6 +541,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (refreshViewport) {
                 getGrid().refreshViewport();
             }
+        }
+
+        @Override
+        public SignalBinding<Boolean> bindVisible(
+                Signal<Boolean> visibleSignal) {
+            return super.bindVisible(visibleSignal).onChange(ctx -> {
+                if (Boolean.FALSE.equals(ctx.getOldValue())
+                        && Boolean.TRUE.equals(ctx.getNewValue())) {
+                    getGrid().refreshViewport();
+                }
+            });
         }
 
         protected void destroyDataGenerators() {
@@ -3678,6 +3691,51 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Column<T> getColumnByKey(String columnKey) {
         return keyToColumnMap.get(columnKey);
+    }
+
+    /**
+     * Gets a {@link Column} of this grid by one of its sort properties. You can
+     * use this to find the column for a sort property that a lazy data provider
+     * receives through {@link Query#getSortOrders()}.
+     * <p>
+     * A column's sort properties are the properties set with
+     * {@link Column#setSortProperty(String...)}, the properties returned by a
+     * custom {@link Column#setSortOrderProvider(SortOrderProvider) sort order
+     * provider}, or the column's key if neither is set. The column matches when
+     * any of its sort properties is equal to the given sort property.
+     * <p>
+     * Note the following limitations:
+     * <ul>
+     * <li>Unlike column keys, sort properties do not have to be unique. If more
+     * than one column uses the given sort property, this method returns the
+     * first one in the order of {@link #getColumns()}.</li>
+     * <li>This method matches against the sort orders that a column returns for
+     * {@link SortDirection#ASCENDING}. If a custom sort order provider returns
+     * different properties per direction, the properties for
+     * {@link SortDirection#DESCENDING} are not matched.</li>
+     * <li>The column does not have to be sortable. For example, a column with a
+     * key that is not sortable still matches its key.</li>
+     * </ul>
+     *
+     * @see Column#setSortProperty(String...)
+     * @see Column#setSortOrderProvider(SortOrderProvider)
+     *
+     * @param sortProperty
+     *            the sort property of the column to get
+     * @return the first column that uses the given sort property, or
+     *         {@code null} if no column uses it or if {@code sortProperty} is
+     *         {@code null}
+     * @since 25.4
+     */
+    public Column<T> getColumnBySortProperty(String sortProperty) {
+        if (sortProperty == null) {
+            return null;
+        }
+        return getColumns().stream()
+                .filter(column -> column.getSortOrder(SortDirection.ASCENDING)
+                        .anyMatch(order -> sortProperty
+                                .equals(order.getSorted())))
+                .findFirst().orElse(null);
     }
 
     /**
