@@ -26,11 +26,11 @@ import com.vaadin.flow.router.Route;
 public class DynamicContextMenuGridPage extends Div {
 
     public DynamicContextMenuGridPage() {
-        gridWithDynamicContextMenu();
+        gridWithDynamicContentHandler();
         gridWithDynamicContentProvider();
     }
 
-    private void gridWithDynamicContextMenu() {
+    private void gridWithDynamicContentHandler() {
         final Grid<Person> grid = new Grid<>();
         grid.addColumn(Person::getFirstName).setHeader("Name").setId("Name-Id");
         grid.addColumn(Person::getAge).setHeader("Born").setId("Born-Id");
@@ -51,7 +51,7 @@ public class DynamicContextMenuGridPage extends Div {
             return true;
         });
 
-        grid.setId("grid-with-dynamic-context-menu");
+        grid.setId("grid-with-dynamic-content-handler");
         add(grid);
     }
 

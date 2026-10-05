@@ -31,24 +31,28 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-grid/dynamic-context-menu-grid")
 public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
-    private GridElement grid;
+    private GridElement handlerGrid;
+    private GridElement providerGrid;
 
     @Before
     public void init() {
         open();
-        grid = $(GridElement.class).id("grid-with-dynamic-context-menu");
+        handlerGrid = $(GridElement.class)
+                .id("grid-with-dynamic-content-handler");
+        providerGrid = $(GridElement.class)
+                .id("grid-with-dynamic-content-provider");
         verifyClosed();
     }
 
     @Test
-    public void shouldNotOpenContextMenuWhenClickedOnRowWithPersonUnder30Years() {
-        grid.getCell(25, 0).contextClick();
+    public void dynamicContentHandler_shouldNotOpenContextMenuWhenClickedOnRowWithPersonUnder30Years() {
+        handlerGrid.getCell(25, 0).contextClick();
         verifyClosed();
     }
 
     @Test
-    public void shouldOpenContextMenuWhenClickedOnRowWithPersonAbove30Years() {
-        grid.getCell(40, 0).contextClick();
+    public void dynamicContentHandler_shouldOpenContextMenuWhenClickedOnRowWithPersonAbove30Years() {
+        handlerGrid.getCell(40, 0).contextClick();
         verifyOpened();
 
         Assert.assertEquals("Person 40",
@@ -59,8 +63,8 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
     }
 
     @Test
-    public void shouldOpenContextMenuWhenClickingOnTheEdgeOfCell() {
-        GridTHTDElement cell = grid.getCell(40, 0);
+    public void dynamicContentHandler_shouldOpenContextMenuWhenClickingOnTheEdgeOfCell() {
+        GridTHTDElement cell = handlerGrid.getCell(40, 0);
         // Move cursor to upper edge of the cell
         // moveToElement moves to center, so we subtract half of the height to
         // approximately get to the cells edge
@@ -78,10 +82,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
     @Test
     public void dynamicContentProvider_menuContentDependsOnClickedColumn() {
-        GridElement columnGrid = $(GridElement.class)
-                .id("grid-with-dynamic-content-provider");
-
-        columnGrid.getCell(5, 1).contextClick();
+        providerGrid.getCell(5, 1).contextClick();
         verifyOpened();
         Assert.assertEquals("Age 5",
                 getContextMenu().getDomProperty("innerText"));
@@ -89,7 +90,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
         $("body").first().click();
         verifyClosed();
 
-        columnGrid.getCell(5, 0).contextClick();
+        providerGrid.getCell(5, 0).contextClick();
         verifyOpened();
         Assert.assertEquals("Call Person 5",
                 getContextMenu().getDomProperty("innerText"));
