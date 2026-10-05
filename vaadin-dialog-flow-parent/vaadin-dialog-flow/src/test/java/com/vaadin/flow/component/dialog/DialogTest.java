@@ -297,6 +297,29 @@ class DialogTest {
     }
 
     @Test
+    @SuppressWarnings("removal")
+    void setAriaLabel_getAriaLabel() {
+        Dialog dialog = new Dialog();
+        dialog.setAriaLabel("Label");
+
+        Assertions.assertEquals("Label", dialog.getAriaLabel());
+        Assertions.assertEquals("Label",
+                dialog.getElement().getProperty("ariaLabel"));
+    }
+
+    @Test
+    @SuppressWarnings("removal")
+    void setAriaLabel_null_setsEmptyString() {
+        Dialog dialog = new Dialog();
+        dialog.setAriaLabel("Label");
+        dialog.setAriaLabel(null);
+
+        Assertions.assertEquals("", dialog.getAriaLabel());
+        Assertions.assertEquals("",
+                dialog.getElement().getProperty("ariaLabel"));
+    }
+
+    @Test
     void implementsHasAriaRole() {
         Assertions.assertTrue(HasAriaRole.class.isAssignableFrom(Dialog.class));
     }

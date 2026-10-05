@@ -1322,7 +1322,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the {@code ariaLabel} property from the webcomponent
      * @since 24.0
+     * @deprecated Dialog will implement
+     *             {@link com.vaadin.flow.component.HasAriaLabel} in Vaadin 26,
+     *             which replaces this method with a public
+     *             {@code Optional<String> getAriaLabel()}. Until then, use
+     *             {@code getElement().getAttribute("aria-label")} instead.
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     protected String getAriaLabel() {
         return getElement().getProperty("ariaLabel");
     }
@@ -1336,7 +1342,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param ariaLabel
      *            the String value to set
      * @since 24.0
+     * @deprecated Dialog will implement
+     *             {@link com.vaadin.flow.component.HasAriaLabel} in Vaadin 26,
+     *             which makes this method public. Until then, use
+     *             {@code getElement().setAttribute("aria-label", ariaLabel)}
+     *             instead.
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     protected void setAriaLabel(String ariaLabel) {
         getElement().setProperty("ariaLabel",
                 ariaLabel == null ? "" : ariaLabel);
