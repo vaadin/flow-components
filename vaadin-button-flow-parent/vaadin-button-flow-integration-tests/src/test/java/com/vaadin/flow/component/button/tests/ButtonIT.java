@@ -502,8 +502,9 @@ public class ButtonIT extends AbstractComponentIT {
         button.click();
         waitUntil(driver -> executeScript("return window.__downloadUrl;"));
 
-        // Fetch only now that the click has been handled on the server, so a
-        // button that disables itself on click is reliably disabled
+        // click() waits until the server has handled the click, so a button
+        // that disables itself on click is already disabled on the server
+        // when the file is requested
         executeScript("""
                 fetch(window.__downloadUrl).then(r => r.text().then(t => {
                   window.__download = r.status + '|' + t;
