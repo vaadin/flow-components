@@ -512,7 +512,8 @@ export class GridConnector {
       const eventContext = grid.getEventContext(sourceEvent);
       const key = eventContext.item?.key || '';
       const columnId = eventContext.column?.id || '';
-      return { key, columnId };
+      const internalColumnId = eventContext.column?._flowId ?? '';
+      return { key, columnId, internalColumnId };
     };
 
     grid.preventContextMenu = (event) => {
