@@ -10,12 +10,6 @@ export interface MapCoordinate {
   y: number;
 }
 
-/** A size sent by the server, converted to an OL size array */
-export interface MapSize {
-  width: number;
-  height: number;
-}
-
 /**
  * A function synchronizing a configuration object of a specific type into an
  * OL instance, creating the instance when no existing one is passed. The

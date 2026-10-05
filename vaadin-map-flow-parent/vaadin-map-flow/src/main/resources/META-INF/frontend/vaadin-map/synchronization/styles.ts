@@ -79,6 +79,11 @@ const pendingIconScales = new WeakMap<Icon, number>();
 
 function calculateIconScale(target: Icon, source: IconChange, scale: number): number | Size {
   const [imageWidth, imageHeight] = target.getSize();
+  if (!imageWidth || !imageHeight) {
+    // Image without a natural size, for example an SVG without width and
+    // height attributes, can not be scaled to a specific size
+    return scale;
+  }
   const scaleX = source.width != null ? source.width / imageWidth : source.height! / imageHeight;
   const scaleY = source.height != null ? source.height / imageHeight : scaleX;
   return scaleX === scaleY ? scaleX * scale : [scaleX * scale, scaleY * scale];
