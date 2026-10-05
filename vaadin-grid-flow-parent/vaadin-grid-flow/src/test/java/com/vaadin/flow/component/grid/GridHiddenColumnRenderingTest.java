@@ -30,6 +30,7 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -88,6 +89,20 @@ class GridHiddenColumnRenderingTest {
     @Test
     void initiallyHiddenColumn_columnDataNotGenerated() {
         column.setVisible(false);
+        ui.fakeClientCommunication();
+        assertColumnDataNotGenerated();
+    }
+
+    @Test
+    void initiallyVisibleColumnWithSignal_columnDataGenerated() {
+        column.bindVisible(new ValueSignal<>(true));
+        ui.fakeClientCommunication();
+        assertColumnDataGenerated();
+    }
+
+    @Test
+    void initiallyHiddenColumnWithSignal_columnDataNotGenerated() {
+        column.bindVisible(new ValueSignal<>(false));
         ui.fakeClientCommunication();
         assertColumnDataNotGenerated();
     }
@@ -191,6 +206,46 @@ class GridHiddenColumnRenderingTest {
             column.setVisible(false);
             ui.fakeClientCommunication();
             assertColumnDataNotGenerated();
+        }
+    }
+
+    @Nested
+    class InitiallyVisibleColumnWithSignalClass {
+        private ValueSignal<Boolean> visibleSignal;
+
+        @BeforeEach
+        void setup() {
+            visibleSignal = new ValueSignal<>(true);
+            column.bindVisible(visibleSignal);
+            ui.fakeClientCommunication();
+            resetColumnDataSpies();
+        }
+
+        @Test
+        void hideColumn_columnDataNotGenerated() {
+            visibleSignal.set(false);
+            ui.fakeClientCommunication();
+            assertColumnDataNotGenerated();
+        }
+    }
+
+    @Nested
+    class InitiallyHiddenColumnWithSignalClass {
+        private ValueSignal<Boolean> visibleSignal;
+
+        @BeforeEach
+        void setup() {
+            visibleSignal = new ValueSignal<>(false);
+            column.bindVisible(visibleSignal);
+            ui.fakeClientCommunication();
+            resetColumnDataSpies();
+        }
+
+        @Test
+        void showColumn_columnDataGenerated() {
+            visibleSignal.set(true);
+            ui.fakeClientCommunication();
+            assertColumnDataGenerated();
         }
     }
 
