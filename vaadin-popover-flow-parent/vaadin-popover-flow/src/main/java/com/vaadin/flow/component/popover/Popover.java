@@ -57,8 +57,8 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.9.19")
-@NpmPackage(value = "@vaadin/popover", version = "24.9.19")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.9.20")
+@NpmPackage(value = "@vaadin/popover", version = "24.9.20")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./flow-component-renderer.js")
