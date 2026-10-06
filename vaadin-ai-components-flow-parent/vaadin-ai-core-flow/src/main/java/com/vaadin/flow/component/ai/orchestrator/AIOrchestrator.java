@@ -146,6 +146,12 @@ public class AIOrchestrator implements Serializable {
     private static final int TIMEOUT_SECONDS = 600;
 
     /**
+     * Shown in the message list in place of, or after, the assistant's answer
+     * when a turn fails for a reason the user cannot act on.
+     */
+    private static final String GENERIC_ERROR_MESSAGE = "An error occurred. Please try again.";
+
+    /**
      * The feature flag ID for AI components.
      */
     static final String FEATURE_FLAG_ID = AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
@@ -473,7 +479,7 @@ public class AIOrchestrator implements Serializable {
                 LOGGER.warn("LLM request timed out after {} seconds",
                         TIMEOUT_SECONDS);
             } else {
-                userMessage = "An error occurred. Please try again.";
+                userMessage = GENERIC_ERROR_MESSAGE;
                 LOGGER.error("Error during LLM streaming", error);
             }
             if (messageList != null) {
@@ -620,7 +626,7 @@ public class AIOrchestrator implements Serializable {
             // fireResponseListener (which appends rather than rewrites).
             var message = getOrCreateAssistantMessage(assistantMessage);
             if (message != null) {
-                message.setText("An error occurred. Please try again.");
+                message.setText(GENERIC_ERROR_MESSAGE);
             }
             throw t;
         }
@@ -668,9 +674,11 @@ public class AIOrchestrator implements Serializable {
             RequestInterceptor.RequestInterceptEvent event) {
         var continuation = event.getContinuation();
         var timeout = continuation.getTimeout();
-        // boundedElastic, not parallel: on timeout the ResponseListener runs
-        // on this thread, and its documented blocking-I/O allowance must not
-        // occupy the CPU-sized parallel pool that backs stream timeouts.
+        // boundedElastic, not parallel: on timeout the end-of-turn hooks may
+        // run inline on this thread (ui.access runs its task on the calling
+        // thread when the session lock is free), and application work in them
+        // must not occupy the CPU-sized parallel pool that backs stream
+        // timeouts.
         var timer = Schedulers.boundedElastic()
                 .schedule(() -> continuation.fail(new TimeoutException(
                         "Request interception timed out after " + timeout)),
@@ -871,35 +879,62 @@ public class AIOrchestrator implements Serializable {
             UI ui, ResponseMetadata metadata) {
         var event = new ResponseListener.ResponseEvent(responseText, error,
                 metadata);
-        if (responseListener != null) {
-            try {
-                responseListener.onResponse(event);
-            } catch (Exception e) {
-                LOGGER.error("Error in response listener", e);
+        // Both hooks run as one ui.access() task, the controller first, so
+        // that a turn the controller could not apply reaches the listener as
+        // the turn's error, and so that the listener has the same threading
+        // contract with and without a controller. accessLater rather than
+        // access: its detach handler also covers a UI that detaches after the
+        // task is enqueued, and the listener must hear the turn end either way.
+        ui.accessLater(() -> notifyResponseListener(applyTurn(event)), () -> {
+            LOGGER.debug("Turn ended after its UI was detached; the response "
+                    + "listener runs without a session");
+            notifyResponseListener(event);
+        }).run();
+    }
+
+    private void notifyResponseListener(ResponseListener.ResponseEvent event) {
+        if (responseListener == null) {
+            return;
+        }
+        try {
+            responseListener.onResponse(event);
+        } catch (Exception e) {
+            LOGGER.error("Error in response listener", e);
+        }
+    }
+
+    /**
+     * Runs the controller hook, if there is a controller, and returns the
+     * outcome the listener gets: the turn's own, or a failure carrying the
+     * hook's throw when a completed turn could not be applied.
+     */
+    private ResponseListener.ResponseEvent applyTurn(
+            ResponseListener.ResponseEvent event) {
+        if (controller == null) {
+            return event;
+        }
+        try {
+            controller.onResponse(event);
+        } catch (Exception e) {
+            LOGGER.error("Error in controller onResponse", e);
+            if (event.getError().isPresent()) {
+                // The turn had already failed; that error stands.
+                return event;
             }
+            // Append a separate assistant message instead of rewriting the
+            // LLM's response. By the time this runs, the response is already
+            // in the provider's chat memory and in our history; rewriting
+            // either would misrepresent what the LLM actually said. Only on
+            // the success path: the failure path already rewrote the
+            // assistant message to a generic error message.
+            if (messageList != null) {
+                messageList.addMessage(GENERIC_ERROR_MESSAGE, assistantName,
+                        Collections.emptyList());
+            }
+            return new ResponseListener.ResponseEvent("", e,
+                    event.getMetadata().orElse(null));
         }
-        if (controller != null) {
-            accessIfAttached(ui, () -> {
-                try {
-                    controller.onResponse(event);
-                } catch (Exception e) {
-                    LOGGER.error("Error in controller onResponse", e);
-                    // Append a separate assistant message instead of
-                    // rewriting the LLM's response. By the time this
-                    // runs, the response is already in the provider's
-                    // chat memory and in our history; rewriting either
-                    // would misrepresent what the LLM actually said.
-                    // Only on the success path — the failure path already
-                    // rewrote the assistant message to a generic error
-                    // message.
-                    if (error == null && messageList != null) {
-                        messageList.addMessage(
-                                "An error occurred. Please try again.",
-                                assistantName, Collections.emptyList());
-                    }
-                }
-            });
-        }
+        return event;
     }
 
     /**
@@ -1485,16 +1520,11 @@ public class AIOrchestrator implements Serializable {
          * On failure {@code event.getError()} carries the cause and the
          * response text is empty, even if text was received before the failure.
          * <p>
-         * The thread the listener runs on depends on the provider: with a
-         * streaming provider, or when the provider runs the turn on a
-         * background thread (background execution), it is called from a
-         * background thread where blocking I/O (e.g. database writes) is safe.
-         * With a non-streaming provider that does not schedule itself, the
-         * whole turn — this listener included — runs on the thread that
-         * triggered the prompt, where blocking prolongs the current request. To
-         * update Vaadin UI components from this listener, use
-         * {@code ui.access()}. See {@link ResponseListener} for the full
-         * threading contract.
+         * The listener runs as a {@code ui.access()} task, right after
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)} when
+         * a controller is attached: the session is locked, so UI components can
+         * be updated directly, and blocking work holds the lock for its
+         * duration. See {@link ResponseListener} for the details.
          * <p>
          * The listener is not called when history is restored via
          * {@link #withHistory(List, Map)}.
