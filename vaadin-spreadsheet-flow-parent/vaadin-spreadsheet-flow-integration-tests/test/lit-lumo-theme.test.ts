@@ -8,6 +8,7 @@
  */
 
 import { expect } from 'chai';
+import { resetMouse, sendMouse } from '@web/test-runner-commands';
 
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import {
@@ -810,6 +811,23 @@ describe('Lumo theme — the context menu', () => {
         expect(card.borderTopWidth).to.equal('0px');
 
         cleanup();
+    });
+
+    it('darkens the item being pressed in Lumo\'s primary colour, as the GWT client did', async () => {
+        const { el, cleanup } = await menu();
+        const item = el.shadowRoot!.querySelector<HTMLElement>('.item')!;
+        const box = item.getBoundingClientRect();
+
+        await sendMouse({ type: 'move', position: [Math.round(box.left + 10), Math.round(box.top + box.height / 2)] });
+        await sendMouse({ type: 'down' });
+        try {
+            const tint = getComputedStyle(item, '::before');
+            expect(`${tint.backgroundColor} ${tint.opacity}`).to.equal('rgb(0, 0, 200) 0.15');
+        } finally {
+            await sendMouse({ type: 'up' });
+            await resetMouse();
+            cleanup();
+        }
     });
 
     it('spaces its items as Lumo does and tints the focused one', async () => {

@@ -133,6 +133,24 @@ function scrollSheet(sheet: Spreadsheet, top: number): void {
   container.dispatchEvent(new Event('scroll'));
 }
 
+/** Where the popup comes to rest, once it has dropped into place. */
+function restingRect(sheet: Spreadsheet): DOMRect {
+  const overlay = sheet.getPopupOverlay();
+  overlay.getAnimations().forEach((animation) => animation.finish());
+  return overlay.getBoundingClientRect();
+}
+
+/** The names of the animations running on an element. */
+function animationNames(el: Element): string[] {
+  return (el.getAnimations() as CSSAnimation[]).map((animation) => animation.animationName);
+}
+
+/** Run an element's animations to their end, and let their end events land. */
+async function settle(el: HTMLElement): Promise<void> {
+  el.getAnimations().forEach((animation) => animation.finish());
+  await frames(2);
+}
+
 function frames(count: number): Promise<void> {
   return new Promise((resolve) => {
     const step = (left: number): void => {
@@ -201,7 +219,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 
-    const overlay = ctx.sheet.getPopupOverlay().getBoundingClientRect();
+    const overlay = restingRect(ctx.sheet);
     const cell = cellBox(ctx.sheet, 4, 1);
     expect(overlay.right).to.be.closeTo(cell.right, 0.5);
     expect(overlay.top).to.be.closeTo(cell.bottom, 0.5);
@@ -215,7 +233,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
     ctx.sheet.onPopupButtonOpen(1, 1, '42', APP);
 
-    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().left).to.be.closeTo(cellBox(ctx.sheet, 1, 1).right, 0.5);
+    expect(restingRect(ctx.sheet).left).to.be.closeTo(cellBox(ctx.sheet, 1, 1).right, 0.5);
   });
 
   it("measures the sheet's left side from the frozen columns, not the row numbers", () => {
@@ -228,7 +246,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
     ctx.sheet.onPopupButtonOpen(1, 3, '42', APP);
 
-    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().left).to.be.closeTo(cellBox(ctx.sheet, 3, 1).right, 0.5);
+    expect(restingRect(ctx.sheet).left).to.be.closeTo(cellBox(ctx.sheet, 3, 1).right, 0.5);
   });
 
   it('opens above its cell when there is no room below it', () => {
@@ -238,7 +256,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
     ctx.sheet.onPopupButtonOpen(row, 4, '42', APP);
 
-    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().bottom).to.be.closeTo(
+    expect(restingRect(ctx.sheet).bottom).to.be.closeTo(
       cellBox(ctx.sheet, 4, row).top,
       0.5
     );
@@ -251,7 +269,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
     ctx.sheet.onPopupButtonOpen(2, 4, '42', APP);
 
-    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
+    expect(restingRect(ctx.sheet).top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
   });
 
   it("is drawn in the top layer, as the GWT client's popover was, so the sheet's edges cannot cut it off", () => {
@@ -270,7 +288,7 @@ describe('Spreadsheet — popup-button popup', () => {
     const row = lastWholeRow(ctx.sheet) - 4;
     ctx.sheet.setPopupButtons([buttonState(4, row, { popupWidth: '120px' })]);
     ctx.sheet.onPopupButtonOpen(row, 4, '42', APP);
-    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().top, 'below at first').to.be.closeTo(
+    expect(restingRect(ctx.sheet).top, 'below at first').to.be.closeTo(
       cellBox(ctx.sheet, 4, row).bottom,
       0.5
     );
@@ -286,7 +304,7 @@ describe('Spreadsheet — popup-button popup', () => {
     popup.style.height = `${grown - chrome}px`;
     await frames(2);
 
-    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().bottom).to.be.closeTo(
+    expect(restingRect(ctx.sheet).bottom).to.be.closeTo(
       cellBox(ctx.sheet, 4, row).top,
       0.5
     );
@@ -326,6 +344,36 @@ describe('Spreadsheet — popup-button popup', () => {
     const overlay = ctx.sheet.getPopupOverlay();
     expect(getComputedStyle(overlay).overflowY).to.equal('visible');
     expect(popup.getBoundingClientRect().bottom).to.be.greaterThan(overlay.getBoundingClientRect().bottom);
+  });
+
+  it("drops into place as it opens, as the GWT client's popup did", () => {
+    withFlowClient({ 42: content('filter') });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    const overlay = ctx.sheet.getPopupOverlay();
+    expect(overlay.classList.contains('animate-in')).to.be.true;
+    expect(animationNames(overlay)).to.deep.equal(['overlay-animate-in']);
+  });
+
+  it('does not drop in again when the server reopens the popup that is open', async () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    await settle(ctx.sheet.getPopupOverlay());
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    expect(animationNames(ctx.sheet.getPopupOverlay())).to.be.empty;
+  });
+
+  it("drops in again for another cell's popup", async () => {
+    withFlowClient({ 42: content('one'), 43: content('two') });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    await settle(ctx.sheet.getPopupOverlay());
+
+    ctx.sheet.onPopupButtonOpen(3, 2, '43', APP);
+
+    expect(animationNames(ctx.sheet.getPopupOverlay())).to.deep.equal(['overlay-animate-in']);
   });
 
   it('closes on the server request for that cell', () => {
@@ -413,7 +461,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
     const overlay = ctx.sheet.getPopupOverlay();
     expect(overlay.hidden).to.be.false;
-    expect(overlay.getBoundingClientRect().top).to.be.closeTo(cellBox(ctx.sheet, 4, 6).bottom, 0.5);
+    expect(restingRect(ctx.sheet).top).to.be.closeTo(cellBox(ctx.sheet, 4, 6).bottom, 0.5);
     expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.be.empty;
   });
 
@@ -453,7 +501,7 @@ describe('Spreadsheet — popup-button popup', () => {
     // Row 3 ends 60px down, so 100px of scrolling takes it above the pane.
     scrollSheet(ctx.sheet, 100);
 
-    expect(ctx.sheet.getPopupOverlay().getBoundingClientRect().top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
+    expect(restingRect(ctx.sheet).top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
   });
 
   it('releases the content when it closes, so reopening another button is clean', () => {

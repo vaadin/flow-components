@@ -3612,6 +3612,34 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
+    it("drops a note into place as it appears, as the GWT client's did", async () => {
+        const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+
+        expect(note.classList.contains('animate-in')).to.be.true;
+        expect((note.getAnimations() as CSSAnimation[]).map((a) => a.animationName)).to.deep.equal([
+            'overlay-animate-in',
+        ]);
+
+        cleanup();
+    });
+
+    it('does not drop a note in again when the sheet repaints', async () => {
+        const { el, note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+        // Run it out and let the class come off, so that a second drop
+        // would show as a new animation.
+        note.getAnimations().forEach((animation) => animation.finish());
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        expect(note.classList.contains('animate-in'), 'the first drop is over').to.be.false;
+
+        el.renderState = { ...el.renderState };
+        await el.updateComplete;
+
+        const again = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+        expect(again.getAnimations()).to.be.empty;
+
+        cleanup();
+    });
+
     it('edges a note with a hairline of shadow rather than a border, as the GWT client did', async () => {
         const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
 

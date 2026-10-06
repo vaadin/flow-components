@@ -8,6 +8,7 @@
  */
 
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { animateIn, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { actionIconSlotName } from '../dom/VirtualChildren.js';
 import type { SpreadsheetActionDetails } from '../types/wire.js';
 
@@ -74,8 +75,10 @@ export class SpreadsheetContextMenu extends LitElement {
     renderState: { attribute: false }
   };
 
-  static styles = css`
-    /*
+  static styles = [
+    overlayAnimationStyles,
+    css`
+      /*
      * Anchored to the spreadsheet, not to the viewport.
      *
      * The menu opens on a point the user clicked, which arrives in
@@ -88,97 +91,119 @@ export class SpreadsheetContextMenu extends LitElement {
      * coordinate space, whatever is done to the sheet is done to the
      * menu, and it cannot drift away from what it opened on.
      */
-    :host {
-      position: absolute;
-      left: 0;
-      top: 0;
-      z-index: 10;
-    }
+      :host {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+      }
 
-    :host([hidden]) {
-      display: none;
-    }
+      :host([hidden]) {
+        display: none;
+      }
 
-    /* The menu as the GWT client drew it: a white card with a soft
+      /* The menu as the GWT client drew it: a white card with a soft
        shadow, its items in 27px rows. */
-    .menu {
-      position: absolute;
-      padding: 4px;
-      box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-contextmenu-bg, var(--_vaadin-spreadsheet-contextmenu-bg, #fff));
-      border: 0;
-      border-radius: 4px;
-      /* The edge is the last shadow, a hairline that takes no room. */
-      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
-        0 0 0 1px
-          var(
-            --vaadin-spreadsheet-contextmenu-border,
-            var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
-          );
-      font: inherit;
-      color: #474747;
-      outline: none;
-    }
+      .menu {
+        position: absolute;
+        padding: 4px;
+        box-sizing: border-box;
+        background: var(--vaadin-spreadsheet-contextmenu-bg, var(--_vaadin-spreadsheet-contextmenu-bg, #fff));
+        border: 0;
+        border-radius: 4px;
+        /* The edge is the last shadow, a hairline that takes no room. */
+        box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
+          0 0 0 1px
+            var(
+              --vaadin-spreadsheet-contextmenu-border,
+              var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
+            );
+        font: inherit;
+        color: #474747;
+        outline: none;
+      }
 
-    .item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0 20px 0 10px;
-      border: 0;
-      border-radius: 3px;
-      background: transparent;
-      font: inherit;
-      font-weight: 400;
-      line-height: 27px;
-      color: inherit;
-      text-align: left;
-      cursor: pointer;
-      white-space: nowrap;
-    }
+      /* Dropping into place as it opens, as the GWT client's menu did. */
+      .menu.animate-in {
+        animation: overlay-animate-in 120ms;
+      }
 
-    /* The item under the pointer on the GWT client's blue, in light type.
+      .item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 20px 0 10px;
+        border: 0;
+        border-radius: 3px;
+        background: transparent;
+        font: inherit;
+        font-weight: 400;
+        line-height: 27px;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      /* The item under the pointer on the GWT client's blue, in light type.
        A stylesheet that gives it a lighter ground through the property
        sets its text through ::part(context-menu-item). */
-    .item:hover,
-    .item:focus {
-      background: var(
-        --vaadin-spreadsheet-contextmenu-hover-bg,
-        var(--_vaadin-spreadsheet-contextmenu-hover-bg, linear-gradient(to bottom, #1b87e3 2%, #166ed6 98%))
-      );
-      color: #ecf2f8;
-      outline: none;
-    }
+      .item:hover,
+      .item:focus {
+        background: var(
+          --vaadin-spreadsheet-contextmenu-hover-bg,
+          var(--_vaadin-spreadsheet-contextmenu-hover-bg, linear-gradient(to bottom, #1b87e3 2%, #166ed6 98%))
+        );
+        color: #ecf2f8;
+        outline: none;
+      }
 
-    /* SpreadsheetTheme.LUMO, as the GWT client drew it: Lumo's card and
+      /* The item being pressed, darkened a little, as the GWT client did. */
+      .item:active::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: #0957a6;
+        opacity: 0.15;
+        pointer-events: none;
+        border-radius: inherit;
+      }
+
+      /* SpreadsheetTheme.LUMO, as the GWT client drew it: Lumo's card and
        spacing, and the item under the pointer in the primary tint. */
-    :host([theme~='lumo']) .menu {
-      padding: var(--lumo-space-xs);
-      border-radius: var(--lumo-border-radius-s);
-      color: var(--lumo-body-text-color);
-      box-shadow: var(--lumo-box-shadow-s),
-        0 0 0 1px
-          var(
-            --vaadin-spreadsheet-contextmenu-border,
-            var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
-          );
-    }
+      :host([theme~='lumo']) .menu {
+        padding: var(--lumo-space-xs);
+        border-radius: var(--lumo-border-radius-s);
+        color: var(--lumo-body-text-color);
+        box-shadow: var(--lumo-box-shadow-s),
+          0 0 0 1px
+            var(
+              --vaadin-spreadsheet-contextmenu-border,
+              var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
+            );
+      }
 
-    :host([theme~='lumo']) .item {
-      gap: var(--lumo-space-xs);
-      padding: 0 var(--lumo-space-l) 0 var(--lumo-space-m);
-      border-radius: var(--lumo-border-radius-s);
-      line-height: calc(1.5 * var(--lumo-line-height-m));
-      cursor: var(--lumo-clickable-cursor);
-    }
+      :host([theme~='lumo']) .item {
+        gap: var(--lumo-space-xs);
+        padding: 0 var(--lumo-space-l) 0 var(--lumo-space-m);
+        border-radius: var(--lumo-border-radius-s);
+        line-height: calc(1.5 * var(--lumo-line-height-m));
+        cursor: var(--lumo-clickable-cursor);
+      }
 
-    :host([theme~='lumo']) .item:hover,
-    :host([theme~='lumo']) .item:focus {
-      color: var(--lumo-body-text-color);
-    }
-  `;
+      :host([theme~='lumo']) .item:hover,
+      :host([theme~='lumo']) .item:focus {
+        color: var(--lumo-body-text-color);
+      }
+
+      :host([theme~='lumo']) .item:active::before {
+        background: var(--lumo-primary-color);
+      }
+    `
+  ];
 
   declare renderState: ContextMenuRenderState;
 
@@ -233,6 +258,12 @@ export class SpreadsheetContextMenu extends LitElement {
     }
     this.place(panel);
     panel.focus({ preventScroll: true });
+    // Only as it opens: offered its actions again while open, the GWT
+    // client's menu stayed put.
+    const before = changed.get('renderState') as ContextMenuRenderState | undefined;
+    if (!(before?.open && before.actions.length > 0)) {
+      animateIn(panel);
+    }
   }
 
   /**

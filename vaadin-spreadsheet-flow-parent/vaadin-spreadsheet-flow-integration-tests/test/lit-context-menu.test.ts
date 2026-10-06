@@ -8,6 +8,7 @@
  */
 
 import { expect } from 'chai';
+import { resetMouse, sendMouse } from '@web/test-runner-commands';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import type { SpreadsheetActionDetails } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
@@ -133,6 +134,8 @@ describe('Spreadsheet context menu — opening', () => {
     const menu = ctx.sheet.getContextMenu();
     await menu.updateComplete;
     const el = menu.shadowRoot!.querySelector<HTMLElement>('.menu')!;
+    // Where it comes to rest, once it has dropped into place.
+    el.getAnimations().forEach((animation) => animation.finish());
     // Where it is drawn, not what is written on it: the style is in the
     // sheet's coordinate space, and only the drawn position is the
     // contract a user's click depends on.
@@ -169,10 +172,13 @@ describe('Spreadsheet context menu — where it lands', () => {
     ctx.cleanup();
   });
 
+  /** The menu where it comes to rest, once it has dropped into place. */
   async function panel(): Promise<HTMLElement> {
     const menu = ctx.sheet.getContextMenu();
     await menu.updateComplete;
-    return menu.shadowRoot!.querySelector<HTMLElement>('.menu')!;
+    const el = menu.shadowRoot!.querySelector<HTMLElement>('.menu')!;
+    el.getAnimations().forEach((animation) => animation.finish());
+    return el;
   }
 
   it('lands on the point that was clicked', async () => {
@@ -621,6 +627,50 @@ describe('Spreadsheet context menu — how it looks', () => {
     const menu = getComputedStyle(menuPanel(ctx.sheet));
     expect(menu.borderTopWidth).to.equal('0px');
     expect(menu.boxShadow).to.contain('rgba(0, 0, 0, 0.09) 0px 0px 0px 1px');
+  });
+
+  it("drops into place as it opens, as the GWT client's menu did", async () => {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    await items(ctx.sheet);
+
+    const panel = menuPanel(ctx.sheet);
+    expect(panel.classList.contains('animate-in')).to.be.true;
+    expect((panel.getAnimations() as CSSAnimation[]).map((a) => a.animationName)).to.deep.equal([
+      'overlay-animate-in'
+    ]);
+  });
+
+  it('does not drop in again when the actions come again while it is open', async () => {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    await items(ctx.sheet);
+    // Run it out and let the class come off, so that a second drop would
+    // show as a new animation.
+    menuPanel(ctx.sheet).getAnimations().forEach((animation) => animation.finish());
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    expect(menuPanel(ctx.sheet).classList.contains('animate-in'), 'the first drop is over').to.be.false;
+
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    await items(ctx.sheet);
+
+    expect(menuPanel(ctx.sheet).getAnimations()).to.be.empty;
+  });
+
+  it('darkens the item being pressed, as the GWT client did', async () => {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    const [item] = await items(ctx.sheet);
+    menuPanel(ctx.sheet).getAnimations().forEach((animation) => animation.finish());
+    const box = item.getBoundingClientRect();
+
+    await sendMouse({ type: 'move', position: [Math.round(box.left + 10), Math.round(box.top + box.height / 2)] });
+    await sendMouse({ type: 'down' });
+    try {
+      const tint = getComputedStyle(item, '::before');
+      expect(`${tint.backgroundColor} ${tint.opacity}`).to.equal('rgb(9, 87, 166) 0.15');
+      expect(`${tint.width} ${tint.height}`).to.equal(`${box.width}px ${box.height}px`);
+    } finally {
+      await sendMouse({ type: 'up' });
+      await resetMouse();
+    }
   });
 
   it('sets its items in 27px rows', async () => {

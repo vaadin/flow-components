@@ -67,6 +67,7 @@ import { resolveSheetRename } from './algorithms/SheetName.js';
 import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
+import { animateIn, overlayAnimationStyles } from './dom/OverlayAnimation.js';
 import {
   columnGroupingGutterPx,
   type PositionedGrouping,
@@ -4397,6 +4398,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   onPopupButtonOpen(row: number, column: number, contentId: string, appId: string): void {
     const nodeId = String(contentId);
+    // Opened again while it shows, the GWT client's popup stayed put.
+    const showing = this.openPopup !== null && this.openPopup.row === row && this.openPopup.col === column;
     this.openPopup = { row, col: column, nodeId };
     // A resolver per call rather than the sheet's own: the id belongs to
     // the application the button reports, not necessarily the sheet's.
@@ -4412,6 +4415,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popupOverlay.hidden = false;
     showInTopLayer(this.popupOverlay);
     this.positionPopupOverlay();
+    if (!showing) {
+      animateIn(this.popupOverlay);
+    }
     this.popupResizeObserver.observe(this.popupOverlay);
     this.scheduleRender();
   }
@@ -4706,6 +4712,10 @@ function hideFromTopLayer(el: HTMLElement): void {
 function popupOverlayRules(): HTMLStyleElement {
   const rules = document.createElement('style');
   rules.textContent = `
+    ${overlayAnimationStyles.cssText}
+    .popup-overlay.animate-in {
+      animation: overlay-animate-in 120ms;
+    }
     .popup-overlay {
       padding: 4px;
       border: 0;

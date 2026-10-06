@@ -15,6 +15,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
 import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
+import { animateIn, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { isCellEditorSlot, overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
@@ -69,296 +70,303 @@ export class SpreadsheetCellGrid extends LitElement {
     theme: { type: String }
   };
 
-  static styles = css`
-    /* Not clipped: a note hangs over the headers when its cell is in the
+  static styles = [
+    overlayAnimationStyles,
+    css`
+      /* Not clipped: a note hangs over the headers when its cell is in the
        first row or column, as the GWT client's did, and it is kept inside
        the visible sheet, so it never stretches the scroll area. */
-    :host {
-      display: block;
-      position: relative;
-    }
+      :host {
+        display: block;
+        position: relative;
+      }
 
-    .cell {
-      position: absolute;
-      box-sizing: border-box;
-      overflow: hidden;
-      white-space: nowrap;
-      /* A column flexbox with its content at the bottom, as the GWT client
+      .cell {
+        position: absolute;
+        box-sizing: border-box;
+        overflow: hidden;
+        white-space: nowrap;
+        /* A column flexbox with its content at the bottom, as the GWT client
          laid cells out. Excel's default vertical alignment is the bottom of
          the row, and the server's per-style rules say otherwise through
          justify-content - which only means anything here because the cell
          is a flex container. As a block, every cell put its text at the
          top, and top/centre/bottom alignment from a workbook did nothing. */
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      /* Pinned rather than inherited: a Vaadin page sets a body line height
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        /* Pinned rather than inherited: a Vaadin page sets a body line height
          of 1.625, which spaced wrapped text so far apart that the second
          line of a cell fell out of its row. */
-      line-height: normal;
-      /* The two pixels either side that the server's fit check assumes
+        line-height: normal;
+        /* The two pixels either side that the server's fit check assumes
          when it decides whether a value fits its column. */
-      padding: 0 2px;
-      /* A cell is a surface, not a window: it has a ground of its own,
+        padding: 0 2px;
+        /* A cell is a surface, not a window: it has a ground of its own,
          so a conditional format that stops matching leaves the cell
          white rather than transparent, and a cell under a merge or an
          overlay does not show what is behind the sheet. A cs<N> or
          cf<N> rule wins over this, being the more specific selector. */
-      background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
-      /* Unset, the workbook's default font, which its default style
+        background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
+        border-right: 1px solid
+          var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
+        border-bottom: 1px solid
+          var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
+        /* Unset, the workbook's default font, which its default style
          declares on every cell - and until the styles arrive, the default
          the host declares for it. */
-      font-family: var(
-        --vaadin-spreadsheet-cell-font,
-        var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
-      );
-      font-size: var(
-        --vaadin-spreadsheet-cell-font-size,
-        var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
-      );
-    }
+        font-family: var(
+          --vaadin-spreadsheet-cell-font,
+          var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
+        );
+        font-size: var(
+          --vaadin-spreadsheet-cell-font-size,
+          var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
+        );
+      }
 
-    /* The server appends an "r" to a cell's class list when the value is
+      /* The server appends an "r" to a cell's class list when the value is
        right-aligned — numbers and dates under most formats. It rides on
        the cell class rather than a cs<N> rule because alignment follows
        the value, not the style index. */
-    .cell.r {
-      text-align: right;
-    }
+      .cell.r {
+        text-align: right;
+      }
 
-    /* Selection overlay: the wrapper .sheet-selection is
+      /* Selection overlay: the wrapper .sheet-selection is
            positioned by the connector with inline left/top/width/
            height. The four border divs inside form the visible
            outline. Their bounding box feeds the TestBench
            isElementSelected check, so they must occupy the
            wrapper's full perimeter. */
-    .sheet-selection {
-      position: absolute;
-      pointer-events: none;
-      box-sizing: border-box;
-    }
+      .sheet-selection {
+        position: absolute;
+        pointer-events: none;
+        box-sizing: border-box;
+      }
 
-    /* A merged cell covers the cells it spans, which stay in the DOM
+      /* A merged cell covers the cells it spans, which stay in the DOM
        underneath so they can still be found by their coordinates. It
        needs a ground of its own or their content shows through. A cs<N>
        rule wins over this, being the more specific selector, so a styled
        merge keeps its own background. */
-    .merged-cell {
-      background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
-    }
+      .merged-cell {
+        background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
+      }
 
-    /* Comment notes. Anchored at the cell's top-right and above every
+      /* Comment notes. Anchored at the cell's top-right and above every
        cell, since the point is to be readable over the sheet. */
-    /* A comment as the GWT client showed it: a white card with a soft
+      /* A comment as the GWT client showed it: a white card with a soft
        shadow, the author above the text in small bold type. */
-    .v-spreadsheet-comment-overlay {
-      z-index: 20;
-      padding: 7px;
-      box-sizing: border-box;
-      pointer-events: none;
-      color: #474747;
-      background: var(--vaadin-spreadsheet-comment-overlay-bg, var(--_vaadin-spreadsheet-comment-overlay-bg, #fff));
-      border: 0;
-      border-radius: 4px;
-      /* The edge is the last shadow, a hairline that takes no room. */
-      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
-        0 0 0 1px
-          var(
-            --vaadin-spreadsheet-comment-overlay-border-color,
-            var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
-          );
-    }
+      /* Dropping into place as it appears, as the GWT client's notes did. */
+      .v-spreadsheet-comment-overlay.animate-in {
+        animation: overlay-animate-in 120ms;
+      }
 
-    .v-spreadsheet-comment-overlay .comment-overlay-label,
-    .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
-      max-width: 168px;
-      max-height: 140px;
-      overflow: hidden;
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
-    }
+      .v-spreadsheet-comment-overlay {
+        z-index: 20;
+        padding: 7px;
+        box-sizing: border-box;
+        pointer-events: none;
+        color: #474747;
+        background: var(--vaadin-spreadsheet-comment-overlay-bg, var(--_vaadin-spreadsheet-comment-overlay-bg, #fff));
+        border: 0;
+        border-radius: 4px;
+        /* The edge is the last shadow, a hairline that takes no room. */
+        box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
+          0 0 0 1px
+            var(
+              --vaadin-spreadsheet-comment-overlay-border-color,
+              var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
+            );
+      }
 
-    .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
-      color: #ed473b;
-    }
+      .v-spreadsheet-comment-overlay .comment-overlay-label,
+      .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+        max-width: 168px;
+        max-height: 140px;
+        overflow: hidden;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+      }
 
-    /* Between an error and the comment under it. */
-    .v-spreadsheet-comment-overlay .comment-overlay-separator {
-      border-bottom: 1px solid #c7c7c7;
-      margin-bottom: 7px;
-    }
+      .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+        color: #ed473b;
+      }
 
-    /*
+      /* Between an error and the comment under it. */
+      .v-spreadsheet-comment-overlay .comment-overlay-separator {
+        border-bottom: 1px solid #c7c7c7;
+        margin-bottom: 7px;
+      }
+
+      /*
      * The note being written. Sized like the note it replaces so the
      * overlay does not jump as it opens.
      */
-    .v-spreadsheet-comment-overlay .comment-overlay-edit {
-      display: block;
-      box-sizing: border-box;
-      width: 160px;
-      height: 60px;
-      resize: none;
-      border: 0;
-      background: transparent;
-      /* The GWT client's note input, in the sheet's own font rather than
+      .v-spreadsheet-comment-overlay .comment-overlay-edit {
+        display: block;
+        box-sizing: border-box;
+        width: 160px;
+        height: 60px;
+        resize: none;
+        border: 0;
+        background: transparent;
+        /* The GWT client's note input, in the sheet's own font rather than
          the page's the note is shown in. */
-      font-family: Helvetica;
-      font-size: 14px;
-      font-weight: 300;
-      color: inherit;
-      outline: none;
-    }
+        font-family: Helvetica;
+        font-size: 14px;
+        font-weight: 300;
+        color: inherit;
+        outline: none;
+      }
 
-    /* From a cell's corner to its note, as the GWT client drew it. Under
+      /* From a cell's corner to its note, as the GWT client drew it. Under
        the note, over the cells. */
-    .comment-overlay-line {
-      position: absolute;
-      height: 1px;
-      transform-origin: 0% 50%;
-      background: #a7a7a7;
-      z-index: 19;
-      pointer-events: none;
-    }
+      .comment-overlay-line {
+        position: absolute;
+        height: 1px;
+        transform-origin: 0% 50%;
+        background: #a7a7a7;
+        z-index: 19;
+        pointer-events: none;
+      }
 
-    .v-spreadsheet-comment-overlay .comment-overlay-author {
-      padding-bottom: 7px;
-      font-size: 11px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
+      .v-spreadsheet-comment-overlay .comment-overlay-author {
+        padding-bottom: 7px;
+        font-size: 11px;
+        font-weight: bold;
+        white-space: nowrap;
+      }
 
-    /* The fill handle's drag outline, as the GWT client drew it: the
+      /* The fill handle's drag outline, as the GWT client drew it: the
        fill colour around a pale green ground, so it reads as what the
        drag will fill rather than as a second selection. */
-    .paintmode {
-      position: absolute;
-      pointer-events: none;
-      box-sizing: border-box;
-      border: 2px solid
-        var(--vaadin-spreadsheet-selection-border-color, var(--_vaadin-spreadsheet-selection-border-color, #40b527));
-      background: rgba(235, 247, 233, 0.8);
-      z-index: 2;
-    }
-    /* Dimmed while the sheet does not have the keyboard, as the GWT
+      .paintmode {
+        position: absolute;
+        pointer-events: none;
+        box-sizing: border-box;
+        border: 2px solid
+          var(--vaadin-spreadsheet-selection-border-color, var(--_vaadin-spreadsheet-selection-border-color, #40b527));
+        background: rgba(235, 247, 233, 0.8);
+        z-index: 2;
+      }
+      /* Dimmed while the sheet does not have the keyboard, as the GWT
        client did; the connector sets the attribute. The outline and the
        handle rather than the overlay: opacity on the overlay would make it
        a stacking context, and the cells would cover the handle. */
-    :host(:not([sheet-focused])) .sheet-selection > * {
-      opacity: 0.6;
-    }
-    .sheet-selection .s-top {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
-      /* Above the cells, which carry z-index 1 and paint an
+      :host(:not([sheet-focused])) .sheet-selection > * {
+        opacity: 0.6;
+      }
+      .sheet-selection .s-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
          higher: a frozen pane, at 2 and later in the tree, covers the
          piece of the selection that scrolls under it. */
-      z-index: 2;
-    }
-    .sheet-selection .s-bottom {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
-      /* Above the cells, which carry z-index 1 and paint an
+        z-index: 2;
+      }
+      .sheet-selection .s-bottom {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
          higher: a frozen pane, at 2 and later in the tree, covers the
          piece of the selection that scrolls under it. */
-      z-index: 2;
-    }
-    .sheet-selection .s-left {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 2px;
-      height: 100%;
-      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
-      /* Above the cells, which carry z-index 1 and paint an
+        z-index: 2;
+      }
+      .sheet-selection .s-left {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2px;
+        height: 100%;
+        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
          higher: a frozen pane, at 2 and later in the tree, covers the
          piece of the selection that scrolls under it. */
-      z-index: 2;
-    }
-    .sheet-selection .s-right {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 2px;
-      height: 100%;
-      background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
-      /* Above the cells, which carry z-index 1 and paint an
+        z-index: 2;
+      }
+      .sheet-selection .s-right {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2px;
+        height: 100%;
+        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
          higher: a frozen pane, at 2 and later in the tree, covers the
          piece of the selection that scrolls under it. */
-      z-index: 2;
-    }
-    /* The fill handle, in the fill colour the drag preview uses - the
+        z-index: 2;
+      }
+      /* The fill handle, in the fill colour the drag preview uses - the
        GWT client's green square, ringed in white so it stands off the
        outline. Where the GWT client put it: hung from the foot of the
        right side, two pixels past it. */
-    .sheet-selection .selection-corner {
-      position: absolute;
-      right: -2px;
-      bottom: -1px;
-      width: 6px;
-      height: 6px;
-      background: var(
-        --vaadin-spreadsheet-selection-border-color,
-        var(--_vaadin-spreadsheet-selection-border-color, #40b527)
-      );
-      outline: 2px solid #fff;
-      cursor: crosshair;
-      pointer-events: auto;
-      /* Above the cells, which carry z-index 1. Without this the handle
+      .sheet-selection .selection-corner {
+        position: absolute;
+        right: -2px;
+        bottom: -1px;
+        width: 6px;
+        height: 6px;
+        background: var(
+          --vaadin-spreadsheet-selection-border-color,
+          var(--_vaadin-spreadsheet-selection-border-color, #40b527)
+        );
+        outline: 2px solid #fff;
+        cursor: crosshair;
+        pointer-events: auto;
+        /* Above the cells, which carry z-index 1. Without this the handle
          paints and can be found in the DOM but the cell under it wins
          every hit test, so a real drag selects cells instead of filling
          them. The border divs above are raised for the same reason. */
-      z-index: 2;
-    }
+        z-index: 2;
+      }
 
-    /* A side the range runs on past, into the next pane or out of view. */
-    .sheet-selection .cut {
-      visibility: hidden;
-    }
-    /* Cells inside the active range get a subtle background
+      /* A side the range runs on past, into the next pane or out of view. */
+      .sheet-selection .cut {
+        visibility: hidden;
+      }
+      /* Cells inside the active range get a subtle background
            highlight by default; matches the previous selected-cell-
            highlight affordance. */
-    /* The selection tint over a cell has to sit on top of whatever the
+      /* The selection tint over a cell has to sit on top of whatever the
        cell is already painted, not replace it: a background would hide a
        conditional format's fill for as long as the cell is selected, and
        Excel shows the fill through the selection. An inset shadow spread
        over the whole box tints instead of replacing. */
-    .cell.cell-range {
-      box-shadow: inset 0 0 0 9999px
-        var(--vaadin-spreadsheet-cell-range-bg, var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1)));
-    }
+      .cell.cell-range {
+        box-shadow: inset 0 0 0 9999px
+          var(--vaadin-spreadsheet-cell-range-bg, var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1)));
+      }
 
-    /* The active range's overlay has nothing of its own underneath, so it
+      /* The active range's overlay has nothing of its own underneath, so it
        paints the tint directly. Matched by class rather than by part: the
        cells carry part="cell cell-range" as well, and a background on them
        is what hid their fill. */
-    .sheet-selection {
-      background: var(
-        --vaadin-spreadsheet-cell-range-bg,
-        var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1))
-      );
-    }
+      .sheet-selection {
+        background: var(
+          --vaadin-spreadsheet-cell-range-bg,
+          var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1))
+        );
+      }
 
-    /* Frozen-pane wrappers (slice 141). Each frozen quadrant lives
+      /* Frozen-pane wrappers (slice 141). Each frozen quadrant lives
            in its own wrapper div that's transform-translated by the
            current scroll offset, so the cells inside stay visually
            pinned to their viewport edge as the scroll container
@@ -366,310 +374,311 @@ export class SpreadsheetCellGrid extends LitElement {
            so the cells' absolute positions remain relative to the
            wrapper's top-left — which is itself anchored at the
            cell-grid's origin. */
-    .quadrant-wrapper {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .quadrant-wrapper-top {
-      z-index: 2;
-    }
-    .quadrant-wrapper-left {
-      z-index: 2;
-    }
-    .quadrant-wrapper-corner {
-      z-index: 3;
-    }
+      .quadrant-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .quadrant-wrapper-top {
+        z-index: 2;
+      }
+      .quadrant-wrapper-left {
+        z-index: 2;
+      }
+      .quadrant-wrapper-corner {
+        z-index: 3;
+      }
 
-    /* The line along a freeze, in the frozen pane's wrapper so it stays
+      /* The line along a freeze, in the frozen pane's wrapper so it stays
        put while the cells scroll under it. Above the wrapper's own cells,
        and out of the way of a click on the cell beneath. */
-    .freeze-line {
-      position: absolute;
-      z-index: 4;
-      background: #6a6a6a;
-      pointer-events: none;
-    }
+      .freeze-line {
+        position: absolute;
+        z-index: 4;
+        background: #6a6a6a;
+        pointer-events: none;
+      }
 
-    /* Per-cell z-index for the unwrapped main quadrant. Frozen
+      /* Per-cell z-index for the unwrapped main quadrant. Frozen
            quadrants inherit z-index from their wrapper (each wrapper
            is its own stacking context via the transform property),
            so the cell-level rule below only takes effect for main
            cells. */
-    .cell.quadrant-main {
-      z-index: 1;
-    }
+      .cell.quadrant-main {
+        z-index: 1;
+      }
 
-    /* A cell whose text runs past its own column. It has to stop
+      /* A cell whose text runs past its own column. It has to stop
        clipping, and it has to paint over the empty neighbours the text
        reaches into - they come later in the DOM and have a ground of
        their own, so at equal z-index they would cover the text. Comes
        after the rule above, which is equally specific. Still below the
        selection outline, which comes later in the tree. */
-    .cell.overflowing {
-      overflow: visible;
-      z-index: 2;
-    }
+      .cell.overflowing {
+        overflow: visible;
+        z-index: 2;
+      }
 
-    /* A cell showing a custom editor, padded on every side as the GWT
+      /* A cell showing a custom editor, padded on every side as the GWT
        client padded it; a plain cell pads only its sides. */
-    .cell.custom-editor-cell {
-      padding: 2px;
-    }
+      .cell.custom-editor-cell {
+        padding: 2px;
+      }
 
-    /* Text too wide for its column with nowhere to go: its holder reaches
+      /* Text too wide for its column with nowhere to go: its holder reaches
        past the cell's edge, as the GWT client's did, and the neighbour
        covers what is past it. Not raised, unlike a cell running on. */
-    .cell.cut-short {
-      overflow: visible;
-    }
+      .cell.cut-short {
+        overflow: visible;
+      }
 
-    /* Holds text too wide for its column, so the browser cuts it short
+      /* Holds text too wide for its column, so the browser cuts it short
        with an ellipsis: at the width the server worked out - the column's
        own when the text has nowhere to go. */
-    .cell-spill {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      pointer-events: none;
-    }
+      .cell-spill {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        pointer-events: none;
+      }
 
-    /* A right-aligned value running on: from the cell's left edge, cut off
+      /* A right-aligned value running on: from the cell's left edge, cut off
        plainly where a neighbour begins. */
-    .cell-spill.runs-right {
-      text-align: left;
-      text-overflow: clip;
-    }
+      .cell-spill.runs-right {
+        text-align: left;
+        text-overflow: clip;
+      }
 
-    /* Sheet overlays — images, charts, and embedded
+      /* Sheet overlays — images, charts, and embedded
            components positioned at absolute pixel coordinates on
            the sheet, each in the pane of its anchor cell. Slice 160.
            Above the cells and below the editor and the notes; in the
            scrolling quadrant no higher than the frozen panes, which
            cover what scrolls under them. */
-    .sheet-overlay {
-      position: absolute;
-      z-index: 2;
-      box-sizing: border-box;
-      pointer-events: auto;
-    }
-    .sheet-overlay-image {
-      display: block;
-    }
+      .sheet-overlay {
+        position: absolute;
+        z-index: 2;
+        box-sizing: border-box;
+        pointer-events: auto;
+      }
+      .sheet-overlay-image {
+        display: block;
+      }
 
-    /* Comment indicator — small red triangle in the top-right
+      /* Comment indicator — small red triangle in the top-right
            of a cell with a comment (slice 165). The triangle is
            drawn via border + clip-path so no extra image asset
            is needed. Excel renders red; gnumeric+LibreOffice
            render yellow. We follow Excel. */
-    /* Invalid-formula indicator — Excel draws a small marker in the
+      /* Invalid-formula indicator — Excel draws a small marker in the
        cell's top-LEFT corner when a formula cannot be evaluated,
        mirroring the comment triangle in the top-right. */
-    /* The GWT client's corner markers: 9px triangles in the cell's
+      /* The GWT client's corner markers: 9px triangles in the cell's
        top-right corner, inside its border - red for a formula that could
        not be evaluated, amber for a comment. */
-    .invalidformula-indicator {
-      position: absolute;
-      right: 0;
-      top: 0;
-      width: 9px;
-      height: 9px;
-      background: var(--vaadin-spreadsheet-invalidformula-bg, var(--_vaadin-spreadsheet-invalidformula-bg, #ed473b));
-      clip-path: polygon(0 0, 100% 0, 100% 100%);
-      z-index: 5;
-      pointer-events: none;
-    }
+      .invalidformula-indicator {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 9px;
+        height: 9px;
+        background: var(--vaadin-spreadsheet-invalidformula-bg, var(--_vaadin-spreadsheet-invalidformula-bg, #ed473b));
+        clip-path: polygon(0 0, 100% 0, 100% 100%);
+        z-index: 5;
+        pointer-events: none;
+      }
 
-    /* Placed at the cell's outer top-right corner and pulled back over it,
+      /* Placed at the cell's outer top-right corner and pulled back over it,
        past the border. */
-    .comment-indicator {
-      position: absolute;
-      width: 9px;
-      height: 9px;
-      transform: translate(calc(-100% - 1px), 0);
-      background: var(--vaadin-spreadsheet-comment-bg, var(--_vaadin-spreadsheet-comment-bg, #ffcf16));
-      clip-path: polygon(0 0, 100% 0, 100% 100%);
-      z-index: 5;
-      pointer-events: none;
-    }
+      .comment-indicator {
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        transform: translate(calc(-100% - 1px), 0);
+        background: var(--vaadin-spreadsheet-comment-bg, var(--_vaadin-spreadsheet-comment-bg, #ffcf16));
+        clip-path: polygon(0 0, 100% 0, 100% 100%);
+        z-index: 5;
+        pointer-events: none;
+      }
 
-    /* Hyperlink cells get a visual underline + color hint
+      /* Hyperlink cells get a visual underline + color hint
            (slice 165). The actual click handling lives in the
            connector; this style just matches the Excel convention. */
-    /* A link looks however its workbook styles it, as in the GWT client;
+      /* A link looks however its workbook styles it, as in the GWT client;
        the colour an application may give links is laid among the cell
        styles - see buildCellStyleBlock. */
-    .cell.link-cell {
-      cursor: pointer;
-    }
+      .cell.link-cell {
+        cursor: pointer;
+      }
 
-    /* Popup-button anchor — small triangle in the bottom-right
+      /* Popup-button anchor — small triangle in the bottom-right
            of a cell that opens a popup on click (slice 161). The
            popup itself is provided by the Flow wrapper via slot;
            this is just the click target + visual indicator. */
-    /* The filter button, as the GWT client drew it: a small white box with
+      /* The filter button, as the GWT client drew it: a small white box with
        a grey arrow, tucked into the bottom-right corner of its cell inside
        the cell's borders. Placed at that corner and pulled back over it. */
-    .popup-button {
-      position: absolute;
-      box-sizing: border-box;
-      width: 13px;
-      height: 13px;
-      transform: translate(calc(-100% - 2px), calc(-100% - 1px));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid #d3d3d3;
-      border-radius: 2px;
-      background: var(--vaadin-spreadsheet-popup-button-bg, var(--_vaadin-spreadsheet-popup-button-bg, #fff));
-      color: var(--vaadin-spreadsheet-popup-button-fg, var(--_vaadin-spreadsheet-popup-button-fg, #808080));
-      cursor: pointer;
-      font-size: 9px;
-      line-height: 1;
-      z-index: 2;
-      user-select: none;
-    }
-    /* A filter in use, marked along the top. */
-    .popup-button.active {
-      background: var(
-        --vaadin-spreadsheet-popup-button-active-bg,
-        var(--_vaadin-spreadsheet-popup-button-active-bg, #fff)
-      );
-      box-shadow: inset 0 2px 0 0 rgb(0, 171, 238);
-    }
+      .popup-button {
+        position: absolute;
+        box-sizing: border-box;
+        width: 13px;
+        height: 13px;
+        transform: translate(calc(-100% - 2px), calc(-100% - 1px));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d3d3d3;
+        border-radius: 2px;
+        background: var(--vaadin-spreadsheet-popup-button-bg, var(--_vaadin-spreadsheet-popup-button-bg, #fff));
+        color: var(--vaadin-spreadsheet-popup-button-fg, var(--_vaadin-spreadsheet-popup-button-fg, #808080));
+        cursor: pointer;
+        font-size: 9px;
+        line-height: 1;
+        z-index: 2;
+        user-select: none;
+      }
+      /* A filter in use, marked along the top. */
+      .popup-button.active {
+        background: var(
+          --vaadin-spreadsheet-popup-button-active-bg,
+          var(--_vaadin-spreadsheet-popup-button-active-bg, #fff)
+        );
+        box-shadow: inset 0 2px 0 0 rgb(0, 171, 238);
+      }
 
-    /* Cell editor input — absolutely positioned over the cell
+      /* Cell editor input — absolutely positioned over the cell
            being edited, sized to match. z-index above all cells +
            overlays so the input + caret are always on top. Slice
            152. */
-    .cell-editor {
-      position: absolute;
-      box-sizing: border-box;
-      z-index: 10;
-      border: 2px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
-      outline: none;
-      font-family: var(
-        --vaadin-spreadsheet-cell-font,
-        var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
-      );
-      font-size: var(
-        --vaadin-spreadsheet-cell-font-size,
-        var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
-      );
-      padding: 0 2px;
-    }
+      .cell-editor {
+        position: absolute;
+        box-sizing: border-box;
+        z-index: 10;
+        border: 2px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
+        outline: none;
+        font-family: var(
+          --vaadin-spreadsheet-cell-font,
+          var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
+        );
+        font-size: var(
+          --vaadin-spreadsheet-cell-font-size,
+          var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
+        );
+        padding: 0 2px;
+      }
 
-    /* The filter arrow, drawn after the button's content as the GWT client
+      /* The filter arrow, drawn after the button's content as the GWT client
        drew it, so a theme can swap the glyph. */
-    .popup-button::after {
-      content: '▼';
-    }
+      .popup-button::after {
+        content: '▼';
+      }
 
-    /*
+      /*
      * SpreadsheetTheme.LUMO, as the GWT client drew it. The colours come
      * from the documented properties' Lumo defaults on the host; the rest
      * of the look is here.
      */
 
-    /* The Lumo font on every cell - the workbook's own fonts too, as the
+      /* The Lumo font on every cell - the workbook's own fonts too, as the
        GWT client had it - and Lumo's small size where the workbook leaves
        the size to its default. Every style rule sets these on the cells it
        styles; this is more specific than any of them. */
-    :host([theme~='lumo']) .cell {
-      --default-font-family: var(--lumo-font-family);
-      --default-font-size: var(--lumo-font-size-s);
-    }
+      :host([theme~='lumo']) .cell {
+        --default-font-family: var(--lumo-font-family);
+        --default-font-size: var(--lumo-font-size-s);
+      }
 
-    /* No more specific than the cell's own rule, so a workbook's indent
+      /* No more specific than the cell's own rule, so a workbook's indent
        still wins. */
-    :where(:host([theme~='lumo'])) .cell {
-      padding: 0 var(--lumo-space-xs);
-    }
+      :where(:host([theme~='lumo'])) .cell {
+        padding: 0 var(--lumo-space-xs);
+      }
 
-    :host([theme~='lumo']) .cell.custom-editor-cell {
-      padding: var(--lumo-space-xs);
-    }
+      :host([theme~='lumo']) .cell.custom-editor-cell {
+        padding: var(--lumo-space-xs);
+      }
 
-    /* Borderless, ringed in the editor colour and lifted off the sheet,
+      /* Borderless, ringed in the editor colour and lifted off the sheet,
        one pixel up and left of the cell it covers. */
-    :host([theme~='lumo']) .cell-editor {
-      border: 0;
-      outline: 1px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
-      box-shadow: var(--lumo-box-shadow-s);
-      margin: -1px 0 0 -1px;
-      padding: 0;
-    }
+      :host([theme~='lumo']) .cell-editor {
+        border: 0;
+        outline: 1px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
+        box-shadow: var(--lumo-box-shadow-s);
+        margin: -1px 0 0 -1px;
+        padding: 0;
+      }
 
-    :host([theme~='lumo']) .selection-corner {
-      outline-color: var(--lumo-base-color);
-    }
+      :host([theme~='lumo']) .selection-corner {
+        outline-color: var(--lumo-base-color);
+      }
 
-    :host([theme~='lumo']) .paintmode {
-      background: var(--lumo-success-color-10pct);
-    }
+      :host([theme~='lumo']) .paintmode {
+        background: var(--lumo-success-color-10pct);
+      }
 
-    :host([theme~='lumo']) .freeze-line {
-      background: var(--lumo-contrast-50pct);
-    }
+      :host([theme~='lumo']) .freeze-line {
+        background: var(--lumo-contrast-50pct);
+      }
 
-    /* A square as tall as its cell, tinted like the headers, with Lumo's
+      /* A square as tall as its cell, tinted like the headers, with Lumo's
        chevron for an arrow. The row height arrives as --_cell-height. */
-    :host([theme~='lumo']) .popup-button {
-      width: calc(var(--_cell-height, 20px) + 1px);
-      height: calc(var(--_cell-height, 20px) + 1px);
-      border-color: var(
-        --vaadin-spreadsheet-header-border-color,
-        var(--_vaadin-spreadsheet-header-border-color, #c7c7c7)
-      );
-      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-      border-radius: var(--lumo-border-radius-s);
-      font-size: var(--lumo-font-size-s);
-      cursor: var(--lumo-clickable-cursor);
-    }
-
-    :host([theme~='lumo']) .popup-button::after {
-      content: var(--lumo-icons-angle-down);
-      font-family: 'lumo-icons';
-      font-size: var(--lumo-font-size-xs);
-    }
-
-    :host([theme~='lumo']) .popup-button.active {
-      box-shadow: var(--lumo-box-shadow-xs) inset;
-    }
-
-    :host([theme~='lumo']) .v-spreadsheet-comment-overlay {
-      padding: var(--lumo-space-s);
-      border: 1px solid
-        var(
-          --vaadin-spreadsheet-comment-overlay-border-color,
-          var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
+      :host([theme~='lumo']) .popup-button {
+        width: calc(var(--_cell-height, 20px) + 1px);
+        height: calc(var(--_cell-height, 20px) + 1px);
+        border-color: var(
+          --vaadin-spreadsheet-header-border-color,
+          var(--_vaadin-spreadsheet-header-border-color, #c7c7c7)
         );
-      border-radius: var(--lumo-border-radius-m);
-      color: var(--lumo-body-text-color);
-      box-shadow: var(--lumo-box-shadow-m);
-    }
+        background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+        border-radius: var(--lumo-border-radius-s);
+        font-size: var(--lumo-font-size-s);
+        cursor: var(--lumo-clickable-cursor);
+      }
 
-    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-author {
-      padding-bottom: var(--lumo-space-s);
-      font-size: var(--lumo-font-size-xs);
-    }
+      :host([theme~='lumo']) .popup-button::after {
+        content: var(--lumo-icons-angle-down);
+        font-family: 'lumo-icons';
+        font-size: var(--lumo-font-size-xs);
+      }
 
-    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
-      color: var(--lumo-error-color);
-    }
+      :host([theme~='lumo']) .popup-button.active {
+        box-shadow: var(--lumo-box-shadow-xs) inset;
+      }
 
-    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-edit {
-      font-family: var(--lumo-font-family);
-      font-size: var(--lumo-font-size-s);
-    }
+      :host([theme~='lumo']) .v-spreadsheet-comment-overlay {
+        padding: var(--lumo-space-s);
+        border: 1px solid
+          var(
+            --vaadin-spreadsheet-comment-overlay-border-color,
+            var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
+          );
+        border-radius: var(--lumo-border-radius-m);
+        color: var(--lumo-body-text-color);
+        box-shadow: var(--lumo-box-shadow-m);
+      }
 
-    :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-separator {
-      border-bottom-color: var(--lumo-contrast-20pct);
-    }
+      :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-author {
+        padding-bottom: var(--lumo-space-s);
+        font-size: var(--lumo-font-size-xs);
+      }
 
-    :host([theme~='lumo']) .comment-overlay-line {
-      background: var(--lumo-contrast-10pct);
-    }
-  `;
+      :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+        color: var(--lumo-error-color);
+      }
+
+      :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-edit {
+        font-family: var(--lumo-font-family);
+        font-size: var(--lumo-font-size-s);
+      }
+
+      :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-separator {
+        border-bottom-color: var(--lumo-contrast-20pct);
+      }
+
+      :host([theme~='lumo']) .comment-overlay-line {
+        background: var(--lumo-contrast-10pct);
+      }
+    `
+  ];
 
   /**
    * State driving the render. The connector assigns a fresh object
@@ -702,6 +711,8 @@ export class SpreadsheetCellGrid extends LitElement {
   declare theme: string | null;
   /** Hidden span the measuring is done in. */
   private valueProbe: HTMLSpanElement | null = null;
+  /** The cells whose notes were drawn last time, so only new ones drop in. */
+  private noteKeysShown: ReadonlySet<string> = new Set();
 
   constructor() {
     super();
@@ -927,6 +938,15 @@ export class SpreadsheetCellGrid extends LitElement {
    */
   private placeCommentOverlays(): void {
     const notes = this.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay');
+    // A note drops into place as it appears, as in the GWT client, and not
+    // again each time the sheet repaints.
+    const keys = new Set(Array.from(notes, (note) => note.dataset.key ?? ''));
+    for (const note of Array.from(notes)) {
+      if (!this.noteKeysShown.has(note.dataset.key ?? '')) {
+        animateIn(note);
+      }
+    }
+    this.noteKeysShown = keys;
     const container = this.parentElement;
     if (notes.length === 0 || container === null) {
       return;
@@ -2007,6 +2027,7 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
         data-cell-top=${geometry.top}
         data-quadrant=${quadrant}
         data-pinned=${pinned ? 'true' : 'false'}
+        data-key=${key}
       >
         ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
         ${showsError && (editing || comment !== undefined)
