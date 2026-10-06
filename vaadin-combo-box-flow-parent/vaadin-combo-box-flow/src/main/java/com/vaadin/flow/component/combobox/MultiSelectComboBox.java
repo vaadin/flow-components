@@ -28,6 +28,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.SignalPropertySupport;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -41,8 +42,10 @@ import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
@@ -115,6 +118,8 @@ public class MultiSelectComboBox<TItem>
     private AutoExpandMode autoExpand;
     private boolean selectAllButtonVisible;
     private final BeforeClientResponseAction allSelectedUpdate;
+    private final SignalPropertySupport<Boolean> readonlySupport = SignalPropertySupport
+            .create(this, this::applyReadOnly);
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -350,6 +355,27 @@ public class MultiSelectComboBox<TItem>
     @Override
     public boolean isRequiredIndicatorVisible() {
         return super.isRequiredIndicatorVisible();
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        readonlySupport.set(readOnly);
+    }
+
+    @Override
+    public SignalBinding<Boolean> bindReadOnly(Signal<Boolean> readOnlySignal) {
+        return readonlySupport.bind(readOnlySignal);
+    }
+
+    private void applyReadOnly(boolean readOnly) {
+        boolean switchedOff = isReadOnly() && !readOnly;
+        super.setReadOnly(readOnly);
+        if (switchedOff) {
+            // The web component drops its loaded items when read-only is
+            // switched off. Reset the data so that the items are sent again
+            // instead of being treated as already loaded.
+            getDataController().reset();
+        }
     }
 
     /**
