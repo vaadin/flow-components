@@ -76,7 +76,7 @@ Questions they asked, with the answers given:
 
 ## 3. Estimate
 
-**21 days (range 18–25.5) for columns**, including tests, docs and review.
+**19 days (range 16.5–23) for columns**, including tests, docs and review.
 Backporting the bug fixes to 25.2 isn't included (about 0.75 day). Rows with
 the same API add **6–8 days**. One
 developer who knows Flow but not Spreadsheet's internals; focused working
@@ -91,19 +91,19 @@ against past Vaadin work.
 | 2c | `<cols>` compaction and benchmark | 1 | Merge identical neighbouring `<col>` elements after changes; benchmark a few thousand columns. |
 | 3 | Replace the legacy column code | 2 | Move `loadGrouping` onto the model and drop the column reflection. Mechanical, but the old index and sorting logic is fragile. |
 | 4 | Sync gaps | 2 | About six small gaps ([section 13](#13-prototype-gaps)). `calculateSheetSizes` is used by many features, so each change needs regression checks. |
-| 5 | Client (GWT) fixes | 2.5 | Five fixes ([section 10](#10-fixes-that-can-land-before-the-feature)). With SDM, rebuilds take about 3 s, so time goes into understanding the layout code. Least certain item. |
-| 6 | Tests | 3.5 | About seven TestBench scenarios at half a day each, plus running and fixing the existing grouping ITs. |
+| 5 | Client (GWT) fixes | 1 | Two reproduced fixes ([section 10](#10-fixes-that-can-land-before-the-feature)): the control state when the server ignores a click, and the unreachable button with inverted outlines and frozen columns. With SDM, rebuilds take about 3 s, so time goes into understanding the layout code. Was 2.5 days before the bugs were reproduced: three suspected client bugs didn't reproduce. |
+| 6 | Tests | 3.25 | About six TestBench scenarios at half a day each, plus running and fixing the existing grouping ITs. `GroupingBugsReproTest` and `GroupingBugsView` already cover the bugs. |
 | 7 | Round-trip in Excel and LibreOffice | 0.5 | Open saved files and check for repair prompts. |
 | 8 | Docs | 1.5 | vaadin/docs article and demo with its own review, plus Javadoc. |
 | 9 | Review rounds | 1.25 | Review feedback on the bug-fix PRs and the feature PR. Backporting the bug fixes to 25.2 isn't counted: about 0.75 day, mostly GWT conflicts across 25.x branches. |
 | 10 | Ramp-up and build friction | 0.25 | SDM is documented on `main`; the traps are written down in [section 17](#17-tooling-and-lessons). |
-| | **Total** | **20.5** | |
+| | **Total** | **18.75** | |
 
-- **18 days** if the client fixes stay local, the spec decisions take the
+- **16.5 days** if the client fixes stay local, the spec decisions take the
   simple options, and POI has no more surprises.
-- **25.5 days** if the client fixes uncover new scroll or frozen-pane layout
+- **23 days** if the client fixes uncover new scroll or frozen-pane layout
   problems and the round trip forces a change to how columns are stored.
-  Items 5 and 2 carry most of this spread.
+  Items 2 and 5 carry most of this spread.
 
 Part of this can be done earlier as prep work, using the bug fixes in
 [section 10](#10-fixes-that-can-land-before-the-feature) and the refactors in
@@ -117,71 +117,68 @@ the estimate splits into three parts:
 
 | Part | Days | Range |
 |---|---|---|
-| A. Bugs the customer reported | 4.75 | 4–6.5 |
+| A. Bugs the customer reported | 2.75 | 2.5–4 |
 | B. Bugs found in this research, not reported | 3.25 | 3–4 |
 | C. The feature | 13 | 11–15 |
-| **Total** | **21** | **18–25.5** |
+| **Total** | **19** | **16.5–23** |
 
-Both bug groups also affect groups loaded from an XLSX file, with no new API.
-Most of them come from code reading, so each must be reproduced before it's
-fixed; a bug that doesn't reproduce drops out with its time. The bugs are
-described in [section 9](#9-known-bugs).
+All bugs below are reproduced on `main`, and all exist today with groups loaded
+from an XLSX file, with no new API. The numbers refer to the list in
+[section 9](#9-known-bugs). The suspected bugs that didn't reproduce (7, 10, 12
+and 15) are out of the estimate.
 
 **A. Bugs the customer reported**
 
-| Bug | Confirmed? | Days | From item |
+| # | Bug | Days | From item |
 |---|---|---|---|
-| Cells missing after expanding a nested group | Code reading | 0.25 | 4 |
-| The control flips before the server answers, so browser and server disagree on visible columns | Code reading | 0.5 | 5 |
-| The control of a group ending at the last column goes outside the sheet | Reproduced, fixed in prototype | 0.25 | none (new) |
-| Controls slide over the row headers while scrolling (group pane not clipped) | Code reading | 1 | 5 |
-| Controls over frozen panes (freeze-pane clone condition) | Code reading | 0.5 | 5 |
-| Stub controls under a collapsed parent group (probably also #3912) | Code reading | 0.5 | 3 |
-| Cached widths come back: a local column resize can skip the next server redraw | Code reading | 0.5 | 5 |
-| Tests, mostly TestBench ITs for scrolling and frozen panes | | 1 | 6 |
-| Review | | 0.25 | 9 |
-| **Total** | | **4.75** | |
+| 11 | The control and the columns disagree after a click the server ignores | 0.5 | 5 |
+| 2 | The control of a group ending at the last column goes outside the sheet | 0.25 | none (new) |
+| 13 | Inverted outline: a group right after the frozen columns has no reachable button | 0.5 | 5 |
+| 14 | Inverted outline: a child of a collapsed parent gets a control | 0.5 | 3 |
+| | Tests, mostly TestBench ITs for frozen panes and inverted outlines | 0.75 | 6 |
+| | Review | 0.25 | 9 |
+| | **Total** | **2.75** | |
 
 **B. Bugs found in this research**
 
-| Bug | Confirmed? | Days | From item |
+| # | Bug | Days | From item |
 |---|---|---|---|
-| Expanding a parent group keeps the columns of nested groups hidden | Reproduced (2 disabled tests in `GroupingTest`) | 0.5 | 3 |
-| Collapsing or expanding resets `setMaxColumns` / `setMaxRows` | Reproduced | 0.5 | 4 |
-| Level buttons: the bar isn't rebuilt, and a click reloads the whole component | Code reading | 0.5 | 3, 5 |
-| Small server bugs: `hidden="0"` reads as collapsed, NPE in `expandColumn`, crash on a saved sheet without `<cols>`, collapse marker past the last column | Marker reproduced in POI, others code reading | 0.5 | 3 |
-| Autofit width for filter buttons lost; groups and hidden columns past `cols` not sent | Code reading | 0.5 | 4 |
-| Tests, mostly unit tests | | 0.5 | 6 |
-| Review | | 0.25 | 9 |
-| **Total** | | **3.25** | |
+| 3 | Expanding a parent group keeps the columns of nested groups hidden | 0.5 | 3 |
+| 18 | Cells of newly shown columns not refreshed; appears once bug 3 is fixed | 0.25 | 4 |
+| 4 | A group click resets `setMaxColumns` / `setMaxRows` | 0.5 | 4 |
+| 9 | A level-button click reloads the whole component | 0.25 | 3 |
+| 5, 6, 8 | A column shown again reads as a collapsed group, then crashes on click; a range grouped twice crashes on click; collapse marker past the last column | 0.5 | 3 |
+| 16, 17 | Autofit width for filter buttons lost; groups past the column count drawn outside the sheet | 0.5 | 4 |
+| | Tests, mostly unit tests | 0.5 | 6 |
+| | Review | 0.25 | 9 |
+| | **Total** | **3.25** | |
 
 Every bug in group B breaks something the customer asked for, so it makes
 sense to keep them in the task:
 
-- Nested expand and `hidden="0"` read as collapsed: nested groups and restoring
-  collapsed states.
-- Limits reset and columns past `cols`: the viewport limits.
-- Autofit width lost: column widths and autofit widths.
-- Collapse marker past the last column: groups ending at the final column.
-- NPE and the crash on a sheet without `<cols>`: the new API calls themselves,
-  for example `addColumnGroup` on a saved sheet.
-- Level-button bar and full reload: the reload drops component state, and the
+- Nested expand (3, and 18 with it) and a column shown again reading as
+  collapsed (5): nested groups and restoring collapsed states.
+- Limits reset (4) and groups past the column count (17): the viewport limits.
+- Autofit width lost (16): column widths and autofit widths.
+- Collapse marker past the last column (8): groups ending at the final column.
+- The crashes (5, 6): the new API calls and the toggle event must not fail on
+  files Excel creates.
+- Full reload on level buttons (9): the reload drops component state, and the
   toggle event and refresh must also work for level buttons.
 
 **C. The feature** is what's left of the work items: 1 (1.5), 2 (3.5),
 2b (1), 2c (1), 3 (0.25: move `loadGrouping` onto the model), 4 (0.75: sheet
 switching and overlays), 6 (2), 7 (0.5), 8 (1.5), 9 (0.75) and 10 (0.25).
 That's 13 days. It includes refreshing the controls when groups change at
-runtime, which is where the customer's "stale or misaligned controls" and most
-of the "cached widths" problem come from. Those aren't bugs: changing groups
+runtime (bug 1), which is where the customer's "stale or misaligned controls"
+and "cached widths" problems come from. Those aren't bugs: changing groups
 after the first render isn't supported today.
 
 Backporting isn't counted in any part. It would add about 0.5 day for group A
 and 0.25 day for group B.
 
-The total is 0.5 day above the 20.5 from the work items, because sizing each
-bug separately came out a little higher: the last-column fix wasn't in any
-item, and the client fixes add up to 0.25 day over item 5.
+The total is 0.25 day above the 18.75 from the work items, because the
+last-column fix (bug 2) wasn't in any item.
 
 The row bugs #10207 and #10226 aren't in A or B. They belong to the row work
 (+6–8 days).
@@ -201,6 +198,7 @@ How the estimate changed:
 | After the Excel checks | 21 (17.5–25) | +5.5–7.5 | Hidden-column behaviour follows Excel, so no server-side state is needed. |
 | Posted | 21 (18–25) | +6–8 | Rounded. |
 | Split by bug, backport excluded | 21 (18–25.5) | +6–8 | Per-bug sizing adds 0.5 day; the backport of the bug fixes (0.75 day) is no longer counted. |
+| After reproducing the bugs | 19 (16.5–23) | +6–8 | Bugs 7, 10, 12 and 15 didn't reproduce; bug 18 moved to the bug 3 fix. The feature part (13 days) is unchanged. |
 
 ## 4. Proposed API
 
@@ -403,7 +401,8 @@ How XLSX encodes outlines:
 Issues in flow-components:
 
 - [#3912](https://github.com/vaadin/flow-components/issues/3912) (open, 2022):
-  hidden columns in a child group cause rendering issues.
+  hidden columns in a child group cause rendering issues. Probably the same
+  cause as bug 5 below.
 - [#10207](https://github.com/vaadin/flow-components/issues/10207) (open, Major):
   collapsing a row group while scrolled down leaves the viewport empty.
 - [#10226](https://github.com/vaadin/flow-components/issues/10226) (open):
@@ -415,66 +414,111 @@ Issues in flow-components:
   grouping inside a `SplitLayout` hid rows.
 
 Legacy `vaadin/spreadsheet` add-on (EOL): #249 (frozen pane + grouping), #341
-(client exception on collapse), #398 (nested grouping fails on reopen).
+(client exception on collapse), #398 (nested grouping fails on reopen), #302
+(`IndexOutOfBoundsException` in `GroupingUtil.expandColumn` after hiding a
+column in a group).
+
+### Bugs found during this research
+
+All bugs were checked on `main` at `4e5ef79bde` (2026-10-06):
+
+- **Unit tests:** each workbook is built with POI, saved, and loaded with
+  `new Spreadsheet(InputStream)`, so the groups come from the file. Clicks are
+  sent as client events.
+- **Browser:** an integration test view on `main`, with workbooks built in code
+  before the Spreadsheet loads them.
+
+Type:
+
+- **Exists today:** happens with groups loaded from an XLSX file, plus public
+  API or user clicks. No runtime outline changes.
+- **Feature only:** happens only when groups change after the first render,
+  which isn't supported today.
+- **Latent:** doesn't happen today, but will appear when another bug is fixed.
+
+| # | Bug | Reproduced? | Type | Tickets |
+|---|---|---|---|---|
+| 1 | Grouping-only changes don't redraw the controls | Yes, browser. A group added through POI and refreshed with the `protected` `setGroupingCollapsed`: the group data reaches the browser and the group pane grows, but no control is drawn. Bug 4 hides it when the column count also changes. | Feature only | None |
+| 2 | The control of a group ending at the last column goes past the sheet | Yes, browser. Group J:L with `setMaxColumns(12)`: the control ends at 944 px, column L at 907 px. | Exists today | None (row version: #10164, fixed) |
+| 3 | Expanding a parent keeps the child columns hidden | Yes, unit. The two `@Disabled` tests in `GroupingTest` fail on `main`. | Exists today | Legacy #398 (open, similar symptom) |
+| 4 | A group click resets `setMaxColumns` / `setMaxRows` | Yes, unit and browser. After `setMaxColumns(6)` and `setMaxRows(15)`, one group or level click gives 52 columns and 200 rows. Row group clicks too. | Exists today | None |
+| 5 | A column shown with `setColumnHidden(c, false)` makes its group read as collapsed | Yes, unit. Only for the group's first column: `hidden="0"` and the `<col>` elements left out of order. After a click on another group, the group shows "+" while its columns are visible. Clicking that "+" throws `IndexOutOfBoundsException` in `GroupingUtil.expandColumn` (`CTColImpl.unsetHidden`). | Exists today | #3912 (open, likely same cause); legacy #302 (same exception) |
+| 6 | `NullPointerException` in `GroupingUtil.expandColumn` | Yes, unit and browser. Same range grouped twice (Excel allows it): the level-1 group gets `uniqueIndex` -2. Clicks toggle the control without changing the columns, then the server throws the NPE. | Exists today | Legacy #302 (same code path) |
+| 8 | Collapsing a group that ends at XFD writes `<col min="16385">` | Yes, unit. POI saves and reads the file back. Not checked in Excel. | Exists today | None |
+| 9 | Level buttons reload the whole component and write no `collapsed` flags | Yes, unit. One column level click: max columns 7 → 52, selection cleared, `SpreadsheetFilterTable` removed, undo history cleared. | Exists today | None |
+| 11 | The control flips without a server change, so control and columns disagree | Yes, browser, with the layout from bug 6: the control shows "+" while all columns are visible. Needs a click that the server ignores. | Exists today | Legacy #249 (weak match) |
+| 13 | Inverted outline: a group starting right after the frozen columns has no reachable button | Yes, browser. Summary column left, A:B frozen, group C:E: its button sits under the frozen pane and can't be clicked. Works without inversion. | Exists today | Legacy #249 (open) |
+| 14 | A child group of a collapsed parent gets a control | Yes, unit and browser, inverted outlines only. Collapsed B:E with child E:E: a "+" is drawn for the hidden child, and clicking it does nothing. Normal layouts are correct. | Exists today | None |
+| 16 | Autofit's extra width for filter buttons is lost after a group click | Yes, unit. Column width 125 px after `autofitColumn`, 109 px after a click on another group. | Exists today | Legacy #190 and #481 cover the width, not this loss |
+| 17 | Groups past the column count are drawn outside the sheet | Yes, unit and browser. `setMaxColumns(5)` with group G:I: the control is drawn at 492–734 px, past the last column at 417 px. After collapsing, `hiddenColumnIndexes` stays empty. | Exists today | None |
+| 18 | Cells not refreshed after expanding | No (unit and browser: cells show after expanding nested groups). It appears once bug 3 is fixed: columns between a group's start and its `uniqueIndex` won't be marked for update. | Latent | Legacy #599, #391, #290 (closed, fixed then) |
 
 Days to fix each bug, and which ones the customer reported, are in
 [section 3](#bug-fixes-and-feature).
 
-Bugs found during this research. "Reproduced" means seen in a test or the
-browser; "code reading" means not yet reproduced.
+The reproductions are kept on this branch:
 
-| Bug | Where | Status |
+- `vaadin-spreadsheet-flow/src/test/java/com/vaadin/flow/component/spreadsheet/GroupingBugsReproTest.java`:
+  28 unit tests named after the bug numbers. Each asserts the correct
+  behaviour, so they all fail on `main` for the reproduced bugs. On this
+  branch, the prototype already fixes bugs 8 and 9, the crash in bug 5 and the
+  crafted case of bug 6. The 11 tests that still fail (bugs 4, 5, 6, 14, 16
+  and 17) are `@Disabled` with the bug number. Remove the annotation when
+  fixing the bug.
+- Bug 3 is covered by the two nested-column tests in `GroupingTest`.
+- `vaadin-spreadsheet-flow-integration-tests/.../tests/GroupingBugsView.java`:
+  a test view at `/spreadsheet-grouping-bugs?s=<scenario>` for the browser
+  checks. Scenarios: `1`, `1b` (bug 1), `2`, `6` (bugs 6 and 11), `12`, `13`,
+  `13b`, `14`, `14b`, `14i` (bug 14 inverted), `17`, `18`.
+
+Not reproduced, so not counted as bugs:
+
+| # | Suspected bug | Why not |
 |---|---|---|
-| Grouping-only changes don't redraw the controls | `SpreadsheetConnector.onStateChanged` | Reproduced, fixed in prototype |
-| Marker of a group ending at the last column runs past the sheet | `SheetWidget.updateGrouping` | Reproduced, fixed in prototype |
-| Expanding a parent keeps child columns hidden (2 `@Disabled` tests in `GroupingTest`) | `GroupingUtil.expandColumn` | Reproduced, fixed in prototype |
-| Grouping refresh resets `setMaxColumns` / `setMaxRows` | `SpreadsheetFactory.calculateSheetSizes` | Reproduced (rows still reset in prototype) |
-| `hidden="0"` reads as collapsed | `GroupingUtil.isColumnGroupCollapsed`, `checkHidden` | Code reading |
-| NPE in `expandColumn` when the column has no `<col>` | `GroupingUtil.expandColumn` | Code reading |
-| `IndexOutOfBoundsException` on `getColsArray(0)` after saving a sheet with no columns | `loadGrouping`, `GroupingUtil` | Code reading (POI behaviour confirmed in bytecode) |
-| Collapse marker written past XFD | `GroupingUtil.collapseColumn` | Reproduced in POI |
-| Level buttons do a full component reload and write no `collapsed` flags | `Spreadsheet.levelHeaderClicked` | Code reading; replaced for columns in prototype |
-| Level-button bar not rebuilt when the count is unchanged | `SheetWidget.updateColGrouping` | Code reading |
-| Control flips before the server answers; stays wrong if the server does nothing | `GroupingWidget.onBrowserEvent` | Code reading |
-| Group pane isn't clipped while scrolling, so markers slide over row headers and the corner | `.col-group-pane` styles, `SheetWidget` scroll margin | Code reading |
-| Freeze-pane clone condition misses inverted groups starting right after the split | `SheetWidget.updateGrouping` | Code reading |
-| Children of collapsed groups drawn as stubs (server filter only checks the last group, mixes 0- and 1-based indexes) | `loadGrouping`, `SheetWidget.updateGrouping` | Code reading |
-| A local column resize can swallow the next server relayout | `SpreadsheetWidget` (`cancelNextSheetRelayout`) | Code reading |
-| Autofit's extra width for filter buttons lost after a grouping refresh | `calculateSheetSizes` | Code reading |
-| Groups and hidden columns past `cols` never sent to the client (`colW` has `cols` entries) | `calculateSheetSizes` | Code reading |
-| Cells not refreshed after expanding when `expandColumn` returns -1 | `Spreadsheet.updateExpandedRegion` | Code reading |
+| 7 | `IndexOutOfBoundsException` on `getColsArray(0)` after saving a sheet with no columns | POI 5.5.1 adds the empty `<cols>` back on write and on load. |
+| 10 | Level-button bar not rebuilt when the count is unchanged | The labels and levels come from the button index, so the old buttons are identical. No visible effect. |
+| 12 | Group pane not clipped while scrolling | The control does extend over the row-header area after a horizontal scroll, but the level-button pane covers it there. The right edge wasn't checked. |
+| 15 | A local column resize swallows the next server relayout | After resizing a column and collapsing and expanding a group, the width stays and the controls line up. |
 
 ## 10. Fixes that can land before the feature
 
 These don't add public API, so they can go in as bug fixes and be backported to
-25.2. They also lower the feature's risk, because they fix the shared client
-code first. Suggested order:
+25.2. They also lower the feature's risk, because they fix the shared code
+first. All of them are reproduced on `main` (numbers from
+[section 9](#9-known-bugs)). Suggested order:
 
-1. **Redraw grouping on grouping-only changes.** Add the six grouping
-   properties to the relayout check in `SpreadsheetConnector.onStateChanged`.
-   8 lines, in the prototype. Fixes stale controls for all users, including
-   workbook-loaded groups.
-2. **Keep the last-column marker inside the sheet.** In
-   `SheetWidget.updateGrouping`, don't add half of the next column's width
-   when there is no next column. In the prototype.
-3. **Expanding a parent keeps child groups collapsed.** Enables the two
-   `@Disabled` tests in `GroupingTest`. In the prototype this comes with the
-   new model; as a standalone fix it means correcting `GroupingUtil.expandColumn`.
-4. **Keep `setMaxColumns` / `setMaxRows` across grouping refreshes.** Store the
-   limit the app set, and have `calculateSheetSizes` respect it. The
+1. **Expanding a parent keeps child groups collapsed** (bug 3, with bug 18).
+   Enables the two `@Disabled` tests in `GroupingTest`. In the prototype this
+   comes with the new model; as a standalone fix it means correcting
+   `GroupingUtil.expandColumn` and marking all newly shown columns for update.
+2. **Keep `setMaxColumns` / `setMaxRows` across grouping refreshes** (bug 4).
+   Store the limit the app set, and have `calculateSheetSizes` respect it. The
    prototype's stopgap (restore the old `cols`) breaks when data grows; don't
    ship it.
-5. **Small server fixes:** use `getHidden()` instead of `isSetHidden()`, null
-   check in `expandColumn`, guard `getColsArray(0)`, don't write the collapse
-   marker past XFD.
-6. **Client fixes:** don't flip the control before the server answers (or
-   always echo the state back), rebuild the level-button bar every time, clip
-   the group pane while scrolling, fix the freeze-pane clone condition.
-7. **Level buttons without a full reload** (columns), and with `collapsed`
-   flags written.
+3. **Keep the last-column control inside the sheet** (bug 2). In
+   `SheetWidget.updateGrouping`, don't add half of the next column's width
+   when there is no next column. In the prototype.
+4. **Server crashes and wrong state** (bugs 5, 6, 8): use `getHidden()` instead
+   of `isSetHidden()` and keep `<col>` sorted after `setColumnHidden`; give a
+   range grouped twice a valid `uniqueIndex`; don't write the collapse marker
+   past XFD.
+5. **Groups past the column count** (bug 17): don't send or draw them, and
+   send the hidden columns past `cols`.
+6. **Autofit width** (bug 16): keep the extra width for filter buttons after a
+   grouping refresh.
+7. **Client fixes:**
+   - don't flip the control unless the server changes the state, or always
+     send the state back (bug 11);
+   - copy the button of an inverted group that starts right after the frozen
+     columns into the frozen pane (bug 13);
+   - don't draw controls for children of a collapsed parent with inverted
+     outlines (bug 14, partly server-side in `loadGrouping`).
+8. **Level buttons without a full reload** (bug 9), and with `collapsed` flags
+   written.
 
-1, 2 and 3 are verified in the prototype. The rest come from code reading and
-need a reproduction first.
+Redrawing the controls on grouping-only changes (bug 1) is in the prototype
+too, but it only matters once groups can change at runtime, so it belongs to
+the feature.
 
 ## 11. Refactors that can land before the feature
 
@@ -546,6 +590,8 @@ Branch `proto/spreadsheet-column-grouping-api`, one commit on top of
 | `vaadin-spreadsheet-flow/src/test/.../tests/ColumnGroupApiTest.java` | 11 unit tests: nested add, collapse/expand nesting, restore in any order, last column, clear, ungroup, max level, event, save/reload round trip, clear-regroup-restore, keep max columns. |
 | `vaadin-spreadsheet-flow/src/test/.../tests/GroupingTest.java` | The two nested-column tests re-enabled. |
 | `vaadin-spreadsheet-flow-integration-tests/.../tests/ColumnGroupingApiView.java` | Manual test view at `/spreadsheet-column-grouping-api`, with buttons for every API call, a freeze pane and autofit. |
+| `vaadin-spreadsheet-flow/src/test/.../spreadsheet/GroupingBugsReproTest.java` | Bug reproductions from section 9; still-failing tests are `@Disabled` with the bug number. |
+| `vaadin-spreadsheet-flow-integration-tests/.../tests/GroupingBugsView.java` | Browser repro scenarios for section 9, at `/spreadsheet-grouping-bugs?s=<scenario>`. |
 
 How the model works:
 
