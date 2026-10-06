@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -35,16 +33,12 @@ import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.DownloadResponse;
 
 /**
  * View for {@link Button} demo.
  */
 @Route("vaadin-button")
 public class ButtonView extends Div {
-    static final String DOWNLOAD_BODY = "button-download-body";
-
     private Div message;
 
     public ButtonView() {
@@ -60,7 +54,6 @@ public class ButtonView extends Div {
         createButtonWithDisableOnClickThatIsHidden();
         createButtonWithDisableOnClickAndPointerEventsAuto();
         createButtonsWithShortcuts();
-        createButtonWithDownloadHandler();
 
         message = new Div();
         message.setId("buttonMessage");
@@ -302,43 +295,6 @@ public class ButtonView extends Div {
         button.setId("disable-on-click-pointer-events-auto");
 
         addCard("Button disabled on click and pointer events auto", button);
-    }
-
-    private void createButtonWithDownloadHandler() {
-        Button button = new Button("Download");
-        button.setId("download-button");
-        button.setDownloadHandler(createDownloadHandler());
-
-        Button disableOnClick = new Button("Download, disable on click");
-        disableOnClick.setId("download-disable-on-click-button");
-        disableOnClick.setDisableOnClick(true);
-        disableOnClick.setDownloadHandler(createDownloadHandler());
-
-        Button explicitlyDisabled = new Button(
-                "Download, disable on click, disabled by listener");
-        explicitlyDisabled.setId("download-explicitly-disabled-button");
-        explicitlyDisabled.setDisableOnClick(true);
-        explicitlyDisabled.setDownloadHandler(createDownloadHandler());
-        explicitlyDisabled
-                .addClickListener(event -> event.getSource().setEnabled(false));
-
-        Button parentDisabled = new Button(
-                "Download, disable on click, parent disabled by listener");
-        parentDisabled.setId("download-parent-disabled-button");
-        parentDisabled.setDisableOnClick(true);
-        parentDisabled.setDownloadHandler(createDownloadHandler());
-        Div parent = new Div(parentDisabled);
-        parentDisabled.addClickListener(event -> parent.setEnabled(false));
-
-        addCard("Button with download handler", button, disableOnClick,
-                explicitlyDisabled, parent);
-    }
-
-    private static DownloadHandler createDownloadHandler() {
-        return DownloadHandler.fromInputStream(event -> new DownloadResponse(
-                new ByteArrayInputStream(
-                        DOWNLOAD_BODY.getBytes(StandardCharsets.UTF_8)),
-                "button.txt", "text/plain", DOWNLOAD_BODY.length()));
     }
 
     private void addCard(String title, Component... components) {
