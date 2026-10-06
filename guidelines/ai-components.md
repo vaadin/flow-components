@@ -105,7 +105,12 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   instead of `ui.access` — a plain `access` on a UI that detaches after
   enqueue silently drops the task and leaves the orchestrator stuck busy.
 - Interceptor/postponement timers run on `Schedulers.boundedElastic()`,
-  never `parallel()` — listeners are allowed to block.
+  never `parallel()`: the end-of-turn hooks may run inline on the timer
+  thread and application code in them may block.
+- The end-of-turn hooks, `AIController.onResponse` and then the
+  `ResponseListener`, run as one `ui.accessLater` task whether or not a
+  controller is attached, so the listener has a single threading contract
+  (session locked) and a detached UI still gets the listener.
 - The orchestrator's `isProcessing` busy flag must be released exactly once
   per prompt. The field comment in `AIOrchestrator` enumerates every release
   path; any new way for a prompt to end must be added there and must decide
@@ -144,7 +149,9 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 - Tools validate their input eagerly so errors round-trip to the LLM within
   the turn, but stage the result and apply it once in `onResponse(null)`;
   `onResponse(error)` discards the pending state and keeps the last good
-  render.
+  render. A throw from `onResponse(null)` is the turn's error: the
+  orchestrator hands the `ResponseListener` the throw instead of a success
+  event, so a controller must not swallow its own apply failures.
 - Error hygiene toward the model: only the message of a
   `ToolException` (public, in `com.vaadin.flow.component.ai.provider`) is
   forwarded verbatim — throw it, from built-in tool code or an application's
