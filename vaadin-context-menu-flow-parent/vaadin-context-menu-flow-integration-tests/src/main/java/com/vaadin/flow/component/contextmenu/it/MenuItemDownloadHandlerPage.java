@@ -40,6 +40,8 @@ public class MenuItemDownloadHandlerPage extends Div {
                 .addItem("Download, disable on click");
         disableOnClick.setId("download-disable-on-click-item");
         disableOnClick.setDisableOnClick(true);
+        // Keep the menu open so the item can be checked after the click
+        disableOnClick.setKeepOpen(true);
         disableOnClick.setDownloadHandler(createDownloadHandler());
 
         MenuItem subMenuItem = contextMenu.addItem("More").getSubMenu()
