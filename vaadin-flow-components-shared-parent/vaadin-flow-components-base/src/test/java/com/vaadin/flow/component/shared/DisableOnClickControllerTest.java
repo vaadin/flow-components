@@ -233,6 +233,41 @@ class DisableOnClickControllerTest {
     }
 
     @Test
+    void untilEnabled_click_disabledByClickUntilEnabledStateSetExplicitly() {
+        Assertions.assertFalse(component.isDisabledByClick());
+        component.setDisableOnClick(DisableOnClickMode.UNTIL_ENABLED);
+
+        component.click();
+        ui.fakeClientCommunication();
+        Assertions.assertTrue(component.isDisabledByClick());
+
+        component.setEnabled(false);
+        Assertions.assertFalse(component.isDisabledByClick());
+    }
+
+    @Test
+    void untilResponse_click_disabledByClickUntilEnabledAfterRoundTrip() {
+        component.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+
+        component.click();
+        Assertions.assertTrue(component.isDisabledByClick());
+
+        ui.fakeClientCommunication();
+        Assertions.assertFalse(component.isDisabledByClick());
+    }
+
+    @Test
+    void listenerDisablesComponent_click_notDisabledByClick() {
+        component
+                .addClickListener(event -> event.getSource().setEnabled(false));
+        component.setDisableOnClick(true);
+
+        component.click();
+        Assertions.assertFalse(component.isEnabled());
+        Assertions.assertFalse(component.isDisabledByClick());
+    }
+
+    @Test
     void untilResponse_click_componentIsDisabledDuringClick_enabledAfterRoundTrip() {
         var componentIsEnabled = new AtomicBoolean(true);
         component.addClickListener(
@@ -440,6 +475,10 @@ class DisableOnClickControllerTest {
 
         public DisableOnClickMode getDisableOnClickMode() {
             return disableOnClickController.getDisableOnClickMode();
+        }
+
+        public boolean isDisabledByClick() {
+            return disableOnClickController.isDisabledByClick();
         }
 
         public void click() {
