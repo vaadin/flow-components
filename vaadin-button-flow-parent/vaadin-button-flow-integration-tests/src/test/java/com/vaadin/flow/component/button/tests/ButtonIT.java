@@ -483,6 +483,13 @@ public class ButtonIT extends AbstractComponentIT {
                 .id("download-disable-on-click-button").isEnabled());
     }
 
+    @Test
+    public void clickDownloadButtonDisabledByListener_downloadRefused() {
+        Assert.assertTrue(
+                clickAndDownload("download-explicitly-disabled-button")
+                        .startsWith("403|"));
+    }
+
     /**
      * Clicks the button and fetches the URL that the click starts a download
      * from, returning the response status and body separated by {@code |}.

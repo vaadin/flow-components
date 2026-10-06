@@ -51,6 +51,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     private final BeforeClientResponseAction clientUpdate;
     private final BeforeClientResponseAction enable;
     private boolean updatingEnabled = false;
+    private boolean disabledByClick = false;
 
     /**
      * Creates a new controller for the given component.
@@ -138,6 +139,20 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     }
 
     /**
+     * Gets whether the component is currently disabled because it was clicked
+     * while disable on click was turned on. This is no longer the case once the
+     * enabled state is set by application code, or the component is enabled
+     * again automatically.
+     *
+     * @return whether the component was disabled by disable on click and has
+     *         not been enabled or disabled explicitly since
+     * @since 25.4
+     */
+    public boolean isDisabledByClick() {
+        return disabledByClick;
+    }
+
+    /**
      * Forces the client-side component's {@code disabled} property to be
      * updated before the response is sent to the client, so that it matches the
      * component's effective enabled state, including whether any parent is
@@ -154,6 +169,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
             // The enabled state was set explicitly by application code, so
             // don't override it after the round trip.
             enable.cancel();
+            disabledByClick = false;
         }
         // If the component is disabled and re-enabled during the same round
         // trip, Flow will not detect any changes and the client side component
@@ -167,6 +183,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
         updatingEnabled = true;
         try {
             component.setEnabled(enabled);
+            disabledByClick = !enabled;
         } finally {
             updatingEnabled = false;
         }

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.button;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import com.vaadin.experimental.Feature;
@@ -50,6 +51,7 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -406,11 +408,12 @@ public class Button extends Component
      * enabled, so hiding or removing the button in a click listener makes the
      * download fail. The exception is a button with
      * {@link #setDisableOnClick(boolean) disable on click}: it disables itself
-     * before the browser requests the file, so the file is then also served
-     * while the button is disabled, as with
-     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}. This
-     * applies whether disable on click is turned on before or after setting the
-     * handler.
+     * before the browser requests the file, so the file is also served while
+     * the button is disabled by the click. Once the enabled state is set
+     * explicitly, for example with {@code setEnabled(false)}, or a parent is
+     * disabled, the file is no longer served while the button is disabled. To
+     * serve the file regardless of the enabled state, pass
+     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}.
      *
      * <pre>{@code
      * Button export = new Button("Export");
@@ -425,22 +428,51 @@ public class Button extends Component
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
-        this.downloadHandler = downloadHandler;
-        updateDownloadRegistration();
-    }
-
-    private void updateDownloadRegistration() {
         if (downloadRegistration != null) {
             downloadRegistration.remove();
             downloadRegistration = null;
         }
+        this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
-            // Disable on click disables the button before the browser
-            // requests the file, so the file must be served while disabled
             downloadRegistration = Download.onClick(this,
-                    isDisableOnClick() ? downloadHandler.allowDisabled()
-                            : downloadHandler);
+                    allowDisabledByClick(downloadHandler));
         }
+    }
+
+    /**
+     * Wraps the handler so that it is also served while the button is disabled
+     * by disable on click, which happens before the browser requests the file.
+     * A button disabled explicitly, or inside a disabled parent, still refuses
+     * the request unless the handler itself allows it.
+     */
+    private DownloadHandler allowDisabledByClick(DownloadHandler delegate) {
+        return new DownloadHandler() {
+            @Override
+            public void handleDownloadRequest(DownloadEvent event)
+                    throws IOException {
+                delegate.handleDownloadRequest(event);
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return delegate.getUrlPostfix();
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return delegate.isAllowInert();
+            }
+
+            @Override
+            public DisabledUpdateMode getDisabledUpdateMode() {
+                Element parent = Button.this.getElement().getParent();
+                if (disableOnClickController.isDisabledByClick()
+                        && (parent == null || parent.isEnabled())) {
+                    return DisabledUpdateMode.ALWAYS;
+                }
+                return delegate.getDisabledUpdateMode();
+            }
+        };
     }
 
     /**
@@ -513,7 +545,6 @@ public class Button extends Component
             checkNoEnabledBinding();
         }
         disableOnClickController.setDisableOnClick(disableOnClick);
-        updateDownloadRegistration();
     }
 
     /**
@@ -546,7 +577,6 @@ public class Button extends Component
         Objects.requireNonNull(mode, "DisableOnClickMode must not be null");
         checkNoEnabledBinding();
         disableOnClickController.setDisableOnClick(mode);
-        updateDownloadRegistration();
     }
 
     private void checkNoEnabledBinding() {
