@@ -3778,6 +3778,21 @@ class AIOrchestratorTest {
                         + "not swallowed silently");
     }
 
+    @Test
+    void noResponseListener_turnEndsWithoutAnError() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .noneMatch(event -> event.getLevel() == Level.ERROR),
+                "A turn without a response listener must not report an error");
+    }
+
     private void assertBuilderWarning(String fieldName) {
         var warning = logger.getLoggingEvents().stream().filter(
                 e -> e.getMessage().contains("was already set on the builder"))
