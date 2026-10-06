@@ -490,6 +490,12 @@ public class ButtonIT extends AbstractComponentIT {
                         .startsWith("403|"));
     }
 
+    @Test
+    public void clickDownloadButtonParentDisabledByListener_downloadRefused() {
+        Assert.assertTrue(clickAndDownload("download-parent-disabled-button")
+                .startsWith("403|"));
+    }
+
     /**
      * Clicks the button and fetches the URL that the click starts a download
      * from, returning the response status and body separated by {@code |}.

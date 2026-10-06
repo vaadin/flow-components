@@ -322,8 +322,16 @@ public class ButtonView extends Div {
         explicitlyDisabled
                 .addClickListener(event -> event.getSource().setEnabled(false));
 
+        Button parentDisabled = new Button(
+                "Download, disable on click, parent disabled by listener");
+        parentDisabled.setId("download-parent-disabled-button");
+        parentDisabled.setDisableOnClick(true);
+        parentDisabled.setDownloadHandler(createDownloadHandler());
+        Div parent = new Div(parentDisabled);
+        parentDisabled.addClickListener(event -> parent.setEnabled(false));
+
         addCard("Button with download handler", button, disableOnClick,
-                explicitlyDisabled);
+                explicitlyDisabled, parent);
     }
 
     private static DownloadHandler createDownloadHandler() {
