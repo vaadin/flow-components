@@ -490,6 +490,9 @@ public class ButtonIT extends AbstractComponentIT {
                         .startsWith("403|"));
     }
 
+    // Disabling the parent leaves the button disabled by its own click, so
+    // unlike the previous test this relies on the button refusing to serve
+    // the file while disabled by click when a parent is disabled
     @Test
     public void clickDownloadButtonParentDisabledByListener_downloadRefused() {
         Assert.assertTrue(clickAndDownload("download-parent-disabled-button")
