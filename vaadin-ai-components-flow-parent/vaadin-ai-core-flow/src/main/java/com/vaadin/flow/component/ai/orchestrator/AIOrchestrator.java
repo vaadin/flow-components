@@ -674,9 +674,11 @@ public class AIOrchestrator implements Serializable {
             RequestInterceptor.RequestInterceptEvent event) {
         var continuation = event.getContinuation();
         var timeout = continuation.getTimeout();
-        // boundedElastic, not parallel: on timeout the ResponseListener runs
-        // on this thread, and its documented blocking-I/O allowance must not
-        // occupy the CPU-sized parallel pool that backs stream timeouts.
+        // boundedElastic, not parallel: on timeout the end-of-turn hooks may
+        // run inline on this thread (ui.access runs its task on the calling
+        // thread when the session lock is free), and application work in them
+        // must not occupy the CPU-sized parallel pool that backs stream
+        // timeouts.
         var timer = Schedulers.boundedElastic()
                 .schedule(() -> continuation.fail(new TimeoutException(
                         "Request interception timed out after " + timeout)),
@@ -877,18 +879,15 @@ public class AIOrchestrator implements Serializable {
             UI ui, ResponseMetadata metadata) {
         var event = new ResponseListener.ResponseEvent(responseText, error,
                 metadata);
-        if (controller == null) {
-            notifyResponseListener(event);
-            return;
-        }
-        // The controller applies the turn before the listener hears of it, so
+        // Both hooks run as one ui.access() task, the controller first, so
         // that a turn the controller could not apply reaches the listener as
-        // the turn's error (see ResponseListener). accessLater rather than
+        // the turn's error, and so that the listener has the same threading
+        // contract with and without a controller. accessLater rather than
         // access: its detach handler also covers a UI that detaches after the
         // task is enqueued, and the listener must hear the turn end either way.
         ui.accessLater(() -> notifyResponseListener(applyTurn(event)), () -> {
-            LOGGER.debug(
-                    "Skipped the controller hook of an abandoned turn (UI detached)");
+            LOGGER.debug("Turn ended after its UI was detached; the response "
+                    + "listener runs without a session");
             notifyResponseListener(event);
         }).run();
     }
@@ -905,12 +904,15 @@ public class AIOrchestrator implements Serializable {
     }
 
     /**
-     * Runs the controller hook and returns the outcome the listener gets: the
-     * turn's own, or a failure carrying the hook's throw when a completed turn
-     * could not be applied.
+     * Runs the controller hook, if there is a controller, and returns the
+     * outcome the listener gets: the turn's own, or a failure carrying the
+     * hook's throw when a completed turn could not be applied.
      */
     private ResponseListener.ResponseEvent applyTurn(
             ResponseListener.ResponseEvent event) {
+        if (controller == null) {
+            return event;
+        }
         try {
             controller.onResponse(event);
         } catch (Exception e) {
@@ -1518,19 +1520,11 @@ public class AIOrchestrator implements Serializable {
          * On failure {@code event.getError()} carries the cause and the
          * response text is empty, even if text was received before the failure.
          * <p>
-         * The thread the listener runs on depends on the provider: with a
-         * streaming provider, or when the provider runs the turn on a
-         * background thread (background execution), it is called from a
-         * background thread. With a non-streaming provider that does not
-         * schedule itself, the whole turn, this listener included, runs on the
-         * thread that triggered the prompt, where blocking prolongs the current
-         * request. Blocking I/O (e.g. database writes) is safe on a background
-         * thread only without a controller: with one attached, the listener
-         * runs inside the same {@code ui.access()} call as
-         * {@link AIController#onResponse(ResponseListener.ResponseEvent)} and
-         * holds the session lock meanwhile. To update Vaadin UI components from
-         * this listener, use {@code ui.access()}. See {@link ResponseListener}
-         * for the full threading contract.
+         * The listener runs as a {@code ui.access()} task, right after
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)} when
+         * a controller is attached: the session is locked, so UI components can
+         * be updated directly, and blocking work holds the lock for its
+         * duration. See {@link ResponseListener} for the details.
          * <p>
          * The listener is not called when history is restored via
          * {@link #withHistory(List, Map)}.

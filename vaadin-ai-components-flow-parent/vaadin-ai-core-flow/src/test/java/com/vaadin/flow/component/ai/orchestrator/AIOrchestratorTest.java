@@ -3921,7 +3921,7 @@ class AIOrchestratorTest {
                 }).build();
         orchestrator.prompt("Hello");
 
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The turn never completed");
         Assertions.assertNotSame(Thread.currentThread(), listenerThread.get(),
                 "A self-scheduling provider must carry the turn without the "
@@ -3965,7 +3965,7 @@ class AIOrchestratorTest {
                 "prompt() must return while the turn is still running");
 
         release.countDown();
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The turn never completed after release");
     }
 
@@ -4008,7 +4008,7 @@ class AIOrchestratorTest {
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
 
         release.countDown();
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The first turn never completed after release");
         Assertions.assertTrue(
                 orchestrator.getHistory().stream().noneMatch(
@@ -4036,7 +4036,7 @@ class AIOrchestratorTest {
                     firstDone.countDown();
                 }).build();
         orchestrator.prompt("First");
-        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, firstDone),
                 "First turn never completed");
         Assertions.assertTrue(firstEvent.get().getError().isEmpty(),
                 "The first turn was expected to complete successfully, got: "
@@ -4080,7 +4080,7 @@ class AIOrchestratorTest {
                     firstDone.countDown();
                 }).build();
         orchestrator.prompt("First");
-        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, firstDone),
                 "First turn never ended");
         Assertions.assertTrue(firstEvent.get().getError().isPresent(),
                 "The first turn was expected to fail with the stream error");
