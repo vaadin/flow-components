@@ -17,7 +17,6 @@ package com.vaadin.flow.component.shared;
 
 import java.io.Serializable;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.shared.internal.SelectionSignalSupport;
 import com.vaadin.flow.js.JsDefinition;
@@ -113,7 +112,7 @@ public interface HasTextSelection extends HasElement {
      * @return a signal with the current selection, never {@code null}
      */
     default Signal<SelectionRange> selectionSignal() {
-        return SelectionSignalSupport.getOrCreate((Component) this);
+        return SelectionSignalSupport.getOrCreate(this);
     }
 
     /**

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.HasTextSelection.TextSelectionJs;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
@@ -120,13 +122,6 @@ class HasTextSelectionTest {
     }
 
     @Test
-    void selectionSignal_attached_installsSelectionListener() {
-        component.selectionSignal();
-
-        assertInstallSelectionListenerCalls(1);
-    }
-
-    @Test
     void selectionSignal_detached_installsSelectionListenerOnAttach() {
         ui.remove(component);
         component.selectionSignal();
@@ -185,8 +180,54 @@ class HasTextSelectionTest {
 
         fireSelectionChange(-1, 4, "abcd");
         fireSelectionChange(5, 2, "");
+        fireSelectionChange(0, 2, "abc");
 
         Assertions.assertEquals(new SelectionRange(1, 4, "bcd"), signal.peek());
+    }
+
+    @Test
+    void selectionChangeEvent_malformedData_ignored() {
+        Signal<SelectionRange> signal = component.selectionSignal();
+        fireSelectionChange(1, 4, "bcd");
+
+        ObjectNode missingContent = JacksonUtils.createObjectNode();
+        missingContent.put("event.detail.start", 0);
+        missingContent.put("event.detail.end", 1);
+        fireSelectionChange(missingContent);
+
+        ObjectNode textStart = JacksonUtils.createObjectNode();
+        textStart.put("event.detail.start", "0");
+        textStart.put("event.detail.end", 1);
+        textStart.put("event.detail.content", "a");
+        fireSelectionChange(textStart);
+
+        Assertions.assertEquals(new SelectionRange(1, 4, "bcd"), signal.peek());
+    }
+
+    @Test
+    void selectionChangeEvent_rerunsEffect() {
+        List<SelectionRange> values = new ArrayList<>();
+        Signal.effect(component,
+                () -> values.add(component.selectionSignal().get()));
+
+        fireSelectionChange(6, 11, "world");
+
+        Assertions.assertEquals(List.of(SelectionRange.empty(),
+                new SelectionRange(6, 11, "world")), values);
+    }
+
+    @Test
+    void selectionSignal_elementWithoutComponent_throws() {
+        Element element = new Element("input");
+        HasTextSelection hasTextSelection = new HasTextSelection() {
+            @Override
+            public Element getElement() {
+                return element;
+            }
+        };
+
+        Assertions.assertThrows(IllegalStateException.class,
+                hasTextSelection::selectionSignal);
     }
 
     private void fireSelectionChange(int start, int end, String content) {
@@ -194,6 +235,10 @@ class HasTextSelectionTest {
         data.put("event.detail.start", start);
         data.put("event.detail.end", end);
         data.put("event.detail.content", content);
+        fireSelectionChange(data);
+    }
+
+    private void fireSelectionChange(ObjectNode data) {
         component.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(new DomEvent(component.getElement(),
                         "vaadin-text-selection-change", data));

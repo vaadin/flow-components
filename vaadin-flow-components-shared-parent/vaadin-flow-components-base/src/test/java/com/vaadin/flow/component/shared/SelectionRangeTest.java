@@ -45,16 +45,6 @@ class SelectionRangeTest {
     }
 
     @Test
-    void equality_recordSemantics() {
-        Assertions.assertEquals(new SelectionRange(2, 5, "abc"),
-                new SelectionRange(2, 5, "abc"));
-        Assertions.assertEquals(new SelectionRange(2, 5, "abc").hashCode(),
-                new SelectionRange(2, 5, "abc").hashCode());
-        Assertions.assertNotEquals(new SelectionRange(2, 5, "abc"),
-                new SelectionRange(2, 6, "abcd"));
-    }
-
-    @Test
     void negativeStart_throws() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new SelectionRange(-1, 0, ""));

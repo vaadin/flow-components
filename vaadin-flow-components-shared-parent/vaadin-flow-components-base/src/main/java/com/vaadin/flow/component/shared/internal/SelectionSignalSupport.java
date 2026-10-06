@@ -19,6 +19,7 @@ import java.io.Serializable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasTextSelection.TextSelectionJs;
 import com.vaadin.flow.component.shared.SelectionRange;
@@ -57,14 +58,21 @@ public final class SelectionSignalSupport implements Serializable {
     }
 
     /**
-     * Returns the selection signal of the given component, creating it and
-     * wiring it to the client on the first call.
+     * Returns the selection signal of the component that owns the element of
+     * the given instance, creating it and wiring it to the client on the first
+     * call.
      *
-     * @param component
-     *            the component to get the selection signal for
+     * @param hasElement
+     *            the instance to get the selection signal for, its element must
+     *            belong to a component
      * @return the read-only selection signal, never {@code null}
+     * @throws IllegalStateException
+     *             if the element does not belong to a component
      */
-    public static Signal<SelectionRange> getOrCreate(Component component) {
+    public static Signal<SelectionRange> getOrCreate(HasElement hasElement) {
+        Component component = hasElement.getElement().getComponent()
+                .orElseThrow(() -> new IllegalStateException(
+                        "The selection signal requires an element that belongs to a component"));
         SelectionSignalSupport support = ComponentUtil.getData(component,
                 SelectionSignalSupport.class);
         if (support == null) {
@@ -89,7 +97,7 @@ public final class SelectionSignalSupport implements Serializable {
         int end = data.get(END).asInt();
         String content = data.get(CONTENT).asString();
         // Ignore tampered values instead of failing in the record constructor
-        if (start < 0 || end < start) {
+        if (start < 0 || end < start || content.length() != end - start) {
             return;
         }
         signal.set(new SelectionRange(start, end, content));
