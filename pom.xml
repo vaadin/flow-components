@@ -351,6 +351,8 @@
 
                           Bundle-Name: ${project.artifactId}
                           Bundle-SymbolicName: ${symbolicName}
+                          // Stable JPMS module name for jars used from the module path
+                          Automatic-Module-Name: ${symbolicName}
 
                           Import-Package: *
                           Export-Package: ${join;${exportPackage};${osgi.export.package.additional}}
