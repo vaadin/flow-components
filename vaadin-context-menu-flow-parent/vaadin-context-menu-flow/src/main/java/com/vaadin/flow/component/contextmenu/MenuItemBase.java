@@ -283,6 +283,10 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         disableOnClickController.onSetEnabled();
     }
 
+    DisableOnClickController<MenuItemBase<C, I, S>> getDisableOnClickController() {
+        return disableOnClickController;
+    }
+
     /**
      * {@inheritDoc}
      * <p>
