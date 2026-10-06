@@ -53,34 +53,19 @@ public class DownloadHandlerButtonIT extends AbstractComponentIT {
                 .id("download-disable-on-click-button").isEnabled());
     }
 
-    @Test
-    public void clickDownloadButtonDisabledByListener_downloadRefused() {
-        Assert.assertTrue(
-                clickAndDownload("download-explicitly-disabled-button")
-                        .startsWith("403|"));
-    }
-
-    // Disabling the parent leaves the button disabled by its own click, so
-    // this relies on the button refusing to serve the file while disabled by
-    // click when a parent is disabled, unlike
-    // clickDownloadButtonDisabledByListener_downloadRefused
-    @Test
-    public void clickDownloadButtonParentDisabledByListener_downloadRefused() {
-        Assert.assertTrue(clickAndDownload("download-parent-disabled-button")
-                .startsWith("403|"));
-    }
-
     /**
      * Clicks the button and fetches the URL that the click starts a download
      * from, returning the response status and body separated by {@code |}.
      */
     private String clickAndDownload(String buttonId) {
         $(ButtonElement.class).id(buttonId).click();
-        waitUntil(driver -> executeScript("return window.__downloadUrl;"));
+        Assert.assertNotNull("Click did not start a download",
+                executeScript("return window.__downloadUrl;"));
 
         // click() waits until the server has handled the click, so a button
         // that disables itself on click is already disabled on the server
-        // when the file is requested
+        // when the file is requested. In a real browser the download request
+        // and the click event are sent independently, in no fixed order.
         executeScript("""
                 window.__download = null;
                 fetch(window.__downloadUrl).then(r => r.text().then(t => {

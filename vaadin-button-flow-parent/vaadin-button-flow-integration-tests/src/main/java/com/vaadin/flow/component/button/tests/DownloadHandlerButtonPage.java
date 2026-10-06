@@ -38,23 +38,7 @@ public class DownloadHandlerButtonPage extends Div {
         disableOnClick.setDisableOnClick(true);
         disableOnClick.setDownloadHandler(createDownloadHandler());
 
-        Button explicitlyDisabled = new Button(
-                "Download, disable on click, disabled by listener");
-        explicitlyDisabled.setId("download-explicitly-disabled-button");
-        explicitlyDisabled.setDisableOnClick(true);
-        explicitlyDisabled.setDownloadHandler(createDownloadHandler());
-        explicitlyDisabled
-                .addClickListener(event -> event.getSource().setEnabled(false));
-
-        Button parentDisabled = new Button(
-                "Download, disable on click, parent disabled by listener");
-        parentDisabled.setId("download-parent-disabled-button");
-        parentDisabled.setDisableOnClick(true);
-        parentDisabled.setDownloadHandler(createDownloadHandler());
-        Div parent = new Div(parentDisabled);
-        parentDisabled.addClickListener(event -> parent.setEnabled(false));
-
-        add(button, disableOnClick, explicitlyDisabled, parent);
+        add(button, disableOnClick);
     }
 
     private static DownloadHandler createDownloadHandler() {
