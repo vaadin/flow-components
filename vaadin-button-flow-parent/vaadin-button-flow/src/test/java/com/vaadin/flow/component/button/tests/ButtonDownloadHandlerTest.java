@@ -27,9 +27,12 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.tests.MockUIExtension;
 
@@ -98,6 +101,33 @@ class ButtonDownloadHandlerTest {
         parent.setEnabled(false);
         parent.setEnabled(true);
 
+        Assertions.assertTrue(requestDownload());
+    }
+
+    @Test
+    void handlerOverridesRequestHandling_overridesUsed() throws IOException {
+        button.setDownloadHandler(new DownloadHandler() {
+            @Override
+            public void handleRequest(VaadinRequest request,
+                    VaadinResponse response, VaadinSession session,
+                    Element owner) {
+                downloads.incrementAndGet();
+            }
+
+            @Override
+            public void handleDownloadRequest(DownloadEvent event) {
+                // Not called, as handleRequest is overridden
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return "report.csv";
+            }
+        });
+
+        Assertions.assertTrue(
+                downloadAttributes().map(button.getElement()::getAttribute)
+                        .findFirst().orElseThrow().endsWith("/report.csv"));
         Assertions.assertTrue(requestDownload());
     }
 
