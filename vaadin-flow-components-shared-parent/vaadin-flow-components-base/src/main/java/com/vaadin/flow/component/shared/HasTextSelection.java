@@ -17,9 +17,12 @@ package com.vaadin.flow.component.shared;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.shared.internal.SelectionSignalSupport;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Mixin interface for field components that wrap a native HTML input and
@@ -83,6 +86,37 @@ public interface HasTextSelection extends HasElement {
     }
 
     /**
+     * Collapses the current selection at its end position, leaving the cursor
+     * there. Does not change the value or the focus.
+     */
+    default void deselect() {
+        getElement().executeJs(TextSelectionJs.class).deselect();
+    }
+
+    /**
+     * Returns a read-only signal with the current text selection of the field.
+     * <p>
+     * The signal updates when the selection or cursor position changes, either
+     * through user interaction or through the methods of this interface.
+     * Updates are debounced, so a burst of changes, such as typing or
+     * drag-selecting, results in a single update with the final selection. You
+     * can read the current selection with {@link Signal#peek()}, for example in
+     * a click listener, or react to changes in an effect.
+     * <p>
+     * Each call returns the same signal instance. Until the field is attached
+     * and reports its first selection, the value is
+     * {@link SelectionRange#empty()}.
+     * <p>
+     * On iOS and Android, the signal does not update for selection changes made
+     * by long-pressing to move the cursor or by dragging the selection handles.
+     *
+     * @return a signal with the current selection, never {@code null}
+     */
+    default Signal<SelectionRange> selectionSignal() {
+        return SelectionSignalSupport.getOrCreate((Component) this);
+    }
+
+    /**
      * For internal use only. May be renamed or removed in a future release.
      */
     @JsDefinition
@@ -117,5 +151,63 @@ public interface HasTextSelection extends HasElement {
                 }, 0)
                 """)
         void setSelectionRange(int selectionStart, int selectionEnd);
+
+        /**
+         * Collapses the selection of the input element at its end position.
+         */
+        // - Defer with setTimeout, same as setSelectionRange
+        @JsExpression("""
+                setTimeout(() => {
+                  const i = this.inputElement;
+                  if (!i) return;
+                  const end = i.selectionEnd || 0;
+                  i.setSelectionRange(end, end);
+                }, 0)
+                """)
+        void deselect();
+
+        /**
+         * Adds listeners to the input element that report selection changes to
+         * the server with a {@code vaadin-text-selection-change} event.
+         */
+        // - Install only once per element, the call is repeated on re-attach
+        // - Debounce, so that a burst of changes (typing, drag-selecting)
+        // results in a single round-trip with the final selection
+        // - Skip unchanged selections, coalesced events can repeat them
+        // - selectionchange covers caret moves, including collapsing a
+        // selection by clicking into it; select is a fallback for browsers
+        // without selectionchange on inputs; input and focus cover value
+        // edits and the initial state
+        @JsExpression("""
+                if (this._textSelectionListenerInstalled) return;
+                this._textSelectionListenerInstalled = true;
+                let last;
+                let timer;
+                const report = () => {
+                  const i = this.inputElement;
+                  if (!i) return;
+                  const start = i.selectionStart || 0;
+                  const end = i.selectionEnd || 0;
+                  const content = (i.value || '').substring(start, end);
+                  const key = start + ':' + end + ':' + content;
+                  if (key === last) return;
+                  last = key;
+                  this.dispatchEvent(new CustomEvent('vaadin-text-selection-change', {
+                    detail: { start, end, content }
+                  }));
+                };
+                const reportDebounced = () => {
+                  clearTimeout(timer);
+                  timer = setTimeout(report, 100);
+                };
+                (this.updateComplete || Promise.resolve()).then(() => {
+                  const i = this.inputElement;
+                  if (!i) return;
+                  ['selectionchange', 'select', 'input', 'focus'].forEach(
+                    (type) => i.addEventListener(type, reportDebounced));
+                  report();
+                });
+                """)
+        void installSelectionListener();
     }
 }

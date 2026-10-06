@@ -77,6 +77,14 @@ public class TextSelectionPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void textField_deselect_collapsesSelectionAtEnd() {
+        clickElementWithJs("text-field-set-range");
+        clickElementWithJs("text-field-deselect");
+
+        assertSelection(textField, 7, 7);
+    }
+
+    @Test
     public void textField_selectAll_focusIsFromServer() {
         clickElementWithJs("text-field-select-all");
 
@@ -99,6 +107,28 @@ public class TextSelectionPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void textArea_selectionSignal_reflectsSelection() {
+        TestBenchElement selection = $("div").id("text-area-selection");
+
+        clickElementWithJs("text-area-set-range");
+        waitUntil(driver -> selection.getText().equals("2-7:rem i"));
+
+        selectWithJs(textArea, 6, 11);
+        waitUntil(driver -> selection.getText().equals("6-11:ipsum"));
+    }
+
+    @Test
+    public void textArea_selectionSignal_clickListenerReadsCurrentSelection() {
+        TestBenchElement selection = $("div").id("text-area-selection");
+        selectWithJs(textArea, 6, 11);
+        waitUntil(driver -> selection.getText().equals("6-11:ipsum"));
+
+        clickElementWithJs("text-area-uppercase");
+
+        Assert.assertEquals("Lorem IPSUM dolor sit amet", textArea.getValue());
+    }
+
+    @Test
     public void passwordField_setSelectionRange_selectsRangeAndFocuses() {
         clickElementWithJs("password-field-set-range");
 
@@ -112,6 +142,13 @@ public class TextSelectionPageIT extends AbstractComponentIT {
                         + "return [input.selectionStart, input.selectionEnd];",
                 field);
         Assert.assertEquals(List.of((long) start, (long) end), selection);
+    }
+
+    private void selectWithJs(TestBenchElement field, int start, int end) {
+        executeScript("const input = arguments[0].inputElement;"
+                + "input.focus();"
+                + "input.setSelectionRange(arguments[1], arguments[2]);", field,
+                start, end);
     }
 
     private void assertTextFieldFocusFromServer() {

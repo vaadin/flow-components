@@ -26,9 +26,16 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.shared.HasTextSelection.TextSelectionJs;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.MockUIExtension;
+
+import tools.jackson.databind.node.ObjectNode;
 
 class HasTextSelectionTest {
 
@@ -86,6 +93,117 @@ class HasTextSelectionTest {
         Assertions.assertEquals(2, calls.size());
         Assertions.assertEquals(List.of(2, 7), calls.get(0).arguments());
         Assertions.assertEquals(List.of(4, 4), calls.get(1).arguments());
+    }
+
+    @Test
+    void deselect_collapsesSelection() {
+        component.deselect();
+
+        List<JsCall> calls = dumpTextSelectionCalls();
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals("deselect", calls.get(0).methodName());
+        Assertions.assertEquals(List.of(), calls.get(0).arguments());
+    }
+
+    @Test
+    void selectionSignal_initialValueIsEmpty() {
+        Assertions.assertEquals(SelectionRange.empty(),
+                component.selectionSignal().peek());
+    }
+
+    @Test
+    void selectionSignal_returnsSameReadonlyInstance() {
+        Signal<SelectionRange> signal = component.selectionSignal();
+
+        Assertions.assertSame(signal, component.selectionSignal());
+        Assertions.assertFalse(signal instanceof ValueSignal);
+    }
+
+    @Test
+    void selectionSignal_attached_installsSelectionListener() {
+        component.selectionSignal();
+
+        assertInstallSelectionListenerCalls(1);
+    }
+
+    @Test
+    void selectionSignal_detached_installsSelectionListenerOnAttach() {
+        ui.remove(component);
+        component.selectionSignal();
+        assertInstallSelectionListenerCalls(0);
+
+        ui.add(component);
+        assertInstallSelectionListenerCalls(1);
+    }
+
+    @Test
+    void selectionSignal_reattach_reinstallsSelectionListener() {
+        component.selectionSignal();
+        dumpTextSelectionCalls();
+
+        ui.remove(component);
+        ui.add(component);
+
+        assertInstallSelectionListenerCalls(1);
+    }
+
+    @Test
+    void selectionSignal_multipleCalls_installsSelectionListenerOnce() {
+        component.selectionSignal();
+        component.selectionSignal();
+
+        assertInstallSelectionListenerCalls(1);
+    }
+
+    @Test
+    void selectionChangeEvent_updatesSelectionSignal() {
+        Signal<SelectionRange> signal = component.selectionSignal();
+
+        fireSelectionChange(6, 11, "world");
+        Assertions.assertEquals(new SelectionRange(6, 11, "world"),
+                signal.peek());
+
+        fireSelectionChange(4, 4, "");
+        Assertions.assertEquals(new SelectionRange(4, 4, ""), signal.peek());
+    }
+
+    @Test
+    void selectionChangeEvent_reattach_updatesSelectionSignal() {
+        Signal<SelectionRange> signal = component.selectionSignal();
+        ui.remove(component);
+        ui.add(component);
+
+        fireSelectionChange(0, 3, "Hel");
+
+        Assertions.assertEquals(new SelectionRange(0, 3, "Hel"), signal.peek());
+    }
+
+    @Test
+    void selectionChangeEvent_invalidRange_ignored() {
+        Signal<SelectionRange> signal = component.selectionSignal();
+        fireSelectionChange(1, 4, "bcd");
+
+        fireSelectionChange(-1, 4, "abcd");
+        fireSelectionChange(5, 2, "");
+
+        Assertions.assertEquals(new SelectionRange(1, 4, "bcd"), signal.peek());
+    }
+
+    private void fireSelectionChange(int start, int end, String content) {
+        ObjectNode data = JacksonUtils.createObjectNode();
+        data.put("event.detail.start", start);
+        data.put("event.detail.end", end);
+        data.put("event.detail.content", content);
+        component.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(component.getElement(),
+                        "vaadin-text-selection-change", data));
+    }
+
+    private void assertInstallSelectionListenerCalls(int expected) {
+        long count = dumpTextSelectionCalls().stream().filter(
+                call -> call.methodName().equals("installSelectionListener"))
+                .count();
+        Assertions.assertEquals(expected, count);
     }
 
     private void assertSelectionRangeCall(int selectionStart,
