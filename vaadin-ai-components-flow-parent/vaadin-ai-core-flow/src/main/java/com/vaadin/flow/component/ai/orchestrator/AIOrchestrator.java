@@ -146,6 +146,12 @@ public class AIOrchestrator implements Serializable {
     private static final int TIMEOUT_SECONDS = 600;
 
     /**
+     * Shown in the message list in place of, or after, the assistant's answer
+     * when a turn fails for a reason the user cannot act on.
+     */
+    private static final String GENERIC_ERROR_MESSAGE = "An error occurred. Please try again.";
+
+    /**
      * The feature flag ID for AI components.
      */
     static final String FEATURE_FLAG_ID = AIComponentsFeatureFlagProvider.FEATURE_FLAG_ID;
@@ -473,7 +479,7 @@ public class AIOrchestrator implements Serializable {
                 LOGGER.warn("LLM request timed out after {} seconds",
                         TIMEOUT_SECONDS);
             } else {
-                userMessage = "An error occurred. Please try again.";
+                userMessage = GENERIC_ERROR_MESSAGE;
                 LOGGER.error("Error during LLM streaming", error);
             }
             if (messageList != null) {
@@ -620,7 +626,7 @@ public class AIOrchestrator implements Serializable {
             // fireResponseListener (which appends rather than rewrites).
             var message = getOrCreateAssistantMessage(assistantMessage);
             if (message != null) {
-                message.setText("An error occurred. Please try again.");
+                message.setText(GENERIC_ERROR_MESSAGE);
             }
             throw t;
         }
@@ -920,8 +926,8 @@ public class AIOrchestrator implements Serializable {
             // the success path: the failure path already rewrote the
             // assistant message to a generic error message.
             if (messageList != null) {
-                messageList.addMessage("An error occurred. Please try again.",
-                        assistantName, Collections.emptyList());
+                messageList.addMessage(GENERIC_ERROR_MESSAGE, assistantName,
+                        Collections.emptyList());
             }
             return new ResponseListener.ResponseEvent("", e,
                     event.getMetadata().orElse(null));
