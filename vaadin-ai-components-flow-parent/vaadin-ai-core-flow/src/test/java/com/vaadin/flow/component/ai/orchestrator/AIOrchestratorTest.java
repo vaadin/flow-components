@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
@@ -3929,6 +3930,31 @@ class AIOrchestratorTest {
         Assertions.assertEquals("Response", responseText.get());
         Assertions.assertEquals("Response", orchestrator.getHistory()
                 .get(orchestrator.getHistory().size() - 1).content());
+    }
+
+    @Test
+    void responseListener_withoutController_runsWithSessionLocked()
+            throws Exception {
+        // The turn ends on a background thread, which holds the session lock
+        // only inside a ui.access() task.
+        var turnEnded = new CountDownLatch(1);
+        var sessionLocked = new AtomicBoolean();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response")
+                        .subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    sessionLocked.set(ui.getSession().hasLock());
+                    turnEnded.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
+                "The turn never completed");
+        Assertions.assertTrue(sessionLocked.get(),
+                "The response listener must run with the session locked");
     }
 
     @Test
