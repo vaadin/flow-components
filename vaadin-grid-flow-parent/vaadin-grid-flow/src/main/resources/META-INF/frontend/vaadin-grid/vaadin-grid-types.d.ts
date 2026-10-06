@@ -31,6 +31,15 @@ export type ItemRange = [start: number, end: number];
 
 export type SelectionMode = 'SINGLE' | 'MULTI' | 'NONE';
 
+/** A row move that the client applied before the server confirmed it */
+export interface RowMove {
+  /** The number of the drop that caused the move, counted from 1 */
+  drop: number;
+  draggedKeys: string[];
+  targetKey: string;
+  location: 'above' | 'below';
+}
+
 /** A row element in the grid body */
 export type FlowGridRow = HTMLTableRowElement & {
   index: number;
@@ -73,6 +82,8 @@ export interface FlowGridInternals {
   __deselectDisallowed: boolean;
   __disallowDetailsOnClick: boolean;
   __dragDataTypes?: string[];
+  __optimisticRowReorder?: boolean;
+  __dropsHandled?: number;
   __selectionDragData?: Record<string, string>;
   __selectionDraggedItemsCount?: number;
   _columnTree: GridColumn<Item>[][];
