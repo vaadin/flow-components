@@ -51,6 +51,9 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -447,6 +450,13 @@ public class Button extends Component
      */
     private DownloadHandler allowDisabledByClick(DownloadHandler delegate) {
         return new DownloadHandler() {
+            @Override
+            public void handleRequest(VaadinRequest request,
+                    VaadinResponse response, VaadinSession session,
+                    Element owner) throws IOException {
+                delegate.handleRequest(request, response, session, owner);
+            }
+
             @Override
             public void handleDownloadRequest(DownloadEvent event)
                     throws IOException {
