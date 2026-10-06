@@ -165,14 +165,16 @@ import tools.jackson.databind.JsonNode;
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
  * the user can currently edit (visible, enabled, and not already read-only) is
  * made read-only <em>on the client</em> so the user cannot type into a field
- * the AI is about to overwrite. This is a UX guard only: the field's
- * server-side read-only state is never changed, so it does not affect what the
- * LLM sees or writes, and a field's application-set read-only state is left
- * untouched. The guard is applied and cleared together with the "AI is working"
- * state (see below), so it is released when the turn ends, successfully or
- * otherwise. A field switched to read-only on the server mid-turn — for example
- * by a value-change listener reacting to one of the AI's writes — stays
- * read-only on the client when the guard is released.
+ * the AI is about to overwrite. A field that becomes editable during the fill,
+ * for example because a value-change listener enables or reveals it in reaction
+ * to one of the AI's writes, is locked from then on as well. This is a UX guard
+ * only: the field's server-side read-only state is never changed, so it does
+ * not affect what the LLM sees or writes, and a field's application-set
+ * read-only state is left untouched. The guard is applied and cleared together
+ * with the "AI is working" state (see below), so it is released when the turn
+ * ends, successfully or otherwise. A field switched to read-only on the server
+ * mid-turn — for example by a value-change listener reacting to one of the AI's
+ * writes — stays read-only on the client when the guard is released.
  * </p>
  *
  * <p>
@@ -1498,7 +1500,7 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Puts every field the AI can write this turn into the "AI is working"
+     * Puts every field the AI can write at turn start into the "AI is working"
      * state: a shimmer plus a client-side read-only guard so the user cannot
      * type into a field the AI is about to overwrite. The read-only guard is
      * applied on the client only — it never changes the field's server-side
@@ -1508,12 +1510,26 @@ public class FormAIController implements AIController {
      * state must not be touched. The state is carried by the field's marker, so
      * a field that has none yet gets one; it stays hidden while the state is
      * on. Tracks the affected fields so {@link #stopWorking()} clears exactly
-     * these at turn end, even the ones detached during the turn.
+     * these at turn end, even the ones detached during the turn. Fields that
+     * become writable later in the turn join through
+     * {@link #startWorkingOnWritableFields()}.
      */
     private void startWorking() {
         stopWorking();
+        startWorkingOnWritableFields();
+    }
+
+    /**
+     * Puts every field the AI can write right now into the "AI is working"
+     * state, skipping the fields already in it. Besides turn start, runs after
+     * each {@code fill_form} write pass: a write can make another field
+     * writable, for example a value-change listener enabling or revealing a
+     * dependent field, and the AI may fill that field in the same turn.
+     */
+    private void startWorkingOnWritableFields() {
         for (var field : collectActiveFields()) {
-            if (isDisabled(field) || field.isReadOnly()) {
+            if (workingFields.contains(field) || isDisabled(field)
+                    || field.isReadOnly()) {
                 continue;
             }
             if (field instanceof Component component) {
@@ -1527,9 +1543,9 @@ public class FormAIController implements AIController {
 
     /**
      * Clears the "AI is working" state (shimmer + client-side read-only guard)
-     * from the fields {@link #startWorking()} set. A field that is marked keeps
-     * its marker, which becomes visible again as the state clears; a field that
-     * is not loses the marker that only carried the state.
+     * from every field put into it this turn. A field that is marked keeps its
+     * marker, which becomes visible again as the state clears; a field that is
+     * not loses the marker that only carried the state.
      */
     private void stopWorking() {
         for (var field : workingFields) {
@@ -1831,6 +1847,14 @@ public class FormAIController implements AIController {
                         rejected)) {
                     writtenValues.put(id, value);
                 }
+            }
+            // The writes may have made more fields writable. Lock them for the
+            // rest of the turn, but only while a turn runs: only turn end
+            // releases the lock, so a fill landing after it, for example from
+            // a tool call still running when the stream timed out, would leave
+            // the fields locked.
+            if (turn.filling) {
+                startWorkingOnWritableFields();
             }
             if (sources.isObject()) {
                 for (var id : sources.propertyNames()) {
