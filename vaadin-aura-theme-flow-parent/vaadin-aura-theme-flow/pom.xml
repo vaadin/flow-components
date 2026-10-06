@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>Vaadin Aura Theme</name>
     <description>Vaadin Aura Theme</description>
+    <properties>
+        <osgi.export.package>com.vaadin.flow.theme.aura</osgi.export.package>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
