@@ -551,7 +551,7 @@ class RequestInterceptorTest {
 
         orchestrator.prompt("first");
 
-        Assertions.assertTrue(errorReported.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, errorReported),
                 "Timeout must fail the turn");
         Assertions.assertInstanceOf(TimeoutException.class,
                 reportedError.get());
@@ -574,7 +574,7 @@ class RequestInterceptorTest {
                 .withResponseListener(event -> timedOut.countDown()).build();
 
         orchestrator.prompt("Hello");
-        Assertions.assertTrue(timedOut.await(5, TimeUnit.SECONDS));
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, timedOut));
 
         continuation.get().proceed();
 
@@ -605,12 +605,12 @@ class RequestInterceptorTest {
             throws Exception {
         // The scenario behind provider background execution: a postponed
         // prompt resumes and the provider schedules the turn itself. The
-        // resumed turn must run and end normally. Two mock-session limits
-        // shape the test: the session lock is permanently held by the test
-        // thread, so both the resume and the turn's ui.access updates must
-        // avoid foreign-thread lock acquisition — proceed() runs on the test
-        // thread and no message list is attached. The cross-thread resume
-        // with a live message list is covered by the manual catalog's C4.
+        // resumed turn must run and end normally. The mock session's lock
+        // shapes the test: the test thread holds it, so the resume runs there
+        // (proceed() is called on it), no message list is attached, and the
+        // wait for the end-of-turn hooks releases the lock for them. The
+        // cross-thread resume with a live message list is covered by the
+        // manual catalog's C4.
         var turnEnded = new CountDownLatch(1);
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
         Mockito.when(
@@ -632,7 +632,7 @@ class RequestInterceptorTest {
 
         continuation.get().proceed();
 
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The resumed turn never completed");
         Assertions.assertEquals(1, responseEvents.size());
         Assertions.assertTrue(responseEvents.getFirst().getError().isEmpty(),

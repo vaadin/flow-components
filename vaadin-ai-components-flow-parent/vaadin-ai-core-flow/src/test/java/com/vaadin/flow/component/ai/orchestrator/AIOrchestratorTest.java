@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
@@ -2257,11 +2258,9 @@ class AIOrchestratorTest {
                 .thenReturn(Flux.error(streamError));
 
         var controller = mockController();
-        AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .withResponseListener(event -> {
-                    throw new RuntimeException("listener died");
-                }).build().prompt("Hello");
+        orchestratorWith(controller, event -> {
+            throw new RuntimeException("listener died");
+        }).prompt("Hello");
 
         Mockito.verify(controller).onResponse(errorIs(streamError));
     }
@@ -2458,11 +2457,8 @@ class AIOrchestratorTest {
             }
         };
 
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withMessageList(mockMessageList).withController(controller)
-                .withResponseListener(
-                        event -> listenerCapture.add(event.getResponse()))
-                .build();
+        var orchestrator = orchestratorWith(controller,
+                event -> listenerCapture.add(event.getResponse()));
         orchestrator.prompt("Hello");
 
         Assertions.assertEquals(1, listenerCapture.size());
@@ -2779,6 +2775,75 @@ class AIOrchestratorTest {
         Mockito.verify(mockMessageList, Mockito.never()).addMessage(
                 Mockito.eq("An error occurred. Please try again."),
                 Mockito.anyString(), Mockito.anyList());
+    }
+
+    @Test
+    void onResponseThrows_onSuccessPath_responseListenerReceivesTheThrow() {
+        // A turn the model completed but the controller could not apply
+        // must not reach the listener as a success: the listener is the
+        // application's only hook to tell the user why nothing happened.
+        stubAddMessage();
+        var metadata = new ResponseMetadata("stop",
+                new ResponseMetadata.TokenUsage(40, 10, 50));
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenAnswer(invocation -> {
+                    LLMProvider.LLMRequest request = invocation.getArgument(0);
+                    request.metadataSink().accept(metadata);
+                    return Flux.just("Done, see the grid.");
+                });
+        var applyFailure = new IllegalStateException("query failed on apply");
+        var controller = mockController();
+        Mockito.doThrow(applyFailure).when(controller)
+                .onResponse(Mockito.any());
+        var listener = Mockito.mock(ResponseListener.class);
+
+        orchestratorWith(controller, listener).prompt("Hello");
+
+        var captor = ArgumentCaptor
+                .forClass(ResponseListener.ResponseEvent.class);
+        Mockito.verify(listener).onResponse(captor.capture());
+        var event = captor.getValue();
+        Assertions.assertSame(applyFailure, event.getError().orElse(null));
+        Assertions.assertEquals("", event.getResponse(),
+                "A failed turn carries no response text");
+        Assertions.assertSame(metadata, event.getMetadata().orElse(null),
+                "The provider's metadata still describes the turn");
+    }
+
+    @Test
+    void onResponseThrows_onFailurePath_responseListenerKeepsStreamError() {
+        stubAddMessage();
+        var streamError = new RuntimeException("API died");
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.error(streamError));
+        var controller = mockController();
+        Mockito.doThrow(new RuntimeException("controller blew up"))
+                .when(controller).onResponse(Mockito.any());
+        var listener = Mockito.mock(ResponseListener.class);
+
+        orchestratorWith(controller, listener).prompt("Hello");
+
+        // The error the turn failed with stands; the controller's own throw
+        // while handling it is only logged.
+        Mockito.verify(listener).onResponse(errorIs(streamError));
+    }
+
+    @Test
+    void withController_responseListenerFiresAfterControllerOnResponse() {
+        stubAddMessage();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var controller = mockController();
+        var listener = Mockito.mock(ResponseListener.class);
+
+        orchestratorWith(controller, listener).prompt("Hello");
+
+        var inOrder = Mockito.inOrder(controller, listener);
+        inOrder.verify(controller).onResponse(noError());
+        inOrder.verify(listener).onResponse(noError());
     }
 
     @Test
@@ -3714,6 +3779,21 @@ class AIOrchestratorTest {
                         + "not swallowed silently");
     }
 
+    @Test
+    void noResponseListener_turnEndsWithoutAnError() {
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+        var orchestrator = AIOrchestrator.builder(mockProvider, null).build();
+
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .noneMatch(event -> event.getLevel() == Level.ERROR),
+                "A turn without a response listener must not report an error");
+    }
+
     private void assertBuilderWarning(String fieldName) {
         var warning = logger.getLoggingEvents().stream().filter(
                 e -> e.getMessage().contains("was already set on the builder"))
@@ -3842,7 +3922,7 @@ class AIOrchestratorTest {
                 }).build();
         orchestrator.prompt("Hello");
 
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The turn never completed");
         Assertions.assertNotSame(Thread.currentThread(), listenerThread.get(),
                 "A self-scheduling provider must carry the turn without the "
@@ -3850,6 +3930,31 @@ class AIOrchestratorTest {
         Assertions.assertEquals("Response", responseText.get());
         Assertions.assertEquals("Response", orchestrator.getHistory()
                 .get(orchestrator.getHistory().size() - 1).content());
+    }
+
+    @Test
+    void responseListener_withoutController_runsWithSessionLocked()
+            throws Exception {
+        // The turn ends on a background thread, which holds the session lock
+        // only inside a ui.access() task.
+        var turnEnded = new CountDownLatch(1);
+        var sessionLocked = new AtomicBoolean();
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response")
+                        .subscribeOn(Schedulers.boundedElastic()));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withResponseListener(event -> {
+                    sessionLocked.set(ui.getSession().hasLock());
+                    turnEnded.countDown();
+                }).build();
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
+                "The turn never completed");
+        Assertions.assertTrue(sessionLocked.get(),
+                "The response listener must run with the session locked");
     }
 
     @Test
@@ -3886,7 +3991,7 @@ class AIOrchestratorTest {
                 "prompt() must return while the turn is still running");
 
         release.countDown();
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The turn never completed after release");
     }
 
@@ -3929,7 +4034,7 @@ class AIOrchestratorTest {
                 .stream(Mockito.any(LLMProvider.LLMRequest.class));
 
         release.countDown();
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The first turn never completed after release");
         Assertions.assertTrue(
                 orchestrator.getHistory().stream().noneMatch(
@@ -3957,7 +4062,7 @@ class AIOrchestratorTest {
                     firstDone.countDown();
                 }).build();
         orchestrator.prompt("First");
-        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, firstDone),
                 "First turn never completed");
         Assertions.assertTrue(firstEvent.get().getError().isEmpty(),
                 "The first turn was expected to complete successfully, got: "
@@ -4001,7 +4106,7 @@ class AIOrchestratorTest {
                     firstDone.countDown();
                 }).build();
         orchestrator.prompt("First");
-        Assertions.assertTrue(firstDone.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, firstDone),
                 "First turn never ended");
         Assertions.assertTrue(firstEvent.get().getError().isPresent(),
                 "The first turn was expected to fail with the stream error");
@@ -4165,8 +4270,9 @@ class AIOrchestratorTest {
 
         Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
                 "The turn must still end after the UI detached");
-        // The listener fires just before the controller hook would run on
-        // the same thread — after() covers that window.
+        // On a detached UI the listener fires directly, in place of the
+        // controller hook it would otherwise follow; after() covers the
+        // window in which the hook would have run.
         Mockito.verify(controller, Mockito.after(500).never())
                 .onResponse(Mockito.any());
     }
@@ -4175,6 +4281,13 @@ class AIOrchestratorTest {
         return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)
                 .build();
+    }
+
+    private AIOrchestrator orchestratorWith(AIController controller,
+            ResponseListener listener) {
+        return AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withController(controller)
+                .withResponseListener(listener).build();
     }
 
     private void prompt(String message) {

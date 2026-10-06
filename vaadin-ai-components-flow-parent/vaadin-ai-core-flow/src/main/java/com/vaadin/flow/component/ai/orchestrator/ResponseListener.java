@@ -52,20 +52,25 @@ import com.vaadin.flow.component.ai.provider.ResponseMetadata;
  * preceding {@link AIController#onRequest(RequestListener.RequestEvent)}, so an
  * error does not imply that per-turn setup has happened.
  * <p>
+ * A turn the model completed but the {@link AIController} could not apply is a
+ * failure too: when {@link AIController#onResponse(ResponseEvent)} throws on a
+ * successful turn, the listener receives that exception as the error, with an
+ * empty response text. The assistant's text stays in the message list and in
+ * {@link AIOrchestrator#getHistory()}, since the model did produce it. A throw
+ * while the controller handles a turn that had already failed does not replace
+ * the original error.
+ * <p>
  * The listener is <b>not</b> called when history is restored via
  * {@code Builder.withHistory()}.
  * <p>
- * <b>Threading:</b> the listener is called from whichever thread ends the turn.
- * Stream completion and stream errors arrive on a background thread — where
- * blocking I/O (e.g. database writes) is safe — unless the provider runs the
- * turn on the thread that triggered the prompt, in which case the listener runs
- * there too and blocking prolongs the current request. That is the case for a
- * non-streaming provider with background execution disabled, which is the
- * default. Interception timeouts arrive on a blocking-tolerant Reactor thread,
- * synchronous failures on the UI thread, and a postponed prompt completes on
- * the application's own thread. To update Vaadin UI components from this
- * listener, use {@code ui.access()}.
- * 
+ * <b>Threading:</b> the listener runs as a {@code ui.access()} task, right
+ * after {@link AIController#onResponse(ResponseEvent)} when a controller is
+ * attached. The session is locked and the Vaadin thread locals are bound, so UI
+ * components can be updated directly; blocking work (e.g. database writes)
+ * holds the session lock for its duration, as in any {@code ui.access()} task.
+ * If the UI is detached when the turn ends, the listener still runs, without a
+ * session and without the controller hook.
+ *
  * @since 25.3
  */
 @FunctionalInterface

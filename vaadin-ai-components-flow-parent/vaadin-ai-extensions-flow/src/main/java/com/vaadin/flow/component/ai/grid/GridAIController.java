@@ -71,7 +71,10 @@ import tools.jackson.databind.JsonNode;
  * <p>
  * If the LLM turn fails, {@link #onResponse(ResponseListener.ResponseEvent)}
  * fires with the cause — pending changes are discarded and the grid keeps its
- * last successfully-rendered state.
+ * last successfully-rendered state. If the turn succeeds but the pending query
+ * fails when the grid is rendered, the exception propagates to the
+ * orchestrator, which reports it to the {@link ResponseListener} as the error
+ * of the turn.
  * </p>
  * <p>
  * <b>Serialization:</b> This controller is not serialized with the
