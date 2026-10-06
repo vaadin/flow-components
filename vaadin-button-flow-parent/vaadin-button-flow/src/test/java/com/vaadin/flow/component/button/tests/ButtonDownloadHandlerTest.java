@@ -17,6 +17,7 @@ package com.vaadin.flow.component.button.tests;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -108,15 +109,29 @@ class ButtonDownloadHandlerTest {
         Assertions.assertTrue(requestDownload());
     }
 
+    @Test
+    void replacedAndCleared_onlyCurrentHandlerRegistered() {
+        DownloadHandler replacement = event -> downloads.incrementAndGet();
+        button.setDownloadHandler(replacement);
+
+        Assertions.assertSame(replacement, button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setDownloadHandler(null);
+
+        Assertions.assertNull(button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(0, downloadAttributes().count());
+    }
+
     /**
      * Sends a request for the button's download URL through Flow's stream
      * request handler and returns whether the handler served the file.
      */
     private boolean requestDownload() throws IOException {
-        String url = button.getElement().getAttributeNames()
-                .filter(name -> name.startsWith("data-flow-download-"))
-                .map(button.getElement()::getAttribute).findFirst()
-                .orElseThrow();
+        String url = downloadAttributes().map(button.getElement()::getAttribute)
+                .findFirst().orElseThrow();
         VaadinRequest request = Mockito.mock(VaadinRequest.class);
         Mockito.when(request.getPathInfo()).thenReturn("/" + url);
         VaadinResponse response = Mockito.mock(VaadinResponse.class);
@@ -135,5 +150,13 @@ class ButtonDownloadHandlerTest {
             Mockito.verify(response).sendError(403, "Resource not available");
         }
         return served;
+    }
+
+    // Each registered download handler is kept as a stream resource attribute
+    // on the button element, so these tell which handlers the browser can
+    // still download from.
+    private Stream<String> downloadAttributes() {
+        return button.getElement().getAttributeNames()
+                .filter(name -> name.startsWith("data-flow-download-"));
     }
 }
