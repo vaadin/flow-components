@@ -2452,9 +2452,9 @@ class FormAIControllerTest {
         @Test
         void fieldRevealedDuringTurnIsMarked() {
             // A field hidden at turn start gets no working state, so nothing
-            // has put a marker on it yet. When the AI reveals and fills it
-            // during the turn — the cascade case — the turn-end marking is
-            // what has to add one.
+            // has put a marker on it yet. When it is revealed and filled
+            // during the turn without going through fill_form, the turn-end
+            // marking is what has to add one.
             var trigger = new TestField();
             var revealed = new TestField();
             revealed.setVisible(false);
