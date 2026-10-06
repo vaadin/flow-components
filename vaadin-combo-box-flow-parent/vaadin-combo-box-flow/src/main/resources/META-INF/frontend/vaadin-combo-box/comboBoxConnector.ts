@@ -21,6 +21,8 @@ export class ComboBoxConnector {
   #lastRequestedRange: ItemRange = [-1, -1];
   #lastRequestedFilter = '';
   #needsDataCommunicatorReset = false;
+  // The web component cache that the last server request was made for
+  #requestedRootCache: FlowComboBox['__dataProviderController']['rootCache'] | null = null;
 
   constructor(comboBox: FlowComboBox) {
     this.#comboBox = comboBox;
@@ -122,7 +124,7 @@ export class ComboBoxConnector {
     this.#cache = {};
     this.#lastRequestedRange = [-1, -1];
     this.#lastTypedFilter = '';
-    comboBox.clearCache();
+    this.#clearCache();
   }
 
   confirm(id: number, filter: string): void {
@@ -150,6 +152,16 @@ export class ComboBoxConnector {
 
     // Let server know we're done
     comboBox.$server.confirmUpdate(id);
+  }
+
+  /**
+   * Clears the web component cache from the connector. The server side is
+   * already in sync in that case, so the next request does not need to reset
+   * the data communicator.
+   */
+  #clearCache(): void {
+    this.#requestedRootCache = null;
+    this.#comboBox.clearCache();
   }
 
   #loadPage(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<Item>): void {
@@ -183,7 +195,7 @@ export class ComboBoxConnector {
             this.#needsDataCommunicatorReset = true;
           }
 
-          comboBox.clearCache();
+          this.#clearCache();
         }
       );
       return;
@@ -233,6 +245,15 @@ export class ComboBoxConnector {
       const endIndex = (viewportPageRange[1] + 1) * comboBox.pageSize;
       comboBox.$server.setViewportRange(startIndex, endIndex - startIndex, filter);
     }
+
+    // The web component cleared its cache on its own (e.g. the multi-select
+    // combo box does that when readonly is turned off). The server considers
+    // the range as already sent, so force it to send it again.
+    const { rootCache } = comboBox.__dataProviderController;
+    if (this.#requestedRootCache && this.#requestedRootCache !== rootCache) {
+      this.#needsDataCommunicatorReset = true;
+    }
+    this.#requestedRootCache = rootCache;
 
     if (this.#needsDataCommunicatorReset) {
       comboBox.$server.resetDataCommunicator();
