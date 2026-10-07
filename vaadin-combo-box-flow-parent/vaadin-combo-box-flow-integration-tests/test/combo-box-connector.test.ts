@@ -171,6 +171,7 @@ describe('combo-box connector', () => {
       comboBox.$connector.confirm(1, '');
       comboBox.opened = false;
       await nextFrame();
+      comboBox.$server.setViewportRange.resetHistory();
     });
 
     it('should reset the data communicator when reopened after the web component cleared its cache', async () => {
@@ -183,10 +184,13 @@ describe('combo-box connector', () => {
     });
 
     it('should not reset the data communicator when loading another page', async () => {
+      comboBox.inputElement.focus();
       comboBox.opened = true;
       await nextFrame();
 
-      comboBox.__dataProviderController.ensureFlatIndexLoaded(comboBox.pageSize);
+      // Highlights the last item, which scrolls to the last page
+      await sendKeys({ press: 'ArrowUp' });
+      await nextFrame();
 
       expect(comboBox.$server.setViewportRange).to.be.called;
       expect(comboBox.$server.resetDataCommunicator).to.be.not.called;
@@ -214,14 +218,14 @@ describe('combo-box connector', () => {
         clock.restore();
       });
 
-      it('should reset the data communicator when the filter changes back to the last requested one', async () => {
+      it('should reset the data communicator when filtering', async () => {
         comboBox.opened = true;
         await nextFrame();
 
         comboBox.filter = 'a';
-        comboBox.filter = '';
         clock.tick(500);
 
+        expect(comboBox.$server.setViewportRange).to.be.calledWith(0, comboBox.pageSize, 'a');
         expect(comboBox.$server.resetDataCommunicator).to.be.calledOnce;
       });
     });
