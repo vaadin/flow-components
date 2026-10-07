@@ -2131,66 +2131,31 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /**
    * Adjust {@code scrollContainer.scrollLeft / scrollTop} so the
    * given cell (either the new active cell or the extend cell
-   * after shift+arrow) is visible. Sets scrollLeft/Top in-place;
-   * the existing `scroll` listener triggers a fresh
-   * recomputeViewport. Slice 156.
-   *
-   * Pure-ish: reads `this.colWidths / rowHeights / defRowHeight /
-   * hiddenRowIndexes / hiddenColumnIndexes`. Side effect = scroll
-   * adjustment.
+   * after shift+arrow) is in full view, by the GWT client's rule -
+   * see {@link scrollToShow}. Sets scrollLeft/Top in-place; the
+   * existing `scroll` listener triggers a fresh recomputeViewport.
+   * Slice 156.
    */
   private scrollCellIntoView(target: { col: number; row: number }): void {
     if (this.rows <= 0 || this.cols <= 0) {
       return;
     }
-    const ppi = FALLBACK_PPI;
-    const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
-    const hiddenColSet = new Set(this.hiddenColumnIndexes);
-    const hiddenRowSet = new Set(this.hiddenRowIndexes);
-    const colWidth = (c: number): number => {
-      if (hiddenColSet.has(c)) return 0;
-      return c > this.colWidths.length ? this.defColWidth : this.colWidths[c - 1];
-    };
-    const rowHeight = (r: number): number => {
-      if (hiddenRowSet.has(r)) return 0;
-      return r > this.rowHeights.length ? defaultRowHeightPx : convertPointsToPixel(this.rowHeights[r - 1], ppi);
-    };
-
-    let left = 0;
-    for (let c = 1; c < target.col; c++) {
-      left += colWidth(c);
+    const sc = this.scrollContainer;
+    // The cells' part of the view: the header strips stick to its top and
+    // left edges, and the cell grid starts where they end.
+    const viewWidth = sc.clientWidth - this.cellGrid.offsetLeft;
+    const viewHeight = sc.clientHeight - this.cellGrid.offsetTop;
+    const left = scrollToShow(target.col, this.horizontalSplitPosition, this.cols, sc.scrollLeft, viewWidth, (c) =>
+      this.colWidthPx(c)
+    );
+    const top = scrollToShow(target.row, this.verticalSplitPosition, this.rows, sc.scrollTop, viewHeight, (r) =>
+      this.rowHeightPx(r)
+    );
+    if (left !== sc.scrollLeft) {
+      sc.scrollLeft = left;
     }
-    const width = colWidth(target.col);
-    let top = 0;
-    for (let r = 1; r < target.row; r++) {
-      top += rowHeight(r);
-    }
-    const height = rowHeight(target.row);
-
-    const viewWidth = this.scrollContainer.clientWidth;
-    const viewHeight = this.scrollContainer.clientHeight;
-    const curLeft = this.scrollContainer.scrollLeft;
-    const curTop = this.scrollContainer.scrollTop;
-
-    let newLeft = curLeft;
-    if (left < curLeft) {
-      newLeft = left;
-    } else if (left + width > curLeft + viewWidth) {
-      newLeft = Math.max(0, left + width - viewWidth);
-    }
-
-    let newTop = curTop;
-    if (top < curTop) {
-      newTop = top;
-    } else if (top + height > curTop + viewHeight) {
-      newTop = Math.max(0, top + height - viewHeight);
-    }
-
-    if (newLeft !== curLeft) {
-      this.scrollContainer.scrollLeft = newLeft;
-    }
-    if (newTop !== curTop) {
-      this.scrollContainer.scrollTop = newTop;
+    if (top !== sc.scrollTop) {
+      sc.scrollTop = top;
     }
   }
 
@@ -4989,6 +4954,66 @@ function hideFromTopLayer(el: HTMLElement): void {
   } catch {
     // Not in the top layer.
   }
+}
+
+/**
+ * Where the scroll position along one axis goes to show the column or row
+ * at a 1-based index, by the GWT client's rule. A frozen one, or one
+ * already in full view, leaves it where it is. One before the first whole
+ * one in view scrolls back past it by one more, and one after the last
+ * whole one in view scrolls on by one more - so holding an arrow key
+ * scrolls two at a time and keeps one in view beyond the one selected.
+ *
+ * `scroll` is the current scroll offset and `view` the length of the
+ * cells' part of the view, frozen ones included; `sizeOf` is a column's
+ * width or a row's height, 0 when it is hidden.
+ */
+export function scrollToShow(
+  index: number,
+  frozen: number,
+  count: number,
+  scroll: number,
+  view: number,
+  sizeOf: (i: number) => number
+): number {
+  if (index <= frozen || index > count) {
+    return scroll;
+  }
+  // Start of each one, from the start of the first: starts[i] for 1-based i.
+  const starts: number[] = [0, 0];
+  const startOf = (i: number): number => {
+    while (starts.length <= i) {
+      const last = starts.length - 1;
+      starts.push(starts[last] + sizeOf(last));
+    }
+    return starts[i];
+  };
+  const frozenExtent = startOf(frozen + 1);
+  // The first whole one in view past the frozen ones.
+  let first = frozen + 1;
+  while (first < count && startOf(first) - scroll < frozenExtent) {
+    first++;
+  }
+  if (index < first) {
+    let back = 0;
+    for (let i = first - 1; i >= index - 1 && i > 0; i--) {
+      back += sizeOf(i);
+    }
+    return Math.max(0, scroll - back);
+  }
+  // The last whole one in view.
+  let last = first;
+  while (last < count && startOf(last + 1) + sizeOf(last + 1) - scroll <= view) {
+    last++;
+  }
+  if (index > last) {
+    let on = 0;
+    for (let i = last + 1; i <= index + 1 && i <= count; i++) {
+      on += sizeOf(i);
+    }
+    return scroll + on;
+  }
+  return scroll;
 }
 
 /** Whether the page runs on a Mac, where shortcuts take Cmd rather than Ctrl. */
