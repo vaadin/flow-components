@@ -1155,6 +1155,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     e: CustomEvent<{ col: number; row: number; clientX?: number; clientY?: number }>
   ): void => {
     const { col, row } = e.detail;
+    // Without actions there is no menu, and the GWT client left the
+    // selection alone.
+    if (!this.hasActions) {
+      return;
+    }
+    // Taken for the sheet's own menu: the browser's stays closed.
+    e.preventDefault();
     this.rememberContextMenuPosition(e.detail);
     if (!isCellInSelection(col, row, this.selection)) {
       this.selectCellOrMerge(col, row);
@@ -1174,25 +1181,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Right-click on a column header (slice 166). Selects the
-   * whole column (Excel behavior) then dispatches
-   * {@code columnHeaderContextMenuOpen}.
+   * Right-click on a column header (slice 166): asks the server for the
+   * column's actions with {@code columnHeaderContextMenuOpen}.
    */
   private readonly handleColumnHeaderContextMenu = (
     e: CustomEvent<{ col: number; clientX?: number; clientY?: number }>
   ): void => {
     const { col } = e.detail;
+    // The menu acts on the column whatever is selected, so the selection
+    // stays as it is, as in the GWT client - and there is no menu without
+    // actions.
+    if (!this.hasActions) {
+      return;
+    }
+    // Taken for the sheet's own menu: the browser's stays closed.
+    e.preventDefault();
     this.rememberContextMenuPosition(e.detail);
-    const rows = this.rows > 0 ? this.rows : 1;
-    this.selection = {
-      activeCell: { col, row: 1 },
-      activeRange: normalizedRange(col, 1, col, rows),
-      auxRanges: []
-    };
-    this.extendCol = col;
-    this.extendRow = rows;
-    this.recomputeViewport();
-    this.dispatchSelectionEvent();
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
@@ -1207,24 +1211,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Right-click on a row header (slice 166). Mirror of the column
-   * variant — selects the whole row then dispatches
-   * {@code rowHeaderContextMenuOpen}.
+   * variant — dispatches {@code rowHeaderContextMenuOpen}.
    */
   private readonly handleRowHeaderContextMenu = (
     e: CustomEvent<{ row: number; clientX?: number; clientY?: number }>
   ): void => {
     const { row } = e.detail;
+    // As for a column: the selection stays, and no actions means no menu.
+    if (!this.hasActions) {
+      return;
+    }
+    // Taken for the sheet's own menu: the browser's stays closed.
+    e.preventDefault();
     this.rememberContextMenuPosition(e.detail);
-    const cols = this.cols > 0 ? this.cols : 1;
-    this.selection = {
-      activeCell: { col: 1, row },
-      activeRange: normalizedRange(1, row, cols, row),
-      auxRanges: []
-    };
-    this.extendCol = cols;
-    this.extendRow = row;
-    this.recomputeViewport();
-    this.dispatchSelectionEvent();
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
@@ -1846,6 +1845,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     const key = e.key;
     const ctrlOrMeta = e.ctrlKey || e.metaKey;
+    // The key that holds a shortcut - select all, undo, redo: Cmd on a Mac,
+    // where Ctrl+A and Ctrl+Z did nothing in the GWT client, and Ctrl or
+    // Cmd elsewhere.
+    const shortcut = isMacPlatform() ? e.metaKey : ctrlOrMeta;
 
     // A cell showing a custom editor is edited through that editor, so
     // every key that would otherwise start editing hands it the focus
@@ -1862,7 +1865,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
 
     // Ctrl+A / Cmd+A — select the entire sheet (slice 159).
-    if (ctrlOrMeta && (key === 'a' || key === 'A')) {
+    if (shortcut && (key === 'a' || key === 'A')) {
       if (this.rows <= 0 || this.cols <= 0) {
         return;
       }
@@ -1882,7 +1885,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Ctrl+Z / Cmd+Z — undo. Pure pass-through to the server;
     // the server owns the undo stack + replies with the
     // resulting cell updates. Slice 159.
-    if (ctrlOrMeta && (key === 'z' || key === 'Z') && !e.shiftKey) {
+    if (shortcut && (key === 'z' || key === 'Z') && !e.shiftKey) {
       e.preventDefault();
       this.host.dispatchEvent(
         new CustomEvent('spreadsheet-event', {
@@ -1898,7 +1901,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // for "history menu" by some apps, so we also accept
     // Cmd+Shift+Z (the Mac convention) + Ctrl+Y (Windows).
     // Slice 159.
-    if (ctrlOrMeta && (key === 'y' || key === 'Y' || ((key === 'z' || key === 'Z') && e.shiftKey))) {
+    if (shortcut && (key === 'y' || key === 'Y' || ((key === 'z' || key === 'Z') && e.shiftKey))) {
       e.preventDefault();
       this.host.dispatchEvent(
         new CustomEvent('spreadsheet-event', {
@@ -4986,6 +4989,11 @@ function hideFromTopLayer(el: HTMLElement): void {
   } catch {
     // Not in the top layer.
   }
+}
+
+/** Whether the page runs on a Mac, where shortcuts take Cmd rather than Ctrl. */
+export function isMacPlatform(): boolean {
+  return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 }
 
 /** Pixels in points, as the GWT client converted the height of a row being dragged. */

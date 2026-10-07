@@ -1166,6 +1166,12 @@ export class SpreadsheetCellGrid extends LitElement {
     if (!(target instanceof Element)) {
       return;
     }
+    // The right button leaves the selection to the context menu, as in the
+    // GWT client. A press of its own would select the cell under it, and a
+    // right-click on a range would lose the range the menu is for.
+    if ((e as MouseEvent).button === 2) {
+      return;
+    }
     // The fill handle sits on top of the cell under it, and a drag from it
     // paints rather than selects — so it is checked first and the event
     // goes no further.
@@ -1300,14 +1306,31 @@ export class SpreadsheetCellGrid extends LitElement {
     if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
       return;
     }
-    e.preventDefault();
-    this.dispatchEvent(
+    // A Ctrl-click on a Mac: the browser reports it as a right-click and
+    // fires no click at all. The GWT client took it as the Ctrl-click it is
+    // and added the cell to the selection, so it is reported as one first.
+    if (e.button === 0 && e.ctrlKey) {
+      this.dispatchEvent(
+        new CustomEvent('cell-click', {
+          detail: { col, row, shiftKey: e.shiftKey, ctrlKey: true, metaKey: e.metaKey, altKey: e.altKey },
+          bubbles: true,
+          composed: true
+        })
+      );
+    }
+    // The browser's own menu stays unless the sheet takes the right-click
+    // for a menu of its own, as with the GWT client.
+    const taken = !this.dispatchEvent(
       new CustomEvent('cell-contextmenu', {
         detail: { col, row, clientX: e.clientX, clientY: e.clientY },
         bubbles: true,
-        composed: true
+        composed: true,
+        cancelable: true
       })
     );
+    if (taken) {
+      e.preventDefault();
+    }
   };
 
   private readonly handleShadowClick = (e: Event): void => {

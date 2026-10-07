@@ -45,6 +45,9 @@ function attachSheet(): {
   sheet.setRows(10);
   sheet.setColW(new Array(10).fill(50));
   sheet.setRowH(new Array(10).fill(15));
+  // A sheet with no action handlers has no menu, and a right-click on it
+  // does nothing at all.
+  sheet.setHasActions(true);
 
   const events: any[] = [];
   host.addEventListener('spreadsheet-event', (e) =>
@@ -174,6 +177,63 @@ describe('Spreadsheet context menu — opening', () => {
     ctx.sheet.showActions([]);
 
     expect(await items(ctx.sheet)).to.have.length(0);
+  });
+});
+
+describe('Spreadsheet context menu — right-clicking a selection', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(async () => {
+    ctx = attachSheet();
+    ctx.sheet.setSelectedCellAndRange('A1', 1, 1, 1, 2, 1, 2, false);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+  });
+
+  afterEach(async () => {
+    await resetMouse();
+    ctx.cleanup();
+  });
+
+  /** Press and release the right button over a cell, with a real mouse. */
+  async function rightClickWithMouse(selector: string): Promise<void> {
+    const target = Array.from(
+      ctx.sheet.getCellGrid().shadowRoot!.querySelectorAll<HTMLElement>(selector)
+    ).find((el) => el.getBoundingClientRect().height > 0)!;
+    const box = target.getBoundingClientRect();
+    await sendMouse({
+      type: 'move',
+      position: [Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)]
+    });
+    await sendMouse({ type: 'down', button: 'right' });
+    await sendMouse({ type: 'up', button: 'right' });
+  }
+
+  it('keeps the range the right-click lands in, as the GWT client did', async () => {
+    // The press used to select the cell under it before the menu opened,
+    // so the server was asked about one cell, and range actions such as
+    // Unmerge cells were never offered.
+    await rightClickWithMouse('.cell.col2.row2');
+
+    expect(ctx.sheet.getSelection().activeRange).to.eql({ c1: 1, c2: 2, r1: 1, r2: 2 });
+    expect(ctx.events.map((e) => e.type)).to.include('contextMenuOpenOnSelection');
+  });
+
+  it('selects the cell a right-click lands on outside the selection', async () => {
+    await rightClickWithMouse('.cell.col4.row4');
+
+    expect(ctx.sheet.getSelection().activeRange).to.eql({ c1: 4, c2: 4, r1: 4, r2: 4 });
+  });
+
+  it('starts no fill from the selection handle with the right button', async () => {
+    let painting = false;
+    ctx.sheet.getCellGrid().addEventListener('selection-paint-start', () => {
+      painting = true;
+    });
+
+    await rightClickWithMouse('.selection-corner');
+
+    expect(painting).to.be.false;
   });
 });
 

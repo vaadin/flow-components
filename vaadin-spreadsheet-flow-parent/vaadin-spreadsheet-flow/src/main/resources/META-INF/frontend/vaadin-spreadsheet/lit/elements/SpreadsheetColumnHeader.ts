@@ -383,8 +383,8 @@ export class SpreadsheetColumnHeader extends LitElement {
     // Slice 166: right-click on a column header dispatches
     // `column-header-contextmenu` so the connector can
     // forward it as `columnHeaderContextMenuOpen` to the
-    // server. preventDefault suppresses the browser's native
-    // menu.
+    // server. The browser's native menu is suppressed when the
+    // connector takes the event.
     this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
     // Double-clicking a resize handle autofits the column to its content,
     // the way Excel does; the drag on the same handle resizes it by hand.
@@ -405,14 +405,19 @@ export class SpreadsheetColumnHeader extends LitElement {
     if (!Number.isFinite(col) || col < 1) {
       return;
     }
-    e.preventDefault();
-    this.dispatchEvent(
+    // The browser's own menu stays unless the sheet takes the right-click
+    // for a menu of its own, as with the GWT client.
+    const taken = !this.dispatchEvent(
       new CustomEvent('column-header-contextmenu', {
         detail: { col, clientX: e.clientX, clientY: e.clientY },
         bubbles: true,
-        composed: true
+        composed: true,
+        cancelable: true
       })
     );
+    if (taken) {
+      e.preventDefault();
+    }
   };
 
   private readonly handleShadowDoubleClick = (e: Event): void => {

@@ -312,9 +312,9 @@ export class SpreadsheetRowHeader extends LitElement {
     // Slice 164: row-resize drag mousedown.
     this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown as EventListener);
     // Slice 166: right-click on a row header dispatches
-    // `row-header-contextmenu`. preventDefault suppresses the
-    // browser's native menu so only the server-supplied
-    // ContextMenu is shown.
+    // `row-header-contextmenu`. When the connector takes it,
+    // the browser's native menu is suppressed so only the
+    // server-supplied ContextMenu is shown.
     this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
     // Double-clicking a resize handle autofits the row to its content, the
     // way Excel does; the drag on the same handle resizes it by hand.
@@ -358,14 +358,19 @@ export class SpreadsheetRowHeader extends LitElement {
     if (!Number.isFinite(row) || row < 1) {
       return;
     }
-    e.preventDefault();
-    this.dispatchEvent(
+    // The browser's own menu stays unless the sheet takes the right-click
+    // for a menu of its own, as with the GWT client.
+    const taken = !this.dispatchEvent(
       new CustomEvent('row-header-contextmenu', {
         detail: { row, clientX: e.clientX, clientY: e.clientY },
         bubbles: true,
-        composed: true
+        composed: true,
+        cancelable: true
       })
     );
+    if (taken) {
+      e.preventDefault();
+    }
   };
 
   private readonly handleShadowMouseDown = (e: Event): void => {

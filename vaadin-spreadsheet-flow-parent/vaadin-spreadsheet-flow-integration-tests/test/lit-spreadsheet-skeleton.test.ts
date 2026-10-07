@@ -11,6 +11,19 @@ import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
+ * Run with the browser reporting the given platform: the sheet's shortcuts
+ * take Cmd on a Mac and Ctrl elsewhere, as the GWT client's did.
+ */
+function onPlatform<T>(platform: string, body: () => T): T {
+    Object.defineProperty(navigator, 'platform', { value: platform, configurable: true });
+    try {
+        return body();
+    } finally {
+        delete (navigator as { platform?: string }).platform;
+    }
+}
+
+/**
  * Smoke tests for the skeleton `Spreadsheet` class. These don't
  * exercise rendering behavior (that's Phase 3.2+); they pin the
  * contract that the class is constructable + every setter accepts its
@@ -2130,7 +2143,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Ctrl+A selects the entire sheet (slice 159)', () => {
+    it('Ctrl+A selects the entire sheet off a Mac (slice 159)', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(20);
         sheet.setCols(10);
@@ -2145,12 +2158,14 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             }
         });
 
-        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'a',
-            ctrlKey: true,
-            bubbles: true,
-            cancelable: true,
-        }));
+        onPlatform('Win32', () =>
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'a',
+                ctrlKey: true,
+                bubbles: true,
+                cancelable: true,
+            }))
+        );
 
         expect(sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 1 });
         expect(sheet.getSelection().activeRange).to.deep.equal({
@@ -2169,12 +2184,14 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
 
-        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'a',
-            metaKey: true,
-            bubbles: true,
-            cancelable: true,
-        }));
+        onPlatform('MacIntel', () =>
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'a',
+                metaKey: true,
+                bubbles: true,
+                cancelable: true,
+            }))
+        );
 
         expect(sheet.getSelection().activeRange).to.deep.equal({
             c1: 1, c2: 5, r1: 1, r2: 5,
@@ -2182,7 +2199,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Ctrl+Z dispatches onUndo (slice 159)', () => {
+    it('Ctrl+Z dispatches onUndo off a Mac (slice 159)', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2195,18 +2212,20 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             }
         });
 
-        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'z',
-            ctrlKey: true,
-            bubbles: true,
-            cancelable: true,
-        }));
+        onPlatform('Win32', () =>
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'z',
+                ctrlKey: true,
+                bubbles: true,
+                cancelable: true,
+            }))
+        );
 
         expect(received).to.exist;
         cleanup();
     });
 
-    it('Ctrl+Y dispatches onRedo (slice 159)', () => {
+    it('Ctrl+Y dispatches onRedo off a Mac (slice 159)', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2219,12 +2238,14 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             }
         });
 
-        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'y',
-            ctrlKey: true,
-            bubbles: true,
-            cancelable: true,
-        }));
+        onPlatform('Win32', () =>
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'y',
+                ctrlKey: true,
+                bubbles: true,
+                cancelable: true,
+            }))
+        );
 
         expect(received).to.exist;
         cleanup();
@@ -2243,13 +2264,15 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             }
         });
 
-        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'z',
-            metaKey: true,
-            shiftKey: true,
-            bubbles: true,
-            cancelable: true,
-        }));
+        onPlatform('MacIntel', () =>
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'z',
+                metaKey: true,
+                shiftKey: true,
+                bubbles: true,
+                cancelable: true,
+            }))
+        );
 
         expect(received).to.exist;
         cleanup();
@@ -2267,13 +2290,15 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             }
         });
 
-        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'z',
-            ctrlKey: true,
-            shiftKey: true,
-            bubbles: true,
-            cancelable: true,
-        }));
+        onPlatform('Win32', () =>
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'z',
+                ctrlKey: true,
+                shiftKey: true,
+                bubbles: true,
+                cancelable: true,
+            }))
+        );
 
         expect(received).to.be.true;
         cleanup();
@@ -2292,15 +2317,42 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             if (detail.type === 'onRedo') { redoReceived = true; }
         });
 
-        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'z',
-            ctrlKey: true,
-            bubbles: true,
-            cancelable: true,
-        }));
+        onPlatform('Win32', () =>
+            sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'z',
+                ctrlKey: true,
+                bubbles: true,
+                cancelable: true,
+            }))
+        );
 
         expect(undoReceived).to.be.true;
         expect(redoReceived).to.be.false;
+        cleanup();
+    });
+
+    it('Ctrl+A and Ctrl+Z do nothing on a Mac, where the GWT client took Cmd', () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        const types: string[] = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => types.push((e as CustomEvent).detail.type));
+
+        onPlatform('MacIntel', () => {
+            for (const key of ['a', 'z', 'y']) {
+                sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+                    key,
+                    ctrlKey: true,
+                    bubbles: true,
+                    cancelable: true,
+                }));
+            }
+        });
+
+        expect(sheet.getSelection().activeRange).to.deep.equal({ c1: 1, c2: 1, r1: 1, r2: 1 });
+        expect(types.filter((t) => ['onUndo', 'onRedo', 'cellRangeSelected'].includes(t))).to.be.empty;
         cleanup();
     });
 
@@ -2722,6 +2774,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHasActions(true);
         // Place an explicit range selection covering B2:D4.
         sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
             detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
@@ -2763,6 +2816,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHasActions(true);
         // Select B2 only.
         sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
             detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
@@ -2795,12 +2849,15 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('right-click on a column header selects whole column and dispatches columnHeaderContextMenuOpen (slice 166)', () => {
+    it('right-click on a column header leaves the selection and dispatches columnHeaderContextMenuOpen (slice 166)', () => {
+        // The GWT client left the selection alone: the menu acts on the
+        // column whatever is selected.
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHasActions(true);
 
         const events: Array<{ type: string; data: Record<string, unknown> }> = [];
         host.addEventListener('spreadsheet-event', (e: Event) => {
@@ -2812,21 +2869,21 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             bubbles: true, composed: true,
         }));
 
-        const colSelEvents = events.filter(e => e.type === 'columnSelected');
-        expect(colSelEvents).to.have.length(1);
-        expect(colSelEvents[0].data).to.include({ column: 3 });
+        expect(events.filter(e => e.type === 'columnSelected')).to.be.empty;
+        expect(sheet.getSelection().activeRange).to.deep.equal({ c1: 1, c2: 1, r1: 1, r2: 1 });
         const ctxEvents = events.filter(e => e.type === 'columnHeaderContextMenuOpen');
         expect(ctxEvents).to.have.length(1);
         expect(ctxEvents[0].data).to.deep.equal({ columnIndex: 3 });
         cleanup();
     });
 
-    it('right-click on a row header selects whole row and dispatches rowHeaderContextMenuOpen (slice 166)', () => {
+    it('right-click on a row header leaves the selection and dispatches rowHeaderContextMenuOpen (slice 166)', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHasActions(true);
 
         const events: Array<{ type: string; data: Record<string, unknown> }> = [];
         host.addEventListener('spreadsheet-event', (e: Event) => {
@@ -2838,9 +2895,8 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             bubbles: true, composed: true,
         }));
 
-        const rowSelEvents = events.filter(e => e.type === 'rowSelected');
-        expect(rowSelEvents).to.have.length(1);
-        expect(rowSelEvents[0].data).to.include({ row: 4 });
+        expect(events.filter(e => e.type === 'rowSelected')).to.be.empty;
+        expect(sheet.getSelection().activeRange).to.deep.equal({ c1: 1, c2: 1, r1: 1, r2: 1 });
         const ctxEvents = events.filter(e => e.type === 'rowHeaderContextMenuOpen');
         expect(ctxEvents).to.have.length(1);
         expect(ctxEvents[0].data).to.deep.equal({ rowIndex: 4 });
@@ -2853,6 +2909,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setHasActions(true);
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 
@@ -2864,6 +2921,37 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         });
         cell!.dispatchEvent(event);
         expect(event.defaultPrevented).to.be.true;
+        cleanup();
+    });
+
+    it('right-click leaves the browser its own menu when the sheet has no actions, as with the GWT client', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.recomputeViewport();
+        await Promise.all([
+            sheet.getCellGrid().updateComplete,
+            sheet.getColumnHeader().updateComplete,
+            sheet.getRowHeader().updateComplete,
+        ]);
+        const types: string[] = [];
+        host.addEventListener('spreadsheet-event', (e: Event) => types.push((e as CustomEvent).detail.type));
+
+        const targets = [
+            sheet.getCellGrid().shadowRoot!.querySelector('.cell.col3.row3')!,
+            sheet.getColumnHeader().shadowRoot!.querySelector('.col-header-cell.col3')!,
+            sheet.getRowHeader().shadowRoot!.querySelector('.row-header-cell.row3')!,
+        ];
+        for (const target of targets) {
+            const event = new MouseEvent('contextmenu', { bubbles: true, composed: true, cancelable: true });
+            target.dispatchEvent(event);
+            expect(event.defaultPrevented, target.className).to.be.false;
+        }
+
+        expect(types).to.be.empty;
+        expect(sheet.getSelection().activeRange).to.deep.equal({ c1: 1, c2: 1, r1: 1, r2: 1 });
         cleanup();
     });
 
