@@ -611,6 +611,21 @@ describe('SpreadsheetSheetTabs — drawn as the GWT client drew it', () => {
         }
     });
 
+    it('leaves a tab under the pointer as it is, as the GWT client did', async () => {
+        const el = await strip();
+        const other = tab(el, 1);
+        const before = getComputedStyle(other).backgroundColor;
+        const box = other.getBoundingClientRect();
+
+        await sendMouse({ type: 'move', position: [Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)] });
+        try {
+            expect(getComputedStyle(other).backgroundColor).to.equal(before);
+        } finally {
+            await resetMouse();
+            cleanup(el);
+        }
+    });
+
     it('cuts a long name short with an ellipsis', async () => {
         const el = await strip();
 

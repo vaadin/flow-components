@@ -127,7 +127,6 @@ export const spreadsheetStyles = css`
     --_vaadin-spreadsheet-tabs-bg: var(--lumo-base-color);
     --_vaadin-spreadsheet-tabs-fg: var(--lumo-body-text-color);
     --_vaadin-spreadsheet-tabs-border: var(--lumo-contrast-20pct);
-    --_vaadin-spreadsheet-tabs-hover-bg: var(--lumo-base-color);
     --_vaadin-spreadsheet-tabs-active-bg: var(--lumo-base-color);
     --_vaadin-spreadsheet-tabs-active-fg: var(--lumo-primary-text-color);
     --_vaadin-spreadsheet-tabs-font: var(--lumo-font-family);

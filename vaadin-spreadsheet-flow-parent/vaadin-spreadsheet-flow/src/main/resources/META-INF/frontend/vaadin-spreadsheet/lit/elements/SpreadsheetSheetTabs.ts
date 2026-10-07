@@ -242,10 +242,6 @@ export class SpreadsheetSheetTabs extends LitElement {
       cursor: default;
     }
 
-    .sheet-tab:hover:not(.active) {
-      background: var(--vaadin-spreadsheet-tabs-hover-bg, var(--_vaadin-spreadsheet-tabs-hover-bg, #e8e8e8));
-    }
-
     /* The status label: 200px at the right end of the strip, over the
        tabs' last stretch, which keep out from under it. */
     .sheet-tabsheet-infolabel {
