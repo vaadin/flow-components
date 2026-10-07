@@ -258,6 +258,19 @@ describe('::part() reaches the parts documented with the Lit client', () => {
     expectStyleable('comment-edit', ctx.sheet.getCellGrid().shadowRoot!.querySelector('.comment-overlay-edit')!);
   });
 
+  it("styles a comment's card, author and text", async () => {
+    ctx.sheet.setCellComments({ 'col2 row2': 'A note' });
+    ctx.sheet.setCellCommentAuthors({ 'col2 row2': 'Ann' });
+    ctx.sheet.setVisibleCellComments(['col2 row2']);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    const grid = ctx.sheet.getCellGrid().shadowRoot!;
+    expectStyleable('comment-overlay', grid.querySelector('.v-spreadsheet-comment-overlay')!);
+    expectStyleable('comment-author', grid.querySelector('.comment-overlay-author')!);
+    expectStyleable('comment-text', grid.querySelector('.comment-overlay-label')!);
+  });
+
   it("styles the pop-up's card, header, close box and caption", () => {
     const content = document.createElement('div');
     (window as any).Vaadin = { Flow: { clients: { ROOT: { getByNodeId: () => content } } } };
@@ -317,7 +330,10 @@ describe('exportparts — the declared lists', () => {
       'invalid-triangle',
       'popup-button',
       'selection-corner',
-      'comment-edit'
+      'comment-edit',
+      'comment-overlay',
+      'comment-author',
+      'comment-text'
     ]);
   });
 

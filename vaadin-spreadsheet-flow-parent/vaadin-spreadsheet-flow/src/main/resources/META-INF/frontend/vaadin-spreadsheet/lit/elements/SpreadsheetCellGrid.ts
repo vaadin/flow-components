@@ -61,7 +61,8 @@ export class SpreadsheetCellGrid extends LitElement {
    * documented styling API silently does nothing.
    */
   static readonly EXPORTED_PARTS =
-    'cell,cell-range,cell-input,comment-triangle,comment-edit,invalid-triangle,popup-button,selection-corner';
+    'cell,cell-range,cell-input,comment-triangle,comment-overlay,comment-author,comment-text,comment-edit,' +
+    'invalid-triangle,popup-button,selection-corner';
 
   static properties = {
     renderState: { attribute: false },
@@ -1995,8 +1996,11 @@ function editorWidth(state: CellGridRenderState, col: number, row: number, textW
  * instead, which is why one function renders both.
  *
  * Class names are the GWT ones (`comment-overlay-label`,
- * `comment-overlay-author`, `comment-overlay-invalidformula`): applications
- * style these today, and renaming them would break that for no gain.
+ * `comment-overlay-author`, `comment-overlay-invalidformula`). A page's
+ * styles reached them while the GWT client drew notes outside the
+ * component's shadow root; here they are two shadow roots in, so the card,
+ * its author and its text are the parts `comment-overlay`, `comment-author`
+ * and `comment-text`, which is what an application styles now.
  */
 /** How far from its cell the GWT client hung a note, across and up. */
 const COMMENT_GAP = 15;
@@ -2097,6 +2101,7 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     overlays.push(html`
       <div
         class="v-spreadsheet-comment-overlay"
+        part="comment-overlay"
         style=${style}
         data-cell-left=${geometry.left}
         data-cell-right=${cellRight}
@@ -2109,7 +2114,7 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
         ${showsError && (editing || comment !== undefined)
           ? html`<div class="comment-overlay-separator"></div>`
           : nothing}
-        ${author ? html`<div class="comment-overlay-author">${author}</div>` : nothing}
+        ${author ? html`<div class="comment-overlay-author" part="comment-author">${author}</div>` : nothing}
         ${editing
           ? html`<textarea
               class="comment-overlay-edit"
@@ -2119,7 +2124,7 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
             ></textarea>`
           : comment === undefined
           ? nothing
-          : html`<div class="comment-overlay-label">${comment}</div>`}
+          : html`<div class="comment-overlay-label" part="comment-text">${comment}</div>`}
       </div>
     `);
   }
