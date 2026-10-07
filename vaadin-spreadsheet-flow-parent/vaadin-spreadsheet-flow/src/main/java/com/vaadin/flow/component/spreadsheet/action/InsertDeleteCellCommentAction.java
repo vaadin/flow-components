@@ -67,7 +67,7 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
             SelectionChangeEvent event) {
         Sheet sheet = spreadsheet.getActiveSheet();
         CellReference cr = event.getSelectedCellReference();
-        boolean cellCreated = false, rowCreated = false, commentEdited = false;
+        boolean cellCreated = false, rowCreated = false;
         Row row = sheet.getRow(cr.getRow());
         if (row == null) {
             row = sheet.createRow(cr.getRow());
@@ -80,21 +80,20 @@ public class InsertDeleteCellCommentAction extends SpreadsheetAction {
         }
         if (cell.getCellComment() == null) {
             createCellComment(spreadsheet, sheet, cell, cr);
-            commentEdited = true;
+            spreadsheet.refreshCells(cell);
+            spreadsheet.editCellComment(cr);
         } else {
             cell.removeCellComment();
+            // Refreshed before the cell and row made only to reach the
+            // comment are taken out again: a cell no longer in its sheet
+            // cannot be read.
+            spreadsheet.refreshCells(cell);
             if (cellCreated) {
-                sheet.getRow(cr.getRow()).removeCell(cell);
+                row.removeCell(cell);
             }
             if (rowCreated) {
-                sheet.removeRow(sheet.getRow(cr.getRow()));
+                sheet.removeRow(row);
             }
-        }
-        if (cell != null) {
-            spreadsheet.refreshCells(cell);
-        }
-        if (commentEdited) {
-            spreadsheet.editCellComment(cr);
         }
     }
 
