@@ -158,8 +158,10 @@ export class SpreadsheetSheetTabs extends LitElement {
       mask-image: var(--_tab-button-icon);
     }
 
+    /* The GWT client's blue, its own: the active tab's colour is the app's
+       to change, and the buttons did not follow it. */
     .sheet-tabsheet-options > div:hover {
-      color: var(--vaadin-spreadsheet-tabs-active-fg, var(--_vaadin-spreadsheet-tabs-active-fg, #2584e2));
+      color: #197de1;
     }
 
     /* Kept in the DOM so a stylesheet can reach it, but inert. */

@@ -8,6 +8,7 @@
  */
 
 import { expect } from 'chai';
+import { resetMouse, sendMouse } from '@web/test-runner-commands';
 
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import {
@@ -590,6 +591,24 @@ describe('SpreadsheetSheetTabs — drawn as the GWT client drew it', () => {
         expect(active.borderBottomWidth, 'no underline').to.equal('1px');
 
         cleanup(el);
+    });
+
+    it("turns a button GWT's blue under the pointer, whatever the active tab's colour", async () => {
+        // The active tab's colour is the app's to set through its property;
+        // the GWT client's buttons kept their own blue.
+        const el = await strip();
+        el.style.setProperty('--vaadin-spreadsheet-tabs-active-fg', 'rgb(200, 0, 0)');
+        const add = el.shadowRoot!.querySelector<HTMLElement>('.add-new-tab')!;
+        const box = add.getBoundingClientRect();
+
+        await sendMouse({ type: 'move', position: [Math.round(box.left + box.width / 2), Math.round(box.top + box.height / 2)] });
+        try {
+            expect(getComputedStyle(add).color).to.equal('rgb(25, 125, 225)');
+            expect(getComputedStyle(tab(el, 0)).color, 'the active tab').to.equal('rgb(200, 0, 0)');
+        } finally {
+            await resetMouse();
+            cleanup(el);
+        }
     });
 
     it('cuts a long name short with an ellipsis', async () => {
