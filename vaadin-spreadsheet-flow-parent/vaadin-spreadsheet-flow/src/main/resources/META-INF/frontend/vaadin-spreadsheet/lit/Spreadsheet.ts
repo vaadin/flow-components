@@ -63,6 +63,15 @@ import {
 } from './algorithms/SelectionPaint.js';
 import { expandToMergedRegions } from './algorithms/MergedSelection.js';
 import { isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
+import {
+  isSingleMerge,
+  moveActiveCell,
+  moveRangeEdge,
+  selectCellAt,
+  type Direction,
+  type SheetShape,
+  type SingleCellSelection
+} from './algorithms/KeyboardMoves.js';
 import { resolveSheetRename } from './algorithms/SheetName.js';
 import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
@@ -142,6 +151,40 @@ export function commitStep(key: string | undefined, shiftKey: boolean): { dCol: 
   }
 }
 
+/** The direction of a commit step, or null for none. */
+export function stepDirection(step: { dCol: number; dRow: number } | null): Direction | null {
+  if (step === null) {
+    return null;
+  }
+  if (step.dRow !== 0) {
+    return step.dRow > 0 ? 'down' : 'up';
+  }
+  return step.dCol > 0 ? 'right' : 'left';
+}
+
+/**
+ * Which way a key moves the selection: an arrow the way it points, Tab
+ * right and Enter down - shift reversing those two. Null for any other key.
+ */
+export function keyDirection(key: string, shiftKey: boolean): Direction | null {
+  switch (key) {
+    case 'ArrowUp':
+      return 'up';
+    case 'ArrowDown':
+      return 'down';
+    case 'ArrowLeft':
+      return 'left';
+    case 'ArrowRight':
+      return 'right';
+    case 'Tab':
+      return shiftKey ? 'left' : 'right';
+    case 'Enter':
+      return shiftKey ? 'up' : 'down';
+    default:
+      return null;
+  }
+}
+
 /**
  * Which way Enter or Tab walks the active cell inside a selected range.
  *
@@ -215,6 +258,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Selection state. */
   private selection: SelectionState = selectSingleCell(1, 1);
+
+  /**
+   * The cell a click or an arrow asked for when the selection is a merged
+   * region: the arrows leave the merge in its column and row, as in the
+   * GWT client. Null when the selection is not a merge.
+   */
+  private mergeEntry: { col: number; row: number } | null = null;
 
   /**
    * Cell-editor state (slice 152). Null when no editor is
@@ -935,7 +985,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.reportRangeSelection();
       return;
     } else {
-      this.selection = selectSingleCell(col, row);
+      this.selectCellOrMerge(col, row);
     }
     this.recomputeViewport();
     this.dispatchSelectionEvent();
@@ -1107,9 +1157,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const { col, row } = e.detail;
     this.rememberContextMenuPosition(e.detail);
     if (!isCellInSelection(col, row, this.selection)) {
-      this.selection = selectSingleCell(col, row);
-      this.extendCol = col;
-      this.extendRow = row;
+      this.selectCellOrMerge(col, row);
       this.recomputeViewport();
       this.dispatchSelectionEvent();
     }
@@ -1270,7 +1318,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         auxRanges: this.selection.auxRanges
       };
     } else {
-      this.selection = selectSingleCell(col, row);
+      this.selectCellOrMerge(col, row);
     }
     this.recomputeViewport();
   };
@@ -1395,8 +1443,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.dragging = false;
-    const range = this.selection.activeRange;
-    if (range.c1 !== range.c2 || range.r1 !== range.r2) {
+    if (this.selectsRange()) {
       // Multi-cell range — dispatch the server-bound
       // selection event so the server learns the final
       // dragged range.
@@ -1532,15 +1579,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Enter and Tab do when nothing is being edited: filling a block
     // cell by cell is the reason the range is selected at all.
     const walkDirection = inSelectionWalkDirection(key, shiftKey);
-    const walks =
-      walkDirection !== null && this.rows > 0 && this.cols > 0 && isMultiCellRange(this.selection.activeRange);
-    const step = walks ? null : commitStep(key, shiftKey);
-    if (step !== null && this.rows > 0 && this.cols > 0) {
-      const nextCol = Math.min(this.cols, Math.max(1, col + step.dCol));
-      const nextRow = Math.min(this.rows, Math.max(1, row + step.dRow));
-      this.selection = selectSingleCell(nextCol, nextRow);
-      this.extendCol = nextCol;
-      this.extendRow = nextRow;
+    const walks = walkDirection !== null && this.rows > 0 && this.cols > 0 && this.selectsRange();
+    // Moving on goes by the arrows' rules: over hidden rows and columns,
+    // and out of a merge on its far side.
+    const direction = walks ? null : stepDirection(commitStep(key, shiftKey));
+    const next =
+      direction !== null && this.rows > 0 && this.cols > 0
+        ? moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape())
+        : null;
+    if (next !== null) {
+      this.applySingleSelection(next);
     }
     if (!walks) {
       this.recomputeViewport();
@@ -1556,7 +1604,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // If we moved the active cell, also dispatch the
     // selection event so the server stays in sync (slice
     // 150 contract — every selection write emits an event).
-    if (step !== null) {
+    if (next !== null) {
       this.dispatchSelectionEvent();
     }
     if (walks) {
@@ -1872,7 +1920,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const entersEditor =
       key === 'F2' ||
       (key === 'Enter' &&
-        !isMultiCellRange(this.selection.activeRange) &&
+        !this.selectsRange() &&
         !this.hiddenRowIndexes.includes(this.selection.activeCell.row) &&
         !this.hiddenColumnIndexes.includes(this.selection.activeCell.col));
     if (entersEditor && !this.editor) {
@@ -1953,7 +2001,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // both wrapping at the end, shift reversing. The range stays, so the
     // server hears a selection that did not discard its old range.
     const walkDirection = inSelectionWalkDirection(key, e.shiftKey);
-    if (walkDirection !== null && this.rows > 0 && this.cols > 0 && isMultiCellRange(this.selection.activeRange)) {
+    if (walkDirection !== null && this.rows > 0 && this.cols > 0 && this.selectsRange()) {
       e.preventDefault();
       const next = walkInsideSelection({
         range: this.selection.activeRange,
@@ -1967,17 +2015,47 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
 
-    // Map each navigation key to a (deltaCol, deltaRow) OR an
-    // absolute coord. Modifier-key semantics:
-    //   - shift+arrow : move "extend" corner (slice 147)
-    //   - plain arrow : move active cell ±1
-    //   - Tab / Enter : same as ArrowRight / ArrowDown
-    //   - Home / End  : absolute col edge, same row
-    //   - Ctrl+Home   : (1, 1)
-    //   - Ctrl+End    : (cols, rows)
-    // The handler resolves the next active-cell (or extend-cell)
-    // through a single code path so the clamping + selection-
-    // write is shared. Slice 149.
+    // The arrows - and Tab and Enter, outside a range - step the way the
+    // GWT client's did: over hidden rows and columns, onto a merge as a
+    // whole and out of it on the far side, and not at all at the edge of
+    // the sheet. Shift+arrow moves the side of the range away from the
+    // active cell instead.
+    const direction = keyDirection(key, e.shiftKey);
+    if (direction !== null) {
+      if (this.rows <= 0 || this.cols <= 0) {
+        return;
+      }
+      e.preventDefault();
+      if (e.shiftKey && key.startsWith('Arrow')) {
+        const grown = moveRangeEdge(
+          this.selection.activeRange,
+          this.selection.activeCell,
+          direction,
+          this.sheetShape()
+        );
+        if (grown === null) {
+          return;
+        }
+        this.selection = { activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] };
+        this.extendCol = grown.moved.col;
+        this.extendRow = grown.moved.row;
+        this.extendingSelection = true;
+        this.showRangeSizeInAddressField();
+        this.scrollCellIntoView(grown.moved);
+      } else {
+        const next = moveActiveCell(this.selection.activeCell, this.mergeEntry, direction, this.sheetShape());
+        if (next === null) {
+          return;
+        }
+        this.moveSelectionTo(next);
+      }
+      this.recomputeViewport();
+      this.dispatchSelectionEvent();
+      return;
+    }
+
+    // Home / End go to the first / last column of the row, Ctrl+Home to
+    // A1 and Ctrl+End to the last cell. Slice 149.
     const target = computeNavigationTarget(key, e, {
       activeCell: this.selection.activeCell,
       extendCol: this.extendCol,
@@ -1992,41 +2070,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     e.preventDefault();
-    if (target.kind === 'extend') {
-      this.extendCol = target.col;
-      this.extendRow = target.row;
-      const anchor = this.selection.activeCell;
-      this.selection = {
-        activeCell: anchor,
-        activeRange: this.rangeTo(anchor, target.col, target.row),
-        auxRanges: []
-      };
-      this.extendingSelection = true;
-      this.showRangeSizeInAddressField();
-    } else {
-      this.extendingSelection = false;
-      this.selection = selectSingleCell(target.col, target.row);
-      this.extendCol = target.col;
-      this.extendRow = target.row;
-      // Name the cell straight away rather than waiting for the server
-      // to say so: the address field is how the user knows where the
-      // keyboard has taken them.
-      this.formulaBar.renderState = {
-        ...this.formulaBar.renderState,
-        address: cellCoordToAddress({ col: target.col, row: target.row })
-      };
-    }
-    // Auto-scroll the new active cell (or extend cell) into
-    // view BEFORE the render (slice 156). Excel scrolls the
-    // viewport whenever keyboard nav moves the cursor off-
-    // screen so the user can keep typing without losing
-    // visual context. Sets scrollLeft/scrollTop directly; the
-    // scroll listener triggers an additional recomputeViewport
-    // automatically.
-    this.scrollCellIntoView(target);
+    this.moveSelectionTo(selectCellAt(target.col, target.row, this.mergedRegions));
     this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
+
+  /**
+   * Move the selection to one cell - or merge - from the keyboard, naming
+   * it in the address field straight away rather than waiting for the
+   * server to: the address field is how the user knows where the keyboard
+   * has taken them. The cell is scrolled into view before the render, by
+   * the GWT client's rule (slice 156).
+   */
+  private moveSelectionTo(next: SingleCellSelection): void {
+    this.extendingSelection = false;
+    this.applySingleSelection(next);
+    this.formulaBar.renderState = {
+      ...this.formulaBar.renderState,
+      address: cellCoordToAddress(next.activeCell)
+    };
+    this.scrollCellIntoView(next.activeCell);
+  }
 
   /**
    * Put the active cell somewhere else inside the range that is already
@@ -2807,7 +2871,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   private dispatchSelectionEvent(): void {
-    const event = buildSelectionEvent(this.selection.activeCell, this.selection.activeRange, this.rows, this.cols);
+    const { activeCell } = this.selection;
+    // A merge is one cell: the server hears that cell, as it did from the
+    // GWT client, rather than a range it would offer to merge again.
+    const range =
+      this.selectsRange() || !isMultiCellRange(this.selection.activeRange)
+        ? this.selection.activeRange
+        : { c1: activeCell.col, c2: activeCell.col, r1: activeCell.row, r2: activeCell.row };
+    const event = buildSelectionEvent(activeCell, range, this.rows, this.cols);
     if (event.type === 'cellRangeSelected') {
       // `onCellRangeSelected` takes only the four corners and reads the
       // anchor from the selection the server already holds — unlike its
@@ -3373,12 +3444,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.returnFocusToSheet();
-    const nextCol = Math.min(this.cols, Math.max(1, col + step.dCol));
-    const nextRow = Math.min(this.rows, Math.max(1, row + step.dRow));
-    this.selection = selectSingleCell(nextCol, nextRow);
-    this.extendCol = nextCol;
-    this.extendRow = nextRow;
-    this.scrollCellIntoView({ col: nextCol, row: nextRow });
+    const next = moveActiveCell({ col, row }, this.mergeEntry, stepDirection(step)!, this.sheetShape());
+    if (next === null) {
+      this.recomputeViewport();
+      return;
+    }
+    this.applySingleSelection(next);
+    this.scrollCellIntoView(next.activeCell);
     this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
@@ -4686,6 +4758,41 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * inside one has to take all of it; reporting the literal rectangle
    * leaves the server writing to cells nobody can see.
    */
+  /** The sheet as the arrow keys see it. */
+  private sheetShape(): SheetShape {
+    return {
+      cols: this.cols,
+      rows: this.rows,
+      mergedRegions: this.mergedRegions,
+      hiddenColumns: new Set(this.hiddenColumnIndexes),
+      hiddenRows: new Set(this.hiddenRowIndexes)
+    };
+  }
+
+  /**
+   * Select one cell - or the whole merge it is part of, with the merge's
+   * top-left cell active, as the GWT client did for a click.
+   */
+  private selectCellOrMerge(col: number, row: number): void {
+    this.applySingleSelection(selectCellAt(col, row, this.mergedRegions));
+  }
+
+  private applySingleSelection(next: SingleCellSelection): void {
+    this.selection = { activeCell: next.activeCell, activeRange: next.activeRange, auxRanges: [] };
+    this.mergeEntry = next.entry;
+    this.extendCol = next.activeCell.col;
+    this.extendRow = next.activeCell.row;
+  }
+
+  /**
+   * Whether a range is selected: more than one cell, and more than the one
+   * merge the active cell is in, which is a single cell to the user.
+   */
+  private selectsRange(): boolean {
+    const { activeRange, activeCell } = this.selection;
+    return isMultiCellRange(activeRange) && !isSingleMerge(activeRange, activeCell, this.mergedRegions);
+  }
+
   private rangeTo(anchor: { col: number; row: number }, col: number, row: number): CellRange {
     const range = normalizedRange(anchor.col, anchor.row, col, row);
     const grown = expandToMergedRegions({ c1: range.c1, c2: range.c2, r1: range.r1, r2: range.r2 }, this.mergedRegions);

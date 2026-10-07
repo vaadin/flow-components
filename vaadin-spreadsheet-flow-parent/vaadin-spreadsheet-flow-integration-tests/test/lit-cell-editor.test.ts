@@ -1262,6 +1262,12 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         sheet.setColW([50, 50, 50]);
         sheet.setRowH([15, 15, 15]);
 
+        // Real-world: a click precedes the dblclick, setting active.
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 2, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
         sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-doubleclick', {
             detail: { col: 2, row: 3 },
             bubbles: true, composed: true,
