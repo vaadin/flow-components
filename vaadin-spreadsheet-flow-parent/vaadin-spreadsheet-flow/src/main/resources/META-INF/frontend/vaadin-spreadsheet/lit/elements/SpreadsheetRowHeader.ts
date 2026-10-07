@@ -383,9 +383,12 @@ export class SpreadsheetRowHeader extends LitElement {
     }
     e.preventDefault();
     const ev = e as MouseEvent;
+    // Where the row starts on screen: the GWT client sized it from there
+    // to the pointer.
+    const number = this.shadowRoot!.querySelector<HTMLElement>(`.row-header-cell.row${row}`);
     this.dispatchEvent(
       new CustomEvent('row-resize-start', {
-        detail: { row, clientY: ev.clientY },
+        detail: { row, clientX: ev.clientX, clientY: ev.clientY, top: number?.getBoundingClientRect().top },
         bubbles: true,
         composed: true
       })

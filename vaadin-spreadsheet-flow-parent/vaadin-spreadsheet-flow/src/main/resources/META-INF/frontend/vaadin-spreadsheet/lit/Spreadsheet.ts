@@ -234,25 +234,33 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Column-resize drag state (slice 164). Set on
-   * {@code column-resize-start}, cleared on mouseup. While
-   * non-null, document-level mousemove updates the column
-   * width live.
+   * {@code column-resize-start}, cleared on mouseup. As in the GWT client,
+   * the column keeps its width until the drag ends: a line and a tooltip
+   * follow the pointer meanwhile, and the width it takes is from the
+   * column's left edge, {@code edge}, to the pointer at {@code x}.
    */
-  private columnResize: {
-    col: number;
-    startWidth: number;
-    startClientX: number;
-  } | null = null;
+  private columnResize: { col: number; edge: number; x: number; y: number } | null = null;
 
   /**
    * Row-resize drag state (slice 164). Symmetric to
-   * {@link columnResize}.
+   * {@link columnResize}: the height runs from the row's top edge to the
+   * pointer at {@code y}.
    */
-  private rowResize: {
-    row: number;
-    startHeight: number;
-    startClientY: number;
-  } | null = null;
+  private rowResize: { row: number; edge: number; x: number; y: number } | null = null;
+
+  /** Where a dragged header edge would go: a line across the whole sheet. */
+  private readonly resizeLine: HTMLElement;
+
+  /** The size a dragged header would take, by the pointer. */
+  private readonly resizeTooltip: HTMLElement;
+
+  /**
+   * Over the sheet while a resize drag moves, so the resize cursor shows
+   * wherever the pointer goes, as the GWT client's did. Not before the
+   * pointer moves: the second click of a double-click, which fits the
+   * column to its content, has to reach the handle.
+   */
+  private readonly resizeCover: HTMLElement;
 
   /**
    * The "current extend position" for shift+arrow navigation
@@ -738,6 +746,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // its check boxes are the popup's, not the sheet's shortcuts. Beside
     // the context menu, the other overlay.
     this.contextMenu.after(this.popupOverlay);
+    // What a header drag shows, as the GWT client showed it - see
+    // showResizeGuide. Drawn by the host's stylesheet.
+    this.resizeLine = document.createElement('div');
+    this.resizeLine.className = 'resize-line';
+    this.resizeLine.hidden = true;
+    this.resizeCover = document.createElement('div');
+    this.resizeCover.className = 'resize-cover';
+    this.resizeCover.hidden = true;
+    // In the top layer, as the GWT client's tooltip was outside the sheet,
+    // so no edge cuts it off.
+    this.resizeTooltip = document.createElement('div');
+    this.resizeTooltip.className = 'resize-tooltip';
+    this.resizeTooltip.popover = 'manual';
+    this.resizeTooltip.hidden = true;
+    this.popupOverlay.after(this.resizeCover, this.resizeLine, this.resizeTooltip);
     this.renderTarget.appendChild(this.root);
     // Slice 174: honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
@@ -954,66 +977,99 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return !this.sheetProtected || !this.lockFormatRows;
   }
 
-  private readonly handleColumnResizeStart = (e: CustomEvent<{ col: number; clientX: number }>): void => {
+  /**
+   * Column resize drag — start. The header reports where the column starts
+   * on screen; without that, the drag is taken to start on the column's
+   * right edge.
+   */
+  private readonly handleColumnResizeStart = (
+    e: CustomEvent<{ col: number; clientX: number; clientY?: number; left?: number }>
+  ): void => {
     if (!this.canResizeColumn()) {
       return;
     }
-    const { col, clientX } = e.detail;
-    const idx = col - 1;
-    const startWidth = idx < this.colWidths.length ? this.colWidths[idx] : this.defColWidth;
-    this.columnResize = { col, startWidth, startClientX: clientX };
+    const { col, clientX, clientY = 0, left } = e.detail;
+    const edge = left ?? clientX - this.colWidthPx(col);
+    this.columnResize = { col, edge, x: clientX, y: clientY };
+    this.showResizeGuide();
   };
 
   /**
    * Row resize drag — start. Mirror of column variant.
    */
-  private readonly handleRowResizeStart = (e: CustomEvent<{ row: number; clientY: number }>): void => {
+  private readonly handleRowResizeStart = (
+    e: CustomEvent<{ row: number; clientX?: number; clientY: number; top?: number }>
+  ): void => {
     if (!this.canResizeRow()) {
       return;
     }
-    const { row, clientY } = e.detail;
-    const idx = row - 1;
-    // Note: rowHeights is in POINTS, not pixels. We convert
-    // on render, but the resize delta is in pixels; convert
-    // back when writing.
-    const startHeight = idx < this.rowHeights.length ? this.rowHeights[idx] : this.defRowHeight;
-    this.rowResize = { row, startHeight, startClientY: clientY };
+    const { row, clientX = 0, clientY, top } = e.detail;
+    const edge = top ?? clientY - this.rowHeightPx(row);
+    this.rowResize = { row, edge, x: clientX, y: clientY };
+    this.showResizeGuide();
   };
 
   /**
-   * Document mousemove during a header-drag resize (slice 164).
-   * Updates the dragged column's pixel width (or row's point
-   * height) from the mouse delta + triggers a re-render. Fires
-   * many times per second during drag; the per-update cost is
-   * one array element write + one recomputeViewport.
+   * Document mousemove during a header-drag resize (slice 164): the line
+   * and the tooltip follow the pointer, and the sheet stays as it is until
+   * the drag ends, as in the GWT client.
    */
   private readonly handleDocumentMouseMove = (e: MouseEvent): void => {
-    if (this.columnResize !== null) {
-      const delta = e.clientX - this.columnResize.startClientX;
-      const newWidth = Math.max(0, this.columnResize.startWidth + delta);
-      const idx = this.columnResize.col - 1;
-      // Convert colWidths to a mutable array if it's an Int32Array
-      // (server-pushed shape) — the resize-drag writes into it.
-      if (!Array.isArray(this.colWidths)) {
-        this.colWidths = Array.from(this.colWidths);
-      }
-      (this.colWidths as number[])[idx] = newWidth;
-      this.recomputeViewport();
+    const resize = this.columnResize ?? this.rowResize;
+    if (resize === null) {
       return;
     }
-    if (this.rowResize !== null) {
-      const deltaPx = e.clientY - this.rowResize.startClientY;
-      // Convert pixel delta → point delta (1 pt = 96/72 px at default ppi).
-      const deltaPt = (deltaPx * 72) / FALLBACK_PPI;
-      const newHeight = Math.max(0, this.rowResize.startHeight + deltaPt);
-      const idx = this.rowResize.row - 1;
-      if (!Array.isArray(this.rowHeights)) {
-        this.rowHeights = Array.from(this.rowHeights);
-      }
-      (this.rowHeights as number[])[idx] = newHeight;
-      this.recomputeViewport();
-    }
+    resize.x = e.clientX;
+    resize.y = e.clientY;
+    this.resizeCover.hidden = false;
+    this.showResizeGuide();
   };
+
+  /**
+   * The line and the tooltip of a resize drag, as the GWT client drew them:
+   * a line across the whole sheet where the edge would go - no further
+   * back than where the column or row starts - and the size it would make,
+   * 10px right of the pointer and 25px above it. Nothing at all is
+   * "Hide column" or "Hide row"; a row's height shows in points too.
+   */
+  private showResizeGuide(): void {
+    const origin = this.root.getBoundingClientRect();
+    const line = this.resizeLine;
+    let text: string;
+    let x: number;
+    let y: number;
+    if (this.columnResize !== null) {
+      ({ x, y } = this.columnResize);
+      const width = Math.max(0, Math.round(x - this.columnResize.edge));
+      text = width > 0 ? `Width: ${width}px` : 'Hide column';
+      const at = Math.max(x, this.columnResize.edge) - 1 - origin.left - this.root.clientLeft;
+      line.style.cssText = `left:${at}px;top:0;width:1px;height:100%;`;
+    } else if (this.rowResize !== null) {
+      ({ x, y } = this.rowResize);
+      const height = Math.max(0, Math.round(y - this.rowResize.edge));
+      text = height > 0 ? `Height: ${height}px ≈ ${pixelsToPoints(height)}pt` : 'Hide row';
+      const at = Math.max(y, this.rowResize.edge) - 1 - origin.top - this.root.clientTop;
+      line.style.cssText = `left:0;top:${at}px;width:100%;height:1px;`;
+    } else {
+      return;
+    }
+    line.hidden = false;
+    this.resizeCover.classList.toggle('rows', this.rowResize !== null);
+    const tooltip = this.resizeTooltip;
+    tooltip.textContent = text;
+    tooltip.style.left = `${x + 10}px`;
+    tooltip.style.top = `${y - 25}px`;
+    tooltip.hidden = false;
+    showInTopLayer(tooltip);
+  }
+
+  /** Take the line, the tooltip and the cover of a resize drag away. */
+  private hideResizeGuide(): void {
+    this.resizeLine.hidden = true;
+    this.resizeCover.hidden = true;
+    this.resizeTooltip.hidden = true;
+    hideFromTopLayer(this.resizeTooltip);
+  }
 
   /**
    * Popup-button click handler (slice 161). Translates the
@@ -1277,19 +1333,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     if (this.columnResize !== null) {
-      // End of column-resize drag (slice 164). Dispatch
-      // the columnResized event with the new pixel width
-      // for the server's persistence + downstream rows
-      // dependencies.
-      const { col } = this.columnResize;
-      const idx = col - 1;
-      const newWidth = idx < this.colWidths.length ? this.colWidths[idx] : this.defColWidth;
+      // End of column-resize drag (slice 164): the column takes the width
+      // from its left edge to where the pointer was let go, here at once
+      // and then on the server - when it is a different width. Nothing
+      // hides it, as in the GWT client.
+      const { col, edge, x } = this.columnResize;
       this.columnResize = null;
+      this.hideResizeGuide();
+      const width = Math.max(0, Math.round(x - edge));
+      if (width === this.colWidthPx(col)) {
+        return;
+      }
+      this.colWidths = withSize(this.colWidths, col, width, this.defColWidth);
+      if (width === 0 && !this.hiddenColumnIndexes.includes(col)) {
+        this.hiddenColumnIndexes = [...this.hiddenColumnIndexes, col];
+      }
+      this.recomputeViewport();
       this.host.dispatchEvent(
         new CustomEvent('spreadsheet-event', {
           detail: {
             type: 'columnResized',
-            data: { colIndexes: [col], newWidths: [newWidth] }
+            data: { colIndexes: [col], newWidths: [width] }
           },
           bubbles: true,
           composed: true
@@ -1298,17 +1362,26 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     if (this.rowResize !== null) {
-      // End of row-resize drag (slice 164). rowHeights is
-      // in points; the event payload also uses points.
-      const { row } = this.rowResize;
-      const idx = row - 1;
-      const newHeight = idx < this.rowHeights.length ? this.rowHeights[idx] : this.defRowHeight;
+      // End of row-resize drag (slice 164). Mirror of the column's;
+      // rowHeights is in points, and so is the event payload.
+      const { row, edge, y } = this.rowResize;
       this.rowResize = null;
+      this.hideResizeGuide();
+      const height = pixelsToPoints(Math.max(0, Math.round(y - edge)));
+      const idx = row - 1;
+      if (height === (idx < this.rowHeights.length ? this.rowHeights[idx] : this.defRowHeight)) {
+        return;
+      }
+      this.rowHeights = withSize(this.rowHeights, row, height, this.defRowHeight);
+      if (height === 0 && !this.hiddenRowIndexes.includes(row)) {
+        this.hiddenRowIndexes = [...this.hiddenRowIndexes, row];
+      }
+      this.recomputeViewport();
       this.host.dispatchEvent(
         new CustomEvent('spreadsheet-event', {
           detail: {
             type: 'rowsResized',
-            data: { rowIndexes: [row], newHeights: [newHeight] }
+            data: { rowIndexes: [row], newHeights: [height] }
           },
           bubbles: true,
           composed: true
@@ -4710,6 +4783,25 @@ function hideFromTopLayer(el: HTMLElement): void {
   } catch {
     // Not in the top layer.
   }
+}
+
+/** Pixels in points, as the GWT client converted the height of a row being dragged. */
+function pixelsToPoints(px: number, ppi: number = FALLBACK_PPI): number {
+  return (px * 72) / ppi;
+}
+
+/**
+ * Column or row sizes with the one at a 1-based index changed. Those past
+ * the end take the default, so the gap up to a size set past it is filled
+ * with the default.
+ */
+function withSize(sizes: ArrayLike<number>, index: number, size: number, fallback: number): number[] {
+  const out = Array.from(sizes);
+  while (out.length < index - 1) {
+    out.push(fallback);
+  }
+  out[index - 1] = size;
+  return out;
 }
 
 /**

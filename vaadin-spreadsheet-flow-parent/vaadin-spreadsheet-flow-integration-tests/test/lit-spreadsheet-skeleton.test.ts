@@ -303,11 +303,11 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         const root = sheet.getRoot();
         expect(host.firstElementChild).to.equal(root);
 
-        // Root has 5 children: formula bar + context menu + scroll
+        // Root has 8 children: formula bar + context menu + scroll
         // container + sheet tabs + the popup overlay, which is outside the
         // scroll container so the keys typed into a popup are not the
-        // sheet's.
-        expect(root.children).to.have.length(5);
+        // sheet's, and the cover, line and tooltip a header drag shows.
+        expect(root.children).to.have.length(8);
         const rootKids = Array.from(root.children);
         expect(rootKids.includes(sheet.getFormulaBar())).to.be.true;
         expect(rootKids.includes(sheet.getContextMenu())).to.be.true;
@@ -2318,8 +2318,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         // under its own root element, not into the light DOM.
         expect(shadow.children.length).to.equal(1);
         expect(shadow.firstElementChild).to.equal(sheet.getRoot());
-        // Formula bar, context menu, popup overlay, scroll container, tabs.
-        expect(sheet.getRoot().children.length).to.equal(5);
+        // Formula bar, context menu, popup overlay, scroll container, tabs,
+        // and what a header drag shows.
+        expect(sheet.getRoot().children.length).to.equal(8);
         expect(host.children.length).to.equal(0);
         // The host belongs to the application: the component must not
         // write a layout onto it. An inline style would beat any
@@ -2549,7 +2550,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column resize live-updates the colWidths during drag (slice 164)', () => {
+    it('column resize keeps the width until the drag ends, as the GWT client did', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -2562,12 +2563,13 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
             composed: true,
         }));
         document.dispatchEvent(new MouseEvent('mousemove', { clientX: 130, bubbles: true }));
+        sheet.recomputeViewport();
 
-        // The cell-grid's render state reflects the new width
-        // (50 + 30 = 80) — visible feedback during drag.
-        const state = sheet.getCellGrid().renderState;
-        expect(state.colWidths[0]).to.equal(80);
+        // A line and a tooltip show the 80px it would take; the column has
+        // its 50px until the pointer is let go.
+        expect(sheet.getCellGrid().renderState.colWidths[0]).to.equal(50);
         document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        expect(sheet.getCellGrid().renderState.colWidths[0]).to.equal(80);
         cleanup();
     });
 

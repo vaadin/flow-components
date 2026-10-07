@@ -453,9 +453,12 @@ export class SpreadsheetColumnHeader extends LitElement {
     }
     e.preventDefault();
     const ev = e as MouseEvent;
+    // Where the column starts on screen: the GWT client sized it from
+    // there to the pointer.
+    const letter = this.shadowRoot!.querySelector<HTMLElement>(`.col-header-cell.col${col}`);
     this.dispatchEvent(
       new CustomEvent('column-resize-start', {
-        detail: { col, clientX: ev.clientX },
+        detail: { col, clientX: ev.clientX, clientY: ev.clientY, left: letter?.getBoundingClientRect().left },
         bubbles: true,
         composed: true
       })

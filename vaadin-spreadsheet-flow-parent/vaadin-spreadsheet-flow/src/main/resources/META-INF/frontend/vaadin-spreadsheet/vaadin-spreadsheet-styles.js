@@ -97,6 +97,46 @@ export const spreadsheetStyles = css`
     border: 1px solid var(--vaadin-spreadsheet-border-color, var(--_vaadin-spreadsheet-border-color, #c7c7c7));
   }
 
+  /* A header being dragged, as the GWT client showed it: a line across the
+     whole sheet where the edge would go, and the resize cursor wherever the
+     pointer goes. The connector places the line. */
+  .resize-line {
+    position: absolute;
+    z-index: 11;
+    background: #197de1;
+    pointer-events: none;
+  }
+
+  .resize-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 11;
+    cursor: col-resize;
+  }
+
+  .resize-cover.rows {
+    cursor: row-resize;
+  }
+
+  /* The size the header would take, by the pointer, on the GWT client's
+     tooltip. In the top layer, placed in viewport coordinates; the inset,
+     margin and border undo the browser's popover defaults. */
+  .resize-tooltip {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    border: 0;
+    padding: 5px 9px;
+    border-radius: 3px;
+    background-color: rgba(50, 50, 50, 0.9);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 14px;
+    max-width: 35em;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
   /* SpreadsheetTheme.LUMO, as the GWT client drew it: the Lumo value of
      every documented property the application leaves unset. Lumo's
      tokens come from the application's Lumo theme. */
@@ -143,6 +183,18 @@ export const spreadsheetStyles = css`
     --default-background-color: var(--lumo-base-color);
     --default-color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
     background-color: var(--lumo-base-color);
+  }
+
+  :host([theme~='lumo']) .resize-line {
+    background: var(--lumo-primary-color);
+  }
+
+  :host([theme~='lumo']) .resize-tooltip {
+    background-color: var(--lumo-contrast-50pct);
+    box-shadow: var(--lumo-box-shadow-s);
+    color: var(--lumo-base-color);
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    font-size: var(--lumo-font-size-s);
   }
 
   /* Spreadsheet.HIDE_FUNCTION_BAR_STYLE — public Java constant
