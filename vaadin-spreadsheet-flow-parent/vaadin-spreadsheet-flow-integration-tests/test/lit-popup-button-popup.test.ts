@@ -420,6 +420,54 @@ describe('Spreadsheet — popup-button popup', () => {
     ]);
   });
 
+  /** Press and click a popup button, as a mouse does. */
+  async function clickButton(col: number, row: number): Promise<void> {
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+    const button = ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector<HTMLElement>(`.popup-button[data-col="${col}"][data-row="${row}"]`)!;
+    button.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+  }
+
+  it('closes and reports when its own button is clicked, as the GWT client did', async () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.addPopupButton(buttonState(4, 1));
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    ctx.sent.length = 0;
+
+    await clickButton(4, 1);
+    await settle(ctx.sheet.getPopupOverlay());
+
+    expect(ctx.sheet.getPopupOverlay().hidden).to.be.true;
+    expect(ctx.sent.map((e) => e.type)).to.eql(['popupClose']);
+  });
+
+  it('asks the server to open it again on the next click of its button', async () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.addPopupButton(buttonState(4, 1));
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    await clickButton(4, 1);
+    ctx.sent.length = 0;
+
+    await clickButton(4, 1);
+
+    expect(ctx.sent).to.eql([{ type: 'popupButtonClick', data: { row: 1, column: 4 } }]);
+  });
+
+  it("opens another cell's popup from its button while one is open", async () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.addPopupButton(buttonState(4, 1));
+    ctx.sheet.addPopupButton(buttonState(6, 1));
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    ctx.sent.length = 0;
+
+    await clickButton(6, 1);
+
+    expect(ctx.sent.map((e) => e.type)).to.eql(['popupClose', 'popupButtonClick']);
+  });
+
   it('keeps the keys typed inside it away from the sheet, as the GWT client did', () => {
     const field = document.createElement('input');
     withFlowClient({ 42: field });

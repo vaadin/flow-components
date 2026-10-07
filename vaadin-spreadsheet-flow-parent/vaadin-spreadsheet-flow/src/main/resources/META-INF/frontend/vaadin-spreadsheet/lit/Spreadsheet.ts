@@ -535,6 +535,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private openPopup: { row: number; col: number; nodeId: string } | null = null;
 
   /**
+   * The button whose press has just closed its own popup: the click that
+   * follows is not to open it again. The GWT client's popup closed the
+   * same way, its auto-hide taking the press on the button.
+   */
+  private popupClosedByItsButton: { row: number; col: number } | null = null;
+
+  /**
    * Places the open popup again when its size changes: its content is
    * Flow's components, which render after they are attached, so the size
    * the popup opens at is seldom the one it settles at.
@@ -1134,6 +1141,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handlePopupButtonClick = (e: CustomEvent<{ col: number; row: number }>): void => {
     const { col, row } = e.detail;
+    const closed = this.popupClosedByItsButton;
+    this.popupClosedByItsButton = null;
+    if (closed !== null && closed.row === row && closed.col === col) {
+      return;
+    }
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
@@ -3945,14 +3957,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Any click outside the menu dismisses it, as a native menu would. */
   private readonly handleDocumentPointerDown = (e: Event): void => {
     const path = e.composedPath();
-    // A click inside the popup belongs to the popup's content; one on the
-    // button that opened it is the server's to interpret, and closing here
-    // would race the reopen it triggers.
+    // A click inside the popup belongs to the popup's content. A press on
+    // the button that opened it closes it, as in the GWT client, and the
+    // click that follows is then not to open it again.
     // The content is a light child of the host projected into the overlay,
     // so the path reaches the overlay through the slot — except before the
     // projection settles, hence the second check.
     const insidePopup = path.includes(this.popupOverlay) || path.some((target) => this.popupContents.owns(target));
-    if (this.openPopup !== null && !insidePopup && !this.hitOpenPopupButton(path)) {
+    const open = this.openPopup;
+    this.popupClosedByItsButton =
+      open !== null && this.hitOpenPopupButton(path) ? { row: open.row, col: open.col } : null;
+    if (open !== null && !insidePopup) {
       this.dismissPopup();
     }
     if (!this.contextMenu.renderState.open) {
