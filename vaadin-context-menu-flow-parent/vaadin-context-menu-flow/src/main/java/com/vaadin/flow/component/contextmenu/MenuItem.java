@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.download.Download;
+import com.vaadin.flow.component.shared.internal.DownloadUtil;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -117,8 +118,8 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
         this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
             downloadRegistration = Download.onClick(this,
-                    getDisableOnClickController()
-                            .allowDisabledByClick(downloadHandler));
+                    DownloadUtil.allowDisabledByClick(this,
+                            getDisableOnClickController(), downloadHandler));
         }
     }
 
