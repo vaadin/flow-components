@@ -63,13 +63,13 @@ describe('selectedColumnSet / selectedRowSet', () => {
     expect([...selectedRowSet(selectSingleCell(3, 7))]).to.deep.equal([7]);
   });
 
-  it('ignores aux ranges — only the active range is headed', () => {
+  it('heads every range, aux ranges too, as the GWT client did', () => {
     // A Ctrl-click makes the clicked cell the active range and demotes
-    // the previous one to an aux range. Header highlighting follows the
-    // active one; the extras are drawn on the cells themselves.
+    // the previous one to an aux range; the headers of both stay lit.
     const selection = addAuxRange(selectSingleCell(1, 1), 9, 9, 9, 9);
     expect(selection.auxRanges).to.have.length(1);
-    expect([...selectedColumnSet(selection)]).to.deep.equal([9]);
+    expect([...selectedColumnSet(selection)].sort((a, b) => a - b)).to.deep.equal([1, 9]);
+    expect([...selectedRowSet(selection)].sort((a, b) => a - b)).to.deep.equal([1, 9]);
   });
 });
 

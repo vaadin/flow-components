@@ -5431,12 +5431,13 @@ export function coerceNumberArray(
  * active range emits {@code part="column-header header-selected"}.
  */
 export function selectedColumnSet(selection: SelectionState): Set<number> {
-  const range = selection.activeRange;
-  const min = Math.min(range.c1, range.c2);
-  const max = Math.max(range.c1, range.c2);
+  // Every range's columns, as the GWT client marked them - not only the
+  // last one added.
   const set = new Set<number>();
-  for (let c = min; c <= max; c++) {
-    set.add(c);
+  for (const range of [selection.activeRange, ...selection.auxRanges]) {
+    for (let c = Math.min(range.c1, range.c2); c <= Math.max(range.c1, range.c2); c++) {
+      set.add(c);
+    }
   }
   return set;
 }
@@ -5446,12 +5447,11 @@ export function selectedColumnSet(selection: SelectionState): Set<number> {
  * Slice 173.
  */
 export function selectedRowSet(selection: SelectionState): Set<number> {
-  const range = selection.activeRange;
-  const min = Math.min(range.r1, range.r2);
-  const max = Math.max(range.r1, range.r2);
   const set = new Set<number>();
-  for (let r = min; r <= max; r++) {
-    set.add(r);
+  for (const range of [selection.activeRange, ...selection.auxRanges]) {
+    for (let r = Math.min(range.r1, range.r2); r <= Math.max(range.r1, range.r2); r++) {
+      set.add(r);
+    }
   }
   return set;
 }

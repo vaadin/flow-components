@@ -17,7 +17,7 @@ import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
 import { ANIMATE_IN_CLASS, animateIn, animateOut, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { isCellEditorSlot, overlayComponentSlotName } from '../dom/VirtualChildren.js';
-import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
+import { isActiveCell, isCellSelected, isCoherentSelection } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 
 /**
@@ -356,20 +356,27 @@ export class SpreadsheetCellGrid extends LitElement {
        conditional format's fill for as long as the cell is selected, and
        Excel shows the fill through the selection. An inset shadow spread
        over the whole box tints instead of replacing. */
+      /* The default tint turns a white cell the GWT client's range colour,
+       rgb(237, 245, 253), while a fill underneath still shows through. */
       .cell.cell-range {
         box-shadow: inset 0 0 0 9999px
-          var(--vaadin-spreadsheet-cell-range-bg, var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1)));
+          var(--vaadin-spreadsheet-cell-range-bg, var(--_vaadin-spreadsheet-cell-range-bg, rgba(75, 155, 235, 0.1)));
       }
 
-      /* The active range's overlay has nothing of its own underneath, so it
-       paints the tint directly. Matched by class rather than by part: the
-       cells carry part="cell cell-range" as well, and a background on them
-       is what hid their fill. */
-      .sheet-selection {
-        background: var(
-          --vaadin-spreadsheet-cell-range-bg,
-          var(--_vaadin-spreadsheet-cell-range-bg, rgba(25, 118, 210, 0.1))
-        );
+      /* The active cell of a selection of several ranges, as the GWT client
+       marked it: a dark line just inside its edge. */
+      .cell.selected-cell-highlight {
+        outline: 1px solid #222;
+        outline-offset: -2px;
+        z-index: 1;
+      }
+
+      .sheet-selection.multi-range {
+        background: none;
+      }
+
+      .sheet-selection.multi-range > * {
+        display: none;
       }
 
       /* Frozen-pane wrappers (slice 141). Each frozen quadrant lives
@@ -602,6 +609,10 @@ export class SpreadsheetCellGrid extends LitElement {
        still wins. */
       :where(:host([theme~='lumo'])) .cell {
         padding: 0 var(--lumo-space-xs);
+      }
+
+      :host([theme~='lumo']) .cell.selected-cell-highlight {
+        outline-color: var(--lumo-contrast-80pct);
       }
 
       :host([theme~='lumo']) .cell.custom-editor-cell {
@@ -1710,7 +1721,12 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
           : html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>`;
       const inSelection = isCellSelected(selection, col, row);
       const isActive = isActiveCell(selection, col, row);
-      const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
+      const cellRangeClass =
+        inSelection && !isActive
+          ? ' cell-range'
+          : isActive && !isCoherentSelection(selection)
+          ? ' selected-cell-highlight'
+          : '';
       // Hyperlink cells get a `link-cell` class for visual
       // styling (blue + underline). The click handler in
       // the connector dispatches `linkCellClicked` based
@@ -1848,7 +1864,12 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
     // single-cell selection behavior.
     const inSelection = isCellSelected(selection, region.col1, region.row1);
     const isActive = isActiveCell(selection, region.col1, region.row1);
-    const cellRangeClass = inSelection && !isActive ? ' cell-range' : '';
+    const cellRangeClass =
+      inSelection && !isActive
+        ? ' cell-range'
+        : isActive && !isCoherentSelection(selection)
+        ? ' selected-cell-highlight'
+        : '';
 
     const classList =
       `cell col${region.col1} row${region.row1} merged-cell` +
@@ -2279,9 +2300,12 @@ function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | strin
   // A side the range runs on past is kept, hidden, so every piece has all
   // four; the handle is only where the range's last cell is.
   const side = (name: string, real: boolean): TemplateResult => html`<div class=${real ? name : `${name} cut`}></div>`;
+  // With several ranges selected the GWT client drew no outline and no
+  // fill handle - the active cell carries the selected-cell-highlight
+  // instead. The overlay stays, for the coordinates it carries.
   return html`
     <div
-      class="sheet-selection"
+      class=${!isCoherentSelection(selection) ? 'sheet-selection multi-range' : 'sheet-selection'}
       data-col=${selection.activeCell.col}
       data-row=${selection.activeCell.row}
       style=${pieceBox(piece)}
