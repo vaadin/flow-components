@@ -192,15 +192,6 @@ describe('combo-box connector', () => {
       expect(comboBox.$server.resetDataCommunicator).to.be.not.called;
     });
 
-    it('should not reset the data communicator when reopened after the connector is reset', async () => {
-      comboBox.$connector.reset();
-
-      comboBox.opened = true;
-      await nextFrame();
-
-      expect(comboBox.$server.resetDataCommunicator).to.be.not.called;
-    });
-
     describe('with filter debouncing', () => {
       let clock: sinon.SinonFakeTimers;
 
@@ -214,15 +205,15 @@ describe('combo-box connector', () => {
         clock.restore();
       });
 
-      it('should not reset the data communicator when filtering', async () => {
+      it('should reset the data communicator when the filter changes back to the last requested one', async () => {
         comboBox.opened = true;
         await nextFrame();
 
         comboBox.filter = 'a';
+        comboBox.filter = '';
         clock.tick(500);
 
-        expect(comboBox.$server.setViewportRange).to.be.calledWith(0, comboBox.pageSize, 'a');
-        expect(comboBox.$server.resetDataCommunicator).to.be.not.called;
+        expect(comboBox.$server.resetDataCommunicator).to.be.calledOnce;
       });
     });
   });

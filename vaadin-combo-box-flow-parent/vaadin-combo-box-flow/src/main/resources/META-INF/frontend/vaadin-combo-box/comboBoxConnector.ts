@@ -19,10 +19,7 @@ export class ComboBoxConnector {
 
   #lastTypedFilter = '';
   #lastRequestedRange: ItemRange = [-1, -1];
-  #lastRequestedFilter = '';
   #needsDataCommunicatorReset = false;
-  // The web component cache that the last server request was made for
-  #requestedRootCache: FlowComboBox['__dataProviderController']['rootCache'] | null = null;
 
   constructor(comboBox: FlowComboBox) {
     this.#comboBox = comboBox;
@@ -39,6 +36,16 @@ export class ComboBoxConnector {
     // Assign last: setting the data provider can synchronously trigger a first
     // page load that calls back into the connector.
     comboBox.dataProvider = (params, callback) => this.#loadPage(params, callback);
+
+    // Whenever the web component cache is cleared after that, the server
+    // considers the requested range as already sent. Make the next request ask
+    // the server to send it again.
+    const connector = this;
+    const clearCache = comboBox.clearCache;
+    comboBox.clearCache = function (this: FlowComboBox) {
+      connector.#needsDataCommunicatorReset = true;
+      return clearCache.apply(this, arguments as unknown as []);
+    };
   }
 
   clear(start: number, length: number): void {
@@ -124,7 +131,7 @@ export class ComboBoxConnector {
     this.#cache = {};
     this.#lastRequestedRange = [-1, -1];
     this.#lastTypedFilter = '';
-    this.#clearCache();
+    comboBox.clearCache();
   }
 
   confirm(id: number, filter: string): void {
@@ -154,16 +161,6 @@ export class ComboBoxConnector {
     comboBox.$server.confirmUpdate(id);
   }
 
-  /**
-   * Clears the web component cache from the connector. The server side is
-   * already in sync in that case, so the next request does not need to reset
-   * the data communicator.
-   */
-  #clearCache(): void {
-    this.#requestedRootCache = null;
-    this.#comboBox.clearCache();
-  }
-
   #loadPage(params: ComboBoxDataProviderParams, callback: ComboBoxDataProviderCallback<Item>): void {
     const comboBox = this.#comboBox;
 
@@ -190,12 +187,7 @@ export class ComboBoxConnector {
         comboBox._filterDebouncer,
         timeOut.after(comboBox._filterTimeout ?? 500),
         () => {
-          // Filter cycled back to what server last received — force re-emit.
-          if (params.filter === this.#lastRequestedFilter) {
-            this.#needsDataCommunicatorReset = true;
-          }
-
-          this.#clearCache();
+          comboBox.clearCache();
         }
       );
       return;
@@ -246,22 +238,12 @@ export class ComboBoxConnector {
       comboBox.$server.setViewportRange(startIndex, endIndex - startIndex, filter);
     }
 
-    // The web component cleared its cache on its own (e.g. the multi-select
-    // combo box does that when readonly is turned off). The server considers
-    // the range as already sent, so force it to send it again.
-    const { rootCache } = comboBox.__dataProviderController;
-    if (this.#requestedRootCache && this.#requestedRootCache !== rootCache) {
-      this.#needsDataCommunicatorReset = true;
-    }
-    this.#requestedRootCache = rootCache;
-
     if (this.#needsDataCommunicatorReset) {
       comboBox.$server.resetDataCommunicator();
       this.#needsDataCommunicatorReset = false;
     }
 
     this.#lastRequestedRange = viewportPageRange;
-    this.#lastRequestedFilter = filter;
   }
 
   /** The range of item indexes currently rendered in the dropdown */
