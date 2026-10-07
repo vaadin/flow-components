@@ -303,13 +303,18 @@ describe('Spreadsheet — the selection while the sheet is not focused', () => {
     ctx.cleanup();
   });
 
-  /** How strongly the outline and the handle are drawn. */
+  /**
+   * How strongly the outline and the handle are drawn: dimmed as one, as
+   * the GWT client dimmed them. Dimmed piece by piece, the outline was
+   * darker where its sides crossed each other and the handle.
+   */
   function opacity(): string {
     const root = ctx.sheet.getCellGrid().shadowRoot!;
-    const outline = getComputedStyle(root.querySelector('.sheet-selection .s-top')!).opacity;
-    const handle = getComputedStyle(root.querySelector('.sheet-selection .selection-corner')!).opacity;
-    expect(handle, 'the handle with the outline').to.equal(outline);
-    return outline;
+    const overlay = root.querySelector('.sheet-selection')!;
+    for (const piece of overlay.querySelectorAll('.s-top, .selection-corner')) {
+      expect(getComputedStyle(piece).opacity, 'each piece at full strength within').to.equal('1');
+    }
+    return getComputedStyle(overlay).opacity;
   }
 
   /** Long enough for the focus change to be read. */
@@ -353,5 +358,28 @@ describe('Spreadsheet — the selection while the sheet is not focused', () => {
     expect(editor, 'the editor opened').to.not.be.null;
     expect(ctx.sheet.getCellGrid().shadowRoot!.activeElement).to.equal(editor);
     expect(opacity()).to.equal('1');
+  });
+});
+
+/**
+ * The outline stays above the cells as one layer. Dimmed as a whole, the
+ * overlay is a layer of its own, and at the cells' level the cells would
+ * cover the outline and the handle.
+ */
+describe('Spreadsheet — the dimmed selection above the cells', () => {
+  it('draws the outline and the handle over the cells under them', async () => {
+    const ctx = attachSheet();
+    ctx.sheet.setSelectedCellAndRange('B3', 2, 3, 2, 3, 2, 3, false);
+    await ctx.sheet.getCellGrid().updateComplete;
+    const root = ctx.sheet.getCellGrid().shadowRoot!;
+
+    for (const piece of root.querySelectorAll<HTMLElement>('.sheet-selection .s-top, .sheet-selection .selection-corner')) {
+      // Hit-testable for the probe: the outline lets clicks through.
+      piece.style.pointerEvents = 'auto';
+      const box = piece.getBoundingClientRect();
+      const onTop = root.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      expect(onTop, piece.className).to.equal(piece);
+    }
+    ctx.cleanup();
   });
 });

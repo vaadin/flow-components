@@ -268,11 +268,16 @@ export class SpreadsheetCellGrid extends LitElement {
         background: rgba(235, 247, 233, 0.8);
         z-index: 2;
       }
+      /* The outline and the handle as one layer, at the level its pieces
+       hold among the cells, the pictures and the filter buttons. */
+      .sheet-selection {
+        z-index: 2;
+      }
       /* Dimmed while the sheet does not have the keyboard, as the GWT
-       client did; the connector sets the attribute. The outline and the
-       handle rather than the overlay: opacity on the overlay would make it
-       a stacking context, and the cells would cover the handle. */
-      :host(:not([sheet-focused])) .sheet-selection > * {
+       client did; the connector sets the attribute. All of it at once, as
+       the GWT client dimmed it: dimmed piece by piece, the outline showed
+       darker where its sides met each other and the handle. */
+      :host(:not([sheet-focused])) .sheet-selection {
         opacity: 0.6;
       }
       .sheet-selection .s-top {
