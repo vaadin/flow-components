@@ -2454,11 +2454,16 @@ function buildCellEditorOverlay(
 
   // The Lumo theme puts every cell in its own font, which the cell's
   // styles would undo here: they reach the editor inline, past anything a
-  // stylesheet says. So the theme's font goes last.
+  // stylesheet says. So the theme's font goes last - and the sheet's text
+  // colour, which the GWT client's Lumo editor wrote in whatever colour the
+  // cell was.
   const style =
     `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
     editorCellStyle(state, col, row) +
-    (lumo ? '--default-font-family:var(--lumo-font-family);--default-font-size:var(--lumo-font-size-s);' : '');
+    (lumo
+      ? '--default-font-family:var(--lumo-font-family);--default-font-size:var(--lumo-font-size-s);' +
+        'color:var(--default-color);'
+      : '');
 
   const dispatchEditorEvent = (
     target: EventTarget,

@@ -430,6 +430,37 @@ describe('Lumo theme — the cell editor', () => {
         cleanup();
     });
 
+    // A red cell, the way the server writes one.
+    const RED_CELL = {
+        editor: { col: 2, row: 1, initialValue: 'x' },
+        cellStyleToCSSStyle: { 0: DEFAULT_STYLE, 5: 'color: rgb(255, 0, 0);' },
+    } as Partial<CellGridRenderState>;
+
+    it('types in the sheet\'s text colour, whatever colour the cell is', async () => {
+        const { el, cleanup } = await grid('lumo', RED_CELL);
+
+        expect(getComputedStyle(inGrid(el, '.cell.col2.row1')).color).to.equal('rgb(255, 0, 0)');
+        expect(getComputedStyle(inGrid(el, '.cell-editor')).color).to.equal(BODY_TEXT);
+
+        cleanup();
+    });
+
+    it('types in the text colour an application sets', async () => {
+        const { el, cleanup } = await grid('lumo', RED_CELL, '--vaadin-spreadsheet-text-color: rgb(1, 2, 3)');
+
+        expect(getComputedStyle(inGrid(el, '.cell-editor')).color).to.equal('rgb(1, 2, 3)');
+
+        cleanup();
+    });
+
+    it('types in the cell\'s own colour without the theme', async () => {
+        const { el, cleanup } = await grid(null, RED_CELL);
+
+        expect(getComputedStyle(inGrid(el, '.cell-editor')).color).to.equal('rgb(255, 0, 0)');
+
+        cleanup();
+    });
+
     it('types in the cell\'s own font without the theme', async () => {
         const { el, cleanup } = await grid(null, EDITING);
 
