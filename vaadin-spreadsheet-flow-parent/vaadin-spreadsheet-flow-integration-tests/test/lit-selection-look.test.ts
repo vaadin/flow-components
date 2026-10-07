@@ -137,3 +137,66 @@ describe('Spreadsheet — how a selection looks', () => {
     expect(sheet.getSelection().auxRanges).to.eql([{ c1: 2, c2: 2, r1: 2, r2: 2 }]);
   });
 });
+
+/**
+ * A selected cell in hidden columns or rows, as scrolled_frozen.xlsx opens
+ * with A1 selected and columns A:B and rows 1:2 hidden. The GWT client's
+ * outline was placed by its first cell and hid with it; the Lit client drew
+ * a sliver of outline and two pixels of fill handle on the gridline.
+ */
+describe('Spreadsheet — a selection out of sight', () => {
+  let sheet: Spreadsheet;
+  let host: HTMLElement;
+
+  beforeEach(() => {
+    host = document.createElement('div');
+    host.style.cssText = 'width:600px;height:400px;display:flex;flex-direction:column;';
+    document.body.appendChild(host);
+    sheet = new Spreadsheet(host);
+    sheet.setRows(10);
+    sheet.setCols(10);
+    sheet.setColW(new Array(10).fill(50));
+    sheet.setRowH(new Array(10).fill(15));
+    sheet.setHiddenColumnIndexes([1, 2]);
+    sheet.setHiddenRowIndexes([1, 2]);
+  });
+
+  afterEach(() => {
+    sheet.dispose();
+    host.remove();
+  });
+
+  async function selection(): Promise<HTMLElement> {
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    return sheet.getCellGrid().shadowRoot!.querySelector<HTMLElement>('.sheet-selection')!;
+  }
+
+  it('draws nothing for a selected cell that is hidden, as the GWT client did', async () => {
+    sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
+
+    const box = await selection();
+
+    expect(box.querySelector('.s-top, .s-left, .s-right, .s-bottom')).to.be.null;
+    expect(box.querySelector('.selection-corner')).to.be.null;
+  });
+
+  it('still says where the selection is', async () => {
+    sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
+
+    const box = await selection();
+
+    expect(`${box.dataset.col} ${box.dataset.row}`).to.equal('1 1');
+  });
+
+  it('draws the part of a range that shows, which the GWT client hid with its first cell', async () => {
+    sheet.setSelectedCellAndRange('A1', 1, 1, 1, 4, 1, 4, false);
+
+    const box = await selection();
+
+    expect(box.querySelectorAll('.s-top, .s-left, .s-right, .s-bottom')).to.have.length(4);
+    expect(box.querySelector('.selection-corner')).to.not.be.null;
+    // C3:D4 shows: two columns and two rows.
+    expect(`${box.style.width} ${box.style.height}`).to.equal('101px 41px');
+  });
+});

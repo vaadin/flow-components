@@ -2435,6 +2435,19 @@ function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | strin
   // A side the range runs on past is kept, hidden, so every piece has all
   // four; the handle is only where the range's last cell is.
   const side = (name: string, real: boolean): TemplateResult => html`<div class=${real ? name : `${name} cut`}></div>`;
+  // A range all in hidden columns or rows draws nothing, as in the GWT
+  // client, whose outline was placed by its first cell and hid with it;
+  // drawn, it was a sliver of outline and fill handle on the gridline.
+  if (piece.right <= piece.left || piece.bottom <= piece.top) {
+    return html`
+      <div
+        class="sheet-selection"
+        data-col=${selection.activeCell.col}
+        data-row=${selection.activeCell.row}
+        style=${pieceBox(piece)}
+      ></div>
+    `;
+  }
   // With several ranges selected the GWT client drew no outline and no
   // fill handle - the active cell carries the selected-cell-highlight
   // instead. The overlay stays, for the coordinates it carries.
