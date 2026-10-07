@@ -242,6 +242,32 @@ describe('SpreadsheetColumnHeader — render with header active', () => {
         cleanup(el);
     });
 
+    it('centres the letter on the whole column, divider included, as the GWT client did', async () => {
+        // The GWT client's divider took no room from the letter, so the
+        // letter sat half a pixel further right than in a column whose
+        // divider is a border of its own.
+        for (const width of [70, 71]) {
+            const el = await attachWithState(
+                buildState({
+                    firstColumnIndex: 1,
+                    lastColumnIndex: 1,
+                    firstColumnPosition: 0,
+                    colX: [0],
+                    colWidths: [width],
+                    headerHeight: 27,
+                })
+            );
+
+            const cell = el.shadowRoot!.querySelector('.col-header-cell') as HTMLElement;
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            const text = range.getBoundingClientRect();
+            const middle = text.left + text.width / 2 - cell.getBoundingClientRect().left;
+            expect(middle, `column of ${width}px`).to.be.closeTo(width / 2, 0.02);
+            cleanup(el);
+        }
+    });
+
     it('skips columns whose width is 0 (hidden columns)', async () => {
         const el = await attachWithState(
             buildState({

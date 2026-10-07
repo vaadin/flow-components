@@ -236,12 +236,15 @@ export class SpreadsheetColumnHeader extends LitElement {
        colour down to a shade darker, over a border of its own along the
        cells - which the active column's marker replaces, and so does an
        application's ::part(column-header) border. The pointer is an arrow
-       down the column a click selects. */
+       down the column a click selects. The pixel of padding centres the
+       letter on the whole column, as the GWT client's was: its divider
+       took no room from the letter. */
     .col-header-cell {
       position: absolute;
       box-sizing: border-box;
       overflow: hidden;
       text-align: center;
+      padding-left: 1px;
       border-right: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       border-bottom: 1px solid

@@ -239,11 +239,19 @@ export class SpreadsheetRowHeader extends LitElement {
        application's ::part(row-header) border. The pointer is an arrow
        along the row a click selects. Each number has the strip's own
        background, as in the GWT client, so a frozen row's number covers
-       the scrolled one under it. */
+       the scrolled one under it. The number is centred the GWT client's
+       way, a line of the font's own height in the middle of the whole
+       row - the pixel of padding makes up for the divider, which took no
+       room from the GWT client's number. */
     .row-header-cell {
       position: absolute;
       box-sizing: border-box;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 1px;
+      line-height: 100%;
       text-align: center;
       background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
       border-bottom: 1px solid
@@ -499,8 +507,7 @@ export class SpreadsheetRowHeader extends LitElement {
       if (numbersWidth <= 0) {
         return;
       }
-      const style =
-        `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;` + `line-height:${height}px;`;
+      const style = `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;`;
       // Slice 173: `part="row-header"` (+ `header-selected`
       // when the row intersects the active selection) mirrors
       // the documented public styling API.

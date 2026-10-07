@@ -217,22 +217,30 @@ describe('SpreadsheetRowHeader — render with header active', () => {
         expect(cell.style.left).to.equal('0px');
     });
 
-    it('line-height = height so the row number is vertically centered', async () => {
-        const el = await attachWithState(
-            buildState({
-                firstRowIndex: 1,
-                lastRowIndex: 1,
-                firstRowPosition: 0,
-                rowY: [0],
-                rowHeights: [30],
-                headerWidth: 40,
-            })
-        );
+    it('centres the number on the whole row, divider included, as the GWT client did', async () => {
+        // The GWT client's divider took no room from the number, so the
+        // number sat half a pixel lower than in a row whose divider is a
+        // border of its own.
+        for (const height of [20, 21]) {
+            const el = await attachWithState(
+                buildState({
+                    firstRowIndex: 1,
+                    lastRowIndex: 1,
+                    firstRowPosition: 0,
+                    rowY: [0],
+                    rowHeights: [height],
+                    headerWidth: 40,
+                })
+            );
 
-        const cell = el.shadowRoot!.querySelector(
-            '.row-header-cell'
-        ) as HTMLElement;
-        expect(cell.style.lineHeight).to.equal('30px');
+            const cell = el.shadowRoot!.querySelector('.row-header-cell') as HTMLElement;
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            const text = range.getBoundingClientRect();
+            const middle = text.top + text.height / 2 - cell.getBoundingClientRect().top;
+            expect(middle, `row of ${height}px`).to.be.closeTo(height / 2, 0.02);
+            cleanup(el);
+        }
     });
 
     it('skips rows whose height is 0 (hidden rows)', async () => {
