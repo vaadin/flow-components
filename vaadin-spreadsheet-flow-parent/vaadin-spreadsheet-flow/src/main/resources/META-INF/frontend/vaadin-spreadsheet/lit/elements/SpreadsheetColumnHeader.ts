@@ -232,6 +232,18 @@ export class SpreadsheetColumnHeader extends LitElement {
       pointer-events: auto;
     }
 
+    /* Over the strip's bottom border too, as the GWT client's pane border
+       crossed it. */
+    .frozen-header-strip > .freeze-line {
+      position: absolute;
+      top: 0;
+      bottom: -1px;
+      width: 1px;
+      z-index: 3;
+      background: #6a6a6a;
+      pointer-events: none;
+    }
+
     /* A letter as the GWT client drew it: on a gradient from the header
        colour down to a shade darker, over a border of its own along the
        cells - which the active column's marker replaces, and so does an
@@ -345,6 +357,10 @@ export class SpreadsheetColumnHeader extends LitElement {
     :host([theme~='lumo']) .col-header-cell {
       background-color: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+    }
+
+    :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
+      background: var(--lumo-contrast-50pct);
     }
 
     :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {
@@ -619,9 +635,15 @@ export class SpreadsheetColumnHeader extends LitElement {
       }
       frozenCells.push(...cells.splice(scrolling).map((cell) => cell.template));
       frozenHandles.push(...handles.splice(scrollingHandles).map((handle) => handle.template));
+      // The freeze line runs on up through the letters and the outline
+      // gutter, as the GWT client's frozen pane border did, over the same
+      // first pixel of the scrolling columns as in the cells.
+      const frozenWidth =
+        (frozenColX[horizontalSplitPosition - 1] ?? 0) + (frozenColWidths[horizontalSplitPosition - 1] ?? 0);
       frozenStrip = html`
         <div class="frozen-header-strip" style="transform:translateX(${scrollLeft}px);">
           ${frozenCells}${frozenHandles}
+          <div class="freeze-line" style="left:${frozenWidth}px;"></div>
         </div>
       `;
     }

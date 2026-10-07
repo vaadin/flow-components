@@ -319,3 +319,88 @@ describe('Frozen panes — headers that cover what scrolls under them', () => {
     expect(onTop(root, frozen)?.closest('.col-header-cell')).to.equal(frozen);
   });
 });
+
+/**
+ * The line along a freeze, through the headers. The GWT client drew it as
+ * the border of its frozen panes, which held the headers and the outline
+ * gutters too, so it ran from the top of the column gutter and from the
+ * left of the row gutter. The Lit client drew it among the cells only.
+ */
+describe('Frozen panes — the freeze line through the headers', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function settle(): Promise<void> {
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getColumnHeader().updateComplete;
+    await ctx.sheet.getRowHeader().updateComplete;
+    await ctx.sheet.getCellGrid().updateComplete;
+  }
+
+  function lines(): DOMRect[] {
+    return [...ctx.sheet.getCellGrid().shadowRoot!.querySelectorAll<HTMLElement>('.freeze-line')].map((l) =>
+      l.getBoundingClientRect()
+    );
+  }
+
+  it('carries the line between frozen and scrolling columns up through the letters and the gutter', async () => {
+    ctx.sheet.setColGroupingMax(1);
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await settle();
+
+    const header = ctx.sheet.getColumnHeader();
+    const line = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-line')!;
+    const box = line.getBoundingClientRect();
+    const strip = header.getBoundingClientRect();
+    // On the pixel the line among the cells is on, from the top of the
+    // gutter down over the strip's bottom border.
+    expect(box.left).to.equal(lines()[0].left);
+    expect(`${box.width} ${box.top} ${box.bottom}`).to.equal(`1 ${strip.top} ${strip.bottom}`);
+    expect(getComputedStyle(line).backgroundColor).to.equal('rgb(106, 106, 106)');
+  });
+
+  it('carries the line between frozen and scrolling rows across the numbers and the gutter', async () => {
+    ctx.sheet.setRowGroupingMax(1);
+    ctx.sheet.setVerticalSplitPosition(2);
+    await settle();
+
+    const header = ctx.sheet.getRowHeader();
+    const line = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-line')!;
+    const box = line.getBoundingClientRect();
+    const strip = header.getBoundingClientRect();
+    expect(box.top).to.equal(lines()[0].top);
+    expect(`${box.height} ${box.left} ${box.right}`).to.equal(`1 ${strip.left} ${strip.right}`);
+  });
+
+  it('keeps the line with the frozen columns as the sheet scrolls', async () => {
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await settle();
+    const before = ctx.sheet
+      .getColumnHeader()
+      .shadowRoot!.querySelector<HTMLElement>('.freeze-line')!
+      .getBoundingClientRect().left;
+
+    ctx.sheet.getScrollContainer().scrollLeft = 500;
+    await settle();
+
+    const after = ctx.sheet
+      .getColumnHeader()
+      .shadowRoot!.querySelector<HTMLElement>('.freeze-line')!
+      .getBoundingClientRect().left;
+    expect(after).to.equal(before);
+  });
+
+  it('draws no line in the headers when nothing is frozen', async () => {
+    await settle();
+
+    expect(ctx.sheet.getColumnHeader().shadowRoot!.querySelector('.freeze-line')).to.be.null;
+    expect(ctx.sheet.getRowHeader().shadowRoot!.querySelector('.freeze-line')).to.be.null;
+  });
+});

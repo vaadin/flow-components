@@ -234,6 +234,22 @@ export class SpreadsheetRowHeader extends LitElement {
       pointer-events: auto;
     }
 
+    /* Over the strip's right border too, as the GWT client's pane border
+       crossed it. */
+    .frozen-header-strip > .freeze-line {
+      position: absolute;
+      left: 0;
+      right: -1px;
+      height: 1px;
+      z-index: 3;
+      background: #6a6a6a;
+      pointer-events: none;
+    }
+
+    :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
+      background: var(--lumo-contrast-50pct);
+    }
+
     /* A number as the GWT client drew it, over a border of its own along
        the cells - which the active row's marker replaces, and so does an
        application's ::part(row-header) border. The pointer is an arrow
@@ -553,9 +569,15 @@ export class SpreadsheetRowHeader extends LitElement {
       }
       const frozenCells = cells.splice(scrolling);
       const frozenHandles = handles.splice(scrollingHandles);
+      // The freeze line runs on across the numbers and the outline gutter,
+      // as the GWT client's frozen pane border did, over the same first
+      // pixel of the scrolling rows as in the cells.
+      const frozenHeight =
+        (frozenRowY[verticalSplitPosition - 1] ?? 0) + (frozenRowHeights[verticalSplitPosition - 1] ?? 0);
       frozenStrip = html`
         <div class="frozen-header-strip" style="transform:translateY(${scrollTop}px);">
           ${frozenCells.map((cell) => cell.template)}${frozenHandles.map((handle) => handle.template)}
+          <div class="freeze-line" style="top:${frozenHeight}px;"></div>
         </div>
       `;
     }
