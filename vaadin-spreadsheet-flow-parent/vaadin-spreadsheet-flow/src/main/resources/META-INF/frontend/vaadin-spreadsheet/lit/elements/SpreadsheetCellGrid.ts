@@ -1716,13 +1716,13 @@ function coveredByMergeCoords(
  * closures — different quadrants use different position arrays
  * (frozen arrays vs main arrays).
  */
-function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
+function renderQuadrant(opts: QuadrantRenderOpts): DirectiveResult {
   const { state, quadrantName, colStart, colEnd, rowStart, rowEnd, getColLeft, getColWidth, getRowTop, getRowHeight } =
     opts;
   const { cellData, selection } = state;
 
   const covered = coveredByMergeCoords(state.mergedRegions);
-  const cells: TemplateResult[] = [];
+  const cells: Array<{ key: string; template: TemplateResult }> = [];
   for (let row = rowStart; row <= rowEnd; row++) {
     const top = getRowTop(row);
     const height = getRowHeight(row);
@@ -1838,15 +1838,28 @@ function renderQuadrant(opts: QuadrantRenderOpts): TemplateResult[] {
       // data-col + data-row drive the click-delegation handler
       // in firstUpdated() (slice 146) — single source of truth
       // for the cell's coordinate when the event bubbles.
-      cells.push(html`
-        <div class=${classList} part=${cellPart} style=${style} data-col=${col} data-row=${row}>
-          ${invalidIndicator}${text}
-        </div>
-        ${commentIndicator}
-      `);
+      // On one line, and the marker only where there is one: whitespace
+      // between the tags is a text node of its own and every binding a
+      // marker, and with a thousand cells drawn they doubled the nodes the
+      // sheet makes and restyles as it scrolls.
+      const content = invalidIndicator === '' ? text : html`${invalidIndicator}${text}`;
+      cells.push({
+        key,
+        template: html`<div class=${classList} part=${cellPart} style=${style} data-col=${col} data-row=${row}
+            >${content}</div
+          >${commentIndicator}`
+      });
     }
   }
-  return cells;
+  // Keyed by cell, so a cell keeps its element as the sheet scrolls. Cells
+  // are placed in sheet coordinates, so one still in view needs no change
+  // at all; matched by position instead, every cell was rewritten - its
+  // class, place and text - and restyled on every scroll step.
+  return repeat(
+    cells,
+    (cell) => cell.key,
+    (cell) => cell.template
+  );
 }
 
 /**

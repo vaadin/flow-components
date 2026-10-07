@@ -8,6 +8,7 @@
  */
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 
 import {
   GROUPING_BUTTON_SIZE_PX,
@@ -488,8 +489,10 @@ export class SpreadsheetRowHeader extends LitElement {
     const numbersLeft = gutterWidth;
     const numbersWidth = Math.max(0, headerWidth - gutterWidth);
 
-    const cells: TemplateResult[] = [];
-    const handles: TemplateResult[] = [];
+    // Keyed by row, so a number keeps its element as the sheet scrolls:
+    // matched by position, every one was rewritten on every scroll step.
+    const cells: Array<{ key: number; template: TemplateResult }> = [];
+    const handles: Array<{ key: number; template: TemplateResult }> = [];
     const buildRow = (row: number, top: number, height: number): void => {
       // Headings hidden, the outline still drawn: no numbers at all, as in
       // the GWT client. A number of no width still draws its border.
@@ -505,12 +508,18 @@ export class SpreadsheetRowHeader extends LitElement {
       const cellPart = isSelected ? 'row-header header-selected' : 'row-header';
       // data-row drives the click-delegation handler in
       // firstUpdated() (slice 148).
-      cells.push(html`
-        <div class="row-header-cell row${row}" part=${cellPart} style=${style} data-row=${row}> ${row} </div>
-      `);
+      cells.push({
+        key: row,
+        template: html`
+          <div class="row-header-cell row${row}" part=${cellPart} style=${style} data-row=${row}> ${row} </div>
+        `
+      });
       // Resize handle on the row's bottom edge (slice 164).
       const handleStyle = `top:${top + height - 3}px;left:${numbersLeft}px;width:${numbersWidth}px;`;
-      handles.push(html` <div class="row-resize-handle" style=${handleStyle} data-row=${row}></div> `);
+      handles.push({
+        key: row,
+        template: html` <div class="row-resize-handle" style=${handleStyle} data-row=${row}></div> `
+      });
     };
 
     for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
@@ -539,7 +548,7 @@ export class SpreadsheetRowHeader extends LitElement {
       const frozenHandles = handles.splice(scrollingHandles);
       frozenStrip = html`
         <div class="frozen-header-strip" style="transform:translateY(${scrollTop}px);">
-          ${frozenCells}${frozenHandles}
+          ${frozenCells.map((cell) => cell.template)}${frozenHandles.map((handle) => handle.template)}
         </div>
       `;
     }
@@ -574,7 +583,15 @@ export class SpreadsheetRowHeader extends LitElement {
         </button>
       `);
     }
-    return html`${groupingEls}${cells}${handles}${frozenStrip}`;
+    return html`${groupingEls}${repeat(
+      cells,
+      (cell) => cell.key,
+      (cell) => cell.template
+    )}${repeat(
+      handles,
+      (handle) => handle.key,
+      (handle) => handle.template
+    )}${frozenStrip}`;
   }
 }
 

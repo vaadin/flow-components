@@ -4002,3 +4002,76 @@ describe('SpreadsheetCellGrid — measuring each value once', () => {
         }
     });
 });
+
+describe('SpreadsheetCellGrid — scrolling keeps the cells it can', () => {
+    // Matched by position, every cell was rewritten - its class, place and
+    // text - and restyled on every scroll step; the GWT client moved what
+    // was already drawn.
+    const base = emptyCellGridRenderState();
+
+    function rowsFrom(first: number): CellGridRenderState {
+        const rows = 10;
+        const cellData = new Map<string, CellData>();
+        for (let row = first; row < first + rows; row++) {
+            for (let col = 1; col <= 3; col++) {
+                cellData.set(`col${col} row${row}`, makeCellData(col, row, `${col}:${row}`));
+            }
+        }
+        return {
+            ...base,
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 3,
+                lastColumnPosition: 150,
+                firstRowIndex: first,
+                firstRowPosition: (first - 1) * 20,
+                lastRowIndex: first + rows - 1,
+                lastRowPosition: (first + rows - 1) * 20,
+            },
+            cellData,
+            colX: [0, 50, 100],
+            rowY: Array.from({ length: rows }, (_, i) => (first - 1 + i) * 20),
+            colWidths: [50, 50, 50],
+            rowHeights: new Array(rows).fill(20),
+        };
+    }
+
+    it('keeps the element of a cell still in view', async () => {
+        const el = await attachWithState(rowsFrom(1));
+        try {
+            const before = el.shadowRoot!.querySelector('.cell.col2.row5');
+
+            el.renderState = rowsFrom(2);
+            await el.updateComplete;
+
+            const after = el.shadowRoot!.querySelector('.cell.col2.row5');
+            expect(after).to.equal(before);
+            expect(after!.textContent!.trim()).to.equal('2:5');
+        } finally {
+            cleanup(el);
+        }
+    });
+
+    it('changes nothing on the cells still in view', async () => {
+        const el = await attachWithState(rowsFrom(1));
+        try {
+            const kept = Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.cell')).filter(
+                (cell) => Number(cell.dataset.row) >= 2
+            );
+            let changed = 0;
+            const observer = new MutationObserver((records) => {
+                changed += records.filter((r) => kept.includes(r.target as HTMLElement)).length;
+            });
+            kept.forEach((cell) => observer.observe(cell, { attributes: true, characterData: true, subtree: true }));
+
+            el.renderState = rowsFrom(2);
+            await el.updateComplete;
+            observer.disconnect();
+
+            expect(changed).to.equal(0);
+        } finally {
+            cleanup(el);
+        }
+    });
+});

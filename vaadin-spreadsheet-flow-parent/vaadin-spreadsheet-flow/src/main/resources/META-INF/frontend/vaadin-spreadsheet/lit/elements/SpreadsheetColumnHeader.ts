@@ -8,6 +8,7 @@
  */
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { columnIndexToLetters } from '../algorithms/CellRef.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
@@ -550,8 +551,10 @@ export class SpreadsheetColumnHeader extends LitElement {
     const gutterHeight = columnGroupingGutterPx(colGroupingMax, headerHeight > 0);
     const letterTop = gutterHeight;
 
-    const cells: TemplateResult[] = [];
-    const handles: TemplateResult[] = [];
+    // Keyed by column, so a letter keeps its element as the sheet scrolls:
+    // matched by position, every one was rewritten on every scroll step.
+    const cells: Array<{ key: number; template: TemplateResult }> = [];
+    const handles: Array<{ key: number; template: TemplateResult }> = [];
     const buildColumn = (col: number, left: number, width: number): void => {
       // Headings hidden, the outline still drawn: no letters at all, as in
       // the GWT client. A letter of no height still draws its border.
@@ -570,14 +573,20 @@ export class SpreadsheetColumnHeader extends LitElement {
       // mirrors the documented public styling API.
       const isSelected = selectedColumns.has(col);
       const cellPart = isSelected ? 'column-header header-selected' : 'column-header';
-      cells.push(html`
-        <div class="col-header-cell col${col}" part=${cellPart} style=${style} data-col=${col}> ${letter} </div>
-      `);
+      cells.push({
+        key: col,
+        template: html`
+          <div class="col-header-cell col${col}" part=${cellPart} style=${style} data-col=${col}> ${letter} </div>
+        `
+      });
       // Resize handle on the right edge of this column
       // (slice 164). Anchored at the column's right edge so
       // mousedown begins a resize-drag for THIS column.
       const handleStyle = `left:${left + width - 3}px;top:${letterTop}px;` + `height:${headerHeight}px;`;
-      handles.push(html` <div class="col-resize-handle" style=${handleStyle} data-col=${col}></div> `);
+      handles.push({
+        key: col,
+        template: html` <div class="col-resize-handle" style=${handleStyle} data-col=${col}></div> `
+      });
     };
 
     for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
@@ -605,8 +614,8 @@ export class SpreadsheetColumnHeader extends LitElement {
         }
         buildColumn(col, frozenColX[col - 1] ?? 0, width);
       }
-      frozenCells.push(...cells.splice(scrolling));
-      frozenHandles.push(...handles.splice(scrollingHandles));
+      frozenCells.push(...cells.splice(scrolling).map((cell) => cell.template));
+      frozenHandles.push(...handles.splice(scrollingHandles).map((handle) => handle.template));
       frozenStrip = html`
         <div class="frozen-header-strip" style="transform:translateX(${scrollLeft}px);">
           ${frozenCells}${frozenHandles}
@@ -644,7 +653,15 @@ export class SpreadsheetColumnHeader extends LitElement {
         </button>
       `);
     }
-    return html`${groupingEls}${cells}${handles}${frozenStrip}`;
+    return html`${groupingEls}${repeat(
+      cells,
+      (cell) => cell.key,
+      (cell) => cell.template
+    )}${repeat(
+      handles,
+      (handle) => handle.key,
+      (handle) => handle.template
+    )}${frozenStrip}`;
   }
 }
 
