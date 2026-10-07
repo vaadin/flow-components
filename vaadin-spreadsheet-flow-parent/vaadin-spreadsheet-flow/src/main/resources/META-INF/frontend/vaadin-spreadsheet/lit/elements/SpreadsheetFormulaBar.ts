@@ -171,16 +171,19 @@ export class SpreadsheetFormulaBar extends LitElement {
       cursor: pointer;
     }
 
+    /* Where the GWT client drew its arrow: a pixel in from the left of
+       the panel's last 15px, on a 33px line from the top of the bar - a
+       little below the middle. */
     .namedrange-arrow {
       position: absolute;
       top: 0;
       right: 0;
       width: 15px;
       height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      box-sizing: border-box;
+      padding-left: 1px;
       font-size: x-small;
+      line-height: 33px;
       pointer-events: none;
     }
 

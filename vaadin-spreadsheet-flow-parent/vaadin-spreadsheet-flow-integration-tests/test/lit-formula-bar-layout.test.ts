@@ -84,6 +84,22 @@ describe('SpreadsheetFormulaBar — laid out as the GWT client laid it out', () 
         el.remove();
     });
 
+    it('draws the arrow where the GWT client drew it, a little below the middle', async () => {
+        // Whatever the font: a pixel in from the left of its 15px, on a
+        // 33px line from the top of the bar. Centred in the bar instead,
+        // it sat a pixel and a half higher and further right.
+        const el = await mount(['Totals']);
+
+        const arrow = part(el, '.namedrange-arrow')!;
+        const range = document.createRange();
+        range.selectNodeContents(arrow);
+        const text = range.getBoundingClientRect();
+        expect(text.left - arrow.getBoundingClientRect().left).to.equal(1);
+        expect(text.top - el.getBoundingClientRect().top).to.equal(Math.floor((33 - text.height) / 2));
+
+        el.remove();
+    });
+
     it('opens the list from the arrow', async () => {
         // The select is the thing clicked; it is just not seen.
         const el = await mount(['Totals']);
