@@ -121,7 +121,8 @@ export const spreadsheetStyles = css`
   /* The size the header would take, by the pointer, on the GWT client's
      tooltip. In the top layer, placed in viewport coordinates; the inset,
      margin and border undo the browser's popover defaults. */
-  .resize-tooltip {
+  .resize-tooltip,
+  .link-tooltip {
     position: fixed;
     inset: auto;
     margin: 0;
@@ -189,7 +190,8 @@ export const spreadsheetStyles = css`
     background: var(--lumo-primary-color);
   }
 
-  :host([theme~='lumo']) .resize-tooltip {
+  :host([theme~='lumo']) .resize-tooltip,
+  :host([theme~='lumo']) .link-tooltip {
     background-color: var(--lumo-contrast-50pct);
     box-shadow: var(--lumo-box-shadow-s);
     color: var(--lumo-base-color);

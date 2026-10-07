@@ -304,6 +304,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The size a dragged header would take, by the pointer. */
   private readonly resizeTooltip: HTMLElement;
 
+  /** A link cell's tooltip, shown while the pointer is over the cell. */
+  private readonly linkTooltip: HTMLElement;
+
   /**
    * Over the sheet while a resize drag moves, so the resize cursor shows
    * wherever the pointer goes, as the GWT client's did. Not before the
@@ -821,7 +824,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.resizeTooltip.className = 'resize-tooltip';
     this.resizeTooltip.popover = 'manual';
     this.resizeTooltip.hidden = true;
-    this.popupOverlay.after(this.resizeCover, this.resizeLine, this.resizeTooltip);
+    this.linkTooltip = document.createElement('div');
+    this.linkTooltip.className = 'link-tooltip';
+    this.linkTooltip.popover = 'manual';
+    this.linkTooltip.hidden = true;
+    this.popupOverlay.after(this.resizeCover, this.resizeLine, this.resizeTooltip, this.linkTooltip);
     this.renderTarget.appendChild(this.root);
     // Slice 174: honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
@@ -879,6 +886,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // outside the spreadsheet still terminates cleanly.
     this.cellGrid.addEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
     this.cellGrid.addEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
+    this.cellGrid.addEventListener('grid-mouseleave', this.hideLinkTooltip);
     this.cellGrid.addEventListener('selection-paint-start', this.handleSelectionPaintStart);
     document.addEventListener('mouseup', this.handleDocumentMouseUp);
     document.addEventListener('keyup', this.handleDocumentKeyUp);
@@ -1125,6 +1133,38 @@ export class Spreadsheet implements SpreadsheetClientApi {
     showInTopLayer(tooltip);
   }
 
+  /**
+   * A link cell's tooltip - the target the server named for it - as the
+   * GWT client showed it while the pointer was over the cell: below the
+   * cell, or above it when there is no room below. Any other cell, or a
+   * drag in progress, takes it away.
+   */
+  private showLinkTooltip(at: { col: number; row: number; box?: DOMRect }): void {
+    const text = this.hyperlinksTooltips[toKey(at.col, at.row)];
+    if (text === undefined || at.box === undefined || this.dragging || this.painting !== null) {
+      this.hideLinkTooltip();
+      return;
+    }
+    const tooltip = this.linkTooltip;
+    tooltip.textContent = text;
+    tooltip.hidden = false;
+    showInTopLayer(tooltip);
+    const { left, top } = linkTooltipPosition(at.box, tooltip.getBoundingClientRect(), {
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  private readonly hideLinkTooltip = (): void => {
+    if (this.linkTooltip.hidden) {
+      return;
+    }
+    this.linkTooltip.hidden = true;
+    hideFromTopLayer(this.linkTooltip);
+  };
+
   /** Take the line, the tooltip and the cover of a resize drag away. */
   private hideResizeGuide(): void {
     this.resizeLine.hidden = true;
@@ -1343,7 +1383,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * cell. Mouseover events that fire while NOT dragging are
    * silently ignored — the cell-grid emits on every hover.
    */
-  private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number }>): void => {
+  private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>): void => {
+    this.showLinkTooltip(e.detail);
     if (this.painting !== null) {
       const { col, row } = e.detail;
       this.painting = {
@@ -2543,6 +2584,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs.removeEventListener('sheet-tab-rename-cancel', this.handleSheetRenameCancel);
     this.cellGrid.removeEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
     this.cellGrid.removeEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
+    this.cellGrid.removeEventListener('grid-mouseleave', this.hideLinkTooltip);
     this.cellGrid.removeEventListener('selection-paint-start', this.handleSelectionPaintStart);
     this.cellGrid.removeEventListener('popup-button-click', this.handlePopupButtonClick as EventListener);
     this.cellGrid.removeEventListener('cell-contextmenu', this.handleCellContextMenu as EventListener);
@@ -5052,6 +5094,30 @@ export function scrollToShow(
     return scroll + on;
   }
   return scroll;
+}
+
+/**
+ * Where a link cell's tooltip goes, in viewport pixels, by the GWT client's
+ * rule for it: left-aligned under the cell; right-aligned with the cell
+ * when it is wider than the cell and would run off the right of the window
+ * but fits that way; and above the cell when there is no room below but
+ * room above.
+ */
+export function linkTooltipPosition(
+  cell: { left: number; top: number; right: number; bottom: number },
+  size: { width: number; height: number },
+  view: { width: number; height: number }
+): { left: number; top: number } {
+  let left = cell.left;
+  const wider = size.width - (cell.right - cell.left);
+  if (wider > 0 && view.width - left < size.width && left >= wider) {
+    left -= wider;
+  }
+  let top = cell.bottom;
+  if (view.height - cell.bottom < size.height && cell.top >= size.height) {
+    top = cell.top - size.height;
+  }
+  return { left, top };
 }
 
 /** Whether the page runs on a Mac, where shortcuts take Cmd rather than Ctrl. */

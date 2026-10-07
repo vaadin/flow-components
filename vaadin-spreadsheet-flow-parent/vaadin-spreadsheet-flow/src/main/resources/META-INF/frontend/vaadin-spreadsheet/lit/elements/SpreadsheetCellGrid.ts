@@ -1236,6 +1236,7 @@ export class SpreadsheetCellGrid extends LitElement {
 
   private readonly handleGridMouseLeave = (): void => {
     this.setHoveredKey(null);
+    this.dispatchEvent(new CustomEvent('grid-mouseleave', { bubbles: true, composed: true }));
   };
 
   private readonly handleShadowMouseOver = (e: Event): void => {
@@ -1257,9 +1258,12 @@ export class SpreadsheetCellGrid extends LitElement {
     // routing it through a full render-state push would repaint the sheet
     // on every pointer move.
     this.setHoveredKey(toKey(col, row));
+    // Where the cell is on screen, for what is shown beside it: a link's
+    // tooltip.
+    const box = cell.getBoundingClientRect();
     this.dispatchEvent(
       new CustomEvent('cell-mouseover', {
-        detail: { col, row },
+        detail: { col, row, box },
         bubbles: true,
         composed: true
       })
