@@ -713,6 +713,12 @@ export class SpreadsheetCellGrid extends LitElement {
   declare theme: string | null;
   /** Hidden span the measuring is done in. */
   private valueProbe: HTMLSpanElement | null = null;
+  /**
+   * How wide the editor is for the text in it, and on which cell: measured
+   * when it opens and as the user types, and kept so that drawing the sheet
+   * again - on a scroll, say - does not shrink it back to its cell.
+   */
+  private editorFit: { key: string; width: number } | null = null;
   /** The cells whose notes were drawn last time, so only new ones drop in. */
   private noteKeysShown: ReadonlySet<string> = new Set();
 
@@ -868,6 +874,38 @@ export class SpreadsheetCellGrid extends LitElement {
     }
   }
 
+  /** The editor's measured width, while it is the editor open now. */
+  private editorFitWidth(): number | undefined {
+    const editor = this.renderState.editor;
+    const fit = this.editorFit;
+    return editor && fit?.key === toKey(editor.col, editor.row) ? fit.width : undefined;
+  }
+
+  /** Widens or narrows the editor to the text typed into it. */
+  private readonly handleEditorInput = (e: Event): void => {
+    const input = e.currentTarget as HTMLInputElement;
+    const width = this.fitEditor(input.value);
+    if (width !== null) {
+      input.style.width = `${width}px`;
+    }
+  };
+
+  /**
+   * Measures text in the edited cell's style, as the GWT client measured
+   * the editor's, and keeps the width the editor needs for it.
+   */
+  private fitEditor(value: string): number | null {
+    const editor = this.renderState.editor;
+    if (!editor) {
+      return null;
+    }
+    const { col, row } = editor;
+    const cellStyle = this.renderState.cellData.get(toKey(col, row))?.cellStyle ?? 'cs0';
+    const width = editorWidth(this.renderState, col, row, this.measureValue(cellStyle, value));
+    this.editorFit = { key: toKey(col, row), width };
+    return width;
+  }
+
   /** What a value would be drawn at, in its own style. */
   private measureValue(cellStyle: string, value: string): number {
     if (this.valueProbe === null) {
@@ -915,6 +953,17 @@ export class SpreadsheetCellGrid extends LitElement {
     if (note !== null && this.shadowRoot!.activeElement !== note) {
       note.focus();
       note.setSelectionRange(note.value.length, note.value.length);
+    }
+    if (!this.renderState.editor) {
+      // The next edit starts from its cell again.
+      this.editorFit = null;
+    } else if (this.editorFitWidth() === undefined) {
+      // Just opened: as wide as the value it opens with.
+      const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
+      const width = input === null ? null : this.fitEditor(input.value);
+      if (input !== null && width !== null) {
+        input.style.width = `${width}px`;
+      }
     }
     if (this.renderState.editor && changedProps.has('renderState')) {
       const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
@@ -1358,7 +1407,12 @@ export class SpreadsheetCellGrid extends LitElement {
     const styleBlock = buildCellStyleBlock(this.renderState);
     // The notes and the editor float above every pane, so they stay at
     // grid level, placed where their cell is on screen.
-    const editor = buildCellEditorOverlay(this.renderState, isLumo(this.theme));
+    const editor = buildCellEditorOverlay(
+      this.renderState,
+      isLumo(this.theme),
+      this.editorFitWidth(),
+      this.handleEditorInput
+    );
     const commentOverlays = buildCommentOverlays(this.renderState, this.hoveredKey);
     return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${topQuadrant}${leftQuadrant}${cornerQuadrant}${commentOverlays}${editor}`;
   }
@@ -1894,11 +1948,12 @@ function columnWidthOf(state: CellGridRenderState, col: number): number {
 }
 
 /**
- * The box a note hangs off: its cell's, or the merged cell's when the cell
- * starts a merge, as the GWT client hung it. In grid coordinates, frozen
- * panes included; null while the cell is not drawn.
+ * The box a cell is drawn in: its own, or the merged cell's when the cell
+ * starts a merge - the box the GWT client hung a note off and laid the
+ * editor over. In grid coordinates, frozen panes included; null while the
+ * cell is not drawn.
  */
-function noteAnchorBox(
+function drawnCellBox(
   state: CellGridRenderState,
   col: number,
   row: number
@@ -1910,6 +1965,25 @@ function noteAnchorBox(
   const index = state.mergedRegions.findIndex((region) => region.col1 === col && region.row1 === row);
   const merged = index < 0 ? undefined : state.mergedRegionBoxes?.[index];
   return merged === undefined ? cell : { left: cell.left, top: cell.top, width: merged.width, height: merged.height };
+}
+
+/**
+ * How wide the editor is for text drawn at a width, as the GWT client sized
+ * it: its cell - the whole merged cell when the cell starts one - and then
+ * the columns after it, whole ones, until the text fits, and a pixel more,
+ * over the gridline at its right. Only the columns drawn count; past them
+ * the editor is out of sight anyway, and the text scrolls inside it.
+ */
+function editorWidth(state: CellGridRenderState, col: number, row: number, textWidth: number): number {
+  const index = state.mergedRegions.findIndex((region) => region.col1 === col && region.row1 === row);
+  const merged = index < 0 ? undefined : state.mergedRegionBoxes?.[index];
+  let last = merged === undefined ? col : state.mergedRegions[index].col2;
+  let width = merged === undefined ? columnWidthOf(state, col) : merged.width;
+  while (width < textWidth && last < state.viewport.lastColumnIndex) {
+    last += 1;
+    width += columnWidthOf(state, last);
+  }
+  return width + 1;
 }
 
 /**
@@ -1998,7 +2072,7 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     }
     // On screen, frozen panes included: the note floats above every pane,
     // so it is drawn at grid level wherever its cell is.
-    const geometry = noteAnchorBox(state, coord.col, coord.row);
+    const geometry = drawnCellBox(state, coord.col, coord.row);
     if (geometry === null) {
       continue;
     }
@@ -2355,7 +2429,12 @@ function editorCellStyle(state: CellGridRenderState, col: number, row: number): 
  * connector can route the value to the correct cell without
  * re-querying its state.
  */
-function buildCellEditorOverlay(state: CellGridRenderState, lumo = false): TemplateResult | string {
+function buildCellEditorOverlay(
+  state: CellGridRenderState,
+  lumo = false,
+  fitWidth?: number,
+  onInput?: (e: Event) => void
+): TemplateResult | string {
   const editor = state.editor;
   if (!editor) {
     return '';
@@ -2364,12 +2443,14 @@ function buildCellEditorOverlay(state: CellGridRenderState, lumo = false): Templ
 
   // Over the cell where it is on screen: a frozen cell moves with the view,
   // and an editor placed by the frozen arrays alone was left behind as soon
-  // as the sheet scrolled.
-  const box = cellBoxOnGrid(state, col, row);
+  // as the sheet scrolled. Over the whole of a merged cell.
+  const box = drawnCellBox(state, col, row);
   if (box === null || box.width === 0 || box.height === 0) {
     return '';
   }
-  const { left, top, width, height } = box;
+  const { left, top, height } = box;
+  // As wide as the text in it needs, once that has been measured.
+  const width = fitWidth ?? editorWidth(state, col, row, 0);
 
   // The Lumo theme puts every cell in its own font, which the cell's
   // styles would undo here: they reach the editor inline, past anything a
@@ -2446,6 +2527,7 @@ function buildCellEditorOverlay(state: CellGridRenderState, lumo = false): Templ
       .value=${initialValue}
       style=${style}
       @keydown=${onKeyDown}
+      @input=${onInput}
       @blur=${onBlur}
     />
   `;

@@ -239,10 +239,11 @@ describe('SpreadsheetCellGrid — cell editor render (slice 152)', () => {
             '.cell-editor'
         ) as HTMLElement;
         // col 2 → colX[1] = 50; row 3 → rowY[2] = 40.
-        // width = colWidths[1] = 50; height = rowHeights[2] = 20.
+        // width = colWidths[1] = 50, and a pixel more over the gridline at
+        // its right, as the GWT client sized it; height = rowHeights[2] = 20.
         expect(input.style.left).to.equal('50px');
         expect(input.style.top).to.equal('40px');
-        expect(input.style.width).to.equal('50px');
+        expect(input.style.width).to.equal('51px');
         expect(input.style.height).to.equal('20px');
 
         el.remove();
@@ -256,6 +257,177 @@ describe('SpreadsheetCellGrid — cell editor render (slice 152)', () => {
         // The editor's col=100 is past lastColumnIndex (3) and not
         // in frozenColX (length 0) — render() returns no input.
         expect(el.shadowRoot!.querySelector('.cell-editor')).to.be.null;
+
+        el.remove();
+    });
+});
+
+/**
+ * The editor's size, as the GWT client set it: the cell, or the whole merged
+ * cell when the cell starts one, and a pixel more over the gridline at its
+ * right. Text that outgrows it widens it by whole columns, as it is typed,
+ * until the text fits; deleting narrows it again.
+ */
+describe('SpreadsheetCellGrid — the editor grows with its text', () => {
+    // Five 50px columns and three 20px rows.
+    function state(editor: CellGridRenderState['editor'], overrides: Partial<CellGridRenderState> = {}): CellGridRenderState {
+        return {
+            ...buildEditorState({ col: 1, row: 1, initialValue: '' }),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 5,
+                lastColumnPosition: 250,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: 3,
+                lastRowPosition: 60,
+            },
+            colX: [0, 50, 100, 150, 200],
+            colWidths: [50, 50, 50, 50, 50],
+            totalGridWidthPx: 250,
+            editor,
+            ...overrides,
+        };
+    }
+
+    function input(el: SpreadsheetCellGrid): HTMLInputElement {
+        return el.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement;
+    }
+
+    /** What the text is drawn at in a cell of the sheet, padding and all. */
+    function drawnWidth(el: SpreadsheetCellGrid, text: string): number {
+        const cell = getComputedStyle(el.shadowRoot!.querySelector('.cell.col1.row1')!);
+        const context = document.createElement('canvas').getContext('2d')!;
+        context.font = cell.font;
+        return context.measureText(text).width + parseFloat(cell.paddingLeft) + parseFloat(cell.paddingRight);
+    }
+
+    /** As many x's as come out between two widths, clear of both. */
+    function textBetween(el: SpreadsheetCellGrid, min: number, max: number): string {
+        for (let text = 'x'; text.length < 200; text += 'x') {
+            const width = drawnWidth(el, text);
+            if (width > min + 3 && width < max - 3) {
+                return text;
+            }
+        }
+        throw new Error(`no run of x's between ${min} and ${max}px`);
+    }
+
+    function type(el: SpreadsheetCellGrid, value: string): void {
+        input(el).value = value;
+        input(el).dispatchEvent(new InputEvent('input', { bubbles: true, composed: true }));
+    }
+
+    it('covers a merged cell whole', async () => {
+        const el = await attachCellGridWithState(
+            state(
+                { col: 2, row: 1, initialValue: '' },
+                {
+                    mergedRegions: [{ id: 1, col1: 2, row1: 1, col2: 3, row2: 2 }],
+                    mergedRegionBoxes: [{ left: 50, top: 0, width: 100, height: 40 }],
+                }
+            )
+        );
+
+        const box = input(el).getBoundingClientRect();
+        const grid = el.getBoundingClientRect();
+        expect([box.left - grid.left, box.top - grid.top, box.width, box.height]).to.deep.equal([50, 0, 101, 40]);
+
+        el.remove();
+    });
+
+    it('opens wide enough for the value it opens with', async () => {
+        const probe = await attachCellGridWithState(state(null));
+        const value = textBetween(probe, 100, 150);
+        probe.remove();
+
+        const el = await attachCellGridWithState(state({ col: 1, row: 1, initialValue: value }));
+
+        expect(input(el).getBoundingClientRect().width).to.equal(151);
+
+        el.remove();
+    });
+
+    it('widens by whole columns as the text outgrows it', async () => {
+        const el = await attachCellGridWithState(state({ col: 1, row: 1, initialValue: '' }));
+        expect(input(el).getBoundingClientRect().width).to.equal(51);
+
+        type(el, textBetween(el, 50, 100));
+        expect(input(el).getBoundingClientRect().width).to.equal(101);
+
+        type(el, textBetween(el, 150, 200));
+        expect(input(el).getBoundingClientRect().width).to.equal(201);
+
+        el.remove();
+    });
+
+    it('narrows again as the text is deleted', async () => {
+        const el = await attachCellGridWithState(state({ col: 1, row: 1, initialValue: '' }));
+        type(el, textBetween(el, 150, 200));
+
+        type(el, 'x');
+
+        expect(input(el).getBoundingClientRect().width).to.equal(51);
+
+        el.remove();
+    });
+
+    it('grows from the far side of a merged cell', async () => {
+        const el = await attachCellGridWithState(
+            state(
+                { col: 1, row: 1, initialValue: '' },
+                {
+                    mergedRegions: [{ id: 1, col1: 1, row1: 1, col2: 2, row2: 1 }],
+                    mergedRegionBoxes: [{ left: 0, top: 0, width: 100, height: 20 }],
+                }
+            )
+        );
+
+        type(el, textBetween(el, 100, 150));
+
+        expect(input(el).getBoundingClientRect().width).to.equal(151);
+
+        el.remove();
+    });
+
+    it('stops at the last column drawn', async () => {
+        const el = await attachCellGridWithState(state({ col: 4, row: 1, initialValue: '' }));
+
+        type(el, textBetween(el, 150, 200));
+
+        // Columns 4 and 5 are all there is; the rest of the text scrolls
+        // inside, as it would past the sheet's last column.
+        expect(input(el).getBoundingClientRect().width).to.equal(101);
+
+        el.remove();
+    });
+
+    it('keeps its width when the sheet draws again', async () => {
+        const el = await attachCellGridWithState(state({ col: 1, row: 1, initialValue: '' }));
+        type(el, textBetween(el, 50, 100));
+
+        // The columns move along, as a scroll that draws other ones moves
+        // them, so the editor's place is written afresh.
+        el.renderState = { ...el.renderState, colX: [10, 60, 110, 160, 210] };
+        await el.updateComplete;
+
+        expect(input(el).style.left).to.equal('10px');
+        expect(input(el).getBoundingClientRect().width).to.equal(101);
+
+        el.remove();
+    });
+
+    it('starts from the cell again when the next edit opens', async () => {
+        const el = await attachCellGridWithState(state({ col: 1, row: 1, initialValue: '' }));
+        type(el, textBetween(el, 50, 100));
+
+        el.renderState = { ...el.renderState, editor: null };
+        await el.updateComplete;
+        el.renderState = { ...el.renderState, editor: { col: 1, row: 1, initialValue: '' } };
+        await el.updateComplete;
+
+        expect(input(el).getBoundingClientRect().width).to.equal(51);
 
         el.remove();
     });
