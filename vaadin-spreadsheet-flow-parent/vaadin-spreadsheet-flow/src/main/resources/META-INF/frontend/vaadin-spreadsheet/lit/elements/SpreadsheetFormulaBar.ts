@@ -35,6 +35,11 @@ export interface FormulaBarRenderState {
    * address field; picking one navigates to it. Empty hides the dropdown.
    */
   namedRanges: ReadonlyArray<string>;
+  /**
+   * The references of a formula being written, coloured behind its text as
+   * the GWT client coloured them. Null or absent while no formula is.
+   */
+  highlights?: { text: string; references: ReadonlyArray<{ start: number; end: number; color: string }> } | null;
 }
 
 /** Helper: build an empty formula-bar render state. */
@@ -80,6 +85,7 @@ export class SpreadsheetFormulaBar extends LitElement {
 
   static styles = css`
     :host {
+      position: relative;
       display: flex;
       align-items: stretch;
       box-sizing: border-box;
@@ -122,8 +128,33 @@ export class SpreadsheetFormulaBar extends LitElement {
     }
 
     .formula {
+      position: relative;
+      z-index: 1;
       flex: 1 1 auto;
       min-width: 0;
+    }
+
+    /* The references of a formula being written, coloured behind the
+       field's text: the same text, laid out as the field lays it out, in
+       no colour, with each reference on its colour. The field has no
+       ground of its own, so the colours show through it. */
+    .formula-highlights {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 0 0 0 5px;
+      overflow: hidden;
+      white-space: pre;
+      color: transparent;
+      pointer-events: none;
+    }
+
+    .formula-highlights > span {
+      border-radius: 2px;
     }
 
     /* The named-range picker, as the GWT client drew it: an arrow at the
@@ -155,7 +186,8 @@ export class SpreadsheetFormulaBar extends LitElement {
 
     /* SpreadsheetTheme.LUMO, as the GWT client drew it: the address on a
        tinted panel, both fields indented by Lumo's spacing. */
-    :host([theme~='lumo']) input {
+    :host([theme~='lumo']) input,
+    :host([theme~='lumo']) .formula-highlights {
       padding-left: var(--lumo-space-s);
     }
 
@@ -248,10 +280,32 @@ export class SpreadsheetFormulaBar extends LitElement {
       const target = e.target;
       if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
         this.dispatchEvent(
-          new CustomEvent('formula-input', { detail: { value: target.value }, bubbles: true, composed: true })
+          new CustomEvent('formula-input', {
+            detail: { value: target.value, caret: target.selectionStart ?? 0 },
+            bubbles: true,
+            composed: true
+          })
         );
+        this.alignHighlights();
       }
     });
+    // Where the caret is, for the reference it is in to be outlined.
+    const reportCaret = (e: Event): void => {
+      const target = e.target;
+      if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
+        this.dispatchEvent(
+          new CustomEvent('formula-caret', {
+            detail: { value: target.value, caret: target.selectionStart ?? 0 },
+            bubbles: true,
+            composed: true
+          })
+        );
+        this.alignHighlights();
+      }
+    };
+    root.addEventListener('keyup', reportCaret);
+    root.addEventListener('mouseup', reportCaret);
+    root.addEventListener('focusin', reportCaret);
   }
 
   /**
@@ -268,6 +322,7 @@ export class SpreadsheetFormulaBar extends LitElement {
     if (!changed.has('renderState')) {
       return;
     }
+    this.alignHighlights();
     const formula = this.shadowRoot?.querySelector<HTMLInputElement>('.formula');
     if (formula && this.shadowRoot!.activeElement !== formula && formula.value !== this.renderState.formula) {
       formula.value = this.renderState.formula;
@@ -286,6 +341,22 @@ export class SpreadsheetFormulaBar extends LitElement {
    */
   private handleFormulaKeyDown(e: KeyboardEvent, input: HTMLInputElement): void {
     e.stopPropagation();
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      // In a formula the sheet may take the arrow, to point at a cell
+      // with it, as the GWT client's formula field let it.
+      const pointed = !this.dispatchEvent(
+        new CustomEvent('formula-arrow', {
+          detail: { key: e.key, shiftKey: e.shiftKey, value: input.value, caret: input.selectionStart ?? 0 },
+          bubbles: true,
+          composed: true,
+          cancelable: true
+        })
+      );
+      if (pointed) {
+        e.preventDefault();
+      }
+      return;
+    }
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       this.commitFormula(input.value, e.key, e.shiftKey);
@@ -317,6 +388,38 @@ export class SpreadsheetFormulaBar extends LitElement {
         composed: true
       })
     );
+  }
+
+  /**
+   * Lines the coloured references up with the field's text: from where the
+   * field starts, and scrolled as far as the field is when its text runs
+   * past its end.
+   */
+  private alignHighlights(): void {
+    const field = this.shadowRoot?.querySelector<HTMLInputElement>('.formula');
+    const layer = this.shadowRoot?.querySelector<HTMLElement>('.formula-highlights');
+    if (!field || !layer) {
+      return;
+    }
+    layer.style.left = `${field.offsetLeft}px`;
+    layer.scrollLeft = field.scrollLeft;
+  }
+
+  /** What the formula field holds, and where its caret is. */
+  formulaFieldState(): { value: string; caret: number } | null {
+    const field = this.shadowRoot?.querySelector<HTMLInputElement>('.formula');
+    return field ? { value: field.value, caret: field.selectionStart ?? field.value.length } : null;
+  }
+
+  /** Puts a value into the formula field being typed into, the caret where given. */
+  setFormulaFieldValue(value: string, caret: number): void {
+    const field = this.shadowRoot?.querySelector<HTMLInputElement>('.formula');
+    if (!field) {
+      return;
+    }
+    field.value = value;
+    field.setSelectionRange(caret, caret);
+    this.alignHighlights();
   }
 
   /** Whether the formula field has the keyboard. */
@@ -369,7 +472,7 @@ export class SpreadsheetFormulaBar extends LitElement {
   }
 
   render(): TemplateResult {
-    const { address, formula, namedRanges = [] } = this.renderState;
+    const { address, formula, namedRanges = [], highlights = null } = this.renderState;
     // The dropdown only appears once the workbook defines a named range,
     // matching Excel — an empty picker beside every sheet would be noise.
     const namedRangeBox =
@@ -385,8 +488,29 @@ export class SpreadsheetFormulaBar extends LitElement {
         <input class="address" part="address-field" .value=${address} />
         ${namedRangeBox}
       </div>
+      ${highlights === null ? '' : this.renderHighlights(highlights)}
       <input class="formula" part="formula-field" .value=${formula} />
     `;
+  }
+
+  /** The text of a formula with its references on their colours - as text, never as markup. */
+  private renderHighlights(highlights: NonNullable<FormulaBarRenderState['highlights']>): TemplateResult {
+    const { text, references } = highlights;
+    const pieces: TemplateResult[] = [];
+    let at = 0;
+    for (const ref of references) {
+      if (ref.start > at) {
+        pieces.push(html`<span>${text.slice(at, ref.start)}</span>`);
+      }
+      pieces.push(
+        html`<span style="background-color:rgba(${ref.color},0.25)">${text.slice(ref.start, ref.end)}</span>`
+      );
+      at = ref.end;
+    }
+    if (at < text.length) {
+      pieces.push(html`<span>${text.slice(at)}</span>`);
+    }
+    return html`<div class="formula-highlights" aria-hidden="true">${pieces}</div>`;
   }
 }
 

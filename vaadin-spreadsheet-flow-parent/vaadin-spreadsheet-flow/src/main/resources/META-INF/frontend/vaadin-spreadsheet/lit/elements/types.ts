@@ -222,6 +222,13 @@ export interface CellGridRenderState {
   editor: CellEditorState | null;
 
   /**
+   * The references of the formula being written, tinted on the sheet in
+   * their colours as the GWT client tinted them; the one the caret is in is
+   * outlined. Absent or empty while no formula is being written.
+   */
+  formulaReferences?: ReadonlyArray<{ range: CellRect; color: string; atCaret: boolean }>;
+
+  /**
    * Positioned sheet overlays (images, charts, components)
    * computed by the connector from {@code setOverlays} +
    * {@code setResources}. The cell-grid renders an absolutely-

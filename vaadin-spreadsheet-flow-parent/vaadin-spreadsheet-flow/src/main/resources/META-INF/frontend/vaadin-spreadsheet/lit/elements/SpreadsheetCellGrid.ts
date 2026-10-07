@@ -10,6 +10,7 @@
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import type { DirectiveResult } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { isFormula } from '../algorithms/FormulaPointing.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
@@ -248,6 +249,16 @@ export class SpreadsheetCellGrid extends LitElement {
       /* The fill handle's drag outline, as the GWT client drew it: the
        fill colour around a pale green ground, so it reads as what the
        drag will fill rather than as a second selection. */
+      /* A reference of the formula being written: its cells tinted in its
+         colour, and the one the caret is in outlined, as the GWT client drew
+         them. Over the cells, and never in the way of a click. */
+      .formula-reference {
+        position: absolute;
+        pointer-events: none;
+        box-sizing: border-box;
+        z-index: 2;
+      }
+
       .paintmode {
         position: absolute;
         pointer-events: none;
@@ -969,7 +980,7 @@ export class SpreadsheetCellGrid extends LitElement {
     if (editor) {
       this.dispatchEvent(
         new CustomEvent('cell-editor-input', {
-          detail: { col: editor.col, row: editor.row, value: input.value },
+          detail: { col: editor.col, row: editor.row, value: input.value, caret: input.selectionStart ?? 0 },
           bubbles: true,
           composed: true
         })
@@ -986,12 +997,15 @@ export class SpreadsheetCellGrid extends LitElement {
    * Puts a value typed elsewhere - into the formula field, carrying the edit
    * on there - into the open editor, which widens or narrows to it.
    */
-  setEditorValue(value: string): void {
+  setEditorValue(value: string, caret?: number): void {
     const input = this.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;
     if (input === null) {
       return;
     }
     input.value = value;
+    if (caret !== undefined) {
+      input.setSelectionRange(caret, caret);
+    }
     const width = this.fitEditor(value);
     if (width !== null) {
       input.style.width = `${width}px`;
@@ -1116,6 +1130,15 @@ export class SpreadsheetCellGrid extends LitElement {
       // sign.
       const caret = caretPosition(input.value);
       input.setSelectionRange(caret, caret);
+      // What it opened on, so that a formula's references are coloured
+      // from the start, as the GWT client coloured them.
+      input.dispatchEvent(
+        new CustomEvent('cell-editor-caret', {
+          detail: { value: input.value, caret },
+          bubbles: true,
+          composed: true
+        })
+      );
     }
     this.focusedEditor = input;
   }
@@ -1254,7 +1277,10 @@ export class SpreadsheetCellGrid extends LitElement {
       return;
     }
     const ev = e as MouseEvent;
-    this.dispatchEvent(
+    // Taken to point at the cell while a formula is written, the press
+    // must not move the keyboard out of the editor - that would end the
+    // edit it is pointing for.
+    const taken = !this.dispatchEvent(
       new CustomEvent('cell-mousedown', {
         detail: {
           col,
@@ -1265,9 +1291,13 @@ export class SpreadsheetCellGrid extends LitElement {
           altKey: ev.altKey
         },
         bubbles: true,
-        composed: true
+        composed: true,
+        cancelable: true
       })
     );
+    if (taken) {
+      ev.preventDefault();
+    }
   };
 
   /**
@@ -1598,7 +1628,7 @@ export class SpreadsheetCellGrid extends LitElement {
     const state = opts.state;
     return html`${buildSheetOverlays(state, opts.quadrantName)}${buildSelectionOverlay(opts)}${buildPaintOutline(
       opts
-    )}${buildPopupButtons(state, opts.quadrantName)}`;
+    )}${buildFormulaReferences(opts)}${buildPopupButtons(state, opts.quadrantName)}`;
   }
 }
 
@@ -2007,6 +2037,30 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
  * element in the tree means an observer can ask whether it is showing
  * rather than whether it exists.
  */
+/**
+ * The references of the formula being written, as far as this quadrant
+ * shows them: each one's cells tinted in its colour at a quarter, and the
+ * one the caret is in ringed at three quarters, two pixels inside its
+ * edge - the GWT client's colours, drawn over the cells rather than in
+ * place of their fill.
+ */
+function buildFormulaReferences(opts: QuadrantRenderOpts): TemplateResult[] {
+  const out: TemplateResult[] = [];
+  for (const ref of opts.state.formulaReferences ?? []) {
+    const piece = rangePiece(opts, ref.range);
+    if (piece === null) {
+      continue;
+    }
+    const style =
+      `left:${piece.left}px;top:${piece.top}px;` +
+      `width:${piece.right - piece.left}px;height:${piece.bottom - piece.top}px;` +
+      `background:rgba(${ref.color},0.25);` +
+      (ref.atCaret ? `box-shadow:inset 0 0 0 2px rgba(${ref.color},0.75);` : '');
+    out.push(html`<div class="formula-reference" style=${style}></div>`);
+  }
+  return out;
+}
+
 function buildPaintOutline(opts: QuadrantRenderOpts): TemplateResult | string {
   // `?? null` rather than `=== null`: a hand-built render state may leave
   // the field off entirely, and a missing outline is not a crash.
@@ -2739,16 +2793,43 @@ function buildCellEditorOverlay(
     } else if (e.key === 'Escape') {
       e.preventDefault();
       dispatchEditorEvent(input, 'cell-editor-cancel', input.value);
-    } else if (editor.mode === 'enter' && ARROW_KEYS.includes(e.key)) {
-      // Excel has two editing modes and they differ here: when the user
-      // is typing over the cell, an arrow commits and moves on. Only
-      // when they opened the existing value to change it does an arrow
-      // move the caret instead.
-      e.preventDefault();
-      dispatchEditorEvent(input, 'cell-editor-commit', input.value, e.key, e.shiftKey);
+    } else if (ARROW_KEYS.includes(e.key)) {
+      // In a formula the sheet may take the arrow, to point at a cell with
+      // it. One it leaves moves the caret and never commits: the GWT client
+      // kept a formula open whatever the arrows did.
+      const pointed = !input.dispatchEvent(
+        new CustomEvent('cell-editor-arrow', {
+          detail: { key: e.key, shiftKey: e.shiftKey, value: input.value, caret: input.selectionStart ?? 0 },
+          bubbles: true,
+          composed: true,
+          cancelable: true
+        })
+      );
+      if (pointed) {
+        e.preventDefault();
+      } else if (editor.mode === 'enter' && !isFormula(input.value)) {
+        // Excel has two editing modes and they differ here: when the user
+        // is typing over the cell, an arrow commits and moves on. Only
+        // when they opened the existing value to change it does an arrow
+        // move the caret instead.
+        e.preventDefault();
+        dispatchEditorEvent(input, 'cell-editor-commit', input.value, e.key, e.shiftKey);
+      }
     }
     // Other keys (typing) are NOT stopped so the input receives them.
     e.stopPropagation();
+  };
+
+  // Where the caret is, for the reference it is in to be outlined.
+  const onCaret = (e: Event): void => {
+    const input = e.currentTarget as HTMLInputElement;
+    input.dispatchEvent(
+      new CustomEvent('cell-editor-caret', {
+        detail: { value: input.value, caret: input.selectionStart ?? 0 },
+        bubbles: true,
+        composed: true
+      })
+    );
   };
 
   const onBlur = (e: FocusEvent): void => {
@@ -2770,6 +2851,8 @@ function buildCellEditorOverlay(
       .value=${initialValue}
       style=${style}
       @keydown=${onKeyDown}
+      @keyup=${onCaret}
+      @mouseup=${onCaret}
       @input=${onInput}
       @blur=${onBlur}
     />

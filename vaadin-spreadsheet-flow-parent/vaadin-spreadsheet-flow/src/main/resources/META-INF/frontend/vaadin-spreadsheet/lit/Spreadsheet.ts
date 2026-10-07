@@ -64,6 +64,14 @@ import {
 import { expandToMergedRegions } from './algorithms/MergedSelection.js';
 import { isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
 import {
+  canPoint,
+  formulaReferences,
+  isFormula,
+  placeReference,
+  referenceAt,
+  referenceText
+} from './algorithms/FormulaPointing.js';
+import {
   isSingleMerge,
   moveActiveCell,
   moveRangeEdge,
@@ -265,6 +273,30 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * GWT client. Null when the selection is not a merge.
    */
   private mergeEntry: { col: number; row: number } | null = null;
+
+  /**
+   * The formula being written and where its caret is, while one is: its
+   * references are coloured, on the sheet and in the formula field.
+   */
+  private formulaDraft: { text: string; caret: number } | null = null;
+
+  /**
+   * The reference last pointed at in the formula being written - the
+   * GWT client's point mode: where the pointed range starts and ends on
+   * the sheet, and where its text is in the formula, which pointing again
+   * replaces. Null once anything is typed.
+   */
+  private pointer: {
+    anchor: { col: number; row: number };
+    end: { col: number; row: number };
+    span: { start: number; end: number };
+  } | null = null;
+
+  /** A drag pointing out a range with the mouse is under way. */
+  private pointerDragging = false;
+
+  /** The press pointed at a cell, so the click it ends in selects nothing. */
+  private pointedByPress = false;
 
   /**
    * Cell-editor state (slice 152). Null when no editor is
@@ -799,6 +831,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.formulaBar.addEventListener('formula-commit', this.handleFormulaCommit as EventListener);
     this.formulaBar.addEventListener('formula-cancel', this.handleFormulaCancel);
     this.formulaBar.addEventListener('formula-input', this.handleFormulaInput as EventListener);
+    this.formulaBar.addEventListener('formula-arrow', this.handleFormulaArrow as EventListener);
+    this.formulaBar.addEventListener('formula-caret', this.handleDraftCaret as EventListener);
     this.root.appendChild(this.scrollContainer);
     // Sheet tabs sit below the scroll container in the flex
     // column. flex:0 so they take their intrinsic height,
@@ -880,6 +914,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
     this.cellGrid.addEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
     this.cellGrid.addEventListener('cell-editor-input', this.handleCellEditorInput as EventListener);
+    this.cellGrid.addEventListener('cell-editor-arrow', this.handleEditorArrow as EventListener);
+    this.cellGrid.addEventListener('cell-editor-caret', this.handleDraftCaret as EventListener);
     // Mouse drag selection (slice 155). The cell-grid emits
     // cell-mousedown + cell-mouseover; the connector watches
     // mouseup at the document level so a drag that ends
@@ -961,6 +997,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       altKey: boolean;
     }>
   ): void => {
+    if (this.pointedByPress) {
+      // The press pointed at the cell for a formula; it selects nothing.
+      this.pointedByPress = false;
+      return;
+    }
     const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
     const ctrlOrMeta = ctrlKey || metaKey;
     this.extendCol = col;
@@ -1349,6 +1390,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }>
   ): void => {
     const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
+    // A formula is being written: the press points at the cell instead of
+    // selecting it, and the keyboard stays where the formula is.
+    const source = this.formulaSource();
+    if (source !== null) {
+      e.preventDefault();
+      this.pointWithMouse(col, row, shiftKey, ctrlKey || metaKey, source);
+      return;
+    }
     this.dragging = true;
     this.extendCol = col;
     this.extendRow = row;
@@ -1385,6 +1434,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>): void => {
     this.showLinkTooltip(e.detail);
+    if (this.pointerDragging && this.pointer !== null) {
+      const draft = this.formulaSource() === 'field' ? this.formulaBar.formulaFieldState() : this.editorDraft();
+      if (draft !== null) {
+        const end = selectCellAt(e.detail.col, e.detail.row, this.mergedRegions).activeCell;
+        this.pointAt(
+          this.pointer.anchor,
+          end,
+          draft.value,
+          this.pointer.span.end,
+          this.pointer.span,
+          this.formulaSource() ?? 'cell'
+        );
+        this.recomputeViewport();
+      }
+      return;
+    }
     if (this.painting !== null) {
       const { col, row } = e.detail;
       this.painting = {
@@ -1492,6 +1557,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
           composed: true
         })
       );
+      return;
+    }
+    if (this.pointerDragging) {
+      this.pointerDragging = false;
       return;
     }
     if (!this.dragging) {
@@ -1619,6 +1688,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // event so the editor doesn't briefly flash on top of the
     // server's response.
     this.editor = null;
+    this.endFormulaPointing();
     if (takeKeyboard) {
       this.returnFocusToSheet();
     }
@@ -1683,6 +1753,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly handleCellEditorCancel = (): void => {
     const editor = this.editor;
     this.editor = null;
+    this.endFormulaPointing();
     // The formula field showed what was typed; it shows the cell again.
     if (editor !== null) {
       this.showInFormulaField(this.formulaFieldValueFor(editor.col, editor.row));
@@ -1692,19 +1763,217 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /** Typed into the cell editor: the formula field shows it as it is typed. */
-  private readonly handleCellEditorInput = (e: CustomEvent<{ value: string }>): void => {
+  private readonly handleCellEditorInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
     this.showInFormulaField(e.detail.value);
+    // Typing ends pointing: the next arrow after an operator points at a
+    // new reference, from the cell being edited.
+    this.pointer = null;
+    this.updateFormulaDraft(e.detail.value, e.detail.caret ?? e.detail.value.length);
   };
 
   /**
    * Typed into the formula field while the edit started in the cell: the
    * cell editor shows it as it is typed, as the GWT client's did.
    */
-  private readonly handleFormulaInput = (e: CustomEvent<{ value: string }>): void => {
+  private readonly handleFormulaInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
     if (this.editor !== null) {
       this.cellGrid.setEditorValue(e.detail.value);
     }
+    this.pointer = null;
+    this.updateFormulaDraft(e.detail.value, e.detail.caret ?? e.detail.value.length);
   };
+
+  /** The caret moved in the formula being written, or the edit just began. */
+  private readonly handleDraftCaret = (e: CustomEvent<{ value: string; caret: number }>): void => {
+    if (this.editor === null && !this.formulaBar.formulaFieldHasFocus()) {
+      // From an editor on its way out - the edit is over.
+      return;
+    }
+    const { value, caret } = e.detail;
+    if (this.pointer !== null && caret !== this.pointer.span.end) {
+      // Moved away from what was pointed at: the next point starts afresh.
+      this.pointer = null;
+    }
+    this.updateFormulaDraft(value, caret);
+  };
+
+  /** An arrow in the cell editor: pointing at a cell, when a formula takes one there. */
+  private readonly handleEditorArrow = (
+    e: CustomEvent<{ key: string; shiftKey: boolean; value: string; caret: number }>
+  ): void => {
+    this.pointWithArrow(e, 'cell');
+  };
+
+  /** An arrow in the formula field: pointing, as in the cell editor. */
+  private readonly handleFormulaArrow = (
+    e: CustomEvent<{ key: string; shiftKey: boolean; value: string; caret: number }>
+  ): void => {
+    this.pointWithArrow(e, 'field');
+  };
+
+  /**
+   * Point at a cell with an arrow while a formula is written, as the GWT
+   * client let the user: after an operator, a bracket or a separator the
+   * arrow puts a reference to the next cell over into the formula, and
+   * further arrows move it on - from the cell being edited at first, then
+   * from the cell pointed at. Shift+arrow stretches it into a range from
+   * where it started. The selection stays on the cell being edited.
+   */
+  private pointWithArrow(
+    e: CustomEvent<{ key: string; shiftKey: boolean; value: string; caret: number }>,
+    source: 'cell' | 'field'
+  ): void {
+    const { key, shiftKey, value, caret } = e.detail;
+    if (!isFormula(value) || this.rows <= 0 || this.cols <= 0) {
+      return;
+    }
+    const pointer = this.pointer !== null && caret === this.pointer.span.end ? this.pointer : null;
+    if (pointer === null && !canPoint(value, caret)) {
+      return;
+    }
+    e.preventDefault();
+    const from = pointer?.end ?? this.formulaCell();
+    const next = moveActiveCell(from, null, keyDirection(key, false)!, this.sheetShape());
+    const end = next?.activeCell ?? from;
+    const anchor = shiftKey && pointer !== null ? pointer.anchor : end;
+    this.pointAt(anchor, end, value, caret, pointer?.span ?? null, source);
+    this.scrollCellIntoView(end);
+    this.recomputeViewport();
+  }
+
+  /**
+   * Point at a cell with the mouse while a formula is written: a click puts
+   * a reference to it into the formula - in place of the reference pointed
+   * at a moment ago, or the one the caret is in, as the GWT client meant
+   * to - a drag stretches it into a range, Shift stretches the last one to
+   * the cell, and Ctrl or Cmd adds another after a comma.
+   */
+  private pointWithMouse(col: number, row: number, shiftKey: boolean, add: boolean, source: 'cell' | 'field'): void {
+    const draft = source === 'field' ? this.formulaBar.formulaFieldState() : this.editorDraft();
+    if (draft === null) {
+      return;
+    }
+    let { value, caret } = draft;
+    const cell = selectCellAt(col, row, this.mergedRegions).activeCell;
+    const pointer = this.pointer !== null && caret === this.pointer.span.end ? this.pointer : null;
+    let span: { start: number; end: number } | null;
+    let anchor = cell;
+    if (add) {
+      const at = pointer?.span.end ?? caret;
+      const comma = placeReference(value, at, null, ',');
+      value = comma.text;
+      caret = comma.end;
+      span = null;
+    } else if (pointer !== null) {
+      span = pointer.span;
+      anchor = shiftKey ? pointer.anchor : cell;
+    } else {
+      const inRef = canPoint(value, caret)
+        ? null
+        : referenceAt(formulaReferences(value, this.activeSheetName()), caret);
+      span = inRef === null ? null : { start: inRef.start, end: inRef.end };
+      if (shiftKey && inRef !== null) {
+        anchor = { col: inRef.range.c1, row: inRef.range.r1 };
+      }
+    }
+    this.pointAt(anchor, cell, value, caret, span, source);
+    this.pointerDragging = true;
+    this.pointedByPress = true;
+    this.recomputeViewport();
+  }
+
+  /** Puts the reference to a pointed cell or range into the formula being written. */
+  private pointAt(
+    anchor: { col: number; row: number },
+    end: { col: number; row: number },
+    value: string,
+    caret: number,
+    span: { start: number; end: number } | null,
+    source: 'cell' | 'field'
+  ): void {
+    const placed = placeReference(value, caret, span, referenceText(anchor, end));
+    this.pointer = { anchor, end, span: { start: placed.start, end: placed.end } };
+    if (this.editor !== null) {
+      this.cellGrid.setEditorValue(placed.text, source === 'cell' ? placed.end : undefined);
+    }
+    if (source === 'field') {
+      this.formulaBar.setFormulaFieldValue(placed.text, placed.end);
+    }
+    this.showInFormulaField(placed.text);
+    this.updateFormulaDraft(placed.text, placed.end);
+  }
+
+  /** Where a formula is being written now: the formula field, the cell editor, or nowhere. */
+  private formulaSource(): 'cell' | 'field' | null {
+    if (this.formulaBar.formulaFieldHasFocus()) {
+      const field = this.formulaBar.formulaFieldState();
+      return field !== null && isFormula(field.value) ? 'field' : null;
+    }
+    const draft = this.editorDraft();
+    return draft !== null && isFormula(draft.value) ? 'cell' : null;
+  }
+
+  /** What the cell editor holds and where its caret is, while it is open. */
+  private editorDraft(): { value: string; caret: number } | null {
+    if (this.editor === null) {
+      return null;
+    }
+    const input = this.cellGrid.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;
+    if (input === null) {
+      return null;
+    }
+    return { value: input.value, caret: input.selectionStart ?? input.value.length };
+  }
+
+  /** The cell the formula being written is for. */
+  private formulaCell(): { col: number; row: number } {
+    return this.editor !== null ? { col: this.editor.col, row: this.editor.row } : this.selection.activeCell;
+  }
+
+  /** The name of the sheet shown. */
+  private activeSheetName(): string {
+    return this.sheetNames[this.sheetIndex - 1] ?? '';
+  }
+
+  /** Colours the references of the formula being written, or none when it is not one. */
+  private updateFormulaDraft(text: string | null, caret: number): void {
+    const draft = text !== null && isFormula(text) ? { text, caret } : null;
+    const before = this.formulaDraft;
+    if (draft === null && before === null) {
+      return;
+    }
+    if (draft !== null && before !== null && draft.text === before.text && draft.caret === before.caret) {
+      return;
+    }
+    this.formulaDraft = draft;
+    const refs = draft === null ? [] : formulaReferences(draft.text, this.activeSheetName());
+    this.formulaBar.renderState = {
+      ...this.formulaBar.renderState,
+      highlights:
+        draft === null
+          ? null
+          : { text: draft.text, references: refs.map((ref) => ({ start: ref.start, end: ref.end, color: ref.color })) }
+    };
+    this.recomputeViewport();
+  }
+
+  /** The formula is written or thrown away: nothing is pointed at or coloured any more. */
+  private endFormulaPointing(): void {
+    this.pointer = null;
+    this.pointerDragging = false;
+    this.updateFormulaDraft(null, 0);
+  }
+
+  /** The references of the formula being written, as the cell grid colours them. */
+  private formulaReferencesToDraw(): Array<{ range: CellRange; color: string; atCaret: boolean }> {
+    const draft = this.formulaDraft;
+    if (draft === null) {
+      return [];
+    }
+    const refs = formulaReferences(draft.text, this.activeSheetName());
+    const atCaret = referenceAt(refs, draft.caret);
+    return refs.map((ref) => ({ range: ref.range, color: ref.color, atCaret: ref === atCaret }));
+  }
 
   /** What the formula field shows - the cell editor's value, while it is open. */
   private showInFormulaField(value: string): void {
@@ -2576,6 +2845,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.removeEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
     this.cellGrid.removeEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
     this.cellGrid.removeEventListener('cell-editor-input', this.handleCellEditorInput as EventListener);
+    this.cellGrid.removeEventListener('cell-editor-arrow', this.handleEditorArrow as EventListener);
+    this.cellGrid.removeEventListener('cell-editor-caret', this.handleDraftCaret as EventListener);
     this.columnHeader.removeEventListener('column-header-click', this.handleColumnHeaderClick as EventListener);
     this.rowHeader.removeEventListener('row-header-click', this.handleRowHeaderClick as EventListener);
     this.sheetTabs.removeEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
@@ -2615,6 +2886,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.formulaBar.removeEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
     this.formulaBar.removeEventListener('formula-commit', this.handleFormulaCommit as EventListener);
     this.formulaBar.removeEventListener('formula-input', this.handleFormulaInput as EventListener);
+    this.formulaBar.removeEventListener('formula-arrow', this.handleFormulaArrow as EventListener);
+    this.formulaBar.removeEventListener('formula-caret', this.handleDraftCaret as EventListener);
     this.formulaBar.removeEventListener('formula-cancel', this.handleFormulaCancel);
   }
 
@@ -3297,6 +3570,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       scrollLeft: opts.scrollLeft,
       scrollTop: opts.scrollTop,
       editor: this.editor,
+      formulaReferences: this.formulaReferencesToDraw(),
       overlays: positionedOverlays,
       popupButtons: positionedPopupButtons,
       paintRect: this.painting?.outcome.kind === 'none' ? null : this.painting?.outcome.painted ?? null,
@@ -3463,6 +3737,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // the cell shows the value, as it does when the edit ends there.
     const editorWasOpen = this.editor !== null;
     this.editor = null;
+    this.endFormulaPointing();
     this.showCommittedValue(col, row, value);
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
@@ -3497,6 +3772,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * started in the cell is thrown away with it, and its editor closes.
    */
   private readonly handleFormulaCancel = (): void => {
+    this.endFormulaPointing();
     const { col, row } = this.selection.activeCell;
     this.formulaBar.renderState = {
       ...this.formulaBar.renderState,
