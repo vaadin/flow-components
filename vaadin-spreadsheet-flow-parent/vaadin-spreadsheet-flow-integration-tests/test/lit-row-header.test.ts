@@ -469,6 +469,23 @@ describe('Row header — grouping outline', () => {
         expect(style.color).to.equal('rgb(255, 255, 255)');
         // Centred on the summary row's position.
         expect(button.style.top).to.equal(`${4 - 6}px`);
+        // Its right edge 2px short of the end of the 10px tick that starts
+        // at 6px, where the GWT client put it: 6 + 10 - 2 - 12.
+        expect(button.style.left).to.equal('2px');
+        cleanup(el);
+    });
+
+    it('writes the sign on an 11px line at the top of the button, as the GWT client did', async () => {
+        // Whatever the font: where a line that tall starts its text at the
+        // button's top edge. Inside a border, the Lit client's sign sat a
+        // pixel lower.
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+
+        const button = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-toggle')!;
+        const range = document.createRange();
+        range.selectNodeContents(button);
+        const text = range.getBoundingClientRect();
+        expect(text.top - button.getBoundingClientRect().top).to.equal(Math.floor((11 - text.height) / 2));
         cleanup(el);
     });
 

@@ -3298,7 +3298,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.colWidths,
         this.colGroupingInversed,
         this.defColWidth,
-        5
+        5,
+        this.rowGroupingMax > 0 ? 1 : 0
       );
       this.columnHeader.style.display = '';
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
@@ -3348,7 +3349,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         rowHeightsPx,
         this.rowGroupingInversed,
         defaultRowHeightPx,
-        2
+        2,
+        this.colGroupingMax > 0 ? 1 : 0
       );
       this.rowHeader.style.display = '';
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
@@ -5974,13 +5976,17 @@ export function computeMergedRegionBoxes(
  *
  * @param startPaddingPx how far into its first header a group's bracket
  *            starts - the GWT client's 5px for columns, 2px for rows
+ * @param shiftPx how far back along the axis every bracket and button is
+ *            drawn - a pixel while the other outline gutter shows, which
+ *            the GWT client measured without its border
  */
 export function computePositionedColGroupings(
   groupings: ReadonlyArray<GroupingData>,
   colWidths: ReadonlyArray<number>,
   inversed: boolean,
   defColWidthPx: number,
-  startPaddingPx = 0
+  startPaddingPx = 0,
+  shiftPx = 0
 ): PositionedGrouping[] {
   const widthAt = (col0: number): number => {
     if (col0 < 0) {
@@ -6003,9 +6009,9 @@ export function computePositionedColGroupings(
     positions.push({
       uniqueIndex: g.uniqueIndex,
       level: g.level,
-      startPx: inversed ? summaryBefore : groupStart + startPaddingPx,
-      endPx: inversed ? groupEnd : summaryAfter,
-      buttonPx: inversed ? summaryBefore : summaryAfter,
+      startPx: (inversed ? summaryBefore : groupStart + startPaddingPx) - shiftPx,
+      endPx: (inversed ? groupEnd : summaryAfter) - shiftPx,
+      buttonPx: (inversed ? summaryBefore : summaryAfter) - shiftPx,
       collapsed: g.collapsed
     });
   }

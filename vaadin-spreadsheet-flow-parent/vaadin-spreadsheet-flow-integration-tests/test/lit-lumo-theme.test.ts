@@ -684,7 +684,8 @@ describe('Lumo theme — the headers', () => {
         const toggle = getComputedStyle(el.shadowRoot!.querySelector('.col-grouping-toggle')!);
         expect(toggle.backgroundColor).to.equal(BASE);
         expect(toggle.backgroundImage).to.equal('linear-gradient(rgba(30, 30, 30, 0.3), rgba(30, 30, 30, 0.3))');
-        expect(toggle.borderTopColor).to.equal('rgba(0, 0, 0, 0)');
+        // No ring: the one drawn inside the button is transparent.
+        expect(toggle.boxShadow).to.equal('rgba(0, 0, 0, 0) 0px 0px 0px 1px inset');
         expect(toggle.fontSize).to.equal('13px');
 
         cleanup();

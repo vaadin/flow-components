@@ -723,6 +723,21 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
         cleanup(el);
     });
 
+    it('writes the sign on an 11px line at the top of the button, as the GWT client did', async () => {
+        // Whatever the font: where a line that tall starts its text at the
+        // button's top edge. Inside a border, the Lit client's sign sat a
+        // pixel lower.
+        const el = await attachWithState(withGroups([{ level: 1 }]));
+
+        const button = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-toggle')!;
+        const range = document.createRange();
+        range.selectNodeContents(button);
+        const text = range.getBoundingClientRect();
+        expect(text.top - button.getBoundingClientRect().top).to.equal(Math.floor((11 - text.height) / 2));
+        expect(getComputedStyle(button).boxShadow).to.contain('rgb(199, 199, 199)');
+        cleanup(el);
+    });
+
     it('gives the dotted lines an odd length, so the dots alternate from the start', async () => {
         // Along an even length the browser doubles the first dot and shifts
         // the rest a pixel off the GWT client's.

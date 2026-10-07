@@ -182,14 +182,19 @@ export class SpreadsheetRowHeader extends LitElement {
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
     }
 
+    /* The sign sits where the GWT client's did, on an 11px line at the
+       top of a borderless button: the ring is drawn inside, taking no room,
+       and the pixel of padding fits the box to the line - a box taller than
+       its line, and the browser centres the line instead. */
     .row-grouping-toggle {
       position: absolute;
       width: 12px;
       height: 12px;
       box-sizing: border-box;
-      padding: 0;
+      padding: 0 0 1px;
       margin: 0;
-      border: 1px solid
+      border: 0;
+      box-shadow: inset 0 0 0 1px
         var(
           --vaadin-spreadsheet-grouping-toggle-border-color,
           var(--_vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7)
@@ -199,7 +204,7 @@ export class SpreadsheetRowHeader extends LitElement {
       color: #fff;
       font: inherit;
       font-size: 12px;
-      line-height: 10px;
+      line-height: 11px;
       text-align: center;
       cursor: pointer;
       z-index: 2;
@@ -631,9 +636,10 @@ export class SpreadsheetRowHeader extends LitElement {
         const lineClass = rowGroupingInversed ? 'row-grouping-line inversed' : 'row-grouping-line';
         groupingEls.push(html`<div class=${lineClass} style=${lineStyle}></div>`);
       }
-      // Centred on the bracket's line, at the summary row.
+      // At the summary row, its right edge 2px short of the bracket's
+      // tick end, as the GWT client placed it.
       const half = GROUPING_BUTTON_SIZE_PX / 2;
-      const btnStyle = `left:${lineLeft + 1 - half}px;top:${g.buttonPx - half}px;`;
+      const btnStyle = `left:${lineLeft + 2 - half}px;top:${g.buttonPx - half}px;`;
       groupingEls.push(html`
         <button
           class="row-grouping-toggle"

@@ -318,14 +318,19 @@ export class SpreadsheetColumnHeader extends LitElement {
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
     }
 
+    /* The sign sits where the GWT client's did, on an 11px line at the
+       top of a borderless button: the ring is drawn inside, taking no room,
+       and the pixel of padding fits the box to the line - a box taller than
+       its line, and the browser centres the line instead. */
     .col-grouping-toggle {
       position: absolute;
       width: 12px;
       height: 12px;
       box-sizing: border-box;
-      padding: 0;
+      padding: 0 0 1px;
       margin: 0;
-      border: 1px solid
+      border: 0;
+      box-shadow: inset 0 0 0 1px
         var(
           --vaadin-spreadsheet-grouping-toggle-border-color,
           var(--_vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7)
@@ -335,7 +340,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       color: #fff;
       font: inherit;
       font-size: 12px;
-      line-height: 10px;
+      line-height: 11px;
       text-align: center;
       cursor: pointer;
       z-index: 2;

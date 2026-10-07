@@ -190,6 +190,17 @@ describe('computePositionedColGroupings', () => {
   it('returns nothing when the sheet has no groupings', () => {
     expect(computePositionedColGroupings([], widths, false, 100)).to.deep.equal([]);
   });
+
+  it('draws the bracket and button a pixel back while the other gutter shows, as the GWT client did', () => {
+    // The GWT client measured the other outline gutter without its border,
+    // so with rows and columns both grouped every bracket started 4px into
+    // its column, not 5px, and ended and had its button a pixel early.
+    const [plain] = computePositionedColGroupings([grouping()], widths, false, 100, 5);
+    const [shifted] = computePositionedColGroupings([grouping()], widths, false, 100, 5, 1);
+    expect(shifted.startPx).to.equal(plain.startPx - 1);
+    expect(shifted.endPx).to.equal(plain.endPx - 1);
+    expect(shifted.buttonPx).to.equal(plain.buttonPx - 1);
+  });
 });
 
 describe('slot names — the contract between the connector and the grid', () => {
