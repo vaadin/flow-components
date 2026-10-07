@@ -43,7 +43,7 @@ import com.vaadin.flow.shared.Registration;
 
 public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
 
-    private static final String OUTER_HTML = "<vaadin-item>\n <span>%s</span>\n</vaadin-item>";
+    private static final String OUTER_HTML = "<vaadin-item><span>%s</span></vaadin-item>";
 
     @Test
     public void getItem_dataViewWithItems_returnsCorrectItem() {
