@@ -59,9 +59,22 @@ describe('computePositionedOverlays — anchor positioning', () => {
             img1: { type: 'IMAGE', col: 2, row: 2, width: 100, height: 60, dx: 7, dy: 11 },
         };
         const result = computePositionedOverlays(overlays, {}, uniformWidth, uniformHeight);
-        // dx is pixels, dy is points — 11pt at 96 ppi truncates to 14px.
+        // dx is pixels, dy is points — 11pt at 96 ppi is 14.67px.
         expect(result[0].leftPx).to.equal(50 + 7);
-        expect(result[0].topPx).to.equal(20 + 14);
+        expect(result[0].topPx).to.be.closeTo(20 + 44 / 3, 1e-9);
+    });
+
+    it('keeps the fractions of a point offset and height, as the GWT client did', () => {
+        // The Tagetik logo: 11.0796pt down its cell, 17.9278pt tall. The
+        // GWT client set both in pt and let the browser place the edges;
+        // cut down to whole pixels, the logo sat a pixel high and short.
+        const overlays: Record<string, OverlayInfo> = {
+            logo: { type: 'IMAGE', col: 1, row: 1, width: 94.0997, height: 17.9278, dx: 0, dy: 11.0796 },
+        };
+        const result = computePositionedOverlays(overlays, {}, uniformWidth, uniformHeight);
+
+        expect(result[0].topPx).to.be.closeTo(14.7728, 1e-4);
+        expect(result[0].heightPx).to.be.closeTo(23.9037, 1e-4);
     });
 
     it('reads the vertical measurements as points and the horizontal as pixels', () => {
@@ -645,11 +658,12 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         ) as HTMLElement;
         // col 3 = sum of widths 1..2 = 100. row 2 = height of row 1 = 20.
         // dx=5 is already pixels; dy=3 and height=40 are points, so at 96
-        // ppi they become 4px and 53px.
+        // ppi they become 4px and 53.33px - the fraction kept, as the GWT
+        // client's pt kept it.
         expect(overlay.style.left).to.equal('105px');
         expect(overlay.style.top).to.equal('24px');
         expect(overlay.style.width).to.equal('80px');
-        expect(overlay.style.height).to.equal('53px');
+        expect(parseFloat(overlay.style.height)).to.be.closeTo(160 / 3, 1e-3);
         cleanup();
     });
 

@@ -5713,6 +5713,11 @@ export function overlayComponentAppId(host: HTMLElement): string {
  * Treating the vertical pair as pixels makes every overlay 25% too short
  * and seats it too high.
  *
+ * The points are converted exactly, fractions kept, as the GWT client
+ * left them to the browser in `pt`. Cut down to whole pixels, a picture
+ * sat up to a pixel high and a pixel short, and a chart drew itself for
+ * a pixel less height.
+ *
  * Pure (no DOM, no instance state) so it's straightforward to
  * unit-test in isolation. Slice 160.
  */
@@ -5740,9 +5745,9 @@ export function computePositionedOverlays(
       type: info.type,
       src: info.type === 'IMAGE' ? resources[id] : undefined,
       leftPx: left + info.dx,
-      topPx: top + convertPointsToPixel(info.dy, ppi),
+      topPx: top + (info.dy * ppi) / 72,
       widthPx: info.width,
-      heightPx: convertPointsToPixel(info.height, ppi)
+      heightPx: (info.height * ppi) / 72
     };
     result.push(positioned);
   }
