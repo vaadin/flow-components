@@ -79,6 +79,16 @@ public class MenuItemDownloadHandlerIT extends AbstractContextMenuIT {
                 clickAndDownload(openItem("download-item")));
     }
 
+    @Test
+    public void clickDownloadItem_menuRemovedBeforeRequest_downloadsFileFromHandler() {
+        clickItem(openItem("download-item"));
+        // Request the file only after the menu has been removed on the
+        // server, which happens first if there is no closing animation
+        verifyClosedAndRemoved();
+
+        Assert.assertEquals(DOWNLOADED, download());
+    }
+
     private WebElement openItem(String id) {
         rightClickOn(TARGET_ID);
         waitForElementPresent(By.id(id));
@@ -90,13 +100,24 @@ public class MenuItemDownloadHandlerIT extends AbstractContextMenuIT {
      * from, returning the response status and body separated by {@code |}.
      */
     private String clickAndDownload(WebElement item) {
-        executeScript("window.__downloadUrl = null;");
-        item.click();
-        waitUntil(driver -> executeScript("return window.__downloadUrl;"));
-
         // click() waits until the server has handled the click, so an item
         // that disables itself on click is already disabled on the server
         // when the file is requested
+        clickItem(item);
+        return download();
+    }
+
+    private void clickItem(WebElement item) {
+        executeScript("window.__downloadUrl = null;");
+        item.click();
+        waitUntil(driver -> executeScript("return window.__downloadUrl;"));
+    }
+
+    /**
+     * Fetches the URL that the last click started a download from, returning
+     * the response status and body separated by {@code |}.
+     */
+    private String download() {
         executeScript("""
                 window.__download = null;
                 fetch(window.__downloadUrl).then(r => r.text().then(t => {
