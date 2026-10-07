@@ -233,11 +233,23 @@ export class SpreadsheetFormulaBar extends LitElement {
     });
     // Clicking away keeps what was typed, as leaving a cell editor does.
     // It is how a value typed here reaches the sheet when the user goes
-    // straight back to the cell rather than pressing a key.
+    // straight back to the cell rather than pressing a key. Where the
+    // keyboard went goes along: back to an open cell editor, the edit
+    // carries on there.
     root.addEventListener('focusout', (e: Event) => {
       const target = e.target;
       if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
-        this.commitFormula(target.value, undefined, false);
+        this.commitFormula(target.value, undefined, false, (e as FocusEvent).relatedTarget);
+      }
+    });
+    // What is typed here shows in an open cell editor as it is typed, as
+    // the GWT client had it.
+    root.addEventListener('input', (e: Event) => {
+      const target = e.target;
+      if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
+        this.dispatchEvent(
+          new CustomEvent('formula-input', { detail: { value: target.value }, bubbles: true, composed: true })
+        );
       }
     });
   }
@@ -268,14 +280,19 @@ export class SpreadsheetFormulaBar extends LitElement {
     }
   }
 
-  private commitFormula(value: string, key: string | undefined, shiftKey: boolean): void {
+  private commitFormula(
+    value: string,
+    key: string | undefined,
+    shiftKey: boolean,
+    relatedTarget: EventTarget | null = null
+  ): void {
     if (!this.editingFormula) {
       return;
     }
     this.editingFormula = false;
     this.dispatchEvent(
       new CustomEvent('formula-commit', {
-        detail: { value, key, shiftKey },
+        detail: { value, key, shiftKey, relatedTarget },
         bubbles: true,
         composed: true
       })

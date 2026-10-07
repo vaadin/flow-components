@@ -735,6 +735,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.formulaBar.addEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
     this.formulaBar.addEventListener('formula-commit', this.handleFormulaCommit as EventListener);
     this.formulaBar.addEventListener('formula-cancel', this.handleFormulaCancel);
+    this.formulaBar.addEventListener('formula-input', this.handleFormulaInput as EventListener);
     this.root.appendChild(this.scrollContainer);
     // Sheet tabs sit below the scroll container in the flex
     // column. flex:0 so they take their intrinsic height,
@@ -811,6 +812,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
     this.cellGrid.addEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
     this.cellGrid.addEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
+    this.cellGrid.addEventListener('cell-editor-input', this.handleCellEditorInput as EventListener);
     // Mouse drag selection (slice 155). The cell-grid emits
     // cell-mousedown + cell-mouseover; the connector watches
     // mouseup at the document level so a drag that ends
@@ -1427,6 +1429,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const initialValue = this.formulaFieldValueFor(col, row);
     // Opening the existing value to change it: arrows move the caret.
     this.editor = { col, row, initialValue, mode: 'edit' };
+    this.showInFormulaField(initialValue);
     this.recomputeViewport();
   };
 
@@ -1474,35 +1477,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
       value: string;
       key?: string;
       shiftKey?: boolean;
+      relatedTarget?: EventTarget | null;
     }>
   ): void => {
-    const { col, row, value, key, shiftKey } = e.detail;
-    // Slice 181: optimistically update the client-side cell
-    // data so the typed value is visible immediately. The
-    // server's `cellsUpdated` callback may arrive much later
-    // (or not at all in offline / TestBench scenarios); the
-    // GWT-era code updated the cell display before the
-    // round-trip — Excel users expect what they typed to
-    // show up at once. Preserves the existing CellData
-    // metadata when present (style index, locked flag).
-    const cellKey = toKey(col, row);
-    const previous = this.cellDataByKey.get(cellKey);
-    this.cellDataByKey.set(cellKey, {
-      col,
-      row,
-      value,
-      cellStyle: previous?.cellStyle ?? 'cs0',
-      locked: previous?.locked ?? false,
-      needsMeasure: previous?.needsMeasure ?? false,
-      isPercentage: previous?.isPercentage ?? false,
-      // Not carried over: how far the old text ran into its neighbours says
-      // nothing about how far the newly typed text should. The server sends
-      // the new width with its answer.
-      overflowWidth: 0,
-      ...(previous?.formulaValue !== undefined ? { formulaValue: previous.formulaValue } : {}),
-      ...(previous?.originalValue !== undefined ? { originalValue: previous.originalValue } : {}),
-      ...(previous?.textColor !== undefined ? { textColor: previous.textColor } : {})
-    });
+    const { col, row, value, key, shiftKey, relatedTarget } = e.detail;
+    // Left for the formula field, the edit carries on there, as in the GWT
+    // client: nothing is committed yet, and the editor stays open.
+    if (key === undefined && relatedTarget === this.formulaBar) {
+      e.preventDefault();
+      return;
+    }
+    this.showCommittedValue(col, row, value);
     // Close the editor first so the re-render removes the
     // input — important to do BEFORE dispatching the server
     // event so the editor doesn't briefly flash on top of the
@@ -1567,10 +1552,67 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * the editor without dispatching anything.
    */
   private readonly handleCellEditorCancel = (): void => {
+    const editor = this.editor;
     this.editor = null;
+    // The formula field showed what was typed; it shows the cell again.
+    if (editor !== null) {
+      this.showInFormulaField(this.formulaFieldValueFor(editor.col, editor.row));
+    }
     this.returnFocusToSheet();
     this.recomputeViewport();
   };
+
+  /** Typed into the cell editor: the formula field shows it as it is typed. */
+  private readonly handleCellEditorInput = (e: CustomEvent<{ value: string }>): void => {
+    this.showInFormulaField(e.detail.value);
+  };
+
+  /**
+   * Typed into the formula field while the edit started in the cell: the
+   * cell editor shows it as it is typed, as the GWT client's did.
+   */
+  private readonly handleFormulaInput = (e: CustomEvent<{ value: string }>): void => {
+    if (this.editor !== null) {
+      this.cellGrid.setEditorValue(e.detail.value);
+    }
+  };
+
+  /** What the formula field shows - the cell editor's value, while it is open. */
+  private showInFormulaField(value: string): void {
+    this.formulaBar.renderState = { ...this.formulaBar.renderState, formula: value };
+  }
+
+  /**
+   * Slice 181: show a committed value in its cell at once. The server's
+   * `cellsUpdated` callback may arrive much later (or not at all in offline
+   * / TestBench scenarios); the GWT client updated the cell before the
+   * round-trip, as Excel users expect - except for a formula, which kept
+   * showing the old value until the server had worked it out. Preserves
+   * the existing CellData metadata when present (style index, locked flag).
+   */
+  private showCommittedValue(col: number, row: number, value: string): void {
+    if (value.startsWith('=') || value.startsWith('+')) {
+      return;
+    }
+    const cellKey = toKey(col, row);
+    const previous = this.cellDataByKey.get(cellKey);
+    this.cellDataByKey.set(cellKey, {
+      col,
+      row,
+      value,
+      cellStyle: previous?.cellStyle ?? 'cs0',
+      locked: previous?.locked ?? false,
+      needsMeasure: previous?.needsMeasure ?? false,
+      isPercentage: previous?.isPercentage ?? false,
+      // Not carried over: how far the old text ran into its neighbours says
+      // nothing about how far the newly typed text should. The server sends
+      // the new width with its answer.
+      overflowWidth: 0,
+      ...(previous?.formulaValue !== undefined ? { formulaValue: previous.formulaValue } : {}),
+      ...(previous?.originalValue !== undefined ? { originalValue: previous.originalValue } : {}),
+      ...(previous?.textColor !== undefined ? { textColor: previous.textColor } : {})
+    });
+  }
 
   /**
    * Put the keyboard back on the sheet.
@@ -1824,6 +1866,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // F2 opens the existing value, so arrows move the caret.
         mode: 'edit'
       };
+      this.showInFormulaField(this.editor.initialValue);
       this.recomputeViewport();
       return;
     }
@@ -1852,6 +1895,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         initialValue: initialEditValue(key, this.cellDataByKey.get(toKey(col, row))),
         mode: 'enter'
       };
+      this.showInFormulaField(this.editor.initialValue);
       this.recomputeViewport();
       return;
     }
@@ -2415,6 +2459,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.removeEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
     this.cellGrid.removeEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
     this.cellGrid.removeEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
+    this.cellGrid.removeEventListener('cell-editor-input', this.handleCellEditorInput as EventListener);
     this.columnHeader.removeEventListener('column-header-click', this.handleColumnHeaderClick as EventListener);
     this.rowHeader.removeEventListener('row-header-click', this.handleRowHeaderClick as EventListener);
     this.sheetTabs.removeEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
@@ -2452,6 +2497,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.formulaBar.removeEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
     this.formulaBar.removeEventListener('formula-commit', this.handleFormulaCommit as EventListener);
+    this.formulaBar.removeEventListener('formula-input', this.handleFormulaInput as EventListener);
     this.formulaBar.removeEventListener('formula-cancel', this.handleFormulaCancel);
   }
 
@@ -3263,8 +3309,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * selection alone - that is how a value typed here reaches the sheet
    * when the user goes straight back to the cell.
    */
-  private readonly handleFormulaCommit = (e: CustomEvent<{ value: string; key?: string; shiftKey: boolean }>): void => {
-    const { value, key, shiftKey } = e.detail;
+  private readonly handleFormulaCommit = (
+    e: CustomEvent<{ value: string; key?: string; shiftKey: boolean; relatedTarget?: EventTarget | null }>
+  ): void => {
+    const { value, key, shiftKey, relatedTarget } = e.detail;
+    // Back to the cell editor the edit came from: it carries on there.
+    if (key === undefined && this.editor !== null && relatedTarget === this.cellGrid) {
+      return;
+    }
     const { col, row } = this.selection.activeCell;
     if (this.rows <= 0 || this.cols <= 0) {
       return;
@@ -3273,6 +3325,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.reportProtectedCellWriteAttempt();
       return;
     }
+    // An edit started in the cell ends here too: its editor closes, and
+    // the cell shows the value, as it does when the edit ends there.
+    const editorWasOpen = this.editor !== null;
+    this.editor = null;
+    this.showCommittedValue(col, row, value);
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: { type: 'cellValueEdited', data: { row, col, value } },
@@ -3284,6 +3341,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // when shift was not held.
     const step = key === 'Tab' && shiftKey ? null : commitStep(key, false);
     if (step === null) {
+      if (editorWasOpen) {
+        this.recomputeViewport();
+      }
       return;
     }
     this.returnFocusToSheet();
@@ -3297,13 +3357,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.dispatchSelectionEvent();
   };
 
-  /** Escape in the formula field: put the cell's own value back. */
+  /**
+   * Escape in the formula field: put the cell's own value back. An edit
+   * started in the cell is thrown away with it, and its editor closes.
+   */
   private readonly handleFormulaCancel = (): void => {
     const { col, row } = this.selection.activeCell;
     this.formulaBar.renderState = {
       ...this.formulaBar.renderState,
       formula: this.formulaFieldValueFor(col, row)
     };
+    if (this.editor !== null) {
+      this.editor = null;
+      this.recomputeViewport();
+    }
     this.returnFocusToSheet();
   };
 

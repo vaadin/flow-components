@@ -725,6 +725,8 @@ export class SpreadsheetCellGrid extends LitElement {
    * again - on a scroll, say - does not shrink it back to its cell.
    */
   private editorFit: { key: string; width: number } | null = null;
+  /** The editor input the keyboard was last given to - see updated(). */
+  private focusedEditor: HTMLInputElement | null = null;
   /** The cells whose notes were drawn last time, so only new ones drop in. */
   private noteKeysShown: ReadonlySet<string> = new Set();
 
@@ -887,14 +889,44 @@ export class SpreadsheetCellGrid extends LitElement {
     return editor && fit?.key === toKey(editor.col, editor.row) ? fit.width : undefined;
   }
 
-  /** Widens or narrows the editor to the text typed into it. */
+  /**
+   * Widens or narrows the editor to the text typed into it, and says what
+   * it now holds: the formula field shows it as it is typed, as the GWT
+   * client's did.
+   */
   private readonly handleEditorInput = (e: Event): void => {
     const input = e.currentTarget as HTMLInputElement;
     const width = this.fitEditor(input.value);
     if (width !== null) {
       input.style.width = `${width}px`;
     }
+    const editor = this.renderState.editor;
+    if (editor) {
+      this.dispatchEvent(
+        new CustomEvent('cell-editor-input', {
+          detail: { col: editor.col, row: editor.row, value: input.value },
+          bubbles: true,
+          composed: true
+        })
+      );
+    }
   };
+
+  /**
+   * Puts a value typed elsewhere - into the formula field, carrying the edit
+   * on there - into the open editor, which widens or narrows to it.
+   */
+  setEditorValue(value: string): void {
+    const input = this.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;
+    if (input === null) {
+      return;
+    }
+    input.value = value;
+    const width = this.fitEditor(value);
+    if (width !== null) {
+      input.style.width = `${width}px`;
+    }
+  }
 
   /**
    * Measures text in the edited cell's style, as the GWT client measured
@@ -1003,18 +1035,20 @@ export class SpreadsheetCellGrid extends LitElement {
         input.style.width = `${width}px`;
       }
     }
-    if (this.renderState.editor && changedProps.has('renderState')) {
-      const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
-      if (input && document.activeElement !== input) {
-        input.focus();
-        // Caret at the end so typing extends the existing value (Excel
-        // convention), except before a trailing percent sign: a cell opened
-        // on "5%" has to take the next digit into the number, not after the
-        // sign.
-        const caret = caretPosition(input.value);
-        input.setSelectionRange(caret, caret);
-      }
+    // The keyboard goes to an editor as it appears, and not again on every
+    // repaint: the user may have taken it to the formula field to carry the
+    // edit on there.
+    const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
+    if (input !== null && input !== this.focusedEditor) {
+      input.focus();
+      // Caret at the end so typing extends the existing value (Excel
+      // convention), except before a trailing percent sign: a cell opened
+      // on "5%" has to take the next digit into the number, not after the
+      // sign.
+      const caret = caretPosition(input.value);
+      input.setSelectionRange(caret, caret);
     }
+    this.focusedEditor = input;
   }
 
   /**
@@ -2534,7 +2568,8 @@ function buildCellEditorOverlay(
     type: 'cell-editor-commit' | 'cell-editor-cancel',
     value: string,
     key?: string,
-    shiftKey?: boolean
+    shiftKey?: boolean,
+    relatedTarget?: EventTarget | null
   ): void => {
     // Closing the editor takes the input out of the document, and losing
     // the focus that way fires blur — which would commit a second time.
@@ -2542,17 +2577,23 @@ function buildCellEditorOverlay(
     if (target instanceof HTMLElement) {
       target.dataset.editorClosed = 'true';
     }
-    target.dispatchEvent(
+    const proceeds = target.dispatchEvent(
       new CustomEvent(type, {
         // Include the key + shift modifier so the connector can
         // pick the next active-cell direction after commit
         // (Excel convention: Enter moves down, Tab moves right;
-        // shift reverses each). Slice 158.
-        detail: { col, row, value, key, shiftKey },
+        // shift reverses each). Slice 158. Left for somewhere, where
+        // to: the edit carries on in the formula field, so the
+        // connector stops the commit then and the editor stays open.
+        detail: { col, row, value, key, shiftKey, relatedTarget },
         bubbles: true,
-        composed: true
+        composed: true,
+        cancelable: true
       })
     );
+    if (!proceeds && target instanceof HTMLElement) {
+      delete target.dataset.editorClosed;
+    }
   };
 
   const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
@@ -2586,7 +2627,7 @@ function buildCellEditorOverlay(
     }
     // Blur commit doesn't pass key/shift — the connector
     // leaves the selection at the committed cell.
-    dispatchEditorEvent(input, 'cell-editor-commit', input.value);
+    dispatchEditorEvent(input, 'cell-editor-commit', input.value, undefined, undefined, e.relatedTarget);
   };
 
   return html`
