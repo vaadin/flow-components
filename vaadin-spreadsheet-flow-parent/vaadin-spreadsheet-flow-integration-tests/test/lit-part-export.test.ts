@@ -199,6 +199,87 @@ describe('::part() reaches out of the nested shadow roots', () => {
   });
 });
 
+describe('::part() reaches the parts documented with the Lit client', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+  const originalVaadin = (window as any).Vaadin;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+    (window as any).Vaadin = originalVaadin;
+  });
+
+  /** Style one part the way an application would and read it back. */
+  function expectStyleable(part: string, el: Element): void {
+    withAppStyle(`${ctx.hostSelector}::part(${part}) { color: rgb(31, 32, 33); }`, () => {
+      expect(getComputedStyle(el).color, part).to.equal('rgb(31, 32, 33)');
+    });
+  }
+
+  it('styles the named-range box', async () => {
+    ctx.sheet.setNamedRanges(['Totals']);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getFormulaBar().updateComplete;
+
+    expectStyleable('named-range-box', ctx.sheet.getFormulaBar().shadowRoot!.querySelector('.namedrangebox')!);
+  });
+
+  it('styles the header corner and its outline level buttons', async () => {
+    ctx.sheet.setColGroupingMax(1);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getHeaderCorner().updateComplete;
+
+    expectStyleable('header-corner', ctx.sheet.getHeaderCorner());
+    expectStyleable('outline-level-button', ctx.sheet.getHeaderCorner().shadowRoot!.querySelector('.level-header')!);
+  });
+
+  it('styles the field a sheet tab is renamed in', async () => {
+    ctx.sheet.setSheetNames(['One', 'Two']);
+    ctx.sheet.setSheetIndex(1);
+    await ctx.sheet.getSheetTabs().updateComplete;
+    ctx.sheet
+      .getSheetTabs()
+      .shadowRoot!.querySelector('.sheet-tab')!
+      .dispatchEvent(new MouseEvent('dblclick', { bubbles: true, composed: true }));
+    await ctx.sheet.getSheetTabs().updateComplete;
+
+    expectStyleable('tab-rename', ctx.sheet.getSheetTabs().shadowRoot!.querySelector('[part~="tab-rename"]')!);
+  });
+
+  it('styles the box a comment is written in', async () => {
+    ctx.sheet.setCellComments({ 'col2 row2': 'A note' });
+    ctx.sheet.editCellComment(2, 2);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    expectStyleable('comment-edit', ctx.sheet.getCellGrid().shadowRoot!.querySelector('.comment-overlay-edit')!);
+  });
+
+  it("styles the pop-up's card, header, close box and caption", () => {
+    const content = document.createElement('div');
+    (window as any).Vaadin = { Flow: { clients: { ROOT: { getByNodeId: () => content } } } };
+    ctx.sheet.onPopupButtonOpen(1, 2, '7', 'ROOT');
+
+    const overlay = ctx.sheet.getPopupOverlay();
+    expectStyleable('popup-overlay', overlay);
+    expectStyleable('popup-header', overlay.querySelector('.popup-header')!);
+    expectStyleable('popup-close', overlay.querySelector('.popup-close')!);
+    expectStyleable('popup-caption', overlay.querySelector('.header-caption')!);
+  });
+
+  it('styles the context menu and its items', async () => {
+    ctx.sheet.showActions([{ caption: 'Insert row', key: '1', type: 0, iconNodeId: 0 }]);
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    const menu = ctx.sheet.getContextMenu().shadowRoot!;
+    expectStyleable('context-menu', menu.querySelector('.menu')!);
+    expectStyleable('context-menu-item', menu.querySelector('.item')!);
+  });
+});
+
 describe('exportparts — the declared lists', () => {
   let ctx: ReturnType<typeof attachSheet>;
 
@@ -235,7 +316,8 @@ describe('exportparts — the declared lists', () => {
       'comment-triangle',
       'invalid-triangle',
       'popup-button',
-      'selection-corner'
+      'selection-corner',
+      'comment-edit'
     ]);
   });
 

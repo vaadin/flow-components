@@ -61,7 +61,7 @@ export class SpreadsheetCellGrid extends LitElement {
    * documented styling API silently does nothing.
    */
   static readonly EXPORTED_PARTS =
-    'cell,cell-range,cell-input,comment-triangle,invalid-triangle,popup-button,selection-corner';
+    'cell,cell-range,cell-input,comment-triangle,comment-edit,invalid-triangle,popup-button,selection-corner';
 
   static properties = {
     renderState: { attribute: false },
