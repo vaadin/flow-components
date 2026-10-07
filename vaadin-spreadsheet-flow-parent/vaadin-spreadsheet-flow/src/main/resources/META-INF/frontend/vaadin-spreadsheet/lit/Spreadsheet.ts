@@ -743,10 +743,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // definite, so it offers nothing, and flex-grow still gives it
     // every pixel left over once the host does have a height. The GWT
     // client got this from absolutely positioned panes.
+    // A sheet smaller than its view keeps to the top left corner: left to
+    // stretch, the grid shares the room left over between the header track
+    // and the cells', and the cells drop away from their headers.
     this.scrollContainer.style.cssText =
       'position:relative;overflow:auto;width:100%;flex:1 1 0;height:0;min-height:0;' +
       'display:grid;grid-template-columns:auto auto;' +
-      'grid-template-rows:auto auto;' +
+      'grid-template-rows:auto auto;align-content:start;justify-content:start;' +
       // outline:none so the browser-default focus ring doesn't
       // render around the spreadsheet; we get focus via
       // tabindex=0 (slice 147) but draw selection feedback via
@@ -2950,6 +2953,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         5
       );
       const gutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
+      this.columnHeader.style.display = '';
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
       this.columnHeader.style.height = `${this.headerRowHeight + gutterPx}px`;
       this.columnHeader.renderState = {
@@ -2974,6 +2978,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // {@code selection.activeRange}.
         selectedColumns: selectedColumnSet(this.selection)
       };
+    } else {
+      // No headings and no outline: the strip goes altogether, border and
+      // all, as the GWT client's did - also when they are turned off while
+      // the sheet is up, rather than keep the size it was last given.
+      this.columnHeader.style.display = 'none';
     }
     // Row-header strip (slice 144). Same opt-in gate as the column
     // header, and the same reason for the grouping half of it.
@@ -2994,6 +3003,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         2
       );
       const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax, this.headerColumnWidth > 0);
+      this.rowHeader.style.display = '';
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
       this.rowHeader.renderState = {
@@ -3018,6 +3028,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         frozenRowHeights: state.frozenRowHeights,
         scrollTop: state.scrollTop
       };
+    } else {
+      this.rowHeader.style.display = 'none';
     }
     // Header corner (slice 145). Sized only when BOTH header
     // dimensions are > 0 so it occupies its grid cell with
@@ -3031,6 +3043,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const colGutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
     const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
     const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
+    this.headerCorner.style.display = cornerWidth === 0 && cornerHeight === 0 ? 'none' : '';
     this.headerCorner.style.width = `${cornerWidth}px`;
     this.headerCorner.style.height = `${cornerHeight}px`;
     this.headerCorner.renderState = {
