@@ -251,7 +251,7 @@ describe('::part() reaches the parts documented with the Lit client', () => {
 
   it('styles the box a comment is written in', async () => {
     ctx.sheet.setCellComments({ 'col2 row2': 'A note' });
-    ctx.sheet.editCellComment(2, 2);
+    ctx.sheet.editCellComment(1, 1);
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getCellGrid().updateComplete;
 

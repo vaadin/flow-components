@@ -271,7 +271,7 @@ describe('Spreadsheet — writing a cell comment', () => {
 
   it('opens the note for typing when the server asks', async () => {
     ctx.sheet.setCellComments({ [A1]: 'a note' });
-    ctx.sheet.editCellComment(1, 1);
+    ctx.sheet.editCellComment(0, 0);
 
     const el = await note();
     expect(el, 'no comment editor').to.not.be.null;
@@ -279,7 +279,7 @@ describe('Spreadsheet — writing a cell comment', () => {
   });
 
   it('opens an empty note on a cell that has none yet', async () => {
-    ctx.sheet.editCellComment(2, 3);
+    ctx.sheet.editCellComment(1, 2);
 
     expect((await note())!.value).to.equal('');
   });
@@ -287,13 +287,13 @@ describe('Spreadsheet — writing a cell comment', () => {
   it('stays up without being hovered', async () => {
     // An ordinary note only shows on hover; the one being written has
     // to stay where the user is typing.
-    ctx.sheet.editCellComment(1, 1);
+    ctx.sheet.editCellComment(0, 0);
 
     expect(await note()).to.not.be.null;
   });
 
   it('tells the server what was written when the note is left', async () => {
-    ctx.sheet.editCellComment(2, 3);
+    ctx.sheet.editCellComment(1, 2);
     const el = (await note())!;
     el.value = 'Check this figure';
     events.length = 0;
@@ -304,8 +304,21 @@ describe('Spreadsheet — writing a cell comment', () => {
     expect(events[0].data).to.eql({ text: 'Check this figure', col: 2, row: 3 });
   });
 
+  it('opens the note on the cell the server names, counting from 0 as POI does', async () => {
+    // The server passes its CellReference's column and row as they are.
+    // Read as counting from 1, the note for B3 opened on A2 and what was
+    // typed into it was saved there.
+    ctx.sheet.editCellComment(1, 2);
+    const el = (await note())!;
+    el.value = 'On B3';
+    events.length = 0;
+    el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+
+    expect(events[0].data).to.eql({ text: 'On B3', col: 2, row: 3 });
+  });
+
   it('shows the note without waiting for the server', async () => {
-    ctx.sheet.editCellComment(1, 1);
+    ctx.sheet.editCellComment(0, 0);
     const el = (await note())!;
     el.value = 'Typed';
     el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
@@ -316,7 +329,7 @@ describe('Spreadsheet — writing a cell comment', () => {
   });
 
   it('closes the note once it is written', async () => {
-    ctx.sheet.editCellComment(1, 1);
+    ctx.sheet.editCellComment(0, 0);
     const el = (await note())!;
     el.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
 
@@ -324,7 +337,7 @@ describe('Spreadsheet — writing a cell comment', () => {
   });
 
   it('reports the note once, not again as it closes', async () => {
-    ctx.sheet.editCellComment(1, 1);
+    ctx.sheet.editCellComment(0, 0);
     const el = (await note())!;
     el.value = 'Once';
     events.length = 0;
@@ -337,7 +350,7 @@ describe('Spreadsheet — writing a cell comment', () => {
   it('keeps the keys out of the sheet underneath', async () => {
     // Without stopping them, typing a note would also be typing into
     // the cell the sheet has selected.
-    ctx.sheet.editCellComment(1, 1);
+    ctx.sheet.editCellComment(0, 0);
     let reachedSheet = false;
     ctx.sheet
       .getScrollContainer()

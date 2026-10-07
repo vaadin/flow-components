@@ -3996,9 +3996,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * The server calls this after its Insert comment / Edit comment
    * action has made sure there is one, so the note is already in the
    * comment map; all that is left is to open it for typing.
+   *
+   * The server names the cell by its POI CellReference, which counts
+   * from 0 where every other cell address here counts from 1.
    */
   editCellComment(col: number, row: number): void {
-    this.editingCommentKey = toKey(col, row);
+    this.editingCommentKey = toKey(col + 1, row + 1);
     this.scheduleRender();
   }
 
