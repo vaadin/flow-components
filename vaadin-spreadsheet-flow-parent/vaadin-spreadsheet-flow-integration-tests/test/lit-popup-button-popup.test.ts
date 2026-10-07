@@ -272,13 +272,14 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(restingRect(ctx.sheet).top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
   });
 
-  it("is drawn in the top layer, as the GWT client's popover was, so the sheet's edges cannot cut it off", () => {
+  it("is drawn in the top layer, as the GWT client's popover was, so the sheet's edges cannot cut it off", async () => {
     withFlowClient({ 42: content('filter') });
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
     expect(ctx.sheet.getPopupOverlay().matches(':popover-open'), 'open').to.be.true;
 
     ctx.sheet.closePopup(1, 4);
+    await settle(ctx.sheet.getPopupOverlay());
     expect(ctx.sheet.getPopupOverlay().matches(':popover-open'), 'closed').to.be.false;
   });
 
@@ -376,11 +377,12 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(animationNames(ctx.sheet.getPopupOverlay())).to.deep.equal(['overlay-animate-in']);
   });
 
-  it('closes on the server request for that cell', () => {
+  it('closes on the server request for that cell', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 
     ctx.sheet.closePopup(1, 4);
+    await settle(ctx.sheet.getPopupOverlay());
 
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.true;
   });
@@ -404,12 +406,13 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.be.empty;
   });
 
-  it('closes and reports when the user clicks away', () => {
+  it('closes and reports when the user clicks away', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
     ctx.sent.length = 0;
 
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+    await settle(ctx.sheet.getPopupOverlay());
 
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.true;
     expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.eql([
@@ -440,12 +443,13 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.false;
   });
 
-  it('closes and reports on Escape', () => {
+  it('closes and reports on Escape', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
     ctx.sent.length = 0;
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await settle(ctx.sheet.getPopupOverlay());
 
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.true;
     expect(ctx.sent.some((e) => e.type === 'popupClose')).to.be.true;
@@ -465,7 +469,7 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.be.empty;
   });
 
-  it('closes and reports when the server takes its button away, as the GWT client did', () => {
+  it('closes and reports when the server takes its button away, as the GWT client did', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.addPopupButton(buttonState(4, 1));
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
@@ -475,6 +479,7 @@ describe('Spreadsheet — popup-button popup', () => {
     // view, or the sheet has changed. The GWT client's popup closed with
     // its button and said so.
     ctx.sheet.removePopupButton(buttonState(4, 1));
+    await settle(ctx.sheet.getPopupOverlay());
 
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.true;
     expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.eql([
@@ -597,12 +602,13 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(getComputedStyle(close).fontSize).to.equal('21px');
   });
 
-  it('closes and reports from the close box', () => {
+  it('closes and reports from the close box', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
     ctx.sent.length = 0;
 
     ctx.sheet.getPopupOverlay().querySelector<HTMLElement>('.popup-close')!.click();
+    await settle(ctx.sheet.getPopupOverlay());
 
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.true;
     expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.eql([
@@ -637,6 +643,97 @@ describe('Spreadsheet — popup-button popup', () => {
     const overlay = ctx.sheet.getPopupOverlay();
     expect(overlay.hidden).to.be.false;
     expect(overlay.querySelector('slot')!.assignedElements({ flatten: true })).to.be.empty;
+  });
+
+  // Closed once it has dropped into place, the GWT client's popup faded out
+  // over 120ms and then went.
+  it('fades out as it closes, taking no clicks, and then goes', async () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    const overlay = ctx.sheet.getPopupOverlay();
+    await settle(overlay);
+
+    ctx.sheet.closePopup(1, 4);
+
+    expect(animationNames(overlay)).to.deep.equal(['overlay-animate-out']);
+    expect(overlay.hidden, 'still there while it fades').to.be.false;
+    expect(overlay.matches(':popover-open')).to.be.true;
+    expect(getComputedStyle(overlay).pointerEvents).to.equal('none');
+    await settle(overlay);
+    expect(overlay.hidden).to.be.true;
+    expect(overlay.matches(':popover-open')).to.be.false;
+  });
+
+  it('finishes dropping into place before it goes, without a fade, when closed as it opens', async () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    const overlay = ctx.sheet.getPopupOverlay();
+
+    ctx.sheet.closePopup(1, 4);
+
+    expect(animationNames(overlay)).to.deep.equal(['overlay-animate-in']);
+    expect(overlay.hidden).to.be.false;
+    await settle(overlay);
+    expect(overlay.hidden).to.be.true;
+  });
+
+  it('fades out with what it holds when the user closes it', async () => {
+    const filter = content('filter');
+    withFlowClient({ 42: filter });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    const overlay = ctx.sheet.getPopupOverlay();
+    await settle(overlay);
+
+    overlay.querySelector<HTMLElement>('.popup-close')!.click();
+
+    expect(filter.assignedSlot, 'shown while the card fades').to.not.be.null;
+    await settle(overlay);
+    expect(filter.isConnected, 'released once it has gone').to.be.false;
+  });
+
+  it('lets what it holds go first when the server closes it, and fades the empty card', async () => {
+    const filter = content('filter');
+    withFlowClient({ 42: filter });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    const overlay = ctx.sheet.getPopupOverlay();
+    await settle(overlay);
+
+    ctx.sheet.closePopup(1, 4);
+
+    expect(filter.isConnected).to.be.false;
+    expect(animationNames(overlay)).to.deep.equal(['overlay-animate-out']);
+  });
+
+  it('lets what it holds go first when the server takes its button away', async () => {
+    const filter = content('filter');
+    withFlowClient({ 42: filter });
+    ctx.sheet.addPopupButton(buttonState(4, 1));
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    await settle(ctx.sheet.getPopupOverlay());
+
+    ctx.sheet.removePopupButton(buttonState(4, 1));
+
+    expect(filter.isConnected).to.be.false;
+  });
+
+  it('stays open when opened again while it fades', async () => {
+    const filter = content('filter');
+    withFlowClient({ 42: filter, 43: content('other') });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    const overlay = ctx.sheet.getPopupOverlay();
+    await settle(overlay);
+    overlay.querySelector<HTMLElement>('.popup-close')!.click();
+    await frames(1);
+
+    ctx.sheet.onPopupButtonOpen(1, 5, '43', APP);
+    await settle(overlay);
+
+    expect(overlay.hidden).to.be.false;
+    expect(overlay.matches(':popover-open')).to.be.true;
+    expect(overlay.classList.contains('animate-out')).to.be.false;
+    expect(overlay.querySelector('slot')!.assignedElements({ flatten: true }).map((el) => el.textContent)).to.deep.equal([
+      'other'
+    ]);
   });
 });
 

@@ -3640,6 +3640,95 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
+    /** Run the note's animations out and let their end events land. */
+    async function settleNotes(el: SpreadsheetCellGrid): Promise<void> {
+        el.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay').forEach((note) =>
+            note.getAnimations().forEach((animation) => animation.finish())
+        );
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }
+
+    function fading(el: SpreadsheetCellGrid): HTMLElement[] {
+        return Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay.animate-out'));
+    }
+
+    it("fades a note out where it was as it goes, as the GWT client's did", async () => {
+        const { el, note, cleanup } = await inSheet(withNote('col3 row3', { commentAuthors: { 'col3 row3': 'Ann' } }), 800, 400);
+        await settleNotes(el);
+        const box = note.getBoundingClientRect();
+
+        el.renderState = { ...el.renderState, visibleCommentKeys: [] };
+        await el.updateComplete;
+
+        expect(el.shadowRoot!.querySelector('.v-spreadsheet-comment-overlay:not(.animate-out)'), 'the note itself').to.be.null;
+        const [copy] = fading(el);
+        expect(copy.textContent!.replace(/\s+/g, ' ').trim()).to.equal('Ann A note');
+        expect(copy.getBoundingClientRect().toJSON()).to.deep.equal(box.toJSON());
+        expect((copy.getAnimations() as CSSAnimation[]).map((a) => a.animationName)).to.deep.equal([
+            'overlay-animate-out',
+        ]);
+        expect(getComputedStyle(copy).pointerEvents).to.equal('none');
+        // The line went at once, as the GWT client's did.
+        expect(el.shadowRoot!.querySelector('.comment-overlay-line')).to.be.null;
+
+        await settleNotes(el);
+        expect(fading(el)).to.be.empty;
+
+        cleanup();
+    });
+
+    it('fades out the text that was being written into a note', async () => {
+        const { el, cleanup } = await inSheet(withNote('col3 row3', { editingCommentKey: 'col3 row3' }), 800, 400);
+        await settleNotes(el);
+        el.shadowRoot!.querySelector<HTMLTextAreaElement>('.comment-overlay-edit')!.value = 'Typed';
+
+        el.renderState = { ...el.renderState, visibleCommentKeys: [], editingCommentKey: null };
+        await el.updateComplete;
+
+        expect(fading(el)[0].querySelector('textarea')!.value).to.equal('Typed');
+
+        cleanup();
+    });
+
+    it('lets a note still dropping into place just go', async () => {
+        const { el, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+
+        el.renderState = { ...el.renderState, visibleCommentKeys: [] };
+        await el.updateComplete;
+
+        expect(el.shadowRoot!.querySelector('.v-spreadsheet-comment-overlay')).to.be.null;
+
+        cleanup();
+    });
+
+    it('fades nothing while the note stays', async () => {
+        const { el, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+        await settleNotes(el);
+
+        el.renderState = { ...el.renderState };
+        await el.updateComplete;
+
+        expect(fading(el)).to.be.empty;
+
+        cleanup();
+    });
+
+    it('drops a note in afresh when it comes back while it fades', async () => {
+        const { el, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
+        await settleNotes(el);
+        el.renderState = { ...el.renderState, visibleCommentKeys: [] };
+        await el.updateComplete;
+
+        el.renderState = { ...el.renderState, visibleCommentKeys: ['col3 row3'] };
+        await el.updateComplete;
+
+        const back = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)')!;
+        expect(back.classList.contains('animate-in')).to.be.true;
+        expect(fading(el)).to.have.length(1);
+
+        cleanup();
+    });
+
     it('edges a note with a hairline of shadow rather than a border, as the GWT client did', async () => {
         const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
 

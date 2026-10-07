@@ -7,8 +7,8 @@
  * license.
  */
 
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { animateIn, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
+import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from 'lit';
+import { animateIn, animateOut, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { actionIconSlotName } from '../dom/VirtualChildren.js';
 import type { SpreadsheetActionDetails } from '../types/wire.js';
 
@@ -123,9 +123,14 @@ export class SpreadsheetContextMenu extends LitElement {
         outline: none;
       }
 
-      /* Dropping into place as it opens, as the GWT client's menu did. */
+      /* Dropping into place as it opens and fading out as it closes, as
+       the GWT client's menu did. */
       .menu.animate-in {
         animation: overlay-animate-in 120ms;
+      }
+
+      .menu.animate-out {
+        animation: overlay-animate-out 120ms;
       }
 
       .item {
@@ -207,6 +212,9 @@ export class SpreadsheetContextMenu extends LitElement {
 
   declare renderState: ContextMenuRenderState;
 
+  /** The menu as it was when it closed, drawn while it fades out. */
+  private fading: ContextMenuRenderState | null = null;
+
   constructor() {
     super();
     this.renderState = emptyContextMenuRenderState();
@@ -248,6 +256,19 @@ export class SpreadsheetContextMenu extends LitElement {
     });
   }
 
+  willUpdate(changed: PropertyValues<this>): void {
+    if (!changed.has('renderState')) {
+      return;
+    }
+    const before = changed.get('renderState') as ContextMenuRenderState | undefined;
+    if (isShowing(this.renderState)) {
+      // Opened again while it fades: it stays.
+      this.fading = null;
+    } else if (before !== undefined && isShowing(before)) {
+      this.fading = before;
+    }
+  }
+
   updated(changed: Map<string, unknown>): void {
     if (!changed.has('renderState')) {
       return;
@@ -256,12 +277,22 @@ export class SpreadsheetContextMenu extends LitElement {
     if (panel === null) {
       return;
     }
+    const fading = this.fading;
+    if (fading !== null) {
+      animateOut(panel, () => {
+        if (this.fading === fading) {
+          this.fading = null;
+          this.requestUpdate();
+        }
+      });
+      return;
+    }
     this.place(panel);
     panel.focus({ preventScroll: true });
     // Only as it opens: offered its actions again while open, the GWT
     // client's menu stayed put.
     const before = changed.get('renderState') as ContextMenuRenderState | undefined;
-    if (!(before?.open && before.actions.length > 0)) {
+    if (before === undefined || !isShowing(before)) {
       animateIn(panel);
     }
   }
@@ -372,10 +403,11 @@ export class SpreadsheetContextMenu extends LitElement {
   }
 
   render(): TemplateResult | typeof nothing {
-    const { open, x, y, actions } = this.renderState;
-    if (!open || actions.length === 0) {
+    const state = isShowing(this.renderState) ? this.renderState : this.fading;
+    if (state === null) {
       return nothing;
     }
+    const { x, y, actions } = state;
     return html`
       <div class="menu" part="context-menu" tabindex="-1" style="left:${x}px;top:${y}px;">
         ${actions.map(
@@ -391,6 +423,11 @@ export class SpreadsheetContextMenu extends LitElement {
       </div>
     `;
   }
+}
+
+/** Whether a menu with this state is drawn. */
+function isShowing(state: ContextMenuRenderState): boolean {
+  return state.open && state.actions.length > 0;
 }
 
 customElements.define('vaadin-spreadsheet-internal-context-menu', SpreadsheetContextMenu);

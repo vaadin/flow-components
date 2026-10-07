@@ -15,7 +15,7 @@ import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
 import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
-import { animateIn, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
+import { ANIMATE_IN_CLASS, animateIn, animateOut, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { isCellEditorSlot, overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
@@ -159,9 +159,14 @@ export class SpreadsheetCellGrid extends LitElement {
        cell, since the point is to be readable over the sheet. */
       /* A comment as the GWT client showed it: a white card with a soft
        shadow, the author above the text in small bold type. */
-      /* Dropping into place as it appears, as the GWT client's notes did. */
+      /* Dropping into place as it appears and fading out as it goes, as
+       the GWT client's notes did. */
       .v-spreadsheet-comment-overlay.animate-in {
         animation: overlay-animate-in 120ms;
+      }
+
+      .v-spreadsheet-comment-overlay.animate-out {
+        animation: overlay-animate-out 120ms;
       }
 
       .v-spreadsheet-comment-overlay {
@@ -944,6 +949,38 @@ export class SpreadsheetCellGrid extends LitElement {
     };
   }
 
+  willUpdate(): void {
+    this.fadeOutLeavingNotes();
+  }
+
+  /**
+   * A note that goes fades out, as the GWT client's did: the sheet drops it
+   * at once, and a copy of it, as it was, fades where it was and then goes
+   * too. Its line goes at once, as the GWT client's did. A note still
+   * dropping into place just goes.
+   */
+  private fadeOutLeavingNotes(): void {
+    const root = this.shadowRoot;
+    if (root === null || this.noteKeysShown.size === 0) {
+      return;
+    }
+    const staying = new Set(drawnNotes(this.renderState, this.hoveredKey).map((note) => note.key));
+    for (const note of root.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)')) {
+      if (
+        staying.has(note.dataset.key ?? '') ||
+        note.style.display === 'none' ||
+        note.classList.contains(ANIMATE_IN_CLASS)
+      ) {
+        continue;
+      }
+      // What was typed into a note being written comes along: a copy of a
+      // text box keeps its value.
+      const copy = note.cloneNode(true) as HTMLElement;
+      root.appendChild(copy);
+      animateOut(copy, () => copy.remove());
+    }
+  }
+
   updated(changedProps: Map<string, unknown>): void {
     if (changedProps.has('renderState')) {
       this.remeasureTooNarrowCells();
@@ -989,7 +1026,8 @@ export class SpreadsheetCellGrid extends LitElement {
    * the pane.
    */
   private placeCommentOverlays(): void {
-    const notes = this.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay');
+    // Not the copies of notes that have gone, fading out where they were.
+    const notes = this.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)');
     // A note drops into place as it appears, as in the GWT client, and not
     // again each time the sheet repaints.
     const keys = new Set(Array.from(notes, (note) => note.dataset.key ?? ''));
@@ -2043,9 +2081,19 @@ function commentLineStyle(
   return `left:${cellRight}px;top:${cellTop}px;width:${length}px;transform:rotate(${degrees}deg);`;
 }
 
-function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | null): TemplateResult[] {
+/** A note on screen: whose it is, and what it shows. */
+interface DrawnNote {
+  key: string;
+  coord: { col: number; row: number };
+  showsError: boolean;
+  editing: boolean;
+  comment: string | undefined;
+  geometry: { left: number; top: number; width: number; height: number };
+}
+
+/** The notes on screen, in the order they are drawn. */
+function drawnNotes(state: CellGridRenderState, hoveredKey: string | null): DrawnNote[] {
   const text = state.commentText ?? {};
-  const authors = state.commentAuthors ?? {};
   const invalidCells = state.invalidFormulaCells ?? new Set<string>();
   const invalidMessage = state.invalidFormulaMessage ?? null;
 
@@ -2060,7 +2108,7 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     keys.add(editingKey);
   }
 
-  const overlays: TemplateResult[] = [];
+  const notes: DrawnNote[] = [];
   for (const key of keys) {
     const coord = parseColRow(key);
     if (coord.col < 1 || coord.row < 1) {
@@ -2080,6 +2128,17 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
     if (geometry === null) {
       continue;
     }
+    notes.push({ key, coord, showsError, editing, comment, geometry });
+  }
+  return notes;
+}
+
+function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | null): TemplateResult[] {
+  const authors = state.commentAuthors ?? {};
+  const invalidMessage = state.invalidFormulaMessage ?? null;
+
+  const overlays: TemplateResult[] = [];
+  for (const { key, coord, showsError, editing, comment, geometry } of drawnNotes(state, hoveredKey)) {
     // The pane it keeps to, and whether it is one of the workbook's
     // always-visible notes, which the GWT client showed only while their
     // cell's corner was in that pane - see placeCommentOverlays.

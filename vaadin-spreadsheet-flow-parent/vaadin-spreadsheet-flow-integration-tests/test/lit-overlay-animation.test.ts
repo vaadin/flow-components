@@ -10,7 +10,9 @@
 import { expect } from 'chai';
 import {
   animateIn,
+  animateOut,
   ANIMATE_IN_CLASS,
+  ANIMATE_OUT_CLASS,
   overlayAnimationStyles
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/OverlayAnimation.js';
 
@@ -28,7 +30,9 @@ describe('Overlay opening animation', () => {
     document.body.appendChild(host);
     const root = host.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
-    style.textContent = `${overlayAnimationStyles.cssText} .overlay.animate-in { animation: overlay-animate-in 120ms; }`;
+    style.textContent =
+      `${overlayAnimationStyles.cssText} .overlay.animate-in { animation: overlay-animate-in 120ms; }` +
+      ' .overlay.animate-out { animation: overlay-animate-out 120ms; }';
     overlay = document.createElement('div');
     overlay.className = 'overlay';
     overlay.textContent = 'note';
@@ -67,5 +71,148 @@ describe('Overlay opening animation', () => {
     animateIn(overlay);
 
     expect(overlay.classList.contains(ANIMATE_IN_CLASS)).to.be.false;
+  });
+});
+
+/**
+ * The GWT client faded an overlay out over 120ms as it closed, with an
+ * `animate-out` class, and took it away once the fade had run. One still
+ * dropping into place finished first and then went without a fade.
+ */
+describe('Overlay closing fade', () => {
+  let host: HTMLElement;
+  let overlay: HTMLElement;
+
+  beforeEach(() => {
+    host = document.createElement('div');
+    document.body.appendChild(host);
+    const root = host.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    style.textContent =
+      `${overlayAnimationStyles.cssText} .overlay.animate-in { animation: overlay-animate-in 120ms; }` +
+      ' .overlay.animate-out { animation: overlay-animate-out 120ms; }';
+    overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.textContent = 'note';
+    root.append(style, overlay);
+  });
+
+  afterEach(() => {
+    host.remove();
+  });
+
+  /** Run every animation on the overlay to its end and let the events land. */
+  async function finish(): Promise<void> {
+    overlay.getAnimations().forEach((animation) => animation.finish());
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  }
+
+  it('fades out', () => {
+    animateOut(overlay, () => {});
+
+    expect(overlay.classList.contains(ANIMATE_OUT_CLASS)).to.be.true;
+    const [animation] = overlay.getAnimations() as CSSAnimation[];
+    expect(animation.animationName).to.equal('overlay-animate-out');
+    expect(animation.effect!.getTiming().duration).to.equal(120);
+    // From as it was to gone, on the default easing, as the GWT client's.
+    animation.currentTime = 0;
+    expect(getComputedStyle(overlay).opacity).to.equal('1');
+    animation.currentTime = 119;
+    expect(Number(getComputedStyle(overlay).opacity)).to.be.below(0.01);
+  });
+
+  it('takes no clicks while it fades', () => {
+    animateOut(overlay, () => {});
+
+    expect(getComputedStyle(overlay).pointerEvents).to.equal('none');
+  });
+
+  it('goes once the fade has run, and not before', async () => {
+    let gone = 0;
+    animateOut(overlay, () => gone++);
+    expect(gone).to.equal(0);
+
+    await finish();
+
+    expect(gone).to.equal(1);
+    expect(overlay.classList.contains(ANIMATE_OUT_CLASS)).to.be.false;
+  });
+
+  it('goes at once when a stylesheet gives it no fade', () => {
+    overlay.style.animation = 'none';
+    let gone = 0;
+
+    animateOut(overlay, () => gone++);
+
+    expect(gone).to.equal(1);
+    expect(overlay.classList.contains(ANIMATE_OUT_CLASS)).to.be.false;
+  });
+
+  it('goes at once on a hidden page, which runs no animations', () => {
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    try {
+      let gone = 0;
+      animateIn(overlay);
+
+      animateOut(overlay, () => gone++);
+
+      expect(gone).to.equal(1);
+      expect(overlay.classList.contains(ANIMATE_IN_CLASS)).to.be.false;
+      expect(overlay.classList.contains(ANIMATE_OUT_CLASS)).to.be.false;
+    } finally {
+      delete (document as { visibilityState?: string }).visibilityState;
+    }
+  });
+
+  it('lets an overlay still dropping in finish, and then go without a fade', async () => {
+    let gone = 0;
+    animateIn(overlay);
+
+    animateOut(overlay, () => gone++);
+
+    expect(overlay.classList.contains(ANIMATE_OUT_CLASS)).to.be.false;
+    expect(gone).to.equal(0);
+    await finish();
+    expect(gone).to.equal(1);
+    expect(overlay.classList.contains(ANIMATE_IN_CLASS)).to.be.false;
+  });
+
+  it('stays when shown again while it fades', async () => {
+    let gone = 0;
+    animateOut(overlay, () => gone++);
+
+    animateIn(overlay);
+
+    expect(overlay.classList.contains(ANIMATE_OUT_CLASS)).to.be.false;
+    expect(overlay.classList.contains(ANIMATE_IN_CLASS)).to.be.true;
+    expect((overlay.getAnimations() as CSSAnimation[]).map((a) => a.animationName)).to.deep.equal([
+      'overlay-animate-in'
+    ]);
+    await finish();
+    expect(gone).to.equal(0);
+    expect(overlay.classList.contains(ANIMATE_IN_CLASS)).to.be.false;
+  });
+
+  it('drops in all the way when shown again while it fades', async () => {
+    const frames = (): Promise<unknown> =>
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    animateOut(overlay, () => {});
+    await frames();
+
+    animateIn(overlay);
+    // The fade that was called off ends a moment after the drop has begun.
+    await frames();
+
+    expect(overlay.classList.contains(ANIMATE_IN_CLASS)).to.be.true;
+  });
+
+  it('does everything asked of it when closed twice while it fades', async () => {
+    const done: string[] = [];
+    animateOut(overlay, () => done.push('first'));
+    animateOut(overlay, () => done.push('second'));
+
+    await finish();
+
+    expect(done).to.deep.equal(['first', 'second']);
   });
 });

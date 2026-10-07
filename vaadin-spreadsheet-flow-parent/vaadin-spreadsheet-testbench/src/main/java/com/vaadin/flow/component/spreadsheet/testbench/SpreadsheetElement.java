@@ -475,7 +475,8 @@ public class SpreadsheetElement extends TestBenchElement {
     /**
      * Fetches the context menu for the spreadsheet. The menu is an internal
      * element inside the spreadsheet's shadow root, so it is found by
-     * traversing the shadow roots rather than by a document query.
+     * traversing the shadow roots rather than by a document query. A menu
+     * fading out as it closes is not open.
      *
      * @return {@link SpreadsheetElement.ContextMenuElement}
      * @throws java.util.NoSuchElementException
@@ -489,7 +490,7 @@ public class SpreadsheetElement extends TestBenchElement {
                                 const menu = host.shadowRoot
                                     .querySelector('vaadin-spreadsheet-internal-context-menu');
                                 return menu && menu.shadowRoot
-                                    ? menu.shadowRoot.querySelector('.menu')
+                                    ? menu.shadowRoot.querySelector('.menu:not(.animate-out)')
                                     : null;
                                 """,
                         this);
@@ -610,14 +611,15 @@ public class SpreadsheetElement extends TestBenchElement {
      * The Lit client shows it in its own overlay inside the spreadsheet's
      * shadow root, drawn in the top layer as the GWT client's popover was,
      * rather than in the GWT-era {@code .v-spreadsheet-popupbutton-overlay} div
-     * in the light DOM.
+     * in the light DOM. A pop-up fading out as it closes counts as closed.
      */
     public boolean isPopupButtonPopupVisible() {
         Object visible = ((JavascriptExecutor) getCommandExecutor().getDriver())
                 .executeScript("""
                         const overlay = arguments[0].shadowRoot
                             .querySelector('.popup-overlay');
-                        return !!overlay && !overlay.hidden;
+                        return !!overlay && !overlay.hidden
+                            && !overlay.classList.contains('animate-out');
                         """, this);
         return Boolean.TRUE.equals(visible);
     }

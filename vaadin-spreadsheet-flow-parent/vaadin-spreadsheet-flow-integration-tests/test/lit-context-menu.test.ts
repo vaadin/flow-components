@@ -70,6 +70,18 @@ async function items(sheet: Spreadsheet): Promise<HTMLElement[]> {
   );
 }
 
+/**
+ * The items left once the menu has finished closing: it fades out first, as
+ * the GWT client's did.
+ */
+async function itemsOnceClosed(sheet: Spreadsheet): Promise<HTMLElement[]> {
+  const menu = sheet.getContextMenu();
+  await menu.updateComplete;
+  menu.shadowRoot!.querySelector<HTMLElement>('.menu')?.getAnimations().forEach((a) => a.finish());
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  return items(sheet);
+}
+
 /** Right-click a cell the way the cell-grid reports it. */
 function rightClickCell(sheet: Spreadsheet, col: number, row: number, clientX = 120, clientY = 90): void {
   sheet.getCellGrid().dispatchEvent(
@@ -287,7 +299,7 @@ describe('Spreadsheet context menu — picking an item', () => {
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
     (await items(ctx.sheet))[0].click();
 
-    expect(await items(ctx.sheet)).to.have.length(0);
+    expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
   });
 });
 
@@ -360,13 +372,13 @@ describe("Spreadsheet context menu — the keyboard, as the GWT client's menu ha
 
     press(ctx.sheet, 'ArrowLeft');
 
-    expect(await items(ctx.sheet)).to.have.length(0);
+    expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
   });
 
   it('closes on Tab', async () => {
     press(ctx.sheet, 'Tab');
 
-    expect(await items(ctx.sheet)).to.have.length(0);
+    expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
   });
 
   it('keeps the arrow keys away from the sheet while it is open', () => {
@@ -414,9 +426,12 @@ describe('Spreadsheet context menu — dismissing', () => {
     document.dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true, composed: true })
     );
+    // Taken now: the new sheet's own start-up events land while the menu
+    // fades.
+    const reported = ctx.events.map((e) => e.type);
 
-    expect(await items(ctx.sheet)).to.have.length(0);
-    expect(ctx.events.map((e) => e.type)).to.deep.equal(['contextMenuClosed']);
+    expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
+    expect(reported).to.deep.equal(['contextMenuClosed']);
   });
 
   it('closes on Escape', async () => {
@@ -425,7 +440,7 @@ describe('Spreadsheet context menu — dismissing', () => {
       new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
     );
 
-    expect(await items(ctx.sheet)).to.have.length(0);
+    expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
   });
 
   it('does not report a close when nothing was open', () => {
@@ -435,6 +450,61 @@ describe('Spreadsheet context menu — dismissing', () => {
     );
 
     expect(ctx.events).to.have.length(0);
+  });
+
+  /** The menu, open and dropped into place. */
+  async function settledMenu(): Promise<HTMLElement> {
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0), action('Delete row', 'delete-row', 0)]);
+    await items(ctx.sheet);
+    const panel = menuPanel(ctx.sheet);
+    panel.getAnimations().forEach((a) => a.finish());
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return panel;
+  }
+
+  function closeByEscape(): void {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  }
+
+  it('fades out as it closes, as the GWT client\'s menu did, taking no clicks', async () => {
+    const panel = await settledMenu();
+
+    closeByEscape();
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    expect(menuPanel(ctx.sheet)).to.equal(panel);
+    expect((panel.getAnimations() as CSSAnimation[]).map((a) => a.animationName)).to.deep.equal([
+      'overlay-animate-out'
+    ]);
+    expect(getComputedStyle(panel).pointerEvents).to.equal('none');
+    expect((await items(ctx.sheet)).map((item) => item.textContent!.trim())).to.deep.equal([
+      'Insert row',
+      'Delete row'
+    ]);
+    expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
+  });
+
+  it('is closed for the sheet while it fades', async () => {
+    await settledMenu();
+    ctx.events.length = 0;
+
+    closeByEscape();
+    await ctx.sheet.getContextMenu().updateComplete;
+    document.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+
+    expect(ctx.events.map((e) => e.type)).to.deep.equal(['contextMenuClosed']);
+  });
+
+  it('stays open when opened again while it fades', async () => {
+    await settledMenu();
+    closeByEscape();
+    await ctx.sheet.getContextMenu().updateComplete;
+
+    ctx.sheet.showActions([action('Hide column', 'hide-col', 2)]);
+
+    const after = await itemsOnceClosed(ctx.sheet);
+    expect(after.map((item) => item.textContent!.trim())).to.deep.equal(['Hide column']);
+    expect(menuPanel(ctx.sheet).classList.contains('animate-out')).to.be.false;
   });
 
   it('stops listening once disposed', async () => {

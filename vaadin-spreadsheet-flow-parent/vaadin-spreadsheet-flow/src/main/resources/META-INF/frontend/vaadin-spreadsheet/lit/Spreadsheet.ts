@@ -67,7 +67,7 @@ import { resolveSheetRename } from './algorithms/SheetName.js';
 import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
-import { animateIn, overlayAnimationStyles } from './dom/OverlayAnimation.js';
+import { animateIn, animateOut, overlayAnimationStyles } from './dom/OverlayAnimation.js';
 import {
   columnGroupingGutterPx,
   type PositionedGrouping,
@@ -4459,19 +4459,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.openPopup === null || this.openPopup.row !== row || this.openPopup.col !== column) {
       return;
     }
-    this.hidePopup();
+    this.hidePopup(true);
   }
 
   /**
    * Take the popup down and tell the server. Used for every client-side
    * dismissal — clicking away, Escape, scrolling the anchor out of view.
+   * Its content fades out with it unless asked to go first - see hidePopup.
    */
-  private dismissPopup(): void {
+  private dismissPopup(releaseContentFirst = false): void {
     const closing = this.openPopup;
     if (closing === null) {
       return;
     }
-    this.hidePopup();
+    this.hidePopup(releaseContentFirst);
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
@@ -4484,14 +4485,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
     );
   }
 
-  /** Hide the overlay and release its content, without telling the server. */
-  private hidePopup(): void {
+  /**
+   * Hide the overlay and release its content, without telling the server.
+   *
+   * The card fades out and then goes, as the GWT client's did. What it held
+   * fades with it when the user closed it; when the server did, or took
+   * the button away, the content goes first and the empty card fades, which
+   * is the order the GWT client released them in then.
+   */
+  private hidePopup(releaseContentFirst: boolean): void {
     this.openPopup = null;
     this.popupResizeObserver.unobserve(this.popupOverlay);
-    this.popupContents.clear();
-    this.popupOverlay.replaceChildren();
-    this.popupOverlay.hidden = true;
-    hideFromTopLayer(this.popupOverlay);
+    if (releaseContentFirst) {
+      this.popupContents.clear();
+    }
+    const overlay = this.popupOverlay;
+    animateOut(overlay, () => {
+      this.popupContents.clear();
+      overlay.replaceChildren();
+      overlay.hidden = true;
+      hideFromTopLayer(overlay);
+    });
     this.scheduleRender();
   }
 
@@ -4609,7 +4623,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     if (this.openPopup !== null && this.openPopup.row === state.row && this.openPopup.col === state.col) {
-      this.dismissPopup();
+      this.dismissPopup(true);
     }
     this.popupButtonStates = this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state));
     this.scheduleRender();
@@ -4713,6 +4727,10 @@ function popupOverlayRules(): HTMLStyleElement {
   const rules = document.createElement('style');
   rules.textContent = `
     ${overlayAnimationStyles.cssText}
+    .popup-overlay.animate-out {
+      animation: overlay-animate-out 120ms;
+    }
+
     .popup-overlay.animate-in {
       animation: overlay-animate-in 120ms;
     }
