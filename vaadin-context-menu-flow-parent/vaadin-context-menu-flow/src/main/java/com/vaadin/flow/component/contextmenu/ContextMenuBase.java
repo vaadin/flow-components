@@ -137,6 +137,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
         this.target = target;
         updateListenOn();
+        onTargetChange();
 
         if (target == null) {
             return;
@@ -584,6 +585,12 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private void initConnector() {
         getElement().executeJs(
                 "window.Vaadin.Flow.contextMenuConnector.initLazy(this)");
+    }
+
+    /**
+     * Called after the target of this context menu has changed.
+     */
+    void onTargetChange() {
     }
 
     void ensureTooltipElement() {

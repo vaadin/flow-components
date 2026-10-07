@@ -15,10 +15,21 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.io.IOException;
+
 import com.vaadin.flow.component.ClickNotifier;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.download.Download;
+import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.server.HttpStatusCode;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -38,6 +49,7 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
     private final SerializableRunnable contentReset;
     private DownloadHandler downloadHandler;
     private Registration downloadRegistration;
+    private Component downloadTarget;
 
     public MenuItem(ContextMenu contextMenu,
             SerializableRunnable contentReset) {
@@ -78,16 +90,21 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * whenComplete}, to react on the server when the transfer has finished or
      * failed.
      * <p>
-     * The file is only served while the item is attached, visible and enabled,
-     * so hiding or removing the item in a click listener makes the download
-     * fail. The exception is an item with {@link #setDisableOnClick(boolean)
-     * disable on click}: it disables itself before the browser requests the
-     * file, so the file is also served while the item is disabled by the click.
-     * Once the enabled state is set explicitly, for example with
+     * The file is only served while the item is part of its menu, visible and
+     * enabled, so hiding or removing the item in a click listener makes the
+     * download fail. Closing the menu does not affect the download. The
+     * exception is an item with {@link #setDisableOnClick(boolean) disable on
+     * click}: it disables itself before the browser requests the file, so the
+     * file is also served while the item is disabled by the click. Once the
+     * enabled state is set explicitly, for example with
      * {@code setEnabled(false)}, or a parent is disabled, the file is no longer
      * served while the item is disabled. To serve the file regardless of the
      * enabled state, pass {@link DownloadHandler#allowDisabled()
      * handler.allowDisabled()}.
+     * <p>
+     * For an item in a {@link ContextMenu} that has a target, the
+     * {@link DownloadEvent#getOwningComponent() owning component} of the
+     * download is the target of the menu.
      *
      * <pre>{@code
      * MenuItem export = menu.addItem("Export");
@@ -101,16 +118,120 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
+        removeDownload();
+        this.downloadHandler = downloadHandler;
+        if (getContextMenu() != null) {
+            getContextMenu().updateDownloads();
+        } else if (downloadHandler != null) {
+            registerDownload(null);
+        }
+    }
+
+    /**
+     * Registers the download handler of this item for the given target, unless
+     * it is already registered for it.
+     * <p>
+     * A context menu removes itself from the UI when it closes, which can
+     * happen before the browser requests the file. So for a menu with a target,
+     * the file is served on behalf of the target, which stays attached, instead
+     * of on behalf of the item.
+     *
+     * @param target
+     *            the target of the context menu, or {@code null} to serve the
+     *            file on behalf of the item
+     */
+    void registerDownload(Component target) {
+        if (downloadRegistration != null && downloadTarget == target) {
+            return;
+        }
+        removeDownload();
+        DownloadHandler handler = getDisableOnClickController()
+                .allowDisabledByClick(downloadHandler);
+        downloadRegistration = target == null ? Download.onClick(this, handler)
+                : registerDownloadOnTarget(target, handler);
+        downloadTarget = target;
+    }
+
+    void removeDownload() {
         if (downloadRegistration != null) {
             downloadRegistration.remove();
             downloadRegistration = null;
+            downloadTarget = null;
         }
-        this.downloadHandler = downloadHandler;
-        if (downloadHandler != null) {
-            downloadRegistration = Download.onClick(this,
-                    getDisableOnClickController()
-                            .allowDisabledByClick(downloadHandler));
-        }
+    }
+
+    private Registration registerDownloadOnTarget(Component target,
+            DownloadHandler handler) {
+        Element targetElement = target.getElement();
+        StreamResourceRegistry.ElementStreamResource resource = new StreamResourceRegistry.ElementStreamResource(
+                createTargetDownloadHandler(handler), targetElement);
+        // The resource is registered while the attribute is set and the target
+        // is attached
+        String attribute = "data-menu-item-download-" + resource.getId();
+        targetElement.setAttribute(attribute, resource);
+        Registration clickRegistration = Download.onClick(this,
+                StreamResourceRegistry.getURI(resource).toASCIIString());
+        return () -> {
+            clickRegistration.remove();
+            targetElement.removeAttribute(attribute);
+        };
+    }
+
+    /**
+     * Wraps the given handler so that it also checks the state of this item, as
+     * only the state of the target is checked before serving the file.
+     */
+    private DownloadHandler createTargetDownloadHandler(
+            DownloadHandler handler) {
+        DisabledUpdateMode targetDisabledUpdateMode = downloadHandler
+                .getDisabledUpdateMode();
+        return new DownloadHandler() {
+            @Override
+            public void handleRequest(VaadinRequest request,
+                    VaadinResponse response, VaadinSession session,
+                    Element owner) throws IOException {
+                boolean available;
+                session.lock();
+                try {
+                    available = isDownloadAvailable(handler);
+                } finally {
+                    session.unlock();
+                }
+                if (!available) {
+                    response.sendError(HttpStatusCode.FORBIDDEN.getCode(),
+                            "Resource not available");
+                    return;
+                }
+                handler.handleRequest(request, response, session, owner);
+            }
+
+            @Override
+            public void handleDownloadRequest(DownloadEvent event)
+                    throws IOException {
+                handler.handleDownloadRequest(event);
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return handler.getUrlPostfix();
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return handler.isAllowInert();
+            }
+
+            @Override
+            public DisabledUpdateMode getDisabledUpdateMode() {
+                return targetDisabledUpdateMode;
+            }
+        };
+    }
+
+    private boolean isDownloadAvailable(DownloadHandler handler) {
+        Element element = getElement();
+        return element.getNode().isVisible() && (element.isEnabled() || handler
+                .getDisabledUpdateMode() == DisabledUpdateMode.ALWAYS);
     }
 
     /**

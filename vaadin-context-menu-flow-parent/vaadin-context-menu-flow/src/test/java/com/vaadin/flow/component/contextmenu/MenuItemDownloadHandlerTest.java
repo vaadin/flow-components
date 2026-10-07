@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
@@ -41,15 +42,19 @@ class MenuItemDownloadHandlerTest {
     private final DownloadHandler handler = event -> downloads
             .incrementAndGet();
 
+    private Div target;
+    private ContextMenu contextMenu;
     private MenuItem item;
 
     @BeforeEach
     void setup() {
-        ContextMenu contextMenu = new ContextMenu();
-        ui.add(contextMenu);
+        target = new Div();
+        ui.add(target);
+        contextMenu = new ContextMenu(target);
         item = contextMenu.addItem("Download");
         item.setDownloadHandler(handler);
-        // Menu items are attached to the UI before the response
+        // Opening the menu adds it to the UI
+        ui.add(contextMenu);
         ui.fakeClientCommunication();
     }
 
@@ -62,6 +67,22 @@ class MenuItemDownloadHandlerTest {
     void disabled_refused() throws IOException {
         item.setEnabled(false);
         Assertions.assertFalse(requestDownload());
+    }
+
+    @Test
+    void hidden_refused() throws IOException {
+        item.setVisible(false);
+        Assertions.assertFalse(requestDownload());
+    }
+
+    @Test
+    void menuClosed_served() throws IOException {
+        // Closing the menu removes it from the UI, which can happen before
+        // the browser requests the file
+        contextMenu.removeFromParent();
+        ui.fakeClientCommunication();
+
+        Assertions.assertTrue(requestDownload());
     }
 
     @Test
@@ -88,14 +109,41 @@ class MenuItemDownloadHandlerTest {
         item.setDownloadHandler(replacement);
 
         Assertions.assertSame(replacement, item.getDownloadHandler());
-        ui.fakeClientCommunication();
-        Assertions.assertEquals(1, downloadAttributes().count());
+        Assertions.assertEquals(1, downloadAttributes(target).count());
 
         item.setDownloadHandler(null);
 
         Assertions.assertNull(item.getDownloadHandler());
-        ui.fakeClientCommunication();
-        Assertions.assertEquals(0, downloadAttributes().count());
+        Assertions.assertEquals(0, downloadAttributes(target).count());
+    }
+
+    @Test
+    void itemRemoved_unregistered() {
+        contextMenu.remove(item);
+        Assertions.assertEquals(0, downloadAttributes(target).count());
+    }
+
+    @Test
+    void parentItemRemoved_subMenuItemUnregistered() {
+        MenuItem parent = contextMenu.addItem("More");
+        parent.getSubMenu().addItem("Download from sub menu")
+                .setDownloadHandler(handler);
+        Assertions.assertEquals(2, downloadAttributes(target).count());
+
+        contextMenu.remove(parent);
+
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+    }
+
+    @Test
+    void targetChanged_registeredForNewTarget() throws IOException {
+        Div newTarget = new Div();
+        ui.add(newTarget);
+        contextMenu.setTarget(newTarget);
+
+        Assertions.assertEquals(0, downloadAttributes(target).count());
+        target = newTarget;
+        Assertions.assertTrue(requestDownload());
     }
 
     private void click() {
@@ -108,8 +156,9 @@ class MenuItemDownloadHandlerTest {
      * handler and returns whether the handler served the file.
      */
     private boolean requestDownload() throws IOException {
-        String url = downloadAttributes().map(item.getElement()::getAttribute)
-                .findFirst().orElseThrow();
+        String url = downloadAttributes(target)
+                .map(target.getElement()::getAttribute).findFirst()
+                .orElseThrow();
         VaadinRequest request = Mockito.mock(VaadinRequest.class);
         Mockito.when(request.getPathInfo()).thenReturn("/" + url);
         VaadinResponse response = Mockito.mock(VaadinResponse.class);
@@ -120,7 +169,7 @@ class MenuItemDownloadHandlerTest {
         boolean served = downloads.get() > before;
 
         // Cross-check with the response, so the test fails if a request is
-        // refused for a reason other than the enabled state
+        // refused for a reason other than the state of the item
         if (served) {
             Mockito.verify(response, Mockito.never())
                     .sendError(Mockito.anyInt(), Mockito.anyString());
@@ -130,10 +179,10 @@ class MenuItemDownloadHandlerTest {
         return served;
     }
 
-    // Each registered download handler is kept as a stream resource attribute
-    // on the item element
-    private Stream<String> downloadAttributes() {
-        return item.getElement().getAttributeNames()
-                .filter(name -> name.startsWith("data-flow-download-"));
+    // The download handlers of the menu items are kept as stream resource
+    // attributes on the target element
+    private static Stream<String> downloadAttributes(Div target) {
+        return target.getElement().getAttributeNames()
+                .filter(name -> name.startsWith("data-menu-item-download-"));
     }
 }

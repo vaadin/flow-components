@@ -16,7 +16,9 @@
 package com.vaadin.flow.component.contextmenu;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -53,6 +55,8 @@ import com.vaadin.flow.function.SerializableRunnable;
 @SuppressWarnings("serial")
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
         implements HasMenuItems {
+
+    private Set<MenuItem> downloadItems = new HashSet<>();
 
     /**
      * Creates an empty context menu.
@@ -141,8 +145,44 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
     @Override
     protected MenuManager<ContextMenu, MenuItem, SubMenu> createMenuManager(
             SerializableRunnable contentReset) {
-        return new MenuManager<>(this, contentReset, MenuItem::new,
+        SerializableRunnable resetContentAndDownloads = () -> {
+            contentReset.run();
+            updateDownloads();
+        };
+        return new MenuManager<>(this, resetContentAndDownloads, MenuItem::new,
                 MenuItem.class, null);
+    }
+
+    @Override
+    void onTargetChange() {
+        updateDownloads();
+    }
+
+    /**
+     * Registers the download handlers of the items in this menu and its sub
+     * menus for the current target, and removes the registrations of items that
+     * are no longer in the menu or no longer have a download handler.
+     */
+    void updateDownloads() {
+        Set<MenuItem> items = new HashSet<>();
+        collectDownloadItems(getItems(), items);
+        downloadItems.stream().filter(item -> !items.contains(item))
+                .forEach(MenuItem::removeDownload);
+        items.forEach(item -> item.registerDownload(getTarget()));
+        downloadItems = items;
+    }
+
+    private static void collectDownloadItems(List<MenuItem> items,
+            Set<MenuItem> downloadItems) {
+        for (MenuItem item : items) {
+            if (item.getDownloadHandler() != null) {
+                downloadItems.add(item);
+            }
+            if (item.isParentItem()) {
+                collectDownloadItems(item.getSubMenu().getItems(),
+                        downloadItems);
+            }
+        }
     }
 
 }
