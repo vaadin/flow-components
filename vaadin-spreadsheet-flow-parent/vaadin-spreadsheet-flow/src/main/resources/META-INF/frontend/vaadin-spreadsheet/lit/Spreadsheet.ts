@@ -1337,8 +1337,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.columnResize !== null) {
       // End of column-resize drag (slice 164): the column takes the width
       // from its left edge to where the pointer was let go, here at once
-      // and then on the server - when it is a different width. Nothing
-      // hides it, as in the GWT client.
+      // and then on the server - when it is a different width. A width of
+      // 0 hides it, as in the GWT client.
       const { col, edge, x } = this.columnResize;
       this.columnResize = null;
       this.hideResizeGuide();
@@ -1481,19 +1481,45 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }>
   ): void => {
     const { col, row, value, key, shiftKey, relatedTarget } = e.detail;
-    // Left for the formula field, the edit carries on there, as in the GWT
-    // client: nothing is committed yet, and the editor stays open.
+    // Left for the formula bar, the edit carries on in the formula field, as
+    // in the GWT client: nothing is committed yet, and the editor stays
+    // open. Gone on to the address field instead, it ends once the keyboard
+    // has settled there, as the GWT client's deferred commit did.
     if (key === undefined && relatedTarget === this.formulaBar) {
       e.preventDefault();
+      setTimeout(() => {
+        if (this.editor?.col === col && this.editor.row === row && !this.formulaBar.formulaFieldHasFocus()) {
+          this.commitCellEdit(col, row, this.cellGrid.editorValue() ?? value, undefined, false, false);
+        }
+      });
       return;
     }
+    this.commitCellEdit(col, row, value, key, shiftKey === true, true);
+  };
+
+  /**
+   * Commit an edit made in the cell editor: report the value, close the
+   * editor and move on the way the key that ended the edit says - see
+   * handleCellEditorCommit. The keyboard goes back to the sheet unless the
+   * user has already put it somewhere.
+   */
+  private commitCellEdit(
+    col: number,
+    row: number,
+    value: string,
+    key: string | undefined,
+    shiftKey: boolean,
+    takeKeyboard: boolean
+  ): void {
     this.showCommittedValue(col, row, value);
     // Close the editor first so the re-render removes the
     // input — important to do BEFORE dispatching the server
     // event so the editor doesn't briefly flash on top of the
     // server's response.
     this.editor = null;
-    this.returnFocusToSheet();
+    if (takeKeyboard) {
+      this.returnFocusToSheet();
+    }
     // Move the active cell to the next slot per Excel
     // convention (slice 158). For 'Enter' / 'Tab' the move
     // direction is fixed; blur leaves the selection at the
@@ -1505,10 +1531,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // With a range selected the commit walks inside it, the same way
     // Enter and Tab do when nothing is being edited: filling a block
     // cell by cell is the reason the range is selected at all.
-    const walkDirection = inSelectionWalkDirection(key, shiftKey === true);
+    const walkDirection = inSelectionWalkDirection(key, shiftKey);
     const walks =
       walkDirection !== null && this.rows > 0 && this.cols > 0 && isMultiCellRange(this.selection.activeRange);
-    const step = walks ? null : commitStep(key, shiftKey === true);
+    const step = walks ? null : commitStep(key, shiftKey);
     if (step !== null && this.rows > 0 && this.cols > 0) {
       const nextCol = Math.min(this.cols, Math.max(1, col + step.dCol));
       const nextRow = Math.min(this.rows, Math.max(1, row + step.dRow));
@@ -1545,7 +1571,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         })
       );
     }
-  };
+  }
 
   /**
    * Cell-editor cancel (slice 152). User pressed Escape. Close

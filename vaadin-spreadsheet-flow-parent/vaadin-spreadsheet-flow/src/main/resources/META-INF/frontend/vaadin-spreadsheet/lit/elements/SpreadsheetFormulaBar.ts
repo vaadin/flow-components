@@ -299,6 +299,11 @@ export class SpreadsheetFormulaBar extends LitElement {
     );
   }
 
+  /** Whether the formula field has the keyboard. */
+  formulaFieldHasFocus(): boolean {
+    return this.shadowRoot?.activeElement?.classList.contains('formula') === true;
+  }
+
   /**
    * Picking a named range navigates to it. The server treats it exactly like
    * typing the name into the address field.

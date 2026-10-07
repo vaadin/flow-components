@@ -912,6 +912,11 @@ export class SpreadsheetCellGrid extends LitElement {
     }
   };
 
+  /** What the open editor holds, or null when none is open. */
+  editorValue(): string | null {
+    return this.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor')?.value ?? null;
+  }
+
   /**
    * Puts a value typed elsewhere - into the formula field, carrying the edit
    * on there - into the open editor, which widens or narrows to it.

@@ -243,6 +243,20 @@ describe('Spreadsheet — an edit carried on in the formula field', () => {
     expect(cellEditor(ctx.sheet)).to.be.null;
   });
 
+  it('ends the edit when the address field is clicked instead, as leaving for anywhere else does', async () => {
+    await select(ctx, 2, 2, 'old');
+    const input = await typeOver(ctx, 'xyz');
+    input.focus();
+
+    ctx.sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.address')!.focus();
+    // Once the keyboard has settled, as the GWT client's deferred commit.
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    await settled(ctx.sheet);
+
+    expect(edits(ctx)).to.deep.equal([{ row: 2, col: 2, value: 'xyz' }]);
+    expect(cellEditor(ctx.sheet)).to.be.null;
+  });
+
   it('still commits the cell editor when it is left for somewhere other than the formula field', async () => {
     await select(ctx, 2, 2, 'old');
     const input = await typeOver(ctx, 'xyz');
