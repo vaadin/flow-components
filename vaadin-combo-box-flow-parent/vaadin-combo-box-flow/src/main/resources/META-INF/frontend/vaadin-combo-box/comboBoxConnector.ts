@@ -40,11 +40,9 @@ export class ComboBoxConnector {
     // Whenever the web component cache is cleared after that, the server
     // considers the requested range as already sent. Make the next request ask
     // the server to send it again.
-    const connector = this;
-    const clearCache = comboBox.clearCache;
-    comboBox.clearCache = function (this: FlowComboBox) {
-      connector.#needsDataCommunicatorReset = true;
-      return clearCache.apply(this, arguments as unknown as []);
+    comboBox.clearCache = () => {
+      this.#needsDataCommunicatorReset = true;
+      Object.getPrototypeOf(comboBox).clearCache.call(comboBox);
     };
   }
 
