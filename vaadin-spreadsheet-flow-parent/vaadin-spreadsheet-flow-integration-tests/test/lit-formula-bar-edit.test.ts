@@ -111,6 +111,28 @@ describe('Spreadsheet — editing through the formula field', () => {
         expect(sheet.getSelection().activeCell).to.eql({ col: 3, row: 3 });
     });
 
+    it('shows the next cell once Enter has moved on, even when it holds what the last one did', async () => {
+        // C3 and C4 are both empty. The field showed '' before the edit and
+        // is told '' for C4 after it, so a binding that only compares with
+        // what it last rendered left the typed '2' standing.
+        const el = await type('2');
+        press(el, 'Enter');
+        // The server names the new cell.
+        sheet.updateFormulaBar(null, 3, 4);
+        await sheet.getFormulaBar().updateComplete;
+
+        expect(sheet.getSelection().activeCell).to.eql({ col: 3, row: 4 });
+        expect(el.value).to.equal('');
+    });
+
+    it('shows the cell again after Escape, even when it is empty', async () => {
+        const el = await type('2');
+        press(el, 'Escape');
+        await sheet.getFormulaBar().updateComplete;
+
+        expect(el.value).to.equal('');
+    });
+
     it('reports the edit once, not again as the field is left', async () => {
         const el = await type('2');
         press(el, 'Enter');

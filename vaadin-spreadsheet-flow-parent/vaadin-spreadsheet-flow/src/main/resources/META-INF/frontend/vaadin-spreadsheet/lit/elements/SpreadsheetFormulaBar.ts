@@ -255,6 +255,26 @@ export class SpreadsheetFormulaBar extends LitElement {
   }
 
   /**
+   * Keeps a formula field nobody is typing in showing the cell's value.
+   *
+   * The field is bound by property, so Lit writes it only when the bound
+   * value changes - and after an edit is committed or thrown away the
+   * state often holds the same value as before the edit, while the input
+   * still holds what was typed. The GWT client wrote the field every
+   * time. While the field has the keyboard it is the user's, and is left
+   * alone.
+   */
+  updated(changed: Map<string, unknown>): void {
+    if (!changed.has('renderState')) {
+      return;
+    }
+    const formula = this.shadowRoot?.querySelector<HTMLInputElement>('.formula');
+    if (formula && this.shadowRoot!.activeElement !== formula && formula.value !== this.renderState.formula) {
+      formula.value = this.renderState.formula;
+    }
+  }
+
+  /**
    * The keys that finish editing in the formula field.
    *
    * Enter commits and moves on to the next cell down, Tab to the next
