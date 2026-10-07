@@ -731,6 +731,16 @@ export class SpreadsheetCellGrid extends LitElement {
   /** Hidden span the measuring is done in. */
   private valueProbe: HTMLSpanElement | null = null;
   /**
+   * Widths already measured, by cell style and value. The sheet draws again
+   * on every scroll step and key press, and measuring every flagged cell
+   * each time - a forced layout per cell - held a large workbook up for a
+   * third of a second a frame. A value is measured once now, as the GWT
+   * client measured a cell once when it drew it.
+   */
+  private readonly measuredWidths = new Map<string, number>();
+  /** The style tables and theme the measured widths hold for. */
+  private measuredWith: readonly unknown[] = [];
+  /**
    * How wide the editor is for the text in it, and on which cell: measured
    * when it opens and as the user types, and kept so that drawing the sheet
    * again - on a scroll, say - does not shrink it back to its cell.
@@ -853,13 +863,13 @@ export class SpreadsheetCellGrid extends LitElement {
    * already showing hashes measures as narrow and would flip back.
    */
   private remeasureTooNarrowCells(): void {
+    const candidates = [...this.renderState.cellData].filter(
+      ([, data]) => data.needsMeasure === true && columnWidthOf(this.renderState, data.col) > 0
+    );
+    this.measureAll(candidates.map(([, data]) => data));
     const measured = new Set<string>();
-    for (const [key, data] of this.renderState.cellData) {
-      if (data.needsMeasure !== true) {
-        continue;
-      }
-      const width = columnWidthOf(this.renderState, data.col);
-      if (width > 0 && this.measureValue(data.cellStyle, data.value ?? '') > width) {
+    for (const [key, data] of candidates) {
+      if (this.measuredWidth(data.cellStyle, data.value ?? '') > columnWidthOf(this.renderState, data.col)) {
         measured.add(key);
       }
     }
@@ -878,19 +888,63 @@ export class SpreadsheetCellGrid extends LitElement {
    * GWT client's scroll width had - are drawn as ordinary cells.
    */
   private remeasureSpills(): void {
+    const candidates = [...this.renderState.cellData].filter(
+      ([, data]) => (data.overflowWidth ?? 0) > 0 && columnWidthOf(this.renderState, data.col) > 0
+    );
+    this.measureAll(candidates.map(([, data]) => data));
     const fitting = new Set<string>();
-    for (const [key, data] of this.renderState.cellData) {
-      if (!(data.overflowWidth > 0)) {
-        continue;
-      }
-      const width = columnWidthOf(this.renderState, data.col);
-      if (width > 0 && this.measureValue(data.cellStyle, data.value ?? '') <= width) {
+    for (const [key, data] of candidates) {
+      if (this.measuredWidth(data.cellStyle, data.value ?? '') <= columnWidthOf(this.renderState, data.col)) {
         fitting.add(key);
       }
     }
     if (!sameKeys(fitting, this.fittingSpills)) {
       this.fittingSpills = fitting;
     }
+  }
+
+  /**
+   * Measures, in one layout, every value among the given cells not measured
+   * yet - one probe each, all read after the last is placed. The widths
+   * measured before stand while the styles they were measured in do.
+   */
+  private measureAll(cells: ReadonlyArray<{ cellStyle: string; value?: string | null }>): void {
+    const inputs = [this.renderState.cellStyleToCSSStyle, this.renderState.conditionalFormattingStyles, this.theme];
+    if (inputs.some((input, i) => input !== this.measuredWith[i]) || this.measuredWidths.size > MEASURED_WIDTHS_LIMIT) {
+      this.measuredWidths.clear();
+      this.measuredWith = inputs;
+    }
+    const missing = new Map<string, { cellStyle: string; value: string }>();
+    for (const cell of cells) {
+      const value = cell.value ?? '';
+      const key = widthKey(cell.cellStyle, value);
+      if (!this.measuredWidths.has(key)) {
+        missing.set(key, { cellStyle: cell.cellStyle, value });
+      }
+    }
+    if (missing.size === 0) {
+      return;
+    }
+    const probes: Array<[string, HTMLSpanElement]> = [];
+    for (const [key, { cellStyle, value }] of missing) {
+      const probe = document.createElement('span');
+      probe.style.cssText = VALUE_PROBE_STYLE;
+      probe.className = `cell ${cellStyle}`;
+      probe.textContent = value;
+      probes.push([key, probe]);
+    }
+    this.shadowRoot!.append(...probes.map(([, probe]) => probe));
+    for (const [key, probe] of probes) {
+      this.measuredWidths.set(key, probe.clientWidth);
+    }
+    for (const [, probe] of probes) {
+      probe.remove();
+    }
+  }
+
+  /** A width measureAll has measured. */
+  private measuredWidth(cellStyle: string, value: string): number {
+    return this.measuredWidths.get(widthKey(cellStyle, value)) ?? this.measureValue(cellStyle, value);
   }
 
   /** The editor's measured width, while it is the editor open now. */
@@ -964,8 +1018,7 @@ export class SpreadsheetCellGrid extends LitElement {
   private measureValue(cellStyle: string, value: string): number {
     if (this.valueProbe === null) {
       const probe = document.createElement('span');
-      // Out of flow and off-screen so measuring never disturbs the sheet.
-      probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
+      probe.style.cssText = VALUE_PROBE_STYLE;
       this.shadowRoot!.appendChild(probe);
       this.valueProbe = probe;
     }
@@ -2066,6 +2119,17 @@ function cellBoxOnGrid(
 }
 
 /** A drawn column's width, frozen ones included; 0 when it is not drawn. */
+/** A value probe: out of flow and off-screen, so measuring never disturbs the sheet. */
+const VALUE_PROBE_STYLE = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
+
+/** How many measured widths are kept before starting over. */
+const MEASURED_WIDTHS_LIMIT = 50000;
+
+/** The key a measured width is kept under. */
+function widthKey(cellStyle: string, value: string): string {
+  return `${cellStyle}\u0000${value}`;
+}
+
 function columnWidthOf(state: CellGridRenderState, col: number): number {
   if (col >= 1 && col <= state.horizontalSplitPosition) {
     return state.frozenColWidths[col - 1] ?? 0;

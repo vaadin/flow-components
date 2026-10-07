@@ -3905,3 +3905,100 @@ describe('SpreadsheetCellGrid — the markers of a merged cell', () => {
         cleanup(el);
     });
 });
+
+describe('SpreadsheetCellGrid — measuring each value once', () => {
+    // The sheet draws again on every scroll step and key press. Measuring
+    // every flagged cell each time - a forced layout per cell - held a
+    // large workbook up for a third of a second a frame.
+    // One base, as the sheet passes the same style tables on every draw
+    // until the server sends new ones.
+    const base = emptyCellGridRenderState();
+
+    function stateWith(cells: number, scrollTop = 0): CellGridRenderState {
+        const cellData = new Map<string, CellData>();
+        for (let row = 1; row <= cells; row++) {
+            cellData.set(`col1 row${row}`, { ...makeCellData(1, row, `value ${row} that is long`), needsMeasure: true });
+        }
+        return {
+            ...base,
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 1,
+                lastColumnPosition: 50,
+                firstRowIndex: 1,
+                firstRowPosition: 0,
+                lastRowIndex: cells,
+                lastRowPosition: cells * 20,
+            },
+            cellData,
+            colX: [0],
+            rowY: Array.from({ length: cells }, (_, i) => i * 20),
+            colWidths: [50],
+            rowHeights: new Array(cells).fill(20),
+            scrollTop,
+        };
+    }
+
+    /** How many value probes an update puts into the grid. */
+    async function probesDuring(el: SpreadsheetCellGrid, update: () => void): Promise<number> {
+        let probes = 0;
+        const observer = new MutationObserver((records) => {
+            for (const record of records) {
+                for (const node of Array.from(record.addedNodes)) {
+                    if (node instanceof HTMLElement && node.style.left === '-10000px') {
+                        probes++;
+                    }
+                }
+            }
+        });
+        observer.observe(el.shadowRoot!, { childList: true });
+        update();
+        await el.updateComplete;
+        await el.updateComplete;
+        observer.disconnect();
+        return probes;
+    }
+
+    it('measures the flagged values once, all in one go', async () => {
+        const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
+        document.body.appendChild(el);
+        try {
+            const probes = await probesDuring(el, () => {
+                el.renderState = stateWith(40);
+            });
+
+            expect(probes).to.equal(40);
+            expect(el.tooNarrowCells.size).to.equal(40);
+        } finally {
+            cleanup(el);
+        }
+    });
+
+    it('draws again without measuring what it has measured', async () => {
+        const el = await attachWithState(stateWith(40));
+        try {
+            const probes = await probesDuring(el, () => {
+                el.renderState = stateWith(40, 20);
+            });
+
+            expect(probes).to.equal(0);
+            expect(el.tooNarrowCells.size).to.equal(40);
+        } finally {
+            cleanup(el);
+        }
+    });
+
+    it('measures again once the styles change', async () => {
+        const el = await attachWithState(stateWith(40));
+        try {
+            const probes = await probesDuring(el, () => {
+                el.renderState = { ...stateWith(40), cellStyleToCSSStyle: { 0: 'font-size:30px;' } };
+            });
+
+            expect(probes).to.equal(40);
+        } finally {
+            cleanup(el);
+        }
+    });
+});
