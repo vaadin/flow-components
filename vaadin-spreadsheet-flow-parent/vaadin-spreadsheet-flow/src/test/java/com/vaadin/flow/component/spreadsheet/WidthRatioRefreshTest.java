@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -75,6 +76,42 @@ class WidthRatioRefreshTest {
                 + " judged against real widths");
         assertTrue(a1.overflowWidth > 0,
                 "and now it knows it spills, was " + a1.overflowWidth);
+    }
+
+    @Test
+    void ratiosArrive_onlyTheCellsInViewAreSentAgain() {
+        // On the sheet, but outside the rows and columns the client has
+        // shown.
+        spreadsheet.createCell(99, 29, "far away");
+        assertTrue(
+                spreadsheet.getRows() >= 100 && spreadsheet.getColumns() >= 30,
+                "The cell has to be on the sheet for this to tell anything");
+        clearInvocations(rpc);
+
+        spreadsheet.getCellValueManager()
+                .onCellStyleWidthRatioUpdate(ratios(10f));
+
+        assertNotNull(sentCell(1, 1));
+        assertNull(sentCell(30, 100),
+                "A cell the client has not been sent is built when it is,"
+                        + " so it is not sent with the ones in view");
+    }
+
+    @Test
+    void ratiosArriveBeforeAnyCellIsShown_nothingIsSent() {
+        Spreadsheet fresh = new Spreadsheet() {
+            @Override
+            protected SpreadsheetClientRpc getRpcProxy() {
+                return rpc;
+            }
+        };
+        fresh.createCell(0, 0, "a value far too wide for its column");
+        clearInvocations(rpc);
+
+        fresh.getCellValueManager().onCellStyleWidthRatioUpdate(ratios(10f));
+
+        assertEquals(List.of(), sentCells(),
+                "The client asks for its cells once it has measured its view");
     }
 
     @Test

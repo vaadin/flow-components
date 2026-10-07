@@ -1053,15 +1053,20 @@ public class CellValueManager implements Serializable {
             HashMap<Integer, Float> cellStyleWidthRatioMap) {
         boolean changed = fitCalculator
                 .onWidthRatioUpdate(cellStyleWidthRatioMap);
-        if (changed) {
+        if (changed && spreadsheet.getFirstColumn() != -1) {
             // Whether a value fits its column - and so whether it is
             // shortened, spills into its neighbours or shows hashes - is
             // judged against these ratios, and the client can only measure
             // them once the styles have arrived. That is after the first
             // batch of cells was built, so those cells went out judged
             // against nothing: a freshly loaded workbook never spilled its
-            // text. Rebuild them now that there is something to judge by.
-            spreadsheet.refreshAllCellValues();
+            // text. Rebuild them now that there is something to judge by -
+            // the ones in view, which are the ones the client has. A cell
+            // further away is built when it is first sent, and by then the
+            // ratios are known; rebuilding the whole sheet here sent every
+            // cell of a 500 x 200 workbook, 9 MB, as it loaded.
+            clearCachedContent();
+            updateVisibleCellValues();
         }
     }
 
