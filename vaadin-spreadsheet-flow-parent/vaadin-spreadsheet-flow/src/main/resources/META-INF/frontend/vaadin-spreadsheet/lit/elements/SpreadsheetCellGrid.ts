@@ -1095,8 +1095,11 @@ export class SpreadsheetCellGrid extends LitElement {
         continue;
       }
       // What was typed into a note being written comes along: a copy of a
-      // text box keeps its value.
+      // text box keeps its value. A copy for the eye only: given the
+      // keyboard, its text box took the keys meant for the sheet - an undo
+      // right after a note became an undo of the note's text.
       const copy = note.cloneNode(true) as HTMLElement;
+      copy.inert = true;
       root.appendChild(copy);
       animateOut(copy, () => copy.remove());
     }
@@ -1108,7 +1111,10 @@ export class SpreadsheetCellGrid extends LitElement {
       this.remeasureSpills();
     }
     this.placeCommentOverlays();
-    const note = this.shadowRoot!.querySelector('.comment-overlay-edit') as HTMLTextAreaElement | null;
+    // The note being written, not the copy of one fading out.
+    const note = this.shadowRoot!.querySelector(
+      '.v-spreadsheet-comment-overlay:not([inert]) .comment-overlay-edit'
+    ) as HTMLTextAreaElement | null;
     if (note !== null && this.shadowRoot!.activeElement !== note) {
       note.focus();
       note.setSelectionRange(note.value.length, note.value.length);

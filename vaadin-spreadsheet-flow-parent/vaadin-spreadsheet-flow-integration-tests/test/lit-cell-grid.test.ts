@@ -3690,6 +3690,30 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
+    it('keeps the keyboard off the fading copy of a note that was being written', async () => {
+        // UndoRedoIT: the copy's text box took the focus back on the next
+        // repaint, so the undo pressed right after a note went into the
+        // copy's text instead of reaching the sheet.
+        const { el, cleanup } = await inSheet(withNote('col3 row3', { editingCommentKey: 'col3 row3' }), 800, 400);
+        await settleNotes(el);
+        const outside = document.createElement('button');
+        document.body.appendChild(outside);
+        outside.focus();
+
+        el.renderState = { ...el.renderState, visibleCommentKeys: [], editingCommentKey: null };
+        await el.updateComplete;
+        el.renderState = { ...el.renderState };
+        await el.updateComplete;
+
+        const [copy] = fading(el);
+        expect(copy.inert, 'the copy is for the eye only').to.be.true;
+        expect(document.activeElement).to.equal(outside);
+        expect(el.shadowRoot!.activeElement).to.be.null;
+
+        outside.remove();
+        cleanup();
+    });
+
     it('lets a note still dropping into place just go', async () => {
         const { el, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
 
