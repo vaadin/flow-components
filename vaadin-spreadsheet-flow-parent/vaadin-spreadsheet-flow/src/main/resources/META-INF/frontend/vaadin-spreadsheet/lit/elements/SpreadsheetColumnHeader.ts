@@ -335,9 +335,12 @@ export class SpreadsheetColumnHeader extends LitElement {
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
 
-    /* The strip's tint shows through: the letters have no gradient. */
+    /* No gradient on the letters: each carries the strip's tint over the
+       Lumo ground, as in the GWT client, so a frozen column's letter
+       covers the scrolled one under it. */
     :host([theme~='lumo']) .col-header-cell {
-      background-image: none;
+      background-color: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
+      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
 
     :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {

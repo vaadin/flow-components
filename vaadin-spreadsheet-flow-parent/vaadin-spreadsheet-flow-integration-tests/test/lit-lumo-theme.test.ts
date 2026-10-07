@@ -647,6 +647,27 @@ describe('Lumo theme — the headers', () => {
         cleanup();
     });
 
+    it('gives each column letter the strip\'s tint over the Lumo ground, as the GWT client did', async () => {
+        // Opaque, so a frozen column's letter covers the one scrolled under it.
+        const { el, cleanup } = await columns('lumo');
+
+        const letter = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell.col1')!);
+        expect(letter.backgroundColor).to.equal(BASE);
+        expect(letter.backgroundImage).to.equal(TINT_5);
+
+        cleanup();
+    });
+
+    it('gives each row number the strip\'s tint over the Lumo ground, as the GWT client did', async () => {
+        const { el, cleanup } = await rows('lumo');
+
+        const number = getComputedStyle(el.shadowRoot!.querySelector('.row-header-cell.row1')!);
+        expect(number.backgroundColor).to.equal(BASE);
+        expect(number.backgroundImage).to.equal(TINT_5);
+
+        cleanup();
+    });
+
     it('keeps the GWT client\'s marker without the theme', async () => {
         const { el, cleanup } = await columns(null);
 

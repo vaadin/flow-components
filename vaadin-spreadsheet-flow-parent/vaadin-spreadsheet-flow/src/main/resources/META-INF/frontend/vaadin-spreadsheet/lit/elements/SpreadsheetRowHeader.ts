@@ -236,12 +236,15 @@ export class SpreadsheetRowHeader extends LitElement {
     /* A number as the GWT client drew it, over a border of its own along
        the cells - which the active row's marker replaces, and so does an
        application's ::part(row-header) border. The pointer is an arrow
-       along the row a click selects. */
+       along the row a click selects. Each number has the strip's own
+       background, as in the GWT client, so a frozen row's number covers
+       the scrolled one under it. */
     .row-header-cell {
       position: absolute;
       box-sizing: border-box;
       overflow: hidden;
       text-align: center;
+      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
       border-bottom: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       border-right: 1px solid
@@ -273,6 +276,12 @@ export class SpreadsheetRowHeader extends LitElement {
        outline gutter tinted over the Lumo ground, the active cell's row in
        the primary tint with its marker beside it. */
     :host([theme~='lumo']) {
+      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+    }
+
+    /* Each number carries the strip's tint too, so a frozen row's number
+       covers the scrolled one under it. */
+    :host([theme~='lumo']) .row-header-cell {
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
 

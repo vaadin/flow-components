@@ -261,3 +261,61 @@ describe('Frozen panes — where the scrolling cells start', () => {
     );
   });
 });
+
+/**
+ * The frozen headers stay put while the rest scroll under them. The row
+ * numbers had no background of their own, so a frozen row's number was
+ * drawn over the scrolled one beneath it - 2 over 42.
+ */
+describe('Frozen panes — headers that cover what scrolls under them', () => {
+  let sheet: Spreadsheet;
+  let host: HTMLElement;
+
+  beforeEach(async () => {
+    host = document.createElement('div');
+    host.style.cssText = 'width:600px;height:300px;display:flex;flex-direction:column;';
+    document.body.appendChild(host);
+    sheet = new Spreadsheet(host);
+    sheet.setRows(100);
+    sheet.setCols(30);
+    sheet.setColW(new Array(30).fill(50));
+    sheet.setRowH(new Array(100).fill(15));
+    sheet.setVerticalSplitPosition(3);
+    sheet.setHorizontalSplitPosition(2);
+    sheet.recomputeViewport();
+    const scroller = sheet.getScrollContainer();
+    scroller.scrollTop = 400;
+    scroller.scrollLeft = 400;
+    scroller.dispatchEvent(new Event('scroll'));
+    sheet.recomputeViewport();
+    await sheet.getRowHeader().updateComplete;
+    await sheet.getColumnHeader().updateComplete;
+  });
+
+  afterEach(() => {
+    sheet.dispose();
+    host.remove();
+  });
+
+  /** The header cell drawn on top at the middle of a frozen one. */
+  function onTop(root: ShadowRoot, frozen: HTMLElement): Element | null {
+    const box = frozen.getBoundingClientRect();
+    return root.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  it('covers the scrolled row numbers under a frozen one', () => {
+    const root = sheet.getRowHeader().shadowRoot!;
+    const frozen = root.querySelector<HTMLElement>('.frozen-header-strip .row-header-cell.row2')!;
+
+    expect(getComputedStyle(frozen).backgroundColor).to.equal('rgb(250, 250, 250)');
+    expect(onTop(root, frozen)?.closest('.row-header-cell')).to.equal(frozen);
+  });
+
+  it('covers the scrolled column letters under a frozen one', () => {
+    const root = sheet.getColumnHeader().shadowRoot!;
+    const frozen = root.querySelector<HTMLElement>('.frozen-header-strip .col-header-cell.col2')!;
+
+    expect(getComputedStyle(frozen).backgroundImage).to.not.equal('none');
+    expect(onTop(root, frozen)?.closest('.col-header-cell')).to.equal(frozen);
+  });
+});
