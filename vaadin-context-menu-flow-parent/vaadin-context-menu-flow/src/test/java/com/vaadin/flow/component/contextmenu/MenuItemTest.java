@@ -46,13 +46,6 @@ class MenuItemTest {
     }
 
     @Test
-    void setDownloadHandler_throws() {
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> item.setDownloadHandler(event -> {
-                }));
-    }
-
-    @Test
     void setCheckable_setChecked_isChecked() {
         item.setCheckable(true);
         Assertions.assertFalse(item.isChecked());
