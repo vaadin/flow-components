@@ -107,7 +107,7 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(input.value).to.equal('=SUM(C4:D5');
   });
 
-  it('points from the edited cell again after an operator is typed', async () => {
+  it('goes on from the cell pointed at last after an operator is typed, as the GWT client did', async () => {
     const input = await startTyping('=');
     press(input, 'ArrowDown');
     press(input, 'ArrowDown');
@@ -116,7 +116,18 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     press(input, 'ArrowLeft');
 
-    expect(input.value).to.equal('=C5+B3');
+    expect(input.value).to.equal('=C5+B5');
+  });
+
+  it('starts from the edited cell again in the next edit', async () => {
+    let input = await startTyping('=');
+    press(input, 'ArrowDown');
+    press(input, 'Escape');
+    await sheet.getCellGrid().updateComplete;
+    input = await startTyping('=');
+    press(input, 'ArrowDown');
+
+    expect(input.value).to.equal('=C4');
   });
 
   it('neither points nor commits on an arrow after a reference, as the GWT client did', async () => {

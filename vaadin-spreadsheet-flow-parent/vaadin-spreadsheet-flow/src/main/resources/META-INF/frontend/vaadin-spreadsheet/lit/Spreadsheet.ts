@@ -292,6 +292,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     span: { start: number; end: number };
   } | null = null;
 
+  /**
+   * The cell pointed at last in the formula being written. The next arrow
+   * after an operator starts from it, as the GWT client's did for the rest
+   * of the edit - not from the cell being edited.
+   */
+  private lastPointed: { col: number; row: number } | null = null;
+
   /** A drag pointing out a range with the mouse is under way. */
   private pointerDragging = false;
 
@@ -1765,8 +1772,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Typed into the cell editor: the formula field shows it as it is typed. */
   private readonly handleCellEditorInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
     this.showInFormulaField(e.detail.value);
-    // Typing ends pointing: the next arrow after an operator points at a
-    // new reference, from the cell being edited.
+    // Typing ends pointing at that reference: the next arrow after an
+    // operator points at a new one, from the cell pointed at last.
     this.pointer = null;
     this.updateFormulaDraft(e.detail.value, e.detail.caret ?? e.detail.value.length);
   };
@@ -1816,8 +1823,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * client let the user: after an operator, a bracket or a separator the
    * arrow puts a reference to the next cell over into the formula, and
    * further arrows move it on - from the cell being edited at first, then
-   * from the cell pointed at. Shift+arrow stretches it into a range from
-   * where it started. The selection stays on the cell being edited.
+   * from the cell pointed at last, even past an operator typed since.
+   * Shift+arrow stretches it into a range from where it started. The
+   * selection stays on the cell being edited.
    */
   private pointWithArrow(
     e: CustomEvent<{ key: string; shiftKey: boolean; value: string; caret: number }>,
@@ -1832,7 +1840,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     e.preventDefault();
-    const from = pointer?.end ?? this.formulaCell();
+    const from = pointer?.end ?? this.lastPointed ?? this.formulaCell();
     const next = moveActiveCell(from, null, keyDirection(key, false)!, this.sheetShape());
     const end = next?.activeCell ?? from;
     const anchor = shiftKey && pointer !== null ? pointer.anchor : end;
@@ -1893,6 +1901,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   ): void {
     const placed = placeReference(value, caret, span, referenceText(anchor, end));
     this.pointer = { anchor, end, span: { start: placed.start, end: placed.end } };
+    this.lastPointed = end;
     if (this.editor !== null) {
       this.cellGrid.setEditorValue(placed.text, source === 'cell' ? placed.end : undefined);
     }
@@ -1960,6 +1969,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The formula is written or thrown away: nothing is pointed at or coloured any more. */
   private endFormulaPointing(): void {
     this.pointer = null;
+    this.lastPointed = null;
     this.pointerDragging = false;
     this.updateFormulaDraft(null, 0);
   }
