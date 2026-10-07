@@ -1058,6 +1058,34 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
+    it('Space opens the editor empty, as the GWT client did', () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.updateBottomRightCellValues([
+            { col: 3, row: 3, value: 'old', cellStyle: 'cs0', locked: false, needsMeasure: false, isPercentage: false },
+        ]);
+        sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
+            detail: { col: 3, row: 3, shiftKey: false, ctrlKey: false,
+                      metaKey: false, altKey: false },
+            bubbles: true, composed: true,
+        }));
+
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key: ' ',
+            bubbles: true,
+            cancelable: true,
+        }));
+
+        const editor = sheet.getCellGrid().renderState.editor;
+        expect(editor).to.not.be.null;
+        expect(editor!.initialValue).to.equal('');
+
+        cleanup();
+    });
+
     it('type-to-edit ignores keys with Ctrl/Meta modifiers (slice 153)', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);

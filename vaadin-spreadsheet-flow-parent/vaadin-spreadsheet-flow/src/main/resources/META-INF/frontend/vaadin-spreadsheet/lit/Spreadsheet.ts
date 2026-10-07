@@ -2022,10 +2022,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Typing over the cell: an arrow commits and moves on.
       // A digit typed into a percentage cell means that many percent, so
       // the editor opens on "5%" rather than "5" - see PercentageEntry.
+      // Space opens it empty, as the GWT client did: it took Space on
+      // keydown, as a key that starts an edit, and typed nothing.
       this.editor = {
         col,
         row,
-        initialValue: initialEditValue(key, this.cellDataByKey.get(toKey(col, row))),
+        initialValue: key === ' ' ? '' : initialEditValue(key, this.cellDataByKey.get(toKey(col, row))),
         mode: 'enter'
       };
       this.showInFormulaField(this.editor.initialValue);
