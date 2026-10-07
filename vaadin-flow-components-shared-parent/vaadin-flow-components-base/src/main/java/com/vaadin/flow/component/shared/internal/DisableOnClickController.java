@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.shared.internal;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -26,13 +25,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
-import com.vaadin.flow.dom.DisabledUpdateMode;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinResponse;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.streams.DownloadEvent;
-import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * An internal controller for handling disabling a component when it is clicked.
@@ -158,55 +150,6 @@ public class DisableOnClickController<C extends Component & HasEnabled>
      */
     public boolean isDisabledByClick() {
         return disabledByClick;
-    }
-
-    /**
-     * Wraps the given download handler so that it is also served while the
-     * component is {@link #isDisabledByClick() disabled by disable on click},
-     * which happens before the browser requests the file. A component disabled
-     * explicitly, or inside a disabled parent, still refuses the request unless
-     * the handler itself allows it.
-     *
-     * @param handler
-     *            the download handler to wrap, not {@code null}
-     * @return a handler that delegates to the given handler
-     * @since 25.4
-     */
-    public DownloadHandler allowDisabledByClick(DownloadHandler handler) {
-        Objects.requireNonNull(handler, "handler must not be null");
-        return new DownloadHandler() {
-            @Override
-            public void handleRequest(VaadinRequest request,
-                    VaadinResponse response, VaadinSession session,
-                    Element owner) throws IOException {
-                handler.handleRequest(request, response, session, owner);
-            }
-
-            @Override
-            public void handleDownloadRequest(DownloadEvent event)
-                    throws IOException {
-                handler.handleDownloadRequest(event);
-            }
-
-            @Override
-            public String getUrlPostfix() {
-                return handler.getUrlPostfix();
-            }
-
-            @Override
-            public boolean isAllowInert() {
-                return handler.isAllowInert();
-            }
-
-            @Override
-            public DisabledUpdateMode getDisabledUpdateMode() {
-                Element parent = component.getElement().getParent();
-                if (disabledByClick && (parent == null || parent.isEnabled())) {
-                    return DisabledUpdateMode.ALWAYS;
-                }
-                return handler.getDisabledUpdateMode();
-            }
-        };
     }
 
     /**

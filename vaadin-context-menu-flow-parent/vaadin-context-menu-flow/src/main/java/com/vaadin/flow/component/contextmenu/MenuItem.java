@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.download.Download;
+import com.vaadin.flow.component.shared.internal.DownloadUtil;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -145,8 +146,8 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
             return;
         }
         removeDownload();
-        DownloadHandler handler = getDisableOnClickController()
-                .allowDisabledByClick(downloadHandler);
+        DownloadHandler handler = DownloadUtil.allowDisabledByClick(this,
+                getDisableOnClickController(), downloadHandler);
         downloadRegistration = target == null ? Download.onClick(this, handler)
                 : registerDownloadOnTarget(target, handler);
         downloadTarget = target;

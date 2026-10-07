@@ -46,6 +46,7 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.component.shared.internal.DownloadUtil;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
@@ -433,8 +434,8 @@ public class Button extends Component
         this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
             downloadRegistration = Download.onClick(this,
-                    disableOnClickController
-                            .allowDisabledByClick(downloadHandler));
+                    DownloadUtil.allowDisabledByClick(this,
+                            disableOnClickController, downloadHandler));
         }
     }
 
