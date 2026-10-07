@@ -132,6 +132,9 @@ export class ComboBoxConnector {
     this.#lastRequestedRange = [-1, -1];
     this.#lastTypedFilter = '';
     comboBox.clearCache();
+    // The server resets the data communicator itself before calling this, so
+    // the next request must not ask for another reset
+    this.#needsDataCommunicatorReset = false;
   }
 
   confirm(id: number, filter: string): void {

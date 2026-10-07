@@ -192,6 +192,15 @@ describe('combo-box connector', () => {
       expect(comboBox.$server.resetDataCommunicator).to.be.not.called;
     });
 
+    it('should not reset the data communicator when reopened after the connector is reset', async () => {
+      comboBox.$connector.reset();
+
+      comboBox.opened = true;
+      await nextFrame();
+
+      expect(comboBox.$server.resetDataCommunicator).to.be.not.called;
+    });
+
     describe('with filter debouncing', () => {
       let clock: sinon.SinonFakeTimers;
 
