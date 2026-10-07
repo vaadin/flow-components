@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.contextmenu;
+package com.vaadin.flow.component.menubar.tests;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,13 +27,15 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.tests.MockUIExtension;
 
-class MenuItemDownloadHandlerTest {
+class MenuBarDownloadHandlerTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
@@ -45,9 +47,9 @@ class MenuItemDownloadHandlerTest {
 
     @BeforeEach
     void setup() {
-        ContextMenu contextMenu = new ContextMenu();
-        ui.add(contextMenu);
-        item = contextMenu.addItem("Download");
+        MenuBar menuBar = new MenuBar();
+        ui.add(menuBar);
+        item = menuBar.addItem("Download");
         item.setDownloadHandler(handler);
         // Menu items are attached to the UI before the response
         ui.fakeClientCommunication();

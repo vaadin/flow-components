@@ -88,9 +88,12 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * served while the item is disabled. To serve the file regardless of the
      * enabled state, pass {@link DownloadHandler#allowDisabled()
      * handler.allowDisabled()}.
+     * <p>
+     * Downloads are supported for items of a {@code MenuBar}. Items of a
+     * {@link ContextMenu} do not support them.
      *
      * <pre>{@code
-     * MenuItem export = menu.addItem("Export");
+     * MenuItem export = menuBar.addItem("Export");
      * export.setDownloadHandler(
      *         DownloadHandler.fromInputStream(event -> createReport()));
      * }</pre>
@@ -98,9 +101,15 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * @param downloadHandler
      *            the handler that produces the file, or {@code null} to not
      *            start a download on click
+     * @throws UnsupportedOperationException
+     *             if the item belongs to a {@link ContextMenu}
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
+        if (getContextMenu() != null) {
+            throw new UnsupportedOperationException(
+                    "Context menu items do not support downloads");
+        }
         if (downloadRegistration != null) {
             downloadRegistration.remove();
             downloadRegistration = null;
