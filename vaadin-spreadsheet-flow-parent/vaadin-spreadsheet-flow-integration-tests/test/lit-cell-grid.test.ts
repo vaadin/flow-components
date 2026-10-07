@@ -3786,6 +3786,33 @@ describe('SpreadsheetCellGrid — the comment marker', () => {
 
         cleanup(el);
     });
+
+    it('stays inside a thicker border, as the GWT client\'s did', async () => {
+        // merged_cells.xlsx has a note on a cell with a 2px black right
+        // border. Placed for a 1px border, the marker covered half of it.
+        const el = await attachWithState({
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1, firstColumnPosition: 0,
+                lastColumnIndex: 2, lastColumnPosition: 100,
+                firstRowIndex: 1, firstRowPosition: 0,
+                lastRowIndex: 2, lastRowPosition: 40,
+            },
+            colX: [0, 50],
+            rowY: [0, 20],
+            colWidths: [50, 50],
+            rowHeights: [20, 20],
+            cellData: new Map([['col2 row2', { ...makeCellData(2, 2, 'x'), cellStyle: 'cs1' }]]),
+            cellStyleToCSSStyle: { 1: 'border-right: 2px solid rgb(0, 0, 0);' },
+            commentCells: new Set(['col2 row2']),
+        });
+
+        const mark = el.shadowRoot!.querySelector<HTMLElement>('.comment-indicator')!;
+        const cell = el.shadowRoot!.querySelector('.cell.col2.row2')!.getBoundingClientRect();
+        expect(mark.getBoundingClientRect().right).to.equal(cell.right - 2);
+
+        cleanup(el);
+    });
 });
 
 /**

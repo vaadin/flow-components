@@ -516,13 +516,14 @@ export class SpreadsheetCellGrid extends LitElement {
         pointer-events: none;
       }
 
-      /* Placed at the cell's outer top-right corner and pulled back over it,
-       past the border. */
+      /* In the cell's top-right corner, inside its border, as the GWT client
+       drew it: a cell with a thicker border keeps all of it. */
       .comment-indicator {
         position: absolute;
+        right: 0;
+        top: 0;
         width: 9px;
         height: 9px;
-        transform: translate(calc(-100% - 1px), 0);
         background: var(--vaadin-spreadsheet-comment-bg, var(--_vaadin-spreadsheet-comment-bg, #ffcf16));
         clip-path: polygon(0 0, 100% 0, 100% 100%);
         z-index: 5;
@@ -1849,19 +1850,12 @@ function renderQuadrant(opts: QuadrantRenderOpts): DirectiveResult {
         invalidFormulaCells.has(key) && !underMerge
           ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
           : '';
-      // The triangle is a sibling of its cell, not a child — it is
-      // positioned in grid coordinates like every other overlay — so it
-      // carries the anchor as data attributes, the way the popup buttons
-      // and sheet overlays do. Nothing else ties it to its cell.
+      // In the cell's corner, inside its border, as the GWT client drew
+      // it. It carries the cell's anchor as data attributes too, so it can
+      // be found by the cell it marks.
       const commentIndicator =
         commentCells.has(key) && !underMerge
-          ? html`<div
-              class="comment-indicator"
-              part="comment-triangle"
-              data-col=${col}
-              data-row=${row}
-              style="left:${left + width}px;top:${top}px;"
-            ></div>`
+          ? html`<div class="comment-indicator" part="comment-triangle" data-col=${col} data-row=${row}></div>`
           : '';
       // Slice 173: `part` attribute mirrors the documented
       // public styling API at
@@ -1877,12 +1871,13 @@ function renderQuadrant(opts: QuadrantRenderOpts): DirectiveResult {
       // between the tags is a text node of its own and every binding a
       // marker, and with a thousand cells drawn they doubled the nodes the
       // sheet makes and restyles as it scrolls.
-      const content = invalidIndicator === '' ? text : html`${invalidIndicator}${text}`;
+      const content =
+        invalidIndicator === '' && commentIndicator === '' ? text : html`${invalidIndicator}${commentIndicator}${text}`;
       cells.push({
         key,
         template: html`<div class=${classList} part=${cellPart} style=${style} data-col=${col} data-row=${row}
-            >${content}</div
-          >${commentIndicator}`
+          >${content}</div
+        >`
       });
     }
   }
@@ -2002,15 +1997,13 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
           part="comment-triangle"
           data-col=${region.col1}
           data-row=${region.row1}
-          style="left:${left + width}px;top:${top}px;"
         ></div>`
       : '';
 
     overlays.push(html`
       <div class=${classList} part=${cellPart} style=${style} data-col=${region.col1} data-row=${region.row1}>
-        ${invalidIndicator}${text}
+        ${invalidIndicator}${commentIndicator}${text}
       </div>
-      ${commentIndicator}
     `);
   }
   return overlays;
