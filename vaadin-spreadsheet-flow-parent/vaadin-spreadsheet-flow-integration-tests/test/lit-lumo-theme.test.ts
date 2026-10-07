@@ -435,7 +435,7 @@ describe('Lumo theme — the cell editor', () => {
 
         const style = getComputedStyle(inGrid(el, '.cell-editor'));
         expect(style.fontFamily).to.equal('Calibri');
-        expect(style.borderTopWidth).to.equal('2px');
+        expect(style.boxShadow).to.equal('rgba(0, 0, 0, 0.75) 0px 0px 10px 0px');
 
         cleanup();
     });

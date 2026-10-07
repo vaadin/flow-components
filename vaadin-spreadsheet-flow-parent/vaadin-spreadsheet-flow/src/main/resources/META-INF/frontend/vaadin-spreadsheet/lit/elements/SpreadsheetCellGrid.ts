@@ -548,13 +548,18 @@ export class SpreadsheetCellGrid extends LitElement {
       /* Cell editor input — absolutely positioned over the cell
            being edited, sized to match. z-index above all cells +
            overlays so the input + caret are always on top. Slice
-           152. */
+           152. Framed as the GWT client framed it: no border, lifted
+           off the sheet on a soft shadow, the text at the cell's
+           edge. The ring is the editor colour, which only the Lumo
+           theme and an application set. */
       .cell-editor {
         position: absolute;
         box-sizing: border-box;
         z-index: 10;
-        border: 2px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
-        outline: none;
+        border: 0;
+        outline: 1px solid
+          var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, transparent));
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.75);
         font-family: var(
           --vaadin-spreadsheet-cell-font,
           var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
@@ -563,7 +568,7 @@ export class SpreadsheetCellGrid extends LitElement {
           --vaadin-spreadsheet-cell-font-size,
           var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
         );
-        padding: 0 2px;
+        padding: 0;
       }
 
       /* The filter arrow, drawn after the button's content as the GWT client
@@ -597,14 +602,11 @@ export class SpreadsheetCellGrid extends LitElement {
         padding: var(--lumo-space-xs);
       }
 
-      /* Borderless, ringed in the editor colour and lifted off the sheet,
-       one pixel up and left of the cell it covers. */
+      /* Ringed in the editor colour, which the theme sets, on Lumo's
+       small shadow, one pixel up and left of the cell it covers. */
       :host([theme~='lumo']) .cell-editor {
-        border: 0;
-        outline: 1px solid var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, #1976d2));
         box-shadow: var(--lumo-box-shadow-s);
         margin: -1px 0 0 -1px;
-        padding: 0;
       }
 
       :host([theme~='lumo']) .selection-corner {

@@ -262,6 +262,51 @@ describe('SpreadsheetCellGrid — cell editor render (slice 152)', () => {
 });
 
 /**
+ * The editor's frame, as the GWT client drew it: no border, lifted off the
+ * sheet on a soft shadow, with the text right at the cell's edge. The ring
+ * is the editor colour, which the Lumo theme sets and an application may.
+ */
+describe('SpreadsheetCellGrid — the editor frame', () => {
+    const SHADOW = 'rgba(0, 0, 0, 0.75) 0px 0px 10px 0px';
+
+    function editorStyle(el: SpreadsheetCellGrid): CSSStyleDeclaration {
+        return getComputedStyle(el.shadowRoot!.querySelector('.cell-editor')!);
+    }
+
+    it('has no border or padding, and a soft shadow', async () => {
+        const el = await attachCellGridWithState(buildEditorState({ col: 2, row: 2, initialValue: 'x' }));
+
+        const style = editorStyle(el);
+        expect([style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth])
+            .to.deep.equal(['0px', '0px', '0px', '0px']);
+        expect(style.padding).to.equal('0px');
+        expect(style.boxShadow).to.equal(SHADOW);
+
+        el.remove();
+    });
+
+    it('has no ring of its own', async () => {
+        const el = await attachCellGridWithState(buildEditorState({ col: 2, row: 2, initialValue: 'x' }));
+
+        expect(editorStyle(el).outlineColor).to.equal('rgba(0, 0, 0, 0)');
+
+        el.remove();
+    });
+
+    it('is ringed in the colour an application sets', async () => {
+        const el = await attachCellGridWithState(buildEditorState({ col: 2, row: 2, initialValue: 'x' }));
+        el.style.setProperty('--vaadin-spreadsheet-editor-border', 'rgb(255, 0, 255)');
+
+        const style = editorStyle(el);
+        expect(`${style.outlineWidth} ${style.outlineStyle} ${style.outlineColor}`).to.equal('1px solid rgb(255, 0, 255)');
+        expect(style.borderTopWidth).to.equal('0px');
+        expect(style.boxShadow).to.equal(SHADOW);
+
+        el.remove();
+    });
+});
+
+/**
  * The editor looks like the cell it edits.
  *
  * The GWT client gave the input the edited cell's own classes, so the user
@@ -410,9 +455,9 @@ describe('SpreadsheetCellGrid — the editor looks like the cell it edits', () =
         );
 
         const style = editorStyle(el);
-        expect(style.borderRightWidth).to.equal('2px');
-        expect(style.borderBottomColor).to.equal('rgb(25, 118, 210)');
-        expect(style.paddingLeft).to.equal('2px');
+        expect(style.borderRightWidth).to.equal('0px');
+        expect(style.borderBottomWidth).to.equal('0px');
+        expect(style.paddingLeft).to.equal('0px');
 
         el.remove();
     });
