@@ -277,9 +277,11 @@ export class SpreadsheetRowHeader extends LitElement {
        along the row a click selects. Each number has the strip's own
        background, as in the GWT client, so a frozen row's number covers
        the scrolled one under it. The number is centred the GWT client's
-       way, a line of the font's own height in the middle of the whole
-       row - the pixel of padding makes up for the divider, which took no
-       room from the GWT client's number. */
+       way, a line of the font's own height in the middle of the whole row.
+       The divider between numbers is drawn inside the number's box, as the
+       GWT client's was: it takes no room from the number, and the border
+       along the cells runs past it to the end, the active row's marker
+       too. */
     .row-header-cell {
       position: absolute;
       box-sizing: border-box;
@@ -287,12 +289,10 @@ export class SpreadsheetRowHeader extends LitElement {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding-top: 1px;
       line-height: 100%;
       text-align: center;
       background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      box-shadow: inset 0 -1px 0 var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       border-right: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       cursor: e-resize;

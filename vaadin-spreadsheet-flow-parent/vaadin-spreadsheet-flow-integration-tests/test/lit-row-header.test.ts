@@ -639,6 +639,20 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
         cleanup(el);
     });
 
+    it('draws the divider inside the number, so the border along the cells runs past it, as the GWT client did', async () => {
+        // As a border of its own, the divider met the active row's 2px
+        // marker in a diagonal join, and the marker's last pixel came out
+        // half grey.
+        const el = await attachWithSelection(new Set([2]));
+
+        const style = getComputedStyle(el.shadowRoot!.querySelector('.row-header-cell.row2')!);
+        expect(style.borderBottomStyle).to.equal('none');
+        expect(style.boxShadow).to.equal('rgb(199, 199, 199) 0px -1px 0px 0px inset');
+        expect(style.borderRightWidth).to.equal('2px');
+
+        cleanup(el);
+    });
+
     it('marks only the selected row with the header-selected part', async () => {
         const el = await attachWithSelection(new Set([2]));
 
@@ -678,7 +692,8 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
         expect(`${selected.borderRightWidth} ${selected.borderRightStyle} ${selected.borderRightColor}`).to.equal(
             '2px solid rgb(99, 177, 255)'
         );
-        expect(selected.boxShadow).to.equal('none');
+        // Nothing drawn over the edge: the one shadow is the divider, inside.
+        expect(selected.boxShadow).to.equal('rgb(199, 199, 199) 0px -1px 0px 0px inset');
         const plain = getComputedStyle(cells[0]);
         expect(`${plain.borderRightWidth} ${plain.borderRightColor}`).to.equal('1px rgb(199, 199, 199)');
 

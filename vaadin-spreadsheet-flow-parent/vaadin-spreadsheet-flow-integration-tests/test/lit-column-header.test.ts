@@ -491,7 +491,8 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         expect(`${selected.borderBottomWidth} ${selected.borderBottomStyle} ${selected.borderBottomColor}`).to.equal(
             '2px solid rgb(99, 177, 255)'
         );
-        expect(selected.boxShadow).to.equal('none');
+        // Nothing drawn over the edge: the one shadow is the divider, inside.
+        expect(selected.boxShadow).to.equal('rgb(199, 199, 199) -1px 0px 0px 0px inset');
         const plain = getComputedStyle(cells[0]);
         expect(`${plain.borderBottomWidth} ${plain.borderBottomColor}`).to.equal('1px rgb(199, 199, 199)');
 
@@ -522,7 +523,8 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
 
         const selected = getComputedStyle(el.shadowRoot!.querySelectorAll('.col-header-cell')[1]);
         expect(selected.borderBottomColor).to.equal('rgb(0, 0, 255)');
-        expect(selected.boxShadow).to.equal('none');
+        // Nothing drawn over it: the one shadow is the divider, inside.
+        expect(selected.boxShadow).to.equal('rgb(199, 199, 199) -1px 0px 0px 0px inset');
 
         style.remove();
         cleanup(el);
@@ -590,9 +592,8 @@ describe('SpreadsheetColumnHeader — the documented border colour', () => {
         );
 
         const cell = el.shadowRoot!.querySelector('.col-header-cell')!;
-        expect(getComputedStyle(cell).borderRightColor).to.equal(
-            'rgb(9, 8, 7)'
-        );
+        expect(getComputedStyle(cell).boxShadow).to.equal('rgb(9, 8, 7) -1px 0px 0px 0px inset');
+        expect(getComputedStyle(cell).borderBottomColor).to.equal('rgb(9, 8, 7)');
 
         cleanup(el);
     });
@@ -610,9 +611,31 @@ describe('SpreadsheetColumnHeader — the documented border colour', () => {
         );
 
         const cell = el.shadowRoot!.querySelector('.col-header-cell')!;
-        expect(getComputedStyle(cell).borderRightColor).to.equal(
-            'rgb(199, 199, 199)'
+        expect(getComputedStyle(cell).boxShadow).to.equal('rgb(199, 199, 199) -1px 0px 0px 0px inset');
+
+        cleanup(el);
+    });
+
+    it('draws the divider inside the letter, so the border along the cells runs under it, as the GWT client did', async () => {
+        // As a border of its own, the divider met the active column's 2px
+        // marker in a diagonal join, and the marker's last pixel came out
+        // half grey.
+        const el = await attachWithState(
+            buildState({
+                firstColumnIndex: 1,
+                lastColumnIndex: 2,
+                firstColumnPosition: 0,
+                colX: [0, 50],
+                colWidths: [50, 50],
+                headerHeight: 20,
+                selectedColumns: new Set([1]),
+            })
         );
+
+        const style = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell.col1')!);
+        expect(style.borderRightStyle).to.equal('none');
+        expect(style.boxShadow).to.contain('inset');
+        expect(style.borderBottomWidth).to.equal('2px');
 
         cleanup(el);
     });
