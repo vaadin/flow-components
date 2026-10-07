@@ -4007,6 +4007,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // the Ctrl-click the moment the server echoes the selection back.
     // A plain click has already cleared them client-side, so preserving
     // the current list is also correct for the replace case.
+    const before = this.selection.activeCell;
+    const moved = before.col !== col || before.row !== row;
     this.selection = {
       activeCell: { col, row },
       activeRange: normalizedRange(c1, r1, c2, r2),
@@ -4028,7 +4030,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
       address: this.extendingSelection
         ? selectionSizeLabel(this.selection.activeRange)
         : name ?? cellCoordToAddress({ col, row }),
-      formula: this.formulaBar.renderState.formula,
+      // A new active cell shows in the field, as the GWT client's
+      // updateSelectedCellValues showed it - unless an edit is open, whose
+      // text stays where the user is typing it. The same cell keeps what
+      // the field has: the server may have just sent its value along with
+      // showSelectedCell, for a cell this client holds no data for.
+      formula:
+        moved && this.editor === null && !this.formulaBar.formulaFieldHasFocus()
+          ? this.formulaFieldValueFor(col, row)
+          : this.formulaBar.renderState.formula,
       namedRanges: this.namedRanges
     };
     if (scroll) {

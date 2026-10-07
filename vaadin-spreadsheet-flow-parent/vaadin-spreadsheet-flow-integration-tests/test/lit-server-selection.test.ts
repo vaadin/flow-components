@@ -374,6 +374,37 @@ describe('Formula bar — the address field', () => {
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
   });
 
+  it('shows the new active cell when the server moves the selection, as the GWT client did', () => {
+    // An address typed into the address field, or a named range picked
+    // there, comes back this way; the field kept the old cell's value.
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any,
+      { row: 5, col: 3, value: 'hello', cellStyle: 'cs0' } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.setSelectedCellAndRange('C5', 3, 5, 3, 3, 5, 5, true);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('hello');
+  });
+
+  it('leaves what is being typed when the server moves the selection mid-edit', () => {
+    ctx.sheet
+      .getScrollContainer()
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true, composed: true, cancelable: true }));
+    ctx.sheet.setSelectedCellAndRange('C5', 3, 5, 3, 3, 5, 5, false);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('x');
+  });
+
+  it('keeps what the server sent for the same cell when it names its range', () => {
+    // A cell this client has no data for yet: the server sends its value
+    // with showSelectedCell, then the range it is in.
+    ctx.sheet.showSelectedCell('C5', 3, 5, 'far away', false, false, false);
+    ctx.sheet.setSelectedCellAndRange('Sales', 3, 5, 3, 4, 5, 6, false);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('far away');
+  });
+
   it('prefers the formula over the unformatted value', () => {
     ctx.sheet.updateBottomRightCellValues([
       {
