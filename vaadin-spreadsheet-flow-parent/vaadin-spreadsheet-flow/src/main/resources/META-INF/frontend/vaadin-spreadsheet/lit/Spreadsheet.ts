@@ -3279,6 +3279,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // A workbook can hide its headers and still group its columns; the
     // outline gutter lives in this strip, so it has to be drawn even
     // when the letters above it are not.
+    //
+    // The corner covers the outline gutters too - otherwise a grouped sheet
+    // has an empty notch where the two gutters meet, and the level buttons
+    // have nowhere to sit. Its size is how far the strips start from the
+    // sheet's edges.
+    const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax, this.headerColumnWidth > 0);
+    const colGutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
+    const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
+    const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
     if (this.headerRowHeight > 0 || this.colGroupingMax > 0) {
       // Slice 167: compute positioned column-groupings so the
       // header can render the outline gutter. Pre-resolving
@@ -3291,10 +3300,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.defColWidth,
         5
       );
-      const gutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
       this.columnHeader.style.display = '';
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
-      this.columnHeader.style.height = `${this.headerRowHeight + gutterPx}px`;
+      this.columnHeader.style.height = `${this.headerRowHeight + colGutterPx}px`;
       this.columnHeader.renderState = {
         viewport: state.viewport,
         colX: state.colX,
@@ -3310,6 +3318,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         colGroupings,
         colGroupingMax: this.colGroupingMax,
         colGroupingInversed: this.colGroupingInversed,
+        leadingPx: cornerWidth,
         // Slice 173: feed the selected-columns set so the
         // header can emit `part="column-header
         // header-selected"` on cells inside the active
@@ -3341,7 +3350,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
         defaultRowHeightPx,
         2
       );
-      const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax, this.headerColumnWidth > 0);
       this.rowHeader.style.display = '';
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
@@ -3360,6 +3368,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         rowGroupingMax: this.rowGroupingMax,
         rowGroupingInversed: this.rowGroupingInversed,
         rowGroupingHeadings: this.headerColumnWidth > 0,
+        leadingPx: cornerHeight,
         // Frozen rows stay on screen whatever the scroll position, so
         // their headers travel with them.
         verticalSplitPosition: state.verticalSplitPosition,
@@ -3374,14 +3383,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // dimensions are > 0 so it occupies its grid cell with
     // matching width + height. When either is 0, the corner
     // collapses to a 0×0 box and isn't visible.
-    //
-    // The outline gutters are part of the strips beside it, so the corner
-    // covers them too - otherwise a grouped sheet has an empty notch where
-    // the two gutters meet, and the level buttons have nowhere to sit.
-    const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax, this.headerColumnWidth > 0);
-    const colGutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
-    const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
-    const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
     this.headerCorner.style.display = cornerWidth === 0 && cornerHeight === 0 ? 'none' : '';
     this.headerCorner.style.width = `${cornerWidth}px`;
     this.headerCorner.style.height = `${cornerHeight}px`;

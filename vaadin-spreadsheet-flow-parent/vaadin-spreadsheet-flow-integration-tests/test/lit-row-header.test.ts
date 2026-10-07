@@ -500,6 +500,32 @@ describe('Row header — grouping outline', () => {
         cleanup(el);
     });
 
+    it('starts the dotted lines at the top of the gutters, where the GWT client\'s did', async () => {
+        // A dotted line's dots are laid from where it starts; started under
+        // the corner, 66px above row 1, they fall on the GWT client's
+        // pixels instead of between them.
+        const el = await attachWithState({ ...stateWithGroupings({ max: 1, groupings: oneGroup }), leadingPx: 66 });
+
+        const divider = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-separator')!;
+        // 66 + 80px rounded up to an odd length: along an even one the
+        // browser doubles the first dot and shifts the rest.
+        expect(`${divider.style.top} ${divider.style.height}`).to.equal('-66px 147px');
+        cleanup(el);
+    });
+
+    it('borders the gutter off from the numbers beside it, as the GWT client did', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+
+        const gutter = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-gutter')!;
+        const style = getComputedStyle(gutter);
+        // One level and one more: 1 + 2 x 15px, its border on the last.
+        expect(gutter.getBoundingClientRect().width).to.equal(31);
+        expect(`${style.borderRightWidth} ${style.borderRightStyle} ${style.borderRightColor}`).to.equal(
+            '1px solid rgb(199, 199, 199)'
+        );
+        cleanup(el);
+    });
+
     it('asks to collapse an expanded group when its toggle is clicked', async () => {
         const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
         const received: any[] = [];

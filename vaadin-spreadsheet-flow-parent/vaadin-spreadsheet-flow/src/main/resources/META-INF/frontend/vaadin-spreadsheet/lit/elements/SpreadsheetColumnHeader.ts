@@ -87,6 +87,13 @@ export interface ColumnHeaderRenderState {
    */
   colGroupingInversed: boolean;
   /**
+   * How far left of the first column the sheet's edge is - the row numbers
+   * and their outline gutter. The dotted lines between the outline levels
+   * start there, where the GWT client's did, so their dots fall on the
+   * same pixels.
+   */
+  leadingPx?: number;
+  /**
    * Columns intersecting the active selection. Each cell whose
    * column is in this set gets the {@code header-selected} part
    * in addition to {@code column-header}, mirroring the
@@ -334,10 +341,19 @@ export class SpreadsheetColumnHeader extends LitElement {
       z-index: 2;
     }
 
+    .col-grouping-gutter {
+      position: absolute;
+      left: 0;
+      top: 0;
+      box-sizing: border-box;
+      border-bottom: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      pointer-events: none;
+    }
+
     /* Divides one outline level from the next. */
     .col-grouping-separator {
       position: absolute;
-      left: 0;
       height: 0;
       border-bottom: 1px dotted
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
@@ -552,6 +568,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       colGroupings = [],
       colGroupingMax = 0,
       colGroupingInversed = false,
+      leadingPx = 0,
       selectedColumns = new Set<number>(),
       horizontalSplitPosition = 0,
       frozenColX = [],
@@ -649,9 +666,20 @@ export class SpreadsheetColumnHeader extends LitElement {
     }
 
     const groupingEls: TemplateResult[] = [];
+    // The gutter is bordered off from the letters below it, as the GWT
+    // client's was; without letters the strip's own border does it.
+    if (gutterHeight > 0 && headerHeight > 0) {
+      const style = `height:${gutterHeight}px;width:${totalGridWidthPx}px;`;
+      groupingEls.push(html`<div class="col-grouping-gutter" style=${style}></div>`);
+    }
+    // From the sheet's edge, and an odd length: the browser lays a dotted
+    // line's dots every other pixel from its start only along an odd
+    // length, and along an even one doubles the first and shifts the rest.
     const levels = Math.round((gutterHeight - 3) / COLUMN_GROUPING_LEVEL_PX);
     for (let level = 1; level < levels; level++) {
-      const style = `top:${level * COLUMN_GROUPING_LEVEL_PX}px;width:${totalGridWidthPx}px;`;
+      const style =
+        `left:${-leadingPx}px;top:${level * COLUMN_GROUPING_LEVEL_PX}px;` +
+        `width:${Math.ceil(totalGridWidthPx + leadingPx) | 1}px;`;
       groupingEls.push(html`<div class="col-grouping-separator" style=${style}></div>`);
     }
     for (const g of colGroupings) {

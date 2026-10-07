@@ -93,6 +93,13 @@ export interface RowHeaderRenderState {
    * the button that opens every group. Absent means they do.
    */
   rowGroupingHeadings?: boolean;
+  /**
+   * How far above the first row the top of the outline gutters is - the
+   * letters and their outline gutter. The dotted lines between the outline
+   * levels start there, where the GWT client's did, so their dots fall on
+   * the same pixels.
+   */
+  leadingPx?: number;
 }
 
 /** Helper: build an empty row-header render state. */
@@ -198,10 +205,19 @@ export class SpreadsheetRowHeader extends LitElement {
       z-index: 2;
     }
 
+    .row-grouping-gutter {
+      position: absolute;
+      left: 0;
+      top: 0;
+      box-sizing: border-box;
+      border-right: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      pointer-events: none;
+    }
+
     /* Divides one outline level from the next. */
     .row-grouping-separator {
       position: absolute;
-      top: 0;
       width: 0;
       border-right: 1px dotted
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
@@ -313,6 +329,10 @@ export class SpreadsheetRowHeader extends LitElement {
     :host([theme~='lumo']) .row-header-cell[part~='header-selected'] {
       background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
       border-right-color: var(--lumo-primary-color-50pct);
+    }
+
+    :host([theme~='lumo']) .row-grouping-separator {
+      border-right-color: var(--lumo-contrast-20pct);
     }
 
     :host([theme~='lumo']) .row-grouping-toggle {
@@ -497,7 +517,8 @@ export class SpreadsheetRowHeader extends LitElement {
       verticalSplitPosition = 0,
       frozenRowY = [],
       frozenRowHeights = [],
-      scrollTop = 0
+      scrollTop = 0,
+      leadingPx = 0
     } = this.renderState;
 
     // As in the column header: no width still draws the grouping
@@ -583,9 +604,21 @@ export class SpreadsheetRowHeader extends LitElement {
     }
 
     const groupingEls: TemplateResult[] = [];
+    // The gutter is bordered off from the numbers beside it, as the GWT
+    // client's was; without numbers the strip's own border does it.
+    if (gutterWidth > 0 && numbersWidth > 0) {
+      const style = `width:${gutterWidth}px;height:${totalGridHeightPx}px;`;
+      groupingEls.push(html`<div class="row-grouping-gutter" style=${style}></div>`);
+    }
+    // From the top of the gutters, and an odd length: the browser lays a
+    // dotted line's dots every other pixel from its start only along an
+    // odd length, and along an even one doubles the first and shifts the
+    // rest.
     const levels = Math.round((gutterWidth - 1) / ROW_GROUPING_LEVEL_PX);
     for (let level = 1; level < levels; level++) {
-      const style = `left:${level * ROW_GROUPING_LEVEL_PX}px;height:${totalGridHeightPx}px;`;
+      const style =
+        `left:${level * ROW_GROUPING_LEVEL_PX}px;top:${-leadingPx}px;` +
+        `height:${Math.ceil(totalGridHeightPx + leadingPx) | 1}px;`;
       groupingEls.push(html`<div class="row-grouping-separator" style=${style}></div>`);
     }
     for (const g of rowGroupings) {

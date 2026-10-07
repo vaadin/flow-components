@@ -711,4 +711,45 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
         expect(getComputedStyle(dividers[0]).borderBottomStyle).to.equal('dotted');
         cleanup(el);
     });
+
+    it('starts the dotted lines at the sheet\'s edge, where the GWT client\'s did', async () => {
+        // A dotted line's dots are laid from where it starts; started under
+        // the corner, 81px left of column A, they fall on the GWT client's
+        // pixels instead of between them.
+        const el = await attachWithState({ ...withGroups([{ level: 1 }]), leadingPx: 81 });
+
+        const divider = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-separator')!;
+        expect(`${divider.style.left} ${divider.style.width}`).to.equal('-81px 481px');
+        cleanup(el);
+    });
+
+    it('gives the dotted lines an odd length, so the dots alternate from the start', async () => {
+        // Along an even length the browser doubles the first dot and shifts
+        // the rest a pixel off the GWT client's.
+        const el = await attachWithState({ ...withGroups([{ level: 1 }]), leadingPx: 80 });
+
+        const divider = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-separator')!;
+        expect(divider.style.width).to.equal('481px');
+        cleanup(el);
+    });
+
+    it('borders the gutter off from the letters below it, as the GWT client did', async () => {
+        const el = await attachWithState(withGroups([{ level: 1 }]));
+
+        const gutter = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-gutter')!;
+        const style = getComputedStyle(gutter);
+        // One level and one more: 3 + 2 x 18px, its border on the last.
+        expect(gutter.getBoundingClientRect().height).to.equal(39);
+        expect(`${style.borderBottomWidth} ${style.borderBottomStyle} ${style.borderBottomColor}`).to.equal(
+            '1px solid rgb(199, 199, 199)'
+        );
+        cleanup(el);
+    });
+
+    it('leaves the gutter to the strip\'s own border without letters', async () => {
+        const el = await attachWithState({ ...withGroups([{ level: 1 }]), headerHeight: 0 });
+
+        expect(el.shadowRoot!.querySelector('.col-grouping-gutter')).to.be.null;
+        cleanup(el);
+    });
 });

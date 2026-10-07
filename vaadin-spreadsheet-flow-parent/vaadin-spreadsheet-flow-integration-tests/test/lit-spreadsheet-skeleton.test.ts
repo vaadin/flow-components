@@ -3814,7 +3814,8 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.sheet.recomputeViewport();
 
         const all = await buttons(ctx.sheet);
-        expect(all.map((b) => b.style.top)).to.eql(['0px', '18px', '36px']);
+        const corner = ctx.sheet.getHeaderCorner().getBoundingClientRect().top;
+        expect(all.map((b) => b.getBoundingClientRect().top - corner)).to.eql([0, 18, 36]);
         ctx.cleanup();
     });
 
