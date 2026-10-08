@@ -19,7 +19,6 @@ export class ComboBoxConnector {
 
   #lastTypedFilter = '';
   #lastRequestedRange: ItemRange = [-1, -1];
-  #lastRequestedFilter = '';
   #needsDataCommunicatorReset = false;
 
   constructor(comboBox: FlowComboBox) {
@@ -37,6 +36,14 @@ export class ComboBoxConnector {
     // Assign last: setting the data provider can synchronously trigger a first
     // page load that calls back into the connector.
     comboBox.dataProvider = (params, callback) => this.#loadPage(params, callback);
+
+    // Whenever the web component cache is cleared after that, the server
+    // considers the requested range as already sent. Make the next request ask
+    // the server to send it again.
+    comboBox.clearCache = () => {
+      this.#needsDataCommunicatorReset = true;
+      Object.getPrototypeOf(comboBox).clearCache.call(comboBox);
+    };
   }
 
   clear(start: number, length: number): void {
@@ -123,6 +130,9 @@ export class ComboBoxConnector {
     this.#lastRequestedRange = [-1, -1];
     this.#lastTypedFilter = '';
     comboBox.clearCache();
+    // The server resets the data communicator itself before calling this, so
+    // the next request must not ask for another reset
+    this.#needsDataCommunicatorReset = false;
   }
 
   confirm(id: number, filter: string): void {
@@ -178,11 +188,6 @@ export class ComboBoxConnector {
         comboBox._filterDebouncer,
         timeOut.after(comboBox._filterTimeout ?? 500),
         () => {
-          // Filter cycled back to what server last received — force re-emit.
-          if (params.filter === this.#lastRequestedFilter) {
-            this.#needsDataCommunicatorReset = true;
-          }
-
           comboBox.clearCache();
         }
       );
@@ -240,7 +245,6 @@ export class ComboBoxConnector {
     }
 
     this.#lastRequestedRange = viewportPageRange;
-    this.#lastRequestedFilter = filter;
   }
 
   /** The range of item indexes currently rendered in the dropdown */
