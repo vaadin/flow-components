@@ -270,14 +270,13 @@ class SheetVisibilityOperationsTest {
 
     @Test
     void setActiveSheetProtected_delegatesToActiveSheetIndexVariant() {
-        // Pin: convenience method routes through setSheetProtected with
-        // the workbook's current active index.
-        when(workbook.getNumberOfSheets()).thenReturn(3);
+        // Pin: convenience method routes through the component's
+        // setSheetProtected with the workbook's current active index, so an
+        // override of it applies.
         when(workbook.getActiveSheetIndex()).thenReturn(2);
-        when(sheet.getProtect()).thenReturn(true);
 
         ops.setActiveSheetProtected("secret");
 
-        verify(sheet).protectSheet("secret");
+        verify(spreadsheet).setSheetProtected(2, "secret");
     }
 }

@@ -220,15 +220,13 @@ class SheetLifecycleOperationsTest {
     @Test
     void deleteSheet_validIndex_delegatesToPOIIndexVariant() {
         // Pin: visible-index translation via getVisibleSheetPOIIndex
-        // then deleteSheetWithPOIIndex.
+        // then the component's deleteSheetWithPOIIndex, so an override of
+        // it applies.
         when(spreadsheet.getNumberOfVisibleSheets()).thenReturn(3);
         when(spreadsheet.getVisibleSheetPOIIndex(1)).thenReturn(2);
-        when(spreadsheet.getSpreadsheetSheetIndex(2)).thenReturn(1);
-        when(spreadsheet.getSheetIndex()).thenReturn(2);
 
         ops.deleteSheet(1);
 
-        verify(workbook).removeSheetAt(2);
-        verify(spreadsheet).reloadActiveSheetData();
+        verify(spreadsheet).deleteSheetWithPOIIndex(2);
     }
 }

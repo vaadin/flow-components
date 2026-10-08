@@ -81,7 +81,8 @@ final class SheetLifecycleOperations implements Serializable {
             throw new IllegalArgumentException(
                     "Invalid index for visible sheet given.");
         }
-        deleteSheetWithPOIIndex(
+        // Through the component, so an override of it applies.
+        spreadsheet.deleteSheetWithPOIIndex(
                 spreadsheet.getVisibleSheetPOIIndex(sheetIndex));
     }
 }

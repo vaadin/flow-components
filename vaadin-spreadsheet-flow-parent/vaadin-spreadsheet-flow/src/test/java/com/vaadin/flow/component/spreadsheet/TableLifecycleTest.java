@@ -35,7 +35,8 @@ import org.mockito.MockitoAnnotations;
  * Pins {@code delete}'s side-effect cascade:
  *
  * <ol>
- * <li>Always: unregister from the registry.</li>
+ * <li>Always: unregister, through the component's {@code unregisterTable}, so
+ * an override of it applies.</li>
  * <li>If the table's sheet is NOT active → early-return; no popup cleanup, no
  * filter clear, no table.clear.</li>
  * <li>If active: for each popup button, clear it via
@@ -47,15 +48,13 @@ class TableLifecycleTest {
 
     @Mock
     private Spreadsheet spreadsheet;
-    @Mock
-    private TableRegistry registry;
 
     private TableLifecycle lifecycle;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        lifecycle = new TableLifecycle(spreadsheet, registry);
+        lifecycle = new TableLifecycle(spreadsheet);
     }
 
     @Test
@@ -65,7 +64,7 @@ class TableLifecycleTest {
 
         lifecycle.delete(table);
 
-        verify(registry).remove(table);
+        verify(spreadsheet).unregisterTable(table);
     }
 
     @Test
@@ -77,7 +76,7 @@ class TableLifecycleTest {
 
         lifecycle.delete(table);
 
-        verify(registry).remove(table);
+        verify(spreadsheet).unregisterTable(table);
         verify(table, never()).getPopupButtons();
         verify(table, never()).clear();
         verify(spreadsheet, never()).setPopup(any(CellReference.class),
@@ -147,7 +146,7 @@ class TableLifecycleTest {
     @Test
     void delete_activeSheet_orderedCascade_unregisterFirst_clearLast() {
         // Pin the canonical order:
-        // 1. registry.remove
+        // 1. unregisterTable
         // 2. setPopup(ref, null) for each button
         // 3. (filter table only) clearAllFilters
         // 4. table.clear
@@ -160,8 +159,8 @@ class TableLifecycleTest {
 
         lifecycle.delete(table);
 
-        InOrder inOrder = Mockito.inOrder(registry, spreadsheet, table);
-        inOrder.verify(registry).remove(table);
+        InOrder inOrder = Mockito.inOrder(spreadsheet, table);
+        inOrder.verify(spreadsheet).unregisterTable(table);
         inOrder.verify(spreadsheet).setPopup(ref, null);
         inOrder.verify(table).clearAllFilters();
         inOrder.verify(table).clear();

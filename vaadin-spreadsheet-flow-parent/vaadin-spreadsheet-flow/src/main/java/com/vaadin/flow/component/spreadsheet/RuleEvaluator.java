@@ -27,7 +27,6 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.ConditionType;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +58,17 @@ final class RuleEvaluator implements Serializable {
 
     private final Spreadsheet spreadsheet;
 
-    RuleEvaluator(Spreadsheet spreadsheet) {
+    /**
+     * The formatter whose overridable methods the rules are matched through, as
+     * the GWT-era formatter matched them itself: a subclass that overrides
+     * {@code matchesValue}, {@code matchesFormula} or
+     * {@code getFormulaEvaluator} sees its override applied.
+     */
+    private final ConditionalFormatter formatter;
+
+    RuleEvaluator(Spreadsheet spreadsheet, ConditionalFormatter formatter) {
         this.spreadsheet = spreadsheet;
+        this.formatter = formatter;
     }
 
     boolean matches(Cell cell, ConditionalFormattingRule rule, int deltaColumn,
@@ -83,9 +91,11 @@ final class RuleEvaluator implements Serializable {
          */
         try {
             if (rule.getConditionType().equals(ConditionType.CELL_VALUE_IS)) {
-                return matchesValue(cell, rule, deltaColumn, deltaRow);
+                return formatter.matchesValue(cell, rule, deltaColumn,
+                        deltaRow);
             } else {
-                return matchesFormula(cell, rule, deltaColumn, deltaRow);
+                return formatter.matchesFormula(cell, rule, deltaColumn,
+                        deltaRow);
             }
         } catch (NotImplementedException e) {
             LOGGER.trace(e.getMessage(), e);
@@ -130,7 +140,7 @@ final class RuleEvaluator implements Serializable {
 
         if (isFormulaType) {
             // make sure we have the latest value for formula cells
-            getFormulaEvaluator().evaluateFormulaCell(cell);
+            formatter.getFormulaEvaluator().evaluateFormulaCell(cell);
         }
 
         boolean isFormulaStringType = isFormulaType
@@ -277,7 +287,4 @@ final class RuleEvaluator implements Serializable {
         return true;
     }
 
-    private FormulaEvaluator getFormulaEvaluator() {
-        return spreadsheet.getFormulaEvaluator();
-    }
 }

@@ -70,7 +70,8 @@ class RuleEvaluatorTest {
         lenient().when(spreadsheet.getActiveSheetIndex()).thenReturn(0);
         lenient().when(spreadsheet.getFormulaEvaluator()).thenReturn(
                 workbook.getCreationHelper().createFormulaEvaluator());
-        evaluator = new RuleEvaluator(spreadsheet);
+        evaluator = new RuleEvaluator(spreadsheet,
+                new ConditionalFormatter(spreadsheet));
     }
 
     @AfterEach

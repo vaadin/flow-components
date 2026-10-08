@@ -125,8 +125,8 @@ class ActiveSheetSelectorTest {
 
         selector.setActiveSheetIndex(1);
 
-        verify(workbook).setActiveSheet(2);
-        verify(workbook).setSelectedTab(2);
+        // Through the component, so an override of it applies.
+        verify(spreadsheet).setActiveSheetWithPOIIndex(2);
     }
 
     @Test

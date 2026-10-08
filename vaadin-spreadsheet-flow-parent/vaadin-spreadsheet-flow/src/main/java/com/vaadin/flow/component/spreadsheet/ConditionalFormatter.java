@@ -86,7 +86,7 @@ public class ConditionalFormatter implements Serializable {
             colorConverter = new XSSFColorConverter((XSSFWorkbook) workbook);
         }
         this.borderTracker = new RuleBorderTracker(colorConverter);
-        this.ruleEvaluator = new RuleEvaluator(spreadsheet);
+        this.ruleEvaluator = new RuleEvaluator(spreadsheet, this);
     }
 
     /**
@@ -335,7 +335,8 @@ public class ConditionalFormatter implements Serializable {
 
     /**
      * Checks if the formula in the given rule evaluates to {@code true}.
-     * Preserved as a protected delegator. Logic in {@link RuleEvaluator}.
+     * {@link #matches} calls it for a formula rule. Logic in
+     * {@link RuleEvaluator}.
      */
     protected boolean matchesFormula(Cell cell, ConditionalFormattingRule rule,
             int deltaColumn, int deltaRow) {
@@ -343,8 +344,9 @@ public class ConditionalFormatter implements Serializable {
     }
 
     /**
-     * Checks if the given cell value matches a {@code VALUE_IS} rule. Preserved
-     * as a protected delegator. Logic in {@link RuleEvaluator}.
+     * Checks if the given cell value matches a {@code VALUE_IS} rule.
+     * {@link #matches} calls it for a value rule. Logic in
+     * {@link RuleEvaluator}.
      */
     protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule,
             int deltaColumn, int deltaRow) {

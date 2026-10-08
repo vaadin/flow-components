@@ -73,13 +73,13 @@ class SheetMetadataOperationsTest {
     @Test
     void setSheetName_validIndex_delegatesToPOIIndexSetter() {
         // Pin: setSheetName translates the visible-sheet index via
-        // getVisibleSheetPOIIndex, then calls setSheetNameWithPOIIndex.
+        // getVisibleSheetPOIIndex, then calls the component's
+        // setSheetNameWithPOIIndex, so an override of it applies.
         when(spreadsheet.getVisibleSheetPOIIndex(1)).thenReturn(2);
-        when(spreadsheet.getSpreadsheetSheetIndex(2)).thenReturn(1);
 
         ops.setSheetName(1, "Renamed");
 
-        verify(workbook).setSheetName(2, "Renamed");
+        verify(spreadsheet).setSheetNameWithPOIIndex(2, "Renamed");
     }
 
     @Test

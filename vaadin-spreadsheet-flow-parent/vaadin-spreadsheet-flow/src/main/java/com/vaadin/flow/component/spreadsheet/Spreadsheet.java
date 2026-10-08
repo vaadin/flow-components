@@ -1033,8 +1033,7 @@ public class Spreadsheet extends Component
     private final TableLoader tableLoader = new TableLoader(this,
             tableRegistry);
 
-    private final TableLifecycle tableLifecycle = new TableLifecycle(this,
-            tableRegistry);
+    private final TableLifecycle tableLifecycle = new TableLifecycle(this);
 
     private final ActiveSheetSelector activeSheetSelector = new ActiveSheetSelector(
             this);

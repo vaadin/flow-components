@@ -44,7 +44,8 @@ final class ActiveSheetSelector implements Serializable {
             throw new IllegalArgumentException("Invalid Sheet index given.");
         }
         int poiSheetIndex = spreadsheet.getVisibleSheetPOIIndex(sheetIndex);
-        setActiveSheetWithPOIIndex(poiSheetIndex);
+        // Through the component, so an override of it applies.
+        spreadsheet.setActiveSheetWithPOIIndex(poiSheetIndex);
     }
 
     void setActiveSheetWithPOIIndex(int sheetIndex) {

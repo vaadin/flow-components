@@ -32,7 +32,8 @@ final class SheetMetadataOperations implements Serializable {
             throw new IllegalArgumentException("Invalid Sheet index given.");
         }
         int poiSheetIndex = spreadsheet.getVisibleSheetPOIIndex(sheetIndex);
-        setSheetNameWithPOIIndex(poiSheetIndex, sheetName);
+        // Through the component, so an override of it applies.
+        spreadsheet.setSheetNameWithPOIIndex(poiSheetIndex, sheetName);
     }
 
     void setSheetNameWithPOIIndex(int sheetIndex, String sheetName) {

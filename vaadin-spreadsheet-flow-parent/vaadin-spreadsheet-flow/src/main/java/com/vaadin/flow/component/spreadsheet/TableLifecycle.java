@@ -18,15 +18,14 @@ import java.io.Serializable;
 final class TableLifecycle implements Serializable {
 
     private final Spreadsheet spreadsheet;
-    private final TableRegistry registry;
 
-    TableLifecycle(Spreadsheet spreadsheet, TableRegistry registry) {
+    TableLifecycle(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        this.registry = registry;
     }
 
     void delete(SpreadsheetTable table) {
-        registry.remove(table);
+        // Through the component, so an override of it applies.
+        spreadsheet.unregisterTable(table);
         if (!table.isTableSheetCurrentlyActive()) {
             return;
         }

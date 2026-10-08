@@ -56,7 +56,9 @@ final class ColumnAutofitter implements Serializable {
         SizeChangeCommand command = new SizeChangeCommand(spreadsheet,
                 Type.COLUMN);
         command.captureValues(new Integer[] { columnIndex + 1 });
-        autofit(columnIndex);
+        // Through the component, as the GWT-era one did, so an application
+        // that overrides autofitColumn sees the user's double click too.
+        spreadsheet.autofitColumn(columnIndex);
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
     }
 
@@ -113,7 +115,7 @@ final class ColumnAutofitter implements Serializable {
             int currentWidth = (int) filteredSheet
                     .getColumnWidthInPixels(cr.getCol());
             if (currentWidth == autofittedWidth) {
-                autofit(cr.getCol());
+                spreadsheet.autofitColumn(cr.getCol());
             }
         }
     }

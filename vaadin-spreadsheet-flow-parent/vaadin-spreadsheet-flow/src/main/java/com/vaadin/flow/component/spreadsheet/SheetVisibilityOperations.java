@@ -93,6 +93,8 @@ final class SheetVisibilityOperations implements Serializable {
     }
 
     void setActiveSheetProtected(String password) {
-        setSheetProtected(spreadsheet.workbook.getActiveSheetIndex(), password);
+        // Through the component, so an override of it applies.
+        spreadsheet.setSheetProtected(
+                spreadsheet.workbook.getActiveSheetIndex(), password);
     }
 }

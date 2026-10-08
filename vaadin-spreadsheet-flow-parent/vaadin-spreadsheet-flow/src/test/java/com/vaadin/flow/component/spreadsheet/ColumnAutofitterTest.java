@@ -197,7 +197,8 @@ class ColumnAutofitterTest {
         autofitter.onClientAutofit(1);
 
         verify(historyManager).addCommand(any());
-        verify(sheet).autoSizeColumn(1);
+        // Through the component, so an override of autofitColumn applies.
+        verify(spreadsheet).autofitColumn(1);
     }
 
     @Test
@@ -211,6 +212,7 @@ class ColumnAutofitterTest {
 
         // No autofit calls because the cache is empty.
         verify(sheet, never()).autoSizeColumn(anyInt());
+        verify(spreadsheet, never()).autofitColumn(anyInt());
     }
 
     @Test
@@ -234,6 +236,7 @@ class ColumnAutofitterTest {
         autofitter.refreshAutofittedColumnsInTable(table);
 
         verify(sheet, never()).autoSizeColumn(anyInt());
+        verify(spreadsheet, never()).autofitColumn(anyInt());
     }
 
     @Test
@@ -254,6 +257,6 @@ class ColumnAutofitterTest {
 
         autofitter.refreshAutofittedColumnsInTable(table);
 
-        verify(sheet).autoSizeColumn(1);
+        verify(spreadsheet).autofitColumn(1);
     }
 }
