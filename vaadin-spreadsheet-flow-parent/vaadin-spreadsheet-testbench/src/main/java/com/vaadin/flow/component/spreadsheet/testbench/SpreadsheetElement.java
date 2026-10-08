@@ -20,17 +20,8 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * Base TestBench element for the Vaadin Spreadsheet component.
- *
- * <p>
- * Slice 177 (Tier 3 Phase 3.7): re-targeted from the GWT-era DOM to the
- * Lit-element DOM. The component now consists of nested shadow roots: the
- * {@code <vaadin-spreadsheet>} wrapper owns one, and each internal Lit
- * sub-element ({@code internal-formula-bar}, {@code internal-column-header},
- * {@code internal-row-header}, {@code internal-cell-grid},
- * {@code internal-sheet-tabs}) owns its own. This class traverses them via
- * JavaScript executor calls — the public Java method signatures here are
- * unchanged, so existing IT tests don't need updates.
+ * This is the base element class for accessing a Vaadin Spreadsheet component
+ * for TestBench testing.
  *
  * @author Vaadin Ltd.
  */
@@ -568,16 +559,16 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Fetches the context menu for the spreadsheet. The menu is an internal
-     * element inside the spreadsheet's shadow root, so it is found by
-     * traversing the shadow roots rather than by a document query. A menu
-     * fading out as it closes is not open.
+     * Fetches the context menu for the spreadsheet. A menu that is fading out
+     * as it closes is not open.
      *
      * @return {@link SpreadsheetElement.ContextMenuElement}
-     * @throws java.util.NoSuchElementException
+     * @throws NoSuchElementException
      *             if the menu isn't open
      */
     public ContextMenuElement getContextMenu() {
+        // The menu is inside the spreadsheet's shadow root, not in the
+        // document body.
         WebElement cm = (WebElement) ((JavascriptExecutor) getCommandExecutor()
                 .getDriver()).executeScript(
                         """
@@ -599,18 +590,18 @@ public class SpreadsheetElement extends TestBenchElement {
     public static class ContextMenuElement extends TestBenchElement {
 
         /**
-         * The menu item whose caption contains the given text, or {@code null}.
-         * <p>
-         * A substring match, because several captions name what they act on —
-         * "Delete row 1", not "Delete row" — and callers ask for the stable
-         * part. The xpath {@code contains()} lookup this replaces did the same.
-         * <p>
-         * Matched on {@code textContent} rather than
-         * {@link WebElement#getText()}: the items live in the context menu's
-         * shadow root, where getText() reports the empty string, so every
-         * lookup came back null.
+         * Gets the menu item whose caption contains the given text. Several
+         * captions name what they act on, such as "Delete row 1", so the text
+         * can be the part of the caption that does not change.
+         *
+         * @param text
+         *            the text to look for in the captions
+         * @return the first menu item whose caption contains the text, or
+         *         {@code null} if there is none
          */
         public WebElement getItem(String text) {
+            // Matched on textContent: getText() reports the empty string for
+            // the items, which are in the menu's shadow root.
             return (WebElement) ((JavascriptExecutor) getCommandExecutor()
                     .getDriver()).executeScript("""
                             const menu = arguments[0];
@@ -682,10 +673,8 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     private boolean isNonCoherentlySelected(WebElement element) {
-        // an element is non-coherently selected if the part attribute
-        // contains "cell-range" — slice 173 emits part="cell cell-range"
-        // on cells inside the active range that aren't the active cell.
-        // Falls back to the legacy "outline-style: solid" CSS check.
+        // A cell in the selected range other than the active cell carries the
+        // cell-range part; a solid outline marks such a cell too.
         String partAttr = Optional.ofNullable(element.getDomAttribute("part"))
                 .orElse("");
         return partAttr.contains("cell-range")
@@ -693,22 +682,25 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * The cell value input — Lit equivalent is the {@code <input>} inside the
-     * cell-grid carrying {@code part="cell-input"}.
+     * Gets the input of the inline cell editor, which holds the value of the
+     * cell being edited.
+     *
+     * @return the input, or {@code null} when no cell is being edited
      */
     public WebElement getCellValueInput() {
+        // The editor is in the DOM only while a cell is being edited.
         return findInCellGrid("[part~=\"cell-input\"]");
     }
 
     /**
-     * Determine if the pop-up of PopupButton is currently visible.
-     * <p>
-     * The Lit client shows it in its own overlay inside the spreadsheet's
-     * shadow root, drawn in the top layer as the GWT client's popover was,
-     * rather than in the GWT-era {@code .v-spreadsheet-popupbutton-overlay} div
-     * in the light DOM. A pop-up fading out as it closes counts as closed.
+     * Determine if the pop-up of PopupButton is currently visible. A pop-up
+     * that is fading out as it closes counts as closed.
+     *
+     * @return {@code true} if the pop-up is visible, {@code false} otherwise
      */
     public boolean isPopupButtonPopupVisible() {
+        // The pop-up is an overlay inside the spreadsheet's shadow root, so
+        // only this spreadsheet's pop-up counts.
         Object visible = ((JavascriptExecutor) getCommandExecutor().getDriver())
                 .executeScript("""
                         const overlay = arguments[0].shadowRoot

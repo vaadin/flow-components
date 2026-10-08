@@ -40,11 +40,9 @@ public class SheetCellElement extends TestBenchElement {
     public void setValue(String newValue) {
         if (isNormalCell()) {
             // Single async JS call that selects the cell, activates the
-            // inline editor, sets the value, and commits with Tab.
-            // Slice 177: re-targeted to the Lit cell-grid's shadow DOM
-            // — the editor input now lives at
-            // {@code [part="cell-input"]} inside
-            // {@code vaadin-spreadsheet-internal-cell-grid}.
+            // inline editor, sets the value, and commits with Tab. The
+            // editor's input is the cell grid's cell-input part, there only
+            // while a cell is being edited.
             Boolean result = (Boolean) getCommandExecutor().getDriver()
                     .executeAsyncScript(
                             """
@@ -175,12 +173,6 @@ public class SheetCellElement extends TestBenchElement {
     /**
      * Determines if this cell has a PopupButton set.
      *
-     * <p>
-     * Slice 177: re-targeted to the Lit cell-grid's popup-button div. Popup
-     * buttons live as siblings of the cell inside the cell-grid's shadow root
-     * (positioned at the cell's bottom-right corner), not as descendants of the
-     * cell. We look up by data coordinates instead of descendant lookup.
-     *
      * @return true if this cell has a pop-up button, false otherwise
      */
     public boolean hasPopupButton() {
@@ -190,7 +182,7 @@ public class SheetCellElement extends TestBenchElement {
     /**
      * Click the PopupButton in the cell.
      *
-     * @throws IllegalArgumentException
+     * @throws IllegalStateException
      *             if the cell doesn't contain a PopupButton
      */
     public void popupButtonClick() {
@@ -203,9 +195,10 @@ public class SheetCellElement extends TestBenchElement {
     }
 
     /**
-     * Slice 177: locate a popup-button element associated with this cell.
-     * Buttons carry {@code part="popup-button"} and
-     * {@code data-col}/{@code data-row} attributes matching the cell.
+     * The popup button of this cell, or {@code null} if it has none. The
+     * buttons are drawn at the cell's corner as siblings of the cell, not
+     * inside it, and carry the cell's {@code data-col} and {@code data-row}
+     * attributes.
      */
     private WebElement findPopupButton() {
         String col = Optional.ofNullable(getDomAttribute("data-col"))
@@ -236,11 +229,9 @@ public class SheetCellElement extends TestBenchElement {
     }
 
     /**
-     * Determines if the cell has invalid formula indicator. Not yet implemented
-     * in the Lit Spreadsheet — returns {@code false} until the invalid-triangle
-     * UI lands.
+     * Determines if the cell has an invalid formula indicator.
      *
-     * @return true if this cell has a invalid formula indicator
+     * @return true if this cell has an invalid formula indicator
      */
     public boolean hasInvalidFormulaIndicator() {
         // The marker is a child of the cell element, so a scoped find
@@ -250,9 +241,7 @@ public class SheetCellElement extends TestBenchElement {
     }
 
     /**
-     * Determines if the cell has a comment indicator. Slice 165 added the
-     * {@code part="comment-triangle"} indicator next to the cell; look for it
-     * by the cell's coordinates.
+     * Determines if the cell has a comment indicator.
      *
      * @return true if this cell has a comment indicator
      */

@@ -22,16 +22,13 @@ import com.vaadin.testbench.TestBenchElement;
 public class SheetHeaderElement extends TestBenchElement {
 
     /**
-     * The drag handle that resizes this header.
-     *
-     * GWT nested the handle inside the header cell. The Lit headers render
-     * handles as siblings of the cells, each carrying the same {@code data-col}
-     * / {@code data-row} as the header it resizes, so the handle is found by
-     * coordinate rather than by descent.
+     * Gets the drag handle that resizes this header.
      *
      * @return the resize handle, or {@code null} if this header has none
      */
     public TestBenchElement getResizeHandle() {
+        // The handles are siblings of the header cells, not inside them, and
+        // carry the data-col or data-row of the header they resize.
         WebElement handle = (WebElement) ((JavascriptExecutor) getCommandExecutor()
                 .getDriver()).executeScript("""
                         const header = arguments[0];
