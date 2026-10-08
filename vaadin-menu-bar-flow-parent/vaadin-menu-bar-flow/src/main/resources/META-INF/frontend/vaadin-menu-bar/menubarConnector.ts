@@ -23,7 +23,6 @@ import type { FlowMenuBar, FlowMenuBarItem } from './vaadin-menu-bar-types.js';
  */
 export class MenuBarConnector {
   readonly #menuBar: FlowMenuBar;
-  readonly #appId: string;
 
   /** The last generated items tree, before hidden items are filtered out */
   #generatedItems: FlowMenuBarItem[] = [];
@@ -43,37 +42,36 @@ export class MenuBarConnector {
     }
   });
 
-  constructor(menuBar: FlowMenuBar, appId: string) {
+  constructor(menuBar: FlowMenuBar) {
     this.#menuBar = menuBar;
-    this.#appId = appId;
   }
 
   /**
    * Generates and assigns the items to the menu bar.
    *
-   * When the method is called without providing a node id,
+   * When the method is called without providing an app id and a node id,
    * the previously generated items tree will be used.
    * That can be useful if you only want to re-filter hidden items
    * and re-render the buttons.
    */
-  generateItems(nodeId?: number): void {
+  generateItems(appId?: string, nodeId?: number): void {
     const menuBar = this.#menuBar;
 
     if (!menuBar.shadowRoot) {
       // workaround for https://github.com/vaadin/flow/issues/5722
-      setTimeout(() => this.generateItems(nodeId));
+      setTimeout(() => this.generateItems(appId, nodeId));
       return;
     }
 
     if (!menuBar._container) {
       // Menu-bar defers first buttons render to avoid re-layout
       // See https://github.com/vaadin/web-components/issues/7271
-      queueMicrotask(() => this.generateItems(nodeId));
+      queueMicrotask(() => this.generateItems(appId, nodeId));
       return;
     }
 
-    if (nodeId) {
-      this.#generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(this.#appId, nodeId) ?? [];
+    if (appId && nodeId) {
+      this.#generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId) ?? [];
     }
 
     this.#generatedItems.forEach((item) => {
@@ -92,9 +90,9 @@ export class MenuBarConnector {
   }
 }
 
-function initLazy(menuBar: FlowMenuBar, appId: string): void {
+function initLazy(menuBar: FlowMenuBar): void {
   // Init the connector only once for the menu bar
-  menuBar.$connector ??= new MenuBarConnector(menuBar, appId);
+  menuBar.$connector ??= new MenuBarConnector(menuBar);
 }
 
 window.Vaadin.Flow.menubarConnector = { initLazy };

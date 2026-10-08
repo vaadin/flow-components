@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
+import static org.springframework.ai.model.tool.ToolCallLimitExceededException.FINISH_REASON;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +79,31 @@ import tools.jackson.databind.JsonNode;
  * user's message renders while the LLM works.
  * </p>
  * <p>
+ * <b>Tool call limits:</b> Spring AI runs the tool-calling loop itself and
+ * bounds it: once the model has requested more than {@code 40} calls to any one
+ * tool, or more than {@code 150} tool calls in total, within a turn, Spring AI
+ * stops the loop and replies with its own message about the exceeded limit. The
+ * provider does not pass that reply on. It fails the turn with a
+ * {@link ToolCallLimitExceededException} instead, the same way
+ * {@link LangChain4JLLMProvider} does, so you receive the exception as the
+ * error of the turn whichever provider runs it. The finish reason
+ * {@code toolCallLimitExceeded} is still published in the
+ * {@link ResponseMetadata response metadata}, and Spring AI's reply may remain
+ * in the chat memory with either constructor, since the provider does not
+ * rewrite what Spring AI's advisors stored. The limits belong to the
+ * {@code ToolCallingAdvisor} of the {@link ChatClient}: a provider created from
+ * a {@link ChatModel} builds its own client and keeps Spring AI's defaults. To
+ * change them, build the client yourself, passing {@code ChatClient.builder} a
+ * {@code ToolCallingAdvisor.Builder} that carries a
+ * {@code DefaultToolCallingManager} with your limits, and create the provider
+ * from that client. Its {@code maxCallsPerTool} and {@code maxTotalToolCalls}
+ * set a limit, {@code unlimitedCallsPerTool()} and
+ * {@code unlimitedTotalToolCalls()} remove one. In a Spring Boot application
+ * the {@code spring.ai.tools.limits} properties configure the same limits on
+ * the auto-configured {@code ChatClient.Builder}, so passing that client to
+ * {@link #SpringAILLMProvider(ChatClient)} needs no builder code.
+ * </p>
+ * <p>
  * With the {@link #SpringAILLMProvider(ChatModel)} constructor the provider
  * maintains its own chat memory, and {@link #setHistory(List, Map)} restores a
  * saved conversation into it. To share conversation history across components,
@@ -95,7 +122,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.1
+ * @since 25.3
  */
 public class SpringAILLMProvider implements LLMProvider {
 
@@ -104,6 +131,18 @@ public class SpringAILLMProvider implements LLMProvider {
 
     private static final int MAX_MESSAGES = 30;
     private static final String CONVERSATION_ID = "default";
+
+    /**
+     * The finish reason Spring AI puts on the reply it synthesizes when its
+     * tool call limit is hit. Spring AI's own exception never reaches this
+     * provider: the {@code ToolCallingAdvisor} of the {@link ChatClient}
+     * catches it and returns the breach as a normal reply carrying this reason.
+     * Not a vendor's wording but a constant Spring AI defines for that reply,
+     * so comparing against it is the one finish-reason check this provider
+     * makes. Spring AI's exception shares its simple name with ours, hence the
+     * static import of the constant alone.
+     */
+    private static final String TOOL_CALL_LIMIT_FINISH_REASON = FINISH_REASON;
 
     private final transient ChatClient chatClient;
     private final transient MessageWindowChatMemory chatMemory;
@@ -173,7 +212,6 @@ public class SpringAILLMProvider implements LLMProvider {
      * Gets whether streaming mode is used.
      *
      * @return {@code true} if streaming mode is used, {@code false} otherwise
-     * @since 25.3
      */
     public boolean isStreaming() {
         return isStreaming;
@@ -195,7 +233,6 @@ public class SpringAILLMProvider implements LLMProvider {
      *
      * @return {@code true} if the call runs on a background thread,
      *         {@code false} if it runs on the thread that asks for the response
-     * @since 25.3
      */
     public boolean isBackgroundExecution() {
         return backgroundExecution.isEnabled();
@@ -213,8 +250,7 @@ public class SpringAILLMProvider implements LLMProvider {
      * so nothing the turn produces reaches the browser and the application
      * appears frozen. Set this to {@code true} to run the call on a background
      * thread instead: the request completes immediately, the user's message and
-     * the assistant placeholder render, and the response is added when it
-     * arrives.
+     * the typing indicator render, and the response is added when it arrives.
      * <p>
      * This requires the following from the application:
      * <ul>
@@ -251,7 +287,6 @@ public class SpringAILLMProvider implements LLMProvider {
      *            {@code true} to run the call on a background thread,
      *            {@code false} to run it on the thread that asks for the
      *            response
-     * @since 25.3
      */
     public void setBackgroundExecution(boolean backgroundExecution) {
         this.backgroundExecution.setEnabled(backgroundExecution);
@@ -396,7 +431,14 @@ public class SpringAILLMProvider implements LLMProvider {
             var collector = new ResponseMetadataCollector(
                     request.metadataSink());
             var chatResponses = getPromptSpec(request).stream().chatResponse()
-                    .doOnNext(collector::observe);
+                    .doOnNext(collector::observe)
+                    .<ChatResponse> handle((response, sink) -> {
+                        if (isToolCallLimitBreach(response)) {
+                            sink.error(toolCallLimitExceeded(response));
+                        } else {
+                            sink.next(response);
+                        }
+                    });
             return warnOnMissingFinishReason(chatResponses)
                     .map(SpringAILLMProvider::getAssistantText)
                     .filter(text -> !text.isEmpty());
@@ -463,6 +505,24 @@ public class SpringAILLMProvider implements LLMProvider {
         return text != null ? text : "";
     }
 
+    private static boolean isToolCallLimitBreach(ChatResponse response) {
+        return TOOL_CALL_LIMIT_FINISH_REASON
+                .equals(ResponseMetadataCollector.getFinishReason(response));
+    }
+
+    /**
+     * Turns the reply Spring AI synthesized for an exceeded tool call limit
+     * into the exception both providers fail such a turn with. Spring AI's
+     * message names the limit and the tool, so it becomes the exception's.
+     */
+    private static ToolCallLimitExceededException toolCallLimitExceeded(
+            ChatResponse response) {
+        var message = getAssistantText(response);
+        return new ToolCallLimitExceededException(message.isEmpty()
+                ? "Spring AI stopped the turn at its tool call limit"
+                : message);
+    }
+
     private ChatClient.ChatClientRequestSpec getPromptSpec(LLMRequest request) {
         var promptSpec = chatClient.prompt();
         if (hasManagedMemory) {
@@ -470,7 +530,8 @@ public class SpringAILLMProvider implements LLMProvider {
                     a -> a.param(ChatMemory.CONVERSATION_ID, CONVERSATION_ID));
         }
         promptSpec = promptSpec.user(userSpec -> {
-            userSpec.text(request.userMessage());
+            userSpec.text(LLMProviderHelpers.withSessionContext(
+                    request.userMessage(), request.sessionContext()));
             var media = buildMedia(request);
             if (media.length != 0) {
                 userSpec.media(media);
@@ -506,6 +567,10 @@ public class SpringAILLMProvider implements LLMProvider {
                 } else {
                     new ResponseMetadataCollector(request.metadataSink())
                             .observe(response);
+                    if (isToolCallLimitBreach(response)) {
+                        sink.error(toolCallLimitExceeded(response));
+                        return;
+                    }
                     warnOnAbnormalCompletion(response);
                     var text = getAssistantText(response);
                     if (!text.isEmpty()) {

@@ -119,6 +119,7 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -131,6 +132,7 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import tools.jackson.databind.JsonNode;
@@ -214,8 +216,8 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.3.0-beta2")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.3.0-beta2")
+@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -541,6 +543,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         }
 
+        @Override
+        public SignalBinding<Boolean> bindVisible(
+                Signal<Boolean> visibleSignal) {
+            return super.bindVisible(visibleSignal).onChange(ctx -> {
+                if (Boolean.FALSE.equals(ctx.getOldValue())
+                        && Boolean.TRUE.equals(ctx.getNewValue())) {
+                    getGrid().refreshViewport();
+                }
+            });
+        }
+
         protected void destroyDataGenerators() {
             if (rendererRegistrations != null) {
                 rendererRegistrations.forEach(Registration::remove);
@@ -622,7 +635,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Sets the width of this column as a CSS-string.
+         * Sets the width of this column as a CSS-string. The default width is
+         * {@code 100px}.
+         * <p>
+         * When the {@link #setFlexGrow(int) flex grow} of this column is above
+         * {@code 0}, this width is both the starting width and the minimum
+         * width of the column. The column grows into the available space, but
+         * never becomes narrower than this width. When the sum of the column
+         * widths exceeds the width of the grid, the grid scrolls horizontally
+         * instead of shrinking the columns. When flex grow is {@code 0}, the
+         * column keeps exactly this width.
+         * <p>
+         * When {@link #setAutoWidth(boolean) auto width} is enabled, the client
+         * replaces this width with the width calculated from the column
+         * contents. {@link #getWidth()} reflects the calculated width only
+         * after the user resizes a column.
          * <p>
          * Please note that using the {@code em} length unit is discouraged as
          * it might lead to misalignment issues if the header, body, and footer
@@ -630,6 +657,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * a length unit relative to the font size.
          *
          * @see #setFlexGrow(int)
+         * @see #setAutoWidth(boolean)
          *
          * @param width
          *            the width to set this column to, as a CSS-string, not
@@ -643,10 +671,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         /**
          * Gets the width of this column as a CSS-string.
+         * <p>
+         * Returns the width set with {@link #setWidth(String)}, or {@code null}
+         * if none was set. After the user resizes any column, returns the
+         * current client-side width of this column, including widths calculated
+         * by {@link #setAutoWidth(boolean) auto width}.
          *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          *
-         * @return the width of this column as a CSS-string
+         * @return the width of this column as a CSS-string, or {@code null}
          */
         @Synchronize("column-drag-resize")
         public String getWidth() {
@@ -654,10 +687,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Sets the flex grow ratio for this column. When set to 0, column width
-         * is fixed.
+         * Sets the flex grow ratio for this column. The default is {@code 1}.
+         * <p>
+         * When set to {@code 0}, the column keeps exactly the width set with
+         * {@link #setWidth(String)}. When above {@code 0}, the column starts
+         * from that width and grows into the available space in proportion to
+         * the flex grow ratios of the other columns. The column never becomes
+         * narrower than its width, so the width also acts as a minimum width.
+         * <p>
+         * When the user resizes a column, the flex grow of the resized column
+         * and of all columns before it is set to {@code 0}, and their widths
+         * are set to their current pixel widths.
          *
          * @see #setWidth(String)
+         * @see #setAutoWidth(boolean)
          *
          * @param flexGrow
          *            the flex grow ratio
@@ -669,11 +712,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Gets the flex grow value, by default 1.
+         * Gets the flex grow value, by default {@code 1}.
+         * <p>
+         * After the user resizes any column, returns the current client-side
+         * flex grow of this column.
          *
          * @see Grid#addColumnResizeListener(ComponentEventListener)
          *
-         * @return the flex grow value, by default 1
+         * @return the flex grow value, by default {@code 1}
          */
         @Synchronize("column-drag-resize")
         public int getFlexGrow() {
@@ -681,10 +727,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Enables or disables automatic width for this column.
+         * Enables or disables automatic width for this column. The default is
+         * {@code false}.
          * <p>
          * Automatically sets the width of the column based on the column
-         * contents when this is set to {@code true}.
+         * contents when this is set to {@code true}. The calculated width
+         * replaces the width set with {@link #setWidth(String)} on the client.
+         * {@link #getWidth()} reflects it only after the user resizes a column.
          * <p>
          * For performance reasons the column width is calculated automatically
          * only once when the grid items are rendered for the first time and the
@@ -701,10 +750,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * {@link Grid#recalculateColumnWidths()}.
          * <p>
          * The column width may still grow larger when {@code flexGrow} is not
-         * 0.
+         * {@code 0}.
          *
          * @see Grid#recalculateColumnWidths()
-         * @see Column#setFlexGrow
+         * @see Column#setFlexGrow(int)
+         * @see Column#setWidth(String)
          *
          * @param autoWidth
          *            whether to enable or disable automatic width on this
@@ -3237,6 +3287,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * @deprecated internal method, will be removed without a replacement.
+     * @since 1.1
      */
     @Deprecated(since = "25.3", forRemoval = true)
     protected void updateSelectionModeOnClient() {
@@ -3479,36 +3530,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     void doClientSideSelection(Set<T> items) {
-        callSelectionFunctionForItems("doSelection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doSelection", jsonArray,
+                false);
     }
 
     void doClientSideDeselection(Set<T> items) {
-        callSelectionFunctionForItems("doDeselection", items);
+        var jsonArray = items.stream().map(this::generateItemSelectionJson)
+                .collect(JacksonUtils.asArray());
+
+        callJsFunctionBeforeClientResponse("$connector.doDeselection",
+                jsonArray, false);
     }
 
     boolean isInActiveRange(T item) {
         return getDataCommunicator().getKeyMapper().has(item);
     }
 
-    private void callSelectionFunctionForItems(String function, Set<T> items) {
-        if (items.isEmpty()) {
-            return;
+    private JsonNode generateItemSelectionJson(T item) {
+        if (item == null) {
+            return JacksonUtils.nullNode();
         }
-        ArrayNode jsonArray = JacksonUtils.createArrayNode();
-        for (T item : items) {
-            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
-                    : null;
-            jsonArray.add(jsonObject);
-        }
-
-        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
-                false);
-    }
-
-    private JsonNode generateJsonForSelection(T item) {
-        ObjectNode json = JacksonUtils.createObjectNode();
-        json.put("key", getDataCommunicator().getKeyMapper().key(item));
-        return json;
+        ObjectNode jsonObject = JacksonUtils.createObjectNode();
+        jsonObject.put("key", getDataCommunicator().getKeyMapper().key(item));
+        return jsonObject;
     }
 
     private void callJsFunctionBeforeClientResponse(String functionName,
@@ -3644,6 +3691,51 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public Column<T> getColumnByKey(String columnKey) {
         return keyToColumnMap.get(columnKey);
+    }
+
+    /**
+     * Gets a {@link Column} of this grid by one of its sort properties. You can
+     * use this to find the column for a sort property that a lazy data provider
+     * receives through {@link Query#getSortOrders()}.
+     * <p>
+     * A column's sort properties are the properties set with
+     * {@link Column#setSortProperty(String...)}, the properties returned by a
+     * custom {@link Column#setSortOrderProvider(SortOrderProvider) sort order
+     * provider}, or the column's key if neither is set. The column matches when
+     * any of its sort properties is equal to the given sort property.
+     * <p>
+     * Note the following limitations:
+     * <ul>
+     * <li>Unlike column keys, sort properties do not have to be unique. If more
+     * than one column uses the given sort property, this method returns the
+     * first one in the order of {@link #getColumns()}.</li>
+     * <li>This method matches against the sort orders that a column returns for
+     * {@link SortDirection#ASCENDING}. If a custom sort order provider returns
+     * different properties per direction, the properties for
+     * {@link SortDirection#DESCENDING} are not matched.</li>
+     * <li>The column does not have to be sortable. For example, a column with a
+     * key that is not sortable still matches its key.</li>
+     * </ul>
+     *
+     * @see Column#setSortProperty(String...)
+     * @see Column#setSortOrderProvider(SortOrderProvider)
+     *
+     * @param sortProperty
+     *            the sort property of the column to get
+     * @return the first column that uses the given sort property, or
+     *         {@code null} if no column uses it or if {@code sortProperty} is
+     *         {@code null}
+     * @since 25.4
+     */
+    public Column<T> getColumnBySortProperty(String sortProperty) {
+        if (sortProperty == null) {
+            return null;
+        }
+        return getColumns().stream()
+                .filter(column -> column.getSortOrder(SortDirection.ASCENDING)
+                        .anyMatch(order -> sortProperty
+                                .equals(order.getSorted())))
+                .findFirst().orElse(null);
     }
 
     /**
@@ -3965,6 +4057,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public GridContextMenu<T> addContextMenu() {
         return new GridContextMenu<T>(this);
+    }
+
+    /**
+     * Gets the grid context menus that have this grid as their target, in the
+     * order their target was set. This includes the menus created with
+     * {@link #addContextMenu()}, but not plain {@code ContextMenu} instances
+     * targeting this grid.
+     *
+     * @return an unmodifiable snapshot of the context menus targeting this
+     *         grid, empty if there are none
+     * @see GridContextMenu#getContextMenus(Grid)
+     * @since 25.4
+     */
+    public List<GridContextMenu<T>> getContextMenus() {
+        return GridContextMenu.getContextMenus(this);
     }
 
     private List<Column<T>> fetchChildColumns(ColumnGroup columnGroup) {
@@ -5098,7 +5205,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             tooltipElement.executeJs(
                     """
                             this.generator = ({ item, column }) => {
-                                const { gridtooltips } = item;
+                                const { gridtooltips } = item ?? {};
                                 if (gridtooltips) {
                                     return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
                                 }

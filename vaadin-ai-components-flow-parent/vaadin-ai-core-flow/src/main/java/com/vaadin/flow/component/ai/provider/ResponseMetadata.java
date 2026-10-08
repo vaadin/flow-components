@@ -71,7 +71,6 @@ public record ResponseMetadata(String finishReason,
      *            tokens in the generated output, or {@code null} when unknown
      * @param totalTokens
      *            total tokens, or {@code null} when unknown
-     * @since 25.3
      */
     public record TokenUsage(Integer inputTokens, Integer outputTokens,
             Integer totalTokens) implements Serializable {

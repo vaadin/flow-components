@@ -62,6 +62,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -74,9 +75,7 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -143,7 +142,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.3.0-beta2")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.4.0-alpha1")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./vaadin-date-picker/datepickerConnector.ts")
 @NpmPackage(value = "date-fns", version = "4.4.0")
@@ -167,7 +166,8 @@ public class DatePicker
 
     private Locale locale;
 
-    private StateTree.ExecutionRegistration pendingI18nUpdate;
+    private final BeforeClientResponseAction i18nUpdateAction = new BeforeClientResponseAction(
+            this, this::executeI18nUpdate);
 
     private String unparsableValue;
 
@@ -182,7 +182,8 @@ public class DatePicker
 
     private DateMetadataProvider dateMetadataProvider;
 
-    private StateTree.ExecutionRegistration pendingDateMetadataUpdate;
+    private final BeforeClientResponseAction dateMetadataUpdateAction = new BeforeClientResponseAction(
+            this, this::executeDateMetadataUpdate);
 
     private boolean pendingConfigUpdate;
 
@@ -432,7 +433,7 @@ public class DatePicker
      * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -821,40 +822,33 @@ public class DatePicker
 
     private void requestConfigUpdate() {
         pendingConfigUpdate = true;
-        scheduleDateMetadataUpdate();
+        dateMetadataUpdateAction.schedule();
     }
 
     private void requestCacheClear() {
         pendingCacheClear = true;
-        scheduleDateMetadataUpdate();
+        dateMetadataUpdateAction.schedule();
     }
 
     /**
-     * Schedules the pending date metadata work to run before the next client
-     * response. Both parts go through the same scheduled update, so that they
-     * keep their order and so that a config update requested in the same round
-     * trip is not replaced by a cache clear.
+     * Runs the pending date metadata work. Both parts go through the same
+     * scheduled update, so that they keep their order and so that a config
+     * update requested in the same round trip is not replaced by a cache clear.
      */
-    private void scheduleDateMetadataUpdate() {
-        pendingDateMetadataUpdate = scheduleUpdate(pendingDateMetadataUpdate,
-                () -> {
-                    pendingDateMetadataUpdate = null;
-                    // A cache clear on its own does not need the config, which
-                    // grows with the number of disabled dates, to be sent
-                    // again.
-                    if (pendingConfigUpdate) {
-                        pendingConfigUpdate = false;
-                        getElement().callJsFunction(
-                                "$connector.setDateMetadataConfig",
-                                createDateMetadataConfig());
-                    }
-                    // The config has to be in place before the cache is dropped
-                    // and refetched, so the order of the calls is load-bearing.
-                    if (pendingCacheClear) {
-                        pendingCacheClear = false;
-                        getElement().callJsFunction("clearCache");
-                    }
-                });
+    private void executeDateMetadataUpdate() {
+        // A cache clear on its own does not need the config, which grows with
+        // the number of disabled dates, to be sent again.
+        if (pendingConfigUpdate) {
+            pendingConfigUpdate = false;
+            getElement().callJsFunction("$connector.setDateMetadataConfig",
+                    createDateMetadataConfig());
+        }
+        // The config has to be in place before the cache is dropped and
+        // refetched, so the order of the calls is load-bearing.
+        if (pendingCacheClear) {
+            pendingCacheClear = false;
+            getElement().callJsFunction("clearCache");
+        }
     }
 
     /**
@@ -877,7 +871,7 @@ public class DatePicker
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
-        requestI18nUpdate();
+        i18nUpdateAction.schedule();
     }
 
     /**
@@ -920,6 +914,8 @@ public class DatePicker
      * <p>
      * The referenced elements are announced in addition to the helper text and
      * the error message.
+     *
+     * @since 25.3
      */
     @Override
     public void setAriaDescribedBy(String ariaDescribedBy) {
@@ -936,7 +932,7 @@ public class DatePicker
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        requestI18nUpdate();
+        i18nUpdateAction.schedule();
         // Work requested while detached must not carry over to a freshly
         // created client element, which has no config and an empty cache.
         pendingConfigUpdate = false;
@@ -974,38 +970,7 @@ public class DatePicker
     public void setI18n(DatePickerI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        requestI18nUpdate();
-    }
-
-    private void requestI18nUpdate() {
-        pendingI18nUpdate = scheduleUpdate(pendingI18nUpdate, () -> {
-            pendingI18nUpdate = null;
-            executeI18nUpdate();
-        });
-    }
-
-    /**
-     * Schedules an update to run before the next client response, replacing the
-     * update of the same kind that has not run yet, if there is one. Does
-     * nothing if the component is not attached.
-     *
-     * @param pending
-     *            the registration of the update that has not run yet, or
-     *            {@code null} if there is none
-     * @param update
-     *            the update to run
-     * @return the registration of the scheduled update, or {@code pending} if
-     *         the component is not attached
-     */
-    private StateTree.ExecutionRegistration scheduleUpdate(
-            StateTree.ExecutionRegistration pending,
-            SerializableRunnable update) {
-        return getUI().map(ui -> {
-            if (pending != null) {
-                pending.remove();
-            }
-            return ui.beforeClientResponse(this, context -> update.run());
-        }).orElse(pending);
+        i18nUpdateAction.schedule();
     }
 
     /**
@@ -1505,7 +1470,7 @@ public class DatePicker
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 2.0.5
      */
     protected void validate() {
@@ -1515,7 +1480,7 @@ public class DatePicker
     /**
      * {@code opened-changed} event is sent when the calendar overlay opened
      * state changes.
-     * 
+     *
      * @since 23.3
      */
     public static class OpenedChangeEvent extends ComponentEvent<DatePicker> {
@@ -1546,7 +1511,7 @@ public class DatePicker
 
     /**
      * {@code invalid-changed} event is sent when the invalid state changes.
-     * 
+     *
      * @since 23.3
      */
     public static class InvalidChangeEvent extends ComponentEvent<DatePicker> {

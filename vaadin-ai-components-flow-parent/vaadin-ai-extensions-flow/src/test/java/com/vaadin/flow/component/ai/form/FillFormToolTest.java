@@ -19,14 +19,23 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;
@@ -45,6 +54,8 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -64,6 +75,18 @@ class FillFormToolTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @Test
+    void fillWritesIntoFieldInsideComposite() {
+        var inner = new TestField();
+        var controller = newController(new FieldGroup(inner));
+        controller.onRequest(requestEvent());
+
+        var result = fillFormResult(controller, payload(inner, "\"filled\""));
+
+        Assertions.assertTrue(success(result), "Result: " + result);
+        Assertions.assertEquals("filled", inner.getValue());
+    }
 
     @Test
     void fillForm_responseFieldsBlockMirrorsGetFormStateForAllVisibleFields() {
@@ -402,6 +425,32 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_refusedWriteToReadOnlyFieldIsNotValidatedAsWritten() {
+        // A refused write is not a write. Validating the read-only field as
+        // if this turn had written it would report the field twice: once for
+        // refusing the write, once for the value it already held.
+        var readOnly = new LabeledStringField();
+        var binder = new Binder<>(TestBean.class);
+        binder.forField(readOnly)
+                .withValidator(v -> v != null && v.length() >= 3,
+                        "Name must be at least 3 characters")
+                .bind("name");
+        readOnly.setValue("X");
+        readOnly.setReadOnly(true);
+        var controller = controllerForBound(binder, readOnly);
+
+        var result = fillFormResult(controller, payload(readOnly, "\"Acme\""));
+
+        Assertions.assertEquals(List.of(idOf(readOnly)), rejectedIds(result),
+                "The refused write must be reported once, and the field's "
+                        + "own invalid value must not be reported as this "
+                        + "turn's rejection, got: " + result);
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(readOnly)).contains("read-only"),
+                "The one reason must be the refused write");
+    }
+
+    @Test
     void fillForm_rejectsWriteToFieldDisabledByEarlierWriteInSamePayload() {
         // A field's availability can change mid-fill: writing a controlling
         // field earlier in the same payload can disable a field that appears
@@ -500,6 +549,112 @@ class FillFormToolTest {
                         + "fill_form post-write snapshot; got: " + entry);
         Assertions.assertEquals("filled", field.getValue(),
                 "Write to a turn-locked (but app-writable) field must land");
+    }
+
+    @Test
+    void fillForm_locksFieldEnabledAndFilledInSamePayload() {
+        // A field disabled at turn start is skipped by the turn-start lock.
+        // When an earlier write in the payload enables it and the AI fills
+        // it, the field must be locked like the others for the rest of the
+        // turn, so the user cannot type into it while the AI works.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+
+        var args = JacksonUtils.createObjectNode();
+        args.put(idOf(trigger), "business");
+        args.put(idOf(dependent), "CC-42");
+        fillFormResult(controller, args);
+
+        Assertions.assertEquals("CC-42", dependent.getValue());
+        Assertions.assertTrue(isWorking(dependent),
+                "A field enabled and filled during the turn must be locked");
+    }
+
+    @Test
+    void fillForm_locksFieldEnabledByWriteBeforeItIsFilled() {
+        // The AI may fill a field enabled by a write in a later fill_form
+        // call of the same turn. The field must be locked as soon as it is
+        // enabled, not left editable until then.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertTrue(isWorking(dependent),
+                "A field enabled by a write must be locked right away");
+    }
+
+    @Test
+    void fillForm_locksFieldRevealedByWrite() {
+        // Same as for a disabled field, for a field hidden at turn start that
+        // a write reveals.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setVisible(false);
+        trigger.addValueChangeListener(e -> dependent.setVisible(true));
+        var controller = controllerFor(trigger, dependent);
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertTrue(isWorking(dependent),
+                "A field revealed by a write must be locked right away");
+    }
+
+    @Test
+    void fillForm_doesNotLockFieldsTheAiStillCannotWrite() {
+        // Only fields the AI can write join the lock. A disabled or read-only
+        // field the writes left as it was must stay untouched.
+        var trigger = new TestField();
+        var disabled = new TestField();
+        disabled.setEnabled(false);
+        var readOnly = new TestField();
+        readOnly.setReadOnly(true);
+        var controller = controllerFor(trigger, disabled, readOnly);
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertFalse(isWorking(disabled));
+        Assertions.assertFalse(isWorking(readOnly));
+    }
+
+    @Test
+    void fillForm_fieldLockedMidTurnIsReleasedAtTurnEnd() {
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        controller.onResponse(AITurnEvents.success());
+
+        Assertions.assertFalse(isWorking(dependent),
+                "A field locked mid-turn must be released at turn end");
+    }
+
+    @Test
+    void fillForm_afterTurnEndLocksNoField() {
+        // Only the turn end releases the lock, so a fill that lands after it,
+        // for example from a tool call still running when the stream timed
+        // out, must not lock any field: it would stay locked until the next
+        // turn.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+        controller.onResponse(AITurnEvents.success());
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertFalse(isWorking(trigger));
+        Assertions.assertFalse(isWorking(dependent));
     }
 
     @Test
@@ -1824,6 +1979,105 @@ class FillFormToolTest {
     }
 
     @Test
+    @Timeout(20)
+    void fillForm_calledOnTheThreadHoldingTheSessionLockFillsInline() {
+        // A provider that answers synchronously calls the tool on the very
+        // thread it was handed — the one still inside prompt(), holding the
+        // session lock. Real ui.access() only queues the fill until that lock
+        // is ultimately released, which cannot happen before the tool call
+        // returns, so waiting for the queued command would wait for this call
+        // itself. The tool has to notice it already holds the lock and fill
+        // inline.
+        var field = new TestField();
+        var controller = controllerFor(field);
+        var queued = queueAccessCommands();
+
+        var result = fillFormResult(controller,
+                payload(field, "\"Ana Torres\""));
+
+        Assertions.assertTrue(success(result),
+                "Fill on the lock-holding thread must succeed, got: " + result);
+        Assertions.assertEquals("Ana Torres", field.getValue(),
+                "Fill on the lock-holding thread must write the field");
+        Assertions.assertTrue(queued.isEmpty(),
+                "The fill must run inline rather than be queued for a lock "
+                        + "release that cannot come before the tool returns");
+    }
+
+    @Test
+    @Timeout(30)
+    void fillForm_calledOffTheLockHoldingThreadWaitsForTheQueuedFill()
+            throws Exception {
+        // The streaming path: the provider calls the tool from its own
+        // thread while the UI thread holds the lock. The fill must go through
+        // ui.access() and the tool must not answer before the command runs,
+        // so the LLM sees the post-write state.
+        var field = new TestField();
+        var controller = controllerFor(field);
+        var queued = queueAccessCommands();
+
+        var toolResult = CompletableFuture
+                .supplyAsync(() -> fillFormPayload(controller,
+                        payload(field, "\"Ana Torres\"")));
+
+        var command = awaitQueuedCommand(queued);
+        Assertions.assertEquals("", field.getValue(),
+                "The fill must wait for the lock holder rather than write "
+                        + "from the calling thread");
+        // What VaadinSession.unlock() does for the queue on ultimate release,
+        // on the thread that holds the lock — here, the test thread.
+        command.execute();
+
+        var result = parseResult(toolResult.get(20, TimeUnit.SECONDS));
+        Assertions.assertTrue(success(result),
+                "Queued fill must succeed, got: " + result);
+        Assertions.assertEquals("Ana Torres", field.getValue(),
+                "Queued fill must write the field");
+    }
+
+    @Test
+    @Timeout(30)
+    void fillForm_onALockHoldingThreadBindsTheThreadLocalsForTheWrite()
+            throws Exception {
+        // Holding the session lock does not imply the Vaadin thread locals
+        // are bound: a provider can take the lock on its own thread — with
+        // session.lock() or an outer accessSynchronously — and call the tool
+        // from there. Writing the fields straight from that thread would run
+        // every value-change listener the fill triggers with
+        // UI.getCurrent() == null, which is what the ui.access() hop existed
+        // to prevent in the first place. accessSynchronously keeps that
+        // guarantee for the inline path.
+        var field = new CurrentInstanceCapturingField();
+        var controller = controllerFor(field);
+        var session = ui.getSession();
+
+        // Hand the lock over the way a request that has finished would, so
+        // the provider's thread can take it.
+        session.unlock();
+        try {
+            var raw = CompletableFuture.supplyAsync(() -> {
+                session.lock();
+                try {
+                    return fillFormPayload(controller,
+                            payload(field, "\"Ana Torres\""));
+                } finally {
+                    session.unlock();
+                }
+            }).get(20, TimeUnit.SECONDS);
+
+            Assertions.assertTrue(success(parseResult(raw)),
+                    "Fill from a lock-holding provider thread must succeed, "
+                            + "got: " + raw);
+            Assertions.assertSame(ui.getUI(), field.uiDuringWrite,
+                    "The write must see the UI bound as the current one");
+            Assertions.assertSame(session, field.sessionDuringWrite,
+                    "The write must see the session bound as the current one");
+        } finally {
+            session.lock();
+        }
+    }
+
+    @Test
     void fillForm_unexpectedConverterThrowKeepsStructuredResponse() {
         // FormValueConverter.convert delegates to field.getEmptyValue() for
         // JSON null. A field whose getEmptyValue() throws produces an
@@ -2001,6 +2255,34 @@ class FillFormToolTest {
         }
     }
 
+    /**
+     * Field that records the Vaadin thread locals in force while its value is
+     * written, so a test can tell whether the fill ran with them bound.
+     */
+    @com.vaadin.flow.component.Tag("current-instance-capturing-field")
+    private static class CurrentInstanceCapturingField extends
+            com.vaadin.flow.component.AbstractField<CurrentInstanceCapturingField, String> {
+
+        private transient UI uiDuringWrite;
+        private transient VaadinSession sessionDuringWrite;
+
+        CurrentInstanceCapturingField() {
+            super("");
+        }
+
+        @Override
+        public void setValue(String value) {
+            uiDuringWrite = UI.getCurrent();
+            sessionDuringWrite = VaadinSession.getCurrent();
+            super.setValue(value);
+        }
+
+        @Override
+        protected void setPresentationValue(String value) {
+            // not exercised
+        }
+    }
+
     // --- helpers ---
 
     private FormAIController controllerFor(Component... fields) {
@@ -2018,6 +2300,13 @@ class FillFormToolTest {
      * required: {@code executeFill} throws {@link IllegalStateException} on a
      * detached form, matching the production contract.
      */
+    /** Reusable group of fields built the recommended way. */
+    private static class FieldGroup extends Composite<Div> {
+        FieldGroup(Component... children) {
+            getContent().add(children);
+        }
+    }
+
     private FormAIController newController(Component... fields) {
         var form = new Div(fields);
         ui.add(form);
@@ -2125,6 +2414,16 @@ class FillFormToolTest {
     }
 
     /**
+     * @return whether the field's marker is in the "AI is working" state, which
+     *         carries the turn lock; {@code false} when the field has no marker
+     */
+    private static boolean isWorking(Component field) {
+        return field.getElement().getChildren().filter(
+                child -> "vaadin-ai-field-marker".equals(child.getTag()))
+                .anyMatch(marker -> marker.getProperty("working", false));
+    }
+
+    /**
      * Returns a {@link FormAITools.Callbacks} whose {@code executeFill} throws
      * the given exception — lets a test pin the outer execute() catches in
      * {@link FormAITools#fillForm(FormAITools.Callbacks)} without going through
@@ -2152,10 +2451,55 @@ class FillFormToolTest {
             }
 
             @Override
+            public boolean isSourceTrackingEnabled() {
+                return false;
+            }
+
+            @Override
             public String executeFill(JsonNode arguments) {
                 throw toThrow;
             }
         };
+    }
+
+    /**
+     * Replaces the mock session's {@code access()} — which runs the command
+     * inline — with the contract a real
+     * {@link com.vaadin.flow.server.VaadinSession} has: the command is queued
+     * and runs only when the session lock is ultimately released, never on the
+     * thread that already holds it. The mock session is locked by the test
+     * thread for the whole test, so that thread stands in for a UI thread
+     * inside {@code prompt()}.
+     *
+     * @return the queue the fills land in, for the test to assert on and to
+     *         drain where a real purge would
+     */
+    private Queue<Command> queueAccessCommands() {
+        var queued = new ConcurrentLinkedQueue<Command>();
+        Mockito.doAnswer(invocation -> {
+            queued.add(invocation.getArgument(0));
+            // Never completed: the caller learns the command ran from the
+            // command itself, exactly as with a real deferred access.
+            return new CompletableFuture<Void>();
+        }).when(ui.getSession()).access(Mockito.any());
+        return queued;
+    }
+
+    /**
+     * Waits for a fill to be queued with {@code ui.access()} by a background
+     * thread and returns it.
+     */
+    private static Command awaitQueuedCommand(Queue<Command> queued)
+            throws InterruptedException {
+        var deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (queued.isEmpty() && System.nanoTime() < deadline) {
+            Thread.sleep(5);
+        }
+        var command = queued.poll();
+        Assertions.assertNotNull(command,
+                "fill_form must queue the fill with ui.access() when the "
+                        + "calling thread does not hold the session lock");
+        return command;
     }
 
     /** Minimal valid {@code fill_form} arguments — an empty values object. */

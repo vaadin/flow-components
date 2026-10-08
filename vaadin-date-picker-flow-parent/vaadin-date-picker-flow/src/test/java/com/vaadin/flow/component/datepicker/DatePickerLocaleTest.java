@@ -16,12 +16,18 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -56,5 +62,31 @@ class DatePickerLocaleTest {
         DatePicker datePicker = new DatePicker();
         datePicker.setLocale(usLocale);
         Assertions.assertEquals(usLocale, datePicker.getLocale());
+    }
+
+    @Test
+    void setLocaleWhileDetached_attach_i18nUpdatedAfterInitLazy() {
+        DatePicker datePicker = new DatePicker();
+        datePicker.setLocale(Locale.GERMANY);
+        ui.add(datePicker);
+
+        List<JavaScriptInvocation> invocations = ui
+                .dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation).toList();
+        int initIndex = indexOf(invocations, invocation -> invocation
+                .getExpression().contains("datepickerConnector.initLazy"));
+        int i18nIndex = indexOf(invocations,
+                invocation -> "$connector.updateI18n".equals(
+                        JsFunctionCallUtil.getFunctionName(invocation)));
+        Assertions.assertTrue(initIndex >= 0, "initLazy was not invoked");
+        Assertions.assertTrue(i18nIndex > initIndex,
+                "I18n must be updated after the connector is initialized");
+    }
+
+    private static int indexOf(List<JavaScriptInvocation> invocations,
+            Predicate<JavaScriptInvocation> predicate) {
+        return IntStream.range(0, invocations.size())
+                .filter(i -> predicate.test(invocations.get(i))).findFirst()
+                .orElse(-1);
     }
 }

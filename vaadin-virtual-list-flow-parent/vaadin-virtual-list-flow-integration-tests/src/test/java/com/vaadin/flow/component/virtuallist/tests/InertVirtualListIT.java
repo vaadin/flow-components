@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -23,6 +22,8 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
+
+import tools.jackson.databind.JsonNode;
 
 @TestPath("vaadin-virtual-list/inert")
 public class InertVirtualListIT extends AbstractComponentIT {
@@ -39,10 +40,11 @@ public class InertVirtualListIT extends AbstractComponentIT {
 
     @Test
     public void inertVirtualList_itemsAreRendered() {
-        var items = VirtualListHelpers.getItems(getDriver(), virtualList);
-        Assert.assertFalse(items.isEmpty());
-        for (var i = 0; i < items.size(); i++) {
-            Assert.assertFalse(items.get(i).isNull());
-        }
+        // The list requests its items only after rendering, so wait for them
+        waitUntil(driver -> {
+            var items = VirtualListHelpers.getItems(driver, virtualList);
+            return !items.isEmpty()
+                    && items.valueStream().noneMatch(JsonNode::isNull);
+        });
     }
 }

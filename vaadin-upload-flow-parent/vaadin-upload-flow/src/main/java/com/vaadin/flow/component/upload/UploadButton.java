@@ -39,7 +39,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @since 25.1
  */
 @Tag("vaadin-upload-button")
-@NpmPackage(value = "@vaadin/upload", version = "25.3.0-beta2")
+@NpmPackage(value = "@vaadin/upload", version = "25.4.0-alpha1")
 @JsModule("@vaadin/upload/src/vaadin-upload-button.js")
 public class UploadButton extends Button implements HasUploadManager {
 
@@ -81,6 +81,46 @@ public class UploadButton extends Button implements HasUploadManager {
 
     private void doSetText(String text) {
         super.setText(text);
+    }
+
+    /**
+     * Gets the device input that is used for capturing a new file.
+     *
+     * @return the device input used for capturing a new file, or {@code null}
+     *         if not set
+     * @see #setCapture(UploadCapture)
+     * @since 25.4
+     */
+    public UploadCapture getCapture() {
+        return UploadCapture.fromValue(getElement().getProperty("capture"));
+    }
+
+    /**
+     * Sets the device input to use for capturing a new file, for example
+     * {@link UploadCapture#ENVIRONMENT} to take a photo with the back camera of
+     * a phone. On devices that support it, clicking the button then opens the
+     * camera or microphone directly instead of the file browser. The type of
+     * input is determined by the accepted MIME types of the manager, for
+     * example {@code "image/*"} for the camera, see
+     * {@link UploadManager#setAcceptedMimeTypes(String...)}.
+     * <p>
+     * This is only a hint to the browser. Devices without such an input, for
+     * example desktop browsers, ignore it and open the file browser. It does
+     * not restrict which files can be uploaded.
+     * <p>
+     * The default is {@code null}, which opens the file browser.
+     *
+     * @param capture
+     *            the device input to use for capturing a new file, or
+     *            {@code null} to choose existing files
+     * @since 25.4
+     */
+    public void setCapture(UploadCapture capture) {
+        if (capture == null) {
+            getElement().removeProperty("capture");
+        } else {
+            getElement().setProperty("capture", capture.getValue());
+        }
     }
 
     /**

@@ -34,6 +34,7 @@ import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServiceEventBus;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
@@ -100,6 +101,8 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         Mockito.when(vaadinContext.getAttribute(ApplicationConfiguration.class))
                 .thenReturn(applicationConfiguration);
         Mockito.when(service.getContext()).thenReturn(vaadinContext);
+        var eventBus = new VaadinServiceEventBus(service);
+        Mockito.when(service.getEventBus()).thenReturn(eventBus);
 
         session = Mockito.spy(new AlwaysLockedVaadinSession(service));
 

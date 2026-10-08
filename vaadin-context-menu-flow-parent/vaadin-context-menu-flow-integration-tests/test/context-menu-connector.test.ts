@@ -169,7 +169,7 @@ describe('context menu connector', () => {
     beforeEach(() => {
       contextMenu = document.createElement('vaadin-context-menu') as FlowContextMenu;
       document.body.appendChild(contextMenu);
-      contextMenuConnector.initLazy(contextMenu, APP_ID);
+      contextMenuConnector.initLazy(contextMenu);
     });
 
     afterEach(() => {
@@ -179,7 +179,7 @@ describe('context menu connector', () => {
     it('should keep the connector of an already initialized menu', () => {
       const connector = contextMenu.$connector;
 
-      contextMenuConnector.initLazy(contextMenu, APP_ID);
+      contextMenuConnector.initLazy(contextMenu);
 
       expect(contextMenu.$connector).to.equal(connector);
     });
@@ -188,7 +188,7 @@ describe('context menu connector', () => {
       const element = createItem();
       const nodeId = createContainer(element);
 
-      contextMenu.$connector.generateItems(nodeId);
+      contextMenu.$connector.generateItems(APP_ID, nodeId);
 
       expect(contextMenu.items).to.have.lengthOf(1);
       expect(contextMenu.items![0].component).to.equal(element);

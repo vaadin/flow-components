@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
@@ -82,7 +84,8 @@ import tools.jackson.databind.JsonNode;
  * The controller accepts any {@link HasComponents} container. It discovers
  * fields by walking the container's component tree and collecting every
  * component that implements {@link HasValue}. The walk recurses into nested
- * {@link HasComponents} children so layouts containing layouts are handled.
+ * {@link HasComponents} and {@link Composite} children so layouts containing
+ * layouts, and fields wrapped in reusable composites, are handled.
  * </p>
  *
  * <p>
@@ -100,6 +103,17 @@ import tools.jackson.databind.JsonNode;
  * LLM-facing labels are derived from the field's
  * {@code setItemLabelGenerator(...)} by default; see {@link ValueOptions} for
  * the full resolution chain.
+ * </p>
+ *
+ * <p>
+ * <b>Field ids:</b> the LLM addresses fields by id. A field that has a
+ * {@link Component#setId(String) component id} when the controller first
+ * discovers it (at the latest on the first prompt) is addressed by that id, so
+ * conversation logs and tool calls stay readable and reproducible across runs.
+ * Component ids must be unique within the form. A field without one is
+ * addressed by a random id that is kept internally and never set on the
+ * component. Either way the id is fixed for the rest of the session; setting or
+ * changing the component id later has no effect on it.
  * </p>
  *
  * <p>
@@ -151,14 +165,16 @@ import tools.jackson.databind.JsonNode;
  * <b>Field locking:</b> while a fill is in progress, every non-ignored field
  * the user can currently edit (visible, enabled, and not already read-only) is
  * made read-only <em>on the client</em> so the user cannot type into a field
- * the AI is about to overwrite. This is a UX guard only: the field's
- * server-side read-only state is never changed, so it does not affect what the
- * LLM sees or writes, and a field's application-set read-only state is left
- * untouched. The guard is applied and cleared together with the "AI is working"
- * state (see below), so it is released when the turn ends, successfully or
- * otherwise. A field switched to read-only on the server mid-turn — for example
- * by a value-change listener reacting to one of the AI's writes — stays
- * read-only on the client when the guard is released.
+ * the AI is about to overwrite. A field that becomes editable during the fill,
+ * for example because a value-change listener enables or reveals it in reaction
+ * to one of the AI's writes, is locked from then on as well. This is a UX guard
+ * only: the field's server-side read-only state is never changed, so it does
+ * not affect what the LLM sees or writes, and a field's application-set
+ * read-only state is left untouched. The guard is applied and cleared together
+ * with the "AI is working" state (see below), so it is released when the turn
+ * ends, successfully or otherwise. A field switched to read-only on the server
+ * mid-turn — for example by a value-change listener reacting to one of the AI's
+ * writes — stays read-only on the client when the guard is released.
  * </p>
  *
  * <p>
@@ -184,8 +200,7 @@ import tools.jackson.databind.JsonNode;
  * the LLM also reports, per filled value, the snippets it read, where each one
  * sits in the document, and a confidence level. The data is available from
  * {@link FieldValueChangeEvent#getFieldSource()} and
- * {@link #getFieldSource(HasValue)}, and can be stored and put back later with
- * {@link #restoreFieldSource(HasValue, ValueSource)}. Off by default.
+ * {@link #getFieldSource(HasValue)}. Off by default.
  * </p>
  *
  * <p>
@@ -198,7 +213,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public class FormAIController implements AIController {
 
@@ -206,9 +221,11 @@ public class FormAIController implements AIController {
             .getLogger(FormAIController.class);
 
     /**
-     * Key under which a field's opaque id is stored on the field component via
-     * {@link ComponentUtil#setData(Component, String, Object)}. The id survives
-     * removing and re-adding the field within a session.
+     * Key under which a field's id is stored on the field component via
+     * {@link ComponentUtil#setData(Component, String, Object)}. The id is the
+     * component's own {@link Component#getId() id} when one is set at first
+     * discovery, and a random one otherwise. It survives removing and re-adding
+     * the field within a session.
      */
     static final String FIELD_ID_KEY = "vaadin.ai.form.fieldId";
 
@@ -234,8 +251,8 @@ public class FormAIController implements AIController {
             Form-fill workflow. Follow this for every turn:
 
             1. Call get_form_state() to see the form. Each field carries an \
-            opaque id, a description, a JSON-Schema-like type block (type, \
-            plus format / pattern / enum / queryable / array / items as \
+            id, a description, a JSON-Schema-like type block (type, plus \
+            format / pattern / enum / queryable / array / items as \
             applicable), and its current value.
             2. For each field you intend to write that declares "queryable": \
             true (single-select) or "items": {"queryable": true} \
@@ -264,8 +281,8 @@ public class FormAIController implements AIController {
             mentioned is set and "rejected" is empty.
 
             Conventions:
-            - Field ids are opaque session-scoped strings; never invent them \
-            and never reuse an id across forms.
+            - Field ids are strings the application assigns; never invent \
+            them and never reuse an id across forms.
             - Fields the application has hidden via .ignoreField() (and \
             password fields) never appear in get_form_state and cannot be \
             written by fill_form. Do not try, even if the user message asks \
@@ -362,17 +379,16 @@ public class FormAIController implements AIController {
      * {@link ComponentUtil#setData(Component, Class, Object)} — tying its
      * lifecycle to the field rather than to the controller — and tied to the
      * field value the source was reported with. The value is captured from the
-     * field right after the write (or at {@link #restoreFieldSource} time) so
-     * any normalisation the field applied is reflected; {@link #getFieldSource}
-     * compares it against the field's current value to detect a source a turn
-     * left stale. A source lasts as long as the value it describes: the
-     * registration belongs to a value-change listener that drops the source the
-     * moment the value changes outside a fill turn, so a stale source can never
-     * come back by the field regaining the value. The listener stands down
-     * during a turn — the AI's own write sequence must not drop the source it
-     * just stored — so sources a turn leaves stale (a value-change cascade
-     * overwriting a sourced field) are swept at turn end instead by
-     * {@link #purgeStaleFieldSources}.
+     * field right after the write so any normalisation the field applied is
+     * reflected; {@link #getFieldSource} compares it against the field's
+     * current value to detect a source a turn left stale. A source lasts as
+     * long as the value it describes: the registration belongs to a
+     * value-change listener that drops the source the moment the value changes
+     * outside a fill turn, so a stale source can never come back by the field
+     * regaining the value. The listener stands down during a turn — the AI's
+     * own write sequence must not drop the source it just stored — so sources a
+     * turn leaves stale (a value-change cascade overwriting a sourced field)
+     * are swept at turn end instead by {@link #purgeStaleFieldSources}.
      */
     private record StoredFieldSource(Object value, ValueSource source,
             Registration registration) implements Serializable {
@@ -729,7 +745,6 @@ public class FormAIController implements AIController {
      *
      * @return {@code true} when source tracking is on, {@code false} otherwise
      * @see #setSourceTrackingEnabled(boolean)
-     * @since 25.3
      */
     public boolean isSourceTrackingEnabled() {
         return sourceTrackingEnabled;
@@ -756,6 +771,10 @@ public class FormAIController implements AIController {
      * extracts are what the model says it read — they are not checked against
      * the document.
      * <p>
+     * A source describes where in an attached document a value was read. A
+     * value with nothing to point at, such as one taken from the chat prompt,
+     * carries no source.
+     * <p>
      * A source says where a snippet is inside a document, but not which
      * document. Send at most one attachment per prompt while source tracking is
      * on: with several, there is no way to tell which one a reported location
@@ -764,7 +783,6 @@ public class FormAIController implements AIController {
      * @param sourceTrackingEnabled
      *            {@code true} to ask the LLM for sources, {@code false} to not
      * @return this controller, for chaining
-     * @since 25.3
      */
     public FormAIController setSourceTrackingEnabled(
             boolean sourceTrackingEnabled) {
@@ -785,7 +803,6 @@ public class FormAIController implements AIController {
      * @param description
      *            the meaning the LLM sees for the level, not {@code null}
      * @return this controller, for chaining
-     * @since 25.3
      */
     public FormAIController describeConfidenceLevel(ConfidenceLevel level,
             String description) {
@@ -815,7 +832,6 @@ public class FormAIController implements AIController {
      *         none applies
      * @throws NullPointerException
      *             if {@code field} is {@code null}
-     * @since 25.3
      */
     public Optional<ValueSource> getFieldSource(HasValue<?, ?> field) {
         Objects.requireNonNull(field, "Field must not be null");
@@ -828,30 +844,6 @@ public class FormAIController implements AIController {
             return Optional.empty();
         }
         return Optional.of(stored.source());
-    }
-
-    /**
-     * Attaches a previously stored source to the field, so an application that
-     * persisted the data (see {@link FieldValueChangeEvent#getFieldSource()})
-     * can show it again after a reload without the original chat session.
-     * Restore the field's value first and the source after: the source is tied
-     * to the field's value at the moment of this call, so it is dropped on the
-     * next edit just like a fresh one.
-     *
-     * @param field
-     *            the field the source describes, not {@code null}
-     * @param source
-     *            the source to restore, not {@code null}
-     * @throws NullPointerException
-     *             if {@code field} or {@code source} is {@code null}
-     * @throws IllegalArgumentException
-     *             if {@code field} is not a {@link Component}
-     * @since 25.3
-     */
-    public void restoreFieldSource(HasValue<?, ?> field, ValueSource source) {
-        Objects.requireNonNull(field, "Field must not be null");
-        Objects.requireNonNull(source, "Source must not be null");
-        putFieldSource(field, source);
     }
 
     /**
@@ -1021,7 +1013,6 @@ public class FormAIController implements AIController {
      * @return the content provider, or {@code null} when the popover shows only
      *         its built-in parts
      * @see #setFieldMarkerPopoverContentProvider(FieldMarkerPopoverContentProvider)
-     * @since 25.3
      */
     public FieldMarkerPopoverContentProvider getFieldMarkerPopoverContentProvider() {
         return fieldMarkerPopoverContentProvider;
@@ -1054,7 +1045,6 @@ public class FormAIController implements AIController {
      * @param fieldMarkerPopoverContentProvider
      *            the provider to use, or {@code null} to show no extra content
      * @return this controller, for chaining
-     * @since 25.3
      */
     public FormAIController setFieldMarkerPopoverContentProvider(
             FieldMarkerPopoverContentProvider fieldMarkerPopoverContentProvider) {
@@ -1510,7 +1500,7 @@ public class FormAIController implements AIController {
     }
 
     /**
-     * Puts every field the AI can write this turn into the "AI is working"
+     * Puts every field the AI can write at turn start into the "AI is working"
      * state: a shimmer plus a client-side read-only guard so the user cannot
      * type into a field the AI is about to overwrite. The read-only guard is
      * applied on the client only — it never changes the field's server-side
@@ -1520,12 +1510,26 @@ public class FormAIController implements AIController {
      * state must not be touched. The state is carried by the field's marker, so
      * a field that has none yet gets one; it stays hidden while the state is
      * on. Tracks the affected fields so {@link #stopWorking()} clears exactly
-     * these at turn end, even the ones detached during the turn.
+     * these at turn end, even the ones detached during the turn. Fields that
+     * become writable later in the turn join through
+     * {@link #startWorkingOnWritableFields()}.
      */
     private void startWorking() {
         stopWorking();
+        startWorkingOnWritableFields();
+    }
+
+    /**
+     * Puts every field the AI can write right now into the "AI is working"
+     * state, skipping the fields already in it. Besides turn start, runs after
+     * each {@code fill_form} write pass: a write can make another field
+     * writable, for example a value-change listener enabling or revealing a
+     * dependent field, and the AI may fill that field in the same turn.
+     */
+    private void startWorkingOnWritableFields() {
         for (var field : collectActiveFields()) {
-            if (isDisabled(field) || field.isReadOnly()) {
+            if (workingFields.contains(field) || isDisabled(field)
+                    || field.isReadOnly()) {
                 continue;
             }
             if (field instanceof Component component) {
@@ -1539,9 +1543,9 @@ public class FormAIController implements AIController {
 
     /**
      * Clears the "AI is working" state (shimmer + client-side read-only guard)
-     * from the fields {@link #startWorking()} set. A field that is marked keeps
-     * its marker, which becomes visible again as the state clears; a field that
-     * is not loses the marker that only carried the state.
+     * from every field put into it this turn. A field that is marked keeps its
+     * marker, which becomes visible again as the state clears; a field that is
+     * not loses the marker that only carried the state.
      */
     private void stopWorking() {
         for (var field : workingFields) {
@@ -1657,7 +1661,11 @@ public class FormAIController implements AIController {
         }
         var id = (String) ComponentUtil.getData(component, FIELD_ID_KEY);
         if (id == null) {
-            id = UUID.randomUUID().toString();
+            // The application's own id, when it set one, keeps tool calls
+            // and conversation logs readable and reproducible across runs;
+            // a random id is only the fallback for anonymous fields.
+            id = component.getId().filter(s -> !s.isBlank())
+                    .orElseGet(() -> UUID.randomUUID().toString());
             ComponentUtil.setData(component, FIELD_ID_KEY, id);
         }
         return id;
@@ -1722,33 +1730,36 @@ public class FormAIController implements AIController {
         }
 
         @Override
+        public boolean isSourceTrackingEnabled() {
+            return sourceTrackingEnabled;
+        }
+
+        @Override
         public String sourceInstructions() {
             if (!sourceTrackingEnabled) {
                 return "";
             }
             return """
                     \s\
-                    Source tracking is on. When a value comes from an \
-                    attached document, wrap it in an object instead of \
-                    sending it plainly: {"value": <the value as you would \
-                    otherwise send it>, "confidence": <level>, "extracts": \
-                    [{"text": <snippet>, "location": {"type": \
-                    "page-region", "page": <page>, "rect": [x, y, width, \
-                    height]}}]}. "value" is required; plain values stay \
-                    valid for fields with nothing to point at. List in \
-                    "extracts" every snippet you read to produce the \
-                    value, each with its text copied verbatim from the \
-                    document. "rect" is the snippet's bounding box as \
-                    fractions of the page as displayed, [left, top, width, \
-                    height] measured from the top-left corner. "page" \
-                    starts at 1; leave it out when the source has a single \
-                    surface, such as an image. Leave "location" out when \
-                    the snippet has no position, such as pasted text; \
-                    leave "extracts" out when there is no source document \
-                    at all. "confidence" is "high" when %s; "medium" when \
-                    %s; "low" when %s. Leave "confidence" out when you \
-                    cannot judge it, such as for a value taken from the \
-                    chat prompt. Never invent a snippet, a location, or a \
+                    Source tracking is on. For every value in "values" \
+                    that you read from an attached document, add an entry \
+                    with the same field id under "sources": {"confidence": \
+                    <level>, "extracts": [{"text": <snippet>, "location": \
+                    {"type": "page-region", "page": <page>, "rect": [x, y, \
+                    width, height]}}]}. List in "extracts" every snippet \
+                    you read to produce the value, each with its text \
+                    copied verbatim from the document. "rect" is the \
+                    snippet's bounding box as fractions of the page as \
+                    displayed, [left, top, width, height] measured from \
+                    the top-left corner. "page" starts at 1; leave it out \
+                    when the source has a single surface, such as an \
+                    image. Leave "location" out when the snippet has no \
+                    position, such as pasted text. "confidence" is "high" \
+                    when %s; "medium" when %s; "low" when %s. Leave \
+                    "confidence" out when you cannot judge it. Leave a \
+                    field out of "sources" when its value did not come \
+                    from a document, such as a value taken from the chat \
+                    prompt. Never invent a snippet, a location, or a \
                     confidence level.""".formatted(
                     describeConfidence(ConfidenceLevel.HIGH),
                     describeConfidence(ConfidenceLevel.MEDIUM),
@@ -1762,12 +1773,9 @@ public class FormAIController implements AIController {
 
         @Override
         public String executeFill(JsonNode arguments) {
-            // The fill always hops through ui.access so writes land on the
-            // UI thread with CurrentInstance bound, regardless of whether
-            // the LLM provider invoked the tool from a reactor scheduler
-            // thread (the production path) or directly from the UI thread
-            // itself (in which case ui.access runs the lambda synchronously
-            // and future.get() returns immediately, so the hop is a no-op).
+            // The fill has to land on a thread that holds the session lock,
+            // with CurrentInstance bound. Which hop gets it there depends on
+            // where the LLM provider called the tool from.
             // A controller whose form isn't attached to a UI is a
             // configuration error — fail fast rather than write silently
             // to a detached state tree.
@@ -1775,6 +1783,21 @@ public class FormAIController implements AIController {
                     .orElseThrow(() -> new IllegalStateException(
                             "fill_form invoked on a controller whose form is not "
                                     + "attached to a UI"));
+            var session = ui.getSession();
+            if (session != null && session.hasLock()) {
+                // The provider called the tool on the very thread it was
+                // handed, which is still inside the prompt call and holds the
+                // session lock. ui.access() would only queue the fill until
+                // that lock is ultimately released, which cannot happen before
+                // this call returns — the wait below would be waiting for
+                // itself. accessSynchronously re-enters the lock and binds
+                // CurrentInstance the same way the queued command would. A
+                // failure propagates out of the tool call, where fill_form's
+                // own catch logs it and reports the fill failure to the LLM.
+                var result = new AtomicReference<String>();
+                ui.accessSynchronously(() -> result.set(doFill(arguments)));
+                return result.get();
+            }
             var future = new CompletableFuture<String>();
             ui.access(() -> {
                 try {
@@ -1805,40 +1828,44 @@ public class FormAIController implements AIController {
                 byId.put(descriptor.id(), descriptor);
             }
             var rejected = new ArrayList<RejectedEntry>();
+            var values = arguments.get("values");
+            // Sources are keyed like values. An entry whose id is not among
+            // the values describes nothing, and is reported below so the
+            // model can fix the key instead of the source going missing
+            // without a trace.
+            var sources = sourceTrackingEnabled ? arguments.path("sources")
+                    : JacksonUtils.nullNode();
             // Phase 1: write the LLM's values. Convert and setValue only,
             // collecting write-level rejections (bad conversion, field-refused
             // value). Validation is deferred to the single pass below so every
             // field is judged against the fully-written form rather than a
             // partial snapshot whose verdict would depend on argument order.
             var writtenValues = new LinkedHashMap<String, JsonNode>();
-            for (var id : arguments.propertyNames()) {
-                var value = arguments.get(id);
-                var field = byId.get(id);
-                if (field == null) {
-                    rejected.add(new RejectedEntry(id, value,
-                            "Unknown field id '" + id
-                                    + "'. Call get_form_state to refresh "
-                                    + "the id list and retry only entries "
-                                    + "that are rejected with the reason "
-                                    + "unknown field id."));
-                    continue;
-                }
-                // Re-evaluate the field's live writability rather than the
-                // verdict captured before this turn's writes: an earlier
-                // write in the same payload (e.g. via a value-change listener)
-                // can disable or enable a field that appears later. Using the
-                // pre-write snapshot would let a write land on a field the
-                // user can no longer edit, or reject one that just became
-                // writable.
-                var raw = field.field();
-                var disabled = isDisabled(raw);
-                if (disabled || raw.isReadOnly()) {
-                    rejected.add(new RejectedEntry(id, value,
-                            notWritableReason(disabled)));
-                    continue;
-                }
-                if (applyValue(field, value, rejected)) {
+            for (var id : values.propertyNames()) {
+                var value = values.get(id);
+                if (writeValue(id, value, byId.get(id), sources.path(id),
+                        rejected)) {
                     writtenValues.put(id, value);
+                }
+            }
+            // The writes may have made more fields writable. Lock them for the
+            // rest of the turn, but only while a turn runs: only turn end
+            // releases the lock, so a fill landing after it, for example from
+            // a tool call still running when the stream timed out, would leave
+            // the fields locked.
+            if (turn.filling) {
+                startWorkingOnWritableFields();
+            }
+            if (sources.isObject()) {
+                for (var id : sources.propertyNames()) {
+                    if (!values.has(id)) {
+                        rejected.add(new RejectedEntry(id, sources.get(id),
+                                "Source reported for '" + id
+                                        + "', which is not among the ids in "
+                                        + "\"values\". Report a source under "
+                                        + "the same field id as its value, "
+                                        + "or leave it out."));
+                    }
                 }
             }
             // Phase 2: validate the post-write state. Each written field is
@@ -1874,16 +1901,52 @@ public class FormAIController implements AIController {
         }
 
         /**
+         * Writes one {@code fill_form} entry: rejects an id that matches no
+         * field or a field the user can no longer edit, otherwise hands the
+         * value to {@link #applyValue}.
+         *
+         * @param field
+         *            the field the id resolved to in the pre-write snapshot, or
+         *            {@code null} for an unknown id
+         * @return {@code true} when the value was written
+         */
+        private boolean writeValue(String id, JsonNode value,
+                FormFieldDescriptor field, JsonNode source,
+                List<RejectedEntry> rejected) {
+            if (field == null) {
+                rejected.add(new RejectedEntry(id, value, "Unknown field id '"
+                        + id + "'. Call get_form_state to refresh the id "
+                        + "list and retry only entries that are rejected "
+                        + "with the reason unknown field id."));
+                return false;
+            }
+            // Re-evaluate the field's live writability rather than the
+            // verdict captured before this turn's writes: an earlier write
+            // in the same payload (e.g. via a value-change listener) can
+            // disable or enable a field that appears later. Using the
+            // pre-write snapshot would let a write land on a field the user
+            // can no longer edit, or reject one that just became writable.
+            var raw = field.field();
+            var disabled = isDisabled(raw);
+            if (disabled || raw.isReadOnly()) {
+                rejected.add(new RejectedEntry(id, value,
+                        notWritableReason(disabled)));
+                return false;
+            }
+            return applyValue(field, value, source, rejected);
+        }
+
+        /**
          * Converts {@code value} and writes it to {@code field}. Validation is
          * not run here — it happens in a single pass after every value is
          * written (see {@code doFill}). Only write failures (a rejected
          * conversion or a field that refuses the value) are recorded.
          * <p>
-         * When source tracking is on, the value may arrive wrapped in a
-         * source-reporting envelope. The plain value inside goes through the
-         * regular conversion, and the reported source is stored on a successful
-         * write, tied to the value the field then holds. Bad source data never
-         * blocks the value (see {@link ValueSourceParser}).
+         * When source tracking is on, {@code source} is the field's entry in
+         * the {@code sources} map the LLM sent, or a missing node when it sent
+         * none. The reported source is stored on a successful write, tied to
+         * the value the field then holds. Bad source data never blocks the
+         * value (see {@link ValueSourceParser}).
          *
          * @return {@code true} when the value was written and is eligible for
          *         the post-write validation pass, {@code false} when a write
@@ -1891,16 +1954,13 @@ public class FormAIController implements AIController {
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         private boolean applyValue(FormFieldDescriptor field, JsonNode value,
-                List<RejectedEntry> rejected) {
-            var payload = value;
-            ValueSource reportedSource = null;
-            if (sourceTrackingEnabled && ValueSourceParser.isEnvelope(value)) {
-                payload = ValueSourceParser.unwrapValue(value);
-                reportedSource = ValueSourceParser.parse(value, field.id());
-            }
+                JsonNode source, List<RejectedEntry> rejected) {
+            var reportedSource = sourceTrackingEnabled
+                    ? ValueSourceParser.parse(source, field.id())
+                    : null;
             Object converted;
             try {
-                converted = FormValueConverter.convert(field, payload);
+                converted = FormValueConverter.convert(field, value);
             } catch (RejectedValueException ex) {
                 LOGGER.debug("Rejected value for field {}: {}", field.id(),
                         ex.getMessage());

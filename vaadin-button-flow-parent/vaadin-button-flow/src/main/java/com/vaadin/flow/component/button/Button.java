@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.button;
 
+import java.io.IOException;
+import java.util.Objects;
+
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.ClickEvent;
@@ -36,7 +39,9 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.download.Download;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -46,6 +51,11 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadEvent;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
 
@@ -57,7 +67,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.3.0-beta2")
+@NpmPackage(value = "@vaadin/button", version = "25.4.0-alpha1")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -69,6 +79,8 @@ public class Button extends Component
     private boolean iconAfterText;
     private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
+    private DownloadHandler downloadHandler;
+    private Registration downloadRegistration;
 
     private final SignalPropertySupport<String> textSupport = SignalPropertySupport
             .create(this, this::textChangeHandler);
@@ -360,11 +372,117 @@ public class Button extends Component
     /**
      * Executes a click on this button at the client-side. Calling this method
      * behaves the same as if the user would have clicked on the button.
-     * 
+     *
      * @since 1.3
      */
     public void clickInClient() {
         getElement().callJsFunction("click");
+    }
+
+    /**
+     * Gets the handler that produces the file downloaded when the button is
+     * clicked.
+     *
+     * @return the download handler, or {@code null} if clicking the button does
+     *         not start a download
+     * @see #setDownloadHandler(DownloadHandler)
+     * @since 25.4
+     */
+    public DownloadHandler getDownloadHandler() {
+        return downloadHandler;
+    }
+
+    /**
+     * Sets a handler that produces a file to download when the button is
+     * clicked. The download starts in the browser as part of the click, and
+     * click listeners still run as usual. Setting a new handler replaces the
+     * previous one, and {@code null} stops the button from starting a download.
+     * <p>
+     * The handler runs only when the browser requests the file, once per click,
+     * so you can create the content, file name and response headers at that
+     * point. If the handler fails, the browser reports a failed download
+     * instead of saving an empty file. Use the transfer callbacks of the
+     * handler, for example
+     * {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler#whenComplete(com.vaadin.flow.function.SerializableConsumer)
+     * whenComplete}, to react on the server when the transfer has finished or
+     * failed.
+     * <p>
+     * The file is only served while the button is attached, visible and
+     * enabled, so hiding or removing the button in a click listener makes the
+     * download fail. The exception is a button with
+     * {@link #setDisableOnClick(boolean) disable on click}: it disables itself
+     * before the browser requests the file, so the file is also served while
+     * the button is disabled by the click. Once the enabled state is set
+     * explicitly, for example with {@code setEnabled(false)}, or a parent is
+     * disabled, the file is no longer served while the button is disabled. To
+     * serve the file regardless of the enabled state, pass
+     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}.
+     *
+     * <pre>{@code
+     * Button export = new Button("Export");
+     * export.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
+     * export.setDownloadHandler(
+     *         DownloadHandler.fromInputStream(event -> createReport()));
+     * }</pre>
+     *
+     * @param downloadHandler
+     *            the handler that produces the file, or {@code null} to not
+     *            start a download on click
+     * @since 25.4
+     */
+    public void setDownloadHandler(DownloadHandler downloadHandler) {
+        if (downloadRegistration != null) {
+            downloadRegistration.remove();
+            downloadRegistration = null;
+        }
+        this.downloadHandler = downloadHandler;
+        if (downloadHandler != null) {
+            downloadRegistration = Download.onClick(this,
+                    allowDisabledByClick(downloadHandler));
+        }
+    }
+
+    /**
+     * Wraps the handler so that it is also served while the button is disabled
+     * by disable on click, which happens before the browser requests the file.
+     * A button disabled explicitly, or inside a disabled parent, still refuses
+     * the request unless the handler itself allows it.
+     */
+    private DownloadHandler allowDisabledByClick(DownloadHandler delegate) {
+        return new DownloadHandler() {
+            @Override
+            public void handleRequest(VaadinRequest request,
+                    VaadinResponse response, VaadinSession session,
+                    Element owner) throws IOException {
+                delegate.handleRequest(request, response, session, owner);
+            }
+
+            @Override
+            public void handleDownloadRequest(DownloadEvent event)
+                    throws IOException {
+                delegate.handleDownloadRequest(event);
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return delegate.getUrlPostfix();
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return delegate.isAllowInert();
+            }
+
+            @Override
+            public DisabledUpdateMode getDisabledUpdateMode() {
+                Element parent = Button.this.getElement().getParent();
+                if (disableOnClickController.isDisabledByClick()
+                        && (parent == null || parent.isEnabled())) {
+                    return DisabledUpdateMode.ALWAYS;
+                }
+                return delegate.getDisabledUpdateMode();
+            }
+        };
     }
 
     /**
@@ -412,8 +530,13 @@ public class Button extends Component
      * Sets whether the button should be disabled when clicked.
      * <p>
      * When set to {@code true}, the button will be immediately disabled on the
-     * client-side when clicked, preventing further clicks until re-enabled from
-     * the server-side.
+     * client-side when clicked, preventing further clicks. How long the button
+     * stays disabled depends on the current {@link #getDisableOnClickMode()
+     * disable on click mode}. By default, the button stays disabled until it is
+     * enabled again by the application. Use
+     * {@link #setDisableOnClick(DisableOnClickMode)} to change the mode, for
+     * example to enable the button again automatically with the next response
+     * after the click.
      * <p>
      * When the enabled state is bound to a signal, the disable on click feature
      * can not be used. Disable on click requires the component to automatically
@@ -428,16 +551,54 @@ public class Button extends Component
      * @since 1.2
      */
     public void setDisableOnClick(boolean disableOnClick) {
+        if (disableOnClick) {
+            checkNoEnabledBinding();
+        }
+        disableOnClickController.setDisableOnClick(disableOnClick);
+    }
+
+    /**
+     * Sets the button to be disabled when clicked, using the given mode to
+     * determine how long the button stays disabled:
+     * <ul>
+     * <li>{@link DisableOnClickMode#UNTIL_ENABLED}: The button stays disabled
+     * until it is enabled again by the application. This is the default mode.
+     * <li>{@link DisableOnClickMode#UNTIL_RESPONSE}: The button is enabled
+     * again automatically with the next response the server sends after the
+     * click, normally the response to the request that delivered the click. If
+     * you explicitly set the enabled state of the button while the click is
+     * handled, the automatic enabling is skipped for that click. See the
+     * constant's documentation for how manual push affects this.
+     * </ul>
+     * <p>
+     * Calling this method is equivalent to calling
+     * {@link #setDisableOnClick(boolean) setDisableOnClick(true)} after setting
+     * the mode. The mode is kept when disable on click is later turned off and
+     * on again with {@link #setDisableOnClick(boolean)}.
+     *
+     * @param mode
+     *            the disable on click mode, not {@code null}
+     * @throws IllegalStateException
+     *             if the enabled state is already bound to a signal
+     * @see #setDisableOnClick(boolean)
+     * @since 25.4
+     */
+    public void setDisableOnClick(DisableOnClickMode mode) {
+        Objects.requireNonNull(mode, "DisableOnClickMode must not be null");
+        checkNoEnabledBinding();
+        disableOnClickController.setDisableOnClick(mode);
+    }
+
+    private void checkNoEnabledBinding() {
         boolean hasEnabledBinding = getElement().getNode()
                 .getFeatureIfInitialized(SignalBindingFeature.class)
                 .map(feature -> feature
                         .hasBinding(SignalBindingFeature.ENABLED))
                 .orElse(false);
-        if (disableOnClick && hasEnabledBinding) {
+        if (hasEnabledBinding) {
             throw new IllegalStateException(
                     "Disable on click is not supported when the enabled state is bound to a signal. ");
         }
-        disableOnClickController.setDisableOnClick(disableOnClick);
     }
 
     /**
@@ -448,6 +609,18 @@ public class Button extends Component
      */
     public boolean isDisableOnClick() {
         return disableOnClickController.isDisableOnClick();
+    }
+
+    /**
+     * Gets the mode that determines how long the button stays disabled after it
+     * has been disabled on click. {@link DisableOnClickMode#UNTIL_ENABLED} by
+     * default.
+     *
+     * @return the disable on click mode, not {@code null}
+     * @since 25.4
+     */
+    public DisableOnClickMode getDisableOnClickMode() {
+        return disableOnClickController.getDisableOnClickMode();
     }
 
     /**
@@ -469,7 +642,7 @@ public class Button extends Component
      *
      * This feature flag will also enable focus events and focus shortcuts for
      * disabled buttons.
-     * 
+     *
      * @since 24.3.8
      */
     @Override
@@ -516,7 +689,7 @@ public class Button extends Component
      *
      * This feature flag will enable focus events and focus shortcuts for
      * disabled buttons.
-     * 
+     *
      * @since 24.7
      */
     @Override
@@ -543,7 +716,7 @@ public class Button extends Component
      *
      * This feature flag will enable focus events and focus shortcuts for
      * disabled buttons.
-     * 
+     *
      * @since 24.7
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -570,7 +743,7 @@ public class Button extends Component
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
      * </pre>
-     * 
+     *
      * @since 24.7
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })

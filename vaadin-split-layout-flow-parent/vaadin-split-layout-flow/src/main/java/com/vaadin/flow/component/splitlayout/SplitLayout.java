@@ -27,14 +27,13 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -45,7 +44,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/split-layout", version = "25.3.0-beta2")
+@NpmPackage(value = "@vaadin/split-layout", version = "25.4.0-alpha1")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -53,7 +52,8 @@ public class SplitLayout extends Component
 
     private Component primaryComponent;
     private Component secondaryComponent;
-    private StateTree.ExecutionRegistration updateStylesRegistration;
+    private final BeforeClientResponseAction stylesUpdateAction = new BeforeClientResponseAction(
+            this, this::updateStylesForSplitterPosition);
     private Double splitterPosition;
     private SplitLayoutI18n i18n;
 
@@ -80,8 +80,7 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Orientation orientation) {
         setOrientation(orientation);
-        addAttachListener(
-                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+        addAttachListener(e -> stylesUpdateAction.schedule());
         addSplitterDragEndListener(e -> {
             splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
@@ -242,20 +241,7 @@ public class SplitLayout extends Component
      */
     public void setSplitterPosition(double position) {
         this.splitterPosition = position;
-        getUI().ifPresent(this::requestStylesUpdatesForSplitterPosition);
-    }
-
-    private void requestStylesUpdatesForSplitterPosition(UI ui) {
-        if (this.updateStylesRegistration != null) {
-            updateStylesRegistration.remove();
-        }
-        this.updateStylesRegistration = ui.beforeClientResponse(this,
-                context -> {
-                    // Update width or height if splitter position is set.
-                    updateStylesForSplitterPosition();
-
-                    this.updateStylesRegistration = null;
-                });
+        stylesUpdateAction.schedule();
     }
 
     private void updateStylesForSplitterPosition() {

@@ -10,10 +10,12 @@ package com.vaadin.flow.component.ai.grid;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -31,14 +33,17 @@ final class GridFormatting implements Serializable {
             .ofPattern("yyyy-MM-dd");
     static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter
             .ofPattern("yyyy-MM-dd HH:mm");
+    static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
+            .ofPattern("HH:mm");
 
     private GridFormatting() {
     }
 
     /**
      * Formats a value for display based on its Java type. Dates are formatted
-     * as {@code yyyy-MM-dd} or {@code yyyy-MM-dd HH:mm}, booleans as
-     * {@code Yes}/{@code No}, and decimal numbers have trailing zeros stripped.
+     * as {@code yyyy-MM-dd} or {@code yyyy-MM-dd HH:mm}, times as
+     * {@code HH:mm}, booleans as {@code Yes}/{@code No}, and decimal numbers
+     * have trailing zeros stripped.
      *
      * @param value
      *            the raw value, not {@code null}
@@ -52,6 +57,10 @@ final class GridFormatting implements Serializable {
             i.atZone(ZoneId.systemDefault()).format(DATETIME_FORMATTER);
         case Timestamp ts -> ts.toLocalDateTime().format(DATETIME_FORMATTER);
         case java.sql.Date d -> d.toLocalDate().format(DATE_FORMATTER);
+        // java.sql.Time extends java.util.Date but carries no date, so
+        // toInstant() throws UnsupportedOperationException by contract
+        case Time t -> t.toLocalTime().format(TIME_FORMATTER);
+        case LocalTime t -> t.format(TIME_FORMATTER);
         case Date d -> d.toInstant().atZone(ZoneId.systemDefault())
                 .format(DATETIME_FORMATTER);
         case Boolean b -> b ? "Yes" : "No";

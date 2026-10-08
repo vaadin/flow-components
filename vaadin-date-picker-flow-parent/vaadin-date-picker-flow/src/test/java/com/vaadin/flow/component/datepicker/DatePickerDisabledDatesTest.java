@@ -20,6 +20,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -202,6 +205,24 @@ class DatePickerDisabledDatesTest {
     }
 
     @Test
+    void setDisabledDatesWhileDetached_attach_configPushedAfterInitLazy() {
+        picker.setDisabledDates(List.of(LocalDate.of(2023, 1, 10)));
+        ui.add(picker);
+
+        List<JavaScriptInvocation> invocations = ui
+                .dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation).toList();
+        int initIndex = indexOf(invocations, invocation -> invocation
+                .getExpression().contains("datepickerConnector.initLazy"));
+        int configIndex = indexOf(invocations,
+                invocation -> "$connector.setDateMetadataConfig".equals(
+                        JsFunctionCallUtil.getFunctionName(invocation)));
+        Assertions.assertTrue(initIndex >= 0, "initLazy was not invoked");
+        Assertions.assertTrue(configIndex > initIndex,
+                "Config must be pushed after the connector is initialized");
+    }
+
+    @Test
     void attach_nothingConfigured_noConfigPushed() {
         ui.add(picker);
 
@@ -302,11 +323,18 @@ class DatePickerDisabledDatesTest {
         Assertions.assertEquals(day, triple.get(2).intValue());
     }
 
+    private static int indexOf(List<JavaScriptInvocation> invocations,
+            Predicate<JavaScriptInvocation> predicate) {
+        return IntStream.range(0, invocations.size())
+                .filter(i -> predicate.test(invocations.get(i))).findFirst()
+                .orElse(-1);
+    }
+
     private List<JavaScriptInvocation> getDateMetadataConfigInvocations() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("setDateMetadataConfig"))
+                .filter(invocation -> "$connector.setDateMetadataConfig"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
                 .toList();
     }
 }

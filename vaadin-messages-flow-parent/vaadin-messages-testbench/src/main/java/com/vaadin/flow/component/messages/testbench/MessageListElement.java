@@ -31,12 +31,38 @@ public class MessageListElement extends TestBenchElement {
 
     /**
      * Gets the <code>&lt;vaadin-message&gt;</code> elements rendered in this
-     * message list.
+     * message list, excluding the typing indicator.
      *
      * @return the message elements
      */
     public List<MessageElement> getMessageElements() {
-        return $(MessageElement.class).all();
+        return $(MessageElement.class)
+                .withoutAttribute("slot", "typing-indicator").all();
+    }
+
+    /**
+     * Gets the names of the users that the typing indicator shows as currently
+     * typing.
+     *
+     * @return the names of the typing users in the order they are shown, empty
+     *         if the typing indicator is not shown
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getTypingUserNames() {
+        return (List<String>) executeScript("""
+                const indicator = arguments[0]
+                    .querySelector('[slot="typing-indicator"]');
+                const group = indicator
+                    && indicator.querySelector('vaadin-avatar-group');
+                if (!group) {
+                    return [];
+                }
+                // The indicator falls back to the abbreviation for users
+                // that have no name
+                return group.items
+                    .map((item) => item.name || item.abbr)
+                    .filter((name) => !!name);
+                """, this);
     }
 
 }

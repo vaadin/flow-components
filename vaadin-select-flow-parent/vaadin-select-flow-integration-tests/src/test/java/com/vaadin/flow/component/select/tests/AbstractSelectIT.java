@@ -149,7 +149,6 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
             Assert.assertEquals("Invalid options selected from popup",
                     expectedItemText,
                     selectElement.getSelectedOptionItem().getText());
-            selectElement.closePopup();
         }
 
         void placeholderSelected(String expectedItemText) {
@@ -302,15 +301,6 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
     @Before
     public void init() {
         open(getDefaultParameter());
-    }
-
-    /*
-     * Reads the item's text content instead of using getText(), which only
-     * returns text of rendered elements. Items are projected into the select's
-     * overlay, which is not rendered while the dropdown is closed.
-     */
-    protected static String getItemText(TestBenchElement item) {
-        return item.getPropertyString("textContent").trim();
     }
 
     protected abstract int getInitialNumberOfItems();

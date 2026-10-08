@@ -50,6 +50,7 @@ import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
@@ -152,6 +153,8 @@ class ComboBoxDataController<TItem>
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private Registration dataProviderListener = null;
+    private SerializableRunnable dataProviderChangeListener;
+    private SerializableRunnable dataUpdateListener;
 
     /**
      * Creates a new data controller for that combo box
@@ -194,6 +197,34 @@ class ComboBoxDataController<TItem>
      */
     CompositeDataGenerator<TItem> getDataGenerator() {
         return dataGenerator;
+    }
+
+    /**
+     * Sets a listener that is called after a new data provider has been set
+     */
+    void setDataProviderChangeListener(SerializableRunnable listener) {
+        dataProviderChangeListener = listener;
+    }
+
+    /**
+     * Sets a listener that is called when the data is reset or an item is
+     * refreshed
+     */
+    void setDataUpdateListener(SerializableRunnable listener) {
+        dataUpdateListener = listener;
+    }
+
+    private void notifyDataUpdateListener() {
+        if (dataUpdateListener != null) {
+            dataUpdateListener.run();
+        }
+    }
+
+    /**
+     * Whether the web component filters the items itself
+     */
+    boolean isClientSideFilter() {
+        return comboBox.getElement().getProperty("_clientSideFilter", false);
     }
 
     /**
@@ -502,10 +533,11 @@ class ComboBoxDataController<TItem>
         if (dataCommunicator == null) {
             // Create data communicator with postponed initialisation
             dataCommunicator = new ComboBoxDataCommunicator<>(comboBox,
-                    dataGenerator, arrayUpdater,
-                    data -> comboBox.getElement()
-                            .callJsFunction("$connector.updateData", data),
-                    comboBox.getElement().getNode(), enableFetch) {
+                    dataGenerator, arrayUpdater, data -> {
+                        comboBox.getElement()
+                                .callJsFunction("$connector.updateData", data);
+                        notifyDataUpdateListener();
+                    }, comboBox.getElement().getNode(), enableFetch) {
 
                 @Override
                 public void reset() {
@@ -521,6 +553,7 @@ class ComboBoxDataController<TItem>
                         // necessary.
                         comboBox.refreshValue();
                     }
+                    notifyDataUpdateListener();
                 }
             };
             dataCommunicator.setPageSize(comboBox.getPageSize());
@@ -567,6 +600,10 @@ class ComboBoxDataController<TItem>
             lazyOpenRegistration = comboBox.getElement()
                     .addPropertyChangeListener("opened",
                             this::executeRegistration);
+        }
+
+        if (dataProviderChangeListener != null) {
+            dataProviderChangeListener.run();
         }
     }
 

@@ -15,20 +15,29 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.messages.MessageListUser;
+import com.vaadin.flow.signals.BindingActiveException;
 
 /**
  * Wrapper for Flow MessageList component to implement AIMessageList interface.
  */
 class MessageListWrapper implements AIMessageList {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MessageListWrapper.class);
 
     final MessageList messageList;
     private final Map<MessageListItem, AIMessage> itemToMessage = new HashMap<>();
@@ -44,6 +53,44 @@ class MessageListWrapper implements AIMessageList {
         itemToMessage.put(message.getItem(), message);
         messageList.addItem(message.getItem());
         return message;
+    }
+
+    @Override
+    public void showTypingIndicator(String userName) {
+        // Only the entry of the given participant is touched, so that the
+        // typing users set by the application are kept
+        var typingUsers = messageList.getTypingUsers();
+        if (typingUsers.stream()
+                .anyMatch(user -> userName.equals(user.getName()))) {
+            return;
+        }
+        var users = new ArrayList<>(typingUsers);
+        users.add(new MessageListUser(userName));
+        setTypingUsers(users);
+    }
+
+    @Override
+    public void hideTypingIndicator(String userName) {
+        var typingUsers = messageList.getTypingUsers();
+        var users = typingUsers.stream()
+                .filter(user -> !userName.equals(user.getName())).toList();
+        if (users.size() != typingUsers.size()) {
+            setTypingUsers(users);
+        }
+    }
+
+    /**
+     * Updates the typing users of the message list. When the application has
+     * bound the typing users to a signal, they cannot be set, and the typing
+     * indicator is left to the application.
+     */
+    private void setTypingUsers(List<MessageListUser> users) {
+        try {
+            messageList.setTypingUsers(users);
+        } catch (BindingActiveException e) {
+            LOGGER.debug("Typing users are bound to a signal, leaving the "
+                    + "typing indicator to the application", e);
+        }
     }
 
     @Override

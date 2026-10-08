@@ -158,7 +158,10 @@ public class SpreadsheetElement extends TestBenchElement {
      *             if the cell at (row, column) is not found.
      */
     public SheetCellElement getCellAt(int row, int column) {
-        String selector = String.format(".col%d.row%d.cell", column, row);
+        // Cells and the merges drawn over them are divs; the prefix keeps
+        // anything else with a cell's classes from answering to them, as
+        // the GWT client's inline editor did.
+        String selector = String.format("div.col%d.row%d.cell", column, row);
         // Polls the cell-grid's shadow root for the cell — the grid may
         // not have rendered yet (e.g. just after a scroll). Where a merge
         // covers the coordinate two elements answer to it: the cell and

@@ -9,13 +9,12 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.Optional;
 
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 
 /**
  * Tracks whether a full client-side reload is pending and flushes the marker to
- * the client through a {@code beforeClientResponse} callback.
+ * the client once before the next response.
  *
  * <p>
  * Names the architectural pattern previously distributed across five fragments
@@ -34,8 +33,8 @@ import com.vaadin.flow.component.UI;
  *
  * <p>
  * Now: {@link #isPending()} reads, {@link #markPending(Spreadsheet)} sets the
- * flag and registers the {@code beforeClientResponse} callback, and the
- * package-private {@link #flush(Spreadsheet)} method (called from the callback)
+ * flag and schedules a {@link BeforeClientResponseAction}, and the
+ * package-private {@link #flush(Spreadsheet)} method (which the action runs)
  * pushes the timestamp, clears the flag, and defaults
  * {@code initialSheetSelection} from the active sheet's selected-cells state
  * when not already set.
@@ -50,33 +49,34 @@ import com.vaadin.flow.component.UI;
  *
  * <p>
  * Multiple calls to {@link #markPending} between flushes coalesce: the flag is
- * just set to true each time, the callback is registered fresh but is
- * idempotent on a true flag, and the flush still fires at most once per client
- * round.
+ * just set to true each time, and the action runs at most once per client
+ * round. Scheduled on the component, it also runs when the reload was asked for
+ * without a current UI - from a background thread, say - which the
+ * {@code UI.beforeClientResponse} callback it replaces never did.
  */
 final class ClientReloadFlag implements Serializable {
 
     private boolean pending;
+
+    /** Runs {@link #flush(Spreadsheet)}; made on the first mark. */
+    private BeforeClientResponseAction flushAction;
 
     boolean isPending() {
         return pending;
     }
 
     /**
-     * Sets the pending flag to true and registers a
-     * {@code beforeClientResponse} callback on the current UI that will call
-     * {@link #flush(Spreadsheet)} when the flag is still true at client-flush
-     * time. Multiple back-to-back calls coalesce into a single flush.
+     * Sets the pending flag to true and schedules {@link #flush(Spreadsheet)}
+     * to run once before the next client response. Multiple back-to-back calls
+     * coalesce into a single flush.
      */
     void markPending(Spreadsheet spreadsheet) {
-        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
-            ui.beforeClientResponse(spreadsheet, e -> {
-                if (pending) {
-                    flush(spreadsheet);
-                }
-            });
-        });
+        if (flushAction == null) {
+            flushAction = new BeforeClientResponseAction(spreadsheet,
+                    () -> flush(spreadsheet));
+        }
         pending = true;
+        flushAction.schedule();
     }
 
     /**

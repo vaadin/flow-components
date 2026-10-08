@@ -156,7 +156,6 @@ public class FieldMarkerI18n implements Serializable {
      * the built-in English default.
      *
      * @author Vaadin Ltd
-     * @since 25.3
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Confidence implements Serializable {

@@ -28,6 +28,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaRole;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
@@ -78,11 +79,12 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.3.0-beta2")
+@NpmPackage(value = "@vaadin/dialog", version = "25.4.0-alpha1")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @ModalRoot
-public class Dialog extends Component implements HasComponents, HasSize,
-        HasStyle, HasThemeVariant<DialogVariant>, HasAriaRole {
+public class Dialog extends Component
+        implements HasComponents, HasSize, HasStyle,
+        HasThemeVariant<DialogVariant>, HasAriaRole, HasAriaDescription {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
 

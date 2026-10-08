@@ -398,6 +398,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
             Serializable... parameters) {
         getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
                 this,
-                context -> ui.getPage().executeJs(expression, parameters)));
+                context -> getElement().executeJs(expression, parameters)));
     }
 }

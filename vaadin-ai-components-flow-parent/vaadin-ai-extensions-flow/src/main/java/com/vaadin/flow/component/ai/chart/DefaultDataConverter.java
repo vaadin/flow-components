@@ -11,10 +11,12 @@ package com.vaadin.flow.component.ai.chart;
 import static com.vaadin.flow.component.ai.chart.ColumnNames.*;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,6 +98,8 @@ import com.vaadin.flow.component.charts.util.Util;
  * Additionally, any pattern that produces a {@code DataSeriesItem} (or
  * subclass) supports an optional {@code _color} column. If present, the value
  * is used to set the item's color via {@link SolidColor#SolidColor(String)}.
+ * The column is never treated as data, so the fallback skips it when it picks
+ * the category and value columns.
  * </p>
  * <p>
  * Column name matching is case-insensitive. Column names are determined from
@@ -111,12 +115,23 @@ import com.vaadin.flow.component.charts.util.Util;
  *
  * @author Vaadin Ltd
  * @see ColumnNames
- * @since 25.2
+ * @since 25.3
  */
 public class DefaultDataConverter implements DataConverter {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(DefaultDataConverter.class);
+
+    /**
+     * Day onto which time-of-day values are placed when converted to a
+     * timestamp. A time of day has no calendar position of its own, so any day
+     * would do for the axis labels. This one is chosen so the values fall
+     * inside the range that {@link ChartRenderer} recognises as timestamps when
+     * it infers a datetime X-axis; values before year 2000 are treated as plain
+     * numbers there.
+     */
+    private static final LocalDate TIME_OF_DAY_ANCHOR = LocalDate.of(2000, 1,
+            1);
 
     @Override
     public List<Series> convertToSeries(List<Map<String, Object>> data) {
@@ -596,7 +611,10 @@ public class DefaultDataConverter implements DataConverter {
 
     private DataSeries convertFallback(List<Map<String, Object>> data,
             Set<String> columns, Map<String, String> columnMapping) {
+        // The color column modifies any pattern and is never data, so it must
+        // not be classified as a category or value column here.
         var lowerNames = new ArrayList<>(columns);
+        lowerNames.remove(COLOR);
         if (lowerNames.isEmpty()) {
             return new DataSeries();
         }
@@ -749,9 +767,15 @@ public class DefaultDataConverter implements DataConverter {
 
     // --- Utility methods ---
 
+    /**
+     * Resolves the X value of a row: the value of the {@code _x} column, or the
+     * row index when the data has no such column.
+     */
     private static Number resolveX(Map<String, Object> row,
             Map<String, String> columnMapping, String xCol, int rowIndex) {
-        return xCol != null ? getNumber(row, columnMapping, xCol) : rowIndex;
+        return columnMapping.containsKey(xCol)
+                ? getNumber(row, columnMapping, xCol)
+                : rowIndex;
     }
 
     private static void applyColor(DataSeriesItem item, Map<String, Object> row,
@@ -849,8 +873,9 @@ public class DefaultDataConverter implements DataConverter {
     /**
      * Converts a value to an {@link Instant}. Handles {@link Instant},
      * {@link Timestamp}, {@link java.sql.Date}, {@link LocalDate},
-     * {@link LocalDateTime}, {@link Date}, and numeric values (interpreted as
-     * milliseconds since epoch).
+     * {@link LocalDateTime}, {@link java.sql.Time} and {@link LocalTime} (both
+     * placed on {@link #TIME_OF_DAY_ANCHOR}), {@link Date}, and numeric values
+     * (interpreted as milliseconds since epoch).
      */
     private static Instant toInstant(Object value) {
         return switch (value) {
@@ -862,6 +887,11 @@ public class DefaultDataConverter implements DataConverter {
             localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
         case LocalDateTime localDateTime ->
             localDateTime.toInstant(ZoneOffset.UTC);
+        // java.sql.Time extends java.util.Date but carries no date, so
+        // toInstant() throws UnsupportedOperationException by contract
+        case Time time -> toInstant(time.toLocalTime());
+        case LocalTime localTime ->
+            localTime.atDate(TIME_OF_DAY_ANCHOR).toInstant(ZoneOffset.UTC);
         case Date date -> date.toInstant();
         case Number number -> Instant.ofEpochMilli(number.longValue());
         case null, default -> null;
@@ -875,7 +905,7 @@ public class DefaultDataConverter implements DataConverter {
     private static boolean isTemporalOrNumeric(Object value) {
         return value instanceof Number || value instanceof Instant
                 || value instanceof LocalDate || value instanceof LocalDateTime
-                || value instanceof Date;
+                || value instanceof LocalTime || value instanceof Date;
     }
 
     /**

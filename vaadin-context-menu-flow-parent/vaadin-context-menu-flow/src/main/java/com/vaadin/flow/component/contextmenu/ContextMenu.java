@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.contextmenu;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -70,6 +71,29 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
     public ContextMenu(Component target) {
         this();
         setTarget(target);
+    }
+
+    /**
+     * Gets the context menus that have the given component as their target, in
+     * the order their target was set. A component can have several context
+     * menus, for example one opened by a right click and another opened by a
+     * left click.
+     *
+     * <pre>{@code
+     * new ContextMenu(button).addItem("Delete");
+     * // elsewhere, e.g. in a browserless test:
+     * ContextMenu.getContextMenus(button).get(0).getItems();
+     * }</pre>
+     *
+     * @param target
+     *            the target component
+     * @return an unmodifiable snapshot of the context menus targeting the
+     *         component, empty if there are none
+     * @see #setTarget(Component)
+     * @since 25.4
+     */
+    public static List<ContextMenu> getContextMenus(Component target) {
+        return getContextMenus(target, ContextMenu.class);
     }
 
     @Override

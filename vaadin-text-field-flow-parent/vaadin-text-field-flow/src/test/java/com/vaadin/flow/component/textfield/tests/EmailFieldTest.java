@@ -28,6 +28,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaDescription;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -190,5 +191,12 @@ class EmailFieldTest {
         EmailField field = new EmailField();
         Assertions.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<EmailField, String>, String>);
+    }
+
+    @Test
+    void doesNotImplementHasTextSelection() {
+        // Browsers do not support text selection for inputs of type email
+        Assertions.assertFalse(
+                HasTextSelection.class.isAssignableFrom(EmailField.class));
     }
 }

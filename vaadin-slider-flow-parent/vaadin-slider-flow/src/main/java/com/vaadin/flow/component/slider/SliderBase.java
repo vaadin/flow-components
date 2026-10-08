@@ -23,8 +23,10 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.SignalBinding;
@@ -50,7 +52,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
         extends AbstractSinglePropertyField<TComponent, TValue> implements
         InputField<ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasValidationProperties, HasValueChangeMode, Focusable<TComponent>,
-        KeyNotifier {
+        HasThemeVariant<SliderVariant>, KeyNotifier {
 
     static final double DEFAULT_MIN = 0;
     static final double DEFAULT_MAX = 100;
@@ -65,7 +67,8 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
-    private boolean consistencyCheckPending = false;
+    private final BeforeClientResponseAction propertyConsistencyCheck = new BeforeClientResponseAction(
+            this, this::warnIfPropertiesInconsistent);
 
     /**
      * Constructs a slider with the given min, max, and custom converters for
@@ -132,7 +135,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
     public void setMin(TNumber min) {
         Objects.requireNonNull(min, "Min value cannot be null");
         getElement().setProperty("min", toDouble.apply(min));
-        schedulePropertyConsistencyCheck();
+        propertyConsistencyCheck.schedule();
     }
 
     /**
@@ -153,7 +156,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
     public void setMax(TNumber max) {
         Objects.requireNonNull(max, "Max value cannot be null");
         getElement().setProperty("max", toDouble.apply(max));
-        schedulePropertyConsistencyCheck();
+        propertyConsistencyCheck.schedule();
     }
 
     /**
@@ -185,7 +188,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
                     "The step must be greater than 0.");
         }
         getElement().setProperty("step", stepDouble);
-        schedulePropertyConsistencyCheck();
+        propertyConsistencyCheck.schedule();
     }
 
     /**
@@ -353,20 +356,7 @@ abstract class SliderBase<TComponent extends SliderBase<TComponent, TValue, TNum
     public void setValue(TValue value) {
         Objects.requireNonNull(value, "Value cannot be null");
         super.setValue(value);
-        schedulePropertyConsistencyCheck();
-    }
-
-    private void schedulePropertyConsistencyCheck() {
-        if (consistencyCheckPending) {
-            return;
-        }
-
-        consistencyCheckPending = true;
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    consistencyCheckPending = false;
-                    warnIfPropertiesInconsistent();
-                }));
+        propertyConsistencyCheck.schedule();
     }
 
     private void warnIfPropertiesInconsistent() {

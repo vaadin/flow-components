@@ -65,6 +65,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
   follows the same shape: optional dependency, `transient` model fields,
   documented as not serializable.
+- Provider chat memory holds the user messages and the assistant's final
+  answer of each turn. Tool calls and results are sent to the model only
+  within their own turn, with both built-in providers, so a controller must
+  not rely on the model remembering a previous turn's tool result; the
+  instruction tools already tell the model to read the state again each
+  turn. `LangChain4JLLMProvider` also leaves a final answer without text out
+  of the memory. A model may answer that way once a tool call has done the
+  work, LangChain4j hands the answer over as an `AiMessage` with a `null`
+  text, and OpenAI's Chat Completions API rejects a replayed assistant
+  message that has neither content nor tool calls, which would fail every
+  later turn of the conversation.
 - The response stream carries text only; everything else the model said
   about the turn goes to `LLMRequest.metadataSink()` as `ResponseMetadata`.
   A provider publishes whenever it learns more — each publish carries the
@@ -80,7 +91,11 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   `OTHER` from its Anthropic one. Framework code therefore never branches on
   the content of a finish reason: checks that must tell a completed turn from
   a truncated one use structure instead — a missing finish reason, or tool
-  calls still pending.
+  calls still pending. The one exception is Spring AI's
+  `ToolCallLimitExceededException.FINISH_REASON`: not a vendor's word but a
+  constant Spring AI defines for the reply it synthesizes itself when its
+  tool call limit is hit, so `SpringAILLMProvider` compares against that
+  constant to turn the reply back into a failed turn.
 
 ## Threading
 
@@ -90,7 +105,12 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   instead of `ui.access` — a plain `access` on a UI that detaches after
   enqueue silently drops the task and leaves the orchestrator stuck busy.
 - Interceptor/postponement timers run on `Schedulers.boundedElastic()`,
-  never `parallel()` — listeners are allowed to block.
+  never `parallel()`: the end-of-turn hooks may run inline on the timer
+  thread and application code in them may block.
+- The end-of-turn hooks, `AIController.onResponse` and then the
+  `ResponseListener`, run as one `ui.accessLater` task whether or not a
+  controller is attached, so the listener has a single threading contract
+  (session locked) and a detached UI still gets the listener.
 - The orchestrator's `isProcessing` busy flag must be released exactly once
   per prompt. The field comment in `AIOrchestrator` enumerates every release
   path; any new way for a prompt to end must be added there and must decide
@@ -109,19 +129,29 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 
 ## LLM tools
 
-- Tool names are `snake_case` and must match `^[a-zA-Z0-9_-]{1,64}$`
-  (validated on registration).
+- Tool names are `snake_case` and must match `^[a-zA-Z0-9_-]{1,64}$`, and a
+  declared parameters schema must be a JSON object (both validated on
+  registration, so a broken definition fails fast and names the tool).
 - Each controller keeps its tool definitions in a sibling `XxxAITools`
   factory class with a nested `Callbacks` interface implemented by the
   controller, keeping tool JSON and descriptions decoupled from the
   component type.
 - Instructions the model must always see go into a tool's *description*
-  (the `get_*_instructions` and session-context tools), with `execute()`
-  returning the same text — the model reads the manifest without a call.
+  (the `get_*_instructions` tools), with `execute()` returning the same
+  text — the model reads the manifest without a call.
+- Keep tool definitions identical from turn to turn. LLM providers cache the
+  prompt prefix in the order tools, system prompt, messages, and any change
+  to a tool name, description or schema invalidates all of it. Per-turn
+  content therefore never goes into a tool description or the system
+  prompt: the session context (`Builder.withMetadata`) travels in
+  `LLMRequest.sessionContext()` and the providers append it to the user
+  message, at the very end of the prompt.
 - Tools validate their input eagerly so errors round-trip to the LLM within
   the turn, but stage the result and apply it once in `onResponse(null)`;
   `onResponse(error)` discards the pending state and keeps the last good
-  render.
+  render. A throw from `onResponse(null)` is the turn's error: the
+  orchestrator hands the `ResponseListener` the throw instead of a success
+  event, so a controller must not swallow its own apply failures.
 - Error hygiene toward the model: only the message of a
   `ToolException` (public, in `com.vaadin.flow.component.ai.provider`) is
   forwarded verbatim — throw it, from built-in tool code or an application's
@@ -133,6 +163,23 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   are executed by the vendor framework, whose default error handling relays
   the raw message of any exception to the model — they are deliberately out
   of scope, so route error-sensitive tools through `ToolSpec`.
+- The tool-calling loop is bounded where it is driven, never by the
+  orchestrator. `LangChain4JLLMProvider` counts the tool calls of a turn
+  against `setMaxCallsPerTool` / `setMaxTotalToolCalls` (defaults 40 and 150,
+  the same as Spring AI's) and fails the turn with the public
+  `ToolCallLimitExceededException`. The check runs before any tool of that
+  round runs, and the tool traffic of the failed turn is discarded with it, so
+  the next turn continues from the chat memory as the last completed turn
+  left it; a cancelled turn likewise stops calling the model and the tools.
+  `SpringAILLMProvider` adds no cap of its own: Spring AI bounds the loop
+  itself and hands back a synthesized reply carrying its
+  `ToolCallLimitExceededException.FINISH_REASON`, which the provider turns
+  into the same exception with Spring AI's message, so both providers fail
+  such a turn the same way. The exception carries no structured detail on
+  purpose: Spring AI's tool name and limit only exist in its message wording,
+  which is not ours to depend on. Spring AI's reply may remain in the chat
+  memory with either constructor; the provider does not rewrite what Spring
+  AI's advisors stored.
 - Never send secrets to the LLM — `FormAIController` auto-ignores password
   fields; preserve that property for new field handling.
 
@@ -181,7 +228,7 @@ server-side only):
   repo. Both published modules need the Mockito java-agent `surefire.argLine`
   (already in the poms) because `EnableFeatureFlagExtension` uses
   `mockStatic`.
-- No test ever uses a real LLM or API key. Unit tests mock `LLMProvider`
+- No unit or integration test uses a real LLM or API key. Unit tests mock `LLMProvider`
   (`Flux.just(...)` + `ArgumentCaptor<LLMRequest>` to assert the built
   request); provider tests mock the vendor model types and hand-build
   responses; IT views define small provider classes inline — an echo
@@ -192,6 +239,14 @@ server-side only):
   matrix belongs in unit tests asserting server-side state (see
   `AIFieldMarkerIT` vs `FormAIControllerTest` for the established split).
 - Log-output assertions use the `slf4j-test` `TestLogger`.
+- The only place a real LLM is used is the unpublished
+  `vaadin-ai-components-flow-benchmark` module. Its JUnit scenarios drive the
+  controllers server-side through `AIOrchestrator` with the Spring AI
+  provider, score the resulting state deterministically (field values and the
+  sources recorded for them, rows returned by the produced SQL, chart type and
+  series), and repeat each scenario to absorb nondeterminism. The suite is
+  skipped unless `AI_BENCHMARK_MODEL` is set, so it never runs in PR
+  validation. See the module README for configuration and output.
 
 ## Other conventions
 

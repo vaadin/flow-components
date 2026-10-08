@@ -35,7 +35,7 @@ import com.vaadin.flow.component.ai.common.AIAttachment;
  * lock. Long-running work should be offloaded to a worker; UI updates do not
  * need an extra {@code ui.access(...)} hop.
  * 
- * @since 25.2
+ * @since 25.3
  */
 @FunctionalInterface
 public interface RequestListener extends Serializable {

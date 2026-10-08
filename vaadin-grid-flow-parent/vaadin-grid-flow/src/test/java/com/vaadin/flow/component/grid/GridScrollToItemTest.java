@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.internal.Range;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -130,20 +131,24 @@ class GridScrollToItemTest {
         Assertions.assertEquals(1, invocations.size());
 
         var invocation = invocations.get(0);
-        Assertions.assertTrue(
-                invocation.getExpression().contains("scrollToItem"));
-        Assertions.assertEquals(expectedItemKey,
-                invocation.getParameters().get(1));
-        Assertions.assertEquals(expectedIndex,
-                invocation.getParameters().get(2));
+        Assertions.assertEquals("$connector.scrollToItem",
+                JsFunctionCallUtil.getFunctionName(invocation));
+        Assertions.assertEquals(List.of(expectedItemKey, expectedIndex),
+                JsFunctionCallUtil.getArguments(invocation));
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("scroll"))
-                .toList();
+                .filter(GridScrollToItemTest::isScrollInvocation).toList();
+    }
+
+    /**
+     * Scrolling to an item or an index is a call of a function named after it.
+     */
+    private static boolean isScrollInvocation(JavaScriptInvocation invocation) {
+        var functionName = JsFunctionCallUtil.getFunctionName(invocation);
+        return functionName != null && functionName.contains("scroll");
     }
 
     private String getViewportRange(Grid<String> grid) {

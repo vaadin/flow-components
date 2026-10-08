@@ -82,6 +82,8 @@ export interface FlowGridInternals {
   _shouldLoadAllRenderedRowsAfterPageLoad: boolean;
   _sorters: GridSorter[];
   __a11yUpdateRowSelected(row: HTMLElement, selected: boolean): void;
+  __pendingScrollToIndexes?: number[];
+  __scrollToPendingIndexes(): void;
   __applySorters(...args: unknown[]): void;
   __updateRow(row: HTMLElement, ...args: unknown[]): void;
   __updateVirtualizerElement(...args: unknown[]): void;
@@ -91,28 +93,32 @@ export interface FlowGridInternals {
   _isDetailsOpened(item: Item | undefined): boolean;
   isItemSelectable(item: Item | null | undefined): boolean;
   _mapSorters(): GridSorterDefinition[];
-  getContextMenuBeforeOpenDetail(event: CustomEvent<{ sourceEvent?: Event }>): { key: string; columnId: string };
+  getContextMenuBeforeOpenDetail(event: CustomEvent<{ sourceEvent?: Event }>): {
+    key: string;
+    columnId: string;
+    internalColumnId: string;
+  };
   preventContextMenu(event: MouseEvent): boolean;
 }
 
 /** The Flow grid element */
-export type FlowGrid = Grid<Item> & FlowGridInternals;
+export type FlowGrid = FlowGridInternals & Grid<Item>;
 
 /**
  * The private/protected @vaadin/grid API and the Flow-specific API that the
  * tree grid connector relies on, in addition to the grid connector's.
  */
 export interface FlowTreeGridInternals {
-  __pendingScrollToIndexes?: number[];
   __getRowLevel(row: FlowGridRow): number;
   _isExpanded(item: Item | undefined): boolean;
   _scrollToFlatIndex(flatIndex: number): void;
   expandItem(item: Item | undefined): void;
   collapseItem(item: Item | undefined): void;
+  scrollToIndex(...indexes: number[]): Promise<number | undefined>;
 }
 
 /** The Flow tree grid element */
-export type FlowTreeGrid = FlowGrid & FlowTreeGridInternals;
+export type FlowTreeGrid = FlowTreeGridInternals & FlowGrid;
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base

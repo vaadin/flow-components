@@ -130,7 +130,7 @@ class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
             return false;
         }
         // Remove items
-        new LinkedHashMap<>(removedItems).forEach(selection::remove);
+        removedItems.keySet().forEach(selection::remove);
         // Add items
         selection.putAll(addedItems);
 

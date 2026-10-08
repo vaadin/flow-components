@@ -164,8 +164,7 @@ public class ComboBoxListDataViewPage extends Div {
     private List<Person> generatePersonItems() {
         return IntStream.range(0, 250)
                 .mapToObj(index -> new Person(index, "Person " + index,
-                        "lastName", index % 100, new Person.Address(),
-                        "1234567890"))
+                        "lastName", index % 100))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 }
