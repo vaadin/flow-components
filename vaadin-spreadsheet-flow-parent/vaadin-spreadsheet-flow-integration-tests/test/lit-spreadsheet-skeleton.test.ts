@@ -368,7 +368,8 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
 
     it('buildRenderState gives every merged region a box', () => {
         // Rows 1-2 frozen, scrolled 10px: a merge from row 2 to row 4 is
-        // pinned with the frozen rows and shortened by the scroll.
+        // pinned with the frozen rows and shortened by the scroll, its rows
+        // past the split starting past the freeze line's own pixel.
         const sheet = makeSheet();
         sheet.setRows(10);
         sheet.setCols(10);
@@ -385,8 +386,26 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         });
 
         expect(state.mergedRegionBoxes).to.deep.equal([
-            { left: 100, top: 20, width: 100, height: 20 + 30 },
+            { left: 100, top: 20, width: 100, height: 20 + 1 + 30 },
         ]);
+    });
+
+    it('buildRenderState makes the scrolling extent a pixel longer on each frozen axis, for the freeze line', () => {
+        const sheet = makeSheet();
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15)); // 20px
+        const size = () => {
+            const state = sheet.buildRenderState({ scrollLeft: 0, scrollTop: 0, viewportWidth: 200, viewportHeight: 80 });
+            return `${state.totalGridWidthPx} ${state.totalGridHeightPx}`;
+        };
+
+        expect(size()).to.equal('500 200');
+        sheet.setHorizontalSplitPosition(2);
+        expect(size()).to.equal('501 200');
+        sheet.setVerticalSplitPosition(3);
+        expect(size()).to.equal('501 201');
     });
 
     it('buildRenderState populates colX, rowY, widths, heights arrays for visible range', () => {

@@ -68,6 +68,15 @@ describe('scrollToShow — the GWT client rule along one axis', () => {
     // Row 7 is past the view; rows 7 and 8 come into view (hidden 6 adds nothing).
     expect(scrollToShow(7, 0, 20, 0, 100, someHidden)).to.equal(40);
   });
+
+  it('counts the freeze line\'s own pixel before the scrolling rows', () => {
+    // Rows 1-3 frozen (60px), then the line's pixel: row 8 ends at 161, a
+    // pixel past a 160px view, so it is cut off and the sheet scrolls on to
+    // show it and row 9.
+    expect(scrollToShow(8, 3, 20, 0, 160, twenty)).to.equal(40);
+    // A pixel more of view and row 8 is whole.
+    expect(scrollToShow(8, 3, 20, 0, 161, twenty)).to.equal(0);
+  });
 });
 
 describe('Spreadsheet — keyboard moves keep the cell in full view', () => {

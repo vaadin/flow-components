@@ -240,13 +240,16 @@ describe('Spreadsheet — popup-button popup', () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.setHorizontalSplitPosition(2);
     ctx.sheet.recomputeViewport();
-    // Column 3 ends 150px in; 120px back from there is inside the two
-    // frozen columns, and the GWT client's scrolling pane starts after them.
+    // Column 3 ends 150px in, and a pixel more past the freeze line's own;
+    // 120px back from there is inside the two frozen columns, and the GWT
+    // client's scrolling pane starts after them.
     ctx.sheet.setPopupButtons([buttonState(3, 1, { popupWidth: '120px' })]);
 
     ctx.sheet.onPopupButtonOpen(1, 3, '42', APP);
 
-    expect(restingRect(ctx.sheet).left).to.be.closeTo(cellBox(ctx.sheet, 3, 1).right, 0.5);
+    const drawn = ctx.sheet.getCellGrid().cellClientRect(3, 1)!;
+    expect(drawn.right).to.equal(cellBox(ctx.sheet, 3, 1).right + 1);
+    expect(restingRect(ctx.sheet).left).to.be.closeTo(drawn.right, 0.5);
   });
 
   it('opens above its cell when there is no room below it', () => {

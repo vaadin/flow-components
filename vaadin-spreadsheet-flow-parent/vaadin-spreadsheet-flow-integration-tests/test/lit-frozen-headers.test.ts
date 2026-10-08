@@ -200,16 +200,20 @@ describe('Frozen panes — where the scrolling cells start', () => {
     return cell(col, row)!.getBoundingClientRect().left;
   }
 
-  it('starts the scrolling columns past the frozen ones', async () => {
-    // Two 50px columns frozen, so column 3 starts 100px in.
+  it('starts the scrolling columns past the frozen ones and the freeze line', async () => {
+    // Two 50px columns frozen, so column 3 starts 100px in, past the
+    // freeze line's own pixel, as the GWT client's scrolling pane started
+    // past its frozen pane's border.
     ctx.sheet.setHorizontalSplitPosition(2);
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getCellGrid().updateComplete;
 
-    expect(cellLeft(3, 5) - cellLeft(1, 5)).to.equal(100);
+    expect(cellLeft(3, 5) - cellLeft(1, 5)).to.equal(100 + 1);
   });
 
-  it('starts the scrolling rows below the frozen ones', async () => {
+  it('starts the scrolling rows below the frozen ones and the freeze line', async () => {
+    // Drawn over the line instead, the first row after a freeze came out
+    // a pixel shorter than the GWT client's.
     ctx.sheet.setVerticalSplitPosition(2);
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getCellGrid().updateComplete;
@@ -217,7 +221,27 @@ describe('Frozen panes — where the scrolling cells start', () => {
     const top = (col: number, row: number): number =>
       cell(col, row)!.getBoundingClientRect().top;
     // 15pt rows are 20px at 96 ppi, so two frozen rows are 40px.
-    expect(top(1, 3) - top(1, 1)).to.equal(40);
+    expect(top(1, 3) - top(1, 1)).to.equal(40 + 1);
+  });
+
+  it('leaves the freeze line a pixel of its own, under no cell', async () => {
+    ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    const grid = ctx.sheet.getCellGrid().shadowRoot!;
+    const [rowsLine, colsLine] = ['rows', 'columns'].map((along) =>
+      [...grid.querySelectorAll<HTMLElement>('.freeze-line')]
+        .map((l) => l.getBoundingClientRect())
+        .find((b) => (along === 'rows' ? b.height === 1 : b.width === 1))!
+    );
+    const frozen = cell(2, 2)!.getBoundingClientRect();
+    const scrolling = cell(3, 3)!.getBoundingClientRect();
+    expect(rowsLine.top).to.equal(frozen.bottom);
+    expect(scrolling.top).to.equal(rowsLine.bottom);
+    expect(colsLine.left).to.equal(frozen.right);
+    expect(scrolling.left).to.equal(colsLine.right);
   });
 
   it('lines the frozen rows up over the scrolling columns', async () => {

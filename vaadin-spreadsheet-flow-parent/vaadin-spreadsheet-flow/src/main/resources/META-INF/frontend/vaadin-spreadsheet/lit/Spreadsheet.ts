@@ -3486,9 +3486,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // underneath the frozen block that is pinned there - the first
     // columns after a freeze could not be seen at all, and a click on
     // one landed on a frozen cell.
+    //
+    // The freeze line has a pixel of its own between the frozen columns or
+    // rows and the rest, as the GWT client's frozen pane border did, so the
+    // scrolling ones start one pixel past it. Drawn over their first pixel
+    // instead, the first row after a freeze came out a pixel short.
+    const split = { cols: this.horizontalSplitPosition, rows: this.verticalSplitPosition };
+    const gapX = freezeGap(split.cols);
+    const gapY = freezeGap(split.rows);
     const colX: number[] = [];
     const colWidths: number[] = [];
-    let cumulativeX = frozenCumX + viewport.firstColumnPosition;
+    let cumulativeX = frozenCumX + gapX + viewport.firstColumnPosition;
     for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
       const w = colWidthForIndex(col);
       colX.push(cumulativeX);
@@ -3498,7 +3506,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     const rowY: number[] = [];
     const rowHeights: number[] = [];
-    let cumulativeY = frozenCumY + viewport.firstRowPosition;
+    let cumulativeY = frozenCumY + gapY + viewport.firstRowPosition;
     for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
       const h = rowHeightForIndex(row);
       rowY.push(cumulativeY);
@@ -3514,7 +3522,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     for (let row = 1; row <= definedRowsLength; row++) {
       definedRowHeightsPx.push(convertPointsToPixel(this.rowHeights[row - 1], ppi));
     }
-    const { totalWidthPx, totalHeightPx } = computeTotalGridSize({
+    const totals = computeTotalGridSize({
       rows: this.rows,
       cols: this.cols,
       definedRowHeightsPx,
@@ -3524,6 +3532,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       defaultRowHeightPx,
       defaultColWidthPx: this.defColWidth
     });
+    const totalWidthPx = totals.totalWidthPx + gapX;
+    const totalHeightPx = totals.totalHeightPx + gapY;
 
     // Compute positioned overlays (slice 160) from the current
     // overlay map + resource map. Each overlay's pixel
@@ -3534,12 +3544,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.resolveResources(),
       colWidthForIndex,
       rowHeightForIndex,
-      ppi
+      ppi,
+      split
     );
 
     const mergedRegionBoxes = computeMergedRegionBoxes(
       this.mergedRegions,
-      { rows: this.verticalSplitPosition, cols: this.horizontalSplitPosition },
+      split,
       { left: opts.scrollLeft, top: opts.scrollTop },
       colWidthForIndex,
       rowHeightForIndex
@@ -3550,7 +3561,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const positionedPopupButtons = computePositionedPopupButtons(
       this.popupButtonStates,
       colWidthForIndex,
-      rowHeightForIndex
+      rowHeightForIndex,
+      split
     );
 
     return {
@@ -5201,9 +5213,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private scrollingPaneClientRect(): { left: number; top: number; bottom: number } {
     const box = this.scrollContainer.getBoundingClientRect();
     const frozen = this.cellGrid.frozenExtent();
+    // Past the freeze line's own pixel, where the scrolling cells start.
     return {
-      left: box.left + this.scrollContainer.clientLeft + this.cellGrid.offsetLeft + frozen.width,
-      top: box.top + this.scrollContainer.clientTop + this.cellGrid.offsetTop + frozen.height,
+      left:
+        box.left +
+        this.scrollContainer.clientLeft +
+        this.cellGrid.offsetLeft +
+        frozen.width +
+        freezeGap(this.horizontalSplitPosition),
+      top:
+        box.top +
+        this.scrollContainer.clientTop +
+        this.cellGrid.offsetTop +
+        frozen.height +
+        freezeGap(this.verticalSplitPosition),
       bottom: box.bottom
     };
   }
@@ -5337,7 +5360,8 @@ function hideFromTopLayer(el: HTMLElement): void {
  *
  * `scroll` is the current scroll offset and `view` the length of the
  * cells' part of the view, frozen ones included; `sizeOf` is a column's
- * width or a row's height, 0 when it is hidden.
+ * width or a row's height, 0 when it is hidden. The ones past the frozen
+ * ones are drawn past the freeze line's own pixel.
  */
 export function scrollToShow(
   index: number,
@@ -5347,6 +5371,7 @@ export function scrollToShow(
   view: number,
   sizeOf: (i: number) => number
 ): number {
+  const gap = freezeGap(frozen);
   if (index <= frozen || index > count) {
     return scroll;
   }
@@ -5374,7 +5399,7 @@ export function scrollToShow(
   }
   // The last whole one in view.
   let last = first;
-  while (last < count && startOf(last + 1) + sizeOf(last + 1) - scroll <= view) {
+  while (last < count && startOf(last + 1) + sizeOf(last + 1) + gap - scroll <= view) {
     last++;
   }
   if (index > last) {
@@ -5541,6 +5566,22 @@ function popupOverlayRules(): HTMLStyleElement {
 }
 
 /**
+ * The pixel the freeze line takes between the frozen columns or rows and the
+ * rest, as the GWT client's frozen pane border did: 1 when any are frozen.
+ */
+export function freezeGap(frozen: number): number {
+  return frozen > 0 ? 1 : 0;
+}
+
+/**
+ * How much further on a column or row is drawn for the freeze line before
+ * it: the line's pixel when it lies past the frozen ones, nothing otherwise.
+ */
+export function pastFreeze(index: number, frozen: number): number {
+  return index > frozen ? freezeGap(frozen) : 0;
+}
+
+/**
  * Pure helper: build the positioned-popup-button list from the
  * server-pushed `PopupButtonState` list. Each button anchors at
  * the bottom-right corner of its target cell — pixel position =
@@ -5550,14 +5591,15 @@ function popupOverlayRules(): HTMLStyleElement {
 export function computePositionedPopupButtons(
   states: ReadonlyArray<PopupButtonState>,
   colWidth: (col: number) => number,
-  rowHeight: (row: number) => number
+  rowHeight: (row: number) => number,
+  split: { cols: number; rows: number } = { cols: 0, rows: 0 }
 ): PositionedPopupButton[] {
   return states.map((state) => {
-    let left = 0;
+    let left = pastFreeze(state.col, split.cols);
     for (let c = 1; c <= state.col; c++) {
       left += colWidth(c);
     }
-    let top = 0;
+    let top = pastFreeze(state.row, split.rows);
     for (let r = 1; r <= state.row; r++) {
       top += rowHeight(r);
     }
@@ -5729,15 +5771,16 @@ export function computePositionedOverlays(
   resources: Record<string, string>,
   colWidth: (col: number) => number,
   rowHeight: (row: number) => number,
-  ppi: number = FALLBACK_PPI
+  ppi: number = FALLBACK_PPI,
+  split: { cols: number; rows: number } = { cols: 0, rows: 0 }
 ): PositionedOverlay[] {
   const result: PositionedOverlay[] = [];
   for (const [id, info] of Object.entries(overlays)) {
-    let left = 0;
+    let left = pastFreeze(info.col, split.cols);
     for (let c = 1; c < info.col; c++) {
       left += colWidth(c);
     }
-    let top = 0;
+    let top = pastFreeze(info.row, split.rows);
     for (let r = 1; r < info.row; r++) {
       top += rowHeight(r);
     }
@@ -5942,17 +5985,20 @@ export function computeMergedRegionBoxes(
   };
   const colStarts = startsOf(lastCol, colWidthAt);
   const rowStarts = startsOf(lastRow, rowHeightAt);
+  // A region across the split keeps its frozen part pinned and shows what
+  // has not scrolled away of the rest, which starts past the freeze line.
   const extent = (starts: Float64Array, from: number, to: number, frozen: number, scrolled: number): number => {
     const whole = starts[to + 1] - starts[from];
     if (from > frozen || to <= frozen) {
       return whole;
     }
     const pinned = starts[frozen + 1] - starts[from];
-    return pinned + Math.max(0, whole - pinned - scrolled);
+    const rest = whole - pinned - scrolled;
+    return rest > 0 ? pinned + freezeGap(frozen) + rest : pinned;
   };
   return regions.map((region) => ({
-    left: colStarts[region.col1],
-    top: rowStarts[region.row1],
+    left: colStarts[region.col1] + pastFreeze(region.col1, split.cols),
+    top: rowStarts[region.row1] + pastFreeze(region.row1, split.rows),
     width: extent(colStarts, region.col1, region.col2, split.cols, scroll.left),
     height: extent(rowStarts, region.row1, region.row2, split.rows, scroll.top)
   }));

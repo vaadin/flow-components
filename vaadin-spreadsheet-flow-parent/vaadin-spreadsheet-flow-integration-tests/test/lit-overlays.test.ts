@@ -13,6 +13,8 @@ import {
     Spreadsheet,
     computePositionedOverlays,
     computePositionedPopupButtons,
+    freezeGap,
+    pastFreeze,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import type {
     OverlayInfo, PopupButtonState,
@@ -88,6 +90,20 @@ describe('computePositionedOverlays — anchor positioning', () => {
 
         expect(result[0].widthPx).to.equal(20);
         expect(result[0].heightPx).to.equal(20);
+    });
+
+    it('places a picture past the freeze line\'s own pixel when its cell is past a split', () => {
+        // The GWT client put a picture in the pane of its anchor cell; the
+        // scrolling pane started past the frozen panes' borders.
+        const overlays: Record<string, OverlayInfo> = {
+            frozen: { type: 'IMAGE', col: 2, row: 2, width: 20, height: 15, dx: 0, dy: 0 },
+            past: { type: 'IMAGE', col: 3, row: 3, width: 20, height: 15, dx: 0, dy: 0 },
+        };
+        const [frozen, past] = computePositionedOverlays(
+            overlays, {}, uniformWidth, uniformHeight, 96, { cols: 2, rows: 2 }
+        );
+        expect(`${frozen.leftPx} ${frozen.topPx}`).to.equal('50 20');
+        expect(`${past.leftPx} ${past.topPx}`).to.equal(`${100 + 1} ${40 + 1}`);
     });
 
     it('honours a measured ppi over the 96 fallback', () => {
@@ -190,6 +206,30 @@ describe('computePositionedPopupButtons (slice 161)', () => {
         ];
         const result = computePositionedPopupButtons(states, uniformWidth, uniformHeight);
         expect(result[0].active).to.be.true;
+    });
+
+    it('moves a button past the freeze line\'s own pixel with its cell, and no other', () => {
+        // Columns A-B and rows 1-2 frozen: a cell past both splits starts a
+        // pixel further on each way; a frozen one stays put.
+        const at = (col: number, row: number): PopupButtonState => ({
+            col, row, active: false, headerHidden: false, popupHeight: null, popupWidth: null, sheet: 'X'
+        });
+        const [frozen, past] = computePositionedPopupButtons(
+            [at(2, 2), at(3, 3)], uniformWidth, uniformHeight, { cols: 2, rows: 2 }
+        );
+        expect(`${frozen.leftPx} ${frozen.topPx}`).to.equal('100 40');
+        expect(`${past.leftPx} ${past.topPx}`).to.equal(`${150 + 1} ${60 + 1}`);
+    });
+});
+
+describe('the freeze line\'s own pixel', () => {
+    it('is a pixel when any column or row is frozen, and none otherwise', () => {
+        expect([0, 1, 5].map(freezeGap)).to.eql([0, 1, 1]);
+    });
+
+    it('comes before the columns or rows past the frozen ones only', () => {
+        expect([1, 2, 3, 4].map((i) => pastFreeze(i, 2))).to.eql([0, 0, 1, 1]);
+        expect(pastFreeze(4, 0), 'nothing frozen').to.equal(0);
     });
 });
 

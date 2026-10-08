@@ -1239,11 +1239,14 @@ export class SpreadsheetCellGrid extends LitElement {
     // The grid sits right of the row numbers and under the column letters.
     const splitX = sheetLeft + this.offsetLeft + this.frozenExtent().width;
     const splitY = sheetTop + this.offsetTop + this.frozenExtent().height;
-    const scrollingX = { left: splitX, right: box.right };
-    // The GWT client's frozen pane took the pixel of the freeze line too.
-    const frozenX = { left: sheetLeft, right: splitX + 1 };
-    const scrollingY = { top: splitY, bottom: box.bottom };
-    const frozenY = { top: sheetTop, bottom: splitY };
+    // The GWT client's frozen pane took the pixel of the freeze line too, and
+    // the scrolling pane starts past it.
+    const gapX = this.renderState.horizontalSplitPosition > 0 ? 1 : 0;
+    const gapY = this.renderState.verticalSplitPosition > 0 ? 1 : 0;
+    const scrollingX = { left: splitX + gapX, right: box.right };
+    const frozenX = { left: sheetLeft, right: splitX + gapX };
+    const scrollingY = { top: splitY + gapY, bottom: box.bottom };
+    const frozenY = { top: sheetTop, bottom: splitY + gapY };
     return {
       main: { ...scrollingX, ...scrollingY },
       top: { ...scrollingX, ...frozenY },

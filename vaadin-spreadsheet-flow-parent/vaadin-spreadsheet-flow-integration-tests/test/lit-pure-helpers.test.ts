@@ -319,8 +319,8 @@ describe('computeMergedRegionBoxes', () => {
 
   it('pins a region that runs past the frozen rows, shortened by the scroll', () => {
     // Rows 1-2 frozen; the region runs from row 2 to row 4, 40px past the
-    // split. Scrolled 15px, 25px of that part is still out from under the
-    // frozen rows.
+    // split, which start past the freeze line's own pixel. Scrolled 15px,
+    // 25px of that part is still out from under the frozen rows.
     const regions = [{ id: 0, col1: 3, col2: 4, row1: 2, row2: 4 }];
     const frozen = { rows: 2, cols: 0 };
 
@@ -328,8 +328,8 @@ describe('computeMergedRegionBoxes', () => {
     const [scrolled] = computeMergedRegionBoxes(regions, frozen, { left: 0, top: 15 }, col, row);
     const [gone] = computeMergedRegionBoxes(regions, frozen, { left: 0, top: 500 }, col, row);
 
-    expect(still.height).to.equal(60);
-    expect(scrolled.height).to.equal(20 + 25);
+    expect(still.height).to.equal(20 + 1 + 40);
+    expect(scrolled.height).to.equal(20 + 1 + 25);
     expect(gone.height, 'never shorter than its frozen part').to.equal(20);
   });
 
@@ -342,7 +342,8 @@ describe('computeMergedRegionBoxes', () => {
       row
     );
 
-    expect(box).to.deep.equal({ left: 0, top: 0, width: 50 + 40, height: 20 + 30 });
+    // Each part past a split starts past the freeze line's own pixel.
+    expect(box).to.deep.equal({ left: 0, top: 0, width: 50 + 1 + 40, height: 20 + 1 + 30 });
   });
 
   it('does not shorten a region that starts past the split', () => {
@@ -354,7 +355,9 @@ describe('computeMergedRegionBoxes', () => {
       row
     );
 
-    expect(box).to.deep.equal({ left: 100, top: 80, width: 100, height: 80 });
+    // Drawn past the freeze lines' own pixels, as the GWT client's
+    // scrolling pane started past its frozen panes' borders.
+    expect(box).to.deep.equal({ left: 100 + 1, top: 80 + 1, width: 100, height: 80 });
   });
 
   it('gives hidden rows and columns no size', () => {
