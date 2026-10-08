@@ -60,6 +60,7 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
  * values and formatting for individual cells.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 public class CellValueManager implements Serializable {
 

@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * This class handles converting Apache POI CellStyles to CSS styles.
  *
  * @author Vaadin Ltd.
+ * @since 23.1
  */
 public class SpreadsheetStyleFactory implements Serializable {
 

@@ -17,11 +17,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * 
  * @since 23.1
  */
-/**
- * A whole snapshot, not an update, so every field goes on the wire: a group
- * that starts at index 0 has to say so, or the client reads no start at all and
- * its outline spans nothing.
- */
+// A whole snapshot, not an update, so every field goes on the wire: a group
+// that starts at index 0 has to say so, or the client reads no start at all
+// and its outline spans nothing.
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public class GroupingData implements Serializable {
     public int startIndex;
