@@ -115,3 +115,33 @@ describe('<vaadin-spreadsheet> — joining and leaving the page', () => {
     connector.dispose();
   });
 });
+
+describe('Spreadsheet — its events to the server', () => {
+  it('keeps them to its own element, so a sheet inside another does not drive the outer one', () => {
+    // Flow listens on the host. A bubbling event also reached the server
+    // component of a spreadsheet this one sits in - as popup content, a
+    // custom editor or a cell's component - which applied it to its own
+    // cells.
+    const outer = document.createElement('div');
+    const inner = document.createElement('div');
+    inner.style.cssText = 'width:300px;height:200px;display:flex;flex-direction:column;';
+    outer.appendChild(inner);
+    document.body.appendChild(outer);
+    const sheet = new Spreadsheet(inner);
+    sheet.setRows(5);
+    sheet.setCols(5);
+    sheet.setColW([50, 50, 50, 50, 50]);
+    sheet.setRowH([15, 15, 15, 15, 15]);
+    const atOuter: string[] = [];
+    const atInner: string[] = [];
+    outer.addEventListener('spreadsheet-event', (e) => atOuter.push((e as CustomEvent).detail.type));
+    inner.addEventListener('spreadsheet-event', (e) => atInner.push((e as CustomEvent).detail.type));
+
+    sheet.recomputeViewport();
+
+    expect(atInner).to.include('onSheetScroll');
+    expect(atOuter).to.be.empty;
+    sheet.dispose();
+    outer.remove();
+  });
+});

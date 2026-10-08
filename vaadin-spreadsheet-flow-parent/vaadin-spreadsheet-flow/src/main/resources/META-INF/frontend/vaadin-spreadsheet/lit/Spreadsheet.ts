@@ -1116,16 +1116,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // server's onLinkCellClicked handler opens the URL.
     const cellKey = toKey(col, row);
     if (this.hyperlinksTooltips[cellKey] !== undefined) {
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: {
-            type: 'linkCellClicked',
-            data: { row, column: col }
-          },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({
+        type: 'linkCellClicked',
+        data: { row, column: col }
+      });
     }
   };
 
@@ -1290,16 +1284,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (closed !== null && closed.row === row && closed.col === col) {
       return;
     }
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'popupButtonClick',
-          data: { row, column: col }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'popupButtonClick',
+      data: { row, column: col }
+    });
   };
 
   /**
@@ -1327,16 +1315,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.recomputeViewport();
       this.dispatchSelectionEvent();
     }
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'contextMenuOpenOnSelection',
-          data: { row, column: col }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'contextMenuOpenOnSelection',
+      data: { row, column: col }
+    });
   };
 
   /**
@@ -1356,16 +1338,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Taken for the sheet's own menu: the browser's stays closed.
     e.preventDefault();
     this.rememberContextMenuPosition(e.detail);
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'columnHeaderContextMenuOpen',
-          data: { columnIndex: col }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'columnHeaderContextMenuOpen',
+      data: { columnIndex: col }
+    });
   };
 
   /**
@@ -1383,16 +1359,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Taken for the sheet's own menu: the browser's stays closed.
     e.preventDefault();
     this.rememberContextMenuPosition(e.detail);
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'rowHeaderContextMenuOpen',
-          data: { rowIndex: row }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'rowHeaderContextMenuOpen',
+      data: { rowIndex: row }
+    });
   };
 
   /**
@@ -1406,30 +1376,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handleColumnGroupingToggle = (e: CustomEvent<{ uniqueIndex: number; collapsed: boolean }>): void => {
     const { uniqueIndex, collapsed } = e.detail;
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'groupingCollapsed',
-          data: { cols: true, colIndex: uniqueIndex, collapsed }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'groupingCollapsed',
+      data: { cols: true, colIndex: uniqueIndex, collapsed }
+    });
   };
 
   private readonly handleRowGroupingToggle = (e: CustomEvent<{ uniqueIndex: number; collapsed: boolean }>): void => {
     const { uniqueIndex, collapsed } = e.detail;
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'groupingCollapsed',
-          data: { cols: false, colIndex: uniqueIndex, collapsed }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'groupingCollapsed',
+      data: { cols: false, colIndex: uniqueIndex, collapsed }
+    });
   };
 
   /**
@@ -1587,16 +1545,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.hiddenColumnIndexes = [...this.hiddenColumnIndexes, col];
       }
       this.recomputeViewport();
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: {
-            type: 'columnResized',
-            data: { colIndexes: [col], newWidths: [width] }
-          },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({
+        type: 'columnResized',
+        data: { colIndexes: [col], newWidths: [width] }
+      });
       return;
     }
     if (this.rowResize !== null) {
@@ -1615,16 +1567,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.hiddenRowIndexes = [...this.hiddenRowIndexes, row];
       }
       this.recomputeViewport();
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: {
-            type: 'rowsResized',
-            data: { rowIndexes: [row], newHeights: [height] }
-          },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({
+        type: 'rowsResized',
+        data: { rowIndexes: [row], newHeights: [height] }
+      });
       return;
     }
     if (this.pointerDragging) {
@@ -1787,13 +1733,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.recomputeViewport();
     }
     const data: CellValueEditedData = { row, col, value };
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'cellValueEdited', data },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'cellValueEdited', data });
     // If we moved the active cell, also dispatch the
     // selection event so the server stays in sync (slice
     // 150 contract — every selection write emits an event).
@@ -2129,13 +2069,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.selection = addAuxRange(this.selection, col, 1, col, rows);
       this.recomputeViewport();
       const data: ColumnSelectedData = { column: col, firstRowIndex: 1 };
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'columnAddedToSelection', data },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'columnAddedToSelection', data });
       return;
     }
     if (shiftKey) {
@@ -2179,13 +2113,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.selection = addAuxRange(this.selection, 1, row, cols, row);
       this.recomputeViewport();
       const data: RowSelectedData = { row, firstColumnIndex: 1 };
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'rowAddedToRangeSelection', data },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'rowAddedToRangeSelection', data });
       return;
     }
     if (shiftKey) {
@@ -2284,13 +2212,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // resulting cell updates. Slice 159.
     if (shortcut && (key === 'z' || key === 'Z') && !e.shiftKey) {
       e.preventDefault();
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'onUndo', data: {} },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'onUndo', data: {} });
       return;
     }
 
@@ -2300,13 +2222,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Slice 159.
     if (shortcut && (key === 'y' || key === 'Y' || ((key === 'z' || key === 'Z') && e.shiftKey))) {
       e.preventDefault();
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'onRedo', data: {} },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'onRedo', data: {} });
       return;
     }
 
@@ -2387,13 +2303,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return;
       }
       e.preventDefault();
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'deleteSelectedCells', data: {} },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'deleteSelectedCells', data: {} });
       return;
     }
     // With a range selected, Enter and Tab walk the active cell around
@@ -2517,13 +2427,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       column: next.col,
       oldSelectionRangeDiscarded: false
     };
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'cellSelected', data },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'cellSelected', data });
   }
 
   /**
@@ -2593,13 +2497,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     e.preventDefault();
     e.clipboardData?.setData('text/plain', tsv);
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'clearSelectedCellsOnCut', data: {} },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'clearSelectedCellsOnCut', data: {} });
   };
 
   /**
@@ -2617,13 +2515,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     e.preventDefault();
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'onPaste', data: { text } },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'onPaste', data: { text } });
   };
 
   /**
@@ -2701,15 +2593,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     if (!this.viewportAnnounced) {
       this.viewportAnnounced = true;
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'onConnectorInit', data: {} },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'onConnectorInit', data: {} });
     }
     this.viewportLoader.check();
+  }
+
+  /**
+   * Send an event to the server. Dispatched on the host alone, where Flow
+   * listens: a bubbling event also reached the server component of a
+   * spreadsheet this one sits in - as popup content, a custom editor or a
+   * cell's component - which applied it to its own cells.
+   */
+  private sendToServer(detail: { type: string; data: unknown }): void {
+    this.host.dispatchEvent(new CustomEvent('spreadsheet-event', { detail }));
   }
 
   /** The cells the grid draws, its drawing buffer included; null before anything is measured. */
@@ -2731,21 +2627,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * a range. Its `onSheetScroll` loads what it has not sent before.
    */
   private sendLoad(range: LoadRange): void {
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'onSheetScroll',
-          data: {
-            firstRow: range.r1,
-            firstColumn: range.c1,
-            lastRow: range.r2,
-            lastColumn: range.c2
-          }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'onSheetScroll',
+      data: {
+        firstRow: range.r1,
+        firstColumn: range.c1,
+        lastRow: range.r2,
+        lastColumn: range.c2
+      }
+    });
   }
 
   /**
@@ -2843,16 +2733,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
 
     this.measuredStyleIndexes = new Set(styleIndexes);
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'setCellStyleWidthRatios',
-          data: { styleIndexes, ratios }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'setCellStyleWidthRatios',
+      data: { styleIndexes, ratios }
+    });
   }
 
   /** The style indexes the cells loaded so far wear, from their cs<N> class. */
@@ -3025,16 +2909,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // focus in the address field means the arrow keys that naturally
     // follow move the caret through the text just typed.
     this.scrollContainer.focus();
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'sheetAddressChanged',
-          data: { value }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'sheetAddressChanged',
+      data: { value }
+    });
   };
 
   /** Test-only accessor: the component's own root inside the host. */
@@ -3094,13 +2972,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       row,
       column: col
     };
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'cellAddedToSelectionAndSelected', data },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'cellAddedToSelectionAndSelected', data });
   }
 
   /** Tell the server a whole range joined a non-coherent selection. */
@@ -3130,13 +3002,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       row2: range.r2,
       col2: range.c2
     };
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'cellsAddedToRangeSelection', data },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'cellsAddedToRangeSelection', data });
   }
 
   /**
@@ -3148,13 +3014,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (!this.canResizeColumn()) {
       return;
     }
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'onColumnAutofit', data: { columnIndex: e.detail.col } },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'onColumnAutofit', data: { columnIndex: e.detail.col } });
   };
 
   /** Double-click on a row's resize handle — size it to its tallest value. */
@@ -3162,13 +3022,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (!this.canResizeRow()) {
       return;
     }
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'onRowAutofit', data: { rowIndex: e.detail.row } },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'onRowAutofit', data: { rowIndex: e.detail.row } });
   };
 
   /**
@@ -3180,13 +3034,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * user with no idea why nothing happened.
    */
   private reportProtectedCellWriteAttempt(): void {
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'protectedCellWriteAttempted', data: {} },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'protectedCellWriteAttempted', data: {} });
   }
 
   /**
@@ -3216,13 +3064,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     if (painting.outcome.kind === 'decrease') {
       const { r1, c1 } = painting.outcome.painted;
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'selectionDecreasePainted', data: { row: r1, col: c1 } },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'selectionDecreasePainted', data: { row: r1, col: c1 } });
       return;
     }
 
@@ -3230,16 +3072,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (!isNonEmpty(grown)) {
       return;
     }
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'selectionIncreasePainted',
-          data: { r1: grown.r1, c1: grown.c1, r2: grown.r2, c2: grown.c2 }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'selectionIncreasePainted',
+      data: { r1: grown.r1, c1: grown.c1, r2: grown.r2, c2: grown.c2 }
+    });
   }
 
   private dispatchSelectionEvent(): void {
@@ -3264,21 +3100,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
         column: anchor.col,
         oldSelectionRangeDiscarded: true
       };
-      this.host.dispatchEvent(
-        new CustomEvent('spreadsheet-event', {
-          detail: { type: 'cellSelected', data: anchorData },
-          bubbles: true,
-          composed: true
-        })
-      );
+      this.sendToServer({ type: 'cellSelected', data: anchorData });
     }
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: event,
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer(event);
   }
 
   // ====================================================================
@@ -3842,13 +3666,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.editor = null;
     this.endFormulaPointing();
     this.showCommittedValue(col, row, value);
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'cellValueEdited', data: { row, col, value } },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'cellValueEdited', data: { row, col, value } });
     // shift+Tab stays put: the GWT client passed the move along only
     // when shift was not held.
     const step = key === 'Tab' && shiftKey ? null : commitStep(key, false);
@@ -3913,13 +3731,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellComments = { ...this.cellComments, [key as string]: text };
     this.scheduleRender();
     this.returnFocusToSheet();
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'updateCellComment', data: { text, col: coord.col, row: coord.row } },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'updateCellComment', data: { text, col: coord.col, row: coord.row } });
   };
 
   /**
@@ -3929,13 +3741,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * which hides whatever is nested under it.
    */
   private readonly handleLevelHeaderClick = (e: CustomEvent<{ cols: boolean; level: number }>): void => {
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'levelHeaderClicked', data: { cols: e.detail.cols, level: e.detail.level } },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'levelHeaderClicked', data: { cols: e.detail.cols, level: e.detail.level } });
   };
 
   /** Double-click on the active tab: show its name in an input. */
@@ -3985,17 +3791,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetNames = renamed;
     this.syncSheetTabs();
     this.returnFocusToSheet();
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          // The server counts sheets from 0; the strip renders from 1.
-          type: 'sheetRenamed',
-          data: { sheetIndex: index - 1, newName: outcome.name }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      // The server counts sheets from 0; the strip renders from 1.
+      type: 'sheetRenamed',
+      data: { sheetIndex: index - 1, newName: outcome.name }
+    });
   };
 
   /** The + button: ask the server for a new sheet. */
@@ -4006,19 +3806,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // The strip button took the focus on the way in. Adding a sheet is a
     // way of moving to it, so the keyboard belongs to the new sheet.
     this.scrollContainer.focus();
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'sheetCreated',
-          data: {
-            scrollLeft: this.scrollContainer.scrollLeft,
-            scrollTop: this.scrollContainer.scrollTop
-          }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'sheetCreated',
+      data: {
+        scrollLeft: this.scrollContainer.scrollLeft,
+        scrollTop: this.scrollContainer.scrollTop
+      }
+    });
   };
 
   private readonly handleSheetTabClick = (e: CustomEvent<{ index: number }>): void => {
@@ -4043,22 +3837,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // will overwrite this when it lands.
     this.sheetIndex = index;
     this.syncSheetTabs();
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'sheetSelected',
-          data: {
-            // The server reads a 0-based tab index here; `index` is the
-            // 1-based position the strip renders.
-            sheetIndex: index - 1,
-            scrollLeft: this.scrollContainer.scrollLeft,
-            scrollTop: this.scrollContainer.scrollTop
-          }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'sheetSelected',
+      data: {
+        // The server reads a 0-based tab index here; `index` is the
+        // 1-based position the strip renders.
+        sheetIndex: index - 1,
+        scrollLeft: this.scrollContainer.scrollLeft,
+        scrollTop: this.scrollContainer.scrollTop
+      }
+    });
   };
 
   /**
@@ -4343,13 +4131,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (menuHadFocus) {
       this.returnFocusToSheet();
     }
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: 'contextMenuClosed', data: {} },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: 'contextMenuClosed', data: {} });
   }
 
   /** An item was picked: report it against whatever the menu was opened on. */
@@ -4363,13 +4145,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // The menu item had the focus; picking it is done, so the keyboard
     // goes back to the sheet.
     this.returnFocusToSheet();
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: { type: eventType, data: { actionKey: key } },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({ type: eventType, data: { actionKey: key } });
   };
 
   /** Left or Tab in the menu closes it, as in the GWT client. */
@@ -5143,16 +4919,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.hidePopup(releaseContentFirst);
-    this.host.dispatchEvent(
-      new CustomEvent('spreadsheet-event', {
-        detail: {
-          type: 'popupClose',
-          data: { row: closing.row, column: closing.col }
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    this.sendToServer({
+      type: 'popupClose',
+      data: { row: closing.row, column: closing.col }
+    });
   }
 
   /**
