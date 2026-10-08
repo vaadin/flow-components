@@ -420,6 +420,18 @@ describe('Row header — grouping outline', () => {
         cleanup(collapsed);
     });
 
+    it('keeps a toggle grey whatever the sheet\'s border colour, as the GWT client did', async () => {
+        // The GWT client's row buttons kept their grey; its column buttons
+        // took the border colour, which the Lit header does not copy.
+        const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
+        el.style.setProperty('--vaadin-spreadsheet-border-color', 'rgb(9, 8, 7)');
+
+        const style = getComputedStyle(el.shadowRoot!.querySelector('.row-grouping-toggle')!);
+        expect(style.backgroundColor).to.equal('rgb(199, 199, 199)');
+        expect(style.boxShadow).to.equal('rgb(199, 199, 199) 0px 0px 0px 1px inset');
+        cleanup(el);
+    });
+
     it('carries the collapsed state as a data attribute', async () => {
         const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
 

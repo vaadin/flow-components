@@ -652,7 +652,7 @@ describe('Lumo theme — the line along a freeze', () => {
 });
 
 describe('Lumo theme — the headers', () => {
-    async function columns(theme: string | null) {
+    async function columns(theme: string | null, wrapperStyle = '') {
         return inHost<SpreadsheetColumnHeader>('vaadin-spreadsheet-internal-column-header', theme, (el) => {
             el.renderState = {
                 ...emptyColumnHeaderRenderState(),
@@ -674,7 +674,7 @@ describe('Lumo theme — the headers', () => {
                 colGroupings: [{ level: 1, startIndex: 1, endIndex: 2, collapsed: false } as any],
                 colGroupingMax: 1,
             };
-        });
+        }, wrapperStyle);
     }
 
     async function rows(theme: string | null) {
@@ -770,6 +770,17 @@ describe('Lumo theme — the headers', () => {
         cleanup();
     });
 
+    it('keeps the column outline toggle on Lumo\'s tint whatever the sheet\'s border colour', async () => {
+        // Only without the theme did the GWT client fill it with that colour.
+        const { el, cleanup } = await columns('lumo', '--vaadin-spreadsheet-border-color: rgb(1, 2, 3)');
+
+        const toggle = getComputedStyle(el.shadowRoot!.querySelector('.col-grouping-toggle')!);
+        expect(toggle.backgroundColor).to.equal(BASE);
+        expect(toggle.boxShadow).to.equal('rgba(0, 0, 0, 0) 0px 0px 0px 1px inset');
+
+        cleanup();
+    });
+
     it('does the same for the row strip', async () => {
         const { el, cleanup } = await rows('lumo');
 
@@ -831,6 +842,22 @@ describe('Lumo theme — the formula bar', () => {
             const style = getComputedStyle(input);
             expect(`${style.fontFamily} ${style.fontSize}`).to.equal('monospace 13px');
         }
+
+        cleanup();
+    });
+
+    it('draws both of its lines in the header border colour, as the GWT client did', async () => {
+        const { el, cleanup } = await inHost<SpreadsheetFormulaBar>(
+            'vaadin-spreadsheet-internal-formula-bar',
+            'lumo',
+            (formulaBar) => {
+                formulaBar.renderState = { address: 'A1', formula: '', namedRanges: [] };
+            },
+            '--vaadin-spreadsheet-header-border-color: rgb(9, 8, 7); --vaadin-spreadsheet-border-color: rgb(1, 2, 3)'
+        );
+
+        const divider = getComputedStyle(el.shadowRoot!.querySelector('.address-panel')!).borderRightColor;
+        expect(`${getComputedStyle(el).borderBottomColor} | ${divider}`).to.equal('rgb(9, 8, 7) | rgb(9, 8, 7)');
 
         cleanup();
     });

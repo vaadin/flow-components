@@ -721,6 +721,20 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
         cleanup(el);
     });
 
+    it('keeps a button grey whatever the sheet\'s border colour', async () => {
+        // Without the theme the GWT client filled a column's button with
+        // --vaadin-spreadsheet-border-color, though not a row's, and not in
+        // Lumo. Both keep their own colour here, which
+        // --vaadin-spreadsheet-grouping-toggle-bg sets.
+        const el = await attachWithState(withGroups([{ level: 1 }]));
+        el.style.setProperty('--vaadin-spreadsheet-border-color', 'rgb(9, 8, 7)');
+
+        const style = getComputedStyle(el.shadowRoot!.querySelector('.col-grouping-toggle')!);
+        expect(style.backgroundColor).to.equal('rgb(199, 199, 199)');
+        expect(style.boxShadow).to.equal('rgb(199, 199, 199) 0px 0px 0px 1px inset');
+        cleanup(el);
+    });
+
     it('keeps only the button of a collapsed group', async () => {
         const el = await attachWithState(withGroups([{ level: 1, collapsed: true }]));
 

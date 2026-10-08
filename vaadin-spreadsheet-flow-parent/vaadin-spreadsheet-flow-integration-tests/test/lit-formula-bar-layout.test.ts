@@ -176,3 +176,56 @@ describe('SpreadsheetFormulaBar — the address in the browser\'s font for text 
         }
     });
 });
+
+/**
+ * The bar's lines in the documented colours, as the GWT client drew them:
+ * the line under the bar in the header border colour, the divider beside the
+ * address in the sheet's border colour. The Lit bar drew both in a grey of
+ * its own, so an application's border colours left them behind.
+ */
+describe('SpreadsheetFormulaBar — its lines in the documented border colours', () => {
+    async function mount(wrapperStyle: string): Promise<{ el: SpreadsheetFormulaBar; cleanup: () => void }> {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = wrapperStyle;
+        const el = document.createElement('vaadin-spreadsheet-internal-formula-bar') as SpreadsheetFormulaBar;
+        el.renderState = { address: 'A1', formula: '', namedRanges: [] };
+        wrapper.appendChild(el);
+        document.body.appendChild(wrapper);
+        await el.updateComplete;
+        return { el, cleanup: () => wrapper.remove() };
+    }
+
+    const COLOURS = '--vaadin-spreadsheet-header-border-color: rgb(9, 8, 7); --vaadin-spreadsheet-border-color: rgb(1, 2, 3);';
+
+    function lines(el: SpreadsheetFormulaBar): string {
+        const divider = getComputedStyle(el.shadowRoot!.querySelector('.address-panel')!).borderRightColor;
+        return `${getComputedStyle(el).borderBottomColor} | ${divider}`;
+    }
+
+    it('rules the bar off in the header border colour and divides the address off in the sheet\'s', async () => {
+        const { el, cleanup } = await mount(COLOURS);
+        try {
+            expect(lines(el)).to.equal('rgb(9, 8, 7) | rgb(1, 2, 3)');
+        } finally {
+            cleanup();
+        }
+    });
+
+    it('keeps the GWT client\'s grey for both by default', async () => {
+        const { el, cleanup } = await mount('');
+        try {
+            expect(lines(el)).to.equal('rgb(199, 199, 199) | rgb(199, 199, 199)');
+        } finally {
+            cleanup();
+        }
+    });
+
+    it('draws both in the bar\'s own border colour when one is set', async () => {
+        const { el, cleanup } = await mount(`${COLOURS} --vaadin-spreadsheet-formulabar-border: rgb(4, 5, 6);`);
+        try {
+            expect(lines(el)).to.equal('rgb(4, 5, 6) | rgb(4, 5, 6)');
+        } finally {
+            cleanup();
+        }
+    });
+});

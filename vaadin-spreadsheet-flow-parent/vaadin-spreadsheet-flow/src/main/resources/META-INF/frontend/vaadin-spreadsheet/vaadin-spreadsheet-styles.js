@@ -162,7 +162,6 @@ export const spreadsheetStyles = css`
     --_vaadin-spreadsheet-comment-overlay-bg: var(--lumo-base-color);
     --_vaadin-spreadsheet-comment-overlay-border-color: var(--lumo-contrast-20pct);
     --_vaadin-spreadsheet-formulabar-bg: var(--lumo-base-color);
-    --_vaadin-spreadsheet-formulabar-border: var(--lumo-contrast-20pct);
     --_vaadin-spreadsheet-formulabar-font: var(--lumo-font-family);
     --_vaadin-spreadsheet-formulabar-font-size: var(--lumo-font-size-s);
     --_vaadin-spreadsheet-tabs-bg: var(--lumo-base-color);
