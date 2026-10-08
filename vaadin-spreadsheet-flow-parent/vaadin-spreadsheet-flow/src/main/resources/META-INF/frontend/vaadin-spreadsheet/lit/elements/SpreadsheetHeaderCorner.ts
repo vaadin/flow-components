@@ -90,10 +90,11 @@ export class SpreadsheetHeaderCorner extends LitElement {
     }
 
     /* Shaded from the header colour down to a shade darker, as the letters
-       are. Its right and bottom edges are the host's border. */
+       are, blended in sRGB as they are. Its right and bottom edges are the
+       host's border. */
     .corner {
       background: linear-gradient(
-        to bottom,
+        to bottom in srgb,
         var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 2%,
         color-mix(in srgb, var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 96%, #000)
           98%

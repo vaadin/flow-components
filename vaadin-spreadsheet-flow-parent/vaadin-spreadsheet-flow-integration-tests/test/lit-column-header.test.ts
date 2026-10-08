@@ -503,10 +503,13 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         const el = await attachWithSelection(new Set());
 
         const image = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell')!).backgroundImage;
-        expect(image).to.match(/^linear-gradient\(rgb\(250, 250, 250\) 2%, .+ 98%\)$/);
+        // Blended in sRGB, as the GWT client's two hex colours were: with the
+        // mixed colour in it, the gradient would blend in Oklab, a level
+        // lighter on some rows.
+        expect(image).to.match(/^linear-gradient\(in srgb, rgb\(250, 250, 250\) 2%, .+ 98%\)$/);
         // #fafafa four parts in a hundred towards black is #f0f0f0.
         const probe = document.createElement('div');
-        probe.style.color = image.replace(/^linear-gradient\(rgb\(250, 250, 250\) 2%, (.+) 98%\)$/, '$1');
+        probe.style.color = image.replace(/^linear-gradient\(in srgb, rgb\(250, 250, 250\) 2%, (.+) 98%\)$/, '$1');
         document.body.appendChild(probe);
         expect(getComputedStyle(probe).color).to.match(/^(rgb\(240, 240, 240\)|color\(srgb 0\.94\d* 0\.94\d* 0\.94\d*\))$/);
         probe.remove();

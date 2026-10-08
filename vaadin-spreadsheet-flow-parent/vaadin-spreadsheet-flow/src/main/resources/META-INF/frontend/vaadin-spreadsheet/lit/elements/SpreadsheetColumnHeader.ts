@@ -298,7 +298,9 @@ export class SpreadsheetColumnHeader extends LitElement {
        drawn inside the letter's box, as the GWT client's was: it takes no
        room from the letter, which is centred on the whole column, and the
        border along the cells runs under it to the end, the active column's
-       marker too. */
+       marker too. The shades blend in sRGB, as the GWT client's two hex
+       colours did: with a mixed colour in it, a gradient blends in Oklab,
+       a level off in places. */
     .col-header-cell {
       position: absolute;
       box-sizing: border-box;
@@ -308,7 +310,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       border-bottom: 1px solid
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
       background: linear-gradient(
-        to bottom,
+        to bottom in srgb,
         var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 2%,
         color-mix(in srgb, var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 96%, #000)
           98%

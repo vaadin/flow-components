@@ -69,7 +69,8 @@ describe('SpreadsheetHeaderCorner — as the GWT client laid it out', () => {
     await attach({});
 
     const square = part('.corner');
-    expect(getComputedStyle(square).backgroundImage).to.contain('linear-gradient');
+    // The letters' gradient, blended in sRGB as theirs is.
+    expect(getComputedStyle(square).backgroundImage).to.match(/^linear-gradient\(in srgb, rgb\(250, 250, 250\) 2%, .+ 98%\)$/);
     // Inside the host's right and bottom border.
     expect(at(square)).to.eql({ left: 0, top: 0, width: 49, height: 26 });
   });
