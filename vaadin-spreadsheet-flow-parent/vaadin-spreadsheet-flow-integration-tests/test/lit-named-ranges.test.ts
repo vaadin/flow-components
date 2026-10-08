@@ -157,6 +157,33 @@ describe('Spreadsheet — named-range picker', () => {
     expect(seen).to.be.empty;
   });
 
+  it('shows the range the selection is on, and the blank entry anywhere else', async () => {
+    // As the GWT client did: the picker follows the address field.
+    ctx.sheet.setNamedRanges(['john', 'local']);
+    ctx.sheet.updateFormulaBar('john', 1, 1);
+    await ctx.sheet.getFormulaBar().updateComplete;
+    expect(namedRangeBox(ctx.sheet)!.value).to.equal('john');
+
+    ctx.sheet.updateFormulaBar(null, 8, 12);
+    await ctx.sheet.getFormulaBar().updateComplete;
+    expect(namedRangeBox(ctx.sheet)!.value).to.equal('');
+  });
+
+  it('lets a range be picked again once the selection has moved away', async () => {
+    // A select only reports a change of option. Left on the range picked
+    // before, picking it again after selecting elsewhere did nothing.
+    ctx.sheet.setNamedRanges(['john', 'local']);
+    await ctx.sheet.getFormulaBar().updateComplete;
+    const box = namedRangeBox(ctx.sheet)!;
+    box.value = 'john';
+    box.dispatchEvent(new Event('change'));
+
+    ctx.sheet.updateFormulaBar(null, 8, 12);
+    await ctx.sheet.getFormulaBar().updateComplete;
+
+    expect(box.value).to.equal('');
+  });
+
   it('keeps the address and formula fields untouched by a range list update', async () => {
     ctx.sheet.getFormulaBar().renderState = {
       address: 'B2',

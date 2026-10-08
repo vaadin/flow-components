@@ -8,6 +8,7 @@
  */
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
+import { live } from 'lit/directives/live.js';
 
 /**
  * Input state for the {@link SpreadsheetFormulaBar} element.
@@ -492,14 +493,22 @@ export class SpreadsheetFormulaBar extends LitElement {
 
   render(): TemplateResult {
     const { address, formula, namedRanges = [], highlights = null } = this.renderState;
+    // The picker follows the address field, as the GWT client's did: the
+    // range the selection is on, or the blank entry. Left on the range
+    // picked before, picking that range again would not be a change.
+    // `live` compares with the option as it is, which the user may have
+    // changed since the last render.
+    const selectedName = namedRanges.includes(address) ? address : '';
     // The dropdown only appears once the workbook defines a named range,
     // matching Excel — an empty picker beside every sheet would be noise.
     const namedRangeBox =
       namedRanges.length === 0
         ? ''
         : html`<select class="namedrangebox" part="named-range-box" @change=${this.handleNamedRangeChange}>
-              <option value=""></option>
-              ${namedRanges.map((name) => html`<option value=${name}>${name}</option>`)}
+              <option value="" .selected=${live(selectedName === '')}></option>
+              ${namedRanges.map(
+                (name) => html`<option value=${name} .selected=${live(name === selectedName)}>${name}</option>`
+              )}
             </select>
             <span class="namedrange-arrow">▼</span>`;
     return html`
