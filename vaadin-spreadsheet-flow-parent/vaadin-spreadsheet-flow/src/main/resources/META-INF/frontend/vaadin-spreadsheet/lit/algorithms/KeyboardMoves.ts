@@ -279,3 +279,36 @@ function letGoOfMerges(
   }
   return at;
 }
+
+/** The parts of a key press {@link typesCharacter} looks at. */
+export interface TypedKey {
+  key: string;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  altKey: boolean;
+  isComposing?: boolean;
+  getModifierState?(key: string): boolean;
+}
+
+/**
+ * Whether a key press types a character - which starts editing the cell,
+ * Excel's way - rather than giving a command.
+ *
+ * Ctrl and Cmd give commands. A character typed with AltGr is still a
+ * character, though: Windows reports AltGr as Ctrl and Alt together, and
+ * German, French or Polish keyboards type @, €, { and } that way. On a Mac
+ * Option types characters as well. Alt alone off a Mac types nothing - the
+ * GWT client, which started editing on the character the browser produced,
+ * did not start on it either. Text still being composed by an IME is not
+ * typed yet.
+ */
+export function typesCharacter(e: TypedKey, mac: boolean): boolean {
+  if (e.key.length !== 1 || e.isComposing === true || e.metaKey) {
+    return false;
+  }
+  if (mac) {
+    return !e.ctrlKey;
+  }
+  const altGraph = (e.ctrlKey && e.altKey) || e.getModifierState?.('AltGraph') === true;
+  return altGraph || (!e.ctrlKey && !e.altKey);
+}

@@ -72,13 +72,14 @@ import {
   referenceText
 } from './algorithms/FormulaPointing.js';
 import {
+  type Direction,
   isSingleMerge,
   moveActiveCell,
   moveRangeEdge,
   selectCellAt,
-  type Direction,
   type SheetShape,
-  type SingleCellSelection
+  type SingleCellSelection,
+  typesCharacter
 } from './algorithms/KeyboardMoves.js';
 import { resolveSheetRename } from './algorithms/SheetName.js';
 import type { WalkDirection } from './algorithms/SelectionWalk.js';
@@ -2254,7 +2255,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // whatever holds the focus once the handlers have run — which by then
     // is the editor.
     const startsEditing =
-      !this.editor && !ctrlOrMeta && !e.altKey && (key === 'F2' || key === 'Enter' || key.length === 1);
+      !this.editor &&
+      (((key === 'F2' || key === 'Enter') && !ctrlOrMeta && !e.altKey) || typesCharacter(e, isMacPlatform()));
     if (startsEditing && this.focusCustomEditor()) {
       return;
     }
@@ -2343,12 +2345,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
 
-    // Type-to-edit: any printable character key without
-    // Ctrl/Meta/Alt modifiers opens the cell editor at the
-    // active cell with the typed character as the initial
-    // value. Excel convention — typing a letter directly
-    // starts replacing the cell's content. Slice 153.
-    if (!this.editor && key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    // Type-to-edit: a key that types a character opens the cell editor at
+    // the active cell with that character as the initial value - Excel's
+    // way: typing directly starts replacing the cell's content. A
+    // character typed with AltGr or Option counts; see typesCharacter.
+    if (!this.editor && typesCharacter(e, isMacPlatform())) {
       if (this.rows <= 0 || this.cols <= 0) {
         return;
       }
