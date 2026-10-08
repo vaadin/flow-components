@@ -214,8 +214,14 @@ public class Spreadsheet extends Component
     private final MirroredProperty<Boolean> showCustomEditorOnFocus = MirroredProperty
             .bool(this, "showCustomEditorOnFocus", false);
 
-    private final MirroredNullableMap<String, String> cellKeysToEditorIdMap = new MirroredNullableMap<>(
-            this, "cellKeysToEditorIdMap");
+    /**
+     * The editor shown in each cell, by cell key. A cell keeps its editor
+     * across the re-renders that keep the cell in view (scroll, selection,
+     * resize), so what the user typed into it survives them. Cleared whenever
+     * the editors are recreated from the factory, see
+     * {@link #setCellKeyToEditorMap(Map)}.
+     */
+    private Map<String, Component> cellKeyToEditor = new HashMap<>();
 
     private final MirroredNullableMap<String, String> componentIDtoCellKeysMap = new MirroredNullableMap<>(
             this, "componentIDtoCellKeysMap");
@@ -349,8 +355,8 @@ public class Spreadsheet extends Component
         return sheetProtected.get();
     }
 
-    HashMap<String, String> getCellKeysToEditorIdMap() {
-        return cellKeysToEditorIdMap.get();
+    Map<String, Component> getCellKeyToEditorMap() {
+        return cellKeyToEditor;
     }
 
     HashMap<String, String> getComponentIDtoCellKeysMap() {
@@ -519,15 +525,34 @@ public class Spreadsheet extends Component
         this.workbookProtected.set(workbookProtected);
     }
 
-    void setCellKeysToEditorIdMap(
-            HashMap<String, String> cellKeysToEditorIdMap) {
-        if (cellKeysToEditorIdMap == null) {
+    /**
+     * Sets the editor of each cell, by cell key, and tells the client the node
+     * id of each one. The ids are derived from the editors on every call rather
+     * than kept: a node id is -1 until the node is attached, and changes when
+     * it is attached again.
+     * <p>
+     * {@code null} drops every editor and the callback tracker, and clears the
+     * map on the client.
+     */
+    void setCellKeyToEditorMap(Map<String, Component> cellKeyToEditor) {
+        HashMap<String, String> editorIds = null;
+        if (cellKeyToEditor == null) {
             // Every editor is gone — a sheet switch, the factory being
             // removed, a forced refresh. The next one to be selected is
             // newly displayed however it compares to the last.
+            this.cellKeyToEditor = new HashMap<>();
             resetEditorCallbackTracker();
+        } else {
+            this.cellKeyToEditor = cellKeyToEditor;
+            editorIds = new HashMap<>();
+            for (Map.Entry<String, Component> entry : cellKeyToEditor
+                    .entrySet()) {
+                editorIds.put(entry.getKey(),
+                        getComponentNodeId(entry.getValue()));
+            }
         }
-        this.cellKeysToEditorIdMap.set(cellKeysToEditorIdMap);
+        getElement().setProperty("cellKeysToEditorIdMap",
+                Serializer.serialize(editorIds));
     }
 
     /**
@@ -1688,7 +1713,7 @@ public class Spreadsheet extends Component
         }
 
         if (!componentIDtoCellKeysMap.get().isEmpty()
-                || !cellKeysToEditorIdMap.get().isEmpty()) {
+                || !cellKeyToEditor.isEmpty()) {
             // The node id's of custom components may no longer be valid after a
             // detach/attach. Remove all custom components and reload them (with
             // updated node id's).
@@ -3067,7 +3092,7 @@ public class Spreadsheet extends Component
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
         setSheetProtected(getActiveSheet().getProtect());
-        setCellKeysToEditorIdMap(null);
+        setCellKeyToEditorMap(null);
         setHyperlinksTooltips(null);
         setComponentIDtoCellKeysMap(null);
         setOverlays(null);
@@ -3119,41 +3144,32 @@ public class Spreadsheet extends Component
             final short col = selectedCellReference.getCol();
             final int row = selectedCellReference.getRow();
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
-            var currentCellKeysToEditorIdMap = getCellKeysToEditorIdMap();
-            if (currentCellKeysToEditorIdMap.containsKey(key)) {
-                String componentId = currentCellKeysToEditorIdMap.get(key);
-                for (Component c : customComponentLoader
-                        .getCustomComponents()) {
-                    if (getComponentNodeId(c).equals(componentId)) {
-                        if (key.equals(lastEditorCallbackKey)
-                                && c == lastEditorCallbackComponent) {
-                            // Same cell, same editor: nothing was newly
-                            // displayed, so the callback has already run for
-                            // it.
-                            return;
-                        }
-                        lastEditorCallbackKey = key;
-                        lastEditorCallbackComponent = c;
-                        insideCustomEditorCallback = true;
-                        try {
-                            factory.onCustomEditorDisplayed(getCell(row, col),
-                                    row, col, this, getActiveSheet(), c);
-                        } catch (Exception e) {
-                            LOGGER.warn(
-                                    "Error in onCustomEditorDisplayed for cell ({}, {})",
-                                    col + 1, row + 1, e);
-                        } finally {
-                            insideCustomEditorCallback = false;
-                        }
-                        return;
-                    }
+            Component editor = cellKeyToEditor.get(key);
+            if (editor != null) {
+                if (key.equals(lastEditorCallbackKey)
+                        && editor == lastEditorCallbackComponent) {
+                    // Same cell, same editor: nothing was newly displayed, so
+                    // the callback has already run for it.
+                    return;
                 }
+                lastEditorCallbackKey = key;
+                lastEditorCallbackComponent = editor;
+                insideCustomEditorCallback = true;
+                try {
+                    factory.onCustomEditorDisplayed(getCell(row, col), row, col,
+                            this, getActiveSheet(), editor);
+                } catch (Exception e) {
+                    LOGGER.warn(
+                            "Error in onCustomEditorDisplayed for cell ({}, {})",
+                            col + 1, row + 1, e);
+                } finally {
+                    insideCustomEditorCallback = false;
+                }
+                return;
             }
             // Selected cell has no custom editor: forget the last-fired
             // editor so returning to an editor cell fires the callback again.
             resetEditorCallbackTracker();
-            setCellKeysToEditorIdMap(
-                    new HashMap<>(currentCellKeysToEditorIdMap));
         }
     }
 

@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import com.vaadin.flow.component.Component;
@@ -73,11 +74,11 @@ final class CustomComponentLoader implements Serializable {
             // Drop the cached editors (and the callback tracker) so the scan
             // below asks the factory for new ones and the callback fires again
             // for the selected cell.
-            spreadsheet.setCellKeysToEditorIdMap(null);
+            spreadsheet.setCellKeyToEditorMap(null);
         }
         if (factory == null) {
             // No factory -> clear all
-            spreadsheet.setCellKeysToEditorIdMap(null);
+            spreadsheet.setCellKeyToEditorMap(null);
             spreadsheet.setComponentIDtoCellKeysMap(null);
             if (!customComponents.isEmpty()) {
                 for (Component c : customComponents) {
@@ -89,8 +90,8 @@ final class CustomComponentLoader implements Serializable {
             return;
         }
 
-        HashMap<String, String> nextCellKeysToEditorIdMap = new HashMap<>(
-                spreadsheet.getCellKeysToEditorIdMap());
+        Map<String, Component> nextCellKeyToEditor = new HashMap<>(
+                spreadsheet.getCellKeyToEditorMap());
         HashMap<String, String> nextComponentIDtoCellKeysMap = new HashMap<>();
         HashSet<Component> nextComponents = new HashSet<>();
         Set<Integer> rowsWithComponents = new HashSet<>();
@@ -104,24 +105,24 @@ final class CustomComponentLoader implements Serializable {
 
         if (verticalSplit > 0 && horizontalSplit > 0) {
             scanner.scan(factory, customComponents, nextComponents,
-                    rowsWithComponents, nextCellKeysToEditorIdMap,
+                    rowsWithComponents, nextCellKeyToEditor,
                     nextComponentIDtoCellKeysMap, 1, 1, verticalSplit,
                     horizontalSplit);
         }
         if (verticalSplit > 0) {
             scanner.scan(factory, customComponents, nextComponents,
-                    rowsWithComponents, nextCellKeysToEditorIdMap,
+                    rowsWithComponents, nextCellKeyToEditor,
                     nextComponentIDtoCellKeysMap, 1, firstColumn, verticalSplit,
                     lastColumn);
         }
         if (horizontalSplit > 0) {
             scanner.scan(factory, customComponents, nextComponents,
-                    rowsWithComponents, nextCellKeysToEditorIdMap,
+                    rowsWithComponents, nextCellKeyToEditor,
                     nextComponentIDtoCellKeysMap, firstRow, 1, lastRow,
                     horizontalSplit);
         }
         scanner.scan(factory, customComponents, nextComponents,
-                rowsWithComponents, nextCellKeysToEditorIdMap,
+                rowsWithComponents, nextCellKeyToEditor,
                 nextComponentIDtoCellKeysMap, firstRow, firstColumn, lastRow,
                 lastColumn);
 
@@ -133,17 +134,17 @@ final class CustomComponentLoader implements Serializable {
             if (nextComponents.contains(c)) {
                 continue;
             }
-            String nodeId = Spreadsheet.getComponentNodeId(c);
-            if (nextCellKeysToEditorIdMap.containsValue(nodeId)) {
+            if (nextCellKeyToEditor.containsValue(c)) {
                 nextComponents.add(c);
             } else {
                 spreadsheet.unRegisterCustomComponent(c);
-                nextComponentIDtoCellKeysMap.remove(nodeId);
+                nextComponentIDtoCellKeysMap
+                        .remove(Spreadsheet.getComponentNodeId(c));
                 i.remove();
             }
         }
         customComponents = nextComponents;
-        spreadsheet.setCellKeysToEditorIdMap(nextCellKeysToEditorIdMap);
+        spreadsheet.setCellKeyToEditorMap(nextCellKeyToEditor);
         spreadsheet.setComponentIDtoCellKeysMap(nextComponentIDtoCellKeysMap);
 
         if (!rowsWithComponents.isEmpty()) {
@@ -158,7 +159,7 @@ final class CustomComponentLoader implements Serializable {
      * previous factory.
      */
     void unloadAll() {
-        spreadsheet.setCellKeysToEditorIdMap(null);
+        spreadsheet.setCellKeyToEditorMap(null);
         if (!customComponents.isEmpty()) {
             for (Component c : customComponents) {
                 spreadsheet.unRegisterCustomComponent(c);

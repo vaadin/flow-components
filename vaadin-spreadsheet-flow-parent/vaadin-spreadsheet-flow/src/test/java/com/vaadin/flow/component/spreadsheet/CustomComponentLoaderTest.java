@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
@@ -81,7 +82,7 @@ class CustomComponentLoaderTest {
         lenient().when(spreadsheet.getLastRow()).thenReturn(10);
         lenient().when(spreadsheet.getFirstColumn()).thenReturn(1);
         lenient().when(spreadsheet.getLastColumn()).thenReturn(10);
-        lenient().when(spreadsheet.getCellKeysToEditorIdMap())
+        lenient().when(spreadsheet.getCellKeyToEditorMap())
                 .thenReturn(new HashMap<>());
         spreadsheetStatic = mockStatic(Spreadsheet.class);
         // Default: identity-ish node id based on the mock's hashCode.
@@ -124,7 +125,7 @@ class CustomComponentLoaderTest {
 
         loader.load();
 
-        verify(spreadsheet).setCellKeysToEditorIdMap(isNull());
+        verify(spreadsheet).setCellKeyToEditorMap(isNull());
         verify(spreadsheet).setComponentIDtoCellKeysMap(isNull());
         verify(spreadsheet).unRegisterCustomComponent(comp1);
         verify(rowSizer).applyHeightsFor(new HashSet<>());
@@ -139,7 +140,7 @@ class CustomComponentLoaderTest {
 
         loader.load();
 
-        verify(spreadsheet).setCellKeysToEditorIdMap(isNull());
+        verify(spreadsheet).setCellKeyToEditorMap(isNull());
         verify(spreadsheet).setComponentIDtoCellKeysMap(isNull());
         verify(spreadsheet, never()).unRegisterCustomComponent(any());
         verify(rowSizer).applyHeightsFor(new HashSet<>());
@@ -189,8 +190,7 @@ class CustomComponentLoaderTest {
         seedOneComponent();
         // Second load: scanner is a no-op (default mock behavior). Editor
         // map is empty so comp1's node id won't be found there.
-        when(spreadsheet.getCellKeysToEditorIdMap())
-                .thenReturn(new HashMap<>());
+        when(spreadsheet.getCellKeyToEditorMap()).thenReturn(new HashMap<>());
 
         loader.load();
 
@@ -200,14 +200,13 @@ class CustomComponentLoaderTest {
 
     @Test
     void load_oldEditorStillInEditorMap_isKept_notUnregistered() {
-        // Pin: an editor whose node id is still in cellKeysToEditorIdMap
-        // is preserved even when the scan doesn't re-add it. Matches the
-        // contract that editor lifetime is keyed off the editor-map
-        // values (not the scan output).
+        // Pin: an editor that is still in the editor map is preserved even
+        // when the scan doesn't re-add it. Matches the contract that editor
+        // lifetime is keyed off the editor-map values (not the scan output).
         seedOneComponent();
-        HashMap<String, String> editorMap = new HashMap<>();
-        editorMap.put("col9 row9", "node-" + System.identityHashCode(comp1));
-        when(spreadsheet.getCellKeysToEditorIdMap()).thenReturn(editorMap);
+        Map<String, Component> editorMap = new HashMap<>();
+        editorMap.put("col9 row9", comp1);
+        when(spreadsheet.getCellKeyToEditorMap()).thenReturn(editorMap);
 
         loader.load();
 
@@ -242,7 +241,7 @@ class CustomComponentLoaderTest {
 
         loader.load();
 
-        verify(spreadsheet).setCellKeysToEditorIdMap(any(HashMap.class));
+        verify(spreadsheet).setCellKeyToEditorMap(any(Map.class));
         verify(spreadsheet).setComponentIDtoCellKeysMap(any(HashMap.class));
     }
 
@@ -254,7 +253,7 @@ class CustomComponentLoaderTest {
 
         loader.unloadAll();
 
-        verify(spreadsheet).setCellKeysToEditorIdMap(isNull());
+        verify(spreadsheet).setCellKeyToEditorMap(isNull());
         verify(spreadsheet).unRegisterCustomComponent(comp1);
         assertTrue(loader.getCustomComponents().isEmpty());
     }
@@ -277,7 +276,7 @@ class CustomComponentLoaderTest {
     @Test
     void unloadAll_noComponents_stillClearsEditorMap() {
         loader.unloadAll();
-        verify(spreadsheet).setCellKeysToEditorIdMap(isNull());
+        verify(spreadsheet).setCellKeyToEditorMap(isNull());
         verify(spreadsheet, never()).unRegisterCustomComponent(any());
     }
 

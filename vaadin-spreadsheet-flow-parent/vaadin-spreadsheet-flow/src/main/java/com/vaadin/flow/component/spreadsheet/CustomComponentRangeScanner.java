@@ -27,9 +27,9 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * {@link SpreadsheetComponentFactory} for any custom components or editors to
  * display. Skips cells inside merged regions (except the top-left anchor).
  * Populates the four collections it receives — the new component set, the rows
- * that contain components, and the two key maps used by the client — and
- * registers any newly-discovered component as a virtual child of the
- * spreadsheet element.
+ * that contain components, the editor of each cell and the cell of each
+ * component — and registers any newly-discovered component as a virtual child
+ * of the spreadsheet element.
  *
  * <p>
  * One range per call; the orchestration of viewport panes lives in
@@ -50,15 +50,9 @@ final class CustomComponentRangeScanner implements Serializable {
             Set<Component> existingComponents,
             HashSet<Component> newCustomComponents,
             Set<Integer> rowsWithComponents,
-            HashMap<String, String> cellKeysToEditorIdMap,
+            Map<String, Component> cellKeyToEditor,
             HashMap<String, String> componentIDtoCellKeysMap, int row1,
             int col1, int row2, int col2) {
-        // Node id to the component it belongs to, so a cell that already
-        // has an editor can be handed the one it has.
-        Map<String, Component> byNodeId = new HashMap<>();
-        for (Component existing : existingComponents) {
-            byNodeId.put(Spreadsheet.getComponentNodeId(existing), existing);
-        }
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = spreadsheet.getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {
@@ -92,8 +86,7 @@ final class CustomComponentRangeScanner implements Serializable {
                             // re-render. Only ask the factory for a cell that
                             // has none — a factory is free to hand back a new
                             // instance every call, and several do.
-                            Component customEditor = byNodeId
-                                    .get(cellKeysToEditorIdMap.get(key));
+                            Component customEditor = cellKeyToEditor.get(key);
                             if (customEditor == null) {
                                 customEditor = factory.getCustomEditorForCell(
                                         cell, r, c, spreadsheet,
@@ -106,8 +99,7 @@ final class CustomComponentRangeScanner implements Serializable {
                                     spreadsheet.registerCustomComponent(
                                             customEditor);
                                 }
-                                cellKeysToEditorIdMap.put(key, Spreadsheet
-                                        .getComponentNodeId(customEditor));
+                                cellKeyToEditor.put(key, customEditor);
                                 newCustomComponents.add(customEditor);
                                 rowsWithComponents.add(r);
                             }

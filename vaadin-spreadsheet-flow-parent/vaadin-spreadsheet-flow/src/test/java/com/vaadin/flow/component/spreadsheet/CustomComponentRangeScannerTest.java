@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -49,7 +50,7 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegio
  * <li>Component vs editor: if {@code getCustomComponentForCell} returns
  * non-null → register, add to {@code componentIDtoCellKeysMap}. Else if the
  * cell is NOT locked, try {@code getCustomEditorForCell} → register, add to
- * {@code cellKeysToEditorIdMap} (a different map).</li>
+ * {@code cellKeyToEditor} (a different map).</li>
  * <li>Locked cells skip the editor path entirely.</li>
  * <li>Existing-components dedup: a component already in
  * {@code existingComponents} is not re-registered.</li>
@@ -59,8 +60,9 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegio
  *
  * <p>
  * Uses {@link MockedStatic} to stub the static
- * {@code Spreadsheet.getComponentNodeId} call (required because the scanner
- * derives keys from it).
+ * {@code Spreadsheet.getComponentNodeId} call, which keys the component map. It
+ * returns the same id for every component, as it is before the spreadsheet is
+ * attached.
  */
 class CustomComponentRangeScannerTest {
 
@@ -81,7 +83,7 @@ class CustomComponentRangeScannerTest {
     private Set<Component> existing;
     private HashSet<Component> newComponents;
     private Set<Integer> rowsWithComponents;
-    private HashMap<String, String> cellKeysToEditorIdMap;
+    private HashMap<String, Component> cellKeyToEditor;
     private HashMap<String, String> componentIDtoCellKeysMap;
     private MockedStatic<Spreadsheet> spreadsheetStatic;
 
@@ -92,7 +94,7 @@ class CustomComponentRangeScannerTest {
         existing = new HashSet<>();
         newComponents = new HashSet<>();
         rowsWithComponents = new HashSet<>();
-        cellKeysToEditorIdMap = new HashMap<>();
+        cellKeyToEditor = new HashMap<>();
         componentIDtoCellKeysMap = new HashMap<>();
         lenient().when(spreadsheet.getActiveSheet()).thenReturn(sheet);
         lenient().when(spreadsheet.getMergedRegionContainer())
@@ -113,8 +115,7 @@ class CustomComponentRangeScannerTest {
 
     private void runScan(int r1, int c1, int r2, int c2) {
         scanner.scan(factory, existing, newComponents, rowsWithComponents,
-                cellKeysToEditorIdMap, componentIDtoCellKeysMap, r1, c1, r2,
-                c2);
+                cellKeyToEditor, componentIDtoCellKeysMap, r1, c1, r2, c2);
     }
 
     @Test
@@ -141,9 +142,9 @@ class CustomComponentRangeScannerTest {
         assertTrue(newComponents.contains(customComponent));
         assertTrue(rowsWithComponents.contains(0));
         // Component path uses componentIDtoCellKeysMap (NOT
-        // cellKeysToEditorIdMap).
+        // cellKeyToEditor).
         assertTrue(componentIDtoCellKeysMap.containsValue("col1 row1"));
-        assertTrue(cellKeysToEditorIdMap.isEmpty());
+        assertTrue(cellKeyToEditor.isEmpty());
     }
 
     @Test
@@ -175,8 +176,8 @@ class CustomComponentRangeScannerTest {
 
         verify(spreadsheet).registerCustomComponent(customEditor);
         assertTrue(newComponents.contains(customEditor));
-        // Editor path uses cellKeysToEditorIdMap (NOT componentID...Map).
-        assertTrue(cellKeysToEditorIdMap.containsKey("col1 row1"));
+        // Editor path uses cellKeyToEditor (NOT componentID...Map).
+        assertSame(customEditor, cellKeyToEditor.get("col1 row1"));
         assertTrue(componentIDtoCellKeysMap.isEmpty());
     }
 
@@ -193,7 +194,7 @@ class CustomComponentRangeScannerTest {
 
         verify(factory, never()).getCustomEditorForCell(any(), anyInt(),
                 anyInt(), any(), any());
-        assertTrue(cellKeysToEditorIdMap.isEmpty());
+        assertTrue(cellKeyToEditor.isEmpty());
         assertTrue(newComponents.isEmpty());
     }
 
@@ -277,7 +278,7 @@ class CustomComponentRangeScannerTest {
     void scan_existingEditor_skipsRegister_butStillAddsToCellKeysMap() {
         // Pin the editor-path dedup: an editor in either `existing` OR
         // already in `newCustomComponents` (within the same scan) is NOT
-        // re-registered. But the cellKeysToEditorIdMap is updated either
+        // re-registered. But the cellKeyToEditor map is updated either
         // way.
         existing.add(customEditor);
         when(factory.getCustomComponentForCell(any(), anyInt(), anyInt(), any(),
@@ -288,7 +289,28 @@ class CustomComponentRangeScannerTest {
         runScan(1, 1, 1, 1);
 
         verify(spreadsheet, never()).registerCustomComponent(customEditor);
-        assertTrue(cellKeysToEditorIdMap.containsKey("col1 row1"));
+        assertSame(customEditor, cellKeyToEditor.get("col1 row1"));
+    }
+
+    @Test
+    void scan_cellsThatHaveEditors_eachKeepsItsOwn() {
+        // Two cells with an editor each, and both editors with the same
+        // node id. Each cell is handed back its own editor, and the factory
+        // is not asked for new ones.
+        Component otherEditor = mock(Component.class);
+        cellKeyToEditor.put("col1 row1", customEditor);
+        cellKeyToEditor.put("col2 row1", otherEditor);
+        existing.add(customEditor);
+        existing.add(otherEditor);
+
+        runScan(1, 1, 1, 2);
+
+        verify(factory, never()).getCustomEditorForCell(any(), anyInt(),
+                anyInt(), any(), any());
+        assertSame(customEditor, cellKeyToEditor.get("col1 row1"));
+        assertSame(otherEditor, cellKeyToEditor.get("col2 row1"));
+        assertTrue(newComponents.contains(customEditor));
+        assertTrue(newComponents.contains(otherEditor));
     }
 
     @Test
@@ -305,7 +327,7 @@ class CustomComponentRangeScannerTest {
         verify(spreadsheet, never()).registerCustomComponent(any());
         assertTrue(newComponents.isEmpty());
         assertTrue(rowsWithComponents.isEmpty());
-        assertTrue(cellKeysToEditorIdMap.isEmpty());
+        assertTrue(cellKeyToEditor.isEmpty());
         assertTrue(componentIDtoCellKeysMap.isEmpty());
     }
 
