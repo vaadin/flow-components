@@ -694,6 +694,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly scrollContainer: HTMLElement;
 
   /**
+   * The headers' and frozen panes' sizes at the last render, which the
+   * scroll container leaves out of the view it pages - see
+   * {@link pagedViewInset}.
+   */
+  private pagedViewParts = {
+    corner: { width: 0, height: 0 },
+    frozen: { width: 0, columns: 0, height: 0, rows: 0 }
+  };
+
+  /**
    * Resize observer on the scroll container. Fires when the host's
    * box size changes — either initially when the host is attached
    * + given dimensions, or later when the parent layout changes
@@ -2921,6 +2931,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sheetTabs.style.display = tabsHidden ? 'none' : '';
     const barHidden = this.host.classList.contains('hidefunctionbar');
     this.formulaBar.style.display = barHidden ? 'none' : '';
+    this.applyPagedViewInset();
+  }
+
+  /**
+   * Leaves the headers and frozen panes out of the view the browser pages,
+   * so Page Up and Page Down move the cells as far as the GWT client's did.
+   * Paging the whole scroll container, they moved them a header further.
+   */
+  private applyPagedViewInset(): void {
+    const { corner, frozen } = this.pagedViewParts;
+    const inset = pagedViewInset(corner, frozen, this.sheetTabs.style.display !== 'none');
+    this.scrollContainer.style.scrollPaddingTop = `${inset.top}px`;
+    this.scrollContainer.style.scrollPaddingLeft = `${inset.left}px`;
   }
 
   /**
@@ -3392,6 +3415,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.headerCorner.style.display = cornerWidth === 0 && cornerHeight === 0 ? 'none' : '';
     this.headerCorner.style.width = `${cornerWidth}px`;
     this.headerCorner.style.height = `${cornerHeight}px`;
+    this.pagedViewParts = {
+      corner: { width: cornerWidth, height: cornerHeight },
+      frozen: {
+        width: state.frozenColWidths.reduce((sum, w) => sum + w, 0),
+        columns: state.horizontalSplitPosition,
+        height: state.frozenRowHeights.reduce((sum, h) => sum + h, 0),
+        rows: state.verticalSplitPosition
+      }
+    };
+    this.applyPagedViewInset();
     this.headerCorner.renderState = {
       headerWidth: this.headerColumnWidth,
       headerHeight: this.headerRowHeight,
@@ -5583,6 +5616,26 @@ export function freezeGap(frozen: number): number {
  */
 export function pastFreeze(index: number, frozen: number): number {
   return index > frozen ? freezeGap(frozen) : 0;
+}
+
+/**
+ * How far the headers and frozen panes reach into the scroll container's
+ * view: the browser leaves that much out of the view it pages, with Page Up,
+ * Page Down or a click in a scrollbar's track, given it as `scroll-padding`.
+ * The GWT client paged its pane of scrolling cells, which started past the
+ * headers, the frozen panes and the freeze line, and ran a pixel under the
+ * top border of the sheet tabs; while the tabs show, a page here is a pixel
+ * taller for it too.
+ */
+export function pagedViewInset(
+  corner: { width: number; height: number },
+  frozen: { width: number; columns: number; height: number; rows: number },
+  tabsShown: boolean
+): { top: number; left: number } {
+  return {
+    top: Math.max(0, corner.height + frozen.height + freezeGap(frozen.rows) - (tabsShown ? 1 : 0)),
+    left: corner.width + frozen.width + freezeGap(frozen.columns)
+  };
 }
 
 /**
