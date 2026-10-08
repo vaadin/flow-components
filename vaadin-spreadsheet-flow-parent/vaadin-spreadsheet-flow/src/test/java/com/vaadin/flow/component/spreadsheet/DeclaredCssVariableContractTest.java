@@ -91,6 +91,16 @@ public class DeclaredCssVariableContractTest {
                         + unread);
     }
 
+    /**
+     * Read with two defaults on purpose. The address field keeps the browser's
+     * own font for text fields, as the GWT client's did, and the formula field
+     * is in Helvetica; the property sets both. The address cannot reach the
+     * browser's font through a property of its own: {@code revert} only works
+     * as the fallback of the declaration itself.
+     */
+    private static final Set<String> TWO_DEFAULTS_ON_PURPOSE = Set
+            .of("--vaadin-spreadsheet-formulabar-font");
+
     /** A read with a fallback: {@code var(--name, fallback)}. */
     private static final Pattern READ_WITH_FALLBACK = Pattern.compile(
             "var\\((--vaadin-spreadsheet-[a-zA-Z0-9-]+),\\s*([^)]+)\\)");
@@ -107,6 +117,8 @@ public class DeclaredCssVariableContractTest {
 
         List<String> conflicting = defaults.entrySet().stream()
                 .filter(entry -> entry.getValue().size() > 1)
+                .filter(entry -> !TWO_DEFAULTS_ON_PURPOSE
+                        .contains(entry.getKey()))
                 .map(entry -> entry.getKey() + " " + entry.getValue()).toList();
 
         assertTrue(conflicting.isEmpty(),
