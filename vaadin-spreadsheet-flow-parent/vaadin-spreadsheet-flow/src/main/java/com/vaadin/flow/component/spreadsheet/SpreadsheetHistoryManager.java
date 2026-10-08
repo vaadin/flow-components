@@ -18,13 +18,6 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
  * class handles remembering any actions done in the Spreadsheet. The purpose is
  * to allow the user to undo and redo any action.
  *
- * <p>
- * Coordinator for undo/redo. Two single-purpose helpers do the work:
- * {@link CommandStack} owns the bounded command list and the cursor;
- * {@link CommandReplayer} applies the side effects of replaying a command on
- * the target {@link Spreadsheet}. This class wires the two together and exposes
- * the public/protected API that callers and subclasses depend on.
- *
  * @author Vaadin Ltd.
  * @since 23.1
  */
@@ -33,16 +26,14 @@ public class SpreadsheetHistoryManager implements Serializable {
     /**
      * Current index within the history.
      * <p>
-     * This field exists for subclass observation. It mirrors the underlying
-     * {@link CommandStack}'s cursor and is rewritten by the public methods
-     * after every stack mutation. Do not mutate directly.
+     * You can read it in a subclass. The public methods update it after every
+     * change to the history, so do not change it directly.
      */
     protected int historyIndex = -1;
 
     /**
-     * All executed commands in chronological order. Shared by reference with
-     * the {@link CommandStack}; subclasses may read this list. Direct mutation
-     * is undefined.
+     * All executed commands in chronological order. You can read this list in a
+     * subclass; changing it directly has undefined results.
      */
     protected final LinkedList<Command> commands = new LinkedList<Command>();
 

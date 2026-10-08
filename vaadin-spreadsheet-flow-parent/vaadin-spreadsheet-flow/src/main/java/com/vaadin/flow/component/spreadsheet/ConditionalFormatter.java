@@ -239,8 +239,17 @@ public class ConditionalFormatter implements Serializable {
 
     /**
      * Goes through the cells specified in the given formatting, and checks if
-     * each rule matches. Style ids from resulting matches are put in
-     * {@link #cellToIndex}.
+     * each rule matches. Style ids from resulting matches are recorded for each
+     * cell, see {@link #getCellFormattingIndex(Cell)}.
+     *
+     * @param cf
+     *            {@link ConditionalFormatting} that specifies the affected
+     *            cells
+     * @param rule
+     *            The rule to be evaluated
+     * @param classNameIndex
+     *            The index of the class name that was generated for this rule,
+     *            to be added to the style ids of the matching cells
      */
     protected void runCellMatcher(ConditionalFormatting cf,
             ConditionalFormattingRule rule, int classNameIndex) {
@@ -325,8 +334,19 @@ public class ConditionalFormatter implements Serializable {
 
     /**
      * Checks if the given cell value matches the given conditional formatting
-     * rule. Preserved as a protected delegator so subclasses can override —
-     * actual logic lives in {@link RuleEvaluator}.
+     * rule. A {@code VALUE_IS} rule is checked with {@link #matchesValue}, any
+     * other rule with {@link #matchesFormula}.
+     *
+     * @param cell
+     *            Target cell
+     * @param rule
+     *            Conditional formatting rule to check against
+     * @param deltaColumn
+     *            delta (on column axis) between cell and the origin cell
+     * @param deltaRow
+     *            delta (on row axis) between cell and the origin cell
+     * @return Whether the given rule evaluates to <code>true</code> for the
+     *         given cell.
      */
     protected boolean matches(Cell cell, ConditionalFormattingRule rule,
             int deltaColumn, int deltaRow) {
@@ -334,9 +354,21 @@ public class ConditionalFormatter implements Serializable {
     }
 
     /**
-     * Checks if the formula in the given rule evaluates to {@code true}.
-     * {@link #matches} calls it for a formula rule. Logic in
-     * {@link RuleEvaluator}.
+     * Checks if the formula in the given rule evaluates to <code>true</code>.
+     * <p>
+     * NOTE: Does not support HSSF files currently.
+     *
+     * @param cell
+     *            Cell with conditional formatting
+     * @param rule
+     *            Conditional formatting rule based on formula
+     * @param deltaColumn
+     *            delta (on column axis) between cell and the origin cell
+     * @param deltaRow
+     *            delta (on row axis) between cell and the origin cell
+     * @return Formula value, if the formula is of boolean formula type Formula
+     *         value != 0, if the formula is of numeric formula type and false
+     *         otherwise
      */
     protected boolean matchesFormula(Cell cell, ConditionalFormattingRule rule,
             int deltaColumn, int deltaRow) {
@@ -344,9 +376,20 @@ public class ConditionalFormatter implements Serializable {
     }
 
     /**
-     * Checks if the given cell value matches a {@code VALUE_IS} rule.
-     * {@link #matches} calls it for a value rule. Logic in
-     * {@link RuleEvaluator}.
+     * Checks if the given cell value matches a
+     * {@link ConditionalFormattingRule} of <code>VALUE_IS</code> type. Covers
+     * all cell types and comparison operations.
+     *
+     * @param cell
+     *            Target cell
+     * @param rule
+     *            Conditional formatting rule to match against.
+     * @param deltaColumn
+     *            delta (on column axis) between cell and the origin cell
+     * @param deltaRow
+     *            delta (on row axis) between cell and the origin cell
+     * @return True if the given cells value matches the given
+     *         <code>VALUE_IS</code> rule, false otherwise
      */
     protected boolean matchesValue(Cell cell, ConditionalFormattingRule rule,
             int deltaColumn, int deltaRow) {

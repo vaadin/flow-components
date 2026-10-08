@@ -179,10 +179,8 @@ public class Spreadsheet extends Component
             .serialized(this, "sheetNames", null);
 
     /**
-     * POI cell-style-index → CSS rule body. Preserved as a protected field on
-     * Spreadsheet (rather than moved into {@link SheetCssStyleMaps}) for
-     * downstream subclass compatibility. Mirrored to the element by
-     * {@link #setCellStyleToCSSStyle}.
+     * The CSS of each cell style of the workbook, by POI cell style index, as
+     * sent to the client. Set when the styles of the active sheet are loaded.
      */
     protected HashMap<Integer, String> cellStyleToCSSStyle = null;
 
@@ -1085,9 +1083,8 @@ public class Spreadsheet extends Component
             this);
 
     /**
-     * Container for merged regions for the currently active sheet. The
-     * implementation is a {@link MergedRegionLookup} backed by a live view of
-     * {@link #getMergedRegions()}.
+     * Container for merged regions for the currently active sheet. It always
+     * reflects the current merged regions of the sheet.
      */
     protected final MergedRegionContainer mergedRegionContainer = new MergedRegionLookup(
             this::getMergedRegions);

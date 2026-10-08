@@ -167,9 +167,23 @@ public class CellValueManager implements Serializable {
     }
 
     /**
-     * Check if the given cell is a numeric cell, and specifically the data
-     * format is "General". In Excel and Spreadsheet this is the default type
-     * for cells.
+     * Gets the raw value of the given cell as text, rather than its formatted,
+     * displayed value:
+     * <ul>
+     * <li>a formula without the leading {@code =};</li>
+     * <li>a number without grouping and with up to 16 decimals, with the
+     * decimal separator of the spreadsheet's locale;</li>
+     * <li>a date as a short date and time in the spreadsheet's locale;</li>
+     * <li>text, with a leading apostrophe when the cell's style has the quote
+     * prefix set, which in an XLS file is every text cell;</li>
+     * <li>{@code true} or {@code false} for a boolean;</li>
+     * <li>the numeric error code for an error.</li>
+     * </ul>
+     *
+     * @param cell
+     *            the cell, may be {@code null}
+     * @return the cell's value for editing, or an empty string for a
+     *         {@code null} or blank cell
      */
     public String getOriginalCellValue(Cell cell) {
         return numericFormatter.getOriginalCellValue(cell);
