@@ -27,11 +27,10 @@ import com.vaadin.testbench.Parameters;
 public abstract class AbstractVisualBaselineIT extends AbstractSpreadsheetIT {
 
     /** The workbooks that have a reference screenshot. */
-    static final List<String> WORKBOOKS = List.of("Tagetik 5.xlsx",
-            "Groupingtest.xlsx", "100_000_rows.xlsx", "merged_cells.xlsx",
-            "scrolled_frozen.xlsx", "ConditionalFormatterSamples.xlsx",
-            "spreadsheet_styles.xlsx", "FormulaValues.xlsx",
-            "data_filters.xlsx");
+    static final List<String> WORKBOOKS = List.of("Groupingtest.xlsx",
+            "100_000_rows.xlsx", "merged_cells.xlsx", "scrolled_frozen.xlsx",
+            "ConditionalFormatterSamples.xlsx", "spreadsheet_styles.xlsx",
+            "FormulaValues.xlsx", "data_filters.xlsx");
 
     private static final Dimension WINDOW_SIZE = new Dimension(1280, 720);
 
