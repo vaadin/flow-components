@@ -430,6 +430,10 @@ export class SpreadsheetColumnHeader extends LitElement {
     }
 
     :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {
+      background-color: var(
+        --vaadin-spreadsheet-header-selected-bg,
+        var(--_vaadin-spreadsheet-header-selected-bg, #e6edf4)
+      );
       background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
       border-bottom-color: var(--lumo-primary-color-50pct);
     }

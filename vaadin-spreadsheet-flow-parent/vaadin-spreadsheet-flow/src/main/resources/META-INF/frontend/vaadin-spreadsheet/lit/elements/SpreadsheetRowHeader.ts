@@ -387,10 +387,6 @@ export class SpreadsheetRowHeader extends LitElement {
       border-right-color: var(--lumo-primary-color-50pct);
     }
 
-    :host([theme~='lumo']) .row-grouping-separator {
-      border-right-color: var(--lumo-contrast-20pct);
-    }
-
     :host([theme~='lumo']) .row-grouping-toggle {
       background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
       font-size: var(--lumo-font-size-xs);

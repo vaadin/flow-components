@@ -197,12 +197,7 @@ export class SpreadsheetHeaderCorner extends LitElement {
     }
 
     :host([theme~='lumo']) .row-group-summary {
-      font-family: var(--lumo-font-family);
       font-size: var(--lumo-font-size-m);
-    }
-
-    :host([theme~='lumo']) .level-separator.rows {
-      border-right-color: var(--lumo-contrast-20pct);
     }
 
     :host([theme~='lumo']) .level-header {

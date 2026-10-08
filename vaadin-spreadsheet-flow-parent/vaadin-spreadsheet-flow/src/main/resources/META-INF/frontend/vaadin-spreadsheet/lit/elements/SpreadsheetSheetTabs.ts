@@ -307,11 +307,6 @@ export class SpreadsheetSheetTabs extends LitElement {
       box-shadow: var(--lumo-box-shadow-xs);
     }
 
-    :host([theme~='lumo']) .sheet-tab-rename {
-      font-size: var(--lumo-font-size-s);
-      color: var(--lumo-primary-text-color);
-    }
-
     :host([theme~='lumo']) .sheet-tabsheet-infolabel {
       background: var(--lumo-contrast-5pct);
       font-size: var(--lumo-font-size-s);

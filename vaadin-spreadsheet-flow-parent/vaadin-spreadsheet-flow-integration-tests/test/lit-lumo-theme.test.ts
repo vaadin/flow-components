@@ -291,6 +291,38 @@ describe('Lumo theme — documented properties set on an ancestor', () => {
         });
     }
 
+    for (const theme of [null, 'lumo']) {
+        it(`colour a cell the workbook styles with --vaadin-spreadsheet-cell-background ${theme ? 'under Lumo' : 'without a theme'}`, async () => {
+            // The server writes a workbook's default fill as
+            // background-color:var(--default-background-color), and that rule
+            // wins over the grid's own, so the property has to reach it.
+            const { el, cleanup } = await grid(
+                theme,
+                { cellStyleToCSSStyle: { 0: DEFAULT_STYLE + 'background-color:var(--default-background-color);' } },
+                '--vaadin-spreadsheet-cell-background: rgb(1, 2, 3)'
+            );
+
+            expect(getComputedStyle(inGrid(el, '.cell.col1.row1')).backgroundColor).to.equal('rgb(1, 2, 3)');
+
+            cleanup();
+        });
+    }
+
+    it('leave the workbook\'s default fill white, or on Lumo\'s ground, when unset', async () => {
+        for (const [theme, expected] of [
+            [null, 'rgb(255, 255, 255)'],
+            ['lumo', BASE],
+        ] as const) {
+            const { el, cleanup } = await grid(theme, {
+                cellStyleToCSSStyle: { 0: DEFAULT_STYLE + 'background-color:var(--default-background-color);' },
+            });
+
+            expect(getComputedStyle(inGrid(el, '.cell.col1.row1')).backgroundColor, String(theme)).to.equal(expected);
+
+            cleanup();
+        }
+    });
+
     it('win over the Lumo default when set on the element', async () => {
         const themed = themedHost('lumo');
         themed.host.style.setProperty('--vaadin-spreadsheet-border-color', 'rgb(7, 8, 9)');
@@ -677,7 +709,7 @@ describe('Lumo theme — the headers', () => {
         }, wrapperStyle);
     }
 
-    async function rows(theme: string | null) {
+    async function rows(theme: string | null, wrapperStyle = '') {
         return inHost<SpreadsheetRowHeader>('vaadin-spreadsheet-internal-row-header', theme, (el) => {
             el.renderState = {
                 ...emptyRowHeaderRenderState(),
@@ -699,7 +731,7 @@ describe('Lumo theme — the headers', () => {
                 rowGroupings: [{ level: 1, startIndex: 1, endIndex: 2, collapsed: false } as any],
                 rowGroupingMax: 1,
             };
-        });
+        }, wrapperStyle);
     }
 
     it('tints the column strip over Lumo\'s ground, in its font', async () => {
@@ -791,6 +823,42 @@ describe('Lumo theme — the headers', () => {
         expect(selected.backgroundImage).to.equal('linear-gradient(rgba(0, 0, 200, 0.1), rgba(0, 0, 200, 0.1))');
         expect(`${selected.borderRightWidth} ${selected.borderRightColor}`).to.equal('2px rgba(0, 0, 200, 0.5)');
         expect(getComputedStyle(el.shadowRoot!.querySelector('.row-grouping-toggle')!).fontSize).to.equal('11px');
+
+        cleanup();
+    });
+
+    it('lets --vaadin-spreadsheet-header-selected-bg colour the active column under Lumo, as it does the row', async () => {
+        const { el, cleanup } = await columns('lumo', '--vaadin-spreadsheet-header-selected-bg: rgb(1, 2, 3)');
+
+        const selected = el.shadowRoot!.querySelector<HTMLElement>(".col-header-cell[part~='header-selected']")!;
+        expect(getComputedStyle(selected).backgroundColor).to.equal('rgb(1, 2, 3)');
+
+        cleanup();
+    });
+
+    it('lets --vaadin-spreadsheet-header-border-color draw the row outline lines under Lumo, as it does the column ones', async () => {
+        const { el, cleanup } = await rows('lumo', '--vaadin-spreadsheet-header-border-color: rgb(1, 2, 3)');
+
+        const divider = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-separator')!;
+        expect(getComputedStyle(divider).borderRightColor).to.equal('rgb(1, 2, 3)');
+
+        cleanup();
+    });
+
+    it('lets the header properties reach the corner\'s row levels under Lumo', async () => {
+        const { el, cleanup } = await inHost<SpreadsheetHeaderCorner>(
+            'vaadin-spreadsheet-internal-header-corner',
+            'lumo',
+            (corner) => {
+                corner.renderState = { headerWidth: 50, headerHeight: 27, colGroupingMax: 1, rowGroupingMax: 1 };
+            },
+            '--vaadin-spreadsheet-header-border-color: rgb(1, 2, 3); --vaadin-spreadsheet-header-font: Courier'
+        );
+
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.level-separator.rows')!).borderRightColor).to.equal(
+            'rgb(1, 2, 3)'
+        );
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.row-group-summary')!).fontFamily).to.equal('Courier');
 
         cleanup();
     });
@@ -889,6 +957,29 @@ describe('Lumo theme — the sheet tabs', () => {
             };
         });
     }
+
+    it('lets the tab properties style the rename input under Lumo', async () => {
+        const { el, cleanup } = await inHost<SpreadsheetSheetTabs>(
+            'vaadin-spreadsheet-internal-sheet-tabs',
+            'lumo',
+            (strip) => {
+                strip.style.width = '800px';
+                strip.renderState = {
+                    ...emptySheetTabsRenderState(),
+                    sheetNames: ['One', 'Two'],
+                    activeIndex: 1,
+                    renamingIndex: 1,
+                };
+            },
+            '--vaadin-spreadsheet-tabs-font-size: 21px; --vaadin-spreadsheet-tabs-active-fg: rgb(1, 2, 3)'
+        );
+
+        const input = getComputedStyle(el.shadowRoot!.querySelector('.sheet-tab-rename')!);
+        expect(input.fontSize).to.equal('21px');
+        expect(input.color).to.equal('rgb(1, 2, 3)');
+
+        cleanup();
+    });
 
     it('draws the strip on Lumo\'s ground under its contrast', async () => {
         const { el, cleanup } = await tabs();

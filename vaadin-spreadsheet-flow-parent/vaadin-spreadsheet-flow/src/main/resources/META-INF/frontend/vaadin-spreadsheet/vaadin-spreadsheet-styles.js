@@ -70,7 +70,10 @@ export const spreadsheetStyles = css`
        grid because custom properties inherit through the shadow
        boundary. No backticks in this comment — the whole stylesheet is
        a template literal and one would end it. */
-    --default-background-color: #fff;
+    --default-background-color: var(
+      --vaadin-spreadsheet-cell-background,
+      var(--_vaadin-spreadsheet-cell-background, #fff)
+    );
     --default-color: #000;
     --default-font-family: Helvetica;
     --default-font-size: 11pt;
@@ -180,7 +183,6 @@ export const spreadsheetStyles = css`
     --_vaadin-spreadsheet-popup-button-bg: var(--lumo-base-color);
     --_vaadin-spreadsheet-popup-button-fg: var(--lumo-body-text-color);
     --_vaadin-spreadsheet-popup-button-active-bg: var(--lumo-base-color);
-    --default-background-color: var(--lumo-base-color);
     --default-color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
     background-color: var(--lumo-base-color);
   }
