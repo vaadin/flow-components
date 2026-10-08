@@ -230,6 +230,35 @@ describe('Spreadsheet — a write to a protected cell', () => {
     return sent.filter((e) => e.type === 'protectedCellWriteAttempted');
   }
 
+  async function formulaField(): Promise<HTMLInputElement> {
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getFormulaBar().updateComplete;
+    return ctx.sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+  }
+
+  it('turns the formula field off on a locked cell, as the GWT client did', async () => {
+    // Left on, the field took a whole formula and refused it only once it
+    // was written.
+    ctx.sheet.setSelectedCellAndRange('', 2, 2, 2, 2, 2, 2, false);
+
+    expect((await formulaField()).disabled).to.be.true;
+  });
+
+  it('keeps the formula field on for an unlocked cell of a protected sheet', async () => {
+    ctx.sheet.setSelectedCellAndRange('', 3, 3, 3, 3, 3, 3, false);
+
+    expect((await formulaField()).disabled).to.be.false;
+  });
+
+  it('turns the formula field back on once the sheet is no longer protected', async () => {
+    ctx.sheet.setSelectedCellAndRange('', 2, 2, 2, 2, 2, 2, false);
+    expect((await formulaField()).disabled).to.be.true;
+
+    ctx.sheet.setSheetProtected(false);
+
+    expect((await formulaField()).disabled).to.be.false;
+  });
+
   it('reports a printable character typed into a locked cell', () => {
     typeInto(ctx.sheet, 2, 2, 'a');
 

@@ -81,7 +81,8 @@ export class SpreadsheetFormulaBar extends LitElement {
   static readonly EXPORTED_PARTS = 'address-field,formula-field,named-range-box';
 
   static properties = {
-    renderState: { attribute: false }
+    renderState: { attribute: false },
+    formulaLocked: { attribute: false }
   };
 
   static styles = css`
@@ -226,9 +227,17 @@ export class SpreadsheetFormulaBar extends LitElement {
 
   declare renderState: FormulaBarRenderState;
 
+  /**
+   * Whether the active cell is locked on a protected sheet. The formula
+   * field is then off, as the GWT client's was: on, it took a whole formula
+   * and refused it only once it was written.
+   */
+  declare formulaLocked: boolean;
+
   constructor() {
     super();
     this.renderState = emptyFormulaBarRenderState();
+    this.formulaLocked = false;
   }
 
   connectedCallback(): void {
@@ -517,7 +526,7 @@ export class SpreadsheetFormulaBar extends LitElement {
         ${namedRangeBox}
       </div>
       ${highlights === null ? '' : this.renderHighlights(highlights)}
-      <input class="formula" part="formula-field" .value=${formula} />
+      <input class="formula" part="formula-field" .value=${formula} ?disabled=${this.formulaLocked} />
     `;
   }
 

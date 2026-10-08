@@ -3323,6 +3323,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.style.width = `${state.totalGridWidthPx}px`;
     this.cellGrid.style.height = `${state.totalGridHeightPx}px`;
     this.cellGrid.renderState = state;
+    const { col, row } = this.selection.activeCell;
+    this.formulaBar.formulaLocked = this.isCellLockedForEdit(col, row);
     // The slots that project these live in the template we just handed the
     // cell-grid, so the components have to be parented before the browser
     // resolves them. sync() is idempotent, so the repaint on every scroll
