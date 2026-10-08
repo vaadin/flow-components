@@ -24,6 +24,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     // Public methods
     const needsDataCommunicatorReset = () => (dataCommunicatorResetNeeded = true);
+    const skipDataCommunicatorReset = () => (dataCommunicatorResetNeeded = false);
     const getLastFilterSentToServer = () => lastFilterSentToServer;
     const requestData = (startIndex, endIndex, params) => {
       const count = endIndex - startIndex;
@@ -39,6 +40,7 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
     return {
       needsDataCommunicatorReset,
+      skipDataCommunicatorReset,
       getLastFilterSentToServer,
       requestData
     };
@@ -147,6 +149,14 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
   };
 
+  // Whenever the web component cache is cleared after that, the server
+  // considers the requested range as already sent. Make the next request ask
+  // the server to send it again.
+  comboBox.clearCache = () => {
+    serverFacade.needsDataCommunicatorReset();
+    Object.getPrototypeOf(comboBox).clearCache.call(comboBox);
+  };
+
   comboBox.$connector.clear = (start, length) => {
     const firstPageToClear = Math.floor(start / comboBox.pageSize);
     const numberOfPagesToClear = Math.ceil(length / comboBox.pageSize);
@@ -221,6 +231,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     clearPageCallbacks();
     cache = {};
     comboBox.clearCache();
+    // The server resets the data communicator itself before calling this, so
+    // the next request must not ask for another reset
+    serverFacade.skipDataCommunicatorReset();
   };
 
   comboBox.$connector.confirm = function (id, filter) {
