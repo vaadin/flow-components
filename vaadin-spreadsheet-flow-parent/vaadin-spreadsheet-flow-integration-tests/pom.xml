@@ -192,6 +192,8 @@
                         <com.vaadin.testbench.Parameters.screenshotRetryDelay>500</com.vaadin.testbench.Parameters.screenshotRetryDelay>
                         <com.vaadin.testbench.Parameters.screenshotReferenceDirectory>${project.basedir}/src/reference-screenshots</com.vaadin.testbench.Parameters.screenshotReferenceDirectory>
                         <com.vaadin.testbench.Parameters.screenshotErrorDirectory>${project.build.directory}/screenshot-diffs</com.vaadin.testbench.Parameters.screenshotErrorDirectory>
+                        <!-- The reference screenshots hold for this module's setup only, so VisualBaselineDiffIT runs only where this is set -->
+                        <spreadsheet.visualBaseline.diff>true</spreadsheet.visualBaseline.diff>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
