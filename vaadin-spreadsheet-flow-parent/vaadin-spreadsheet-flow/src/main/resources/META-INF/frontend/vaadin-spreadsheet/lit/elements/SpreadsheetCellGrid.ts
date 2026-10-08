@@ -11,7 +11,6 @@ import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import type { DirectiveResult } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { isFormula } from '../algorithms/FormulaPointing.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
 import { caretPosition } from '../algorithms/PercentageEntry.js';
@@ -2622,14 +2621,13 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
   if (rules.length === 0) {
     return '';
   }
-  // Compose the rules as plain text + use unsafeHTML — Lit's
-  // template literal doesn't substitute into <style> children
-  // safely otherwise. The content is server-controlled CSS, so
-  // this is the same trust boundary the wrapper already exposes
-  // (the GWT path emitted these rules via document.createElement
-  // ('style') + appendChild).
+  // The rules go in as text. A workbook names its own fonts, and a name is
+  // written into these rules as it is, so markup in one has to stay text:
+  // read as HTML, a font named `</style><img src=x onerror=...>` ran its
+  // script. The GWT client inserted each rule through the CSSOM, which
+  // reads no markup.
   return html`<style>
-    ${unsafeHTML(rules.join('\n'))}
+    ${rules.join('\n')}
   </style>`;
 }
 
