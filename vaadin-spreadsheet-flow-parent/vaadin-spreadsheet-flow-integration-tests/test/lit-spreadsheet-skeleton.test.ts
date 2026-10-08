@@ -2102,7 +2102,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('vertical scroll dispatches onSheetScroll with updated row range (slice 157)', () => {
+    it('vertical scroll asks for the rows scrolled into view and a margin beyond them', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(50);
         sheet.setCols(20);
@@ -2127,8 +2127,11 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         scroller.scrollTop = 200; // 10 rows down (20px each)
         scroller.dispatchEvent(new Event('scroll'));
 
+        // Rows 11 to 15 are in view. The request covers them and loads
+        // ahead, so the next steps of a scroll need no request of their own.
         expect(received).to.exist;
-        expect(received!.data.firstRow).to.be.greaterThanOrEqual(11);
+        expect(received!.data.firstRow).to.be.at.most(11);
+        expect(received!.data.lastRow).to.be.greaterThan(15);
         cleanup();
     });
 

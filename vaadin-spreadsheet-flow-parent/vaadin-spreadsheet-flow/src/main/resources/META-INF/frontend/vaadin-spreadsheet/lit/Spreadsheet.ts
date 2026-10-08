@@ -96,6 +96,7 @@ import { SpreadsheetHeaderCorner } from './elements/SpreadsheetHeaderCorner.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
 import { emptyContextMenuRenderState, SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
+import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
@@ -595,8 +596,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The style indexes last reported to the server with a width ratio. */
   private measuredStyleIndexes: ReadonlySet<number> = new Set();
 
-  /** The viewport bounds last reported to the server, as "r1,c1,r2,c2". */
-  private announcedBounds = '';
+  /** Decides when the server is asked for the cells the sheet scrolls to. */
+  private readonly viewportLoader = new ViewportLoader({
+    drawnRange: () => this.drawnRange(),
+    sheet: () => ({
+      rows: this.rows,
+      cols: this.cols,
+      frozenRows: this.verticalSplitPosition,
+      frozenCols: this.horizontalSplitPosition,
+      rowPx: getDefaultRowHeightPx(this.defRowHeight, FALLBACK_PPI),
+      colPx: this.defColWidth
+    }),
+    serverBusy: () => flowRequestInFlight(this.host),
+    load: (range) => this.sendLoad(range)
+  });
 
   /**
    * The fill-handle drag in progress: the selection it started from and the
@@ -2602,16 +2615,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Scroll-event handler: recompute the visible viewport from the
-   * scroll container's current state + push a fresh render state
-   * to the cell-grid. The recompute tells the server about a visible
-   * range that changed, so it can load the cells newly in view - once
-   * per change: the GWT client asked only when the view had moved on, and
-   * the same range twice is the same load twice. Bound as an arrow
-   * function so the listener binding survives without explicit
-   * {@code .bind(this)}.
+   * Scroll-event handler: tell the loader where the sheet is, recompute
+   * the visible viewport and push a fresh render state to the cell-grid.
+   * The loader decides whether the server needs asking for cells now - see
+   * {@link ViewportLoader}.
    */
   private readonly handleScroll = (): void => {
+    this.viewportLoader.scrolled(this.scrollContainer.scrollTop, this.scrollContainer.scrollLeft);
     this.recomputeViewport();
     // The GWT client moved an open popup along with its cell.
     this.positionPopupOverlay();
@@ -2633,13 +2643,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * the server discards its sheet state, and the next completed viewport
    * introduces itself again.
    *
-   * The announcement itself repeats, though, every time the visible range
-   * actually changes. Only scrolling dispatches a viewport of its own, and
-   * plenty of things resize the sheet without one — a tab revealing it, a
-   * split pane opening, the window resizing. A sheet that came up 0 wide
-   * inside a hidden tab would otherwise keep the viewport it measured
-   * while hidden, and the cells and popup buttons outside it would never
-   * load.
+   * Loading itself is checked again on every repaint, not only on
+   * scrolling: plenty of things resize the sheet without a scroll - a tab
+   * revealing it, a split pane opening, the window resizing. A sheet that
+   * came up 0 wide inside a hidden tab would otherwise keep the viewport it
+   * measured while hidden, and the cells and popup buttons outside it
+   * would never load. The {@link ViewportLoader} asks only for what is not
+   * loaded yet.
    */
   private announceViewport(): void {
     if (this.rows <= 0 || this.cols <= 0) {
@@ -2647,18 +2657,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // viewport that means nothing and the server would load nothing.
       return;
     }
-    const viewport = this.cellGrid.renderState.viewport;
-    if (viewport.lastRowIndex < viewport.firstRowIndex || viewport.lastColumnIndex < viewport.firstColumnIndex) {
+    if (this.drawnRange() === null) {
       // Nothing measured yet; try again after the next render.
-      return;
-    }
-    const bounds = [
-      viewport.firstRowIndex,
-      viewport.firstColumnIndex,
-      viewport.lastRowIndex,
-      viewport.lastColumnIndex
-    ].join(',');
-    if (this.viewportAnnounced && bounds === this.announcedBounds) {
       return;
     }
     if (!this.viewportAnnounced) {
@@ -2671,27 +2671,37 @@ export class Spreadsheet implements SpreadsheetClientApi {
         })
       );
     }
-    this.announcedBounds = bounds;
-    this.dispatchSheetScrollEvent();
+    this.viewportLoader.check();
+  }
+
+  /** The cells the grid draws, its drawing buffer included; null before anything is measured. */
+  private drawnRange(): LoadRange | null {
+    const viewport = this.cellGrid.renderState.viewport;
+    if (viewport.lastRowIndex < viewport.firstRowIndex || viewport.lastColumnIndex < viewport.firstColumnIndex) {
+      return null;
+    }
+    return {
+      r1: viewport.firstRowIndex,
+      c1: viewport.firstColumnIndex,
+      r2: viewport.lastRowIndex,
+      c2: viewport.lastColumnIndex
+    };
   }
 
   /**
-   * Dispatch `onSheetScroll` carrying the current viewport
-   * bounds (firstRow/firstColumn/lastRow/lastColumn). The
-   * server's `SpreadsheetHandler.onSheetScroll` uses these to
-   * decide which cell values to push. Slice 157.
+   * Ask the server to load the cells, comments, overlays and components of
+   * a range. Its `onSheetScroll` loads what it has not sent before.
    */
-  private dispatchSheetScrollEvent(): void {
-    const viewport = this.cellGrid.renderState.viewport;
+  private sendLoad(range: LoadRange): void {
     this.host.dispatchEvent(
       new CustomEvent('spreadsheet-event', {
         detail: {
           type: 'onSheetScroll',
           data: {
-            firstRow: viewport.firstRowIndex,
-            firstColumn: viewport.firstColumnIndex,
-            lastRow: viewport.lastRowIndex,
-            lastColumn: viewport.lastColumnIndex
+            firstRow: range.r1,
+            firstColumn: range.c1,
+            lastRow: range.r2,
+            lastColumn: range.c2
           }
         },
         bubbles: true,
@@ -2842,6 +2852,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * scroll container after teardown.
    */
   dispose(): void {
+    this.viewportLoader.dispose();
     this.renderQueued = false;
     this.scrollContainer.removeEventListener('scroll', this.handleScroll);
     this.scrollContainer.removeEventListener('focusin', this.handleSheetFocusChange);
@@ -4700,9 +4711,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // is never mentioned again and the old value would show through.
       this.cellDataByKey.clear();
       this.viewportAnnounced = false;
-      // The bounds it holds are gone too — re-announce even if they come
-      // out identical.
-      this.announcedBounds = '';
+      // What it was asked to load is gone too: load again, even the same
+      // range.
+      this.viewportLoader.reset();
       this.scheduleRender();
     }
   }
@@ -5797,6 +5808,17 @@ export function visibleCellSlots(
 /** Two popup-button states describe the same button when they share a cell. */
 function samePopupButtonCell(a: PopupButtonState, b: PopupButtonState): boolean {
   return a.col === b.col && a.row === b.row;
+}
+
+/**
+ * Whether Flow is waiting for the server to answer the application the
+ * host belongs to. False when there is no Flow client to ask.
+ */
+function flowRequestInFlight(host: HTMLElement): boolean {
+  const clients = (
+    window as unknown as { Vaadin?: { Flow?: { clients?: Record<string, { isActive?: () => boolean }> } } }
+  ).Vaadin?.Flow?.clients;
+  return clients?.[overlayComponentAppId(host)]?.isActive?.() === true;
 }
 
 export function overlayComponentAppId(host: HTMLElement): string {
