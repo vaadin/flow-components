@@ -1460,17 +1460,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.pointWithMouse(col, row, shiftKey, ctrlKey || metaKey, source);
       return;
     }
-    this.dragging = true;
-    this.extendCol = col;
-    this.extendRow = row;
     if (ctrlKey || metaKey) {
       // Ctrl/Cmd-mousedown must leave the selection untouched. The
       // click that follows adds this cell as a further range, and it
       // needs the current active range to push aside — replacing the
       // selection here would wipe exactly what the Ctrl-click is meant
       // to keep. mousedown always precedes click for a real pointer.
+      // Nor does it start a drag, as in the GWT client: a pointer that
+      // drifted into the next cell before the button came up replaced
+      // every range picked out with Ctrl with one rectangle.
       return;
     }
+    this.dragging = true;
+    this.extendCol = col;
+    this.extendRow = row;
     if (shiftKey) {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
@@ -1527,11 +1530,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const { col, row } = e.detail;
     // Same as shift-arrow: keep activeCell as anchor, move
     // the extend corner.
+    // The ranges picked out before stay: a plain press has already let
+    // them go, and a Shift-press drags out the range it extends.
     const anchor = this.selection.activeCell;
     this.selection = {
       activeCell: anchor,
       activeRange: this.rangeTo(anchor, col, row),
-      auxRanges: []
+      auxRanges: this.selection.auxRanges
     };
     this.extendCol = col;
     this.extendRow = row;

@@ -162,6 +162,46 @@ describe('Spreadsheet non-coherent selection — Ctrl-click', () => {
     expect(selection.auxRanges).to.have.length(0);
   });
 
+  it('keeps the earlier ranges when the pointer drifts across a cell edge during a Ctrl-click', () => {
+    // A hand is rarely still: the pointer often crosses into the next cell
+    // between pressing and letting go. The press started a range drag, the
+    // drift replaced every range picked out with Ctrl with one rectangle,
+    // and the server was told to discard them. The GWT client started no
+    // drag on a Ctrl, Cmd or Shift press.
+    clickCell(ctx.sheet, 2, 2);
+    clickCell(ctx.sheet, 4, 4, { ctrlKey: true });
+    ctx.events.length = 0;
+
+    const grid = ctx.sheet.getCellGrid();
+    const detail = { col: 6, row: 6, shiftKey: false, ctrlKey: true, metaKey: false, altKey: false };
+    grid.dispatchEvent(new CustomEvent('cell-mousedown', { detail, bubbles: true, composed: true }));
+    grid.dispatchEvent(new CustomEvent('cell-mouseover', { detail: { col: 7, row: 6 }, bubbles: true, composed: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    grid.dispatchEvent(new CustomEvent('cell-click', { detail, bubbles: true, composed: true }));
+
+    const selection = ctx.sheet.getSelection();
+    expect(isCellSelected(selection, 2, 2), 'B2').to.be.true;
+    expect(isCellSelected(selection, 4, 4), 'D4').to.be.true;
+    expect(isCellSelected(selection, 6, 6), 'F6').to.be.true;
+    expect(isCellSelected(selection, 7, 6), 'G6').to.be.false;
+    expect(ctx.events.map((e) => e.type)).to.eql(['cellAddedToSelectionAndSelected']);
+  });
+
+  it('keeps the earlier ranges while a Shift-press drags its range out', () => {
+    clickCell(ctx.sheet, 2, 2);
+    clickCell(ctx.sheet, 4, 4, { ctrlKey: true });
+
+    const grid = ctx.sheet.getCellGrid();
+    const detail = { col: 5, row: 5, shiftKey: true, ctrlKey: false, metaKey: false, altKey: false };
+    grid.dispatchEvent(new CustomEvent('cell-mousedown', { detail, bubbles: true, composed: true }));
+    grid.dispatchEvent(new CustomEvent('cell-mouseover', { detail: { col: 6, row: 6 }, bubbles: true, composed: true }));
+
+    const selection = ctx.sheet.getSelection();
+    expect(isCellSelected(selection, 2, 2), 'B2').to.be.true;
+    expect(isCellSelected(selection, 6, 6), 'F6').to.be.true;
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+  });
+
   it('marks the cells of an earlier range as cell-range after a Ctrl-click', () => {
     clickCell(ctx.sheet, 2, 1);
     clickCell(ctx.sheet, 2, 3, { shiftKey: true });
