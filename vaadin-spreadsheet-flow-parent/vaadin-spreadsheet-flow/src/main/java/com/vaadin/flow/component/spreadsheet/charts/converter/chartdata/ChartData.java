@@ -58,12 +58,16 @@ public class ChartData {
         public double angle;
     }
 
-    public record ColorProperties(int red, int green, int blue,
-            double opacity) {
+    public static class ColorProperties {
         public ColorProperties(int[] rgbUnsignedWithLum, double opacity) {
-            this(rgbUnsignedWithLum[0], rgbUnsignedWithLum[1],
-                    rgbUnsignedWithLum[2], opacity);
+            this.opacity = opacity;
+            red = rgbUnsignedWithLum[0];
+            green = rgbUnsignedWithLum[1];
+            blue = rgbUnsignedWithLum[2];
         }
+
+        public int red, green, blue;
+        public double opacity;
     }
 
     public static class AxisProperties {

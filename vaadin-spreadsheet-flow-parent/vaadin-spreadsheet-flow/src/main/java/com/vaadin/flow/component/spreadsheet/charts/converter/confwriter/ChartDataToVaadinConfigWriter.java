@@ -244,8 +244,8 @@ public class ChartDataToVaadinConfigWriter {
             return defaultColor;
         }
 
-        return new SolidColor(colorProp.red(), colorProp.green(),
-                colorProp.blue(), colorProp.opacity());
+        return new SolidColor(colorProp.red, colorProp.green, colorProp.blue,
+                colorProp.opacity);
     }
 
     private void updateXAxis(XAxis axis, AxisProperties axisProperties) {
