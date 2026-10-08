@@ -82,6 +82,12 @@ export class SpreadsheetCellGrid extends LitElement {
         position: relative;
       }
 
+      /* A row of cells, keyed as one: scrolling a row out of view takes
+       its cells with it in one removal. No box of its own. */
+      .cell-row {
+        display: contents;
+      }
+
       .cell {
         position: absolute;
         box-sizing: border-box;
@@ -1839,8 +1845,9 @@ function renderQuadrant(opts: QuadrantRenderOpts): DirectiveResult {
   const { cellData, selection } = state;
 
   const covered = coveredByMergeCoords(state.mergedRegions, colStart, colEnd, rowStart, rowEnd);
-  const cells: Array<{ key: string; template: TemplateResult }> = [];
+  const rows: Array<{ row: number; cells: Array<{ key: string; template: TemplateResult }> }> = [];
   for (let row = rowStart; row <= rowEnd; row++) {
+    const cells: Array<{ key: string; template: TemplateResult }> = [];
     const top = getRowTop(row);
     const height = getRowHeight(row);
     for (let col = colStart; col <= colEnd; col++) {
@@ -1961,15 +1968,26 @@ function renderQuadrant(opts: QuadrantRenderOpts): DirectiveResult {
         >`
       });
     }
+    rows.push({ row, cells });
   }
-  // Keyed by cell, so a cell keeps its element as the sheet scrolls. Cells
-  // are placed in sheet coordinates, so one still in view needs no change
-  // at all; matched by position instead, every cell was rewritten - its
-  // class, place and text - and restyled on every scroll step.
+  // Keyed by row, and each row's cells by cell, so a cell keeps its element
+  // as the sheet scrolls: cells are placed in sheet coordinates, and one
+  // still in view needs no change at all. A row scrolled out of view goes in
+  // one removal. Keyed by cell alone, each step removed every cell of every
+  // row that left the view one by one, which took most of a frame while
+  // scrolling fast; matched by position instead, every cell was rewritten -
+  // its class, place and text - and restyled on every step.
   return repeat(
-    cells,
-    (cell) => cell.key,
-    (cell) => cell.template
+    rows,
+    (group) => group.row,
+    (group) =>
+      html`<div class="cell-row"
+        >${repeat(
+          group.cells,
+          (cell) => cell.key,
+          (cell) => cell.template
+        )}</div
+      >`
   );
 }
 

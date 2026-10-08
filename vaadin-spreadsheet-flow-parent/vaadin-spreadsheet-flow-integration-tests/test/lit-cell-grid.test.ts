@@ -4203,3 +4203,78 @@ describe('SpreadsheetCellGrid — the cells it draws', () => {
     });
 });
 
+
+describe('SpreadsheetCellGrid — the cells as the sheet scrolls', () => {
+    /** Rows `first` to `first + 3` of two 50px columns, 20px rows. */
+    function rowsFrom(first: number): CellGridRenderState {
+        const cells = new Map<string, CellData>();
+        for (let row = first; row <= first + 3; row++) {
+            for (let col = 1; col <= 2; col++) {
+                cells.set(`col${col} row${row}`, makeCellData(col, row, `${col},${row}`));
+            }
+        }
+        return {
+            ...emptyCellGridRenderState(),
+            viewport: {
+                firstColumnIndex: 1,
+                firstColumnPosition: 0,
+                lastColumnIndex: 2,
+                lastColumnPosition: 100,
+                firstRowIndex: first,
+                firstRowPosition: (first - 1) * 20,
+                lastRowIndex: first + 3,
+                lastRowPosition: (first + 3) * 20,
+            },
+            cellData: cells,
+            colX: [0, 50],
+            rowY: [0, 1, 2, 3].map((i) => (first - 1 + i) * 20),
+            colWidths: [50, 50],
+            rowHeights: [20, 20, 20, 20],
+        };
+    }
+
+    function cell(el: SpreadsheetCellGrid, col: number, row: number): HTMLElement | null {
+        return el.shadowRoot!.querySelector<HTMLElement>(`.cell.col${col}.row${row}`);
+    }
+
+    it('keeps the element of a cell still in view', async () => {
+        const el = await attachWithState(rowsFrom(1));
+        const before = cell(el, 2, 3);
+
+        el.renderState = rowsFrom(2);
+        await el.updateComplete;
+
+        expect(cell(el, 2, 3) === before).to.be.true;
+        expect(cell(el, 1, 1)).to.be.null;
+        expect(cell(el, 1, 5)!.textContent!.trim()).to.equal('1,5');
+
+        cleanup(el);
+    });
+
+    it('draws each row\'s cells together, so a row that leaves the view goes at once', async () => {
+        // One removal per row rather than per cell: removing every cell of
+        // the rows that left the view one by one took most of a frame while
+        // scrolling fast.
+        const el = await attachWithState(rowsFrom(1));
+
+        const group = cell(el, 1, 3)!.parentElement!;
+        expect(group.classList.contains('cell-row')).to.be.true;
+        expect(cell(el, 2, 3)!.parentElement === group).to.be.true;
+        expect(group.querySelectorAll('.cell')).to.have.length(2);
+
+        cleanup(el);
+    });
+
+    it('lays the cells out as though the row group were not there', async () => {
+        const el = await attachWithState(rowsFrom(1));
+
+        const group = cell(el, 1, 3)!.parentElement!;
+        expect(getComputedStyle(group).display).to.equal('contents');
+        const grid = el.getBoundingClientRect();
+        const box = cell(el, 2, 3)!.getBoundingClientRect();
+        expect(Math.round(box.left - grid.left)).to.equal(50);
+        expect(Math.round(box.top - grid.top)).to.equal(40);
+
+        cleanup(el);
+    });
+});
