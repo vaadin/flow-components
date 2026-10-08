@@ -59,11 +59,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     /**
-     * Slice 178: deep-search through the spreadsheet's nested shadow roots (the
-     * Lit cell-grid, column-header, row-header, formula-bar, and sheet-tabs
-     * each own their own shadow root). Maps the legacy GWT selectors to their
-     * Lit-DOM equivalents on the fly so the existing IT call sites don't need
-     * bulk rewriting.
+     * Finds an element anywhere in the spreadsheet's nested shadow roots: the
+     * cell grid, the column and row headers, the formula bar and the sheet tabs
+     * each have their own. Selectors written for the GWT client's DOM are
+     * translated to the current DOM first. Throws
+     * {@link org.openqa.selenium.NoSuchElementException} if nothing matches.
      */
     protected WebElement findElementInShadowRoot(By by) {
         WebElement el = findInLitShadowRoots(toCssSelector(by));
@@ -82,7 +82,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
      * Convert a Selenium {@link By} locator to its equivalent CSS selector
      * string. Selenium's {@code By.toString()} returns
      * {@code "By.cssSelector: <sel>"} or {@code "By.className: <name>"};
-     * normalize both shapes to a plain CSS selector. Slice 178.
+     * normalize both shapes to a plain CSS selector.
      */
     private String toCssSelector(By by) {
         String raw = by.toString();
@@ -99,8 +99,9 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     /**
-     * Translate a legacy GWT-era CSS selector to its Lit-DOM equivalent.
-     * Returns the input unchanged when no translation applies. Slice 178.
+     * Translate a CSS selector written for the GWT client's DOM to its
+     * equivalent in the current DOM. Returns the input unchanged when no
+     * translation applies.
      */
     private String translateSelector(String selector) {
         // Headers — GWT used .ch / .rh class on header cells; Lit
@@ -426,15 +427,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
         this.spreadsheet = spreadsheet;
-        // Slice 178 gave the sheet its initial focus by clicking the first
-        // sheet tab, standing in for the legacy `.sheet-tabsheet` click.
-        // That is not a focus gesture: it selects a sheet. On a workbook
-        // whose active sheet is not the first one it switched sheets behind
-        // the test, and even on the first one the server answered with a
-        // full `reloadActiveSheetData`, discarding the overlays, comments,
-        // hyperlinks and popup buttons the load had just delivered. Focus
-        // the scroll container directly instead — that is the element the
-        // keyboard handlers live on (tabindex=0, slice 147).
+        // Focus the scroll container, which holds the keyboard handlers,
+        // rather than clicking a sheet tab. Clicking a tab is not a focus
+        // gesture: it selects a sheet. On a workbook whose active sheet is
+        // not the first one it would switch sheets behind the test, and even
+        // on the first one the server answers with a full
+        // `reloadActiveSheetData`, discarding the overlays, comments,
+        // hyperlinks and popup buttons the load has just delivered.
         focusSheet();
     }
 
@@ -901,17 +900,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     // Context menu helpers
 
     /**
-     * Find a context-menu item by its caption. The menu lives in the
-     * spreadsheet's nested shadow roots, and there is no TestBench query for
-     * "element whose text is X", so this walks the roots in one script rather
-     * than paying a round-trip per candidate.
-     */
-    /**
      * Waits until the context menu is up and has items in it.
      * <p>
-     * The Lit client draws the menu inside its own shadow root; GWT put a
-     * {@code .v-contextmenu} div in the document body, which nothing creates
-     * any more.
+     * The menu is drawn inside the spreadsheet's shadow root; the GWT client
+     * put a {@code .v-contextmenu} div in the document body, which nothing
+     * creates any more.
      */
     public void waitForContextMenu() {
         waitUntil(webDriver -> Boolean.TRUE.equals(executeScript("""
@@ -923,6 +916,12 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 """, getSpreadsheet())));
     }
 
+    /**
+     * Find a context-menu item by its caption. The menu lives in the
+     * spreadsheet's nested shadow roots, and there is no TestBench query for
+     * "element whose text is X", so this walks the roots in one script rather
+     * than paying a round-trip per candidate.
+     */
     private WebElement findMenuItem(String caption) {
         return (WebElement) ((org.openqa.selenium.JavascriptExecutor) getDriver())
                 .executeScript("""

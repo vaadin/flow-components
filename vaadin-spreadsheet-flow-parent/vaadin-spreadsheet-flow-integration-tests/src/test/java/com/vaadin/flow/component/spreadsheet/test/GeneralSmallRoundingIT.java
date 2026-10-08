@@ -89,7 +89,6 @@ public class GeneralSmallRoundingIT extends AbstractSpreadsheetIT {
         String cellAfterResize = getSpreadsheet().getCellAt(TARGET_CELL)
                 .getValue();
 
-        // TODO: fix shortening the number in Finnish locale
         Assert.assertTrue("Number not shortened",
                 cellAfterResize.length() < cellBeforeResize.length());
         Assert.assertFalse(cellAfterResize.contains("."));
