@@ -113,3 +113,66 @@ describe('SpreadsheetFormulaBar — laid out as the GWT client laid it out', () 
         el.remove();
     });
 });
+
+/**
+ * The address in the browser's own font for text fields, as the GWT
+ * client's was: its stylesheet gave the field a size but never a font, so
+ * Chrome showed Arial there, beside a formula in Helvetica. The Lit bar
+ * wrote both in Helvetica, the same size but different letters.
+ */
+describe('SpreadsheetFormulaBar — the address in the browser\'s font for text fields', () => {
+    /** The font the browser gives a text field no stylesheet has touched. */
+    function browserFieldFont(): string {
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+        const input = document.createElement('input');
+        host.attachShadow({ mode: 'open' }).appendChild(input);
+        const family = getComputedStyle(input).fontFamily;
+        host.remove();
+        return family;
+    }
+
+    async function mount(wrapperStyle = ''): Promise<{ el: SpreadsheetFormulaBar; cleanup: () => void }> {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = wrapperStyle;
+        const el = document.createElement('vaadin-spreadsheet-internal-formula-bar') as SpreadsheetFormulaBar;
+        el.renderState = { address: 'A1', formula: '=A1', namedRanges: [] };
+        wrapper.appendChild(el);
+        document.body.appendChild(wrapper);
+        await el.updateComplete;
+        return { el, cleanup: () => wrapper.remove() };
+    }
+
+    function font(el: SpreadsheetFormulaBar, selector: string): string {
+        const style = getComputedStyle(el.shadowRoot!.querySelector(selector)!);
+        return `${style.fontFamily} ${style.fontSize}`;
+    }
+
+    it('writes the address in the browser\'s font, at the bar\'s size', async () => {
+        const { el, cleanup } = await mount();
+        try {
+            expect(font(el, '.address')).to.equal(`${browserFieldFont()} 14px`);
+        } finally {
+            cleanup();
+        }
+    });
+
+    it('writes the formula in Helvetica', async () => {
+        const { el, cleanup } = await mount();
+        try {
+            expect(font(el, '.formula')).to.equal('Helvetica 14px');
+        } finally {
+            cleanup();
+        }
+    });
+
+    it('writes both in a font set for the bar', async () => {
+        const { el, cleanup } = await mount('--vaadin-spreadsheet-formulabar-font: Courier');
+        try {
+            expect(font(el, '.address')).to.equal('Courier 14px');
+            expect(font(el, '.formula')).to.equal('Courier 14px');
+        } finally {
+            cleanup();
+        }
+    });
+});

@@ -822,6 +822,19 @@ describe('Lumo theme — the formula bar', () => {
         cleanup();
     });
 
+    it('writes both fields in Lumo\'s font, as the GWT client did', async () => {
+        // Without the theme the address is in the browser's font for text
+        // fields; Lumo's font reaches it too.
+        const { el, cleanup } = await bar();
+
+        for (const input of Array.from(el.shadowRoot!.querySelectorAll('input'))) {
+            const style = getComputedStyle(input);
+            expect(`${style.fontFamily} ${style.fontSize}`).to.equal('monospace 13px');
+        }
+
+        cleanup();
+    });
+
     it('indents both fields and tints the address panel', async () => {
         const { el, cleanup } = await bar();
 

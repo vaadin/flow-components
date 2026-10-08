@@ -122,9 +122,14 @@ export class SpreadsheetFormulaBar extends LitElement {
       background: #fafafa;
     }
 
+    /* The GWT client gave the address a size but never a font, so the
+       browser's own font for text fields showed there - Arial in Chrome -
+       beside a formula in Helvetica. A font set for the bar, by an
+       application or by the theme, still writes both. */
     .address {
       width: 100%;
       text-align: center;
+      font-family: var(--vaadin-spreadsheet-formulabar-font, var(--_vaadin-spreadsheet-formulabar-font, revert));
     }
 
     .formula {
