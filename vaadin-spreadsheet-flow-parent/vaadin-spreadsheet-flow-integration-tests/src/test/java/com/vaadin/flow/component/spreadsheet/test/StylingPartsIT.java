@@ -20,8 +20,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-spreadsheet")
 public class StylingPartsIT extends AbstractSpreadsheetIT {
@@ -132,10 +134,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         var spreadsheet = getSpreadsheet();
         var firstCell = spreadsheet.getCellAt("A1");
 
-        // The indicator is a sibling of the cell rather than a child, so
-        // it is found through the sheet rather than under the cell.
-        var commentTriangle = findElementInShadowRoot(
-                By.cssSelector("[part~=\"comment-triangle\"]"));
+        var commentTriangle = getCellMarker(firstCell, "comment-triangle");
         assertPartEquals(commentTriangle, "comment-triangle");
     }
 
@@ -159,8 +158,7 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
         loadTestFixture(TestFixtures.SpreadsheetTable);
         var spreadsheet = getSpreadsheet();
         var popupButtonCell = spreadsheet.getCellAt("B2");
-        var popupButton = findElementInShadowRoot(
-                By.cssSelector("[part~=\"popup-button\"]"));
+        var popupButton = getCellMarker(popupButtonCell, "popup-button");
         assertPartEquals(popupButton, "popup-button");
     }
 
@@ -211,6 +209,20 @@ public class StylingPartsIT extends AbstractSpreadsheetIT {
                 SCROLL_TABS_FORWARD_BUTTON);
         assertPartEquals(scrollTabEnd, SCROLL_TABS_BUTTON_DISABLED,
                 SCROLL_TABS_TO_END_BUTTON);
+    }
+
+    /**
+     * Gets the element with the given part that marks the given cell, such as
+     * its comment triangle. The markers are drawn next to the cell they belong
+     * to rather than inside it, and carry the cell's coordinates.
+     */
+    private TestBenchElement getCellMarker(SheetCellElement cell, String part) {
+        return getSpreadsheet().$("vaadin-spreadsheet-internal-cell-grid")
+                .single().$(TestBenchElement.class)
+                .withAttributeContainingWord("part", part)
+                .withAttribute("data-col", cell.getDomAttribute("data-col"))
+                .withAttribute("data-row", cell.getDomAttribute("data-row"))
+                .waitForSingle();
     }
 
     /**

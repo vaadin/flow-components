@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-spreadsheet")
@@ -19,6 +20,7 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
 
     private static final int WINDOW_WIDTH = 1280;
     private static final int WINDOW_HEIGHT = 768;
+    private static final int COLUMN_D = 4;
 
     @Before
     public void init() {
@@ -37,14 +39,9 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         var d2 = spreadsheet.getCellAt("D2");
         Assert.assertEquals(cellText, d2.getValue());
 
-        // Three columns are frozen, so the merge that starts at D sits
-        // past them rather than at the sheet's left edge. The GWT
-        // client gave each pane its own origin and this was "0px"
-        // there; the Lit client places every quadrant in the sheet's
-        // own coordinates, so the position to hold on to is the one
-        // the cell starts at.
-        String left = d2.getCssValue("left");
-        Assert.assertNotEquals("0px", left);
+        // Columns A to C are frozen, and the merge starts at the first
+        // column past them.
+        assertStartsAtColumn(d2, COLUMN_D);
 
         testBench().resizeViewPortTo(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
@@ -57,8 +54,7 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         d2 = spreadsheet.getCellAt("D2");
         Assert.assertEquals(cellText, d2.getValue());
 
-        Assert.assertEquals("Merged cell moved when the window resized", left,
-                d2.getCssValue("left"));
+        assertStartsAtColumn(d2, COLUMN_D);
     }
 
     @Test
@@ -87,6 +83,17 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(cellText, e8.getValue());
 
         Assert.assertEquals(originalLeft, e8.getCssValue("left"));
+    }
+
+    /**
+     * Asserts that the left edge of the given cell is where the header of the
+     * given column starts.
+     */
+    private void assertStartsAtColumn(SheetCellElement cell, int column) {
+        Assert.assertEquals(
+                "The cell should start where column " + column + " starts",
+                getSpreadsheet().getColumnHeader(column).getRect().getX(),
+                cell.getRect().getX());
     }
 
 }

@@ -31,6 +31,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
     private static final double CHART1_OFFSET_LEFT = 28.6667;
     private static final int CHART1_WIDTH = 397;
     private static final int CHART1_HEIGHT = 288;
+    private static final int CHART_MINIMIZED_WIDTH = 0;
+    private static final int CHART_MINIMIZED_HEIGHT = 0;
 
     @Before
     public void init() {
@@ -78,14 +80,13 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
         minimizeButton.click();
 
-        // Minimized, the chart gives its space back: the server sends a
-        // size of nothing. The GWT client still measured 28x16 there,
-        // which was its padding - the offset it drew as padding rather
-        // than as a position - and not a size anybody chose. What
-        // matters is that the button to bring the chart back is still
-        // there to click.
-        Assert.assertEquals("Minimized overlay should take no space", 0,
-                getOverlayElement(CHART1_CELL).getSize().width);
+        // Minimized, the chart gives its space back: the overlay stays
+        // where it was, but takes no room in either direction. The GWT
+        // client measured 28x16 there, which was the offset it drew as
+        // padding. The button to bring the chart back is still there to
+        // click.
+        assertOverlayProperties(CHART1_CELL, CHART_MINIMIZED_WIDTH,
+                CHART_MINIMIZED_HEIGHT, CHART1_OFFSET_LEFT);
         Assert.assertTrue("Restore button should still be there",
                 minimizeButton.isDisplayed());
 
