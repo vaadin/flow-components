@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -95,15 +96,8 @@ final class FontStyleComposer implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("font-family: var(--default-font-family);");
         sb.append("--default-font-family:");
-        String fontName = font.getFontName();
-        if (fontName.contains(" ")) {
-            sb.append("\"");
-            sb.append(fontName);
-            sb.append("\",");
-        } else {
-            sb.append(fontName);
-            sb.append(",");
-        }
+        sb.append(cssFontName(font.getFontName()));
+        sb.append(",");
         if (font instanceof XSSFFont xssfFont) {
             FontFamily family = FontFamily.valueOf(xssfFont.getFamily());
             switch (family) {
@@ -130,5 +124,35 @@ final class FontStyleComposer implements Serializable {
         }
         sb.append("Helvetica,arial;");
         return sb.toString();
+    }
+
+    /**
+     * A plain font name: letters and digits of any script, spaces, hyphens and
+     * underscores.
+     */
+    private static final Pattern PLAIN_FONT_NAME = Pattern
+            .compile("[\\p{L}\\p{N} _-]+");
+
+    /**
+     * A font's name as CSS. A workbook names its own fonts, and the client puts
+     * the rule the name is written into in a style block. A plain name goes in
+     * as it is, quoted when it has a space. Any other is quoted, with what
+     * could end the string or the style block escaped, so that it cannot add
+     * rules or markup of its own.
+     */
+    static String cssFontName(String name) {
+        if (PLAIN_FONT_NAME.matcher(name).matches()) {
+            return name.contains(" ") ? "\"" + name + "\"" : name;
+        }
+        StringBuilder quoted = new StringBuilder("\"");
+        name.codePoints().forEach(c -> {
+            if (c < 0x20 || c == 0x7f || c == '"' || c == '\\' || c == '<'
+                    || c == '>') {
+                quoted.append('\\').append(Integer.toHexString(c)).append(' ');
+            } else {
+                quoted.appendCodePoint(c);
+            }
+        });
+        return quoted.append('"').toString();
     }
 }

@@ -198,6 +198,48 @@ class FontStyleComposerTest {
     }
 
     @Test
+    void styleFontFamily_keepsMarkupInANameText() {
+        // A workbook names its own fonts, and the client puts the rule in a
+        // style block. Written raw, this name closed the block and added an
+        // element whose script ran, in the Lit client.
+        Font font = workbook.createFont();
+        font.setFontName("X</style><img src=x onerror=\"alert(1)\">");
+
+        String css = FontStyleComposer.styleFontFamily(font);
+
+        assertTrue(css.contains(
+                "--default-font-family:\"X\\3c /style\\3e \\3c img src=x onerror=\\22 alert(1)\\22 \\3e \","),
+                "The name should be a quoted, escaped string; got: " + css);
+        assertFalse(css.contains("<") || css.contains(">"),
+                "No markup should be left; got: " + css);
+    }
+
+    @Test
+    void styleFontFamily_quotesANameThatWouldEndTheRule() {
+        // Unquoted, this name ended the declaration and the rule and added a
+        // rule of its own; quoted, it is just a name.
+        Font font = workbook.createFont();
+        font.setFontName("X;}.cell{color:red}");
+
+        String css = FontStyleComposer.styleFontFamily(font);
+
+        assertTrue(
+                css.contains("--default-font-family:\"X;}.cell{color:red}\","),
+                "The name should be quoted; got: " + css);
+    }
+
+    @Test
+    void styleFontFamily_keepsAPlainNameInAnyScriptAsItIs() {
+        Font font = workbook.createFont();
+        font.setFontName("游ゴシック");
+
+        String css = FontStyleComposer.styleFontFamily(font);
+
+        assertTrue(css.contains("--default-font-family:游ゴシック,"),
+                "A plain name should not be quoted; got: " + css);
+    }
+
+    @Test
     void styleFontFamily_xssfRoman_emitsRomanBeforeFallbackStack() {
         // Pin the FULL CSS shape for ROMAN — including ordering. A
         // regression that emitted "roman" AFTER the fallback stack
