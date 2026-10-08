@@ -112,6 +112,13 @@ public class SpreadsheetEventListener
                 SpreadsheetEventListener::toInt);
     }
 
+    /** Leaves out the entries whose index is outside the given range. */
+    private static <V> HashMap<Integer, V> keysWithin(HashMap<Integer, V> m,
+            int firstIndex, int lastIndex) {
+        m.keySet().removeIf(index -> index < firstIndex || index > lastIndex);
+        return m;
+    }
+
     /** Smallest key of the map, or 0 when it is empty. */
     private static int minKey(Map<Integer, ?> m) {
         return m.keySet().stream().mapToInt(Integer::intValue).min().orElse(0);
@@ -211,15 +218,23 @@ public class SpreadsheetEventListener
             handler.linkCellClicked(toInt(pars, "row"), toInt(pars, "column"));
         } else if ("rowsResized".equals(type)) {
             // The client reports which rows changed and their new heights;
-            // the affected span doubles as the range to refresh.
-            HashMap<Integer, Float> heights = toFloatMap(pars, "rowIndexes",
-                    "newHeights");
-            handler.rowsResized(heights, minKey(heights), 1, maxKey(heights),
-                    1);
+            // the affected span doubles as the range to refresh. Rows are
+            // 1-based, and only the rows of the sheet can be resized.
+            HashMap<Integer, Float> heights = keysWithin(
+                    toFloatMap(pars, "rowIndexes", "newHeights"), 1,
+                    event.getSource().getRows());
+            if (!heights.isEmpty()) {
+                handler.rowsResized(heights, minKey(heights), 1,
+                        maxKey(heights), 1);
+            }
         } else if ("columnResized".equals(type)) {
-            HashMap<Integer, Integer> widths = toIntMap(pars, "colIndexes",
-                    "newWidths");
-            handler.columnResized(widths, 1, minKey(widths), 1, maxKey(widths));
+            HashMap<Integer, Integer> widths = keysWithin(
+                    toIntMap(pars, "colIndexes", "newWidths"), 1,
+                    event.getSource().getColumns());
+            if (!widths.isEmpty()) {
+                handler.columnResized(widths, 1, minKey(widths), 1,
+                        maxKey(widths));
+            }
         } else if ("onRowAutofit".equals(type)) {
             handler.onRowAutofit(toInt(pars, "rowIndex"));
         } else if ("onColumnAutofit".equals(type)) {
@@ -229,8 +244,10 @@ public class SpreadsheetEventListener
         } else if ("onRedo".equals(type)) {
             handler.onRedo();
         } else if ("setCellStyleWidthRatios".equals(type)) {
-            handler.setCellStyleWidthRatios(
-                    toFloatMap(pars, "styleIndexes", "ratios"));
+            // Style indexes are the workbook's own, 0-based.
+            handler.setCellStyleWidthRatios(keysWithin(
+                    toFloatMap(pars, "styleIndexes", "ratios"), 0,
+                    event.getSource().getWorkbook().getNumCellStyles() - 1));
         } else if ("protectedCellWriteAttempted".equals(type)) {
             handler.protectedCellWriteAttempted();
         } else if ("onPaste".equals(type)) {

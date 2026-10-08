@@ -9,11 +9,14 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,18 +40,22 @@ public class SpreadsheetEventListenerTest {
 
     private SpreadsheetHandlerImpl handler;
     private SpreadsheetEventListener listener;
+    // The sheet the events come from: 200 rows, 52 columns and one cell
+    // style. Resize and style indexes are checked against it.
+    private Spreadsheet source;
 
     @BeforeEach
     public void setup() {
         handler = mock(SpreadsheetHandlerImpl.class);
         listener = new SpreadsheetEventListener(handler);
+        source = new Spreadsheet();
     }
 
     private void fire(String type, String json) {
         ObjectNode data = (ObjectNode) JsonMapper.builder().build()
                 .readTree(json);
-        listener.onComponentEvent(new Spreadsheet.SpreadsheetEvent(
-                mock(Spreadsheet.class), true, type, data));
+        listener.onComponentEvent(
+                new Spreadsheet.SpreadsheetEvent(source, true, type, data));
     }
 
     @Test
@@ -266,5 +273,48 @@ public class SpreadsheetEventListenerTest {
         verify(handler).rowsResized(sizes.capture(), eq(3), eq(1), eq(3),
                 eq(1));
         assertEquals(Map.of(3, 20f), sizes.getValue());
+    }
+
+    @Test
+    public void rowsResized_indexesOutsideTheSheetAreLeftOut() {
+        fire("rowsResized",
+                "{\"rowIndexes\":[-1,0,3,201],\"newHeights\":[20,20,20,20]}");
+
+        ArgumentCaptor<Map<Integer, Float>> sizes = ArgumentCaptor
+                .forClass(Map.class);
+        verify(handler).rowsResized(sizes.capture(), eq(3), eq(1), eq(3),
+                eq(1));
+        assertEquals(Map.of(3, 20f), sizes.getValue());
+    }
+
+    @Test
+    public void columnResized_indexesOutsideTheSheetAreLeftOut() {
+        fire("columnResized",
+                "{\"colIndexes\":[-1,0,4,53],\"newWidths\":[80,80,80,80]}");
+
+        ArgumentCaptor<Map<Integer, Integer>> sizes = ArgumentCaptor
+                .forClass(Map.class);
+        verify(handler).columnResized(sizes.capture(), eq(1), eq(4), eq(1),
+                eq(4));
+        assertEquals(Map.of(4, 80), sizes.getValue());
+    }
+
+    @Test
+    public void resizeWithEveryIndexOutsideTheSheet_doesNotReachTheHandler() {
+        fire("rowsResized", "{\"rowIndexes\":[0,201],\"newHeights\":[20,20]}");
+        fire("columnResized", "{\"colIndexes\":[0,53],\"newWidths\":[80,80]}");
+
+        verify(handler, never()).rowsResized(any(), anyInt(), anyInt(),
+                anyInt(), anyInt());
+        verify(handler, never()).columnResized(any(), anyInt(), anyInt(),
+                anyInt(), anyInt());
+    }
+
+    @Test
+    public void styleWidthRatios_stylesTheWorkbookDoesNotHaveAreLeftOut() {
+        fire("setCellStyleWidthRatios",
+                "{\"styleIndexes\":[-1,0,7],\"ratios\":[7.5,7.5,7.5]}");
+
+        verify(handler).setCellStyleWidthRatios(new HashMap<>(Map.of(0, 7.5f)));
     }
 }

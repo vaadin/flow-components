@@ -1531,6 +1531,9 @@ public class Spreadsheet extends Component
     /**
      * This method is called when the sheet is scrolled. It takes care of
      * sending newly revealed data to the client side.
+     * <p>
+     * A range that reaches outside the sheet is limited to the rows and columns
+     * of the sheet.
      *
      * @param firstRow
      *            Index of first visible row after the scroll, 1-based
@@ -1543,6 +1546,14 @@ public class Spreadsheet extends Component
      */
     protected void onSheetScroll(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
+        // Every cell of this range is loaded below, so it can only cover
+        // cells the sheet has.
+        int maxRow = Math.max(1, getRows());
+        int maxColumn = Math.max(1, getColumns());
+        firstRow = Math.clamp(firstRow, 1, maxRow);
+        lastRow = Math.clamp(lastRow, firstRow, maxRow);
+        firstColumn = Math.clamp(firstColumn, 1, maxColumn);
+        lastColumn = Math.clamp(lastColumn, firstColumn, maxColumn);
         if (reloadCellDataOnNextScroll || viewportBounds.hasChanged(firstRow,
                 lastRow, firstColumn, lastColumn)) {
             viewportBounds.update(firstRow, lastRow, firstColumn, lastColumn);
