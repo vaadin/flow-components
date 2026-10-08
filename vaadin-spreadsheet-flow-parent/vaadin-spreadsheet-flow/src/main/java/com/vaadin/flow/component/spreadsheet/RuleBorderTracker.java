@@ -39,22 +39,17 @@ import com.vaadin.flow.component.spreadsheet.SpreadsheetStyleFactory.BorderStyle
  * </ul>
  *
  * <p>
- * Holds {@link ColorConverter} (the parent's `protected` field) by constructor
- * injection — the converter object stays canonical on
- * {@link ConditionalFormatter} for subclass compatibility.
+ * The colour converter is passed in on each call rather than kept, because
+ * {@link ConditionalFormatter#colorConverter} is a {@code protected} field that
+ * a subclass may assign: border colours then come from the same converter as
+ * font and fill colours.
  */
 final class RuleBorderTracker implements Serializable {
 
     private static final String BORDER_STYLE_DEFAULT = "1pt solid #d6d6d6;";
 
-    private final ColorConverter colorConverter;
-
     private final Map<ConditionalFormatting, Integer> topBorders = new HashMap<ConditionalFormatting, Integer>();
     private final Map<ConditionalFormatting, Integer> leftBorders = new HashMap<ConditionalFormatting, Integer>();
-
-    RuleBorderTracker(ColorConverter colorConverter) {
-        this.colorConverter = colorConverter;
-    }
 
     void clear() {
         topBorders.clear();
@@ -82,11 +77,12 @@ final class RuleBorderTracker implements Serializable {
      * registers any spillover top/left borders into the {@code topBorders} /
      * {@code leftBorders} maps. Returns the next {@code cssIndex} to use (may
      * be advanced by 0, 1, or 2 depending on how many spillover borders the
-     * rule has).
+     * rule has). The border colours come from {@code colorConverter}.
      */
     int addBorderFormatting(ConditionalFormatting cf,
             ConditionalFormattingRule rule, StringBuilder css, int cssIndex,
-            HashMap<Integer, String> conditionalFormattingStyles) {
+            HashMap<Integer, String> conditionalFormattingStyles,
+            ColorConverter colorConverter) {
 
         if (!(rule instanceof XSSFConditionalFormattingRule)) {
             // HSSF not supported

@@ -85,7 +85,7 @@ public class ConditionalFormatter implements Serializable {
         } else {
             colorConverter = new XSSFColorConverter((XSSFWorkbook) workbook);
         }
-        this.borderTracker = new RuleBorderTracker(colorConverter);
+        this.borderTracker = new RuleBorderTracker();
         this.ruleEvaluator = new RuleEvaluator(spreadsheet, this);
     }
 
@@ -213,7 +213,7 @@ public class ConditionalFormatter implements Serializable {
                 }
 
                 cssIndex = borderTracker.addBorderFormatting(cf, rule, css,
-                        cssIndex, conditionalFormattingStyles);
+                        cssIndex, conditionalFormattingStyles, colorConverter);
 
                 conditionalFormattingStyles.put(cssIndex, css.toString());
 

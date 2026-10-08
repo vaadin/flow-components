@@ -71,7 +71,7 @@ class RuleBorderTrackerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        tracker = new RuleBorderTracker(colorConverter);
+        tracker = new RuleBorderTracker();
         lenient().when(xssfRule.getBorderFormatting())
                 .thenReturn(borderFormatting);
         // Default: no border on any side.
@@ -117,7 +117,7 @@ class RuleBorderTrackerTest {
                 .thenReturn(true);
         HashMap<Integer, String> styles = new HashMap<>();
         tracker.addBorderFormatting(cf, xssfRule, new StringBuilder(), 0,
-                styles);
+                styles, colorConverter);
         assertTrue(tracker.hasTopBorder(cf));
         assertTrue(tracker.hasLeftBorder(cf));
 
@@ -134,7 +134,7 @@ class RuleBorderTrackerTest {
                 .thenReturn(true);
         HashMap<Integer, String> styles = new HashMap<>();
         tracker.addBorderFormatting(cf, xssfRule, new StringBuilder(), 42,
-                styles);
+                styles, colorConverter);
 
         assertEquals(42, tracker.getTopBorder(cf));
     }
@@ -150,7 +150,7 @@ class RuleBorderTrackerTest {
         StringBuilder css = new StringBuilder();
 
         int returned = tracker.addBorderFormatting(cf, plainRule, css, 7,
-                styles);
+                styles, colorConverter);
 
         assertEquals(7, returned);
         assertEquals(0, css.length(), "CSS untouched");
@@ -163,8 +163,8 @@ class RuleBorderTrackerTest {
         HashMap<Integer, String> styles = new HashMap<>();
         StringBuilder css = new StringBuilder();
 
-        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 5,
-                styles);
+        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 5, styles,
+                colorConverter);
 
         assertEquals(5, returned);
         assertFalse(tracker.hasTopBorder(cf));
@@ -182,8 +182,8 @@ class RuleBorderTrackerTest {
         StringBuilder css = new StringBuilder();
         HashMap<Integer, String> styles = new HashMap<>();
 
-        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 0,
-                styles);
+        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 0, styles,
+                colorConverter);
 
         assertTrue(css.toString().startsWith("border-right:"));
         assertEquals(0, returned, "cssIndex unchanged for right/bottom");
@@ -196,8 +196,8 @@ class RuleBorderTrackerTest {
         StringBuilder css = new StringBuilder();
         HashMap<Integer, String> styles = new HashMap<>();
 
-        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 0,
-                styles);
+        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 0, styles,
+                colorConverter);
 
         assertTrue(css.toString().contains("border-bottom:"));
         assertEquals(0, returned);
@@ -216,7 +216,7 @@ class RuleBorderTrackerTest {
         HashMap<Integer, String> styles = new HashMap<>();
 
         int returned = tracker.addBorderFormatting(cf, xssfRule, css, 10,
-                styles);
+                styles, colorConverter);
 
         assertEquals(11, returned);
         assertTrue(tracker.hasTopBorder(cf));
@@ -236,7 +236,7 @@ class RuleBorderTrackerTest {
         HashMap<Integer, String> styles = new HashMap<>();
 
         int returned = tracker.addBorderFormatting(cf, xssfRule, css, 10,
-                styles);
+                styles, colorConverter);
 
         assertEquals(11, returned);
         assertTrue(tracker.hasLeftBorder(cf));
@@ -257,8 +257,8 @@ class RuleBorderTrackerTest {
         StringBuilder css = new StringBuilder();
         HashMap<Integer, String> styles = new HashMap<>();
 
-        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 5,
-                styles);
+        int returned = tracker.addBorderFormatting(cf, xssfRule, css, 5, styles,
+                colorConverter);
 
         assertEquals(7, returned);
         assertEquals(5, tracker.getTopBorder(cf));
@@ -278,7 +278,8 @@ class RuleBorderTrackerTest {
         StringBuilder css = new StringBuilder();
         HashMap<Integer, String> styles = new HashMap<>();
 
-        tracker.addBorderFormatting(cf, xssfRule, css, 0, styles);
+        tracker.addBorderFormatting(cf, xssfRule, css, 0, styles,
+                colorConverter);
 
         // Default style: 1pt solid #d6d6d6.
         String result = css.toString();
@@ -302,7 +303,7 @@ class RuleBorderTrackerTest {
         HashMap<Integer, String> styles = new HashMap<>();
 
         int returned = tracker.addBorderFormatting(cf, xssfRule, css, 10,
-                styles);
+                styles, colorConverter);
 
         assertEquals(10, returned, "cssIndex NOT advanced for NONE-top");
         assertFalse(tracker.hasTopBorder(cf),
@@ -318,7 +319,7 @@ class RuleBorderTrackerTest {
         HashMap<Integer, String> styles = new HashMap<>();
 
         int returned = tracker.addBorderFormatting(cf, xssfRule, css, 99,
-                styles);
+                styles, colorConverter);
 
         assertEquals(99, returned);
         assertEquals(0, css.length());
@@ -339,9 +340,9 @@ class RuleBorderTrackerTest {
         HashMap<Integer, String> styles = new HashMap<>();
 
         tracker.addBorderFormatting(cf, xssfRule, new StringBuilder(), 0,
-                styles);
+                styles, colorConverter);
         tracker.addBorderFormatting(cf2, xssfRule, new StringBuilder(), 1,
-                styles);
+                styles, colorConverter);
 
         assertEquals(0, tracker.getTopBorder(cf));
         assertEquals(1, tracker.getTopBorder(cf2));

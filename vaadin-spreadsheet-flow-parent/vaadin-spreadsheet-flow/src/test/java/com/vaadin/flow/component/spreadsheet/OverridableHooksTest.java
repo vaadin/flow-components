@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.BorderFormatting;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
@@ -22,6 +24,7 @@ import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -192,5 +195,52 @@ class OverridableHooksTest {
         assertTrue(calls.contains("matchesValue"), calls::toString);
         assertTrue(calls.contains("matchesFormula"), calls::toString);
         assertTrue(calls.contains("getFormulaEvaluator"), calls::toString);
+    }
+
+    @Test
+    void conditionalFormatting_bordersUseTheFormattersColorConverter() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Rules");
+        sheet.createRow(0).createCell(0).setCellValue(5);
+        SheetConditionalFormatting formatting = sheet
+                .getSheetConditionalFormatting();
+        ConditionalFormattingRule rule = formatting
+                .createConditionalFormattingRule(ComparisonOperator.GT, "1");
+        rule.createBorderFormatting().setBorderRight(BorderStyle.THIN);
+        formatting.addConditionalFormatting(
+                new CellRangeAddress[] { CellRangeAddress.valueOf("A1") },
+                rule);
+
+        Spreadsheet spreadsheet = new Spreadsheet(workbook) {
+            @Override
+            protected ConditionalFormatter createConditionalFormatter() {
+                return new OwnColorConverterFormatter(this);
+            }
+        };
+        spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
+
+        String styles = String.join("",
+                spreadsheet.getConditionalFormattingStyles().values());
+        assertTrue(styles.contains("border-right-color:#c0ffee;"), styles);
+    }
+
+    /**
+     * A formatter that assigns its own colour converter, which reports every
+     * border colour as {@code #c0ffee}.
+     */
+    private static class OwnColorConverterFormatter
+            extends ConditionalFormatter {
+
+        OwnColorConverterFormatter(Spreadsheet spreadsheet) {
+            super(spreadsheet);
+            colorConverter = new XSSFColorConverter(
+                    (XSSFWorkbook) spreadsheet.getWorkbook()) {
+                @Override
+                public String getBorderColorCSS(BorderSide borderSide,
+                        String attr, BorderFormatting format) {
+                    return attr + ":#c0ffee;";
+                }
+            };
+        }
     }
 }
