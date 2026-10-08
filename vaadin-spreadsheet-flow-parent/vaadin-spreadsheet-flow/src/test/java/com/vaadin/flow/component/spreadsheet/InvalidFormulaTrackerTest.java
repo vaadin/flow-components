@@ -30,11 +30,10 @@ import org.mockito.MockitoAnnotations;
  * workbook's active sheet index on every call — a sheet switch hides marks made
  * under the previous sheet.</li>
  * <li>{@code clearAll} empties the per-sheet map across all sheets.</li>
- * <li>{@code shiftActiveSheetRows} re-keys marks on the active sheet based on
- * the same row-removed / row-shifted predicates the original code on
- * {@code Spreadsheet} used. Three sub-paths: drop (removed rows), translate
- * (rows within [first, last]), keep (rows outside the shift range). The
- * {@code n < 0} guard makes the drop path up-shift-only.</li>
+ * <li>{@code shiftActiveSheetRows} re-keys marks on the active sheet after
+ * {@code shiftRows(startRow, endRow, n)}: marks on the shifted rows move by
+ * {@code n}, marks on the rows the shift overwrites are dropped, in both
+ * directions, and the rest stay.</li>
  * </ul>
  */
 class InvalidFormulaTrackerTest {
@@ -209,15 +208,12 @@ class InvalidFormulaTrackerTest {
                 "No marks before shift, none after");
     }
 
-    // ----- shiftActiveSheetRows: translate branch --------------------------
+    // ----- shiftActiveSheetRows: shifted rows move -------------------------
 
     @Test
     void shiftActiveSheetRows_rowInsideShiftRange_isTranslatedByN() {
-        // Pin the numberOfRowsAboveWasChanged branch. Pre-shift mark at
-        // POI row 4 (= toKey-row 5). Shift rows [first=2, last=10] by
-        // n=3 (down by 3). row=4 is in [2, 10], so the new POI row is
-        // 4+3=7, new toKey row 8. After the shift, mark at (col=3,
-        // toKey-row 5) is gone and (col=3, toKey-row 8) is present.
+        // Mark at POI row 4 (= toKey-row 5). Rows 2..10 move down by 3,
+        // so the new POI row is 4+3=7, toKey row 8.
         tracker.mark(3, 5);
 
         tracker.shiftActiveSheetRows(2, 10, 3);
@@ -229,23 +225,20 @@ class InvalidFormulaTrackerTest {
 
     @Test
     void shiftActiveSheetRows_rowOutsideShiftRange_isKeptUnchanged() {
-        // Pin the keep branch. Mark at POI row 100 (toKey-row 101).
-        // Shift rows [2, 10] by 3 — row 100 is outside [2, 10], so it
-        // is kept as-is.
+        // Mark at POI row 100 (toKey-row 101). Rows 2..10 move down by 3
+        // and land on 5..13, so row 100 is not touched.
         tracker.mark(3, 101);
 
         tracker.shiftActiveSheetRows(2, 10, 3);
 
         assertTrue(tracker.isMarked(3, 101),
-                "Row above the shift range MUST be untouched");
+                "Row below the rows the shift lands on MUST be untouched");
     }
 
     @Test
-    void shiftActiveSheetRows_rowBelowFirst_isKeptUnchanged() {
-        // Pin: row below `first` (and not in the dropped range when
-        // n < 0) is kept. Mark at POI row 0 (toKey-row 1). Shift
-        // [first=5, last=10] by n=3 (down) — row 0 is outside [5, 10]
-        // AND below the shift range. Kept.
+    void shiftActiveSheetRows_rowAboveTheShift_isKeptUnchanged() {
+        // Mark at POI row 0 (toKey-row 1). Rows 5..10 move down by 3,
+        // so row 0 is not touched.
         tracker.mark(1, 1);
 
         tracker.shiftActiveSheetRows(5, 10, 3);
@@ -253,78 +246,82 @@ class InvalidFormulaTrackerTest {
         assertTrue(tracker.isMarked(1, 1));
     }
 
-    // ----- shiftActiveSheetRows: drop branch (n < 0 only) ------------------
+    @Test
+    void shiftActiveSheetRows_negativeN_firstShiftedRow_isTranslatedByN() {
+        // Rows 5..10 move up by 3: POI row 5 (toKey 6) lands on row 2
+        // (toKey 3).
+        tracker.mark(3, 6);
+
+        tracker.shiftActiveSheetRows(5, 10, -3);
+
+        assertFalse(tracker.isMarked(3, 6));
+        assertTrue(tracker.isMarked(3, 3));
+    }
 
     @Test
-    void shiftActiveSheetRows_negativeN_rowInRemovedRange_isDropped() {
-        // Pin the rowWasRemoved branch: `n < 0 && first+n < row &&
-        // row <= first`. With first=5, n=-3 the dropped POI rows are
-        // {3, 4, 5} (toKey rows 4, 5, 6). Mark at toKey row 5 (POI 4)
-        // MUST be dropped. The translation branch does NOT fire
-        // because rowWasRemoved is checked FIRST.
+    void shiftActiveSheetRows_positiveN_firstShiftedRow_isTranslatedByN() {
+        // Rows 5..10 move down by 3: POI row 5 (toKey 6) lands on row 8
+        // (toKey 9).
+        tracker.mark(3, 6);
+
+        tracker.shiftActiveSheetRows(5, 10, 3);
+
+        assertFalse(tracker.isMarked(3, 6));
+        assertTrue(tracker.isMarked(3, 9),
+                "Positive n shifts row 5 to row 8 (toKey 9)");
+    }
+
+    // ----- shiftActiveSheetRows: overwritten rows are dropped ---------------
+
+    @Test
+    void shiftActiveSheetRows_negativeN_rowTheShiftLandsOn_isDropped() {
+        // Rows 5..10 move up by 3 and land on 2..7, so POI rows 2..4 are
+        // overwritten. The mark at POI row 4 (toKey 5) goes with its row.
         tracker.mark(3, 5);
 
         tracker.shiftActiveSheetRows(5, 10, -3);
 
         assertFalse(tracker.isMarked(3, 5),
-                "Mark on a removed row MUST be dropped");
+                "Mark on an overwritten row MUST be dropped");
+        assertFalse(tracker.isMarked(3, 2),
+                "The mark MUST NOT move along with the shifted rows");
     }
 
     @Test
-    void shiftActiveSheetRows_negativeN_rowAtFirstBoundary_isDropped() {
-        // Pin the inclusive upper bound: row == first IS in the
-        // dropped range. With first=5, n=-3, toKey row 6 (POI 5 ==
-        // first) is dropped.
-        tracker.mark(3, 6);
+    void shiftActiveSheetRows_negativeN_rowAboveTheOverwrittenRows_isKept() {
+        // Rows 5..10 move up by 3, overwriting POI rows 2..4. POI row 1
+        // (toKey 2), just above them, is not touched.
+        tracker.mark(3, 2);
 
         tracker.shiftActiveSheetRows(5, 10, -3);
 
-        assertFalse(tracker.isMarked(3, 6),
-                "Row == first MUST be dropped (inclusive upper bound)");
+        assertTrue(tracker.isMarked(3, 2),
+                "Row above the overwritten rows MUST be kept");
     }
 
     @Test
-    void shiftActiveSheetRows_negativeN_rowAtFirstPlusN_isNotDropped_butTranslated() {
-        // Pin the exclusive lower bound: row == first+n is NOT in the
-        // dropped range (the predicate is `first+n < row`). With
-        // first=5, n=-3, POI row 2 (toKey 3) is NOT dropped. Since
-        // row 2 < first=5, the numberOfRowsAboveWasChanged check
-        // (`first <= row && row <= last`) is false too. So the key is
-        // KEPT.
-        tracker.mark(3, 3);
-
-        tracker.shiftActiveSheetRows(5, 10, -3);
-
-        assertTrue(tracker.isMarked(3, 3),
-                "Row at first+n (exclusive lower bound) MUST be kept");
-    }
-
-    @Test
-    void shiftActiveSheetRows_positiveN_doesNotDropRowsAtFirst() {
-        // Pin the `n < 0` guard on the drop predicate. With n > 0 the
-        // drop branch is ALWAYS false — even for rows in (first+n,
-        // first]. So a positive n only translates / keeps, never drops.
-        tracker.mark(3, 6); // POI 5 == first
+    void shiftActiveSheetRows_positiveN_rowTheShiftLandsOn_isDropped() {
+        // Rows 5..10 move down by 3 and land on 8..13, so POI rows 11..13
+        // are overwritten. The mark at POI row 12 (toKey 13) goes with its
+        // row.
+        tracker.mark(3, 13);
 
         tracker.shiftActiveSheetRows(5, 10, 3);
 
-        // POI 5 is in [5, 10], so it's translated: new POI row = 5+3 =
-        // 8, new toKey row = 9.
-        assertFalse(tracker.isMarked(3, 6));
-        assertTrue(tracker.isMarked(3, 9),
-                "Positive n shifts row 5 to row 8 (toKey 9)");
+        assertFalse(tracker.isMarked(3, 13),
+                "Mark on an overwritten row MUST be dropped");
+        assertFalse(tracker.isMarked(3, 16),
+                "The mark MUST NOT move along with the shifted rows");
     }
 
     // ----- shiftActiveSheetRows: mixed + sheet scope -----------------------
 
     @Test
     void shiftActiveSheetRows_mixedKeys_appliesPerKeyClassification() {
-        // Pin: each key in the set is classified independently. In one
-        // call we expect:
-        // key (3, 5) — POI row 4 — in [first=2, last=10] → translate
-        // to row 4+3=7 → toKey row 8.
-        // key (1, 101) — POI row 100 — outside [2, 10] → keep.
-        // key (2, 1) — POI row 0 — outside [2, 10], below first → keep.
+        // Each key is classified on its own. Rows 2..10 move down by 3:
+        // key (3, 5) — POI row 4 — is shifted → row 4+3=7 → toKey row 8.
+        // key (1, 101) — POI row 100 — is below the shift → keep.
+        // key (2, 1) — POI row 0 — is above the shift → keep.
         tracker.mark(3, 5);
         tracker.mark(1, 101);
         tracker.mark(2, 1);

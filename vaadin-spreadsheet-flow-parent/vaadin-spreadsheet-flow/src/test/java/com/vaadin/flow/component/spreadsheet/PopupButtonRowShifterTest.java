@@ -37,8 +37,9 @@ import org.mockito.MockitoAnnotations;
  * <li>Empty-registry early-return — no detaches, no replaceAll.</li>
  * <li>Detach-first contract: every button gets detached before the remap,
  * because its row index is now stale.</li>
- * <li>Three row-classification branches: row removed, row shifted (above range
- * changed), row unaffected.</li>
+ * <li>Three row-classification branches for
+ * {@code shiftRows(startRow, endRow, n)}: row overwritten by the shift, row
+ * shifted, row unaffected.</li>
  * <li>`replaceAll` is called with the rebuilt map.</li>
  * </ul>
  */
@@ -81,9 +82,8 @@ class PopupButtonRowShifterTest {
 
     @Test
     void shift_rowAboveAffectedRange_unaffected() {
-        // Pin: a button at row 0 when shifting [first=5, last=10] is
-        // unaffected. Its cell reference goes into the rebuilt map
-        // unchanged.
+        // Pin: a button at row 0 when shifting rows 5..10 is unaffected.
+        // Its cell reference goes into the rebuilt map unchanged.
         when(registry.isEmpty()).thenReturn(false);
         CellReference ref0 = new CellReference("Sheet1", 0, 1, true, true);
         when(button1.getCellReference()).thenReturn(ref0);
@@ -102,10 +102,8 @@ class PopupButtonRowShifterTest {
 
     @Test
     void shift_rowInsideAffectedRange_movesByTheOffset() {
-        // A button inside [first=5, last=10] moves with its row: 7 + 3 = 10.
-        // The old test asked for row > last as well, so a button inside the
-        // range stayed where it was while its row moved out from under it -
-        // flow-components#3223.
+        // A button on one of the shifted rows 5..10 moves with its row:
+        // 7 + 3 = 10.
         when(registry.isEmpty()).thenReturn(false);
         CellReference ref7 = new CellReference("Sheet1", 7, 1, true, true);
         when(button1.getCellReference()).thenReturn(ref7);
@@ -145,7 +143,8 @@ class PopupButtonRowShifterTest {
         when(button1.getCellReference()).thenReturn(ref6);
         when(registry.values()).thenReturn(Arrays.asList(button1));
 
-        shifter.shift(5, 10, -3);
+        // Rows 8..12 move up by 3 and overwrite rows 5..7.
+        shifter.shift(8, 12, -3);
 
         verify(binding).detach(button1);
         verify(binding, never()).attach(button1);
@@ -153,17 +152,17 @@ class PopupButtonRowShifterTest {
 
     @Test
     void shift_rowRemoved_buttonDropped() {
-        // Pin: when n is negative, a row in [first, first - n) was removed.
-        // The button doesn't make it into the rebuilt map → effectively
-        // dropped from the registry. binding.detach still fires (the
-        // button must be cleaned up).
+        // Pin: the button of a row the shifted rows land on, and that is
+        // not shifted itself, doesn't make it into the rebuilt map →
+        // effectively dropped from the registry. binding.detach still
+        // fires (the button must be cleaned up).
         when(registry.isEmpty()).thenReturn(false);
-        // Shift first=5, last=10, n=-3 → rows 5..7 are removed.
+        // Rows 8..12 move up by 3 and overwrite rows 5..7.
         CellReference ref6 = new CellReference("Sheet1", 6, 1, true, true);
         when(button1.getCellReference()).thenReturn(ref6);
         when(registry.values()).thenReturn(Arrays.asList(button1));
 
-        shifter.shift(5, 10, -3);
+        shifter.shift(8, 12, -3);
 
         verify(binding).detach(button1);
         verify(button1, never()).setCellReference(any());
@@ -172,26 +171,42 @@ class PopupButtonRowShifterTest {
     }
 
     @Test
-    void shift_rowBelowAffectedRange_isUnaffected() {
-        // A button at row 11 is past the end of [first=5, last=10], so
-        // nothing above it moved and neither does it.
+    void shift_rowOverwrittenByADownwardShift_buttonDropped() {
+        // Rows 5..10 move down by 3 and overwrite rows 11..13. The button
+        // of row 12 goes with its row instead of moving along.
         when(registry.isEmpty()).thenReturn(false);
-        CellReference ref11 = new CellReference("Sheet1", 11, 1, true, true);
-        when(button1.getCellReference()).thenReturn(ref11);
+        CellReference ref12 = new CellReference("Sheet1", 12, 1, true, true);
+        when(button1.getCellReference()).thenReturn(ref12);
+        when(registry.values()).thenReturn(Arrays.asList(button1));
+
+        shifter.shift(5, 10, 3);
+
+        verify(button1, never()).setCellReference(any());
+        verify(binding, never()).attach(button1);
+        verify(registry).replaceAll(argThat(Map::isEmpty));
+    }
+
+    @Test
+    void shift_rowBelowAffectedRange_isUnaffected() {
+        // Rows 5..10 move down by 3 and land on 8..13. A button at row 14
+        // is past them, so neither it nor its row moves.
+        when(registry.isEmpty()).thenReturn(false);
+        CellReference ref14 = new CellReference("Sheet1", 14, 1, true, true);
+        when(button1.getCellReference()).thenReturn(ref14);
         when(registry.values()).thenReturn(Arrays.asList(button1));
 
         shifter.shift(5, 10, 3);
 
         verify(button1, never()).setCellReference(any());
         verify(registry)
-                .replaceAll(argThat(updated -> updated.get(ref11) == button1));
+                .replaceAll(argThat(updated -> updated.get(ref14) == button1));
     }
 
     @Test
     void shift_mixedButtons_eachClassifiedIndependently() {
         // Pin: each button is classified by its own row. button1=unaffected,
-        // button2=shifted, button3=removed. The rebuilt map contains
-        // button1 (original key) + button2 (new key) — button3 dropped.
+        // button2=unaffected, button3=overwritten. The rebuilt map contains
+        // button1 + button2 with their original keys — button3 dropped.
         when(registry.isEmpty()).thenReturn(false);
         CellReference ref0 = new CellReference("Sheet1", 0, 1, true, true);
         CellReference ref15 = new CellReference("Sheet1", 15, 1, true, true);
@@ -202,18 +217,18 @@ class PopupButtonRowShifterTest {
         when(registry.values())
                 .thenReturn(Arrays.asList(button1, button2, button3));
 
-        shifter.shift(5, 10, -3); // removes rows 5..7
+        shifter.shift(8, 12, -3); // overwrites rows 5..7
 
         // All three detached.
         verify(binding).detach(button1);
         verify(binding).detach(button2);
         verify(binding).detach(button3);
 
-        // button1 unaffected (row 0 is above first=5).
+        // button1 unaffected (row 0 is above the shift).
         verify(button1, never()).setCellReference(any());
-        // button2 at row 15 is past last=10, so nothing above it moved.
+        // button2 at row 15 is past the shifted rows 8..12.
         verify(button2, never()).setCellReference(any());
-        // button3 at row 6 was one of the removed rows 5..7.
+        // button3 at row 6 was one of the overwritten rows 5..7.
         verify(button3, never()).setCellReference(any());
 
         // replaceAll contains button1 + button2 only.
@@ -269,7 +284,7 @@ class PopupButtonRowShifterTest {
         when(button1.getCellReference()).thenReturn(ref6);
         when(registry.values()).thenReturn(Collections.singletonList(button1));
 
-        shifter.shift(5, 10, -3); // row 6 removed
+        shifter.shift(8, 12, -3); // row 6 overwritten
 
         verify(registry).replaceAll(argThat(Map::isEmpty));
     }

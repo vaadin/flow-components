@@ -73,13 +73,11 @@ final class InvalidFormulaTracker implements Serializable {
     }
 
     /**
-     * Re-key marks on the active sheet after a {@code shiftRows(first, last,
-     * n)} operation. Marks whose row is in {@code [first, first + n - 1]} (when
-     * {@code n > 0}) get dropped — those rows were removed. Marks whose row is
-     * in {@code [first, last]} get translated by {@code n}. Marks outside the
-     * range stay as-is.
+     * Moves the active sheet's marks along with their rows after
+     * {@code Sheet.shiftRows(startRow, endRow, n)}, and drops the marks of the
+     * rows the shift overwrote. Rows are 0-based here; the keys are 1-based.
      */
-    void shiftActiveSheetRows(int first, int last, int n) {
+    void shiftActiveSheetRows(int startRow, int endRow, int n) {
         int activeSheetIndex = activeSheetIndex();
         HashSet<String> original = invalidFormulas.get(activeSheetIndex);
         if (original == null) {
@@ -88,15 +86,12 @@ final class InvalidFormulaTracker implements Serializable {
         HashSet<String> updated = new HashSet<>();
         for (String key : original) {
             int row = SpreadsheetUtil.getRowFromKey(key) - 1;
-            int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
-            if (rowWasRemoved(row, first, n)) {
-                // do nothing -> will be removed
-            } else if (numberOfRowsAboveWasChanged(row, last, first)) {
-                // the number of rows above has changed -> update the row
-                // index
-                updated.add(SpreadsheetUtil.toKey(col + 1, row + n + 1));
-            } else {
-                updated.add(key);
+            int newRow = RowShiftOrchestrator.rowAfterShift(row, startRow,
+                    endRow, n);
+            if (newRow != RowShiftOrchestrator.OVERWRITTEN) {
+                updated.add(SpreadsheetUtil.toKey(
+                        SpreadsheetUtil.getColumnIndexFromKey(key),
+                        newRow + 1));
             }
         }
         original.clear();
@@ -109,14 +104,5 @@ final class InvalidFormulaTracker implements Serializable {
 
     private int activeSheetIndex() {
         return spreadsheet.getWorkbook().getActiveSheetIndex();
-    }
-
-    private static boolean numberOfRowsAboveWasChanged(int row, int last,
-            int first) {
-        return first <= row && row <= last;
-    }
-
-    private static boolean rowWasRemoved(int row, int first, int n) {
-        return n < 0 && first + n < row && row <= first;
     }
 }

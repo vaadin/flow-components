@@ -16,7 +16,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
 /**
@@ -24,9 +23,9 @@ import org.apache.poi.ss.util.CellReference;
  * server-side bookkeeping that POI doesn't know about: cached row heights,
  * hidden-row indexes, cell styles for shifted borders, the formula and
  * conditional-formatting evaluator caches, the value-manager's client-cache row
- * mapping, the selection address, merged regions intersected by removed rows,
- * popup buttons rooted in shifted rows, and the invalid-formula tracker's
- * per-cell key set.
+ * mapping, the selection address, the client's list of merged regions, popup
+ * buttons rooted in shifted or overwritten rows, and the invalid-formula
+ * tracker's per-cell key set.
  *
  * <p>
  * One concern, one place. Before extraction, all of this lived inline in
@@ -138,7 +137,11 @@ final class RowShiftOrchestrator implements Serializable {
             }
             spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
         }
-        rowsMoved(firstAffectedRow, lastAffectedRow, n);
+        // POI moves and removes the merged regions itself, and
+        // updateMergedRegions() below passes its result to the client.
+        spreadsheet.popupButtonRowShifter.shift(startRow, endRow, n);
+        spreadsheet.invalidFormulaTracker.shiftActiveSheetRows(startRow, endRow,
+                n);
 
         for (Cell cell : cellsToUpdate) {
             styler.cellStyleUpdated(cell, false);
@@ -168,35 +171,28 @@ final class RowShiftOrchestrator implements Serializable {
     }
 
     /**
-     * Called after POI's shiftRows completes. Updates server-side state that
-     * POI does not know about: merged regions that intersect the deleted-row
-     * range (only relevant for upward shifts), popup-button row anchors, and
-     * invalid-formula key mapping.
-     *
-     * <p>
-     * If {@code n} is negative, rows moved UP and the original rows in
-     * {@code [first + n, first]} are gone — merged regions rooted there must be
-     * removed. POI handles the others automatically.
+     * The value of {@link #rowAfterShift} for a row whose content is gone.
      */
-    private void rowsMoved(int first, int last, int n) {
-        // Merged regions
-        if (n < 0) {
-            // Remove merged cells from deleted rows. POI will handle the
-            // other updated values.
-            for (int row = (first + n); row <= first; ++row) {
-                Sheet sheet = spreadsheet.getActiveSheet();
-                for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
-                    CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
-                    if (mergedRegion.getFirstRow() == row) {
-                        spreadsheet.removeMergedRegion(i);
-                    }
-                }
-            }
+    static final int OVERWRITTEN = -1;
+
+    /**
+     * Where the content of a row is after
+     * {@code Sheet.shiftRows(startRow, endRow, n)}. The shifted rows move by
+     * {@code n}. The rows they land on that are not shifted themselves are
+     * overwritten: POI removes their content. Every other row stays where it
+     * is. Rows are 0-based.
+     *
+     * @return the row the content is on after the shift, or
+     *         {@link #OVERWRITTEN}
+     */
+    static int rowAfterShift(int row, int startRow, int endRow, int n) {
+        if (startRow <= row && row <= endRow) {
+            return row + n;
         }
-
-        spreadsheet.popupButtonRowShifter.shift(first, last, n);
-
-        spreadsheet.invalidFormulaTracker.shiftActiveSheetRows(first, last, n);
+        if (startRow + n <= row && row <= endRow + n) {
+            return OVERWRITTEN;
+        }
+        return row;
     }
 
     /**

@@ -156,35 +156,19 @@ class RowShiftOrchestratorTest {
         verify(valueManager).updateDeletedRowsInClientCache(4, 6);
     }
 
-    // ----- merged-region removal on negative N -----------------------------
+    // ----- merged regions are left to POI ----------------------------------
 
     @Test
-    void shift_negativeN_removesMergedRegionsRootedInDeletedRows() {
-        // Pin rowsMoved's n<0 branch. The orchestrator computes
-        // firstAffectedRow = startRow + n and passes it to rowsMoved as
-        // the `first` argument. rowsMoved then scans rows in
-        // [first+n, first] — for startRow=5, n=-2: firstAffectedRow=3,
-        // so the scan range is rows {1, 2, 3}.
-        //
-        // Real POI's Sheet.shiftRows already removes merged regions it
-        // detects as invalidated by the shift (since POI 3.15+), so
-        // a real-fixture test of this branch would mostly fail. Use a
-        // MOCK Sheet so the post-shift scan sees the region we want to
-        // test against — this isolates the SUT's logic from POI version
-        // behavior.
-        Sheet mockSheet = org.mockito.Mockito.mock(Sheet.class);
-        when(spreadsheet.getActiveSheet()).thenReturn(mockSheet);
-        when(mockSheet.getLastRowNum()).thenReturn(-1);
-        when(mockSheet.getDefaultRowHeightInPoints()).thenReturn(15.0f);
-        // Region at row 2 — inside the scan range {1, 2, 3}. The SUT
-        // should call removeMergedRegion(0) when row=2 hits this entry.
-        when(mockSheet.getNumMergedRegions()).thenReturn(1);
-        when(mockSheet.getMergedRegion(0))
-                .thenReturn(new CellRangeAddress(2, 2, 0, 1));
+    void shift_negativeN_doesNotRemoveMergedRegions() {
+        // POI's shiftRows removes the merged regions the shifted rows land
+        // on and moves the shifted ones, so the orchestrator removes none
+        // itself. Row 2 is above the rows the shift lands on (3..5).
+        // ShiftRowsTest checks the outcome on a real spreadsheet.
+        activeSheet.addMergedRegion(new CellRangeAddress(2, 2, 0, 1));
 
         orchestrator.shift(5, 7, -2, false, false);
 
-        verify(spreadsheet).removeMergedRegion(0);
+        verify(spreadsheet, never()).removeMergedRegion(anyInt());
     }
 
     @Test
@@ -202,24 +186,21 @@ class RowShiftOrchestratorTest {
 
     @Test
     void shift_alwaysCallsPopupButtonRowShifter_andInvalidFormulaTrackerShift() {
-        // Pin: rowsMoved unconditionally dispatches to popupButtonRowShifter
-        // and invalidFormulaTracker. Both must fire regardless of n sign.
+        // Pin: the shift is passed on to popupButtonRowShifter and
+        // invalidFormulaTracker, with the arguments POI got. Both must fire
+        // regardless of n sign.
         orchestrator.shift(2, 5, 1, false, false);
 
-        verify(popupButtonRowShifter).shift(2, 6, 1);
-        verify(invalidFormulaTracker).shiftActiveSheetRows(2, 6, 1);
+        verify(popupButtonRowShifter).shift(2, 5, 1);
+        verify(invalidFormulaTracker).shiftActiveSheetRows(2, 5, 1);
     }
 
     @Test
-    void shift_negativeN_callsHelpersWithUpShiftedRange() {
-        // Pin the affected-row range computation for n<0:
-        // firstAffectedRow = startRow + n
-        // lastAffectedRow = endRow
-        // For startRow=5, endRow=7, n=-2: affectedRange = (3, 7).
+    void shift_negativeN_passesTheShiftToTheHelpers() {
         orchestrator.shift(5, 7, -2, false, false);
 
-        verify(popupButtonRowShifter).shift(3, 7, -2);
-        verify(invalidFormulaTracker).shiftActiveSheetRows(3, 7, -2);
+        verify(popupButtonRowShifter).shift(5, 7, -2);
+        verify(invalidFormulaTracker).shiftActiveSheetRows(5, 7, -2);
     }
 
     // ----- overlay reload-from-POI branch ----------------------------------

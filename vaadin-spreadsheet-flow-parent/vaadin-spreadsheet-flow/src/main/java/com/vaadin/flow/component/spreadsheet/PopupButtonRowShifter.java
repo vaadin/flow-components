@@ -35,11 +35,11 @@ final class PopupButtonRowShifter implements Serializable {
     }
 
     /**
-     * Shift cell references after a row-insert / row-delete. {@code first} and
-     * {@code last} bound the affected range; {@code n} is the row-offset to
-     * apply to surviving buttons.
+     * Moves the buttons along with their rows after
+     * {@code Sheet.shiftRows(startRow, endRow, n)}, and drops the buttons of
+     * the rows the shift overwrote. Rows are 0-based.
      */
-    void shift(int first, int last, int n) {
+    void shift(int startRow, int endRow, int n) {
         if (registry.isEmpty()) {
             return;
         }
@@ -47,16 +47,16 @@ final class PopupButtonRowShifter implements Serializable {
         for (PopupButton button : registry.values()) {
             CellReference cell = button.getCellReference();
             binding.detach(button);
-            int row = cell.getRow();
-            if (rowWasRemoved(row, first, n)) {
-                // do nothing -> will be removed
-            } else if (n != 0
-                    && numberOfRowsAboveWasChanged(row, last, first)) {
-                int newRow = row + n;
-                int col = cell.getCol();
+            int newRow = RowShiftOrchestrator.rowAfterShift(cell.getRow(),
+                    startRow, endRow, n);
+            if (newRow == RowShiftOrchestrator.OVERWRITTEN) {
+                // Its row is gone, and the button with it.
+                continue;
+            }
+            if (newRow != cell.getRow()) {
                 CellReference newCell = new CellReference(
                         spreadsheet.getActiveSheet().getSheetName(), newRow,
-                        col, true, true);
+                        cell.getCol(), true, true);
                 button.setCellReference(newCell);
                 updated.put(newCell, button);
             } else {
@@ -70,24 +70,5 @@ final class PopupButtonRowShifter implements Serializable {
         for (PopupButton button : updated.values()) {
             binding.attach(button);
         }
-    }
-
-    private static boolean rowWasRemoved(int row, int first, int n) {
-        return n < 0 && row >= first && row < first - n;
-    }
-
-    /**
-     * Whether the count of rows above {@code row} changed, which is what moves
-     * a button.
-     * <p>
-     * Every row inside the affected range moves by the offset. The old test
-     * asked for {@code row > last} as well, which is true of almost nothing:
-     * {@code last} is the end of the affected range, so a button inside the
-     * range failed it and stayed where it was while its row moved out from
-     * under it. That is flow-components#3223.
-     */
-    private static boolean numberOfRowsAboveWasChanged(int row, int last,
-            int first) {
-        return first <= row && row <= last;
     }
 }
