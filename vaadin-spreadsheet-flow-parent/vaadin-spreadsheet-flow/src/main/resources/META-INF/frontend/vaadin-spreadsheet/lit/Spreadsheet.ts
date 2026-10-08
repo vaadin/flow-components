@@ -596,6 +596,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The style indexes last reported to the server with a width ratio. */
   private measuredStyleIndexes: ReadonlySet<number> = new Set();
 
+  /** The listeners on the page while the sheet is in it; see {@link connect}. */
+  private pageListeners: AbortController | null = null;
+
   /** Decides when the server is asked for the cells the sheet scrolls to. */
   private readonly viewportLoader = new ViewportLoader({
     drawnRange: () => this.drawnRange(),
@@ -905,10 +908,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.applyHostHideClasses();
       this.applyHostTheme();
     });
-    this.hostClassObserver.observe(this.host, {
-      attributes: true,
-      attributeFilter: ['class', 'theme']
-    });
     // Sheet tab click → switch active sheet via spreadsheet-event
     // (slice 154).
     this.sheetTabs.addEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
@@ -935,8 +934,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-click', this.handleCellClick as EventListener);
     this.contextMenu.addEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
     this.contextMenu.addEventListener('context-menu-dismiss', this.handleContextMenuDismiss);
-    document.addEventListener('pointerdown', this.handleDocumentPointerDown);
-    document.addEventListener('keydown', this.handleContextMenuKeyDown);
     // Cell editor lifecycle events (slice 152). The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
@@ -954,8 +951,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
     this.cellGrid.addEventListener('grid-mouseleave', this.hideLinkTooltip);
     this.cellGrid.addEventListener('selection-paint-start', this.handleSelectionPaintStart);
-    document.addEventListener('mouseup', this.handleDocumentMouseUp);
-    document.addEventListener('keyup', this.handleDocumentKeyUp);
     // Popup-button click → dispatch popupButtonClick (slice
     // 161). The server's `onPopupButtonClick` opens the
     // associated popup component.
@@ -991,7 +986,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.rowHeader.addEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
     this.columnHeader.addEventListener('column-autofit', this.handleColumnAutofit as EventListener);
     this.rowHeader.addEventListener('row-autofit', this.handleRowAutofit as EventListener);
-    document.addEventListener('mousemove', this.handleDocumentMouseMove);
     // Header click delegation (slice 148). Each header element
     // emits its own custom event with the col / row coordinate;
     // the connector translates them into whole-column / whole-
@@ -1006,7 +1000,45 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.addEventListener('keydown', this.handleKeyDown as EventListener);
     this.scrollContainer.addEventListener('pointerdown', this.handleHostedEditorPointerDown);
     this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
+    this.connect();
+  }
+
+  /**
+   * Start listening to the page and observing the host. Called as the
+   * element joins the page, and again whenever it is moved: these
+   * listeners hold the connector, so {@link disconnect} releases them and a
+   * sheet removed from the page can be collected. Without that every
+   * removed sheet stayed in memory, with its cells, and went on handling
+   * every key press and mouse move in the page.
+   */
+  connect(): void {
+    if (this.pageListeners !== null) {
+      return;
+    }
+    this.pageListeners = new AbortController();
+    const options = { signal: this.pageListeners.signal };
+    document.addEventListener('pointerdown', this.handleDocumentPointerDown, options);
+    document.addEventListener('keydown', this.handleContextMenuKeyDown, options);
+    document.addEventListener('mouseup', this.handleDocumentMouseUp, options);
+    document.addEventListener('keyup', this.handleDocumentKeyUp, options);
+    document.addEventListener('mousemove', this.handleDocumentMouseMove, options);
     this.resizeObserver.observe(this.scrollContainer);
+    if (this.hostClassObserver !== null) {
+      this.hostClassObserver.observe(this.host, { attributes: true, attributeFilter: ['class', 'theme'] });
+      // The host's classes may have changed while it was out of the page.
+      this.applyHostHideClasses();
+      this.applyHostTheme();
+    }
+  }
+
+  /** Stop listening to the page; see {@link connect}. */
+  disconnect(): void {
+    this.pageListeners?.abort();
+    this.pageListeners = null;
+    this.resizeObserver.disconnect();
+    this.popupResizeObserver.disconnect();
+    this.hostClassObserver?.disconnect();
+    this.viewportLoader.dispose();
   }
 
   /**
@@ -2852,7 +2884,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * scroll container after teardown.
    */
   dispose(): void {
-    this.viewportLoader.dispose();
     this.renderQueued = false;
     this.scrollContainer.removeEventListener('scroll', this.handleScroll);
     this.scrollContainer.removeEventListener('focusin', this.handleSheetFocusChange);
@@ -2870,8 +2901,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.actionIcons.clear();
     this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
     this.contextMenu.removeEventListener('context-menu-dismiss', this.handleContextMenuDismiss);
-    document.removeEventListener('pointerdown', this.handleDocumentPointerDown);
-    document.removeEventListener('keydown', this.handleContextMenuKeyDown);
     this.cellGrid.removeEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
     this.cellGrid.removeEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
     this.cellGrid.removeEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
@@ -2900,20 +2929,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.columnHeader.removeEventListener('column-grouping-toggle', this.handleColumnGroupingToggle as EventListener);
     this.rowHeader.removeEventListener('row-grouping-toggle', this.handleRowGroupingToggle as EventListener);
     this.rowHeader.removeEventListener('row-header-contextmenu', this.handleRowHeaderContextMenu as EventListener);
-    document.removeEventListener('mouseup', this.handleDocumentMouseUp);
-    document.removeEventListener('keyup', this.handleDocumentKeyUp);
-    document.removeEventListener('mousemove', this.handleDocumentMouseMove);
     this.columnHeader.removeEventListener('column-resize-start', this.handleColumnResizeStart as EventListener);
     this.rowHeader.removeEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
     this.columnHeader.removeEventListener('column-autofit', this.handleColumnAutofit as EventListener);
     this.rowHeader.removeEventListener('row-autofit', this.handleRowAutofit as EventListener);
-    this.resizeObserver.disconnect();
-    this.popupResizeObserver.disconnect();
+    this.disconnect();
     hideFromTopLayer(this.popupOverlay);
-    if (this.hostClassObserver) {
-      this.hostClassObserver.disconnect();
-      this.hostClassObserver = null;
-    }
+    this.hostClassObserver = null;
     this.formulaBar.removeEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
     this.formulaBar.removeEventListener('formula-commit', this.handleFormulaCommit as EventListener);
     this.formulaBar.removeEventListener('formula-input', this.handleFormulaInput as EventListener);

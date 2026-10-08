@@ -206,6 +206,9 @@ export class VaadinSpreadsheet extends LitElement {
       window.Vaadin.Flow.spreadsheetConnector.initLazy(this);
 
       this._firstUpdate = true;
+    } else {
+      // Moved, or back in the page after leaving it: listen to it again.
+      this.$connector.connect();
     }
 
     // The overlay container lives in light DOM, so the overlay styles are
@@ -222,6 +225,9 @@ export class VaadinSpreadsheet extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     spreadsheetResizeObserver.unobserve(this);
+    // The connector's page listeners hold it, and this element with it:
+    // released, a sheet removed from the page can be collected.
+    this.$connector?.disconnect();
   }
 
   updated(changedProperties) {
