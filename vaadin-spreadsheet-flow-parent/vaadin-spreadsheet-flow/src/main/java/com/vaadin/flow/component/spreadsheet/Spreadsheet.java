@@ -4667,16 +4667,17 @@ public class Spreadsheet extends Component
      * Flags the cell as holding a formula the server could not parse, which is
      * what draws the invalid-formula marker on it.
      * <p>
-     * Public so the undo commands can put the flag back on a cell whose text
-     * they restore; the flag lives beside the workbook rather than in it, so
-     * restoring the text alone would leave a broken cell looking fine.
+     * The undo commands put the flag back on a cell whose text they restore,
+     * through {@link InvalidFormulaMarks}: the flag lives beside the workbook
+     * rather than in it, so restoring the text alone would leave a broken cell
+     * looking fine.
      *
      * @param col
      *            column index, 1-based
      * @param row
      *            row index, 1-based
      */
-    public void markInvalidFormula(int col, int row) {
+    void markInvalidFormula(int col, int row) {
         invalidFormulaTracker.mark(col, row);
     }
 
@@ -4690,7 +4691,7 @@ public class Spreadsheet extends Component
      * @return {@code true} when the cell carries the invalid-formula flag
      * @see #markInvalidFormula(int, int)
      */
-    public boolean isMarkedAsInvalidFormula(int col, int row) {
+    boolean isMarkedAsInvalidFormula(int col, int row) {
         return invalidFormulaTracker.isMarked(col, row);
     }
 

@@ -28,6 +28,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 
+import com.vaadin.flow.component.spreadsheet.InvalidFormulaMarks;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
@@ -184,8 +185,8 @@ class RowData implements Serializable {
             // A formula the server could not parse is kept as text, and the
             // flag that says so lives beside the workbook. Restoring the text
             // without it would leave a broken cell looking fine.
-            invalidFormula = spreadsheet
-                    .isMarkedAsInvalidFormula(columnIndex + 1, rowIndex + 1);
+            invalidFormula = InvalidFormulaMarks.isMarked(spreadsheet,
+                    columnIndex + 1, rowIndex + 1);
 
             switch (cellType) {
             case _NONE, BLANK -> stringCellValue = cell.getStringCellValue();
@@ -233,7 +234,7 @@ class RowData implements Serializable {
             }
 
             if (invalidFormula) {
-                spreadsheet.markInvalidFormula(cell.getColumnIndex() + 1,
+                InvalidFormulaMarks.mark(spreadsheet, cell.getColumnIndex() + 1,
                         cell.getRowIndex() + 1);
             }
         }
