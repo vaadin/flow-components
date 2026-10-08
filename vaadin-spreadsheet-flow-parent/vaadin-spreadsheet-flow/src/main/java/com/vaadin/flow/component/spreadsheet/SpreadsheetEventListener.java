@@ -9,6 +9,8 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,78 +33,93 @@ public class SpreadsheetEventListener
         this.handler = spreadsheetHandler;
     }
 
-    private int toInt(ObjectNode o, String field) {
-        JsonNode value = o == null ? null : o.get(field);
-        return value == null || value.isNull() ? 0 : value.intValue();
+    /*
+     * The decoders below never throw. A value of an unexpected type reads as if
+     * it were missing, so a malformed event does what an event without that
+     * field does instead of failing the request.
+     */
+
+    private static JsonNode field(ObjectNode o, String field) {
+        return o == null ? null : o.get(field);
     }
 
-    private String toStr(ObjectNode o, String field) {
-        JsonNode value = o == null ? null : o.get(field);
-        return value == null || value.isNull() ? null : value.asString();
+    private static boolean isNumber(JsonNode value) {
+        return value != null && value.isNumber();
     }
 
-    private boolean toBool(ObjectNode o, String field) {
-        JsonNode value = o == null ? null : o.get(field);
-        return value != null && value.asBoolean();
+    /**
+     * A number rounded to the nearest int, or 0 when the value is missing,
+     * {@code null} or not a number. Browsers report scroll offsets with a
+     * fraction on scaled displays, so whole numbers cannot be assumed.
+     */
+    private static int toInt(JsonNode value) {
+        if (!isNumber(value)) {
+            return 0;
+        }
+        return Math.clamp(Math.round(value.asDouble()), Integer.MIN_VALUE,
+                Integer.MAX_VALUE);
+    }
+
+    private static int toInt(ObjectNode o, String field) {
+        return toInt(field(o, field));
+    }
+
+    /** The text of a scalar, or {@code null} for anything else. */
+    private static String toStr(ObjectNode o, String field) {
+        JsonNode value = field(o, field);
+        return value == null ? null : value.asString(null);
+    }
+
+    private static boolean toBool(ObjectNode o, String field) {
+        JsonNode value = field(o, field);
+        return value != null && value.asBoolean(false);
     }
 
     /**
      * Zip two parallel arrays — indexes and their new sizes — into the map the
      * resize handlers take. The client sends them separately because that is
-     * the natural shape on the JavaScript side.
+     * the natural shape on the JavaScript side. A pair whose index or size is
+     * not a number is left out.
      */
-    private HashMap<Integer, Float> toFloatMap(ObjectNode o, String indexField,
-            String valueField) {
-        HashMap<Integer, Float> m = new HashMap<>();
-        JsonNode indexes = o == null ? null : o.get(indexField);
-        JsonNode values = o == null ? null : o.get(valueField);
+    private static <V> HashMap<Integer, V> toMap(ObjectNode o,
+            String indexField, String valueField,
+            Function<JsonNode, V> toValue) {
+        HashMap<Integer, V> m = new HashMap<>();
+        JsonNode indexes = field(o, indexField);
+        JsonNode values = field(o, valueField);
         if (indexes == null || values == null) {
             return m;
         }
         for (int i = 0; i < Math.min(indexes.size(), values.size()); i++) {
-            m.put(indexes.get(i).intValue(), (float) values.get(i).asDouble());
+            JsonNode index = indexes.get(i);
+            JsonNode value = values.get(i);
+            if (isNumber(index) && isNumber(value)) {
+                m.put(toInt(index), toValue.apply(value));
+            }
         }
         return m;
     }
 
-    private HashMap<Integer, Integer> toIntMap(ObjectNode o, String indexField,
-            String valueField) {
-        HashMap<Integer, Integer> m = new HashMap<>();
-        JsonNode indexes = o == null ? null : o.get(indexField);
-        JsonNode values = o == null ? null : o.get(valueField);
-        if (indexes == null || values == null) {
-            return m;
-        }
-        for (int i = 0; i < Math.min(indexes.size(), values.size()); i++) {
-            m.put(indexes.get(i).intValue(), values.get(i).intValue());
-        }
-        return m;
+    private static HashMap<Integer, Float> toFloatMap(ObjectNode o,
+            String indexField, String valueField) {
+        return toMap(o, indexField, valueField,
+                value -> (float) value.asDouble());
     }
 
-    /** Smallest value in an index array, or 0 when it is empty. */
-    private int minIndex(ObjectNode o, String field) {
-        JsonNode indexes = o == null ? null : o.get(field);
-        if (indexes == null || indexes.isEmpty()) {
-            return 0;
-        }
-        int min = Integer.MAX_VALUE;
-        for (JsonNode n : indexes) {
-            min = Math.min(min, n.intValue());
-        }
-        return min;
+    private static HashMap<Integer, Integer> toIntMap(ObjectNode o,
+            String indexField, String valueField) {
+        return toMap(o, indexField, valueField,
+                SpreadsheetEventListener::toInt);
     }
 
-    /** Largest value in an index array, or 0 when it is empty. */
-    private int maxIndex(ObjectNode o, String field) {
-        JsonNode indexes = o == null ? null : o.get(field);
-        if (indexes == null || indexes.isEmpty()) {
-            return 0;
-        }
-        int max = 0;
-        for (JsonNode n : indexes) {
-            max = Math.max(max, n.intValue());
-        }
-        return max;
+    /** Smallest key of the map, or 0 when it is empty. */
+    private static int minKey(Map<Integer, ?> m) {
+        return m.keySet().stream().mapToInt(Integer::intValue).min().orElse(0);
+    }
+
+    /** Largest key of the map, or 0 when it is empty. */
+    private static int maxKey(Map<Integer, ?> m) {
+        return m.keySet().stream().mapToInt(Integer::intValue).max().orElse(0);
     }
 
     @Override
@@ -195,13 +212,14 @@ public class SpreadsheetEventListener
         } else if ("rowsResized".equals(type)) {
             // The client reports which rows changed and their new heights;
             // the affected span doubles as the range to refresh.
-            handler.rowsResized(toFloatMap(pars, "rowIndexes", "newHeights"),
-                    minIndex(pars, "rowIndexes"), 1,
-                    maxIndex(pars, "rowIndexes"), 1);
+            HashMap<Integer, Float> heights = toFloatMap(pars, "rowIndexes",
+                    "newHeights");
+            handler.rowsResized(heights, minKey(heights), 1, maxKey(heights),
+                    1);
         } else if ("columnResized".equals(type)) {
-            handler.columnResized(toIntMap(pars, "colIndexes", "newWidths"), 1,
-                    minIndex(pars, "colIndexes"), 1,
-                    maxIndex(pars, "colIndexes"));
+            HashMap<Integer, Integer> widths = toIntMap(pars, "colIndexes",
+                    "newWidths");
+            handler.columnResized(widths, 1, minKey(widths), 1, maxKey(widths));
         } else if ("onRowAutofit".equals(type)) {
             handler.onRowAutofit(toInt(pars, "rowIndex"));
         } else if ("onColumnAutofit".equals(type)) {

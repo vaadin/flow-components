@@ -167,6 +167,24 @@ class MultipleSheetsTest {
     }
 
     @Test
+    void selectSheetWithFractionalScrollOffset_switchesTheSheet() {
+        // Browsers report fractional scroll offsets on scaled displays.
+        TestHelper.fireClientEvent(spreadsheet, "sheetSelected",
+                "{\"sheetIndex\": 1, \"scrollLeft\": 12.5, \"scrollTop\": 37.6}");
+
+        Assertions.assertEquals(1, spreadsheet.getActiveSheetIndex());
+    }
+
+    @Test
+    void createSheetWithFractionalScrollOffset_addsTheSheet() {
+        TestHelper.fireClientEvent(spreadsheet, "sheetCreated",
+                "{\"scrollLeft\": 12.5, \"scrollTop\": 37.6}");
+
+        Assertions.assertEquals(3, spreadsheet.getNumberOfSheets());
+        Assertions.assertEquals(2, spreadsheet.getActiveSheetIndex());
+    }
+
+    @Test
     void createNewSheet_emptyName_throws() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> spreadsheet.createNewSheet("", 1, 1));

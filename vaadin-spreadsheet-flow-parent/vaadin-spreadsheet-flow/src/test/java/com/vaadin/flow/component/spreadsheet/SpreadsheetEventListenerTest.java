@@ -8,7 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -210,5 +212,59 @@ public class SpreadsheetEventListenerTest {
         fire("cellSelected", "{\"row\":7}");
 
         verify(handler).cellSelected(7, 0, false);
+    }
+
+    @Test
+    public void fractionalNumber_isRoundedToTheNearestInt() {
+        fire("sheetSelected",
+                "{\"sheetIndex\":1,\"scrollLeft\":12.4,\"scrollTop\":37.6}");
+
+        verify(handler).sheetSelected(1, 12, 38);
+    }
+
+    @Test
+    public void numberFieldThatIsNotANumber_readsAsZero() {
+        fire("cellSelected", "{\"row\":\"7\",\"column\":{\"x\":1}}");
+
+        verify(handler).cellSelected(0, 0, false);
+    }
+
+    @Test
+    public void flagThatIsNotABoolean_readsAsFalse() {
+        fire("groupingCollapsed",
+                "{\"cols\":1.5,\"colIndex\":3,\"collapsed\":[true]}");
+
+        verify(handler).setGroupingCollapsed(false, 3, false);
+    }
+
+    @Test
+    public void textFieldThatIsNotAScalar_readsAsNull() {
+        fire("sheetAddressChanged", "{\"value\":{\"cell\":\"B12\"}}");
+
+        verify(handler).sheetAddressChanged(null);
+    }
+
+    @Test
+    public void columnResized_fractionalWidthIsRounded() {
+        fire("columnResized", "{\"colIndexes\":[2],\"newWidths\":[80.6]}");
+
+        ArgumentCaptor<Map<Integer, Integer>> sizes = ArgumentCaptor
+                .forClass(Map.class);
+        verify(handler).columnResized(sizes.capture(), anyInt(), anyInt(),
+                anyInt(), anyInt());
+        assertEquals(Map.of(2, 81), sizes.getValue());
+    }
+
+    @Test
+    public void rowsResized_entriesThatAreNotNumbersAreLeftOut() {
+        fire("rowsResized",
+                "{\"rowIndexes\":[3,\"x\",5],\"newHeights\":[20,30,\"y\"]}");
+
+        ArgumentCaptor<Map<Integer, Float>> sizes = ArgumentCaptor
+                .forClass(Map.class);
+        // The refresh range covers only the rows that are resized.
+        verify(handler).rowsResized(sizes.capture(), eq(3), eq(1), eq(3),
+                eq(1));
+        assertEquals(Map.of(3, 20f), sizes.getValue());
     }
 }
