@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.spreadsheet.testbench;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.openqa.selenium.JavascriptExecutor;
@@ -121,25 +120,6 @@ public class SpreadsheetElement extends TestBenchElement {
                                 return st && st.shadowRoot
                                     ? st.shadowRoot.querySelector(arguments[1])
                                     : null;
-                                """,
-                        this, selector);
-    }
-
-    /**
-     * Find all elements in the sheet-tabs' shadow root matching a selector.
-     * Returns an empty list when the element isn't there.
-     */
-    @SuppressWarnings("unchecked")
-    private List<WebElement> findAllInSheetTabs(String selector) {
-        return (List<WebElement>) ((JavascriptExecutor) getCommandExecutor()
-                .getDriver()).executeScript(
-                        """
-                                const host = arguments[0];
-                                const st = host.shadowRoot
-                                    .querySelector('vaadin-spreadsheet-internal-sheet-tabs');
-                                return st && st.shadowRoot
-                                    ? Array.from(st.shadowRoot.querySelectorAll(arguments[1]))
-                                    : [];
                                 """,
                         this, selector);
     }
@@ -382,25 +362,33 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Scrolls the sheet-tab strip all the way back to the first tab.
+     * Scrolls the sheet selector all the way back to the first tab.
+     * <p>
+     * Has no effect if there are not enough sheets to require scrolling.
      */
     public void scrollSheetsToStart() {
         clickTabScrollButton(".scroll-tabs-beginning");
     }
 
     /**
-     * Scrolls the sheet-tab strip all the way to the last tab.
+     * Scrolls the sheet selector as far as it goes, so that it shows the last
+     * tab.
+     * <p>
+     * Has no effect if there are not enough sheets to require scrolling.
      */
     public void scrollSheetsToEnd() {
         clickTabScrollButton(".scroll-tabs-end");
     }
 
     /**
-     * Scrolls the sheet-tab strip one tab at a time.
+     * Scrolls the sheet selector by the given number of tabs, one tab at a
+     * time. Scrolling stops at either end of the selector.
+     * <p>
+     * Has no effect if there are not enough sheets to require scrolling.
      *
      * @param amount
-     *            how many tabs to scroll; negative scrolls back towards the
-     *            first tab
+     *            how many tabs to scroll; positive numbers scroll to the right
+     *            and negative numbers back towards the first tab
      */
     public void scrollSheets(int amount) {
         String selector = amount < 0 ? ".scroll-tabs-left"
@@ -429,36 +417,140 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Selects the sheet at the given index. Indexes are counted only for
-     * visible sheets.
+     * Selects the sheet at the given index by clicking its tab. Indexes are
+     * counted only for visible sheets: a hidden sheet has no tab. When the tab
+     * is scrolled out of the sheet selector, the selector is scrolled to show
+     * it first.
      *
      * @param sheetIndex
      *            Index of sheet to select, 0-based
+     * @throws NoSuchElementException
+     *             if there is no visible sheet at the given index
      */
     public void selectSheetAt(int sheetIndex) {
-        List<WebElement> tabs = findAllInSheetTabs(".sheet-tab");
-        if (sheetIndex < 0 || sheetIndex >= tabs.size()) {
+        if (!clickSheetTab(sheetIndex + 1, null)) {
             throw new NoSuchElementException(
                     "Sheet index out of range: " + sheetIndex);
         }
-        tabs.get(sheetIndex).click();
     }
 
     /**
-     * Selects the sheet with the given name. Only visible sheets can be
-     * selected.
+     * Selects the sheet with the given name by clicking its tab. Only visible
+     * sheets can be selected: a hidden sheet has no tab. When the tab is
+     * scrolled out of the sheet selector, the selector is scrolled to show it
+     * first.
+     * <p>
+     * Selects nothing when no visible sheet has the given name.
      *
      * @param sheetName
      *            Name of sheet to select
      */
     public void selectSheet(String sheetName) {
-        List<WebElement> tabs = findAllInSheetTabs(".sheet-tab");
-        for (WebElement tab : tabs) {
-            if (tab.getText().equals(sheetName)) {
-                tab.click();
-                return;
-            }
+        clickSheetTab(0, sheetName);
+    }
+
+    /**
+     * Scrolls the sheet selector until it shows the tab of the given sheet, and
+     * clicks the tab.
+     *
+     * @param index
+     *            the sheet's index among the visible sheets, 1-based, or
+     *            {@code 0} to find the sheet by its name
+     * @param name
+     *            the sheet's name, or {@code null} to find the sheet by its
+     *            index
+     * @return {@code false} if there is no such sheet
+     */
+    private boolean clickSheetTab(int index, String name) {
+        // The selector scrolls by whole tabs with its own buttons, and has
+        // no tab in the DOM for the sheets before the first one it shows,
+        // while the tabs past its right end are there but cut off. A tab
+        // that is missing is therefore found by scrolling back to the
+        // start, and a tab that is cut off by scrolling forward until it
+        // shows whole - or as whole as it gets when it is wider than the
+        // selector. Done in one script, waiting for the tabs to render
+        // after each step, rather than a round trip per tab.
+        WebElement tab = (WebElement) getCommandExecutor().getDriver()
+                .executeAsyncScript(
+                        """
+                                const [host, index, name] = arguments;
+                                const done = arguments[arguments.length - 1];
+                                const strip = host.shadowRoot && host.shadowRoot
+                                    .querySelector('vaadin-spreadsheet-internal-sheet-tabs');
+                                const root = strip && strip.shadowRoot;
+                                if (!root) {
+                                    done(null);
+                                    return;
+                                }
+                                const renderedTabs = () => Array.from(root.querySelectorAll('.sheet-tab'));
+                                const isWanted = (tab) => name === null
+                                    ? Number(tab.dataset.index) === index
+                                    : tab.title === name;
+                                // A button that cannot scroll any further carries
+                                // the hidden class.
+                                const enabledButton = (selector) => {
+                                    const button = root.querySelector(selector);
+                                    return button && !button.classList.contains('hidden')
+                                        ? button : null;
+                                };
+                                // Tabs show between the scroll buttons and the
+                                // status label, when there is one.
+                                const isShownWhole = (tab) => {
+                                    const shown = root.querySelector('.sheet-tabsheet-container')
+                                        .getBoundingClientRect();
+                                    const label = root.querySelector('.sheet-tabsheet-infolabel');
+                                    const right = label
+                                        ? Math.min(shown.right, label.getBoundingClientRect().left)
+                                        : shown.right;
+                                    const box = tab.getBoundingClientRect();
+                                    return box.left >= shown.left - 0.5 && box.right <= right + 0.5;
+                                };
+                                // Every tab from the first one shown is in the DOM,
+                                // so the last one carries the number of sheets.
+                                const initialTabs = renderedTabs();
+                                const sheetCount = initialTabs.length
+                                    ? Number(initialTabs[initialTabs.length - 1].dataset.index) : 0;
+                                if (name === null && (index < 1 || index > sheetCount)) {
+                                    done(null);
+                                    return;
+                                }
+                                (async () => {
+                                    // One step back to the start, and at most one
+                                    // step forward per sheet.
+                                    for (let step = 0; step <= sheetCount + 1; step++) {
+                                        const tabs = renderedTabs();
+                                        const tab = tabs.find(isWanted);
+                                        let button;
+                                        if (!tab) {
+                                            button = enabledButton('.scroll-tabs-beginning');
+                                            if (!button) {
+                                                done(null);
+                                                return;
+                                            }
+                                        } else if (tab === tabs[0] || isShownWhole(tab)) {
+                                            done(tab);
+                                            return;
+                                        } else {
+                                            button = enabledButton('.scroll-tabs-right');
+                                            if (!button) {
+                                                done(tab);
+                                                return;
+                                            }
+                                        }
+                                        button.click();
+                                        while (!(await strip.updateComplete)) {
+                                            // Rendered again after measuring the tabs.
+                                        }
+                                    }
+                                    done(renderedTabs().find(isWanted) || null);
+                                })();
+                                """,
+                        this, index, name);
+        if (tab == null) {
+            return false;
         }
+        wrapElement(tab, getCommandExecutor()).click();
+        return true;
     }
 
     /**
