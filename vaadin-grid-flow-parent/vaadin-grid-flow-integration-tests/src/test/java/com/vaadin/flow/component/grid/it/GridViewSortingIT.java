@@ -27,7 +27,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.GridSorterElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.testutil.TestPath;
@@ -64,21 +64,21 @@ public class GridViewSortingIT extends AbstractComponentIT {
     public void gridWithSorting() {
         scrollToElement(grid);
 
-        getCellContent(grid.getHeaderCell(0)).click();
+        grid.getHeaderCell(0).getSorter().click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
-        getCellContent(grid.getHeaderCell(2)).click();
+        grid.getHeaderCell(2).getSorter().click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("street").thenAsc("number").build(), true);
-        getCellContent(grid.getHeaderCell(2)).click();
+        grid.getHeaderCell(2).getSorter().click();
         assertSortMessageEquals(
                 QuerySortOrder.desc("street").thenDesc("number").build(), true);
-        getCellContent(grid.getHeaderCell(2)).click();
+        grid.getHeaderCell(2).getSorter().click();
         assertSortMessageEquals(Collections.emptyList(), true);
 
         // enable multi sort
         multiSortToggle.click();
-        getCellContent(grid.getHeaderCell(0)).click();
-        getCellContent(grid.getHeaderCell(1)).click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(1).getSorter().click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
     }
@@ -87,9 +87,9 @@ public class GridViewSortingIT extends AbstractComponentIT {
     public void gridWithSorting_switchColumnSorting() {
         scrollToElement(grid);
 
-        getCellContent(grid.getHeaderCell(0)).click();
-        getCellContent(grid.getHeaderCell(0)).click();
-        getCellContent(grid.getHeaderCell(0)).click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(0).getSorter().click();
 
         Assert.assertEquals(
                 "Current sort order: . Sort originates from the client: true.",
@@ -100,7 +100,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
     public void gridWithSorting_invertAndResetSortings() {
         scrollToElement(grid);
 
-        getCellContent(grid.getHeaderCell(0)).click();
+        grid.getHeaderCell(0).getSorter().click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
 
         invertSortDirections.click();
@@ -115,8 +115,8 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
         // enable multi sort
         multiSortToggle.click();
-        getCellContent(grid.getHeaderCell(0)).click();
-        getCellContent(grid.getHeaderCell(1)).click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(1).getSorter().click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
 
@@ -136,7 +136,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
         WebElement toggleFirstColumnButton = findElement(
                 By.id("grid-sortable-columns-toggle-first"));
 
-        getCellContent(grid.getHeaderCell(0)).click();
+        grid.getHeaderCell(0).getSorter().click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
 
         clickElementWithJs(toggleFirstColumnButton);
@@ -145,9 +145,9 @@ public class GridViewSortingIT extends AbstractComponentIT {
         clickElementWithJs(toggleFirstColumnButton);
         assertSortMessageEquals(Collections.emptyList(), false);
 
-        WebElement sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter")
-                .first();
-        Assert.assertNull(sorter.getDomProperty("direction"));
+        GridSorterElement sorter = grid.getHeaderCell(0).getSorter();
+        Assert.assertFalse(sorter.isAscending());
+        Assert.assertFalse(sorter.isDescending());
     }
 
     @Test
@@ -172,13 +172,13 @@ public class GridViewSortingIT extends AbstractComponentIT {
         // set multi-sort priority to append
         multiSortPriorityToggle.click();
 
-        getCellContent(grid.getHeaderCell(0)).click();
-        getCellContent(grid.getHeaderCell(1)).click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(1).getSorter().click();
 
         assertSortMessageEquals(
                 QuerySortOrder.asc("firstName").thenAsc("age").build(), true);
 
-        getCellContent(grid.getHeaderCell(1)).click();
+        grid.getHeaderCell(1).getSorter().click();
 
         assertSortMessageEquals(
                 QuerySortOrder.asc("firstName").thenDesc("age").build(), true);
@@ -223,33 +223,27 @@ public class GridViewSortingIT extends AbstractComponentIT {
                 sortOrdersString, fromClient), message.getText());
     }
 
-    private WebElement getCellContent(GridTHTDElement cell) {
-        return (WebElement) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0].firstElementChild;",
-                cell);
-    }
-
     private void assertSortIndicatorOrder(
             List<QuerySortOrder> querySortOrders) {
-        List<TestBenchElement> sorters = grid.$("vaadin-grid-sorter")
+        List<GridSorterElement> sorters = grid.$(GridSorterElement.class)
                 .hasAttribute("direction").all();
 
         querySortOrders.forEach((querySortOrder) -> {
             // Lookup sorter for column
             String columnName = querySortOrder.getSorted();
-            TestBenchElement columnSorter = sorters.stream()
+            GridSorterElement columnSorter = sorters.stream()
                     .filter(sorter -> sorter.getText().startsWith(columnName))
                     .findFirst().orElse(null);
             Assert.assertNotNull(
                     "Could not find sorter for column: " + columnName,
                     columnSorter);
 
-            // Check sort direction attribute
+            // Check sort direction
             SortDirection direction = querySortOrder.getDirection();
-            String directionValue = direction == SortDirection.ASCENDING ? "asc"
-                    : "desc";
-            Assert.assertEquals(directionValue,
-                    columnSorter.getDomProperty("direction"));
+            Assert.assertEquals(direction == SortDirection.ASCENDING,
+                    columnSorter.isAscending());
+            Assert.assertEquals(direction == SortDirection.DESCENDING,
+                    columnSorter.isDescending());
 
             // Check order part displays correct order value
             String orderValue = String

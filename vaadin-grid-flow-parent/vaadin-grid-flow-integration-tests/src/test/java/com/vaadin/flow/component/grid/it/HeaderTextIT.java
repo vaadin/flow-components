@@ -51,11 +51,9 @@ public class HeaderTextIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "After calling setHeader for a sortable column, the header text is not changed to the new value.",
                 "Birth Year", grid.getHeaderCell(1).getText());
-        Assert.assertFalse(
+        Assert.assertNotNull(
                 "After calling setHeader for a sortable column, vaadin-grid-sorter is removed from the column header.",
-                grid.getHeaderCellContent(0, 1)
-                        .findElements(By.tagName("vaadin-grid-sorter"))
-                        .isEmpty());
+                grid.getHeaderCell(0, 1).getSorter());
     }
 
     @Test
@@ -76,11 +74,9 @@ public class HeaderTextIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "After calling setHeader for a sortable column in a grid with multi header rows, the header text is not changed to the new value.",
                 "Afterlife", grid.getHeaderCellContent(1, 1).getText());
-        Assert.assertFalse(
+        Assert.assertNotNull(
                 "After calling setHeader for a sortable column, vaadin-grid-sorter is removed from the column header.",
-                grid.getHeaderCellContent(1, 1)
-                        .findElements(By.tagName("vaadin-grid-sorter"))
-                        .isEmpty());
+                grid.getHeaderCell(1, 1).getSorter());
     }
 
     @Test

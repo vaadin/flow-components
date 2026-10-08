@@ -36,14 +36,14 @@ public class BeanGridSortingIT extends AbstractComponentIT {
         Assert.assertEquals("1", grid.getCell(2, 1).getText());
 
         // Sort by ascending order
-        grid.getHeaderCell(1).$("vaadin-grid-sorter").first().click();
+        grid.getHeaderCell(1).getSorter().click();
 
         Assert.assertEquals("1", grid.getCell(0, 1).getText());
         Assert.assertEquals("99", grid.getCell(1, 1).getText());
         Assert.assertEquals("1111", grid.getCell(2, 1).getText());
 
         // Sort by descending order
-        grid.getHeaderCell(1).$("vaadin-grid-sorter").first().click();
+        grid.getHeaderCell(1).getSorter().click();
 
         Assert.assertEquals("1111", grid.getCell(0, 1).getText());
         Assert.assertEquals("99", grid.getCell(1, 1).getText());
