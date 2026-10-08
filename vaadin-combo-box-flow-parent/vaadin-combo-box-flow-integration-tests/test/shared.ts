@@ -9,6 +9,7 @@ export type ComboBoxConnector = {
   reset: () => void;
   set: (index: number, items: unknown[], filter: string) => void;
   confirm: (id: number, filter: string) => void;
+  updateSize: (newSize: number) => void;
 };
 
 export type ComboBoxServer = {
