@@ -16,7 +16,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   let lastTypedFilter = '';
   let lastRequestedRange = [-1, -1];
-  let lastRequestedFilter = '';
   let needsDataCommunicatorReset = false;
 
   const dataProvider = function (params, callback) {
@@ -43,11 +42,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
         comboBox._filterDebouncer,
         timeOut.after(comboBox._filterTimeout ?? 500),
         () => {
-          // Filter cycled back to what server last received — force re-emit.
-          if (params.filter === lastRequestedFilter) {
-            needsDataCommunicatorReset = true;
-          }
-
           comboBox.clearCache();
         }
       );
@@ -109,7 +103,6 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     }
 
     lastRequestedRange = viewportPageRange;
-    lastRequestedFilter = filter;
   };
 
   comboBox.$connector.clear = (start, length) => {
@@ -190,6 +183,9 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
     lastRequestedRange = [-1, -1];
     lastTypedFilter = '';
     comboBox.clearCache();
+    // The server resets the data communicator itself before calling this, so
+    // the next request must not ask for another reset
+    needsDataCommunicatorReset = false;
   };
 
   comboBox.$connector.confirm = function (id, filter) {
@@ -239,6 +235,14 @@ window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
 
   // Assign last, after all `$connector` functions are defined.
   comboBox.dataProvider = dataProvider;
+
+  // Whenever the web component cache is cleared after that, the server
+  // considers the requested range as already sent. Make the next request ask
+  // the server to send it again.
+  comboBox.clearCache = () => {
+    needsDataCommunicatorReset = true;
+    Object.getPrototypeOf(comboBox).clearCache.call(comboBox);
+  };
 };
 
 window.Vaadin.ComboBoxPlaceholder = ComboBoxPlaceholder;
