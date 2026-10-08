@@ -8,6 +8,7 @@
  */
 
 import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from 'lit';
+import { showInTopLayer } from '../dom/TopLayer.js';
 import { animateIn, animateOut, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { actionIconSlotName } from '../dom/VirtualChildren.js';
 import type { SpreadsheetActionDetails } from '../types/wire.js';
@@ -79,17 +80,12 @@ export class SpreadsheetContextMenu extends LitElement {
     overlayAnimationStyles,
     css`
       /*
-     * Anchored to the spreadsheet, not to the viewport.
-     *
-     * The menu opens on a point the user clicked, which arrives in
-     * viewport coordinates. Placing a fixed box at those coordinates
-     * only works while no ancestor has a transform: a dialog overlay
-     * has one while it animates, becomes the containing block for
-     * fixed positioning, and then drops it again - so the menu was
-     * drawn 16px off and jumped a moment later, and a click aimed at
-     * one item landed on its neighbour. Sharing the sheet's own
-     * coordinate space, whatever is done to the sheet is done to the
-     * menu, and it cannot drift away from what it opened on.
+     * The sheet's origin. The menu is given the point clicked in the
+     * sheet's own coordinates and measures this element to turn it back
+     * into the page's. The menu itself goes in the top layer, where no
+     * ancestor's transform applies: a fixed box inside a dialog overlay,
+     * which is transformed while it animates, was drawn 16px off and
+     * jumped a moment later.
      */
       :host {
         position: absolute;
@@ -104,8 +100,17 @@ export class SpreadsheetContextMenu extends LitElement {
 
       /* The menu as the GWT client drew it: a white card with a soft
        shadow, its items in 27px rows. */
+      /* In the top layer while open, as the GWT client's menu was outside
+       the sheet: the sheet clips what overflows it, and a menu opened near
+       its bottom or right edge lost its last items. Absolutely placed
+       there, so in page coordinates and moving with the page. The inset
+       and margin undo the browser's popover defaults; a menu taller than
+       the window scrolls. */
       .menu {
         position: absolute;
+        inset: auto;
+        margin: 0;
+        overflow: hidden auto;
         padding: 4px;
         box-sizing: border-box;
         background: var(--vaadin-spreadsheet-contextmenu-bg, var(--_vaadin-spreadsheet-contextmenu-bg, #fff));
@@ -287,6 +292,9 @@ export class SpreadsheetContextMenu extends LitElement {
       });
       return;
     }
+    // Shown before it is placed: a popover that is not open takes no room
+    // and cannot be measured.
+    showInTopLayer(panel);
     this.place(panel);
     panel.focus({ preventScroll: true });
     // Only as it opens: offered its actions again while open, the GWT
@@ -324,8 +332,14 @@ export class SpreadsheetContextMenu extends LitElement {
     if (top === 0) {
       panel.style.maxHeight = `${windowHeight}px`;
     }
-    panel.style.left = `${left - origin.left}px`;
-    panel.style.top = `${top - origin.top}px`;
+    if (panel.matches(':popover-open')) {
+      panel.style.left = `${left + window.scrollX}px`;
+      panel.style.top = `${top + window.scrollY}px`;
+    } else {
+      // No top layer in this browser: placed in the sheet's own space.
+      panel.style.left = `${left - origin.left}px`;
+      panel.style.top = `${top - origin.top}px`;
+    }
   }
 
   private readonly handleKeyDown = (e: KeyboardEvent): void => {
@@ -407,9 +421,9 @@ export class SpreadsheetContextMenu extends LitElement {
     if (state === null) {
       return nothing;
     }
-    const { x, y, actions } = state;
+    const { actions } = state;
     return html`
-      <div class="menu" part="context-menu" tabindex="-1" style="left:${x}px;top:${y}px;">
+      <div class="menu" part="context-menu" tabindex="-1" popover="manual">
         ${actions.map(
           (action) => html`
             <button class="item" part="context-menu-item" type="button" data-key=${action.key} data-type=${action.type}>

@@ -96,6 +96,19 @@ function rightClickCell(sheet: Spreadsheet, col: number, row: number, clientX = 
   );
 }
 
+/** The element under a point, looking into shadow roots. */
+function deepElementFromPoint(x: number, y: number): Element | null {
+  let el = document.elementFromPoint(x, y);
+  while (el?.shadowRoot) {
+    const inner = el.shadowRoot.elementFromPoint(x, y);
+    if (inner === null || inner === el) {
+      break;
+    }
+    el = inner;
+  }
+  return el;
+}
+
 function menuPanel(sheet: Spreadsheet): HTMLElement {
   return sheet.getContextMenu().shadowRoot!.querySelector<HTMLElement>('.menu')!;
 }
@@ -297,6 +310,24 @@ describe('Spreadsheet context menu — where it lands', () => {
     const rect = (await panel()).getBoundingClientRect();
     expect(Math.round(rect.bottom)).to.equal(document.documentElement.clientHeight);
     expect(Math.round(rect.x)).to.equal(120);
+  });
+
+  it('is not cut off by the edge of the sheet, as the GWT client\'s menu was not', async () => {
+    // The component clips what overflows it, and the menu was drawn inside
+    // it: opened near the bottom of a sheet shorter than the window, its
+    // last items were cut off and could not be clicked.
+    ctx = attachSheet();
+    ctx.host.style.height = '150px';
+    ctx.host.style.overflow = 'hidden';
+    const sheetBottom = ctx.host.getBoundingClientRect().bottom;
+    rightClickCell(ctx.sheet, 2, 2, 120, sheetBottom - 10);
+    ctx.sheet.showActions([action('One', '1', 0), action('Two', '2', 0), action('Three', '3', 0)]);
+
+    const last = (await panel()).querySelectorAll<HTMLElement>('.item')[2];
+    const box = last.getBoundingClientRect();
+    expect(box.top, 'the last item should lie below the sheet').to.be.greaterThan(sheetBottom);
+    const hit = deepElementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+    expect(hit !== null && (hit === last || last.contains(hit)), `hit ${hit?.tagName}`).to.be.true;
   });
 
   it('lands there inside a transformed ancestor too', async () => {
