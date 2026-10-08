@@ -347,6 +347,22 @@ describe('Spreadsheet — writing a cell comment', () => {
     expect(events.map((e) => e.type)).to.eql(['updateCellComment']);
   });
 
+  it('takes a click inside the note, so the cell under it is not selected', async () => {
+    // The card lets the pointer through to the cells so a note shown on
+    // hover never gets in the way. The note being written has to take it:
+    // a click meant to place the caret otherwise selected the cell
+    // underneath, and the note lost the focus and closed.
+    ctx.sheet.editCellComment(0, 0);
+    const el = (await note())!;
+    const box = el.getBoundingClientRect();
+
+    const hit = ctx.sheet
+      .getCellGrid()
+      .shadowRoot!.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+
+    expect(hit === el, `hit ${hit?.className}`).to.be.true;
+  });
+
   it('keeps the keys out of the sheet underneath', async () => {
     // Without stopping them, typing a note would also be typing into
     // the cell the sheet has selected.

@@ -213,6 +213,10 @@ export class SpreadsheetCellGrid extends LitElement {
       .v-spreadsheet-comment-overlay .comment-overlay-edit {
         display: block;
         box-sizing: border-box;
+        /* The card lets the pointer through; the note being written takes
+         it, so a click places the caret instead of selecting the cell
+         underneath. */
+        pointer-events: auto;
         width: 160px;
         height: 60px;
         resize: none;
