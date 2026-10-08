@@ -3313,6 +3313,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // Frozen columns stay on screen whatever the scroll position,
         // so their headers travel with them.
         horizontalSplitPosition: state.horizontalSplitPosition,
+        frozenRows: state.verticalSplitPosition > 0,
+        scrollTop: state.scrollTop,
         frozenColX: state.frozenColX,
         frozenColWidths: state.frozenColWidths,
         scrollLeft: state.scrollLeft,
@@ -3374,6 +3376,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // Frozen rows stay on screen whatever the scroll position, so
         // their headers travel with them.
         verticalSplitPosition: state.verticalSplitPosition,
+        frozenColumns: state.horizontalSplitPosition > 0,
+        scrollLeft: state.scrollLeft,
         frozenRowY: state.frozenRowY,
         frozenRowHeights: state.frozenRowHeights,
         scrollTop: state.scrollTop

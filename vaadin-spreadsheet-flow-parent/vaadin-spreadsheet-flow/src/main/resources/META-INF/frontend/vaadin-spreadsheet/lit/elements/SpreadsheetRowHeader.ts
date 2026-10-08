@@ -7,7 +7,7 @@
  * license.
  */
 
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
@@ -64,6 +64,21 @@ export interface RowHeaderRenderState {
    * worse than none.
    */
   verticalSplitPosition?: number;
+  /**
+   * Whether columns are frozen as well. Only then does the freeze line run
+   * on through the numbers, as the GWT client's corner pane border did;
+   * with rows frozen alone that pane had no border, and the numbers keep a
+   * pixel's gap at the freeze line that the sheet's background shows
+   * through.
+   */
+  frozenColumns?: boolean;
+  /**
+   * How far the sheet is scrolled right. With rows frozen alone, the GWT
+   * client's pane of frozen rows slid left under the numbers as the sheet
+   * scrolled right, and its border showed through the numbers' gap at the
+   * freeze line from the right - under the numbers scrolled over it.
+   */
+  scrollLeft?: number;
   /** Pixel y-offsets of the frozen rows, indexed by {@code row - 1}. */
   frozenRowY?: ReadonlyArray<number>;
   /** Pixel heights of the frozen rows, same indexing as frozenRowY. */
@@ -220,9 +235,11 @@ export class SpreadsheetRowHeader extends LitElement {
       pointer-events: none;
     }
 
-    /* Divides one outline level from the next. */
+    /* Divides one outline level from the next. Over the freeze line in
+       the gutter, as the GWT client drew its level lines over its panes. */
     .row-grouping-separator {
       position: absolute;
+      z-index: 3;
       width: 0;
       border-right: 1px dotted
         var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
@@ -259,8 +276,6 @@ export class SpreadsheetRowHeader extends LitElement {
        crossed it. */
     .frozen-header-strip > .freeze-line {
       position: absolute;
-      left: 0;
-      right: -1px;
       height: 1px;
       z-index: 3;
       background: #6a6a6a;
@@ -268,6 +283,40 @@ export class SpreadsheetRowHeader extends LitElement {
     }
 
     :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
+      background: var(--lumo-contrast-50pct);
+    }
+
+    .freeze-gutter-pane {
+      position: absolute;
+      left: 0;
+      top: 0;
+      box-sizing: border-box;
+      border-right: 1px solid
+        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px solid #6a6a6a;
+      pointer-events: none;
+    }
+
+    :host([theme~='lumo']) .freeze-gutter-pane {
+      border-bottom-color: var(--lumo-contrast-50pct);
+    }
+
+    /* The gap the GWT client left at the freeze line in the numbers when
+       only rows were frozen: under the numbers, the sheet's background. */
+    .freeze-gap {
+      position: absolute;
+      right: -1px;
+      height: 1px;
+      z-index: -1;
+      background: var(--default-background-color, #fff);
+      pointer-events: none;
+    }
+
+    .freeze-gap.slid {
+      background: #6a6a6a;
+    }
+
+    :host([theme~='lumo']) .freeze-gap.slid {
       background: var(--lumo-contrast-50pct);
     }
 
@@ -520,6 +569,8 @@ export class SpreadsheetRowHeader extends LitElement {
       rowGroupingInversed = false,
       rowGroupingHeadings = true,
       verticalSplitPosition = 0,
+      frozenColumns = false,
+      scrollLeft = 0,
       frozenRowY = [],
       frozenRowHeights = [],
       scrollTop = 0,
@@ -583,6 +634,7 @@ export class SpreadsheetRowHeader extends LitElement {
     // so it stays put while the rest slides underneath — the same trick
     // the cell-grid uses for its frozen quadrants.
     let frozenStrip: TemplateResult | string = '';
+    let freezeGap: TemplateResult | typeof nothing = nothing;
     if (verticalSplitPosition > 0) {
       const scrolling = cells.length;
       const scrollingHandles = handles.length;
@@ -595,15 +647,51 @@ export class SpreadsheetRowHeader extends LitElement {
       }
       const frozenCells = cells.splice(scrolling);
       const frozenHandles = handles.splice(scrollingHandles);
-      // The freeze line runs on across the numbers and the outline gutter,
-      // as the GWT client's frozen pane border did, over the same first
-      // pixel of the scrolling rows as in the cells.
+      // The freeze line runs on across the outline gutter, as the GWT
+      // client's frozen gutter pane border did, on the pixel it has to
+      // itself among the cells; across the numbers too when columns are
+      // frozen as well, and otherwise a gap there.
       const frozenHeight =
         (frozenRowY[verticalSplitPosition - 1] ?? 0) + (frozenRowHeights[verticalSplitPosition - 1] ?? 0);
+      // In the gutter, the bottom border of a pane over the frozen rows'
+      // part of it, bordered along the right as the gutter is - the GWT
+      // client's frozen gutter pane, whose two borders met in a blended
+      // corner pixel.
+      const gutterLine =
+        gutterWidth > 0
+          ? html`<div class="freeze-gutter-pane" style="width:${gutterWidth}px;height:${frozenHeight + 1}px;"></div>`
+          : nothing;
+      const numberLine =
+        numbersWidth > 0 && frozenColumns
+          ? html`<div class="freeze-line" style="top:${frozenHeight}px;left:${gutterWidth}px;right:-1px;"></div>`
+          : nothing;
+      // With rows frozen alone the GWT client's corner pane had no border,
+      // and its pixel was see-through: the sheet's background at rest, the
+      // numbers that scroll under it as the sheet scrolls. So the gap lies
+      // under the numbers, pinned with the frozen ones.
+      // What of the frozen rows' line has slid left under the numbers lies
+      // in the gap too, under the numbers.
+      freezeGap =
+        numbersWidth > 0 && !frozenColumns
+          ? html`<div
+                class="freeze-gap"
+                style="transform:translateY(${scrollTop}px);top:${frozenHeight}px;left:${gutterWidth}px;"
+              ></div
+              >${scrollLeft > 0
+                ? html`<div
+                    class="freeze-gap slid"
+                    style="transform:translateY(${scrollTop}px);top:${frozenHeight}px;left:${Math.max(
+                      gutterWidth,
+                      headerWidth - scrollLeft
+                    )}px;"
+                  ></div>`
+                : nothing}`
+          : nothing;
       frozenStrip = html`
         <div class="frozen-header-strip" style="transform:translateY(${scrollTop}px);">
-          ${frozenCells.map((cell) => cell.template)}${frozenHandles.map((handle) => handle.template)}
-          <div class="freeze-line" style="top:${frozenHeight}px;"></div>
+          ${frozenCells.map((cell) => cell.template)}${frozenHandles.map(
+            (handle) => handle.template
+          )}${gutterLine}${numberLine}
         </div>
       `;
     }
@@ -659,7 +747,7 @@ export class SpreadsheetRowHeader extends LitElement {
       handles,
       (handle) => handle.key,
       (handle) => handle.template
-    )}${frozenStrip}`;
+    )}${freezeGap}${frozenStrip}`;
   }
 }
 

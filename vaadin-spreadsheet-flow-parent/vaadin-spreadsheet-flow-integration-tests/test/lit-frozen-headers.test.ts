@@ -374,37 +374,175 @@ describe('Frozen panes — the freeze line through the headers', () => {
     );
   }
 
-  it('carries the line between frozen and scrolling columns up through the letters and the gutter', async () => {
+  /** The freeze lines in a header strip's frozen part, top to bottom or left to right. */
+  function headerLines(header: HTMLElement): HTMLElement[] {
+    return [...header.shadowRoot!.querySelectorAll<HTMLElement>('.frozen-header-strip > .freeze-line')];
+  }
+
+  it('carries the line up through the letters and the gutter when rows are frozen too, as the GWT client did', async () => {
+    ctx.sheet.setColGroupingMax(1);
+    ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.setVerticalSplitPosition(2);
+    await settle();
+
+    const header = ctx.sheet.getColumnHeader();
+    const [letters] = headerLines(header);
+    const pane = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-gutter-pane')!;
+    const strip = header.getBoundingClientRect();
+    // On the pixel the line among the cells is on: in the gutter the right
+    // border of the GWT client's frozen gutter pane, bordered along the
+    // bottom as the gutter is; then down the letters over the strip's
+    // bottom border, in the line's colour.
+    const cellLine = lines().find((b) => b.width === 1)!;
+    const paneBox = pane.getBoundingClientRect();
+    expect(`${paneBox.right - 1} ${paneBox.top}`).to.equal(`${cellLine.left} ${strip.top}`);
+    expect(getComputedStyle(pane).borderRight).to.equal('1px solid rgb(106, 106, 106)');
+    expect(getComputedStyle(pane).borderBottom).to.equal('1px solid rgb(199, 199, 199)');
+    const box = letters.getBoundingClientRect();
+    expect(`${box.left} ${box.top} ${box.bottom}`).to.equal(`${cellLine.left} ${paneBox.bottom} ${strip.bottom}`);
+    expect(getComputedStyle(letters).backgroundColor).to.equal('rgb(106, 106, 106)');
+  });
+
+  it('leaves the letters a see-through gap at the freeze line when only columns are frozen, as the GWT client did', async () => {
+    // The GWT client's corner pane drew the line through the letters, and
+    // had no border while no rows were frozen: its pixel was see-through,
+    // the sheet's white at rest and the letters scrolling under it as the
+    // sheet scrolls. The gutter's own pane kept its line.
     ctx.sheet.setColGroupingMax(1);
     ctx.sheet.setHorizontalSplitPosition(2);
     await settle();
 
     const header = ctx.sheet.getColumnHeader();
-    const line = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-line')!;
-    const box = line.getBoundingClientRect();
-    const strip = header.getBoundingClientRect();
-    // On the pixel the line among the cells is on, from the top of the
-    // gutter down over the strip's bottom border.
-    expect(box.left).to.equal(lines()[0].left);
-    expect(`${box.width} ${box.top} ${box.bottom}`).to.equal(`1 ${strip.top} ${strip.bottom}`);
-    expect(getComputedStyle(line).backgroundColor).to.equal('rgb(106, 106, 106)');
+    expect(headerLines(header), 'no line through the letters').to.be.empty;
+    const pane = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-gutter-pane')!;
+    expect(getComputedStyle(pane).borderRight, 'the gutter keeps its line').to.equal('1px solid rgb(106, 106, 106)');
+    const gap = header.shadowRoot!.querySelector<HTMLElement>('.freeze-gap')!;
+    const cellLine = lines().find((b) => b.width === 1)!;
+    expect(getComputedStyle(gap).backgroundColor).to.equal('rgb(255, 255, 255)');
+    expect(`${gap.getBoundingClientRect().left} ${gap.getBoundingClientRect().width}`).to.equal(`${cellLine.left} 1`);
+
+    ctx.sheet.getScrollContainer().scrollLeft = 105;
+    await settle();
+
+    const box = gap.getBoundingClientRect();
+    expect(box.left, 'pinned with the frozen letters').to.equal(cellLine.left);
+    // A scrolled letter now lies across it, and is drawn over it.
+    const under = [...header.shadowRoot!.querySelectorAll<HTMLElement>('.col-header-cell')].filter((c) => {
+      const b = c.getBoundingClientRect();
+      return b.left <= box.left && box.right <= b.right;
+    });
+    expect(under, 'a letter across the gap').to.not.be.empty;
+    expect(getComputedStyle(gap).zIndex, 'under the letters').to.equal('-1');
   });
 
-  it('carries the line between frozen and scrolling rows across the numbers and the gutter', async () => {
+  it('carries the line across the numbers and the gutter when columns are frozen too, as the GWT client did', async () => {
+    ctx.sheet.setRowGroupingMax(1);
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await settle();
+
+    const header = ctx.sheet.getRowHeader();
+    const [numbers] = headerLines(header);
+    const pane = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-gutter-pane')!;
+    const strip = header.getBoundingClientRect();
+    const cellLine = lines().find((b) => b.height === 1)!;
+    const paneBox = pane.getBoundingClientRect();
+    expect(`${paneBox.bottom - 1} ${paneBox.left}`).to.equal(`${cellLine.top} ${strip.left}`);
+    expect(getComputedStyle(pane).borderBottom).to.equal('1px solid rgb(106, 106, 106)');
+    expect(getComputedStyle(pane).borderRight).to.equal('1px solid rgb(199, 199, 199)');
+    const box = numbers.getBoundingClientRect();
+    expect(`${box.top} ${box.left} ${box.right}`).to.equal(`${cellLine.top} ${paneBox.right} ${strip.right}`);
+    expect(getComputedStyle(numbers).backgroundColor).to.equal('rgb(106, 106, 106)');
+  });
+
+  it('leaves the numbers a see-through gap at the freeze line when only rows are frozen, as the GWT client did', async () => {
     ctx.sheet.setRowGroupingMax(1);
     ctx.sheet.setVerticalSplitPosition(2);
     await settle();
 
     const header = ctx.sheet.getRowHeader();
-    const line = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-line')!;
-    const box = line.getBoundingClientRect();
+    expect(headerLines(header), 'no line through the numbers').to.be.empty;
+    const pane = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-gutter-pane')!;
+    expect(getComputedStyle(pane).borderBottom, 'the gutter keeps its line').to.equal('1px solid rgb(106, 106, 106)');
+    const gap = header.shadowRoot!.querySelector<HTMLElement>('.freeze-gap')!;
+    const cellLine = lines().find((b) => b.height === 1)!;
+    expect(getComputedStyle(gap).backgroundColor).to.equal('rgb(255, 255, 255)');
+    expect(`${gap.getBoundingClientRect().top} ${gap.getBoundingClientRect().height}`).to.equal(`${cellLine.top} 1`);
+
+    ctx.sheet.getScrollContainer().scrollTop = 105;
+    await settle();
+
+    const box = gap.getBoundingClientRect();
+    expect(box.top, 'pinned with the frozen numbers').to.equal(cellLine.top);
+    // A scrolled number now lies across it, and is drawn over it.
+    const under = [...header.shadowRoot!.querySelectorAll<HTMLElement>('.row-header-cell')].filter((c) => {
+      const b = c.getBoundingClientRect();
+      return b.top <= box.top && box.bottom <= b.bottom;
+    });
+    expect(under, 'a number across the gap').to.not.be.empty;
+    expect(getComputedStyle(gap).zIndex, 'under the numbers').to.equal('-1');
+  });
+
+  it('shows the frozen columns\' line sliding up into the letters\' gap as the sheet scrolls down, as the GWT client did', async () => {
+    // The GWT client moved its pane of frozen columns up under the letters
+    // as the sheet scrolled down, and the pane's border showed through the
+    // gap from the bottom up.
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await settle();
+    ctx.sheet.getScrollContainer().scrollTop = 10;
+    await settle();
+
+    const header = ctx.sheet.getColumnHeader();
+    const [risen] = headerLines(header);
     const strip = header.getBoundingClientRect();
-    expect(box.top).to.equal(lines()[0].top);
-    expect(`${box.height} ${box.left} ${box.right}`).to.equal(`1 ${strip.left} ${strip.right}`);
+    const box = risen.getBoundingClientRect();
+    const cellLine = lines().find((b) => b.width === 1)!;
+    expect(`${box.left} ${box.width}`).to.equal(`${cellLine.left} 1`);
+    expect(`${box.top} ${box.bottom}`).to.equal(`${strip.bottom - 10} ${strip.bottom}`);
+    expect(getComputedStyle(risen).backgroundColor).to.equal('rgb(106, 106, 106)');
+  });
+
+  it('shows the frozen rows\' line sliding left into the numbers\' gap as the sheet scrolls right, as the GWT client did', async () => {
+    // Under the numbers, which the GWT client drew over that pane.
+    ctx.sheet.setVerticalSplitPosition(2);
+    await settle();
+    ctx.sheet.getScrollContainer().scrollLeft = 20;
+    await settle();
+
+    const header = ctx.sheet.getRowHeader();
+    const slid = header.shadowRoot!.querySelector<HTMLElement>('.freeze-gap.slid')!;
+    const strip = header.getBoundingClientRect();
+    const box = slid.getBoundingClientRect();
+    const cellLine = lines().find((b) => b.height === 1)!;
+    expect(`${box.top} ${box.height}`).to.equal(`${cellLine.top} 1`);
+    expect(`${box.left} ${box.right}`).to.equal(`${strip.right - 20} ${strip.right}`);
+    expect(getComputedStyle(slid).backgroundColor).to.equal('rgb(106, 106, 106)');
+    expect(getComputedStyle(slid).zIndex, 'under the numbers').to.equal('-1');
+  });
+
+  it('draws the dotted level lines over the freeze line in the gutters, as the GWT client did', async () => {
+    // Its level lines' pane lay over its frozen gutter panes, so a dot that
+    // fell on the freeze line was drawn on it.
+    ctx.sheet.setRowGroupingMax(1);
+    ctx.sheet.setColGroupingMax(1);
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await settle();
+
+    for (const [header, separator] of [
+      [ctx.sheet.getRowHeader(), '.row-grouping-separator'],
+      [ctx.sheet.getColumnHeader(), '.col-grouping-separator'],
+    ] as const) {
+      const root = header.shadowRoot!;
+      const strip = root.querySelector<HTMLElement>('.frozen-header-strip')!;
+      const dots = root.querySelector<HTMLElement>(separator)!;
+      expect(Number(getComputedStyle(dots).zIndex), separator).to.be.greaterThan(Number(getComputedStyle(strip).zIndex));
+    }
   });
 
   it('keeps the line with the frozen columns as the sheet scrolls', async () => {
     ctx.sheet.setHorizontalSplitPosition(2);
+    ctx.sheet.setVerticalSplitPosition(2);
     await settle();
     const before = ctx.sheet
       .getColumnHeader()
