@@ -282,8 +282,10 @@ export class SpreadsheetRowHeader extends LitElement {
       pointer-events: none;
     }
 
+    /* Over the sheet's ground, as the GWT client's pane border was, not
+       over the numbers' tint. */
     :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
-      background: var(--lumo-contrast-50pct);
+      background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
     }
 
     .freeze-gutter-pane {
@@ -317,7 +319,7 @@ export class SpreadsheetRowHeader extends LitElement {
     }
 
     :host([theme~='lumo']) .freeze-gap.slid {
-      background: var(--lumo-contrast-50pct);
+      background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
     }
 
     /* A number as the GWT client drew it, over a border of its own along

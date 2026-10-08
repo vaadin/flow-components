@@ -421,8 +421,10 @@ export class SpreadsheetColumnHeader extends LitElement {
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
 
+    /* Over the sheet's ground, as the GWT client's pane border was, not
+       over the letters' tint. */
     :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
-      background: var(--lumo-contrast-50pct);
+      background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
     }
 
     :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {

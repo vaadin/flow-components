@@ -651,8 +651,12 @@ export class SpreadsheetCellGrid extends LitElement {
         background: var(--lumo-success-color-10pct);
       }
 
+      /* Lumo's line colour over the sheet's ground, made solid: the GWT
+       client's line was its panes' border, over the sheet's own ground
+       whatever scrolled past. See-through, it darkened over the cells under
+       it and where its pieces overlapped in the frozen corner. */
       :host([theme~='lumo']) .freeze-line {
-        background: var(--lumo-contrast-50pct);
+        background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
       }
 
       /* A square as tall as its cell, tinted like the headers, with Lumo's

@@ -84,6 +84,7 @@ const TOKENS = [
 const SHADOW_S = 'rgba(2, 2, 2, 0.2) 0px 2px 4px 0px';
 const TINT_5 = 'linear-gradient(rgba(5, 5, 5, 0.05), rgba(5, 5, 5, 0.05))';
 const CONTRAST_20 = 'rgba(20, 20, 20, 0.2)';
+const HALF_CONTRAST = 'linear-gradient(rgba(50, 50, 50, 0.5), rgba(50, 50, 50, 0.5))';
 const BASE = 'rgb(251, 252, 253)';
 const BODY_TEXT = 'rgb(11, 12, 13)';
 
@@ -543,7 +544,7 @@ describe('Lumo theme — comments', () => {
 });
 
 describe('Lumo theme — the line along a freeze', () => {
-    it('is drawn in Lumo\'s half contrast', async () => {
+    it('is drawn in Lumo\'s half contrast, solid over its ground', async () => {
         const { el, cleanup } = await grid('lumo', {
             viewport: {
                 firstColumnIndex: 3,
@@ -566,9 +567,87 @@ describe('Lumo theme — the line along a freeze', () => {
             totalGridHeightPx: 500,
         });
 
-        expect(getComputedStyle(inGrid(el, '.freeze-line')).backgroundColor).to.equal('rgba(50, 50, 50, 0.5)');
+        // Lumo's line colour laid over the sheet's ground, solid, as the GWT
+        // client's pane border lay over it: see-through, it darkened where
+        // its pieces overlapped and over the cells scrolling under it.
+        const line = getComputedStyle(inGrid(el, '.freeze-line'));
+        expect(line.backgroundImage).to.equal(HALF_CONTRAST);
+        expect(line.backgroundColor).to.equal(BASE);
 
         cleanup();
+    });
+
+    it('is drawn solid in the headers too', async () => {
+        // Columns and rows 2 and 3 in view, past one frozen of each.
+        const viewport = {
+            firstColumnIndex: 2,
+            firstColumnPosition: 50,
+            lastColumnIndex: 3,
+            lastColumnPosition: 150,
+            firstRowIndex: 2,
+            firstRowPosition: 20,
+            lastRowIndex: 3,
+            lastRowPosition: 60,
+        };
+        const letters = await inHost<SpreadsheetColumnHeader>('vaadin-spreadsheet-internal-column-header', 'lumo', (el) => {
+            el.renderState = {
+                ...emptyColumnHeaderRenderState(),
+                viewport,
+                colX: [50, 100],
+                colWidths: [50, 50],
+                headerHeight: 27,
+                horizontalSplitPosition: 1,
+                frozenColX: [0],
+                frozenColWidths: [50],
+                frozenRows: true,
+            };
+        });
+        const numbers = await inHost<SpreadsheetRowHeader>('vaadin-spreadsheet-internal-row-header', 'lumo', (el) => {
+            el.renderState = {
+                ...emptyRowHeaderRenderState(),
+                viewport,
+                rowY: [20, 40],
+                rowHeights: [20, 20],
+                headerWidth: 50,
+                verticalSplitPosition: 1,
+                frozenRowY: [0],
+                frozenRowHeights: [20],
+                frozenColumns: true,
+            };
+        });
+        // Rows frozen alone, scrolled right: the piece of their line that
+        // slid left under the numbers.
+        const slid = await inHost<SpreadsheetRowHeader>('vaadin-spreadsheet-internal-row-header', 'lumo', (el) => {
+            el.renderState = {
+                ...emptyRowHeaderRenderState(),
+                viewport,
+                rowY: [20, 40],
+                rowHeights: [20, 20],
+                headerWidth: 50,
+                verticalSplitPosition: 1,
+                frozenRowY: [0],
+                frozenRowHeights: [20],
+                scrollLeft: 20,
+            };
+        });
+
+        // Three hosts left on the page would push the ones after them out of
+        // the window.
+        try {
+            for (const line of [
+                letters.el.shadowRoot!.querySelector('.frozen-header-strip > .freeze-line')!,
+                numbers.el.shadowRoot!.querySelector('.frozen-header-strip > .freeze-line')!,
+                slid.el.shadowRoot!.querySelector('.freeze-gap.slid')!,
+            ]) {
+                const style = getComputedStyle(line);
+                expect(style.backgroundImage).to.equal(HALF_CONTRAST);
+                expect(style.backgroundColor).to.equal(BASE);
+            }
+        } finally {
+            letters.cleanup();
+            numbers.cleanup();
+            slid.cleanup();
+        }
     });
 });
 
