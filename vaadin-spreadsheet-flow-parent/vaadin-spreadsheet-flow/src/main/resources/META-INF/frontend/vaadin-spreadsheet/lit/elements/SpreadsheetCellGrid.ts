@@ -887,18 +887,13 @@ export class SpreadsheetCellGrid extends LitElement {
    * already showing hashes measures as narrow and would flip back.
    */
   private remeasureTooNarrowCells(): void {
-    const candidates = [...this.renderState.cellData].filter(
-      ([, data]) => data.needsMeasure === true && columnWidthOf(this.renderState, data.col) > 0
+    const next = this.remeasured(
+      this.tooNarrowCells,
+      (data) => data.needsMeasure === true,
+      (columnWidth, textWidth) => textWidth > columnWidth
     );
-    this.measureAll(candidates.map(([, data]) => data));
-    const measured = new Set<string>();
-    for (const [key, data] of candidates) {
-      if (this.measuredWidth(data.cellStyle, data.value ?? '') > columnWidthOf(this.renderState, data.col)) {
-        measured.add(key);
-      }
-    }
-    if (!sameKeys(measured, this.tooNarrowCells)) {
-      this.tooNarrowCells = measured;
+    if (next !== this.tooNarrowCells) {
+      this.tooNarrowCells = next;
     }
   }
 
@@ -912,19 +907,67 @@ export class SpreadsheetCellGrid extends LitElement {
    * GWT client's scroll width had - are drawn as ordinary cells.
    */
   private remeasureSpills(): void {
-    const candidates = [...this.renderState.cellData].filter(
-      ([, data]) => (data.overflowWidth ?? 0) > 0 && columnWidthOf(this.renderState, data.col) > 0
+    const next = this.remeasured(
+      this.fittingSpills,
+      (data) => (data.overflowWidth ?? 0) > 0,
+      (columnWidth, textWidth) => textWidth <= columnWidth
     );
-    this.measureAll(candidates.map(([, data]) => data));
-    const fitting = new Set<string>();
-    for (const [key, data] of candidates) {
-      if (this.measuredWidth(data.cellStyle, data.value ?? '') <= columnWidthOf(this.renderState, data.col)) {
-        fitting.add(key);
+    if (next !== this.fittingSpills) {
+      this.fittingSpills = next;
+    }
+  }
+
+  /**
+   * Judges the drawn cells again for one measured condition and returns
+   * the keys that meet it: the same set as before when no drawn cell
+   * changed, so an unchanged result asks for no second render.
+   * <p>
+   * Only the drawn cells are looked at. The cache holds every cell loaded
+   * since the sheet opened, and scanning it on every render cost more the
+   * further the sheet had been scrolled. A cell is judged when it comes
+   * into view; a key left over from a cell out of view is never read.
+   */
+  private remeasured(
+    current: ReadonlySet<string>,
+    flagged: (data: CellData) => boolean,
+    meets: (columnWidth: number, textWidth: number) => boolean
+  ): ReadonlySet<string> {
+    const candidates: CellData[] = [];
+    const stale: string[] = [];
+    for (const range of drawnRanges(this.renderState)) {
+      for (let row = range.r1; row <= range.r2; row++) {
+        for (let col = range.c1; col <= range.c2; col++) {
+          const key = toKey(col, row);
+          const data = this.renderState.cellData.get(key);
+          if (data !== undefined && flagged(data) && columnWidthOf(this.renderState, col) > 0) {
+            candidates.push(data);
+          } else if (current.has(key)) {
+            stale.push(key);
+          }
+        }
       }
     }
-    if (!sameKeys(fitting, this.fittingSpills)) {
-      this.fittingSpills = fitting;
+    this.measureAll(candidates);
+    let next: Set<string> | null = null;
+    const changing = (): Set<string> => (next ??= new Set(current));
+    for (const key of stale) {
+      changing().delete(key);
     }
+    for (const data of candidates) {
+      const key = toKey(data.col, data.row);
+      const yes = meets(
+        columnWidthOf(this.renderState, data.col),
+        this.measuredWidth(data.cellStyle, data.value ?? '')
+      );
+      if (yes !== current.has(key)) {
+        if (yes) {
+          changing().add(key);
+        } else {
+          changing().delete(key);
+        }
+      }
+    }
+    return next ?? current;
   }
 
   /**
@@ -1724,40 +1767,62 @@ function groupByStyle(byIndex: Readonly<Record<number, number>>): Map<number, nu
   return out;
 }
 
-/** Whether two key sets hold the same keys. */
-function sameKeys(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
-  if (a.size !== b.size) {
-    return false;
-  }
-  for (const key of a) {
-    if (!b.has(key)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 /**
- * Every coordinate a merged region covers, its anchor included.
+ * Every coordinate of a quadrant that a merged region covers, anchors
+ * included.
  *
  * These cells are still rendered — an application, and the tests, ask
  * about a cell by its coordinates whether or not a merge sits over it —
  * but the merge owns the region's content, so they render their text and
  * nothing else. A second slot of the same name underneath would capture
  * the component and hide it below the merge.
+ *
+ * Each region is clipped to the quadrant first: a merge as tall as the
+ * sheet cost a million coordinates on every render otherwise.
  */
-function coveredByMergeCoords(
-  mergedRegions: ReadonlyArray<{ col1: number; col2: number; row1: number; row2: number }>
+export function coveredByMergeCoords(
+  mergedRegions: ReadonlyArray<{ col1: number; col2: number; row1: number; row2: number }>,
+  colStart: number,
+  colEnd: number,
+  rowStart: number,
+  rowEnd: number
 ): Set<string> {
   const covered = new Set<string>();
   for (const region of mergedRegions) {
-    for (let row = region.row1; row <= region.row2; row++) {
-      for (let col = region.col1; col <= region.col2; col++) {
+    const lastRow = Math.min(region.row2, rowEnd);
+    const lastCol = Math.min(region.col2, colEnd);
+    for (let row = Math.max(region.row1, rowStart); row <= lastRow; row++) {
+      for (let col = Math.max(region.col1, colStart); col <= lastCol; col++) {
         covered.add(toKey(col, row));
       }
     }
   }
   return covered;
+}
+
+/**
+ * The cell ranges the grid draws: the scrolling quadrant's, and those of
+ * the frozen panes there are. 1-based and inclusive; empty while nothing
+ * is measured.
+ */
+export function drawnRanges(state: CellGridRenderState): Array<{ c1: number; c2: number; r1: number; r2: number }> {
+  const { viewport, verticalSplitPosition, horizontalSplitPosition } = state;
+  if (viewport.lastColumnIndex < viewport.firstColumnIndex || viewport.lastRowIndex < viewport.firstRowIndex) {
+    return [];
+  }
+  const cols = { c1: viewport.firstColumnIndex, c2: viewport.lastColumnIndex };
+  const rows = { r1: viewport.firstRowIndex, r2: viewport.lastRowIndex };
+  const ranges = [{ ...cols, ...rows }];
+  if (verticalSplitPosition > 0) {
+    ranges.push({ ...cols, r1: 1, r2: verticalSplitPosition });
+  }
+  if (horizontalSplitPosition > 0) {
+    ranges.push({ c1: 1, c2: horizontalSplitPosition, ...rows });
+  }
+  if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
+    ranges.push({ c1: 1, c2: horizontalSplitPosition, r1: 1, r2: verticalSplitPosition });
+  }
+  return ranges;
 }
 
 /**
@@ -1773,7 +1838,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): DirectiveResult {
     opts;
   const { cellData, selection } = state;
 
-  const covered = coveredByMergeCoords(state.mergedRegions);
+  const covered = coveredByMergeCoords(state.mergedRegions, colStart, colEnd, rowStart, rowEnd);
   const cells: Array<{ key: string; template: TemplateResult }> = [];
   for (let row = rowStart; row <= rowEnd; row++) {
     const top = getRowTop(row);

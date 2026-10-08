@@ -10,7 +10,11 @@
 import { expect } from 'chai';
 
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
-import { SpreadsheetCellGrid } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetCellGrid.js';
+import {
+    coveredByMergeCoords,
+    drawnRanges,
+    SpreadsheetCellGrid,
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetCellGrid.js';
 import {
     type CellGridRenderState,
     emptyCellGridRenderState,
@@ -2284,6 +2288,27 @@ describe('SpreadsheetCellGrid — a value too wide for its column', () => {
         cleanup(el);
     });
 
+    it('measures a flagged value when it scrolls into view', async () => {
+        // Only the drawn cells are measured: the cache holds every cell
+        // loaded since the sheet opened. A cell out of view is judged once
+        // it is drawn.
+        const a5 = { ...makeCellData(1, 5, '$246 913 578 024 690,00'), needsMeasure: true };
+        const el = await attachWithState({
+            ...stateWith(false),
+            cellData: new Map<string, CellData>([['col1 row5', a5]]),
+        });
+        el.renderState = {
+            ...el.renderState,
+            viewport: { ...el.renderState.viewport, firstRowIndex: 5, lastRowIndex: 5 },
+        };
+        await el.updateComplete;
+        await el.updateComplete;
+
+        expect(el.shadowRoot!.querySelector('.cell.row5')!.textContent!.trim()).to.equal('###');
+
+        cleanup(el);
+    });
+
     it('shows the value when it fits', async () => {
         const el = await attachWithState(stateWith(false));
 
@@ -4126,3 +4151,55 @@ describe('SpreadsheetCellGrid — scrolling keeps the cells it can', () => {
         }
     });
 });
+
+describe('SpreadsheetCellGrid — the cells it draws', () => {
+    const region = (col1: number, row1: number, col2: number, row2: number) => ({ col1, row1, col2, row2 });
+
+    it('covers only the part of a merge inside the quadrant', () => {
+        // A merge as tall as the sheet cost a million coordinates on every
+        // render before it was clipped.
+        const covered = coveredByMergeCoords([region(1, 1, 1, 1048576)], 1, 3, 10, 12);
+
+        expect([...covered].sort()).to.eql(['col1 row10', 'col1 row11', 'col1 row12']);
+    });
+
+    it('covers nothing for a merge outside the quadrant', () => {
+        expect(coveredByMergeCoords([region(5, 5, 6, 6)], 1, 3, 1, 3).size).to.equal(0);
+    });
+
+    it('covers where a merge and the quadrant overlap', () => {
+        const covered = coveredByMergeCoords([region(2, 2, 9, 9)], 1, 3, 1, 3);
+
+        expect([...covered].sort()).to.eql(['col2 row2', 'col2 row3', 'col3 row2', 'col3 row3']);
+    });
+
+    it('draws the scrolling range alone without frozen panes', () => {
+        const state = {
+            ...emptyCellGridRenderState(),
+            viewport: { ...emptyCellGridRenderState().viewport, firstColumnIndex: 3, lastColumnIndex: 9, firstRowIndex: 20, lastRowIndex: 40 },
+        };
+
+        expect(drawnRanges(state)).to.eql([{ c1: 3, c2: 9, r1: 20, r2: 40 }]);
+    });
+
+    it('adds the frozen panes, the corner where both are frozen', () => {
+        const state = {
+            ...emptyCellGridRenderState(),
+            viewport: { ...emptyCellGridRenderState().viewport, firstColumnIndex: 3, lastColumnIndex: 9, firstRowIndex: 20, lastRowIndex: 40 },
+            verticalSplitPosition: 2,
+            horizontalSplitPosition: 1,
+        };
+
+        expect(drawnRanges(state)).to.eql([
+            { c1: 3, c2: 9, r1: 20, r2: 40 },
+            { c1: 3, c2: 9, r1: 1, r2: 2 },
+            { c1: 1, c2: 1, r1: 20, r2: 40 },
+            { c1: 1, c2: 1, r1: 1, r2: 2 },
+        ]);
+    });
+
+    it('draws nothing before anything is measured', () => {
+        expect(drawnRanges(emptyCellGridRenderState())).to.eql([]);
+    });
+});
+
