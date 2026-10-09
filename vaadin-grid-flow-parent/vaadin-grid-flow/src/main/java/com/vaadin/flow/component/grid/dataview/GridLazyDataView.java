@@ -22,6 +22,7 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.Query;
 
 /**
@@ -100,5 +101,13 @@ public class GridLazyDataView<T> extends AbstractLazyDataView<T> {
     @Override
     public void setItemCountUnknown() {
         super.setItemCountUnknown();
+    }
+
+    @Override
+    public void setIdentifierProvider(
+            IdentifierProvider<T> identifierProvider) {
+        super.setIdentifierProvider(identifierProvider);
+        getDataCommunicator().getKeyMapper()
+                .setIdentifierGetter(identifierProvider);
     }
 }
