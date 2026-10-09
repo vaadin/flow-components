@@ -580,6 +580,54 @@ class UploadManagerTest {
                 "AllFinished should fire twice");
     }
 
+    @Test
+    void uploadStartedBeforeModal_allowedToFinishWhileModalIsOpen() {
+        manager.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
+        }));
+        AtomicInteger finishedCount = new AtomicInteger(0);
+        manager.addAllFinishedListener(
+                event -> finishedCount.incrementAndGet());
+        fireConnectorDomEvent(manager, "upload-start");
+        openModal();
+
+        Assertions.assertTrue(getRegisteredHandler().isAllowInert(),
+                "Queued files should be received for an inert owner");
+
+        simulateAllFinishedDomEvent(manager);
+
+        Assertions.assertEquals(1, finishedCount.get(),
+                "AllFinished should fire for an inert owner");
+        Assertions.assertFalse(getRegisteredHandler().isAllowInert(),
+                "A finished upload should not allow further uploads");
+    }
+
+    @Test
+    void uploadStartedWhileModalIsOpen_rejected() {
+        manager.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
+        }));
+        AtomicInteger finishedCount = new AtomicInteger(0);
+        manager.addAllFinishedListener(
+                event -> finishedCount.incrementAndGet());
+        openModal();
+
+        fireConnectorDomEvent(manager, "upload-start");
+
+        Assertions.assertFalse(getRegisteredHandler().isAllowInert(),
+                "An upload should not start for an inert owner");
+
+        simulateAllFinishedDomEvent(manager);
+
+        Assertions.assertEquals(0, finishedCount.get(),
+                "AllFinished should not fire for an upload rejected while inert");
+    }
+
+    private void openModal() {
+        Div modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
+    }
+
     // --- Wrapper delegation of ElementRequestHandler defaults ---
     //
     // These tests verify that the file-type-validation wrapper created
@@ -671,9 +719,14 @@ class UploadManagerTest {
      * Simulates the client-side "all-finished" DOM event on the connector.
      */
     private void simulateAllFinishedDomEvent(UploadManager manager) {
+        fireConnectorDomEvent(manager, "all-finished");
+    }
+
+    private void fireConnectorDomEvent(UploadManager manager,
+            String eventType) {
         Component connector = getConnector(manager);
         Element element = connector.getElement();
-        DomEvent event = new DomEvent(element, "all-finished",
+        DomEvent event = new DomEvent(element, eventType,
                 JacksonUtils.createObjectNode());
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
