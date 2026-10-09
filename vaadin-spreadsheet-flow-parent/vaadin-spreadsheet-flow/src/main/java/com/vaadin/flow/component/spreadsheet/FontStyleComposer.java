@@ -91,12 +91,20 @@ final class FontStyleComposer implements Serializable {
      * CSS rule for a font's family. Static because it has no field touches and
      * is also called from {@link DefaultStyleBaseline#captureDefaultStyle}
      * before any composer instance exists.
+     * <p>
+     * A font with no name, which POI reports for a {@code <name/>} without a
+     * value, sets no family at all: its cells keep the family they would have
+     * without it, the workbook default's or the theme's.
      */
     static String styleFontFamily(Font font) {
+        String name = font.getFontName();
+        if (name == null || name.isBlank()) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("font-family: var(--default-font-family);");
         sb.append("--default-font-family:");
-        sb.append(cssFontName(font.getFontName()));
+        sb.append(cssFontName(name));
         sb.append(",");
         if (font instanceof XSSFFont xssfFont) {
             FontFamily family = FontFamily.valueOf(xssfFont.getFamily());

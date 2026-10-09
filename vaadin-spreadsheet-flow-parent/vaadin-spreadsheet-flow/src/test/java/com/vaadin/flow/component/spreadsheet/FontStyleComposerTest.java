@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -291,6 +292,62 @@ class FontStyleComposerTest {
                 "font-family: var(--default-font-family);"
                         + "--default-font-family:Arial,Helvetica,arial;",
                 familyCssWith("Arial", FontFamily.NOT_APPLICABLE));
+    }
+
+    /**
+     * A font whose {@code <name/>} has no value, which POI reports as a
+     * {@code null} name.
+     */
+    private XSSFFont fontWithNoName(XSSFWorkbook book, int index) {
+        XSSFFont font = book.getFontAt(index);
+        font.getCTFont().removeName(0);
+        font.getCTFont().addNewName();
+        return font;
+    }
+
+    @Test
+    void styleFontFamily_fontWithNoName_setsNoFamily() {
+        XSSFFont font = fontWithNoName(workbook,
+                workbook.createFont().getIndexAsInt());
+        assertNull(font.getFontName());
+
+        assertEquals("", FontStyleComposer.styleFontFamily(font));
+    }
+
+    @Test
+    void styleFontFamily_fontWithAnEmptyName_setsNoFamily() {
+        XSSFFont font = workbook.createFont();
+        font.setFontName("");
+
+        assertEquals("", FontStyleComposer.styleFontFamily(font));
+    }
+
+    @Test
+    void appendFontStyle_fontWithNoName_keepsTheDefaultFamily() {
+        XSSFFont font = fontWithNoName(workbook,
+                workbook.createFont().getIndexAsInt());
+        font.setBold(true);
+        CellStyle style = workbook.createCellStyle();
+        style.setFont(font);
+
+        StringBuilder sb = new StringBuilder();
+        composer.appendFontStyle(sb, style);
+
+        assertFalse(sb.toString().contains("font-family"), sb.toString());
+        assertTrue(sb.toString().contains("font-weight:bold;"), sb.toString());
+    }
+
+    @Test
+    void workbookWhoseDefaultFontHasNoName_loads() throws Exception {
+        try (XSSFWorkbook book = new XSSFWorkbook()) {
+            fontWithNoName(book, 0);
+            book.createSheet().createRow(0).createCell(0).setCellValue("text");
+
+            Spreadsheet loaded = new Spreadsheet(book);
+
+            String defaultStyle = loaded.getCellStyleToCSSStyle().get(0);
+            assertFalse(defaultStyle.contains("font-family"), defaultStyle);
+        }
     }
 
     /**
