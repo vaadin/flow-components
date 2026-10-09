@@ -17,10 +17,9 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 /**
  * Orchestrates loading and refreshing the active sheet's overlays (images,
  * charts, embedded components placed on cells). Composes
- * {@link SheetOverlayStorage} (the wrappers and attached components),
- * {@link SheetOverlayVisibility} (is this overlay in the viewport?), and
- * {@link SheetOverlayInfoBuilder} (turn a wrapper into the client-side
- * {@code OverlayInfo} payload).
+ * {@link SheetOverlayStorage} (the wrappers), {@link SheetOverlayVisibility}
+ * (is this overlay in the viewport?), and {@link SheetOverlayInfoBuilder} (turn
+ * a wrapper into the client-side {@code OverlayInfo} payload).
  *
  * <p>
  * The {@code reloadFromPoi} flag is set externally (after row/column resizing
@@ -98,7 +97,6 @@ final class SheetOverlayManager implements Serializable {
     private void addOverlayData(SheetOverlayWrapper overlay) {
         if (overlay.getComponent(true) != null) {
             spreadsheet.registerCustomComponent(overlay.getComponent(true));
-            storage.addComponent(overlay.getComponent(true));
         }
 
         if (overlay.getId() != null && overlay.getResourceHandler() != null
@@ -136,7 +134,6 @@ final class SheetOverlayManager implements Serializable {
         }
 
         if (overlay.getComponent(false) != null) {
-            storage.removeComponent(overlay.getComponent(false));
             spreadsheet.unRegisterCustomComponent(overlay.getComponent(false));
         }
     }

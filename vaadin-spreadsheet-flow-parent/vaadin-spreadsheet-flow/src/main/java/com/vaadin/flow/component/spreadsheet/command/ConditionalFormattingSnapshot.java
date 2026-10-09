@@ -87,10 +87,6 @@ final class ConditionalFormattingSnapshot implements Serializable {
         return snapshot;
     }
 
-    boolean isEmpty() {
-        return formattingXml.isEmpty();
-    }
-
     /**
      * Puts the captured formattings back on the sheet.
      *

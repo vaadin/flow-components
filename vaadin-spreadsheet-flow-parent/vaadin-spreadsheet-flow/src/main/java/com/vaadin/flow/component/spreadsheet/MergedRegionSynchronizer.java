@@ -24,12 +24,9 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 final class MergedRegionSynchronizer implements Serializable {
 
     private final Spreadsheet spreadsheet;
-    private final MergedRegionOperations operations;
 
-    MergedRegionSynchronizer(Spreadsheet spreadsheet,
-            MergedRegionOperations operations) {
+    MergedRegionSynchronizer(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        this.operations = operations;
     }
 
     /**
@@ -45,22 +42,13 @@ final class MergedRegionSynchronizer implements Serializable {
         for (int i = 0; i < poiRegionCount; i++) {
             CellRangeAddress poiRegion = spreadsheet.getActiveSheet()
                     .getMergedRegion(i);
-            try {
-                MergedRegion region = new MergedRegion();
-                region.col1 = poiRegion.getFirstColumn() + 1;
-                region.col2 = poiRegion.getLastColumn() + 1;
-                region.row1 = poiRegion.getFirstRow() + 1;
-                region.row2 = poiRegion.getLastRow() + 1;
-                region.id = spreadsheet.mergedRegionCounter++;
-                rebuilt.add(i, region);
-            } catch (IndexOutOfBoundsException ioobe) {
-                // POI reports a region that wasn't in the cache; route it
-                // through the full add path so the cascade runs.
-                operations.addRegionToPoiAndCache(poiRegion);
-            }
-        }
-        while (poiRegionCount < rebuilt.size()) {
-            rebuilt.remove(rebuilt.size() - 1);
+            MergedRegion region = new MergedRegion();
+            region.col1 = poiRegion.getFirstColumn() + 1;
+            region.col2 = poiRegion.getLastColumn() + 1;
+            region.row1 = poiRegion.getFirstRow() + 1;
+            region.row2 = poiRegion.getLastRow() + 1;
+            region.id = spreadsheet.mergedRegionCounter++;
+            rebuilt.add(region);
         }
         spreadsheet.setMergedRegions(rebuilt);
     }

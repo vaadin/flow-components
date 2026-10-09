@@ -152,10 +152,6 @@ public class CellValueManager implements Serializable {
         return spreadsheet.getConditionalFormattingEvaluator();
     }
 
-    private String getCachedFormulaCellValue(Cell formulaCell) {
-        return numericFormatter.getCachedFormulaCellValue(formulaCell);
-    }
-
     protected CellData createCellDataForCell(Cell cell) {
         return cellDataBuilder.createCellDataForCell(cell);
     }

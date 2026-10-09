@@ -191,24 +191,6 @@ public class Spreadsheet extends Component
     private final MirroredProperty<Boolean> sheetProtected = MirroredProperty
             .bool(this, "sheetProtected", false);
 
-    private final MirroredProperty<Boolean> workbookProtected = MirroredProperty
-            .bool(this, "workbookProtected", false);
-
-    private final MirroredProperty<Boolean> hasActions = MirroredProperty
-            .bool(this, "hasActions", false);
-
-    private final MirroredProperty<Boolean> lockFormatColumns = MirroredProperty
-            .bool(this, "lockFormatColumns", false);
-
-    private final MirroredProperty<Boolean> lockFormatRows = MirroredProperty
-            .bool(this, "lockFormatRows", false);
-
-    private final MirroredProperty<String> invalidFormulaErrorMessage = MirroredProperty
-            .string(this, "invalidFormulaErrorMessage", null);
-
-    private final MirroredProperty<List<String>> namedRanges = MirroredProperty
-            .serialized(this, "namedRanges", null);
-
     private final MirroredProperty<Boolean> showCustomEditorOnFocus = MirroredProperty
             .bool(this, "showCustomEditorOnFocus", false);
 
@@ -520,7 +502,7 @@ public class Spreadsheet extends Component
     }
 
     private void setWorkbookProtected(boolean workbookProtected) {
-        this.workbookProtected.set(workbookProtected);
+        getElement().setProperty("workbookProtected", workbookProtected);
     }
 
     /**
@@ -595,7 +577,7 @@ public class Spreadsheet extends Component
     }
 
     private void setHasActions(boolean hasActions) {
-        this.hasActions.set(hasActions);
+        getElement().setProperty("hasActions", hasActions);
     }
 
     void setOverlays(HashMap<String, OverlayInfo> overlays) {
@@ -632,15 +614,16 @@ public class Spreadsheet extends Component
     }
 
     void setLockFormatColumns(boolean lockFormatColumns) {
-        this.lockFormatColumns.set(lockFormatColumns);
+        getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
     void setLockFormatRows(boolean lockFormatRows) {
-        this.lockFormatRows.set(lockFormatRows);
+        getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
     void setNamedRanges(List<String> namedRanges) {
-        this.namedRanges.set(namedRanges);
+        getElement().setProperty("namedRanges",
+                Serializer.serialize(namedRanges));
     }
 
     void onPopupButtonClick(int row, int column) {
@@ -1096,7 +1079,7 @@ public class Spreadsheet extends Component
             this, mergedRegionCascade);
 
     private final MergedRegionSynchronizer mergedRegionSynchronizer = new MergedRegionSynchronizer(
-            this, mergedRegionOperations);
+            this);
 
     /**
      * Minimum row height for rows containing components (in points).
@@ -3391,19 +3374,6 @@ public class Spreadsheet extends Component
         rowSizeOperations.setHeight(index, height);
     }
 
-    /**
-     * Sets the row height for multiple rows. Used internally in order to defer
-     * the style calculations until all the row heights are updated.
-     *
-     * @see #setRowHeight(int, float)
-     *
-     * @param rowIndexToHeight
-     *            Map of 0-based row indexes to the new row height in points
-     */
-    void setRowHeights(Map<Integer, Float> rowIndexToHeight) {
-        rowSizeOperations.setHeights(rowIndexToHeight);
-    }
-
     void onColumnResized(Map<Integer, Integer> newColumnSizes, int row1,
             int col1, int row2, int col2) {
         columnSizeOperations.onClientResized(newColumnSizes, row1, col1, row2,
@@ -3421,20 +3391,6 @@ public class Spreadsheet extends Component
      */
     public void setColumnWidth(int index, int width) {
         columnSizeOperations.setWidth(index, width);
-    }
-
-    /**
-     * Sets the column width for multiple columns. Used internally in order to
-     * defer the style calculations until all the column widths are updated.
-     *
-     * @see #setColumnWidth(int, int)
-     *
-     * @param columnIndexToWidth
-     *            Map of 0-based column indexes to the new column width in
-     *            pixels
-     */
-    void setColumnWidths(Map<Integer, Integer> columnIndexToWidth) {
-        columnSizeOperations.setWidths(columnIndexToWidth);
     }
 
     void loadHyperLinks() {
@@ -4496,7 +4452,8 @@ public class Spreadsheet extends Component
 
     public void setInvalidFormulaErrorMessage(
             String invalidFormulaErrorMessage) {
-        this.invalidFormulaErrorMessage.set(invalidFormulaErrorMessage);
+        getElement().setProperty("invalidFormulaErrorMessage",
+                invalidFormulaErrorMessage);
     }
 
     /**

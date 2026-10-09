@@ -149,7 +149,7 @@ class SheetOverlayManagerTest {
     @Test
     void loadOrUpdate_overlayWithComponent_registersCustomComponent() {
         // Pin: addOverlayData's first branch — when the overlay has a
-        // component, register it with the parent + remember in storage.
+        // component, register it with the parent.
         Component component = org.mockito.Mockito.mock(Component.class);
         when(storage.all()).thenReturn(Arrays.asList(overlay1));
         when(visibility.isVisible(overlay1)).thenReturn(true);
@@ -160,7 +160,6 @@ class SheetOverlayManagerTest {
         manager.loadOrUpdate();
 
         verify(spreadsheet).registerCustomComponent(component);
-        verify(storage).addComponent(component);
     }
 
     @Test

@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -40,16 +39,12 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * {@code setMergedRegions(null)}.
  *
  * <p>
- * Mocks the parent {@link Spreadsheet}, the underlying {@link Sheet}, and the
- * {@link MergedRegionOperations} (only used by the apparently- unreachable IOOB
- * catch path).
+ * Mocks the parent {@link Spreadsheet} and the underlying {@link Sheet}.
  */
 class MergedRegionSynchronizerTest {
 
     @Mock
     private Spreadsheet spreadsheet;
-    @Mock
-    private MergedRegionOperations operations;
     @Mock
     private Sheet sheet;
 
@@ -59,7 +54,7 @@ class MergedRegionSynchronizerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(spreadsheet.getActiveSheet()).thenReturn(sheet);
-        sync = new MergedRegionSynchronizer(spreadsheet, operations);
+        sync = new MergedRegionSynchronizer(spreadsheet);
     }
 
     private CellRangeAddress range(int r1, int c1, int r2, int c2) {
@@ -77,7 +72,6 @@ class MergedRegionSynchronizerTest {
         sync.rebuildFromPoi();
 
         verify(spreadsheet).setMergedRegions(isNull());
-        verify(operations, never()).addRegionToPoiAndCache(any());
     }
 
     @Test
@@ -180,23 +174,5 @@ class MergedRegionSynchronizerTest {
         verify(sheet, never()).getMergedRegion(0);
         // setMergedRegions(null) fires exactly once.
         verify(spreadsheet, times(1)).setMergedRegions(isNull());
-    }
-
-    @Test
-    void rebuildFromPoi_neverInvokesCascadeOrOperationsOnHappyPath() {
-        // Pin: the happy path replaces the cache wholesale via
-        // setMergedRegions — it does NOT call addRegionToPoiAndCache,
-        // which is reserved for the apparently-unreachable IOOB catch.
-        // Worth pinning so a future change that accidentally routes
-        // through the per-region add path (which would re-fire the merge
-        // cascade for every existing region) is caught.
-        when(sheet.getNumMergedRegions()).thenReturn(3);
-        when(sheet.getMergedRegion(0)).thenReturn(range(0, 0, 0, 0));
-        when(sheet.getMergedRegion(1)).thenReturn(range(1, 1, 1, 1));
-        when(sheet.getMergedRegion(2)).thenReturn(range(2, 2, 2, 2));
-
-        sync.rebuildFromPoi();
-
-        verify(operations, never()).addRegionToPoiAndCache(any());
     }
 }

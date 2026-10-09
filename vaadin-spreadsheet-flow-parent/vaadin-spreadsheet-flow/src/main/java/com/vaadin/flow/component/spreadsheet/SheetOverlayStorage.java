@@ -11,31 +11,22 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
-
-import com.vaadin.flow.component.Component;
 
 /**
- * Holds the sheet's overlay wrappers and the Components currently attached
- * because of them. Pure storage — no POI access, no DOM attachment, no
- * visibility logic.
+ * Holds the sheet's overlay wrappers. Pure storage — no POI access, no DOM
+ * attachment, no visibility logic.
  *
  * <p>
  * The {@code overlays} field is reset to an empty set in {@link #initialize};
- * before that call {@link #isInitialized} returns {@code false}, matching the
- * Spreadsheet field's pre-workbook-load state.
+ * before that call {@link #all} returns {@code null}, matching the
+ * Spreadsheet's pre-workbook-load state.
  */
 final class SheetOverlayStorage implements Serializable {
 
     private HashSet<SheetOverlayWrapper> overlays;
-    private final Set<Component> overlayComponents = new HashSet<>();
 
     void initialize() {
         overlays = new HashSet<>();
-    }
-
-    boolean isInitialized() {
-        return overlays != null;
     }
 
     boolean isEmpty() {
@@ -52,13 +43,5 @@ final class SheetOverlayStorage implements Serializable {
 
     void clearOverlays() {
         overlays.clear();
-    }
-
-    void addComponent(Component component) {
-        overlayComponents.add(component);
-    }
-
-    void removeComponent(Component component) {
-        overlayComponents.remove(component);
     }
 }

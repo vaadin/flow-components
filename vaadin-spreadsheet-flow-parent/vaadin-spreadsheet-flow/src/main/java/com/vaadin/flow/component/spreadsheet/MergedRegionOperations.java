@@ -83,11 +83,9 @@ final class MergedRegionOperations implements Serializable {
     }
 
     /**
-     * POI-add + DTO build + id mint + merge cascade + update flush. Also used
-     * by {@link MergedRegionSynchronizer} as a fallback when its rebuild
-     * detects a region that's in POI but missing from the cache.
+     * POI-add + DTO build + id mint + merge cascade + update flush.
      */
-    void addRegionToPoiAndCache(CellRangeAddress range) {
+    private void addRegionToPoiAndCache(CellRangeAddress range) {
         Sheet sheet = spreadsheet.getActiveSheet();
         sheet.addMergedRegion(range);
         MergedRegion region = new MergedRegion();

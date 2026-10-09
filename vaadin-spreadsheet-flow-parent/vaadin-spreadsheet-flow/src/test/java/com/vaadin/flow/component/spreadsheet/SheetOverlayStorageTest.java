@@ -19,52 +19,35 @@ import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.vaadin.flow.component.Component;
-
 /**
  * The overlays {@link SheetOverlayStorage} holds.
  *
  * <p>
- * Two parallel collections behind one storage class:
- *
- * <ul>
- * <li>{@code overlays} — lazy-initialized via
- * {@link SheetOverlayStorage#initialize}. Before initialize,
- * {@code isInitialized} returns false and {@code isEmpty} returns true; calling
- * {@code add} or {@code all} pre-initialize NPEs.</li>
- * <li>{@code overlayComponents} — non-null from construction. Has only
- * {@code addComponent} / {@code removeComponent} — no getter, no clear. The set
- * is currently <strong>write-only</strong> from outside this class — no caller
- * reads it back. Pinned in {@link #overlayComponents_isWriteOnly} as a
- * future-cleanup observation, not a contract that must hold.</li>
- * </ul>
+ * The set is lazy-initialized via {@link SheetOverlayStorage#initialize}.
+ * Before initialize, {@code isEmpty} returns true and {@code all} returns
+ * {@code null}; calling {@code add} or {@code clearOverlays} pre-initialize
+ * NPEs.
  */
 class SheetOverlayStorageTest {
 
     private SheetOverlayStorage storage;
     private SheetOverlayWrapper overlay1;
     private SheetOverlayWrapper overlay2;
-    private Component component1;
-    private Component component2;
 
     @BeforeEach
     void setUp() {
         storage = new SheetOverlayStorage();
         overlay1 = mock(SheetOverlayWrapper.class);
         overlay2 = mock(SheetOverlayWrapper.class);
-        component1 = mock(Component.class);
-        component2 = mock(Component.class);
     }
 
     // ----- overlays lifecycle -----------------------------------------------
 
     @Test
-    void freshStorage_isUninitialized() {
-        // Pin pre-initialize state: matches the Spreadsheet field's
+    void freshStorage_isEmpty() {
+        // Pin pre-initialize state: matches the Spreadsheet's
         // pre-workbook-load state. isEmpty returns true (the storage is
-        // conceptually empty) but isInitialized returns false (no backing
-        // set exists yet).
-        assertFalse(storage.isInitialized());
+        // conceptually empty) although no backing set exists yet.
         assertTrue(storage.isEmpty());
     }
 
@@ -87,9 +70,8 @@ class SheetOverlayStorageTest {
     }
 
     @Test
-    void initialize_makesStorageInitializedAndEmpty() {
+    void initialize_makesStorageEmpty() {
         storage.initialize();
-        assertTrue(storage.isInitialized());
         assertTrue(storage.isEmpty());
         assertEquals(0, storage.all().size());
     }
@@ -106,7 +88,6 @@ class SheetOverlayStorageTest {
 
         storage.initialize();
 
-        assertTrue(storage.isInitialized());
         assertTrue(storage.isEmpty());
     }
 
@@ -132,15 +113,14 @@ class SheetOverlayStorageTest {
     @Test
     void clearOverlays_emptiesTheSet_butKeepsItInitialized() {
         // Pin the asymmetry: clearOverlays only empties; the set reference
-        // stays. isInitialized remains true after a clear, matching the
-        // semantic "the workbook is loaded but has no overlays."
+        // stays, matching the semantic "the workbook is loaded but has no
+        // overlays."
         storage.initialize();
         storage.add(overlay1);
         storage.add(overlay2);
 
         storage.clearOverlays();
 
-        assertTrue(storage.isInitialized());
         assertTrue(storage.isEmpty());
         assertEquals(0, storage.all().size());
     }
@@ -150,32 +130,5 @@ class SheetOverlayStorageTest {
         // Pin: clearOverlays is undefined pre-initialize — like add, it
         // assumes the backing set exists. The storage doesn't lazy-init.
         assertThrows(NullPointerException.class, () -> storage.clearOverlays());
-    }
-
-    // ----- overlayComponents (write-only by current callers) ----------------
-
-    @Test
-    void overlayComponents_addAndRemove_donotThrow() {
-        // Pin contract: the addComponent / removeComponent calls always
-        // succeed (the backing set is non-null from construction, unlike
-        // overlays). No NPE pre-initialize.
-        //
-        // The overlayComponents set has no getter and no clear method; it
-        // is write-only from outside this class today (SheetOverlayManager
-        // adds on attach, removes on detach, nothing reads). That
-        // observation is documented at the class-Javadoc level. A future
-        // change that adds a read API should expand this test suite.
-        storage.addComponent(component1);
-        storage.removeComponent(component1);
-    }
-
-    @Test
-    void overlayComponents_workIndependentlyOfOverlaysLifecycle() {
-        // Pin: the two collections have separate lifecycles. addComponent
-        // works pre-initialize; add does not.
-        assertFalse(storage.isInitialized());
-        storage.addComponent(component1); // does not throw
-        storage.addComponent(component2);
-        storage.removeComponent(component1); // does not throw
     }
 }
