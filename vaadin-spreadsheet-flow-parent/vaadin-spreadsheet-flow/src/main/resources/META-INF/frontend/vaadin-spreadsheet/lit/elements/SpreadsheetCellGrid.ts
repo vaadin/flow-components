@@ -2706,11 +2706,9 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
   if (rules.length === 0) {
     return '';
   }
-  // The rules go in as text. A workbook names its own fonts, and a name is
-  // written into these rules as it is, so markup in one has to stay text:
-  // read as HTML, a font named `</style><img src=x onerror=...>` ran its
-  // script. The GWT client inserted each rule through the CSSOM, which
-  // reads no markup.
+  // The rules go in as text, never as markup. A workbook names its own
+  // fonts, and a name is written into these rules as it is. The GWT client
+  // inserted each rule through the CSSOM, which reads no markup either.
   return html`<style>
     ${rules.join('\n')}
   </style>`;

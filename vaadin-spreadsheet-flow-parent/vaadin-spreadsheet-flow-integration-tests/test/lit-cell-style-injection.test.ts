@@ -20,11 +20,10 @@ import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/
 
 /**
  * A workbook's styles reach the page as CSS rules, and a workbook names its
- * own fonts: the server writes a font's name into its rule as it is. The
- * Lit grid put the rules into its style block as HTML, so a font named
- * `</style><img src=x onerror=...>` closed the block and ran its script.
- * The GWT client inserted each rule through the CSSOM, which reads no
- * markup.
+ * own fonts: the server writes a font's name into its rule as it is. Markup
+ * in a name stays text, so it can neither close the style block nor add
+ * elements. The GWT client inserted each rule through the CSSOM, which
+ * reads no markup.
  */
 describe('SpreadsheetCellGrid — markup in a workbook style', () => {
   const FLAG = '__spreadsheetStyleInjection';

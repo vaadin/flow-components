@@ -238,13 +238,13 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(spans[3].style.backgroundColor).to.equal('rgba(236, 100, 100, 0.25)');
   });
 
-  it('writes the formula into the field as text, never as markup, which the GWT client did', async () => {
-    await startTyping('="<img src=x onerror=alert(1)>"&A1');
+  it('writes the formula into the field as text, never as markup', async () => {
+    await startTyping('="<b>bold</b>"&A1');
     await sheet.getFormulaBar().updateComplete;
 
     const layer = sheet.getFormulaBar().shadowRoot!.querySelector('.formula-highlights')!;
-    expect(layer.querySelector('img')).to.be.null;
-    expect(layer.textContent).to.equal('="<img src=x onerror=alert(1)>"&A1');
+    expect(layer.querySelector('b')).to.be.null;
+    expect(layer.textContent).to.equal('="<b>bold</b>"&A1');
   });
 
   it('takes the colours away once the formula is written', async () => {

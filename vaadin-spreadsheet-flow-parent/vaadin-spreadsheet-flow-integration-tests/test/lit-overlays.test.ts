@@ -67,9 +67,9 @@ describe('computePositionedOverlays — anchor positioning', () => {
     });
 
     it('keeps the fractions of a point offset and height, as the GWT client did', () => {
-        // The Tagetik logo: 11.0796pt down its cell, 17.9278pt tall. The
-        // GWT client set both in pt and let the browser place the edges;
-        // cut down to whole pixels, the logo sat a pixel high and short.
+        // A logo 11.0796pt down its cell and 17.9278pt tall. The GWT
+        // client set both in pt and let the browser place the edges; cut
+        // down to whole pixels, the logo sat a pixel high and short.
         const overlays: Record<string, OverlayInfo> = {
             logo: { type: 'IMAGE', col: 1, row: 1, width: 94.0997, height: 17.9278, dx: 0, dy: 11.0796 },
         };

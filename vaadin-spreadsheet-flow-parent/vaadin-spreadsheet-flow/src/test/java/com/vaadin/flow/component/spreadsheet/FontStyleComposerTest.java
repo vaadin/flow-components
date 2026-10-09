@@ -200,8 +200,8 @@ class FontStyleComposerTest {
     @Test
     void styleFontFamily_keepsMarkupInANameText() {
         // A workbook names its own fonts, and the client puts the rule in a
-        // style block. Written raw, this name closed the block and added an
-        // element whose script ran, in the Lit client.
+        // style block, so markup in a name has to come out as an escaped
+        // string.
         Font font = workbook.createFont();
         font.setFontName("X</style><img src=x onerror=\"alert(1)\">");
 
