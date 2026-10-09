@@ -167,7 +167,12 @@ npmNames.forEach((npmName) => {
 const reactComponents = readReactComponents(sources);
 const reactNames = Object.keys(reactComponents).sort();
 if (reactNames.length > 0) {
-  const versionsDeclared = [...new Set(npmNames.map((npmName) => npmPackages[npmName].version))];
+  // A preview build of the web components gives each package a URL of its
+  // own, which names the package, so the versions are compared with the name
+  // taken out, and the React components get the URL with their own name.
+  const versionsDeclared = [
+    ...new Set(npmNames.map((npmName) => npmPackages[npmName].version.replace(npmName, '{name}')))
+  ];
   if (versionsDeclared.length !== 1) {
     console.error(
       `The React components take the version of the packages of ${sourceDir}, which declares several: ${versionsDeclared.join(', ')}`
@@ -177,7 +182,7 @@ if (reactNames.length > 0) {
   reactNames.forEach((npmName) => {
     versions[entryName(npmName)] = {
       exclusions: reactComponents[npmName],
-      jsVersion: versionsDeclared[0],
+      jsVersion: versionsDeclared[0].replace('{name}', npmName),
       mode: 'react',
       npmName
     };
