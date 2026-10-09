@@ -1572,6 +1572,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableFunction<T, String> partNameGenerator = item -> null;
     private SerializablePredicate<T> dropFilter = item -> true;
+
+    private static final String OPTIMISTIC_DROP_NUMBER = "event.detail.optimisticDropNumber";
+
+    private Registration optimisticRowReorderRegistration;
     private SerializablePredicate<T> dragFilter = item -> true;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
@@ -5010,6 +5014,76 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public boolean isRowsDraggable() {
         return getElement().getProperty("rowsDraggable", false);
+    }
+
+    /**
+     * Sets whether the client moves dropped rows right away, before the server
+     * handles the drop. This removes the delay between the drop and the new row
+     * order on the screen.
+     * <p>
+     * The client moves the dragged rows above or below the target row for drops
+     * with {@link GridDropLocation#ABOVE} or {@link GridDropLocation#BELOW}.
+     * After the drop listeners run, the grid sends its own row order for the
+     * visible range to the client. If a drop listener does not move the items
+     * in the data, for example because it rejects the drop, the rows go back to
+     * their earlier positions.
+     * <p>
+     * Use this only when the drop listeners move the dragged items to the drop
+     * location, and the data is not sorted or filtered in a way that could put
+     * them somewhere else. The client does not move rows when the user has
+     * sorted a column, or in a {@code TreeGrid}.
+     * <p>
+     * PROTOTYPE: see https://github.com/vaadin/flow-components/issues/10353
+     *
+     * @param optimisticRowReorder
+     *            {@code true} to move dropped rows on the client right away,
+     *            {@code false} to wait for the server
+     */
+    public void setOptimisticRowReorder(boolean optimisticRowReorder) {
+        getElement().setProperty("__optimisticRowReorder",
+                optimisticRowReorder);
+        if (optimisticRowReorder && optimisticRowReorderRegistration == null) {
+            // An element listener, so that the server confirms the drop also
+            // when the grid is disabled or inert, or a drop listener throws
+            optimisticRowReorderRegistration = getElement().addEventListener(
+                    "grid-drop",
+                    event -> onOptimisticRowReorderDrop(
+                            event.getEventData().get(OPTIMISTIC_DROP_NUMBER)))
+                    .addEventData(OPTIMISTIC_DROP_NUMBER).allowInert()
+                    .setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
+        } else if (!optimisticRowReorder
+                && optimisticRowReorderRegistration != null) {
+            optimisticRowReorderRegistration.remove();
+            optimisticRowReorderRegistration = null;
+        }
+    }
+
+    /**
+     * Gets whether the client moves dropped rows right away.
+     *
+     * @return {@code true} if the client moves dropped rows right away
+     * @see #setOptimisticRowReorder(boolean)
+     */
+    public boolean isOptimisticRowReorder() {
+        return getElement().getProperty("__optimisticRowReorder", false);
+    }
+
+    private void onOptimisticRowReorderDrop(JsonNode dropNumber) {
+        if (dropNumber == null || !dropNumber.isNumber()) {
+            // The client did not have optimistic row reorder on
+            return;
+        }
+        // Tell the client which of its drops the server has handled. Flow
+        // applies property changes before the data communicator calls of the
+        // same response, so the client knows which of its row moves the data
+        // already includes. Using the client's number, and not a server-side
+        // count, means that a drop that never reached this listener does not
+        // leave the client waiting for it.
+        getElement().setProperty("__dropsHandled", Math.max(dropNumber.asInt(),
+                getElement().getProperty("__dropsHandled", 0)));
+        // Send the server-side row order for the viewport, whether the drop
+        // listeners moved the items or not
+        refreshViewport();
     }
 
     /**
