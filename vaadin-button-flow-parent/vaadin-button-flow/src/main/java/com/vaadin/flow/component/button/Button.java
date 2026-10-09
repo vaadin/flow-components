@@ -67,7 +67,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/button", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/button", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/button@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,

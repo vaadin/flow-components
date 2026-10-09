@@ -51,7 +51,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/app-layout", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/app-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/app-layout@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors

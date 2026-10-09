@@ -31,6 +31,10 @@ concurrency:
 
 env:
   FORK_COUNT: 4
+  # The preview packages of the web components depend on each other through
+  # pkg.pr.new URLs, which pnpm refuses in dependencies of dependencies unless
+  # blockExoticSubdeps is turned off
+  pnpm_config_block_exotic_subdeps: false
 
 jobs:
   build:

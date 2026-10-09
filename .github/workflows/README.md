@@ -49,6 +49,7 @@ git commit -am "chore: use web components preview"
 - The tests of the branch and the published snapshot then use the same preview.
 - Do not merge a branch with preview URLs. Revert the commit first.
 - Flow drops URL versions from the versions files it pins. React mode installs `@vaadin/react-components` from those files, so it is not supported yet.
+- The preview packages depend on each other through URLs, which pnpm 11 refuses by default (`ERR_PNPM_EXOTIC_SUBDEP`). Turn that off with `blockExoticSubdeps: false` in `pnpm-workspace.yaml`, or with the `pnpm_config_block_exotic_subdeps=false` environment variable, which the validation workflow sets.
 - An existing application keeps the `@vaadin/*` versions in its `package.json`. Remove them before the first run with a preview.
 
 Publishing needs the credentials, and GitHub only hands secrets to pull requests

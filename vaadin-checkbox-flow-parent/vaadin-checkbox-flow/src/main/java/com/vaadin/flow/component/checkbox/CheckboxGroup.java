@@ -112,7 +112,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 1.1
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/checkbox-group@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>

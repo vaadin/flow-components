@@ -212,7 +212,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/form-layout", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/form-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/form-layout@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -398,7 +398,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.4.0-alpha2")
+    @NpmPackage(value = "@vaadin/form-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/form-layout@275762dfe309017d7928b26395bafb73226e28fd")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -507,7 +507,7 @@ public class FormLayout extends Component
      * @since 24.8
      */
     @Tag("vaadin-form-row")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.4.0-alpha2")
+    @NpmPackage(value = "@vaadin/form-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/form-layout@275762dfe309017d7928b26395bafb73226e28fd")
     @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
     public static class FormRow extends Component implements HasComponents {
 

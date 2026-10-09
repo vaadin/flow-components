@@ -102,7 +102,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 23.2
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/multi-select-combo-box@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-combo-box/comboBoxConnector.ts")

@@ -48,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 24.8
  */
 @Tag("vaadin-master-detail-layout")
-@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/master-detail-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/master-detail-layout@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
 public class MasterDetailLayout extends Component
         implements HasSize, RouterLayout {
