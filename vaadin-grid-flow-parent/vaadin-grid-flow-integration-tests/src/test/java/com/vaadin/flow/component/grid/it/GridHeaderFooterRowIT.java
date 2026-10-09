@@ -536,13 +536,8 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
 
     private void assertRenderedHeaderCell(GridTHTDElement headerCell,
             String text, boolean withSorter) {
-        String html = headerCell.getInnerHTML();
-        if (withSorter) {
-            Assert.assertTrue(html.contains("<vaadin-grid-sorter"));
-        } else {
-            Assert.assertFalse(html.contains("<vaadin-grid-sorter"));
-        }
-        Assert.assertTrue(html.contains(text));
+        Assert.assertEquals(withSorter, headerCell.getSorter() != null);
+        Assert.assertTrue(headerCell.getInnerHTML().contains(text));
     }
 
     private void clickButton(String id) {

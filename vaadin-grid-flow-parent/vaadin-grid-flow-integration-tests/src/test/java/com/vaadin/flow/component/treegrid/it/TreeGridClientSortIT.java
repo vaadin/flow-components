@@ -35,8 +35,8 @@ public class TreeGridClientSortIT extends AbstractTreeGridIT {
     public void client_sorting_with_collapse_and_expand() {
         findElement(By.id("TreeDataProvider")).click();
 
-        getTreeGrid().getHeaderCell(0).$("vaadin-grid-sorter").first().click();
-        getTreeGrid().getHeaderCell(0).$("vaadin-grid-sorter").first().click();
+        getTreeGrid().getHeaderCell(0).getSorter().click();
+        getTreeGrid().getHeaderCell(0).getSorter().click();
         getTreeGrid().expandWithClick(0);
         getTreeGrid().expandWithClick(1);
         getTreeGrid().collapseWithClick(0);
