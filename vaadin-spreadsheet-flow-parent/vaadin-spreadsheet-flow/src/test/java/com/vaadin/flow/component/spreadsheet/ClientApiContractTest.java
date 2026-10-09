@@ -67,6 +67,14 @@ public class ClientApiContractTest {
     private static final Pattern SET_PROPERTY = Pattern
             .compile("\\.setProperty\\(\\s*\"([^\"]+)\"");
 
+    /**
+     * An element property the component mirrors: {@code MirroredProperty
+     * .integer(this, "rows", 0)} and the like, and {@code new
+     * MirroredNullableMap<>(this, "name")}.
+     */
+    private static final Pattern MIRRORED_PROPERTY = Pattern.compile(
+            "(?:MirroredProperty\\s*\\.\\s*\\w+|new\\s+MirroredNullableMap<[^>]*>)\\s*\\(\\s*this\\s*,\\s*\"([^\"]+)\"");
+
     /** A method on the wrapper element — two-space indent, class body level. */
     private static final Pattern WRAPPER_METHOD = Pattern
             .compile("^ {2}([a-zA-Z_$][\\w$]*)\\s*\\(", Pattern.MULTILINE);
@@ -75,9 +83,12 @@ public class ClientApiContractTest {
             "^ {2}([a-zA-Z_$][\\w$]*)\\s*\\([^)]*\\)\\s*\\{.*?this\\.\\$connector\\.([a-zA-Z_$][\\w$]*)\\s*\\(",
             Pattern.MULTILINE | Pattern.DOTALL);
 
-    /** A property handled in the wrapper's {@code updated()} dispatch. */
-    private static final Pattern PROPERTY_BRANCH = Pattern.compile(
-            "'([a-zA-Z_$][\\w$]*)'\\s*==\\s*name\\s*\\)\\s*\\{\\s*this\\.\\$connector\\.([a-zA-Z_$][\\w$]*)\\s*\\(");
+    /**
+     * A property the wrapper's {@code updated()} handles itself rather than
+     * passing to the connector's {@code set<Name>} method.
+     */
+    private static final Pattern SPECIAL_PROPERTY = Pattern
+            .compile("name\\s*===\\s*'([a-zA-Z_$][\\w$]*)'");
 
     private static final Pattern PROPERTY_DECLARED = Pattern
             .compile("^ {6}([a-zA-Z_$][\\w$]*)\\s*:\\s*\\{", Pattern.MULTILINE);
@@ -133,24 +144,25 @@ public class ClientApiContractTest {
         Set<String> connectorMembers = matches(CONNECTOR_MEMBER,
                 readResource(CONNECTOR_RESOURCE));
         Set<String> declared = matches(PROPERTY_DECLARED, wrapper);
+        Set<String> special = matches(SPECIAL_PROPERTY, wrapper);
+        assertTrue(special.contains("reload"),
+                "failed to parse the wrapper's special properties: " + special);
 
-        Map<String, String> handled = new LinkedHashMap<>();
-        Matcher m = PROPERTY_BRANCH.matcher(wrapper);
-        while (m.find()) {
-            handled.put(m.group(1), m.group(2));
-        }
-
+        // The wrapper passes every other property to the connector's
+        // set<Name> method, and logs - nothing a test sees - when there is
+        // none.
         List<String> problems = new ArrayList<>();
         for (String property : new TreeSet<>(serverProperties())) {
             if (UNDECLARED_BY_DESIGN.contains(property)) {
                 continue;
             }
+            String setter = "set" + Character.toUpperCase(property.charAt(0))
+                    + property.substring(1);
             if (!declared.contains(property)) {
                 problems.add(property + ": not a declared wrapper property");
-            } else if (handled.containsKey(property)
-                    && !connectorMembers.contains(handled.get(property))) {
-                problems.add(property + ": forwarded to a missing connector "
-                        + "method " + handled.get(property));
+            } else if (!special.contains(property)
+                    && !connectorMembers.contains(setter)) {
+                problems.add(property + ": no connector method " + setter);
             }
         }
         assertEquals(List.of(), problems,
@@ -169,6 +181,10 @@ public class ClientApiContractTest {
     private Set<String> serverProperties() throws IOException {
         Set<String> properties = scanJava(SET_PROPERTY);
         assertTrue(properties.size() > 10, "failed to find setProperty uses");
+        Set<String> mirrored = scanJava(MIRRORED_PROPERTY);
+        assertTrue(mirrored.contains("rows"),
+                "failed to find the mirrored properties: " + mirrored);
+        properties.addAll(mirrored);
         return properties;
     }
 

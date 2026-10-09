@@ -45,8 +45,6 @@ export interface SpreadsheetClientApi {
   setWidth(width: string): void;
   /** Set the spreadsheet's height as a CSS dimension string. */
   setHeight(height: string): void;
-  /** Trigger a full relayout (called after the initial state batch). */
-  relayout(): void;
   /** Re-measure on container size change. */
   resize(): void;
   /**
@@ -166,80 +164,6 @@ export interface SpreadsheetClientApi {
   setHyperlinksTooltips(tooltips: Record<string, string>): void;
   setId(id: string): void;
   setClass(className: string): void;
-
-  // ====================================================================
-  // Event-callback registration
-  //
-  // Each setter wires up one client→server event. The wrapper element
-  // re-dispatches each callback's argument as a `CustomEvent` on its
-  // host. Event payload shapes vary per callback — see
-  // `rpc-client-to-server.ts` for the 17 strongly-typed payload
-  // interfaces. Callbacks fire client-side in response to user input.
-  //
-  // Naming: most callbacks are `setXCallback` where X names the
-  // event. A few use `setOnXCallback` matching the GWT-side handler
-  // method name.
-  // ====================================================================
-
-  setGroupingCollapsedCallback(callback: (event: unknown) => void): void;
-  setContextMenuClosedCallback(callback: (event: unknown) => void): void;
-  setLevelHeaderClickedCallback(callback: (event: unknown) => void): void;
-  setOnSheetScrollCallback(callback: (event: unknown) => void): void;
-  setSheetAddressChangedCallback(callback: (event: unknown) => void): void;
-  setCellSelectedCallback(callback: (event: unknown) => void): void;
-  setCellRangeSelectedCallback(callback: (event: unknown) => void): void;
-  setCellAddedToSelectionAndSelectedCallback(callback: (event: unknown) => void): void;
-  setCellsAddedToRangeSelectionCallback(callback: (event: unknown) => void): void;
-  setRowSelectedCallback(callback: (event: unknown) => void): void;
-  setRowAddedToRangeSelectionCallback(callback: (event: unknown) => void): void;
-  setColumnSelectedCallback(callback: (event: unknown) => void): void;
-  setColumnAddedToSelectionCallback(callback: (event: unknown) => void): void;
-  setSelectionIncreasePaintedCallback(callback: (event: unknown) => void): void;
-  setSelectionDecreasePaintedCallback(callback: (event: unknown) => void): void;
-  setCellValueEditedCallback(callback: (event: unknown) => void): void;
-  setSheetSelectedCallback(callback: (event: unknown) => void): void;
-  setSheetRenamedCallback(callback: (event: unknown) => void): void;
-  setSheetCreatedCallback(callback: (event: unknown) => void): void;
-  setCellRangePaintedCallback(callback: (event: unknown) => void): void;
-  setDeleteSelectedCellsCallback(callback: (event: unknown) => void): void;
-  setLinkCellClickedCallback(callback: (event: unknown) => void): void;
-  setRowsResizedCallback(callback: (event: unknown) => void): void;
-  setColumnResizedCallback(callback: (event: unknown) => void): void;
-  setOnRowAutofitCallback(callback: (event: unknown) => void): void;
-  setOnColumnAutofitCallback(callback: (event: unknown) => void): void;
-  setOnUndoCallback(callback: (event: unknown) => void): void;
-  setOnRedoCallback(callback: (event: unknown) => void): void;
-  setSetCellStyleWidthRatiosCallback(callback: (event: unknown) => void): void;
-  setProtectedCellWriteAttemptedCallback(callback: (event: unknown) => void): void;
-  setOnPasteCallback(callback: (event: unknown) => void): void;
-  setClearSelectedCellsOnCutCallback(callback: (event: unknown) => void): void;
-  setUpdateCellCommentCallback(callback: (event: unknown) => void): void;
-  setOnConnectorInitCallback(callback: (event: unknown) => void): void;
-  setContextMenuOpenOnSelectionCallback(callback: (event: unknown) => void): void;
-  setActionOnCurrentSelectionCallback(callback: (event: unknown) => void): void;
-  setRowHeaderContextMenuOpenCallback(callback: (event: unknown) => void): void;
-  setActionOnRowHeaderCallback(callback: (event: unknown) => void): void;
-  setColumnHeaderContextMenuOpenCallback(callback: (event: unknown) => void): void;
-  setActionOnColumnHeaderCallback(callback: (event: unknown) => void): void;
-  setPopupButtonClickCallback(callback: (event: unknown) => void): void;
-  setPopupCloseCallback(callback: (event: unknown) => void): void;
-
-  // ====================================================================
-  // Internal-widget escape hatch (legacy)
-  //
-  // The GWT-era wrapper reads `api.spreadsheetWidget.sheetWidget.
-  // definedRowHeights` directly to time the initial render. This
-  // bypasses the typed API surface and is only present for
-  // GWT-blob-compat. The new TS implementation MUST NOT rely on this
-  // — Phase 3.6 removes it. Until then, the type is permissive.
-  // ====================================================================
-
-  spreadsheetWidget?: {
-    sheetWidget?: {
-      definedRowHeights?: unknown;
-      [key: string]: unknown;
-    };
-  };
 
   // ====================================================================
   // Popup-button lifecycle

@@ -134,7 +134,6 @@ describe('Spreadsheet skeleton — RPC stubs are callable without throwing', () 
     });
 
     it('lifecycle methods are callable', () => {
-        expect(() => sheet.relayout()).to.not.throw();
         expect(() => sheet.resize()).to.not.throw();
         expect(() => sheet.notifyStateChanges([], true)).to.not.throw();
     });
@@ -189,96 +188,6 @@ describe('Spreadsheet skeleton — freeze + display state (slice 126)', () => {
             .to.not.throw();
         expect(() => sheet.setId('spreadsheet-1')).to.not.throw();
         expect(() => sheet.setClass('spreadsheet themed')).to.not.throw();
-    });
-});
-
-describe('Spreadsheet skeleton — callback registry (slice 126)', () => {
-    let sheet: Spreadsheet;
-
-    beforeEach(() => {
-        sheet = new Spreadsheet(document.createElement('div'));
-    });
-
-    it('representative selection-event callbacks are all callable', () => {
-        const noop = () => {};
-        expect(() => sheet.setCellSelectedCallback(noop)).to.not.throw();
-        expect(() => sheet.setCellRangeSelectedCallback(noop)).to.not.throw();
-        expect(() => sheet.setRowSelectedCallback(noop)).to.not.throw();
-        expect(() => sheet.setColumnSelectedCallback(noop)).to.not.throw();
-        expect(() => sheet.setSelectionIncreasePaintedCallback(noop)).to.not.throw();
-        expect(() => sheet.setSelectionDecreasePaintedCallback(noop)).to.not.throw();
-        expect(() =>
-            sheet.setCellAddedToSelectionAndSelectedCallback(noop)
-        ).to.not.throw();
-        expect(() =>
-            sheet.setCellsAddedToRangeSelectionCallback(noop)
-        ).to.not.throw();
-        expect(() =>
-            sheet.setRowAddedToRangeSelectionCallback(noop)
-        ).to.not.throw();
-        expect(() =>
-            sheet.setColumnAddedToSelectionCallback(noop)
-        ).to.not.throw();
-    });
-
-    it('sheet-lifecycle + edit + scroll callbacks are all callable', () => {
-        const noop = () => {};
-        expect(() => sheet.setSheetSelectedCallback(noop)).to.not.throw();
-        expect(() => sheet.setSheetRenamedCallback(noop)).to.not.throw();
-        expect(() => sheet.setSheetCreatedCallback(noop)).to.not.throw();
-        expect(() => sheet.setCellValueEditedCallback(noop)).to.not.throw();
-        expect(() => sheet.setOnSheetScrollCallback(noop)).to.not.throw();
-        expect(() => sheet.setSheetAddressChangedCallback(noop)).to.not.throw();
-        expect(() => sheet.setCellRangePaintedCallback(noop)).to.not.throw();
-        expect(() => sheet.setDeleteSelectedCellsCallback(noop)).to.not.throw();
-    });
-
-    it('action + context-menu callbacks are all callable', () => {
-        const noop = () => {};
-        expect(() => sheet.setContextMenuClosedCallback(noop)).to.not.throw();
-        expect(() => sheet.setContextMenuOpenOnSelectionCallback(noop)).to.not.throw();
-        expect(() => sheet.setRowHeaderContextMenuOpenCallback(noop)).to.not.throw();
-        expect(() =>
-            sheet.setColumnHeaderContextMenuOpenCallback(noop)
-        ).to.not.throw();
-        expect(() => sheet.setActionOnCurrentSelectionCallback(noop)).to.not.throw();
-        expect(() => sheet.setActionOnRowHeaderCallback(noop)).to.not.throw();
-        expect(() => sheet.setActionOnColumnHeaderCallback(noop)).to.not.throw();
-    });
-
-    it('resize + autofit + undo/redo + grouping callbacks are all callable', () => {
-        const noop = () => {};
-        expect(() => sheet.setRowsResizedCallback(noop)).to.not.throw();
-        expect(() => sheet.setColumnResizedCallback(noop)).to.not.throw();
-        expect(() => sheet.setOnRowAutofitCallback(noop)).to.not.throw();
-        expect(() => sheet.setOnColumnAutofitCallback(noop)).to.not.throw();
-        expect(() => sheet.setOnUndoCallback(noop)).to.not.throw();
-        expect(() => sheet.setOnRedoCallback(noop)).to.not.throw();
-        expect(() => sheet.setGroupingCollapsedCallback(noop)).to.not.throw();
-        expect(() => sheet.setLevelHeaderClickedCallback(noop)).to.not.throw();
-    });
-
-    it('cut/paste + protected-write + comment + connector callbacks are all callable', () => {
-        const noop = () => {};
-        expect(() => sheet.setOnPasteCallback(noop)).to.not.throw();
-        expect(() => sheet.setClearSelectedCellsOnCutCallback(noop)).to.not.throw();
-        expect(() => sheet.setProtectedCellWriteAttemptedCallback(noop)).to.not.throw();
-        expect(() => sheet.setUpdateCellCommentCallback(noop)).to.not.throw();
-        expect(() => sheet.setOnConnectorInitCallback(noop)).to.not.throw();
-        expect(() => sheet.setLinkCellClickedCallback(noop)).to.not.throw();
-        expect(() => sheet.setSetCellStyleWidthRatiosCallback(noop)).to.not.throw();
-        expect(() => sheet.setPopupButtonClickCallback(noop)).to.not.throw();
-        expect(() => sheet.setPopupCloseCallback(noop)).to.not.throw();
-    });
-});
-
-describe('Spreadsheet skeleton — legacy spreadsheetWidget escape hatch (slice 126)', () => {
-    it('exposes spreadsheetWidget as undefined (not throw on read)', () => {
-        const sheet = new Spreadsheet(document.createElement('div'));
-        // The GWT-era wrapper reads `api.spreadsheetWidget.sheetWidget.
-        // definedRowHeights` to time first render. The new impl returns
-        // undefined; the wrapper's existence check handles this safely.
-        expect(sheet.spreadsheetWidget).to.be.undefined;
     });
 });
 
@@ -2408,7 +2317,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         host.remove();
     });
 
-    it('resize() + relayout() call recomputeViewport (slice 162)', () => {
+    it('repaints on resize()', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -2417,12 +2326,25 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
 
         const before = sheet.getCellGrid().renderState;
         sheet.resize();
-        const afterResize = sheet.getCellGrid().renderState;
-        expect(afterResize === before).to.be.false;
+        expect(sheet.getCellGrid().renderState === before).to.be.false;
 
-        sheet.relayout();
-        const afterRelayout = sheet.getCellGrid().renderState;
-        expect(afterRelayout === afterResize).to.be.false;
+        cleanup();
+    });
+
+    it('draws the first property batch even when it is empty', () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
+        sheet.setRows(10);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(10).fill(15));
+
+        const before = sheet.getCellGrid().renderState;
+        sheet.notifyStateChanges([], true);
+        const afterFirst = sheet.getCellGrid().renderState;
+        expect(afterFirst === before, 'the first batch drew nothing').to.be.false;
+
+        sheet.notifyStateChanges([], false);
+        expect(sheet.getCellGrid().renderState === afterFirst, 'an empty later batch drew').to.be.true;
 
         cleanup();
     });

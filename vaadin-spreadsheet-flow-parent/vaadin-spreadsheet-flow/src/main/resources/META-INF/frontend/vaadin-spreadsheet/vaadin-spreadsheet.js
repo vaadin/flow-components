@@ -7,7 +7,7 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import { LitElement, html } from 'lit';
+import { LitElement } from 'lit';
 import { Spreadsheet } from './lit/Spreadsheet.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
@@ -15,18 +15,14 @@ const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.$connector.resize());
 });
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 /**
- * Connector-registration namespace, matching the convention from
- * vaadin-grid-flow's `gridConnector.ts` (slice 131's architectural
- * survey). The wrapper element calls `initLazy(this)` from its
- * `connectedCallback` instead of `new Spreadsheet(...)` directly,
- * so future code paths (e.g. dev-tools introspection,
- * cross-component lookups via `window.Vaadin.Flow.spreadsheetConnector`)
- * can rely on the standard hook.
- *
- * The `$connector` property on each element is the connector
- * instance; matches `grid.$connector` exactly so the team's
- * mental model stays consistent across components.
+ * The connector namespace, as the other components' connectors have one:
+ * the element calls `initLazy(this)` from its `connectedCallback`, and the
+ * connector instance is the element's `$connector`.
  */
 window.Vaadin = window.Vaadin || {};
 window.Vaadin.Flow = window.Vaadin.Flow || {};
@@ -35,14 +31,9 @@ window.Vaadin.Flow.spreadsheetConnector = window.Vaadin.Flow.spreadsheetConnecto
     if (element.$connector) {
       return;
     }
-    // Slice 178: the TS/Lit Spreadsheet is the only client
-    // implementation. The use-lit / global flag opt-in from
-    // slice 162 is gone; the GWT bundle was deleted in this
-    // slice. Every spreadsheet instance uses the Lit path.
     element.$connector = new Spreadsheet(element, element.renderRoot);
     element.$connector.setHeight('100%');
     element.$connector.setWidth('100%');
-    element.createCallbacks();
   }
 };
 
@@ -59,8 +50,6 @@ export class VaadinSpreadsheet extends LitElement {
 
   static get properties() {
     return {
-      api: { type: Object },
-
       dirty: { type: Number },
 
       id: { type: String },
@@ -186,23 +175,10 @@ export class VaadinSpreadsheet extends LitElement {
     }
   }
 
-  render() {
-    return html`<slot name="overlays"></slot>`;
-  }
-
   connectedCallback() {
     super.connectedCallback();
     spreadsheetResizeObserver.observe(this);
     if (!this.$connector) {
-      // Per-instance overlay container slotted into this element (not appended
-      // to document.body), so overlay styles resolve correctly when the
-      // spreadsheet is nested in another element's shadow root. Required by the
-      // getRootNode() adoption below. From main #9303 / #9713.
-      this._overlays = document.createElement('div');
-      this._overlays.id = 'spreadsheet-overlays';
-      this._overlays.slot = 'overlays';
-      this.appendChild(this._overlays);
-
       window.Vaadin.Flow.spreadsheetConnector.initLazy(this);
 
       this._firstUpdate = true;
@@ -211,12 +187,12 @@ export class VaadinSpreadsheet extends LitElement {
       this.$connector.connect();
     }
 
-    // The overlay container lives in light DOM, so the overlay styles are
-    // injected into `document.head` (see constructor). That does not reach the
-    // container when `<vaadin-spreadsheet>` is nested inside another element's
-    // shadow root. In that case, also adopt the overlay styles onto the
-    // container's root so the scoped rules apply there too.
-    const root = this._overlays.getRootNode();
+    // The filter popup's content is the application's components, in this
+    // element's light DOM, so its styles are injected into `document.head`
+    // (see constructor). That does not reach them when `<vaadin-spreadsheet>`
+    // is nested inside another element's shadow root. In that case, also
+    // adopt the overlay styles onto that root so the rules apply there too.
+    const root = this.getRootNode();
     if (root instanceof ShadowRoot && !root.adoptedStyleSheets.includes(spreadsheetOverlayStyles.styleSheet)) {
       root.adoptedStyleSheets.push(spreadsheetOverlayStyles.styleSheet);
     }
@@ -232,139 +208,34 @@ export class VaadinSpreadsheet extends LitElement {
 
   updated(changedProperties) {
     super.updated(changedProperties);
-    this._overlays.setAttribute('theme', this.getAttribute('theme'));
-    let propNames = [];
-    let dirty = false;
     changedProperties.forEach((oldValue, name) => {
-      let newVal = this[name];
-      if ('dirty' == name) {
-        dirty = true;
-      } else if ('rowBufferSize' == name) {
-        this.$connector.setRowBufferSize(newVal);
-      } else if ('columnBufferSize' == name) {
-        this.$connector.setColumnBufferSize(newVal);
-      } else if ('rows' == name) {
-        this.$connector.setRows(newVal);
-      } else if ('cols' == name) {
-        this.$connector.setCols(newVal);
-      } else if ('colGroupingData' == name) {
-        this.$connector.setColGroupingData(newVal);
-      } else if ('rowGroupingData' == name) {
-        this.$connector.setRowGroupingData(newVal);
-      } else if ('colGroupingMax' == name) {
-        this.$connector.setColGroupingMax(newVal);
-      } else if ('rowGroupingMax' == name) {
-        this.$connector.setRowGroupingMax(newVal);
-      } else if ('colGroupingInversed' == name) {
-        this.$connector.setColGroupingInversed(newVal);
-      } else if ('rowGroupingInversed' == name) {
-        this.$connector.setRowGroupingInversed(newVal);
-      } else if ('defRowH' == name) {
-        this.$connector.setDefRowH(newVal);
-      } else if ('defColW' == name) {
-        this.$connector.setDefColW(newVal);
-      } else if ('rowH' == name) {
-        this.$connector.setRowH(newVal);
-      } else if ('colW' == name) {
-        this.$connector.setColW(newVal);
-      } else if ('reload' == name) {
+      const newVal = this[name];
+      // Most server properties map to a `set<Name>` method on the connector.
+      // A few need special handling, and dirty and theme are not forwarded
+      // at all (still reported via notifyStateChanges below).
+      if (name === 'dirty' || name === 'theme') {
+        // No-op.
+      } else if (name === 'reload') {
         this.$connector.setReload(true);
-      } else if ('sheetIndex' == name) {
-        this.$connector.setSheetIndex(newVal);
-      } else if ('sheetNames' == name) {
-        this.$connector.setSheetNames(newVal);
-      } else if ('cellStyleToCSSStyle' == name) {
-        this.$connector.setCellStyleToCSSStyle(newVal);
-      } else if ('rowIndexToStyleIndex' == name) {
-        this.$connector.setRowIndexToStyleIndex(newVal);
-      } else if ('columnIndexToStyleIndex' == name) {
-        this.$connector.setColumnIndexToStyleIndex(newVal);
-      } else if ('lockedColumnIndexes' == name) {
-        this.$connector.setLockedColumnIndexes(newVal);
-      } else if ('lockedRowIndexes' == name) {
-        this.$connector.setLockedRowIndexes(newVal);
-      } else if ('shiftedCellBorderStyles' == name) {
-        this.$connector.setShiftedCellBorderStyles(newVal);
-      } else if ('conditionalFormattingStyles' == name) {
-        this.$connector.setConditionalFormattingStyles(newVal);
-      } else if ('hiddenColumnIndexes' == name) {
-        this.$connector.setHiddenColumnIndexes(newVal);
-      } else if ('hiddenRowIndexes' == name) {
-        this.$connector.setHiddenRowIndexes(newVal);
-      } else if ('verticalScrollPositions' == name) {
-        this.$connector.setVerticalScrollPositions(newVal);
-      } else if ('horizontalScrollPositions' == name) {
-        this.$connector.setHorizontalScrollPositions(newVal);
-      } else if ('sheetProtected' == name) {
-        this.$connector.setSheetProtected(newVal);
-      } else if ('workbookProtected' == name) {
-        this.$connector.setWorkbookProtected(newVal);
-      } else if ('cellKeysToEditorIdMap' == name) {
-        this.$connector.setCellKeysToEditorIdMap(newVal);
-      } else if ('componentIDtoCellKeysMap' == name) {
-        this.$connector.setComponentIDtoCellKeysMap(newVal);
-      } else if ('hyperlinksTooltips' == name) {
-        this.$connector.setHyperlinksTooltips(newVal);
-      } else if ('cellComments' == name) {
-        this.$connector.setCellComments(newVal);
-      } else if ('cellCommentAuthors' == name) {
-        this.$connector.setCellCommentAuthors(newVal);
-      } else if ('visibleCellComments' == name) {
-        this.$connector.setVisibleCellComments(newVal);
-      } else if ('invalidFormulaCells' == name) {
-        this.$connector.setInvalidFormulaCells(newVal);
-      } else if ('hasActions' == name) {
-        this.$connector.setHasActions(newVal);
-      } else if ('overlays' == name) {
-        this.$connector.setOverlays(newVal);
-      } else if ('mergedRegions' == name) {
-        this.$connector.setMergedRegions(newVal);
-      } else if ('displayGridlines' == name) {
-        this.$connector.setDisplayGridlines(newVal);
-      } else if ('displayRowColHeadings' == name) {
-        this.$connector.setDisplayRowColHeadings(newVal);
-      } else if ('verticalSplitPosition' == name) {
-        this.$connector.setVerticalSplitPosition(newVal);
-      } else if ('horizontalSplitPosition' == name) {
-        this.$connector.setHorizontalSplitPosition(newVal);
-      } else if ('infoLabelValue' == name) {
-        this.$connector.setInfoLabelValue(newVal);
-      } else if ('workbookChangeToggle' == name) {
-        this.$connector.setWorkbookChangeToggle(newVal);
-      } else if ('invalidFormulaErrorMessage' == name) {
-        this.$connector.setInvalidFormulaErrorMessage(newVal);
-      } else if ('lockFormatColumns' == name) {
-        this.$connector.setLockFormatColumns(newVal);
-      } else if ('lockFormatRows' == name) {
-        this.$connector.setLockFormatRows(newVal);
-      } else if ('namedRanges' == name) {
-        this.$connector.setNamedRanges(newVal);
-      } else if ('id' == name) {
-        this.$connector.setId(newVal);
-      } else if ('class' == name) {
-        this.$connector.setClass(newVal);
-      } else if ('resources' == name) {
+      } else if (name === 'resources') {
         this.$connector.setResources(this, newVal);
-      } else if ('api' == name) {
-      } else if ('theme' == name) {
-      } else if ('showCustomEditorOnFocus' == name) {
-        this.$connector.setShowCustomEditorOnFocus(newVal);
       } else {
-        console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
+        const setter = `set${capitalize(name)}`;
+        if (typeof this.$connector[setter] === 'function') {
+          this.$connector[setter](newVal);
+        } else {
+          console.error(`<vaadin-spreadsheet> unsupported property received from server: property=${name}`);
+        }
       }
-      propNames.push(name);
     });
-    this.$connector.notifyStateChanges(propNames, this._firstUpdate);
-    if (this._firstUpdate) {
-      this.$connector.relayout();
-      this._firstUpdate = false;
-    }
+    this.$connector.notifyStateChanges([...changedProperties.keys()], this._firstUpdate);
+    this._firstUpdate = false;
   }
 
   // Flow can send RPC calls in the same task as the property writes that
-  // configure the api, before Lit's microtask-scheduled `updated()` runs to
-  // propagate those properties to the api. Calling `performUpdate()` flushes
-  // the pending update synchronously so the api state is ready.
+  // configure the connector, before Lit's microtask-scheduled `updated()`
+  // runs to pass those properties on. Calling `performUpdate()` flushes the
+  // pending update synchronously so the connector's state is ready.
   _flush() {
     this.performUpdate();
   }
@@ -411,12 +282,9 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
-    // `_flush()` is the whole ordering guard here. The GWT widget deferred
-    // its first relayout through GWT's scheduler, so this RPC could arrive
-    // before `definedRowHeights` existed and had to be re-queued until it
-    // did. The Lit connector has no such deferred layout — it reads the
-    // row/column arrays it already holds and schedules its own repaint — so
-    // flushing the pending property batch is sufficient.
+    // `_flush()` is the whole ordering guard here: the connector reads the
+    // row and column sizes it already holds and schedules its own repaint,
+    // so passing on the pending property batch first is enough.
     this._flush();
     this.$connector.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
   }
@@ -454,185 +322,6 @@ export class VaadinSpreadsheet extends LitElement {
   removePopupButton(rawState) {
     this._flush();
     this.$connector.removePopupButton(rawState);
-  }
-
-  /* SERVER RPC METHOD CALLBACKS */
-  createCallbacks() {
-    this.$connector.setGroupingCollapsedCallback((e) => {
-      this.dispatchEvent(this.createEvent('groupingCollapsed', e));
-    });
-
-    this.$connector.setContextMenuClosedCallback((e) => {
-      this.dispatchEvent(this.createEvent('contextMenuClosed', e));
-    });
-
-    this.$connector.setLevelHeaderClickedCallback((e) => {
-      this.dispatchEvent(this.createEvent('levelHeaderClicked', e));
-    });
-
-    this.$connector.setOnSheetScrollCallback((e) => {
-      this.dispatchEvent(this.createEvent('onSheetScroll', e));
-    });
-
-    this.$connector.setSheetAddressChangedCallback((e) => {
-      this.dispatchEvent(this.createEvent('sheetAddressChanged', e));
-    });
-
-    this.$connector.setCellSelectedCallback((e) => {
-      this.dispatchEvent(this.createEvent('cellSelected', e));
-    });
-
-    this.$connector.setCellRangeSelectedCallback((e) => {
-      this.dispatchEvent(this.createEvent('cellRangeSelected', e));
-    });
-
-    this.$connector.setCellAddedToSelectionAndSelectedCallback((e) => {
-      this.dispatchEvent(this.createEvent('cellAddedToSelectionAndSelected', e));
-    });
-
-    this.$connector.setCellsAddedToRangeSelectionCallback((e) => {
-      this.dispatchEvent(this.createEvent('cellsAddedToRangeSelection', e));
-    });
-
-    this.$connector.setRowSelectedCallback((e) => {
-      this.dispatchEvent(this.createEvent('rowSelected', e));
-    });
-
-    this.$connector.setRowAddedToRangeSelectionCallback((e) => {
-      this.dispatchEvent(this.createEvent('rowAddedToRangeSelection', e));
-    });
-
-    this.$connector.setColumnSelectedCallback((e) => {
-      this.dispatchEvent(this.createEvent('columnSelected', e));
-    });
-
-    this.$connector.setColumnAddedToSelectionCallback((e) => {
-      this.dispatchEvent(this.createEvent('columnAddedToSelection', e));
-    });
-
-    this.$connector.setSelectionIncreasePaintedCallback((e) => {
-      this.dispatchEvent(this.createEvent('selectionIncreasePainted', e));
-    });
-
-    this.$connector.setSelectionDecreasePaintedCallback((e) => {
-      this.dispatchEvent(this.createEvent('selectionDecreasePainted', e));
-    });
-
-    this.$connector.setCellValueEditedCallback((e) => {
-      this.dispatchEvent(this.createEvent('cellValueEdited', e));
-    });
-
-    this.$connector.setSheetSelectedCallback((e) => {
-      this.dispatchEvent(this.createEvent('sheetSelected', e));
-    });
-
-    this.$connector.setSheetRenamedCallback((e) => {
-      this.dispatchEvent(this.createEvent('sheetRenamed', e));
-    });
-
-    this.$connector.setSheetCreatedCallback((e) => {
-      this.dispatchEvent(this.createEvent('sheetCreated', e));
-    });
-
-    this.$connector.setCellRangePaintedCallback((e) => {
-      this.dispatchEvent(this.createEvent('cellRangePainted', e));
-    });
-
-    this.$connector.setDeleteSelectedCellsCallback((e) => {
-      this.dispatchEvent(this.createEvent('deleteSelectedCells', e));
-    });
-
-    this.$connector.setLinkCellClickedCallback((e) => {
-      this.dispatchEvent(this.createEvent('linkCellClicked', e));
-    });
-
-    this.$connector.setRowsResizedCallback((e) => {
-      this.dispatchEvent(this.createEvent('rowsResized', e));
-    });
-
-    this.$connector.setColumnResizedCallback((e) => {
-      this.dispatchEvent(this.createEvent('columnResized', e));
-    });
-
-    this.$connector.setOnRowAutofitCallback((e) => {
-      this.dispatchEvent(this.createEvent('onRowAutofit', e));
-    });
-
-    this.$connector.setOnColumnAutofitCallback((e) => {
-      this.dispatchEvent(this.createEvent('onColumnAutofit', e));
-    });
-
-    this.$connector.setOnUndoCallback((e) => {
-      this.dispatchEvent(this.createEvent('onUndo', e));
-    });
-
-    this.$connector.setOnRedoCallback((e) => {
-      this.dispatchEvent(this.createEvent('onRedo', e));
-    });
-
-    this.$connector.setSetCellStyleWidthRatiosCallback((e) => {
-      this.dispatchEvent(this.createEvent('setCellStyleWidthRatios', e));
-    });
-
-    this.$connector.setProtectedCellWriteAttemptedCallback((e) => {
-      this.dispatchEvent(this.createEvent('protectedCellWriteAttempted', e));
-    });
-
-    this.$connector.setOnPasteCallback((e) => {
-      this.dispatchEvent(this.createEvent('onPaste', e));
-    });
-
-    this.$connector.setClearSelectedCellsOnCutCallback((e) => {
-      this.dispatchEvent(this.createEvent('clearSelectedCellsOnCut', e));
-    });
-
-    this.$connector.setUpdateCellCommentCallback((e) => {
-      this.dispatchEvent(this.createEvent('updateCellComment', e));
-    });
-
-    this.$connector.setOnConnectorInitCallback((e) => {
-      this.dispatchEvent(this.createEvent('onConnectorInit', e));
-    });
-
-    this.$connector.setContextMenuOpenOnSelectionCallback((e) => {
-      this.dispatchEvent(this.createEvent('contextMenuOpenOnSelection', e));
-    });
-
-    this.$connector.setActionOnCurrentSelectionCallback((e) => {
-      this.dispatchEvent(this.createEvent('actionOnCurrentSelection', e));
-    });
-
-    this.$connector.setRowHeaderContextMenuOpenCallback((e) => {
-      this.dispatchEvent(this.createEvent('rowHeaderContextMenuOpen', e));
-    });
-
-    this.$connector.setActionOnRowHeaderCallback((e) => {
-      this.dispatchEvent(this.createEvent('actionOnRowHeader', e));
-    });
-
-    this.$connector.setColumnHeaderContextMenuOpenCallback((e) => {
-      this.dispatchEvent(this.createEvent('columnHeaderContextMenuOpen', e));
-    });
-
-    this.$connector.setActionOnColumnHeaderCallback((e) => {
-      this.dispatchEvent(this.createEvent('actionOnColumnHeader', e));
-    });
-
-    this.$connector.setPopupButtonClickCallback((e) => {
-      this.dispatchEvent(this.createEvent('popupButtonClick', e));
-    });
-
-    this.$connector.setPopupCloseCallback((e) => {
-      this.dispatchEvent(this.createEvent('popupClose', e));
-    });
-
-    this.dispatchEvent(this.createEvent('onConnectorInit'), []);
-  }
-
-  createEvent(type, data) {
-    return new CustomEvent('spreadsheet-event', {
-      detail: { type, data }
-    });
   }
 }
 
