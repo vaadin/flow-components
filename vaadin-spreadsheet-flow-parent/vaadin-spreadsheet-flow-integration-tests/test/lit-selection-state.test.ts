@@ -14,13 +14,15 @@ import {
     isActiveCell,
     isCellSelected,
     isCoherentSelection,
-    iterateRange,
     normalizedRange,
-    selectionBoundingBox,
-    selectRange,
     selectSingleCell,
     type SelectionState,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
+
+/** A range selection from one corner to the other, the active cell at the first. */
+function selectRange(col1: number, row1: number, col2: number, row2: number): SelectionState {
+    return { activeCell: { col: col1, row: row1 }, activeRange: normalizedRange(col1, row1, col2, row2), auxRanges: [] };
+}
 
 describe('SelectionState — selectSingleCell', () => {
     it('builds a single-cell selection with matching active range', () => {
@@ -35,24 +37,6 @@ describe('SelectionState — selectSingleCell', () => {
         const state = selectSingleCell(1, 1);
 
         expect(isCoherentSelection(state)).to.be.true;
-    });
-});
-
-describe('SelectionState — selectRange', () => {
-    it('builds a range with normalized corners regardless of input order', () => {
-        const s1 = selectRange(1, 1, 5, 5);
-        const s2 = selectRange(5, 5, 1, 1);
-
-        expect(s1.activeRange).to.deep.equal({ c1: 1, c2: 5, r1: 1, r2: 5 });
-        expect(s2.activeRange).to.deep.equal({ c1: 1, c2: 5, r1: 1, r2: 5 });
-    });
-
-    it('keeps the first corner as the active cell (anchor)', () => {
-        // Excel: shift-click extends from anchor; the original click
-        // is preserved as the active cell.
-        const state = selectRange(2, 3, 6, 8);
-
-        expect(state.activeCell).to.deep.equal({ col: 2, row: 3 });
     });
 });
 
@@ -157,57 +141,5 @@ describe('SelectionState — isActiveCell', () => {
         expect(isActiveCell(state, 2, 2)).to.be.true;  // anchor
         expect(isActiveCell(state, 3, 3)).to.be.false; // in range but not active
         expect(isActiveCell(state, 4, 4)).to.be.false; // far corner
-    });
-});
-
-describe('SelectionState — iterateRange', () => {
-    it('yields cells in row-major order', () => {
-        const range = { c1: 1, c2: 3, r1: 1, r2: 2 };
-        const cells = [...iterateRange(range)];
-
-        expect(cells).to.deep.equal([
-            { col: 1, row: 1 },
-            { col: 2, row: 1 },
-            { col: 3, row: 1 },
-            { col: 1, row: 2 },
-            { col: 2, row: 2 },
-            { col: 3, row: 2 },
-        ]);
-    });
-
-    it('yields exactly one cell for a 1x1 range', () => {
-        const range = { c1: 5, c2: 5, r1: 5, r2: 5 };
-
-        expect([...iterateRange(range)]).to.deep.equal([{ col: 5, row: 5 }]);
-    });
-});
-
-describe('SelectionState — selectionBoundingBox', () => {
-    it('returns the active range when no aux ranges exist', () => {
-        const state = selectRange(2, 2, 4, 4);
-
-        expect(selectionBoundingBox(state)).to.deep.equal({
-            c1: 2, c2: 4, r1: 2, r2: 4,
-        });
-    });
-
-    it('grows to cover all aux ranges', () => {
-        let state = selectRange(2, 2, 4, 4);
-        state = addAuxRange(state, 10, 10, 12, 12);
-
-        const bbox = selectionBoundingBox(state);
-        expect(bbox).to.deep.equal({ c1: 2, c2: 12, r1: 2, r2: 12 });
-    });
-
-    it('handles aux ranges that extend in both directions from active', () => {
-        let state: SelectionState = selectRange(50, 50, 52, 52);
-        state = addAuxRange(state, 1, 1, 3, 3);     // smaller corner
-        state = addAuxRange(state, 100, 100, 102, 102);  // larger corner
-
-        const bbox = selectionBoundingBox(state);
-        expect(bbox.c1).to.equal(1);
-        expect(bbox.r1).to.equal(1);
-        expect(bbox.c2).to.equal(102);
-        expect(bbox.r2).to.equal(102);
     });
 });

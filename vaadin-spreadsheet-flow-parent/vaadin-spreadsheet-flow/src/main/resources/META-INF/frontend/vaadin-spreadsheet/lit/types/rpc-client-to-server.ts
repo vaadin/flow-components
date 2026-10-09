@@ -318,33 +318,6 @@ export interface PopupButtonEventData {
 }
 
 /**
- * Helper: narrow an arbitrary CustomEvent dispatched by the wrapper to
- * a typed {@code SpreadsheetEvent}. Returns null if the event type
- * isn't recognized — callers handle the missing case.
- *
- * Use:
- *
- * <pre>
- *     element.addEventListener('cellSelected', (e) =&gt; {
- *         const detail = asSpreadsheetEvent(e);
- *         if (detail?.type === 'cellSelected') {
- *             // detail.data is CellSelectedData
- *         }
- *     });
- * </pre>
- */
-export function asSpreadsheetEvent(event: Event): SpreadsheetEvent | null {
-  if (!(event instanceof CustomEvent)) {
-    return null;
-  }
-  const detail = event.detail as SpreadsheetEvent | null;
-  if (!detail || typeof detail !== 'object' || typeof detail.type !== 'string') {
-    return null;
-  }
-  return detail;
-}
-
-/**
  * The payload key names the server reads for each event type — the single
  * source of truth for the client-to-server wire.
  *

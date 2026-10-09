@@ -707,16 +707,16 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup();
     });
 
-    it('setPopupButtons + render: dispatches popupButtonClick on click (slice 161)', async () => {
+    it('a popup button tells the server it was clicked (slice 161)', async () => {
         const { host, sheet, cleanup } = attachSheet(400, 300);
         sheet.setRows(10);
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15, 15, 15, 15, 15, 15]);
-        sheet.setPopupButtons([
-            { col: 2, row: 3, active: false, headerHidden: false,
-              popupHeight: null, popupWidth: null, sheet: 'Sheet1' },
-        ]);
+        sheet.addPopupButton({
+            col: 2, row: 3, active: false, headerHidden: false,
+            popupHeight: null, popupWidth: null, sheet: 'Sheet1',
+        });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 
@@ -748,10 +748,10 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setPopupButtons([
-            { col: 1, row: 1, active: true, headerHidden: false,
-              popupHeight: null, popupWidth: null, sheet: 'Sheet1' },
-        ]);
+        sheet.addPopupButton({
+            col: 1, row: 1, active: true, headerHidden: false,
+            popupHeight: null, popupWidth: null, sheet: 'Sheet1',
+        });
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 

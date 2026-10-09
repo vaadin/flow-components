@@ -9,7 +9,6 @@
 
 import { expect } from 'chai';
 import {
-  commitStep,
   computeMergedRegionBoxes,
   computePositionedColGroupings,
   isCellInSelection,
@@ -29,9 +28,15 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/VirtualChildren.js';
 import {
   addAuxRange,
-  selectRange,
+  normalizedRange,
+  type SelectionState,
   selectSingleCell
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
+
+/** A range selection from one corner to the other, the active cell at the first. */
+function selectRange(col1: number, row1: number, col2: number, row2: number): SelectionState {
+  return { activeCell: { col: col1, row: row1 }, activeRange: normalizedRange(col1, row1, col2, row2), auxRanges: [] };
+}
 
 /**
  * Pure helpers the connector leans on, pinned directly.
@@ -242,38 +247,6 @@ describe('overlayComponentAppId', () => {
     // name and quietly find nothing.
     expect(overlayComponentAppId(document.createElement('div'))).to.equal('');
   });
-});
-
-/**
- * Where the selection lands when an edit is committed with a key.
- *
- * Extracted from the commit handler so the direction table can be read at
- * a glance: Enter down, Tab right, shift reverses each, an arrow the way
- * it points, and nothing at all for a blur.
- */
-describe('commitStep — direction of the post-commit move', () => {
-    it('moves down on Enter and up with shift', () => {
-        expect(commitStep('Enter', false)).to.eql({ dCol: 0, dRow: 1 });
-        expect(commitStep('Enter', true)).to.eql({ dCol: 0, dRow: -1 });
-    });
-
-    it('moves right on Tab and left with shift', () => {
-        expect(commitStep('Tab', false)).to.eql({ dCol: 1, dRow: 0 });
-        expect(commitStep('Tab', true)).to.eql({ dCol: -1, dRow: 0 });
-    });
-
-    it('follows an arrow key, which shift does not reverse', () => {
-        expect(commitStep('ArrowUp', false)).to.eql({ dCol: 0, dRow: -1 });
-        expect(commitStep('ArrowUp', true)).to.eql({ dCol: 0, dRow: -1 });
-        expect(commitStep('ArrowDown', false)).to.eql({ dCol: 0, dRow: 1 });
-        expect(commitStep('ArrowLeft', false)).to.eql({ dCol: -1, dRow: 0 });
-        expect(commitStep('ArrowRight', false)).to.eql({ dCol: 1, dRow: 0 });
-    });
-
-    it('stays put for a commit with no key — a blur', () => {
-        expect(commitStep(undefined, false)).to.be.null;
-        expect(commitStep('a', false)).to.be.null;
-    });
 });
 
 /**

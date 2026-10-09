@@ -7,14 +7,7 @@
  * license.
  */
 
-import type {
-  CellData,
-  GroupingData,
-  MergedRegion,
-  OverlayInfo,
-  PopupButtonState,
-  SpreadsheetActionDetails
-} from './wire.js';
+import type { CellData, GroupingData, MergedRegion, OverlayInfo, SpreadsheetActionDetails } from './wire.js';
 
 /**
  * The complete set of methods the new Spreadsheet client must expose to
@@ -145,7 +138,6 @@ export interface SpreadsheetClientApi {
   setInvalidFormulaErrorMessage(message: string | null): void;
   setNamedRanges(names: string[]): void;
   setResources(host: HTMLElement, jsonString: string): void;
-  setPopupButtons(popupButtons: PopupButtonState[]): void;
 
   // Freeze pane split positions
   setVerticalSplitPosition(value: number): void;

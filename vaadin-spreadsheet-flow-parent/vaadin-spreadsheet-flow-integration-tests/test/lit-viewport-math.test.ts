@@ -9,15 +9,11 @@
 
 import { expect } from 'chai';
 import {
-    calculateLeftValueOfScrolledColumns,
-    calculateTopValueOfScrolledRows,
     computeTotalGridSize,
     computeViewportBounds,
-    convertPixelsToPoint,
     convertPointsToPixel,
     FALLBACK_PPI,
     getDefaultRowHeightPx,
-    getRowHeightPx,
     type ViewportInput,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 
@@ -41,14 +37,6 @@ describe('ViewportMath — unit conversion', () => {
         expect(convertPointsToPixel(12, 72)).to.equal(12);
     });
 
-    it('round-trips points → pixels → points within truncation tolerance', () => {
-        for (const points of [12, 15, 20, 24, 36, 72]) {
-            const px = convertPointsToPixel(points, 96);
-            const back = convertPixelsToPoint(px, 96);
-            expect(Math.abs(back - points)).to.be.lessThan(1);
-        }
-    });
-
     it('exposes the 96 ppi fallback constant', () => {
         expect(FALLBACK_PPI).to.equal(96);
     });
@@ -70,76 +58,6 @@ describe('ViewportMath — getDefaultRowHeightPx', () => {
 
     it('uses the supplied ppi when it is positive', () => {
         expect(getDefaultRowHeightPx(15, 192)).to.equal(40);
-    });
-});
-
-describe('ViewportMath — getRowHeightPx', () => {
-    const definedHeights = [20, 30, 40, 25, 20]; // length 5: rows 1..5 covered
-
-    it('returns the defined height for rows 1..length, non-hidden', () => {
-        expect(getRowHeightPx(1, definedHeights, new Set(), 18)).to.equal(20);
-        expect(getRowHeightPx(3, definedHeights, new Set(), 18)).to.equal(40);
-        expect(getRowHeightPx(4, definedHeights, new Set(), 18)).to.equal(25);
-        expect(getRowHeightPx(5, definedHeights, new Set(), 18)).to.equal(20);
-    });
-
-    it('returns 0 for a hidden row, ignoring the defined height', () => {
-        expect(getRowHeightPx(3, definedHeights, new Set([3]), 18)).to.equal(0);
-    });
-
-    it('returns the default height for a row index beyond definedHeights', () => {
-        expect(getRowHeightPx(6, definedHeights, new Set(), 18)).to.equal(18);
-        expect(getRowHeightPx(100, definedHeights, new Set(), 18)).to.equal(18);
-    });
-
-    it('returns 0 for a hidden row even when its index is beyond definedHeights', () => {
-        expect(getRowHeightPx(10, definedHeights, new Set([10]), 18)).to.equal(0);
-    });
-});
-
-describe('ViewportMath — calculateLeftValueOfScrolledColumns', () => {
-    const colWidths = (col: number) => (col % 2 === 0 ? 50 : 40); // alternating 40/50
-
-    it('returns 0 when first column is right at the freeze boundary', () => {
-        // horizontalSplitPosition = 2, firstColumnIndex = 3
-        // Loop: i from 3 to firstColumnIndex (exclusive) → no iterations
-        expect(
-            calculateLeftValueOfScrolledColumns(2, 3, colWidths)
-        ).to.equal(0);
-    });
-
-    it('returns 0 when no freeze is active (split = 0) and first = 1', () => {
-        expect(
-            calculateLeftValueOfScrolledColumns(0, 1, colWidths)
-        ).to.equal(0);
-    });
-
-    it('sums column widths between freeze + 1 and firstColumnIndex (exclusive)', () => {
-        // freeze = 2, first = 6 → sum cols 3, 4, 5 → 40 + 50 + 40 = 130
-        expect(
-            calculateLeftValueOfScrolledColumns(2, 6, colWidths)
-        ).to.equal(130);
-    });
-
-    it('uses the getColWidth callback for each iteration (not a precomputed array)', () => {
-        const calls: number[] = [];
-        const tracked = (col: number) => {
-            calls.push(col);
-            return 10;
-        };
-        calculateLeftValueOfScrolledColumns(2, 5, tracked);
-        expect(calls).to.deep.equal([3, 4]);
-    });
-});
-
-describe('ViewportMath — calculateTopValueOfScrolledRows', () => {
-    const rowHeights = (row: number) => (row * 10); // row 1 = 10, row 2 = 20, ...
-
-    it('symmetric to calculateLeftValueOfScrolledColumns', () => {
-        // split = 1, first = 4 → sum rows 2, 3 → 20 + 30 = 50
-        expect(
-            calculateTopValueOfScrolledRows(1, 4, rowHeights)
-        ).to.equal(50);
     });
 });
 

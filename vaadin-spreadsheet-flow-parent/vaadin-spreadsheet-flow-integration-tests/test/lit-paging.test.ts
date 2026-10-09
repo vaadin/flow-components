@@ -61,8 +61,6 @@ describe('Spreadsheet — the view the browser pages', () => {
     sheet.setRows(400);
     sheet.setColW(new Array(60).fill(50));
     sheet.setRowH(new Array(400).fill(15));
-    sheet.setHeaderRowHeight(20);
-    sheet.setHeaderColumnWidth(40);
     sheet.recomputeViewport();
   });
 
@@ -92,7 +90,9 @@ describe('Spreadsheet — the view the browser pages', () => {
   }
 
   it('leaves the headers out of it', () => {
-    expect(inset()).to.equal('19px 40px');
+    // The headers are 27px tall and 50px wide, and the pane starts a pixel
+    // under the tabs.
+    expect(inset()).to.equal('26px 50px');
   });
 
   it('gives the pixel back when the sheet hides its tabs', async () => {
@@ -100,7 +100,7 @@ describe('Spreadsheet — the view the browser pages', () => {
     // The host's classes are watched, not polled.
     await Promise.resolve();
 
-    expect(inset()).to.equal('20px 40px');
+    expect(inset()).to.equal('27px 50px');
   });
 
   it('leaves the frozen panes and the freeze line out of it too', () => {
@@ -109,7 +109,7 @@ describe('Spreadsheet — the view the browser pages', () => {
     sheet.recomputeViewport();
 
     // Rows of 15pt are 20px.
-    expect(inset()).to.equal(`${20 + 2 * 20 + 1 - 1}px ${40 + 50 + 1}px`);
+    expect(inset()).to.equal(`${27 + 2 * 20 + 1 - 1}px ${50 + 50 + 1}px`);
   });
 
   it('pages the cells as far as a pane as tall as the GWT client\'s would', async () => {
@@ -118,7 +118,7 @@ describe('Spreadsheet — the view the browser pages', () => {
     // and a pixel under the tabs.
     reference = document.createElement('div');
     reference.tabIndex = 0;
-    reference.style.cssText = `height:${scroller.clientHeight - 19}px;width:200px;overflow:auto;`;
+    reference.style.cssText = `height:${scroller.clientHeight - 26}px;width:200px;overflow:auto;`;
     reference.innerHTML = '<div style="height:6000px"></div>';
     document.body.appendChild(reference);
 

@@ -36,8 +36,7 @@ export interface ColumnHeaderRenderState {
   /**
    * Height of the header strip in pixels. {@code 0} disables the
    * header (the connector still pushes a state, but render() emits
-   * an empty fragment). Excel's default header is around 18-22 px;
-   * the connector picks the value via {@code setHeaderRowHeight}.
+   * an empty fragment). 27 by default, as in the GWT client.
    */
   headerHeight: number;
   /**

@@ -29,8 +29,6 @@ function attachSheet(): { sheet: Spreadsheet; cleanup: () => void } {
   sheet.setRows(400);
   sheet.setColW(new Array(60).fill(50));
   sheet.setRowH(new Array(400).fill(15));
-  sheet.setHeaderRowHeight(20);
-  sheet.setHeaderColumnWidth(40);
   return {
     sheet,
     cleanup: () => {

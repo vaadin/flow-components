@@ -46,8 +46,6 @@ async function attach(theme: string | null = null, tokens = ''): Promise<Sheet> 
   sheet.setRows(10);
   sheet.setColW([50, 50, 50, 50, 50]);
   sheet.setRowH(new Array(10).fill(15));
-  sheet.setHeaderRowHeight(20);
-  sheet.setHeaderColumnWidth(40);
   sheet.recomputeViewport();
   await sheet.getColumnHeader().updateComplete;
   await sheet.getRowHeader().updateComplete;
@@ -130,7 +128,8 @@ describe('Spreadsheet — dragging a column edge, as the GWT client did', () => 
   function dragB(x: number, y = 0): { left: number; y: number } {
     const b = columnLetter(ctx.sheet, 2);
     const handle = columnHandle(ctx.sheet, 2).getBoundingClientRect();
-    const grabY = handle.top + handle.height / 2;
+    // A mouse event's coordinates are whole pixels.
+    const grabY = Math.floor(handle.top + handle.height / 2);
     press(columnHandle(ctx.sheet, 2), handle.left + handle.width / 2, grabY);
     move(x, y || grabY);
     return { left: b.left, y: y || grabY };

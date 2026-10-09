@@ -41,8 +41,6 @@ function attachSheet(): {
   sheet.setRows(200);
   sheet.setColW(new Array(20).fill(50));
   sheet.setRowH(new Array(200).fill(15));
-  sheet.setHeaderRowHeight(20);
-  sheet.setHeaderColumnWidth(40);
   sheet.setSheetNames(['One', 'Two']);
   sheet.setSheetIndex(1);
   sheet.recomputeViewport();

@@ -215,7 +215,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
   it("hangs below its cell with its right edge on the cell's right edge, as the GWT client did", () => {
     withFlowClient({ 42: content('filter') });
-    ctx.sheet.setPopupButtons([buttonState(4, 1, { popupWidth: '120px' })]);
+    ctx.sheet.addPopupButton(buttonState(4, 1, { popupWidth: '120px' }));
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 
@@ -229,7 +229,7 @@ describe('Spreadsheet — popup-button popup', () => {
     withFlowClient({ 42: content('filter') });
     // Column 1 is 50px wide, so a 120px popup ending at its right edge
     // would start under the row numbers.
-    ctx.sheet.setPopupButtons([buttonState(1, 1, { popupWidth: '120px' })]);
+    ctx.sheet.addPopupButton(buttonState(1, 1, { popupWidth: '120px' }));
 
     ctx.sheet.onPopupButtonOpen(1, 1, '42', APP);
 
@@ -243,7 +243,7 @@ describe('Spreadsheet — popup-button popup', () => {
     // Column 3 ends 150px in, and a pixel more past the freeze line's own;
     // 120px back from there is inside the two frozen columns, and the GWT
     // client's scrolling pane starts after them.
-    ctx.sheet.setPopupButtons([buttonState(3, 1, { popupWidth: '120px' })]);
+    ctx.sheet.addPopupButton(buttonState(3, 1, { popupWidth: '120px' }));
 
     ctx.sheet.onPopupButtonOpen(1, 3, '42', APP);
 
@@ -255,7 +255,7 @@ describe('Spreadsheet — popup-button popup', () => {
   it('opens above its cell when there is no room below it', () => {
     withFlowClient({ 42: content('filter') });
     const row = lastWholeRow(ctx.sheet);
-    ctx.sheet.setPopupButtons([buttonState(4, row, { popupWidth: '120px', popupHeight: '100px' })]);
+    ctx.sheet.addPopupButton(buttonState(4, row, { popupWidth: '120px', popupHeight: '100px' }));
 
     ctx.sheet.onPopupButtonOpen(row, 4, '42', APP);
 
@@ -268,7 +268,7 @@ describe('Spreadsheet — popup-button popup', () => {
   it('never rises above the top of the scrolling pane', () => {
     withFlowClient({ 42: content('filter') });
     // Taller than the room on either side of row 2.
-    ctx.sheet.setPopupButtons([buttonState(4, 2, { popupWidth: '120px', popupHeight: '400px' })]);
+    ctx.sheet.addPopupButton(buttonState(4, 2, { popupWidth: '120px', popupHeight: '400px' }));
 
     ctx.sheet.onPopupButtonOpen(2, 4, '42', APP);
 
@@ -290,7 +290,7 @@ describe('Spreadsheet — popup-button popup', () => {
     const popup = content('filter');
     withFlowClient({ 42: popup });
     const row = lastWholeRow(ctx.sheet) - 4;
-    ctx.sheet.setPopupButtons([buttonState(4, row, { popupWidth: '120px' })]);
+    ctx.sheet.addPopupButton(buttonState(4, row, { popupWidth: '120px' }));
     ctx.sheet.onPopupButtonOpen(row, 4, '42', APP);
     expect(restingRect(ctx.sheet).top, 'below at first').to.be.closeTo(
       cellBox(ctx.sheet, 4, row).bottom,
@@ -316,17 +316,15 @@ describe('Spreadsheet — popup-button popup', () => {
 
   it('sizes the overlay from the button state when the server gave one', () => {
     withFlowClient({ 42: content('filter') });
-    ctx.sheet.setPopupButtons([
-      {
-        col: 4,
-        row: 1,
-        active: true,
-        headerHidden: false,
-        popupWidth: '220px',
-        popupHeight: '180px',
-        sheet: 'Sheet1'
-      }
-    ]);
+    ctx.sheet.addPopupButton({
+      col: 4,
+      row: 1,
+      active: true,
+      headerHidden: false,
+      popupWidth: '220px',
+      popupHeight: '180px',
+      sheet: 'Sheet1'
+    });
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 
@@ -339,7 +337,7 @@ describe('Spreadsheet — popup-button popup', () => {
     const popup = content('filter');
     popup.style.height = '300px';
     withFlowClient({ 42: popup });
-    ctx.sheet.setPopupButtons([buttonState(4, 1, { popupWidth: '120px', popupHeight: '100px' })]);
+    ctx.sheet.addPopupButton(buttonState(4, 1, { popupWidth: '120px', popupHeight: '100px' }));
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 
@@ -508,7 +506,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
   it('follows its cell as the sheet scrolls and stays open, as the GWT client did', () => {
     withFlowClient({ 42: content('filter') });
-    ctx.sheet.setPopupButtons([buttonState(4, 6, { popupWidth: '120px', popupHeight: '60px' })]);
+    ctx.sheet.addPopupButton(buttonState(4, 6, { popupWidth: '120px', popupHeight: '60px' }));
     ctx.sheet.onPopupButtonOpen(6, 4, '42', APP);
     ctx.sent.length = 0;
 
@@ -551,7 +549,7 @@ describe('Spreadsheet — popup-button popup', () => {
 
   it('waits at the top of the pane while its cell scrolls up out of sight', () => {
     withFlowClient({ 42: content('filter') });
-    ctx.sheet.setPopupButtons([buttonState(4, 3, { popupWidth: '120px', popupHeight: '60px' })]);
+    ctx.sheet.addPopupButton(buttonState(4, 3, { popupWidth: '120px', popupHeight: '60px' }));
     ctx.sheet.onPopupButtonOpen(3, 4, '42', APP);
 
     // Row 3 ends 60px down, so 100px of scrolling takes it above the pane.
@@ -669,17 +667,15 @@ describe('Spreadsheet — popup-button popup', () => {
 
   it('omits the header when the button asked for it hidden', () => {
     withFlowClient({ 42: content('filter') });
-    ctx.sheet.setPopupButtons([
-      {
-        col: 4,
-        row: 1,
-        active: true,
-        headerHidden: true,
-        popupWidth: null,
-        popupHeight: null,
-        sheet: 'Sheet1'
-      }
-    ]);
+    ctx.sheet.addPopupButton({
+      col: 4,
+      row: 1,
+      active: true,
+      headerHidden: true,
+      popupWidth: null,
+      popupHeight: null,
+      sheet: 'Sheet1'
+    });
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 

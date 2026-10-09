@@ -96,26 +96,6 @@ export function selectSingleCell(col: number, row: number): SelectionState {
 }
 
 /**
- * Construct a range selection from two corner coordinates. Corners may
- * be in any order; the result has the corner invariants enforced
- * ({@code c1 <= c2}, {@code r1 <= r2}). The active cell becomes the
- * FIRST corner — matches Excel's behavior when shift-clicking to
- * extend a selection.
- */
-export function selectRange(
-  anchorCol: number,
-  anchorRow: number,
-  extendCol: number,
-  extendRow: number
-): SelectionState {
-  return {
-    activeCell: { col: anchorCol, row: anchorRow },
-    activeRange: normalizedRange(anchorCol, anchorRow, extendCol, extendRow),
-    auxRanges: []
-  };
-}
-
-/**
  * Build a {@code CellRange} with normalized corners.
  */
 export function normalizedRange(c1: number, r1: number, c2: number, r2: number): CellRange {
@@ -183,32 +163,4 @@ export function isActiveCell(state: SelectionState, col: number, row: number): b
  */
 export function containsCell(range: CellRange, col: number, row: number): boolean {
   return col >= range.c1 && col <= range.c2 && row >= range.r1 && row <= range.r2;
-}
-
-/**
- * Iterate the cells in a {@code CellRange} in row-major order. Used by
- * the clipboard serializer and the selection-fill logic.
- */
-export function* iterateRange(range: CellRange): Generator<CellPosition> {
-  for (let row = range.r1; row <= range.r2; row++) {
-    for (let col = range.c1; col <= range.c2; col++) {
-      yield { col, row };
-    }
-  }
-}
-
-/**
- * Returns the smallest range that contains all of the selection's
- * ranges (active + auxiliaries). Used by status-bar count + the
- * "select all" extension logic.
- */
-export function selectionBoundingBox(state: SelectionState): CellRange {
-  let { c1, r1, c2, r2 } = state.activeRange;
-  for (const range of state.auxRanges) {
-    c1 = Math.min(c1, range.c1);
-    r1 = Math.min(r1, range.r1);
-    c2 = Math.max(c2, range.c2);
-    r2 = Math.max(r2, range.r2);
-  }
-  return { c1, r1, c2, r2 };
 }

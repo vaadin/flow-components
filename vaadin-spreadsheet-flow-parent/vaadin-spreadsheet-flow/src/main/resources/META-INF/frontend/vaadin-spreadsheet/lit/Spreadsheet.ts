@@ -100,78 +100,6 @@ import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
- * The new Spreadsheet client class — the replacement for the
- * GWT-compiled {@code Spreadsheet} class exported from
- * {@code spreadsheet-export.js}. The Lit wrapper at
- * {@code ../vaadin-spreadsheet.js} holds a reference to an instance of
- * this class as {@code this.api} once Phase 3.6 flips the import.
- *
- * Today this class is a **type-safe stub**. Every method on
- * {@link SpreadsheetClientApi} is implemented with a minimal placeholder
- * (typically just storing the argument into a private field, or a
- * {@code TODO} comment naming the phase that fills it in). The
- * TypeScript compiler enforces that every method the interface declares
- * is present here, so the team gradually fills in real implementations
- * without losing track of any.
- *
- * Implementation roadmap (per
- * {@code refactor-artifacts/TIER3_PLAN.md} § 6):
- *
- * - **Phase 3.2** — Cell grid + virtual scrolling. The
- *   `update*CellValues` / `setRowH` / `setColW` / `notifyStateChanges`
- *   methods get real implementations that build / recycle DOM.
- * - **Phase 3.3** — Editing + formula bar. `updateFormulaBar`,
- *   `showSelectedCell`, `setSelectedCellAndRange` get real
- *   implementations.
- * - **Phase 3.4** — Vaadin integration. `setResources` +
- *   custom-editor + popup-button methods get real implementations.
- * - **Phase 3.5** — Polish. Remaining setters + edge cases.
- *
- * Until Phase 3.6 (rollout), this class is NOT loaded by the Lit
- * wrapper — it exists alongside the GWT bundle. Only when the wrapper's
- * `import { Spreadsheet } from './spreadsheet-export.js'` flips to
- * `import { Spreadsheet } from './lit/Spreadsheet.js'` does this code
- * actually run.
- */
-/**
- * Where the selection goes when an edit is committed with a key.
- *
- * Enter moves down and Tab right, each reversed by shift; an arrow key
- * moves the way it points. Returns null for a commit that should leave the
- * selection where it is — a blur, or a key with no direction.
- */
-export function commitStep(key: string | undefined, shiftKey: boolean): { dCol: number; dRow: number } | null {
-  const back = shiftKey ? -1 : 1;
-  switch (key) {
-    case 'Enter':
-      return { dCol: 0, dRow: back };
-    case 'Tab':
-      return { dCol: back, dRow: 0 };
-    case 'ArrowUp':
-      return { dCol: 0, dRow: -1 };
-    case 'ArrowDown':
-      return { dCol: 0, dRow: 1 };
-    case 'ArrowLeft':
-      return { dCol: -1, dRow: 0 };
-    case 'ArrowRight':
-      return { dCol: 1, dRow: 0 };
-    default:
-      return null;
-  }
-}
-
-/** The direction of a commit step, or null for none. */
-export function stepDirection(step: { dCol: number; dRow: number } | null): Direction | null {
-  if (step === null) {
-    return null;
-  }
-  if (step.dRow !== 0) {
-    return step.dRow > 0 ? 'down' : 'up';
-  }
-  return step.dCol > 0 ? 'right' : 'left';
-}
-
-/**
  * Which way a key moves the selection: an arrow the way it points, Tab
  * right and Enter down - shift reversing those two. Null for any other key.
  */
@@ -234,6 +162,15 @@ const DEFAULT_HEADER_ROW_HEIGHT = 27;
  */
 const DEFAULT_HEADER_COLUMN_WIDTH = 50;
 
+/**
+ * The client of the Spreadsheet component: the connector between the
+ * {@code <vaadin-spreadsheet>} element and the server.
+ *
+ * It builds the sheet's parts - formula bar, headers, cell grid, sheet
+ * tabs, context menu - and pushes one render state to each; it turns what
+ * the user does into events for the server and applies what the server
+ * sends. The element creates one per element, as its {@code $connector}.
+ */
 export class Spreadsheet implements SpreadsheetClientApi {
   // ====================================================================
   // Internal state — placeholder fields. The real Phase 3.2+ class
@@ -355,17 +292,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly resizeCover: HTMLElement;
 
-  /**
-   * The "current extend position" for shift+arrow navigation
-   * (slice 147). Starts equal to the active cell. Shift+arrow
-   * moves this corner ±1; the resulting range is normalized
-   * across (activeCell, extendCol/Row). Plain arrow / click
-   * resets extendCol/Row to the new active cell so the next
-   * shift+arrow starts fresh.
-   */
-  private extendCol = 1;
-  private extendRow = 1;
-
   /** Row / column geometry. */
   private rowHeights: NumberList = [];
   private colWidths: NumberList = [];
@@ -429,9 +355,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private resourceKeys: string[] = [];
   /** The element the `resource-<id>` attributes live on. */
   private resourceHost: HTMLElement | null = null;
-  /**
-   * Popup-button states from {@link setPopupButtons}. Slice 161.
-   */
+  /** The popup buttons the server has added, one per cell. */
   private popupButtonStates: PopupButtonState[] = [];
   private cellKeysToEditorIdMap: Record<string, string> = {};
   private componentIDtoCellKeysMap: Record<string, string> = {};
@@ -616,8 +540,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * The column-header sub-element. Sibling of the cell-grid
    * inside the scroll container; renders the column letters
    * (A, B, ..., AA) above the cells. Hidden when
-   * {@link headerRowHeight} is 0 (the default until a host
-   * calls {@code setHeaderRowHeight}). Slice 143.
+   * {@link headerRowHeight} is 0, as it is while the server hides
+   * the headings.
    */
   private readonly columnHeader: SpreadsheetColumnHeader;
 
@@ -625,7 +549,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * The row-header sub-element. Sibling of the cell-grid
    * inside the scroll container; renders the row numbers
    * (1, 2, 3, ...) at the left of the cells. Hidden when
-   * {@link headerColumnWidth} is 0. Slice 144.
+   * {@link headerColumnWidth} is 0.
    */
   private readonly rowHeader: SpreadsheetRowHeader;
 
@@ -1058,8 +982,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
     const ctrlOrMeta = ctrlKey || metaKey;
-    this.extendCol = col;
-    this.extendRow = row;
     if (ctrlOrMeta && shiftKey) {
       // Extend the active range, keeping the ranges already picked
       // out with earlier Ctrl-clicks.
@@ -1422,8 +1344,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.dragging = true;
-    this.extendCol = col;
-    this.extendRow = row;
     if (shiftKey) {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
@@ -1488,8 +1408,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeRange: this.rangeTo(anchor, col, row),
       auxRanges: this.selection.auxRanges
     };
-    this.extendCol = col;
-    this.extendRow = row;
     this.showRangeSizeInAddressField();
     this.recomputeViewport();
   };
@@ -1712,7 +1630,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const walks = walkDirection !== null && this.rows > 0 && this.cols > 0 && this.selectsRange();
     // Moving on goes by the arrows' rules: over hidden rows and columns,
     // and out of a merge on its far side.
-    const direction = walks ? null : stepDirection(commitStep(key, shiftKey));
+    const direction = walks || key === undefined ? null : keyDirection(key, shiftKey);
     const next =
       direction !== null && this.rows > 0 && this.cols > 0
         ? moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape())
@@ -2039,8 +1957,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * column (rows 1..this.rows). The active cell becomes the
    * column's row 1. Shift-click extends from the existing anchor
    * column to the clicked column, selecting a whole-column
-   * range. Updates {@code extendCol/Row} so subsequent
-   * shift+arrow continues naturally.
+   * range.
    */
   private readonly handleColumnHeaderClick = (
     e: CustomEvent<{
@@ -2053,8 +1970,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   ): void => {
     const { col, shiftKey, ctrlKey, metaKey } = e.detail;
     const rows = this.rows > 0 ? this.rows : 1;
-    this.extendCol = col;
-    this.extendRow = rows;
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole column joins the selection as a further range.
       this.selection = addAuxRange(this.selection, col, 1, col, rows);
@@ -2097,8 +2012,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   ): void => {
     const { row, shiftKey, ctrlKey, metaKey } = e.detail;
     const cols = this.cols > 0 ? this.cols : 1;
-    this.extendCol = cols;
-    this.extendRow = row;
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole row joins the selection as a further range.
       this.selection = addAuxRange(this.selection, 1, row, cols, row);
@@ -2127,17 +2040,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Keyboard navigation handler (slice 147). Plain arrow keys
-   * move the active cell ±1 in the requested direction, clamped
-   * to {@code [1, rows]} / {@code [1, cols]}. Shift+arrow moves
-   * the "extend position" (separate from active cell) and
-   * recomputes the range as
-   * {@code normalizedRange(activeCell, extendCol/Row)} — matches
-   * Excel's behavior where the active cell stays fixed across a
-   * sequence of shift+arrow presses.
-   *
-   * Other keys (Tab, Enter, Home, End, etc.) are deferred to
-   * future slices.
+   * Keyboard navigation. Arrow keys, Tab and Enter move the active cell
+   * over hidden rows and columns and out of merges; Shift with an arrow
+   * grows the range from the active cell, which stays where it is, as in
+   * Excel. Home and End go along the row, or with Ctrl to the sheet's first
+   * and last cell; typing starts an edit.
    */
   private readonly handleKeyDown = (e: KeyboardEvent): void => {
     if (this.eventCameFromHostedComponent(e)) {
@@ -2191,8 +2098,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
         activeRange: normalizedRange(1, 1, this.cols, this.rows),
         auxRanges: []
       };
-      this.extendCol = this.cols;
-      this.extendRow = this.rows;
       this.recomputeViewport();
       this.dispatchSelectionEvent();
       return;
@@ -2339,8 +2244,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
           return;
         }
         this.selection = { activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] };
-        this.extendCol = grown.moved.col;
-        this.extendRow = grown.moved.row;
         this.extendingSelection = true;
         this.showRangeSizeInAddressField();
         this.scrollCellIntoView(grown.moved);
@@ -2357,14 +2260,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
 
     // Home / End go to the first / last column of the row, Ctrl+Home to
-    // A1 and Ctrl+End to the last cell. Slice 149.
-    const target = computeNavigationTarget(key, e, {
-      activeCell: this.selection.activeCell,
-      extendCol: this.extendCol,
-      extendRow: this.extendRow,
-      cols: this.cols,
-      rows: this.rows
-    });
+    // A1 and Ctrl+End to the last cell.
+    const target = homeEndTarget(key, e.ctrlKey || e.metaKey, this.selection.activeCell, this.cols, this.rows);
     if (!target) {
       return;
     }
@@ -2409,8 +2306,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeRange: this.selection.activeRange,
       auxRanges: this.selection.auxRanges
     };
-    this.extendCol = next.col;
-    this.extendRow = next.row;
     this.scrollCellIntoView(next);
     this.recomputeViewport();
     const data: CellSelectedData = {
@@ -3117,18 +3012,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * @param opts.scrollTop Vertical scroll offset in pixels.
    * @param opts.viewportWidth Viewport pixel width.
    * @param opts.viewportHeight Viewport pixel height.
-   * @param opts.ppi Pixels-per-inch for point→pixel row-height
-   *                 conversion. Defaults to 96 (Excel's standard).
-   *                 Callers that have measured the host's actual PPI
-   *                 should pass it for visual stability across
-   *                 high-DPR displays.
    */
   applyRenderState(opts: {
     scrollLeft: number;
     scrollTop: number;
     viewportWidth: number;
     viewportHeight: number;
-    ppi?: number;
   }): void {
     const state = this.buildRenderState(opts);
     // Size the cell-grid to the full virtual grid so the scroll
@@ -3291,7 +3180,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Pure: build a {@code CellGridRenderState} from the current
-   * internal state + the given scroll / viewport / PPI. Exposed for
+   * internal state + the given scroll / viewport. Exposed for
    * tests to call without going through the DOM (the public
    * {@link applyRenderState} writes the result to the cell-grid;
    * this lets tests inspect it directly).
@@ -3301,9 +3190,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     scrollTop: number;
     viewportWidth: number;
     viewportHeight: number;
-    ppi?: number;
   }): CellGridRenderState {
-    const ppi = opts.ppi ?? FALLBACK_PPI;
+    const ppi = FALLBACK_PPI;
     const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
     const hiddenRowSet = this.hiddenRows;
 
@@ -3660,15 +3548,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sendToServer({ type: 'cellValueEdited', data: { row, col, value } });
     // shift+Tab stays put: the GWT client passed the move along only
     // when shift was not held.
-    const step = key === 'Tab' && shiftKey ? null : commitStep(key, false);
-    if (step === null) {
+    const direction = key === undefined || (key === 'Tab' && shiftKey) ? null : keyDirection(key, false);
+    if (direction === null) {
       if (editorWasOpen) {
         this.recomputeViewport();
       }
       return;
     }
     this.returnFocusToSheet();
-    const next = moveActiveCell({ col, row }, this.mergeEntry, stepDirection(step)!, this.sheetShape());
+    const next = moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape());
     if (next === null) {
       this.recomputeViewport();
       return;
@@ -3846,32 +3734,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       scrollLeft: Math.round(this.scrollContainer.scrollLeft),
       scrollTop: Math.round(this.scrollContainer.scrollTop)
     };
-  }
-
-  /**
-   * Set the column-header strip's height in pixels; {@code 0} hides the
-   * strip. Slice 143.
-   */
-  setHeaderRowHeight(pixels: number): void {
-    this.headerRowHeight = pixels;
-  }
-
-  /** Current column-header strip height in pixels. Slice 143. */
-  getHeaderRowHeight(): number {
-    return this.headerRowHeight;
-  }
-
-  /**
-   * Set the row-header strip's width in pixels; {@code 0} hides the
-   * strip. Slice 144.
-   */
-  setHeaderColumnWidth(pixels: number): void {
-    this.headerColumnWidth = pixels;
-  }
-
-  /** Current row-header strip width in pixels. Slice 144. */
-  getHeaderColumnWidth(): number {
-    return this.headerColumnWidth;
   }
 
   // ====================================================================
@@ -4056,8 +3918,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // anchor of the range they are in the middle of making.
     const sizeLabel = selectionSizeLabel(this.selection.activeRange);
     this.selection = selectSingleCell(col, row);
-    this.extendCol = col;
-    this.extendRow = row;
     this.formulaBar.renderState = {
       address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }),
       formula: formula && cellValue !== '' ? `=${cellValue}` : cellValue,
@@ -4220,13 +4080,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeRange: normalizedRange(c1, r1, c2, r2),
       auxRanges: this.selection.auxRanges
     };
-    // Shift+arrow grows the selection from its far corner, so that
-    // corner has to follow a selection the server made. Left where it
-    // was, the first shift+arrow after any server-driven selection
-    // stretched the range back to wherever the user had last been.
-    const far = normalizedRange(c1, r1, c2, r2);
-    this.extendCol = far.c2;
-    this.extendRow = far.r2;
     this.formulaBar.renderState = {
       // As in updateFormulaBar: the server names a selection only when
       // it has a name, and leaves an ordinary one to the client. While
@@ -4430,8 +4283,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.selection = selectSingleCell(cell.col, cell.row);
-    this.extendCol = cell.col;
-    this.extendRow = cell.row;
     this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
@@ -4600,13 +4451,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     return resolved;
   }
-  setPopupButtons(popupButtons: PopupButtonState[]): void {
-    // Store the raw popup-button list. The connector computes
-    // positions at render time via `buildRenderState`. Slice
-    // 161.
-    this.popupButtonStates = coerceArray(popupButtons);
-  }
-
   setWorkbookProtected(isProtected: boolean): void {
     this.workbookProtected = isProtected;
   }
@@ -4836,8 +4680,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private applySingleSelection(next: SingleCellSelection): void {
     this.selection = { activeCell: next.activeCell, activeRange: next.activeRange, auxRanges: [] };
     this.mergeEntry = next.entry;
-    this.extendCol = next.activeCell.col;
-    this.extendRow = next.activeCell.row;
   }
 
   /**
@@ -5877,100 +5719,22 @@ export function buildSelectionEvent(
 }
 
 /**
- * Pure helper: given the pressed key + modifier state + current
- * selection + grid bounds, compute the next active cell (or the
- * next extend-cell when shift is held).
- *
- * Returns {@code null} when the key isn't a recognized navigation
- * key — the connector returns early without consuming the event.
- *
- * Slice 147 introduced the arrow keys; slice 149 extends with
- * Tab / Enter / Home / End / Ctrl+Home / Ctrl+End. Each navigation
- * key has the same modifier semantics:
- *   - plain  : move active cell, collapse range
- *   - shift  : move extend cell, keep active as anchor
- *   - ctrl   : absolute jumps (Ctrl+Home/End)
- *
- * Pure (no DOM, no instance state) so it's straightforward to
- * unit-test in isolation.
+ * Where Home and End take the active cell: the first or last column of its
+ * row, or with Ctrl (Cmd on a Mac) the first cell of the sheet or the last.
+ * Null for any other key.
  */
-export interface NavigationTarget {
-  kind: 'move' | 'extend';
-  col: number;
-  row: number;
-}
-
-export function computeNavigationTarget(
+export function homeEndTarget(
   key: string,
-  modifiers: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean },
-  state: {
-    activeCell: { col: number; row: number };
-    extendCol: number;
-    extendRow: number;
-    cols: number;
-    rows: number;
+  toSheetCorner: boolean,
+  activeCell: { col: number; row: number },
+  cols: number,
+  rows: number
+): { col: number; row: number } | null {
+  if (key === 'Home') {
+    return { col: 1, row: toSheetCorner ? 1 : activeCell.row };
   }
-): NavigationTarget | null {
-  const { activeCell, extendCol, extendRow, cols, rows } = state;
-  const ctrlOrMeta = modifiers.ctrlKey || modifiers.metaKey;
-  // Arrow keys participate in extend (shift+arrow grows the
-  // range, base = extendCell). Tab/Enter/Home/End always MOVE
-  // the active cell, ignoring shift's "extend" meaning — they
-  // use shift as a direction flag (shift+Tab = back, shift+
-  // Enter = up) and base from activeCell.
-  const isArrow = key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight';
-  const isExtend = isArrow && modifiers.shiftKey;
-  const baseCol = isExtend ? extendCol : activeCell.col;
-  const baseRow = isExtend ? extendRow : activeCell.row;
-  let nextCol: number | null = null;
-  let nextRow: number | null = null;
-
-  switch (key) {
-    case 'ArrowUp':
-      nextCol = baseCol;
-      nextRow = baseRow - 1;
-      break;
-    case 'ArrowDown':
-      nextCol = baseCol;
-      nextRow = baseRow + 1;
-      break;
-    case 'ArrowLeft':
-      nextCol = baseCol - 1;
-      nextRow = baseRow;
-      break;
-    case 'ArrowRight':
-      nextCol = baseCol + 1;
-      nextRow = baseRow;
-      break;
-    case 'Enter':
-      // Shift+Enter goes up, plain Enter goes down — both
-      // move the active cell from its current position.
-      nextCol = baseCol;
-      nextRow = modifiers.shiftKey ? baseRow - 1 : baseRow + 1;
-      break;
-    case 'Tab':
-      // Shift+Tab goes left, plain Tab goes right.
-      nextCol = modifiers.shiftKey ? baseCol - 1 : baseCol + 1;
-      nextRow = baseRow;
-      break;
-    case 'Home':
-      // Ctrl+Home jumps to A1; plain Home goes to col 1 in
-      // the current row.
-      nextCol = 1;
-      nextRow = ctrlOrMeta ? 1 : baseRow;
-      break;
-    case 'End':
-      // Ctrl+End jumps to the last cell; plain End goes to
-      // the last column in the current row.
-      nextCol = cols;
-      nextRow = ctrlOrMeta ? rows : baseRow;
-      break;
-    default:
-      return null;
+  if (key === 'End') {
+    return { col: Math.max(1, cols), row: toSheetCorner ? Math.max(1, rows) : activeCell.row };
   }
-  return {
-    kind: isExtend ? 'extend' : 'move',
-    col: Math.max(1, Math.min(cols, nextCol!)),
-    row: Math.max(1, Math.min(rows, nextRow!))
-  };
+  return null;
 }

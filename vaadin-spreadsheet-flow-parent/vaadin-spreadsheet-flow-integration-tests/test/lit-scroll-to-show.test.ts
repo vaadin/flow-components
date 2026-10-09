@@ -89,8 +89,6 @@ describe('Spreadsheet — keyboard moves keep the cell in full view', () => {
     sheet.setCols(30);
     sheet.setColW(new Array(30).fill(50));
     sheet.setRowH(new Array(100).fill(15));
-    sheet.setHeaderRowHeight(20);
-    sheet.setHeaderColumnWidth(40);
     if (rowsFrozen > 0) {
       sheet.setVerticalSplitPosition(rowsFrozen);
     }

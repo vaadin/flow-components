@@ -14,15 +14,12 @@
  * clipboard format and lets the spreadsheet cross-paste with Excel /
  * Sheets / Numbers / etc.
  *
- * Two pure functions: `serializeToTsv` (2D values → TSV text) and
- * `parseTsv` (TSV text → 2D values). The GWT-side
- * {@code CopyPasteHandlerImpl.getClipboardText} only had the serialize
- * direction (paste is delegated to the server). The TS port adds the
- * parse direction because the new client may handle paste locally for
- * trivial cases.
+ * Only the copy direction lives here, as in the GWT client's
+ * {@code CopyPasteHandlerImpl.getClipboardText}: the server parses what
+ * is pasted.
  *
  * IMPORTANT: TSV has no escaping convention for tabs or newlines INSIDE
- * a cell value. If a cell contains `\t` or `\n`, both directions are
+ * a cell value. If a cell contains `\t` or `\n`, the copy is
  * lossy. The GWT version doesn't escape; neither does this port.
  * Cells containing newlines will round-trip wrong; this is the
  * documented Excel-clipboard quirk. Use cell-display-value (which
@@ -57,35 +54,4 @@ export function serializeToTsv(values: readonly (string | null)[][]): string {
     rows.push(row.map((cell) => cell ?? '').join('\t'));
   }
   return rows.join('\n');
-}
-
-/**
- * Parse TSV text into a 2D array of cell values.
- *
- * Behavior:
- * - Rows split on `\n`. CRLF-style `\r\n` line endings are normalized
- *   to `\n` first (Windows-clipboard tolerance).
- * - Empty cells preserved as empty strings (NOT as null) — the caller
- *   converts to null if needed.
- * - Trailing empty row from a trailing newline is dropped.
- * - No escaping convention — cells containing `\t` or `\n` aren't
- *   recoverable; the parser's output will look "shifted" in those
- *   cases. This matches Excel's clipboard behavior.
- *
- * @param text  TSV text from the clipboard.
- * @returns A 2D array of strings. Empty input returns an empty array
- *          (not `[[]]`).
- */
-export function parseTsv(text: string): string[][] {
-  if (text.length === 0) {
-    return [];
-  }
-  // Normalize CRLF and CR to LF for cross-platform clipboard
-  // tolerance (Windows / classic-Mac).
-  const normalized = text.replace(/\r\n?/g, '\n');
-  // Strip a single trailing newline if present, so a TSV ending in
-  // `\n` doesn't produce an empty trailing row.
-  const trimmed = normalized.endsWith('\n') ? normalized.slice(0, -1) : normalized;
-  const rows = trimmed.split('\n');
-  return rows.map((row) => row.split('\t'));
 }

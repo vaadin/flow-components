@@ -9,13 +9,7 @@
 
 import { expect } from 'chai';
 import {
-    HEADER_COL,
-    HEADER_NONE,
-    HEADER_ROW,
-    headerType,
     parseColRow,
-    parseHeaderIndex,
-    toCssKey,
     toKey,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/CellKeys.js';
 
@@ -36,16 +30,6 @@ describe('CellKeys — toKey', () => {
         // server's MirroredProperty serializers — depends on the
         // format.
         expect(toKey(5, 3)).to.equal('col5 row3');
-    });
-});
-
-describe('CellKeys — toCssKey', () => {
-    it('formats (1, 1) as ".col1.row1"', () => {
-        expect(toCssKey(1, 1)).to.equal('.col1.row1');
-    });
-
-    it('handles multi-digit values', () => {
-        expect(toCssKey(27, 100)).to.equal('.col27.row100');
     });
 });
 
@@ -91,86 +75,5 @@ describe('CellKeys — parseColRow', () => {
                 expect(parsed, key).to.deep.equal({ col, row });
             }
         }
-    });
-});
-
-describe('CellKeys — HEADER_* constants pin the wire-contract numeric values', () => {
-    // The classifier's numeric return type is part of the wire contract
-    // (the server side reads these values as ints). Pinning the
-    // constant values here keeps the contract from drifting.
-    it('HEADER_NONE = 0, HEADER_ROW = 1, HEADER_COL = 2', () => {
-        expect(HEADER_NONE).to.equal(0);
-        expect(HEADER_ROW).to.equal(1);
-        expect(HEADER_COL).to.equal(2);
-    });
-});
-
-describe('CellKeys — headerType', () => {
-    it('classifies "rh5" as a row header', () => {
-        expect(headerType('rh5')).to.equal(HEADER_ROW);
-    });
-
-    it('classifies "ch3" as a column header', () => {
-        expect(headerType('ch3')).to.equal(HEADER_COL);
-    });
-
-    it('classifies cell keys ("col1 row1") as HEADER_NONE', () => {
-        // Cell keys start with "col" not "rh"/"ch"; the second
-        // character is 'o', not 'h', so they correctly classify as
-        // not-a-header.
-        expect(headerType('col1 row1')).to.equal(HEADER_NONE);
-    });
-
-    it('classifies "row5" as HEADER_NONE (row keys must start "rh", not "row")', () => {
-        // The naming convention separates cell keys ("col<C> row<R>")
-        // from row-header keys ("rh<N>"). A bare "row5" string isn't
-        // a row header — it's the row portion of a cell-key prefix
-        // in isolation.
-        expect(headerType('row5')).to.equal(HEADER_NONE);
-    });
-
-    it('returns HEADER_NONE for empty / single-char input', () => {
-        expect(headerType('')).to.equal(HEADER_NONE);
-        expect(headerType('r')).to.equal(HEADER_NONE);
-        expect(headerType('c')).to.equal(HEADER_NONE);
-    });
-
-    it('returns HEADER_NONE for unrelated strings', () => {
-        expect(headerType('foo')).to.equal(HEADER_NONE);
-        expect(headerType('hello world')).to.equal(HEADER_NONE);
-    });
-});
-
-describe('CellKeys — parseHeaderIndex', () => {
-    it('extracts the index from a row header "rh5"', () => {
-        expect(parseHeaderIndex('rh5')).to.equal(5);
-    });
-
-    it('extracts the index from a column header "ch12"', () => {
-        expect(parseHeaderIndex('ch12')).to.equal(12);
-    });
-
-    it('extracts multi-digit indexes from "rh1024"', () => {
-        expect(parseHeaderIndex('rh1024')).to.equal(1024);
-    });
-
-    it('returns 0 for strings shorter than the 2-char prefix + 1 digit', () => {
-        expect(parseHeaderIndex('rh')).to.equal(0);
-        expect(parseHeaderIndex('r')).to.equal(0);
-        expect(parseHeaderIndex('')).to.equal(0);
-    });
-
-    it('returns 0 for input without digits after the prefix', () => {
-        expect(parseHeaderIndex('rhfoo')).to.equal(0);
-        expect(parseHeaderIndex('foobar')).to.equal(0);
-    });
-
-    it('stops at the first non-digit after the prefix', () => {
-        // Clean-room contract (slice 130): header keys are "rh<N>" /
-        // "ch<N>" — the index runs from char 2 until a non-digit.
-        // Anything after the digit run is ignored.
-        expect(parseHeaderIndex('rh5extra')).to.equal(5);
-        expect(parseHeaderIndex('rh1ch2')).to.equal(1);
-        expect(parseHeaderIndex('ch5rh10')).to.equal(5);
     });
 });

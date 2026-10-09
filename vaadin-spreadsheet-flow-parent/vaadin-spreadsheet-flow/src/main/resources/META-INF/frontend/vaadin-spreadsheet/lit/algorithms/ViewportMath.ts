@@ -33,7 +33,11 @@
  * scroll-handler paths.
  */
 
-/** Pixels-per-inch — used to convert Excel's point-based row heights to pixels. */
+/**
+ * Pixels per inch, to convert Excel's point-based row heights to pixels. A
+ * CSS inch is always 96 CSS pixels: the GWT client measured a 1in-wide
+ * element and got this same number.
+ */
 export const FALLBACK_PPI = 96;
 
 /**
@@ -48,80 +52,13 @@ export function convertPointsToPixel(points: number, ppi: number): number {
   return Math.trunc((points * ppi) / 72);
 }
 
-/** Inverse of {@link convertPointsToPixel}. Returns a float (no truncation). */
-export function convertPixelsToPoint(pixels: number, ppi: number): number {
-  return (pixels / ppi) * 72;
-}
-
 /**
  * Default per-row height in pixels, converted from POI's points-based
- * `defaultRowHeight` using the supplied PPI. When the caller can't
- * measure PPI (early in attach), pass 0 — the 96-PPI fallback applies.
+ * `defaultRowHeight` using the supplied PPI; 0 means {@link FALLBACK_PPI}.
  */
 export function getDefaultRowHeightPx(defaultRowHeightPoints: number, ppi: number): number {
   const effectivePpi = ppi > 0 ? ppi : FALLBACK_PPI;
   return Math.trunc((defaultRowHeightPoints * effectivePpi) / 72);
-}
-
-/**
- * Per-row height in pixels, accounting for hidden rows and rows whose
- * index is beyond the explicitly defined heights.
- *
- * @param row1Based 1-based row index (Apache POI / A1-notation convention).
- * @param definedRowHeightsPx Pre-computed pixel heights for rows
- *   1..length (0-indexed in the array — element 0 corresponds to
- *   row 1, element length-1 to row length). Rows beyond the array
- *   use {@code defaultRowHeightPx}.
- * @param hiddenRows Set of 1-based row indices that are hidden.
- *   Hidden rows return 0 regardless of their defined height.
- * @param defaultRowHeightPx Fallback height for rows beyond the array.
- */
-export function getRowHeightPx(
-  row1Based: number,
-  definedRowHeightsPx: number[],
-  hiddenRows: ReadonlySet<number>,
-  defaultRowHeightPx: number
-): number {
-  if (hiddenRows.has(row1Based)) {
-    return 0;
-  }
-  if (row1Based > definedRowHeightsPx.length) {
-    return defaultRowHeightPx;
-  }
-  return definedRowHeightsPx[row1Based - 1];
-}
-
-/**
- * Sum of column widths between the horizontal freeze-pane split and
- * the first visible (non-frozen) column. Used to compute the visual
- * offset of the scrolled pane relative to the frozen pane.
- *
- * `horizontalSplitPosition` is 0 when no freeze is active — the loop
- * sums column widths starting at column 1, which is the natural origin.
- */
-export function calculateLeftValueOfScrolledColumns(
-  horizontalSplitPosition: number,
-  firstColumnIndex: number,
-  getColWidth: (col1Based: number) => number
-): number {
-  let left = 0;
-  for (let i = horizontalSplitPosition + 1; i < firstColumnIndex; i++) {
-    left += getColWidth(i);
-  }
-  return left;
-}
-
-/** Symmetric row variant of {@link calculateLeftValueOfScrolledColumns}. */
-export function calculateTopValueOfScrolledRows(
-  verticalSplitPosition: number,
-  firstRowIndex: number,
-  getRowHeightForIndex: (row1Based: number) => number
-): number {
-  let top = 0;
-  for (let i = verticalSplitPosition + 1; i < firstRowIndex; i++) {
-    top += getRowHeightForIndex(i);
-  }
-  return top;
 }
 
 /** Inputs for {@link computeViewportBounds}. */
@@ -282,8 +219,8 @@ export interface TotalGridSizeInput {
  * reflect actual scroll extent.
  *
  * Hidden rows/columns contribute 0. Out-of-range indices use the
- * defaults — matches {@link getRowHeightPx} behavior so the scroll
- * extent and the per-cell positions stay consistent.
+ * defaults, as the cells' own positions do, so the scroll extent and
+ * the cells agree.
  */
 export function computeTotalGridSize(input: TotalGridSizeInput): {
   totalWidthPx: number;

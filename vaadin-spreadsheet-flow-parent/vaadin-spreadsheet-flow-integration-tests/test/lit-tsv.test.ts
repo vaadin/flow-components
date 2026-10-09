@@ -9,7 +9,6 @@
 
 import { expect } from 'chai';
 import {
-    parseTsv,
     serializeToTsv,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/Tsv.js';
 
@@ -57,78 +56,5 @@ describe('Tsv — serializeToTsv', () => {
 
     it('returns empty string on empty input', () => {
         expect(serializeToTsv([])).to.equal('');
-    });
-});
-
-describe('Tsv — parseTsv', () => {
-    it('parses a single cell', () => {
-        expect(parseTsv('A')).to.deep.equal([['A']]);
-    });
-
-    it('parses a single row with tab separators', () => {
-        expect(parseTsv('A\tB\tC')).to.deep.equal([['A', 'B', 'C']]);
-    });
-
-    it('parses a single column with newline separators', () => {
-        expect(parseTsv('A\nB\nC')).to.deep.equal([['A'], ['B'], ['C']]);
-    });
-
-    it('parses an MxN grid', () => {
-        expect(parseTsv('A\tB\tC\nD\tE\tF')).to.deep.equal([
-            ['A', 'B', 'C'],
-            ['D', 'E', 'F'],
-        ]);
-    });
-
-    it('preserves empty cells as empty strings (not null)', () => {
-        expect(parseTsv('A\t\tC')).to.deep.equal([['A', '', 'C']]);
-    });
-
-    it('normalizes Windows CRLF line endings to LF', () => {
-        expect(parseTsv('A\tB\r\nC\tD')).to.deep.equal([
-            ['A', 'B'],
-            ['C', 'D'],
-        ]);
-    });
-
-    it('normalizes classic-Mac CR line endings to LF', () => {
-        expect(parseTsv('A\tB\rC\tD')).to.deep.equal([
-            ['A', 'B'],
-            ['C', 'D'],
-        ]);
-    });
-
-    it('strips a single trailing newline (no phantom empty row)', () => {
-        expect(parseTsv('A\tB\nC\tD\n')).to.deep.equal([
-            ['A', 'B'],
-            ['C', 'D'],
-        ]);
-    });
-
-    it('returns an empty array on empty input (not [[]])', () => {
-        expect(parseTsv('')).to.deep.equal([]);
-    });
-});
-
-describe('Tsv — round-trip', () => {
-    it('round-trips a representative MxN grid', () => {
-        const original: (string | null)[][] = [
-            ['Name', 'Age', 'City'],
-            ['Alice', '30', 'Paris'],
-            ['Bob', '', 'Berlin'],
-            [null, '25', null],
-        ];
-
-        const tsv = serializeToTsv(original);
-        const parsed = parseTsv(tsv);
-
-        // Round-trip: null becomes '' on output, parses as '' on input.
-        // The round-tripped form preserves shape but normalizes nulls.
-        expect(parsed).to.deep.equal([
-            ['Name', 'Age', 'City'],
-            ['Alice', '30', 'Paris'],
-            ['Bob', '', 'Berlin'],
-            ['', '25', ''],
-        ]);
     });
 });

@@ -449,29 +449,6 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         expect(state.cellData.get('col4 row4')?.value).to.equal('BR');
     });
 
-    it('buildRenderState honors a non-default ppi for row-height conversion', () => {
-        // At ppi 192 (2x retina-like), the default 15-point row
-        // height converts to 40 pixels instead of the 20 pixels at
-        // 96 ppi. The connector passes opts.ppi all the way through
-        // getDefaultRowHeightPx + convertPointsToPixel.
-        const sheet = makeSheet();
-        sheet.setRows(3);
-        sheet.setCols(1);
-        sheet.setColW([50]);
-        sheet.setRowH([15, 15, 15]);
-
-        const state = sheet.buildRenderState({
-            scrollLeft: 0,
-            scrollTop: 0,
-            viewportWidth: 50,
-            viewportHeight: 200,
-            ppi: 192,
-        });
-
-        // 15pt * 192/72 = 40px per row
-        expect(state.rowHeights[0]).to.equal(40);
-    });
-
     it('buildRenderState honors hiddenRowIndexes (height 0)', () => {
         const sheet = makeSheet();
         sheet.setRows(5);
@@ -663,7 +640,7 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         cleanup();
     });
 
-    it('totalGridHeightPx respects the ppi used for row-height conversion', () => {
+    it('totalGridHeightPx adds up the rows converted from points', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(1);
@@ -671,17 +648,10 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         sheet.setRowH([15, 15, 15, 15, 15]); // 15 pt each
 
         // At 96 ppi: 15 pt → 20 px, total = 100.
-        const state96 = sheet.buildRenderState({
+        const state = sheet.buildRenderState({
             scrollLeft: 0, scrollTop: 0, viewportWidth: 50, viewportHeight: 200,
         });
-        expect(state96.totalGridHeightPx).to.equal(100);
-
-        // At 192 ppi: 15 pt → 40 px, total = 200.
-        const state192 = sheet.buildRenderState({
-            scrollLeft: 0, scrollTop: 0, viewportWidth: 50, viewportHeight: 200,
-            ppi: 192,
-        });
-        expect(state192.totalGridHeightPx).to.equal(200);
+        expect(state.totalGridHeightPx).to.equal(100);
 
         cleanup();
     });
@@ -844,70 +814,52 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('header corner sizes to (headerColumnWidth, headerRowHeight) when BOTH are set (slice 145)', () => {
+    it('header corner is as wide as the row numbers and as tall as the column letters', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(3);
         sheet.setColW([50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(24);
-        sheet.setHeaderColumnWidth(40);
 
         sheet.recomputeViewport();
 
+        // The GWT client's 50 and 27: a sheet's first cell starts where it did.
         const corner = sheet.getHeaderCorner();
-        expect(corner.style.width).to.equal('40px');
-        expect(corner.style.height).to.equal('24px');
+        expect(corner.style.width).to.equal('50px');
+        expect(corner.style.height).to.equal('27px');
 
         cleanup();
     });
 
-    it('header corner collapses to 0x0 when EITHER header dimension is 0 (slice 145)', () => {
+    it('header corner collapses with the headings hidden, and comes back with them', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(3);
         sheet.setColW([50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
 
-        // Only column header set, row header at 0 → nothing to draw.
-        sheet.setHeaderRowHeight(24);
-        sheet.setHeaderColumnWidth(0);
-        sheet.recomputeViewport();
+        sheet.setDisplayRowColHeadings(false);
         expect(sheet.getHeaderCorner().style.width).to.equal('0px');
-
-        // Only row header set → nothing to draw either.
-        sheet.setHeaderRowHeight(0);
-        sheet.setHeaderColumnWidth(40);
-        sheet.recomputeViewport();
         expect(sheet.getHeaderCorner().style.height).to.equal('0px');
 
-        // Both set → real dimensions.
-        sheet.setHeaderRowHeight(24);
-        sheet.setHeaderColumnWidth(40);
-        sheet.recomputeViewport();
-        expect(sheet.getHeaderCorner().style.width).to.equal('40px');
-        expect(sheet.getHeaderCorner().style.height).to.equal('24px');
+        sheet.setDisplayRowColHeadings(true);
+        expect(sheet.getHeaderCorner().style.width).to.equal('50px');
+        expect(sheet.getHeaderCorner().style.height).to.equal('27px');
 
         cleanup();
     });
 
-    it('setHeaderColumnWidth + applyRenderState push state to the row-header sub-element (slice 144)', () => {
+    it('row header gets its width and the row heights in pixels', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(3);
         sheet.setColW([50, 50, 50]);
         sheet.setRowH([15, 18, 15, 12, 15]); // varying row heights
 
-        // The GWT client's 50: a sheet's first column starts where it did.
-        expect(sheet.getHeaderColumnWidth()).to.equal(50);
-
-        sheet.setHeaderColumnWidth(40);
-        expect(sheet.getHeaderColumnWidth()).to.equal(40);
-
         sheet.recomputeViewport();
 
         const rowState = sheet.getRowHeader().renderState;
-        expect(rowState.headerWidth).to.equal(40);
+        expect(rowState.headerWidth).to.equal(50);
         // rowHeights are in points → pixels at 96 ppi (15pt→20, 18pt→24,
         // 12pt→16). Use Array.from to avoid chai serializing the
         // ReadonlyArray + LitElement cycle on assertion failure.
@@ -918,28 +870,22 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(rowState.totalGridHeightPx).to.equal(20 + 24 + 20 + 16 + 20);
 
         // The row header's inline width matches.
-        expect(sheet.getRowHeader().style.width).to.equal('40px');
+        expect(sheet.getRowHeader().style.width).to.equal('50px');
 
         cleanup();
     });
 
-    it('setHeaderRowHeight + applyRenderState push header state to the column-header sub-element (slice 143)', () => {
+    it('column header gets its height and the column widths', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(3);
         sheet.setColW([50, 60, 40]);
         sheet.setRowH([15, 15, 15, 15, 15]);
 
-        // The GWT client's 27: a sheet's first row starts where it did.
-        expect(sheet.getHeaderRowHeight()).to.equal(27);
-
-        sheet.setHeaderRowHeight(24);
-        expect(sheet.getHeaderRowHeight()).to.equal(24);
-
         sheet.recomputeViewport();
 
         const headerState = sheet.getColumnHeader().renderState;
-        expect(headerState.headerHeight).to.equal(24);
+        expect(headerState.headerHeight).to.equal(27);
         // Use plain-array comparison, not chai .deep.equal, to avoid
         // chai walking into the LitElement's cyclic renderState on
         // assertion failure.
@@ -949,7 +895,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         expect(headerState.totalGridWidthPx).to.equal(150);
 
         // The column header's inline height matches.
-        expect(sheet.getColumnHeader().style.height).to.equal('24px');
+        expect(sheet.getColumnHeader().style.height).to.equal('27px');
 
         cleanup();
     });
@@ -2596,7 +2542,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(3);
         sheet.setColW([50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(24);
         sheet.recomputeViewport();
         await sheet.getColumnHeader().updateComplete;
 
@@ -2908,8 +2853,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(8);
         sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(20);
-        sheet.setHeaderColumnWidth(40);
         sheet.setColGroupingMax(2);
         sheet.setColGroupingData([
             { uniqueIndex: 1, level: 1, startIndex: 1, endIndex: 3, collapsed: false },
@@ -2935,7 +2878,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(8);
         sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(20);
         sheet.setColGroupingMax(1);
         sheet.setColGroupingData([
             { uniqueIndex: 7, level: 1, startIndex: 2, endIndex: 4, collapsed: false },
@@ -2971,7 +2913,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(8);
         sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(20);
         sheet.setColGroupingMax(1);
         sheet.setColGroupingData([
             { uniqueIndex: 9, level: 1, startIndex: 1, endIndex: 2, collapsed: true },
@@ -3002,7 +2943,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(8);
         sheet.setColW([50, 50, 50, 50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(20);
         sheet.setColGroupingMax(1);
         sheet.setColGroupingData([
             { uniqueIndex: 1, level: 1, startIndex: 1, endIndex: 2, collapsed: false },
@@ -3032,7 +2972,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(20);
         sheet.setColGroupingMax(2);
         sheet.setColGroupingData([]);
         sheet.recomputeViewport();
@@ -3054,7 +2993,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(20);
         sheet.setColGroupingMax(1);
         sheet.setColGroupingInversed(true);
         sheet.setColGroupingData([
@@ -3141,7 +3079,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderRowHeight(20);
         // Select B2:C3 — columns 2-3 selected, columns 1, 4, 5 not.
         sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
             detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
@@ -3177,7 +3114,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setHeaderColumnWidth(40);
         // Select B2:C3 — rows 2-3 selected, 1/4/5 not.
         sheet.getCellGrid().dispatchEvent(new CustomEvent('cell-click', {
             detail: { col: 2, row: 2, shiftKey: false, ctrlKey: false,
@@ -3287,9 +3223,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         sheet.setCols(5);
         sheet.setColW([50, 50, 50, 50, 50]);
         sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setPopupButtons([
-            { col: 2, row: 2, active: false } as any,
-        ]);
+        sheet.addPopupButton({ col: 2, row: 2, active: false } as any);
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 
@@ -3532,8 +3466,7 @@ describe('Spreadsheet — grouping outline without headers', () => {
         sheet.setColW(new Array(8).fill(50));
         sheet.setRowH(new Array(20).fill(15));
         // No headers at all, which is what the workbook asked for.
-        sheet.setHeaderRowHeight(0);
-        sheet.setHeaderColumnWidth(0);
+        sheet.setDisplayRowColHeadings(false);
         return {
             sheet,
             cleanup: () => {
@@ -3646,8 +3579,6 @@ describe('Spreadsheet — outline level buttons', () => {
         sheet.setCols(8);
         sheet.setColW(new Array(8).fill(50));
         sheet.setRowH(new Array(20).fill(15));
-        sheet.setHeaderRowHeight(20);
-        sheet.setHeaderColumnWidth(40);
         const events: any[] = [];
         host.addEventListener('spreadsheet-event', (e) =>
             events.push((e as CustomEvent).detail)
@@ -3799,8 +3730,8 @@ describe('Spreadsheet — outline level buttons', () => {
         // The GWT client's gutters: a 15px column per row level and one
         // more, after a pixel; an 18px row per column level and one more,
         // after three.
-        expect(ctx.sheet.getHeaderCorner().style.width).to.equal(`${40 + 1 + 2 * 15}px`);
-        expect(ctx.sheet.getHeaderCorner().style.height).to.equal(`${20 + 3 + 3 * 18}px`);
+        expect(ctx.sheet.getHeaderCorner().style.width).to.equal(`${50 + 1 + 2 * 15}px`);
+        expect(ctx.sheet.getHeaderCorner().style.height).to.equal(`${27 + 3 + 3 * 18}px`);
         ctx.cleanup();
     });
 });
