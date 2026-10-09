@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,6 +62,14 @@ final class ClientFlushQueue implements Serializable {
 
     boolean isMarkedForUpdate(String key) {
         return markedCells.contains(key);
+    }
+
+    /**
+     * The keys of the cells currently marked for update. A read-only view, so
+     * copy it before marking more cells.
+     */
+    Set<String> getMarkedCells() {
+        return Collections.unmodifiableSet(markedCells);
     }
 
     void enqueueRemoval(CellData cd) {

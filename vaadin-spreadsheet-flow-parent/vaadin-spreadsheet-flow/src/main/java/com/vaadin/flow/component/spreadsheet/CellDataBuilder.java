@@ -293,6 +293,34 @@ final class CellDataBuilder implements Serializable {
     }
 
     /**
+     * The nearest cell to the left of the given column that holds a value. Only
+     * that cell's text can run into the column: the text of any cell further
+     * left stops at it. How far it runs depends on whether the column holds a
+     * value and on how wide it is, so the cell has to be built again when
+     * either changes.
+     *
+     * @param row
+     *            the row to look in, may be {@code null}
+     * @param columnIndex
+     *            the column, 0-based
+     * @return the cell, or {@code null} when no cell to the left of the column
+     *         holds a value
+     */
+    static Cell spillSourceOf(Row row, int columnIndex) {
+        if (row == null || row.getFirstCellNum() < 0) {
+            return null;
+        }
+        int first = row.getFirstCellNum();
+        for (int column = Math.min(columnIndex, row.getLastCellNum())
+                - 1; column >= first; column--) {
+            if (holdsValue(row, column)) {
+                return row.getCell(column);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Whether the row shows anything at the given 0-based column.
      * <p>
      * Reads the cell's type rather than formatting it: this runs once per

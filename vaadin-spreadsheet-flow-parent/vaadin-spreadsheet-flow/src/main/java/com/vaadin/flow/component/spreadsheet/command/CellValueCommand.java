@@ -223,6 +223,9 @@ public class CellValueCommand extends SpreadsheetCommand
         if (value == null) { // delete
             if (cell == null || cell.getCellStyle().getIndex() == 0) {
                 if (!spreadsheet.isRerenderPending()) {
+                    // Empty before it is sent: the cell whose text may run
+                    // into this one is sent with it, and has to see it empty.
+                    cell.setBlank();
                     spreadsheet.markCellAsDeleted(cell, false);
                 }
                 getSheet().getRow(row).removeCell(cell);

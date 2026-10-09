@@ -1095,4 +1095,34 @@ public class CellValueManager implements Serializable {
         clientCache.pruneColumn(indexColumn);
     }
 
+    /**
+     * Sends the cells whose text runs into the given column again, after the
+     * column's width changed: in each row, the nearest cell to the left of the
+     * column that holds a value, if the client has it and its text is too wide
+     * for its own column.
+     *
+     * @param columnIndex
+     *            the column, 0-based
+     */
+    void resendTextRunningInto(int columnIndex) {
+        ArrayList<CellData> resent = new ArrayList<>();
+        for (Row row : spreadsheet.getActiveSheet()) {
+            Cell source = CellDataBuilder.spillSourceOf(row, columnIndex);
+            if (source == null) {
+                continue;
+            }
+            String key = SpreadsheetUtil.toKey(source);
+            if (clientCache.containsNormal(key)
+                    || clientCache.containsFormula(key)) {
+                CellData cellData = createCellDataForCell(source);
+                if (cellData != null && cellData.overflowWidth > 0) {
+                    resent.add(cellData);
+                }
+            }
+        }
+        if (!resent.isEmpty()) {
+            spreadsheet.getRpcProxy().cellsUpdated(resent);
+        }
+    }
+
 }

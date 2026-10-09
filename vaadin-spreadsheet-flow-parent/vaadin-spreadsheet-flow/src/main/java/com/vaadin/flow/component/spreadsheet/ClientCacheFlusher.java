@@ -11,6 +11,9 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -38,6 +41,10 @@ import com.vaadin.flow.component.spreadsheet.client.CellData;
  * </ul>
  *
  * <p>
+ * Before that, a cell whose text runs into a marked or removed cell is captured
+ * too, as how far it runs depends on whether that cell holds a value.
+ *
+ * <p>
  * The {@link ClientFlushQueue}'s {@code removedCells} are appended to the batch
  * (each carries only {@code row} / {@code col} so the client knows to evict
  * that key). The marked / removed queues are then cleared. If any formula
@@ -62,6 +69,7 @@ final class ClientCacheFlusher implements Serializable {
     void flush() {
         ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
         Sheet sheet = spreadsheet.getActiveSheet();
+        addSpillSources(sheet, updatedCellData);
 
         // it is unnecessary to worry about having custom components in the
         // cell because the client side handles it — it will not replace a
@@ -119,5 +127,45 @@ final class ClientCacheFlusher implements Serializable {
             spreadsheet.getRpcProxy().refreshCellStyles();
         }
         queue.clear();
+    }
+
+    /**
+     * Adds the cells whose text may run into a cell about to be sent.
+     * <p>
+     * Text too wide for its column runs on into the empty cells to its right
+     * and stops at the first one holding a value. A cell that gets or loses a
+     * value therefore changes how far the nearest cell to its left runs, and
+     * the client has that from when the cell was sent. Text that fits its
+     * column runs nowhere, so such a cell is not sent again; nor is one sent
+     * below anyway, being marked or a formula the client has.
+     */
+    private void addSpillSources(Sheet sheet, List<CellData> updatedCellData) {
+        Map<String, Cell> sources = new LinkedHashMap<>();
+        for (String key : queue.getMarkedCells()) {
+            addSpillSource(sheet, SpreadsheetUtil.getColumnIndexFromKey(key),
+                    SpreadsheetUtil.getRowFromKey(key), sources);
+        }
+        for (CellData removed : queue.getRemovedCells()) {
+            addSpillSource(sheet, removed.col, removed.row, sources);
+        }
+        for (Cell source : sources.values()) {
+            CellData cellData = parent.createCellDataForCell(source);
+            if (cellData != null && cellData.overflowWidth > 0) {
+                updatedCellData.add(cellData);
+            }
+        }
+    }
+
+    /** Column and row are 1-based. */
+    private void addSpillSource(Sheet sheet, int column, int row,
+            Map<String, Cell> sources) {
+        Cell source = CellDataBuilder.spillSourceOf(sheet.getRow(row - 1),
+                column - 1);
+        if (source != null) {
+            String key = SpreadsheetUtil.toKey(source);
+            if (cache.containsNormal(key) && !queue.isMarkedForUpdate(key)) {
+                sources.put(key, source);
+            }
+        }
     }
 }

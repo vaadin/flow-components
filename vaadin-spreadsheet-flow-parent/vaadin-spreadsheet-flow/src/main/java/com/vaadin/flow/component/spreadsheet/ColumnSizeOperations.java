@@ -110,6 +110,7 @@ final class ColumnSizeOperations implements Serializable {
         spreadsheet.getCellValueManager().loadCellData(
                 spreadsheet.getFirstRow(), index + 1, spreadsheet.getLastRow(),
                 index + 1);
+        spreadsheet.getCellValueManager().resendTextRunningInto(index);
     }
 
     private void applyHidden(int columnIndex, boolean hidden) {
@@ -134,5 +135,6 @@ final class ColumnSizeOperations implements Serializable {
         }
         spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
         spreadsheet.setColW(colW);
+        spreadsheet.getCellValueManager().resendTextRunningInto(columnIndex);
     }
 }
