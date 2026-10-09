@@ -374,10 +374,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private defColWidth = 64; // pixels
 
   /** Hidden / locked indexes. */
-  private hiddenRowIndexes: number[] = [];
-  private hiddenColumnIndexes: number[] = [];
-  private lockedRowIndexes: number[] = [];
-  private lockedColumnIndexes: number[] = [];
+  /*
+   * Sets, not arrays: they are asked about one row or column at a time
+   * inside loops over rows, and on a filtered table with tens of thousands
+   * of hidden rows an array lookup made each arrow key take 200 ms.
+   */
+  private hiddenRows: ReadonlySet<number> = new Set();
+  private hiddenColumns: ReadonlySet<number> = new Set();
+  private lockedRows: ReadonlySet<number> = new Set();
+  private lockedColumns: ReadonlySet<number> = new Set();
 
   /** Merged regions. */
   private mergedRegions: MergedRegion[] = [];
@@ -1534,8 +1539,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return;
       }
       this.colWidths = withSize(this.colWidths, col, width, this.defColWidth);
-      if (width === 0 && !this.hiddenColumnIndexes.includes(col)) {
-        this.hiddenColumnIndexes = [...this.hiddenColumnIndexes, col];
+      if (width === 0 && !this.hiddenColumns.has(col)) {
+        this.hiddenColumns = new Set([...this.hiddenColumns, col]);
       }
       this.recomputeViewport();
       this.sendToServer({
@@ -1556,8 +1561,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         return;
       }
       this.rowHeights = withSize(this.rowHeights, row, height, this.defRowHeight);
-      if (height === 0 && !this.hiddenRowIndexes.includes(row)) {
-        this.hiddenRowIndexes = [...this.hiddenRowIndexes, row];
+      if (height === 0 && !this.hiddenRows.has(row)) {
+        this.hiddenRows = new Set([...this.hiddenRows, row]);
       }
       this.recomputeViewport();
       this.sendToServer({
@@ -1633,7 +1638,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (cellData !== undefined) {
       return cellData.locked;
     }
-    return this.lockedColumnIndexes.includes(col) && this.lockedRowIndexes.includes(row);
+    return this.lockedColumns.has(col) && this.lockedRows.has(row);
   }
 
   /**
@@ -1740,8 +1745,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
           col,
           row,
           direction: walkDirection!,
-          hiddenColumns: new Set(this.hiddenColumnIndexes),
-          hiddenRows: new Set(this.hiddenRowIndexes)
+          hiddenColumns: this.hiddenColumns,
+          hiddenRows: this.hiddenRows
         })
       );
     }
@@ -2230,8 +2235,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       key === 'F2' ||
       (key === 'Enter' &&
         !this.selectsRange() &&
-        !this.hiddenRowIndexes.includes(this.selection.activeCell.row) &&
-        !this.hiddenColumnIndexes.includes(this.selection.activeCell.col));
+        !this.hiddenRows.has(this.selection.activeCell.row) &&
+        !this.hiddenColumns.has(this.selection.activeCell.col));
     if (entersEditor && !this.editor) {
       if (this.rows <= 0 || this.cols <= 0) {
         return;
@@ -2312,8 +2317,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         col: this.selection.activeCell.col,
         row: this.selection.activeCell.row,
         direction: walkDirection,
-        hiddenColumns: new Set(this.hiddenColumnIndexes),
-        hiddenRows: new Set(this.hiddenRowIndexes)
+        hiddenColumns: this.hiddenColumns,
+        hiddenRows: this.hiddenRows
       });
       this.moveActiveCellInsideSelection(next);
       return;
@@ -3307,7 +3312,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }): CellGridRenderState {
     const ppi = opts.ppi ?? FALLBACK_PPI;
     const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
-    const hiddenRowSet = new Set(this.hiddenRowIndexes);
+    const hiddenRowSet = this.hiddenRows;
 
     const definedRowsLength = this.rowHeights.length;
     const rowHeightForIndex = (row: number): number => {
@@ -3320,7 +3325,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return convertPointsToPixel(this.rowHeights[row - 1], ppi);
     };
 
-    const hiddenColSet = new Set(this.hiddenColumnIndexes);
+    const hiddenColSet = this.hiddenColumns;
     const colWidthForIndex = (col: number): number => {
       if (hiddenColSet.has(col)) {
         return 0;
@@ -4298,16 +4303,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.colWidths = coerceNumberArray(colWidthsInPixels);
   }
   setHiddenColumnIndexes(indexes: number[]): void {
-    this.hiddenColumnIndexes = coerceArray(indexes);
+    this.hiddenColumns = new Set(coerceArray<number>(indexes));
   }
   setHiddenRowIndexes(indexes: number[]): void {
-    this.hiddenRowIndexes = coerceArray(indexes);
+    this.hiddenRows = new Set(coerceArray<number>(indexes));
   }
   setLockedColumnIndexes(indexes: number[]): void {
-    this.lockedColumnIndexes = coerceArray(indexes);
+    this.lockedColumns = new Set(coerceArray<number>(indexes));
   }
   setLockedRowIndexes(indexes: number[]): void {
-    this.lockedRowIndexes = coerceArray(indexes);
+    this.lockedRows = new Set(coerceArray<number>(indexes));
   }
   setSheetIndex(index: number): void {
     this.sheetIndex = index;
@@ -4804,8 +4809,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       cols: this.cols,
       rows: this.rows,
       mergedRegions: this.mergedRegions,
-      hiddenColumns: new Set(this.hiddenColumnIndexes),
-      hiddenRows: new Set(this.hiddenRowIndexes)
+      hiddenColumns: this.hiddenColumns,
+      hiddenRows: this.hiddenRows
     };
   }
 
@@ -4844,7 +4849,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * sheet's default past the last defined column.
    */
   private colWidthPx(col: number): number {
-    if (this.hiddenColumnIndexes.includes(col)) {
+    if (this.hiddenColumns.has(col)) {
       return 0;
     }
     return col > this.colWidths.length ? this.defColWidth : this.colWidths[col - 1];
@@ -4855,7 +4860,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * this is the one place the conversion happens.
    */
   private rowHeightPx(row: number, ppi: number = FALLBACK_PPI): number {
-    if (this.hiddenRowIndexes.includes(row)) {
+    if (this.hiddenRows.has(row)) {
       return 0;
     }
     return row > this.rowHeights.length
