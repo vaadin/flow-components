@@ -63,7 +63,7 @@ import tools.jackson.databind.node.ObjectNode;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/dashboard", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/dashboard@27f913046dfdd3a818a368f93858583870d96e40")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 

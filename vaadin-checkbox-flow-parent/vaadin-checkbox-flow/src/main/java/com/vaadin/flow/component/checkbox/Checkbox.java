@@ -83,7 +83,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/checkbox", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/checkbox", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/checkbox@27f913046dfdd3a818a368f93858583870d96e40")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>,

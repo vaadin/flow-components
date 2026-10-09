@@ -60,7 +60,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 24.1
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/side-nav", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/side-nav@27f913046dfdd3a818a368f93858583870d96e40")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends Component implements HasSideNavItems,
         HasEnabled, HasPrefix, HasSuffix, HasTooltip {

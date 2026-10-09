@@ -32,7 +32,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @since 2.0
  */
 @Tag("vaadin-drawer-toggle")
-@NpmPackage(value = "@vaadin/app-layout", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/app-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/app-layout@27f913046dfdd3a818a368f93858583870d96e40")
 @JsModule("@vaadin/app-layout/src/vaadin-drawer-toggle.js")
 public class DrawerToggle extends Button {
 

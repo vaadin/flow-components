@@ -50,12 +50,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@NpmPackage(value = "@vaadin/a11y-base", version = "25.4.0-alpha2")
-@NpmPackage(value = "@vaadin/component-base", version = "25.4.0-alpha2")
-@NpmPackage(value = "@vaadin/field-base", version = "25.4.0-alpha2")
-@NpmPackage(value = "@vaadin/input-container", version = "25.4.0-alpha2")
-@NpmPackage(value = "@vaadin/lit-renderer", version = "25.4.0-alpha2")
-@NpmPackage(value = "@vaadin/overlay", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/a11y-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/a11y-base@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/component-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/component-base@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/field-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/field-base@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/input-container", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/input-container@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/lit-renderer", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/lit-renderer@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/overlay", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/overlay@27f913046dfdd3a818a368f93858583870d96e40")
 final class TransitiveNpmPackages implements Serializable {
 
     /**

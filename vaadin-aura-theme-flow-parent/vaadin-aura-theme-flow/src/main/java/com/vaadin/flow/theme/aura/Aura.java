@@ -24,7 +24,7 @@ import com.vaadin.flow.component.page.AppShellConfigurator;
  *
  * @since 25.0
  */
-@NpmPackage(value = "@vaadin/aura", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/aura", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/aura@27f913046dfdd3a818a368f93858583870d96e40")
 public class Aura {
     /**
      * The path to the Aura stylesheet. Can be used as argument to a

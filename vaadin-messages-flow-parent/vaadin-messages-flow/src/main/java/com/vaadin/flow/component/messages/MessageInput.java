@@ -49,7 +49,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-message-input")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/message-input", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/message-input@27f913046dfdd3a818a368f93858583870d96e40")
 public class MessageInput extends Component
         implements Focusable<MessageInput>, HasSize, HasStyle, HasEnabled,
         HasTooltip, HasThemeVariant<MessageInputVariant> {

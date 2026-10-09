@@ -57,7 +57,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/details", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/details", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/details@27f913046dfdd3a818a368f93858583870d96e40")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component implements HasComponents, HasSize,
         HasThemeVariant<DetailsVariant>, HasTooltip {

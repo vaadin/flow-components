@@ -42,7 +42,7 @@ import com.vaadin.flow.signals.BindingActiveException;
  * @since 24.7
  */
 @Tag("vaadin-card")
-@NpmPackage(value = "@vaadin/card", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/card", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/card@27f913046dfdd3a818a368f93858583870d96e40")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component implements HasSize, HasAriaLabel,
         HasAriaRole, HasComponents, HasThemeVariant<CardVariant> {

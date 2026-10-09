@@ -55,7 +55,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/grid-pro", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/grid-pro@27f913046dfdd3a818a368f93858583870d96e40")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
