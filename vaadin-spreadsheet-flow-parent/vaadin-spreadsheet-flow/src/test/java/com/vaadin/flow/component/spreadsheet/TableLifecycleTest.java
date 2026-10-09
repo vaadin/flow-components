@@ -29,7 +29,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link TableLifecycle}.
+ * Deleting a table with {@link TableLifecycle}.
  *
  * <p>
  * Pins {@code delete}'s side-effect cascade:

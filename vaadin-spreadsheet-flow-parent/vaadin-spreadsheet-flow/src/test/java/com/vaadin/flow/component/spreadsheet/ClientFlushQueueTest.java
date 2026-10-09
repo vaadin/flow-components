@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 
 /**
- * Characterization tests for {@link ClientFlushQueue}.
+ * The cells {@link ClientFlushQueue} queues for sending to the client.
  *
  * <p>
  * Three independent queues:

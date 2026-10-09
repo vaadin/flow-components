@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.Component;
 
 /**
- * Characterization tests for {@link SheetOverlayStorage}.
+ * The overlays {@link SheetOverlayStorage} holds.
  *
  * <p>
  * Two parallel collections behind one storage class:

@@ -34,7 +34,7 @@ import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeLi
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 
 /**
- * Characterization tests for {@link SheetOverlayManager}.
+ * Loading, updating and clearing overlays with {@link SheetOverlayManager}.
  *
  * <p>
  * Pins the orchestration of {@code loadOrUpdate}, {@code clear}, and the

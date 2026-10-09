@@ -29,7 +29,7 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link SheetCssStyleMaps}.
+ * The CSS maps {@link SheetCssStyleMaps} stores and mirrors to the client.
  *
  * <p>
  * Six getter/setter pairs, each paired with a serialized-property mirror. Pure

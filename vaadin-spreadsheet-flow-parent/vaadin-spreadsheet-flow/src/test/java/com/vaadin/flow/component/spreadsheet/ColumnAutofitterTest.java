@@ -30,7 +30,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link ColumnAutofitter}.
+ * Fitting a column to its content with {@link ColumnAutofitter}.
  *
  * <p>
  * Three concerns pinned:

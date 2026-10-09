@@ -20,7 +20,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link InvalidFormulaTracker}.
+ * The invalid-formula marks of each sheet, kept by
+ * {@link InvalidFormulaTracker}.
  *
  * <p>
  * Pins the per-active-sheet semantics of the invalid-formula key set:

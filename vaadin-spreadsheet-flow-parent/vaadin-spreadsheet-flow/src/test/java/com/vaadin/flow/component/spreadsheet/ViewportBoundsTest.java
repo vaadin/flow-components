@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link ViewportBounds}.
+ * The visible range {@link ViewportBounds} remembers.
  *
  * <p>
  * Pins the four-index state-holder behavior: getters reflect last update,

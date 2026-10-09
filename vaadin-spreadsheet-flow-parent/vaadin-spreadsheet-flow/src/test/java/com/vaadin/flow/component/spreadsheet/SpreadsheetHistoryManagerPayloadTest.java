@@ -37,10 +37,7 @@ import com.vaadin.tests.MockUIExtension;
  * Purpose: a stronger safety gate than the pure-state assertions in
  * {@link SpreadsheetHistoryManagerTest}. Any future refactor that touches
  * {@code SpreadsheetHistoryManager} must keep this snapshot
- * <strong>byte-identical</strong> after normalization. The slice-1 refactor was
- * verified byte-shape-preserving by running this test against both the pre- and
- * post-refactor trees (see {@code SPREADSHEET_REFACTOR_LOG.md} §7 activity log
- * for the 2026-06-04 differential.)
+ * <strong>byte-identical</strong> after normalization.
  *
  * <p>
  * Normalization: timestamp-valued properties ({@code reload}, {@code dirty},
@@ -88,11 +85,6 @@ class SpreadsheetHistoryManagerPayloadTest {
         var jsCalls = captureJsCalls();
         var snapshot = renderDiffAndCalls(before, after, jsCalls);
 
-        // Golden — recorded against the slice-1 post-refactor tree at
-        // commit bccb70fdef (+ slice-1 changes) on 2026-06-04. Verified
-        // byte-identical against the pre-refactor tree by stashing the
-        // production-code changes and re-running.
-        //
         // Observation pinned: undo flips sheetIndex 2.0 -> 1.0 (the
         // property is 1-based) and produces no other element property
         // changes and no pending JS invocations. The Flow JSON

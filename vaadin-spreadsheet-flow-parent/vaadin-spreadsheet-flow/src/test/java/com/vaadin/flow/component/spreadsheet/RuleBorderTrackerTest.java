@@ -33,7 +33,8 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link RuleBorderTracker}.
+ * The border CSS of conditional-formatting rules, built by
+ * {@link RuleBorderTracker}.
  *
  * <p>
  * Pins:

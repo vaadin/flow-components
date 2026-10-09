@@ -23,7 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link CellFitCalculator}.
+ * Whether a value fits its column, as {@link CellFitCalculator} estimates it
+ * from the width ratios the client reports.
  *
  * <p>
  * Pure-function calculator with one piece of stateful memory (the per-style

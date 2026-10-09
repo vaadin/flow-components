@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link CellValueShifter}.
+ * Writing a filled cell during autofill with {@link CellValueShifter}.
  *
  * <p>
  * Pins the type-dispatch behavior of the Excel-autofill cell writer. Each

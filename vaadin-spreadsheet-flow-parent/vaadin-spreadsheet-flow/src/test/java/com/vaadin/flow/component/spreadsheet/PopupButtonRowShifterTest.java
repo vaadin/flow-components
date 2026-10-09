@@ -28,7 +28,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link PopupButtonRowShifter}.
+ * Moving and dropping pop-up buttons when rows shift, with
+ * {@link PopupButtonRowShifter}.
  *
  * <p>
  * Pins:

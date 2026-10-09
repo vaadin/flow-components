@@ -33,7 +33,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.HyperlinkCellClickHandler;
 
 /**
- * Characterization tests for {@link HyperlinkRangeScanner}.
+ * Collecting the hyperlink tooltips of a cell range with
+ * {@link HyperlinkRangeScanner}.
  *
  * <p>
  * Pins the per-cell decision tree:

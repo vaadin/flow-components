@@ -39,14 +39,14 @@ import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 
 /**
- * Characterization tests for {@link ClientCacheFlusher}.
+ * Sending the marked and removed cells to the client with
+ * {@link ClientCacheFlusher}.
  *
  * <p>
- * Pins the invariants spelled out in
- * {@code refactor-artifacts/specs/ClientCacheFlusher.md}: empty-sheet no-op,
- * one-marked-plain-cell push, formula-with-stale-cache eager re-push, in-band
- * conditional-formatting marking, ordering of formula-change event vs. RPC
- * push, and the null-CellData fallback branch for formula cells.
+ * Pins: empty-sheet no-op, one-marked-plain-cell push, formula-with-stale-cache
+ * eager re-push, in-band conditional-formatting marking, ordering of
+ * formula-change event vs. RPC push, and the null-CellData fallback branch for
+ * formula cells.
  *
  * <p>
  * Uses a real {@link XSSFWorkbook} for the sheet (the traversal contract is
@@ -156,7 +156,7 @@ class ClientCacheFlusherTest {
 
     @Test
     void conditionalFormattingOnPlainCell_marksInBand_andPushes() {
-        // Pin the in-band CF-marking quirk from the spec: the CF check runs
+        // Pin the in-band CF-marking quirk: the CF check runs
         // first in the loop body and may call markForUpdate(key); the same
         // iteration's plain-cell branch then reads isMarkedForUpdate(key)
         // and sees true. End result: a CF-only cell (no caller-side mark)
@@ -181,7 +181,7 @@ class ClientCacheFlusherTest {
 
     @Test
     void changedFormulaCells_eventFiresBeforeRpcPush() {
-        // Pin the ordering invariant from the spec: fireFormulaValueChangeEvent
+        // Pin the ordering invariant: fireFormulaValueChangeEvent
         // runs BEFORE cellsUpdated / refreshCellStyles. Listeners can mutate
         // cell state during the event and have those mutations reflected in
         // the same RPC push.

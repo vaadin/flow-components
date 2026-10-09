@@ -29,7 +29,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
 /**
- * Characterization tests for {@link MergedRegionCascade}.
+ * The style and cache updates {@link MergedRegionCascade} makes after a merge
+ * or unmerge.
  *
  * <p>
  * Pins the post-merge / post-unmerge side-effect cascades. Both methods walk a

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
 /**
- * Characterization tests for {@link MergedRegionLookup}.
+ * Finding the merged region of a cell with {@link MergedRegionLookup}.
  *
  * <p>
  * Pins the two queries the lookup implements over a live region list:

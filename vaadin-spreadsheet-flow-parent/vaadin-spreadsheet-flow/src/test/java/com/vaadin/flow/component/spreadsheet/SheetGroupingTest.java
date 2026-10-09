@@ -31,7 +31,7 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link SheetGrouping}.
+ * The grouping state {@link SheetGrouping} stores and mirrors to the client.
  *
  * <p>
  * Five property pairs (col-data, col-max, row-max, col-inversed, row-inversed)

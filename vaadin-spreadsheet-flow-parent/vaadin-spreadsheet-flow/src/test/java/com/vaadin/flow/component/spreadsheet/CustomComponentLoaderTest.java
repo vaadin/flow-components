@@ -38,7 +38,8 @@ import org.mockito.stubbing.Answer;
 import com.vaadin.flow.component.Component;
 
 /**
- * Characterization tests for {@link CustomComponentLoader}.
+ * Loading the custom components of the visible panes with
+ * {@link CustomComponentLoader}.
  *
  * <p>
  * Three modes pinned:

@@ -37,7 +37,8 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 
 /**
- * Characterization tests for {@link CellCommentRangeScanner}.
+ * Collecting the comments and invalid-formula marks of a cell range with
+ * {@link CellCommentRangeScanner}.
  *
  * <p>
  * Pins:
@@ -50,8 +51,8 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegio
  * {@code getCellComment}); zero-height rows skip; hidden columns skip; cells
  * inside merged regions (not anchor) skip-ahead to {@code col2}; merged-region
  * anchor IS scanned.</li>
- * <li>Defensive new-collection writes — same property-mirror invariant pinned
- * in slice 45's merged-region operations spec.</li>
+ * <li>Defensive new-collection writes, so that each write reaches the element
+ * property.</li>
  * </ul>
  *
  * <p>

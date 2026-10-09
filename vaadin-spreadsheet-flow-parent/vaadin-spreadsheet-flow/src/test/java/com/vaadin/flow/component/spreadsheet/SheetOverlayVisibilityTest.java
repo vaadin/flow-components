@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link SheetOverlayVisibility}.
+ * Whether an overlay is in view, as {@link SheetOverlayVisibility} decides it.
  *
  * <p>
  * Pins the visibility decision tree:

@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link SheetMetadataOperations}.
+ * Renaming sheets with {@link SheetMetadataOperations}.
  *
  * <p>
  * Pins the validation cascade for sheet-rename and the conditional

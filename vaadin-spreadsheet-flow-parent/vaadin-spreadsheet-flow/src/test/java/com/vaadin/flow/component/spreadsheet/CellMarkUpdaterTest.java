@@ -26,7 +26,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link CellMarkUpdater}.
+ * Sending updated and deleted cells to the client with {@link CellMarkUpdater}.
  *
  * <p>
  * Pins the five orchestration paths the helper owns. The SUT is a pure

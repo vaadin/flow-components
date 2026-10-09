@@ -29,11 +29,11 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The methods an application can override to change what the component does are
- * called on the paths the GWT-era component called them on.
+ * called on every path that does what they do.
  * <p>
- * Moving the work into helper classes made the helpers call their own copies of
- * these steps, so an override of, say, {@code deleteSheetWithPOIIndex} was
- * skipped when the sheet was deleted through {@code deleteSheet}.
+ * A helper that runs its own copy of such a step skips the override: an
+ * override of, say, {@code deleteSheetWithPOIIndex} would be skipped when the
+ * sheet is deleted through {@code deleteSheet}.
  */
 class OverridableHooksTest {
 

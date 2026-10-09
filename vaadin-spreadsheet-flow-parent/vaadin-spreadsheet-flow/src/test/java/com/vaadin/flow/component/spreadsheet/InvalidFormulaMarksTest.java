@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 /**
  * The undo commands reach a cell's invalid-formula flag through
  * {@link InvalidFormulaMarks}, so the flag's methods on {@link Spreadsheet}
- * stay package-private, as they are on the GWT-era component.
+ * stay package-private.
  */
 class InvalidFormulaMarksTest {
 

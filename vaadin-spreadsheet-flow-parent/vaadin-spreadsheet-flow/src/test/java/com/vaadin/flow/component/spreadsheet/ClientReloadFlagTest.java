@@ -27,7 +27,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link ClientReloadFlag}.
+ * The pending full reload {@link ClientReloadFlag} tracks and sends to the
+ * client.
  *
  * <p>
  * The helper has three observable contracts:

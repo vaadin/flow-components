@@ -29,7 +29,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
 /**
- * Characterization tests for {@link MergedRegionSynchronizer}.
+ * Rebuilding the client's list of merged regions from POI with
+ * {@link MergedRegionSynchronizer}.
  *
  * <p>
  * Pins the {@code rebuildFromPoi} contract: read POI's region count + the
@@ -116,9 +117,9 @@ class MergedRegionSynchronizerTest {
         // Pin: ids come from spreadsheet.mergedRegionCounter via direct
         // post-increment. Two POI regions → ids 0 and 1 (counter starts at
         // 0 on a fresh mock). The synchronizer does not reset the counter
-        // — a subsequent rebuild would continue minting fresh ids,
-        // which matches the contract pinned in MergedRegionOperations slice
-        // 45 (ids are monotonic across the spreadsheet's lifetime).
+        // — a subsequent rebuild would continue minting fresh ids, as
+        // MergedRegionOperations does (ids are monotonic across the
+        // spreadsheet's lifetime).
         when(sheet.getNumMergedRegions()).thenReturn(2);
         when(sheet.getMergedRegion(0)).thenReturn(range(0, 0, 0, 0));
         when(sheet.getMergedRegion(1)).thenReturn(range(1, 1, 1, 1));

@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link ColumnSizeOperations}.
+ * Setting column widths and hiding columns with {@link ColumnSizeOperations}.
  *
  * <p>
  * Sibling of {@link RowSizeOperations} but with tighter coupling — the

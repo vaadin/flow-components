@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link RowSizeOperations}.
+ * Setting row heights and hiding rows with {@link RowSizeOperations}.
  *
  * <p>
  * Pins the entanglement between {@code height == 0} and "row is hidden":

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 
 /**
- * Characterization tests for {@link ClientCellCache}.
+ * The record {@link ClientCellCache} keeps of the cells sent to the client.
  *
  * <p>
  * Pins the cache's pure-data behavior: separate plain / formula sets,

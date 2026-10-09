@@ -102,8 +102,8 @@ class CellOverflowWireTest {
 
     @Test
     void rightAlignedText_runsOnToTheRightToo() {
-        // The GWT client let a value too wide for its column overflow its
-        // cell whatever the alignment.
+        // A value too wide for its column overflows its cell whatever the
+        // alignment.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0, "a value far too wide");
         CellStyle style = spreadsheet.getWorkbook().createCellStyle();
@@ -116,10 +116,9 @@ class CellOverflowWireTest {
 
     @Test
     void dateTooWideForItsColumn_runsOn() {
-        // A date is never hashed the way a number is: the GWT client let one
-        // too wide for its column run on into the empty cells beside it.
-        // The server left dates out of every width check, so the Lit client
-        // clipped them mid-digit.
+        // A date is never hashed the way a number is: one too wide for its
+        // column runs on into the empty cells beside it, rather than being
+        // clipped mid-digit.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0,
                 new GregorianCalendar(1999, 2, 19).getTime());
@@ -174,10 +173,9 @@ class CellOverflowWireTest {
     }
 
     @Test
-    void aNumberShownInScientificNotation_runsOnLikeTheGwtClientsDid() {
-        // Excel would hash it. The GWT client showed "1.23457E+14" and let it
-        // overflow its right-aligned cell into the empty one beside it, which
-        // is what this branch matches; the Lit client used to clip it.
+    void aNumberShownInScientificNotation_runsOnIntoTheEmptyCellBesideIt() {
+        // Excel would hash it. Here it is shown as "1.23457E+14" and
+        // overflows its right-aligned cell into the empty one beside it.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0, 123456789012345d);
 
@@ -192,8 +190,8 @@ class CellOverflowWireTest {
 
     @Test
     void aLinksLabel_runsOnLikeText() {
-        // The GWT client measured every cell it drew, so a link whose label
-        // was too wide ran on into the empty cells beside it.
+        // A link whose label is too wide runs on into the empty cells beside
+        // it, like text.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0, null);
         a1.setCellFormula(
@@ -224,11 +222,9 @@ class CellOverflowWireTest {
     @Test
     void aGeneralNumberInAStyleWithoutCss_keepsAllItsDigits() {
         // A style set on a cell through POI has no CSS until the styles are
-        // reloaded. The GWT client measured a character's width only for
-        // the styles it had CSS for, so a number in any other style was
-        // shown as it was, never shortened. The Lit client measures every
-        // style its cells wear, for the text that runs on, and the server
-        // shortened the number with that width too.
+        // reloaded. A number in such a style is shown as it is, never
+        // shortened, even though the client measures every style its cells
+        // wear, for the text that runs on.
         spreadsheet.setLocale(Locale.US);
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0, 38247.12269d);
@@ -250,8 +246,7 @@ class CellOverflowWireTest {
     @Test
     void aNumericFormulaInAStyleWithoutCss_isNotSentForMeasuring() {
         // The client hashes a value it is told to measure that does not
-        // fit; the GWT client was never told to for a style it had no CSS
-        // for.
+        // fit; it is not told to for a style that has no CSS.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createFormulaCell(0, 0, "1/3");
         CellStyle style = spreadsheet.getWorkbook().createCellStyle();
@@ -277,8 +272,8 @@ class CellOverflowWireTest {
 
     @Test
     void textInAStyleWithoutCss_stillRunsOn() {
-        // Run-on is the GWT client's own measurement of every cell, so a
-        // style without CSS takes part in it.
+        // Text runs on whatever its style, so a style without CSS takes part
+        // too.
         reportWidthRatios(WIDE);
         Cell a1 = spreadsheet.createCell(0, 0, "a value far too wide");
         a1.setCellStyle(spreadsheet.getWorkbook().createCellStyle());

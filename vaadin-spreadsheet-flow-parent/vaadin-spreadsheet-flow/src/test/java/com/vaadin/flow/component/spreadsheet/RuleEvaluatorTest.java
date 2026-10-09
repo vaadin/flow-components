@@ -29,7 +29,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link RuleEvaluator}.
+ * Matching cells against conditional-formatting rules with
+ * {@link RuleEvaluator}.
  *
  * <p>
  * Uses a real {@link XSSFWorkbook} so POI's formula machinery (FormulaParser /

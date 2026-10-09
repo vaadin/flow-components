@@ -29,7 +29,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link MirroredNullableMap}.
+ * Storing a map and mirroring it to the client with
+ * {@link MirroredNullableMap}.
  *
  * <p>
  * The block has tricky semantics worth pinning explicitly: {@code set(null)}
@@ -106,8 +107,7 @@ class MirroredNullableMapTest {
     void setNull_stillPushesSerializedNullToElement() {
         // Pin: even though the server-side state is "empty map", the client
         // receives serialized null (Serializer.serialize(null) returns "").
-        // This is the pre-refactor behavior and the client-side handler
-        // must treat null and {} equivalently.
+        // The client-side handler must treat null and {} equivalently.
         map.set(null);
         // Two args (String, String) — Serializer.serialize(null) returns "".
         verify(element).setProperty(eq("myProp"), eq(""));

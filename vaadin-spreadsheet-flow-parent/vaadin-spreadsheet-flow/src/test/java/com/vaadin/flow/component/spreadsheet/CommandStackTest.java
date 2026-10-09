@@ -23,14 +23,13 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.spreadsheet.command.Command;
 
 /**
- * Characterization tests for {@link CommandStack}.
+ * The undo history list and cursor of {@link CommandStack}.
  *
  * <p>
  * Pure data structure — no {@link Spreadsheet} dependency. Pins the overflow
- * and cursor-navigation shapes that {@link SpreadsheetHistoryManager} relied on
- * before extraction (see the slice-1 journal entry). The backing list is shared
- * by reference with the host's protected {@code commands} field, so the test
- * exercises that contract too.
+ * and cursor-navigation shapes that {@link SpreadsheetHistoryManager} relies
+ * on. The backing list is shared by reference with the host's protected
+ * {@code commands} field, so the test exercises that contract too.
  */
 class CommandStackTest {
 
@@ -112,8 +111,8 @@ class CommandStackTest {
 
     @Test
     void push_overflowingMaxSize_dropsOldest_andDoesNotAdvanceCursor() {
-        // Pin the LOAD-BEARING overflow shape (slice-1 journal entry):
-        // when size > maxSize, removeFirst() drops the oldest command;
+        // Pin the overflow shape: when size > maxSize, removeFirst() drops
+        // the oldest command;
         // cursor STAYS at maxSize - 1 instead of advancing to maxSize.
         Command first = mock(Command.class);
         Command second = mock(Command.class);

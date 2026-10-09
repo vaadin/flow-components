@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link SheetScrollMemory}.
+ * How {@link SheetScrollMemory} remembers the scroll position of each sheet.
  *
  * <p>
  * Pins the defensive-copy semantic on both arrays: each call reads the current

@@ -32,13 +32,12 @@ import org.junit.jupiter.api.Test;
  * <p>
  * The stylesheet's {@code :host} block is where the documented styling
  * properties live, so declaring one is a promise that setting it changes
- * something. {@code --vaadin-spreadsheet-header-border-color} was declared,
- * documented, and read by nothing for the whole of the Lit rewrite: the headers
- * took an undocumented {@code --vaadin-spreadsheet-header-border} with a
- * different default, so the documented property did nothing and the header
- * borders came out a different grey from the cell borders next to them. Nothing
- * caught it, because a property that resolves to its own declared value looks
- * exactly like one that is working.
+ * something. A declared property that nothing reads goes unnoticed, because a
+ * property that resolves to its own declared value looks exactly like one that
+ * is working: when the headers read an undocumented property with a different
+ * default, the documented {@code --vaadin-spreadsheet-header-border-color} did
+ * nothing, and the header borders came out a different grey from the cell
+ * borders next to them.
  */
 public class DeclaredCssVariableContractTest {
 
@@ -59,9 +58,8 @@ public class DeclaredCssVariableContractTest {
     /**
      * The stylesheet only reads the documented properties. A declaration on the
      * host hides the value an application sets on an ancestor - its theme's
-     * {@code html} rule, a layout around the sheet - and the four the GWT
-     * client documented were declared that way for the whole of the Lit
-     * rewrite, so setting them anywhere but on the element did nothing.
+     * {@code html} rule, a layout around the sheet - so setting the property
+     * anywhere but on the element would do nothing.
      */
     @Test
     public void noDocumentedProperty_isDeclaredByTheComponent()
@@ -93,10 +91,10 @@ public class DeclaredCssVariableContractTest {
 
     /**
      * Read with two defaults on purpose. The address field keeps the browser's
-     * own font for text fields, as the GWT client's did, and the formula field
-     * is in Helvetica; the property sets both. The address cannot reach the
-     * browser's font through a property of its own: {@code revert} only works
-     * as the fallback of the declaration itself.
+     * own font for text fields, and the formula field is in Helvetica; the
+     * property sets both. The address cannot reach the browser's font through a
+     * property of its own: {@code revert} only works as the fallback of the
+     * declaration itself.
      */
     private static final Set<String> TWO_DEFAULTS_ON_PURPOSE = Set
             .of("--vaadin-spreadsheet-formulabar-font");

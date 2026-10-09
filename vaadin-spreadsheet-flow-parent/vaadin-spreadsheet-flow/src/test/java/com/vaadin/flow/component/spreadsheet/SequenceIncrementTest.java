@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link SequenceIncrement}.
+ * The step of an arithmetic sequence, as {@link SequenceIncrement} computes it.
  *
  * <p>
  * Pins the arithmetic-progression detection that drives Excel autofill — "if

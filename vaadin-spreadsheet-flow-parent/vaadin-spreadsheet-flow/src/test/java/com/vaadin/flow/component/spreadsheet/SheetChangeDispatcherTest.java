@@ -22,7 +22,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link SheetChangeDispatcher}.
+ * How {@link SheetChangeDispatcher} handles selecting, creating and renaming a
+ * sheet.
  *
  * <p>
  * Three client-event handlers: tab selected, new-sheet, rename. Pins the

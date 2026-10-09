@@ -25,7 +25,7 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link MirroredProperty}.
+ * Storing a value and mirroring it to the client with {@link MirroredProperty}.
  *
  * <p>
  * Pins three properties of the abstraction:

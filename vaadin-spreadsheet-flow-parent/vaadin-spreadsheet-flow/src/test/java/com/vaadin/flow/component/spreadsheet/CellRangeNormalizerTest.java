@@ -19,7 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link CellRangeNormalizer}.
+ * Turning an address or coordinates into a range within the sheet with
+ * {@link CellRangeNormalizer}.
  *
  * <p>
  * Pins the two normalization paths:

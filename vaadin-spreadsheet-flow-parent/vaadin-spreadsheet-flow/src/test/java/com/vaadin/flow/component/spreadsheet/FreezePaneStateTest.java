@@ -26,7 +26,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link FreezePaneState}.
+ * The freeze-pane state {@link FreezePaneState} stores and mirrors to the
+ * client.
  *
  * <p>
  * Four mirrored fields: two int split positions (primitives) and two int[]

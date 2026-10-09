@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link TableLoader}.
+ * Loading the tables of the active sheet with {@link TableLoader}.
  *
  * <p>
  * Thin orchestrator over {@link TableRegistry}. Pins:

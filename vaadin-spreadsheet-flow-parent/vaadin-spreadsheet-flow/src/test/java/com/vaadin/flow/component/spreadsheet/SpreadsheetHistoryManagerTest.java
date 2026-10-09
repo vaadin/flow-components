@@ -28,14 +28,13 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
 import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
 
 /**
- * Characterization tests for {@link SpreadsheetHistoryManager}.
+ * Undo and redo with {@link SpreadsheetHistoryManager}.
  *
  * <p>
  * These tests pin the manager's current observable behavior — bugs included —
- * so that the planned slice-1 refactor (extracting a narrow
- * {@code SpreadsheetHistoryHost} interface) can be verified as
- * behavior-preserving. They do <strong>not</strong> assert that the behavior is
- * correct; they assert that it is unchanged.
+ * so that a change to it can be verified as behavior-preserving. They do
+ * <strong>not</strong> assert that the behavior is correct; they assert that it
+ * is unchanged.
  *
  * <p>
  * Test layout, grouped by behavior path:
@@ -318,12 +317,11 @@ class SpreadsheetHistoryManagerTest {
     // CellSelectionManager based on whether the command carries a
     // selectedCellReference, a paintedCellRange, both, or neither.
     //
-    // Headless characterization of this routing requires a recording proxy or
-    // spy around CellSelectionManager — CellSelectionManager's downstream
-    // state is not populated headlessly, so getCellSelectionManager()
+    // Testing this routing headless requires a recording proxy or spy around
+    // CellSelectionManager — CellSelectionManager's downstream state is not
+    // populated headlessly, so getCellSelectionManager()
     // .getSelectedCellReference() returns null even after a successful route.
-    // Deferred to the Stage 4 step 2 work (server-side payload-recording
-    // proxy); UndoRedoIT covers the end-to-end behavior in the meantime.
+    // UndoRedoIT covers the end-to-end behavior.
 
     // 8. setHistorySize clips -----------------------------------------------
 

@@ -18,7 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link RangeSequenceDetector}.
+ * Detecting an arithmetic sequence in a row or column with
+ * {@link RangeSequenceDetector}.
  *
  * <p>
  * Pins the row / column dispatch logic that combines

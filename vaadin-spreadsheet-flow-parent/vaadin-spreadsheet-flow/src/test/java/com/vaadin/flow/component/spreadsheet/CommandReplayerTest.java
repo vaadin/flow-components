@@ -34,7 +34,7 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
 import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
 
 /**
- * Characterization tests for {@link CommandReplayer}.
+ * What {@link CommandReplayer} does around undoing or redoing a command.
  *
  * <p>
  * Pins the three concerns documented on the SUT: switching the active sheet

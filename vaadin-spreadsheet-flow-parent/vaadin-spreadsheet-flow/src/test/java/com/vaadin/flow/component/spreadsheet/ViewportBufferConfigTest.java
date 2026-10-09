@@ -24,7 +24,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link ViewportBufferConfig}.
+ * The viewport buffer sizes {@link ViewportBufferConfig} stores and mirrors to
+ * the client.
  *
  * <p>
  * Pins the two-axis buffer-size state + element-property mirroring. Both

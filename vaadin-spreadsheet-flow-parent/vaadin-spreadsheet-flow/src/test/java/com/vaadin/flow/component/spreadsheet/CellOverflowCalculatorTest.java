@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Test;
  *
  * <p>
  * A spreadsheet carries text on across empty neighbours instead of clipping it
- * at the column edge. The Lit client clipped every cell, which the Phase 3.0
- * baselines show as "File open" where the GWT reference reads "File opened".
+ * at the column edge.
  */
 class CellOverflowCalculatorTest {
 
@@ -58,17 +57,17 @@ class CellOverflowCalculatorTest {
     @Test
     void textBlockedByTheNextColumn_keepsToItsOwn() {
         // Still too wide, so still drawn clipped with an ellipsis - in the
-        // one column it has. The GWT client read "Wednesd..." here.
+        // one column it has: "Wednesd...".
         assertEquals(50, CellOverflowCalculator.spillWidth(0, 120, WIDTHS, 0,
                 occupied(1)));
     }
 
     @Test
     void rightAlignedTextRunsOnToTheRightLikeAnyOther() {
-        // Excel runs these leftwards. The GWT client let a value too wide for
-        // its column overflow its cell whatever the alignment, so the text
-        // started at the cell's left edge and ran on to the right; the
-        // calculator no longer knows the alignment at all.
+        // Excel runs these leftwards. Here a value too wide for its column
+        // overflows its cell whatever the alignment, so the text starts at
+        // the cell's left edge and runs on to the right; the calculator does
+        // not know the alignment at all.
         assertEquals(150, CellOverflowCalculator.spillWidth(0, 120, WIDTHS, 0,
                 NOTHING_BESIDE_IT));
     }

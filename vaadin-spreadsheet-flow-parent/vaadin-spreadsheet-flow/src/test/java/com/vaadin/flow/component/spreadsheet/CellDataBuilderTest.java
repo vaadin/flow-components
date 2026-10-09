@@ -33,7 +33,7 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 
 /**
- * Characterization tests for {@link CellDataBuilder}.
+ * Building the data sent to the client for a cell with {@link CellDataBuilder}.
  *
  * <p>
  * The {@code createCellDataForCell} method has eight major branches plus the

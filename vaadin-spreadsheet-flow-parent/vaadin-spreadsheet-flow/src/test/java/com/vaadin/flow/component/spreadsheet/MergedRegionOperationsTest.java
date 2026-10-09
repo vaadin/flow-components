@@ -35,7 +35,7 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
 /**
- * Characterization tests for {@link MergedRegionOperations}.
+ * Merging and unmerging cells with {@link MergedRegionOperations}.
  *
  * <p>
  * Pins validation rules (overlap rejected, enclose rejected, inside discarded),

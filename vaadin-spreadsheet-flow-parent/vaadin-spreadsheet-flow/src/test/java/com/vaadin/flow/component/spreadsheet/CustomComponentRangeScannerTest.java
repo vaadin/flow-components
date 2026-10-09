@@ -38,7 +38,8 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 
 /**
- * Characterization tests for {@link CustomComponentRangeScanner}.
+ * Collecting the custom components and editors of a cell range with
+ * {@link CustomComponentRangeScanner}.
  *
  * <p>
  * Pins the per-cell decision tree:

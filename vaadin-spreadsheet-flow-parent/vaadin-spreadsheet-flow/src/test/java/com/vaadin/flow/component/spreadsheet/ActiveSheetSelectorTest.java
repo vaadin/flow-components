@@ -27,7 +27,7 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link ActiveSheetSelector}.
+ * Reading and switching the active sheet with {@link ActiveSheetSelector}.
  *
  * <p>
  * Pins:

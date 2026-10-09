@@ -18,7 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link SequenceValueExtractor}.
+ * Reading a run of numbers or texts out of a row or column with
+ * {@link SequenceValueExtractor}.
  *
  * <p>
  * Pins the "read a contiguous run of typed cells, stop at the first mismatch"

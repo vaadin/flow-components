@@ -26,7 +26,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link PopupButtonRefresher}.
+ * Attaching the pop-up buttons in view and detaching the others with
+ * {@link PopupButtonRefresher}.
  *
  * <p>
  * Walks the registry and dispatches each button to attach / detach based on its

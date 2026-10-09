@@ -35,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link RowShiftOrchestrator}.
+ * What {@link RowShiftOrchestrator} updates around a POI row shift.
  *
  * <p>
  * The SUT is a broad orchestrator — every test mocks the Spreadsheet host +
@@ -98,7 +98,7 @@ class RowShiftOrchestratorTest {
 
         // sheetOverlayManager, popupButtonRowShifter, invalidFormulaTracker
         // are package-private final fields on Spreadsheet — wire via
-        // reflection on the mock (same pattern as the audit fix-pass tests).
+        // reflection on the mock.
         wireField("sheetOverlayManager", sheetOverlayManager);
         wireField("popupButtonRowShifter", popupButtonRowShifter);
         wireField("invalidFormulaTracker", invalidFormulaTracker);

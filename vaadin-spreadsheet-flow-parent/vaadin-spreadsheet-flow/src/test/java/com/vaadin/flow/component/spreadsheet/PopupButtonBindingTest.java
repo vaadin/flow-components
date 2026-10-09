@@ -25,7 +25,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link PopupButtonBinding}.
+ * Attaching pop-up buttons to the spreadsheet element and detaching them with
+ * {@link PopupButtonBinding}.
  *
  * <p>
  * Pins the attach / detach / detachAll contract:
@@ -85,7 +86,7 @@ class PopupButtonBindingTest {
     void attach_buttonAlreadyChildOfSpreadsheet_doesNotReAppend() {
         // Pin: the parent check guards against double-appending. If the
         // element's parent IS the spreadsheet, the virtual-child add is
-        // skipped. The JS callback still fires (the GWT widget needs to
+        // skipped. The JS callback still fires (the web component needs to
         // know about the re-attach).
         when(buttonAElement.getParent()).thenReturn(spreadsheetElement);
 

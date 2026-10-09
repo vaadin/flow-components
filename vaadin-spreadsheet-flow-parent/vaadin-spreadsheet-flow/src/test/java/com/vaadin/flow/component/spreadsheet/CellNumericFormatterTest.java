@@ -40,13 +40,13 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link CellNumericFormatter}.
+ * The locale-dependent formatting of {@link CellNumericFormatter}.
  *
  * <p>
  * Pins:
  * <ul>
- * <li>{@code updateLocale} rebuilds all four formatting fields together
- * (formatter, decimal format, locale symbols, embedded value formatter
+ * <li>{@code updateLocale} rebuilds the locale-dependent formatting fields
+ * together (formatter, decimal format, locale symbols, embedded value formatter
  * symbols).</li>
  * <li>{@code getOriginalCellValue} dispatches on {@link CellType} per branch —
  * formula source / date-formatted numeric / numeric / string with-and-without
@@ -143,14 +143,9 @@ class CellNumericFormatterTest {
         // Pin: the localeDecimalSymbols rebuild during updateLocale is the
         // same instance used by valueContainsOnlyNumbers. Switching from
         // US (dot separator) to Germany (comma separator) MUST change
-        // what the predicate accepts under the comma-only branch.
-        //
-        // Use a comma-vs-dot pair where only ONE form is unambiguously
-        // numeric. "1,5x" with a trailing non-digit fails under both
-        // locales; "1,5" alone is matched under Germany. Under US the
-        // regex's '.' meta-character is "any char", which masks the
-        // separator change for single-char alternatives — see
-        // valueContainsOnlyNumbers_commaUnderUSLocale_pinsRegexMetacharQuirk.
+        // what the predicate accepts: "1,5" is a number under Germany
+        // only, and a trailing letter is never one. See also
+        // valueContainsOnlyNumbers_separatorIsALiteral_notARegex.
         formatter.updateLocale(Locale.US);
         assertFalse(formatter.valueContainsOnlyNumbers("1,5a"),
                 "Trailing letter must never match");

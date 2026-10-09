@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link PopupButtonRegistry}.
+ * Storing pop-up buttons by cell in {@link PopupButtonRegistry}.
  *
  * <p>
  * Pure storage class — the tests pin the {@link java.util.HashMap} delegation

@@ -24,7 +24,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link CellCommentLoader}.
+ * Loading the comments of the visible panes with {@link CellCommentLoader}.
  *
  * <p>
  * Same 4-quadrant scan dispatch as {@link HyperlinkLoader} plus two extras:
@@ -116,10 +116,9 @@ class CellCommentLoaderTest {
 
     @Test
     void load_bothSplits_secondCall_scansTheFrozenCornerAgain() {
-        // Every load empties the comment maps before scanning. The refactor
-        // latched area 1 after its first scan, so the second load - any
-        // scroll or refresh - dropped every comment in the frozen corner.
-        // The GWT-era Spreadsheet never set its latch.
+        // Every load empties the comment maps before scanning, so a frozen
+        // corner scanned only on the first load would lose every comment on
+        // the second - any scroll or refresh.
         when(spreadsheet.getLastFrozenRow()).thenReturn(3);
         when(spreadsheet.getLastFrozenColumn()).thenReturn(2);
 

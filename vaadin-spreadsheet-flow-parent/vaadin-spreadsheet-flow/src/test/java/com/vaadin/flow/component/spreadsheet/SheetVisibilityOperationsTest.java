@@ -27,7 +27,7 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link SheetVisibilityOperations}.
+ * Hiding, showing and protecting sheets with {@link SheetVisibilityOperations}.
  *
  * <p>
  * Pins:

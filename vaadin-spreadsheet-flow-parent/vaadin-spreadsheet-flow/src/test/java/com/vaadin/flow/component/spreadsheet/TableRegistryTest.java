@@ -22,7 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link TableRegistry}.
+ * Storing, removing and listing tables in {@link TableRegistry}, and its loaded
+ * latch.
  *
  * <p>
  * Pure storage class with a single latch ({@code tablesLoaded}). Pins:

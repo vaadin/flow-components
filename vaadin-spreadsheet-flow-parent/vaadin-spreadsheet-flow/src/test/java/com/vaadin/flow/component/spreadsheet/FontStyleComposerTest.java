@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link FontStyleComposer}.
+ * The font CSS of cell styles, built by {@link FontStyleComposer}.
  *
  * <p>
  * Two-axis pinning: (a) {@link FontStyleComposer#appendFontStyle} emits CSS

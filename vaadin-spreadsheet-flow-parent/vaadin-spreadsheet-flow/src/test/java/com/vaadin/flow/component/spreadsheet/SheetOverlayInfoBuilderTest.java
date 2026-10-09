@@ -30,7 +30,7 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
 
 /**
- * Characterization tests for {@link SheetOverlayInfoBuilder}.
+ * Building the client data for an overlay with {@link SheetOverlayInfoBuilder}.
  *
  * <p>
  * Pins the two paths of {@code build}:

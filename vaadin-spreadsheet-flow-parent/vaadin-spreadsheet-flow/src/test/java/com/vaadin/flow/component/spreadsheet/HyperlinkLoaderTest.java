@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link HyperlinkLoader}.
+ * Loading the hyperlinks of the visible panes with {@link HyperlinkLoader}.
  *
  * <p>
  * Thin orchestrator over {@link HyperlinkRangeScanner}. Pins:

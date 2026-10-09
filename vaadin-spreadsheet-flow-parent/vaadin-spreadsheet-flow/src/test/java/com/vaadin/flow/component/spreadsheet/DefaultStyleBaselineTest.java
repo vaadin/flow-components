@@ -24,14 +24,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link DefaultStyleBaseline}.
+ * Capturing the workbook's default style with {@link DefaultStyleBaseline}.
  *
  * <p>
  * Pins the dual nature of {@link DefaultStyleBaseline#captureDefaultStyle}: it
  * both <em>captures</em> the workbook's default font into the baseline fields
  * AND <em>emits</em> the CSS for that font into the passed
- * {@link StringBuilder}. The dual action is preserved from the original
- * {@code SpreadsheetStyleFactory.defaultFontStyle} pre-refactor behavior.
+ * {@link StringBuilder}.
  *
  * <p>
  * Uses an in-memory {@link XSSFWorkbook} for the real POI {@link CellStyle} +

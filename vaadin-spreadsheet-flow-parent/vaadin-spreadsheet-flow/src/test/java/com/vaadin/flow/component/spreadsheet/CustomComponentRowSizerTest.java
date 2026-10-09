@@ -29,7 +29,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link CustomComponentRowSizer}.
+ * The heights {@link CustomComponentRowSizer} gives the rows that hold custom
+ * components.
  *
  * <p>
  * Three behaviors pinned:

@@ -21,20 +21,15 @@ import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 
 /**
  * Pins the JSON wire-format produced by {@link Serializer#serialize(Object)}
- * for each of the 6 DTOs whose server-side shape is consumed by the
- * GWT-compiled client. Each test populates fields with a known set of values
- * and asserts the exact JSON bytes the server would emit on the wire.
+ * for each of the 6 DTOs the client reads. Each test populates fields with a
+ * known set of values and asserts the exact JSON bytes the server would emit on
+ * the wire.
  *
  * <p>
- * These are NOT "mirror" tests — the server-side and client-side classes have
- * intentionally different shapes (server uses enums where the client uses
- * String constants; server uses {@code int} where the client uses
- * {@code String}; the client side of {@code PopupButtonState} extends
- * {@code AbstractComponentState} where the server is a POJO). They communicate
- * via Jackson's tolerant cross-type JSON convention. These tests pin the
- * server's serialization output so that any field rename, default-value change,
- * or {@code @JsonInclude} edit on the server side surfaces here at PR time —
- * before it would silently drift the wire and break the GWT client.
+ * These tests pin the server's serialization output so that any field rename,
+ * default-value change, or {@code @JsonInclude} edit on the server side
+ * surfaces here at PR time — before it would silently drift the wire and break
+ * the client.
  *
  * <p>
  * Two Jackson behaviors are load-bearing and pinned implicitly by every
@@ -167,10 +162,9 @@ class DtoWireFormatTest {
 
     @Test
     void spreadsheetActionDetails_intTypeAndIconNodeId_serializeAsNumbers() {
-        // type is `int` on the server, `String` on the client. iconNodeId is
-        // similarly typed differently. Wire format is JSON numbers; the GWT
-        // client coerces. This pin catches either side silently flipping to
-        // the other's type.
+        // type and iconNodeId are numbers on both sides, so the wire carries
+        // JSON numbers. This pin catches either of them silently turning
+        // into a string.
         SpreadsheetActionDetails details = new SpreadsheetActionDetails();
         details.caption = "Cut";
         details.key = "cut";
@@ -185,13 +179,8 @@ class DtoWireFormatTest {
 
     @Test
     void popupButtonState_serializesOnlyServerSideFields() {
-        // Server is a plain POJO; the GWT-side mirror extends
-        // AbstractComponentState (a Vaadin-8-era base class with caption /
-        // description / enabled / etc.). The wire-format compatibility relies
-        // on the client tolerating ABSENT base-class fields — which
-        // Serializer's
-        // NON_DEFAULT inclusion guarantees by never emitting them from the
-        // server. This snapshot pins that the server side stays a clean POJO.
+        // Server is a plain POJO, with only the fields the client reads. This
+        // snapshot pins that it stays one.
         PopupButtonState state = new PopupButtonState();
         state.col = 2;
         state.row = 3;

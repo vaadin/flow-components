@@ -27,7 +27,7 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link SheetLifecycleOperations}.
+ * Creating and deleting sheets with {@link SheetLifecycleOperations}.
  *
  * <p>
  * Pins:

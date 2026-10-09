@@ -32,12 +32,11 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
 
 /**
- * Characterization tests for {@link CellBorderStyleBuilder}.
+ * The border CSS of cell styles, built by {@link CellBorderStyleBuilder}.
  *
  * <p>
- * Largest helper in the refactor at 607 LOC. Test strategy: cover the
- * high-value branches without diving into the XSSF theme-border XML path (which
- * requires constructing CT-level XML fixtures).
+ * Covers the high-value branches without diving into the XSSF theme-border XML
+ * path (which requires constructing CT-level XML fixtures).
  *
  * <p>
  * Pins:

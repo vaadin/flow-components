@@ -37,7 +37,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellDeletionHandler;
 
 /**
- * Characterization tests for {@link CellDeletionGuard}.
+ * Whether a deletion handler lets the default deletion run, as
+ * {@link CellDeletionGuard} checks it.
  *
  * <p>
  * Three deletion-shape predicates plus an in-range helper. Each predicate

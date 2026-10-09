@@ -27,7 +27,8 @@ import org.mockito.MockitoAnnotations;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Characterization tests for {@link SheetDimensions}.
+ * The row and column sizes {@link SheetDimensions} stores and mirrors to the
+ * client.
  *
  * <p>
  * Per-sheet geometry state with six getter/setter pairs. Every setter is paired

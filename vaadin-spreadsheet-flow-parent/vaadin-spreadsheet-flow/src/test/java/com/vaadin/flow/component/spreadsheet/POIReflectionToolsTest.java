@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Characterization tests for {@link POIReflectionTools}.
+ * The POI internals {@link POIReflectionTools} reads by reflection.
  *
  * <p>
  * All five static methods are reflection-bridges over POI's hidden state. Uses
@@ -231,9 +231,8 @@ class POIReflectionToolsTest {
     void isBorderSet_xmlElementCreatedDirectly_returnsTrue() {
         // Pin the positive case via direct CTBorder manipulation — this
         // models what POI's parser does when reading a workbook XML that
-        // has a <left> border element. The slice-78 RuleBorderTracker
-        // NONE-default-grey branch fires only when the XML is set this
-        // way.
+        // has a <left> border element. The NONE-default-grey branch of
+        // RuleBorderTracker fires only when the XML is set this way.
         SheetConditionalFormatting scf = sheet.getSheetConditionalFormatting();
         XSSFConditionalFormattingRule rule = (XSSFConditionalFormattingRule) scf
                 .createConditionalFormattingRule(ComparisonOperator.GT, "0");

@@ -34,7 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Characterization tests for {@link DirectionalShiftOperator}.
+ * Filling cells down, up, right and left with {@link DirectionalShiftOperator}.
  *
  * <p>
  * Four structurally-similar methods (shiftRowsDown / shiftRowsUp /
