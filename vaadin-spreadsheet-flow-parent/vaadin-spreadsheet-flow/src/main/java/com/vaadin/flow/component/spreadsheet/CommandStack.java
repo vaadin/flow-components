@@ -21,7 +21,7 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
  * subclasses that read that field continue to see the live list.
  *
  * <p>
- * Pinned behavior shapes (see {@code SpreadsheetHistoryManagerTest}):
+ * Two behaviours that {@code SpreadsheetHistoryManager} has always had:
  * <ul>
  * <li>{@link #push} when the list overflows {@code maxSize} drops the oldest
  * command via {@code removeFirst()} and does <em>not</em> advance the cursor in
@@ -57,8 +57,7 @@ final class CommandStack implements Serializable {
     /**
      * Pushes a new command on top of the cursor. Discards anything in the redo
      * branch first. When the resulting list size exceeds {@code maxSize}, drops
-     * the oldest command instead of advancing the cursor — this preserves the
-     * existing overflow shape pinned by the characterization tests.
+     * the oldest command instead of advancing the cursor.
      */
     void push(Command command) {
         clipAfter(cursor);
@@ -120,10 +119,8 @@ final class CommandStack implements Serializable {
 
     void setMaxSize(int newMaxSize) {
         this.maxSize = newMaxSize;
-        // Pinned: existing setHistorySize() called
-        // discardAllAfter(historySize),
-        // which keeps the first (newMaxSize + 1) commands and does NOT touch
-        // the cursor. Preserved here.
+        // Keeps the first (newMaxSize + 1) commands and leaves the cursor
+        // where it is, as setHistorySize always has.
         clipAfter(newMaxSize);
     }
 }

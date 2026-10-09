@@ -28,20 +28,15 @@ import org.apache.poi.ss.util.CellReference;
  * tracker's per-cell key set.
  *
  * <p>
- * One concern, one place. Before extraction, all of this lived inline in
- * {@code Spreadsheet.shiftRows(int, int, int, boolean, boolean)} (~155 LOC)
- * plus a private {@code rowsMoved} helper and a private
- * {@code getLastNonBlankRow} scan. Public surface preserved: the orchestrator
- * is only called from the two public {@code shiftRows} overloads on
- * {@code Spreadsheet} which still exist as thin delegators.
+ * Called from the two public {@code shiftRows} overloads on
+ * {@code Spreadsheet}.
  *
  * <p>
  * The orchestrator carries no state of its own; it holds a {@link Spreadsheet}
  * reference for read/write into the host's many collaborator handles
  * ({@code valueManager}, {@code styler}, {@code sheetOverlayManager},
  * {@code selectionManager}, {@code viewportBounds},
- * {@code popupButtonRowShifter}, {@code invalidFormulaTracker}). The behavior
- * is preserved verbatim from the pre-extraction code path.
+ * {@code popupButtonRowShifter}, {@code invalidFormulaTracker}).
  */
 final class RowShiftOrchestrator implements Serializable {
 

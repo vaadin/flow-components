@@ -195,9 +195,6 @@ class RowData implements Serializable {
             case FORMULA -> cellFormula = cell.getCellFormula();
             case NUMERIC -> {
                 if (DateUtil.isCellDateFormatted(cell)) {
-                    // The duplicated null guard is preserved verbatim from
-                    // the pre-modernization code; modernizing the redundant
-                    // check is out of scope for this slice.
                     if (DateUtil.isCellDateFormatted(cell)) {
                         dateCellValue = cell.getDateCellValue();
                     }

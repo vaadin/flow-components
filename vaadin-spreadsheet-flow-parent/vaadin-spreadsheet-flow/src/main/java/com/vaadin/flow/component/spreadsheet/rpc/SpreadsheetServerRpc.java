@@ -11,19 +11,15 @@ package com.vaadin.flow.component.spreadsheet.rpc;
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetHandler;
 
 /**
- * Typed façade for client→server messages — NOT legacy Vaadin 8
- * {@code ServerRpc}. Despite the "Rpc" suffix (kept for historical continuity),
- * the runtime mechanism is a single {@code @DomEvent} carrying a {@code type}
- * string plus a {@code JsonNode} payload (see
- * {@code Spreadsheet.SpreadsheetEvent}). Server-side dispatch routes the event
- * to {@code SpreadsheetHandlerImpl} which implements this interface and
- * translates each typed method into its concrete server-side action.
+ * The messages the client sends to the server. Despite the "Rpc" suffix, kept
+ * for compatibility, each message arrives as a {@code @DomEvent} carrying a
+ * {@code type} string plus a {@code JsonNode} payload (see
+ * {@code Spreadsheet.SpreadsheetEvent}), and {@code SpreadsheetHandlerImpl},
+ * which implements this interface, carries out the action.
  *
  * <p>
- * The interface extends {@link SpreadsheetHandler} to share the grouping and
- * sheet-scroll methods declared there; the methods declared directly on this
- * interface are the context-menu / connector-init signals that don't have a
- * sibling on the GWT-side grouping handler.
+ * Most messages are declared in {@link SpreadsheetHandler}. The ones declared
+ * here are the connector initialization and the context menu.
  *
  * <p>
  * Subclass {@code SpreadsheetHandlerImpl} (not this interface directly) to

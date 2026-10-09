@@ -28,11 +28,11 @@ import org.apache.poi.util.LocaleUtil;
  * Locale-aware numeric / formula-bar formatting for cell values.
  *
  * <p>
- * Owns the four formatting fields previously held by {@link CellValueManager}:
- * the POI {@link DataFormatter} (locale-aware {@link CustomDataFormatter}), the
- * formula-bar high-precision decimal format, the locale decimal symbols, and
- * the scientific-notation {@link CellValueFormatter}. All four reset together
- * on a locale change, so they form one concern.
+ * Owns the formatting fields that depend on the locale: the POI
+ * {@link DataFormatter} (locale-aware {@link CustomDataFormatter}), the
+ * formula-bar high-precision decimal format and date format, the locale decimal
+ * symbols, and the scientific-notation {@link CellValueFormatter}. They all
+ * reset together on a locale change, so they form one concern.
  *
  * <p>
  * Methods cover the three formatting axes:
@@ -49,9 +49,9 @@ import org.apache.poi.util.LocaleUtil;
  * </ul>
  *
  * <p>
- * Used by {@link CellValueManager} (preserves its public API as thin
- * delegators) and by {@link CellFitCalculator} (which reads the embedded
- * {@link CellValueFormatter} for scientific-notation output).
+ * Used by {@link CellValueManager}, whose public methods delegate here, and by
+ * {@link CellDataBuilder}, which reads the embedded {@link CellValueFormatter}
+ * for scientific-notation output.
  */
 final class CellNumericFormatter implements Serializable {
 
@@ -106,10 +106,11 @@ final class CellNumericFormatter implements Serializable {
 
     /**
      * Formula-bar raw value for {@code cell}. Returns the formula source for
-     * {@code FORMULA} cells, an ISO-style date string for date-formatted
-     * numeric cells, the leading-quote-preserved string for {@code STRING}
-     * cells, the boolean's string form for {@code BOOLEAN}, the error text for
-     * {@code ERROR}, and {@code ""} for {@code BLANK} / unknown.
+     * {@code FORMULA} cells, a short date and time in the locale for
+     * date-formatted numeric cells, the leading-quote-preserved string for
+     * {@code STRING} cells, the boolean's string form for {@code BOOLEAN}, the
+     * numeric error code for {@code ERROR}, and {@code ""} for {@code BLANK} /
+     * unknown.
      */
     String getOriginalCellValue(Cell cell) {
         if (cell == null) {
@@ -163,10 +164,8 @@ final class CellNumericFormatter implements Serializable {
                     formulaCell.getNumericCellValue(), style.getDataFormat(),
                     style.getDataFormatString());
         }
-        // Preserve the pre-modernization behavior: pre-switch-expression
-        // code initialized `result = null` and returned null when no case
-        // matched. Without `default -> null` the new form would throw
-        // MatchException if POI ever adds a new CellType.
+        // null for a cell type POI may add in the future, rather than a
+        // MatchException.
         default -> null;
         };
     }

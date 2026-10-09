@@ -59,9 +59,8 @@ final class RuleEvaluator implements Serializable {
     private final Spreadsheet spreadsheet;
 
     /**
-     * The formatter whose overridable methods the rules are matched through, as
-     * the GWT-era formatter matched them itself: a subclass that overrides
-     * {@code matchesValue}, {@code matchesFormula} or
+     * The formatter whose overridable methods the rules are matched through: a
+     * subclass that overrides {@code matchesValue}, {@code matchesFormula} or
      * {@code getFormulaEvaluator} sees its override applied.
      */
     private final ConditionalFormatter formatter;

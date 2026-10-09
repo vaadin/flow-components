@@ -18,7 +18,7 @@ import java.util.HashSet;
  * <li>appends the button's element as a Flow virtual child of the spreadsheet
  * so its rendering can be addressed from the client;</li>
  * <li>invokes the client RPC {@code addPopupButton} / {@code removePopupButton}
- * so the GWT widget knows about the attached button.</li>
+ * so the web component knows about the attached button.</li>
  * </ul>
  *
  * <p>

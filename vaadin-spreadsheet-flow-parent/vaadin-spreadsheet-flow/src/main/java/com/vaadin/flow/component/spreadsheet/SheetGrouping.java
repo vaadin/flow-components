@@ -32,8 +32,7 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
  * <p>
  * Note: row-grouping data is mirrored without server-side caching — the setter
  * for it pushes directly to the element. Only the column-grouping data is
- * stored here; the asymmetry is preserved from the original
- * {@link Spreadsheet#setRowGroupingData} which never assigned to a field.
+ * stored here.
  */
 final class SheetGrouping implements Serializable {
 
@@ -60,8 +59,8 @@ final class SheetGrouping implements Serializable {
     }
 
     void setRowGroupingData(List<GroupingData> rowGroupingData) {
-        // Preserves the original asymmetry — row-grouping data goes straight
-        // to the element without server-side caching.
+        // Unlike the column data, row-grouping data goes straight to the
+        // element without server-side caching.
         spreadsheet.getElement().setProperty("rowGroupingData",
                 Serializer.serialize(rowGroupingData));
     }

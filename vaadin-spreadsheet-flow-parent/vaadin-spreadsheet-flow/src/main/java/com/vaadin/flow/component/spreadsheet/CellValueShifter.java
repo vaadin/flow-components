@@ -89,10 +89,7 @@ final class CellValueShifter implements Serializable {
         case NUMERIC -> shiftNumeric(shiftedCell, newCell, sequenceIncrement);
         case STRING -> shiftString(shiftedCell, newCell, sequenceIncrement);
         case BLANK -> newCell.setBlank();
-        // _NONE / future CellType values: no-op (was a default: break in the
-        // pre-modernization switch). Statement-form switch is non-exhaustive
-        // so omitting an explicit default is identical to the previous
-        // default branch.
+        // _NONE / future CellType values: no-op.
         default -> {
             // intentional no-op
         }

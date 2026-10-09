@@ -17,25 +17,10 @@ import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
  * the client once before the next response.
  *
  * <p>
- * Names the architectural pattern previously distributed across five fragments
- * on {@code Spreadsheet}:
- *
- * <ol>
- * <li>a {@code boolean reload} field — the pending-flag state</li>
- * <li>a private {@code setReload(boolean)} setter that mirrors a timestamp to
- * the client {@code reload} element property</li>
- * <li>the public {@code isRerenderPending()} read</li>
- * <li>an inline {@code beforeClientResponse} callback registration in
- * {@code reloadActiveSheetData}</li>
- * <li>a private {@code updateReloadState()} method that wires the callback's
- * flush logic, including a default for {@code initialSheetSelection}</li>
- * </ol>
- *
- * <p>
- * Now: {@link #isPending()} reads, {@link #markPending(Spreadsheet)} sets the
- * flag and schedules a {@link BeforeClientResponseAction}, and the
- * package-private {@link #flush(Spreadsheet)} method (which the action runs)
- * pushes the timestamp, clears the flag, and defaults
+ * {@link #isPending()} reads the flag, {@link #markPending(Spreadsheet)} sets
+ * it and schedules a {@link BeforeClientResponseAction}, and
+ * {@link #flush(Spreadsheet)}, which the action runs, pushes a timestamp to the
+ * client {@code reload} element property, clears the flag, and defaults
  * {@code initialSheetSelection} from the active sheet's selected-cells state
  * when not already set.
  *
@@ -51,8 +36,7 @@ import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
  * Multiple calls to {@link #markPending} between flushes coalesce: the flag is
  * just set to true each time, and the action runs at most once per client
  * round. Scheduled on the component, it also runs when the reload was asked for
- * without a current UI - from a background thread, say - which the
- * {@code UI.beforeClientResponse} callback it replaces never did.
+ * without a current UI, from a background thread, say.
  */
 final class ClientReloadFlag implements Serializable {
 

@@ -25,8 +25,7 @@ import org.apache.poi.ss.util.CellReference;
  * {@code getRows() - 1} / {@code getCols() - 1} directly. The 1-based int
  * overload clamps with {@code getRows()} / {@code getCols()} then subtracts one
  * when constructing the {@code CellRangeAddress}. The two paths arrive at the
- * same observable result, but the inner arithmetic differs and is pinned
- * verbatim — characterization tests cover both.
+ * same observable result, but the inner arithmetic differs.
  *
  * <p>
  * Holds a {@link Spreadsheet} reference for the {@code getRows()} /

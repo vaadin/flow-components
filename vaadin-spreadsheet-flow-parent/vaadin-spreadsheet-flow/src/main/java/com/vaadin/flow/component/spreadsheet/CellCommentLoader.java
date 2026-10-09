@@ -19,9 +19,8 @@ import java.util.HashSet;
  * pane via {@link CellCommentRangeScanner}.
  *
  * <p>
- * Owns the {@code topLeftCellCommentsLoaded} latch — the top-left frozen pane
- * is only re-scanned once per spreadsheet lifecycle, since frozen rows and
- * columns don't scroll out of view.
+ * Every pane is scanned on every load, the frozen top-left one included, as the
+ * maps are emptied first.
  */
 final class CellCommentLoader implements Serializable {
 

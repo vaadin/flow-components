@@ -20,11 +20,12 @@ import java.util.function.IntPredicate;
  * long as they are empty, and stops at the first one holding anything.
  *
  * <p>
- * The rules are the ones the GWT client applied in {@code Cell.updateOverflow}:
+ * The rules:
  *
  * <ul>
- * <li>A right-aligned cell stays inside its column. Excel runs those leftwards
- * instead; the GWT client never did, and this is a parity port.</li>
+ * <li>Text runs to the right whatever its alignment, so right-aligned text that
+ * runs on starts at its cell's left edge. Excel runs right-aligned text
+ * leftwards instead.</li>
  * <li>The text stops at the first column of the row that holds a value.</li>
  * <li>The text stops at the frozen/scrolling split. The two sides are drawn in
  * separate quadrants, so text crossing the split would be cut by the quadrant
@@ -35,8 +36,7 @@ import java.util.function.IntPredicate;
  * </ul>
  *
  * <p>
- * The GWT client measured the rendered text with {@code scrollWidth}. Here the
- * width is the estimate the server already makes from the per-style width
+ * The width is the estimate the server already makes from the per-style width
  * ratios the client reports, the same one {@link CellFitCalculator} uses to
  * decide whether a value fits at all — so a cell that reports as not fitting
  * cannot then be computed as having nothing to spill.
@@ -48,8 +48,8 @@ import java.util.function.IntPredicate;
  * runs past its column is judged to fit and stays clipped. Both halves read the
  * same estimate, so the sheet stays self-consistent — a value the server thinks
  * fits is neither shortened into scientific notation nor spilled — but it is
- * not the pixel-exact answer {@code scrollWidth} gave. Measuring per cell in
- * the browser is what that would cost.
+ * not pixel-exact. Measuring each cell's rendered text in the browser is what
+ * that would cost.
  */
 final class CellOverflowCalculator implements Serializable {
 
@@ -80,9 +80,8 @@ final class CellOverflowCalculator implements Serializable {
      */
     static int spillWidth(int columnIndex, int textWidth, int[] columnWidths,
             int horizontalSplitPosition, IntPredicate occupied) {
-        // Right-aligned text runs on to the right as well: the GWT client
-        // let a value too wide for its column overflow its cell whatever its
-        // alignment, and the text then starts at the cell's left edge.
+        // Text runs on to the right whatever its alignment; right-aligned
+        // text then starts at the cell's left edge.
         if (columnIndex < 0 || columnIndex >= columnWidths.length) {
             return 0;
         }

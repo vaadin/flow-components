@@ -9,10 +9,8 @@
 package com.vaadin.flow.component.spreadsheet.client;
 
 /**
- * Grouping-feature subset of the client→server signals from the GWT widget.
- * Split out from {@link SpreadsheetHandler} so the widget-side grouping code
- * can depend on the smaller interface without pulling in the full handler
- * surface.
+ * The grouping messages the client sends to the server.
+ * {@link SpreadsheetHandler} extends it with all the others.
  *
  * @since 23.1
  */

@@ -20,12 +20,6 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * current POI state. Called whenever a structural operation (row delete, sheet
  * load, etc.) may have changed the set of merged regions in POI without going
  * through {@link MergedRegionOperations}, leaving the cache out of date.
- *
- * <p>
- * Falls back to {@link MergedRegionOperations#addRegionToPoiAndCache} when the
- * rebuild detects a region in POI that has no corresponding entry in the cache
- * yet — that path re-applies the merge cascade so the new region's cells are
- * styled and marked correctly.
  */
 final class MergedRegionSynchronizer implements Serializable {
 

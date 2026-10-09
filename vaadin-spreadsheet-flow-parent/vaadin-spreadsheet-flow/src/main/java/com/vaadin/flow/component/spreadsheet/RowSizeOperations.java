@@ -22,13 +22,12 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
 
 /**
  * Sets row heights and row visibility on the active sheet. Owns the
- * entanglement between {@code height == 0} and "row is hidden" — a zero- height
+ * entanglement between {@code height == 0} and "row is hidden" — a zero-height
  * set hides the row, and explicitly hiding clears its height mirror.
  *
  * <p>
- * Public-API methods on {@link Spreadsheet} that touch row dimensions delegate
- * here (the public surface on Spreadsheet stays the same; the logic lives
- * here).
+ * The public methods on {@link Spreadsheet} that touch row dimensions delegate
+ * here.
  */
 final class RowSizeOperations implements Serializable {
 

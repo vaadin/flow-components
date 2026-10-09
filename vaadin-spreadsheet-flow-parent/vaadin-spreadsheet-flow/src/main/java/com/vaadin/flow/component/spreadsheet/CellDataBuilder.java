@@ -33,19 +33,8 @@ import com.vaadin.flow.component.spreadsheet.client.CellData;
  * indexes, column widths).
  *
  * <p>
- * One concern, one place. Pre-extraction this was a 148-LOC method inline on
- * {@code CellValueManager} plus an 11-LOC private
- * {@code handleIsDisplayZeroPreference} helper. The orchestrator preserves the
- * behavior verbatim and exposes one package-private entry point
- * ({@link #createCellDataForCell}).
- *
- * <p>
- * Called from two sites in the codebase:
- * {@code CellValueManager.loadCellDataForRowAndColumnRange} (internal) and
- * {@code ClientCacheFlusher.flush} (external, via a delegator on
- * {@code CellValueManager}). The delegator preserves the subclass extension
- * surface — the public {@code createCellDataForCell} on
- * {@code CellValueManager} remains as a {@code protected} delegating wrapper.
+ * Reached through {@code CellValueManager.createCellDataForCell}, which is
+ * {@code protected} so that a subclass can change what is sent for a cell.
  */
 final class CellDataBuilder implements Serializable {
 
@@ -150,11 +139,9 @@ final class CellDataBuilder implements Serializable {
                                         && !cell.getCellFormula()
                                                 .startsWith("HYPERLINK")))) {
                     if (!manager.doesValueFit(cell, formattedCellValue)) {
-                        // A number is shortened or hashed only in a style the
-                        // GWT client had CSS for, the only styles it measured;
-                        // in any other it was shown as it was. Text runs on
-                        // whatever its style: the GWT client measured that
-                        // itself, cell by cell.
+                        // A number is shortened or hashed only in a style that
+                        // has CSS on the client; in any other it is shown as
+                        // it is. Text runs on whatever its style.
                         boolean measuredForNumbers = manager.hasStyleCss(cell);
                         if (manager.numericFormatter
                                 .valueContainsOnlyNumbers(formattedCellValue)
@@ -191,8 +178,8 @@ final class CellDataBuilder implements Serializable {
                                 || SpreadsheetUtil.cellContainsDate(cell))
                         && !manager.doesValueFit(cell, formattedCellValue)) {
                     // A link's label, TRUE or FALSE, an error, a date: never
-                    // shortened or hashed the way a number is, and the GWT
-                    // client let them run on into the empty cells beside them.
+                    // shortened or hashed the way a number is, but run on
+                    // into the empty cells beside them like text.
                     valueOverflows = true;
                 }
 

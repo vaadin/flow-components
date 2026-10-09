@@ -2527,31 +2527,6 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Checks if the current column has a filter popup button and calculates
-     * extra width to accommodate when to include it in autofit.
-     *
-     * @param columnIndex
-     *            Index of the target column, 0 based
-     * @param autofitWidth
-     *            The autofit width without the button, in pixels
-     * @return Pixel width of the column
-     */
-
-    /**
-     * Called when number of rows has moved. Spreadsheet needs to update its
-     * internal state.
-     *
-     * Note: If n is negative it would mean the rows has moved up. Positive
-     * value indicates that new rows are moved below.
-     *
-     * @param first
-     *            the first row that has changed, 0-based
-     * @param last
-     *            the last row that has changed, 0-based
-     * @param n
-     *            the amount of lines that rows has been moved
-     */
-    /**
      * @return the common {@link FormulaEvaluator} instance.
      */
     public FormulaEvaluator getFormulaEvaluator() {
@@ -3468,15 +3443,10 @@ public class Spreadsheet extends Component
 
     /**
      * Loads the custom components for the currently viewed cells and clears
-     * previous components that are not currently visible.
-     *
-     * @param recreateEditors
-     *            {@code true} to recreate custom editors from the factory, used
-     *            when the application forces a refresh, changes the factory, or
-     *            the sheet changes; {@code false} to reuse the editor already
-     *            shown for a cell so its state survives the re-render, used
-     *            when the same cells stay visible (scrolling, selection,
-     *            resize).
+     * previous components that are not currently visible. A cell that already
+     * has a custom editor keeps it, so its state survives the re-render; see
+     * {@link #loadCustomComponentsRecreatingEditors()} to ask the factory for
+     * new ones.
      */
     void loadCustomComponents() {
         customComponentLoader.load(false);

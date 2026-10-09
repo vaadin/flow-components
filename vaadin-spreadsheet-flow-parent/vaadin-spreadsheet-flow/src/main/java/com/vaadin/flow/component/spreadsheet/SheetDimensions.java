@@ -22,10 +22,9 @@ import java.util.ArrayList;
  *
  * <p>
  * The data here is consumed by both {@code RowSizeOperations} /
- * {@code ColumnSizeOperations} (slice 8 helpers — the operations on row /
- * column geometry) and the client-rendering path; this class holds it as
- * single-source state so the operations and the renderer can't drift on what
- * the current row heights are.
+ * {@code ColumnSizeOperations} (the operations on row / column geometry) and
+ * the client-rendering path; this class holds it as single-source state so the
+ * operations and the renderer can't drift on what the current row heights are.
  */
 final class SheetDimensions implements Serializable {
 

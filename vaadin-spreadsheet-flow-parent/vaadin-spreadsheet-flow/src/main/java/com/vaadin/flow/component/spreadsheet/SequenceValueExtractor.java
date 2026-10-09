@@ -20,7 +20,8 @@ import org.apache.poi.ss.usermodel.Sheet;
  *
  * <p>
  * Pure POI reads — no {@link Spreadsheet} dependency, no mutations. Used by
- * {@link SequenceIncrement} to feed its arithmetic-sequence detection.
+ * {@link RangeSequenceDetector} to feed the arithmetic-sequence detection of
+ * {@link SequenceIncrement}.
  *
  * <p>
  * Indexing convention follows the rest of the spreadsheet code base: all row /

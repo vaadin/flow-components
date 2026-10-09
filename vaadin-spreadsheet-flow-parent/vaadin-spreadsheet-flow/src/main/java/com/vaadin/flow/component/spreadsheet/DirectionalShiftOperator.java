@@ -216,9 +216,8 @@ final class DirectionalShiftOperator implements Serializable {
 
     private void clearCellReversed(Cell newCell) {
         // Column variants: clear value first, then reset style, then notify.
-        // Preserved verbatim from the original CellSelectionShifter — the
-        // statement order differs between row-shift and column-shift paths
-        // and may matter for style-cache invalidation.
+        // The order differs from the row variant above, as it always has, and
+        // may matter for style-cache invalidation.
         newCell.setCellValue((String) null);
         spreadsheet.getCellValueManager().cellDeleted(newCell);
         newCell.setCellStyle(null);

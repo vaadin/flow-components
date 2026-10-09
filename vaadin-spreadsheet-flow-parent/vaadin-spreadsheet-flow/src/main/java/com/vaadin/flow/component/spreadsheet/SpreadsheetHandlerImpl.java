@@ -36,23 +36,19 @@ import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetServerRpc;
 
 /**
- * Default handler for client→server signals from the GWT-compiled Spreadsheet
- * widget. Implements the typed dispatch interface {@link SpreadsheetServerRpc}
- * — each method corresponds to one client-side action (cell selection, formula
- * edit, context menu, sheet scroll, etc.).
+ * Default handler for the messages the client sends to the server. Implements
+ * {@link SpreadsheetServerRpc}: each method corresponds to one user action
+ * (cell selection, formula edit, context menu, sheet scroll, etc.).
  *
  * <p>
- * The runtime wiring lives in {@code Spreadsheet}: a single
- * {@code @DomEvent("spreadsheet-event")} fires per client action, carrying a
- * {@code type} string + {@code JsonNode} payload; the
- * {@code SpreadsheetEventListener} dispatches the event to the matching method
- * on this class.
+ * The client sends one {@code @DomEvent("spreadsheet-event")} per action,
+ * carrying a {@code type} string and a {@code JsonNode} payload, and
+ * {@code SpreadsheetEventListener} calls the matching method on this class.
  *
  * <p>
- * Subclass to customize client-event handling; pass the subclass instance via
- * {@code Spreadsheet.setSpreadsheetHandler(...)} to replace the default. The
- * "RPC" in the parent interface name is a historical naming convention — there
- * is no legacy Vaadin 8 RPC machinery in the runtime path.
+ * Subclass to customize how client events are handled, and pass the subclass
+ * instance to {@code Spreadsheet.setSpreadsheetHandler(...)} to replace the
+ * default.
  *
  * @since 23.1
  */

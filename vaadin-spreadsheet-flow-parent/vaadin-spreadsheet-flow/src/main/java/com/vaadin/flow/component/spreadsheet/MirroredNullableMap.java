@@ -64,8 +64,7 @@ final class MirroredNullableMap<K, V> implements Serializable {
      * reference with {@code input}. Either way, pushes the serialized
      * {@code input} (which may be {@code null}) to the client element property
      * — the server-side cache and the client-side state can briefly diverge
-     * after a null call (server has empty map, client sees null); this matches
-     * the pre-refactor behavior of every call site that used this pattern.
+     * after a null call (server has empty map, client sees null).
      */
     void set(HashMap<K, V> input) {
         if (input == null) {

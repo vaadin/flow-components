@@ -35,8 +35,7 @@ import java.util.Set;
  * <p>
  * Note: {@code cellStyleToCSSStyle} is intentionally <em>not</em> here. That
  * field is {@code protected} on {@link Spreadsheet} and would break downstream
- * subclasses if moved — so it stays on the parent. The other six fields had
- * uniformly {@code private} visibility before this slice.
+ * subclasses if moved — so it stays on the parent.
  *
  * <p>
  * Every setter mirrors the value to the corresponding element property. Setters

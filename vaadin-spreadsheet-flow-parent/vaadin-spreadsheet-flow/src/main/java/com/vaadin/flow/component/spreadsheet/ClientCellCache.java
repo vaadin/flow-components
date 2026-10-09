@@ -66,10 +66,7 @@ final class ClientCellCache implements Serializable {
     /**
      * Drops {@code key} from whichever set holds it. Tries the plain-cell set
      * first; only falls through to the formula set if the plain set didn't have
-     * it. Matches the original idiom
-     * {@code if (!sentCells.remove(key)) sentFormulaCells.remove(key);} so
-     * callers can rely on the same ordering when both sets are empty by the
-     * end.
+     * it.
      */
     boolean dropSent(String key) {
         if (sentCells.remove(key)) {
@@ -82,9 +79,8 @@ final class ClientCellCache implements Serializable {
      * Removes every key in either set that ends with {@code "row" + r} for any
      * {@code r} in {@code [startRow, endRow]}, and returns one {@link CellData}
      * removal entry per pruned key (with {@code row} set to the matched row
-     * index and {@code col} extracted from the cell key). Iteration order is
-     * the {@code sentCells}-first, {@code sentFormulaCells}-second order from
-     * the original {@code updateDeletedRowsInClientCache}.
+     * index and {@code col} extracted from the cell key). Plain cells come
+     * before formula cells.
      */
     List<CellData> pruneRowsRange(int startRow, int endRow) {
         List<CellData> removals = new ArrayList<CellData>();

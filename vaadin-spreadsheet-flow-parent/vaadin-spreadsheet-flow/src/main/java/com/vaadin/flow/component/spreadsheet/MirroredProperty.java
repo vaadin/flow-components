@@ -18,16 +18,12 @@ import com.vaadin.flow.dom.Element;
  * property on every set.
  *
  * <p>
- * Encapsulates the repeated `this.x = x; getElement().setProperty(name, x)`
- * pattern that appears across many Vaadin-Flow components. The two-line "store
- * + mirror" idiom is a Phase-1 abstraction candidate per
- * `LEGACY_REFACTOR_PIPELINE.md` §10 Rule C.
+ * Encapsulates the repeated {@code this.x = x;
+ * getElement().setProperty(name, x)} pattern.
  *
  * <p>
- * Construction does <em>not</em> sync the initial value to the client — the
- * original code only mirrored on explicit setter calls, and the Flow framework
- * pushes initial state on its own schedule. Matching that timing is part of the
- * contract.
+ * Construction does <em>not</em> sync the initial value to the client: the
+ * value is mirrored only on explicit setter calls.
  *
  * <p>
  * The {@link #set(Object)} method is the primary surface. Read-back via

@@ -27,17 +27,16 @@ import java.util.regex.Pattern;
  *
  * <p>
  * Pure functions on the inputs — no POI access, no Spreadsheet dependency. Used
- * by {@link CellSelectionShifter} when extending a selection (Excel autofill
+ * by {@link RangeSequenceDetector} when a selection is extended (Excel autofill
  * semantics).
  */
 final class SequenceIncrement {
 
     /**
      * Trailing-digit pattern. Used by this class's string-sequence overload,
-     * and also by {@link CellSelectionShifter}'s {@code shiftString} when
-     * extending a string-with-digits sequence onto a new cell — same regex
-     * serves both detection (here) and application (there), so they cannot
-     * drift.
+     * and also by {@link CellValueShifter} when extending a string-with-digits
+     * sequence onto a new cell — same regex serves both detection (here) and
+     * application (there), so they cannot drift.
      */
     static final Pattern TRAILING_DIGITS_PATTERN = Pattern.compile("\\d+$");
 

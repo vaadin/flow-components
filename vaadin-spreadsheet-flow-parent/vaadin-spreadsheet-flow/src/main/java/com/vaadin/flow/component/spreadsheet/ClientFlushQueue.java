@@ -90,9 +90,8 @@ final class ClientFlushQueue implements Serializable {
 
     /**
      * Returns the changed-formula-cells set and resets the field to a fresh
-     * empty set (the original idiom replaced the field rather than calling
-     * {@code clear()}, presumably to let any listener iterate the returned set
-     * without concurrent modification).
+     * empty set, rather than clearing it, so a listener can iterate the
+     * returned set while new changes are recorded.
      */
     Set<CellReference> drainChangedFormulaCells() {
         Set<CellReference> snapshot = changedFormulaCells;
