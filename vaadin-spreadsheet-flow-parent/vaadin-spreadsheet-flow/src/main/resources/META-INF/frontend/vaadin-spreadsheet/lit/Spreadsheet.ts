@@ -19,7 +19,6 @@ import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
   addAuxRange,
   normalizedRange,
-  selectRange,
   selectSingleCell,
   type CellRange,
   type SelectionState
@@ -368,8 +367,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private extendRow = 1;
 
   /** Row / column geometry. */
-  private rowHeights: Float32Array | number[] = [];
-  private colWidths: Int32Array | number[] = [];
+  private rowHeights: NumberList = [];
+  private colWidths: NumberList = [];
   private defRowHeight = 15; // points
   private defColWidth = 64; // pixels
 
@@ -405,8 +404,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Buffer + scroll state. */
   private rowBufferSize = 200;
   private columnBufferSize = 200;
-  private verticalScrollPositions: number[] = [];
-  private horizontalScrollPositions: number[] = [];
 
   /** Misc. */
   private sheetProtected = false;
@@ -446,16 +443,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Display flags. */
   private displayGridlines = true;
-  private displayRowColHeadings = true;
   private lockFormatColumns = false;
   private lockFormatRows = false;
   private hasActions = false;
-  private workbookChangeToggle = false;
 
   /** Display content. The status label, or null while there is none. */
   private infoLabelValue: string | null = null;
-  private elementId = '';
-  private elementClass = '';
 
   /**
    * Cells currently known to the client, keyed by
@@ -4334,11 +4327,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // (slice 154).
     this.syncSheetTabs();
   }
-  setVerticalScrollPositions(positions: number[]): void {
-    this.verticalScrollPositions = coerceArray(positions);
+  /**
+   * Where each sheet was last scrolled to, as the server keeps it. Not
+   * applied: returning to a sheet does not scroll back to where it was,
+   * here or in the GWT client.
+   */
+  setVerticalScrollPositions(_positions: number[]): void {
+    // See above.
   }
-  setHorizontalScrollPositions(positions: number[]): void {
-    this.horizontalScrollPositions = coerceArray(positions);
+  /** See {@link setVerticalScrollPositions}. */
+  setHorizontalScrollPositions(_positions: number[]): void {
+    // See setVerticalScrollPositions.
   }
   setCellStyleToCSSStyle(map: Record<number, string>): void {
     this.cellStyleToCSSStyle = coerceObject(map);
@@ -4628,7 +4627,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scheduleRender();
   }
   setDisplayRowColHeadings(visible: boolean): void {
-    this.displayRowColHeadings = visible;
     // The server sends only this boolean, never the strips' sizes: shown,
     // they get their default sizes back; hidden, they collapse.
     if (visible) {
@@ -4653,8 +4651,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setHasActions(hasActions: boolean): void {
     this.hasActions = hasActions;
   }
-  setWorkbookChangeToggle(toggle: boolean): void {
-    this.workbookChangeToggle = toggle;
+  /**
+   * The server flips this on loading another workbook. The change alone is
+   * the point: the property batch it comes in is drawn, as every batch is.
+   */
+  setWorkbookChangeToggle(_toggle: boolean): void {
+    // See above.
   }
 
   // Display content
@@ -4670,11 +4672,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setHyperlinksTooltips(tooltips: Record<string, string>): void {
     this.hyperlinksTooltips = coerceObject(tooltips);
   }
-  setId(id: string): void {
-    this.elementId = id;
-  }
-  setClass(className: string): void {
-    this.elementClass = className;
+  /**
+   * The id the server gives the element. The element's own id property
+   * applies it: Lit wraps the native one.
+   */
+  setId(_id: string): void {
+    // See above.
   }
 
   // ====================================================================
@@ -4941,7 +4944,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * renderer already positions, keyed by their cell.
    */
   addPopupButton(rawState: PopupButtonState | string): void {
-    const state = coerceObject<unknown>(rawState) as unknown as PopupButtonState;
+    const state = coerceJson(rawState);
     if (state === null || typeof state.col !== 'number') {
       return;
     }
@@ -4958,7 +4961,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * button and told the server it had.
    */
   removePopupButton(rawState: PopupButtonState | string): void {
-    const state = coerceObject<unknown>(rawState) as unknown as PopupButtonState;
+    const state = coerceJson(rawState);
     if (state === null || typeof state.col !== 'number') {
       return;
     }
@@ -5581,6 +5584,25 @@ export function coerceArray<T>(value: T[] | string | null | undefined): T[] {
 }
 
 /**
+ * One object the server sends, as it is or as the JSON string Flow may send
+ * it as; null for anything else.
+ */
+function coerceJson<T extends object>(value: T | string | null | undefined): T | null {
+  if (value == null) {
+    return null;
+  }
+  if (typeof value !== 'string') {
+    return value;
+  }
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return parsed !== null && typeof parsed === 'object' ? (parsed as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Object-shaped variant of {@link coerceArray}. The same JSON-string-
  * coming-from-Flow-attribute path applies to record/map setters.
  * Slice 179.
@@ -5600,14 +5622,15 @@ export function coerceObject<V>(value: Record<string, V> | string | null | undef
   return value;
 }
 
+/** The sizes the server sends: a plain array, or a typed one. */
+type NumberList = number[] | Int32Array | Float32Array;
+
 /**
  * Numeric-array variant. Typed arrays (Int32Array, Float32Array)
  * arrive intact when pushed via Flow's typed-array support; JSON
  * strings get parsed. Slice 179.
  */
-export function coerceNumberArray(
-  value: number[] | Int32Array | Float32Array | string | null | undefined
-): number[] | Int32Array | Float32Array {
+export function coerceNumberArray(value: NumberList | string | null | undefined): NumberList {
   if (value == null) {
     return [];
   }
@@ -5761,7 +5784,7 @@ export function computeMergedRegionBoxes(
  */
 export function computePositionedColGroupings(
   groupings: ReadonlyArray<GroupingData>,
-  colWidths: ReadonlyArray<number>,
+  colWidths: ArrayLike<number>,
   inversed: boolean,
   defColWidthPx: number,
   startPaddingPx = 0,

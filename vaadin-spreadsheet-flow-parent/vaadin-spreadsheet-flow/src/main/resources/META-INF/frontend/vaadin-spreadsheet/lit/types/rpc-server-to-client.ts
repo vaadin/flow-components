@@ -163,7 +163,6 @@ export interface SpreadsheetClientApi {
   setInfoLabelValue(label: string): void;
   setHyperlinksTooltips(tooltips: Record<string, string>): void;
   setId(id: string): void;
-  setClass(className: string): void;
 
   // ====================================================================
   // Popup-button lifecycle

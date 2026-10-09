@@ -8,7 +8,6 @@
  */
 
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import type { DirectiveResult } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { isFormula } from '../algorithms/FormulaPointing.js';
 
@@ -1538,8 +1537,7 @@ export class SpreadsheetCellGrid extends LitElement {
   };
 
   render(): TemplateResult {
-    const { viewport, mergedRegions, verticalSplitPosition, horizontalSplitPosition, scrollLeft, scrollTop } =
-      this.renderState;
+    const { viewport, verticalSplitPosition, horizontalSplitPosition, scrollLeft, scrollTop } = this.renderState;
 
     if (viewport.lastColumnIndex < viewport.firstColumnIndex || viewport.lastRowIndex < viewport.firstRowIndex) {
       // Empty viewport — render an empty host. (The connector
@@ -1839,7 +1837,7 @@ export function drawnRanges(state: CellGridRenderState): Array<{ c1: number; c2:
  * closures — different quadrants use different position arrays
  * (frozen arrays vs main arrays).
  */
-function renderQuadrant(opts: QuadrantRenderOpts): DirectiveResult {
+function renderQuadrant(opts: QuadrantRenderOpts): unknown {
   const { state, quadrantName, colStart, colEnd, rowStart, rowEnd, getColLeft, getColWidth, getRowTop, getRowHeight } =
     opts;
   const { cellData, selection } = state;
@@ -2983,7 +2981,7 @@ function buildCellEditorOverlay(
  * so every image re-downloads and flickers even though nothing about it
  * changed. Keyed, Lit moves the existing elements instead.
  */
-function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRenderOpts['quadrantName']): DirectiveResult {
+function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRenderOpts['quadrantName']): unknown {
   // Defensive default — some older test fixtures may not
   // declare the overlays array yet (slice 160 introduced it).
   // Real connector pushes always populate the field.

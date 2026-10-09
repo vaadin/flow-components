@@ -54,8 +54,6 @@ export class VaadinSpreadsheet extends LitElement {
 
       id: { type: String },
 
-      class: { type: String },
-
       resources: { type: String },
 
       popupbuttons: { type: String },

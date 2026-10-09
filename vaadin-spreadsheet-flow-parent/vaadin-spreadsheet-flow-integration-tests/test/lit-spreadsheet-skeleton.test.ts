@@ -187,7 +187,6 @@ describe('Spreadsheet skeleton — freeze + display state (slice 126)', () => {
         expect(() => sheet.setHyperlinksTooltips({ 'col1 row1': 'see http://...' }))
             .to.not.throw();
         expect(() => sheet.setId('spreadsheet-1')).to.not.throw();
-        expect(() => sheet.setClass('spreadsheet themed')).to.not.throw();
     });
 });
 
