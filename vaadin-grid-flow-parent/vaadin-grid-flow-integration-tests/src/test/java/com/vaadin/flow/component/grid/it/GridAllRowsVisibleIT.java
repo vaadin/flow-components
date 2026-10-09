@@ -23,8 +23,8 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid-it-demo/all-rows-visible")
-public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
+@TestPath("vaadin-grid/all-rows-visible")
+public class GridAllRowsVisibleIT extends AbstractComponentIT {
 
     private GridElement grid;
 
@@ -32,14 +32,13 @@ public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
     public void init() {
         open();
         grid = $(GridElement.class).id("grid-all-rows-visible");
-        scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() == 50);
     }
 
     @Test
-    public void allRowsVisible_allRowsAreFetched() {
-        Assert.assertTrue("Grid should have allRowsVisible set to true",
-                grid.getPropertyBoolean("allRowsVisible"));
+    public void allRowsVisible_allRowsRendered() {
+        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
+        Assert.assertEquals(49, grid.getLastVisibleRowIndex());
     }
 
     @Test
