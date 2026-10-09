@@ -10,14 +10,9 @@ name: Flow Components PR Snapshot
 # builds of the other Vaadin repositories derive theirs, so that a Flow
 # Components snapshot and a Flow snapshot built from branches with the same name
 # carry the same version qualifier and can be imported as a pair.
-#
-# A `web-components-preview: <sha>` line in the pull request description builds
-# the snapshot against the pkg.pr.new preview of that vaadin/web-components
-# commit instead of the released web components. Editing the description
-# rebuilds the snapshot.
 on:
   pull_request:
-    types: [labeled, synchronize, edited]
+    types: [labeled, synchronize]
     # Deliberately unfiltered by base branch: a snapshot is as useful for a
     # pull request against a maintenance branch as for one against main. That
     # branch has to carry its own copy of this file for its pull requests, like
@@ -62,14 +57,12 @@ jobs:
     # be triggered from the outside. Fork pull requests are skipped entirely -
     # labeling one does nothing.
     #
-    # The label has to be present for all event types, a `labeled` event for
-    # some other label must not start a build of its own, and neither must an
-    # edit that leaves the description as it was.
+    # The label has to be present for both event types, and a `labeled` event
+    # for some other label must not start a build of its own.
     if: >-
       !github.event.pull_request.head.repo.fork
       && contains(github.event.pull_request.labels.*.name, 'snapshot build')
       && (github.event.action != 'labeled' || github.event.label.name == 'snapshot build')
-      && (github.event.action != 'edited' || github.event.changes.body != null)
     steps:
       - name: Check configuration
         # The address is a variable and the credentials are secrets, but an
@@ -156,34 +149,6 @@ jobs:
           mvn -q -B -ntp org.codehaus.mojo:versions-maven-plugin:2.22.0:set \
             -DnewVersion="$VERSION" -DprocessAllModules=true -DgenerateBackupPoms=false
 
-      - name: Use a web components preview
-        id: preview
-        # The sha has to be the full commit hash: the preview URLs carry it, and
-        # the annotations have to match them exactly, or npm installs a second
-        # copy of a package. The rewrite stays in this throwaway checkout.
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          set -o pipefail
-          sha=$(printf '%s' "$PR_BODY" | tr -d '\r' \
-            | sed -nE 's/^[[:space:]]*web-components-preview:[[:space:]]*([^[:space:]]*)[[:space:]]*$/\1/p' | head -1)
-          if [ -z "$sha" ]; then
-            exit 0
-          fi
-          if ! [[ "$sha" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "🚫 \`web-components-preview: $sha\` is not a full 40 character commit hash" \
-              | tee -a $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-          url="https://pkg.pr.new/vaadin/web-components/@vaadin/component-base@$sha"
-          if ! curl -sfL -o /dev/null "$url"; then
-            echo "🚫 No web components preview found at $url. Add the \`preview\` label to the web components pull request and wait for its build." \
-              | tee -a $GITHUB_STEP_SUMMARY
-            exit 1
-          fi
-          node scripts/useWebComponentsPreview.js "$sha" | tee -a $GITHUB_STEP_SUMMARY
-          echo "sha=$sha" >> $GITHUB_OUTPUT
-
       - name: Build and deploy the snapshot
         id: deploy
         env:
@@ -234,14 +199,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
           DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
-          PREVIEW_SHA: ${{ steps.preview.outputs.sha }}
         run: |
           marker='<!-- flow-components-pr-snapshot -->'
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          preview_line=''
-          if [ -n "$PREVIEW_SHA" ]; then
-            preview_line="Uses the web components preview of vaadin/web-components@${PREVIEW_SHA:0:7} instead of the released web components."
-          fi
           # The heredocs are written at the indentation of this block rather
           # than of the branch they sit in, because their content is the
           # comment body verbatim, delimiter included.
@@ -251,8 +211,6 @@ jobs:
           ### 📦 Snapshot published
 
           \`$VERSION\` — built from ${_HEAD_SHA:0:7} ([run]($run_url)).
-
-          $preview_line
 
           Built without running tests. Look at the checks on this pull request before relying on it.
 

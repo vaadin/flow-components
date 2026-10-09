@@ -38,16 +38,16 @@ A snapshot can use a [pkg.pr.new](https://pkg.pr.new) preview build of
 vaadin/web-components instead of the released web components. The `preview`
 label on a web components pull request publishes such a build.
 
-To use it, add this line to the pull request description:
+To use it, commit the preview URLs on the branch:
 
 ```
-web-components-preview: <full commit sha of the web components pull request>
+node scripts/useWebComponentsPreview.js <full commit sha of the web components pull request>
+git commit -am "chore: use web components preview"
 ```
 
-- The workflow runs `scripts/useWebComponentsPreview.js` in its checkout. Nothing is committed.
 - The script points every web component `@NpmPackage` annotation at the preview URL of that commit.
-- The workflow fails early when the description names a short hash or a commit without a preview.
-- An edit of the description rebuilds the snapshot.
+- The tests of the branch and the published snapshot then use the same preview.
+- Do not merge a branch with preview URLs. Revert the commit first.
 - Flow drops URL versions from the versions files it pins. React mode installs `@vaadin/react-components` from those files, so it is not supported yet.
 - An existing application keeps the `@vaadin/*` versions in its `package.json`. Remove them before the first run with a preview.
 

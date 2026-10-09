@@ -2,8 +2,9 @@
 
 /**
  * Points the `@NpmPackage` annotations of the web components at a pkg.pr.new
- * preview build of vaadin/web-components, so that a snapshot built from the
- * rewritten sources installs the web components of that commit.
+ * preview build of vaadin/web-components. Committed on a branch, the change
+ * makes its tests and its `snapshot build` snapshot use the web components of
+ * that commit.
  *
  * A web component package is a `@vaadin/` package declared at the version of
  * `@vaadin/component-base`. Other npm packages, such as `date-fns`, are left
@@ -13,7 +14,8 @@
  * between its own packages, with the full commit hash. Any other form makes
  * npm install a second copy of a package.
  *
- * The rewrite is meant for a throwaway CI checkout and is never committed.
+ * A branch with preview URLs must not be merged. Revert the commit to return
+ * to released versions: `updateNpmVer.js` only reads numeric versions.
  *
  * Usage:
  *   node scripts/useWebComponentsPreview.js <web-components-commit-sha>
