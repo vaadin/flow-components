@@ -89,7 +89,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 6.0.1
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/charts", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/charts@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/charts", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/charts@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 

@@ -48,7 +48,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/crud", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/crud@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/crud", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/crud@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {

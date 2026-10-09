@@ -32,8 +32,8 @@ import com.vaadin.flow.theme.AbstractTheme;
  *
  * @since 1.0
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vaadin-themable-mixin@27f913046dfdd3a818a368f93858583870d96e40")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vaadin-lumo-styles@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vaadin-themable-mixin@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vaadin-lumo-styles@275762dfe309017d7928b26395bafb73226e28fd")
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class Lumo implements AbstractTheme {
 

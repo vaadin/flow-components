@@ -36,7 +36,7 @@ import com.vaadin.flow.component.icon.IconFactory;
  * @author Vaadin Ltd
  * @since 23.2
  */
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vaadin-lumo-styles@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vaadin-lumo-styles@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
 public enum LumoIcon implements IconFactory {
 

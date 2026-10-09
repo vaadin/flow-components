@@ -64,7 +64,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/confirm-dialog@27f913046dfdd3a818a368f93858583870d96e40")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/confirm-dialog@275762dfe309017d7928b26395bafb73226e28fd")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @ModalRoot
 public class ConfirmDialog extends Component
