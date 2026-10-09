@@ -12,7 +12,7 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
- * Slice 183 — server-pushed updates must repaint.
+ * Server-pushed updates must repaint.
  *
  * Before this slice the four `update*CellValues` methods stored cell
  * data and never painted, `cellsUpdated` did nothing at all, and

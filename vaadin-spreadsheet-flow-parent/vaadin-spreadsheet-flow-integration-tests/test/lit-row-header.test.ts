@@ -17,9 +17,9 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetRowHeader.js';
 
 /**
- * Slice 144 — row header strip.
+ * Row header strip.
  *
- * Mirrors the column-header tests (slice 143). Pins the wire-format
+ * Mirrors the column-header tests. Pins the wire-format
  * contract of the row-header element: one
  * {@code .row-header-cell .row<N>} per visible row with the row's
  * 1-based number inside.
@@ -282,7 +282,7 @@ describe('SpreadsheetRowHeader — render with header active', () => {
     });
 });
 
-describe('SpreadsheetRowHeader — click delegation (slice 148)', () => {
+describe('SpreadsheetRowHeader — click delegation', () => {
     it('puts data-row on each rendered header cell', async () => {
         const el = await attachWithState(
             buildState({

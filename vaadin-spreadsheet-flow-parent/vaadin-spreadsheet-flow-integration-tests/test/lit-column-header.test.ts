@@ -16,7 +16,7 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetColumnHeader.js';
 
 /**
- * Slice 143 — column header strip.
+ * Column header strip.
  *
  * Pins the wire-format contract of the column-header element: one
  * {@code .col-header-cell} per visible column with the column letter
@@ -310,7 +310,7 @@ describe('SpreadsheetColumnHeader — render with header active', () => {
     });
 });
 
-describe('SpreadsheetColumnHeader — click delegation (slice 148)', () => {
+describe('SpreadsheetColumnHeader — click delegation', () => {
     it('puts data-col on each rendered header cell', async () => {
         const el = await attachWithState(
             buildState({

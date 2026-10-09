@@ -10,12 +10,10 @@
 /**
  * Pure-state model for the spreadsheet's cell selection.
  *
- * The GWT side scattered selection state across `SheetWidget` (read
- * accessors) and `SelectionHandler` (mutation methods) — slice 116's
- * survey identified subsystem C (selection, 2,600 LOC) as the third-
- * largest piece. This TS module pulls the STATE part out into a typed,
- * immutable-ish shape so the Lit renderer and the keyboard navigator
- * (coming in Phase 3.2 cont.) work against an explicit contract.
+ * The GWT client scattered selection state across `SheetWidget` (read
+ * accessors) and `SelectionHandler` (mutation methods). This module keeps
+ * the state in one typed, immutable-ish shape that the renderer and the
+ * keyboard handling share.
  *
  * Coordinates are **1-based** throughout, matching the rest of the
  * spreadsheet API. Anchors and ranges follow Excel conventions.

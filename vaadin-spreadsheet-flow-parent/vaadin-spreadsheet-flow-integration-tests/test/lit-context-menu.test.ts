@@ -13,7 +13,7 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import type { SpreadsheetActionDetails } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
- * Slice 191 — the right-click context menu.
+ * The right-click context menu.
  *
  * `showActions` was a no-op, so right-clicking dispatched the open event to
  * the server, the server answered with the actions it offers, and nothing

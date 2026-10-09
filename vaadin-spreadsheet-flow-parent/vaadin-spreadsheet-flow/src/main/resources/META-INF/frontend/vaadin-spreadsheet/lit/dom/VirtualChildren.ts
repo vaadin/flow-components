@@ -256,6 +256,16 @@ interface PlacedChild {
 }
 
 /**
+ * A plain named slot. Use when the slot sits in the same shadow root as the
+ * component's light host, so one boundary is all it has to cross.
+ */
+export function namedSlot(name: string): HTMLSlotElement {
+  const slot = document.createElement('slot');
+  slot.setAttribute('name', name);
+  return slot;
+}
+
+/**
  * A {@code <slot>} that passes a component through a second shadow
  * boundary.
  *
@@ -266,16 +276,6 @@ interface PlacedChild {
  * component up by name, and is itself assigned — under the same name — to
  * the slot the cell renders.
  */
-/**
- * A plain named slot. Use when the slot sits in the same shadow root as the
- * component's light host, so one boundary is all it has to cross.
- */
-export function namedSlot(name: string): HTMLSlotElement {
-  const slot = document.createElement('slot');
-  slot.setAttribute('name', name);
-  return slot;
-}
-
 function forwarderFor(name: string): HTMLSlotElement {
   const forwarder = document.createElement('slot');
   forwarder.setAttribute('name', name);

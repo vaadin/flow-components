@@ -23,7 +23,7 @@ import { SpreadsheetCellGrid } from '../../vaadin-spreadsheet-flow/src/main/reso
 import { emptyCellGridRenderState } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/types.js';
 
 /**
- * Slice 160 — sheet overlay rendering.
+ * Sheet overlay rendering.
  *
  * Pure tests for `computePositionedOverlays` (the position math
  * helper) + integration tests for setOverlays / setResources
@@ -176,7 +176,7 @@ describe('computePositionedOverlays — anchor positioning', () => {
     });
 });
 
-describe('computePositionedPopupButtons (slice 161)', () => {
+describe('computePositionedPopupButtons', () => {
     const uniformWidth = (_c: number) => 50;
     const uniformHeight = (_r: number) => 20;
 
@@ -487,7 +487,7 @@ describe('Spreadsheet — component overlays', () => {
     });
 });
 
-describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => {
+describe('Spreadsheet — setResources + setOverlays wiring', () => {
     function attachSheet(width: number, height: number): {
         host: HTMLElement;
         sheet: Spreadsheet;
@@ -707,7 +707,7 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup();
     });
 
-    it('a popup button tells the server it was clicked (slice 161)', async () => {
+    it('a popup button tells the server it was clicked', async () => {
         const { host, sheet, cleanup } = attachSheet(400, 300);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -742,7 +742,7 @@ describe('Spreadsheet — setResources + setOverlays wiring (slice 160)', () => 
         cleanup();
     });
 
-    it('active popup button gets .active class (slice 161)', async () => {
+    it('active popup button gets .active class', async () => {
         const { sheet, cleanup } = attachSheet(400, 300);
         sheet.setRows(5);
         sheet.setCols(5);

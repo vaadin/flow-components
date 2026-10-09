@@ -10,8 +10,8 @@
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 
 /**
- * Input state for the {@link SpreadsheetSheetTabs} element
- * (slice 154). The connector builds + pushes this whenever
+ * Input state for the {@link SpreadsheetSheetTabs} element.
+ * The connector builds + pushes this whenever
  * {@code setSheetNames} or {@code setSheetIndex} changes the
  * sheet list / active sheet.
  */
@@ -69,7 +69,7 @@ function tabWidth(tab: HTMLElement): number {
 }
 
 /**
- * Sheet-tab strip element (slice 154). Renders one tab per sheet
+ * Sheet-tab strip element. Renders one tab per sheet
  * name from {@link SheetTabsRenderState.sheetNames}, highlights
  * the tab at {@link SheetTabsRenderState.activeIndex}. Clicking
  * a tab dispatches a {@code sheet-tab-click} custom event with
@@ -79,7 +79,7 @@ function tabWidth(tab: HTMLElement): number {
  * Renders empty when {@code sheetNames} is empty.
  *
  * Same no-decorator pattern as the cell-grid + column-header
- * sub-elements (slice 132+).
+ * sub-elements.
  */
 export class SpreadsheetSheetTabs extends LitElement {
   /**
@@ -378,7 +378,7 @@ export class SpreadsheetSheetTabs extends LitElement {
 
   /**
    * Wire shadow-root-level click delegation on first render —
-   * same pattern as the cell-grid + headers (slices 146+148).
+   * same pattern as the cell-grid + headers.
    * Each click that lands on a {@code .sheet-tab} dispatches
    * {@code sheet-tab-click} with the clicked index.
    */
@@ -580,7 +580,7 @@ export class SpreadsheetSheetTabs extends LitElement {
       const oneBasedIndex = i + 1;
       const isActive = oneBasedIndex === activeIndex;
       const className = isActive ? 'sheet-tab active' : 'sheet-tab';
-      // Slice 173: `part="tab"` is the documented public
+      // `part="tab"` is the documented public
       // styling part for sheet tabs; the active tab also
       // carries `tab-selected` so
       // `vaadin-spreadsheet::part(tab-selected)` works.

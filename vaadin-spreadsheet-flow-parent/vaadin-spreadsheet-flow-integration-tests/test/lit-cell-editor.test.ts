@@ -18,15 +18,15 @@ import {
 import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
- * Slice 152 — cell editor.
+ * Cell editor.
  *
  * Tests the in-place cell editor across two layers:
  *  (1) cell-grid element: render the input when editor state is
- *      set, dispatch cell-doubleclick, dispatch cell-editor-commit
+ * set, dispatch cell-doubleclick, dispatch cell-editor-commit
  *      / cell-editor-cancel from input keydown.
  *  (2) connector: double-click triggers editor activation,
- *      commit dispatches cellValueEdited spreadsheet-event,
- *      cancel clears editor state.
+ * commit dispatches cellValueEdited spreadsheet-event,
+ * cancel clears editor state.
  */
 
 async function attachCellGridWithState(
@@ -206,7 +206,7 @@ describe('Spreadsheet cell editor — the value it opens with', () => {
   });
 });
 
-describe('SpreadsheetCellGrid — cell editor render (slice 152)', () => {
+describe('SpreadsheetCellGrid — cell editor render', () => {
     it('renders nothing when editor state is null', async () => {
         const empty = emptyCellGridRenderState();
         const el = await attachCellGridWithState(empty);
@@ -702,7 +702,7 @@ describe('SpreadsheetCellGrid — the editor looks like the cell it edits', () =
     }
 });
 
-describe('SpreadsheetCellGrid — double-click delegation (slice 152)', () => {
+describe('SpreadsheetCellGrid — double-click delegation', () => {
     it('dispatches cell-doubleclick on a cell dblclick with the coord', async () => {
         const empty = emptyCellGridRenderState();
         // Build a state with cells visible.
@@ -756,7 +756,7 @@ describe('SpreadsheetCellGrid — double-click delegation (slice 152)', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — editor input keydown (slice 152)', () => {
+describe('SpreadsheetCellGrid — editor input keydown', () => {
     it('Enter dispatches cell-editor-commit with the input value', async () => {
         const el = await attachCellGridWithState(
             buildEditorState({ col: 2, row: 2, initialValue: 'old' })
@@ -784,7 +784,7 @@ describe('SpreadsheetCellGrid — editor input keydown (slice 152)', () => {
         expect(received!.col).to.equal(2);
         expect(received!.row).to.equal(2);
         expect(received!.value).to.equal('new value');
-        // Slice 158: key+shift are also in the detail so the
+        // Key+shift are also in the detail so the
         // connector can pick the next active-cell direction.
         expect(received!.key).to.equal('Enter');
         expect(received!.shiftKey).to.equal(false);
@@ -857,7 +857,7 @@ describe('SpreadsheetCellGrid — editor input keydown (slice 152)', () => {
     });
 });
 
-describe('Spreadsheet — cell editor lifecycle through the connector (slice 152)', () => {
+describe('Spreadsheet — cell editor lifecycle through the connector', () => {
     it('cell-doubleclick activates the editor at the dbl-clicked cell', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
@@ -966,7 +966,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('F2 opens the editor at the active cell with the cell value (slice 153)', () => {
+    it('F2 opens the editor at the active cell with the cell value', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -998,7 +998,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('F2 is a no-op when the editor is already open (slice 153)', () => {
+    it('F2 is a no-op when the editor is already open', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1027,7 +1027,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('type-to-edit: a printable key opens the editor with that char as initial value (slice 153)', () => {
+    it('type-to-edit: a printable key opens the editor with that char as initial value', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1086,7 +1086,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('type-to-edit ignores keys with Ctrl/Meta modifiers (slice 153)', () => {
+    it('type-to-edit ignores keys with Ctrl/Meta modifiers', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1114,7 +1114,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('type-to-edit is a no-op when editor is already open (slice 153)', () => {
+    it('type-to-edit is a no-op when editor is already open', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1149,7 +1149,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('type-to-edit does not fire for navigation keys (slice 153)', () => {
+    it('type-to-edit does not fire for navigation keys', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1171,7 +1171,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('Enter commit moves the active cell DOWN by 1 (slice 158)', () => {
+    it('Enter commit moves the active cell DOWN by 1', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1195,7 +1195,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('Shift+Enter commit moves the active cell UP by 1 (slice 158)', () => {
+    it('Shift+Enter commit moves the active cell UP by 1', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1215,7 +1215,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('Tab commit moves the active cell RIGHT by 1 (slice 158)', () => {
+    it('Tab commit moves the active cell RIGHT by 1', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1235,7 +1235,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('Shift+Tab commit moves the active cell LEFT by 1 (slice 158)', () => {
+    it('Shift+Tab commit moves the active cell LEFT by 1', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1255,7 +1255,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('blur commit (no key) leaves the active cell unchanged (slice 158)', () => {
+    it('blur commit (no key) leaves the active cell unchanged', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1283,7 +1283,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('Enter commit at last row stays at last row (clamped) (slice 158)', () => {
+    it('Enter commit at last row stays at last row (clamped)', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(3);
         sheet.setCols(3);
@@ -1310,7 +1310,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('double-click does NOT open editor on a locked cell when sheet is protected (slice 183)', () => {
+    it('double-click does NOT open editor on a locked cell when sheet is protected', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1333,7 +1333,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('double-click opens editor on a locked cell when sheet is NOT protected (slice 183)', () => {
+    it('double-click opens editor on a locked cell when sheet is NOT protected', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1356,7 +1356,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('double-click opens editor on an unlocked cell when sheet IS protected (slice 183)', () => {
+    it('double-click opens editor on an unlocked cell when sheet IS protected', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1379,7 +1379,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('F2 does NOT open editor on a locked cell when sheet is protected (slice 183)', () => {
+    it('F2 does NOT open editor on a locked cell when sheet is protected', () => {
         const { host, sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1397,7 +1397,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector (slice 152
         cleanup();
     });
 
-    it('type-to-edit does NOT open editor on a locked cell when sheet is protected (slice 183)', () => {
+    it('type-to-edit does NOT open editor on a locked cell when sheet is protected', () => {
         const { host, sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);

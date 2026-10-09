@@ -173,9 +173,7 @@ const DEFAULT_HEADER_COLUMN_WIDTH = 50;
  */
 export class Spreadsheet implements SpreadsheetClientApi {
   // ====================================================================
-  // Internal state — placeholder fields. The real Phase 3.2+ class
-  // will replace these with subsystem-specific managers (cell grid,
-  // virtual scroller, selection state, etc.).
+  // Internal state
   // ====================================================================
 
   /**
@@ -183,14 +181,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * wrapper `<vaadin-spreadsheet>` from the Flow side, or a
    * plain test div). DOM is appended to {@link renderTarget}
    * — usually the same element, but a ShadowRoot when the
-   * wrapper passes its `renderRoot`. Slice 162.
+   * wrapper passes its `renderRoot`.
    */
   private readonly host: HTMLElement;
 
   /**
    * Where DOM gets appended. When the wrapper is a LitElement,
    * this is its shadow root (passed as the second constructor
-   * arg). Otherwise it's the host element itself. Slice 162.
+   * arg). Otherwise it's the host element itself.
    */
   private readonly renderTarget: HTMLElement | ShadowRoot;
 
@@ -244,15 +242,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private pointedByPress = false;
 
   /**
-   * Cell-editor state (slice 152). Null when no editor is
+   * Cell-editor state. Null when no editor is
    * active. When set, the cell-grid renders an editable
    * {@code <input>} at the cell's coordinates; the user types,
-   * then Enter/Tab commits (slice 153) and Escape cancels.
+   * then Enter/Tab commits and Escape cancels.
    */
   private editor: CellEditorState | null = null;
 
   /**
-   * Mouse-drag state (slice 155). True between mousedown on a
+   * Mouse-drag state. True between mousedown on a
    * cell and the subsequent mouseup (anywhere). While true,
    * {@code cell-mouseover} events extend the active range from
    * the drag's anchor cell to the hovered cell.
@@ -260,7 +258,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private dragging = false;
 
   /**
-   * Column-resize drag state (slice 164). Set on
+   * Column-resize drag state. Set on
    * {@code column-resize-start}, cleared on mouseup. As in the GWT client,
    * the column keeps its width until the drag ends: a line and a tooltip
    * follow the pointer meanwhile, and the width it takes is from the
@@ -269,7 +267,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private columnResize: { col: number; edge: number; x: number; y: number } | null = null;
 
   /**
-   * Row-resize drag state (slice 164). Symmetric to
+   * Row-resize drag state. Symmetric to
    * {@link columnResize}: the height runs from the row's top edge to the
    * pointer at {@code y}.
    */
@@ -298,7 +296,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private defRowHeight = 15; // points
   private defColWidth = 64; // pixels
 
-  /** Hidden / locked indexes. */
+  // Hidden / locked indexes
   /*
    * Sets, not arrays: they are asked about one row or column at a time
    * inside loops over rows, and on a filtered table with tens of thousands
@@ -350,7 +348,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Overlay IDs the server has published a resource for, from
    * {@link setResources}. The URLs themselves are not kept: they live on
    * the host as `resource-<id>` attributes and are read at render time by
-   * {@link resolveResources}. Slice 160.
+   * {@link resolveResources}.
    */
   private resourceKeys: string[] = [];
   /** The element the `resource-<id>` attributes live on. */
@@ -376,17 +374,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Cells currently known to the client, keyed by
-   * {@code toKey(col, row)}. Populated by the
-   * {@code update*CellValues} RPC methods (slice 134 wires the
-   * accessors; the methods themselves stay TODO until later in
-   * Phase 3.2 — the connector still needs to dispatch per-quadrant).
+   * {@code toKey(col, row)}. Filled by the {@code update*CellValues}
+   * RPC methods and {@code cellsUpdated}, and by a committed edit until
+   * the server answers.
    */
   private cellDataByKey: Map<string, CellData> = new Map();
 
-  /**
-   * Handle of the animation frame a coalesced repaint is waiting on, or
-   * {@code null} when no repaint is pending. See {@link scheduleRender}.
-   */
   /**
    * Whether a coalesced repaint is already queued.
    *
@@ -419,13 +412,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
   /**
-   * Server-side components the sheet renders as overlays — charts, and
-   * anything else added with {@code Spreadsheet.setComponent}. Flow creates
-   * the elements but leaves placing them to us; they become light-DOM
-   * children of the cell-grid so the slots in its shadow root can project
-   * them over the sheet.
-   */
-  /**
    * Leftmost sheet tab currently shown. The strip scrolls by whole
    * tabs; the scroll buttons move this and the server is told, so it
    * can restore the position on the next load.
@@ -456,6 +442,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * could read it.
    */
   private extendingSelection = false;
+  /**
+   * Server-side components the sheet renders as overlays — charts, and
+   * anything else added with {@code Spreadsheet.setComponent}. Flow creates
+   * the elements but leaves placing them to us; they become light-DOM
+   * children of the cell-grid so the slots in its shadow root can project
+   * them over the sheet.
+   */
   private readonly overlayComponents: SlottedVirtualChildren;
   /**
    * Server-side components rendered inside a cell. Same mechanism as
@@ -561,21 +554,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * their intersection. Sized to
    * {@code headerColumnWidth × headerRowHeight} on every
    * {@link applyRenderState}; hidden when either dimension is
-   * 0. Slice 145.
+   * 0.
    */
   private readonly headerCorner: SpreadsheetHeaderCorner;
 
   /**
    * The sheet-tab strip below the scroll container — renders
    * one tab per sheet name with the active tab highlighted.
-   * Clicking a tab dispatches `sheetSelected` to the server
-   * (slice 154).
+   * Clicking a tab dispatches `sheetSelected` to the server.
    */
   private readonly sheetTabs: SpreadsheetSheetTabs;
 
   /**
    * Formula bar at the top of the spreadsheet — two text inputs
-   * for the active cell's address + formula. Slice 175. Wired
+   * for the active cell's address + formula. Wired
    * by {@link updateFormulaBar} + {@link showSelectedCell}. The
    * documented parts {@code address-field} + {@code formula-field}
    * live on the input elements (see {@link SpreadsheetFormulaBar}).
@@ -584,12 +576,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * MutationObserver watching the spreadsheet host for class
-   * changes. Slice 174 honors {@code Spreadsheet.HIDE_TABSHEET_STYLE}
-   * ("hidetabsheet") + {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE}
-   * ("hidefunctionbar") by toggling display on the internal
-   * elements. The wrapper element is light DOM, so we can't use
-   * a {@code :host-context()} CSS selector — class observation
-   * is the portable path.
+   * changes: {@code Spreadsheet.HIDE_TABSHEET_STYLE}
+   * ("hidetabsheet") and {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE}
+   * ("hidefunctionbar") hide the matching internal elements.
    */
   private hostClassObserver: MutationObserver | null = null;
 
@@ -607,14 +596,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private headerColumnWidth = DEFAULT_HEADER_COLUMN_WIDTH;
 
   /**
-   * The scroll surface — wraps the cell-grid and provides the
-   * scrollbars + viewport bounds. The user scrolls THIS element;
-   * the connector listens for {@code scroll} events and recomputes
-   * the visible viewport. The cell-grid's intrinsic size is set to
-   * the total grid dimensions so the scrollbar track reflects the
-   * full scroll extent (slice 140).
-   */
-  /**
    * The component's own root inside {@link renderTarget}.
    *
    * Everything the spreadsheet draws lives in here, and this element —
@@ -623,6 +604,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * positions the component its own way is silently overridden.
    */
   private readonly root: HTMLElement;
+  /**
+   * The scroll surface — wraps the cell-grid and provides the
+   * scrollbars + viewport bounds. The user scrolls THIS element;
+   * the connector listens for {@code scroll} events and recomputes
+   * the visible viewport. The cell-grid's intrinsic size is set to
+   * the total grid dimensions so the scrollbar track reflects the
+   * full scroll extent.
+   */
   private readonly scrollContainer: HTMLElement;
 
   /**
@@ -643,7 +632,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@link recomputeViewport}, which pushes a fresh render state
    * with the new {@code clientWidth} / {@code clientHeight}. The
    * initial fire also serves as the first render, replacing the
-   * empty default state assigned in the constructor (slice 142).
+   * empty default state assigned in the constructor.
    */
   private readonly resizeObserver: ResizeObserver;
 
@@ -653,7 +642,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // `new Spreadsheet(element, element.renderRoot)` so DOM
     // goes into the shadow root, not the light DOM. Tests
     // and direct callers can omit the second arg and let
-    // DOM go into the host directly. Slice 162.
+    // DOM go into the host directly.
     this.renderTarget = renderTarget ?? host;
     this.cellGrid = new SpreadsheetCellGrid();
     this.columnHeader = new SpreadsheetColumnHeader();
@@ -722,10 +711,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // row-header (auto-sized to its intrinsic width); column
     // 2 = cell-grid (auto-sized to its intrinsic width). Same
     // for rows. Sticky positioning on each header pins it to
-    // its viewport edge during scroll. Slice 144.
+    // its viewport edge during scroll.
     // `flex:1` so the container takes the remaining vertical
     // space inside the flex-column host, leaving room for the
-    // sheet tabs below. Slice 154.
+    // sheet tabs below.
     // height:0 with flex:1 1 0 is what keeps the sheet from sizing the
     // component. A column flex item still offers its content height
     // when the container's own height is indefinite, and the grid
@@ -743,15 +732,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
       'grid-template-rows:auto auto;align-content:start;justify-content:start;' +
       // outline:none so the browser-default focus ring doesn't
       // render around the spreadsheet; we get focus via
-      // tabindex=0 (slice 147) but draw selection feedback via
+      // tabindex=0 but draw selection feedback via
       // the .sheet-selection overlay instead.
       'outline:none;';
     // tabindex=0 makes the scroll container focusable so it can
-    // receive keydown events for keyboard navigation (slice 147).
+    // receive keydown events for keyboard navigation.
     this.scrollContainer.tabIndex = 0;
     // Header corner at (col 1, row 1) — sticky on both axes
     // so it overlays both header strips at their intersection.
-    // Slice 145. Hidden when either header dimension is 0.
+    // Hidden when either header dimension is 0.
     this.headerCorner.className = 'sheet-header-corner';
     this.headerCorner.style.cssText =
       'grid-column:1;grid-row:1;' + 'position:sticky;top:0;left:0;z-index:6;' + 'width:0;height:0;';
@@ -769,7 +758,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.appendChild(this.columnHeader);
     this.scrollContainer.appendChild(this.rowHeader);
     this.scrollContainer.appendChild(this.cellGrid);
-    // Slice 175: formula bar sits ABOVE the scroll container
+    // Formula bar sits ABOVE the scroll container
     // in the flex column. flex:0 so it takes its intrinsic
     // height. Appended to renderTarget first so it ends up
     // ahead of the scroll container in DOM order.
@@ -813,7 +802,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.linkTooltip.hidden = true;
     this.popupOverlay.after(this.resizeCover, this.resizeLine, this.resizeTooltip, this.linkTooltip);
     this.renderTarget.appendChild(this.root);
-    // Slice 174: honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
+    // Honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
     // tabs strip hides. Observe the host's class attribute via
     // MutationObserver — the wrapper element is light DOM, so
@@ -824,8 +813,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.applyHostHideClasses();
       this.applyHostTheme();
     });
-    // Sheet tab click → switch active sheet via spreadsheet-event
-    // (slice 154).
+    // Sheet tab click → switch active sheet via spreadsheet-event.
     this.sheetTabs.addEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
     this.sheetTabs.addEventListener('sheet-tabs-scroll', this.handleSheetTabsScroll as EventListener);
     this.sheetTabs.addEventListener('sheet-tab-add', this.handleSheetTabAdd);
@@ -835,14 +823,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.addEventListener('scroll', this.handleScroll);
     this.scrollContainer.addEventListener('focusin', this.handleSheetFocusChange);
     this.scrollContainer.addEventListener('focusout', this.handleSheetFocusChange);
-    // Clipboard integration (slice 163). The browser routes
+    // Clipboard integration. The browser routes
     // copy/cut/paste events to the focused element when the
     // user presses Ctrl+C / Ctrl+X / Ctrl+V. The scroll
-    // container is the focus host (tabindex=0 from slice 147).
+    // container is the focus host (tabindex=0).
     this.scrollContainer.addEventListener('copy', this.handleCopy as EventListener);
     this.scrollContainer.addEventListener('cut', this.handleCut as EventListener);
     this.scrollContainer.addEventListener('paste', this.handlePaste as EventListener);
-    // Cell-click delegation (slice 146): the cell-grid dispatches
+    // Cell-click delegation: the cell-grid dispatches
     // a `cell-click` custom event with detail = { col, row,
     // shiftKey, ctrlKey, metaKey, altKey }. The connector updates
     // its selection + re-renders. Bubble + composed = true so the
@@ -850,7 +838,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-click', this.handleCellClick as EventListener);
     this.contextMenu.addEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
     this.contextMenu.addEventListener('context-menu-dismiss', this.handleContextMenuDismiss);
-    // Cell editor lifecycle events (slice 152). The cell-grid
+    // Cell editor lifecycle events. The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
     this.cellGrid.addEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
@@ -859,7 +847,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-editor-input', this.handleCellEditorInput as EventListener);
     this.cellGrid.addEventListener('cell-editor-arrow', this.handleEditorArrow as EventListener);
     this.cellGrid.addEventListener('cell-editor-caret', this.handleDraftCaret as EventListener);
-    // Mouse drag selection (slice 155). The cell-grid emits
+    // Mouse drag selection. The cell-grid emits
     // cell-mousedown + cell-mouseover; the connector watches
     // mouseup at the document level so a drag that ends
     // outside the spreadsheet still terminates cleanly.
@@ -867,11 +855,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.cellGrid.addEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
     this.cellGrid.addEventListener('grid-mouseleave', this.hideLinkTooltip);
     this.cellGrid.addEventListener('selection-paint-start', this.handleSelectionPaintStart);
-    // Popup-button click → dispatch popupButtonClick (slice
-    // 161). The server's `onPopupButtonClick` opens the
-    // associated popup component.
+    // Popup-button click → dispatch popupButtonClick. The
+    // server's `onPopupButtonClick` opens the associated popup
+    // component.
     this.cellGrid.addEventListener('popup-button-click', this.handlePopupButtonClick as EventListener);
-    // Context-menu wiring (slice 166). Right-click on a cell
+    // Context-menu wiring. Right-click on a cell
     // / column-header / row-header dispatches the matching
     // local event from the element; the connector forwards it
     // to the server as `contextMenuOpenOnSelection` /
@@ -885,14 +873,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
       'column-header-contextmenu',
       this.handleColumnHeaderContextMenu as EventListener
     );
-    // Grouping outline (slice 167). The column header emits
+    // Grouping outline. The column header emits
     // `column-grouping-toggle` when the user clicks a +/-
     // button in the grouping gutter; the connector forwards
     // it as `groupingCollapsed` to the server.
     this.columnHeader.addEventListener('column-grouping-toggle', this.handleColumnGroupingToggle as EventListener);
     this.rowHeader.addEventListener('row-grouping-toggle', this.handleRowGroupingToggle as EventListener);
     this.rowHeader.addEventListener('row-header-contextmenu', this.handleRowHeaderContextMenu as EventListener);
-    // Header-drag resize (slice 164). The header elements
+    // Header-drag resize. The header elements
     // emit `column-resize-start` / `row-resize-start` from
     // their right-edge / bottom-edge mousedown handles; the
     // connector tracks the drag via document mousemove +
@@ -902,13 +890,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.rowHeader.addEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
     this.columnHeader.addEventListener('column-autofit', this.handleColumnAutofit as EventListener);
     this.rowHeader.addEventListener('row-autofit', this.handleRowAutofit as EventListener);
-    // Header click delegation (slice 148). Each header element
+    // Header click delegation. Each header element
     // emits its own custom event with the col / row coordinate;
     // the connector translates them into whole-column / whole-
     // row range selections.
     this.columnHeader.addEventListener('column-header-click', this.handleColumnHeaderClick as EventListener);
     this.rowHeader.addEventListener('row-header-click', this.handleRowHeaderClick as EventListener);
-    // Keyboard navigation (slice 147). Listen on the scroll
+    // Keyboard navigation. Listen on the scroll
     // container so arrow keys + shift+arrow work whenever the
     // spreadsheet has focus. preventDefault() in the handler
     // stops the browser from scrolling the viewport via the
@@ -962,8 +950,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * selection to that cell. Shift-click = extend the active range
    * to include the new anchor while keeping the existing active
    * cell as the range origin (Excel convention). Ctrl/Meta click
-   * is reserved for non-coherent selection (auxRanges) — deferred
-   * to a future slice. Slice 146.
+   * adds the cell to the selection as a range of its own, and
+   * Ctrl/Meta+Shift extends the active range keeping the others.
    */
   private readonly handleCellClick = (
     e: CustomEvent<{
@@ -1025,7 +1013,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.recomputeViewport();
     this.dispatchSelectionEvent();
     // Hyperlink cells additionally dispatch `linkCellClicked`
-    // after the normal selection event (slice 165). The
+    // after the normal selection event. The
     // server's onLinkCellClicked handler opens the URL.
     const cellKey = toKey(col, row);
     if (this.hyperlinksTooltips[cellKey] !== undefined) {
@@ -1036,11 +1024,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
   };
 
-  /**
-   * Column resize drag — start. Captures the dragged column's
-   * current width + mouse position so {@link handleDocumentMouseMove}
-   * can apply deltas. Slice 164.
-   */
   /**
    * Whether the user may change column widths.
    *
@@ -1091,7 +1074,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Document mousemove during a header-drag resize (slice 164): the line
+   * Document mousemove during a header-drag resize: the line
    * and the tooltip follow the pointer, and the sheet stays as it is until
    * the drag ends, as in the GWT client.
    */
@@ -1185,7 +1168,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Popup-button click handler (slice 161). Translates the
+   * Popup-button click handler. Translates the
    * cell-grid's local event into a server-bound
    * `popupButtonClick` spreadsheet-event so the server can
    * open the popup component.
@@ -1204,7 +1187,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Right-click on a cell (slice 166). Excel behavior: if the
+   * Right-click on a cell. Excel behavior: if the
    * clicked cell is outside the current selection, move selection
    * to it first (firing a selection event), then dispatch
    * {@code contextMenuOpenOnSelection}. If inside the existing
@@ -1235,7 +1218,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Right-click on a column header (slice 166): asks the server for the
+   * Right-click on a column header: asks the server for the
    * column's actions with {@code columnHeaderContextMenuOpen}.
    */
   private readonly handleColumnHeaderContextMenu = (
@@ -1258,7 +1241,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Right-click on a row header (slice 166). Mirror of the column
+   * Right-click on a row header. Mirror of the column
    * variant — dispatches {@code rowHeaderContextMenuOpen}.
    */
   private readonly handleRowHeaderContextMenu = (
@@ -1279,7 +1262,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Column-grouping toggle (slice 167). Forwards the user's
+   * Column-grouping toggle. Forwards the user's
    * +/- click in the grouping outline gutter as
    * {@code groupingCollapsed} for the server. Wire payload:
    * {@code cols: true}, {@code colIndex} carries the
@@ -1304,7 +1287,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Mouse drag — mousedown begin (slice 155). Starts a drag.
+   * Mouse drag — mousedown begin. Starts a drag.
    * Sets the selection to the single cell at the mousedown
    * coord (anchor) + opens the dragging flag so subsequent
    * `cell-mouseover` events extend the range. Doesn't dispatch
@@ -1362,7 +1345,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Mouse drag — mouseover during drag (slice 155). Extends
+   * Mouse drag — mouseover during drag. Extends
    * the range from the active cell (anchor) to the hovered
    * cell. Mouseover events that fire while NOT dragging are
    * silently ignored — the cell-grid emits on every hover.
@@ -1426,7 +1409,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Mouse drag — mouseup end (slice 155). Closes the drag.
+   * Mouse drag — mouseup end. Closes the drag.
    * Dispatches a {@code cellRangeSelected} event when the
    * final range covers more than one cell (single-cell drag
    * is treated as a click, whose `cell-click` handler already
@@ -1438,7 +1421,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     if (this.columnResize !== null) {
-      // End of column-resize drag (slice 164): the column takes the width
+      // End of column-resize drag: the column takes the width
       // from its left edge to where the pointer was let go, here at once
       // and then on the server - when it is a different width. A width of
       // 0 hides it, as in the GWT client.
@@ -1461,7 +1444,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     if (this.rowResize !== null) {
-      // End of row-resize drag (slice 164). Mirror of the column's;
+      // End of row-resize drag. Mirror of the column's;
       // rowHeights is in points, and so is the event payload.
       const { row, edge, y } = this.rowResize;
       this.rowResize = null;
@@ -1503,7 +1486,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Double-click on a cell opens the in-place editor at that
-   * cell (slice 152). The connector loads the cell's existing
+   * cell. The connector loads the cell's existing
    * value (or empty string when there's no data) into the
    * editor state, then pushes a fresh render. The cell-grid's
    * `updated()` lifecycle focuses the input + places the caret
@@ -1556,13 +1539,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Cell-editor commit. Called when the user presses Enter,
    * Tab, or blurs the input. Reads the typed value, dispatches
    * `cellValueEdited` to the server, closes the editor. When
-   * the commit key was Enter/Tab (slice 158), moves the active
+   * the commit key was Enter/Tab, moves the active
    * cell in the canonical Excel direction:
-   *   Enter           → row + 1
-   *   Shift+Enter     → row - 1
-   *   Tab             → col + 1
-   *   Shift+Tab       → col - 1
-   *   blur (no key)   → stay at the committed cell
+   * Enter           → row + 1
+   * Shift+Enter     → row - 1
+   * Tab             → col + 1
+   * Shift+Tab       → col - 1
+   * blur (no key)   → stay at the committed cell
    */
   private readonly handleCellEditorCommit = (
     e: CustomEvent<{
@@ -1616,7 +1599,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.returnFocusToSheet();
     }
     // Move the active cell to the next slot per Excel
-    // convention (slice 158). For 'Enter' / 'Tab' the move
+    // convention. For 'Enter' / 'Tab' the move
     // direction is fixed; blur leaves the selection at the
     // committed cell. Clamped to grid bounds.
     // Enter moves down, Tab right, shift reverses each; an arrow key
@@ -1644,8 +1627,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const data: CellValueEditedData = { row, col, value };
     this.sendToServer({ type: 'cellValueEdited', data });
     // If we moved the active cell, also dispatch the
-    // selection event so the server stays in sync (slice
-    // 150 contract — every selection write emits an event).
+    // selection event so the server stays in sync: every
+    // selection write sends an event.
     if (next !== null) {
       this.dispatchSelectionEvent();
     }
@@ -1664,7 +1647,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Cell-editor cancel (slice 152). User pressed Escape. Close
+   * Cell-editor cancel. User pressed Escape. Close
    * the editor without dispatching anything.
    */
   private readonly handleCellEditorCancel = (): void => {
@@ -1901,7 +1884,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Slice 181: show a committed value in its cell at once. The server's
+   * Show a committed value in its cell at once. The server's
    * `cellsUpdated` callback may arrive much later (or not at all in offline
    * / TestBench scenarios); the GWT client updated the cell before the
    * round-trip, as Excel users expect - except for a formula, which kept
@@ -1953,7 +1936,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Column-header click handler (slice 148). Selects the entire
+   * Column-header click handler. Selects the entire
    * column (rows 1..this.rows). The active cell becomes the
    * column's row 1. Shift-click extends from the existing anchor
    * column to the clicked column, selecting a whole-column
@@ -1998,7 +1981,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Row-header click handler (slice 148). Mirror of the column
+   * Row-header click handler. Mirror of the column
    * variant — selects an entire row (cols 1..this.cols).
    */
   private readonly handleRowHeaderClick = (
@@ -2087,7 +2070,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
 
-    // Ctrl+A / Cmd+A — select the entire sheet (slice 159).
+    // Ctrl+A / Cmd+A — select the entire sheet.
     if (shortcut && (key === 'a' || key === 'A')) {
       if (this.rows <= 0 || this.cols <= 0) {
         return;
@@ -2105,7 +2088,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     // Ctrl+Z / Cmd+Z — undo. Pure pass-through to the server;
     // the server owns the undo stack + replies with the
-    // resulting cell updates. Slice 159.
+    // resulting cell updates.
     if (shortcut && (key === 'z' || key === 'Z') && !e.shiftKey) {
       e.preventDefault();
       this.sendToServer({ type: 'onUndo', data: {} });
@@ -2115,7 +2098,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Ctrl+Y / Cmd+Shift+Z — redo. Cmd+Y is reserved on Mac
     // for "history menu" by some apps, so we also accept
     // Cmd+Shift+Z (the Mac convention) + Ctrl+Y (Windows).
-    // Slice 159.
     if (shortcut && (key === 'y' || key === 'Y' || ((key === 'z' || key === 'Z') && e.shiftKey))) {
       e.preventDefault();
       this.sendToServer({ type: 'onRedo', data: {} });
@@ -2123,7 +2105,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
 
     // F2 opens the cell editor at the active cell, loaded with the
-    // cell's existing value (Excel convention). Slice 153.
+    // cell's existing value (Excel convention).
     //
     // So does Enter on a single cell, as it always has: the GWT client
     // treated the two keys as one case. With a range selected Enter
@@ -2279,7 +2261,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * it in the address field straight away rather than waiting for the
    * server to: the address field is how the user knows where the keyboard
    * has taken them. The cell is scrolled into view before the render, by
-   * the GWT client's rule (slice 156).
+   * the GWT client's rule.
    */
   private moveSelectionTo(next: SingleCellSelection): void {
     this.extendingSelection = false;
@@ -2322,7 +2304,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * after shift+arrow) is in full view, by the GWT client's rule -
    * see {@link scrollToShow}. Sets scrollLeft/Top in-place; the
    * existing `scroll` listener triggers a fresh recomputeViewport.
-   * Slice 156.
    */
   private scrollCellIntoView(target: { col: number; row: number }): void {
     if (this.rows <= 0 || this.cols <= 0) {
@@ -2348,7 +2329,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Copy handler (slice 163). Serializes the current selection
+   * Copy handler. Serializes the current selection
    * range to TSV via {@code serializeToTsv} + writes to the
    * browser's clipboard via {@code event.clipboardData}. No
    * server-bound event — the server doesn't track the
@@ -2368,7 +2349,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Cut handler (slice 163). Same as copy + dispatches
+   * Cut handler. Same as copy + dispatches
    * {@code clearSelectedCellsOnCut} to the server so it can
    * clear the cells (the visual update comes back via
    * {@code update*CellValues}).
@@ -2387,7 +2368,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Paste handler (slice 163). Reads the clipboard's text/plain
+   * Paste handler. Reads the clipboard's text/plain
    * payload + forwards to the server via {@code onPaste}.
    * The server parses the TSV and writes cells starting at the
    * active cell.
@@ -2410,8 +2391,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * is invalid or no cells exist. Uses
    * {@link cellDataByKey} as the source of truth — cells
    * without data are emitted as empty strings.
-   *
-   * Slice 163.
    */
   private selectionToTsv(): string | null {
     const range = this.selection.activeRange;
@@ -2525,22 +2504,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Recompute the visible viewport from the scroll container's
-   * current scroll position + client dimensions, then push the
-   * resulting render state to the cell-grid. Called by the scroll
-   * listener {@link handleScroll}, the {@link resizeObserver}, and
-   * the wrapper element on data changes. Public so callers (the
-   * Lit wrapper's {@code updated} cycle, integration tests) can
-   * force a re-render without going through the scroll surface.
-   */
-  /**
-   * Request a repaint on the next animation frame, coalescing repeated
+   * Request a repaint once the current task is done, coalescing repeated
    * calls into a single {@link recomputeViewport}.
    *
    * The server pushes cell values, styles and reload signals as several
    * separate RPC calls within one roundtrip. Painting on each one would
    * re-render the whole viewport many times over for what the user sees
-   * as a single update, so the calls collapse into one frame.
+   * as a single update, so the calls collapse into one repaint.
    */
   private scheduleRender(): void {
     if (this.renderQueued) {
@@ -2557,7 +2527,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Repaint now, dropping any frame already scheduled.
+   * Repaint now, dropping any repaint already queued.
    *
    * The counterpart to {@link scheduleRender}: coalescing is right for
    * scrolling, where the next frame is the soonest anything can be seen
@@ -2637,6 +2607,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return indexes;
   }
 
+  /**
+   * Recompute the visible viewport from the scroll container's
+   * current scroll position + client dimensions, then push the
+   * resulting render state to the cell-grid. Called by the scroll
+   * listener {@link handleScroll}, the {@link resizeObserver}, and
+   * the wrapper element on data changes. Public so callers (the
+   * Lit wrapper's {@code updated} cycle, integration tests) can
+   * force a re-render without going through the scroll surface.
+   */
   recomputeViewport(): void {
     this.applyRenderState({
       scrollLeft: this.scrollContainer.scrollLeft,
@@ -2654,10 +2633,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Release the scroll + resize listeners. Call this when the host
-   * element is being detached + destroyed so the
-   * {@link resizeObserver} doesn't keep a reference to the
-   * scroll container after teardown.
+   * Stop listening for good: the page listeners and observers that
+   * {@link disconnect} releases, and the listeners on the sheet's own
+   * elements. The element only disconnects on detach, since it may be
+   * attached again; tests dispose of the sheets they make.
    */
   dispose(): void {
     this.renderQueued = false;
@@ -2721,7 +2700,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Slice 174: read the spreadsheet host's class list + apply
+   * Read the spreadsheet host's class list + apply
    * the two public "hide bar" classes by toggling display on
    * the matching internal elements. The constants
    * {@link Spreadsheet#HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
@@ -2730,10 +2709,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@code addClassName(HIDE_TABSHEET_STYLE)} on the host
    * (or use {@code setSheetSelectionBarVisible(false)} which
    * does the same) to suppress the corresponding strip.
-   *
-   * The function bar isn't built yet (deferred to slice 175);
-   * the function-bar branch becomes meaningful when that
-   * element exists.
    */
   private applyHostHideClasses(): void {
     const tabsHidden = this.host.classList.contains('hidetabsheet');
@@ -2784,7 +2759,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Slice 175: dispatched when the user presses Enter in the
+   * Dispatched when the user presses Enter in the
    * formula-bar address input. Forwards as the documented
    * {@code sheetAddressChanged} server-bound event.
    */
@@ -2806,7 +2781,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.root;
   }
 
-  /** Test-only accessor: the scroll container element. */
   /**
    * Tells the cell grid whether the sheet has the keyboard, which it shows
    * by dimming the selection when it does not - as the GWT client did, so
@@ -2821,6 +2795,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     });
   };
 
+  /** Test-only accessor: the scroll container element. */
   getScrollContainer(): HTMLElement {
     return this.scrollContainer;
   }
@@ -2830,24 +2805,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.popupOverlay;
   }
 
-  /**
-   * Dispatch a {@code spreadsheet-event} on the host carrying
-   * the appropriate server-bound event for the current selection
-   * (slice 150). Picks one of {@code cellSelected /
-   * cellRangeSelected / columnSelected / rowSelected} based on
-   * the shape of {@code this.selection.activeRange}:
-   *
-   *  - whole column (r1=1, r2=rows, single col) → columnSelected
-   *  - whole row    (c1=1, c2=cols, single row) → rowSelected
-   *  - single cell  (c1=c2, r1=r2)              → cellSelected
-   *  - otherwise                                → cellRangeSelected
-   *
-   * The wrapper subscribes to {@code spreadsheet-event} with a
-   * {@code @DomEvent} listener on the server side; the detail's
-   * {@code type} + {@code data} mirror the existing
-   * SpreadsheetHandler dispatch signatures (preserved verbatim
-   * from the GWT side as a wire contract).
-   */
   /**
    * Tell the server a cell joined a non-coherent selection. Distinct
    * from {@link dispatchSelectionEvent}, which reports a selection that
@@ -2861,7 +2818,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sendToServer({ type: 'cellAddedToSelectionAndSelected', data });
   }
 
-  /** Tell the server a whole range joined a non-coherent selection. */
   /**
    * Tell the server about the active range, as a whole selection or as
    * one more piece of a selection that is already in pieces.
@@ -2881,6 +2837,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.dispatchSelectionEvent();
   }
 
+  /** Tell the server a whole range joined a non-coherent selection. */
   private dispatchCellsAddedToRangeSelection(range: CellRange): void {
     const data: CellRangeSelectedData = {
       row1: range.r1,
@@ -2964,6 +2921,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
     });
   }
 
+  /**
+   * Dispatch a {@code spreadsheet-event} on the host carrying
+   * the appropriate server-bound event for the current selection.
+   * Picks one of {@code cellSelected /
+   * cellRangeSelected / columnSelected / rowSelected} based on
+   * the shape of {@code this.selection.activeRange}:
+   *
+   *  - whole column (r1=1, r2=rows, single col) → columnSelected
+   *  - whole row    (c1=1, c2=cols, single row) → rowSelected
+   *  - single cell  (c1=c2, r1=r2)              → cellSelected
+   *  - otherwise                                → cellRangeSelected
+   *
+   * The server receives {@code spreadsheet-event} through a
+   * {@code @DomEvent}; the detail's {@code type} + {@code data} keep the
+   * GWT client's SpreadsheetHandler signatures as a wire contract.
+   */
   private dispatchSelectionEvent(): void {
     const { activeCell } = this.selection;
     // A merge is one cell: the server hears that cell, as it did from the
@@ -2992,10 +2965,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   // ====================================================================
-  // Render pipeline (slice 134) — compose `CellGridRenderState` from
-  // current state + push to the cell-grid sub-element. The full
-  // event-driven trigger flow (scroll handler → applyRenderState)
-  // wires up when the wrapper flips imports in Phase 3.6.
+  // Render pipeline — compose `CellGridRenderState` from
+  // current state + push to the cell-grid sub-element.
   // ====================================================================
 
   /**
@@ -3004,9 +2975,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    *
    * The connector calls this in response to scroll events, viewport
    * resize, or any state change that affects rendering (data updates,
-   * style changes, selection moves). Slice 134 ships the composition
-   * + push; slice 135+ extend each branch (styling, selection,
-   * merged-cell overlays, frozen panes).
+   * style changes, selection moves).
    *
    * @param opts.scrollLeft Horizontal scroll offset in pixels.
    * @param opts.scrollTop Vertical scroll offset in pixels.
@@ -3039,7 +3008,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const visible = visibleCellSlots(this.cellSlotAssignments(), state);
     this.cellComponents.sync(visible.filter((a) => a.kind === 'component').map((a) => a.nodeId));
     this.cellEditors.sync(visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId));
-    // Column-header strip (slice 143). Sized + state-pushed only
+    // Column-header strip. Sized + state-pushed only
     // when there is something to draw, so the default opt-out path
     // stays a no-op — important to avoid feedback loops with the
     // ResizeObserver under wtr parallel.
@@ -3057,7 +3026,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
     const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
     if (this.headerRowHeight > 0 || this.colGroupingMax > 0) {
-      // Slice 167: compute positioned column-groupings so the
+      // Compute positioned column-groupings so the
       // header can render the outline gutter. Pre-resolving
       // pixel positions in the connector keeps the header
       // element independent of the full colWidths array.
@@ -3090,7 +3059,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         colGroupingMax: this.colGroupingMax,
         colGroupingInversed: this.colGroupingInversed,
         leadingPx: cornerWidth,
-        // Slice 173: feed the selected-columns set so the
+        // Feed the selected-columns set so the
         // header can emit `part="column-header
         // header-selected"` on cells inside the active
         // range. Pure derivation from
@@ -3103,7 +3072,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // the sheet is up, rather than keep the size it was last given.
       this.columnHeader.style.display = 'none';
     }
-    // Row-header strip (slice 144). Same opt-in gate as the column
+    // Row-header strip. Same opt-in gate as the column
     // header, and the same reason for the grouping half of it.
     if (this.headerColumnWidth > 0 || this.rowGroupingMax > 0) {
       // Row groupings mirror the column ones; heights come from the same
@@ -3131,7 +3100,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         rowHeights: state.rowHeights,
         headerWidth: this.headerColumnWidth + rowGutterPx,
         totalGridHeightPx: state.totalGridHeightPx,
-        // Slice 173: feed the selected-rows set so the
+        // Feed the selected-rows set so the
         // header can emit `part="row-header
         // header-selected"` on rows inside the active
         // range.
@@ -3153,7 +3122,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     } else {
       this.rowHeader.style.display = 'none';
     }
-    // Header corner (slice 145). Sized only when BOTH header
+    // Header corner. Sized only when BOTH header
     // dimensions are > 0 so it occupies its grid cell with
     // matching width + height. When either is 0, the corner
     // collapses to a 0×0 box and isn't visible.
@@ -3316,7 +3285,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const totalWidthPx = totals.totalWidthPx + gapX;
     const totalHeightPx = totals.totalHeightPx + gapY;
 
-    // Compute positioned overlays (slice 160) from the current
+    // Compute positioned overlays from the current
     // overlay map + resource map. Each overlay's pixel
     // position is anchor cell's left/top (cumulative col/row
     // widths/heights) + the overlay's dx/dy offset.
@@ -3337,7 +3306,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       rowHeightForIndex
     );
 
-    // Compute positioned popup buttons (slice 161). Each
+    // Compute positioned popup buttons. Each
     // button anchors at its cell's bottom-right corner.
     const positionedPopupButtons = computePositionedPopupButtons(
       this.popupButtonStates,
@@ -3385,7 +3354,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       visibleCommentKeys: this.visibleCellComments,
       editingCommentKey: this.editingCommentKey,
       invalidFormulaMessage: this.invalidFormulaErrorMessage,
-      // Comment-bearing + hyperlink cell keys (slice 165).
+      // Comment-bearing + hyperlink cell keys.
       // The maps from setCellComments / setHyperlinksTooltips
       // are keyed by the cell-key format already, so a Set
       // of their keys is the right shape for the render.
@@ -3418,27 +3387,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.cellGrid;
   }
 
-  /** Test-only accessor: the column-header sub-element (slice 143). */
+  /** Test-only accessor: the column-header sub-element. */
   getColumnHeader(): SpreadsheetColumnHeader {
     return this.columnHeader;
   }
 
-  /** Test-only accessor: the row-header sub-element (slice 144). */
+  /** Test-only accessor: the row-header sub-element. */
   getRowHeader(): SpreadsheetRowHeader {
     return this.rowHeader;
   }
 
-  /** Test-only accessor: the header-corner box (slice 145). */
+  /** Test-only accessor: the header-corner box. */
   getHeaderCorner(): HTMLElement {
     return this.headerCorner;
   }
 
-  /** Test-only accessor: the sheet-tabs sub-element (slice 154). */
+  /** Test-only accessor: the sheet-tabs sub-element. */
   getSheetTabs(): SpreadsheetSheetTabs {
     return this.sheetTabs;
   }
 
-  /** Test-only accessor: the formula-bar sub-element (slice 175). */
+  /** Test-only accessor: the formula-bar sub-element. */
   getFormulaBar(): SpreadsheetFormulaBar {
     return this.formulaBar;
   }
@@ -3447,7 +3416,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Push fresh state to the sheet tabs from the current
    * {@code sheetNames} + {@code sheetIndex} fields. Called from
    * the public setters when those change, AND from any caller
-   * that wants to force a re-render. Slice 154.
+   * that wants to force a re-render.
    */
   private syncSheetTabs(): void {
     this.sheetTabs.renderState = {
@@ -3460,13 +3429,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     };
   }
 
-  /**
-   * Sheet-tab click handler — translates to a `sheetSelected`
-   * spreadsheet-event for the server. The server is expected
-   * to call back into {@code setSheetIndex} + push fresh data
-   * via the cell value APIs, which the next render picks up.
-   * Slice 154.
-   */
   /**
    * A scroll button moved the strip.
    *
@@ -3691,6 +3653,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     });
   };
 
+  /**
+   * Sheet-tab click handler — translates to a `sheetSelected`
+   * spreadsheet-event for the server. The server is expected
+   * to call back into {@code setSheetIndex} + push fresh data
+   * via the cell value APIs, which the next render picks up.
+   */
   private readonly handleSheetTabClick = (e: CustomEvent<{ index: number }>): void => {
     const { index } = e.detail;
     // Clicking a tab focused it. Switching sheets is navigation, so the
@@ -3737,7 +3705,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   // ====================================================================
-  // Lifecycle (Phase 3.2 wires up the real DOM)
+  // Lifecycle
   // ====================================================================
 
   /** The sheet's width, not the component's. See {@link setHeight}. */
@@ -3763,9 +3731,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   resize(): void {
     // The wrapper's `spreadsheetResizeObserver` calls this
     // on container size changes. We also have our own
-    // ResizeObserver (slice 142) on the scroll container —
+    // ResizeObserver on the scroll container —
     // calling recomputeViewport here is idempotent + cheap.
-    // Slice 162.
     this.recomputeViewport();
   }
 
@@ -3814,11 +3781,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Stash each cell's data into {@link cellDataByKey} keyed by
-   * its wire-format key. The Phase 3.2-cont. quadrant-aware rendering
-   * (top-left / top-right / bottom-left / bottom-right cell-grid
-   * sub-trees) can iterate the map at render time; until then, all
-   * four quadrants share one map (the cell-grid's renderState picks
-   * out the visible subset).
+   * its wire-format key. All four quadrants share the one map; the
+   * cell-grid picks out what each pane draws.
    */
   private storeCellData(cellData: CellData[] | string): void {
     // Flow hands collections over as a JSON string on some lanes and as an
@@ -3840,7 +3804,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // range, or a sheet-qualified reference. For an ordinary cell it
     // sends null and leaves the address to the client, which is the
     // common case: without this the address field sits empty for every
-    // selection the user makes. Slice 175.
+    // selection the user makes.
     this.formulaBar.renderState = {
       // While the user is still growing a selection the address field
       // counts the block out, and this is the server naming the anchor
@@ -3938,7 +3902,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       x: this.lastContextMenuPosition.x,
       y: this.lastContextMenuPosition.y,
       // Arrives JSON-serialized through the Flow lane, like the
-      // collection-shaped property pushes slice 179 handles.
+      // collection-shaped properties.
       actions
     };
     // An action can carry an icon component; 0 means it has none. The
@@ -4171,13 +4135,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setSheetIndex(index: number): void {
     this.sheetIndex = index;
     // Update the sheet-tabs strip so the active tab moves to
-    // the server's chosen sheet (slice 154).
+    // the server's chosen sheet.
     this.syncSheetTabs();
   }
   setSheetNames(names: string[]): void {
     this.sheetNames = coerceArray(names);
-    // Re-render the sheet-tabs strip with the new names list
-    // (slice 154).
+    // Re-render the sheet-tabs strip with the new names list.
     this.syncSheetTabs();
   }
   /**
@@ -4228,20 +4191,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setRowGroupingInversed(inversed: boolean): void {
     this.rowGroupingInversed = inversed;
   }
-  /**
-   * The server signals that it has thrown away its per-sheet state.
-   *
-   * `Spreadsheet.reloadActiveSheetData` clears the overlay, comment,
-   * hyperlink and custom-component maps and resets its viewport bounds to
-   * -1 before raising this flag. Everything `loadCells` provides is gone on
-   * the server side until the client reports its viewport again, and
-   * `loadCells` only runs off `onSheetScroll`. Repainting alone leaves a
-   * sheet that shows its cells and nothing else — no images, no charts, no
-   * comment markers — for as long as the user does not scroll.
-   *
-   * So clear the handshake latch and let the next completed viewport
-   * announce itself.
-   */
   /**
    * Whether an event was raised inside a server-side component the sheet
    * is hosting — a custom editor, an in-cell component, a chart overlay.
@@ -4357,6 +4306,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
     });
   }
 
+  /**
+   * The server signals that it has thrown away its per-sheet state.
+   *
+   * `Spreadsheet.reloadActiveSheetData` clears the overlay, comment,
+   * hyperlink and custom-component maps and resets its viewport bounds to
+   * -1 before raising this flag. Everything `loadCells` provides is gone on
+   * the server side until the client reports its viewport again, and
+   * `loadCells` only runs off `onSheetScroll`. Repainting alone leaves a
+   * sheet that shows its cells and nothing else — no images, no charts, no
+   * comment markers — for as long as the user does not scroll.
+   *
+   * So clear the handshake latch and forget what was loaded, and let the
+   * next completed viewport announce itself.
+   */
   setReload(triggerReload: boolean): void {
     if (triggerReload) {
       // The server has thrown away everything it knew about the sheet —
@@ -4525,7 +4488,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   // ====================================================================
-  // Popup-button lifecycle (Phase 3.5)
+  // Popup-button lifecycle
   // ====================================================================
 
   /**
@@ -4650,14 +4613,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scheduleRender();
   }
 
-  /**
-   * The range from the anchor to a target cell, grown to take in whole
-   * merged regions.
-   *
-   * A merged region is one cell to the user, so a selection that ends
-   * inside one has to take all of it; reporting the literal rectangle
-   * leaves the server writing to cells nobody can see.
-   */
   /** The sheet as the arrow keys see it. */
   private sheetShape(): SheetShape {
     return {
@@ -4691,6 +4646,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return isMultiCellRange(activeRange) && !isSingleMerge(activeRange, activeCell, this.mergedRegions);
   }
 
+  /**
+   * The range from the anchor to a target cell, grown to take in whole
+   * merged regions.
+   *
+   * A merged region is one cell to the user, so a selection that ends
+   * inside one has to take all of it; reporting the literal rectangle
+   * leaves the server writing to cells nobody can see.
+   */
   private rangeTo(anchor: { col: number; row: number }, col: number, row: number): CellRange {
     const range = normalizedRange(anchor.col, anchor.row, col, row);
     const grown = expandToMergedRegions({ c1: range.c1, c2: range.c2, r1: range.r1, r2: range.r2 }, this.mergedRegions);
@@ -4815,8 +4778,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   // ====================================================================
-  // Read accessors — used by tests + the renderer + the selection
-  // controller (coming in slice 122).
+  // Read accessors
   // ====================================================================
 
   getRows(): number {
@@ -5153,7 +5115,7 @@ export function pagedViewInset(
  * server-pushed `PopupButtonState` list. Each button anchors at
  * the bottom-right corner of its target cell — pixel position =
  * (sum of widths 1..col + col width, sum of heights 1..row + row
- * height). Slice 161.
+ * height).
  */
 export function computePositionedPopupButtons(
   states: ReadonlyArray<PopupButtonState>,
@@ -5297,13 +5259,6 @@ export function visibleCellSlots(
   return visible;
 }
 
-/**
- * The Flow application the sheet belongs to.
- *
- * The server pushes it as an {@code appId} property on the host — the
- * component is registered against one running application, and looking a
- * virtual child up in the wrong one silently finds nothing.
- */
 /** Two popup-button states describe the same button when they share a cell. */
 function samePopupButtonCell(a: PopupButtonState, b: PopupButtonState): boolean {
   return a.col === b.col && a.row === b.row;
@@ -5320,6 +5275,13 @@ function flowRequestInFlight(host: HTMLElement): boolean {
   return clients?.[overlayComponentAppId(host)]?.isActive?.() === true;
 }
 
+/**
+ * The Flow application the sheet belongs to.
+ *
+ * The server pushes it as an {@code appId} property on the host — the
+ * component is registered against one running application, and looking a
+ * virtual child up in the wrong one silently finds nothing.
+ */
 export function overlayComponentAppId(host: HTMLElement): string {
   return String((host as unknown as { appId?: string }).appId ?? '');
 }
@@ -5342,7 +5304,7 @@ export function overlayComponentAppId(host: HTMLElement): string {
  * a pixel less height.
  *
  * Pure (no DOM, no instance state) so it's straightforward to
- * unit-test in isolation. Slice 160.
+ * unit-test in isolation.
  */
 export function computePositionedOverlays(
   overlays: Record<string, OverlayInfo>,
@@ -5379,28 +5341,12 @@ export function computePositionedOverlays(
 }
 
 /**
- * Pure helper: classify a selection shape and build the matching
- * server-bound {@link SpreadsheetEvent}.
- *
- * Detection order (specific → general):
- *   1. whole column: r1=1, r2=rows, c1=c2 → {@code columnSelected}
- *   2. whole row:    c1=1, c2=cols, r1=r2 → {@code rowSelected}
- *   3. single cell:  c1=c2, r1=r2         → {@code cellSelected}
- *   4. otherwise:                          → {@code cellRangeSelected}
- *
- * Note: when `rows`/`cols` is 0 (uninitialized grid) the "whole
- * column / row" branches collapse to cellSelected since the
- * full-axis match can't succeed against a zero-width axis.
- *
- * Slice 150.
- */
-/**
  * Coerce a value that may be either an array or a JSON-encoded
  * string into an array. The Flow runtime serializes server-side
  * property values to JSON strings when they reach the
  * {@code <vaadin-spreadsheet>} element's attribute lane, and they
  * arrive at the connector's setters as strings; the GWT-side
- * client used to JSON-parse them on the way in. Slice 179.
+ * client used to JSON-parse them on the way in.
  */
 export function coerceArray<T>(value: T[] | string | null | undefined): T[] {
   if (value == null) {
@@ -5447,7 +5393,6 @@ function coerceJson<T extends object>(value: T | string | null | undefined): T |
 /**
  * Object-shaped variant of {@link coerceArray}. The same JSON-string-
  * coming-from-Flow-attribute path applies to record/map setters.
- * Slice 179.
  */
 export function coerceObject<V>(value: Record<string, V> | string | null | undefined): Record<string, V> {
   if (value == null) {
@@ -5470,7 +5415,7 @@ type NumberList = number[] | Int32Array | Float32Array;
 /**
  * Numeric-array variant. Typed arrays (Int32Array, Float32Array)
  * arrive intact when pushed via Flow's typed-array support; JSON
- * strings get parsed. Slice 179.
+ * strings get parsed.
  */
 export function coerceNumberArray(value: NumberList | string | null | undefined): NumberList {
   if (value == null) {
@@ -5492,7 +5437,7 @@ export function coerceNumberArray(value: NumberList | string | null | undefined)
 
 /**
  * Pure helper: return the set of column indices that intersect
- * the active range of the selection. Slice 173 — fed to the
+ * the active range of the selection, fed to the
  * column-header element so each cell whose column is inside the
  * active range emits {@code part="column-header header-selected"}.
  */
@@ -5510,7 +5455,6 @@ export function selectedColumnSet(selection: SelectionState): Set<number> {
 
 /**
  * Pure helper: symmetric row variant of {@link selectedColumnSet}.
- * Slice 173.
  */
 export function selectedRowSet(selection: SelectionState): Set<number> {
   const set = new Set<number>();
@@ -5524,9 +5468,8 @@ export function selectedRowSet(selection: SelectionState): Set<number> {
 
 /**
  * Pure helper: is the given (col, row) inside the active range OR
- * any aux range of the current selection? Slice 166 uses this for
- * "right-click outside selection → move selection to clicked cell"
- * Excel behavior.
+ * any aux range of the current selection? A right-click outside the
+ * selection moves the selection to the clicked cell, as in Excel.
  */
 export function isCellInSelection(col: number, row: number, selection: SelectionState): boolean {
   const inRange = (range: CellRange): boolean => {
@@ -5619,10 +5562,10 @@ export function computeMergedRegionBoxes(
  * indices). The connector's `colWidths` array is 0-indexed too.
  *
  * @param startPaddingPx how far into its first header a group's bracket
- *            starts - the GWT client's 5px for columns, 2px for rows
+ * starts - the GWT client's 5px for columns, 2px for rows
  * @param shiftPx how far back along the axis every bracket and button is
- *            drawn - a pixel while the other outline gutter shows, which
- *            the GWT client measured without its border
+ * drawn - a pixel while the other outline gutter shows, which
+ * the GWT client measured without its border
  */
 export function computePositionedColGroupings(
   groupings: ReadonlyArray<GroupingData>,
@@ -5672,6 +5615,20 @@ export function selectionSizeLabel(range: CellRange): string {
   return `${rows}R x ${cols}C`;
 }
 
+/**
+ * Pure helper: classify a selection shape and build the matching
+ * server-bound {@link SpreadsheetEvent}.
+ *
+ * Detection order (specific → general):
+ *   1. whole column: r1=1, r2=rows, c1=c2 → {@code columnSelected}
+ *   2. whole row:    c1=1, c2=cols, r1=r2 → {@code rowSelected}
+ *   3. single cell:  c1=c2, r1=r2         → {@code cellSelected}
+ *   4. otherwise:                          → {@code cellRangeSelected}
+ *
+ * Note: when `rows`/`cols` is 0 (uninitialized grid) the "whole
+ * column / row" branches collapse to cellSelected since the
+ * full-axis match can't succeed against a zero-width axis.
+ */
 export function buildSelectionEvent(
   activeCell: { col: number; row: number },
   range: CellRange,
@@ -5701,10 +5658,8 @@ export function buildSelectionEvent(
     const data: CellSelectedData = {
       row: activeCell.row,
       column: activeCell.col,
-      // Every TS-side selection write replaces the prior
-      // range (we don't yet support non-coherent / Ctrl-
-      // click auxRanges, slice 146 deferred). The wrapper
-      // can still ignore this when re-applying state.
+      // A plain selection replaces every earlier range;
+      // Ctrl-click sends events of its own.
       oldSelectionRangeDiscarded: true
     };
     return { type: 'cellSelected', data };

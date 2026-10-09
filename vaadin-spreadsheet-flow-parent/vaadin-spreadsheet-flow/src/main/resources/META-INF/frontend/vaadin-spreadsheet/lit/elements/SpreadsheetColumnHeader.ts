@@ -17,7 +17,7 @@ import type { ViewportBounds } from '../algorithms/ViewportMath.js';
  * Input state for the {@link SpreadsheetColumnHeader} element.
  * The Spreadsheet connector builds a fresh instance alongside the
  * cell-grid's {@code CellGridRenderState} and pushes it to the
- * header on every render cycle (slice 143).
+ * header on every render cycle.
  *
  * Coordinates use the same conventions as the cell-grid: 1-based
  * column indices, pixel offsets from the (virtual) grid origin.
@@ -45,14 +45,6 @@ export interface ColumnHeaderRenderState {
    * extent the same way the cell-grid does.
    */
   totalGridWidthPx: number;
-  /**
-   * Column groupings (outline) with pre-computed pixel positions
-   * (slice 167). Pushed by the connector after computing the
-   * absolute startPx/endPx from {@code colWidths}. The header
-   * renders one row per level above (or below, if inversed) the
-   * letter cells; each grouping shows a clickable +/- button at
-   * one end of its range.
-   */
   /**
    * Number of frozen columns at the left of the sheet. Those columns
    * stay on screen whatever the scroll position, so their headers have
@@ -86,6 +78,14 @@ export interface ColumnHeaderRenderState {
    */
   scrollLeft?: number;
 
+  /**
+   * Column groupings (outline) with pre-computed pixel positions.
+   * Pushed by the connector after computing the
+   * absolute startPx/endPx from {@code colWidths}. The header
+   * renders one row per level above (or below, if inversed) the
+   * letter cells; each grouping shows a clickable +/- button at
+   * one end of its range.
+   */
   colGroupings: ReadonlyArray<PositionedGrouping>;
   /**
    * Number of grouping levels (rows in the gutter). {@code 0}
@@ -111,14 +111,14 @@ export interface ColumnHeaderRenderState {
    * Columns intersecting the active selection. Each cell whose
    * column is in this set gets the {@code header-selected} part
    * in addition to {@code column-header}, mirroring the
-   * documented public styling API. Slice 173.
+   * documented public styling API.
    */
   selectedColumns: ReadonlySet<number>;
 }
 
 /**
  * A grouping outline entry with pre-computed pixel positions.
- * Slice 167. The connector pre-computes {@code startPx} +
+ * The connector pre-computes {@code startPx} +
  * {@code endPx} + {@code buttonPx} from {@code colWidths} /
  * {@code rowHeights} so the header doesn't need access to the
  * full width array.
@@ -206,7 +206,7 @@ export function rowGroupingGutterPx(maxLevel: number, headings: boolean): number
  *
  * Properties are declared via Lit's {@code static properties} API
  * (no decorators) for the same esbuild-compatibility reason as
- * {@link SpreadsheetCellGrid} (slice 132).
+ * {@link SpreadsheetCellGrid}.
  */
 export class SpreadsheetColumnHeader extends LitElement {
   /**
@@ -327,8 +327,8 @@ export class SpreadsheetColumnHeader extends LitElement {
       border-bottom: 2px solid #63b1ff;
     }
 
-    /* Resize handle on the right edge of each column header
-           (slice 164). 4px wide, full-height, cursor:col-resize.
+    /* Resize handle on the right edge of each column header.
+           4px wide, full-height, cursor:col-resize.
            Mousedown begins a column-resize drag. */
     .col-resize-handle {
       position: absolute;
@@ -463,16 +463,16 @@ export class SpreadsheetColumnHeader extends LitElement {
    * pattern as {@link SpreadsheetCellGrid}. Each click that
    * lands on a {@code .col-header-cell} dispatches a
    * {@code column-header-click} custom event with the column
-   * coordinate + modifier-key state. Slice 148.
+   * coordinate + modifier-key state.
    */
   firstUpdated(): void {
     this.shadowRoot!.addEventListener('click', this.handleShadowClick);
-    // Slice 164: column-resize drag. mousedown on a
+    // Column-resize drag. mousedown on a
     // `.col-resize-handle` dispatches `column-resize-start`
     // with the col + the original clientX so the connector
     // can track the drag.
     this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown as EventListener);
-    // Slice 166: right-click on a column header dispatches
+    // Right-click on a column header dispatches
     // `column-header-contextmenu` so the connector can
     // forward it as `columnHeaderContextMenuOpen` to the
     // server. The browser's native menu is suppressed when the
@@ -568,7 +568,7 @@ export class SpreadsheetColumnHeader extends LitElement {
     if (!(target instanceof Element)) {
       return;
     }
-    // Slice 167: grouping toggle click — dispatch
+    // Grouping toggle click — dispatch
     // `column-grouping-toggle` so the connector can forward
     // `groupingCollapsed` to the server. Stop here so the
     // click doesn't also bubble as a column-header click.
@@ -657,9 +657,9 @@ export class SpreadsheetColumnHeader extends LitElement {
         `left:${left}px;top:${letterTop}px;width:${width}px;` +
         `height:${headerHeight}px;line-height:${headerHeight}px;`;
       // data-col drives the click delegation handler in
-      // firstUpdated() (slice 148) — same pattern as the
-      // cell-grid (slice 146).
-      // Slice 173: `part="column-header"` (+ `header-selected`
+      // firstUpdated() — same pattern as the
+      // cell-grid.
+      // `part="column-header"` (+ `header-selected`
       // when the column intersects the active selection)
       // mirrors the documented public styling API.
       const isSelected = selectedColumns.has(col);
@@ -670,8 +670,8 @@ export class SpreadsheetColumnHeader extends LitElement {
           <div class="col-header-cell col${col}" part=${cellPart} style=${style} data-col=${col}> ${letter} </div>
         `
       });
-      // Resize handle on the right edge of this column
-      // (slice 164). Anchored at the column's right edge so
+      // Resize handle on the right edge of this column.
+      // Anchored at the column's right edge so
       // mousedown begins a resize-drag for THIS column.
       const handleStyle = `left:${left + width - 3}px;top:${letterTop}px;` + `height:${headerHeight}px;`;
       handles.push({

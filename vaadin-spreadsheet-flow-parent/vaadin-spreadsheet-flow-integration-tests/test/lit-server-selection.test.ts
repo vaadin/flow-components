@@ -11,7 +11,7 @@ import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
- * Slice 184 — `setSelectedCellAndRange` applies server-driven selection.
+ * `setSelectedCellAndRange` applies server-driven selection.
  *
  * The server calls this after `Spreadsheet.setSelection` /
  * `setSelectionRange`, and after operations that move the selection on
@@ -171,7 +171,7 @@ describe('Spreadsheet selection overlay — reports where the selection is', () 
 
   async function overlay(): Promise<Element | null> {
     // setSelectedCellAndRange coalesces its repaint into an animation
-    // frame (slice 183), so wait for the frame before Lit's update.
+    // frame, so wait for the frame before Lit's update.
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
     });

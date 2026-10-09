@@ -12,7 +12,7 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import { isCellSelected } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
 
 /**
- * Slice 185 — Ctrl/Cmd-click builds a non-coherent selection.
+ * Ctrl/Cmd-click builds a non-coherent selection.
  *
  * `handleCellClick` read `shiftKey` and ignored `ctrlKey` / `metaKey`,
  * so Ctrl-clicking a second cell replaced the selection instead of

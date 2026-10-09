@@ -112,13 +112,6 @@ export interface CellGridRenderState {
   columnIndexToStyleIndex?: Readonly<Record<number, number>>;
 
   /**
-   * Conditional-formatting rule bodies, keyed by rule index. A cell that
-   * a rule matches carries {@code "cf<index>"} in its {@code cellStyle}.
-   * Emitted after the {@code cs<N>} rules so a matching rule wins over the
-   * cell's own style, and in ascending key order so a later rule wins over
-   * an earlier one — the order Excel resolves them in.
-   */
-  /**
    * Cells that show a server-side component instead of their own text, as
    * cell key → the name of the slot that projects it.
    *
@@ -128,6 +121,13 @@ export interface CellGridRenderState {
    */
   cellSlots: Readonly<Record<string, string>>;
 
+  /**
+   * Conditional-formatting rule bodies, keyed by rule index. A cell that
+   * a rule matches carries {@code "cf<index>"} in its {@code cellStyle}.
+   * Emitted after the {@code cs<N>} rules so a matching rule wins over the
+   * cell's own style, and in ascending key order so a later rule wins over
+   * an earlier one — the order Excel resolves them in.
+   */
   conditionalFormattingStyles: Readonly<Record<number, string>>;
 
   /**
@@ -149,8 +149,7 @@ export interface CellGridRenderState {
   mergedRegionBoxes?: ReadonlyArray<MergedRegionBox>;
 
   /**
-   * Current selection state. Slice 136 will render selection
-   * overlays; slice 132's minimal render ignores it.
+   * Current selection state, which the grid draws.
    */
   selection: SelectionState;
 
@@ -205,7 +204,7 @@ export interface CellGridRenderState {
    * {@code transform:translateY(scrollTop)} to counter the scroll
    * container's vertical shift; the frozen-column and corner
    * wrappers apply {@code transform:translateX(scrollLeft)} to
-   * counter the horizontal shift. Slice 141.
+   * counter the horizontal shift.
    */
   scrollLeft: number;
 
@@ -213,7 +212,7 @@ export interface CellGridRenderState {
   scrollTop: number;
 
   /**
-   * Cell-editor state (slice 152). When non-null, the cell-grid
+   * Cell-editor state. When non-null, the cell-grid
    * renders an editable {@code <input>} positioned over the
    * editor's target cell so the user can type a new value. When
    * null, no editor is rendered. The connector sets this on
@@ -233,12 +232,12 @@ export interface CellGridRenderState {
    * computed by the connector from {@code setOverlays} +
    * {@code setResources}. The cell-grid renders an absolutely-
    * positioned element per overlay. Empty when no overlays
-   * are active. Slice 160.
+   * are active.
    */
   overlays: ReadonlyArray<PositionedOverlay>;
 
   /**
-   * Positioned popup-button anchors (slice 161). The cell-grid
+   * Positioned popup-button anchors. The cell-grid
    * renders a small {@code <div class="popup-button">} in the
    * bottom-right corner of each anchor cell. Clicking dispatches
    * {@code popup-button-click}; the connector translates to
@@ -275,7 +274,7 @@ export interface CellGridRenderState {
    * Cell keys (in {@link toKey} format — `"col<C> row<R>"`)
    * whose cell carries a comment. The cell-grid renders a
    * small yellow corner-triangle indicator on each. Empty
-   * set when no cell has a comment. Slice 165.
+   * set when no cell has a comment.
    */
   commentCells: ReadonlySet<string>;
   /**
@@ -289,14 +288,14 @@ export interface CellGridRenderState {
    * Cell keys whose cell is a clickable hyperlink. Click on
    * such a cell dispatches {@code linkCellClicked} INSTEAD OF
    * (well, in addition to) the normal {@code cellSelected}.
-   * Empty set when no cells are hyperlinks. Slice 165.
+   * Empty set when no cells are hyperlinks.
    */
   hyperlinkCells: ReadonlySet<string>;
 }
 
 /**
  * A positioned popup-button anchor with the cell's pixel
- * coordinates pre-computed by the connector. Slice 161.
+ * coordinates pre-computed by the connector.
  */
 export interface PositionedPopupButton {
   /** 1-based column of the anchor cell. */
@@ -317,7 +316,7 @@ export interface PositionedPopupButton {
 }
 
 /**
- * State for the in-place cell editor (slice 152). The cell-grid
+ * State for the in-place cell editor. The cell-grid
  * uses col/row to look up the cell's pixel position from its
  * existing {@code colX} / {@code rowY} / {@code colWidths} /
  * {@code rowHeights} arrays — no separate position computation.
@@ -350,13 +349,6 @@ export interface CellEditorState {
 }
 
 /**
- * A sheet overlay (image, chart, embedded component) with its
- * pixel position pre-computed by the connector. The cell-grid
- * just absolutely-positions each overlay at the supplied
- * coordinates — it doesn't know about anchor cells or offsets.
- * Slice 160.
- */
-/**
  * A merged region's box in the sheet's own pixel coordinates - the distance
  * from its top-left corner, frozen rows and columns included - which every
  * quadrant of the cell grid places its cells by.
@@ -368,6 +360,12 @@ export interface MergedRegionBox {
   height: number;
 }
 
+/**
+ * A sheet overlay (image, chart, embedded component) with its
+ * pixel position pre-computed by the connector. The cell-grid
+ * just absolutely-positions each overlay at the supplied
+ * coordinates — it doesn't know about anchor cells or offsets.
+ */
 export interface PositionedOverlay {
   /** Identifier from the server's `setOverlays` map. */
   id: string;
@@ -379,8 +377,7 @@ export interface PositionedOverlay {
   type: 'IMAGE' | 'COMPONENT';
   /**
    * For IMAGE: the image URL resolved from {@code setResources}.
-   * For COMPONENT: undefined (rendered as a placeholder div
-   * pending slice 161+ slot integration).
+   * For COMPONENT: undefined; the component is slotted in.
    */
   src: string | undefined;
   /** Pixel left of the overlay, relative to the cell-grid's origin. */

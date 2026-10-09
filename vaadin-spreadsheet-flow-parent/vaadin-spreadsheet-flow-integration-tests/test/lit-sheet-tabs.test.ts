@@ -18,7 +18,7 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetSheetTabs.js';
 
 /**
- * Slice 154 — sheet tabs.
+ * Sheet tabs.
  *
  * Element-level tests pin the wire-format contract for the
  * sheet-tab strip; connector-level tests verify setSheetNames /
@@ -638,7 +638,7 @@ describe('SpreadsheetSheetTabs — drawn as the GWT client drew it', () => {
     });
 });
 
-describe('Spreadsheet — sheet tabs lifecycle through the connector (slice 154)', () => {
+describe('Spreadsheet — sheet tabs lifecycle through the connector', () => {
     it('connector creates a SpreadsheetSheetTabs element below the scroll container', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         expect(sheet.getRoot().lastElementChild === sheet.getSheetTabs()).to.be.true;

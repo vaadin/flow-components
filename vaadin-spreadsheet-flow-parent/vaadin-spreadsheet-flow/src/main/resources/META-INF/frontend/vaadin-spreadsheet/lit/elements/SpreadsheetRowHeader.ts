@@ -21,7 +21,7 @@ import type { ViewportBounds } from '../algorithms/ViewportMath.js';
 /**
  * Input state for the {@link SpreadsheetRowHeader} element. The
  * connector builds + pushes this alongside the cell-grid's render
- * state on every render cycle (slice 144).
+ * state on every render cycle.
  *
  * Mirror of {@link ColumnHeaderRenderState}: same shape, swapped
  * column axis → row axis.
@@ -54,7 +54,7 @@ export interface RowHeaderRenderState {
    * Rows intersecting the active selection. Each cell whose row
    * is in this set gets the {@code header-selected} part in
    * addition to {@code row-header}, mirroring the documented
-   * public styling API. Slice 173.
+   * public styling API.
    */
   selectedRows: ReadonlySet<number>;
   /**
@@ -157,7 +157,7 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
  * their rows.
  *
  * Same render-state-driven contract + same no-decorator pattern as
- * the cell-grid + column-header. Slice 144.
+ * the cell-grid + column-header.
  */
 export class SpreadsheetRowHeader extends LitElement {
   /**
@@ -359,8 +359,8 @@ export class SpreadsheetRowHeader extends LitElement {
       border-right: 2px solid #63b1ff;
     }
 
-    /* Resize handle on the bottom edge of each row header
-           (slice 164). 5px tall, full-width, cursor:row-resize. */
+    /* Resize handle on the bottom edge of each row header.
+           5px tall, full-width, cursor:row-resize. */
     .row-resize-handle {
       position: absolute;
       left: 0;
@@ -410,14 +410,14 @@ export class SpreadsheetRowHeader extends LitElement {
 
   /**
    * Shadow-root click delegation — same pattern as the column
-   * header (slice 148). Dispatches {@code row-header-click}
+   * header. Dispatches {@code row-header-click}
    * with the row coordinate + modifier-key state.
    */
   firstUpdated(): void {
     this.shadowRoot!.addEventListener('click', this.handleShadowClick);
-    // Slice 164: row-resize drag mousedown.
+    // Row-resize drag mousedown.
     this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown as EventListener);
-    // Slice 166: right-click on a row header dispatches
+    // Right-click on a row header dispatches
     // `row-header-contextmenu`. When the connector takes it,
     // the browser's native menu is suppressed so only the
     // server-supplied ContextMenu is shown.
@@ -599,20 +599,20 @@ export class SpreadsheetRowHeader extends LitElement {
         return;
       }
       const style = `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;`;
-      // Slice 173: `part="row-header"` (+ `header-selected`
+      // `part="row-header"` (+ `header-selected`
       // when the row intersects the active selection) mirrors
       // the documented public styling API.
       const isSelected = selectedRows.has(row);
       const cellPart = isSelected ? 'row-header header-selected' : 'row-header';
       // data-row drives the click-delegation handler in
-      // firstUpdated() (slice 148).
+      // firstUpdated().
       cells.push({
         key: row,
         template: html`
           <div class="row-header-cell row${row}" part=${cellPart} style=${style} data-row=${row}> ${row} </div>
         `
       });
-      // Resize handle on the row's bottom edge (slice 164).
+      // Resize handle on the row's bottom edge.
       const handleStyle = `top:${top + height - 3}px;left:${numbersLeft}px;width:${numbersWidth}px;`;
       handles.push({
         key: row,

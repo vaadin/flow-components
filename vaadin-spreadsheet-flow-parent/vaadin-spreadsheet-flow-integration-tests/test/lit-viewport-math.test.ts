@@ -214,18 +214,18 @@ describe('ViewportMath — computeViewportBounds — rows beyond definedRows', (
         // firstRowPosition advances while < 100, then firstRowIndex++.
         // The >= definedRows check is on the CURRENT firstRowIndex,
         // BEFORE the post-iter increment.
-        //   Iter 1: 0 < 100; idx 1 >= 3? no → getRowHeight(1)=20. pos=20, idx=2.
-        //   Iter 2: 20 < 100; idx 2 >= 3? no → 20. pos=40, idx=3.
-        //   Iter 3: 40 < 100; idx 3 >= 3? YES → default 25. pos=65, idx=4.
-        //   Iter 4: 65 < 100; idx 4 >= 3? YES → 25. pos=90, idx=5.
-        //   Iter 5: 90 < 100; idx 5 >= 3? YES → 25. pos=115, idx=6.
+        // Iter 1: 0 < 100; idx 1 >= 3? no → getRowHeight(1)=20. pos=20, idx=2.
+        // Iter 2: 20 < 100; idx 2 >= 3? no → 20. pos=40, idx=3.
+        // Iter 3: 40 < 100; idx 3 >= 3? YES → default 25. pos=65, idx=4.
+        // Iter 4: 65 < 100; idx 4 >= 3? YES → 25. pos=90, idx=5.
+        // Iter 5: 90 < 100; idx 5 >= 3? YES → 25. pos=115, idx=6.
         //   115 < 100? no. Stop.
         expect(r.firstRowIndex).to.equal(6);
         expect(r.firstRowPosition).to.equal(115);
     });
 });
 
-describe('ViewportMath — computeTotalGridSize (slice 140)', () => {
+describe('ViewportMath — computeTotalGridSize', () => {
     it('sums all defined row heights + column widths', () => {
         // 3 cols × widths 50/60/40 = 150 px wide.
         // 2 rows × heights 20/30 = 50 px tall.

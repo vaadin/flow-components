@@ -11,12 +11,10 @@
  * Wire-format data transfer objects exchanged between the server-side
  * Spreadsheet and this client. These interfaces mirror the JSON shape the
  * server emits via `Serializer.serialize(...)`, pinned by
- * `DtoWireFormatTest` on the server side (slice 106).
+ * `DtoWireFormatTest` on the server side.
  *
  * IMPORTANT: the field names and types here MUST match the server's wire
- * format. Any divergence breaks the GWT-compatibility path during the
- * Tier 3 transition (the new client must consume the same JSON the GWT
- * client does today). See `vaadin-spreadsheet-flow/src/test/java/com/
+ * format. See `vaadin-spreadsheet-flow/src/test/java/com/
  * vaadin/flow/component/spreadsheet/DtoWireFormatTest.java` for the
  * authoritative server-side snapshots.
  *

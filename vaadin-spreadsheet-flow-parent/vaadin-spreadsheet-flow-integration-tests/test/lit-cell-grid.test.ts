@@ -22,9 +22,9 @@ import {
 import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
- * Slice 132's cell-grid tests pin the wire-format-class-name +
- * absolute-positioning contract. Render-correctness for styling /
- * selection / merged-cell overlays is deferred to slices 135-137.
+ * The cell grid on its own, driven by render states: the wire-format
+ * class names, positions, styling, selection, merged cells and frozen
+ * panes.
  */
 
 function makeCellData(col: number, row: number, value: string): CellData {
@@ -350,7 +350,7 @@ describe('SpreadsheetCellGrid — hidden rows + columns', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
+describe('SpreadsheetCellGrid — cell styling', () => {
     function build1x1State(
         cellData: Map<string, CellData>,
         cellStyleToCSSStyle: Record<number, string>,
@@ -625,7 +625,7 @@ describe('SpreadsheetCellGrid — cell styling (slice 135)', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
+describe('SpreadsheetCellGrid — selection overlays', () => {
     function build3x3State(
         selection: CellGridRenderState['selection']
     ): CellGridRenderState {
@@ -756,7 +756,7 @@ describe('SpreadsheetCellGrid — selection overlays (slice 136)', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
+describe('SpreadsheetCellGrid — .sheet-selection overlay', () => {
     function buildOverlayState(
         selection: CellGridRenderState['selection']
     ): CellGridRenderState {
@@ -799,7 +799,7 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay (slice 137)', () => {
         // positioned with z-index 1 and an opaque background, so an
         // outline left at the default z-index is in the DOM, correctly
         // sized, and completely invisible - which is how it shipped
-        // until the Phase 3.0 baselines were read pixel by pixel. Only
+        // until the baselines were read pixel by pixel. Only
         // the corner handle, which had its own z-index, showed.
         const el = await attachWithState(buildOverlayState({
             activeCell: { col: 2, row: 2 },
@@ -1086,7 +1086,7 @@ describe('SpreadsheetCellGrid — clicking a merged cell', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — merged-cell overlays (slice 138)', () => {
+describe('SpreadsheetCellGrid — merged-cell overlays', () => {
     function buildMergedState(
         mergedRegions: CellGridRenderState['mergedRegions'],
         cellData: Map<string, CellData> = new Map()
@@ -1257,7 +1257,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays (slice 138)', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
+describe('SpreadsheetCellGrid — frozen-pane quadrants', () => {
     function buildFreezeState(opts: {
         verticalSplitPosition: number;
         horizontalSplitPosition: number;
@@ -1365,8 +1365,8 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
         }));
 
         // Top quadrant cell at (col 3, row 1) uses:
-        //   left = colX[col - firstColumnIndex] = colX[0] = 100
-        //   top  = frozenRowY[row - 1] = frozenRowY[0] = 0
+        // left = colX[col - firstColumnIndex] = colX[0] = 100
+        // top  = frozenRowY[row - 1] = frozenRowY[0] = 0
         const cell = el.shadowRoot!.querySelector('.col3.row1') as HTMLElement;
         expect(cell.classList.contains('quadrant-top')).to.be.true;
         expect(cell.style.left).to.equal('100px');
@@ -1382,8 +1382,8 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
         }));
 
         // Left quadrant cell at (col 1, row 3) uses:
-        //   left = frozenColX[col - 1] = frozenColX[0] = 0
-        //   top  = rowY[row - firstRowIndex] = rowY[0] = 40
+        // left = frozenColX[col - 1] = frozenColX[0] = 0
+        // top  = rowY[row - firstRowIndex] = rowY[0] = 40
         const cell = el.shadowRoot!.querySelector('.col1.row3') as HTMLElement;
         expect(cell.classList.contains('quadrant-left')).to.be.true;
         expect(cell.style.left).to.equal('0px');
@@ -1399,8 +1399,8 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
         }));
 
         // Corner cell at (col 2, row 2) uses:
-        //   left = frozenColX[1] = 50
-        //   top  = frozenRowY[1] = 20
+        // left = frozenColX[1] = 50
+        // top  = frozenRowY[1] = 20
         const cell = el.shadowRoot!.querySelector('.col2.row2') as HTMLElement;
         expect(cell.classList.contains('quadrant-corner')).to.be.true;
         expect(cell.style.left).to.equal('50px');
@@ -1439,7 +1439,7 @@ describe('SpreadsheetCellGrid — frozen-pane quadrants (slice 139)', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — cell-click event delegation (slice 146)', () => {
+describe('SpreadsheetCellGrid — cell-click event delegation', () => {
     function build3x3State(): CellGridRenderState {
         return {
             viewport: {
@@ -1582,14 +1582,14 @@ describe('SpreadsheetCellGrid — cell-click event delegation (slice 146)', () =
     });
 });
 
-describe('SpreadsheetCellGrid — frozen-pane transform wrappers (slice 141)', () => {
+describe('SpreadsheetCellGrid — frozen-pane transform wrappers', () => {
     function buildScrolledFreezeState(opts: {
         verticalSplitPosition: number;
         horizontalSplitPosition: number;
         scrollLeft: number;
         scrollTop: number;
     }): CellGridRenderState {
-        // Same shape as slice 139's buildFreezeState — adding
+        // Same shape as buildFreezeState — adding
         // scrollLeft + scrollTop so the wrappers' transforms are
         // observable.
         return {

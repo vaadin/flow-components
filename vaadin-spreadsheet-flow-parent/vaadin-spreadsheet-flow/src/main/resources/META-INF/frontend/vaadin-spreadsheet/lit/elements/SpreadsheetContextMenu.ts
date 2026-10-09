@@ -57,7 +57,7 @@ export function emptyContextMenuRenderState(): ContextMenuRenderState {
  * Spreadsheet's dependency graph is a product decision rather than a detail of
  * this rewrite.
  *
- * No-decorator pattern matching every other internal element (slice 132+).
+ * No-decorator pattern matching every other internal element.
  */
 export class SpreadsheetContextMenu extends LitElement {
   /**

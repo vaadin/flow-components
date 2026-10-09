@@ -24,7 +24,7 @@ import { live } from 'lit/directives/live.js';
  * Both fields are editable text inputs. Editing the address +
  * pressing Enter dispatches {@code sheet-address-changed} from
  * this element; the connector forwards as the
- * {@code sheetAddressChanged} server RPC. Slice 175.
+ * {@code sheetAddressChanged} server RPC.
  */
 export interface FormulaBarRenderState {
   /** Active cell's address (e.g. "A1") or named-range name. */
@@ -64,8 +64,7 @@ export function emptyFormulaBarRenderState(): FormulaBarRenderState {
  * a formula bar (default = visible; hide via
  * {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE}).
  *
- * No-decorator pattern matching every other internal element
- * (slice 132+).
+ * No-decorator pattern matching every other internal element.
  */
 export class SpreadsheetFormulaBar extends LitElement {
   /**
@@ -257,7 +256,7 @@ export class SpreadsheetFormulaBar extends LitElement {
   private editingFormula = false;
 
   firstUpdated(): void {
-    // Slice 175: when the user presses Enter inside the
+    // When the user presses Enter inside the
     // address field, dispatch `sheet-address-changed` with
     // the input's current value. The connector translates
     // this into a `sheetAddressChanged` spreadsheet-event

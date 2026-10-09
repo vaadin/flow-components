@@ -10,12 +10,11 @@
 import { css } from 'lit';
 
 /**
- * Slice 176 (Tier 3 Phase 3.7). Rewrites the legacy 1832-line
- * GWT-era stylesheet down to the slim Lit-aligned shape.
+ * The stylesheet of the {@code <vaadin-spreadsheet>} element.
  *
  * The documented public styling API for the Spreadsheet is at
  * ../docs/articles/components/spreadsheet/styling.adoc and consists
- * of three pieces ONLY:
+ * of four pieces ONLY:
  *
  *   1. {@code ::part(...)} selectors — applied to elements inside
  *      the internal Lit sub-elements' shadow DOM via the {@code part}
@@ -29,9 +28,8 @@ import { css } from 'lit';
  *   3. {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
  *      + {@code Spreadsheet.HIDE_TABSHEET_STYLE} ("hidetabsheet")
  *      Java constants — applied to the host's class list and
- *      handled by CSS selectors below (defense-in-depth — the
- *      Lit connector also toggles display via a MutationObserver,
- *      slice 174-175).
+ *      handled by CSS selectors below, as well as by the connector,
+ *      which watches the host's classes.
  *   4. {@code Spreadsheet.setTheme(SpreadsheetTheme.LUMO)} — the
  *      host's {@code theme="lumo"}, which the connector copies onto
  *      each internal element. The theme defaults below give every
@@ -203,7 +201,7 @@ export const spreadsheetStyles = css`
   /* Spreadsheet.HIDE_FUNCTION_BAR_STYLE — public Java constant
      ("hidefunctionbar"). Setting it on the host removes the formula
      bar above the cell grid. The connector also toggles display via
-     a MutationObserver (slice 175); this CSS is defense-in-depth so
+     a MutationObserver; this CSS is defense-in-depth so
      the bar hides even before the observer fires (e.g., for a host
      that has the class set at construction time). */
   :host(.hidefunctionbar) vaadin-spreadsheet-internal-formula-bar {

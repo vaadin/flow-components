@@ -23,18 +23,13 @@ import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
  * Internal cell-grid Lit element. Renders absolutely-positioned cell
  * divs for the visible viewport portion of a spreadsheet.
  *
- * The element is driven entirely by its {@link renderState} property
- * — no internal state, no direct interaction with the connector.
+ * The element is driven by its {@link renderState} property; of its
+ * own it keeps only what it measures (text that runs out of its cell,
+ * the editor's width) and the cell under the pointer, and it talks to
+ * the connector only through events.
  * The Spreadsheet connector builds a fresh {@code CellGridRenderState}
  * on every scroll / data update / selection change and assigns it
  * here. Lit's diff handles cell-element churn.
- *
- * This is slice 132's minimal render: cell positions + text content,
- * no styling, no merged regions, no selection overlays. Subsequent
- * slices fill in:
- * - Slice 135: per-cell CSS styling
- * - Slice 136: selection overlays
- * - Slice 137: merged-cell overlays + frozen-pane geometry
  *
  * CSS class names on rendered cells follow the wire-format
  * convention from {@link toKey}: each cell carries
@@ -160,10 +155,6 @@ export class SpreadsheetCellGrid extends LitElement {
         background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
       }
 
-      /* Comment notes. Anchored at the cell's top-right and above every
-       cell, since the point is to be readable over the sheet. */
-      /* A comment as the GWT client showed it: a white card with a soft
-       shadow, the author above the text in small bold type. */
       /* Dropping into place as it appears and fading out as it goes, as
        the GWT client's notes did. */
       .v-spreadsheet-comment-overlay.animate-in {
@@ -174,6 +165,10 @@ export class SpreadsheetCellGrid extends LitElement {
         animation: overlay-animate-out 120ms;
       }
 
+      /* Comment notes. Anchored at the cell's top-right and above every
+       cell, since the point is to be readable over the sheet. */
+      /* A comment as the GWT client showed it: a white card with a soft
+       shadow, the author above the text in small bold type. */
       .v-spreadsheet-comment-overlay {
         z-index: 20;
         padding: 7px;
@@ -254,9 +249,6 @@ export class SpreadsheetCellGrid extends LitElement {
         white-space: nowrap;
       }
 
-      /* The fill handle's drag outline, as the GWT client drew it: the
-       fill colour around a pale green ground, so it reads as what the
-       drag will fill rather than as a second selection. */
       /* A reference of the formula being written: its cells tinted in its
          colour, and the one the caret is in outlined, as the GWT client drew
          them. Over the cells, and never in the way of a click. */
@@ -267,6 +259,9 @@ export class SpreadsheetCellGrid extends LitElement {
         z-index: 2;
       }
 
+      /* The fill handle's drag outline, as the GWT client drew it: the
+       fill colour around a pale green ground, so it reads as what the
+       drag will fill rather than as a second selection. */
       .paintmode {
         position: absolute;
         pointer-events: none;
@@ -372,9 +367,6 @@ export class SpreadsheetCellGrid extends LitElement {
       .sheet-selection .cut {
         visibility: hidden;
       }
-      /* Cells inside the active range get a subtle background
-           highlight by default; matches the previous selected-cell-
-           highlight affordance. */
       /* The selection tint over a cell has to sit on top of whatever the
        cell is already painted, not replace it: a background would hide a
        conditional format's fill for as long as the cell is selected, and
@@ -403,7 +395,7 @@ export class SpreadsheetCellGrid extends LitElement {
         display: none;
       }
 
-      /* Frozen-pane wrappers (slice 141). Each frozen quadrant lives
+      /* Frozen-pane wrappers. Each frozen quadrant lives
            in its own wrapper div that's transform-translated by the
            current scroll offset, so the cells inside stay visually
            pinned to their viewport edge as the scroll container
@@ -487,7 +479,7 @@ export class SpreadsheetCellGrid extends LitElement {
 
       /* Sheet overlays — images, charts, and embedded
            components positioned at absolute pixel coordinates on
-           the sheet, each in the pane of its anchor cell. Slice 160.
+           the sheet, each in the pane of its anchor cell.
            Above the cells and below the editor and the notes; in the
            scrolling quadrant no higher than the frozen panes, which
            cover what scrolls under them. */
@@ -501,14 +493,6 @@ export class SpreadsheetCellGrid extends LitElement {
         display: block;
       }
 
-      /* Comment indicator — small red triangle in the top-right
-           of a cell with a comment (slice 165). The triangle is
-           drawn via border + clip-path so no extra image asset
-           is needed. Excel renders red; gnumeric+LibreOffice
-           render yellow. We follow Excel. */
-      /* Invalid-formula indicator — Excel draws a small marker in the
-       cell's top-LEFT corner when a formula cannot be evaluated,
-       mirroring the comment triangle in the top-right. */
       /* The GWT client's corner markers: 9px triangles in the cell's
        top-right corner, inside its border - red for a formula that could
        not be evaluated, amber for a comment. */
@@ -538,9 +522,6 @@ export class SpreadsheetCellGrid extends LitElement {
         pointer-events: none;
       }
 
-      /* Hyperlink cells get a visual underline + color hint
-           (slice 165). The actual click handling lives in the
-           connector; this style just matches the Excel convention. */
       /* A link looks however its workbook styles it, as in the GWT client;
        the colour an application may give links is laid among the cell
        styles - see buildCellStyleBlock. */
@@ -548,10 +529,6 @@ export class SpreadsheetCellGrid extends LitElement {
         cursor: pointer;
       }
 
-      /* Popup-button anchor — small triangle in the bottom-right
-           of a cell that opens a popup on click (slice 161). The
-           popup itself is provided by the Flow wrapper via slot;
-           this is just the click target + visual indicator. */
       /* The filter button, as the GWT client drew it: a small white box with
        a grey arrow, tucked into the bottom-right corner of its cell inside
        the cell's borders. Placed at that corner and pulled back over it. */
@@ -801,16 +778,16 @@ export class SpreadsheetCellGrid extends LitElement {
    * `.cell` ancestor and dispatches a {@code cell-click} custom
    * event with the cell's coordinate + modifier-key state. The
    * connector listens for this event to update its selection
-   * state + push a fresh render. Slice 146.
+   * state + push a fresh render.
    */
   firstUpdated(): void {
     this.shadowRoot!.addEventListener('click', this.handleShadowClick);
-    // Double-click delegation for cell-editor activation
-    // (slice 152). Same pattern as the single-click handler;
+    // Double-click delegation for cell-editor activation.
+    // Same pattern as the single-click handler;
     // dispatches `cell-doubleclick` so the connector can open
     // its editor at the dbl-clicked cell.
     this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick);
-    // Mouse drag selection (slice 155). The cell-grid emits
+    // Mouse drag selection. The cell-grid emits
     // `cell-mousedown` + `cell-mouseover`; the connector
     // tracks a dragging flag + extends the range as the
     // mouse moves over new cells. mouseup is bound at the
@@ -821,7 +798,7 @@ export class SpreadsheetCellGrid extends LitElement {
     // mouseleave on the grid itself: mouseout fires between cells too, and
     // would flicker the comment off and on as the pointer crosses a border.
     this.addEventListener('mouseleave', this.handleGridMouseLeave);
-    // Right-click delegation (slice 166). preventDefault stops
+    // Right-click delegation. preventDefault stops
     // the browser's native context menu so the server-supplied
     // ContextMenu component is the only one shown. Dispatches
     // `cell-contextmenu` with the cell coordinate; the connector
@@ -867,13 +844,6 @@ export class SpreadsheetCellGrid extends LitElement {
     }
   };
 
-  /**
-   * After every render, focus the editor input if one is now
-   * active. The browser auto-focus attribute only works once on
-   * insertion; this hook focuses on every transition into edit
-   * mode so re-activating an editor at a new cell still places
-   * the caret inside.
-   */
   /**
    * The render state with this element's own measurements folded in.
    */
@@ -1160,6 +1130,13 @@ export class SpreadsheetCellGrid extends LitElement {
     }
   }
 
+  /**
+   * After every render: measure what the new state needs measured, place
+   * the notes, and give the keyboard to the note or editor being written.
+   * The browser's autofocus works only once, on insertion, so this focuses
+   * on every move into editing, which also puts the caret in an editor
+   * opened at another cell.
+   */
   updated(changedProps: Map<string, unknown>): void {
     if (changedProps.has('renderState')) {
       this.remeasureTooNarrowCells();
@@ -1316,7 +1293,7 @@ export class SpreadsheetCellGrid extends LitElement {
    * connector decides whether to consume the event vs let the
    * normal click handler run (Excel: mousedown immediately
    * selects, then drag extends, then mouseup commits the
-   * range). Slice 155.
+   * range).
    */
   private readonly handleShadowMouseDown = (e: Event): void => {
     const target = e.target;
@@ -1370,12 +1347,6 @@ export class SpreadsheetCellGrid extends LitElement {
     }
   };
 
-  /**
-   * Mouseover handler — emits {@code cell-mouseover} when the
-   * mouse enters a new cell. Fires on every hover (not just
-   * during drag); the connector filters by checking its
-   * dragging flag. Slice 155.
-   */
   /** The cell the pointer is over, or null. Presentation-only state. */
   private hoveredKey: string | null = null;
 
@@ -1392,6 +1363,12 @@ export class SpreadsheetCellGrid extends LitElement {
     this.dispatchEvent(new CustomEvent('grid-mouseleave', { bubbles: true, composed: true }));
   };
 
+  /**
+   * Mouseover handler — emits {@code cell-mouseover} when the
+   * mouse enters a new cell. Fires on every hover (not just
+   * during drag); the connector filters by checking its
+   * dragging flag.
+   */
   private readonly handleShadowMouseOver = (e: Event): void => {
     const target = e.target;
     if (!(target instanceof Element)) {
@@ -1457,7 +1434,7 @@ export class SpreadsheetCellGrid extends LitElement {
    * Right-click handler — emits {@code cell-contextmenu} with the
    * cell coordinate. preventDefault stops the browser's native
    * context menu so the server-side {@code ContextMenu} is the
-   * only menu shown. Slice 166.
+   * only menu shown.
    */
   private readonly handleShadowContextMenu = (event: Event): void => {
     const e = event as MouseEvent;
@@ -1572,8 +1549,8 @@ export class SpreadsheetCellGrid extends LitElement {
     const mainOverlays = this.quadrantOverlays(mainOpts);
 
     // Frozen quadrants live inside transform-translated wrappers
-    // so their cells visually stay pinned as the user scrolls
-    // (slice 141). The wrapper transform counters the scroll
+    // so their cells visually stay pinned as the user scrolls.
+    // The wrapper transform counters the scroll
     // container's shift; cells inside use coordinates relative
     // to the wrapper, which is itself anchored at the cell-grid
     // origin. CSS z-index on the wrappers stacks corner > top +
@@ -1906,13 +1883,12 @@ function renderQuadrant(opts: QuadrantRenderOpts): unknown {
           : isActive && !isCoherentSelection(selection)
           ? ' selected-cell-highlight'
           : '';
-      // Hyperlink cells get a `link-cell` class for visual
-      // styling (blue + underline). The click handler in
+      // Hyperlink cells get a `link-cell` class: a pointer cursor,
+      // the workbook styling the link itself. The click handler in
       // the connector dispatches `linkCellClicked` based
-      // on the same hyperlinks map. Slice 165.
-      // Defensive default — older fixtures may not declare
-      // the hyperlinkCells / commentCells sets (slice 165
-      // introduced them).
+      // on the same hyperlinks map.
+      // Defensive default — some test fixtures do not declare
+      // the hyperlinkCells / commentCells sets.
       const hyperlinkCells = state.hyperlinkCells ?? new Set();
       const commentCells = state.commentCells ?? new Set();
       const invalidFormulaCells = state.invalidFormulaCells ?? new Set();
@@ -1931,7 +1907,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): unknown {
         textColorDeclaration(data);
       // Comment indicator — render an additional triangle
       // anchored at the cell's top-right when the cell has
-      // a comment. Slice 165.
+      // a comment.
       const invalidIndicator =
         invalidFormulaCells.has(key) && !underMerge
           ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
@@ -1943,7 +1919,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): unknown {
         commentCells.has(key) && !underMerge
           ? html`<div class="comment-indicator" part="comment-triangle" data-col=${col} data-row=${row}></div>`
           : '';
-      // Slice 173: `part` attribute mirrors the documented
+      // `part` attribute mirrors the documented
       // public styling API at
       // ../docs/articles/components/spreadsheet/styling.adoc.
       // Cells inside the active range (but not the active
@@ -1951,7 +1927,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): unknown {
       // `vaadin-spreadsheet::part(cell-range)` works.
       const cellPart = inSelection && !isActive ? 'cell cell-range' : 'cell';
       // data-col + data-row drive the click-delegation handler
-      // in firstUpdated() (slice 146) — single source of truth
+      // in firstUpdated() — single source of truth
       // for the cell's coordinate when the event bubbles.
       // On one line, and the marker only where there is one: whitespace
       // between the tags is a text node of its own and every binding a
@@ -2107,32 +2083,6 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
 }
 
 /**
- * Build the {@code .sheet-selection} overlay div positioned over the
- * active range. The div contains 4 child elements
- * ({@code .s-top}, {@code .s-left}, {@code .s-right}, {@code .s-bottom})
- * which TestBench's {@code SpreadsheetElement.findSelectionOutline}
- * locates by class name.
- *
- * Returns an empty string when the active range doesn't overlap the
- * visible viewport (selection scrolled off-screen) — TestBench's
- * waitUntil lookup will then poll until the user scrolls back.
- *
- * Wire contract: class names match the GWT-side
- * {@code SelectionWidget.java:116-126}. The overlay is positioned
- * absolutely within the cell-grid's shadow DOM. CSS styling for the
- * border-line children is deferred to the consumer (theme + a future
- * slice) — slice 137's scope is the structural DOM that TestBench
- * locates.
- */
-/**
- * The dashed outline the fill handle drags out.
- *
- * Always rendered, hidden when nothing is being painted: it is the only
- * feedback the user has for where a fill drag will land, and keeping the
- * element in the tree means an observer can ask whether it is showing
- * rather than whether it exists.
- */
-/**
  * The references of the formula being written, as far as this quadrant
  * shows them: each one's cells tinted in its colour at a quarter, and the
  * one the caret is in ringed at three quarters, two pixels inside its
@@ -2156,6 +2106,14 @@ function buildFormulaReferences(opts: QuadrantRenderOpts): TemplateResult[] {
   return out;
 }
 
+/**
+ * The dashed outline the fill handle drags out.
+ *
+ * Always rendered, hidden when nothing is being painted: it is the only
+ * feedback the user has for where a fill drag will land, and keeping the
+ * element in the tree means an observer can ask whether it is showing
+ * rather than whether it exists.
+ */
 function buildPaintOutline(opts: QuadrantRenderOpts): TemplateResult | string {
   // `?? null` rather than `=== null`: a hand-built render state may leave
   // the field off entirely, and a missing outline is not a crash.
@@ -2280,7 +2238,6 @@ function cellBoxOnGrid(
   return { left, top, width, height };
 }
 
-/** A drawn column's width, frozen ones included; 0 when it is not drawn. */
 /** A value probe: out of flow and off-screen, so measuring never disturbs the sheet. */
 const VALUE_PROBE_STYLE = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
 
@@ -2292,6 +2249,7 @@ function widthKey(cellStyle: string, value: string): string {
   return `${cellStyle}\u0000${value}`;
 }
 
+/** A drawn column's width, frozen ones included; 0 when it is not drawn. */
 function columnWidthOf(state: CellGridRenderState, col: number): number {
   if (col >= 1 && col <= state.horizontalSplitPosition) {
     return state.frozenColWidths[col - 1] ?? 0;
@@ -2338,21 +2296,6 @@ function editorWidth(state: CellGridRenderState, col: number, row: number, textW
   return width + 1;
 }
 
-/**
- * Comment overlays — the little yellow notes.
- *
- * Two things put one on screen: the workbook marking a comment "always
- * visible", and the pointer resting on a cell that has one. A cell whose
- * formula the server rejected shows the same overlay carrying the error
- * instead, which is why one function renders both.
- *
- * Class names are the GWT ones (`comment-overlay-label`,
- * `comment-overlay-author`, `comment-overlay-invalidformula`). A page's
- * styles reached them while the GWT client drew notes outside the
- * component's shadow root; here they are two shadow roots in, so the card,
- * its author and its text are the parts `comment-overlay`, `comment-author`
- * and `comment-text`, which is what an application styles now.
- */
 /** How far from its cell the GWT client hung a note, across and up. */
 const COMMENT_GAP = 15;
 
@@ -2446,6 +2389,21 @@ function drawnNotes(state: CellGridRenderState, hoveredKey: string | null): Draw
   return notes;
 }
 
+/**
+ * Comment overlays — the little yellow notes.
+ *
+ * Two things put one on screen: the workbook marking a comment "always
+ * visible", and the pointer resting on a cell that has one. A cell whose
+ * formula the server rejected shows the same overlay carrying the error
+ * instead, which is why one function renders both.
+ *
+ * Class names are the GWT ones (`comment-overlay-label`,
+ * `comment-overlay-author`, `comment-overlay-invalidformula`). A page's
+ * styles reached them while the GWT client drew notes outside the
+ * component's shadow root; here they are two shadow roots in, so the card,
+ * its author and its text are the parts `comment-overlay`, `comment-author`
+ * and `comment-text`, which is what an application styles now.
+ */
 function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | null): TemplateResult[] {
   const authors = state.commentAuthors ?? {};
   const invalidMessage = state.invalidFormulaMessage ?? null;
@@ -2503,6 +2461,21 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
   return overlays;
 }
 
+/**
+ * Build the {@code .sheet-selection} overlay div positioned over the
+ * active range. The div contains 4 child elements
+ * ({@code .s-top}, {@code .s-left}, {@code .s-right}, {@code .s-bottom})
+ * which TestBench's {@code SpreadsheetElement.findSelectionOutline}
+ * locates by class name.
+ *
+ * Returns an empty string when the active range doesn't overlap the
+ * visible viewport (selection scrolled off-screen) — TestBench's
+ * waitUntil lookup will then poll until the user scrolls back.
+ *
+ * Wire contract: class names match the GWT-side
+ * {@code SelectionWidget.java:116-126}. The overlay is positioned
+ * absolutely within the cell-grid's shadow DOM.
+ */
 function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | string {
   const { selection } = opts.state;
   const range = selection.activeRange;
@@ -2513,7 +2486,7 @@ function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | strin
   }
 
   // The active cell's coordinates ride on the overlay as data-col /
-  // data-row (slice 188). Nothing else in the DOM identifies the active
+  // data-row. Nothing else in the DOM identifies the active
   // cell — it renders as a plain `part="cell"`, indistinguishable from
   // an unselected one — so this is the only way to read "where is the
   // selection" from outside.
@@ -2564,6 +2537,22 @@ function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | strin
   `;
 }
 
+/** Whether a theme attribute's value names the Lumo variant. */
+function isLumo(theme: string | null | undefined): boolean {
+  return (theme ?? '').split(/\s+/).includes('lumo');
+}
+
+/**
+ * A hidden row or column collapses its cells to nothing.
+ *
+ * `display:none` rather than a zero-sized box: a box with no width still
+ * paints its borders, still answers a hit test on its edge, and still
+ * reports itself as laid out. Hidden means gone.
+ */
+function collapsedDeclaration(width: number, height: number): string {
+  return width === 0 || height === 0 ? 'display:none;' : '';
+}
+
 /**
  * Inline {@code color:} declaration for a cell whose number format names a
  * colour — `[Red]#,##0` and friends.
@@ -2573,22 +2562,6 @@ function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | strin
  * differently) while the style index describes the format itself. So the
  * server resolves it per cell and sends the hex digits without the `#`.
  */
-/**
- * A hidden row or column collapses its cells to nothing.
- *
- * `display:none` rather than a zero-sized box: a box with no width still
- * paints its borders, still answers a hit test on its edge, and still
- * reports itself as laid out. Hidden means gone.
- */
-/** Whether a theme attribute's value names the Lumo variant. */
-function isLumo(theme: string | null | undefined): boolean {
-  return (theme ?? '').split(/\s+/).includes('lumo');
-}
-
-function collapsedDeclaration(width: number, height: number): string {
-  return width === 0 || height === 0 ? 'display:none;' : '';
-}
-
 function textColorDeclaration(data: CellData | undefined): string {
   const color = data?.textColor;
   return color ? `color:#${color};` : '';
@@ -2791,14 +2764,14 @@ function editorCellStyle(state: CellGridRenderState, col: number, row: number): 
 
 /**
  * Build the cell-editor overlay {@code <input>} when {@code state
- * .editor} is non-null (slice 152). The input is sized to match
+ * .editor} is non-null. The input is sized to match
  * the cell's pixel box using the appropriate quadrant arrays:
  *
  *  - col within frozen cols: use {@code frozenColX} / {@code
- *    frozenColWidths}
+ * frozenColWidths}
  *  - col within viewport: use {@code colX} / {@code colWidths}
  *  - row within frozen rows: use {@code frozenRowY} / {@code
- *    frozenRowHeights}
+ * frozenRowHeights}
  *  - row within viewport: use {@code rowY} / {@code rowHeights}
  *
  * When the editor's coordinate falls outside both the viewport
@@ -2807,13 +2780,13 @@ function editorCellStyle(state: CellGridRenderState, col: number, row: number): 
  * this keeps the render safe regardless).
  *
  * On keydown:
- *   Enter / Tab → dispatch {@code cell-editor-commit} with the
- *     current input value; the connector dispatches
- *     `cellValueEdited` (slice 153) + clears editor state.
- *   Escape       → dispatch {@code cell-editor-cancel};
- *                  connector clears editor state without
- *                  dispatching cellValueEdited.
- *   Blur          → same as commit (Excel convention; slice 153).
+ * Enter / Tab → dispatch {@code cell-editor-commit} with the
+ * current input value; the connector dispatches
+ *     `cellValueEdited` + clears editor state.
+ * Escape       → dispatch {@code cell-editor-cancel};
+ * connector clears editor state without
+ * dispatching cellValueEdited.
+ * Blur          → same as commit (Excel convention).
  *
  * The detail event payload is {@code { col, row, value }} so the
  * connector can route the value to the correct cell without
@@ -2874,7 +2847,7 @@ function buildCellEditorOverlay(
         // Include the key + shift modifier so the connector can
         // pick the next active-cell direction after commit
         // (Excel convention: Enter moves down, Tab moves right;
-        // shift reverses each). Slice 158. Left for somewhere, where
+        // shift reverses each). Left for somewhere, where
         // to: the edit carries on in the formula field, so the
         // connector stops the commit then and the editor stays open.
         detail: { col, row, value, key, shiftKey, relatedTarget },
@@ -2970,7 +2943,7 @@ function buildCellEditorOverlay(
  * overlay sheet-overlay-image" src="...">}. COMPONENT overlays
  * render as a placeholder {@code <div class="sheet-overlay
  * sheet-overlay-component" data-overlay-id="...">} pending
- * Vaadin-component slotting in a later slice. Slice 160.
+ * Vaadin-component slotting in a later slice.
  *
  * Keyed on the overlay id. The list arrives from the server's overlay map,
  * whose iteration order shifts whenever an entry is removed and re-added —
@@ -2980,9 +2953,8 @@ function buildCellEditorOverlay(
  * changed. Keyed, Lit moves the existing elements instead.
  */
 function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRenderOpts['quadrantName']): unknown {
-  // Defensive default — some older test fixtures may not
-  // declare the overlays array yet (slice 160 introduced it).
-  // Real connector pushes always populate the field.
+  // Defensive default — some test fixtures do not declare the
+  // overlays array. Real connector pushes always populate the field.
   //
   // Each in the pane its anchor cell is in, as the GWT client placed them,
   // so a picture anchored in a frozen row stays with that row. The frozen
@@ -3032,7 +3004,7 @@ function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRender
 }
 
 /**
- * Build the popup-button rendering (slice 161). One small
+ * Build the popup-button rendering. One small
  * triangle/icon per anchor cell at its bottom-right corner.
  * Click on a button dispatches `popup-button-click { col, row }`
  * which the connector translates to a `popupButtonClick`

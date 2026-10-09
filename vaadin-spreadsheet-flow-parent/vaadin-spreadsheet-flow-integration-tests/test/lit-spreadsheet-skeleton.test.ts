@@ -120,7 +120,7 @@ describe('Spreadsheet skeleton — initial selection state', () => {
     });
 });
 
-describe('Spreadsheet — render pipeline (slice 134)', () => {
+describe('Spreadsheet — render pipeline', () => {
     function makeSheet(): Spreadsheet {
         return newSheet();
     }
@@ -136,16 +136,13 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
     });
 
     it('appends the cell-grid + headers + corner + sheet tabs + formula bar to the host element', () => {
-        // Slice 140: scroll container wraps the cell-grid. Slice 143
-        // added the column-header sibling. Slice 144 added the
-        // row-header + restructured the scroll container as a CSS
-        // grid. Slice 145 added the corner box at (col 1, row 1).
-        // Slice 154 added the sheet-tabs strip below the scroll
-        // container. Slice 175 added the formula bar above it.
-        // Slice 191 added the context menu, which stays empty until the
-        // server answers a right-click with the actions it offers.
-        // They all hang off the component's own root element, which owns
-        // the vertical layout — the host belongs to the application.
+        // The scroll container is a CSS grid of the cell-grid, the column
+        // and row headers and the corner box at (col 1, row 1), with the
+        // formula bar above it and the sheet-tabs strip below. The context
+        // menu stays empty until the server answers a right-click with the
+        // actions it offers. They all hang off the component's own root
+        // element, which owns the vertical layout — the host belongs to the
+        // application.
         const host = document.createElement('div');
         const sheet = newSheet(host);
 
@@ -405,7 +402,7 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
     });
 });
 
-describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
+describe('Spreadsheet — scroll-event wiring', () => {
     /**
      * Helper: attach the connector to a real DOM node so the scroll
      * container has a measurable {@code clientWidth} / {@code clientHeight}.
@@ -424,7 +421,7 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
             host,
             sheet,
             // Dispose the sheet on cleanup so the ResizeObserver
-            // (slice 142) + scroll listener (slice 140) don't leak
+            //  + scroll listener don't leak
             // across tests. Without this, many test files in the
             // same wtr session accumulate dangling observers and
             // exceed the test-finish timeout.
@@ -445,7 +442,7 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         const computed = getComputedStyle(scroller);
         expect(computed.display).to.equal('grid');
         // Four children: header-corner + column-header + row-header
-        // + cell-grid (CSS-grid layout, slice 144+145).
+        // + cell-grid (CSS-grid layout).
         expect(scroller.children).to.have.length(4);
 
         cleanup();
@@ -604,7 +601,7 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
         cleanup();
     });
 
-    it('buildRenderState carries scrollLeft + scrollTop into the render state (slice 141)', () => {
+    it('buildRenderState carries scrollLeft + scrollTop into the render state', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(20);
         sheet.setCols(20);
@@ -627,7 +624,7 @@ describe('Spreadsheet — scroll-event wiring (slice 140)', () => {
     });
 });
 
-describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 142)', () => {
+describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
     function attachSheetForLifecycle(width: number, height: number): {
         host: HTMLElement;
         sheet: Spreadsheet;
@@ -731,7 +728,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         host.remove();
     });
 
-    it('header corner box sits in CSS-grid (col 1, row 1) with sticky positioning (slice 145)', () => {
+    it('header corner box sits in CSS-grid (col 1, row 1) with sticky positioning', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         const corner = sheet.getHeaderCorner();
         expect(corner).to.be.instanceOf(HTMLElement);
@@ -829,7 +826,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('cell-click event from the cell-grid updates the active cell selection (slice 146)', () => {
+    it('cell-click event from the cell-grid updates the active cell selection', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -857,7 +854,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('shift-click extends the active range from the previous active cell (slice 146)', () => {
+    it('shift-click extends the active range from the previous active cell', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -891,7 +888,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('cell-click triggers a re-render with the new selection (slice 146)', () => {
+    it('cell-click triggers a re-render with the new selection', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -930,13 +927,13 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         }));
     }
 
-    it('scroll container is focusable via tabindex=0 (slice 147)', () => {
+    it('scroll container is focusable via tabindex=0', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         expect(sheet.getScrollContainer().tabIndex).to.equal(0);
         cleanup();
     });
 
-    it('ArrowRight moves the active cell one column right (slice 147)', () => {
+    it('ArrowRight moves the active cell one column right', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -956,7 +953,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('ArrowDown / ArrowLeft / ArrowUp all move the active cell one cell (slice 147)', () => {
+    it('ArrowDown / ArrowLeft / ArrowUp all move the active cell one cell', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -982,7 +979,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Arrow keys clamp at the grid edges (slice 147)', () => {
+    it('Arrow keys clamp at the grid edges', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(3);
         sheet.setCols(3);
@@ -1011,7 +1008,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Shift+ArrowDown extends the range without moving the active cell (slice 147)', () => {
+    it('Shift+ArrowDown extends the range without moving the active cell', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1039,7 +1036,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Shift+arrow contracts the range when extending back toward the anchor (slice 147)', () => {
+    it('Shift+arrow contracts the range when extending back toward the anchor', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1070,7 +1067,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('plain arrow after a shift-extended range resets the extend position (slice 147)', () => {
+    it('plain arrow after a shift-extended range resets the extend position', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1099,7 +1096,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('keyboard navigation is a no-op when rows or cols is 0 (slice 147)', () => {
+    it('keyboard navigation is a no-op when rows or cols is 0', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         // No setRows/setCols — rows=cols=0.
         const before = sheet.getSelection();
@@ -1112,7 +1109,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column-header-click selects the entire column (slice 148)', () => {
+    it('column-header-click selects the entire column', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1136,7 +1133,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('shift-click on column header extends from anchor column to clicked column (slice 148)', () => {
+    it('shift-click on column header extends from anchor column to clicked column', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1168,7 +1165,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('row-header-click selects the entire row (slice 148)', () => {
+    it('row-header-click selects the entire row', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1190,7 +1187,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('shift-click on row header extends from anchor row to clicked row (slice 148)', () => {
+    it('shift-click on row header extends from anchor row to clicked row', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1221,7 +1218,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Tab moves active cell right + Shift+Tab moves left (slice 149)', () => {
+    it('Tab moves active cell right + Shift+Tab moves left', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1273,7 +1270,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Home / End jump to first / last column in current row (slice 149)', () => {
+    it('Home / End jump to first / last column in current row', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1294,7 +1291,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Ctrl+Home and Ctrl+End jump to A1 / last cell (slice 149)', () => {
+    it('Ctrl+Home and Ctrl+End jump to A1 / last cell', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1325,7 +1322,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('cell-click dispatches spreadsheet-event with cellSelected (slice 150)', () => {
+    it('cell-click dispatches spreadsheet-event with cellSelected', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1355,7 +1352,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('shift-click dispatches cellRangeSelected with the new range (slice 150)', () => {
+    it('shift-click dispatches cellRangeSelected with the new range', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1398,7 +1395,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column-header click dispatches columnSelected (slice 150)', () => {
+    it('column-header click dispatches columnSelected', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1425,7 +1422,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('row-header click dispatches rowSelected (slice 150)', () => {
+    it('row-header click dispatches rowSelected', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1452,7 +1449,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('keyboard arrow dispatches cellSelected (slice 150)', () => {
+    it('keyboard arrow dispatches cellSelected', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1475,7 +1472,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('shift+arrow dispatches cellRangeSelected (slice 150)', () => {
+    it('shift+arrow dispatches cellRangeSelected', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1504,7 +1501,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Delete key dispatches deleteSelectedCells spreadsheet-event (slice 151)', () => {
+    it('Delete key dispatches deleteSelectedCells spreadsheet-event', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1527,7 +1524,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Backspace also dispatches deleteSelectedCells (slice 151)', () => {
+    it('Backspace also dispatches deleteSelectedCells', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1548,7 +1545,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Delete does NOT dispatch deleteSelectedCells on an empty grid (slice 151)', () => {
+    it('Delete does NOT dispatch deleteSelectedCells on an empty grid', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         // No setRows/setCols.
 
@@ -1566,7 +1563,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Delete does NOT modify the client-side selection (slice 151)', () => {
+    it('Delete does NOT modify the client-side selection', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -1594,7 +1591,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('mousedown on a cell starts a drag and selects the anchor cell (slice 155)', () => {
+    it('mousedown on a cell starts a drag and selects the anchor cell', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1615,7 +1612,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('mouseover during drag extends the range from anchor to hover cell (slice 155)', () => {
+    it('mouseover during drag extends the range from anchor to hover cell', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1643,7 +1640,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('mouseover when NOT dragging does not change selection (slice 155)', () => {
+    it('mouseover when NOT dragging does not change selection', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1661,7 +1658,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('mouseup ends the drag and dispatches cellRangeSelected for multi-cell ranges (slice 155)', () => {
+    it('mouseup ends the drag and dispatches cellRangeSelected for multi-cell ranges', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1698,7 +1695,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('mouseup after a single-cell drag does NOT dispatch a duplicate cellSelected (slice 155)', () => {
+    it('mouseup after a single-cell drag does NOT dispatch a duplicate cellSelected', () => {
         // mousedown + mouseup on the same cell = a click. The
         // existing cell-click handler dispatches `cellSelected`;
         // mouseup should NOT additionally dispatch since the
@@ -1726,7 +1723,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('mouseup is a no-op when no drag was in progress (slice 155)', () => {
+    it('mouseup is a no-op when no drag was in progress', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1740,7 +1737,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('shift+mousedown extends range from existing anchor (slice 155)', () => {
+    it('shift+mousedown extends range from existing anchor', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1772,7 +1769,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('keyboard nav past the right edge scrolls the active cell into view (slice 156)', () => {
+    it('keyboard nav past the right edge scrolls the active cell into view', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(100, 100);
         sheet.setRows(20);
         sheet.setCols(20);
@@ -1795,7 +1792,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('keyboard nav past the bottom edge scrolls the active cell into view (slice 156)', () => {
+    it('keyboard nav past the bottom edge scrolls the active cell into view', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 60);
         sheet.setRows(20);
         sheet.setCols(20);
@@ -1811,7 +1808,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('keyboard nav within visible viewport does NOT scroll (slice 156)', () => {
+    it('keyboard nav within visible viewport does NOT scroll', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(20);
         sheet.setCols(20);
@@ -1827,7 +1824,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('ArrowLeft past the left edge scrolls back to bring active into view (slice 156)', () => {
+    it('ArrowLeft past the left edge scrolls back to bring active into view', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(100, 100);
         sheet.setRows(20);
         sheet.setCols(20);
@@ -1848,7 +1845,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('scrolling dispatches onSheetScroll with the new viewport bounds (slice 157)', () => {
+    it('scrolling dispatches onSheetScroll with the new viewport bounds', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(50);
         sheet.setCols(20);
@@ -1949,7 +1946,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Ctrl+A selects the entire sheet off a Mac (slice 159)', () => {
+    it('Ctrl+A selects the entire sheet off a Mac', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(20);
         sheet.setCols(10);
@@ -1983,7 +1980,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Cmd+A (Mac convention) also selects the entire sheet (slice 159)', () => {
+    it('Cmd+A (Mac convention) also selects the entire sheet', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2005,7 +2002,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Ctrl+Z dispatches onUndo off a Mac (slice 159)', () => {
+    it('Ctrl+Z dispatches onUndo off a Mac', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2031,7 +2028,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Ctrl+Y dispatches onRedo off a Mac (slice 159)', () => {
+    it('Ctrl+Y dispatches onRedo off a Mac', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2057,7 +2054,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Cmd+Shift+Z (Mac convention) also dispatches onRedo (slice 159)', () => {
+    it('Cmd+Shift+Z (Mac convention) also dispatches onRedo', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2084,7 +2081,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('Ctrl+Shift+Z dispatches onRedo (Windows convention) (slice 159)', () => {
+    it('Ctrl+Shift+Z dispatches onRedo (Windows convention)', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2110,7 +2107,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('plain Ctrl+Z without shift does NOT dispatch onRedo (slice 159)', () => {
+    it('plain Ctrl+Z without shift does NOT dispatch onRedo', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2162,7 +2159,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('constructor accepts an optional renderTarget arg for shadow-DOM hosts (slice 162)', () => {
+    it('constructor accepts an optional renderTarget arg for shadow-DOM hosts', () => {
         // The Lit wrapper passes (element, element.renderRoot) so
         // DOM goes into the shadow root, not the light DOM. Verify
         // the second arg controls where children are appended.
@@ -2223,7 +2220,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('copy writes selected cells as TSV to the clipboard (slice 163)', () => {
+    it('copy writes selected cells as TSV to the clipboard', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2267,7 +2264,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('cut dispatches clearSelectedCellsOnCut AND writes to clipboard (slice 163)', () => {
+    it('cut dispatches clearSelectedCellsOnCut AND writes to clipboard', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2297,7 +2294,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('paste dispatches onPaste with the clipboard text (slice 163)', () => {
+    it('paste dispatches onPaste with the clipboard text', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2323,7 +2320,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('copy is a no-op when the cell editor is open (slice 163)', () => {
+    it('copy is a no-op when the cell editor is open', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2351,7 +2348,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column resize: mousedown on handle + drag + mouseup dispatches columnResized (slice 164)', () => {
+    it('column resize: mousedown on handle + drag + mouseup dispatches columnResized', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -2387,7 +2384,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('row resize: mousedown on handle + drag + mouseup dispatches rowsResized (slice 164)', () => {
+    it('row resize: mousedown on handle + drag + mouseup dispatches rowsResized', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -2444,7 +2441,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column resize clamps at 0 width (no negative columns) (slice 164)', () => {
+    it('column resize clamps at 0 width (no negative columns)', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2465,7 +2462,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column-header renders a resize handle for each column (slice 164)', async () => {
+    it('column-header renders a resize handle for each column', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(3);
@@ -2481,7 +2478,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('cell comments: setCellComments + recomputeViewport renders comment-indicator divs (slice 165)', async () => {
+    it('cell comments: setCellComments + recomputeViewport renders comment-indicator divs', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2501,7 +2498,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('hyperlink cells: setHyperlinksTooltips + click dispatches linkCellClicked (slice 165)', () => {
+    it('hyperlink cells: setHyperlinksTooltips + click dispatches linkCellClicked', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2531,7 +2528,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('non-hyperlink cells do NOT dispatch linkCellClicked on click (slice 165)', () => {
+    it('non-hyperlink cells do NOT dispatch linkCellClicked on click', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2559,7 +2556,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('hyperlink cells render with .link-cell class for visual styling (slice 165)', async () => {
+    it('hyperlink cells render with .link-cell class for visual styling', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2584,9 +2581,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
     });
 
     // ===================================================================
-    // Slice 166 — right-click context menu
+    // Right-click context menu
     // ===================================================================
-    it('right-click on a cell inside the selection dispatches contextMenuOpenOnSelection (slice 166)', () => {
+    it('right-click on a cell inside the selection dispatches contextMenuOpenOnSelection', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2628,7 +2625,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('right-click on a cell outside the selection moves selection and then dispatches contextMenuOpenOnSelection (slice 166)', () => {
+    it('right-click on a cell outside the selection moves selection and then dispatches contextMenuOpenOnSelection', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2667,7 +2664,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('right-click on a column header leaves the selection and dispatches columnHeaderContextMenuOpen (slice 166)', () => {
+    it('right-click on a column header leaves the selection and dispatches columnHeaderContextMenuOpen', () => {
         // The GWT client left the selection alone: the menu acts on the
         // column whatever is selected.
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
@@ -2695,7 +2692,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('right-click on a row header leaves the selection and dispatches rowHeaderContextMenuOpen (slice 166)', () => {
+    it('right-click on a row header leaves the selection and dispatches rowHeaderContextMenuOpen', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2721,7 +2718,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('right-click contextmenu listener calls preventDefault to suppress the browser menu (slice 166)', async () => {
+    it('right-click contextmenu listener calls preventDefault to suppress the browser menu', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2774,9 +2771,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
     });
 
     // ===================================================================
-    // Slice 167 — column grouping outline (+/- buttons)
+    // Column grouping outline (+/- buttons)
     // ===================================================================
-    it('column grouping: setColGroupingData + setColGroupingMax renders toggle buttons (slice 167)', async () => {
+    it('column grouping: setColGroupingData + setColGroupingMax renders toggle buttons', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(8);
@@ -2801,7 +2798,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column grouping: clicking a toggle dispatches groupingCollapsed with flipped state (slice 167)', async () => {
+    it('column grouping: clicking a toggle dispatches groupingCollapsed with flipped state', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(8);
@@ -2836,7 +2833,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column grouping: clicking a collapsed toggle requests EXPAND (slice 167)', async () => {
+    it('column grouping: clicking a collapsed toggle requests EXPAND', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(8);
@@ -2866,7 +2863,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column grouping: toggle click does NOT also fire column-header-click (slice 167)', async () => {
+    it('column grouping: toggle click does NOT also fire column-header-click', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(8);
@@ -2945,9 +2942,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
     });
 
     // ===================================================================
-    // Slice 173 — `part` attribute scaffolding for documented styling API
+    // `part` attribute scaffolding for documented styling API
     // ===================================================================
-    it('cells render with part="cell" (slice 173)', async () => {
+    it('cells render with part="cell"', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2969,7 +2966,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('cells in active range get part="cell cell-range" except the active cell (slice 173)', async () => {
+    it('cells in active range get part="cell cell-range" except the active cell', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3002,7 +2999,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('column headers render with part="column-header"; cells in selected range get header-selected (slice 173)', async () => {
+    it('column headers render with part="column-header"; cells in selected range get header-selected', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3037,7 +3034,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('row headers render with part="row-header"; rows in selected range get header-selected (slice 173)', async () => {
+    it('row headers render with part="row-header"; rows in selected range get header-selected', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3072,7 +3069,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('sheet tabs render with part="tab"; active tab gets tab-selected (slice 173)', async () => {
+    it('sheet tabs render with part="tab"; active tab gets tab-selected', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setSheetNames(['One', 'Two', 'Three']);
         sheet.setSheetIndex(2);
@@ -3086,7 +3083,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('comment indicators render with part="comment-triangle" (slice 173)', async () => {
+    it('comment indicators render with part="comment-triangle"', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3104,7 +3101,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('cell editor input renders with part="cell-input" (slice 173)', async () => {
+    it('cell editor input renders with part="cell-input"', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3125,7 +3122,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('selection overlay carries no part + selection-corner child has part="selection-corner" (slice 173)', async () => {
+    it('selection overlay carries no part + selection-corner child has part="selection-corner"', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3146,7 +3143,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('popup buttons render with part="popup-button" (slice 173)', async () => {
+    it('popup buttons render with part="popup-button"', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -3165,9 +3162,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
     });
 
     // ===================================================================
-    // Slice 174 — honor HIDE_TABSHEET_STYLE on host
+    // Honor HIDE_TABSHEET_STYLE on host
     // ===================================================================
-    it('sheet tabs hide when host gets the hidetabsheet class (slice 174)', async () => {
+    it('sheet tabs hide when host gets the hidetabsheet class', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setSheetNames(['Sheet1', 'Sheet2']);
         sheet.setSheetIndex(1);
@@ -3190,7 +3187,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('initial hidetabsheet class on the host is honored at attach time (slice 174)', async () => {
+    it('initial hidetabsheet class on the host is honored at attach time', async () => {
         const host = document.createElement('div');
         host.classList.add('hidetabsheet');
         document.body.appendChild(host);
@@ -3204,9 +3201,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
     });
 
     // ===================================================================
-    // Slice 175 — formula bar implementation
+    // Formula bar implementation
     // ===================================================================
-    it('formula bar renders two inputs with documented parts (slice 175)', async () => {
+    it('formula bar renders two inputs with documented parts', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         await sheet.getFormulaBar().updateComplete;
         const fb = sheet.getFormulaBar().shadowRoot!;
@@ -3219,7 +3216,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('updateFormulaBar sets the address-field value (slice 175)', async () => {
+    it('updateFormulaBar sets the address-field value', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.updateFormulaBar('B7', 2, 7);
         await sheet.getFormulaBar().updateComplete;
@@ -3230,7 +3227,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('showSelectedCell sets both address + formula fields (slice 175)', async () => {
+    it('showSelectedCell sets both address + formula fields', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         // Formula without its leading '=', as the server sends it.
         sheet.showSelectedCell('C3', 3, 3, 'A1+B2', true, false, false);
@@ -3243,7 +3240,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('pressing Enter in the address field dispatches sheetAddressChanged (slice 175)', async () => {
+    it('pressing Enter in the address field dispatches sheetAddressChanged', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.updateFormulaBar('A1', 1, 1);
         await sheet.getFormulaBar().updateComplete;
@@ -3268,7 +3265,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle (slice 14
         cleanup();
     });
 
-    it('formula bar hides when host gets the hidefunctionbar class (slice 175)', async () => {
+    it('formula bar hides when host gets the hidefunctionbar class', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         await sheet.getFormulaBar().updateComplete;
         expect(sheet.getFormulaBar().style.display).to.not.equal('none');

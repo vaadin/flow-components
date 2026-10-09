@@ -8,39 +8,23 @@
  */
 
 /**
- * Type definitions for the client→server events dispatched by the
- * {@code <vaadin-spreadsheet>} Lit wrapper element.
+ * Type definitions for the client→server events.
  *
- * The wrapper re-emits every server-bound action as a
- * {@code CustomEvent} on the host element, where the event name matches
- * the typed dispatch handler on the server side
- * ({@link com.vaadin.flow.component.spreadsheet.SpreadsheetHandlerImpl}).
+ * The connector sends every server-bound action as one
+ * {@code spreadsheet-event} CustomEvent on the {@code <vaadin-spreadsheet>}
+ * element, with a {@code {type, data}} detail. The server's
+ * {@code @DomEvent("spreadsheet-event")} receives both, and
+ * {@code SpreadsheetEventListener} calls the matching method of
+ * {@link com.vaadin.flow.component.spreadsheet.SpreadsheetHandlerImpl}.
  *
- * On the WIRE the events travel through a single
- * {@code @DomEvent("spreadsheet-event")} carrying
- * {@code {type: string, data: JsonNode}} — see slice 116's Tier 3
- * examination. Individually-named events on the wrapper element are the
- * client-side DOM convenience; the JSON payload that crosses the wire
- * is built by the {@code SpreadsheetEventListener} on the server when it
- * receives the typed DOM event.
- *
- * The type discriminator below is keyed by the wrapper event name (one
- * of the 39 strings the wrapper dispatches today). New event types
- * added in Phase 3.2+ should extend this union — the
- * exhaustiveness-check pattern is enforced by `SpreadsheetEventDetail`
- * being a discriminated union.
- *
- * As of Phase 3.1 slice 120, the {@code data} shapes are mostly typed
- * as {@code Record<string, unknown>} pending the Phase 3.2 work that
- * wires the new client's per-event dispatch. The names and the
- * envelope shape are stable; the inner data fields will be sharpened
- * incrementally.
+ * Some {@code data} shapes are typed below; the others are
+ * {@code Record<string, unknown>}. {@link SERVER_EVENT_PAYLOAD_KEYS} lists
+ * the keys the server reads from each.
  */
 
 /**
- * The complete set of event names the wrapper dispatches today.
- * Compile-time exhaustive — if a new event is added in Phase 3.2+ but
- * forgotten here, the dispatch switch in the new client won't compile.
+ * Every event type the connector sends. `lit-server-event-contract.test.ts`
+ * checks that each event sent is one of these.
  */
 export type SpreadsheetEventType =
   // Grouping (outline) interactions
@@ -93,14 +77,12 @@ export type SpreadsheetEventType =
   // Init + protection
   | 'onConnectorInit'
   | 'protectedCellWriteAttempted'
-  // Popup buttons (slice 128 — added after audit; the original
-  // slice 120 survey scanned the wrapper's GENERAL event-dispatch
-  // section + missed these two in the popup-button section)
+  // Popup buttons
   | 'popupButtonClick'
   | 'popupClose';
 
 /**
- * Generic envelope for every event the wrapper dispatches. The data
+ * Generic envelope for every event the connector sends. The data
  * shape varies per event; specific event interfaces below narrow it.
  */
 export interface SpreadsheetEventDetail<
@@ -255,10 +237,9 @@ export interface ContextMenuOpenData {
  * {@code event.detail.type === 'cellSelected'} narrows
  * {@code event.detail.data} to {@code CellSelectedData}.
  *
- * Events whose data shape isn't yet typed default to
- * {@code SpreadsheetEventDetail<T>} with the generic
- * {@code Record<string, unknown>} payload — Phase 3.2+ work will
- * incrementally narrow those.
+ * Events whose data shape isn't typed here carry the generic
+ * {@code Record<string, unknown>} payload of
+ * {@code SpreadsheetEventDetail<T>}.
  */
 export type SpreadsheetEvent =
   | { type: 'onSheetScroll'; data: OnSheetScrollData }

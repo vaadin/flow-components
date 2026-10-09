@@ -10,24 +10,17 @@
 import type { CellData, GroupingData, MergedRegion, OverlayInfo, SpreadsheetActionDetails } from './wire.js';
 
 /**
- * The complete set of methods the new Spreadsheet client must expose to
- * the Lit wrapper element ({@code vaadin-spreadsheet.js}). The wrapper
- * keeps a reference to an instance of this type as {@code this.api} and
- * dispatches every property change + RPC call through it.
+ * The methods the connector exposes to the {@code <vaadin-spreadsheet>}
+ * element ({@code vaadin-spreadsheet.js}), which keeps it as
+ * {@code $connector}: each server-to-client RPC call goes to the method
+ * of the same name, and each property the server sets to its
+ * {@code set<Name>} method.
  *
- * This interface IS the contract the Phase 3.6 swap turns on: today
- * {@code this.api} is an instance of the GWT-compiled
- * {@code Spreadsheet} class (from {@code spreadsheet-export.js}); when
- * the new client ships, {@code this.api} becomes an instance of a TS
- * class that implements this interface.
- *
- * Method shapes derived from the existing wrapper's call sites
- * (lines 174-749 of {@code vaadin-spreadsheet.js} as of slice 118).
- * The 12 RPC methods at the top mirror
- * {@link com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc}
- * (the typed façade clarified in slice 108) — they're the server→client
- * action messages. The setters below are the property-mirror lane (each
- * one corresponds to a {@link MirroredProperty} on the server).
+ * The RPC methods at the top mirror
+ * {@link com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc}.
+ * The setters below receive the properties, which the server sets
+ * directly or through a {@link MirroredProperty};
+ * {@code ClientApiContractTest} checks that each one has a setter.
  */
 export interface SpreadsheetClientApi {
   // ====================================================================
