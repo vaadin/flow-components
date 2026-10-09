@@ -3806,10 +3806,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.focus();
     this.sendToServer({
       type: 'sheetCreated',
-      data: {
-        scrollLeft: this.scrollContainer.scrollLeft,
-        scrollTop: this.scrollContainer.scrollTop
-      }
+      data: this.scrollOffsets()
     });
   };
 
@@ -3841,11 +3838,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // The server reads a 0-based tab index here; `index` is the
         // 1-based position the strip renders.
         sheetIndex: index - 1,
-        scrollLeft: this.scrollContainer.scrollLeft,
-        scrollTop: this.scrollContainer.scrollTop
+        ...this.scrollOffsets()
       }
     });
   };
+
+  /**
+   * Where the sheet is scrolled to, in whole pixels, as the server stores
+   * it. A browser reports fractions on a scaled display, and the server
+   * reads whole numbers.
+   */
+  private scrollOffsets(): { scrollLeft: number; scrollTop: number } {
+    return {
+      scrollLeft: Math.round(this.scrollContainer.scrollLeft),
+      scrollTop: Math.round(this.scrollContainer.scrollTop)
+    };
+  }
 
   /**
    * Set the column-header strip's height in pixels; {@code 0} hides the

@@ -200,6 +200,25 @@ describe('Spreadsheet — client-to-server payload contract', () => {
     expect(selected!.data.sheetIndex).to.equal(1);
   });
 
+  it('sends where the sheet was scrolled to in whole pixels', () => {
+    // A browser reports fractional scroll offsets on a scaled display, and
+    // the server reads whole numbers: given 37.6 it refused the event, and
+    // the sheet never switched.
+    const scroller = ctx.sheet.getScrollContainer();
+    Object.defineProperty(scroller, 'scrollTop', { get: () => 37.6, configurable: true });
+    Object.defineProperty(scroller, 'scrollLeft', { get: () => 12.4, configurable: true });
+
+    ctx.sheet.getSheetTabs().dispatchEvent(
+      new CustomEvent('sheet-tab-click', { detail: { index: 2 }, bubbles: true, composed: true })
+    );
+    ctx.sheet.getSheetTabs().dispatchEvent(new CustomEvent('sheet-tab-add', { bubbles: true, composed: true }));
+
+    const selected = ctx.sent.find((e) => e.type === 'sheetSelected');
+    const created = ctx.sent.find((e) => e.type === 'sheetCreated');
+    expect(selected!.data).to.include({ scrollTop: 38, scrollLeft: 12 });
+    expect(created!.data).to.eql({ scrollLeft: 12, scrollTop: 38 });
+  });
+
   it('conforms when a sheet is added', () => {
     ctx.sheet.getSheetTabs().dispatchEvent(
       new CustomEvent('sheet-tab-add', { bubbles: true, composed: true })
