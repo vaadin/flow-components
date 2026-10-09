@@ -548,8 +548,19 @@ public abstract class AbstractGridMultiSelectionModel<T>
         clientSideUpdater.accept(activeItems);
     }
 
+    /**
+     * Updates the identifiers of the selected items, for example after the
+     * identifier provider has changed. Keeps the selected items.
+     */
+    void refreshSelectedItemIds() {
+        Map<Object, T> refreshed = mapItemsById(
+                new LinkedHashSet<>(selected.values()));
+        selected.clear();
+        selected.putAll(refreshed);
+    }
+
     private Object getItemId(T item) {
-        return getGrid().getDataCommunicator().getDataProvider().getId(item);
+        return getGrid().getItemId(item);
     }
 
     private long getDataProviderSize() {
