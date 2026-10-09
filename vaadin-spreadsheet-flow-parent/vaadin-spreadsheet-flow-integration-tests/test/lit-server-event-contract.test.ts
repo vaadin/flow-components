@@ -164,12 +164,13 @@ describe('Spreadsheet — client-to-server payload contract', () => {
   });
 
   it('conforms when the sheet scrolls', async () => {
-    ctx.sheet.getScrollContainer().scrollTop = 600;
+    // Well past the rows loaded with the first screen.
+    ctx.sheet.getScrollContainer().scrollTop = 2000;
     ctx.sheet.getScrollContainer().dispatchEvent(new Event('scroll'));
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getCellGrid().updateComplete;
 
-    expectConforms(ctx.sent);
+    expect(expectConforms(ctx.sent)).to.include('onSheetScroll');
   });
 
   it('conforms when a sheet tab is clicked', () => {
@@ -246,7 +247,7 @@ describe('Spreadsheet — client-to-server payload contract', () => {
     mouse(header!, 'mousedown');
     mouse(header!, 'click');
 
-    expectConforms(ctx.sent);
+    expect(expectConforms(ctx.sent)).to.include('rowSelected');
   });
 
   it('conforms when a column header is clicked', () => {
@@ -258,6 +259,6 @@ describe('Spreadsheet — client-to-server payload contract', () => {
     mouse(header!, 'mousedown');
     mouse(header!, 'click');
 
-    expectConforms(ctx.sent);
+    expect(expectConforms(ctx.sent)).to.include('columnSelected');
   });
 });

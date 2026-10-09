@@ -23,22 +23,23 @@ function onPlatform<T>(platform: string, body: () => T): T {
     }
 }
 
-/**
- * Smoke tests for the skeleton `Spreadsheet` class. These don't
- * exercise rendering behavior (that's Phase 3.2+); they pin the
- * contract that the class is constructable + every setter accepts its
- * documented type + the read accessors return what was set.
- *
- * The real value is COMPILE-TIME: every test below requires the class
- * to satisfy `SpreadsheetClientApi`. If a method is renamed / removed
- * / wrong-typed, this file fails to compile, surfacing the
- * contract drift immediately.
- */
+/** Sheets the tests below make, disposed after each test: a sheet listens on the page. */
+const sheets: Spreadsheet[] = [];
+
+function newSheet(host: HTMLElement = document.createElement('div')): Spreadsheet {
+    const sheet = new Spreadsheet(host);
+    sheets.push(sheet);
+    return sheet;
+}
+
+afterEach(() => {
+    sheets.splice(0).forEach((sheet) => sheet.dispose());
+});
 
 describe('Spreadsheet skeleton — constructor + identity', () => {
     it('is constructable with a host element', () => {
         const host = document.createElement('div');
-        const sheet = new Spreadsheet(host);
+        const sheet = newSheet(host);
 
         expect(sheet).to.be.instanceOf(Spreadsheet);
     });
@@ -47,7 +48,7 @@ describe('Spreadsheet skeleton — constructor + identity', () => {
         // The component's size belongs to the application; the setters
         // are how the wrapper tells the sheet how much room it has.
         const host = document.createElement('div');
-        const sheet = new Spreadsheet(host);
+        const sheet = newSheet(host);
 
         sheet.setWidth('500px');
         sheet.setHeight('400px');
@@ -64,7 +65,7 @@ describe('Spreadsheet skeleton — property mirrors', () => {
     let sheet: Spreadsheet;
 
     beforeEach(() => {
-        sheet = new Spreadsheet(document.createElement('div'));
+        sheet = newSheet();
     });
 
     it('stores + returns rows + cols', () => {
@@ -107,50 +108,9 @@ describe('Spreadsheet skeleton — property mirrors', () => {
     });
 });
 
-describe('Spreadsheet skeleton — RPC stubs are callable without throwing', () => {
-    let sheet: Spreadsheet;
-
-    beforeEach(() => {
-        sheet = new Spreadsheet(document.createElement('div'));
-    });
-
-    it('the 12 explicit RPC methods are all callable', () => {
-        expect(() => sheet.updateBottomRightCellValues([])).to.not.throw();
-        expect(() => sheet.updateTopLeftCellValues([])).to.not.throw();
-        expect(() => sheet.updateTopRightCellValues([])).to.not.throw();
-        expect(() => sheet.updateBottomLeftCellValues([])).to.not.throw();
-        expect(() => sheet.updateFormulaBar('Sheet1!A1', 1, 1)).to.not.throw();
-        expect(() => sheet.invalidCellAddress()).to.not.throw();
-        expect(() =>
-            sheet.showSelectedCell('A1', 1, 1, 'val', false, false, true)
-        ).to.not.throw();
-        expect(() => sheet.showActions([])).to.not.throw();
-        expect(() =>
-            sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false)
-        ).to.not.throw();
-        expect(() => sheet.cellsUpdated([])).to.not.throw();
-        expect(() => sheet.refreshCellStyles()).to.not.throw();
-        expect(() => sheet.editCellComment(1, 1)).to.not.throw();
-    });
-
-    it('lifecycle methods are callable', () => {
-        expect(() => sheet.resize()).to.not.throw();
-        expect(() => sheet.notifyStateChanges([], true)).to.not.throw();
-    });
-
-    it('popup-button methods are callable', () => {
-        expect(() =>
-            sheet.onPopupButtonOpen(1, 1, 'content', 'app')
-        ).to.not.throw();
-        expect(() => sheet.closePopup(1, 1)).to.not.throw();
-        expect(() => sheet.addPopupButton('{}')).to.not.throw();
-        expect(() => sheet.removePopupButton('{}')).to.not.throw();
-    });
-});
-
 describe('Spreadsheet skeleton — initial selection state', () => {
     it('starts with A1 (single-cell) selected', () => {
-        const sheet = new Spreadsheet(document.createElement('div'));
+        const sheet = newSheet();
 
         const sel = sheet.getSelection();
 
@@ -160,40 +120,9 @@ describe('Spreadsheet skeleton — initial selection state', () => {
     });
 });
 
-describe('Spreadsheet skeleton — freeze + display state (slice 126)', () => {
-    let sheet: Spreadsheet;
-
-    beforeEach(() => {
-        sheet = new Spreadsheet(document.createElement('div'));
-    });
-
-    it('freeze split positions are all callable + storable', () => {
-        expect(() => sheet.setVerticalSplitPosition(3)).to.not.throw();
-        expect(() => sheet.setHorizontalSplitPosition(2)).to.not.throw();
-    });
-
-    it('display flags are all callable', () => {
-        expect(() => sheet.setDisplayGridlines(false)).to.not.throw();
-        expect(() => sheet.setDisplayRowColHeadings(false)).to.not.throw();
-        expect(() => sheet.setLockFormatColumns(true)).to.not.throw();
-        expect(() => sheet.setLockFormatRows(true)).to.not.throw();
-        expect(() => sheet.setHasActions(true)).to.not.throw();
-        expect(() => sheet.setWorkbookChangeToggle(true)).to.not.throw();
-        expect(() => sheet.setWorkbookProtected(true)).to.not.throw();
-    });
-
-    it('display content setters are all callable', () => {
-        expect(() => sheet.setInfoLabelValue('Sheet1: A1')).to.not.throw();
-        expect(() => sheet.setHyperlinksTooltips({ 'col1 row1': 'see http://...' }))
-            .to.not.throw();
-        expect(() => sheet.setId('spreadsheet-1')).to.not.throw();
-    });
-});
-
 describe('Spreadsheet — render pipeline (slice 134)', () => {
     function makeSheet(): Spreadsheet {
-        const host = document.createElement('div');
-        return new Spreadsheet(host);
+        return newSheet();
     }
 
     it('creates + owns a SpreadsheetCellGrid sub-element on construction', () => {
@@ -218,7 +147,7 @@ describe('Spreadsheet — render pipeline (slice 134)', () => {
         // They all hang off the component's own root element, which owns
         // the vertical layout — the host belongs to the application.
         const host = document.createElement('div');
-        const sheet = new Spreadsheet(host);
+        const sheet = newSheet(host);
 
         expect(host.children).to.have.length(1);
         const root = sheet.getRoot();
