@@ -1,11 +1,6 @@
-import { esbuildPlugin } from "@web/dev-server-esbuild";
+import { sharedConfig } from '../../shared/shared-web-test-runner-config.mjs';
 
+/** @type {import('@web/test-runner').TestRunnerConfig} */
 export default {
-  plugins: [esbuildPlugin({ ts: true })],
-  testFramework: {
-    config: {
-      ui: 'bdd',
-      timeout: '10000',
-    },
-  },
+  ...sharedConfig
 };
