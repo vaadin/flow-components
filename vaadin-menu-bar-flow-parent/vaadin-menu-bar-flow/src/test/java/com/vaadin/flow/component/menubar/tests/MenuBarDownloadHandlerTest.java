@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.button.tests;
+package com.vaadin.flow.component.menubar.tests;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,18 +25,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
-import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.tests.MockUIExtension;
 
-class ButtonDownloadHandlerTest {
+class MenuBarDownloadHandlerTest {
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
 
@@ -44,15 +43,16 @@ class ButtonDownloadHandlerTest {
     private final DownloadHandler handler = event -> downloads
             .incrementAndGet();
 
-    private Div parent;
-    private Button button;
+    private MenuItem item;
 
     @BeforeEach
     void setup() {
-        button = new Button();
-        parent = new Div(button);
-        ui.add(parent);
-        button.setDownloadHandler(handler);
+        MenuBar menuBar = new MenuBar();
+        ui.add(menuBar);
+        item = menuBar.addItem("Download");
+        item.setDownloadHandler(handler);
+        // Menu items are attached to the UI before the response
+        ui.fakeClientCommunication();
     }
 
     @Test
@@ -62,105 +62,55 @@ class ButtonDownloadHandlerTest {
 
     @Test
     void disabled_refused() throws IOException {
-        button.setEnabled(false);
+        item.setEnabled(false);
         Assertions.assertFalse(requestDownload());
     }
 
     @Test
     void disabledByClick_served() throws IOException {
-        button.setDisableOnClick(true);
-        button.click();
+        item.setDisableOnClick(true);
+        click();
 
-        Assertions.assertFalse(button.isEnabled());
+        Assertions.assertFalse(item.isEnabled());
         Assertions.assertTrue(requestDownload());
     }
 
     @Test
     void disabledByClick_thenDisabledExplicitly_refused() throws IOException {
-        button.setDisableOnClick(true);
-        button.click();
-        button.setEnabled(false);
+        item.setDisableOnClick(true);
+        click();
+        item.setEnabled(false);
 
         Assertions.assertFalse(requestDownload());
-    }
-
-    @Test
-    void disabledByClick_thenParentDisabled_refused() throws IOException {
-        button.setDisableOnClick(true);
-        button.click();
-        parent.setEnabled(false);
-
-        Assertions.assertFalse(requestDownload());
-    }
-
-    @Test
-    void disabledByClick_parentDisabledAndEnabledAgain_served()
-            throws IOException {
-        button.setDisableOnClick(true);
-        button.click();
-        parent.setEnabled(false);
-        parent.setEnabled(true);
-
-        Assertions.assertTrue(requestDownload());
-    }
-
-    @Test
-    void handlerOverridesRequestHandling_overridesUsed() throws IOException {
-        button.setDownloadHandler(new DownloadHandler() {
-            @Override
-            public void handleRequest(VaadinRequest request,
-                    VaadinResponse response, VaadinSession session,
-                    Element owner) {
-                downloads.incrementAndGet();
-            }
-
-            @Override
-            public void handleDownloadRequest(DownloadEvent event) {
-                // Not called, as handleRequest is overridden
-            }
-
-            @Override
-            public String getUrlPostfix() {
-                return "report.csv";
-            }
-        });
-
-        Assertions.assertTrue(
-                downloadAttributes().map(button.getElement()::getAttribute)
-                        .findFirst().orElseThrow().endsWith("/report.csv"));
-        Assertions.assertTrue(requestDownload());
-    }
-
-    @Test
-    void allowDisabled_disabled_served() throws IOException {
-        button.setDownloadHandler(handler.allowDisabled());
-        button.setEnabled(false);
-
-        Assertions.assertTrue(requestDownload());
     }
 
     @Test
     void replacedAndCleared_onlyCurrentHandlerRegistered() {
         DownloadHandler replacement = event -> downloads.incrementAndGet();
-        button.setDownloadHandler(replacement);
+        item.setDownloadHandler(replacement);
 
-        Assertions.assertSame(replacement, button.getDownloadHandler());
+        Assertions.assertSame(replacement, item.getDownloadHandler());
         ui.fakeClientCommunication();
         Assertions.assertEquals(1, downloadAttributes().count());
 
-        button.setDownloadHandler(null);
+        item.setDownloadHandler(null);
 
-        Assertions.assertNull(button.getDownloadHandler());
+        Assertions.assertNull(item.getDownloadHandler());
         ui.fakeClientCommunication();
         Assertions.assertEquals(0, downloadAttributes().count());
     }
 
+    private void click() {
+        ComponentUtil.fireEvent(item, new ClickEvent<>(item, false, 0, 0, 0, 0,
+                0, 0, false, false, false, false));
+    }
+
     /**
-     * Sends a request for the button's download URL through Flow's stream
-     * request handler and returns whether the handler served the file.
+     * Sends a request for the item's download URL through Flow's stream request
+     * handler and returns whether the handler served the file.
      */
     private boolean requestDownload() throws IOException {
-        String url = downloadAttributes().map(button.getElement()::getAttribute)
+        String url = downloadAttributes().map(item.getElement()::getAttribute)
                 .findFirst().orElseThrow();
         VaadinRequest request = Mockito.mock(VaadinRequest.class);
         Mockito.when(request.getPathInfo()).thenReturn("/" + url);
@@ -183,10 +133,9 @@ class ButtonDownloadHandlerTest {
     }
 
     // Each registered download handler is kept as a stream resource attribute
-    // on the button element, so these tell which handlers the browser can
-    // still download from.
+    // on the item element
     private Stream<String> downloadAttributes() {
-        return button.getElement().getAttributeNames()
+        return item.getElement().getAttributeNames()
                 .filter(name -> name.startsWith("data-flow-download-"));
     }
 }

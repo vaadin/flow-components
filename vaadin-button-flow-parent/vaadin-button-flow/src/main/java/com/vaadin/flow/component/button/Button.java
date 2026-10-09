@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.button;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import com.vaadin.experimental.Feature;
@@ -47,14 +46,11 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.component.shared.internal.DownloadUtil;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinResponse;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -438,51 +434,9 @@ public class Button extends Component
         this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
             downloadRegistration = Download.onClick(this,
-                    allowDisabledByClick(downloadHandler));
+                    DownloadUtil.allowDisabledByClick(this,
+                            disableOnClickController, downloadHandler));
         }
-    }
-
-    /**
-     * Wraps the handler so that it is also served while the button is disabled
-     * by disable on click, which happens before the browser requests the file.
-     * A button disabled explicitly, or inside a disabled parent, still refuses
-     * the request unless the handler itself allows it.
-     */
-    private DownloadHandler allowDisabledByClick(DownloadHandler delegate) {
-        return new DownloadHandler() {
-            @Override
-            public void handleRequest(VaadinRequest request,
-                    VaadinResponse response, VaadinSession session,
-                    Element owner) throws IOException {
-                delegate.handleRequest(request, response, session, owner);
-            }
-
-            @Override
-            public void handleDownloadRequest(DownloadEvent event)
-                    throws IOException {
-                delegate.handleDownloadRequest(event);
-            }
-
-            @Override
-            public String getUrlPostfix() {
-                return delegate.getUrlPostfix();
-            }
-
-            @Override
-            public boolean isAllowInert() {
-                return delegate.isAllowInert();
-            }
-
-            @Override
-            public DisabledUpdateMode getDisabledUpdateMode() {
-                Element parent = Button.this.getElement().getParent();
-                if (disableOnClickController.isDisabledByClick()
-                        && (parent == null || parent.isEnabled())) {
-                    return DisabledUpdateMode.ALWAYS;
-                }
-                return delegate.getDisabledUpdateMode();
-            }
-        };
     }
 
     /**
