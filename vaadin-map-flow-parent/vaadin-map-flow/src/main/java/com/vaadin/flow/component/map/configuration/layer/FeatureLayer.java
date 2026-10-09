@@ -284,8 +284,6 @@ public class FeatureLayer extends VectorLayer {
     private static Style createDefaultClusterStyle() {
         Icon.Options iconOptions = new Icon.Options();
         iconOptions.setImg(Assets.CLUSTER.getHandler());
-        iconOptions.setImgSize(new Icon.ImageSize(Assets.CLUSTER.getWidth(),
-                Assets.CLUSTER.getHeight()));
         iconOptions.setScale(0.5f);
         iconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
         iconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
