@@ -128,12 +128,12 @@ public class SelectListDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals("Unexpected sort order", "John,Mike,Paul",
                 select.$("vaadin-select-item").all().stream()
-                        .map(TestBenchElement::getText)
+                        .map(SelectListDataViewIT::getItemText)
                         .collect(Collectors.joining(",")));
 
         Assert.assertEquals("Unexpected sort order", "John,Paul,Mike",
                 otherSelect.$("vaadin-select-item").all().stream()
-                        .map(TestBenchElement::getText)
+                        .map(SelectListDataViewIT::getItemText)
                         .collect(Collectors.joining(",")));
     }
 
@@ -144,13 +144,22 @@ public class SelectListDataViewIT extends AbstractComponentIT {
         Assert.assertEquals("Unexpected filtered items count", 1,
                 select.$("vaadin-select-item").all().size());
         Assert.assertEquals("Unexpected filtered item", "Paul",
-                select.$("vaadin-select-item").all().get(0).getText());
+                getItemText(select.$("vaadin-select-item").all().get(0)));
 
         Assert.assertEquals("No filter expected", 3,
                 otherSelect.$("vaadin-select-item").all().size());
         Assert.assertArrayEquals("No filter expected",
                 new String[] { "John", "Paul", "Mike" },
                 otherSelect.$("vaadin-select-item").all().stream()
-                        .map(TestBenchElement::getText).toArray());
+                        .map(SelectListDataViewIT::getItemText).toArray());
+    }
+
+    /*
+     * Reads the item's text content instead of using getText(), which only
+     * returns text of rendered elements. The items are projected into the
+     * select's overlay, which is not rendered while the dropdown is closed.
+     */
+    private static String getItemText(TestBenchElement item) {
+        return item.getPropertyString("textContent").trim();
     }
 }
