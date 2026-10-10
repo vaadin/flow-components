@@ -28,7 +28,32 @@ const wtrTestsFolderName = 'test';
 // Playwright 1.62 dropped Chromium builds for Debian 11, which the CI agents still run
 const playwrightVersion = '1.61.0';
 
-function runTests() {
+async function appendSessionError(xmlPath, error) {
+  let xml;
+  if (fs.existsSync(xmlPath)) {
+    xml = await xml2js.parseStringPromise(fs.readFileSync(xmlPath, 'utf8'));
+    if (!xml.testsuites.testsuite) {
+      xml.testsuites.testsuite = [];
+    }
+  } else {
+    xml = { testsuites: { $: {}, testsuite: [] } };
+  }
+  const hasFailures = xml.testsuites.testsuite?.some(
+    (s) => parseInt(s.$.failures || '0') > 0 || parseInt(s.$.errors || '0') > 0
+  );
+  if (hasFailures) return;
+
+  xml.testsuites.testsuite.push({
+    $: { name: 'WTR Session', tests: '1', failures: '1', errors: '0', skipped: '0', time: '0' },
+    testcase: [{
+      $: { name: 'Browser session completed cleanly', classname: 'WTR Session', time: '0' },
+      failure: [{ _: `WTR exited with code ${error.status}: ${error.message}`, $: { message: 'WTR session error' } }]
+    }]
+  });
+  fs.writeFileSync(xmlPath, new xml2js.Builder().buildObject(xml));
+}
+
+async function runTests() {
   for (const module of modules) {
     const id = module.replace('-parent', '');
     const itFolder = `${module}/${id}-integration-tests`;
@@ -75,17 +100,25 @@ function runTests() {
 
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
-      execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
-        cwd: itFolder,
-        stdio: 'inherit'
-      });
+      try {
+        execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
+          cwd: itFolder,
+          stdio: 'inherit'
+        });
+      } catch (e) {
+        if (process.env.GITHUB_ACTIONS) {
+          await appendSessionError(`${itFolder}/wtr-results.xml`, e);
+        }
+
+        throw e;
+      }
     }
   }
 }
 
 async function main() {
   await computeModules();
-  runTests();
+  await runTests();
 }
 
 main();
