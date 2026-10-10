@@ -87,7 +87,7 @@ async function runTests() {
       fs.writeFileSync(packageJson, JSON.stringify(json, null, 2));
 
       // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
+      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @web/test-runner-junit-reporter @types/mocha sinon @vaadin/testing-helpers --save-dev --legacy-peer-deps`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
