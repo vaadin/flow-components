@@ -145,3 +145,30 @@ describe('Spreadsheet — its events to the server', () => {
     outer.remove();
   });
 });
+
+describe('Spreadsheet — telling TestBench a request may still come', () => {
+  it('reports a request as pending until the loader is done with it', async () => {
+    // TestBench waits for Flow, which does not see the loader's timer.
+    const host = document.createElement('div');
+    host.style.cssText = 'width:300px;height:200px;display:flex;flex-direction:column;';
+    document.body.appendChild(host);
+    const sheet = new Spreadsheet(host);
+    try {
+      sheet.setRows(50);
+      sheet.setCols(5);
+      sheet.setColW([50, 50, 50, 50, 50]);
+      sheet.setRowH(new Array(50).fill(15));
+      expect(sheet.isViewportLoadPending(), 'before anything is drawn').to.be.false;
+
+      sheet.recomputeViewport();
+      expect(sheet.isViewportLoadPending(), 'just asked').to.be.true;
+
+      // No server here: the request counts as answered at the next look.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(sheet.isViewportLoadPending(), 'answered').to.be.false;
+    } finally {
+      sheet.dispose();
+      host.remove();
+    }
+  });
+});

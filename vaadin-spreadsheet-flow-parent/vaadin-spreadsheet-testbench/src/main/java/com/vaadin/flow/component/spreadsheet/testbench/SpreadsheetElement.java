@@ -299,12 +299,15 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Waits until the sheet has drawn itself at its new scroll position.
+     * Waits until the sheet has drawn itself at its new scroll position, and
+     * has asked the server for what the position needs.
      * <p>
      * The cells are drawn a frame after the scroll, and the cell elements are
      * reused for whichever cells the new position shows. A cell found and
      * clicked in between can turn out to be another cell by the time the click
-     * lands, so a scroll is not over until the sheet has caught up.
+     * lands, so a scroll is not over until the sheet has caught up. The sheet
+     * also tells the server where it stopped a moment after the scroll, on a
+     * timer that the usual wait for the server does not see.
      */
     private void waitUntilDrawnAtScrollPosition() {
         ((JavascriptExecutor) getCommandExecutor().getDriver())
@@ -315,12 +318,15 @@ public class SpreadsheetElement extends TestBenchElement {
                                 const root = host.shadowRoot;
                                 const container = root.querySelector('.sheet-scroll');
                                 const grid = root.querySelector('vaadin-spreadsheet-internal-cell-grid');
+                                const connector = host.$connector;
                                 let tries = 0;
                                 const check = () => {
                                     const state = grid && grid.renderState;
                                     const caughtUp = !state || (state.scrollLeft === container.scrollLeft
                                         && state.scrollTop === container.scrollTop);
-                                    if (caughtUp || ++tries > 100) {
+                                    const asked = !connector || !connector.isViewportLoadPending
+                                        || !connector.isViewportLoadPending();
+                                    if ((caughtUp && asked) || ++tries > 500) {
                                         requestAnimationFrame(() => requestAnimationFrame(() => done(null)));
                                     } else {
                                         setTimeout(check, 20);

@@ -4781,6 +4781,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
   // Read accessors
   // ====================================================================
 
+  /**
+   * Whether a request for cells, or for the server to hear where the sheet
+   * stopped, may still be on its way. TestBench waits for this as well as for
+   * Flow after a scroll: the loader decides on a timer that Flow cannot see.
+   */
+  isViewportLoadPending(): boolean {
+    return this.viewportLoader.pending;
+  }
+
   getRows(): number {
     return this.rows;
   }

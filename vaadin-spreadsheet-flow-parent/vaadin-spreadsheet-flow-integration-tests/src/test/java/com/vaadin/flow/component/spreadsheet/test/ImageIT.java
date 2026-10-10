@@ -108,8 +108,10 @@ public class ImageIT extends AbstractSpreadsheetIT {
         var image = findElementInShadowRoot(
                 By.cssSelector(cellToCSS("D3") + " img"));
         var originalSrc = image.getAttribute("src");
-        // Scroll to bottom so the image is detached
-        spreadsheet.scroll(1000);
+        // Scroll to the bottom so the image is detached. The sheet keeps half
+        // a screen loaded behind what it shows, and the image reaches far
+        // enough down to stay in that at 1000 pixels.
+        spreadsheet.scroll(10000);
 
         // Scroll back to top so the image is reattached
         spreadsheet.scroll(0);

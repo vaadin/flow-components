@@ -109,16 +109,69 @@ describe('ViewportLoader', () => {
     expect(t.loads).to.eql([{ r1: 1, c1: 1, r2: 75, c2: 10 }]);
   });
 
-  it('asks nothing while the drawn cells stay inside what was loaded', () => {
+  it('asks nothing while the sheet scrolls inside what was loaded, then says where it stopped', () => {
+    // The server closes popups and lets go of pictures by the range it was
+    // last given, as it did with the GWT client, which told it after every
+    // scroll.
     const t = setUp();
     t.loader.check();
+    t.scrollTo(0);
 
+    t.loader.scrolled(400, 0);
+    t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
+    t.loader.check();
+    expect(t.loads, 'asked while scrolling').to.have.length(1);
+
+    t.time.advance(200);
+
+    expect(t.loads).to.have.length(2);
+    expect(t.loads[1]).to.eql({ r1: 6, c1: 1, r2: 95, c2: 10 });
+  });
+
+  it('asks nothing more once the server knows where the sheet stopped', () => {
+    const t = setUp();
+    t.loader.check();
     t.scrollTo(0);
     t.scrollTo(400);
     t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
     t.loader.check();
 
-    expect(t.loads).to.have.length(1);
+    t.loader.check();
+    t.time.advance(1000);
+
+    expect(t.loads).to.have.length(2);
+  });
+
+  it('asks at once, with its own request still out, for cells a layout change shows', () => {
+    // A tab shown or a window resized redraws the sheet bigger before the
+    // first cells are in. Waiting for them left Flow idle in between, and
+    // TestBench saw half a table.
+    const t = setUp();
+    t.serverAnswersAfterEachLoad();
+    t.loader.check();
+
+    t.show({ r1: 1, c1: 1, r2: 60, c2: 20 });
+    t.loader.check();
+
+    expect(t.loads).to.have.length(2);
+    expect(t.loads[1]).to.eql({ r1: 1, c1: 1, r2: 150, c2: 20 });
+  });
+
+  it('counts as pending while its request is out or it waits to decide', () => {
+    const t = setUp();
+    expect(t.loader.pending, 'before anything').to.be.false;
+
+    t.loader.check();
+    expect(t.loader.pending, 'with its request out').to.be.true;
+    t.time.advance(50);
+    expect(t.loader.pending, 'answered').to.be.false;
+
+    t.loader.scrolled(400, 0);
+    t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
+    t.loader.check();
+    expect(t.loader.pending, 'waiting for the sheet to stop').to.be.true;
+    t.time.advance(400);
+    expect(t.loader.pending, 'told where it stopped').to.be.false;
   });
 
   it('asks again once the drawn cells leave what was loaded, half a screen behind and a screen and a half ahead', () => {
@@ -260,13 +313,41 @@ describe('ViewportLoader', () => {
 
   it('stops looking again once disposed', () => {
     const t = setUp();
-    t.setBusy(true);
+    t.serverAnswersAfterEachLoad();
+    t.loader.check();
+    t.loader.scrolled(4000, 0);
+    t.show({ r1: 201, c1: 1, r2: 230, c2: 10 });
     t.loader.check();
 
     t.loader.dispose();
-    t.setBusy(false);
+    t.answer();
     t.time.advance(1000);
 
-    expect(t.loads).to.be.empty;
+    expect(t.loads).to.have.length(1);
+  });
+
+  it('asks at once while the server answers something else, for Flow to send next', () => {
+    // Held back until the server was idle, the first load cost a round trip
+    // of its own, and TestBench, which waits only for Flow, saw an idle
+    // client with the cells not yet asked for.
+    const t = setUp();
+    t.setBusy(true);
+
+    t.loader.check();
+
+    expect(t.loads).to.have.length(1);
+  });
+
+  it('does not time a request that went out after another one', () => {
+    const t = setUp();
+    t.serverAnswersAfterEachLoad();
+    t.setBusy(true);
+    t.loader.check();
+
+    t.time.advance(2000);
+    t.answer();
+    t.time.advance(30);
+
+    expect(t.loader.loadRoundTrip).to.equal(200);
   });
 });

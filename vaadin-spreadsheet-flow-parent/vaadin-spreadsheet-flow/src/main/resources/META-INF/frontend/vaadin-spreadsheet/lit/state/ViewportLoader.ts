@@ -69,9 +69,19 @@ const STOPPED_AFTER_MS = 100;
  * <li>Ask only when the drawn cells are not all loaded, and then load a
  * margin ahead in the direction of scrolling, so a steady scroll needs a
  * request only every screen or so.
- * <li>One request at a time. While the server answers, the sheet may move
- * on, and only the latest position is asked for: positions passed while
- * waiting are never loaded.
+ * <li>Once the sheet stops, tell the server where, even when its cells are
+ * all loaded, as the GWT client did after every scroll. The server uses the
+ * range it was last given for more than cells: it closes the popup of a
+ * button scrolled out of it, and lets go of pictures and components.
+ * <li>One request of its own at a time. While the server answers, the sheet
+ * may move on, and only the latest position is asked for: positions passed
+ * while waiting are never loaded.
+ * <li>A request is not held back while the server answers something else,
+ * nor, when the sheet is not scrolling, while it answers our own: Flow keeps
+ * it and sends it as soon as that answer is in. Waiting for the server to go
+ * idle instead cost a round trip at startup, and left Flow idle in between,
+ * so TestBench, which waits for Flow, read a sheet that was still loading.
+ * Such a request is not timed.
  * <li>No request while the sheet moves faster than a load comes back, timed
  * from the round trips so far: the cells would arrive after the user has
  * scrolled past them. The request goes out once the scrolling slows down
@@ -82,9 +92,13 @@ const STOPPED_AFTER_MS = 100;
  */
 export class ViewportLoader {
   private loaded: LoadRange | null = null;
+  /** The drawn range the last request was made for. */
+  private reportedDrawn: LoadRange | null = null;
   private inFlightSince: number | null = null;
   /** Whether the request in flight was seen to keep the server busy, so its round trip means something. */
   private sawBusy = false;
+  /** Whether the request in flight went out at once rather than after another one, so its round trip is its own. */
+  private timed = false;
   private roundTrip = FIRST_ROUND_TRIP_MS;
   private samples: Array<{ t: number; top: number; left: number }> = [];
   private rowDirection = 0;
@@ -113,34 +127,45 @@ export class ViewportLoader {
   }
 
   /**
-   * Load what the sheet shows, if it is not loaded yet and now is the time.
-   * Called whenever the drawn range may have changed.
+   * Load what the sheet shows if it is not loaded yet, or tell the server
+   * where the sheet stopped - when now is the time. Called whenever the
+   * drawn range may have changed.
    */
   check(): void {
     this.noteAnswered();
     if (this.inFlightSince !== null) {
-      // Ours is still out: back once it is answered, to time it and to
-      // catch up with where the sheet has gone meanwhile.
+      // Ours is still out: back once it is answered, to time it - and,
+      // while the sheet scrolls, to ask then for wherever it has got to.
       this.checkLater();
-      return;
+      if (this.moving()) {
+        return;
+      }
     }
     const drawn = this.host.drawnRange();
-    if (drawn === null || this.isLoaded(drawn)) {
+    if (drawn === null) {
       return;
     }
-    if (this.host.serverBusy()) {
+    const loaded = this.isLoaded(drawn);
+    if (loaded && sameRange(drawn, this.reportedDrawn)) {
+      return;
+    }
+    if (loaded && this.moving()) {
+      // Nothing to load: the server hears where the sheet stops.
       this.checkLater();
       return;
     }
     const target = this.target(drawn);
-    if (this.tooFast(drawn, target)) {
+    if (!loaded && this.tooFast(drawn, target)) {
       this.checkLater();
       return;
     }
+    this.timed = this.inFlightSince === null && !this.host.serverBusy();
     this.loaded = target;
+    this.reportedDrawn = drawn;
     this.inFlightSince = this.clock.now();
     this.host.load(target);
-    // Flow sends the request as the event is dispatched.
+    // Flow sends the request as the event is dispatched, or as soon as the
+    // answer it waits for is in.
     this.sawBusy = this.host.serverBusy();
     // Back once the server has answered, to time the round trip and catch
     // up with where the sheet has gone meanwhile.
@@ -150,6 +175,7 @@ export class ViewportLoader {
   /** Forget what was loaded: the server has thrown away what it sent. */
   reset(): void {
     this.loaded = null;
+    this.reportedDrawn = null;
     this.inFlightSince = null;
     this.cancelTimer();
   }
@@ -162,6 +188,15 @@ export class ViewportLoader {
   /** How long a load takes, smoothed over the round trips so far, in ms. */
   get loadRoundTrip(): number {
     return this.roundTrip;
+  }
+
+  /**
+   * Whether a request may still be on its way: one is out, or the loader
+   * waits to decide. Flow does not know about the latter, so TestBench asks
+   * here before it takes a scroll as done.
+   */
+  get pending(): boolean {
+    return this.timer !== null;
   }
 
   private isLoaded(range: LoadRange): boolean {
@@ -200,6 +235,12 @@ export class ViewportLoader {
     };
   }
 
+  /** Whether a scroll event came in only just now. */
+  private moving(): boolean {
+    const last = this.samples[this.samples.length - 1];
+    return last !== undefined && this.clock.now() - last.t <= STOPPED_AFTER_MS;
+  }
+
   /** Whether the sheet moves past the target's margin before a load could come back. */
   private tooFast(drawn: LoadRange, target: LoadRange): boolean {
     const now = this.clock.now();
@@ -230,7 +271,7 @@ export class ViewportLoader {
       this.sawBusy = true;
       return;
     }
-    if (this.sawBusy) {
+    if (this.sawBusy && this.timed) {
       this.roundTrip = (this.roundTrip + (this.clock.now() - this.inFlightSince)) / 2;
     }
     this.inFlightSince = null;
@@ -252,4 +293,8 @@ export class ViewportLoader {
       this.timer = null;
     }
   }
+}
+
+function sameRange(a: LoadRange, b: LoadRange | null): boolean {
+  return b !== null && a.r1 === b.r1 && a.c1 === b.c1 && a.r2 === b.r2 && a.c2 === b.c2;
 }
