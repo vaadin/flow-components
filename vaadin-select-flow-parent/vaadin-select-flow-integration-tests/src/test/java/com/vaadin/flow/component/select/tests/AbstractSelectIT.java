@@ -303,6 +303,15 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         open(getDefaultParameter());
     }
 
+    /*
+     * Reads the item's text content instead of using getText(), which only
+     * returns text of rendered elements. Items are projected into the select's
+     * overlay, which is not rendered while the dropdown is closed.
+     */
+    protected static String getItemText(TestBenchElement item) {
+        return item.getPropertyString("textContent").trim();
+    }
+
     protected abstract int getInitialNumberOfItems();
 
 }

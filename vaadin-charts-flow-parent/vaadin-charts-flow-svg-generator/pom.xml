@@ -72,6 +72,7 @@
                             <arguments>
                                 <argument>install</argument>
                             </arguments>
+                            <skip>${skipSvgChartsBuild}</skip>
                         </configuration>
                     </execution>
                     <execution>
@@ -86,6 +87,7 @@
                                 <argument>run</argument>
                                 <argument>build</argument>
                             </arguments>
+                            <skip>${skipSvgChartsBuild}</skip>
                         </configuration>
                     </execution>
                     <execution>
@@ -99,7 +101,7 @@
                             <arguments>
                                 <argument>test</argument>
                             </arguments>
-                            <skip>${skipTests}</skip>
+                            <skip>${skipSvgChartsBuild}</skip>
                         </configuration>
                     </execution>
                 </executions>
