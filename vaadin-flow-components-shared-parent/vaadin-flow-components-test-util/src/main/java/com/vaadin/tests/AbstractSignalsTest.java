@@ -62,6 +62,10 @@ public class AbstractSignalsTest {
      * <li><b>resynchronizesAfterAttach</b> – verifies that the component
      * property catches up with the latest signal value when the component is
      * attached to a UI after the signal was updated while detached.</li>
+     * <li><b>resynchronizesAfterReattach</b> – verifies that signal value
+     * changes are not propagated after an attached component is detached, and
+     * that the component property catches up with the latest signal value when
+     * the component is attached again.</li>
      * <li><b>manualSetWhileBoundThrows</b> – verifies that imperative updates
      * to a bound property via its setter throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.</li>
@@ -153,6 +157,22 @@ public class AbstractSignalsTest {
                     assertEquals(updatedValue, getter.apply(component));
                 });
 
+        var resynchronizesAfterReattach = createTest(
+                "resynchronizesAfterReattach", () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+
+                    UI.getCurrent().add(component);
+                    bind.accept(component, signal);
+
+                    component.removeFromParent();
+                    signal.set(updatedValue);
+                    assertEquals(initialValue, getter.apply(component));
+
+                    UI.getCurrent().add(component);
+                    assertEquals(updatedValue, getter.apply(component));
+                });
+
         var manualSetWhileBoundThrows = createTest("manualSetWhileBoundThrows",
                 () -> {
                     var component = componentFactory.get();
@@ -188,8 +208,8 @@ public class AbstractSignalsTest {
         return Stream.of(synchronizesWhileAttached,
                 appliesInitialValueWhileDetached,
                 doesNotSynchronizeWhileDetached, resynchronizesAfterAttach,
-                manualSetWhileBoundThrows, rebindWhileBoundThrows,
-                bindNullSignalThrows);
+                resynchronizesAfterReattach, manualSetWhileBoundThrows,
+                rebindWhileBoundThrows, bindNullSignalThrows);
     }
 
     /**
