@@ -15,9 +15,13 @@
  */
 package com.vaadin.flow.component.badge.tests;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.badge.Badge;
 import com.vaadin.flow.component.html.Span;
@@ -34,6 +38,18 @@ class BadgeSignalTest extends AbstractSignalsTest {
     void setup() {
         textSignal = new ValueSignal<>("foo");
         numberSignal = new ValueSignal<>(0);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> bindText() {
+        return generateBindingTests(Badge::new, Badge::bindText, Badge::getText,
+                Badge::setText, "foo", "bar");
+    }
+
+    @TestFactory
+    Stream<DynamicTest> bindNumber() {
+        return generateBindingTests(Badge::new, Badge::bindNumber,
+                Badge::getNumber, Badge::setNumber, 5, 10);
     }
 
     @Test
@@ -86,14 +102,6 @@ class BadgeSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindTextSignal_setText_throws() {
-        Badge badge = new Badge();
-        badge.bindText(textSignal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> badge.setText("bar"));
-    }
-
-    @Test
     void bindTextSignal_setContent_throws() {
         Badge badge = new Badge();
         badge.bindText(textSignal);
@@ -113,13 +121,5 @@ class BadgeSignalTest extends AbstractSignalsTest {
 
         numberSignal.set(50);
         Assertions.assertEquals((Integer) 50, badge.getNumber());
-    }
-
-    @Test
-    void bindNumberSignal_setNumber_throws() {
-        Badge badge = new Badge();
-        badge.bindNumber(numberSignal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> badge.setNumber(5));
     }
 }
