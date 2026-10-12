@@ -115,7 +115,7 @@ class LitRendererTest {
         // The copied value is the argument the template passes, so the same
         // function serves every rendered row.
         JsFunction text = (JsFunction) copy.getCaptures().get(0);
-        Assertions.assertEquals("return context[$0][$1]", text.getBody());
+        Assertions.assertEquals("return context?.[$0]?.[$1]", text.getBody());
         Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
     }
 
