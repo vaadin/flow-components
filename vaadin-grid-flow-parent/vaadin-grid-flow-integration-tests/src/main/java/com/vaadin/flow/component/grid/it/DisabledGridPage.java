@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
@@ -56,6 +57,20 @@ public class DisabledGridPage extends Div {
         grid.addItemDoubleClickListener(event -> reportError());
 
         add(grid, message, toggleEnabled);
+
+        createDisabledScrollingGrid();
+    }
+
+    private void createDisabledScrollingGrid() {
+        Grid<String> grid = new Grid<>();
+        grid.setId("scrolling-grid");
+        grid.setItems(
+                IntStream.range(0, 100).mapToObj(i -> "Item " + i).toList());
+        grid.addColumn(ValueProvider.identity()).setHeader("Item");
+        grid.addColumn(new NativeButtonRenderer<>("Native button",
+                item -> reportError())).setHeader("Button renderer");
+        grid.setEnabled(false);
+        add(grid);
     }
 
     private void reportError() {

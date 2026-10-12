@@ -18,17 +18,13 @@ package com.vaadin.flow.component.grid.it;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid-it-demo")
-public class GridViewBasicIT extends AbstractComponentIT {
+@TestPath("vaadin-grid/basic")
+public class GridBasicIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -36,32 +32,7 @@ public class GridViewBasicIT extends AbstractComponentIT {
     }
 
     @Test
-    public void disabledGrid_itemsAreDisabled() {
-        GridElement grid = $(GridElement.class).id("disabled-grid");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() > 0);
-        Assert.assertFalse("Grid should be disabled", grid.isEnabled());
-
-        GridTRElement row = grid.getRow(0);
-        GridTHTDElement cell = row.getCell(grid.getColumn("Action"));
-        WebElement button = cell.getContext().findElement(By.tagName("button"));
-
-        Assert.assertFalse("The rendered button should be disabled",
-                button.isEnabled());
-
-        grid.scrollToRow(499);
-        waitUntil(driver -> grid.getRowCount() == 500);
-
-        row = grid.getRow(499);
-        cell = row.getCell(grid.getColumn("Action"));
-        button = cell.getContext().findElement(By.tagName("button"));
-
-        Assert.assertFalse("The rendered button should be disabled",
-                button.isEnabled());
-    }
-
-    @Test
-    public void dataIsShown() throws InterruptedException {
+    public void dataIsShown() {
         GridElement grid = $(GridElement.class).id("basic");
 
         Assert.assertEquals("Name", grid.getHeaderCell(0).getText());
@@ -72,7 +43,7 @@ public class GridViewBasicIT extends AbstractComponentIT {
     }
 
     @Test
-    public void noHeaderIsShown() throws InterruptedException {
+    public void noHeaderIsShown() {
         GridElement grid = $(GridElement.class).id("noHeader");
 
         Assert.assertFalse(grid.getHeaderCell(0).isDisplayed());
@@ -80,7 +51,7 @@ public class GridViewBasicIT extends AbstractComponentIT {
     }
 
     @Test
-    public void lazyDataIsShown() throws InterruptedException {
+    public void lazyDataIsShown() {
         GridElement grid = $(GridElement.class).id("lazy-loading");
         scrollToElement(grid);
 
