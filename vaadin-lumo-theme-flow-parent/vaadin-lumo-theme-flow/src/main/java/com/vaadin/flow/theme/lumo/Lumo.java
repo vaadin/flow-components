@@ -32,8 +32,8 @@ import com.vaadin.flow.theme.AbstractTheme;
  *
  * @since 1.0
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.2.14")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.2.14")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.2.15")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.2.15")
 @CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 public class Lumo implements AbstractTheme {
 
