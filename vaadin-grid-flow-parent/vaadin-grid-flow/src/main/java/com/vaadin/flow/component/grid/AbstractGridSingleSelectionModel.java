@@ -218,7 +218,6 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     }
 
     private Object getItemId(T item) {
-        return item == null ? null
-                : getGrid().getDataCommunicator().getDataProvider().getId(item);
+        return item == null ? null : getGrid().getItemId(item);
     }
 }
