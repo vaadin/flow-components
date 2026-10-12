@@ -17,9 +17,12 @@ package com.vaadin.flow.component.shared;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
@@ -118,27 +121,13 @@ class HasThemeVariantTest extends AbstractSignalsTest {
                 component.getThemeNames());
     }
 
-    @Test
-    void bindThemeVariant_setSignalValueTrue_themeNamesContainsThemeVariant() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-
-        Assertions.assertEquals(
-                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
-                component.getThemeNames());
-    }
-
-    @Test
-    void bindThemeVariant_setSignalValueFalse_themeNamesDoesNotContainThemeVariant() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-
-        signal.set(false);
-        Assertions.assertTrue(component.getThemeNames().isEmpty());
+    @TestFactory
+    Stream<DynamicTest> bindThemeVariant() {
+        var variant = TestComponentVariant.TEST_VARIANT;
+        return generateBindingTests(TestComponent::new,
+                (c, s) -> c.bindThemeVariant(variant, s),
+                c -> c.getThemeNames().contains(variant.getVariantName()),
+                (c, v) -> c.setThemeVariant(variant, v), true, false);
     }
 
     @Test

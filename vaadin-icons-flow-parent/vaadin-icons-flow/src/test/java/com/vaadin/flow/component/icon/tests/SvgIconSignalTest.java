@@ -17,36 +17,20 @@ package com.vaadin.flow.component.icon.tests;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
 class SvgIconSignalTest extends AbstractSignalsTest {
-
-    private SvgIcon svgIcon;
-    private ValueSignal<String> symbolSignal;
-
-    @BeforeEach
-    void setup() {
-        svgIcon = new SvgIcon();
-        symbolSignal = new ValueSignal<>("icon-home");
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (svgIcon != null && svgIcon.isAttached()) {
-            svgIcon.removeFromParent();
-        }
-    }
 
     private static DownloadHandler getDownloadHandler() {
         return downloadEvent -> {
@@ -59,73 +43,17 @@ class SvgIconSignalTest extends AbstractSignalsTest {
         };
     }
 
-    // ===== SYMBOL BINDING TESTS =====
-
-    @Test
-    void bindSymbol_signalBound_symbolSynchronizedWhenAttached() {
-        svgIcon.bindSymbol(symbolSignal);
-        UI.getCurrent().add(svgIcon);
-
-        Assertions.assertEquals("icon-home", svgIcon.getSymbol());
-
-        symbolSignal.set("icon-search");
-        Assertions.assertEquals("icon-search", svgIcon.getSymbol());
-
-        symbolSignal.set("icon-user");
-        Assertions.assertEquals("icon-user", svgIcon.getSymbol());
-    }
-
-    @Test
-    void bindSymbol_signalBound_noEffectWhenDetached() {
-        svgIcon.bindSymbol(symbolSignal);
-        // Not attached to UI
-
-        String initialSymbol = svgIcon.getSymbol();
-        symbolSignal.set("icon-search");
-        Assertions.assertEquals(initialSymbol, svgIcon.getSymbol());
-    }
-
-    @Test
-    void bindSymbol_signalBound_detachAndReattach() {
-        svgIcon.bindSymbol(symbolSignal);
-        UI.getCurrent().add(svgIcon);
-        Assertions.assertEquals("icon-home", svgIcon.getSymbol());
-
-        // Detach
-        svgIcon.removeFromParent();
-        symbolSignal.set("icon-search");
-        Assertions.assertEquals("icon-home", svgIcon.getSymbol());
-
-        // Reattach
-        UI.getCurrent().add(svgIcon);
-        Assertions.assertEquals("icon-search", svgIcon.getSymbol());
-
-        symbolSignal.set("icon-user");
-        Assertions.assertEquals("icon-user", svgIcon.getSymbol());
-    }
-
-    @Test
-    void bindSymbol_setSymbolWhileBound_throwsException() {
-        svgIcon.bindSymbol(symbolSignal);
-        UI.getCurrent().add(svgIcon);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> svgIcon.setSymbol("icon-search"));
-    }
-
-    @Test
-    void bindSymbol_bindAgainWhileBound_throwsException() {
-        svgIcon.bindSymbol(symbolSignal);
-        UI.getCurrent().add(svgIcon);
-
-        ValueSignal<String> anotherSignal = new ValueSignal<>("icon-search");
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> svgIcon.bindSymbol(anotherSignal));
+    @TestFactory
+    Stream<DynamicTest> bindSymbol() {
+        return generateBindingTests(SvgIcon::new, SvgIcon::bindSymbol,
+                SvgIcon::getSymbol, SvgIcon::setSymbol, "icon-home",
+                "icon-search");
     }
 
     @Test
     void constructor_stringWithSignal_bindsSymbolCorrectly() {
-        svgIcon = new SvgIcon("path/to/sprite.svg", symbolSignal);
+        var symbolSignal = new ValueSignal<>("icon-home");
+        var svgIcon = new SvgIcon("path/to/sprite.svg", symbolSignal);
         UI.getCurrent().add(svgIcon);
 
         Assertions.assertEquals("path/to/sprite.svg", svgIcon.getSrc());
@@ -137,8 +65,9 @@ class SvgIconSignalTest extends AbstractSignalsTest {
 
     @Test
     void constructor_downloadHandlerWithSignal_bindsSymbolCorrectly() {
+        var symbolSignal = new ValueSignal<>("icon-home");
         DownloadHandler handler = getDownloadHandler();
-        svgIcon = new SvgIcon(handler, symbolSignal);
+        var svgIcon = new SvgIcon(handler, symbolSignal);
         UI.getCurrent().add(svgIcon);
 
         Assertions.assertEquals("icon-home", svgIcon.getSymbol());
