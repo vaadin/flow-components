@@ -16,15 +16,16 @@
 package com.vaadin.flow.component.shared;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
@@ -35,75 +36,24 @@ class HasClearButtonSignalTest extends AbstractSignalsTest {
             implements HasClearButton {
     }
 
-    @Test
-    void bindClearButtonVisible_elementAttached_updatesWithSignal_andNullMapsToFalse() {
-        TestComponent component = new TestComponent();
-        // Attach component so that Element.bindProperty becomes active
-        UI.getCurrent().add(component);
+    @TestFactory
+    Stream<DynamicTest> bindClearButtonVisible() {
+        return generateBindingTests(TestComponent::new,
+                TestComponent::bindClearButtonVisible,
+                TestComponent::isClearButtonVisible,
+                TestComponent::setClearButtonVisible, true, false);
+    }
 
-        // Bind a signal and verify initial propagation
+    @Test
+    void bindClearButtonVisible_nullValue_mapsToFalse() {
+        TestComponent component = new TestComponent();
+        UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindClearButtonVisible(signal);
-        assertTrue(component.isClearButtonVisible());
-        assertTrue(component.getElement().getProperty("clearButtonVisible",
-                false));
 
-        // Update to a different non-null value
-        signal.set(false);
-        assertFalse(component.isClearButtonVisible());
-        assertFalse(component.getElement().getProperty("clearButtonVisible",
-                false));
-
-        // Update to null -> should map to false
         signal.set(null);
         assertFalse(component.isClearButtonVisible());
         assertFalse(component.getElement().getProperty("clearButtonVisible",
                 false));
-    }
-
-    @Test
-    void bindClearButtonVisible_elementNotAttached_initialValueApplied_changesDeferred_untilAttach() {
-        TestComponent component = new TestComponent();
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindClearButtonVisible(signal);
-
-        // Initial value is applied immediately (effect runs on creation)
-        assertTrue(component.isClearButtonVisible());
-
-        // While detached, subsequent changes are deferred
-        signal.set(false);
-        assertTrue(component.isClearButtonVisible());
-
-        // Attach -> latest deferred value is applied
-        UI.getCurrent().add(component);
-        assertFalse(component.isClearButtonVisible());
-
-        // Update after attach -> applied
-        signal.set(true);
-        assertTrue(component.isClearButtonVisible());
-    }
-
-    @Test
-    void setClearButtonVisible_whileBindingActive_throwsBindingActiveException() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindClearButtonVisible(signal);
-        assertTrue(component.isClearButtonVisible());
-
-        assertThrows(BindingActiveException.class,
-                () -> component.setClearButtonVisible(false));
-    }
-
-    @Test
-    void bindClearButtonVisible_againWhileActive_throwsBindingActiveException() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindClearButtonVisible(signal);
-        assertTrue(component.isClearButtonVisible());
-
-        assertThrows(BindingActiveException.class, () -> component
-                .bindClearButtonVisible(new ValueSignal<>(false)));
     }
 }

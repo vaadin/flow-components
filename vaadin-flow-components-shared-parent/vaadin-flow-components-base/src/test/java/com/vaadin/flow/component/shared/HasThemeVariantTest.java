@@ -17,9 +17,12 @@ package com.vaadin.flow.component.shared;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
@@ -118,43 +121,26 @@ class HasThemeVariantTest extends AbstractSignalsTest {
                 component.getThemeNames());
     }
 
-    @Test
-    void bindThemeVariant_setSignalValueTrue_themeNamesContainsThemeVariant() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-
-        Assertions.assertEquals(
-                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
-                component.getThemeNames());
+    @TestFactory
+    Stream<DynamicTest> bindThemeVariant() {
+        var variant = TestComponentVariant.TEST_VARIANT;
+        return generateBindingTests(TestComponent::new,
+                (c, s) -> c.bindThemeVariant(variant, s),
+                c -> c.getThemeNames().contains(variant.getVariantName()),
+                (c, v) -> c.setThemeVariant(variant, v), true, false);
     }
 
     @Test
-    void bindThemeVariant_setSignalValueFalse_themeNamesDoesNotContainThemeVariant() {
+    void bindThemeVariant_otherThemeSetters_throwBindingActiveException() {
         TestComponent component = new TestComponent();
         UI.getCurrent().add(component);
         ValueSignal<Boolean> signal = new ValueSignal<>(true);
         component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-
-        signal.set(false);
-        Assertions.assertTrue(component.getThemeNames().isEmpty());
-    }
-
-    @Test
-    void bindThemeVariant_editWithActiveBinding_throwBindingActiveException() {
-        TestComponent component = new TestComponent();
-        UI.getCurrent().add(component);
-        ValueSignal<Boolean> signal = new ValueSignal<>(true);
-        component.bindThemeVariant(TestComponentVariant.TEST_VARIANT, signal);
-        Assertions.assertFalse(component.getThemeNames().isEmpty());
 
         Assertions.assertThrows(BindingActiveException.class, () -> component
                 .removeThemeVariants(TestComponentVariant.TEST_VARIANT));
         Assertions.assertThrows(BindingActiveException.class, () -> component
                 .addThemeVariants(TestComponentVariant.TEST_VARIANT));
-        Assertions.assertThrows(BindingActiveException.class, () -> component
-                .setThemeVariant(TestComponentVariant.TEST_VARIANT, false));
         Assertions.assertThrows(BindingActiveException.class, () -> component
                 .setThemeVariant(TestComponentVariant.TEST_VARIANT, true));
         Assertions.assertThrows(BindingActiveException.class, () -> component
