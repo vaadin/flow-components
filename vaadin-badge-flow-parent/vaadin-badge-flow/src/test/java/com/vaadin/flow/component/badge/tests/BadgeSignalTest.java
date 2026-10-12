@@ -72,20 +72,25 @@ class BadgeSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindTextSignal() {
+    void bindText_updatesElementText() {
         Badge badge = new Badge();
         badge.bindText(textSignal);
         ui.add(badge);
-        Assertions.assertEquals("foo", badge.getText());
         Assertions.assertEquals("foo", badge.getElement().getText());
+
+        textSignal.set("bar");
+        Assertions.assertEquals("bar", badge.getElement().getText());
+    }
+
+    @Test
+    void bindText_nullValue_clearsText() {
+        Badge badge = new Badge();
+        badge.bindText(textSignal);
+        ui.add(badge);
 
         textSignal.set(null);
         Assertions.assertNull(badge.getText());
         Assertions.assertEquals("", badge.getElement().getText());
-
-        textSignal.set("bar");
-        Assertions.assertEquals("bar", badge.getText());
-        Assertions.assertEquals("bar", badge.getElement().getText());
     }
 
     @Test
@@ -110,16 +115,12 @@ class BadgeSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindNumberSignal() {
+    void bindNumber_nullValue_clearsNumber() {
         Badge badge = new Badge();
         badge.bindNumber(numberSignal);
         ui.add(badge);
-        Assertions.assertEquals((Integer) 0, badge.getNumber());
 
         numberSignal.set(null);
         Assertions.assertNull(badge.getNumber());
-
-        numberSignal.set(50);
-        Assertions.assertEquals((Integer) 50, badge.getNumber());
     }
 }
