@@ -15,97 +15,20 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.component.UI;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
 class CheckboxSignalTest extends AbstractSignalsTest {
 
-    private Checkbox checkbox;
-    private ValueSignal<Boolean> signal;
-
-    @BeforeEach
-    void setup() {
-        checkbox = new Checkbox();
-        signal = new ValueSignal<>(false);
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (checkbox != null && checkbox.isAttached()) {
-            checkbox.removeFromParent();
-        }
-    }
-
-    @Test
-    void bindIndeterminate_signalBound_propertySync() {
-        checkbox.bindIndeterminate(signal, signal::set);
-        UI.getCurrent().add(checkbox);
-
-        Assertions.assertFalse(checkbox.isIndeterminate());
-
-        signal.set(true);
-        Assertions.assertTrue(checkbox.isIndeterminate());
-
-        signal.set(false);
-        Assertions.assertFalse(checkbox.isIndeterminate());
-    }
-
-    @Test
-    void bindIndeterminate_notAttached_noEffect() {
-        checkbox.bindIndeterminate(signal, signal::set);
-
-        boolean initial = checkbox.isIndeterminate();
-        signal.set(true);
-        Assertions.assertEquals(initial, checkbox.isIndeterminate());
-    }
-
-    @Test
-    void bindIndeterminate_detachAndReattach() {
-        checkbox.bindIndeterminate(signal, signal::set);
-        UI.getCurrent().add(checkbox);
-
-        signal.set(true);
-        Assertions.assertTrue(checkbox.isIndeterminate());
-
-        checkbox.removeFromParent();
-        signal.set(false);
-        Assertions.assertTrue(checkbox.isIndeterminate());
-
-        UI.getCurrent().add(checkbox);
-        Assertions.assertFalse(checkbox.isIndeterminate());
-    }
-
-    void bindIndeterminate_setWhileBound_syncsToSignal() {
-        checkbox.bindIndeterminate(signal, signal::set);
-        UI.getCurrent().add(checkbox);
-
-        checkbox.setIndeterminate(true);
-        Assertions.assertTrue(signal.peek());
-
-        checkbox.setIndeterminate(false);
-        Assertions.assertFalse(signal.peek());
-    }
-
-    @Test
-    void bindIndeterminate_doubleBind_throws() {
-        checkbox.bindIndeterminate(signal, signal::set);
-        var other = new ValueSignal<>(true);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> checkbox.bindIndeterminate(other, other::set));
-    }
-
-    @Test
-    void bindIndeterminate_nullSignal_throwsNPE() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> checkbox.bindIndeterminate(null, null));
+    @TestFactory
+    Stream<DynamicTest> bindIndeterminate() {
+        return generateTwoWayBindingTests(Checkbox::new,
+                Checkbox::bindIndeterminate, Checkbox::isIndeterminate,
+                Checkbox::setIndeterminate, "indeterminate", true, false);
     }
 }

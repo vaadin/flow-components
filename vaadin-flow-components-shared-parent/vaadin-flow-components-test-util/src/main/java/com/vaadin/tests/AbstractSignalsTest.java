@@ -19,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,7 +33,10 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.signals.BindingActiveException;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -210,6 +216,170 @@ public class AbstractSignalsTest {
                 doesNotSynchronizeWhileDetached, resynchronizesAfterAttach,
                 resynchronizesAfterReattach, manualSetWhileBoundThrows,
                 rebindWhileBoundThrows, bindNullSignalThrows);
+    }
+
+    /**
+     * A bind method that takes a signal and a write callback, for example
+     * {@code AppLayout::bindDrawerOpened}.
+     *
+     * @param <C>
+     *            the component type
+     * @param <T>
+     *            the property value type
+     */
+    @FunctionalInterface
+    public interface TwoWayBindMethod<C, T> {
+        /**
+         * Binds the signal to the component property.
+         *
+         * @param component
+         *            the component to bind
+         * @param signal
+         *            the signal to bind
+         * @param writeCallback
+         *            the callback to propagate value changes back, or
+         *            {@code null} for a one-way binding
+         */
+        void bind(C component, Signal<T> signal,
+                SerializableConsumer<T> writeCallback);
+    }
+
+    /**
+     * Generates a suite of JUnit 5 dynamic tests that verify the standard
+     * behavior of a two-way signal binding on a component property, which is
+     * implemented with
+     * {@link com.vaadin.flow.dom.Element#bindProperty(String, Signal, SerializableConsumer)}.
+     * The returned stream is intended to be used with
+     * {@link org.junit.jupiter.api.TestFactory}.
+     * <p>
+     * The suite contains all test cases of
+     * {@link #generateBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)},
+     * run with a {@code null} write callback, which verifies that such a
+     * binding is one-way. In addition, the following test cases are generated:
+     * <ul>
+     * <li><b>setterWhileBoundCallsWriteCallback</b> – verifies that calling the
+     * setter while bound invokes the write callback, which updates the signal
+     * and the component property.</li>
+     * <li><b>setterWhileBoundSignalWins</b> – verifies that the component
+     * property keeps the signal value when the write callback does not update
+     * the signal.</li>
+     * <li><b>clientUpdateCallsWriteCallback</b> – verifies that a property
+     * change from the client invokes the write callback, which updates the
+     * signal and the component property.</li>
+     * <li><b>signalChangeDoesNotCallWriteCallback</b> – verifies that signal
+     * value changes update the component property without invoking the write
+     * callback.</li>
+     * </ul>
+     * <p>
+     * <b>NOTE:</b> The tests are not necessarily exhaustive for all aspects of
+     * a specific signal binding, but only cover common expected behaviors.
+     * Additional test cases may be needed for edge cases or specific
+     * implementation details of a particular binding.
+     *
+     * @param <C>
+     *            the component type
+     * @param <T>
+     *            the property value type
+     * @param componentFactory
+     *            supplier that creates a new component instance for each test
+     * @param bind
+     *            the bind method under test (e.g.
+     *            {@code AppLayout::bindDrawerOpened})
+     * @param getter
+     *            the getter for the bound property (e.g.
+     *            {@code AppLayout::isDrawerOpened})
+     * @param setter
+     *            the setter for the bound property (e.g.
+     *            {@code AppLayout::setDrawerOpened})
+     * @param propertyName
+     *            the name of the bound element property, used to simulate a
+     *            property change from the client
+     * @param initialValue
+     *            the initial value of the signal created for each test
+     * @param updatedValue
+     *            a value different from {@code initialValue}, used to test
+     *            synchronization behavior. Must be a type that the client can
+     *            send as a property value.
+     * @return a stream of dynamic tests to be returned from a
+     *         {@link org.junit.jupiter.api.TestFactory} method
+     */
+    protected <C extends Component, T> Stream<DynamicTest> generateTwoWayBindingTests(
+            Supplier<C> componentFactory, TwoWayBindMethod<C, T> bind,
+            Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
+            T initialValue, T updatedValue) {
+
+        var oneWayTests = generateBindingTests(componentFactory,
+                (component, signal) -> bind.bind(component, signal, null),
+                getter, setter, initialValue, updatedValue);
+
+        var setterWhileBoundCallsWriteCallback = createTest(
+                "setterWhileBoundCallsWriteCallback", () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+
+                    UI.getCurrent().add(component);
+                    bind.bind(component, signal, signal::set);
+
+                    setter.accept(component, updatedValue);
+
+                    assertEquals(updatedValue, signal.peek());
+                    assertEquals(updatedValue, getter.apply(component));
+                });
+
+        var setterWhileBoundSignalWins = createTest(
+                "setterWhileBoundSignalWins", () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+                    var writtenValues = new ArrayList<T>();
+
+                    UI.getCurrent().add(component);
+                    bind.bind(component, signal, writtenValues::add);
+
+                    setter.accept(component, updatedValue);
+
+                    assertEquals(List.of(updatedValue), writtenValues);
+                    assertEquals(initialValue, signal.peek());
+                    assertEquals(initialValue, getter.apply(component));
+                });
+
+        var clientUpdateCallsWriteCallback = createTest(
+                "clientUpdateCallsWriteCallback", () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+
+                    UI.getCurrent().add(component);
+                    bind.bind(component, signal, signal::set);
+
+                    component.getElement().getNode()
+                            .getFeature(ElementPropertyMap.class)
+                            .deferredUpdateFromClient(propertyName,
+                                    (Serializable) updatedValue)
+                            .run();
+
+                    assertEquals(updatedValue, signal.peek());
+                    assertEquals(updatedValue, getter.apply(component));
+                });
+
+        var signalChangeDoesNotCallWriteCallback = createTest(
+                "signalChangeDoesNotCallWriteCallback", () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+                    var writtenValues = new ArrayList<T>();
+
+                    UI.getCurrent().add(component);
+                    bind.bind(component, signal, writtenValues::add);
+
+                    signal.set(updatedValue);
+
+                    assertEquals(updatedValue, getter.apply(component));
+                    assertEquals(List.of(), writtenValues);
+                });
+
+        return Stream.concat(oneWayTests,
+                Stream.of(setterWhileBoundCallsWriteCallback,
+                        setterWhileBoundSignalWins,
+                        clientUpdateCallsWriteCallback,
+                        signalChangeDoesNotCallWriteCallback));
     }
 
     /**
