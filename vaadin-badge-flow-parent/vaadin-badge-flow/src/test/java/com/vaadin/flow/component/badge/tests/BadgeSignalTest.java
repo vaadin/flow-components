@@ -83,7 +83,7 @@ class BadgeSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindText_nullValue_clearsText() {
+    void bindText_nullValue_clearsTextUntilNextValue() {
         Badge badge = new Badge();
         badge.bindText(textSignal);
         ui.add(badge);
@@ -91,6 +91,9 @@ class BadgeSignalTest extends AbstractSignalsTest {
         textSignal.set(null);
         Assertions.assertNull(badge.getText());
         Assertions.assertEquals("", badge.getElement().getText());
+
+        textSignal.set("bar");
+        Assertions.assertEquals("bar", badge.getElement().getText());
     }
 
     @Test
