@@ -443,15 +443,15 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * the time the server responds.
      * <p>
      * The action is bound once for the whole renderer, however many items it
-     * renders, and reads the values it needs from the item it fired for:
+     * renders, and reads the values it needs from the arguments the template
+     * calls it with or from the item it fired for:
      *
      * <pre>
      * {@code
      * LitRenderer.<Person> of(
-     *         "<span>${item.email}</span><button @click=${copy}>Copy</button>")
+     *         "<span>${item.email}</span><button @click=${() => copy(item.email)}>Copy</button>")
      *         .withProperty("email", Person::getEmail)
-     *         .withClientAction("copy", Clipboard.write()
-     *                 .text(ClientValue.itemProperty("email")));
+     *         .withClientAction("copy", Clipboard.write());
      * }
      * </pre>
      *

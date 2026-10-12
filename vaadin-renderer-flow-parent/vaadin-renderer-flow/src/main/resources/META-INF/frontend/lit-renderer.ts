@@ -11,7 +11,10 @@ type Renderer = ((root: RenderRoot, rendererOwner: HTMLElement, model: ItemModel
 
 type Component = HTMLElement & { [key: string]: Renderer | undefined };
 
-type ClientActionFunction = (event: Event, context: { item: any; index: number; key: string }) => void;
+type ClientActionFunction = (
+  event: Event | undefined,
+  context: { item: any; index: number; key: string; args: any[] }
+) => void;
 
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
@@ -28,7 +31,8 @@ _window.Vaadin = _window.Vaadin || {};
  * @param clientCallables A list of function names that can be called from within the template literal.
  * @param clientActions A list of client-side action names that can be called from within the template literal.
  * @param clientActionsFactory Returns the client-side action functions, positionally matching clientActions.
- * Each is called as action(event, context) with the row the event came from as context, and runs entirely
+ * Each is called as action(event, context) with the row the event came from and the arguments the template
+ * passed (as context.args) as context, and runs entirely
  * on the client - inside the browser event handler, so the user gesture is still valid.
  * @param propertyNamespace LitRenderer-specific namespace for properties.
  * Needed to avoid property name collisions between renderers.
@@ -55,7 +59,14 @@ _window.Vaadin.setLitRenderer = (
   // Bound per rendered item: the action itself is one server-side binding for
   // the whole renderer, and the context is what tells it which item fired it.
   const actionsCreator = (item: any, index: number, itemKey: string) =>
-    clientActionFunctions.map((action) => (event: Event) => action(event, { item, index, key: itemKey }));
+    clientActionFunctions.map(
+      (action) =>
+        (...args: any[]) =>
+          action(
+            args.find((arg) => arg instanceof Event),
+            { item, index, key: itemKey, args }
+          )
+    );
 
   const fnArgs = [
     'html',
