@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -34,8 +32,8 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid-it-demo/sorting")
-public class GridViewSortingIT extends AbstractComponentIT {
+@TestPath("vaadin-grid/multi-sort")
+public class GridMultiSortIT extends AbstractComponentIT {
 
     private GridElement grid;
     private CheckboxElement multiSortToggle;
@@ -62,8 +60,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void gridWithSorting() {
-        scrollToElement(grid);
-
         grid.getHeaderCell(0).getSorter().click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
         grid.getHeaderCell(2).getSorter().click();
@@ -85,8 +81,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void gridWithSorting_switchColumnSorting() {
-        scrollToElement(grid);
-
         grid.getHeaderCell(0).getSorter().click();
         grid.getHeaderCell(0).getSorter().click();
         grid.getHeaderCell(0).getSorter().click();
@@ -98,8 +92,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void gridWithSorting_invertAndResetSortings() {
-        scrollToElement(grid);
-
         grid.getHeaderCell(0).getSorter().click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
 
@@ -131,18 +123,16 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void gridWithSorting_toggleColumnVisibilityAndReset() {
-        scrollToElement(grid);
-
-        WebElement toggleFirstColumnButton = findElement(
-                By.id("grid-sortable-columns-toggle-first"));
+        TestBenchElement toggleFirstColumnButton = $("button")
+                .id("grid-sortable-columns-toggle-first");
 
         grid.getHeaderCell(0).getSorter().click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
 
-        clickElementWithJs(toggleFirstColumnButton);
+        toggleFirstColumnButton.click();
         assertSortMessageEquals(Collections.emptyList(), false);
 
-        clickElementWithJs(toggleFirstColumnButton);
+        toggleFirstColumnButton.click();
         assertSortMessageEquals(Collections.emptyList(), false);
 
         GridSorterElement sorter = grid.getHeaderCell(0).getSorter();
@@ -152,7 +142,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void gridWithSorting_noMultiSort_secondSortColumnIgnored() {
-        scrollToElement(grid);
         sortByAgeThenName.click();
         assertSortMessageEquals(QuerySortOrder.asc("age").build(), false);
 
@@ -166,7 +155,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void gridWithSorting_multiSortPriorityAppend() {
-        scrollToElement(grid);
         // enable multi sort
         multiSortToggle.click();
         // set multi-sort priority to append
@@ -186,7 +174,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void multiSortPrepend_sortByAgeThenFirstName_sortIndicatorsOrderedByAgeThenFirstName() {
-        scrollToElement(grid);
         // enable multi sort
         multiSortToggle.click();
         sortByAgeThenName.click();
@@ -198,7 +185,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void multiSortAppend_sortByAgeThenFirstName_sortIndicatorsOrderedByAgeThenFirstName() {
-        scrollToElement(grid);
         // enable multi sort
         multiSortToggle.click();
         // set multi-sort priority to append
