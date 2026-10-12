@@ -260,9 +260,10 @@ public class AbstractSignalsTest {
      * <li><b>setterWhileBoundCallsWriteCallback</b> – verifies that calling the
      * setter while bound invokes the write callback, which updates the signal
      * and the component property.</li>
-     * <li><b>setterWhileBoundSignalWins</b> – verifies that the component
-     * property keeps the signal value when the write callback does not update
-     * the signal.</li>
+     * <li><b>setterWhileBoundRevertsWhenCallbackIgnoresValue</b> – verifies
+     * that calling the setter while bound passes the value to the write
+     * callback, and that the component property reverts to the signal value
+     * when the callback does not update the signal.</li>
      * <li><b>clientUpdateCallsWriteCallback</b> – verifies that a property
      * change from the client invokes the write callback, which updates the
      * signal and the component property.</li>
@@ -326,8 +327,8 @@ public class AbstractSignalsTest {
                     assertEquals(updatedValue, getter.apply(component));
                 });
 
-        var setterWhileBoundSignalWins = createTest(
-                "setterWhileBoundSignalWins", () -> {
+        var setterWhileBoundRevertsWhenCallbackIgnoresValue = createTest(
+                "setterWhileBoundRevertsWhenCallbackIgnoresValue", () -> {
                     var component = componentFactory.get();
                     var signal = new ValueSignal<>(initialValue);
                     var writtenValues = new ArrayList<T>();
@@ -377,7 +378,7 @@ public class AbstractSignalsTest {
 
         return Stream.concat(oneWayTests,
                 Stream.of(setterWhileBoundCallsWriteCallback,
-                        setterWhileBoundSignalWins,
+                        setterWhileBoundRevertsWhenCallbackIgnoresValue,
                         clientUpdateCallsWriteCallback,
                         signalChangeDoesNotCallWriteCallback));
     }
