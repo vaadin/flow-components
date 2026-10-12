@@ -15,228 +15,31 @@
  */
 package com.vaadin.flow.component.progressbar.tests;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.component.UI;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
 class ProgressBarSignalTest extends AbstractSignalsTest {
 
-    private ProgressBar progressBar;
-    private ValueSignal<Double> minSignal;
-    private ValueSignal<Double> maxSignal;
-    private ValueSignal<Double> valueSignal;
-
-    @BeforeEach
-    void setup() {
-        progressBar = new ProgressBar();
-        minSignal = new ValueSignal<>(0.0);
-        maxSignal = new ValueSignal<>(100.0);
-        valueSignal = new ValueSignal<>(50.0);
+    @TestFactory
+    Stream<DynamicTest> bindMin() {
+        return generateBindingTests(ProgressBar::new, ProgressBar::bindMin,
+                ProgressBar::getMin, ProgressBar::setMin, 0.1, 0.2);
     }
 
-    @AfterEach
-    void tearDown() {
-        if (progressBar != null && progressBar.isAttached()) {
-            progressBar.removeFromParent();
-        }
+    @TestFactory
+    Stream<DynamicTest> bindMax() {
+        return generateBindingTests(ProgressBar::new, ProgressBar::bindMax,
+                ProgressBar::getMax, ProgressBar::setMax, 2.0, 3.0);
     }
 
-    // ===== MIN BINDING TESTS =====
-
-    @Test
-    void bindMin_signalBound_minSynchronizedWhenAttached() {
-        progressBar.bindMin(minSignal);
-        UI.getCurrent().add(progressBar);
-
-        Assertions.assertEquals(0.0, progressBar.getMin(), 0.001);
-
-        minSignal.set(10.0);
-        Assertions.assertEquals(10.0, progressBar.getMin(), 0.001);
-
-        minSignal.set(5.5);
-        Assertions.assertEquals(5.5, progressBar.getMin(), 0.001);
-    }
-
-    @Test
-    void bindMin_signalBound_noEffectWhenDetached() {
-        progressBar.bindMin(minSignal);
-        // Not attached to UI
-
-        double initialMin = progressBar.getMin();
-        minSignal.set(10.0);
-        Assertions.assertEquals(initialMin, progressBar.getMin(), 0.001);
-    }
-
-    @Test
-    void bindMin_signalBound_detachAndReattach() {
-        progressBar.bindMin(minSignal);
-        UI.getCurrent().add(progressBar);
-        Assertions.assertEquals(0.0, progressBar.getMin(), 0.001);
-
-        // Detach
-        progressBar.removeFromParent();
-        minSignal.set(10.0);
-        Assertions.assertEquals(0.0, progressBar.getMin(), 0.001);
-
-        // Reattach
-        UI.getCurrent().add(progressBar);
-        Assertions.assertEquals(10.0, progressBar.getMin(), 0.001);
-
-        minSignal.set(15.0);
-        Assertions.assertEquals(15.0, progressBar.getMin(), 0.001);
-    }
-
-    @Test
-    void bindMin_setMinWhileBound_throwsException() {
-        progressBar.bindMin(minSignal);
-        UI.getCurrent().add(progressBar);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> progressBar.setMin(10.0));
-    }
-
-    @Test
-    void bindMin_bindAgainWhileBound_throwsException() {
-        progressBar.bindMin(minSignal);
-        UI.getCurrent().add(progressBar);
-
-        ValueSignal<Double> anotherSignal = new ValueSignal<>(50.0);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> progressBar.bindMin(anotherSignal));
-    }
-
-    // ===== MAX BINDING TESTS =====
-
-    @Test
-    void bindMax_signalBound_maxSynchronizedWhenAttached() {
-        progressBar.bindMax(maxSignal);
-        UI.getCurrent().add(progressBar);
-
-        Assertions.assertEquals(100.0, progressBar.getMax(), 0.001);
-
-        maxSignal.set(200.0);
-        Assertions.assertEquals(200.0, progressBar.getMax(), 0.001);
-
-        maxSignal.set(150.5);
-        Assertions.assertEquals(150.5, progressBar.getMax(), 0.001);
-    }
-
-    @Test
-    void bindMax_signalBound_noEffectWhenDetached() {
-        progressBar.bindMax(maxSignal);
-        // Not attached to UI
-
-        double initialMax = progressBar.getMax();
-        maxSignal.set(200.0);
-        Assertions.assertEquals(initialMax, progressBar.getMax(), 0.001);
-    }
-
-    @Test
-    void bindMax_signalBound_detachAndReattach() {
-        progressBar.bindMax(maxSignal);
-        UI.getCurrent().add(progressBar);
-        Assertions.assertEquals(100.0, progressBar.getMax(), 0.001);
-
-        // Detach
-        progressBar.removeFromParent();
-        maxSignal.set(200.0);
-        Assertions.assertEquals(100.0, progressBar.getMax(), 0.001);
-
-        // Reattach
-        UI.getCurrent().add(progressBar);
-        Assertions.assertEquals(200.0, progressBar.getMax(), 0.001);
-
-        maxSignal.set(250.0);
-        Assertions.assertEquals(250.0, progressBar.getMax(), 0.001);
-    }
-
-    @Test
-    void bindMax_setMaxWhileBound_throwsException() {
-        progressBar.bindMax(maxSignal);
-        UI.getCurrent().add(progressBar);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> progressBar.setMax(200.0));
-    }
-
-    @Test
-    void bindMax_bindAgainWhileBound_throwsException() {
-        progressBar.bindMax(maxSignal);
-        UI.getCurrent().add(progressBar);
-
-        ValueSignal<Double> anotherSignal = new ValueSignal<>(500.0);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> progressBar.bindMax(anotherSignal));
-    }
-
-    // ===== VALUE BINDING TESTS =====
-
-    @Test
-    void bindValue_signalBound_valueSynchronizedWhenAttached() {
-        progressBar.bindValue(valueSignal);
-        UI.getCurrent().add(progressBar);
-
-        Assertions.assertEquals(50.0, progressBar.getValue(), 0.001);
-
-        valueSignal.set(75.0);
-        Assertions.assertEquals(75.0, progressBar.getValue(), 0.001);
-
-        valueSignal.set(25.5);
-        Assertions.assertEquals(25.5, progressBar.getValue(), 0.001);
-    }
-
-    @Test
-    void bindValue_signalBound_noEffectWhenDetached() {
-        progressBar.bindValue(valueSignal);
-        // Not attached to UI
-
-        double initialValue = progressBar.getValue();
-        valueSignal.set(75.0);
-        Assertions.assertEquals(initialValue, progressBar.getValue(), 0.001);
-    }
-
-    @Test
-    void bindValue_signalBound_detachAndReattach() {
-        progressBar.bindValue(valueSignal);
-        UI.getCurrent().add(progressBar);
-        Assertions.assertEquals(50.0, progressBar.getValue(), 0.001);
-
-        // Detach
-        progressBar.removeFromParent();
-        valueSignal.set(75.0);
-        Assertions.assertEquals(50.0, progressBar.getValue(), 0.001);
-
-        // Reattach
-        UI.getCurrent().add(progressBar);
-        Assertions.assertEquals(75.0, progressBar.getValue(), 0.001);
-
-        valueSignal.set(90.0);
-        Assertions.assertEquals(90.0, progressBar.getValue(), 0.001);
-    }
-
-    @Test
-    void bindValue_setValueWhileBound_throwsException() {
-        progressBar.bindValue(valueSignal);
-        UI.getCurrent().add(progressBar);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> progressBar.setValue(75.0));
-    }
-
-    @Test
-    void bindValue_bindAgainWhileBound_throwsException() {
-        progressBar.bindValue(valueSignal);
-        UI.getCurrent().add(progressBar);
-
-        ValueSignal<Double> anotherSignal = new ValueSignal<>(80.0);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> progressBar.bindValue(anotherSignal));
+    @TestFactory
+    Stream<DynamicTest> bindValue() {
+        return generateBindingTests(ProgressBar::new, ProgressBar::bindValue,
+                ProgressBar::getValue, ProgressBar::setValue, 0.2, 0.5);
     }
 }
