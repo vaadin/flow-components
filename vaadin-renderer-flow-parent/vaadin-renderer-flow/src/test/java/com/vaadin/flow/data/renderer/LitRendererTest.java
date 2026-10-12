@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.trigger.ClientValue;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.function.ValueProvider;
@@ -86,10 +85,9 @@ class LitRendererTest {
         ui.add(container);
 
         LitRenderer<String> renderer = LitRenderer.<String> of(
-                "<span>${item.email}</span><button @click=${copy}>Copy</button>")
+                "<span>${item.email}</span><button @click=${() => copy(item.email)}>Copy</button>")
                 .withProperty("email", ValueProvider.identity())
-                .withClientAction("copy", Clipboard.write()
-                        .text(ClientValue.itemProperty("email")));
+                .withClientAction("copy", Clipboard.write());
 
         renderer.render(container.getElement(), new KeyMapper<>(), "renderer");
         ui.getUI().getInternals().getStateTree()
@@ -114,11 +112,11 @@ class LitRendererTest {
                 copy.getBody().contains("window.Vaadin.Flow.clipboard"),
                 "expected a clipboard write, got: " + copy.getBody());
 
-        // The copied value is read from the item the action fired for, so the
-        // same function serves every rendered row.
+        // The copied value is the argument the template passes, so the same
+        // function serves every rendered row.
         JsFunction text = (JsFunction) copy.getCaptures().get(0);
         Assertions.assertEquals("return context[$0][$1]", text.getBody());
-        Assertions.assertEquals(List.of("item", "email"), text.getCaptures());
+        Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
     }
 
     @Test
@@ -146,7 +144,7 @@ class LitRendererTest {
     void doNotAllowClientActionNamesWithSpaces() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> LitRenderer.of("").withClientAction("illegal name",
-                        Clipboard.write().text(ClientValue.of("x"))));
+                        Clipboard.write()));
     }
 
     @Test
@@ -154,6 +152,6 @@ class LitRendererTest {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> LitRenderer.of("").withFunction("copy", item -> {
                 }).withClientAction("copy",
-                        Clipboard.write().text(ClientValue.of("x"))));
+                        Clipboard.write()));
     }
 }

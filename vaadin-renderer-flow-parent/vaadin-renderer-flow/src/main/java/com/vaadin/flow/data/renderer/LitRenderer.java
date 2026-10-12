@@ -226,7 +226,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
         // Each client action is bound once for the whole renderer: it renders
         // to a client-side function that the template calls from its own event
-        // binding, so the action runs inside the browser.s event handler with
+        // binding, so the action runs inside the browser's event handler with
         // the user gesture still valid. The rows the renderer draws need no
         // server-side component of their own to fire it.
         List<JsFunction> actionFunctions = new ArrayList<>();
@@ -436,15 +436,14 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     /**
      * Adds a client-side action that can be called from within the template
-     * expression, for affordances that must run inside the browser.s own event
+     * expression, for affordances that must run inside the browser's own event
      * handler — copying to the clipboard, sharing, entering fullscreen — where
      * a {@link #withFunction(String, SerializableConsumer) function} cannot
      * work because it round-trips to the server and the user gesture is gone by
      * the time the server responds.
      * <p>
      * The action is bound once for the whole renderer, however many items it
-     * renders, and reads the values it needs from the arguments the template
-     * calls it with or from the item it fired for:
+     * renders; the template passes it the values it works on:
      *
      * <pre>
      * {@code
