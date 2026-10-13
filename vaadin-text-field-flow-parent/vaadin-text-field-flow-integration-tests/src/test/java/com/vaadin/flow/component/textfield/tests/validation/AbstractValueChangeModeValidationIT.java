@@ -51,6 +51,8 @@ public abstract class AbstractValueChangeModeValidationIT<T extends HasValidatio
     }
 
     protected void assertValidationResults(String... expectedResults) {
+        // Validation is logged by a server round trip, wait for it to arrive
+        waitUntil(e -> getValidationResults().size() >= expectedResults.length);
         Assert.assertEquals(Arrays.asList(expectedResults),
                 getValidationResults());
         resetValidationLog();
