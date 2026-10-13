@@ -67,9 +67,6 @@ public class ItemClickListenerPage extends Div {
             return select;
         }).setHeader("Select");
         grid.addColumn(String::toUpperCase).setHeader("Upper").setKey("Upper");
-        // Clicking a Select overlay item activates the row. Selection or a
-        // details toggle would then re-render the row components.
-        grid.setSelectionMode(Grid.SelectionMode.NONE);
 
         grid.addItemClickListener(event -> {
             clickMsg.add(event.getItem());
@@ -87,7 +84,6 @@ public class ItemClickListenerPage extends Div {
                 (SerializableFunction<String, Span>) ItemClickListenerPage::getDetailsComponent));
         grid.setDetailsVisible("foo", false);
         grid.setDetailsVisible("bar", true);
-        grid.setDetailsVisibleOnClick(false);
 
         NativeButton resizeGrid = new NativeButton("Resize grid", event -> {
             grid.setWidth("100px");

@@ -146,7 +146,13 @@ public class ItemClickListenerIT extends AbstractComponentIT {
     @Test
     public void selectItemInSelectOverlay_noItemClickEventFired() {
         SelectElement select = getCell("Select").$(SelectElement.class).first();
-        select.selectByText("Second");
+        // Open with a click: selectByText opens the overlay programmatically,
+        // which activates the row, see
+        // https://github.com/vaadin/web-components/issues/13113
+        select.click();
+        select.getItems().stream()
+                .filter(item -> item.getText().equals("Second")).findFirst()
+                .orElseThrow().click();
         Assert.assertEquals("Second", select.getSelectedText());
         Assert.assertEquals("", getClickMessage());
     }
