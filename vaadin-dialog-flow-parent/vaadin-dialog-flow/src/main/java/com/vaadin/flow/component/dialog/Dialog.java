@@ -947,6 +947,28 @@ public class Dialog extends Component
     }
 
     /**
+     * Sets the ARIA heading level, used to set the {@code aria-level} attribute
+     * on the header title element. Defaults to {@code 2}.
+     *
+     * @param headingLevel
+     *            the heading level
+     * @since 25.4
+     */
+    public void setHeadingLevel(int headingLevel) {
+        getElement().setProperty("headingLevel", headingLevel);
+    }
+
+    /**
+     * Gets the ARIA heading level of the header title element.
+     *
+     * @return the heading level, {@code 2} by default
+     * @since 25.4
+     */
+    public int getHeadingLevel() {
+        return getElement().getProperty("headingLevel", 2);
+    }
+
+    /**
      * Gets the object from which components can be added or removed from the
      * dialog header area. The header is displayed only if there's a
      * {@link #getHeaderTitle()} or at least one component added with
