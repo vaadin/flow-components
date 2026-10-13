@@ -109,7 +109,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/select", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/select@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/select", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/select@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaDescription, HasAriaLabel,

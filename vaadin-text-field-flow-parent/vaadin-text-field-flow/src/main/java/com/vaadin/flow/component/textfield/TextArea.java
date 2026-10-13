@@ -86,7 +86,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.0
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/text-area", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/text-area@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/text-area", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/text-area@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasTextSelection,

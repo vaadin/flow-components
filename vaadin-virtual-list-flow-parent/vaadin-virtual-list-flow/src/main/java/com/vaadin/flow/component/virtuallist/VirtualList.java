@@ -71,7 +71,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 21.0
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/virtual-list", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/virtual-list@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/virtual-list", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/virtual-list@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-virtual-list/virtualListConnector.ts")

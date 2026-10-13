@@ -86,7 +86,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.0
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/password-field", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/password-field@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/password-field", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/password-field@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasTextSelection,

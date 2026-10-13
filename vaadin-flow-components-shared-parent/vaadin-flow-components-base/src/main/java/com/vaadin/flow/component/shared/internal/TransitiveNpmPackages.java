@@ -50,12 +50,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@NpmPackage(value = "@vaadin/a11y-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/a11y-base@275762dfe309017d7928b26395bafb73226e28fd")
-@NpmPackage(value = "@vaadin/component-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/component-base@275762dfe309017d7928b26395bafb73226e28fd")
-@NpmPackage(value = "@vaadin/field-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/field-base@275762dfe309017d7928b26395bafb73226e28fd")
-@NpmPackage(value = "@vaadin/input-container", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/input-container@275762dfe309017d7928b26395bafb73226e28fd")
-@NpmPackage(value = "@vaadin/lit-renderer", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/lit-renderer@275762dfe309017d7928b26395bafb73226e28fd")
-@NpmPackage(value = "@vaadin/overlay", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/overlay@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/a11y-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/a11y-base@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/component-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/component-base@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/field-base", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/field-base@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/input-container", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/input-container@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/lit-renderer", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/lit-renderer@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/overlay", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/overlay@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 final class TransitiveNpmPackages implements Serializable {
 
     /**

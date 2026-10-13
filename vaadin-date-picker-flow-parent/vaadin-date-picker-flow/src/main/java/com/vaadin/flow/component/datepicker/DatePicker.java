@@ -142,7 +142,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/date-picker@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/date-picker", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/date-picker@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./vaadin-date-picker/datepickerConnector.ts")
 @NpmPackage(value = "date-fns", version = "4.4.0")

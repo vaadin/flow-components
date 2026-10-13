@@ -27,7 +27,7 @@ import com.vaadin.flow.component.details.Details;
  * @since 1.0
  */
 @Tag("vaadin-accordion-panel")
-@NpmPackage(value = "@vaadin/accordion", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/accordion@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/accordion", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/accordion@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
 

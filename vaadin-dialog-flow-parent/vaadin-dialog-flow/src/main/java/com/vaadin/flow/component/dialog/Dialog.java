@@ -79,7 +79,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/dialog@275762dfe309017d7928b26395bafb73226e28fd")
+@NpmPackage(value = "@vaadin/dialog", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/dialog@3141b6e97ee28811344a2e851112c4ba1ae340ce")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @ModalRoot
 public class Dialog extends Component
