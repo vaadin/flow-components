@@ -679,6 +679,31 @@ public class ConfirmDialog extends Component
     }
 
     /**
+     * Sets the ARIA heading level, used to set the {@code aria-level} attribute
+     * on the header element. Defaults to {@code 3}.
+     * <p>
+     * Only applies to the header text set with {@link #setHeader(String)}, a
+     * custom header component is not changed.
+     *
+     * @param headingLevel
+     *            the heading level
+     * @since 25.4
+     */
+    public void setHeadingLevel(int headingLevel) {
+        getElement().setProperty("headingLevel", headingLevel);
+    }
+
+    /**
+     * Gets the ARIA heading level of the header element.
+     *
+     * @return the heading level, {@code 3} by default
+     * @since 25.4
+     */
+    public int getHeadingLevel() {
+        return getElement().getProperty("headingLevel", 3);
+    }
+
+    /**
      * Opens the dialog.
      * <p>
      * If a dialog was not added manually to a parent component, it will be
