@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +71,18 @@ public class VirtualListDataProviderRefreshIT extends AbstractComponentIT {
     }
 
     private void assertItemText(int itemIndex, String expectedText) {
+        waitForItemLoaded(itemIndex);
         TestBenchElement item = virtualList.$("span").get(itemIndex);
         Assert.assertEquals(expectedText, item.getText());
+    }
+
+    private void waitForItemLoaded(int itemIndex) {
+        // The list adds rows in steps after the first render, and renders
+        // empty placeholders until the item data arrives, so wait for both
+        waitUntil(driver -> {
+            List<TestBenchElement> items = virtualList.$("span").all();
+            return items.size() > itemIndex
+                    && !items.get(itemIndex).getText().isEmpty();
+        });
     }
 }
