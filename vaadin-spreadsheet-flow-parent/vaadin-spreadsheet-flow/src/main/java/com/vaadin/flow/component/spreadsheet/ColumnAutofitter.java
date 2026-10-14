@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -77,8 +76,8 @@ final class ColumnAutofitter implements Serializable {
         int columnPixelWidth = computePixelWidthWithFilterPadding(columnIndex,
                 (int) activeSheet.getColumnWidthInPixels(columnIndex));
 
-        int[] colW = Arrays.copyOf(spreadsheet.getColW(),
-                spreadsheet.getColW().length);
+        int[] colW = ColumnSizeOperations.widthsCovering(spreadsheet,
+                columnIndex);
         colW[columnIndex] = columnPixelWidth;
         spreadsheet.setColW(colW);
 

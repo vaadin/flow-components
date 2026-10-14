@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand;
@@ -88,8 +89,7 @@ final class ColumnSizeOperations implements Serializable {
         }
         ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>(
                 spreadsheet.getHiddenColumnIndexes());
-        int[] colW = Arrays.copyOf(spreadsheet.getColW(),
-                spreadsheet.getColW().length);
+        int[] colW = widthsCovering(spreadsheet, index);
         if (hiddenColumnIndexes.contains(Integer.valueOf(index + 1))) {
             hiddenColumnIndexes.remove(Integer.valueOf(index + 1));
         }
@@ -117,8 +117,7 @@ final class ColumnSizeOperations implements Serializable {
         spreadsheet.getActiveSheet().setColumnHidden(columnIndex, hidden);
         ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>(
                 spreadsheet.getHiddenColumnIndexes());
-        int[] colW = Arrays.copyOf(spreadsheet.getColW(),
-                spreadsheet.getColW().length);
+        int[] colW = widthsCovering(spreadsheet, columnIndex);
         if (hidden && !hiddenColumnIndexes.contains(columnIndex + 1)) {
             hiddenColumnIndexes.add(columnIndex + 1);
             colW[columnIndex] = 0;
@@ -136,5 +135,23 @@ final class ColumnSizeOperations implements Serializable {
         spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
         spreadsheet.setColW(colW);
         spreadsheet.getCellValueManager().resendTextRunningInto(columnIndex);
+    }
+
+    /**
+     * A copy of the column widths long enough to hold the column at
+     * {@code index}. The widths stop at the columns the sheet had when it was
+     * loaded, and {@link Spreadsheet#setMaxColumns(int)} can add more: those
+     * take their widths from POI, as loading gives them.
+     */
+    static int[] widthsCovering(Spreadsheet spreadsheet, int index) {
+        int[] current = spreadsheet.getColW();
+        int[] colW = Arrays.copyOf(current,
+                Math.max(current.length, index + 1));
+        Sheet sheet = spreadsheet.getActiveSheet();
+        for (int column = current.length; column < colW.length; column++) {
+            colW[column] = sheet.isColumnHidden(column) ? 0
+                    : (int) sheet.getColumnWidthInPixels(column);
+        }
+        return colW;
     }
 }
