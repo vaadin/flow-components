@@ -31,7 +31,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @since 2.0.1
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/board", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/board", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/board@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/board/src/vaadin-board-row.js")
 @Deprecated(since = "25.0", forRemoval = true)
 public class Row extends Component

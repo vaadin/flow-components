@@ -41,7 +41,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @since 24.1
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/side-nav", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/side-nav@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends Component implements HasSideNavItems, HasSize,
         HasStyle, HasThemeVariant<SideNavVariant> {

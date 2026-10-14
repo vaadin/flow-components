@@ -59,7 +59,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/message-list", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/message-list@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 public class MessageList extends Component implements HasStyle, HasSize,
         LocaleChangeObserver, HasThemeVariant<MessageListVariant> {
 

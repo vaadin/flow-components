@@ -56,7 +56,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 23.3
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/tabsheet", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/tabsheet@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {

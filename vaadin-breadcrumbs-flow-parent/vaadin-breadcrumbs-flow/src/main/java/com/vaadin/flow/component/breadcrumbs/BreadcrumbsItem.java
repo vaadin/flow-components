@@ -47,7 +47,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 25.2
  */
 @Tag("vaadin-breadcrumbs-item")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/breadcrumbs@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs-item.js")
 public class BreadcrumbsItem extends Component
         implements HasText, HasEnabled, HasPrefix {

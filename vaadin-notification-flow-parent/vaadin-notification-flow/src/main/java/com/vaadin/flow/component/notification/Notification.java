@@ -56,7 +56,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/notification", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/notification", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/notification@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,

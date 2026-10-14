@@ -60,8 +60,8 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.4.0-alpha2")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha2")
+@NpmPackage(value = "@vaadin/context-menu", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/context-menu@dcd878f1286c04a77ca05219d530dcaa802a41dd")
+@NpmPackage(value = "@vaadin/tooltip", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/tooltip@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @JsModule("./flow-component-renderer.js")
