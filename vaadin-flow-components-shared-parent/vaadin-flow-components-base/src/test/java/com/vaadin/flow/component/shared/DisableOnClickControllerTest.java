@@ -103,6 +103,7 @@ class DisableOnClickControllerTest {
 
     @Test
     void setEnabled_clientSideDisabledPropertyUpdated() {
+        component.setDisableOnClick(true);
         component.setEnabled(false);
         Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
 
@@ -112,13 +113,33 @@ class DisableOnClickControllerTest {
 
     @Test
     void setEnabled_noChange_clientSideDisabledPropertyUpdated() {
+        component.setDisableOnClick(true);
         component.setEnabled(true);
         Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
     }
 
     @Test
     void disabledAndEnabledInSameRoundTrip_clientSideEnabledOnce() {
+        component.setDisableOnClick(true);
         component.setEnabled(false);
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void disableOnClickNotSetUp_setEnabled_clientSideDisabledPropertyNotUpdated() {
+        component.setEnabled(false);
+        component.setEnabled(true);
+        Assertions.assertEquals(List.of(), dumpClientSideDisabledValues());
+    }
+
+    @Test
+    void disableOnClickTurnedOffAfterClick_setEnabled_clientSideDisabledPropertyUpdated() {
+        component.setDisableOnClick(true);
+        component.click();
+        Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
+
+        component.setDisableOnClick(false);
         component.setEnabled(true);
         Assertions.assertEquals(List.of(false), dumpClientSideDisabledValues());
     }
@@ -133,6 +154,7 @@ class DisableOnClickControllerTest {
 
     @Test
     void parentDisabled_setEnabled_clientSideStaysDisabled() {
+        component.setDisableOnClick(true);
         parent.setEnabled(false);
         ui.fakeClientCommunication();
 
@@ -142,6 +164,7 @@ class DisableOnClickControllerTest {
 
     @Test
     void parentDisabled_setEnabledAndParentEnabledInSameRoundTrip_clientSideEnabled() {
+        component.setDisableOnClick(true);
         parent.setEnabled(false);
         ui.fakeClientCommunication();
 
@@ -152,6 +175,7 @@ class DisableOnClickControllerTest {
 
     @Test
     void parentDisabledInSameRoundTrip_setEnabled_clientSideDisabled() {
+        component.setDisableOnClick(true);
         component.setEnabled(true);
         parent.setEnabled(false);
         Assertions.assertEquals(List.of(true), dumpClientSideDisabledValues());
@@ -159,6 +183,7 @@ class DisableOnClickControllerTest {
 
     @Test
     void detached_setEnabled_clientSideUpdatedAfterAttach() {
+        component.setDisableOnClick(true);
         parent.remove(component);
         ui.fakeClientCommunication();
 
@@ -171,6 +196,7 @@ class DisableOnClickControllerTest {
 
     @Test
     void detachedBeforeResponse_attachedToAnotherUi_setEnabled_clientSideDisabledPropertyUpdated() {
+        component.setDisableOnClick(true);
         component.setEnabled(false);
         component.getElement().removeFromTree();
         ui.fakeClientCommunication();
