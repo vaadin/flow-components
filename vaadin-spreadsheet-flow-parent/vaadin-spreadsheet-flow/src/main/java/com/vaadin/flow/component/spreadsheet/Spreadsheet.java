@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.IntPredicate;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
@@ -1534,11 +1535,24 @@ public class Spreadsheet extends Component
     }
 
     /**
+     * The most rows that are not hidden one scroll loads. Well above what the
+     * client asks for in the tallest window, with the rows it loads ahead.
+     */
+    private static final int MAX_SHOWN_ROWS_PER_SCROLL = 2000;
+
+    /**
+     * The most columns that are not hidden one scroll loads. See
+     * {@link #MAX_SHOWN_ROWS_PER_SCROLL}.
+     */
+    private static final int MAX_SHOWN_COLUMNS_PER_SCROLL = 1000;
+
+    /**
      * This method is called when the sheet is scrolled. It takes care of
      * sending newly revealed data to the client side.
      * <p>
      * A range that reaches outside the sheet is limited to the rows and columns
-     * of the sheet.
+     * of the sheet, and to at most 2,000 rows and 1,000 columns that are not
+     * hidden.
      *
      * @param firstRow
      *            Index of first visible row after the scroll, 1-based
@@ -1547,7 +1561,7 @@ public class Spreadsheet extends Component
      * @param lastRow
      *            Index of last visible row after the scroll, 1-based
      * @param lastColumn
-     *            Index of first visible column after the scroll, 1-based
+     *            Index of last visible column after the scroll, 1-based
      */
     protected void onSheetScroll(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
@@ -1559,6 +1573,14 @@ public class Spreadsheet extends Component
         lastRow = Math.clamp(lastRow, firstRow, maxRow);
         firstColumn = Math.clamp(firstColumn, 1, maxColumn);
         lastColumn = Math.clamp(lastColumn, firstColumn, maxColumn);
+        // Every cell of the range is visited, so it is no bigger than the
+        // client asks for at most. Hidden rows and columns do not count: a
+        // filtered sheet loads the rows it shows however far apart they are.
+        lastRow = lastWithShownCount(firstRow, lastRow,
+                MAX_SHOWN_ROWS_PER_SCROLL, row -> isRowHidden(row - 1));
+        lastColumn = lastWithShownCount(firstColumn, lastColumn,
+                MAX_SHOWN_COLUMNS_PER_SCROLL,
+                column -> isColumnHidden(column - 1));
         if (reloadCellDataOnNextScroll || viewportBounds.hasChanged(firstRow,
                 lastRow, firstColumn, lastColumn)) {
             viewportBounds.update(firstRow, lastRow, firstColumn, lastColumn);
@@ -1571,6 +1593,21 @@ public class Spreadsheet extends Component
             selectionManager.reloadCurrentSelection();
         }
         reloadCellDataOnNextScroll = false;
+    }
+
+    /**
+     * The last index from {@code first} to {@code last} up to which no more
+     * than {@code max} indexes are shown.
+     */
+    private static int lastWithShownCount(int first, int last, int max,
+            IntPredicate hidden) {
+        int shown = 0;
+        for (int index = first; index <= last; index++) {
+            if (!hidden.test(index) && ++shown == max) {
+                return index;
+            }
+        }
+        return last;
     }
 
     /**

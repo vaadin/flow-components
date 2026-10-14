@@ -22,7 +22,8 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetComponentFactory;
 
 /**
- * Rows and columns the client reports are limited to the ones the sheet has.
+ * Rows and columns the client reports are limited to the ones the sheet has,
+ * and to as many as one scroll loads.
  */
 class IndexesOutsideTheSheetTest {
 
@@ -103,6 +104,52 @@ class IndexesOutsideTheSheetTest {
         assertEquals(19, askedRows[1]);
         assertEquals(0, askedColumns[0]);
         assertEquals(9, askedColumns[1]);
+    }
+
+    @Test
+    void scrollOverMoreRowsThanOneScrollLoads_viewportIsCutDown() {
+        spreadsheet = new Spreadsheet(3000, 10);
+
+        scroll(1, 1, 3000, 10);
+
+        assertEquals(2000, spreadsheet.getLastRow());
+        assertEquals(10, spreadsheet.getLastColumn());
+    }
+
+    @Test
+    void hiddenRows_doNotCountTowardsTheRowsOneScrollLoads() {
+        spreadsheet = new Spreadsheet(3500, 10);
+        for (int row = 1; row <= 1000; row++) {
+            spreadsheet.setRowHidden(row, true);
+        }
+
+        scroll(1, 1, 3500, 10);
+
+        // Row 1 and rows 1002 to 3000 are the 2,000 shown.
+        assertEquals(3000, spreadsheet.getLastRow());
+    }
+
+    @Test
+    void scrollOverMoreColumnsThanOneScrollLoads_viewportIsCutDown() {
+        spreadsheet = new Spreadsheet(20, 1500);
+
+        scroll(1, 1, 20, 1500);
+
+        assertEquals(20, spreadsheet.getLastRow());
+        assertEquals(1000, spreadsheet.getLastColumn());
+    }
+
+    @Test
+    void hiddenColumns_doNotCountTowardsTheColumnsOneScrollLoads() {
+        spreadsheet = new Spreadsheet(20, 1600);
+        for (int column = 1; column <= 500; column++) {
+            spreadsheet.setColumnHidden(column, true);
+        }
+
+        scroll(1, 1, 20, 1600);
+
+        // Column 1 and columns 502 to 1500 are the 1,000 shown.
+        assertEquals(1500, spreadsheet.getLastColumn());
     }
 
     @Test
