@@ -87,6 +87,8 @@ final class ColumnSizeOperations implements Serializable {
             applyHidden(index, true);
             return;
         }
+        // No wider than POI holds, so the sheet and the workbook agree.
+        width = Math.min(width, SpreadsheetUtil.MAX_COLUMN_WIDTH_PX);
         ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>(
                 spreadsheet.getHiddenColumnIndexes());
         int[] colW = widthsCovering(spreadsheet, index);

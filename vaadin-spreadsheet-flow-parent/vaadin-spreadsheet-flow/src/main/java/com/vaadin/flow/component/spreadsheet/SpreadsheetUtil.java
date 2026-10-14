@@ -55,6 +55,12 @@ public class SpreadsheetUtil implements Serializable {
             146, 182, 219 };
 
     /**
+     * The widest column POI holds, 255 characters, in pixels: 255 times the
+     * pixels {@link #pixel2WidthUnits(int)} counts per character.
+     */
+    static final int MAX_COLUMN_WIDTH_PX = 255 * UNIT_OFFSET_LENGTH;
+
+    /**
      * Translates cell coordinates to a cell key used to identify cells in the
      * server-client communication.
      *
@@ -218,9 +224,9 @@ public class SpreadsheetUtil implements Serializable {
      *            Pixel value to convert
      * @return Value in Excel width units
      */
-    static short pixel2WidthUnits(int pxs) {
-        short widthUnits = (short) (EXCEL_COLUMN_WIDTH_FACTOR
-                * (pxs / UNIT_OFFSET_LENGTH));
+    static int pixel2WidthUnits(int pxs) {
+        // An int: as a short, every width from 896 pixels on overflowed.
+        int widthUnits = EXCEL_COLUMN_WIDTH_FACTOR * (pxs / UNIT_OFFSET_LENGTH);
 
         widthUnits += UNIT_OFFSET_MAP[(pxs % UNIT_OFFSET_LENGTH)];
 
