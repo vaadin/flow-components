@@ -31,7 +31,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * @since 1.0
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vertical-layout@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/vertical-layout@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component
         implements ThemableLayout, FlexComponent, ClickNotifier<VerticalLayout>,

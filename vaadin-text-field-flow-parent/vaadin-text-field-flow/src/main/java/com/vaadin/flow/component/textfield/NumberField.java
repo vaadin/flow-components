@@ -78,7 +78,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.3
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/number-field", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/number-field@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/number-field", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/number-field@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {

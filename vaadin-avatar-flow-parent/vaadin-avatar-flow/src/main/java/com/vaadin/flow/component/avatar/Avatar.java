@@ -57,7 +57,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  */
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/avatar@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/avatar", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/avatar@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 

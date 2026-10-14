@@ -49,7 +49,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 24.5
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/popover", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/popover@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/popover", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/popover@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasAriaRole,

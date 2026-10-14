@@ -75,7 +75,7 @@ import tools.jackson.databind.node.ObjectNode;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/avatar-group@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/avatar-group", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/avatar-group@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 

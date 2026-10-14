@@ -104,7 +104,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/radio-group", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/radio-group@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/radio-group", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/radio-group@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>

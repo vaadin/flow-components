@@ -89,7 +89,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.3
  */
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/email-field", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/email-field@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/email-field", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/email-field@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {

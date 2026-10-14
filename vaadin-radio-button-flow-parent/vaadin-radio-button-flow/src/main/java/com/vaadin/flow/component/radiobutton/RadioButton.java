@@ -34,7 +34,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-button")
-@NpmPackage(value = "@vaadin/radio-group", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/radio-group@3141b6e97ee28811344a2e851112c4ba1ae340ce")
+@NpmPackage(value = "@vaadin/radio-group", version = "https://pkg.pr.new/vaadin/web-components/@vaadin/radio-group@dcd878f1286c04a77ca05219d530dcaa802a41dd")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-button.js")
 class RadioButton<T> extends Component
         implements ClickNotifier<RadioButton<T>>, Focusable<RadioButton<T>>,
