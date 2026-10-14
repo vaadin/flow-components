@@ -117,10 +117,21 @@ final class CommandStack implements Serializable {
         return maxSize;
     }
 
+    /**
+     * Changes the bound, dropping the commands that no longer fit: those that
+     * could be redone first, latest first, then the oldest, with the cursor
+     * following them. Keeping the oldest instead, as this once did, left the
+     * cursor past the end of the list, and an undo then failed.
+     */
     void setMaxSize(int newMaxSize) {
         this.maxSize = newMaxSize;
-        // Keeps the first (newMaxSize + 1) commands and leaves the cursor
-        // where it is, as setHistorySize always has.
-        clipAfter(newMaxSize);
+        int fits = Math.max(0, newMaxSize);
+        while (commands.size() > fits && commands.size() - 1 > cursor) {
+            commands.removeLast();
+        }
+        while (commands.size() > fits) {
+            commands.removeFirst();
+            cursor--;
+        }
     }
 }

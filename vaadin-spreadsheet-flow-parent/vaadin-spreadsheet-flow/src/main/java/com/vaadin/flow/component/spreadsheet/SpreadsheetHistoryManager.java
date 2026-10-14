@@ -143,14 +143,15 @@ public class SpreadsheetHistoryManager implements Serializable {
     }
 
     /**
-     * Changes the history size. Discards possible commands that won't fit the
-     * size anymore.
+     * Changes the history size. Discards the commands that won't fit the size
+     * anymore: those that could be redone first, latest first, then the oldest.
      *
      * @param historySize
      *            New size for Command history
      */
     public void setHistorySize(int historySize) {
         stack.setMaxSize(historySize);
+        historyIndex = stack.getCursor();
     }
 
     /**

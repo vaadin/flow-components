@@ -326,20 +326,23 @@ class SpreadsheetHistoryManagerTest {
     // 8. setHistorySize clips -----------------------------------------------
 
     @Test
-    void setHistorySize_smaller_clipsCommandsAfterIndex() {
+    void setHistorySize_smaller_keepsTheLatestSteps_andUndoStillWorks() {
         history.setHistorySize(5);
+        RecordingCommand[] added = new RecordingCommand[5];
         for (int i = 0; i < 5; i++) {
-            history.addCommand(new RecordingCommand());
+            added[i] = new RecordingCommand();
+            history.addCommand(added[i]);
         }
-        assertEquals(4, history.getHistoryIndex());
 
         history.setHistorySize(2);
 
-        // discardAllAfter(2) trims commands 3 and 4. The index field itself
-        // is not touched by setHistorySize — it stays where it was. This is
-        // a sharp edge worth pinning.
-        assertEquals(4, history.getHistoryIndex());
+        // Keeping the oldest steps left the index past the end of the list,
+        // and the next undo threw.
+        assertEquals(1, history.getHistoryIndex());
         assertEquals(2, history.getHistorySize());
+        assertSame(added[4], history.getCommand(1));
+        history.undo();
+        assertEquals(0, history.getHistoryIndex());
     }
 
     // 9. addCommand mid-history discards future -----------------------------

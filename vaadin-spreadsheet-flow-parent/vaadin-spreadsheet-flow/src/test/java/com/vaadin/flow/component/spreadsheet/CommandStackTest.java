@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -323,22 +324,74 @@ class CommandStackTest {
     }
 
     @Test
-    void setMaxSize_clipsExistingCommands_butDoesNotMoveCursor() {
-        // Pin the load-bearing setHistorySize() shape (per source
-        // comment): setMaxSize calls clipAfter(newMaxSize), keeping the
-        // first (newMaxSize + 1) commands and NOT touching the cursor.
+    void setMaxSize_smaller_keepsTheLatestCommands_andTheCursorOnTheLast() {
+        // The oldest commands go: keeping them instead left the cursor past
+        // the end of the list, and the next undo failed.
+        Command[] pushed = new Command[10];
         for (int i = 0; i < 10; i++) {
-            stack.push(mock(Command.class));
+            pushed[i] = mock(Command.class);
+            stack.push(pushed[i]);
         }
-        assertEquals(9, stack.getCursor());
 
         stack.setMaxSize(3);
 
-        // clipAfter(3) keeps indices 0..3 (size 4 = newMaxSize + 1).
-        assertEquals(4, backing.size());
-        assertEquals(9, stack.getCursor(),
-                "setMaxSize MUST NOT touch the cursor "
-                        + "(cursor stays at the pre-clip value)");
+        assertEquals(List.of(pushed[7], pushed[8], pushed[9]), backing);
+        assertEquals(2, stack.getCursor());
+        assertSame(pushed[9], stack.nextForUndo());
+    }
+
+    @Test
+    void setMaxSize_smaller_dropsWhatCouldBeRedoneFirst_latestFirst() {
+        Command[] pushed = new Command[10];
+        for (int i = 0; i < 10; i++) {
+            pushed[i] = mock(Command.class);
+            stack.push(pushed[i]);
+        }
+        for (int i = 0; i < 4; i++) {
+            stack.nextForUndo();
+        }
+        assertEquals(5, stack.getCursor());
+
+        stack.setMaxSize(8);
+
+        assertEquals(8, backing.size());
+        assertEquals(5, stack.getCursor());
+        assertSame(pushed[6], stack.nextForRedo());
+        assertSame(pushed[7], stack.nextForRedo());
+        assertFalse(stack.canRedo());
+    }
+
+    @Test
+    void setMaxSize_smallerThanWhatWasDone_dropsAllRedoAndTheOldest() {
+        Command[] pushed = new Command[10];
+        for (int i = 0; i < 10; i++) {
+            pushed[i] = mock(Command.class);
+            stack.push(pushed[i]);
+        }
+        for (int i = 0; i < 4; i++) {
+            stack.nextForUndo();
+        }
+
+        stack.setMaxSize(4);
+
+        assertEquals(List.of(pushed[2], pushed[3], pushed[4], pushed[5]),
+                backing);
+        assertEquals(3, stack.getCursor());
+        assertFalse(stack.canRedo());
+        assertSame(pushed[5], stack.nextForUndo());
+    }
+
+    @Test
+    void setMaxSize_zero_emptiesTheHistory() {
+        stack.push(mock(Command.class));
+        stack.push(mock(Command.class));
+
+        stack.setMaxSize(0);
+
+        assertEquals(0, backing.size());
+        assertEquals(-1, stack.getCursor());
+        assertFalse(stack.canUndo());
+        assertFalse(stack.canRedo());
     }
 
     @Test
