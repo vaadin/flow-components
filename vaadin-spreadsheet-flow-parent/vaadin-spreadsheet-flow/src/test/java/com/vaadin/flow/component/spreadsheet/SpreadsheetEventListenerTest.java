@@ -317,4 +317,23 @@ public class SpreadsheetEventListenerTest {
 
         verify(handler).setCellStyleWidthRatios(new HashMap<>(Map.of(0, 7.5f)));
     }
+
+    @Test
+    public void styleWidthRatios_stylesPast32767AreKept() {
+        // CellStyle.getIndex() is a short, so the server keys an XLSX
+        // workbook's styles past 32767 by negative numbers, and the client
+        // reports them by those keys.
+        while (source.getWorkbook().getNumCellStyles() < 32770) {
+            source.getWorkbook().createCellStyle();
+        }
+        assertEquals(-32767,
+                source.getWorkbook().getCellStyleAt(32769).getIndex());
+
+        fire("setCellStyleWidthRatios",
+                "{\"styleIndexes\":[-32768,-32767,-32766,40000],"
+                        + "\"ratios\":[7.5,7.5,7.5,7.5]}");
+
+        verify(handler).setCellStyleWidthRatios(
+                new HashMap<>(Map.of(-32768, 7.5f, -32767, 7.5f)));
+    }
 }

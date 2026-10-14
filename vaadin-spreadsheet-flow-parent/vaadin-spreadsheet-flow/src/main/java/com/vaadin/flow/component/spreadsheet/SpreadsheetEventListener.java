@@ -119,6 +119,17 @@ public class SpreadsheetEventListener
         return m;
     }
 
+    /**
+     * Whether a workbook of {@code styleCount} styles has a style keyed this
+     * way. Styles are keyed by their index as a short, as
+     * {@code CellStyle.getIndex()} gives it, so in an XLSX workbook the ones
+     * past 32767 are keyed by negative numbers.
+     */
+    private static boolean isStyleKey(int key, int styleCount) {
+        return key >= Short.MIN_VALUE && key <= Short.MAX_VALUE
+                && Short.toUnsignedInt((short) key) < styleCount;
+    }
+
     /** Smallest key of the map, or 0 when it is empty. */
     private static int minKey(Map<Integer, ?> m) {
         return m.keySet().stream().mapToInt(Integer::intValue).min().orElse(0);
@@ -244,10 +255,12 @@ public class SpreadsheetEventListener
         } else if ("onRedo".equals(type)) {
             handler.onRedo();
         } else if ("setCellStyleWidthRatios".equals(type)) {
-            // Style indexes are the workbook's own, 0-based.
-            handler.setCellStyleWidthRatios(keysWithin(
-                    toFloatMap(pars, "styleIndexes", "ratios"), 0,
-                    event.getSource().getWorkbook().getNumCellStyles() - 1));
+            // Only styles the workbook has.
+            HashMap<Integer, Float> ratios = toFloatMap(pars, "styleIndexes",
+                    "ratios");
+            int styleCount = event.getSource().getWorkbook().getNumCellStyles();
+            ratios.keySet().removeIf(key -> !isStyleKey(key, styleCount));
+            handler.setCellStyleWidthRatios(ratios);
         } else if ("protectedCellWriteAttempted".equals(type)) {
             handler.protectedCellWriteAttempted();
         } else if ("onPaste".equals(type)) {
