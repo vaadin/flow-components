@@ -21,7 +21,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -49,6 +52,21 @@ public class ItemClickListenerPage extends Div {
         grid.setItems("foo", "bar");
         grid.addColumn(item -> item).setHeader("Name").setKey("Name");
         grid.addComponentColumn(Checkbox::new);
+        grid.addComponentColumn(item -> {
+            Span span = new Span("Action");
+            span.getElement().executeJs(
+                    "$0.addEventListener('click', e => e.preventDefault())");
+            return span;
+        }).setHeader("Action");
+        grid.addComponentColumn(item -> new Button(VaadinIcon.PENCIL.create()))
+                .setHeader("Button");
+        grid.addComponentColumn(item -> {
+            Select<String> select = new Select<>();
+            select.setItems("First", "Second");
+            select.setValue("First");
+            return select;
+        }).setHeader("Select");
+        grid.addColumn(String::toUpperCase).setHeader("Upper").setKey("Upper");
 
         grid.addItemClickListener(event -> {
             clickMsg.add(event.getItem());
@@ -67,7 +85,14 @@ public class ItemClickListenerPage extends Div {
         grid.setDetailsVisible("foo", false);
         grid.setDetailsVisible("bar", true);
 
-        add(grid, clickMsg, dblClickMsg, columnClickMsg, columnDblClickMsg);
+        NativeButton resizeGrid = new NativeButton("Resize grid", event -> {
+            grid.setWidth("100px");
+            grid.getColumnByKey("Name").setWidth("1000px");
+        });
+        resizeGrid.setId("resize-grid");
+
+        add(grid, clickMsg, dblClickMsg, columnClickMsg, columnDblClickMsg,
+                resizeGrid);
 
         createGridWithChangingKeysOfItemsAndFocusableHeader();
     }
