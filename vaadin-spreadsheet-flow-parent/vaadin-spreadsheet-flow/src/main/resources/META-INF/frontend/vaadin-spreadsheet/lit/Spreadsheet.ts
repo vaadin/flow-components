@@ -2344,8 +2344,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Read the spreadsheet host's class list + apply
-   * the two public "hide bar" classes by toggling display on
-   * the matching internal elements. The constants
+   * the two public "hide bar" classes by hiding the matching
+   * internal elements. The constants
    * {@link Spreadsheet#HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
    * and {@link Spreadsheet#HIDE_TABSHEET_STYLE} ("hidetabsheet")
    * are public JavaDoc-documented API; consumers call
@@ -2354,10 +2354,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * does the same) to suppress the corresponding strip.
    */
   private applyHostHideClasses(): void {
-    const tabsHidden = this.host.classList.contains('hidetabsheet');
-    this.sheetTabs.style.display = tabsHidden ? 'none' : '';
-    const barHidden = this.host.classList.contains('hidefunctionbar');
-    this.formulaBar.style.display = barHidden ? 'none' : '';
+    this.sheetTabs.hidden = this.host.classList.contains('hidetabsheet');
+    this.formulaBar.hidden = this.host.classList.contains('hidefunctionbar');
     this.applyPagedViewInset();
   }
 
@@ -2368,7 +2366,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private applyPagedViewInset(): void {
     const { corner, frozen } = this.pagedViewParts;
-    const inset = pagedViewInset(corner, frozen, this.sheetTabs.style.display !== 'none');
+    const inset = pagedViewInset(corner, frozen, !this.sheetTabs.hidden);
     this.scrollContainer.style.scrollPaddingTop = `${inset.top}px`;
     this.scrollContainer.style.scrollPaddingLeft = `${inset.left}px`;
   }
@@ -2719,7 +2717,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         5,
         this.rowGroupingMax > 0 ? 1 : 0
       );
-      this.columnHeader.style.display = '';
+      this.columnHeader.hidden = false;
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
       this.columnHeader.style.height = `${this.headerRowHeight + colGutterPx}px`;
       this.columnHeader.renderState = {
@@ -2751,7 +2749,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // No headings and no outline: the strip goes altogether, border and
       // all, as the GWT client's did - also when they are turned off while
       // the sheet is up, rather than keep the size it was last given.
-      this.columnHeader.style.display = 'none';
+      this.columnHeader.hidden = true;
     }
     // Row-header strip. Same opt-in gate as the column
     // header, and the same reason for the grouping half of it.
@@ -2767,7 +2765,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         2,
         this.colGroupingMax > 0 ? 1 : 0
       );
-      this.rowHeader.style.display = '';
+      this.rowHeader.hidden = false;
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
       this.rowHeader.renderState = {
@@ -2796,13 +2794,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
         scrollTop: state.scrollTop
       };
     } else {
-      this.rowHeader.style.display = 'none';
+      this.rowHeader.hidden = true;
     }
     // Header corner. Sized only when BOTH header
     // dimensions are > 0 so it occupies its grid cell with
     // matching width + height. When either is 0, the corner
     // collapses to a 0×0 box and isn't visible.
-    this.headerCorner.style.display = cornerWidth === 0 && cornerHeight === 0 ? 'none' : '';
+    this.headerCorner.hidden = cornerWidth === 0 && cornerHeight === 0;
     this.headerCorner.style.width = `${cornerWidth}px`;
     this.headerCorner.style.height = `${cornerHeight}px`;
     this.pagedViewParts = {

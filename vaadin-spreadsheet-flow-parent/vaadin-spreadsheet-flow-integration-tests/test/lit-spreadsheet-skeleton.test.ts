@@ -3160,18 +3160,18 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
 
         const tabs = sheet.getSheetTabs();
         // Initially visible.
-        expect(tabs.style.display).to.not.equal('none');
+        expect(getComputedStyle(tabs).display).to.not.equal('none');
 
         // Add hidetabsheet → tabs hidden.
         host.classList.add('hidetabsheet');
         // MutationObserver is async — wait a microtask.
         await Promise.resolve();
-        expect(tabs.style.display).to.equal('none');
+        expect(getComputedStyle(tabs).display).to.equal('none');
 
         // Remove → tabs visible again.
         host.classList.remove('hidetabsheet');
         await Promise.resolve();
-        expect(tabs.style.display).to.not.equal('none');
+        expect(getComputedStyle(tabs).display).to.not.equal('none');
         cleanup();
     });
 
@@ -3183,7 +3183,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         sheet.setSheetNames(['One']);
         sheet.setSheetIndex(1);
         await sheet.getSheetTabs().updateComplete;
-        expect(sheet.getSheetTabs().style.display).to.equal('none');
+        expect(getComputedStyle(sheet.getSheetTabs()).display).to.equal('none');
         sheet.dispose();
         document.body.removeChild(host);
     });
@@ -3257,13 +3257,13 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
     it('formula bar hides when host gets the hidefunctionbar class', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         await sheet.getFormulaBar().updateComplete;
-        expect(sheet.getFormulaBar().style.display).to.not.equal('none');
+        expect(getComputedStyle(sheet.getFormulaBar()).display).to.not.equal('none');
         host.classList.add('hidefunctionbar');
         await Promise.resolve();
-        expect(sheet.getFormulaBar().style.display).to.equal('none');
+        expect(getComputedStyle(sheet.getFormulaBar()).display).to.equal('none');
         host.classList.remove('hidefunctionbar');
         await Promise.resolve();
-        expect(sheet.getFormulaBar().style.display).to.not.equal('none');
+        expect(getComputedStyle(sheet.getFormulaBar()).display).to.not.equal('none');
         cleanup();
     });
 

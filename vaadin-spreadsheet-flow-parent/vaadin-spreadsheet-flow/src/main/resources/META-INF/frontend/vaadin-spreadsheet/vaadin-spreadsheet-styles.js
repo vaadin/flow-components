@@ -27,9 +27,9 @@ import { css } from 'lit';
  *      GWT client's own value.
  *   3. {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
  *      + {@code Spreadsheet.HIDE_TABSHEET_STYLE} ("hidetabsheet")
- *      Java constants — applied to the host's class list and
- *      handled by CSS selectors below, as well as by the connector,
- *      which watches the host's classes.
+ *      Java constants — applied to the host's class list. The
+ *      connector watches the host's classes and hides the matching
+ *      internal element; no rule here is needed for them.
  *   4. {@code Spreadsheet.setTheme(SpreadsheetTheme.LUMO)} — the
  *      host's {@code theme="lumo"}, which the connector copies onto
  *      each internal element. The theme defaults below give every
@@ -196,23 +196,6 @@ export const spreadsheetStyles = css`
     color: var(--lumo-base-color);
     padding: var(--lumo-space-xs) var(--lumo-space-s);
     font-size: var(--lumo-font-size-s);
-  }
-
-  /* Spreadsheet.HIDE_FUNCTION_BAR_STYLE — public Java constant
-     ("hidefunctionbar"). Setting it on the host removes the formula
-     bar above the cell grid. The connector also toggles display via
-     a MutationObserver; this CSS is defense-in-depth so
-     the bar hides even before the observer fires (e.g., for a host
-     that has the class set at construction time). */
-  :host(.hidefunctionbar) vaadin-spreadsheet-internal-formula-bar {
-    display: none !important;
-  }
-
-  /* Spreadsheet.HIDE_TABSHEET_STYLE — public Java constant
-     ("hidetabsheet"). Setting it on the host removes the sheet-tab
-     strip below the cell grid. Same defense-in-depth pattern. */
-  :host(.hidetabsheet) vaadin-spreadsheet-internal-sheet-tabs {
-    display: none !important;
   }
 `;
 

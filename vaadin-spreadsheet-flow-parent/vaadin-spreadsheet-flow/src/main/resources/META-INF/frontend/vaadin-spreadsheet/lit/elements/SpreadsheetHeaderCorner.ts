@@ -82,6 +82,10 @@ export class SpreadsheetHeaderCorner extends LitElement {
       font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, Helvetica));
     }
 
+    :host([hidden]) {
+      display: none !important;
+    }
+
     .corner,
     .col-group-summary,
     .row-group-summary,

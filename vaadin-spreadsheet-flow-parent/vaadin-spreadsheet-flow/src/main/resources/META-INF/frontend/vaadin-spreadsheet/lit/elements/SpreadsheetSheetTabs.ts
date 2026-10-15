@@ -209,6 +209,10 @@ export class SpreadsheetSheetTabs extends LitElement {
       overflow: hidden;
     }
 
+    :host([hidden]) {
+      display: none !important;
+    }
+
     /* A tab as the GWT client drew one: a folder tab hanging from the
        strip's top border, its name in light type, cut short with an
        ellipsis past 200px. */

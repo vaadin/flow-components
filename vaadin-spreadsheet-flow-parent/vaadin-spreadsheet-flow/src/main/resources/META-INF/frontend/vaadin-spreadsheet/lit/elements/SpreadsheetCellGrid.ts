@@ -78,6 +78,10 @@ export class SpreadsheetCellGrid extends LitElement {
         position: relative;
       }
 
+      :host([hidden]) {
+        display: none !important;
+      }
+
       /* A row of cells, keyed as one: scrolling a row out of view takes
        its cells with it in one removal. No box of its own. */
       .cell-row {

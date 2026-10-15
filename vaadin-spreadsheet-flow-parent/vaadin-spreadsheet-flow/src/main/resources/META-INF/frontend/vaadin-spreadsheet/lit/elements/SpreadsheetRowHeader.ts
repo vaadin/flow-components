@@ -260,6 +260,10 @@ export class SpreadsheetRowHeader extends LitElement {
       font-size: var(--vaadin-spreadsheet-header-font-size, var(--_vaadin-spreadsheet-header-font-size, 13px));
     }
 
+    :host([hidden]) {
+      display: none !important;
+    }
+
     /* Frozen rows are drawn in their own strip, translated to cancel
        the scroll out, above the scrolling headers. */
     .frozen-header-strip {

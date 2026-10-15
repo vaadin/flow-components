@@ -105,6 +105,10 @@ export class SpreadsheetFormulaBar extends LitElement {
       font-size: var(--vaadin-spreadsheet-formulabar-font-size, var(--_vaadin-spreadsheet-formulabar-font-size, 14px));
     }
 
+    :host([hidden]) {
+      display: none !important;
+    }
+
     input {
       flex: 0 0 auto;
       box-sizing: border-box;

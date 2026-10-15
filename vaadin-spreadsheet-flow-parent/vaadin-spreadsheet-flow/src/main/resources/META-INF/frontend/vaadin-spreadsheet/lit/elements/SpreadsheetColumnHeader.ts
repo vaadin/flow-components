@@ -240,6 +240,10 @@ export class SpreadsheetColumnHeader extends LitElement {
       font-size: var(--vaadin-spreadsheet-header-font-size, var(--_vaadin-spreadsheet-header-font-size, 13px));
     }
 
+    :host([hidden]) {
+      display: none !important;
+    }
+
     /* Frozen columns are drawn in their own strip, translated to
        cancel the scroll out. It sits above the scrolling headers so a
        column sliding underneath does not show through. */
