@@ -3811,7 +3811,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
   setDisplayRowColHeadings(visible: boolean): void {
     // The server sends only this boolean, never the strips' sizes: shown,
-    // they get their default sizes back; hidden, they collapse.
+    // they get their default sizes back; hidden, they collapse. They are
+    // drawn with the rest of the batch this came in, as every property is,
+    // not halfway through it.
     if (visible) {
       if (this.headerRowHeight === 0) {
         this.headerRowHeight = DEFAULT_HEADER_ROW_HEIGHT;
@@ -3823,7 +3825,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.headerRowHeight = 0;
       this.headerColumnWidth = 0;
     }
-    this.recomputeViewport();
   }
   setLockFormatColumns(locked: boolean): void {
     this.headerResize.setLockFormatColumns(locked);

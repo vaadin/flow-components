@@ -765,10 +765,12 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         sheet.setRowH([15, 15, 15, 15, 15]);
 
         sheet.setDisplayRowColHeadings(false);
+        sheet.notifyStateChanges(['displayRowColHeadings'], false);
         expect(sheet.getHeaderCorner().style.width).to.equal('0px');
         expect(sheet.getHeaderCorner().style.height).to.equal('0px');
 
         sheet.setDisplayRowColHeadings(true);
+        sheet.notifyStateChanges(['displayRowColHeadings'], false);
         expect(sheet.getHeaderCorner().style.width).to.equal('50px');
         expect(sheet.getHeaderCorner().style.height).to.equal('27px');
 

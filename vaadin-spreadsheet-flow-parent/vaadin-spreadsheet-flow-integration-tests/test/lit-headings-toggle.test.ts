@@ -36,6 +36,11 @@ describe('Spreadsheet — turning the headings off and on', () => {
     host.remove();
   });
 
+  /** The server's batch of properties ends, as the wrapper ends it. */
+  function endBatch(names: string[]): void {
+    sheet.notifyStateChanges(names, false);
+  }
+
   it('shows both strips to begin with', () => {
     expect(sheet.getColumnHeader().getBoundingClientRect().height).to.equal(27);
     expect(sheet.getRowHeader().getBoundingClientRect().width).to.equal(50);
@@ -49,6 +54,7 @@ describe('Spreadsheet — turning the headings off and on', () => {
 
   it('collapses both strips when the headings are turned off', () => {
     sheet.setDisplayRowColHeadings(false);
+    endBatch(['displayRowColHeadings']);
 
     expect(sheet.getColumnHeader().getBoundingClientRect().height).to.equal(0);
     expect(sheet.getRowHeader().getBoundingClientRect().width).to.equal(0);
@@ -58,9 +64,29 @@ describe('Spreadsheet — turning the headings off and on', () => {
 
   it('brings them back at their default sizes when turned on again', () => {
     sheet.setDisplayRowColHeadings(false);
+    endBatch(['displayRowColHeadings']);
     sheet.setDisplayRowColHeadings(true);
+    endBatch(['displayRowColHeadings']);
 
     expect(sheet.getColumnHeader().getBoundingClientRect().height).to.equal(27);
     expect(sheet.getRowHeader().getBoundingClientRect().width).to.equal(50);
+  });
+
+  it('draws a batch that turns them off once, at its end, with everything else in it', () => {
+    // Drawn halfway through, the sheet was measured with the widths the
+    // batch had not set yet, and its viewport told to the server so.
+    let draws = 0;
+    const draw = sheet.recomputeViewport.bind(sheet);
+    sheet.recomputeViewport = () => {
+      draws++;
+      draw();
+    };
+
+    sheet.setDisplayRowColHeadings(false);
+    sheet.setColW(new Array(10).fill(80));
+    endBatch(['displayRowColHeadings', 'colW']);
+
+    expect(draws).to.equal(1);
+    expect(sheet.getCellGrid().offsetLeft).to.equal(0);
   });
 });
