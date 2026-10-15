@@ -269,9 +269,9 @@ export class VaadinSpreadsheet extends LitElement {
     this.$connector.invalidCellAddress();
   }
 
-  showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection) {
+  showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection, keepView) {
     this._flush();
-    this.$connector.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
+    this.$connector.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection, keepView);
   }
 
   showActions(actionDetails) {

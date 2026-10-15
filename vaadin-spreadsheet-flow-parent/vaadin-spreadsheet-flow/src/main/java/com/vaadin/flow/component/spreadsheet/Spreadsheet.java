@@ -750,7 +750,8 @@ public class Spreadsheet extends Component
                 boolean initialSelection) {
             selectionManager.onCellSelected(row, col, initialSelection);
             getElement().callJsFunction("showSelectedCell", name, col, row,
-                    cellValue, function, locked, initialSelection);
+                    cellValue, function, locked, initialSelection,
+                    selectionManager.isKeepingView());
         }
 
         @Override
@@ -764,7 +765,8 @@ public class Spreadsheet extends Component
         public void setSelectedCellAndRange(String name, int col, int row,
                 int c1, int c2, int r1, int r2, boolean scroll) {
             getElement().callJsFunction("setSelectedCellAndRange", name, col,
-                    row, c1, c2, r1, r2, scroll);
+                    row, c1, c2, r1, r2,
+                    scroll && !selectionManager.isKeepingView());
         }
 
         @Override
@@ -994,6 +996,14 @@ public class Spreadsheet extends Component
     private String defaultPercentageFormat = "0.00%";
 
     protected String initialSheetSelection = null;
+
+    /**
+     * Whether {@link #initialSheetSelection} is the selection the sheet was
+     * left with, which it is shown with again without moving the view: the
+     * client puts the sheet back where it was scrolled. A selection that a
+     * hyperlink, a named range or an undo leads to is brought into view.
+     */
+    boolean initialSheetSelectionKeepsView;
 
     private final CellCommentRangeScanner cellCommentRangeScanner = new CellCommentRangeScanner(
             this);
@@ -1588,8 +1598,14 @@ public class Spreadsheet extends Component
             loadCells(firstRow, firstColumn, lastRow, lastColumn);
         }
         if (initialSheetSelection != null) {
-            selectionManager.onSheetAddressChanged(initialSheetSelection, true);
+            if (initialSheetSelectionKeepsView) {
+                selectionManager.selectKeepingView(initialSheetSelection);
+            } else {
+                selectionManager.onSheetAddressChanged(initialSheetSelection,
+                        true);
+            }
             initialSheetSelection = null;
+            initialSheetSelectionKeepsView = false;
         } else if (reloadCellDataOnNextScroll) {
             selectionManager.reloadCurrentSelection();
         }

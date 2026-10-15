@@ -3920,6 +3920,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * `cellValue` is the formula without its leading `=` when
    * `formula` is set — that is how POI stores it and how the server
    * sends it.
+   *
+   * `keepView` is set for the selection a sheet is shown with again: the
+   * sheet has just gone back to where it was scrolled, and its selection
+   * leaves it there, wherever the selected cell is.
    */
   showSelectedCell(
     name: string | null,
@@ -3928,7 +3932,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     cellValue: string,
     formula: boolean,
     _locked: boolean,
-    _initialSelection: boolean
+    _initialSelection: boolean,
+    keepView = false
   ): void {
     // Read before the selection collapses to the one cell below: while
     // the user is still growing a selection the address field is
@@ -3946,7 +3951,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // sheet operation landing somewhere else. Somewhere the user cannot
     // see is not somewhere they have been taken, so bring it into view.
     // A cell that is already visible stays where it is.
-    this.scrollCellIntoView({ col, row });
+    if (!keepView) {
+      this.scrollCellIntoView({ col, row });
+    }
     this.scheduleRender();
   }
   showActions(actionDetails: SpreadsheetActionDetails[]): void {

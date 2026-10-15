@@ -255,6 +255,16 @@ describe('showSelectedCell — the server moving the selection', () => {
     expect(ctx.sheet.getScrollContainer().scrollLeft).to.be.greaterThan(0);
   });
 
+  it('leaves the view alone for the selection a sheet is shown with again', () => {
+    // The sheet has just gone back to where it was scrolled, and the
+    // selection it was left with, out of view, leaves it there.
+    ctx.sheet.getScrollContainer().scrollTop = 4000;
+    ctx.sheet.showSelectedCell('B10', 2, 10, '', false, false, true, true);
+
+    expect(ctx.sheet.getScrollContainer().scrollTop).to.equal(4000);
+    expect(ctx.sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 10 });
+  });
+
   it('leaves the viewport alone for a cell already in view', () => {
     ctx.sheet.getScrollContainer().scrollTop = 400;
     ctx.sheet.showSelectedCell('B22', 2, 22, '', false, false, false);

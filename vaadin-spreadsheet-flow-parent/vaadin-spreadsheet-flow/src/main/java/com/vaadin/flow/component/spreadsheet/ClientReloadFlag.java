@@ -22,7 +22,8 @@ import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
  * {@link #flush(Spreadsheet)}, which the action runs, pushes a timestamp to the
  * client {@code reload} element property, clears the flag, and defaults
  * {@code initialSheetSelection} from the active sheet's selected-cells state
- * when not already set.
+ * when not already set. It also decides whether that selection leaves the
+ * client's view where it is, as the selection a sheet was left with does.
  *
  * <p>
  * The flush also defaults the initial selection because the two are
@@ -67,7 +68,10 @@ final class ClientReloadFlag implements Serializable {
      * Pushes a fresh timestamp into the client {@code reload} property, clears
      * the pending flag, and seeds {@code spreadsheet.initialSheetSelection}
      * when not already set — either to the active sheet's remembered selection
-     * or, failing that, to {@code "A1"}.
+     * or, failing that, to {@code "A1"}. A seeded selection leaves the view
+     * where it is, unless cells were selected after the reload; one that was
+     * already set, by a hyperlink, a named range or an undo, is brought into
+     * view.
      */
     void flush(Spreadsheet spreadsheet) {
         spreadsheet.getElement().setProperty("reload",
@@ -79,6 +83,14 @@ final class ClientReloadFlag implements Serializable {
             spreadsheet.initialSheetSelection = selectedCellsOnSheet == null
                     ? "A1"
                     : selectedCellsOnSheet;
+            // The reload cleared the selection. Unless something has selected
+            // cells since, this is the selection the sheet was left with, and
+            // it leaves the view where the client puts the sheet back.
+            spreadsheet.initialSheetSelectionKeepsView = spreadsheet
+                    .getCellSelectionManager()
+                    .getSelectedCellReference() == null;
+        } else {
+            spreadsheet.initialSheetSelectionKeepsView = false;
         }
     }
 }

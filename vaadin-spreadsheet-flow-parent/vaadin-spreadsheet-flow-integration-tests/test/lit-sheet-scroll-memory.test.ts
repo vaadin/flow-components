@@ -60,6 +60,16 @@ describe('Spreadsheet — each sheet remembers where it was scrolled', () => {
     expect(scroller.scrollTop).to.equal(600);
   });
 
+  it('stays there when the selection it was left with comes, out of view', () => {
+    serverShows(2, [600, 0], [0, 0]);
+    serverShows(1, [600, 0], [0, 0]);
+
+    // The server's answer to where the sheet is: its selection, A1.
+    sheet.showSelectedCell('A1', 1, 1, '', false, false, true, true);
+
+    expect(sheet.getScrollContainer().scrollTop).to.equal(600);
+  });
+
   it('goes back across too', () => {
     serverShows(2, [0, 0], [450, 0]);
     serverShows(1, [0, 0], [450, 0]);

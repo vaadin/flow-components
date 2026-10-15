@@ -46,6 +46,9 @@ public class CellSelectionManager implements Serializable {
     private final ArrayList<CellRangeAddress> cellRangeAddresses = new ArrayList<CellRangeAddress>();
     private final ArrayList<CellReference> individualSelectedCells = new ArrayList<CellReference>();
 
+    /** Set while a selection that leaves the view where it is is sent. */
+    private boolean keepingView;
+
     /**
      * Creates a new CellSelectionManager and ties it to the given Spreadsheet
      *
@@ -196,6 +199,30 @@ public class CellSelectionManager implements Serializable {
             ensureClientHasSelectionData();
             fireNewSelectionChangeEvent();
         }
+    }
+
+    /**
+     * Selects the given address as the selection a sheet is shown with again,
+     * and tells the client to leave the view where it is: the client has put
+     * the sheet back where it was scrolled, which need not show the selection.
+     *
+     * @param address
+     *            the cell, range or name to select
+     */
+    void selectKeepingView(String address) {
+        keepingView = true;
+        try {
+            onSheetAddressChanged(address, true);
+        } finally {
+            keepingView = false;
+        }
+    }
+
+    /**
+     * Whether the selection being sent leaves the client's view where it is.
+     */
+    boolean isKeepingView() {
+        return keepingView;
     }
 
     /**

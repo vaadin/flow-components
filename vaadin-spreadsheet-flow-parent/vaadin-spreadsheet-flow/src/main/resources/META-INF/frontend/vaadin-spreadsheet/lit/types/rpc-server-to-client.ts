@@ -58,7 +58,8 @@ export interface SpreadsheetClientApi {
     cellValue: string,
     formula: boolean,
     locked: boolean,
-    initialSelection: boolean
+    initialSelection: boolean,
+    keepView?: boolean
   ): void;
   showActions(actionDetails: SpreadsheetActionDetails[]): void;
   setSelectedCellAndRange(

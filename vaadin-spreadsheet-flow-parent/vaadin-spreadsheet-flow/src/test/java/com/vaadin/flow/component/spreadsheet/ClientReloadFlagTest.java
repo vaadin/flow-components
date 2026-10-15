@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,7 +41,8 @@ import com.vaadin.flow.dom.Element;
  * happens unconditionally after).</li>
  * <li>{@code flush} pushes a timestamp to the element {@code "reload"}
  * property, clears the flag, and defaults
- * {@code spreadsheet.initialSheetSelection} when not already set.</li>
+ * {@code spreadsheet.initialSheetSelection} when not already set, deciding
+ * whether it leaves the client's view where it is.</li>
  * </ol>
  *
  * <p>
@@ -61,6 +63,8 @@ class ClientReloadFlagTest {
     private SheetState sheetState;
     @Mock
     private Sheet activeSheet;
+    @Mock
+    private CellSelectionManager selectionManager;
 
     private ClientReloadFlag flag;
 
@@ -69,6 +73,9 @@ class ClientReloadFlagTest {
         MockitoAnnotations.openMocks(this);
         lenient().when(spreadsheet.getElement()).thenReturn(element);
         lenient().when(spreadsheet.getActiveSheet()).thenReturn(activeSheet);
+        // The reload has cleared the selection.
+        lenient().when(spreadsheet.getCellSelectionManager())
+                .thenReturn(selectionManager);
 
         // sheetState is a package-private field on Spreadsheet — wire it
         // via reflection on the mock (same pattern as CellDeletionGuardTest
@@ -235,5 +242,41 @@ class ClientReloadFlagTest {
         inOrder.verify(sheetState).getSelectedCellsOnSheet(activeSheet);
         assertFalse(flag.isPending());
         assertEquals("D7", spreadsheet.initialSheetSelection);
+    }
+
+    // ----- flush: whether the selection leaves the view --------------------
+
+    @Test
+    void flush_theSelectionTheSheetWasLeftWith_leavesTheView() {
+        // The client puts the sheet back where it was scrolled, and the
+        // selection must not take it elsewhere.
+        when(sheetState.getSelectedCellsOnSheet(activeSheet)).thenReturn("B4");
+
+        flag.flush(spreadsheet);
+
+        assertTrue(spreadsheet.initialSheetSelectionKeepsView);
+    }
+
+    @Test
+    void flush_cellsSelectedSinceTheReload_areBroughtIntoView() {
+        // The application selected cells along with the sheet switch.
+        when(selectionManager.getSelectedCellReference())
+                .thenReturn(new CellReference("D30"));
+        when(sheetState.getSelectedCellsOnSheet(activeSheet)).thenReturn("D30");
+
+        flag.flush(spreadsheet);
+
+        assertFalse(spreadsheet.initialSheetSelectionKeepsView);
+    }
+
+    @Test
+    void flush_aSelectionAlreadySet_isBroughtIntoView() {
+        // As a hyperlink, a named range or an undo sets it.
+        spreadsheet.initialSheetSelectionKeepsView = true;
+        spreadsheet.initialSheetSelection = "C5";
+
+        flag.flush(spreadsheet);
+
+        assertFalse(spreadsheet.initialSheetSelectionKeepsView);
     }
 }
