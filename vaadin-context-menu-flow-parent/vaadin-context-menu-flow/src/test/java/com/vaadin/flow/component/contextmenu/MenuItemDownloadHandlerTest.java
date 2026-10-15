@@ -147,6 +147,18 @@ class MenuItemDownloadHandlerTest {
     }
 
     @Test
+    void disabledByClick_thenMenuParentDisabled_refused() throws IOException {
+        item.setDisableOnClick(true);
+        Div parent = new Div(menu);
+        ui.add(parent);
+        ui.fakeClientCommunication();
+        click(item);
+        parent.setEnabled(false);
+
+        Assertions.assertFalse(requestDownload());
+    }
+
+    @Test
     void allowDisabled_disabled_served() throws IOException {
         item.setDownloadHandler(handler.allowDisabled());
         item.setEnabled(false);
