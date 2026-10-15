@@ -89,6 +89,84 @@ describe('expandToMergedRegions', () => {
   });
 });
 
+describe('expandToMergedRegions — against its definition', () => {
+  /**
+   * The definition: the smallest rectangle holding the selection and all
+   * of every merge that overlaps it, found by taking merges in until none
+   * is left half in.
+   */
+  function definition(
+    selection: { c1: number; c2: number; r1: number; r2: number },
+    regions: { col1: number; col2: number; row1: number; row2: number }[]
+  ) {
+    let { c1, c2, r1, r2 } = selection;
+    for (let grew = true; grew; ) {
+      grew = false;
+      for (const m of regions) {
+        const overlaps = m.col1 <= c2 && m.col2 >= c1 && m.row1 <= r2 && m.row2 >= r1;
+        const inside = m.col1 >= c1 && m.col2 <= c2 && m.row1 >= r1 && m.row2 <= r2;
+        if (overlaps && !inside) {
+          c1 = Math.min(c1, m.col1);
+          c2 = Math.max(c2, m.col2);
+          r1 = Math.min(r1, m.row1);
+          r2 = Math.max(r2, m.row2);
+          grew = true;
+        }
+      }
+    }
+    return { c1, c2, r1, r2 };
+  }
+
+  /** A small deterministic generator, so a failure can be run again. */
+  function random(seed: number): () => number {
+    let x = seed;
+    return () => {
+      x = (x * 1103515245 + 12345) % 2147483648;
+      return x / 2147483648;
+    };
+  }
+
+  it('grows a long edge at a merge partway along it', () => {
+    const regions = [{ col1: 10, col2: 11, row1: 50, row2: 52 }];
+    expect(expandToMergedRegions({ c1: 1, c2: 10, r1: 1, r2: 1000 }, regions)).to.eql({
+      c1: 1,
+      c2: 11,
+      r1: 1,
+      r2: 1000
+    });
+  });
+
+  it('leaves a merge just outside the selection alone', () => {
+    const regions = [{ col1: 6, col2: 7, row1: 1, row2: 2 }];
+    expect(expandToMergedRegions({ c1: 1, c2: 5, r1: 1, r2: 5 }, regions)).to.eql({ c1: 1, c2: 5, r1: 1, r2: 5 });
+  });
+
+  it('agrees with its definition on many sheets', () => {
+    const next = random(7);
+    const pick = (n: number) => 1 + Math.floor(next() * n);
+    for (let sheet = 0; sheet < 400; sheet++) {
+      // Merges never overlap one another: a workbook cannot hold two that do.
+      const regions: { col1: number; col2: number; row1: number; row2: number }[] = [];
+      for (let i = pick(12); i > 0; i--) {
+        const col1 = pick(30);
+        const row1 = pick(30);
+        const m = { col1, col2: col1 + pick(4) - 1, row1, row2: row1 + pick(4) - 1 };
+        const clashes = regions.some((o) => o.col1 <= m.col2 && o.col2 >= m.col1 && o.row1 <= m.row2 && o.row2 >= m.row1);
+        if (!clashes) {
+          regions.push(m);
+        }
+      }
+      const c = pick(30);
+      const r = pick(30);
+      const selection = { c1: c, c2: c + pick(8) - 1, r1: r, r2: r + pick(8) - 1 };
+
+      expect(expandToMergedRegions(selection, regions), JSON.stringify({ selection, regions })).to.eql(
+        definition(selection, regions)
+      );
+    }
+  });
+});
+
 function attachSheet(): {
   sheet: Spreadsheet;
   sent: { type: string; data: Record<string, unknown> }[];
