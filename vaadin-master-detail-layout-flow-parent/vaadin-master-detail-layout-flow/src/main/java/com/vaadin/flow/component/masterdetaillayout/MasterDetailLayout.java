@@ -215,7 +215,7 @@ public class MasterDetailLayout extends Component
             pendingDetailsUpdate.cancelExecution();
         }
         boolean skipTransition = !hasInitialized;
-        pendingDetailsUpdate = getElement().executeJs("this._setDetail($0, $1)",
+        pendingDetailsUpdate = getElement().callJsFunction("_setDetail",
                 detail != null ? detail.getElement() : null, skipTransition);
     }
 
