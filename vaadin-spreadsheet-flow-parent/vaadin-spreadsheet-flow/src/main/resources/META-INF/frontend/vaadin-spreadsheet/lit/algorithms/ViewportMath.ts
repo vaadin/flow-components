@@ -8,6 +8,8 @@
  * license.
  */
 
+import type { AxisSizes } from './AxisSizes.js';
+
 /**
  * Pure-algorithm coordinate / viewport math for the spreadsheet
  * client.
@@ -88,23 +90,13 @@ export interface ViewportInput {
   maxColumns: number;
   /** Total number of rows in the active sheet. */
   maxRows: number;
+  /** The column widths, hidden ones 0. */
+  columns: AxisSizes;
   /**
-   * Index (1-based, exclusive) past which row heights aren't explicitly
-   * defined — beyond this point, the default row height is assumed.
+   * The row heights, hidden ones 0. Rows past the ones the server gave a
+   * height to are the default height, hidden or not, as in the GWT client.
    */
-  definedRows: number;
-  /** Default per-row height in pixels (see {@link getDefaultRowHeightPx}). */
-  defaultRowHeightPx: number;
-  /**
-   * Per-column width getter. Must already account for hidden
-   * columns (returning 0 for them).
-   */
-  getColWidthActual: (col1Based: number) => number;
-  /**
-   * Per-row height getter for rows within `definedRows`. Must
-   * return 0 for hidden rows.
-   */
-  getRowHeight: (row1Based: number) => number;
+  rows: AxisSizes;
 }
 
 /**
@@ -130,48 +122,36 @@ export interface ViewportBounds {
  * recycle, etc.).
  *
  * Algorithm:
- *  1. Start at column/row 1 (or one past the freeze split).
- *  2. Advance the "first" index until its accumulated pixel position
- *     reaches `scroll - buffer` (so the first rendered cell is within
- *     the buffer zone above/left of the viewport).
+ *  1. Start at column/row 1 (or one past the freeze split); positions are
+ *     measured from there.
+ *  2. The "first" index is the first one whose position reaches
+ *     `scroll - buffer` (so the first rendered cell is within the buffer
+ *     zone above/left of the viewport), found from the running totals
+ *     rather than by adding up every one before it.
  *  3. Advance the "last" index from the first index until its
  *     accumulated position covers `scroll + viewport + buffer`.
- *
- * The row branch has an extra wrinkle: rows beyond `definedRows` use
- * `defaultRowHeightPx` directly (skipping the `getRowHeight` hidden
- * check), because the per-row hidden-set is only populated for rows
- * within the defined range.
  */
 export function computeViewportBounds(input: ViewportInput): ViewportBounds {
-  let firstRowIndex = input.verticalSplitPosition > 0 ? input.verticalSplitPosition + 1 : 1;
-  let firstRowPosition = 0;
-  let firstColumnIndex = input.horizontalSplitPosition > 0 ? input.horizontalSplitPosition + 1 : 1;
-  let firstColumnPosition = 0;
-  // Rows are 1-based, so the last defined row is definedRows itself. The
-  // GWT client's `>=` gave that row the default height.
-  const rowHeight = (row: number): number =>
-    row > input.definedRows ? input.defaultRowHeightPx : input.getRowHeight(row);
+  const { columns, rows } = input;
+  const columnOrigin = input.horizontalSplitPosition + 1;
+  const rowOrigin = input.verticalSplitPosition + 1;
 
-  while (firstColumnPosition < input.scrollLeft - input.columnBufferSize) {
-    firstColumnPosition += input.getColWidthActual(firstColumnIndex);
-    firstColumnIndex++;
-  }
+  const firstColumnIndex = columns.reach(columnOrigin, input.scrollLeft - input.columnBufferSize);
+  const firstColumnPosition = columns.start(firstColumnIndex) - columns.start(columnOrigin);
   let lastColumnIndex = firstColumnIndex;
-  let lastColumnPosition = firstColumnPosition + input.getColWidthActual(firstColumnIndex);
+  let lastColumnPosition = firstColumnPosition + columns.size(firstColumnIndex);
 
-  while (firstRowPosition < input.scrollTop - input.rowBufferSize) {
-    firstRowPosition += rowHeight(firstRowIndex);
-    firstRowIndex++;
-  }
+  const firstRowIndex = rows.reach(rowOrigin, input.scrollTop - input.rowBufferSize);
+  const firstRowPosition = rows.start(firstRowIndex) - rows.start(rowOrigin);
   let lastRowIndex = firstRowIndex;
-  let lastRowPosition = firstRowPosition + rowHeight(lastRowIndex);
+  let lastRowPosition = firstRowPosition + rows.size(lastRowIndex);
 
   while (
     lastColumnPosition < input.scrollLeft + input.scrollViewWidth + input.columnBufferSize &&
     lastColumnIndex < input.maxColumns
   ) {
     lastColumnIndex++;
-    lastColumnPosition += input.getColWidthActual(lastColumnIndex);
+    lastColumnPosition += columns.size(lastColumnIndex);
   }
 
   while (
@@ -179,7 +159,7 @@ export function computeViewportBounds(input: ViewportInput): ViewportBounds {
     lastRowIndex < input.maxRows
   ) {
     lastRowIndex++;
-    lastRowPosition += rowHeight(lastRowIndex);
+    lastRowPosition += rows.size(lastRowIndex);
   }
 
   return {

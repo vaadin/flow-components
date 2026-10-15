@@ -16,6 +16,29 @@ import {
     getDefaultRowHeightPx,
     type ViewportInput,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
+import { AxisSizes } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/AxisSizes.js';
+
+/**
+ * A sheet's sizes given one by one, as a test reads best: the column widths
+ * and the heights of the rows the server sized, hidden ones 0, and the
+ * height every row past those has.
+ */
+interface Sizes extends Omit<ViewportInput, 'columns' | 'rows'> {
+    definedRows: number;
+    defaultRowHeightPx: number;
+    getColWidthActual: (col: number) => number;
+    getRowHeight: (row: number) => number;
+}
+
+/** The bounds for sizes given one by one. */
+function bounds(sizes: Sizes) {
+    const { definedRows, defaultRowHeightPx, getColWidthActual, getRowHeight, ...rest } = sizes;
+    return computeViewportBounds({
+        ...rest,
+        columns: new AxisSizes(sizes.maxColumns, getColWidthActual, getColWidthActual(sizes.maxColumns + 1)),
+        rows: new AxisSizes(definedRows, getRowHeight, defaultRowHeightPx),
+    });
+}
 
 describe('ViewportMath — unit conversion', () => {
     it('converts points to pixels at 96 ppi (Excel default)', () => {
@@ -62,7 +85,7 @@ describe('ViewportMath — getDefaultRowHeightPx', () => {
 });
 
 describe('ViewportMath — computeViewportBounds — no freeze, simple scroll', () => {
-    function buildInput(overrides: Partial<ViewportInput> = {}): ViewportInput {
+    function buildInput(overrides: Partial<Sizes> = {}): Sizes {
         return {
             scrollLeft: 0,
             scrollTop: 0,
@@ -83,7 +106,7 @@ describe('ViewportMath — computeViewportBounds — no freeze, simple scroll', 
     }
 
     it('starts at column 1 / row 1 when scroll is 0', () => {
-        const r = computeViewportBounds(buildInput());
+        const r = bounds(buildInput());
         expect(r.firstColumnIndex).to.equal(1);
         expect(r.firstColumnPosition).to.equal(0);
         expect(r.firstRowIndex).to.equal(1);
@@ -91,7 +114,7 @@ describe('ViewportMath — computeViewportBounds — no freeze, simple scroll', 
     });
 
     it('extends last index until viewport is covered', () => {
-        const r = computeViewportBounds(buildInput());
+        const r = bounds(buildInput());
         // 300px wide viewport / 50px columns = 6 cols. Loop continues
         // while lastColumnPosition < scrollLeft + viewportW; lastColumnPosition
         // starts at 50 (one column's width) and adds 50 per iteration.
@@ -102,7 +125,7 @@ describe('ViewportMath — computeViewportBounds — no freeze, simple scroll', 
     });
 
     it('scrolls past visible columns when scrollLeft is large', () => {
-        const r = computeViewportBounds(
+        const r = bounds(
             buildInput({ scrollLeft: 200, scrollTop: 0 })
         );
         // firstColumnPosition advances while < 200: 50, 100, 150, 200 (stop)
@@ -112,14 +135,14 @@ describe('ViewportMath — computeViewportBounds — no freeze, simple scroll', 
     });
 
     it('caps lastColumnIndex at maxColumns when sheet ends inside viewport', () => {
-        const r = computeViewportBounds(
+        const r = bounds(
             buildInput({ maxColumns: 4, scrollViewWidth: 1000 })
         );
         expect(r.lastColumnIndex).to.equal(4);
     });
 
     it('caps lastRowIndex at maxRows when sheet ends inside viewport', () => {
-        const r = computeViewportBounds(
+        const r = bounds(
             buildInput({ maxRows: 3, scrollViewHeight: 1000 })
         );
         expect(r.lastRowIndex).to.equal(3);
@@ -128,7 +151,7 @@ describe('ViewportMath — computeViewportBounds — no freeze, simple scroll', 
 
 describe('ViewportMath — computeViewportBounds — buffer', () => {
     it('applies the column buffer to widen the first/last range on both sides', () => {
-        const baseInput: ViewportInput = {
+        const baseInput: Sizes = {
             scrollLeft: 200,
             scrollTop: 0,
             scrollViewWidth: 100,
@@ -144,7 +167,7 @@ describe('ViewportMath — computeViewportBounds — buffer', () => {
             getColWidthActual: () => 50,
             getRowHeight: () => 20,
         };
-        const r = computeViewportBounds(baseInput);
+        const r = bounds(baseInput);
         // Without buffer: firstColumnIndex = 5 (firstColumnPosition = 200 satisfies < 200 false).
         // With buffer 50: scrollLeft - buffer = 150; advance while < 150:
         //   50, 100, 150 (stop). 3 increments → firstColumnIndex = 4.
@@ -157,7 +180,7 @@ describe('ViewportMath — computeViewportBounds — buffer', () => {
 });
 
 describe('ViewportMath — computeViewportBounds — freeze panes', () => {
-    function buildInput(overrides: Partial<ViewportInput> = {}): ViewportInput {
+    function buildInput(overrides: Partial<Sizes> = {}): Sizes {
         return {
             scrollLeft: 0,
             scrollTop: 0,
@@ -178,13 +201,13 @@ describe('ViewportMath — computeViewportBounds — freeze panes', () => {
     }
 
     it('starts the scroll pane at horizontalSplit + 1 when freeze is active', () => {
-        const r = computeViewportBounds(buildInput());
+        const r = bounds(buildInput());
         expect(r.firstColumnIndex).to.equal(3); // first non-frozen
         expect(r.firstColumnPosition).to.equal(0);
     });
 
     it('starts the scroll pane at verticalSplit + 1 for the row freeze', () => {
-        const r = computeViewportBounds(buildInput({
+        const r = bounds(buildInput({
             horizontalSplitPosition: 0,
             verticalSplitPosition: 3, // freeze rows 1-3
         }));
@@ -195,7 +218,7 @@ describe('ViewportMath — computeViewportBounds — freeze panes', () => {
 
 describe('ViewportMath — computeViewportBounds — rows beyond definedRows', () => {
     it('uses defaultRowHeightPx for rows past definedRows during advance', () => {
-        const r = computeViewportBounds({
+        const r = bounds({
             scrollLeft: 0,
             scrollTop: 100, // scroll past first 5 rows
             scrollViewWidth: 100,
@@ -372,7 +395,7 @@ describe('ViewportMath — computeViewportBounds — against a walk from the fir
         };
     }
 
-    function inputOf(s: RandomSheet): ViewportInput {
+    function inputOf(s: RandomSheet): Sizes {
         return {
             scrollLeft: s.scrollLeft,
             scrollTop: s.scrollTop,
@@ -435,7 +458,7 @@ describe('ViewportMath — computeViewportBounds — against a walk from the fir
         const next = random(11);
         for (let i = 0; i < 2000; i++) {
             const sheet = randomSheet(next);
-            expect(computeViewportBounds(inputOf(sheet)), JSON.stringify(sheet)).to.eql(walk(sheet));
+            expect(bounds(inputOf(sheet)), JSON.stringify(sheet)).to.eql(walk(sheet));
         }
     });
 });

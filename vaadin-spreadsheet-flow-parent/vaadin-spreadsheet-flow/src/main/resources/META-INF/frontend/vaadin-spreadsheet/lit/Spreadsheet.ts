@@ -50,6 +50,7 @@ import {
   scrollToShow,
   withSize
 } from './algorithms/ViewportMath.js';
+import { AxisSizes } from './algorithms/AxisSizes.js';
 import { initialEditValue } from './algorithms/PercentageEntry.js';
 import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
@@ -142,6 +143,19 @@ function styleIndexOf(cellStyle: string | undefined): number | null {
  * the fill handle - from the selection it started with, painting a strip.
  */
 type CellDrag = { kind: 'select' } | { kind: 'point' } | { kind: 'fill'; from: CellRect; outcome: PaintOutcome };
+
+/**
+ * A sheet's row and column sizes as they are drawn, in pixels, with what
+ * follows from them alone.
+ */
+interface SheetSizes {
+  rows: AxisSizes;
+  columns: AxisSizes;
+  totalWidthPx: number;
+  totalHeightPx: number;
+  /** The heights of the rows the server gave one, hidden or not. */
+  rowHeightsPx: number[];
+}
 
 /**
  * Height of the column headers, in pixels: the GWT client's 27, so a sheet
@@ -263,6 +277,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Row / column geometry. */
   private rowHeights: NumberList = [];
+  /** The sizes worked out from the geometry, and what they were worked out from; see {@link sheetSizes}. */
+  private sizesCache: { inputs: readonly unknown[]; sizes: SheetSizes } | null = null;
   private colWidths: NumberList = [];
   private defRowHeight = 15; // points
   private defColWidth = 64; // pixels
@@ -2588,6 +2604,64 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * @param opts.viewportWidth Viewport pixel width.
    * @param opts.viewportHeight Viewport pixel height.
    */
+  /**
+   * The sheet's row and column sizes as drawn, worked out again only when
+   * one of them changes. A sheet can have a million rows: adding them all
+   * up on every scroll step cost more than the rest of the draw.
+   *
+   * Rows past the ones the server gave a height to are the default height,
+   * hidden or not, as the GWT client measured them.
+   */
+  private sheetSizes(): SheetSizes {
+    const inputs = [
+      this.rowHeights,
+      this.colWidths,
+      this.hiddenRows,
+      this.hiddenColumns,
+      this.defRowHeight,
+      this.defColWidth,
+      this.rows,
+      this.cols
+    ];
+    const cached = this.sizesCache;
+    if (cached !== null && inputs.every((input, i) => input === cached.inputs[i])) {
+      return cached.sizes;
+    }
+    const ppi = FALLBACK_PPI;
+    const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
+    const rowHeightsPx = Array.from(this.rowHeights, (points) => convertPointsToPixel(points, ppi));
+    const { hiddenRows, hiddenColumns, colWidths, defColWidth } = this;
+    const colWidthAt = (col: number): number => {
+      if (hiddenColumns.has(col)) {
+        return 0;
+      }
+      return col > colWidths.length ? defColWidth : colWidths[col - 1];
+    };
+    const totals = computeTotalGridSize({
+      rows: this.rows,
+      cols: this.cols,
+      definedRowHeightsPx: rowHeightsPx,
+      definedColWidthsPx: Array.from(colWidths),
+      hiddenRows,
+      hiddenColumns,
+      defaultRowHeightPx,
+      defaultColWidthPx: defColWidth
+    });
+    const sizes: SheetSizes = {
+      rows: new AxisSizes(
+        rowHeightsPx.length,
+        (row) => (hiddenRows.has(row) ? 0 : rowHeightsPx[row - 1]),
+        defaultRowHeightPx
+      ),
+      columns: new AxisSizes(Math.max(this.cols, colWidths.length), colWidthAt, defColWidth),
+      totalWidthPx: totals.totalWidthPx,
+      totalHeightPx: totals.totalHeightPx,
+      rowHeightsPx
+    };
+    this.sizesCache = { inputs, sizes };
+    return sizes;
+  }
+
   applyRenderState(opts: {
     scrollLeft: number;
     scrollTop: number;
@@ -2684,15 +2758,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.headerColumnWidth > 0 || this.rowGroupingMax > 0) {
       // Row groupings mirror the column ones; heights come from the same
       // point-to-pixel conversion the grid uses.
-      const ppi = FALLBACK_PPI;
-      const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
-      const rowHeightsPx: number[] = [];
-      for (let r = 0; r < this.rowHeights.length; r++) {
-        rowHeightsPx.push(convertPointsToPixel(this.rowHeights[r], ppi));
-      }
+      const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, FALLBACK_PPI);
       const rowGroupings = computePositionedColGroupings(
         this.rowGroupingData,
-        rowHeightsPx,
+        this.sheetSizes().rowHeightsPx,
         this.rowGroupingInversed,
         defaultRowHeightPx,
         2,
@@ -2796,6 +2865,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return this.colWidths[col - 1];
     };
 
+    const sizes = this.sheetSizes();
     const viewport = computeViewportBounds({
       scrollLeft: opts.scrollLeft,
       scrollTop: opts.scrollTop,
@@ -2807,10 +2877,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       rowBufferSize: this.rowBufferSize,
       maxColumns: this.cols,
       maxRows: this.rows,
-      definedRows: definedRowsLength,
-      defaultRowHeightPx,
-      getColWidthActual: colWidthForIndex,
-      getRowHeight: rowHeightForIndex
+      columns: sizes.columns,
+      rows: sizes.rows
     });
 
     // Frozen columns: cols 1..horizontalSplitPosition (1-based,
@@ -2875,25 +2943,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
 
     // Total grid dimensions in pixels — used by the scroll surface
-    // to establish scroll extent. Row heights are passed as points
-    // converted via the active PPI; column widths come through
-    // as-is (already pixels).
-    const definedRowHeightsPx: number[] = [];
-    for (let row = 1; row <= definedRowsLength; row++) {
-      definedRowHeightsPx.push(convertPointsToPixel(this.rowHeights[row - 1], ppi));
-    }
-    const totals = computeTotalGridSize({
-      rows: this.rows,
-      cols: this.cols,
-      definedRowHeightsPx,
-      definedColWidthsPx: Array.from(this.colWidths),
-      hiddenRows: hiddenRowSet,
-      hiddenColumns: hiddenColSet,
-      defaultRowHeightPx,
-      defaultColWidthPx: this.defColWidth
-    });
-    const totalWidthPx = totals.totalWidthPx + gapX;
-    const totalHeightPx = totals.totalHeightPx + gapY;
+    // to establish scroll extent.
+    const totalWidthPx = sizes.totalWidthPx + gapX;
+    const totalHeightPx = sizes.totalHeightPx + gapY;
 
     // Compute positioned overlays from the current
     // overlay map + resource map. Each overlay's pixel
