@@ -761,6 +761,41 @@ describe('Spreadsheet — context-menu action icons', () => {
  * items in 27px rows, the one under the pointer on blue with light type.
  * The Lit menu had a plain grey border and a grey highlight.
  */
+/**
+ * Assistive technology is told the menu is a menu of menu items, as the GWT
+ * client's menu bar told it. The items are reached with the arrows, not Tab.
+ */
+describe('Spreadsheet context menu — what assistive technology is told', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(async () => {
+    ctx = attachSheet();
+    ctx.sheet.getScrollContainer().focus();
+    rightClickCell(ctx.sheet, 2, 2);
+    ctx.sheet.showActions([action('One', '1', 0), action('Two', '2', 0)]);
+    await items(ctx.sheet);
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('is a menu of menu items', async () => {
+    expect(menuPanel(ctx.sheet).getAttribute('role')).to.equal('menu');
+    expect((await items(ctx.sheet)).map((item) => item.getAttribute('role'))).to.eql(['menuitem', 'menuitem']);
+  });
+
+  it('keeps its items out of the Tab order', async () => {
+    expect((await items(ctx.sheet)).map((item) => item.tabIndex)).to.eql([-1, -1]);
+  });
+
+  it('still takes the items with the arrows', () => {
+    press(ctx.sheet, 'ArrowDown');
+
+    expect((focusedInMenu(ctx.sheet) as HTMLElement).textContent!.trim()).to.equal('One');
+  });
+});
+
 describe('Spreadsheet context menu — how it looks', () => {
   let ctx: ReturnType<typeof attachSheet>;
 

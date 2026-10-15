@@ -51,7 +51,8 @@ export function emptyContextMenuRenderState(): ContextMenuRenderState {
  * the focus when it opens, with no item in hand; Down and Up take the first
  * item and then go down or up the list and round, Enter picks the item in
  * hand, Left and Tab close the menu. The item under the pointer is the one
- * in hand.
+ * in hand. Assistive technology is told it is a menu of menu items, as the
+ * GWT client's menu bar told it; the items are not Tab stops.
  *
  * Built as an internal element rather than on `@vaadin/context-menu`: the Lit
  * client has no `@vaadin/*` dependency today, and adding one to the
@@ -424,10 +425,18 @@ export class SpreadsheetContextMenu extends LitElement {
     }
     const { actions } = state;
     return html`
-      <div class="menu" part="context-menu" tabindex="-1" popover="manual">
+      <div class="menu" part="context-menu" role="menu" tabindex="-1" popover="manual">
         ${actions.map(
           (action) => html`
-            <button class="item" part="context-menu-item" type="button" data-key=${action.key} data-type=${action.type}>
+            <button
+              class="item"
+              part="context-menu-item"
+              type="button"
+              role="menuitem"
+              tabindex="-1"
+              data-key=${action.key}
+              data-type=${action.type}
+            >
               ${action.iconNodeId
                 ? html`<slot class="item-icon" name=${actionIconSlotName(String(action.iconNodeId))}></slot>`
                 : nothing}
