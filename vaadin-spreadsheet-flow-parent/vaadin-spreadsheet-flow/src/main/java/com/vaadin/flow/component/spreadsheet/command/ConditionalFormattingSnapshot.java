@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet.command;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +16,7 @@ import org.apache.poi.ss.usermodel.ConditionalFormatting;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFConditionalFormatting;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTConditionalFormatting;
 import org.slf4j.Logger;
@@ -41,12 +41,9 @@ import org.slf4j.LoggerFactory;
  * quietly lose whatever the copy did not cover.
  *
  * <p>
- * Reaching the XML needs the package-private {@code _cf} field of
- * {@code XSSFConditionalFormatting}; the same need for POI's hidden
- * conditional-formatting state is why {@code POIReflectionTools} exists in the
- * parent package. Only {@code .xlsx} keeps its formatting this way. For
- * {@code .xls} nothing is captured and the old behaviour stands, which is that
- * the formatting is lost.
+ * {@code XSSFConditionalFormatting.toString()} gives the XML. Only
+ * {@code .xlsx} keeps its formatting this way. For {@code .xls} nothing is
+ * captured and the old behaviour stands, which is that the formatting is lost.
  */
 final class ConditionalFormattingSnapshot implements Serializable {
 
@@ -124,23 +121,10 @@ final class ConditionalFormattingSnapshot implements Serializable {
         return true;
     }
 
-    /**
-     * The formatting's XML, or {@code null} when this POI build does not lay it
-     * out where we expect.
-     */
+    /** The formatting's XML, or {@code null} for an {@code .xls} one. */
     private static String xmlOf(ConditionalFormatting formatting) {
-        try {
-            Field field = formatting.getClass().getDeclaredField("_cf");
-            field.setAccessible(true);
-            Object ct = field.get(formatting);
-            if (ct instanceof CTConditionalFormatting typed) {
-                return typed.xmlText();
-            }
-        } catch (ReflectiveOperationException | RuntimeException e) {
-            LOGGER.warn("Could not read a conditional formatting's XML, so it"
-                    + " will not come back if its row is removed and the"
-                    + " removal undone", e);
-        }
-        return null;
+        return formatting instanceof XSSFConditionalFormatting
+                ? formatting.toString()
+                : null;
     }
 }
