@@ -323,3 +323,119 @@ describe('ViewportMath — computeTotalGridSize', () => {
         expect(result.totalHeightPx).to.equal(0);
     });
 });
+
+describe('ViewportMath — computeViewportBounds — against a walk from the first row', () => {
+    /** A sheet's sizes, as the connector holds them. */
+    interface RandomSheet {
+        rows: number;
+        cols: number;
+        rowHeights: number[];
+        colWidths: number[];
+        defaultRowHeightPx: number;
+        verticalSplitPosition: number;
+        horizontalSplitPosition: number;
+        scrollTop: number;
+        scrollLeft: number;
+        view: number;
+        buffer: number;
+    }
+
+    /** A small deterministic generator, so a failure can be run again. */
+    function random(seed: number): () => number {
+        let x = seed;
+        return () => {
+            x = (x * 1103515245 + 12345) % 2147483648;
+            return x / 2147483648;
+        };
+    }
+
+    function randomSheet(next: () => number): RandomSheet {
+        const pick = (n: number) => Math.floor(next() * n);
+        const rows = 1 + pick(300);
+        const cols = 1 + pick(60);
+        // Some hidden, some sized by hand; fewer defined than there are rows.
+        const size = () => (next() < 0.15 ? 0 : 5 + pick(40));
+        const rowHeights = Array.from({ length: pick(rows + 1) }, size);
+        const colWidths = Array.from({ length: cols }, size);
+        return {
+            rows,
+            cols,
+            rowHeights,
+            colWidths,
+            defaultRowHeightPx: 1 + pick(30),
+            verticalSplitPosition: next() < 0.3 ? pick(Math.min(5, rows)) : 0,
+            horizontalSplitPosition: next() < 0.3 ? pick(Math.min(5, cols)) : 0,
+            scrollTop: pick(4000),
+            scrollLeft: pick(2000),
+            view: 50 + pick(500),
+            buffer: pick(300),
+        };
+    }
+
+    function inputOf(s: RandomSheet): ViewportInput {
+        return {
+            scrollLeft: s.scrollLeft,
+            scrollTop: s.scrollTop,
+            scrollViewWidth: s.view,
+            scrollViewHeight: s.view,
+            horizontalSplitPosition: s.horizontalSplitPosition,
+            verticalSplitPosition: s.verticalSplitPosition,
+            columnBufferSize: s.buffer,
+            rowBufferSize: s.buffer,
+            maxColumns: s.cols,
+            maxRows: s.rows,
+            definedRows: s.rowHeights.length,
+            defaultRowHeightPx: s.defaultRowHeightPx,
+            getColWidthActual: (col) => (col <= s.colWidths.length ? s.colWidths[col - 1] : 64),
+            getRowHeight: (row) => s.rowHeights[row - 1],
+        };
+    }
+
+    /** The bounds by walking from the first row and column, as the GWT client found them. */
+    function walk(s: RandomSheet) {
+        const colWidth = (col: number) => (col <= s.colWidths.length ? s.colWidths[col - 1] : 64);
+        const rowHeight = (row: number) => (row > s.rowHeights.length ? s.defaultRowHeightPx : s.rowHeights[row - 1]);
+        let firstColumnIndex = s.horizontalSplitPosition + 1;
+        let firstColumnPosition = 0;
+        while (firstColumnPosition < s.scrollLeft - s.buffer) {
+            firstColumnPosition += colWidth(firstColumnIndex);
+            firstColumnIndex++;
+        }
+        let lastColumnIndex = firstColumnIndex;
+        let lastColumnPosition = firstColumnPosition + colWidth(firstColumnIndex);
+        while (lastColumnPosition < s.scrollLeft + s.view + s.buffer && lastColumnIndex < s.cols) {
+            lastColumnIndex++;
+            lastColumnPosition += colWidth(lastColumnIndex);
+        }
+        let firstRowIndex = s.verticalSplitPosition + 1;
+        let firstRowPosition = 0;
+        while (firstRowPosition < s.scrollTop - s.buffer) {
+            firstRowPosition += rowHeight(firstRowIndex);
+            firstRowIndex++;
+        }
+        let lastRowIndex = firstRowIndex;
+        let lastRowPosition = firstRowPosition + rowHeight(lastRowIndex);
+        while (lastRowPosition < s.scrollTop + s.view + s.buffer && lastRowIndex < s.rows) {
+            lastRowIndex++;
+            lastRowPosition += rowHeight(lastRowIndex);
+        }
+        return {
+            firstColumnIndex,
+            firstColumnPosition,
+            lastColumnIndex,
+            lastColumnPosition,
+            firstRowIndex,
+            firstRowPosition,
+            lastRowIndex,
+            lastRowPosition,
+        };
+    }
+
+    it('finds the same bounds on many sheets', () => {
+        const next = random(11);
+        for (let i = 0; i < 2000; i++) {
+            const sheet = randomSheet(next);
+            expect(computeViewportBounds(inputOf(sheet)), JSON.stringify(sheet)).to.eql(walk(sheet));
+        }
+    });
+});
