@@ -268,6 +268,47 @@ describe('SpreadsheetCellGrid — cell editor render', () => {
  * right. Text that outgrows it widens it by whole columns, as it is typed,
  * until the text fits; deleting narrows it again.
  */
+describe('SpreadsheetCellGrid — the editor stand-in', () => {
+    // The GWT client's input was always there, hidden while nothing was
+    // edited, and TestBench's getCellValueInput() hands this one out then,
+    // so tests asking whether the editor is displayed keep working.
+    /** A drawn sheet with no cell being edited. */
+    function drawnWithoutEditor(): CellGridRenderState {
+        return { ...buildEditorState({ col: 1, row: 1, initialValue: '' }), editor: null };
+    }
+
+    it('is there, hidden, while no cell is being edited', async () => {
+        const el = await attachCellGridWithState(drawnWithoutEditor());
+
+        const standIn = el.shadowRoot!.querySelector<HTMLInputElement>('.cell-input-stand-in')!;
+        expect(standIn).to.not.be.null;
+        expect(getComputedStyle(standIn).display).to.equal('none');
+        expect(standIn.inert).to.be.true;
+        expect(standIn.tabIndex).to.equal(-1);
+        expect(standIn.getAttribute('aria-hidden')).to.equal('true');
+
+        el.remove();
+    });
+
+    it('is not taken for the editor, nor styled as it', async () => {
+        const el = await attachCellGridWithState(drawnWithoutEditor());
+
+        expect(el.shadowRoot!.querySelector('[part~="cell-input"]')).to.be.null;
+        expect(el.shadowRoot!.querySelector('.cell-input-stand-in')!.hasAttribute('part')).to.be.false;
+
+        el.remove();
+    });
+
+    it('stays hidden while a cell is being edited, beside the real editor', async () => {
+        const el = await attachCellGridWithState(buildEditorState({ col: 2, row: 2, initialValue: 'x' }));
+
+        expect(el.shadowRoot!.querySelectorAll('[part~="cell-input"]')).to.have.length(1);
+        expect(getComputedStyle(el.shadowRoot!.querySelector('.cell-input-stand-in')!).display).to.equal('none');
+
+        el.remove();
+    });
+});
+
 describe('SpreadsheetCellGrid — the editor grows with its text', () => {
     // Five 50px columns and three 20px rows.
     function state(editor: CellGridRenderState['editor'], overrides: Partial<CellGridRenderState> = {}): CellGridRenderState {

@@ -690,12 +690,16 @@ public class SpreadsheetElement extends TestBenchElement {
     /**
      * Gets the input of the inline cell editor, which holds the value of the
      * cell being edited.
+     * <p>
+     * While no cell is being edited, this is a hidden stand-in, as in earlier
+     * versions: {@code isDisplayed()} is {@code false}.
      *
-     * @return the input, or {@code null} when no cell is being edited
+     * @return the input
      */
     public WebElement getCellValueInput() {
         // The editor is in the DOM only while a cell is being edited.
-        return findInCellGrid("[part~=\"cell-input\"]");
+        WebElement editor = findInCellGrid("[part~=\"cell-input\"]");
+        return editor != null ? editor : findInCellGrid(".cell-input-stand-in");
     }
 
     /**

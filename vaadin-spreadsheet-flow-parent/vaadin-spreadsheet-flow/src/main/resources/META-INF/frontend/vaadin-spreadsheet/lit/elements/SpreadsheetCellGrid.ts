@@ -567,6 +567,11 @@ export class SpreadsheetCellGrid extends LitElement {
            off the sheet on a soft shadow, the text at the cell's
            edge. The ring is the editor colour, which only the Lumo
            theme and an application set. */
+      /* Never shown, whatever an application does to inputs. */
+      .cell-input-stand-in {
+        display: none !important;
+      }
+
       .cell-editor {
         position: absolute;
         box-sizing: border-box;
@@ -1659,7 +1664,11 @@ export class SpreadsheetCellGrid extends LitElement {
       this.handleEditorInput
     );
     const commentOverlays = buildCommentOverlays(this.renderState, this.hoveredKey);
-    return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${topQuadrant}${leftQuadrant}${cornerQuadrant}${commentOverlays}${editor}`;
+    // A hidden stand-in for the editor, as the GWT client's input was always
+    // there: TestBench hands it out while no cell is being edited, so tests
+    // that ask whether the editor is shown keep working.
+    const standIn = html`<input class="cell-input-stand-in" hidden inert tabindex="-1" aria-hidden="true" />`;
+    return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${topQuadrant}${leftQuadrant}${cornerQuadrant}${commentOverlays}${editor}${standIn}`;
   }
 
   /**
