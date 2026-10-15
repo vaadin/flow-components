@@ -264,6 +264,63 @@ describe('Spreadsheet — dragging a column edge, as the GWT client did', () => 
 
     expect(ctx.sent.filter((e) => e.type === 'onColumnAutofit')).to.have.length(1);
   });
+
+  /** A point on the handle a pixel inside column B, where a click lands, in whole pixels. */
+  function clickPoint(): { x: number; y: number } {
+    const handle = columnHandle(ctx.sheet, 2).getBoundingClientRect();
+    return { x: Math.round(columnLetter(ctx.sheet, 2).left) + 45, y: Math.round(handle.top + handle.height / 2) };
+  }
+
+  it('resizes nothing when the handle is only clicked, as the GWT client did', async () => {
+    const { x, y } = clickPoint();
+
+    press(columnHandle(ctx.sheet, 2), x, y);
+    release(x, y);
+    await ctx.sheet.getColumnHeader().updateComplete;
+
+    expect(ctx.sent.filter((e) => e.type === 'columnResized')).to.be.empty;
+    expect(columnLetter(ctx.sheet, 2).width).to.equal(50);
+    expect(line(ctx).hidden).to.be.true;
+  });
+
+  it('takes a move event that leaves the pointer where it was pressed for no move', () => {
+    const { x, y } = clickPoint();
+
+    press(columnHandle(ctx.sheet, 2), x, y);
+    move(x, y);
+
+    expect(cover(ctx).hidden, 'the second click of a double-click goes to the handle').to.be.true;
+    release(x, y);
+    expect(ctx.sent.filter((e) => e.type === 'columnResized')).to.be.empty;
+  });
+
+  it('fits the column on a double-click without resizing it on the clicks first', () => {
+    const handle = columnHandle(ctx.sheet, 2);
+    const { x, y } = clickPoint();
+
+    for (let click = 1; click <= 2; click++) {
+      press(handle, x, y);
+      release(x, y);
+    }
+    handle.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, composed: true, clientX: x, clientY: y }));
+
+    expect(
+      ctx.sent.filter((e) => e.type === 'columnResized' || e.type === 'onColumnAutofit').map((e) => e.type)
+    ).to.deep.equal(['onColumnAutofit']);
+  });
+
+  it('takes the width to the pointer when a drag comes back to where it was taken', () => {
+    const { x, y } = clickPoint();
+
+    press(columnHandle(ctx.sheet, 2), x, y);
+    move(x + 30, y);
+    move(x, y);
+    release(x, y);
+
+    expect(ctx.sent.filter((e) => e.type === 'columnResized').map((e) => e.data)).to.deep.equal([
+      { colIndexes: [2], newWidths: [Math.round(x - columnLetter(ctx.sheet, 2).left)] }
+    ]);
+  });
 });
 
 function sheetColumnLetters(ctx: Sheet): string[] {
@@ -331,6 +388,18 @@ describe('Spreadsheet — dragging a row edge, as the GWT client did', () => {
     drag3(rowNumber(ctx.sheet, 3).top + 24);
 
     expect(getComputedStyle(cover(ctx)).cursor).to.equal('row-resize');
+  });
+
+  it('resizes nothing when the handle is only clicked, as the GWT client did', () => {
+    const handle = rowHandle(ctx.sheet, 3).getBoundingClientRect();
+    const x = Math.round(handle.left + handle.width / 2);
+    const y = Math.round(rowNumber(ctx.sheet, 3).top) + 16;
+
+    press(rowHandle(ctx.sheet, 3), x, y);
+    release(x, y);
+
+    expect(ctx.sent.filter((e) => e.type === 'rowsResized')).to.be.empty;
+    expect(rowNumber(ctx.sheet, 3).height).to.equal(20);
   });
 });
 

@@ -39,7 +39,9 @@ export interface HeaderResizeTargets {
 
 /**
  * A column or row edge being dragged: the size it gives runs from where the
- * column or row starts, `edge`, to the pointer at `x`, `y`.
+ * column or row starts, `edge`, to the pointer at `x`, `y`. Until the
+ * pointer leaves the point it was pressed at, `moved` is false and the press
+ * is only a click.
  */
 interface EdgeDrag {
   axis: 'column' | 'row';
@@ -47,6 +49,9 @@ interface EdgeDrag {
   edge: number;
   x: number;
   y: number;
+  pressX: number;
+  pressY: number;
+  moved: boolean;
 }
 
 /**
@@ -120,13 +125,16 @@ export class HeaderResize {
 
   /**
    * The pointer moved on the page: during a drag, the line and the tooltip
-   * follow it, and the sheet stays as it is until the drag ends.
+   * follow it, and the sheet stays as it is until the drag ends. A move
+   * event that leaves the pointer where it was pressed - the browser sends
+   * one when what is under the pointer changes - is no move.
    */
   moved(e: MouseEvent): void {
     const drag = this.drag;
-    if (drag === null) {
+    if (drag === null || (!drag.moved && e.clientX === drag.pressX && e.clientY === drag.pressY)) {
       return;
     }
+    drag.moved = true;
     drag.x = e.clientX;
     drag.y = e.clientY;
     this.cover.hidden = false;
@@ -136,7 +144,10 @@ export class HeaderResize {
   /**
    * The pointer was let go: a dragged column takes the width from its left
    * edge to where the pointer is, and a row the height, when it is a
-   * different one. Returns whether a drag ended.
+   * different one. A press let go without moving - a click, or the first
+   * click of a double-click - resizes nothing, as in earlier versions: the
+   * handle is a few pixels wide, so the pointer is rarely on the edge
+   * itself. Returns whether a drag ended.
    */
   finish(): boolean {
     const drag = this.drag;
@@ -145,6 +156,9 @@ export class HeaderResize {
     }
     this.drag = null;
     this.hideGuide();
+    if (!drag.moved) {
+      return true;
+    }
     const { axis, index, edge, x, y } = drag;
     if (axis === 'column') {
       const width = Math.max(0, Math.round(x - edge));
@@ -201,7 +215,16 @@ export class HeaderResize {
     }
     const { col, clientX, clientY = 0, left } = e.detail;
     const edge = left ?? clientX - this.host.colWidthPx(col);
-    this.drag = { axis: 'column', index: col, edge, x: clientX, y: clientY };
+    this.drag = {
+      axis: 'column',
+      index: col,
+      edge,
+      x: clientX,
+      y: clientY,
+      pressX: clientX,
+      pressY: clientY,
+      moved: false
+    };
     this.showGuide();
   };
 
@@ -214,7 +237,16 @@ export class HeaderResize {
     }
     const { row, clientX = 0, clientY, top } = e.detail;
     const edge = top ?? clientY - this.host.rowHeightPx(row);
-    this.drag = { axis: 'row', index: row, edge, x: clientX, y: clientY };
+    this.drag = {
+      axis: 'row',
+      index: row,
+      edge,
+      x: clientX,
+      y: clientY,
+      pressX: clientX,
+      pressY: clientY,
+      moved: false
+    };
     this.showGuide();
   };
 
