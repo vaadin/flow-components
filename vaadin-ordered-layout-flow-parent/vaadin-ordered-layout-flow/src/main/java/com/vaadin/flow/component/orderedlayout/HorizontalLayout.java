@@ -292,17 +292,8 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent.super.replace(oldComponent, newComponent);
 
         if (newComponent != null && oldComponent != null) {
-            if (oldSlotName == null) {
-                newComponent.getElement().removeAttribute("slot");
-            } else {
-                newComponent.getElement().setAttribute("slot", oldSlotName);
-            }
-
-            if (newSlotName == null) {
-                oldComponent.getElement().removeAttribute("slot");
-            } else {
-                oldComponent.getElement().setAttribute("slot", newSlotName);
-            }
+            newComponent.getElement().setAttribute("slot", oldSlotName);
+            oldComponent.getElement().setAttribute("slot", newSlotName);
         }
 
         updateChildDetachListeners();
@@ -349,11 +340,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
 
         FlexComponent.super.addComponentAtIndex(index, component);
 
-        if (slotName == null) {
-            component.getElement().removeAttribute("slot");
-        } else {
-            component.getElement().setAttribute("slot", slotName);
-        }
+        component.getElement().setAttribute("slot", slotName);
 
         updateChildDetachListeners();
     }

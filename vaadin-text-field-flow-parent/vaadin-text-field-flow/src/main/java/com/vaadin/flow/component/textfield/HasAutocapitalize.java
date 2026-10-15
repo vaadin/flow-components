@@ -46,12 +46,8 @@ public interface HasAutocapitalize extends HasElement {
      *            the {@code autocapitalize} value, or {@code null} to unset
      */
     default void setAutocapitalize(Autocapitalize autocapitalize) {
-        if (autocapitalize == null) {
-            getElement().removeAttribute(AUTOCAPITALIZE_ATTRIBUTE);
-        } else {
-            getElement().setAttribute(AUTOCAPITALIZE_ATTRIBUTE,
-                    autocapitalize.value);
-        }
+        getElement().setAttribute(AUTOCAPITALIZE_ATTRIBUTE,
+                autocapitalize == null ? null : autocapitalize.value);
     }
 
     /**
