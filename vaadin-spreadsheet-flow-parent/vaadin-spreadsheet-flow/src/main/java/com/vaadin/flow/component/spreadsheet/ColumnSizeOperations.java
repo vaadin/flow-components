@@ -45,7 +45,9 @@ final class ColumnSizeOperations implements Serializable {
     void setWidths(Map<Integer, Integer> columnIndexToWidth) {
         AtomicBoolean isAnyHidden = new AtomicBoolean();
         columnIndexToWidth.forEach((key, value) -> {
-            isAnyHidden.set(value == 0);
+            if (value == 0) {
+                isAnyHidden.set(true);
+            }
             applyWidth(key, value);
         });
         if (isAnyHidden.get()) {

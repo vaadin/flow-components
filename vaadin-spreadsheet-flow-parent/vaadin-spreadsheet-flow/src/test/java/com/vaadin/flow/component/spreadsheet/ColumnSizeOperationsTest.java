@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -179,6 +180,18 @@ class ColumnSizeOperationsTest {
         Map<Integer, Integer> widths = new HashMap<>();
         widths.put(0, 50);
         widths.put(1, 0); // hidden
+
+        ops.setWidths(widths);
+
+        verify(spreadsheet).reloadSheetStyles(false, true);
+    }
+
+    @Test
+    void setWidths_hiddenBeforeShown_stillReloadsStyles() {
+        // Every width set the flag, so only the last one counted.
+        Map<Integer, Integer> widths = new LinkedHashMap<>();
+        widths.put(0, 0); // hidden
+        widths.put(1, 50);
 
         ops.setWidths(widths);
 
