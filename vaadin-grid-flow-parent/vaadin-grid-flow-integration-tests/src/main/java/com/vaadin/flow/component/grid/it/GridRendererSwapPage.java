@@ -62,7 +62,11 @@ public class GridRendererSwapPage extends Div {
                 event -> editor.editItem(items.get(0)));
         editFirst.setId("edit-first");
 
-        add(grid, swapRenderer, editFirst);
+        NativeButton cancelEdit = new NativeButton("Cancel edit",
+                event -> editor.cancel());
+        cancelEdit.setId("cancel-edit");
+
+        add(grid, swapRenderer, editFirst, cancelEdit);
     }
 
     private static Item createItem(String name, double price) {

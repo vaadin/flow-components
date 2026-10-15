@@ -57,6 +57,19 @@ public class GridRendererSwapIT extends AbstractComponentIT {
         Assert.assertEquals("73.1", priceField.getValue());
     }
 
+    @Test
+    public void openAndCloseEditor_swapRenderer_editorIsShown() {
+        editFirstItem();
+        $("button").id("cancel-edit").click();
+
+        swapRenderer();
+        editFirstItem();
+
+        NumberFieldElement priceField = grid.getCell(0, 1)
+                .$(NumberFieldElement.class).first();
+        Assert.assertEquals("73.1", priceField.getValue());
+    }
+
     private void swapRenderer() {
         $("button").id("swap-renderer").click();
     }
