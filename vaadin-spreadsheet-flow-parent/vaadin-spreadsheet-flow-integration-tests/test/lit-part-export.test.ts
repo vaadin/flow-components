@@ -8,6 +8,7 @@
  */
 
 import { expect } from 'chai';
+import { SpreadsheetPart } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetPart.js';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
@@ -348,5 +349,22 @@ describe('exportparts — the declared lists', () => {
     expect(
       ctx.sheet.getSheetTabs().getAttribute('exportparts')!.split(',')
     ).to.include.members(['tab', 'tab-selected']);
+  });
+});
+
+describe('SpreadsheetPart — the parts an internal element shows above it', () => {
+  class Probe extends SpreadsheetPart {
+    static readonly EXPORTED_PARTS = 'first-part,second-part';
+  }
+  customElements.define('spreadsheet-part-probe', Probe);
+
+  it('shows the parts its class names once it is in the page, not before', () => {
+    const el = document.createElement('spreadsheet-part-probe');
+    const before = el.getAttribute('exportparts');
+
+    document.body.appendChild(el);
+
+    expect([before, el.getAttribute('exportparts')]).to.eql([null, 'first-part,second-part']);
+    el.remove();
   });
 });

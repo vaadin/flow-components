@@ -8,7 +8,8 @@
  * license.
  */
 
-import { LitElement, css, html, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
+import { SpreadsheetPart } from './SpreadsheetPart.js';
 import type { TemplateResult } from 'lit';
 
 // One row (or column) of outline gutter. Shared with the header strips so
@@ -62,7 +63,7 @@ export function emptyHeaderCornerRenderState(): HeaderCornerRenderState {
  * levels, each bordered off from the gutters; and, where the two gutters
  * meet, a box over the dotted lines that divide their levels.
  */
-export class SpreadsheetHeaderCorner extends LitElement {
+export class SpreadsheetHeaderCorner extends SpreadsheetPart {
   static readonly EXPORTED_PARTS = 'header-corner,outline-level-button';
 
   static properties = {
@@ -217,7 +218,6 @@ export class SpreadsheetHeaderCorner extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    this.setAttribute('exportparts', SpreadsheetHeaderCorner.EXPORTED_PARTS);
     this.setAttribute('part', 'header-corner');
   }
 
