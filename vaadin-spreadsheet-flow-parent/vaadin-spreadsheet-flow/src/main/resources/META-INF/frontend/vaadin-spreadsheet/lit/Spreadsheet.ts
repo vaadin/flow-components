@@ -2062,6 +2062,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * and last cell; typing starts an edit.
    */
   private readonly handleKeyDown = (e: KeyboardEvent): void => {
+    // Enter and Space on a button of the sheet's own - an outline button, a
+    // popup's close box - press that button, as on any button, rather than
+    // editing the active cell.
+    if ((e.key === 'Enter' || e.key === ' ') && pressesButton(e)) {
+      return;
+    }
     if (this.eventCameFromHostedComponent(e)) {
       // The key belongs to the component the user is typing into. Acting
       // on it as a sheet shortcut moves the selection out from under a
@@ -5374,6 +5380,12 @@ export function visibleCellSlots(
     }
   }
   return visible;
+}
+
+/** Whether a key goes to a button, which the key itself is pressing. */
+function pressesButton(e: KeyboardEvent): boolean {
+  const target = e.composedPath()[0];
+  return target instanceof HTMLElement && (target.localName === 'button' || target.getAttribute('role') === 'button');
 }
 
 /** Two popup-button states describe the same button when they share a cell. */

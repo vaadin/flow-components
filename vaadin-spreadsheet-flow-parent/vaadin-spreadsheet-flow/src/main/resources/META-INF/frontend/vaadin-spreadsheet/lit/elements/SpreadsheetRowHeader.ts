@@ -730,6 +730,8 @@ export class SpreadsheetRowHeader extends LitElement {
       groupingEls.push(html`
         <button
           class="row-grouping-toggle"
+          type="button"
+          aria-expanded=${g.collapsed ? 'false' : 'true'}
           style=${btnStyle}
           data-unique-index=${g.uniqueIndex}
           data-collapsed=${g.collapsed ? 'true' : 'false'}

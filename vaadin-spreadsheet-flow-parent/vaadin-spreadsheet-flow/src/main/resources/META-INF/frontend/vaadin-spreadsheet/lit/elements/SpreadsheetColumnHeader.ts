@@ -789,6 +789,8 @@ export class SpreadsheetColumnHeader extends LitElement {
       groupingEls.push(html`
         <button
           class="col-grouping-toggle"
+          type="button"
+          aria-expanded=${g.collapsed ? 'false' : 'true'}
           style=${btnStyle}
           data-unique-index=${g.uniqueIndex}
           data-collapsed=${g.collapsed ? 'true' : 'false'}
