@@ -38,6 +38,18 @@ export interface HeaderResizeTargets {
 }
 
 /**
+ * A column or row edge being dragged: the size it gives runs from where the
+ * column or row starts, `edge`, to the pointer at `x`, `y`.
+ */
+interface EdgeDrag {
+  axis: 'column' | 'row';
+  index: number;
+  edge: number;
+  x: number;
+  y: number;
+}
+
+/**
  * Resizing columns and rows by their header edges, as the GWT client did.
  * The column or row keeps its size while the edge is dragged - a line and
  * a tooltip follow the pointer - and takes the new one when the drag ends,
@@ -46,14 +58,8 @@ export interface HeaderResizeTargets {
  * measure. A protected sheet allows either only where its format flags do.
  */
 export class HeaderResize {
-  /**
-   * A column edge being dragged: the width it takes runs from the column's
-   * left edge, `edge`, to the pointer at `x`.
-   */
-  private columnResize: { col: number; edge: number; x: number; y: number } | null = null;
-
-  /** A row edge being dragged; its height runs from `edge` to `y`. */
-  private rowResize: { row: number; edge: number; x: number; y: number } | null = null;
+  /** The edge being dragged; null between drags. */
+  private drag: EdgeDrag | null = null;
 
   /** Whether a protected sheet's columns keep their widths. */
   private lockFormatColumns = false;
@@ -119,12 +125,12 @@ export class HeaderResize {
    * follow it, and the sheet stays as it is until the drag ends.
    */
   moved(e: MouseEvent): void {
-    const resize = this.columnResize ?? this.rowResize;
-    if (resize === null) {
+    const drag = this.drag;
+    if (drag === null) {
       return;
     }
-    resize.x = e.clientX;
-    resize.y = e.clientY;
+    drag.x = e.clientX;
+    drag.y = e.clientY;
     this.cover.hidden = false;
     this.showGuide();
   }
@@ -135,30 +141,28 @@ export class HeaderResize {
    * different one. Returns whether a drag ended.
    */
   finish(): boolean {
-    if (this.columnResize !== null) {
-      const { col, edge, x } = this.columnResize;
-      this.columnResize = null;
-      this.hideGuide();
+    const drag = this.drag;
+    if (drag === null) {
+      return false;
+    }
+    this.drag = null;
+    this.hideGuide();
+    const { axis, index, edge, x, y } = drag;
+    if (axis === 'column') {
       const width = Math.max(0, Math.round(x - edge));
-      if (width !== this.host.colWidthPx(col)) {
-        this.host.setColumnWidth(col, width);
-        this.host.send({ type: 'columnResized', data: { colIndexes: [col], newWidths: [width] } });
+      if (width !== this.host.colWidthPx(index)) {
+        this.host.setColumnWidth(index, width);
+        this.host.send({ type: 'columnResized', data: { colIndexes: [index], newWidths: [width] } });
       }
       return true;
     }
-    if (this.rowResize !== null) {
-      // The row's height and the event's are in points.
-      const { row, edge, y } = this.rowResize;
-      this.rowResize = null;
-      this.hideGuide();
-      const height = pixelsToPoints(Math.max(0, Math.round(y - edge)));
-      if (height !== this.host.rowHeightPt(row)) {
-        this.host.setRowHeight(row, height);
-        this.host.send({ type: 'rowsResized', data: { rowIndexes: [row], newHeights: [height] } });
-      }
-      return true;
+    // The row's height and the event's are in points.
+    const height = pixelsToPoints(Math.max(0, Math.round(y - edge)));
+    if (height !== this.host.rowHeightPt(index)) {
+      this.host.setRowHeight(index, height);
+      this.host.send({ type: 'rowsResized', data: { rowIndexes: [index], newHeights: [height] } });
     }
-    return false;
+    return true;
   }
 
   /**
@@ -191,7 +195,7 @@ export class HeaderResize {
     }
     const { col, clientX, clientY = 0, left } = e.detail;
     const edge = left ?? clientX - this.host.colWidthPx(col);
-    this.columnResize = { col, edge, x: clientX, y: clientY };
+    this.drag = { axis: 'column', index: col, edge, x: clientX, y: clientY };
     this.showGuide();
   };
 
@@ -204,7 +208,7 @@ export class HeaderResize {
     }
     const { row, clientX = 0, clientY, top } = e.detail;
     const edge = top ?? clientY - this.host.rowHeightPx(row);
-    this.rowResize = { row, edge, x: clientX, y: clientY };
+    this.drag = { axis: 'row', index: row, edge, x: clientX, y: clientY };
     this.showGuide();
   };
 
@@ -236,28 +240,27 @@ export class HeaderResize {
    * "Hide column" or "Hide row"; a row's height shows in points too.
    */
   private showGuide(): void {
-    const origin = this.root.getBoundingClientRect();
-    const line = this.line;
-    let text: string;
-    let x: number;
-    let y: number;
-    if (this.columnResize !== null) {
-      ({ x, y } = this.columnResize);
-      const width = Math.max(0, Math.round(x - this.columnResize.edge));
-      text = width > 0 ? `Width: ${width}px` : 'Hide column';
-      const at = Math.max(x, this.columnResize.edge) - 1 - origin.left - this.root.clientLeft;
-      line.style.cssText = `left:${at}px;top:0;width:1px;height:100%;`;
-    } else if (this.rowResize !== null) {
-      ({ x, y } = this.rowResize);
-      const height = Math.max(0, Math.round(y - this.rowResize.edge));
-      text = height > 0 ? `Height: ${height}px ≈ ${pixelsToPoints(height)}pt` : 'Hide row';
-      const at = Math.max(y, this.rowResize.edge) - 1 - origin.top - this.root.clientTop;
-      line.style.cssText = `left:0;top:${at}px;width:100%;height:1px;`;
-    } else {
+    const drag = this.drag;
+    if (drag === null) {
       return;
     }
+    const origin = this.root.getBoundingClientRect();
+    const line = this.line;
+    const { axis, edge, x, y } = drag;
+    let text: string;
+    if (axis === 'column') {
+      const width = Math.max(0, Math.round(x - edge));
+      text = width > 0 ? `Width: ${width}px` : 'Hide column';
+      const at = Math.max(x, edge) - 1 - origin.left - this.root.clientLeft;
+      line.style.cssText = `left:${at}px;top:0;width:1px;height:100%;`;
+    } else {
+      const height = Math.max(0, Math.round(y - edge));
+      text = height > 0 ? `Height: ${height}px ≈ ${pixelsToPoints(height)}pt` : 'Hide row';
+      const at = Math.max(y, edge) - 1 - origin.top - this.root.clientTop;
+      line.style.cssText = `left:0;top:${at}px;width:100%;height:1px;`;
+    }
     line.hidden = false;
-    this.cover.classList.toggle('rows', this.rowResize !== null);
+    this.cover.classList.toggle('rows', axis === 'row');
     const tooltip = this.tooltip;
     tooltip.textContent = text;
     tooltip.style.left = `${x + 10}px`;

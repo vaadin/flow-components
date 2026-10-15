@@ -137,6 +137,13 @@ function styleIndexOf(cellStyle: string | undefined): number | null {
 }
 
 /**
+ * What a press on the cells is doing until its button comes up: dragging
+ * out a range, pointing one out for the formula being written, or dragging
+ * the fill handle - from the selection it started with, painting a strip.
+ */
+type CellDrag = { kind: 'select' } | { kind: 'point' } | { kind: 'fill'; from: CellRect; outcome: PaintOutcome };
+
+/**
  * Height of the column headers, in pixels: the GWT client's 27, so a sheet
  * starts its first row where it always did.
  */
@@ -223,9 +230,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private lastPointed: { col: number; row: number } | null = null;
 
-  /** A drag pointing out a range with the mouse is under way. */
-  private pointerDragging = false;
-
   /** The press pointed at a cell, so the click it ends in selects nothing. */
   private pointedByPress = false;
 
@@ -245,12 +249,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private autoPercentEntry = false;
 
   /**
-   * Mouse-drag state. True between mousedown on a
-   * cell and the subsequent mouseup (anywhere). While true,
-   * {@code cell-mouseover} events extend the active range from
-   * the drag's anchor cell to the hovered cell.
+   * The drag a press on the cells started, from the press to the release
+   * anywhere on the page; null between drags. While one runs, the cells the
+   * pointer crosses grow the range, the pointed reference or the strip.
    */
-  private dragging = false;
+  private drag: CellDrag | null = null;
 
   /** A link cell's tooltip, shown while the pointer is over the cell. */
   private readonly linkTooltip: HTMLElement;
@@ -446,12 +449,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     serverBusy: () => flowRequestInFlight(this.host),
     load: (range) => this.sendLoad(range)
   });
-
-  /**
-   * The fill-handle drag in progress: the selection it started from and the
-   * strip it is currently painting. Null when no drag is running.
-   */
-  private painting: { from: CellRect; outcome: PaintOutcome } | null = null;
 
   /**
    * The column-header sub-element. Sibling of the cell-grid
@@ -995,7 +992,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private showLinkTooltip(at: { col: number; row: number; box?: DOMRect }): void {
     const text = this.hyperlinksTooltips[toKey(at.col, at.row)];
-    if (text === undefined || at.box === undefined || this.dragging || this.painting !== null) {
+    const dragging = this.drag?.kind === 'select' || this.drag?.kind === 'fill';
+    if (text === undefined || at.box === undefined || dragging) {
       this.hideLinkTooltip();
       return;
     }
@@ -1084,7 +1082,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // every range picked out with Ctrl with one rectangle.
       return;
     }
-    this.dragging = true;
+    this.drag = { kind: 'select' };
     if (shiftKey) {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
@@ -1110,7 +1108,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>): void => {
     this.showLinkTooltip(e.detail);
-    if (this.pointerDragging && this.pointer !== null) {
+    const drag = this.drag;
+    if (drag?.kind === 'point' && this.pointer !== null) {
       const draft = this.formulaSource() === 'field' ? this.formulaBar.formulaFieldState() : this.editorDraft();
       if (draft !== null) {
         const end = selectCellAt(e.detail.col, e.detail.row, this.mergedRegions).activeCell;
@@ -1126,16 +1125,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
       return;
     }
-    if (this.painting !== null) {
+    if (drag?.kind === 'fill') {
       const { col, row } = e.detail;
-      this.painting = {
-        from: this.painting.from,
-        outcome: computePaintRectangle(this.painting.from, col, row)
-      };
+      this.drag = { ...drag, outcome: computePaintRectangle(drag.from, col, row) };
       this.recomputeViewport();
       return;
     }
-    if (!this.dragging) {
+    if (drag?.kind !== 'select') {
       return;
     }
     const { col, row } = e.detail;
@@ -1171,22 +1167,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * dispatched `cellSelected`).
    */
   private readonly handleDocumentMouseUp = (): void => {
-    if (this.painting !== null) {
-      this.finishPainting();
+    const drag = this.drag;
+    if (drag?.kind === 'fill') {
+      this.finishPainting(drag);
       return;
     }
     if (this.headerResize.finish()) {
       return;
     }
-    if (this.pointerDragging) {
-      this.pointerDragging = false;
+    if (drag === null) {
       return;
     }
-    if (!this.dragging) {
-      return;
-    }
-    this.dragging = false;
-    if (this.selectsRange()) {
+    this.drag = null;
+    if (drag.kind === 'select' && this.selectsRange()) {
       // Multi-cell range — dispatch the server-bound
       // selection event so the server learns the final
       // dragged range.
@@ -1492,7 +1485,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       }
     }
     this.pointAt(anchor, cell, value, caret, span, source);
-    this.pointerDragging = true;
+    this.drag = { kind: 'point' };
     this.pointedByPress = true;
     this.recomputeViewport();
   }
@@ -1577,7 +1570,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private endFormulaPointing(): void {
     this.pointer = null;
     this.lastPointed = null;
-    this.pointerDragging = false;
+    if (this.drag?.kind === 'point') {
+      this.drag = null;
+    }
     this.updateFormulaDraft(null, 0);
   }
 
@@ -2490,7 +2485,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly handleSelectionPaintStart = (): void => {
     const { c1, c2, r1, r2 } = this.selection.activeRange;
-    this.painting = { from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } };
+    this.drag = { kind: 'fill', from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } };
   };
 
   /**
@@ -2500,11 +2495,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * through different events — growing reports the whole new rectangle,
    * shrinking reports only the corner the selection retreats to.
    */
-  private finishPainting(): void {
-    const painting = this.painting;
-    this.painting = null;
+  private finishPainting(painting: { from: CellRect; outcome: PaintOutcome }): void {
+    this.drag = null;
     this.recomputeViewport();
-    if (painting === null || painting.outcome.kind === 'none') {
+    if (painting.outcome.kind === 'none') {
       return;
     }
 
@@ -2951,7 +2945,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       formulaReferences: this.formulaReferencesToDraw(),
       overlays: positionedOverlays,
       popupButtons: positionedPopupButtons,
-      paintRect: this.painting?.outcome.kind === 'none' ? null : this.painting?.outcome.painted ?? null,
+      paintRect: this.drag?.kind === 'fill' && this.drag.outcome.kind !== 'none' ? this.drag.outcome.painted : null,
       commentText: this.cellComments,
       commentAuthors: this.cellCommentAuthors,
       visibleCommentKeys: this.visibleCellComments,
