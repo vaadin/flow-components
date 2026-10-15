@@ -87,6 +87,14 @@ public class AddingColumnsIT extends AbstractComponentIT {
         assertCellContents("<button>click</button>", "<button>click</button>");
     }
 
+    @Test
+    public void gridRendered_addColumnWithIconRenderer_cellsRendered() {
+        clickElementWithJs("add-icon-column");
+        assertCellContentsContain("<span>$</span>", "<span>$$$</span>");
+        Assert.assertTrue(grid.getCell(0, 0).getText().contains("foo"));
+        Assert.assertTrue(grid.getCell(1, 0).getText().contains("bar"));
+    }
+
     private void assertCellContents(String expectedFirstRow,
             String expectedSecondRow) {
         Assert.assertEquals(expectedFirstRow,
