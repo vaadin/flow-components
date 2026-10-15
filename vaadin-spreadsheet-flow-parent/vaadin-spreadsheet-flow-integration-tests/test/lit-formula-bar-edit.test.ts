@@ -199,6 +199,82 @@ describe('Spreadsheet — editing through the formula field', () => {
  * this case - and the rejected text stayed on screen naming a cell nobody
  * was standing on.
  */
+/**
+ * Keys an input method composes with are its own, in the formula field and
+ * the address field alike: confirming a conversion with Enter commits
+ * nothing, and Escape dropping one keeps what was typed.
+ */
+describe('Spreadsheet — the formula bar and an input method', () => {
+    let host: HTMLDivElement;
+    let sheet: Spreadsheet;
+    let events: { type: string; data: Record<string, unknown> }[];
+
+    beforeEach(() => {
+        host = document.createElement('div');
+        host.style.cssText =
+            'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        sheet = new Spreadsheet(host);
+        sheet.setRows(20);
+        sheet.setCols(10);
+        sheet.setColW(new Array(10).fill(50));
+        sheet.setRowH(new Array(20).fill(15));
+        sheet.setSelectedCellAndRange('C3', 3, 3, 3, 3, 3, 3, false);
+        events = [];
+        host.addEventListener('spreadsheet-event', (e: Event) =>
+            events.push((e as CustomEvent).detail)
+        );
+    });
+
+    afterEach(() => {
+        sheet.dispose();
+        host.remove();
+    });
+
+    async function input(cls: 'formula' | 'address', value: string): Promise<HTMLInputElement> {
+        const bar = sheet.getFormulaBar();
+        await bar.updateComplete;
+        const el = bar.shadowRoot!.querySelector<HTMLInputElement>(`.${cls}`)!;
+        el.dispatchEvent(new FocusEvent('focusin', { bubbles: true, composed: true }));
+        el.value = value;
+        return el;
+    }
+
+    function compose(el: HTMLElement, key: string): void {
+        el.dispatchEvent(
+            new KeyboardEvent('keydown', { key, isComposing: true, bubbles: true, composed: true, cancelable: true })
+        );
+    }
+
+    function sent(type: string): unknown[] {
+        return events.filter((e) => e.type === type);
+    }
+
+    it('commits nothing on the Enter that confirms a conversion', async () => {
+        compose(await input('formula', '漢字'), 'Enter');
+
+        expect(sent('cellValueEdited')).to.eql([]);
+        expect(sheet.getSelection().activeCell).to.eql({ col: 3, row: 3 });
+    });
+
+    it('keeps what was typed on the Escape that drops a conversion', async () => {
+        const el = await input('formula', '漢字');
+        let cancelled = false;
+        sheet.getFormulaBar().addEventListener('formula-cancel', () => (cancelled = true));
+
+        compose(el, 'Escape');
+
+        expect(cancelled).to.be.false;
+        expect(el.value).to.equal('漢字');
+    });
+
+    it('goes nowhere on a confirming Enter in the address field', async () => {
+        compose(await input('address', 'B2'), 'Enter');
+
+        expect(sent('sheetAddressChanged')).to.eql([]);
+    });
+});
+
 describe('Spreadsheet — an address the server rejects', () => {
     let host: HTMLDivElement;
     let sheet: Spreadsheet;

@@ -9,6 +9,7 @@
  */
 
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { composing } from '../algorithms/KeyboardMoves.js';
 
 /**
  * Input state for the {@link SpreadsheetSheetTabs} element.
@@ -428,6 +429,10 @@ export class SpreadsheetSheetTabs extends LitElement {
    */
   private readonly handleRenameKeyDown = (e: KeyboardEvent): void => {
     e.stopPropagation();
+    if (composing(e)) {
+      // The input method's: confirming a conversion keeps the name open.
+      return;
+    }
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       this.commitRename(e.target as HTMLInputElement);

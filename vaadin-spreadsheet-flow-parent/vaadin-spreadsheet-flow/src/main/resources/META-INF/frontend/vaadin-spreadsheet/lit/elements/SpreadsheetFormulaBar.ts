@@ -10,6 +10,7 @@
 
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { live } from 'lit/directives/live.js';
+import { composing } from '../algorithms/KeyboardMoves.js';
 
 /**
  * Input state for the {@link SpreadsheetFormulaBar} element.
@@ -266,7 +267,8 @@ export class SpreadsheetFormulaBar extends LitElement {
     root.addEventListener('keydown', (e: Event) => {
       const ev = e as KeyboardEvent;
       const target = ev.target;
-      if (!(target instanceof HTMLInputElement)) {
+      if (!(target instanceof HTMLInputElement) || composing(ev)) {
+        // A key an input method is composing with is its own.
         return;
       }
       if (target.classList.contains('formula')) {

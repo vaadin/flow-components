@@ -313,3 +313,20 @@ export function typesCharacter(e: TypedKey, mac: boolean): boolean {
   const altGraph = (e.ctrlKey && e.altKey) || e.getModifierState?.('AltGraph') === true;
   return altGraph || (!e.ctrlKey && !e.altKey);
 }
+
+/** The parts of a key press {@link composing} looks at. */
+export interface ComposedKey {
+  isComposing?: boolean;
+  keyCode?: number;
+}
+
+/**
+ * Whether a key press belongs to text an input method is composing, rather
+ * than to the field it is typed into: the Enter that confirms a conversion,
+ * the Escape that drops one, the arrows that pick a candidate. Such a key
+ * must not commit, cancel or move. Safari sends the confirming Enter after
+ * the composition has ended, with the key code 229 of the composing keys.
+ */
+export function composing(e: ComposedKey): boolean {
+  return e.isComposing === true || e.keyCode === 229;
+}

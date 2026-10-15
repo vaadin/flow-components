@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 
 import {
+  composing,
   isSingleMerge,
   mergeAt,
   moveActiveCell,
@@ -332,5 +333,24 @@ describe('Spreadsheet — the keyboard and merged cells', () => {
     press('ArrowDown', { shiftKey: true });
 
     expect(sheet.getSelection().activeRange).to.eql({ c1: 1, c2: 4, r1: 4, r2: 7 });
+  });
+});
+
+/**
+ * A key an input method composes with is the input method's: the Enter that
+ * confirms a conversion must not commit the cell.
+ */
+describe('composing — keys that belong to an input method', () => {
+  it('takes a key pressed while text is being composed', () => {
+    expect(composing({ isComposing: true, keyCode: 13 })).to.be.true;
+  });
+
+  it("takes Safari's confirming Enter, sent after the composition with key code 229", () => {
+    expect(composing({ isComposing: false, keyCode: 229 })).to.be.true;
+  });
+
+  it('leaves a plain key alone', () => {
+    expect(composing({ isComposing: false, keyCode: 13 })).to.be.false;
+    expect(composing({})).to.be.false;
   });
 });

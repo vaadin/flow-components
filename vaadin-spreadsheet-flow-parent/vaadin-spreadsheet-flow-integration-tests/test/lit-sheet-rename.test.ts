@@ -304,4 +304,31 @@ describe('Spreadsheet — renaming a sheet tab', () => {
 
         expect(reachedSheet).to.be.false;
     });
+
+    function compose(el: HTMLElement, key: string): void {
+        el.dispatchEvent(
+            new KeyboardEvent('keydown', { key, isComposing: true, bubbles: true, composed: true, cancelable: true })
+        );
+    }
+
+    it('keeps the name open on the Enter that confirms a conversion', async () => {
+        // The key is the input method's, as in a cell.
+        await doubleClick(2);
+        const el = await type('予算');
+        events.length = 0;
+
+        compose(el, 'Enter');
+
+        expect(events).to.be.empty;
+        expect(await input()).to.not.be.null;
+    });
+
+    it('keeps the name open on the Escape that drops a conversion', async () => {
+        await doubleClick(2);
+        const el = await type('予算');
+
+        compose(el, 'Escape');
+
+        expect(await input()).to.not.be.null;
+    });
 });

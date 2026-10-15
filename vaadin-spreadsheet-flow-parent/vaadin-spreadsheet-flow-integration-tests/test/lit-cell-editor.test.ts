@@ -898,6 +898,68 @@ describe('SpreadsheetCellGrid — editor input keydown', () => {
     });
 });
 
+/**
+ * Keys an input method composes with are its own. Confirming a Japanese or
+ * Chinese conversion with Enter committed the cell and moved on, before the
+ * text was even in it.
+ */
+describe('SpreadsheetCellGrid — the editor and an input method', () => {
+    async function editor(): Promise<{ el: HTMLElement; input: HTMLInputElement; seen: string[] }> {
+        const el = await attachCellGridWithState(
+            buildEditorState({ col: 2, row: 2, initialValue: '' })
+        );
+        const seen: string[] = [];
+        el.addEventListener('cell-editor-commit', () => seen.push('commit'));
+        el.addEventListener('cell-editor-cancel', () => seen.push('cancel'));
+        const input = el.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement;
+        return { el, input, seen };
+    }
+
+    function keydown(input: HTMLElement, key: string, init: KeyboardEventInit = {}, keyCode?: number): void {
+        const event = new KeyboardEvent('keydown', { key, bubbles: true, composed: true, cancelable: true, ...init });
+        if (keyCode !== undefined) {
+            Object.defineProperty(event, 'keyCode', { get: () => keyCode });
+        }
+        input.dispatchEvent(event);
+    }
+
+    it('leaves the Enter that confirms a conversion to the input method', async () => {
+        const { el, input, seen } = await editor();
+
+        keydown(input, 'Enter', { isComposing: true });
+
+        expect(seen).to.eql([]);
+        el.remove();
+    });
+
+    it("leaves Safari's confirming Enter, with key code 229, to it as well", async () => {
+        const { el, input, seen } = await editor();
+
+        keydown(input, 'Enter', {}, 229);
+
+        expect(seen).to.eql([]);
+        el.remove();
+    });
+
+    it('leaves the Escape that drops a conversion to it, and keeps the edit', async () => {
+        const { el, input, seen } = await editor();
+
+        keydown(input, 'Escape', { isComposing: true });
+
+        expect(seen).to.eql([]);
+        el.remove();
+    });
+
+    it('commits on the Enter after the text is in', async () => {
+        const { el, input, seen } = await editor();
+
+        keydown(input, 'Enter', { isComposing: false }, 13);
+
+        expect(seen).to.eql(['commit']);
+        el.remove();
+    });
+});
+
 describe('Spreadsheet — cell editor lifecycle through the connector', () => {
     it('cell-doubleclick activates the editor at the dbl-clicked cell', () => {
         const { sheet, cleanup } = attachSheet(200, 100);

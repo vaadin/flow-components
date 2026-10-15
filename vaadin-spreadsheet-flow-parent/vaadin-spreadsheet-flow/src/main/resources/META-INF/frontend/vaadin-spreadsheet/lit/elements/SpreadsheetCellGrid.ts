@@ -11,6 +11,7 @@
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { isFormula } from '../algorithms/FormulaPointing.js';
+import { composing } from '../algorithms/KeyboardMoves.js';
 
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
 import { caretPosition } from '../algorithms/PercentageEntry.js';
@@ -844,7 +845,8 @@ export class SpreadsheetCellGrid extends LitElement {
       return;
     }
     e.stopPropagation();
-    if ((e as KeyboardEvent).key === 'Escape') {
+    // Escape dropping a conversion leaves the note open.
+    if ((e as KeyboardEvent).key === 'Escape' && !composing(e as KeyboardEvent)) {
       e.preventDefault();
       target.blur();
     }
@@ -2875,6 +2877,12 @@ function buildCellEditorOverlay(
 
   const onKeyDown = (e: KeyboardEvent): void => {
     const input = e.currentTarget as HTMLInputElement;
+    if (composing(e)) {
+      // The key is the input method's: confirming a conversion with Enter
+      // neither commits nor moves on.
+      e.stopPropagation();
+      return;
+    }
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       dispatchEditorEvent(input, 'cell-editor-commit', input.value, e.key, e.shiftKey);

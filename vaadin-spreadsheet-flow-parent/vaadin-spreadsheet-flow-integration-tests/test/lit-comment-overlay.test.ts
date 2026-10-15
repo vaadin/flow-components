@@ -284,6 +284,33 @@ describe('Spreadsheet — writing a cell comment', () => {
     expect((await note())!.value).to.equal('');
   });
 
+  function escape(el: HTMLElement, isComposing: boolean): void {
+    el.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', isComposing, bubbles: true, composed: true, cancelable: true })
+    );
+  }
+
+  it('leaves the note on Escape', async () => {
+    ctx.sheet.editCellComment(1, 2);
+    const el = (await note())!;
+    el.focus();
+
+    escape(el, false);
+
+    expect(ctx.sheet.getCellGrid().shadowRoot!.activeElement).to.not.equal(el);
+  });
+
+  it('stays in the note on the Escape that drops a conversion', async () => {
+    // The key is the input method's: it drops the text being composed.
+    ctx.sheet.editCellComment(1, 2);
+    const el = (await note())!;
+    el.focus();
+
+    escape(el, true);
+
+    expect(ctx.sheet.getCellGrid().shadowRoot!.activeElement).to.equal(el);
+  });
+
   it('stays up without being hovered', async () => {
     // An ordinary note only shows on hover; the one being written has
     // to stay where the user is typing.
