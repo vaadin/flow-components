@@ -47,7 +47,6 @@ import {
   freezeGap,
   getDefaultRowHeightPx,
   pagedViewInset,
-  pixelsToPoints,
   scrollToShow,
   withSize
 } from './algorithms/ViewportMath.js';
@@ -105,6 +104,7 @@ import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
 import { SheetTabs } from './controllers/SheetTabs.js';
 import { ContextMenu } from './controllers/ContextMenu.js';
+import { HeaderResize } from './controllers/HeaderResize.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
 import { linkTooltipPosition, popupPlacement } from './algorithms/Placement.js';
@@ -259,38 +259,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private dragging = false;
 
-  /**
-   * Column-resize drag state. Set on
-   * {@code column-resize-start}, cleared on mouseup. As in the GWT client,
-   * the column keeps its width until the drag ends: a line and a tooltip
-   * follow the pointer meanwhile, and the width it takes is from the
-   * column's left edge, {@code edge}, to the pointer at {@code x}.
-   */
-  private columnResize: { col: number; edge: number; x: number; y: number } | null = null;
-
-  /**
-   * Row-resize drag state. Symmetric to
-   * {@link columnResize}: the height runs from the row's top edge to the
-   * pointer at {@code y}.
-   */
-  private rowResize: { row: number; edge: number; x: number; y: number } | null = null;
-
-  /** Where a dragged header edge would go: a line across the whole sheet. */
-  private readonly resizeLine: HTMLElement;
-
-  /** The size a dragged header would take, by the pointer. */
-  private readonly resizeTooltip: HTMLElement;
-
   /** A link cell's tooltip, shown while the pointer is over the cell. */
   private readonly linkTooltip: HTMLElement;
 
-  /**
-   * Over the sheet while a resize drag moves, so the resize cursor shows
-   * wherever the pointer goes, as the GWT client's did. Not before the
-   * pointer moves: the second click of a double-click, which fits the
-   * column to its content, has to reach the handle.
-   */
-  private readonly resizeCover: HTMLElement;
+  /** Resizing columns and rows by their header edges; see {@link HeaderResize}. */
+  private readonly headerResize: HeaderResize;
 
   /** Row / column geometry. */
   private rowHeights: NumberList = [];
@@ -366,8 +339,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Display flags. */
   private displayGridlines = true;
-  private lockFormatColumns = false;
-  private lockFormatRows = false;
 
 
   /** Where each sheet was last scrolled to; see {@link setVerticalScrollPositions}. */
@@ -785,25 +756,37 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // its check boxes are the popup's, not the sheet's shortcuts. Beside
     // the context menu, the other overlay.
     this.contextMenu.after(this.popupOverlay);
-    // What a header drag shows, as the GWT client showed it - see
-    // showResizeGuide. Drawn by the host's stylesheet.
-    this.resizeLine = document.createElement('div');
-    this.resizeLine.className = 'resize-line';
-    this.resizeLine.hidden = true;
-    this.resizeCover = document.createElement('div');
-    this.resizeCover.className = 'resize-cover';
-    this.resizeCover.hidden = true;
-    // In the top layer, as the GWT client's tooltip was outside the sheet,
-    // so no edge cuts it off.
-    this.resizeTooltip = document.createElement('div');
-    this.resizeTooltip.className = 'resize-tooltip';
-    this.resizeTooltip.popover = 'manual';
-    this.resizeTooltip.hidden = true;
+    this.headerResize = new HeaderResize(
+      this.root,
+      { columnHeader: this.columnHeader, rowHeader: this.rowHeader },
+      {
+        sheetProtected: () => this.sheetProtected,
+        colWidthPx: (col) => this.colWidthPx(col),
+        rowHeightPx: (row) => this.rowHeightPx(row),
+        rowHeightPt: (row) => (row - 1 < this.rowHeights.length ? this.rowHeights[row - 1] : this.defRowHeight),
+        setColumnWidth: (col, width) => {
+          this.colWidths = withSize(this.colWidths, col, width, this.defColWidth);
+          if (width === 0 && !this.hiddenColumns.has(col)) {
+            this.hiddenColumns = new Set([...this.hiddenColumns, col]);
+          }
+          this.recomputeViewport();
+        },
+        setRowHeight: (row, height) => {
+          this.rowHeights = withSize(this.rowHeights, row, height, this.defRowHeight);
+          if (height === 0 && !this.hiddenRows.has(row)) {
+            this.hiddenRows = new Set([...this.hiddenRows, row]);
+          }
+          this.recomputeViewport();
+        },
+        send: (event) => this.sendToServer(event)
+      },
+      this.ownListeners.signal
+    );
     this.linkTooltip = document.createElement('div');
     this.linkTooltip.className = 'link-tooltip';
     this.linkTooltip.popover = 'manual';
     this.linkTooltip.hidden = true;
-    this.popupOverlay.after(this.resizeCover, this.resizeLine, this.resizeTooltip, this.linkTooltip);
+    this.popupOverlay.after(...this.headerResize.elements(), this.linkTooltip);
     this.renderTarget.appendChild(this.root);
     // Honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
@@ -906,10 +889,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // connector tracks the drag via document mousemove +
     // mouseup. Live-updates colWidths/rowHeights for the
     // current drag column/row.
-    this.on(this.columnHeader, 'column-resize-start', this.handleColumnResizeStart);
-    this.on(this.rowHeader, 'row-resize-start', this.handleRowResizeStart);
-    this.on(this.columnHeader, 'column-autofit', this.handleColumnAutofit);
-    this.on(this.rowHeader, 'row-autofit', this.handleRowAutofit);
     // Header click delegation. Each header element
     // emits its own custom event with the col / row coordinate;
     // the connector translates them into whole-column / whole-
@@ -1052,108 +1031,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
   };
 
-  /**
-   * Whether the user may change column widths.
-   *
-   * A protected sheet can still allow formatting; `lockFormatColumns` is
-   * the workbook's own flag for that, and the server sends it precisely so
-   * the client can refuse the drag rather than let it happen and be undone
-   * by the next repaint.
-   */
-  private canResizeColumn(): boolean {
-    return !this.sheetProtected || !this.lockFormatColumns;
-  }
-
-  /** Whether the user may change row heights. See {@link canResizeColumn}. */
-  private canResizeRow(): boolean {
-    return !this.sheetProtected || !this.lockFormatRows;
-  }
-
-  /**
-   * Column resize drag — start. The header reports where the column starts
-   * on screen; without that, the drag is taken to start on the column's
-   * right edge.
-   */
-  private readonly handleColumnResizeStart = (
-    e: CustomEvent<{ col: number; clientX: number; clientY?: number; left?: number }>
-  ): void => {
-    if (!this.canResizeColumn()) {
-      return;
-    }
-    const { col, clientX, clientY = 0, left } = e.detail;
-    const edge = left ?? clientX - this.colWidthPx(col);
-    this.columnResize = { col, edge, x: clientX, y: clientY };
-    this.showResizeGuide();
-  };
-
-  /**
-   * Row resize drag — start. Mirror of column variant.
-   */
-  private readonly handleRowResizeStart = (
-    e: CustomEvent<{ row: number; clientX?: number; clientY: number; top?: number }>
-  ): void => {
-    if (!this.canResizeRow()) {
-      return;
-    }
-    const { row, clientX = 0, clientY, top } = e.detail;
-    const edge = top ?? clientY - this.rowHeightPx(row);
-    this.rowResize = { row, edge, x: clientX, y: clientY };
-    this.showResizeGuide();
-  };
-
-  /**
-   * Document mousemove during a header-drag resize: the line
-   * and the tooltip follow the pointer, and the sheet stays as it is until
-   * the drag ends, as in the GWT client.
-   */
+  /** The pointer moved on the page: a header drag follows it. */
   private readonly handleDocumentMouseMove = (e: MouseEvent): void => {
-    const resize = this.columnResize ?? this.rowResize;
-    if (resize === null) {
-      return;
-    }
-    resize.x = e.clientX;
-    resize.y = e.clientY;
-    this.resizeCover.hidden = false;
-    this.showResizeGuide();
+    this.headerResize.moved(e);
   };
-
-  /**
-   * The line and the tooltip of a resize drag, as the GWT client drew them:
-   * a line across the whole sheet where the edge would go - no further
-   * back than where the column or row starts - and the size it would make,
-   * 10px right of the pointer and 25px above it. Nothing at all is
-   * "Hide column" or "Hide row"; a row's height shows in points too.
-   */
-  private showResizeGuide(): void {
-    const origin = this.root.getBoundingClientRect();
-    const line = this.resizeLine;
-    let text: string;
-    let x: number;
-    let y: number;
-    if (this.columnResize !== null) {
-      ({ x, y } = this.columnResize);
-      const width = Math.max(0, Math.round(x - this.columnResize.edge));
-      text = width > 0 ? `Width: ${width}px` : 'Hide column';
-      const at = Math.max(x, this.columnResize.edge) - 1 - origin.left - this.root.clientLeft;
-      line.style.cssText = `left:${at}px;top:0;width:1px;height:100%;`;
-    } else if (this.rowResize !== null) {
-      ({ x, y } = this.rowResize);
-      const height = Math.max(0, Math.round(y - this.rowResize.edge));
-      text = height > 0 ? `Height: ${height}px ≈ ${pixelsToPoints(height)}pt` : 'Hide row';
-      const at = Math.max(y, this.rowResize.edge) - 1 - origin.top - this.root.clientTop;
-      line.style.cssText = `left:0;top:${at}px;width:100%;height:1px;`;
-    } else {
-      return;
-    }
-    line.hidden = false;
-    this.resizeCover.classList.toggle('rows', this.rowResize !== null);
-    const tooltip = this.resizeTooltip;
-    tooltip.textContent = text;
-    tooltip.style.left = `${x + 10}px`;
-    tooltip.style.top = `${y - 25}px`;
-    tooltip.hidden = false;
-    showInTopLayer(tooltip);
-  }
 
   /**
    * A link cell's tooltip - the target the server named for it - as the
@@ -1186,14 +1067,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.linkTooltip.hidden = true;
     hideFromTopLayer(this.linkTooltip);
   };
-
-  /** Take the line, the tooltip and the cover of a resize drag away. */
-  private hideResizeGuide(): void {
-    this.resizeLine.hidden = true;
-    this.resizeCover.hidden = true;
-    this.resizeTooltip.hidden = true;
-    hideFromTopLayer(this.resizeTooltip);
-  }
 
   /**
    * Popup-button click handler. Translates the
@@ -1376,49 +1249,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.finishPainting();
       return;
     }
-    if (this.columnResize !== null) {
-      // End of column-resize drag: the column takes the width
-      // from its left edge to where the pointer was let go, here at once
-      // and then on the server - when it is a different width. A width of
-      // 0 hides it, as in the GWT client.
-      const { col, edge, x } = this.columnResize;
-      this.columnResize = null;
-      this.hideResizeGuide();
-      const width = Math.max(0, Math.round(x - edge));
-      if (width === this.colWidthPx(col)) {
-        return;
-      }
-      this.colWidths = withSize(this.colWidths, col, width, this.defColWidth);
-      if (width === 0 && !this.hiddenColumns.has(col)) {
-        this.hiddenColumns = new Set([...this.hiddenColumns, col]);
-      }
-      this.recomputeViewport();
-      this.sendToServer({
-        type: 'columnResized',
-        data: { colIndexes: [col], newWidths: [width] }
-      });
-      return;
-    }
-    if (this.rowResize !== null) {
-      // End of row-resize drag. Mirror of the column's;
-      // rowHeights is in points, and so is the event payload.
-      const { row, edge, y } = this.rowResize;
-      this.rowResize = null;
-      this.hideResizeGuide();
-      const height = pixelsToPoints(Math.max(0, Math.round(y - edge)));
-      const idx = row - 1;
-      if (height === (idx < this.rowHeights.length ? this.rowHeights[idx] : this.defRowHeight)) {
-        return;
-      }
-      this.rowHeights = withSize(this.rowHeights, row, height, this.defRowHeight);
-      if (height === 0 && !this.hiddenRows.has(row)) {
-        this.hiddenRows = new Set([...this.hiddenRows, row]);
-      }
-      this.recomputeViewport();
-      this.sendToServer({
-        type: 'rowsResized',
-        data: { rowIndexes: [row], newHeights: [height] }
-      });
+    if (this.headerResize.finish()) {
       return;
     }
     if (this.pointerDragging) {
@@ -2707,26 +2538,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     };
     this.sendToServer({ type: 'cellsAddedToRangeSelection', data });
   }
-
-  /**
-   * Double-click on a column's resize handle — size it to its widest
-   * value. Only the server can measure that: it holds every value in the
-   * column, including the ones outside the viewport.
-   */
-  private readonly handleColumnAutofit = (e: CustomEvent<{ col: number }>): void => {
-    if (!this.canResizeColumn()) {
-      return;
-    }
-    this.sendToServer({ type: 'onColumnAutofit', data: { columnIndex: e.detail.col } });
-  };
-
-  /** Double-click on a row's resize handle — size it to its tallest value. */
-  private readonly handleRowAutofit = (e: CustomEvent<{ row: number }>): void => {
-    if (!this.canResizeRow()) {
-      return;
-    }
-    this.sendToServer({ type: 'onRowAutofit', data: { rowIndex: e.detail.row } });
-  };
 
   /**
    * Tell the server the user tried to change a cell they may not change.
@@ -4107,10 +3918,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.recomputeViewport();
   }
   setLockFormatColumns(locked: boolean): void {
-    this.lockFormatColumns = locked;
+    this.headerResize.setLockFormatColumns(locked);
   }
   setLockFormatRows(locked: boolean): void {
-    this.lockFormatRows = locked;
+    this.headerResize.setLockFormatRows(locked);
   }
   setHasActions(hasActions: boolean): void {
     this.menu.setHasActions(hasActions);
