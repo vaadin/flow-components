@@ -99,11 +99,11 @@ import {
   type SingleCellSelection,
   typesCharacter
 } from './algorithms/KeyboardMoves.js';
-import { resolveSheetRename } from './algorithms/SheetName.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { animateIn, animateOut } from './dom/OverlayAnimation.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
+import { SheetTabs } from './controllers/SheetTabs.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
 import { linkTooltipPosition, popupPlacement } from './algorithms/Placement.js';
@@ -193,10 +193,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Total grid dimensions. */
   private rows = 0;
   private cols = 0;
-
-  /** Sheet navigation. */
-  private sheetIndex = 0;
-  private sheetNames: string[] = [];
 
   /** Selection state. */
   private selection: SelectionState = selectSingleCell(1, 1);
@@ -336,7 +332,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Misc. */
   private sheetProtected = false;
-  private workbookProtected = false;
   private showCustomEditorOnFocus = false;
   // The message a cell with a formula the workbook cannot make sense of
   // shows on hover. Held here rather than waited for: the server only
@@ -374,8 +369,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private lockFormatRows = false;
   private hasActions = false;
 
-  /** Display content. The status label, or null while there is none. */
-  private infoLabelValue: string | null = null;
 
   /** Where each sheet was last scrolled to; see {@link setVerticalScrollPositions}. */
   private verticalScrollPositions: NumberList = [];
@@ -424,19 +417,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
-  /**
-   * Leftmost sheet tab currently shown. The strip scrolls by whole
-   * tabs; the scroll buttons move this and the server is told, so it
-   * can restore the position on the next load.
-   */
-  private firstVisibleTab = 0;
-
-  /**
-   * The tab whose name the user is typing, 1-based, or 0 when none is.
-   * Client-side only: the server hears about a rename once, when it is
-   * finished.
-   */
-  private renamingSheetIndex = 0;
 
   /**
    * The cell whose comment is being written, as a cell key, or null when
@@ -581,6 +561,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Clicking a tab dispatches `sheetSelected` to the server.
    */
   private readonly sheetTabs: SpreadsheetSheetTabs;
+  /** The sheet tabs' state and what they do; see {@link SheetTabs}. */
+  private readonly tabs: SheetTabs;
 
   /**
    * Formula bar at the top of the spreadsheet — two text inputs
@@ -839,12 +821,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.applyHostTheme();
     });
     // Sheet tab click → switch active sheet via spreadsheet-event.
-    this.on(this.sheetTabs, 'sheet-tab-click', this.handleSheetTabClick);
-    this.on(this.sheetTabs, 'sheet-tabs-scroll', this.handleSheetTabsScroll);
-    this.on(this.sheetTabs, 'sheet-tab-add', this.handleSheetTabAdd);
-    this.on(this.sheetTabs, 'sheet-tab-rename-start', this.handleSheetRenameStart);
-    this.on(this.sheetTabs, 'sheet-tab-rename', this.handleSheetRename);
-    this.on(this.sheetTabs, 'sheet-tab-rename-cancel', this.handleSheetRenameCancel);
+    this.tabs = new SheetTabs(
+      this.sheetTabs,
+      {
+        scrollOffsets: () => this.scrollOffsets(),
+        focusSheet: () => this.scrollContainer.focus(),
+        returnFocusToSheet: () => this.returnFocusToSheet(),
+        send: (event) => this.sendToServer(event)
+      },
+      this.ownListeners.signal
+    );
     this.on(this.scrollContainer, 'scroll', this.handleScroll);
     this.on(this.scrollContainer, 'focusin', this.handleSheetFocusChange);
     this.on(this.scrollContainer, 'focusout', this.handleSheetFocusChange);
@@ -1879,7 +1865,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** The name of the sheet shown. */
   private activeSheetName(): string {
-    return this.sheetNames[this.sheetIndex - 1] ?? '';
+    return this.tabs.shownSheetName();
   }
 
   /** Colours the references of the formula being written, or none when it is not one. */
@@ -3353,53 +3339,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Push fresh state to the sheet tabs from the current
-   * {@code sheetNames} + {@code sheetIndex} fields. Called from
-   * the public setters when those change, AND from any caller
-   * that wants to force a re-render.
-   */
-  private syncSheetTabs(): void {
-    this.sheetTabs.renderState = {
-      sheetNames: this.sheetNames,
-      activeIndex: this.sheetIndex,
-      firstVisibleTab: this.firstVisibleTab,
-      readOnly: this.workbookProtected,
-      renamingIndex: this.renamingSheetIndex,
-      infoLabel: this.infoLabelValue
-    };
-  }
-
-  /**
-   * A scroll button moved the strip.
-   *
-   * Nothing is reported: the GWT client told its own handler about the
-   * new index, but the Flow server has no counterpart for it, so which
-   * tab is leftmost is the client's business alone. Scrolling the strip
-   * does not change the sheet.
-   *
-   * The end button goes to the leftmost tab that still shows the last
-   * one, which the strip measured: as far as the strip can scroll
-   * without showing empty space after the last tab.
-   */
-  private readonly handleSheetTabsScroll = (
-    e: CustomEvent<{ direction: 'start' | 'backward' | 'forward' | 'end'; lastFirstTab?: number }>
-  ): void => {
-    const last = Math.max(0, this.sheetNames.length - 1);
-    const moved = {
-      start: 0,
-      backward: this.firstVisibleTab - 1,
-      forward: this.firstVisibleTab + 1,
-      end: e.detail.lastFirstTab ?? last
-    }[e.detail.direction];
-    const next = Math.min(last, Math.max(0, moved));
-    if (next === this.firstVisibleTab) {
-      return;
-    }
-    this.firstVisibleTab = next;
-    this.syncSheetTabs();
-  };
-
-  /**
    * Shift let go: the selection is made, so the address field goes back
    * to naming the cell the user started from.
    */
@@ -3525,113 +3464,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sendToServer({ type: 'levelHeaderClicked', data: { cols: e.detail.cols, level: e.detail.level } });
   };
 
-  /** Double-click on the active tab: show its name in an input. */
-  private readonly handleSheetRenameStart = (e: CustomEvent<{ index: number }>): void => {
-    if (this.workbookProtected) {
-      return;
-    }
-    this.renamingSheetIndex = e.detail.index;
-    this.syncSheetTabs();
-  };
-
-  /** Escape: leave the sheet called what it was called. */
-  private readonly handleSheetRenameCancel = (): void => {
-    this.renamingSheetIndex = 0;
-    this.syncSheetTabs();
-    this.returnFocusToSheet();
-  };
-
-  /**
-   * A finished rename.
-   *
-   * A name the workbook would refuse, one that is what the sheet is
-   * already called, and one another sheet has taken all leave the tab
-   * as it was and the server none the wiser. Anything else is shown on
-   * the tab straight away - the server will send the names back, and
-   * waiting for that leaves the old name sitting there in the meantime.
-   */
-  private readonly handleSheetRename = (e: CustomEvent<{ index: number; name: string }>): void => {
-    const { index, name } = e.detail;
-    this.renamingSheetIndex = 0;
-    if (index < 1 || index > this.sheetNames.length) {
-      this.syncSheetTabs();
-      return;
-    }
-    const outcome = resolveSheetRename({
-      proposed: name,
-      index: index - 1,
-      names: this.sheetNames
-    });
-    if (outcome.kind === 'revert') {
-      this.syncSheetTabs();
-      this.returnFocusToSheet();
-      return;
-    }
-    const renamed = [...this.sheetNames];
-    renamed[index - 1] = outcome.name;
-    this.sheetNames = renamed;
-    this.syncSheetTabs();
-    this.returnFocusToSheet();
-    this.sendToServer({
-      // The server counts sheets from 0; the strip renders from 1.
-      type: 'sheetRenamed',
-      data: { sheetIndex: index - 1, newName: outcome.name }
-    });
-  };
-
-  /** The + button: ask the server for a new sheet. */
-  private readonly handleSheetTabAdd = (): void => {
-    if (this.workbookProtected) {
-      return;
-    }
-    // The strip button took the focus on the way in. Adding a sheet is a
-    // way of moving to it, so the keyboard belongs to the new sheet.
-    this.scrollContainer.focus();
-    this.sendToServer({
-      type: 'sheetCreated',
-      data: this.scrollOffsets()
-    });
-  };
-
-  /**
-   * Sheet-tab click handler — translates to a `sheetSelected`
-   * spreadsheet-event for the server. The server is expected
-   * to call back into {@code setSheetIndex} + push fresh data
-   * via the cell value APIs, which the next render picks up.
-   */
-  private readonly handleSheetTabClick = (e: CustomEvent<{ index: number }>): void => {
-    const { index } = e.detail;
-    // Clicking a tab focused it. Switching sheets is navigation, so the
-    // keyboard goes back to the grid — the arrow keys that naturally follow
-    // must move the selection, not the tab strip. This holds for a click on
-    // the already-active tab too, which is otherwise a no-op.
-    this.scrollContainer.focus();
-    if (index === this.sheetIndex) {
-      // Clicking the tab that is already active selects nothing — Excel
-      // does nothing here either. Reporting it anyway makes the server run
-      // `setActiveSheetIndex` on the sheet it is already showing, and that
-      // goes through `reloadActiveSheetData`, which throws away every
-      // overlay, comment, hyperlink, table and popup button `loadCells`
-      // had just loaded.
-      return;
-    }
-    // Optimistically reflect the click in the tab strip so the
-    // active tab visually moves immediately, without waiting
-    // for the server's response. The server's setSheetIndex
-    // will overwrite this when it lands.
-    this.sheetIndex = index;
-    this.syncSheetTabs();
-    this.sendToServer({
-      type: 'sheetSelected',
-      data: {
-        // The server reads a 0-based tab index here; `index` is the
-        // 1-based position the strip renders.
-        sheetIndex: index - 1,
-        ...this.scrollOffsets()
-      }
-    });
-  };
-
   /**
    * Where the sheet is scrolled to, in whole pixels, as the server stores
    * it. A browser reports fractions on a scaled display, and the server
@@ -3696,8 +3528,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // A sheet shown again goes back to where it was scrolled. The sheet
     // shown can also get another index without changing, when a sheet
     // before it is deleted, hidden or shown again: it stays where it is.
-    const index = this.sheetIndex - 1;
-    const shownSheetName = this.sheetNames[index] ?? null;
+    const index = this.tabs.sheetIndex - 1;
+    const shownSheetName = this.tabs.sheetNames[index] ?? null;
     if (!firstUpdate && changedPropertyNames.includes('sheetIndex') && shownSheetName !== this.shownSheetName) {
       this.pendingSheetScroll = {
         top: this.verticalScrollPositions[index] ?? 0,
@@ -4107,15 +3939,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.lockedRows = new Set(coerceArray<number>(indexes));
   }
   setSheetIndex(index: number): void {
-    this.sheetIndex = index;
-    // Update the sheet-tabs strip so the active tab moves to
-    // the server's chosen sheet.
-    this.syncSheetTabs();
+    this.tabs.setSheetIndex(index);
   }
   setSheetNames(names: Json<string[]>): void {
-    this.sheetNames = coerceArray(names);
-    // Re-render the sheet-tabs strip with the new names list.
-    this.syncSheetTabs();
+    this.tabs.setSheetNames(coerceArray(names));
   }
   /**
    * Where each sheet was last scrolled to, by visible sheet, as the server
@@ -4388,7 +4215,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return resolved;
   }
   setWorkbookProtected(isProtected: boolean): void {
-    this.workbookProtected = isProtected;
+    this.tabs.setWorkbookProtected(isProtected);
   }
 
   // Freeze pane split positions
@@ -4446,8 +4273,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * undefined; an empty string is a label with nothing in it.
    */
   setInfoLabelValue(label: string | null | undefined): void {
-    this.infoLabelValue = label ?? null;
-    this.syncSheetTabs();
+    this.tabs.setInfoLabel(label ?? null);
   }
   setHyperlinksTooltips(tooltips: Json<Record<string, string>>): void {
     this.hyperlinksTooltips = coerceObject(tooltips);
@@ -4794,10 +4620,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.cols;
   }
   getSheetIndex(): number {
-    return this.sheetIndex;
+    return this.tabs.sheetIndex;
   }
   getSheetNames(): readonly string[] {
-    return this.sheetNames;
+    return this.tabs.sheetNames;
   }
   getSelection(): SelectionState {
     return this.selection;
