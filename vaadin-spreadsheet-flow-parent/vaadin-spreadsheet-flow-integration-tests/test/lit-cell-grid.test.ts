@@ -555,6 +555,85 @@ describe('SpreadsheetCellGrid — cell styling', () => {
         cleanup(el);
     });
 
+    /** The rules the grid wrote from the workbook's styles. */
+    function ruleText(el: SpreadsheetCellGrid): string {
+        return Array.from(el.shadowRoot!.querySelectorAll('style'))
+            .map((n) => n.textContent ?? '')
+            .filter((text) => text.includes('.cell.'))
+            .join('\n');
+    }
+
+    /** Draw a state, then the same state with one of what the rules are built from replaced. */
+    async function rulesAfter(
+        before: Partial<CellGridRenderState>,
+        after: Partial<CellGridRenderState>
+    ): Promise<{ first: string; second: string }> {
+        const state = build1x1State(a1(), { 0: 'color: black;', 3: 'color: red;' }, before);
+        const el = await attachWithState(state);
+        const first = ruleText(el);
+        el.renderState = { ...state, ...after };
+        await el.updateComplete;
+        const second = ruleText(el);
+        cleanup(el);
+        return { first, second };
+    }
+
+    it('writes the rules again when the cell styles change', async () => {
+        const { second } = await rulesAfter({}, { cellStyleToCSSStyle: { 0: 'color: black;', 3: 'color: blue;' } });
+
+        expect(second).to.include('.cell.cs3 { color: blue; }');
+        expect(second).to.not.include('color: red;');
+    });
+
+    it('writes the rules again when the gridlines are turned off', async () => {
+        const { first, second } = await rulesAfter({ displayGridlines: true }, { displayGridlines: false });
+
+        expect(first).to.not.include('border-right: 0;');
+        expect(second).to.include('.cell.cell { border-right: 0; border-bottom: 0; }');
+    });
+
+    it('writes the rules again when a row is given a style', async () => {
+        const { second } = await rulesAfter({ rowIndexToStyleIndex: {} }, { rowIndexToStyleIndex: { 1: 3 } });
+
+        expect(second).to.include('.cell.row1.cs0');
+    });
+
+    it('writes the rules again when a column is given a style', async () => {
+        const { second } = await rulesAfter({ columnIndexToStyleIndex: {} }, { columnIndexToStyleIndex: { 1: 3 } });
+
+        expect(second).to.include('.cell.col1.cs0');
+    });
+
+    it('writes the rules again when the conditional formats change', async () => {
+        const { second } = await rulesAfter(
+            { conditionalFormattingStyles: {} },
+            { conditionalFormattingStyles: { 1: 'color: lime;' } }
+        );
+
+        expect(second).to.include('.cell.cf1 { color: lime; }');
+    });
+
+    it('writes the rules again when the shifted borders change', async () => {
+        const { second } = await rulesAfter(
+            { shiftedCellBorderStyles: [] },
+            { shiftedCellBorderStyles: ['.col1.row1 { border-right: 2px solid blue; }'] }
+        );
+
+        expect(second).to.include('.cell.col1.row1 { border-right: 2px solid blue; }');
+    });
+
+    it('keeps the rules as they are on a draw that changes none of what they are built from', async () => {
+        const state = build1x1State(a1(), { 0: 'color: black;', 3: 'color: red;' });
+        const el = await attachWithState(state);
+        const before = ruleText(el);
+
+        el.renderState = { ...state, scrollTop: 0, scrollLeft: 0 };
+        await el.updateComplete;
+
+        expect(ruleText(el)).to.equal(before);
+        cleanup(el);
+    });
+
     it('emits a <style> block with the cellStyleToCSSStyle rules', async () => {
         const el = await attachWithState(
             build1x1State(new Map(), {
@@ -2274,6 +2353,66 @@ describe('SpreadsheetCellGrid — a value too wide for its column', () => {
             rowHeights: [20],
         };
     }
+
+    /** A1's text once the grid has measured what it needs. */
+    async function a1Text(el: SpreadsheetCellGrid): Promise<string> {
+        await el.updateComplete;
+        await el.updateComplete;
+        return el.shadowRoot!.querySelector('.cell.col1.row1')!.textContent!.trim();
+    }
+
+    function withA1(state: CellGridRenderState, value: string, colWidth: number): CellGridRenderState {
+        return {
+            ...state,
+            cellData: new Map<string, CellData>([
+                ['col1 row1', { ...makeCellData(1, 1, value), needsMeasure: true }],
+            ]),
+            colWidths: [colWidth],
+            viewport: { ...state.viewport, lastColumnPosition: colWidth },
+        };
+    }
+
+    it('judges a cell again when the server sends it a value that no longer fits', async () => {
+        const el = await attachWithState(withA1(stateWith(true), '12', 50));
+        expect(await a1Text(el)).to.equal('12');
+
+        el.renderState = withA1(el.renderState, '$246 913 578 024 690,00', 50);
+
+        expect(await a1Text(el)).to.equal('###');
+        cleanup(el);
+    });
+
+    it('judges a cell again when the server sends it a value that fits', async () => {
+        const el = await attachWithState(withA1(stateWith(true), '$246 913 578 024 690,00', 50));
+        expect(await a1Text(el)).to.equal('###');
+
+        el.renderState = withA1(el.renderState, '12', 50);
+
+        expect(await a1Text(el)).to.equal('12');
+        cleanup(el);
+    });
+
+    it('judges a cell again when its column narrows', async () => {
+        const el = await attachWithState(withA1(stateWith(true), '$246 913 578', 300));
+        expect(await a1Text(el)).to.equal('$246 913 578');
+
+        const cell = el.renderState.cellData.get('col1 row1')!;
+        el.renderState = { ...el.renderState, colWidths: [30], viewport: { ...el.renderState.viewport, lastColumnPosition: 30 } };
+        expect(el.renderState.cellData.get('col1 row1')).to.equal(cell);
+
+        expect(await a1Text(el)).to.equal('###');
+        cleanup(el);
+    });
+
+    it('judges a cell again when its column widens', async () => {
+        const el = await attachWithState(withA1(stateWith(true), '$246 913 578', 30));
+        expect(await a1Text(el)).to.equal('###');
+
+        el.renderState = { ...el.renderState, colWidths: [300], viewport: { ...el.renderState.viewport, lastColumnPosition: 300 } };
+
+        expect(await a1Text(el)).to.equal('$246 913 578');
+        cleanup(el);
+    });
 
     it('shows hashes instead of a clipped number', async () => {
         // A clipped "$246 913" reads as a number, and a wrong one by a
