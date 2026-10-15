@@ -55,6 +55,7 @@ final class SheetLifecycleOperations implements Serializable {
         int removedVisibleIndex = spreadsheet
                 .getSpreadsheetSheetIndex(poiSheetIndex);
         workbook.removeSheetAt(poiSheetIndex);
+        spreadsheet.forgetScrollPositionOfDeletedSheet(poiSheetIndex);
 
         // POI doesn't seem to shift the active sheet index ...
         // TODO: This no longer seems to be the case. Remove the following

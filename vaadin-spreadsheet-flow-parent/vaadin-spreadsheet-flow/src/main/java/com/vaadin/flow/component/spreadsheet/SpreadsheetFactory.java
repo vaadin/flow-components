@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -197,14 +196,6 @@ public class SpreadsheetFactory implements Serializable {
         workbook.setActiveSheet(sheetIndex);
         spreadsheet.reloadActiveSheetData();
         spreadsheet.reloadActiveSheetStyles();
-        int[] verticalScrollPositions = Arrays.copyOf(
-                spreadsheet.getVerticalScrollPositions(),
-                spreadsheet.getSheetNames().length);
-        int[] horizontalScrollPositions = Arrays.copyOf(
-                spreadsheet.getHorizontalScrollPositions(),
-                spreadsheet.getSheetNames().length);
-        spreadsheet.setVerticalScrollPositions(verticalScrollPositions);
-        spreadsheet.setHorizontalScrollPositions(horizontalScrollPositions);
         generateNewSpreadsheet(spreadsheet, sheet, rows, columns);
     }
 

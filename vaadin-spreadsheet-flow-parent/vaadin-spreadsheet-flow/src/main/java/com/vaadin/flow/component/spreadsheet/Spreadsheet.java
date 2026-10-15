@@ -3032,6 +3032,7 @@ public class Spreadsheet extends Component
 
         styler = createSpreadsheetStyleFactory();
 
+        sheetScrollMemory.clear();
         reloadActiveSheetData();
         if (workbook instanceof HSSFWorkbook hssf) {
             setWorkbookProtected(hssf.isWriteProtected());
@@ -3040,9 +3041,6 @@ public class Spreadsheet extends Component
         }
         // clear all tables from memory
         tableRegistry.getAll().clear();
-
-        setVerticalScrollPositions(new int[getSheetNames().length]);
-        setHorizontalScrollPositions(new int[getSheetNames().length]);
 
         conditionalFormatter = createConditionalFormatter();
 
@@ -3176,6 +3174,15 @@ public class Spreadsheet extends Component
         }
         setSheetNames(
                 sheetNamesList.toArray(new String[sheetNamesList.size()]));
+        sheetScrollMemory.publish();
+    }
+
+    /**
+     * Forgets where the sheet at the given POI index was scrolled to, as it has
+     * been deleted.
+     */
+    void forgetScrollPositionOfDeletedSheet(int poiSheetIndex) {
+        sheetScrollMemory.sheetDeleted(poiSheetIndex);
     }
 
     /**

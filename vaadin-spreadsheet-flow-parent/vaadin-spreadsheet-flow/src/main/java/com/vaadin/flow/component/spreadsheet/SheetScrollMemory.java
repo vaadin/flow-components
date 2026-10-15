@@ -12,37 +12,84 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Records the current scroll position into the per-sheet vertical/horizontal
- * scroll-position arrays before a sheet switch, so the client can restore the
- * right scroll offset when the user returns to a previously visited sheet.
- *
+ * Remembers where each sheet was scrolled to when another sheet was shown, so
+ * that the client can scroll it back there when it is shown again.
  * <p>
- * Both {@link SheetChangeDispatcher#onSheetSelected} and
- * {@link SheetChangeDispatcher#onNewSheetCreated} call into this class before
- * the actual sheet change.
+ * The offsets are kept by POI sheet index, hidden sheets included, so that they
+ * stay with their sheets when other sheets are hidden, shown again or deleted.
+ * The client gets them in the order of the visible sheets.
  */
 final class SheetScrollMemory implements Serializable {
 
     private final Spreadsheet spreadsheet;
 
+    /** Offsets by POI sheet index. A sheet past the end is at the top. */
+    private int[] tops = new int[0];
+    private int[] lefts = new int[0];
+
     SheetScrollMemory(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
     }
 
-    /**
-     * Stash the given scroll position against the sheet at the given visible
-     * index.
-     */
-    void rememberForSheetAtIndex(int oldIndex, int scrollLeft, int scrollTop) {
-        int[] vertical = Arrays.copyOf(spreadsheet.getVerticalScrollPositions(),
-                spreadsheet.getVerticalScrollPositions().length);
-        vertical[oldIndex] = scrollTop;
-        spreadsheet.setVerticalScrollPositions(vertical);
+    /** Forgets every offset, for a workbook being loaded. */
+    void clear() {
+        tops = new int[0];
+        lefts = new int[0];
+    }
 
-        int[] horizontal = Arrays.copyOf(
-                spreadsheet.getHorizontalScrollPositions(),
-                spreadsheet.getHorizontalScrollPositions().length);
-        horizontal[oldIndex] = scrollLeft;
-        spreadsheet.setHorizontalScrollPositions(horizontal);
+    /**
+     * Remembers the given offsets for the sheet at the given visible index, and
+     * sends them to the client. An index that is not a visible sheet's is
+     * ignored.
+     */
+    void rememberForSheetAtIndex(int visibleIndex, int scrollLeft,
+            int scrollTop) {
+        if (visibleIndex < 0
+                || visibleIndex >= spreadsheet.getNumberOfVisibleSheets()) {
+            return;
+        }
+        int poiIndex = spreadsheet.getVisibleSheetPOIIndex(visibleIndex);
+        if (poiIndex >= tops.length) {
+            tops = Arrays.copyOf(tops, poiIndex + 1);
+            lefts = Arrays.copyOf(lefts, poiIndex + 1);
+        }
+        tops[poiIndex] = scrollTop;
+        lefts[poiIndex] = scrollLeft;
+        publish();
+    }
+
+    /**
+     * Forgets the offsets of the sheet at the given POI index, which has been
+     * deleted: the sheets after it have moved up one index.
+     */
+    void sheetDeleted(int poiIndex) {
+        if (poiIndex >= 0 && poiIndex < tops.length) {
+            tops = withoutIndex(tops, poiIndex);
+            lefts = withoutIndex(lefts, poiIndex);
+        }
+    }
+
+    /** Sends the client the offsets of the visible sheets, in their order. */
+    void publish() {
+        int count = spreadsheet.getNumberOfVisibleSheets();
+        int[] visibleTops = new int[count];
+        int[] visibleLefts = new int[count];
+        for (int i = 0; i < count; i++) {
+            int poiIndex = spreadsheet.getVisibleSheetPOIIndex(i);
+            if (poiIndex < tops.length) {
+                visibleTops[i] = tops[poiIndex];
+                visibleLefts[i] = lefts[poiIndex];
+            }
+        }
+        spreadsheet.setVerticalScrollPositions(visibleTops);
+        spreadsheet.setHorizontalScrollPositions(visibleLefts);
+    }
+
+    private static int[] withoutIndex(int[] values, int index) {
+        int[] result = new int[values.length - 1];
+        System.arraycopy(values, 0, result, 0, index);
+        System.arraycopy(values, index + 1, result, index,
+                values.length - index - 1);
+        return result;
     }
 }

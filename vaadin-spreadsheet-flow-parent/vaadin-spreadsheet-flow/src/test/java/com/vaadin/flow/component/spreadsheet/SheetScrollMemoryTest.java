@@ -9,120 +9,138 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.poi.ss.usermodel.SheetVisibility;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 /**
- * How {@link SheetScrollMemory} remembers the scroll position of each sheet.
- *
- * <p>
- * Pins the defensive-copy semantic on both arrays: each call reads the current
- * arrays, makes a fresh copy via {@code Arrays.copyOf}, updates the target
- * index, and writes the new array back. In-place mutation would skip the
- * {@code MirroredProperty} client mirror.
+ * Each sheet is shown again at the scroll offsets it was left at. The offsets
+ * stay with their sheets when other sheets are deleted, hidden or shown again,
+ * and the client gets them in the order of the visible sheets.
  */
 class SheetScrollMemoryTest {
 
-    @Mock
-    private Spreadsheet spreadsheet;
+    /** Sheets A, B and C, with B hidden when asked. */
+    private static Spreadsheet spreadsheetWith(boolean bHidden) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet("A");
+        workbook.createSheet("B");
+        workbook.createSheet("C");
+        if (bHidden) {
+            workbook.setSheetVisibility(1, SheetVisibility.HIDDEN);
+        }
+        return new Spreadsheet(workbook);
+    }
 
-    private SheetScrollMemory memory;
+    /**
+     * Leaves the active sheet scrolled to the given offsets for the visible
+     * sheet at the given index, as a click on its tab does.
+     */
+    private static void leave(Spreadsheet spreadsheet, int top, int left,
+            int toVisibleIndex) {
+        spreadsheet.onSheetSelected(toVisibleIndex, left, top);
+    }
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        memory = new SheetScrollMemory(spreadsheet);
-        lenient().when(spreadsheet.getVerticalScrollPositions())
-                .thenReturn(new int[] { 0, 0, 0 });
-        lenient().when(spreadsheet.getHorizontalScrollPositions())
-                .thenReturn(new int[] { 0, 0, 0 });
+    /** A at 100/10, B at 200/20 and C at 300/30, with A showing. */
+    private static Spreadsheet allThreeScrolled() {
+        Spreadsheet spreadsheet = spreadsheetWith(false);
+        leave(spreadsheet, 100, 10, 1);
+        leave(spreadsheet, 200, 20, 2);
+        leave(spreadsheet, 300, 30, 0);
+        return spreadsheet;
+    }
+
+    private static void assertOffsets(Spreadsheet spreadsheet, int[] tops,
+            int[] lefts) {
+        assertArrayEquals(tops, spreadsheet.getVerticalScrollPositions());
+        assertArrayEquals(lefts, spreadsheet.getHorizontalScrollPositions());
     }
 
     @Test
-    void rememberForSheetAtIndex_setsBothArraysAtTargetIndex() {
-        memory.rememberForSheetAtIndex(1, 50, 75);
-
-        ArgumentCaptor<int[]> verticalCaptor = ArgumentCaptor
-                .forClass(int[].class);
-        verify(spreadsheet)
-                .setVerticalScrollPositions(verticalCaptor.capture());
-        assertArrayEquals(new int[] { 0, 75, 0 }, verticalCaptor.getValue());
-
-        ArgumentCaptor<int[]> horizontalCaptor = ArgumentCaptor
-                .forClass(int[].class);
-        verify(spreadsheet)
-                .setHorizontalScrollPositions(horizontalCaptor.capture());
-        assertArrayEquals(new int[] { 0, 50, 0 }, horizontalCaptor.getValue());
+    void sheetsLeft_rememberTheirOffsets() {
+        assertOffsets(allThreeScrolled(), new int[] { 100, 200, 300 },
+                new int[] { 10, 20, 30 });
     }
 
     @Test
-    void rememberForSheetAtIndex_doesNotMutatePriorArrays() {
-        // Pin defensive-copy: the arrays passed to set* are NOT the same
-        // reference as the arrays returned by get*. The original arrays
-        // are untouched (which would matter if any caller is holding a
-        // reference to them).
-        int[] originalVertical = { 100, 200, 300 };
-        int[] originalHorizontal = { 10, 20, 30 };
-        when(spreadsheet.getVerticalScrollPositions())
-                .thenReturn(originalVertical);
-        when(spreadsheet.getHorizontalScrollPositions())
-                .thenReturn(originalHorizontal);
+    void theClientIsSentTheOffsets() {
+        Spreadsheet spreadsheet = allThreeScrolled();
 
-        memory.rememberForSheetAtIndex(0, 99, 88);
-
-        ArgumentCaptor<int[]> verticalCaptor = ArgumentCaptor
-                .forClass(int[].class);
-        verify(spreadsheet)
-                .setVerticalScrollPositions(verticalCaptor.capture());
-        assertNotSame(originalVertical, verticalCaptor.getValue(),
-                "Vertical array must be a fresh copy");
-        // Original arrays unchanged.
-        assertArrayEquals(new int[] { 100, 200, 300 }, originalVertical);
-        assertArrayEquals(new int[] { 10, 20, 30 }, originalHorizontal);
+        assertEquals("[100,200,300]", spreadsheet.getElement()
+                .getProperty("verticalScrollPositions"));
+        assertEquals("[10,20,30]", spreadsheet.getElement()
+                .getProperty("horizontalScrollPositions"));
     }
 
     @Test
-    void rememberForSheetAtIndex_preservesOtherIndices() {
-        int[] originalVertical = { 11, 22, 33 };
-        int[] originalHorizontal = { 44, 55, 66 };
-        when(spreadsheet.getVerticalScrollPositions())
-                .thenReturn(originalVertical);
-        when(spreadsheet.getHorizontalScrollPositions())
-                .thenReturn(originalHorizontal);
+    void deletingASheet_leavesTheOthersTheirOffsets() {
+        // C was given B's offsets.
+        Spreadsheet spreadsheet = allThreeScrolled();
 
-        memory.rememberForSheetAtIndex(1, 999, 888);
+        spreadsheet.deleteSheet(1);
 
-        ArgumentCaptor<int[]> verticalCaptor = ArgumentCaptor
-                .forClass(int[].class);
-        verify(spreadsheet)
-                .setVerticalScrollPositions(verticalCaptor.capture());
-        // index 1 updated, others preserved.
-        assertArrayEquals(new int[] { 11, 888, 33 }, verticalCaptor.getValue());
-
-        ArgumentCaptor<int[]> horizontalCaptor = ArgumentCaptor
-                .forClass(int[].class);
-        verify(spreadsheet)
-                .setHorizontalScrollPositions(horizontalCaptor.capture());
-        assertArrayEquals(new int[] { 44, 999, 66 },
-                horizontalCaptor.getValue());
+        assertOffsets(spreadsheet, new int[] { 100, 300 },
+                new int[] { 10, 30 });
     }
 
     @Test
-    void rememberForSheetAtIndex_indexZero_works() {
-        memory.rememberForSheetAtIndex(0, 5, 6);
+    void hidingASheet_leavesTheOthersTheirOffsets() {
+        Spreadsheet spreadsheet = allThreeScrolled();
 
-        ArgumentCaptor<int[]> verticalCaptor = ArgumentCaptor
-                .forClass(int[].class);
-        verify(spreadsheet)
-                .setVerticalScrollPositions(verticalCaptor.capture());
-        assertArrayEquals(new int[] { 6, 0, 0 }, verticalCaptor.getValue());
+        spreadsheet.setSheetHidden(1, SheetVisibility.HIDDEN);
+
+        assertOffsets(spreadsheet, new int[] { 100, 300 },
+                new int[] { 10, 30 });
+    }
+
+    @Test
+    void showingAHiddenSheet_keepsTheOffsetsItHad() {
+        Spreadsheet spreadsheet = allThreeScrolled();
+        spreadsheet.setSheetHidden(1, SheetVisibility.HIDDEN);
+        leave(spreadsheet, 150, 15, 1);
+
+        spreadsheet.setSheetHidden(1, SheetVisibility.VISIBLE);
+
+        assertOffsets(spreadsheet, new int[] { 150, 200, 300 },
+                new int[] { 15, 20, 30 });
+    }
+
+    @Test
+    void leavingASheetShownAfterLoading_remembersItsOffsets() {
+        // Threw ArrayIndexOutOfBoundsException: the offsets had a place only
+        // for the sheets that were visible when the workbook was loaded.
+        Spreadsheet spreadsheet = spreadsheetWith(true);
+        spreadsheet.setSheetHidden(1, SheetVisibility.VISIBLE);
+
+        leave(spreadsheet, 0, 0, 2);
+        leave(spreadsheet, 300, 30, 0);
+
+        assertOffsets(spreadsheet, new int[] { 0, 0, 300 },
+                new int[] { 0, 0, 30 });
+    }
+
+    @Test
+    void aNewSheet_startsAtTheTop() {
+        Spreadsheet spreadsheet = spreadsheetWith(true);
+        leave(spreadsheet, 100, 10, 1);
+
+        spreadsheet.createNewSheet("D", 10, 10);
+
+        assertOffsets(spreadsheet, new int[] { 100, 0, 0 },
+                new int[] { 10, 0, 0 });
+    }
+
+    @Test
+    void anotherWorkbook_startsEverySheetAtTheTop() {
+        Spreadsheet spreadsheet = allThreeScrolled();
+        XSSFWorkbook other = new XSSFWorkbook();
+        other.createSheet("X");
+        other.createSheet("Y");
+
+        spreadsheet.setWorkbook(other);
+
+        assertOffsets(spreadsheet, new int[] { 0, 0 }, new int[] { 0, 0 });
     }
 }
