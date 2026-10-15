@@ -41,8 +41,7 @@ export interface SheetTabsRenderState {
   /**
    * Index of the leftmost tab currently shown, 0-based. With more
    * sheets than fit, the strip scrolls by whole tabs and the scroll
-   * buttons move this. Mirrors the GWT client's `tabScrollIndex`, and
-   * the server is told about changes so it can restore the position.
+   * buttons move this, and the server is told about changes so it can restore the position.
    */
   firstVisibleTab: number;
   /**
@@ -59,7 +58,7 @@ export interface SheetTabsRenderState {
   /**
    * What `Spreadsheet.setStatusLabelValue` shows at the right end of the
    * strip, or null for no label at all. An empty string still shows the
-   * label, empty, as the GWT client did.
+   * label, empty.
    */
   infoLabel?: string | null;
 }
@@ -106,8 +105,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
   };
 
   static styles = css`
-    /* The buttons sit before the tabs, as the GWT strip had them. */
-    /* The strip buttons, side by side in the GWT client's 130px. */
+    /* The buttons sit before the tabs, side by side in 130px. */
     .sheet-tabsheet-options {
       display: inline-flex;
       flex: none;
@@ -140,8 +138,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     }
 
     /* The scroll and add-sheet buttons. Each is an icon painted in the
-       button's text colour through a mask, as the GWT client drew them -
-       a bare filled box says nothing about what it does, and five of them
+       button's text colour through a mask - a bare filled box says nothing about what it does, and five of them
        in a row read as decoration. */
     .sheet-tabsheet-options > div {
       width: 26px;
@@ -162,8 +159,8 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
       mask-image: var(--_tab-button-icon);
     }
 
-    /* The GWT client's blue, its own: the active tab's colour is the app's
-       to change, and the buttons did not follow it. */
+    /* A blue of their own: the active tab's colour is the app's to change,
+       and the buttons do not follow it. */
     .sheet-tabsheet-options > div:hover {
       color: #197de1;
     }
@@ -194,7 +191,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
       --_tab-button-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>');
     }
 
-    /* The GWT client's strip: 28px under a one-pixel border, with the
+    /* The strip: 28px under a one-pixel border, with the
        tabs hanging from that border. Tabs past its end are cut off; the
        buttons scroll to them. */
     :host {
@@ -215,7 +212,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
       display: none !important;
     }
 
-    /* A tab as the GWT client drew one: a folder tab hanging from the
+    /* A tab: a folder tab hanging from the
        strip's top border, its name in light type, cut short with an
        ellipsis past 200px. */
     .sheet-tab {
@@ -274,7 +271,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
       margin-right: 206px;
     }
 
-    /* SpreadsheetTheme.LUMO, as the GWT client drew it: tinted folder tabs
+    /* SpreadsheetTheme.LUMO: tinted folder tabs
        in regular weight, the active one lifted off the strip, and buttons
        that light up in the primary tint. */
     :host([theme~='lumo']) {
@@ -304,7 +301,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
       cursor: var(--lumo-clickable-cursor);
     }
 
-    /* The GWT client's Lumo tabs did not change under the pointer. */
+    /* Lumo's tabs do not change under the pointer. */
     :host([theme~='lumo']) .sheet-tab:hover:not(.active) {
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
@@ -324,8 +321,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
   declare renderState: SheetTabsRenderState;
 
   /**
-   * The leftmost tab that still shows the last one, as the GWT client
-   * worked it out: from the last tab back, as many as fit beside the
+   * The leftmost tab that still shows the last one: from the last tab back, as many as fit beside the
    * buttons and the status label. Scrolling forward stops there and the
    * end button goes straight to it, so the strip never scrolls into empty
    * space - and with every tab in view, neither button does anything.
@@ -534,7 +530,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
   };
 
   /**
-   * The strip's buttons, in the order the GWT client had them.
+   * The strip's buttons, in their order.
    *
    * Not named `renderOptions`: LitElement assigns an instance property
    * of that name in its own constructor, which shadows a prototype
@@ -574,7 +570,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
         ></div>
         ${
           // A protected workbook takes no new sheet, and shows no button
-          // for one, as the GWT client did.
+          // for one.
           this.renderState.readOnly ? nothing : html`<div class="add-new-tab" part="new-tab-button" data-new-tab></div>`
         }
       </div>

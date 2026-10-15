@@ -77,7 +77,7 @@ export interface CellGridRenderState {
   /**
    * Cells the server gave a run-on width whose value, measured, fits its
    * column after all, by key. Not wire state: the server guesses by
-   * character count, and the GWT client measured the text itself, so these
+   * character count, and the text is measured here, so these
    * are drawn as ordinary cells - a right-aligned number stays right.
    */
   fittingSpills?: ReadonlySet<string>;
@@ -223,7 +223,7 @@ export interface CellGridRenderState {
 
   /**
    * The references of the formula being written, tinted on the sheet in
-   * their colours as the GWT client tinted them; the one the caret is in is
+   * their colours; the one the caret is in is
    * outlined. Absent or empty while no formula is being written.
    */
   formulaReferences?: ReadonlyArray<{ range: CellRect; color: string; atCaret: boolean }>;
@@ -309,7 +309,7 @@ export interface PositionedPopupButton {
   topPx: number;
   /**
    * Height of the anchor cell's row: the Lumo theme draws the button as
-   * tall as its cell, as the GWT client did.
+   * tall as its cell.
    */
   cellHeightPx?: number;
   /** True when the popup is currently shown — affects the indicator style. */

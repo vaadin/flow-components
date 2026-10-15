@@ -90,8 +90,7 @@ export class ContextMenu {
     e: CustomEvent<{ col: number; row: number; clientX?: number; clientY?: number }>
   ): void => {
     const { col, row } = e.detail;
-    // Without actions there is no menu, and the GWT client left the
-    // selection alone.
+    // Without actions there is no menu, and the selection stays as it is.
     if (!this.hasActions) {
       return;
     }
@@ -114,8 +113,7 @@ export class ContextMenu {
   ): void => {
     const { col } = e.detail;
     // The menu acts on the column whatever is selected, so the selection
-    // stays as it is, as in the GWT client - and there is no menu without
-    // actions.
+    // stays as it is - and there is no menu without actions.
     if (!this.hasActions) {
       return;
     }
@@ -193,8 +191,8 @@ export class ContextMenu {
     if (!this.element.renderState.open) {
       return;
     }
-    // The menu had the keyboard; the GWT client gave it back to where it
-    // had been. A click elsewhere still moves it on, once this is done.
+    // The menu had the keyboard; it goes back to where it had been. A
+    // click elsewhere still moves it on, once this is done.
     const menuHadFocus = this.element.hasFocus();
     this.element.renderState = emptyContextMenuRenderState();
     this.icons.clear();
@@ -218,7 +216,7 @@ export class ContextMenu {
     this.host.send({ type: eventType, data: { actionKey: key } });
   };
 
-  /** Left or Tab in the menu closes it, as in the GWT client. */
+  /** Left or Tab in the menu closes it. */
   private readonly handleContextMenuDismiss = (): void => {
     this.close();
   };

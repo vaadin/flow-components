@@ -78,17 +78,16 @@ export interface RowHeaderRenderState {
   verticalSplitPosition?: number;
   /**
    * Whether columns are frozen as well. Only then does the freeze line run
-   * on through the numbers, as the GWT client's corner pane border did;
-   * with rows frozen alone that pane had no border, and the numbers keep a
-   * pixel's gap at the freeze line that the sheet's background shows
+   * on through the numbers; with rows frozen alone it does not, and the
+   * numbers keep a pixel's gap at the freeze line that the sheet's background shows
    * through.
    */
   frozenColumns?: boolean;
   /**
-   * How far the sheet is scrolled right. With rows frozen alone, the GWT
-   * client's pane of frozen rows slid left under the numbers as the sheet
-   * scrolled right, and its border showed through the numbers' gap at the
-   * freeze line from the right - under the numbers scrolled over it.
+   * How far the sheet is scrolled right. With rows frozen alone, the frozen
+   * rows' border shows through the numbers' gap at the freeze line as the
+   * sheet scrolls right, from the right - under the numbers scrolled over
+   * it.
    */
   scrollLeft?: number;
   /** Pixel y-offsets of the frozen rows, indexed by {@code row - 1}. */
@@ -123,8 +122,7 @@ export interface RowHeaderRenderState {
   /**
    * How far above the first row the top of the outline gutters is - the
    * letters and their outline gutter. The dotted lines between the outline
-   * levels start there, where the GWT client's did, so their dots fall on
-   * the same pixels.
+   * levels start there, so their dots fall on the same pixels.
    */
   leadingPx?: number;
 }
@@ -179,8 +177,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
   };
 
   static styles = css`
-    /* The outline gutter beside the numbers, as the GWT client drew it:
-       a bracket down each group - a line with a tick where the group
+    /* The outline gutter beside the numbers: a bracket down each group - a line with a tick where the group
        starts - and a round button beside its summary row, which sits
        below the group or, inversed, above it. */
     .row-grouping-line {
@@ -196,8 +193,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       border-bottom: 2px solid ${headerBorderColor};
     }
 
-    /* The sign sits where the GWT client's did, on an 11px line at the
-       top of a borderless button: the ring is drawn inside, taking no room,
+    /* The sign sits on an 11px line at the top of a borderless button: the ring is drawn inside, taking no room,
        and the pixel of padding fits the box to the line - a box taller than
        its line, and the browser centres the line instead. */
     .row-grouping-toggle {
@@ -230,7 +226,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     }
 
     /* Divides one outline level from the next. Over the freeze line in
-       the gutter, as the GWT client drew its level lines over its panes. */
+       the gutter. */
     .row-grouping-separator {
       position: absolute;
       z-index: 3;
@@ -268,8 +264,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       pointer-events: auto;
     }
 
-    /* Over the strip's right border too, as the GWT client's pane border
-       crossed it. */
+    /* Over the strip's right border too. */
     .frozen-header-strip > .freeze-line {
       position: absolute;
       height: 1px;
@@ -278,8 +273,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       pointer-events: none;
     }
 
-    /* Over the sheet's ground, as the GWT client's pane border was, not
-       over the numbers' tint. */
+    /* Over the sheet's ground, not over the numbers' tint. */
     :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
       background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
     }
@@ -298,8 +292,8 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       border-bottom-color: var(--lumo-contrast-50pct);
     }
 
-    /* The gap the GWT client left at the freeze line in the numbers when
-       only rows were frozen: under the numbers, the sheet's background. */
+    /* The gap at the freeze line in the numbers when only rows are
+       frozen: under the numbers, the sheet's background. */
     .freeze-gap {
       position: absolute;
       right: -1px;
@@ -317,15 +311,14 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
     }
 
-    /* A number as the GWT client drew it, over a border of its own along
+    /* A number, over a border of its own along
        the cells - which the active row's marker replaces, and so does an
        application's ::part(row-header) border. The pointer is an arrow
        along the row a click selects. Each number has the strip's own
-       background, as in the GWT client, so a frozen row's number covers
-       the scrolled one under it. The number is centred the GWT client's
-       way, a line of the font's own height in the middle of the whole row.
-       The divider between numbers is drawn inside the number's box, as the
-       GWT client's was: it takes no room from the number, and the border
+       background, so a frozen row's number covers the scrolled one under
+       it. The number is centred as a line of the font's own height in the
+       middle of the whole row. The divider between numbers is drawn inside
+       the number's box: it takes no room from the number, and the border
        along the cells runs past it to the end, the active row's marker
        too. */
     .row-header-cell {
@@ -344,12 +337,11 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     }
 
     /* The active cell's headers are tinted so the cursor's row and
-       column stay findable on a wide sheet. This is the tint the GWT
-       client painted; the cell also carries the documented
+       column stay findable on a wide sheet. The cell also carries the documented
        ::part(header-selected) for consumers who want another one. */
     .row-header-cell[part~='header-selected'] {
       background: ${headerSelectedBg};
-      /* The GWT client's marker along the edge that faces the cells. */
+      /* A marker along the edge that faces the cells. */
       border-right: 2px solid #63b1ff;
     }
 
@@ -363,7 +355,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       z-index: 1;
     }
 
-    /* SpreadsheetTheme.LUMO, as the GWT client drew it: the strip and its
+    /* SpreadsheetTheme.LUMO: the strip and its
        outline gutter tinted over the Lumo ground, the active cell's row in
        the primary tint with its marker beside it. */
     :host([theme~='lumo']) {
@@ -438,7 +430,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     }
     const row = at.index;
     // The browser's own menu stays unless the sheet takes the right-click
-    // for a menu of its own, as with the GWT client.
+    // for a menu of its own.
     const taken = !this.dispatchEvent(
       new CustomEvent('row-header-contextmenu', {
         detail: { row, clientX: e.clientX, clientY: e.clientY },
@@ -460,8 +452,8 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     const row = at.index;
     e.preventDefault();
     const ev = e as MouseEvent;
-    // Where the row starts on screen: the GWT client sized it from there
-    // to the pointer.
+    // Where the row starts on screen: the row is sized from there to the
+    // pointer.
     const number = this.shadowRoot!.querySelector<HTMLElement>(`.row-header-cell.row${row}`);
     this.dispatchEvent(
       new CustomEvent('row-resize-start', {
@@ -545,8 +537,8 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     }
 
     // The gutter takes a fixed slice of the header's width, on the left
-    // whichever side a group's summary row is on, as in the GWT client;
-    // the numbers occupy the rest.
+    // whichever side a group's summary row is on; the numbers occupy the
+    // rest.
     const gutterWidth = rowGroupingGutterPx(rowGroupingMax, rowGroupingHeadings);
     const numbersLeft = gutterWidth;
     const numbersWidth = Math.max(0, headerWidth - gutterWidth);
@@ -556,8 +548,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     const cells: Array<{ key: number; template: TemplateResult }> = [];
     const handles: Array<{ key: number; template: TemplateResult }> = [];
     const buildRow = (row: number, top: number, height: number): void => {
-      // Headings hidden, the outline still drawn: no numbers at all, as in
-      // the GWT client. A number of no width still draws its border.
+      // Headings hidden, the outline still drawn: no numbers at all. A number of no width still draws its border.
       if (numbersWidth <= 0) {
         return;
       }
@@ -608,16 +599,15 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       }
       const frozenCells = cells.splice(scrolling);
       const frozenHandles = handles.splice(scrollingHandles);
-      // The freeze line runs on across the outline gutter, as the GWT
-      // client's frozen gutter pane border did, on the pixel it has to
+      // The freeze line runs on across the outline gutter, on the pixel it
+      // has to
       // itself among the cells; across the numbers too when columns are
       // frozen as well, and otherwise a gap there.
       const frozenHeight =
         (frozenRowY[verticalSplitPosition - 1] ?? 0) + (frozenRowHeights[verticalSplitPosition - 1] ?? 0);
       // In the gutter, the bottom border of a pane over the frozen rows'
-      // part of it, bordered along the right as the gutter is - the GWT
-      // client's frozen gutter pane, whose two borders met in a blended
-      // corner pixel.
+      // part of it, bordered along the right as the gutter is, the two
+      // borders meeting in a blended corner pixel.
       const gutterLine =
         gutterWidth > 0
           ? html`<div class="freeze-gutter-pane" style="width:${gutterWidth}px;height:${frozenHeight + 1}px;"></div>`
@@ -626,9 +616,9 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
         numbersWidth > 0 && frozenColumns
           ? html`<div class="freeze-line" style="top:${frozenHeight}px;left:${gutterWidth}px;right:-1px;"></div>`
           : nothing;
-      // With rows frozen alone the GWT client's corner pane had no border,
-      // and its pixel was see-through: the sheet's background at rest, the
-      // numbers that scroll under it as the sheet scrolls. So the gap lies
+      // With rows frozen alone the corner has no border, and its pixel is
+      // see-through: the sheet's background at rest, the numbers that
+      // scroll under it as the sheet scrolls. So the gap lies
       // under the numbers, pinned with the frozen ones.
       // What of the frozen rows' line has slid left under the numbers lies
       // in the gap too, under the numbers.
@@ -658,8 +648,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     }
 
     const groupingEls: TemplateResult[] = [];
-    // The gutter is bordered off from the numbers beside it, as the GWT
-    // client's was; without numbers the strip's own border does it.
+    // The gutter is bordered off from the numbers beside it; without numbers the strip's own border does it.
     if (gutterWidth > 0 && numbersWidth > 0) {
       const style = `width:${gutterWidth}px;height:${totalGridHeightPx}px;`;
       groupingEls.push(html`<div class="row-grouping-gutter" style=${style}></div>`);
@@ -680,13 +669,13 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       // A collapsed group keeps only its button, showing "+".
       if (!g.collapsed) {
         // The tick's border comes on top of the height, so the bracket
-        // reaches just past the button's centre, as the GWT client's did.
+        // reaches just past the button's centre.
         const lineStyle = `left:${lineLeft}px;top:${g.startPx}px;height:${Math.max(0, g.endPx - g.startPx)}px;`;
         const lineClass = rowGroupingInversed ? 'row-grouping-line inversed' : 'row-grouping-line';
         groupingEls.push(html`<div class=${lineClass} style=${lineStyle}></div>`);
       }
       // At the summary row, its right edge 2px short of the bracket's
-      // tick end, as the GWT client placed it.
+      // tick end.
       const half = GROUPING_BUTTON_SIZE_PX / 2;
       const btnStyle = `left:${lineLeft + 2 - half}px;top:${g.buttonPx - half}px;`;
       groupingEls.push(html`

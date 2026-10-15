@@ -64,8 +64,8 @@ export function computePositionedPopupButtons(
  * Treating the vertical pair as pixels makes every overlay 25% too short
  * and seats it too high.
  *
- * The points are converted exactly, fractions kept, as the GWT client
- * left them to the browser in `pt`. Cut down to whole pixels, a picture
+ * The points are converted exactly, fractions kept, as a browser converts
+ * `pt`. Cut down to whole pixels, a picture
  * sat up to a pixel high and a pixel short, and a chart drew itself for
  * a pixel less height.
  *
@@ -113,7 +113,7 @@ export function computePositionedOverlays(
  * Every region gets one, not only those whose top-left cell is on screen: a
  * merge whose first rows have scrolled away is still showing the rest. A
  * region that starts among the frozen rows or columns and runs past the split
- * is drawn pinned with them, as the GWT client drew it, the part beyond the
+ * is drawn pinned with them, the part beyond the
  * split shortened by how far the sheet has scrolled underneath.
  *
  * @param split the number of frozen rows and columns
@@ -164,8 +164,7 @@ export function computeMergedRegionBoxes(
 /**
  * Pure helper: convert {@link GroupingData} entries into
  * {@link PositionedGrouping} entries - where each group's bracket runs and
- * where its button sits, along the axis the sizes are for - as the GWT client
- * laid them out.
+ * where its button sits, along the axis the sizes are for.
  *
  * A group's summary row or column holds its button: by default the one after
  * the group, so the bracket runs from just inside the group's first header
@@ -178,10 +177,10 @@ export function computeMergedRegionBoxes(
  * indices). The connector's `colWidths` array is 0-indexed too.
  *
  * @param startPaddingPx how far into its first header a group's bracket
- * starts - the GWT client's 5px for columns, 2px for rows
+ * starts - 5px for columns, 2px for rows
  * @param shiftPx how far back along the axis every bracket and button is
- * drawn - a pixel while the other outline gutter shows, which
- * the GWT client measured without its border
+ * drawn - a pixel while the other outline gutter shows, measured without
+ * its border
  */
 export function computePositionedColGroupings(
   groupings: ReadonlyArray<GroupingData>,

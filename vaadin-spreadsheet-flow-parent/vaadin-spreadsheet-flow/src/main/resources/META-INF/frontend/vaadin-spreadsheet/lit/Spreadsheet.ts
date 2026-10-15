@@ -126,8 +126,8 @@ import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
- * Sample the cell-style width measurement uses: ten digits, matching what
- * the GWT client measured, so the ratios keep the same meaning server-side.
+ * Sample the cell-style width measurement uses: ten digits, as earlier
+ * versions measured, so the ratios keep the same meaning server-side.
  */
 const WIDTH_PROBE_TEXT = '5555555555';
 
@@ -158,14 +158,14 @@ interface SheetSizes {
 }
 
 /**
- * Height of the column headers, in pixels: the GWT client's 27, so a sheet
- * starts its first row where it always did.
+ * Height of the column headers, in pixels: 27, so a sheet starts its first
+ * row where it always did.
  */
 const DEFAULT_HEADER_ROW_HEIGHT = 27;
 
 /**
- * Width of the row headers, in pixels: the GWT client's 50, which also fits
- * a six-digit row number.
+ * Width of the row headers, in pixels: 50, as in earlier versions, which
+ * also fits a six-digit row number.
  */
 const DEFAULT_HEADER_COLUMN_WIDTH = 50;
 
@@ -214,8 +214,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * The cell a click or an arrow asked for when the selection is a merged
-   * region: the arrows leave the merge in its column and row, as in the
-   * GWT client. Null when the selection is not a merge.
+   * region: the arrows leave the merge in its column and row. Null when
+   * the selection is not a merge.
    */
   private mergeEntry: { col: number; row: number } | null = null;
 
@@ -226,8 +226,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private formulaDraft: { text: string; caret: number } | null = null;
 
   /**
-   * The reference last pointed at in the formula being written - the
-   * GWT client's point mode: where the pointed range starts and ends on
+   * The reference last pointed at in the formula being written: where the
+   * pointed range starts and ends on
    * the sheet, and where its text is in the formula, which pointing again
    * replaces. Null once anything is typed.
    */
@@ -239,8 +239,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * The cell pointed at last in the formula being written. The next arrow
-   * after an operator starts from it, as the GWT client's did for the rest
-   * of the edit - not from the cell being edited.
+   * after an operator starts from it, for the rest of the edit - not from
+   * the cell being edited.
    */
   private lastPointed: { col: number; row: number } | null = null;
 
@@ -634,8 +634,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // wherever the connector is used, stylesheet or not.
     this.root = document.createElement('div');
     this.root.className = 'spreadsheet-root';
-    // min-height is the floor the GWT client had on .v-spreadsheet: a
-    // spreadsheet nobody has given a height to is still a spreadsheet,
+    // min-height is a floor: a spreadsheet nobody has given a height to is still a spreadsheet,
     // not a one-line strip.
     this.root.style.cssText =
       'display:flex;flex-direction:column;width:100%;flex:1 1 auto;' +
@@ -660,8 +659,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // inside is as tall as the whole sheet, so a spreadsheet with no
     // height became thousands of pixels tall. A stated height of 0 is
     // definite, so it offers nothing, and flex-grow still gives it
-    // every pixel left over once the host does have a height. The GWT
-    // client got this from absolutely positioned panes.
+    // every pixel left over once the host does have a height.
     // A sheet smaller than its view keeps to the top left corner: left to
     // stretch, the grid shares the room left over between the header track
     // and the cells', and the cells drop away from their headers.
@@ -674,8 +672,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // tabindex=0 but draw selection feedback via
       // the .sheet-selection overlay instead.
       'outline:none;' +
-      // Cells and headers are not text to select, as in the GWT client: a
-      // drag selects cells, and a long press on a phone opens the sheet's
+      // Cells and headers are not text to select: a drag selects cells, and a long press on a phone opens the sheet's
       // menu rather than the browser's. Fields typed into still select.
       'user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;';
     // tabindex=0 makes the scroll container focusable so it can
@@ -720,8 +717,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // never grow / shrink based on content.
     this.sheetTabs.style.flex = '0 0 auto';
     this.root.appendChild(this.sheetTabs);
-    // Outside the scroll container, as the GWT client's popup was outside
-    // the sheet: the keys typed into a filter's fields and the clicks on
+    // Outside the scroll container: the keys typed into a filter's fields and the clicks on
     // its check boxes are the popup's, not the sheet's shortcuts. Beside
     // the context menu, the other overlay.
     this.contextMenu.after(this.popup.overlay);
@@ -870,8 +866,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // arrow keys.
     this.on(this.scrollContainer, 'keydown', this.handleKeyDown);
     this.on(this.scrollContainer, 'pointerdown', this.handleHostedEditorPointerDown);
-    // Safari on iOS opens no menu on a long press; the GWT client made one
-    // a right-click there, on the cells and the headers alike.
+    // Safari on iOS opens no menu on a long press, so it is made a
+    // right-click there, on the cells and the headers alike.
     this.stopLongPress = Spreadsheet.platform.isIOS() ? listenForLongPress(this.scrollContainer) : () => {};
     this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
     this.connect();
@@ -1005,8 +1001,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * A link cell's tooltip - the target the server named for it - as the
-   * GWT client showed it while the pointer was over the cell: below the
+   * A link cell's tooltip - the target the server named for it - while
+   * the pointer is over the cell: below the
    * cell, or above it when there is no room below. Any other cell, or a
    * drag in progress, takes it away.
    */
@@ -1097,9 +1093,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // needs the current active range to push aside — replacing the
       // selection here would wipe exactly what the Ctrl-click is meant
       // to keep. mousedown always precedes click for a real pointer.
-      // Nor does it start a drag, as in the GWT client: a pointer that
-      // drifted into the next cell before the button came up replaced
-      // every range picked out with Ctrl with one rectangle.
+      // Nor does it start a drag: a pointer that drifted into the next
+      // cell before the button came up would replace every range picked
+      // out with Ctrl with one rectangle.
       return;
     }
     this.drag = { kind: 'select' };
@@ -1226,9 +1222,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     // Seeded with what the cell IS, not what it shows — the formula
     // behind a computed cell, and the unformatted value otherwise, which
-    // is what carries a text cell's leading apostrophe. The GWT client
-    // seeded the inline editor from the formula field for the same
-    // reason.
+    // is what carries a text cell's leading apostrophe.
     const initialValue = this.formulaFieldValueFor(col, row);
     // Opening the existing value to change it: arrows move the caret.
     this.editor = { col, row, initialValue, mode: 'edit' };
@@ -1290,10 +1284,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.editor?.col !== col || this.editor.row !== row) {
       return;
     }
-    // Left for the formula bar, the edit carries on in the formula field, as
-    // in the GWT client: nothing is committed yet, and the editor stays
-    // open. Gone on to the address field instead, it ends once the keyboard
-    // has settled there, as the GWT client's deferred commit did.
+    // Left for the formula bar, the edit carries on in the formula field:
+    // nothing is committed yet, and the editor stays open. Gone on to the
+    // address field instead, it ends once the keyboard has settled there.
     if (key === undefined && relatedTarget === this.formulaBar) {
       e.preventDefault();
       setTimeout(() => {
@@ -1405,7 +1398,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Typed into the formula field while the edit started in the cell: the
-   * cell editor shows it as it is typed, as the GWT client's did.
+   * cell editor shows it as it is typed.
    */
   private readonly handleFormulaInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
     if (this.editor !== null) {
@@ -1444,8 +1437,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Point at a cell with an arrow while a formula is written, as the GWT
-   * client let the user: after an operator, a bracket or a separator the
+   * Point at a cell with an arrow while a formula is written: after an
+   * operator, a bracket or a separator the
    * arrow puts a reference to the next cell over into the formula, and
    * further arrows move it on - from the cell being edited at first, then
    * from the cell pointed at last, even past an operator typed since.
@@ -1477,8 +1470,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /**
    * Point at a cell with the mouse while a formula is written: a click puts
    * a reference to it into the formula - in place of the reference pointed
-   * at a moment ago, or the one the caret is in, as the GWT client meant
-   * to - a drag stretches it into a range, Shift stretches the last one to
+   * at a moment ago, or the one the caret is in - a drag stretches it into a range, Shift stretches the last one to
    * the cell, and Ctrl or Cmd adds another after a comma.
    */
   private pointWithMouse(col: number, row: number, shiftKey: boolean, add: boolean, source: 'cell' | 'field'): void {
@@ -1527,7 +1519,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.autoPercentEntry && value.endsWith('%')) {
       // The % a sign typed into a percentage cell was given belongs to a
       // number. Pointing makes the entry a formula, where "+A1%" would take
-      // a hundredth of A1: a GWT bug.
+      // a hundredth of A1.
       value = value.slice(0, -1);
       caret = Math.min(caret, value.length);
     }
@@ -1646,9 +1638,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /**
    * Show a committed value in its cell at once. The server's
    * `cellsUpdated` callback may arrive much later (or not at all in offline
-   * / TestBench scenarios); the GWT client updated the cell before the
-   * round-trip, as Excel users expect - except for a formula, which kept
-   * showing the old value until the server had worked it out. Preserves
+   * / TestBench scenarios); the cell is updated before the round-trip, as
+   * Excel users expect - except for a formula, which keeps showing the old
+   * value until the server has worked it out. Preserves
    * the existing CellData metadata when present (style index, locked flag).
    */
   private showCommittedValue(col: number, row: number, value: string): void {
@@ -1817,8 +1809,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const key = e.key;
     const ctrlOrMeta = e.ctrlKey || e.metaKey;
     // The key that holds a shortcut - select all, undo, redo: Cmd on a Mac,
-    // where Ctrl+A and Ctrl+Z did nothing in the GWT client, and Ctrl or
-    // Cmd elsewhere.
+    // where Ctrl+A and Ctrl+Z do nothing, and Ctrl or Cmd elsewhere.
     const shortcut = isMacPlatform() ? e.metaKey : ctrlOrMeta;
 
     // A cell showing a custom editor is edited through that editor, so
@@ -1873,8 +1864,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // F2 opens the cell editor at the active cell, loaded with the
     // cell's existing value (Excel convention).
     //
-    // So does Enter on a single cell, as it always has: the GWT client
-    // treated the two keys as one case. With a range selected Enter
+    // So does Enter on a single cell, as it always has. With a range
+    // selected Enter
     // walks inside it instead, and on a cell the user cannot see there
     // is nothing to edit, so it falls through to moving on.
     const entersEditor =
@@ -1923,8 +1914,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Typing over the cell: an arrow commits and moves on.
       // A digit typed into a percentage cell means that many percent, so
       // the editor opens on "5%" rather than "5" - see PercentageEntry.
-      // Space opens it empty, as the GWT client did: it took Space on
-      // keydown, as a key that starts an edit, and typed nothing.
+      // Space opens it empty: it starts an edit and types nothing.
       this.editor = {
         col,
         row,
@@ -1972,8 +1962,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
 
-    // The arrows - and Tab and Enter, outside a range - step the way the
-    // GWT client's did: over hidden rows and columns, onto a merge as a
+    // The arrows - and Tab and Enter, outside a range - step over hidden
+    // rows and columns, onto a merge as a
     // whole and out of it on the far side, and not at all at the edge of
     // the sheet. Shift+arrow moves the side of the range away from the
     // active cell instead.
@@ -2028,8 +2018,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Move the selection to one cell - or merge - from the keyboard, naming
    * it in the address field straight away rather than waiting for the
    * server to: the address field is how the user knows where the keyboard
-   * has taken them. The cell is scrolled into view before the render, by
-   * the GWT client's rule.
+   * has taken them. The cell is scrolled into view before the render -
+   * see {@link scrollToShow}.
    */
   private moveSelectionTo(next: SingleCellSelection): void {
     this.extendingSelection = false;
@@ -2066,8 +2056,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /**
    * Adjust {@code scrollContainer.scrollLeft / scrollTop} so the
    * given cell (either the new active cell or the extend cell
-   * after shift+arrow) is in full view, by the GWT client's rule -
-   * see {@link scrollToShow}. Sets scrollLeft/Top in-place; the
+   * after shift+arrow) is in full view - see {@link scrollToShow}. Sets scrollLeft/Top in-place; the
    * existing `scroll` listener triggers a fresh recomputeViewport.
    */
   private scrollCellIntoView(target: { col: number; row: number }): void {
@@ -2102,7 +2091,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly handleScroll = (): void => {
     this.viewportLoader.scrolled(this.scrollContainer.scrollTop, this.scrollContainer.scrollLeft);
     this.recomputeViewport();
-    // The GWT client moved an open popup along with its cell.
+    // An open popup moves along with its cell.
     this.popup.reposition();
   };
 
@@ -2232,8 +2221,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * a pixels-per-character ratio per style index. Without one it assumes
    * everything fits and no number is ever shortened.
    *
-   * Measured the way the GWT client measured it — ten digits in a probe
-   * carrying the style's class, divided by ten — so the server's existing
+   * Measured as ten digits in a probe carrying the style's class, divided
+   * by ten, as earlier versions measured it, so the server's existing
    * arithmetic keeps its meaning.
    */
   private reportCellStyleWidthRatios(): void {
@@ -2361,8 +2350,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Leaves the headers and frozen panes out of the view the browser pages,
-   * so Page Up and Page Down move the cells as far as the GWT client's did.
-   * Paging the whole scroll container, they moved them a header further.
+   * so Page Up and Page Down move the cells by a page of cells. Paging the
+   * whole scroll container, they would move them a header further.
    */
   private applyPagedViewInset(): void {
     const { corner, frozen } = this.pagedViewParts;
@@ -2424,8 +2413,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Tells the cell grid whether the sheet has the keyboard, which it shows
-   * by dimming the selection when it does not - as the GWT client did, so
-   * a sheet left for another field does not look like it still takes the
+   * by dimming the selection when it does not, so a sheet left for another field does not look like it still takes the
    * typing. Read once the focus has settled: moving between the sheet and
    * its own cell editor fires a focusout and a focusin, and only the
    * outcome matters.
@@ -2466,9 +2454,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * An ordinary selection event says the old range is gone, and the
    * server drops the cells earlier Ctrl-clicks put there along with it.
    * Anything then acting on the selection - a context-menu action, a
-   * delete - misses them. The GWT client drew no selection outline once
-   * a Ctrl-click had broken the selection up, and used that as the same
-   * signal.
+   * delete - misses them.
    */
   private reportRangeSelection(): void {
     if (this.selection.auxRanges.length > 0) {
@@ -2554,13 +2540,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    *  - otherwise                                → cellRangeSelected
    *
    * The server receives {@code spreadsheet-event} through a
-   * {@code @DomEvent}; the detail's {@code type} + {@code data} keep the
-   * GWT client's SpreadsheetHandler signatures as a wire contract.
+   * {@code @DomEvent}; the detail's {@code type} + {@code data} follow the
+   * server's SpreadsheetHandler signatures as a wire contract.
    */
   private dispatchSelectionEvent(): void {
     const { activeCell } = this.selection;
-    // A merge is one cell: the server hears that cell, as it did from the
-    // GWT client, rather than a range it would offer to merge again.
+    // A merge is one cell: the server hears that cell, rather than a range
+    // it would offer to merge again.
     const range =
       this.selectsRange() || !isMultiCellRange(this.selection.activeRange)
         ? this.selection.activeRange
@@ -2569,10 +2555,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (event.type === 'cellRangeSelected') {
       // `onCellRangeSelected` takes only the four corners and reads the
       // anchor from the selection the server already holds — unlike its
-      // sibling `onCellRangePainted`, which is given a starting point. The
-      // GWT client established that anchor on mousedown, before the drag
-      // produced a range. Without it the server dereferences a null
-      // selectedCellReference.
+      // sibling `onCellRangePainted`, which is given a starting point. So
+      // the anchor is reported first, as a `cellSelected`, before the range.
+      // Without it the server dereferences a null selectedCellReference.
       const anchor = this.selection.activeCell;
       const anchorData: CellSelectedData = {
         row: anchor.row,
@@ -2608,7 +2593,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * up on every scroll step cost more than the rest of the draw.
    *
    * Rows past the ones the server gave a height to are the default height,
-   * hidden or not, as the GWT client measured them.
+   * hidden or not.
    */
   private sheetSizes(): SheetSizes {
     const inputs = [
@@ -2747,7 +2732,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       };
     } else {
       // No headings and no outline: the strip goes altogether, border and
-      // all, as the GWT client's did - also when they are turned off while
+      // all - also when they are turned off while
       // the sheet is up, rather than keep the size it was last given.
       this.columnHeader.hidden = true;
     }
@@ -2914,8 +2899,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // one landed on a frozen cell.
     //
     // The freeze line has a pixel of its own between the frozen columns or
-    // rows and the rest, as the GWT client's frozen pane border did, so the
-    // scrolling ones start one pixel past it. Drawn over their first pixel
+    // rows and the rest, the frozen pane's border, so the scrolling ones start one pixel past it. Drawn over their first pixel
     // instead, the first row after a freeze came out a pixel short.
     const split = { cols: this.horizontalSplitPosition, rows: this.verticalSplitPosition };
     const gapX = freezeGap(split.cols);
@@ -3088,8 +3072,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * It belongs to the cell the sheet has selected, so it is reported as
    * an ordinary edit of that cell. Enter then moves on to the next cell
    * down and Tab to the next one right, the way finishing an edit in
-   * the cell itself does; shift+Tab commits without moving, which is
-   * what the GWT client did. Clicking away commits too and leaves the
+   * the cell itself does; shift+Tab commits without moving. Clicking away commits too and leaves the
    * selection alone - that is how a value typed here reaches the sheet
    * when the user goes straight back to the cell.
    */
@@ -3116,8 +3099,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.endFormulaPointing();
     this.showCommittedValue(col, row, value);
     this.sendToServer({ type: 'cellValueEdited', data: { row, col, value } });
-    // shift+Tab stays put: the GWT client passed the move along only
-    // when shift was not held.
+    // shift+Tab stays put.
     const direction = key === undefined || (key === 'Tab' && shiftKey) ? null : keyDirection(key, false);
     if (direction === null) {
       if (editorWasOpen) {
@@ -3218,9 +3200,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * the sheet filling whatever room the component has. Writing that on
    * the host instead threw away the size the application had given the
    * component with its own setHeight, and the sheet then took the
-   * height of the page rather than the 250px it was asked for. The GWT
-   * client put this on the widget, and the host was never its to
-   * touch.
+   * height of the page rather than the 250px it was asked for. The host
+   * is the application's to size.
    */
   setHeight(height: string): void {
     this.root.style.height = height;
@@ -3303,8 +3284,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
   updateFormulaBar(possibleName: string | null, col: number, row: number): void {
     // The answer about a cell the user has already left - the keyboard
-    // moves on without waiting for the server - is out of date. The GWT
-    // client dropped it too.
+    // moves on without waiting for the server - is out of date.
     const active = this.selection.activeCell;
     if (active.col !== col || active.row !== row) {
       return;
@@ -3351,8 +3331,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /**
    * The server could not make sense of the address that was typed.
    *
-   * The address field goes back to the cell the selection is actually on,
-   * as the GWT client did. Leaving the typed text would have the field
+   * The address field goes back to the cell the selection is actually on.
+   * Leaving the typed text would have the field
    * naming a cell nobody is standing on, and the next Enter would send it
    * again.
    */
@@ -3364,7 +3344,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    *
    * Sent from the server's address-change path — jumping by address,
    * and following an internal hyperlink — so the selection collapses
-   * to that one cell, as the GWT client did. Range selections never
+   * to that one cell. Range selections never
    * come through here, so nothing a drag produced is disturbed.
    *
    * Updating only the formula bar, as this did before, left the
@@ -3466,8 +3446,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         ? selectionSizeLabel(this.selection.activeRange)
         : name ?? cellCoordToAddress({ col, row })
     });
-    // A new active cell shows in the field, as the GWT client's
-    // updateSelectedCellValues showed it. The same cell keeps what the
+    // A new active cell shows in the field. The same cell keeps what the
     // field has: the server may have just sent its value along with
     // showSelectedCell, for a cell this client holds no data for.
     if (moved) {
@@ -3549,8 +3528,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
   /**
    * Where each sheet was last scrolled to, by visible sheet, as the server
-   * keeps it: a sheet shown again goes back there. The GWT client meant to
-   * and did not.
+   * keeps it: a sheet shown again goes back there.
    */
   setVerticalScrollPositions(positions: Json<number[]>): void {
     this.verticalScrollPositions = coerceNumberArray(positions);
@@ -3624,8 +3602,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Bound to pointerdown rather than focus on purpose: the server focuses
    * an editor itself when it displays one, and reporting that back as a
    * selection would move the selection to whatever the server was last
-   * talking about — the feedback loop the GWT client guarded against with
-   * its `userInitiatedFocus` flag.
+   * talking about, in a loop.
    */
   private readonly handleHostedEditorPointerDown = (e: Event): void => {
     const cell = this.cellShowingEditorFor(e);
@@ -3929,7 +3906,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Select one cell - or the whole merge it is part of, with the merge's
-   * top-left cell active, as the GWT client did for a click.
+   * top-left cell active, as for a click.
    */
   private selectCellOrMerge(col: number, row: number): void {
     this.applySingleSelection(selectCellAt(col, row, this.mergedRegions));
@@ -3989,9 +3966,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * The scrolling pane on screen: the cells under the column letters and
-   * right of the row numbers, past the frozen rows and columns. The GWT
-   * client's popups kept to this, its bottom-right pane, whose bottom is the
-   * sheet's own.
+   * right of the row numbers, past the frozen rows and columns. Popups keep
+   * to this pane, whose bottom is the sheet's own.
    */
   private scrollingPaneClientRect(): { left: number; top: number; bottom: number } {
     const box = this.scrollContainer.getBoundingClientRect();

@@ -18,10 +18,8 @@ import type {
 /**
  * Pure-state model for the spreadsheet's cell selection.
  *
- * The GWT client scattered selection state across `SheetWidget` (read
- * accessors) and `SelectionHandler` (mutation methods). This module keeps
- * the state in one typed, immutable-ish shape that the renderer and the
- * keyboard handling share.
+ * The state is kept in one typed, immutable-ish shape that the renderer and
+ * the keyboard handling share.
  *
  * Coordinates are **1-based** throughout, matching the rest of the
  * spreadsheet API. Anchors and ranges follow Excel conventions.
@@ -76,8 +74,8 @@ export interface CellRange {
  *    added via Ctrl/Cmd-click. May be empty.
  *
  * The selection is "coherent" iff {@code auxRanges.length === 0} —
- * only the GWT clipboard format supports coherent selections, so
- * the copy/paste path checks this before serializing.
+ * only a coherent selection can go on the clipboard, so the
+ * copy/paste path checks this before serializing.
  */
 export interface SelectionState {
   /** The single cell with keyboard focus + formula-bar display. */
@@ -178,8 +176,7 @@ export function containsCell(range: CellRange, col: number, row: number): boolea
  * active range emits {@code part="column-header header-selected"}.
  */
 export function selectedColumnSet(selection: SelectionState): Set<number> {
-  // Every range's columns, as the GWT client marked them - not only the
-  // last one added.
+  // Every range's columns, not only the last one added.
   const set = new Set<number>();
   for (const range of [selection.activeRange, ...selection.auxRanges]) {
     for (let c = Math.min(range.c1, range.c2); c <= Math.max(range.c1, range.c2); c++) {

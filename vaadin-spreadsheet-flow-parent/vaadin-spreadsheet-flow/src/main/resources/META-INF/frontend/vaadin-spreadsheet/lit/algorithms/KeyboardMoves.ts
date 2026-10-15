@@ -12,7 +12,7 @@ import { expandToMergedRegions, type MergedRect } from './MergedSelection.js';
 import type { CellRect } from './SelectionPaint.js';
 
 /**
- * Where the arrow keys take the selection, by the GWT client's rules.
+ * Where the arrow keys take the selection.
  *
  * A merged region is one cell to the user: an arrow that lands anywhere in
  * it selects all of it, and the next arrow leaves it from its far side.
@@ -65,7 +65,7 @@ export function mergeAt(regions: ReadonlyArray<MergedRect>, col: number, row: nu
 
 /**
  * Select one cell. A cell inside a merge selects the whole merge, with
- * its top-left cell active, as the GWT client did for a click or an arrow.
+ * its top-left cell active, for a click and an arrow alike.
  */
 export function selectCellAt(col: number, row: number, regions: ReadonlyArray<MergedRect>): SingleCellSelection {
   const region = mergeAt(regions, col, row);
@@ -144,7 +144,7 @@ export function moveActiveCell(
 }
 
 /**
- * How Shift+arrow changes the selected range, by the GWT client's rule.
+ * How Shift+arrow changes the selected range.
  *
  * The side away from the active cell moves: with the active cell on the
  * left edge, Shift+Right grows the range to the right and Shift+Left
@@ -298,10 +298,8 @@ export interface TypedKey {
  * Ctrl and Cmd give commands. A character typed with AltGr is still a
  * character, though: Windows reports AltGr as Ctrl and Alt together, and
  * German, French or Polish keyboards type @, €, { and } that way. On a Mac
- * Option types characters as well. Alt alone off a Mac types nothing - the
- * GWT client, which started editing on the character the browser produced,
- * did not start on it either. Text still being composed by an IME is not
- * typed yet.
+ * Option types characters as well. Alt alone off a Mac types nothing, so it
+ * starts no edit. Text still being composed by an IME is not typed yet.
  */
 export function typesCharacter(e: TypedKey, mac: boolean): boolean {
   if (e.key.length !== 1 || e.isComposing === true || e.metaKey) {

@@ -66,8 +66,7 @@ export class Popup {
 
   /**
    * The button whose press has just closed its own popup: the click that
-   * follows is not to open it again. The GWT client's popup closed the
-   * same way, its auto-hide taking the press on the button.
+   * follows is not to open it again.
    */
   private closedByItsButton: { row: number; col: number } | null = null;
 
@@ -96,11 +95,10 @@ export class Popup {
     this.overlay.className = 'popup-overlay';
     this.overlay.setAttribute('part', 'popup-overlay');
     this.overlay.hidden = true;
-    // In the top layer while open, as the GWT client's popover was: no
-    // edge of the sheet or of the page around it cuts it off. Absolutely
+    // In the top layer while open: no edge of the sheet or of the page around it cuts it off. Absolutely
     // placed there, so in page coordinates and moving with the page. The
-    // inset, margin and overflow undo the browser's popover defaults, as
-    // the GWT client's overlay did: content taller than a set height shows
+    // inset, margin and overflow undo the browser's popover defaults:
+    // content taller than a set height shows
     // past it rather than scrolling. Drawn by the rules the overlay carries
     // - see popupOverlayRules.
     this.overlay.popover = 'manual';
@@ -135,8 +133,8 @@ export class Popup {
    * of the state may differ.
    *
    * The server takes a button away once its cell has scrolled out of view,
-   * and when the sheet changes. The GWT client's popup closed with its
-   * button and told the server it had.
+   * and when the sheet changes. The popup closes with its button and tells
+   * the server it has.
    */
   removeButton(state: PopupButtonState): void {
     // The button goes first, so that a popup closing with it does not give
@@ -165,7 +163,7 @@ export class Popup {
    */
   open(row: number, column: number, contentId: number | string, appId: string): void {
     const nodeId = String(contentId);
-    // Opened again while it shows, the GWT client's popup stayed put.
+    // Opened again while it shows, the popup stays put.
     const showing = this.openPopup !== null && this.openPopup.row === row && this.openPopup.col === column;
     this.openPopup = { row, col: column, nodeId };
     // A resolver per call rather than the sheet's own: the id belongs to
@@ -231,8 +229,8 @@ export class Popup {
 
   /**
    * A press somewhere on the page. A press inside the popup belongs to the
-   * popup's content. A press on the button that opened it closes it, as in
-   * the GWT client, and the click that follows is then not to open it
+   * popup's content. A press on the button that opened it closes it, and the
+   * click that follows is then not to open it
    * again. Any other press closes it.
    */
   pressed(path: EventTarget[]): void {
@@ -248,12 +246,11 @@ export class Popup {
   }
 
   /**
-   * Place the overlay at its button by the GWT client's rule - see
-   * {@link popupPlacement} - against the cell as it is drawn now and the
+   * Place the overlay at its button - see {@link popupPlacement} - against the cell as it is drawn now and the
    * scrolling pane around it.
    *
    * While the cell is outside the rendered range the overlay stays where it
-   * is, as the GWT client's did.
+   * is.
    */
   reposition(): void {
     if (this.openPopup === null) {
@@ -309,8 +306,8 @@ export class Popup {
   };
 
   /**
-   * The popup's header strip: its close box and, as in the GWT client, the
-   * text of the cell the button is on - a filter's column title.
+   * The popup's header strip: its close box and the text of the cell the
+   * button is on - a filter's column title.
    *
    * Shown unless the button asked for {@code headerHidden}, which is what
    * {@code PopupButton.setHeaderHidden(true)} sets: a popup with no header
@@ -337,10 +334,9 @@ export class Popup {
   /**
    * Hide the overlay and release its content, without telling the server.
    *
-   * The card fades out and then goes, as the GWT client's did. What it held
-   * fades with it when the user closed it; when the server did, or took
-   * the button away, the content goes first and the empty card fades, which
-   * is the order the GWT client released them in then.
+   * The card fades out and then goes. What it held fades with it when the
+   * user closed it; when the server did, or took the button away, the
+   * content goes first and the empty card fades.
    */
   private hide(releaseContentFirst: boolean): void {
     const closing = this.openPopup;

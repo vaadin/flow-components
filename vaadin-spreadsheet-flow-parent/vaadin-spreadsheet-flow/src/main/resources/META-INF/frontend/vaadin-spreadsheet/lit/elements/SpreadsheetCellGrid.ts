@@ -78,7 +78,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     overlayAnimationStyles,
     css`
       /* Not clipped: a note hangs over the headers when its cell is in the
-       first row or column, as the GWT client's did, and it is kept inside
+       first row or column, and it is kept inside
        the visible sheet, so it never stretches the scroll area. */
       :host {
         display: block;
@@ -100,8 +100,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         box-sizing: border-box;
         overflow: hidden;
         white-space: nowrap;
-        /* A column flexbox with its content at the bottom, as the GWT client
-         laid cells out. Excel's default vertical alignment is the bottom of
+        /* A column flexbox with its content at the bottom. Excel's default vertical alignment is the bottom of
          the row, and the server's per-style rules say otherwise through
          justify-content - which only means anything here because the cell
          is a flex container. As a block, every cell put its text at the
@@ -160,8 +159,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         background: ${cellBackground};
       }
 
-      /* Dropping into place as it appears and fading out as it goes, as
-       the GWT client's notes did. */
+      /* Dropping into place as it appears and fading out as it goes. */
       .v-spreadsheet-comment-overlay.animate-in {
         animation: overlay-animate-in 120ms;
       }
@@ -172,7 +170,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
 
       /* Comment notes. Anchored at the cell's top-right and above every
        cell, since the point is to be readable over the sheet. */
-      /* A comment as the GWT client showed it: a white card with a soft
+      /* A comment: a white card with a soft
        shadow, the author above the text in small bold type. */
       .v-spreadsheet-comment-overlay {
         z-index: 20;
@@ -223,8 +221,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         resize: none;
         border: 0;
         background: transparent;
-        /* The GWT client's note input, in the sheet's own font rather than
-         the page's the note is shown in. */
+        /* The note's input, in the sheet's own font rather than the page's
+         the note is shown in. */
         font-family: Helvetica;
         font-size: 14px;
         font-weight: 300;
@@ -232,8 +230,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         outline: none;
       }
 
-      /* From a cell's corner to its note, as the GWT client drew it. Under
-       the note, over the cells. */
+      /* From a cell's corner to its note. Under the note, over the cells. */
       .comment-overlay-line {
         position: absolute;
         height: 1px;
@@ -251,8 +248,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       }
 
       /* A reference of the formula being written: its cells tinted in its
-         colour, and the one the caret is in outlined, as the GWT client drew
-         them. Over the cells, and never in the way of a click. */
+         colour, and the one the caret is in outlined. Over the cells, and never in the way of a click. */
       .formula-reference {
         position: absolute;
         pointer-events: none;
@@ -260,8 +256,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         z-index: 2;
       }
 
-      /* The fill handle's drag outline, as the GWT client drew it: the
-       fill colour around a pale green ground, so it reads as what the
+      /* The fill handle's drag outline: the fill colour around a pale green ground, so it reads as what the
        drag will fill rather than as a second selection. */
       .paintmode {
         position: absolute;
@@ -276,10 +271,10 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       .sheet-selection {
         z-index: 2;
       }
-      /* Dimmed while the sheet does not have the keyboard, as the GWT
-       client did; the connector sets the attribute. All of it at once, as
-       the GWT client dimmed it: dimmed piece by piece, the outline showed
-       darker where its sides met each other and the handle. */
+      /* Dimmed while the sheet does not have the keyboard; the connector
+       sets the attribute. All of it at once: dimmed piece by piece, the
+       outline would show darker where its sides meet each other and the
+       handle. */
       :host(:not([sheet-focused])) .sheet-selection {
         opacity: 0.6;
       }
@@ -339,10 +334,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
          piece of the selection that scrolls under it. */
         z-index: 2;
       }
-      /* The fill handle, in the fill colour the drag preview uses - the
-       GWT client's green square, ringed in white so it stands off the
-       outline. Where the GWT client put it: hung from the foot of the
-       right side, two pixels past it. */
+      /* The fill handle, in the fill colour the drag preview uses - a green
+       square, ringed in white so it stands off the outline, hung from the
+       foot of the right side, two pixels past it. */
       .sheet-selection .selection-corner {
         position: absolute;
         right: -2px;
@@ -369,14 +363,14 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
        conditional format's fill for as long as the cell is selected, and
        Excel shows the fill through the selection. An inset shadow spread
        over the whole box tints instead of replacing. */
-      /* The default tint turns a white cell the GWT client's range colour,
+      /* The default tint turns a white cell the range colour,
        rgb(237, 245, 253), while a fill underneath still shows through. */
       .cell.cell-range {
         box-shadow: inset 0 0 0 9999px ${cellRangeBg};
       }
 
-      /* The active cell of a selection of several ranges, as the GWT client
-       marked it: a dark line just inside its edge. */
+      /* The active cell of a selection of several ranges: a dark line just
+       inside its edge. */
       .cell.selected-cell-highlight {
         outline: 1px solid #222;
         outline-offset: -2px;
@@ -444,14 +438,14 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         z-index: 2;
       }
 
-      /* A cell showing a custom editor, padded on every side as the GWT
-       client padded it; a plain cell pads only its sides. */
+      /* A cell showing a custom editor, padded on every side; a plain cell
+       pads only its sides. */
       .cell.custom-editor-cell {
         padding: 2px;
       }
 
       /* Text too wide for its column with nowhere to go: its holder reaches
-       past the cell's edge, as the GWT client's did, and the neighbour
+       past the cell's edge, and the neighbour
        covers what is past it. Not raised, unlike a cell running on. */
       .cell.cut-short {
         overflow: visible;
@@ -489,7 +483,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         display: block;
       }
 
-      /* The GWT client's corner markers: 9px triangles in the cell's
+      /* The corner markers: 9px triangles in the cell's
        top-right corner, inside its border - red for a formula that could
        not be evaluated, amber for a comment. */
       .invalidformula-indicator {
@@ -504,8 +498,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         pointer-events: none;
       }
 
-      /* In the cell's top-right corner, inside its border, as the GWT client
-       drew it: a cell with a thicker border keeps all of it. */
+      /* In the cell's top-right corner, inside its border: a cell with a
+       thicker border keeps all of it. */
       .comment-indicator {
         position: absolute;
         right: 0;
@@ -518,14 +512,13 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         pointer-events: none;
       }
 
-      /* A link looks however its workbook styles it, as in the GWT client;
-       the colour an application may give links is laid among the cell
+      /* A link looks however its workbook styles it; the colour an application may give links is laid among the cell
        styles - see buildCellStyleBlock. */
       .cell.link-cell {
         cursor: pointer;
       }
 
-      /* The filter button, as the GWT client drew it: a small white box with
+      /* The filter button: a small white box with
        a grey arrow, tucked into the bottom-right corner of its cell inside
        the cell's borders. Placed at that corner and pulled back over it. */
       .popup-button {
@@ -556,7 +549,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       /* Cell editor input — absolutely positioned over the cell
            being edited, sized to match. z-index above all cells +
            overlays so the input + caret are always on top. Slice
-           152. Framed as the GWT client framed it: no border, lifted
+           152. Framed with no border, lifted
            off the sheet on a soft shadow, the text at the cell's
            edge. The ring is the editor colour, which only the Lumo
            theme and an application set. */
@@ -577,20 +570,20 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         padding: 0;
       }
 
-      /* The filter arrow, drawn after the button's content as the GWT client
-       drew it, so a theme can swap the glyph. */
+      /* The filter arrow, drawn after the button's content, so a theme can
+       swap the glyph. */
       .popup-button::after {
         content: '▼';
       }
 
       /*
-     * SpreadsheetTheme.LUMO, as the GWT client drew it. The colours come
+     * SpreadsheetTheme.LUMO. The colours come
      * from the documented properties' Lumo defaults on the host; the rest
      * of the look is here.
      */
 
-      /* The Lumo font on every cell - the workbook's own fonts too, as the
-       GWT client had it - and Lumo's small size where the workbook leaves
+      /* The Lumo font on every cell - the workbook's own fonts too - and
+       Lumo's small size where the workbook leaves
        the size to its default. Every style rule sets these on the cells it
        styles; this is more specific than any of them. */
       :host([theme~='lumo']) .cell {
@@ -627,9 +620,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
         background: var(--lumo-success-color-10pct);
       }
 
-      /* Lumo's line colour over the sheet's ground, made solid: the GWT
-       client's line was its panes' border, over the sheet's own ground
-       whatever scrolled past. See-through, it darkened over the cells under
+      /* Lumo's line colour over the sheet's ground, made solid: the line
+       is the panes' border, over the sheet's own ground whatever scrolls
+       past. See-through, it darkened over the cells under
        it and where its pieces overlapped in the frozen corner. */
       :host([theme~='lumo']) .freeze-line {
         background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
@@ -707,7 +700,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * width by one character's width times the character count, which is too
    * coarse to decide on: it calls a date that fits too wide. So the flagged
    * ones - a handful at most - are measured here before their value is
-   * replaced with hashes, which is what the GWT client did too.
+   * replaced with hashes.
    */
   declare tooNarrowCells: ReadonlySet<string>;
   /** Cells given a run-on width whose value fits after all - see remeasureSpills. */
@@ -724,8 +717,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * Widths already measured, by cell style and value. The sheet draws again
    * on every scroll step and key press, and measuring every flagged cell
    * each time - a forced layout per cell - held a large workbook up for a
-   * third of a second a frame. A value is measured once now, as the GWT
-   * client measured a cell once when it drew it.
+   * third of a second a frame. A value is measured once now.
    */
   private readonly measuredWidths = new Map<string, number>();
   /** The style tables and theme the measured widths hold for. */
@@ -835,7 +827,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * The server judges width by one character's width times the character
    * count, which is too coarse to replace a value with hashes on: it calls a
    * date that fits too wide. So it flags candidates and the real width is
-   * measured here, the way the GWT client did. Only the flagged cells are
+   * measured here. Only the flagged cells are
    * measured, and in a probe rather than in the cells themselves - a cell
    * already showing hashes measures as narrow and would flip back.
    */
@@ -855,9 +847,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * <p>
    * The server guesses a value's width from its character count, and a
    * guess that is too wide draws a right-aligned number from the cell's
-   * left edge as though it ran on. The GWT client measured the text, so the
-   * ones that fit their column - the probe has the cell's padding, as the
-   * GWT client's scroll width had - are drawn as ordinary cells.
+   * left edge as though it ran on. The text is measured here, so the ones
+   * that fit their column - the probe has the cell's padding - are drawn as
+   * ordinary cells.
    */
   private remeasureSpills(): void {
     const next = this.remeasured(
@@ -972,8 +964,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
 
   /**
    * Widens or narrows the editor to the text typed into it, and says what
-   * it now holds: the formula field shows it as it is typed, as the GWT
-   * client's did.
+   * it now holds: the formula field shows it as it is typed.
    */
   private readonly handleEditorInput = (e: Event): void => {
     const input = e.currentTarget as HTMLInputElement;
@@ -1018,8 +1009,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   /**
-   * Measures text in the edited cell's style, as the GWT client measured
-   * the editor's, and keeps the width the editor needs for it.
+   * Measures text in the edited cell's style, and keeps the width the
+   * editor needs for it.
    */
   private fitEditor(value: string): number | null {
     const editor = this.renderState.editor;
@@ -1078,8 +1069,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   /**
-   * Where a cell is drawn on screen, frozen panes included - what the GWT
-   * client read off the cell's element. Null while the cell is outside the
+   * Where a cell is drawn on screen, frozen panes included. Null while the cell is outside the
    * rendered range.
    */
   cellClientRect(col: number, row: number): DOMRect | null {
@@ -1105,9 +1095,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   /**
-   * A note that goes fades out, as the GWT client's did: the sheet drops it
-   * at once, and a copy of it, as it was, fades where it was and then goes
-   * too. Its line goes at once, as the GWT client's did. A note still
+   * A note that goes fades out: the sheet drops it at once, and a copy of
+   * it, as it was, fades where it was and then goes too. Its line goes at
+   * once. A note still
    * dropping into place just goes.
    */
   private fadeOutLeavingNotes(): void {
@@ -1180,7 +1170,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       const caret = caretPosition(input.value);
       input.setSelectionRange(caret, caret);
       // What it opened on, so that a formula's references are coloured
-      // from the start, as the GWT client coloured them.
+      // from the start.
       input.dispatchEvent(
         new CustomEvent('cell-editor-caret', {
           detail: { value: input.value, caret },
@@ -1193,8 +1183,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   /**
-   * Move a note that does not fit its pane, as the GWT client did once it
-   * knew the note's size: to the left of its cell when it runs past the
+   * Move a note that does not fit its pane, once its size is known: to the
+   * left of its cell when it runs past the
    * pane's right edge and fits there, up when it runs past the bottom, and
    * never above the top. The line to it follows. A workbook's
    * always-visible note shows only while its cell's top-right corner is in
@@ -1203,8 +1193,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   private placeCommentOverlays(): void {
     // Not the copies of notes that have gone, fading out where they were.
     const notes = this.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)');
-    // A note drops into place as it appears, as in the GWT client, and not
-    // again each time the sheet repaints.
+    // A note drops into place as it appears, and not again each time the
+    // sheet repaints.
     const keys = new Set(Array.from(notes, (note) => note.dataset.key ?? ''));
     for (const note of Array.from(notes)) {
       if (!this.noteKeysShown.has(note.dataset.key ?? '')) {
@@ -1262,7 +1252,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   /**
-   * The panes a note keeps to, on screen, as the GWT client laid them out:
+   * The panes a note keeps to, on screen:
    * the scrolling pane under the column letters and right of the row
    * numbers, past the frozen rows and columns; a frozen pane takes in the
    * headers along its frozen side.
@@ -1276,8 +1266,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     // The grid sits right of the row numbers and under the column letters.
     const splitX = sheetLeft + this.offsetLeft + this.frozenExtent().width;
     const splitY = sheetTop + this.offsetTop + this.frozenExtent().height;
-    // The GWT client's frozen pane took the pixel of the freeze line too, and
-    // the scrolling pane starts past it.
+    // The frozen pane takes the pixel of the freeze line too, and the
+    // scrolling pane starts past it.
     const gapX = this.renderState.horizontalSplitPosition > 0 ? 1 : 0;
     const gapY = this.renderState.verticalSplitPosition > 0 ? 1 : 0;
     const scrollingX = { left: splitX + gapX, right: box.right };
@@ -1305,8 +1295,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     if (!(target instanceof Element)) {
       return;
     }
-    // The right button leaves the selection to the context menu, as in the
-    // GWT client. A press of its own would select the cell under it, and a
+    // The right button leaves the selection to the context menu. A press of
+    // its own would select the cell under it, and a
     // right-click on a range would lose the range the menu is for.
     if ((e as MouseEvent).button === 2) {
       return;
@@ -1470,8 +1460,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       return;
     }
     // A Ctrl-click on a Mac: the browser reports it as a right-click and
-    // fires no click at all. The GWT client took it as the Ctrl-click it is
-    // and added the cell to the selection, so it is reported as one first.
+    // fires no click at all. It is the Ctrl-click it is, adding the cell to
+    // the selection, so it is reported as one first.
     if (e.button === 0 && e.ctrlKey) {
       this.dispatchEvent(
         new CustomEvent('cell-click', {
@@ -1482,7 +1472,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       );
     }
     // The browser's own menu stays unless the sheet takes the right-click
-    // for a menu of its own, as with the GWT client.
+    // for a menu of its own.
     const taken = !this.dispatchEvent(
       new CustomEvent('cell-contextmenu', {
         detail: { col, row, clientX: e.clientX, clientY: e.clientY },
@@ -1561,8 +1551,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     // come later at the same z-index, stay on top of a merge scrolling
     // under them. The selection, the fill outline, the pictures and the
     // filter buttons of the scrolling quadrant go there too, for the same
-    // reason: under a frozen pane they scroll out of sight, as in the GWT
-    // client, instead of painting over it.
+    // reason: under a frozen pane they scroll out of sight, instead of
+    // painting over it.
     const mainMerged = buildMergedCellOverlays(mainOpts);
     const mainOverlays = this.quadrantOverlays(mainOpts);
 
@@ -1677,8 +1667,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       this.handleEditorInput
     );
     const commentOverlays = buildCommentOverlays(this.renderState, this.hoveredKey);
-    // A hidden stand-in for the editor, as the GWT client's input was always
-    // there: TestBench hands it out while no cell is being edited, so tests
+    // A hidden stand-in for the editor, an input that is always there:
+    // TestBench hands it out while no cell is being edited, so tests
     // that ask whether the editor is shown keep working.
     const standIn = html`<input class="cell-input-stand-in" hidden inert tabindex="-1" aria-hidden="true" />`;
     return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${topQuadrant}${leftQuadrant}${cornerQuadrant}${commentOverlays}${editor}${standIn}`;
@@ -1687,10 +1677,10 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   /**
    * What a quadrant draws over its cells: the pictures anchored in it, its
    * piece of the selection and of the fill outline, and its filter buttons
-   * - each in its own pane, as the GWT client had them.
+   * - each in its own pane.
    *
-   * All on the same level, so the order is the stacking: the GWT client
-   * put the selection over the pictures.
+   * All on the same level, so the order is the stacking: the selection goes
+   * over the pictures.
    */
   private quadrantOverlays(opts: QuadrantRenderOpts): TemplateResult {
     const state = opts.state;
@@ -1734,10 +1724,8 @@ function frozenExtent(starts: ReadonlyArray<number>, sizes: ReadonlyArray<number
 }
 
 /**
- * The line along a freeze, as the GWT client drew it: the dark border of a
- * frozen pane, one pixel past the last frozen row or column. It lies over the
- * first pixel of the scrolling cells, where GWT's border pushed them along a
- * pixel instead, so no cell moves for it.
+ * The line along a freeze: the dark border of a frozen pane, one pixel past
+ * the last frozen row or column.
  */
 function freezeLine(along: 'rows' | 'columns', at: number, length: number): TemplateResult {
   const style =
@@ -1876,18 +1864,17 @@ function renderQuadrant(opts: QuadrantRenderOpts): unknown {
       // A cell the server sent nothing for still wears the workbook's
       // default style. Without it the cell falls through to the host's own
       // font and colour - Helvetica 14px in grey - instead of the sheet's
-      // default, Calibri 11pt in black, which is what the GWT client gave
-      // every cell before anything else applied.
+      // default, Calibri 11pt in black, which every cell has before anything
+      // else applies.
       const cellStyleClass = data?.cellStyle ?? 'cs0';
       // A right-aligned value too wide for its cell - a date, a number in
-      // scientific notation - overflowed it in the GWT client as any value
-      // did: it starts at the cell's left edge and runs on to the right, over
+      // scientific notation - overflows it as any value does: it starts at the cell's left edge and runs on to the right, over
       // its own padding and border too, until a neighbour holding a value
       // cuts it off, without an ellipsis.
       const runsRight = spill > 0 && cellStyleClass.split(/\s+/).includes('r');
       const overflowing = runsRight || spill > width;
       // With nowhere to go the text is still held at the column's width from
-      // the padding on, as in the GWT client: it reaches past the cell's
+      // the padding on: it reaches past the cell's
       // right edge, under the neighbour, which is drawn later on a ground of
       // its own - see .cut-short.
       const cutShort = spill > 0 && !overflowing;
@@ -1934,8 +1921,7 @@ function renderQuadrant(opts: QuadrantRenderOpts): unknown {
         invalidFormulaCells.has(key) && !underMerge
           ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
           : '';
-      // In the cell's corner, inside its border, as the GWT client drew
-      // it. It carries the cell's anchor as data attributes too, so it can
+      // In the cell's corner, inside its border. It carries the cell's anchor as data attributes too, so it can
       // be found by the cell it marks.
       const commentIndicator =
         commentCells.has(key) && !underMerge
@@ -2081,8 +2067,8 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
     // selected at all. `part` for the same reason a plain cell has it:
     // a merged cell is still a cell to a stylesheet.
     const cellPart = inSelection && !isActive ? 'cell cell-range' : 'cell';
-    // The markers go on the merged cell, as the GWT client put them: the
-    // cells underneath leave theirs out.
+    // The markers go on the merged cell: the cells underneath leave theirs
+    // out.
     const invalidIndicator = (state.invalidFormulaCells ?? new Set()).has(key)
       ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
       : '';
@@ -2108,8 +2094,7 @@ function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResult[] {
  * The references of the formula being written, as far as this quadrant
  * shows them: each one's cells tinted in its colour at a quarter, and the
  * one the caret is in ringed at three quarters, two pixels inside its
- * edge - the GWT client's colours, drawn over the cells rather than in
- * place of their fill.
+ * edge - drawn over the cells rather than in place of their fill.
  */
 function buildFormulaReferences(opts: QuadrantRenderOpts): TemplateResult[] {
   const out: TemplateResult[] = [];
@@ -2157,21 +2142,18 @@ function buildPaintOutline(opts: QuadrantRenderOpts): TemplateResult | string {
     (piece.hasLeft ? '' : 'border-left-width:0;') +
     (piece.hasRight ? '' : 'border-right-width:0;') +
     (piece.hasBottom ? '' : 'border-bottom-width:0;');
-  // Deliberately not also `.sheet-selection`, which GWT put on it: that
-  // class is how the selection overlay is found, and two elements
+  // Deliberately not also `.sheet-selection`: that class is how the selection overlay is found, and two elements
   // answering to it makes every such lookup order-dependent.
   //
-  // No `part` either. GWT exposed the outline as a class and nothing more,
-  // and naming a part here would add to the documented styling API, which
-  // is a product decision rather than part of this rewrite.
+  // No `part` either: naming a part here would add to the documented
+  // styling API, which is a product decision.
   return html`<div class="paintmode" style=${style}></div>`;
 }
 
 /**
  * The part of a cell rectangle one quadrant shows, in that quadrant's own
  * coordinates, and which of the rectangle's sides it holds. A rectangle
- * that crosses a freeze is drawn a piece per pane, as the GWT client drew
- * it, and a side it runs on past - into the next pane, or out of view - is
+ * that crosses a freeze is drawn a piece per pane, and a side it runs on past - into the next pane, or out of view - is
  * not an edge of the piece.
  */
 interface RangePiece {
@@ -2210,8 +2192,7 @@ function rangePiece(
 
 /**
  * The box a piece's outline is drawn in. One pixel up and left of the
- * cells where the rectangle's own top and left sides are, as the GWT client
- * drew it: each side of the outline then lies on a gridline. A cell draws
+ * cells where the rectangle's own top and left sides are: each side of the outline then lies on a gridline. A cell draws
  * only its right and bottom borders, so the gridlines above and to the left
  * of a range belong to the cells next to it.
  */
@@ -2290,8 +2271,7 @@ function columnWidthOf(state: CellGridRenderState, col: number): number {
 
 /**
  * The box a cell is drawn in: its own, or the merged cell's when the cell
- * starts a merge - the box the GWT client hung a note off and laid the
- * editor over. In grid coordinates, frozen panes included; null while the
+ * starts a merge - the box a note hangs off and the editor lies over. In grid coordinates, frozen panes included; null while the
  * cell is not drawn.
  */
 function drawnCellBox(
@@ -2309,8 +2289,7 @@ function drawnCellBox(
 }
 
 /**
- * How wide the editor is for text drawn at a width, as the GWT client sized
- * it: its cell - the whole merged cell when the cell starts one - and then
+ * How wide the editor is for text drawn at a width: its cell - the whole merged cell when the cell starts one - and then
  * the columns after it, whole ones, until the text fits, and a pixel more,
  * over the gridline at its right. Only the columns drawn count; past them
  * the editor is out of sight anyway, and the text scrolls inside it.
@@ -2327,12 +2306,11 @@ function editorWidth(state: CellGridRenderState, col: number, row: number, textW
   return width + 1;
 }
 
-/** How far from its cell the GWT client hung a note, across and up. */
+/** How far from its cell a note hangs, across and up. */
 const COMMENT_GAP = 15;
 
 /**
- * The line from a cell's top-right corner to its note, as the GWT client
- * drew it: to the note's top-left corner when the note is to the right, to
+ * The line from a cell's top-right corner to its note: to the note's top-left corner when the note is to the right, to
  * its top-right corner when it had to go to the left, two pixels in for the
  * rounded corner. A one-pixel bar, turned about its start.
  */
@@ -2428,10 +2406,10 @@ function drawnNotes(state: CellGridRenderState, hoveredKey: string | null): Draw
  * formula the server rejected shows the same overlay carrying the error
  * instead, which is why one function renders both.
  *
- * Class names are the GWT ones (`comment-overlay-label`,
+ * Class names are those of earlier versions (`comment-overlay-label`,
  * `comment-overlay-author`, `comment-overlay-invalidformula`). A page's
- * styles reached them while the GWT client drew notes outside the
- * component's shadow root; here they are two shadow roots in, so the card,
+ * styles reached them while notes were drawn outside the component's
+ * shadow root; here they are two shadow roots in, so the card,
  * its author and its text are the parts `comment-overlay`, `comment-author`
  * and `comment-text`, which is what an application styles now.
  */
@@ -2442,11 +2420,11 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
   const overlays: TemplateResult[] = [];
   for (const { key, coord, showsError, editing, comment, geometry } of drawnNotes(state, hoveredKey)) {
     // The pane it keeps to, and whether it is one of the workbook's
-    // always-visible notes, which the GWT client showed only while their
-    // cell's corner was in that pane - see placeCommentOverlays.
+    // always-visible notes, which show only while their cell's corner is
+    // in that pane - see placeCommentOverlays.
     const quadrant = quadrantOf(coord.col, coord.row, state.horizontalSplitPosition, state.verticalSplitPosition);
     const pinned = key !== hoveredKey && !editing;
-    // Where the GWT client hung a note: 15px right of the cell and 15px
+    // Where a note hangs: 15px right of the cell and 15px
     // above it, with a line from the cell's corner to the note's. Moved to
     // the cell's left, or down, once the note's size is known, should it
     // not fit the sheet - see placeCommentOverlays.
@@ -2503,9 +2481,9 @@ function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | n
  * visible viewport (selection scrolled off-screen) — TestBench's
  * waitUntil lookup will then poll until the user scrolls back.
  *
- * Wire contract: class names match the GWT-side
- * {@code SelectionWidget.java:116-126}. The overlay is positioned
- * absolutely within the cell-grid's shadow DOM.
+ * Wire contract: the class names are those of earlier versions, which
+ * tests look for. The overlay is positioned absolutely within the
+ * cell-grid's shadow DOM.
  */
 function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | string {
   const { selection } = opts.state;
@@ -2523,20 +2501,18 @@ function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | strin
   // selection" from outside.
   //
   // The overlay carries no part. The documented `cell-range` part names
-  // the cells of the range other than the active one, as the GWT client
-  // had it; on the overlay too, a rule meant for those cells drew around
+  // the cells of the range other than the active one; on the overlay too, a rule meant for those cells drew around
   // the whole range, the active cell included. The selection corner
   // handle (drag affordance in the bottom-right) carries
-  // `part="selection-corner"`. Border divs are internal (s-* names are
-  // GWT-era; here we keep them only as internal class names — no part
-  // attribute since they aren't documented).
+  // `part="selection-corner"`. Border divs are internal (their s-* names
+  // come from earlier versions; no part attribute since they aren't
+  // documented).
   //
   // A side the range runs on past is kept, hidden, so every piece has all
   // four; the handle is only where the range's last cell is.
   const side = (name: string, real: boolean): TemplateResult => html`<div class=${real ? name : `${name} cut`}></div>`;
-  // A range all in hidden columns or rows draws nothing, as in the GWT
-  // client, whose outline was placed by its first cell and hid with it;
-  // drawn, it was a sliver of outline and fill handle on the gridline.
+  // A range all in hidden columns or rows draws nothing: drawn, it would
+  // be a sliver of outline and fill handle on the gridline.
   if (piece.right <= piece.left || piece.bottom <= piece.top) {
     return html`
       <div
@@ -2547,8 +2523,8 @@ function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | strin
       ></div>
     `;
   }
-  // With several ranges selected the GWT client drew no outline and no
-  // fill handle - the active cell carries the selected-cell-highlight
+  // With several ranges selected there is no outline and no fill handle -
+  // the active cell carries the selected-cell-highlight
   // instead. The overlay stays, for the coordinates it carries.
   return html`
     <div
@@ -2604,8 +2580,7 @@ function textColorDeclaration(data: CellData | undefined): string {
  * Blink and WebKit keep the index of a selector inside its rule in 13 bits
  * and silently drop every selector that starts past the 8192nd simple
  * selector: a rule listing 3432 cells as `.cell.col<N>.row<N>` styled the
- * first 2731 of them and no more. The GWT client's rules lost their tails
- * the same way, sooner, its selectors being longer. A thousand selectors of
+ * first 2731 of them and no more. A thousand selectors of
  * the three classes these carry stay well inside the limit.
  */
 const MAX_SELECTORS_PER_RULE = 1000;
@@ -2631,15 +2606,13 @@ function chunkedRules(selectors: readonly string[], block: string): string[] {
 function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | string {
   const rules: string[] = [];
   const styles = state.cellStyleToCSSStyle;
-  // A sheet with its gridlines turned off, as the GWT client's nogrid rule
-  // did it. First, and no more specific than the style rules, so the
+  // A sheet with its gridlines turned off. First, and no more specific than the style rules, so the
   // borders the workbook gives its cells - in their styles, conditional
   // formats and the borders shifted onto a neighbour - still draw.
   if (state.displayGridlines === false) {
     rules.push('.cell.cell { border-right: 0; border-bottom: 0; }');
   }
-  // The workbook's default style under every cell, as the GWT client laid
-  // it. A style is sent with only what it changes from the default, so a
+  // The workbook's default style under every cell. A style is sent with only what it changes from the default, so a
   // cell styled cs5 whose font colour is automatic carries no colour of its
   // own: scoped to .cs0 alone, the default reached none of those cells and
   // they fell through to the host's grey. Two classes, so it beats the
@@ -2656,8 +2629,8 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
     );
   }
   // Links: --vaadin-spreadsheet-link-fg when an application sets it, for a
-  // link whose own style sets no colour. Unset, the default style's colour,
-  // as the GWT client showed every link. After the default rule, before the
+  // link whose own style sets no colour. Unset, the default style's colour.
+  // After the default rule, before the
   // cell styles, so a workbook's styled link keeps its own colour.
   rules.push(
     `.cell.link-cell { color: var(--vaadin-spreadsheet-link-fg, ${
@@ -2694,8 +2667,7 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
     rules.push(`.cell.cf${index} { ${conditional[index]} }`);
   }
   // Shifted borders last. These arrive as complete rules selecting
-  // `.col<N>.row<N>`; scope them to cells the way the GWT client did,
-  // which prefixed them with its sheet id.
+  // `.col<N>.row<N>`; scope them to cells.
   for (const rule of state.shiftedCellBorderStyles ?? []) {
     const open = rule.indexOf('{');
     if (open < 0) {
@@ -2711,8 +2683,7 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
     return '';
   }
   // The rules go in as text, never as markup. A workbook names its own
-  // fonts, and a name is written into these rules as it is. The GWT client
-  // inserted each rule through the CSSOM, which reads no markup either.
+  // fonts, and a name is written into these rules as it is.
   return html`<style>
     ${rules.join('\n')}
   </style>`;
@@ -2752,9 +2723,8 @@ function editorDeclarations(body: string | undefined): string[] {
 /**
  * Inline style that dresses the editor as the cell it edits.
  *
- * The GWT client gave the input the cell's own classes, so the user typed
- * in the cell's font, colour, fill and alignment. Classes would bring the
- * cell's borders and indent too, and holding those off would take
+ * The user types in the cell's font, colour, fill and alignment. The cell's
+ * own classes would bring its borders and indent too, and holding those off would take
  * `!important` - which no `::part(cell-input)` rule of an application could
  * then override. So the styles are gathered here instead, in the order the
  * rules of {@link buildCellStyleBlock} and the element's `.cell.r` resolve
@@ -2849,8 +2819,7 @@ function buildCellEditorOverlay(
   // The Lumo theme puts every cell in its own font, which the cell's
   // styles would undo here: they reach the editor inline, past anything a
   // stylesheet says. So the theme's font goes last - and the sheet's text
-  // colour, which the GWT client's Lumo editor wrote in whatever colour the
-  // cell was.
+  // colour, which Lumo's editor writes in whatever colour the cell is.
   const style =
     `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
     editorCellStyle(state, col, row) +
@@ -2910,8 +2879,8 @@ function buildCellEditorOverlay(
       dispatchEditorEvent(input, 'cell-editor-cancel', input.value);
     } else if (ARROW_KEYS.includes(e.key)) {
       // In a formula the sheet may take the arrow, to point at a cell with
-      // it. One it leaves moves the caret and never commits: the GWT client
-      // kept a formula open whatever the arrows did.
+      // it. One it leaves moves the caret and never commits: a formula stays
+      // open whatever the arrows do.
       const pointed = !input.dispatchEvent(
         new CustomEvent('cell-editor-arrow', {
           detail: { key: e.key, shiftKey: e.shiftKey, value: input.value, caret: input.selectionStart ?? 0 },
@@ -2993,8 +2962,7 @@ function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRender
   // Defensive default — some test fixtures do not declare the
   // overlays array. Real connector pushes always populate the field.
   //
-  // Each in the pane its anchor cell is in, as the GWT client placed them,
-  // so a picture anchored in a frozen row stays with that row. The frozen
+  // Each in the pane its anchor cell is in, so a picture anchored in a frozen row stays with that row. The frozen
   // panes' coordinates start where the sheet does, so the position the
   // connector worked out serves in any pane.
   const overlays = (state.overlays ?? []).filter(
@@ -3071,8 +3039,8 @@ function buildPopupButtons(state: CellGridRenderState, quadrant: QuadrantRenderO
       e.stopPropagation();
       press(e.currentTarget as Element, false);
     };
-    // A button to assistive technology and the keyboard, as the GWT
-    // client's was, and pressed with Enter or Space like any button. The
+    // A button to assistive technology and the keyboard, pressed with Enter
+    // or Space like any button. The
     // keys are its own: the sheet would edit the cell with them.
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== ' ') {

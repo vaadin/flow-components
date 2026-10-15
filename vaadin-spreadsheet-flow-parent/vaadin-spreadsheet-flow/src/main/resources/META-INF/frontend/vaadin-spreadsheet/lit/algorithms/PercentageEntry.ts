@@ -13,9 +13,9 @@
  *
  * Someone typing `5` into a cell that reads `19%` means five percent. Without
  * help they get five hundred: the editor sends `5`, the sheet stores 5, and a
- * percentage format draws 5 as `500.00%`. The GWT client avoided that by
- * opening the editor on `5%` and putting the caret before the sign, so the
- * next keystroke still lands on the number.
+ * percentage format draws 5 as `500.00%`. So the editor opens on `5%`, with
+ * the caret before the sign, and the next keystroke still lands on the
+ * number.
  *
  * Both halves of that matter. The `%` alone would put the caret after it and
  * turn `53` into `5%3`.

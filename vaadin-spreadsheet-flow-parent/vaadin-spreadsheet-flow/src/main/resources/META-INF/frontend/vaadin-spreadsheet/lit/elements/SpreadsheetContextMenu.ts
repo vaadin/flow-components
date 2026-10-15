@@ -49,12 +49,12 @@ export function emptyContextMenuRenderState(): ContextMenuRenderState {
  * Closing it from the keyboard dispatches `context-menu-dismiss`, which the
  * connector reports as `contextMenuClosed`.
  *
- * The keyboard works as the GWT client's menu bar had it: the menu takes
+ * The keyboard: the menu takes
  * the focus when it opens, with no item in hand; Down and Up take the first
  * item and then go down or up the list and round, Enter picks the item in
  * hand, Left and Tab close the menu. The item under the pointer is the one
- * in hand. Assistive technology is told it is a menu of menu items, as the
- * GWT client's menu bar told it; the items are not Tab stops.
+ * in hand. Assistive technology is told it is a menu of menu items; the
+ * items are not Tab stops.
  *
  * Built as an internal element rather than on `@vaadin/context-menu`: the Lit
  * client has no `@vaadin/*` dependency today, and adding one to the
@@ -92,10 +92,8 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
         display: none;
       }
 
-      /* The menu as the GWT client drew it: a white card with a soft
-       shadow, its items in 27px rows. */
-      /* In the top layer while open, as the GWT client's menu was outside
-       the sheet: the sheet clips what overflows it, and a menu opened near
+      /* The menu: a white card with a soft shadow, its items in 27px rows. */
+      /* In the top layer while open, outside the sheet: the sheet clips what overflows it, and a menu opened near
        its bottom or right edge lost its last items. Absolutely placed
        there, so in page coordinates and moving with the page. The inset
        and margin undo the browser's popover defaults; a menu taller than
@@ -117,8 +115,7 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
         outline: none;
       }
 
-      /* Dropping into place as it opens and fading out as it closes, as
-       the GWT client's menu did. */
+      /* Dropping into place as it opens and fading out as it closes. */
       .menu.animate-in {
         animation: overlay-animate-in 120ms;
       }
@@ -147,7 +144,7 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
         white-space: nowrap;
       }
 
-      /* The item under the pointer on the GWT client's blue, in light type.
+      /* The item under the pointer on blue, in light type.
        A stylesheet that gives it a lighter ground through the property
        sets its text through ::part(context-menu-item). */
       .item:hover,
@@ -157,7 +154,7 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
         outline: none;
       }
 
-      /* The item being pressed, darkened a little, as the GWT client did. */
+      /* The item being pressed, darkened a little. */
       .item:active::before {
         content: '';
         position: absolute;
@@ -168,8 +165,7 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
         border-radius: inherit;
       }
 
-      /* SpreadsheetTheme.LUMO, as the GWT client drew it: Lumo's card and
-       spacing, and the item under the pointer in the primary tint. */
+      /* SpreadsheetTheme.LUMO: Lumo's card and spacing, and the item under the pointer in the primary tint. */
       :host([theme~='lumo']) .menu {
         padding: var(--lumo-space-xs);
         border-radius: var(--lumo-border-radius-s);
@@ -271,8 +267,8 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
     showInTopLayer(panel);
     this.place(panel);
     panel.focus({ preventScroll: true });
-    // Only as it opens: offered its actions again while open, the GWT
-    // client's menu stayed put.
+    // Only as it opens: offered its actions again while open, the menu
+    // stays put.
     const before = changed.get('renderState') as ContextMenuRenderState | undefined;
     if (before === undefined || !isShowing(before)) {
       animateIn(panel);
@@ -280,7 +276,7 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
   }
 
   /**
-   * Where the GWT client put its menu: at the point clicked, to the left of
+   * Where the menu goes: at the point clicked, to the left of
    * it when it would cross the right edge of the window, and moved up to
    * fit when it would cross the bottom - no higher than the top, where it
    * is as tall as the window.

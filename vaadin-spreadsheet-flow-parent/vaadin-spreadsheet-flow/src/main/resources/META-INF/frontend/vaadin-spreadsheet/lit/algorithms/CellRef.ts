@@ -11,10 +11,7 @@
 import type { MergedRegion } from '../types/wire.js';
 
 /**
- * A 1-based cell coordinate. Mirrors the GWT-side
- * `SheetWidget.CellCoord` shape; renamed slightly to avoid the
- * "Coord" / "CellCoord" naming ambiguity that bit the Java
- * codebase.
+ * A 1-based cell coordinate.
  *
  * - `col` is 1-based: column A is 1, column B is 2, ..., column Z is 26,
  *   column AA is 27, column ZZ is 702, column AAA is 703.

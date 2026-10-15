@@ -14,7 +14,7 @@
  */
 
 /**
- * Where a popup goes, by the GWT client's rule, in screen coordinates.
+ * Where a popup goes, in screen coordinates.
  *
  * Under the button's cell, its right edge on the cell's right edge - or
  * starting at that edge instead, when ending there would take it past the
@@ -43,8 +43,7 @@ export function popupPlacement(
 }
 
 /**
- * Where a link cell's tooltip goes, in viewport pixels, by the GWT client's
- * rule for it: left-aligned under the cell; right-aligned with the cell
+ * Where a link cell's tooltip goes, in viewport pixels: left-aligned under the cell; right-aligned with the cell
  * when it is wider than the cell and would run off the right of the window
  * but fits that way; and above the cell when there is no room below but
  * room above.

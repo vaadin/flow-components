@@ -204,8 +204,7 @@ export class SheetTabs {
   /**
    * A scroll button moved the strip.
    *
-   * Nothing is reported: the GWT client told its own handler about the
-   * new index, but the Flow server has no counterpart for it, so which
+   * Nothing is reported: the server has no use for it, so which
    * tab is leftmost is the client's business alone. Scrolling the strip
    * does not change the sheet.
    *

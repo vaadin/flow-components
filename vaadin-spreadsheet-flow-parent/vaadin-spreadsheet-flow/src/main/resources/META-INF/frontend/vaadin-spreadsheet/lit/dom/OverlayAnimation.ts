@@ -11,9 +11,9 @@
 import { css } from 'lit';
 
 /**
- * The GWT client's animations for its overlays - the filter popup, the
- * context menu and the notes: dropping 4px into place while fading in as one
- * opened, and fading out as it closed. They played in either theme.
+ * The animations of the sheet's overlays - the filter popup, the context
+ * menu and the notes: dropping 4px into place while fading in as one opens,
+ * and fading out as it closes. They play in either theme.
  *
  * Keyframes belong to the shadow tree whose stylesheet defines them, so
  * every tree an overlay is drawn in carries these.
@@ -69,8 +69,8 @@ function stayIn(el: HTMLElement): void {
 }
 
 /**
- * Play the opening animation on an overlay that has just appeared, the way
- * the GWT client did: with the {@code animate-in} class, taken off again
+ * Play the opening animation on an overlay that has just appeared: with the
+ * {@code animate-in} class, taken off again
  * once the animation has run. An overlay that a stylesheet gives no
  * animation loses the class at once. One that is on its way out stays.
  */
@@ -97,8 +97,7 @@ export function animateIn(el: HTMLElement): void {
 }
 
 /**
- * Take an overlay away the way the GWT client did: fade it out with the
- * {@code animate-out} class and call `done`, which removes it, once the fade
+ * Take an overlay away: fade it out with the {@code animate-out} class and call `done`, which removes it, once the fade
  * has run. One still dropping into place is let finish, and then goes
  * without a fade. One that a stylesheet gives no fade goes at once, and so
  * does one on a hidden page, which runs no animations until it is shown.

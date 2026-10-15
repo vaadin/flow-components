@@ -15,22 +15,19 @@
  * clipboard format and lets the spreadsheet cross-paste with Excel /
  * Sheets / Numbers / etc.
  *
- * Only the copy direction lives here, as in the GWT client's
- * {@code CopyPasteHandlerImpl.getClipboardText}: the server parses what
- * is pasted.
+ * Only the copy direction lives here: the server parses what is pasted.
  *
  * A cell that holds a tab, a line break or a double quote is written in
  * double quotes, with its own quotes doubled, as spreadsheets put such
  * cells on the clipboard; the server's {@code ClipboardText} reads them
- * back the same way. The GWT client wrote them as they were, so a cell
- * with a line break pasted as two rows.
+ * back the same way. Written as they were, a cell with a line break would
+ * paste as two rows.
  */
 
 /**
  * Serialize a 2D array of cell values into TSV format.
  *
- * As the GWT client's {@code CopyPasteHandlerImpl.getClipboardText} did,
- * apart from the quoting: `null` values emit as empty strings; column
+ * `null` values emit as empty strings; column
  * separator is `\t`; row separator is `\n`; no trailing newline on the
  * last row.
  *

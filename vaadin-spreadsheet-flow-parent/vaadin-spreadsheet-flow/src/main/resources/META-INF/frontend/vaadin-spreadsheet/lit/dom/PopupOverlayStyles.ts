@@ -20,11 +20,11 @@ import { popupBackground, popupBorderColor } from '../elements/ThemeProperties.j
  *
  * The overlay is the connector's own element in the host's tree, where no
  * internal element's stylesheet reaches, and a rule says what an inline
- * style cannot: "on hover", and "under the Lumo theme". The GWT client's
- * card is white, rounded and softly shadowed, with an 18px header whose
- * close box sits at its left, grey until pointed at, and whose caption is
- * centred; its Lumo popup put the close box at the right, under a rule, as
- * Lumo's cross, and the caption at the left in bold.
+ * style cannot: "on hover", and "under the Lumo theme". The card is white,
+ * rounded and softly shadowed, with an 18px header whose close box sits at
+ * its left, grey until pointed at, and whose caption is centred. Under Lumo
+ * the close box is Lumo's cross at the right, under a rule, and the caption
+ * is at the left in bold.
  */
 export function popupOverlayRules(): HTMLStyleElement {
   const rules = document.createElement('style');

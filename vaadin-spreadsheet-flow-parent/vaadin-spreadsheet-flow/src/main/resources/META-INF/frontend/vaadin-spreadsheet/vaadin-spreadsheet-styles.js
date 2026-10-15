@@ -25,7 +25,7 @@ import { borderColor, cellBackground, textColor } from './lit/elements/ThemeProp
  *      never declared, so a value an application sets on any
  *      ancestor reaches the sheet. Each read falls back to a
  *      {@code --_vaadin-spreadsheet-*} theme default and then to the
- *      GWT client's own value.
+ *      value it has always had.
  *   3. {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
  *      + {@code Spreadsheet.HIDE_TABSHEET_STYLE} ("hidetabsheet")
  *      Java constants — applied to the host's class list. The
@@ -37,7 +37,7 @@ import { borderColor, cellBackground, textColor } from './lit/elements/ThemeProp
  *      documented property its Lumo value; each element draws the
  *      rest of the Lumo look under {@code :host([theme~='lumo'])}.
  *
- * GWT-era selectors (.s-top, .sheet-tabsheet, .ch.col1, .rh.row1,
+ * Selectors of earlier versions (.s-top, .sheet-tabsheet, .ch.col1, .rh.row1,
  * .addressfield, .functionfield, .bottom-right-pane, .v-spreadsheet,
  * .merged-cell, .v-contextmenu, etc.) were NOT documented and are
  * removed. End users who customized appearance via those selectors
@@ -47,8 +47,7 @@ export const spreadsheetStyles = css`
   :host {
     /* No documented property is declared here. A declaration on the
        host would hide whatever an application sets on an ancestor -
-       its theme's html rule, a layout around the sheet - as the GWT
-       client never did. */
+       its theme's html rule, a layout around the sheet. */
 
     /* A flex column so the root fills a host that has been given a
        height. Declared here rather than written onto the host inline,
@@ -74,9 +73,9 @@ export const spreadsheetStyles = css`
     --default-font-family: Helvetica;
     --default-font-size: 11pt;
     color: ${textColor};
-    /* No font here. The GWT client set its own font on the sheet's parts
-       and left the rest to the page: a comment, the context menu and a
-       pop-up are drawn in the page's font, as they were then. */
+    /* No font here. The sheet's parts set their own font and leave the
+       rest to the page: a comment, the context menu and a pop-up are
+       drawn in the page's font. */
     box-sizing: border-box;
     overflow: hidden;
     position: relative;
@@ -86,17 +85,16 @@ export const spreadsheetStyles = css`
      carries the visible frame. The border belongs here rather than on
      the host for the same reason the layout does: the host is the
      application's element. Keeping it here also means the root fills
-     the host exactly, as the GWT widget's root div did. */
+     the host exactly. */
   /* The visible frame. It belongs on the component's own root rather
      than on the host, for the same reason the layout does — and it
-     keeps the root exactly the size of the host, as the GWT widget's
-     root div was. The root's sizing is set on the element itself; only
+     keeps the root exactly the size of the host. The root's sizing is set on the element itself; only
      the theming lives here. */
   .spreadsheet-root {
     border: 1px solid ${borderColor};
   }
 
-  /* A header being dragged, as the GWT client showed it: a line across the
+  /* A header being dragged: a line across the
      whole sheet where the edge would go, and the resize cursor wherever the
      pointer goes. The connector places the line. */
   .resize-line {
@@ -117,8 +115,8 @@ export const spreadsheetStyles = css`
     cursor: row-resize;
   }
 
-  /* The size the header would take, by the pointer, on the GWT client's
-     tooltip. In the top layer, placed in viewport coordinates; the inset,
+  /* The size the header would take, by the pointer, on a tooltip. In the
+     top layer, placed in viewport coordinates; the inset,
      margin and border undo the browser's popover defaults. */
   .resize-tooltip,
   .link-tooltip {
@@ -137,7 +135,7 @@ export const spreadsheetStyles = css`
     pointer-events: none;
   }
 
-  /* SpreadsheetTheme.LUMO, as the GWT client drew it: the Lumo value of
+  /* SpreadsheetTheme.LUMO: the Lumo value of
      every documented property the application leaves unset. Lumo's
      tokens come from the application's Lumo theme. */
   :host([theme~='lumo']) {
@@ -205,7 +203,7 @@ export const spreadsheetStyles = css`
  * shadow tree and styled there.
  */
 export const spreadsheetOverlayStyles = css`
-  /* The filter popup's content, laid out as the GWT client laid it out:
+  /* The filter popup's content:
      the column's own controls above its values, the values in a column
      that scrolls past 275px. The content is the application's components,
      in the host's light DOM, so these rules live at the document level. */

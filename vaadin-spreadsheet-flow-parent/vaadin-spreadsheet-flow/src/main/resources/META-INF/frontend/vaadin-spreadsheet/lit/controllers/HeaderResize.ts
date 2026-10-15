@@ -50,7 +50,7 @@ interface EdgeDrag {
 }
 
 /**
- * Resizing columns and rows by their header edges, as the GWT client did.
+ * Resizing columns and rows by their header edges.
  * The column or row keeps its size while the edge is dragged - a line and
  * a tooltip follow the pointer - and takes the new one when the drag ends,
  * here at once and then on the server; 0 hides it. A double-click on an
@@ -75,7 +75,7 @@ export class HeaderResize {
 
   /**
    * Over the sheet while a resize drag moves, so the resize cursor shows
-   * wherever the pointer goes, as the GWT client's did. Not before the
+   * wherever the pointer goes. Not before the
    * pointer moves: the second click of a double-click, which fits the
    * column to its content, has to reach the handle.
    */
@@ -87,16 +87,14 @@ export class HeaderResize {
     private readonly host: HeaderResizeHost,
     signal: AbortSignal
   ) {
-    // What a header drag shows, as the GWT client showed it - see
-    // showGuide. Drawn by the host's stylesheet.
+    // What a header drag shows - see showGuide. Drawn by the host's stylesheet.
     this.line = document.createElement('div');
     this.line.className = 'resize-line';
     this.line.hidden = true;
     this.cover = document.createElement('div');
     this.cover.className = 'resize-cover';
     this.cover.hidden = true;
-    // In the top layer, as the GWT client's tooltip was outside the sheet,
-    // so no edge cuts it off.
+    // In the top layer, outside the sheet, so no edge cuts it off.
     this.tooltip = document.createElement('div');
     this.tooltip.className = 'resize-tooltip';
     this.tooltip.popover = 'manual';
@@ -241,7 +239,7 @@ export class HeaderResize {
   };
 
   /**
-   * The line and the tooltip of a resize drag, as the GWT client drew them:
+   * The line and the tooltip of a resize drag:
    * a line across the whole sheet where the edge would go - no further
    * back than where the column or row starts - and the size it would make,
    * 10px right of the pointer and 25px above it. Nothing at all is

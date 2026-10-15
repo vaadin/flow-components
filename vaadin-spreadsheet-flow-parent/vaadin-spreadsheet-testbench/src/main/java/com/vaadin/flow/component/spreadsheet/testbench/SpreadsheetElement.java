@@ -130,8 +130,8 @@ public class SpreadsheetElement extends TestBenchElement {
      */
     public SheetCellElement getCellAt(int row, int column) {
         // Cells and the merges drawn over them are divs; the prefix keeps
-        // anything else with a cell's classes from answering to them, as
-        // the GWT client's inline editor did.
+        // anything else with a cell's classes from answering to them, such
+        // as an input dressed as the cell it edits.
         String selector = String.format("div.col%d.row%d.cell", column, row);
         // Polls the cell-grid's shadow root for the cell — the grid may
         // not have rendered yet (e.g. just after a scroll). Where a merge

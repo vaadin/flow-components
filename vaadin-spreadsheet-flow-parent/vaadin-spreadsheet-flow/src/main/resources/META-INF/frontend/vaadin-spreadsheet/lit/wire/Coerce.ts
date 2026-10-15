@@ -18,8 +18,7 @@
  * string into an array. The Flow runtime serializes server-side
  * property values to JSON strings when they reach the
  * {@code <vaadin-spreadsheet>} element's attribute lane, and they
- * arrive at the connector's setters as strings; the GWT-side
- * client used to JSON-parse them on the way in.
+ * arrive at the connector's setters as strings, to be parsed on the way in.
  */
 export function coerceArray<T>(value: T[] | string | null | undefined): T[] {
   if (value == null) {

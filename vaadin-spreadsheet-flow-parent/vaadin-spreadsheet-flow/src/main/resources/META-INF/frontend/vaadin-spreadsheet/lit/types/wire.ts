@@ -110,9 +110,8 @@ export interface OverlayInfo {
  * Context-menu action details emitted from server to client.
  *
  * Server-side shape: `com.vaadin.flow.component.spreadsheet.client.
- * SpreadsheetActionDetails`. Note `type` is `int` on the server but
- * `string` on the GWT client side; the wire is a JSON number so the new
- * TS client reads it as `number` (preserving the server's typing).
+ * SpreadsheetActionDetails`. `type` is an `int` on the server and a JSON
+ * number on the wire, so it is a `number` here.
  */
 export interface SpreadsheetActionDetails {
   caption: string;
@@ -127,10 +126,9 @@ export interface SpreadsheetActionDetails {
  * Per-popup-button state.
  *
  * Server-side shape: `com.vaadin.flow.component.spreadsheet.shared.
- * PopupButtonState`. The GWT-side mirror extends `AbstractComponentState`
- * (Vaadin-8 base) for legacy reasons; the wire-format Serializer's
- * NON_DEFAULT inclusion guarantees the server never emits those legacy
- * fields, so the TS-side interface only declares the server's own POJO
+ * PopupButtonState`. The wire-format Serializer's NON_DEFAULT inclusion
+ * leaves out the fields the server class inherits, so the TS-side
+ * interface only declares the server's own POJO
  * shape.
  */
 export interface PopupButtonState {

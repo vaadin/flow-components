@@ -19,11 +19,10 @@ import { borderColor, formulabarBg, formulabarFont, formulabarFontSize, headerBo
  * Two display fields drive the strip:
  *
  * - {@code address} — the active cell's address ("A1") or its
- *   associated named-range name. Mirrors what the GWT path
- *   pushed via {@code updateFormulaBar(possibleName, col, row)}.
+ *   associated named-range name, from
+ *   {@code updateFormulaBar(possibleName, col, row)}.
  * - {@code formula} — the active cell's formula or display value.
- *   Mirrors what the GWT path pushed via
- *   {@code showSelectedCell(name, col, row, cellValue, ...)}.
+ *   From {@code showSelectedCell(name, col, row, cellValue, ...)}.
  *
  * Both fields are editable text inputs. Editing the address +
  * pressing Enter dispatches {@code sheet-address-changed} from
@@ -41,8 +40,8 @@ export interface FormulaBarRenderState {
    */
   namedRanges: ReadonlyArray<string>;
   /**
-   * The references of a formula being written, coloured behind its text as
-   * the GWT client coloured them. Null or absent while no formula is.
+   * The references of a formula being written, coloured behind its text.
+   * Null or absent while no formula is.
    */
   highlights?: { text: string; references: ReadonlyArray<{ start: number; end: number; color: string }> } | null;
 }
@@ -86,8 +85,8 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       box-sizing: border-box;
       height: var(--vaadin-spreadsheet-formulabar-height, 30px);
       background: ${formulabarBg};
-      /* The bar's own border colour, or each line in the documented colour
-         the GWT client drew it in: this one in the header border colour. */
+      /* The bar's own border colour, or each line in its documented colour:
+         this one in the header border colour, as in earlier versions. */
       --_line-color: ${headerBorderColor};
       border-bottom: 1px solid var(--vaadin-spreadsheet-formulabar-border, var(--_line-color));
       font-family: ${formulabarFont};
@@ -110,22 +109,21 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       color: inherit;
     }
 
-    /* The address field's panel, laid out as the GWT client's: wide
-       enough for a long range or a named one, on its own ground. */
+    /* The address field's panel: wide enough for a long range or a named one, on its own ground. */
     .address-panel {
       position: relative;
       flex: 0 0 auto;
       box-sizing: border-box;
       width: 176px;
       height: 100%;
-      /* The divider in the sheet's border colour, as the GWT client drew it. */
+      /* The divider in the sheet's border colour, as in earlier versions. */
       --_line-color: ${borderColor};
       border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, var(--_line-color));
       background: #fafafa;
     }
 
-    /* The GWT client gave the address a size but never a font, so the
-       browser's own font for text fields showed there - Arial in Chrome -
+    /* The address has a size but never a font of its own, so the
+       browser's own font for text fields shows there - Arial in Chrome -
        beside a formula in Helvetica. A font set for the bar, by an
        application or by the theme, still writes both. */
     .address {
@@ -164,8 +162,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       border-radius: 2px;
     }
 
-    /* The named-range picker, as the GWT client drew it: an arrow at the
-       right end of the address field, over a select that cannot be seen
+    /* The named-range picker: an arrow at the right end of the address field, over a select that cannot be seen
        but opens the list of names. */
     .namedrangebox {
       position: absolute;
@@ -178,7 +175,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       cursor: pointer;
     }
 
-    /* Where the GWT client drew its arrow: a pixel in from the left of
+    /* Where the arrow goes: a pixel in from the left of
        the panel's last 15px, on a 33px line from the top of the bar - a
        little below the middle. */
     .namedrange-arrow {
@@ -194,8 +191,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       pointer-events: none;
     }
 
-    /* SpreadsheetTheme.LUMO, as the GWT client drew it: the address on a
-       tinted panel, both fields indented by Lumo's spacing. */
+    /* SpreadsheetTheme.LUMO: the address on a tinted panel, both fields indented by Lumo's spacing. */
     :host([theme~='lumo']) input,
     :host([theme~='lumo']) .formula-highlights {
       padding-left: var(--lumo-space-s);
@@ -205,7 +201,8 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       padding-right: var(--lumo-space-xs);
     }
 
-    /* In Lumo the GWT client drew the divider in the header border colour. */
+    /* In Lumo the divider is in the header border colour, as in earlier
+       versions. */
     :host([theme~='lumo']) .address-panel {
       --_line-color: ${headerBorderColor};
       background: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct)) var(--lumo-base-color);
@@ -220,8 +217,8 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
 
   /**
    * Whether the active cell is locked on a protected sheet. The formula
-   * field is then off, as the GWT client's was: on, it took a whole formula
-   * and refused it only once it was written.
+   * field is then off: on, it would take a whole formula and refuse it only
+   * once it was written.
    */
   declare formulaLocked: boolean;
 
@@ -295,8 +292,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
         this.commitFormula(target.value, undefined, false, (e as FocusEvent).relatedTarget);
       }
     });
-    // What is typed here shows in an open cell editor as it is typed, as
-    // the GWT client had it.
+    // What is typed here shows in an open cell editor as it is typed.
     root.addEventListener('input', (e: Event) => {
       const target = e.target;
       if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
@@ -336,8 +332,8 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
    * The field is bound by property, so Lit writes it only when the bound
    * value changes - and after an edit is committed or thrown away the
    * state often holds the same value as before the edit, while the input
-   * still holds what was typed. The GWT client wrote the field every
-   * time. While the field has the keyboard it is the user's, and is left
+   * still holds what was typed, so the field is written every time. While
+   * the field has the keyboard it is the user's, and is left
    * alone.
    */
   updated(changed: Map<string, unknown>): void {
@@ -355,8 +351,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
    * The keys that finish editing in the formula field.
    *
    * Enter commits and moves on to the next cell down, Tab to the next
-   * one right; shift+Tab commits without moving, which is what the GWT
-   * client did. Escape throws the edit away and puts the cell's own
+   * one right; shift+Tab commits without moving. Escape throws the edit away and puts the cell's own
    * value back. Every other key belongs to the field, and so does the
    * event - without stopping it, typing a formula would also be typing
    * into the sheet underneath.
@@ -365,7 +360,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
     e.stopPropagation();
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       // In a formula the sheet may take the arrow, to point at a cell
-      // with it, as the GWT client's formula field let it.
+      // with it.
       const pointed = !this.dispatchEvent(
         new CustomEvent('formula-arrow', {
           detail: { key: e.key, shiftKey: e.shiftKey, value: input.value, caret: input.selectionStart ?? 0 },
@@ -517,8 +512,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
 
   render(): TemplateResult {
     const { address, formula, namedRanges = [], highlights = null } = this.renderState;
-    // The picker follows the address field, as the GWT client's did: the
-    // range the selection is on, or the blank entry. Left on the range
+    // The picker follows the address field: the range the selection is on, or the blank entry. Left on the range
     // picked before, picking that range again would not be a change.
     // `live` compares with the option as it is, which the user may have
     // changed since the last render.

@@ -70,7 +70,7 @@ const STOPPED_AFTER_MS = 100;
  * margin ahead in the direction of scrolling, so a steady scroll needs a
  * request only every screen or so.
  * <li>Once the sheet stops, tell the server where, even when its cells are
- * all loaded, as the GWT client did after every scroll. The server uses the
+ * all loaded. The server uses the
  * range it was last given for more than cells: it closes the popup of a
  * button scrolled out of it, and lets go of pictures and components.
  * <li>One request of its own at a time. While the server answers, the sheet

@@ -52,12 +52,11 @@ export function emptyHeaderCornerRenderState(): HeaderCornerRenderState {
  * along the gutter columns, each button sitting in line with the gutter
  * it belongs to.
  *
- * As in the GWT client and Excel there is one button more than there are
- * levels, the last opening every group; the gutters have a level for it.
- * Without headings there is nowhere for the buttons, and the GWT client
- * showed none.
+ * As in Excel there is one button more than there are levels, the last
+ * opening every group; the gutters have a level for it. Without headings
+ * there is nowhere for the buttons, and none show.
  *
- * Laid out as the GWT client's corner was, in boxes of its own: the
+ * Laid out in boxes of its own: the
  * square beside the letters and above the numbers, shaded as the letters
  * are; a box above it for the column levels and one beside it for the row
  * levels, each bordered off from the gutters; and, where the two gutters
@@ -107,8 +106,7 @@ export class SpreadsheetHeaderCorner extends SpreadsheetPart {
     }
 
     /* The row levels, side by side in a line of the sheet's own font as
-       tall as the letters, which sets how far down they sit, as it did in
-       the GWT client. */
+       tall as the letters, which sets how far down they sit. */
     .row-group-summary {
       border-right: 1px solid ${headerBorderColor};
       font-size: 14px;
@@ -124,8 +122,8 @@ export class SpreadsheetHeaderCorner extends SpreadsheetPart {
     }
 
     /* The dotted lines between the levels, carried on from the gutters
-       across the level boxes. Each starts at the corner's edge, where the
-       GWT client's did, and is an odd length, so the dots fall on the same
+       across the level boxes. Each starts at the corner's edge and is an
+       odd length, so the dots fall on the same
        pixels: along an even length the browser doubles the first dot and
        shifts the rest. */
     .level-separator {
@@ -145,7 +143,7 @@ export class SpreadsheetHeaderCorner extends SpreadsheetPart {
       border-right: 1px dotted ${headerBorderColor};
     }
 
-    /* Plain numbers, as the GWT client drew them. */
+    /* Plain numbers. */
     .level-header {
       box-sizing: border-box;
       width: 11px;
@@ -177,7 +175,7 @@ export class SpreadsheetHeaderCorner extends SpreadsheetPart {
       margin-left: 4px;
     }
 
-    /* SpreadsheetTheme.LUMO, as the GWT client drew it. */
+    /* SpreadsheetTheme.LUMO. */
     :host([theme~='lumo']) {
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }

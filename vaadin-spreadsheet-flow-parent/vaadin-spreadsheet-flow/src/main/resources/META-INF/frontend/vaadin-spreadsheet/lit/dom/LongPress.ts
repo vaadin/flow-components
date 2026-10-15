@@ -8,7 +8,7 @@
  * license.
  */
 
-/** How long a press stays put to be a long press: the GWT client's 750 ms. */
+/** How long a press stays put to be a long press, as it has been in earlier versions. */
 export const LONG_PRESS_MS = 750;
 
 /** How far a finger may drift during a long press, in CSS pixels. */
@@ -16,7 +16,7 @@ const DRIFT_PX = 10;
 
 /**
  * Makes a long press on the target a `contextmenu` event at the point pressed,
- * as the GWT client did on iOS: one finger that stays put for
+ * since Safari on iOS opens no menu of its own: one finger that stays put for
  * {@link LONG_PRESS_MS}. A press that moves, lifts, gets a second finger, or
  * meets a context menu event of the system's own is not one, so the menu never
  * opens twice.

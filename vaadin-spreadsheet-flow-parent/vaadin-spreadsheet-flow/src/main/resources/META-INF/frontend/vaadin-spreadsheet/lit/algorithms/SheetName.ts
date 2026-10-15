@@ -55,9 +55,8 @@ export interface SheetRenameInput {
  * A name the workbook would refuse, a name that is what the sheet is
  * already called, and a name another sheet has taken all leave the tab as
  * it was. Only a name that is none of those is worth telling the server
- * about. Excel says so with a dialog; the GWT client left a TODO where the
- * message would go and simply put the old name back, which is what this
- * keeps doing - the reason is reported so a caller can do better.
+ * about. Excel says so with a dialog; the sheet puts the old name back, and
+ * the reason is reported so a caller can do better.
  */
 export function resolveSheetRename(input: SheetRenameInput): SheetRenameOutcome {
   const { proposed, index, names } = input;

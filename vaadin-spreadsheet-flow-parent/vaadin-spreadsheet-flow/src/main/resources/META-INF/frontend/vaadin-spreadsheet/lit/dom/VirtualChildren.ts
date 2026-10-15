@@ -25,8 +25,7 @@ import { toKey } from '../algorithms/CellKeys.js';
  * passed in as a {@link VirtualChildResolver} rather than reached for
  * directly: the placement logic below is then testable with plain elements.
  *
- * The placement itself is a named slot, matching what the GWT client did:
- * the component stays a light-DOM child of a host element and is projected
+ * The placement itself is a named slot: the component stays a light-DOM child of a host element and is projected
  * wherever the sheet renders a matching {@code <slot>}. Moving the element
  * into a shadow root instead would take it out of the server's reach.
  */
@@ -308,8 +307,7 @@ export interface CellSlotAssignment {
  * cell's editor is.
  *
  * Editors are applied after components, so an editor wins a cell that has
- * both — the same order the GWT client mounted them in, and the one that
- * makes sense: the editor is the interactive thing.
+ * both: the editor is the interactive thing.
  */
 export function computeCellSlots(input: {
   componentIdToCellKey: Readonly<Record<string, string>>;

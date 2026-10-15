@@ -12,7 +12,7 @@ import { cellCoordToAddress } from './CellRef.js';
 import type { CellRect } from './SelectionPaint.js';
 
 /**
- * Writing a formula by pointing at cells, as the GWT client let the user:
+ * Writing a formula by pointing at cells:
  * the references in the formula being written are coloured, on the sheet
  * and in the text, and after an operator the arrows and the mouse put a
  * reference into the formula instead of moving on.
@@ -27,8 +27,8 @@ export interface CellAt {
 }
 
 /**
- * The colours the GWT client gave a formula's references, in the order it
- * handed them out, as "R,G,B". A reference's cells are tinted at 0.25 and
+ * The colours a formula's references are given, in the order they are
+ * handed out, as "R,G,B". A reference's cells are tinted at 0.25 and
  * the one the caret is in is outlined at 0.75.
  */
 export const REFERENCE_COLORS: readonly string[] = [
@@ -77,7 +77,7 @@ const REFERENCE = new RegExp(`(?:(?:'((?:[^']|'')+)'|([A-Za-z_][A-Za-z0-9_.]*))!
 /** What may not touch a reference on either side: it would be part of a longer name. */
 const NAME_CHAR = /[A-Za-z0-9_.$]/;
 
-/** Whether a value being typed is a formula: it starts with = or +, as the GWT client took it. */
+/** Whether a value being typed is a formula: it starts with = or +. */
 export function isFormula(text: string): boolean {
   return text.startsWith('=') || text.startsWith('+');
 }
@@ -110,8 +110,7 @@ function colorKey(range: CellRect): string {
  * Not references: text in quotes, function names (LOG10 followed by a
  * bracket), a name that only starts like an address (TAX2024A), and an
  * address past the sheet's last column or row. A reference to another
- * sheet is not drawn on this one and takes no colour, as in the GWT
- * client.
+ * sheet is not drawn on this one and takes no colour.
  */
 export function formulaReferences(text: string, activeSheet: string): FormulaReference[] {
   const refs: FormulaReference[] = [];
@@ -169,9 +168,8 @@ const POINTS_AFTER = '=+-*/^&(,;:<>';
 
 /**
  * Whether the arrows put a reference into the formula now: the caret
- * follows an operator, an opening bracket or a separator - the GWT client
- * took only ( + - / * and a lone =, and gave a comma nothing to point
- * with.
+ * follows an operator, an opening bracket or a separator, a comma among
+ * them.
  */
 export function canPoint(text: string, caret: number): boolean {
   if (!isFormula(text) || caret < 1) {

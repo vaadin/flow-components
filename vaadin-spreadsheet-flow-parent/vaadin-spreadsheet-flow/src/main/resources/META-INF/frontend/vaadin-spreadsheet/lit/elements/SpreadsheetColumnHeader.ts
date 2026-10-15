@@ -48,7 +48,7 @@ export interface ColumnHeaderRenderState {
   /**
    * Height of the header strip in pixels. {@code 0} disables the
    * header (the connector still pushes a state, but render() emits
-   * an empty fragment). 27 by default, as in the GWT client.
+   * an empty fragment). 27 by default, as in earlier versions.
    */
   headerHeight: number;
   /**
@@ -68,17 +68,16 @@ export interface ColumnHeaderRenderState {
   frozenColX?: ReadonlyArray<number>;
   /**
    * Whether rows are frozen as well. Only then does the freeze line run on
-   * through the letters, as the GWT client's corner pane border did; with
-   * columns frozen alone that pane had no border, and the letters keep a
-   * pixel's gap at the freeze line that the sheet's background shows
+   * through the letters; with columns frozen alone it does not, and the
+   * letters keep a pixel's gap at the freeze line that the sheet's background shows
    * through.
    */
   frozenRows?: boolean;
   /**
-   * How far the sheet is scrolled down. With columns frozen alone, the GWT
-   * client's pane of frozen columns slid up under the letters as the sheet
-   * scrolled down, and its border showed through the letters' gap at the
-   * freeze line, from the bottom up, over the letters scrolled under it.
+   * How far the sheet is scrolled down. With columns frozen alone, the
+   * frozen columns' border shows through the letters' gap at the freeze
+   * line as the sheet scrolls down, from the bottom up, over the letters
+   * scrolled under it.
    */
   scrollTop?: number;
   /** Pixel widths of the frozen columns, same indexing as frozenColX. */
@@ -115,8 +114,7 @@ export interface ColumnHeaderRenderState {
   /**
    * How far left of the first column the sheet's edge is - the row numbers
    * and their outline gutter. The dotted lines between the outline levels
-   * start there, where the GWT client's did, so their dots fall on the
-   * same pixels.
+   * start there, so their dots fall on the same pixels.
    */
   leadingPx?: number;
   /**
@@ -181,15 +179,15 @@ export function emptyColumnHeaderRenderState(): ColumnHeaderRenderState {
   };
 }
 
-/** Height of one column outline level in the gutter: the GWT client's 18px. */
+/** Height of one column outline level in the gutter. */
 export const COLUMN_GROUPING_LEVEL_PX = 18;
-/** Width of one row outline level in the gutter: the GWT client's 15px. */
+/** Width of one row outline level in the gutter. */
 export const ROW_GROUPING_LEVEL_PX = 15;
 /** Diameter of a group's round expand/collapse button. */
 export const GROUPING_BUTTON_SIZE_PX = 12;
 
 /**
- * Height of the column outline gutter, in the GWT client's sizes: a level
+ * Height of the column outline gutter: a level
  * per depth of grouping and, while the headings show, one more for the level
  * button that expands everything. Nothing when no column is grouped.
  */
@@ -258,8 +256,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       pointer-events: auto;
     }
 
-    /* Over the strip's bottom border too, as the GWT client's pane border
-       crossed it. */
+    /* Over the strip's bottom border too. */
     .frozen-header-strip > .freeze-line {
       position: absolute;
       width: 1px;
@@ -282,8 +279,8 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       border-right-color: var(--lumo-contrast-50pct);
     }
 
-    /* The gap the GWT client left at the freeze line in the letters when
-       only columns were frozen: under the letters, the sheet's background. */
+    /* The gap at the freeze line in the letters when only columns are
+       frozen: under the letters, the sheet's background. */
     .freeze-gap {
       position: absolute;
       bottom: -1px;
@@ -293,17 +290,16 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       pointer-events: none;
     }
 
-    /* A letter as the GWT client drew it: on a gradient from the header
+    /* A letter: on a gradient from the header
        colour down to a shade darker, over a border of its own along the
        cells - which the active column's marker replaces, and so does an
        application's ::part(column-header) border. The pointer is an arrow
        down the column a click selects. The divider between letters is
-       drawn inside the letter's box, as the GWT client's was: it takes no
-       room from the letter, which is centred on the whole column, and the
+       drawn inside the letter's box: it takes no room from the letter, which is centred on the whole column, and the
        border along the cells runs under it to the end, the active column's
-       marker too. The shades blend in sRGB, as the GWT client's two hex
-       colours did: with a mixed colour in it, a gradient blends in Oklab,
-       a level off in places. */
+       marker too. The shades blend in sRGB, as two hex colours do: with a
+       mixed colour in it, a gradient blends in Oklab, a level off in
+       places. */
     .col-header-cell {
       position: absolute;
       box-sizing: border-box;
@@ -316,12 +312,11 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     }
 
     /* The active cell's headers are tinted so the cursor's row and
-       column stay findable on a wide sheet. This is the tint the GWT
-       client painted; the cell also carries the documented
+       column stay findable on a wide sheet. The cell also carries the documented
        ::part(header-selected) for consumers who want another one. */
     .col-header-cell[part~='header-selected'] {
       background: ${headerSelectedBg};
-      /* The GWT client's marker along the edge that faces the cells. */
+      /* A marker along the edge that faces the cells. */
       border-bottom: 2px solid #63b1ff;
     }
 
@@ -336,8 +331,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       z-index: 1;
     }
 
-    /* The outline gutter above the letters, as the GWT client drew it: a
-       bracket over each group - a line with a tick where the group
+    /* The outline gutter above the letters: a bracket over each group - a line with a tick where the group
        starts - and a round button over its summary column, which sits
        after the group or, inversed, before it. */
     .col-grouping-line {
@@ -353,8 +347,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       border-right: 2px solid ${headerBorderColor};
     }
 
-    /* The sign sits where the GWT client's did, on an 11px line at the
-       top of a borderless button: the ring is drawn inside, taking no room,
+    /* The sign sits on an 11px line at the top of a borderless button: the ring is drawn inside, taking no room,
        and the pixel of padding fits the box to the line - a box taller than
        its line, and the browser centres the line instead. */
     .col-grouping-toggle {
@@ -387,7 +380,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     }
 
     /* Divides one outline level from the next. Over the freeze line in
-       the gutter, as the GWT client drew its level lines over its panes. */
+       the gutter. */
     .col-grouping-separator {
       position: absolute;
       z-index: 3;
@@ -396,7 +389,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       pointer-events: none;
     }
 
-    /* SpreadsheetTheme.LUMO, as the GWT client drew it: the strip and its
+    /* SpreadsheetTheme.LUMO: the strip and its
        outline gutter tinted over the Lumo ground, the active cell's column
        in the primary tint with its marker below. */
     :host([theme~='lumo']) {
@@ -404,15 +397,14 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     }
 
     /* No gradient on the letters: each carries the strip's tint over the
-       Lumo ground, as in the GWT client, so a frozen column's letter
+       Lumo ground, so a frozen column's letter
        covers the scrolled one under it. */
     :host([theme~='lumo']) .col-header-cell {
       background-color: ${headerBg};
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
 
-    /* Over the sheet's ground, as the GWT client's pane border was, not
-       over the letters' tint. */
+    /* Over the sheet's ground, not over the letters' tint. */
     :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
       background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
     }
@@ -470,7 +462,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     }
     const col = at.index;
     // The browser's own menu stays unless the sheet takes the right-click
-    // for a menu of its own, as with the GWT client.
+    // for a menu of its own.
     const taken = !this.dispatchEvent(
       new CustomEvent('column-header-contextmenu', {
         detail: { col, clientX: e.clientX, clientY: e.clientY },
@@ -508,8 +500,8 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     const col = at.index;
     e.preventDefault();
     const ev = e as MouseEvent;
-    // Where the column starts on screen: the GWT client sized it from
-    // there to the pointer.
+    // Where the column starts on screen: the column is sized from there to
+    // the pointer.
     const letter = this.shadowRoot!.querySelector<HTMLElement>(`.col-header-cell.col${col}`);
     this.dispatchEvent(
       new CustomEvent('column-resize-start', {
@@ -593,7 +585,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     }
 
     // The outline gutter sits above the letters whichever side a group's
-    // summary column is on, as it did in the GWT client.
+    // summary column is on.
     const gutterHeight = columnGroupingGutterPx(colGroupingMax, headerHeight > 0);
     const letterTop = gutterHeight;
 
@@ -602,8 +594,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     const cells: Array<{ key: number; template: TemplateResult }> = [];
     const handles: Array<{ key: number; template: TemplateResult }> = [];
     const buildColumn = (col: number, left: number, width: number): void => {
-      // Headings hidden, the outline still drawn: no letters at all, as in
-      // the GWT client. A letter of no height still draws its border.
+      // Headings hidden, the outline still drawn: no letters at all. A letter of no height still draws its border.
       if (headerHeight <= 0) {
         return;
       }
@@ -663,16 +654,15 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       }
       frozenCells.push(...cells.splice(scrolling).map((cell) => cell.template));
       frozenHandles.push(...handles.splice(scrollingHandles).map((handle) => handle.template));
-      // The freeze line runs on up through the outline gutter, as the GWT
-      // client's frozen gutter pane border did, on the pixel it has to
+      // The freeze line runs on up through the outline gutter, on the pixel
+      // it has to
       // itself among the cells; through the letters too when rows are
       // frozen as well, and otherwise a gap there.
       const frozenWidth =
         (frozenColX[horizontalSplitPosition - 1] ?? 0) + (frozenColWidths[horizontalSplitPosition - 1] ?? 0);
       // In the gutter, the right border of a pane over the frozen columns'
-      // part of it, bordered along the bottom as the gutter is - the GWT
-      // client's frozen gutter pane, whose two borders met in a blended
-      // corner pixel.
+      // part of it, bordered along the bottom as the gutter is, the two
+      // borders meeting in a blended corner pixel.
       const gutterLine =
         gutterHeight > 0
           ? html`<div class="freeze-gutter-pane" style="width:${frozenWidth + 1}px;height:${gutterHeight}px;"></div>`
@@ -681,10 +671,10 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
         headerHeight > 0 && frozenRows
           ? html`<div class="freeze-line" style="left:${frozenWidth}px;top:${gutterHeight}px;bottom:-1px;"></div>`
           : nothing;
-      // With columns frozen alone the GWT client's corner pane had no
-      // border, and its pixel was see-through: the sheet's background at
-      // rest, the letters that scroll under it as the sheet scrolls. So
-      // the gap lies under the letters, pinned with the frozen ones.
+      // With columns frozen alone the corner has no border, and its pixel
+      // is see-through: the sheet's background at rest, the letters that
+      // scroll under it as the sheet scrolls. So the gap lies under the
+      // letters, pinned with the frozen ones.
       freezeGap =
         headerHeight > 0 && !frozenRows
           ? html`<div
@@ -711,8 +701,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     }
 
     const groupingEls: TemplateResult[] = [];
-    // The gutter is bordered off from the letters below it, as the GWT
-    // client's was; without letters the strip's own border does it.
+    // The gutter is bordered off from the letters below it; without letters the strip's own border does it.
     if (gutterHeight > 0 && headerHeight > 0) {
       const style = `height:${gutterHeight}px;width:${totalGridWidthPx}px;`;
       groupingEls.push(html`<div class="col-grouping-gutter" style=${style}></div>`);
@@ -732,7 +721,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       // A collapsed group keeps only its button, showing "+".
       if (!g.collapsed) {
         // The tick's border comes on top of the width, so the bracket
-        // reaches just past the button's centre, as the GWT client's did.
+        // reaches just past the button's centre.
         const lineStyle = `left:${g.startPx}px;top:${lineTop}px;width:${Math.max(0, g.endPx - g.startPx)}px;`;
         const lineClass = colGroupingInversed ? 'col-grouping-line inversed' : 'col-grouping-line';
         groupingEls.push(html`<div class=${lineClass} style=${lineStyle}></div>`);
