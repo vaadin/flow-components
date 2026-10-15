@@ -754,7 +754,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // render around the spreadsheet; we get focus via
       // tabindex=0 but draw selection feedback via
       // the .sheet-selection overlay instead.
-      'outline:none;';
+      'outline:none;' +
+      // Cells and headers are not text to select, as in the GWT client: a
+      // drag selects cells, and a long press on a phone opens the sheet's
+      // menu rather than the browser's. Fields typed into still select.
+      'user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;';
     // tabindex=0 makes the scroll container focusable so it can
     // receive keydown events for keyboard navigation.
     this.scrollContainer.tabIndex = 0;
