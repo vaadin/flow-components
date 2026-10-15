@@ -232,9 +232,12 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       top: 0;
       z-index: 5;
       box-sizing: border-box;
-      /* The frozen strip moves with the scroll; past the header's end it
-         would make the sheet's scroll area grow with every scroll. */
-      overflow: clip;
+      /* What moves with the scroll - the frozen strip, the freeze line's
+         gap - and the last column's resize handle reach past the header's
+         end, and would make the sheet's scroll area grow with every scroll.
+         Clipped across only: along the cells, the active letter's marker
+         and the freeze line run over the header's border. */
+      overflow-x: clip;
       background: ${headerBg};
       border-bottom: 1px solid ${headerBorderColor};
       font-family: ${headerFont};

@@ -612,3 +612,76 @@ describe('Frozen panes — the scroll area stays the size of the sheet', () => {
     expect(pane.scrollWidth).to.equal(wide);
   });
 });
+
+/**
+ * The active cell's letter and number carry a marker along the edge that
+ * faces the cells, drawn over the header's own border. Clipping the whole
+ * header to keep the frozen strip from growing the scroll area cut that
+ * pixel off, and the baseline screenshots caught it.
+ */
+describe('Headers — the active marker over the border', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function draw(): Promise<void> {
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getColumnHeader().updateComplete;
+    await ctx.sheet.getRowHeader().updateComplete;
+  }
+
+  /** What is drawn on the header's last pixel along the cells, at the middle of the given letter. */
+  function atLettersEdge(letter: HTMLElement): Element | null {
+    const header = ctx.sheet.getColumnHeader();
+    const box = letter.getBoundingClientRect();
+    return header.shadowRoot!.elementFromPoint(box.left + box.width / 2, header.getBoundingClientRect().bottom - 0.5);
+  }
+
+  function atNumbersEdge(number: HTMLElement): Element | null {
+    const header = ctx.sheet.getRowHeader();
+    const box = number.getBoundingClientRect();
+    return header.shadowRoot!.elementFromPoint(header.getBoundingClientRect().right - 0.5, box.top + box.height / 2);
+  }
+
+  it('draws the active letter over the bottom border of the letters', async () => {
+    await draw();
+
+    const a = ctx.sheet.getColumnHeader().shadowRoot!.querySelector<HTMLElement>('.col-header-cell.col1')!;
+    expect(a.getAttribute('part')).to.include('header-selected');
+    expect(atLettersEdge(a)).to.equal(a);
+  });
+
+  it('draws a frozen active letter over it too', async () => {
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await draw();
+
+    const a = ctx.sheet
+      .getColumnHeader()
+      .shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip .col-header-cell.col1')!;
+    expect(atLettersEdge(a)).to.equal(a);
+  });
+
+  it('draws the active number over the right border of the numbers', async () => {
+    await draw();
+
+    const one = ctx.sheet.getRowHeader().shadowRoot!.querySelector<HTMLElement>('.row-header-cell.row1')!;
+    expect(one.getAttribute('part')).to.include('header-selected');
+    expect(atNumbersEdge(one)).to.equal(one);
+  });
+
+  it('draws a frozen active number over it too', async () => {
+    ctx.sheet.setVerticalSplitPosition(2);
+    await draw();
+
+    const one = ctx.sheet
+      .getRowHeader()
+      .shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip .row-header-cell.row1')!;
+    expect(atNumbersEdge(one)).to.equal(one);
+  });
+});
