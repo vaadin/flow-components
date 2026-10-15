@@ -9,6 +9,7 @@
  */
 
 import { css, html, nothing, type TemplateResult } from 'lit';
+import { indexedTarget } from '../dom/IndexedTarget.js';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -463,18 +464,11 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
 
   private readonly handleShadowContextMenu = (event: Event): void => {
     const e = event as MouseEvent;
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = indexedTarget(e, '.col-header-cell', 'col');
+    if (at === null) {
       return;
     }
-    const cell = target.closest<HTMLElement>('.col-header-cell');
-    if (!cell) {
-      return;
-    }
-    const col = Number(cell.dataset.col);
-    if (!Number.isFinite(col) || col < 1) {
-      return;
-    }
+    const col = at.index;
     // The browser's own menu stays unless the sheet takes the right-click
     // for a menu of its own, as with the GWT client.
     const taken = !this.dispatchEvent(
@@ -491,18 +485,11 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
   };
 
   private readonly handleShadowDoubleClick = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = indexedTarget(e, '.col-resize-handle', 'col');
+    if (at === null) {
       return;
     }
-    const handle = target.closest<HTMLElement>('.col-resize-handle');
-    if (!handle) {
-      return;
-    }
-    const col = Number(handle.dataset.col);
-    if (!Number.isFinite(col) || col < 1) {
-      return;
-    }
+    const col = at.index;
     e.preventDefault();
     this.dispatchEvent(
       new CustomEvent('column-autofit', {
@@ -514,18 +501,11 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
   };
 
   private readonly handleShadowMouseDown = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = indexedTarget(e, '.col-resize-handle', 'col');
+    if (at === null) {
       return;
     }
-    const handle = target.closest<HTMLElement>('.col-resize-handle');
-    if (!handle) {
-      return;
-    }
-    const col = Number(handle.dataset.col);
-    if (!Number.isFinite(col) || col < 1) {
-      return;
-    }
+    const col = at.index;
     e.preventDefault();
     const ev = e as MouseEvent;
     // Where the column starts on screen: the GWT client sized it from
@@ -566,14 +546,11 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       ev.stopPropagation();
       return;
     }
-    const cell = target.closest<HTMLElement>('.col-header-cell');
-    if (!cell) {
+    const at = indexedTarget(ev, '.col-header-cell', 'col');
+    if (at === null) {
       return;
     }
-    const col = Number(cell.dataset.col);
-    if (!Number.isFinite(col) || col < 1) {
-      return;
-    }
+    const col = at.index;
     this.dispatchEvent(
       new CustomEvent('column-header-click', {
         detail: {

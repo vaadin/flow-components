@@ -9,6 +9,7 @@
  */
 
 import { css, html, nothing, type TemplateResult } from 'lit';
+import { indexedTarget } from '../dom/IndexedTarget.js';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -414,18 +415,11 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
   }
 
   private readonly handleShadowDoubleClick = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = indexedTarget(e, '.row-resize-handle', 'row');
+    if (at === null) {
       return;
     }
-    const handle = target.closest<HTMLElement>('.row-resize-handle');
-    if (!handle) {
-      return;
-    }
-    const row = Number(handle.dataset.row);
-    if (!Number.isFinite(row) || row < 1) {
-      return;
-    }
+    const row = at.index;
     e.preventDefault();
     this.dispatchEvent(
       new CustomEvent('row-autofit', {
@@ -438,18 +432,11 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
 
   private readonly handleShadowContextMenu = (event: Event): void => {
     const e = event as MouseEvent;
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = indexedTarget(e, '.row-header-cell', 'row');
+    if (at === null) {
       return;
     }
-    const cell = target.closest<HTMLElement>('.row-header-cell');
-    if (!cell) {
-      return;
-    }
-    const row = Number(cell.dataset.row);
-    if (!Number.isFinite(row) || row < 1) {
-      return;
-    }
+    const row = at.index;
     // The browser's own menu stays unless the sheet takes the right-click
     // for a menu of its own, as with the GWT client.
     const taken = !this.dispatchEvent(
@@ -466,18 +453,11 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
   };
 
   private readonly handleShadowMouseDown = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = indexedTarget(e, '.row-resize-handle', 'row');
+    if (at === null) {
       return;
     }
-    const handle = target.closest<HTMLElement>('.row-resize-handle');
-    if (!handle) {
-      return;
-    }
-    const row = Number(handle.dataset.row);
-    if (!Number.isFinite(row) || row < 1) {
-      return;
-    }
+    const row = at.index;
     e.preventDefault();
     const ev = e as MouseEvent;
     // Where the row starts on screen: the GWT client sized it from there
@@ -517,14 +497,11 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       ev.stopPropagation();
       return;
     }
-    const cell = target.closest<HTMLElement>('.row-header-cell');
-    if (!cell) {
+    const at = indexedTarget(ev, '.row-header-cell', 'row');
+    if (at === null) {
       return;
     }
-    const row = Number(cell.dataset.row);
-    if (!Number.isFinite(row) || row < 1) {
-      return;
-    }
+    const row = at.index;
     this.dispatchEvent(
       new CustomEvent('row-header-click', {
         detail: {
