@@ -165,6 +165,14 @@ export class HeaderResize {
     return true;
   }
 
+  /** Ends a drag without resizing anything: the sheet it was on has gone. */
+  cancel(): void {
+    if (this.drag !== null) {
+      this.drag = null;
+      this.hideGuide();
+    }
+  }
+
   /**
    * Whether the user may change column widths.
    *

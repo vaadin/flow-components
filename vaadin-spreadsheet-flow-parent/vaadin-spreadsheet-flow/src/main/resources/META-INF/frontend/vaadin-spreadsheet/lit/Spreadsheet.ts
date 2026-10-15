@@ -1265,6 +1265,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }>
   ): void => {
     const { col, row, value, key, shiftKey, relatedTarget } = e.detail;
+    // An editor that has been closed commits nothing: its input losing the
+    // keyboard as it goes is not the user leaving it.
+    if (this.editor?.col !== col || this.editor.row !== row) {
+      return;
+    }
     // Left for the formula bar, the edit carries on in the formula field, as
     // in the GWT client: nothing is committed yet, and the editor stays
     // open. Gone on to the address field instead, it ends once the keyboard
@@ -3683,7 +3688,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // What it was asked to load is gone too: load again, even the same
       // range.
       this.viewportLoader.reset();
+      // So has the selection, and the sheet may be another one: a value, a
+      // note or a menu pick still under way would land on whatever sheet
+      // the server shows now.
+      this.abandonInteraction();
       this.scheduleRender();
+    }
+  }
+
+  /**
+   * Ends whatever the user is in the middle of on the sheet, committing
+   * none of it: an edit in a cell or in the formula field, pointing at
+   * cells for a formula, a note being written, a drag, the context menu.
+   * The keyboard goes back to the sheet if it was in any of them.
+   */
+  private abandonInteraction(): void {
+    const hadKeyboard = this.host.matches(':focus-within');
+    this.editor = null;
+    this.endFormulaPointing();
+    this.pointedByPress = false;
+    this.formulaBar.abandonFormulaEdit();
+    this.editingCommentKey = null;
+    this.drag = null;
+    this.headerResize.cancel();
+    this.extendingSelection = false;
+    this.menu.close();
+    this.hideLinkTooltip();
+    if (hadKeyboard) {
+      this.returnFocusToSheet();
     }
   }
   setSheetProtected(isProtected: boolean): void {

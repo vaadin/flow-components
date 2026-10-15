@@ -468,6 +468,19 @@ export class SpreadsheetFormulaBar extends LitElement {
   }
 
   /**
+   * Ends an edit in the formula field without committing it, and takes the
+   * keyboard out of the field: the sheet it was for has gone.
+   */
+  abandonFormulaEdit(): void {
+    if (!this.editingFormula) {
+      return;
+    }
+    this.editingFormula = false;
+    this.formulaTyped = false;
+    this.shadowRoot?.querySelector<HTMLInputElement>('.formula')?.blur();
+  }
+
+  /**
    * Whether the user is writing in the formula field: it has the keyboard,
    * and has been typed into, or pointed from, since it took it.
    */
