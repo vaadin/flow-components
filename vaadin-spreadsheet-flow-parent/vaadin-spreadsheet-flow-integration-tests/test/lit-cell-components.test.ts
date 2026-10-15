@@ -1067,3 +1067,31 @@ describe('Spreadsheet — custom cell editors', () => {
     expect(editor.parentElement).to.be.null;
   });
 });
+
+describe('Spreadsheet — the cell slots of a draw', () => {
+  it('works them out once per draw, for the grid and for placing the components', () => {
+    const host = document.createElement('div');
+    host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+    document.body.appendChild(host);
+    const sheet = new Spreadsheet(host);
+    sheet.setRows(10);
+    sheet.setCols(10);
+    sheet.setColW(new Array(10).fill(50));
+    sheet.setRowH(new Array(10).fill(15));
+    sheet.setComponentIDtoCellKeysMap({ '7': 'col2 row2' });
+    const target = sheet as unknown as { cellSlotAssignments: () => unknown };
+    const work = target.cellSlotAssignments.bind(sheet);
+    let calls = 0;
+    target.cellSlotAssignments = () => {
+      calls++;
+      return work();
+    };
+
+    sheet.recomputeViewport();
+
+    expect(calls).to.equal(1);
+    expect(Object.keys(sheet.getCellGrid().renderState.cellSlots)).to.eql(['col2 row2']);
+    sheet.dispose();
+    host.remove();
+  });
+});

@@ -2590,7 +2590,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     viewportWidth: number;
     viewportHeight: number;
   }): void {
-    const state = this.buildRenderState(opts);
+    const slots = this.cellSlotAssignments();
+    const state = this.buildRenderState(opts, slots);
     // Size the cell-grid to the full virtual grid so the scroll
     // surface's scrollWidth / scrollHeight reflect actual extent.
     // Cells render at absolute virtual coordinates inside; the
@@ -2607,7 +2608,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.overlayComponents.sync(state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id));
     // Only the cells on screen render a slot, so only those elements are
     // placed — one off-screen would be parented with nowhere to project.
-    const visible = visibleCellSlots(this.cellSlotAssignments(), state);
+    const visible = visibleCellSlots(slots, state);
     this.cellComponents.sync(visible.filter((a) => a.kind === 'component').map((a) => a.nodeId));
     this.cellEditors.sync(visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId));
     // Column-header strip. Sized + state-pushed only
@@ -2756,12 +2757,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@link applyRenderState} writes the result to the cell-grid;
    * this lets tests inspect it directly).
    */
-  buildRenderState(opts: {
-    scrollLeft: number;
-    scrollTop: number;
-    viewportWidth: number;
-    viewportHeight: number;
-  }): CellGridRenderState {
+  buildRenderState(
+    opts: {
+      scrollLeft: number;
+      scrollTop: number;
+      viewportWidth: number;
+      viewportHeight: number;
+    },
+    slots: Record<string, CellSlotAssignment> = this.cellSlotAssignments()
+  ): CellGridRenderState {
     const ppi = FALLBACK_PPI;
     const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
     const hiddenRowSet = this.hiddenRows;
@@ -2928,9 +2932,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       displayGridlines: this.displayGridlines,
       rowIndexToStyleIndex: this.rowIndexToStyleIndex,
       columnIndexToStyleIndex: this.columnIndexToStyleIndex,
-      cellSlots: Object.fromEntries(
-        Object.entries(this.cellSlotAssignments()).map(([cellKey, a]) => [cellKey, a.slot])
-      ),
+      cellSlots: Object.fromEntries(Object.entries(slots).map(([cellKey, a]) => [cellKey, a.slot])),
       conditionalFormattingStyles: this.conditionalFormattingStyles,
       shiftedCellBorderStyles: this.shiftedCellBorderStyles,
       mergedRegions: this.mergedRegions,
@@ -3650,7 +3652,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * server pushes separately.
    *
    * Recomputed rather than cached: it depends on the selection, which
-   * changes on every click, and the maps it reads are small.
+   * changes on every click, and the maps it reads are small. A draw works
+   * it out once and uses it twice.
    */
   private cellSlotAssignments(): Record<string, CellSlotAssignment> {
     const active = this.selection.activeCell;
