@@ -103,6 +103,7 @@ import { resolveSheetRename } from './algorithms/SheetName.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { animateIn, animateOut } from './dom/OverlayAnimation.js';
+import { listen } from './dom/Listen.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
 import { linkTooltipPosition, popupPlacement } from './algorithms/Placement.js';
@@ -521,6 +522,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** The listeners on the page while the sheet is in it; see {@link connect}. */
   private pageListeners: AbortController | null = null;
+  /** The listeners on the sheet's own elements, released by {@link dispose}. */
+  private readonly ownListeners = new AbortController();
 
   /** Decides when the server is asked for the cells the sheet scrolls to. */
   private readonly viewportLoader = new ViewportLoader({
@@ -766,7 +769,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.headerCorner.className = 'sheet-header-corner';
     this.headerCorner.style.cssText =
       'grid-column:1;grid-row:1;' + 'position:sticky;top:0;left:0;z-index:6;' + 'width:0;height:0;';
-    this.headerCorner.addEventListener('level-header-click', this.handleLevelHeaderClick as EventListener);
+    this.on(this.headerCorner, 'level-header-click', this.handleLevelHeaderClick);
     // Column-header at (col 2, row 1) — top strip above cells.
     this.columnHeader.style.gridColumn = '2';
     this.columnHeader.style.gridRow = '1';
@@ -787,12 +790,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.formulaBar.style.flex = '0 0 auto';
     this.root.appendChild(this.formulaBar);
     this.root.appendChild(this.contextMenu);
-    this.formulaBar.addEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
-    this.formulaBar.addEventListener('formula-commit', this.handleFormulaCommit as EventListener);
-    this.formulaBar.addEventListener('formula-cancel', this.handleFormulaCancel);
-    this.formulaBar.addEventListener('formula-input', this.handleFormulaInput as EventListener);
-    this.formulaBar.addEventListener('formula-arrow', this.handleFormulaArrow as EventListener);
-    this.formulaBar.addEventListener('formula-caret', this.handleDraftCaret as EventListener);
+    this.on(this.formulaBar, 'sheet-address-changed', this.handleSheetAddressChanged);
+    this.on(this.formulaBar, 'formula-commit', this.handleFormulaCommit);
+    this.on(this.formulaBar, 'formula-cancel', this.handleFormulaCancel);
+    this.on(this.formulaBar, 'formula-input', this.handleFormulaInput);
+    this.on(this.formulaBar, 'formula-arrow', this.handleFormulaArrow);
+    this.on(this.formulaBar, 'formula-caret', this.handleDraftCaret);
     this.root.appendChild(this.scrollContainer);
     // Sheet tabs sit below the scroll container in the flex
     // column. flex:0 so they take their intrinsic height,
@@ -836,51 +839,51 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.applyHostTheme();
     });
     // Sheet tab click → switch active sheet via spreadsheet-event.
-    this.sheetTabs.addEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
-    this.sheetTabs.addEventListener('sheet-tabs-scroll', this.handleSheetTabsScroll as EventListener);
-    this.sheetTabs.addEventListener('sheet-tab-add', this.handleSheetTabAdd);
-    this.sheetTabs.addEventListener('sheet-tab-rename-start', this.handleSheetRenameStart as EventListener);
-    this.sheetTabs.addEventListener('sheet-tab-rename', this.handleSheetRename as EventListener);
-    this.sheetTabs.addEventListener('sheet-tab-rename-cancel', this.handleSheetRenameCancel);
-    this.scrollContainer.addEventListener('scroll', this.handleScroll);
-    this.scrollContainer.addEventListener('focusin', this.handleSheetFocusChange);
-    this.scrollContainer.addEventListener('focusout', this.handleSheetFocusChange);
+    this.on(this.sheetTabs, 'sheet-tab-click', this.handleSheetTabClick);
+    this.on(this.sheetTabs, 'sheet-tabs-scroll', this.handleSheetTabsScroll);
+    this.on(this.sheetTabs, 'sheet-tab-add', this.handleSheetTabAdd);
+    this.on(this.sheetTabs, 'sheet-tab-rename-start', this.handleSheetRenameStart);
+    this.on(this.sheetTabs, 'sheet-tab-rename', this.handleSheetRename);
+    this.on(this.sheetTabs, 'sheet-tab-rename-cancel', this.handleSheetRenameCancel);
+    this.on(this.scrollContainer, 'scroll', this.handleScroll);
+    this.on(this.scrollContainer, 'focusin', this.handleSheetFocusChange);
+    this.on(this.scrollContainer, 'focusout', this.handleSheetFocusChange);
     // Clipboard integration. The browser routes
     // copy/cut/paste events to the focused element when the
     // user presses Ctrl+C / Ctrl+X / Ctrl+V. The scroll
     // container is the focus host (tabindex=0).
-    this.scrollContainer.addEventListener('copy', this.handleCopy as EventListener);
-    this.scrollContainer.addEventListener('cut', this.handleCut as EventListener);
-    this.scrollContainer.addEventListener('paste', this.handlePaste as EventListener);
+    this.on(this.scrollContainer, 'copy', this.handleCopy);
+    this.on(this.scrollContainer, 'cut', this.handleCut);
+    this.on(this.scrollContainer, 'paste', this.handlePaste);
     // Cell-click delegation: the cell-grid dispatches
     // a `cell-click` custom event with detail = { col, row,
     // shiftKey, ctrlKey, metaKey, altKey }. The connector updates
     // its selection + re-renders. Bubble + composed = true so the
     // event crosses the cell-grid's shadow DOM boundary.
-    this.cellGrid.addEventListener('cell-click', this.handleCellClick as EventListener);
-    this.contextMenu.addEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
-    this.contextMenu.addEventListener('context-menu-dismiss', this.handleContextMenuDismiss);
+    this.on(this.cellGrid, 'cell-click', this.handleCellClick);
+    this.on(this.contextMenu, 'context-menu-action', this.handleContextMenuAction);
+    this.on(this.contextMenu, 'context-menu-dismiss', this.handleContextMenuDismiss);
     // Cell editor lifecycle events. The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
-    this.cellGrid.addEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
-    this.cellGrid.addEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
-    this.cellGrid.addEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
-    this.cellGrid.addEventListener('cell-editor-input', this.handleCellEditorInput as EventListener);
-    this.cellGrid.addEventListener('cell-editor-arrow', this.handleEditorArrow as EventListener);
-    this.cellGrid.addEventListener('cell-editor-caret', this.handleDraftCaret as EventListener);
+    this.on(this.cellGrid, 'cell-doubleclick', this.handleCellDoubleClick);
+    this.on(this.cellGrid, 'cell-editor-commit', this.handleCellEditorCommit);
+    this.on(this.cellGrid, 'cell-editor-cancel', this.handleCellEditorCancel);
+    this.on(this.cellGrid, 'cell-editor-input', this.handleCellEditorInput);
+    this.on(this.cellGrid, 'cell-editor-arrow', this.handleEditorArrow);
+    this.on(this.cellGrid, 'cell-editor-caret', this.handleDraftCaret);
     // Mouse drag selection. The cell-grid emits
     // cell-mousedown + cell-mouseover; the connector watches
     // mouseup at the document level so a drag that ends
     // outside the spreadsheet still terminates cleanly.
-    this.cellGrid.addEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
-    this.cellGrid.addEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
-    this.cellGrid.addEventListener('grid-mouseleave', this.hideLinkTooltip);
-    this.cellGrid.addEventListener('selection-paint-start', this.handleSelectionPaintStart);
+    this.on(this.cellGrid, 'cell-mousedown', this.handleCellMouseDown);
+    this.on(this.cellGrid, 'cell-mouseover', this.handleCellMouseOver);
+    this.on(this.cellGrid, 'grid-mouseleave', this.hideLinkTooltip);
+    this.on(this.cellGrid, 'selection-paint-start', this.handleSelectionPaintStart);
     // Popup-button click → dispatch popupButtonClick. The
     // server's `onPopupButtonClick` opens the associated popup
     // component.
-    this.cellGrid.addEventListener('popup-button-click', this.handlePopupButtonClick as EventListener);
+    this.on(this.cellGrid, 'popup-button-click', this.handlePopupButtonClick);
     // Context-menu wiring. Right-click on a cell
     // / column-header / row-header dispatches the matching
     // local event from the element; the connector forwards it
@@ -889,42 +892,39 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // after first updating the selection (Excel: right-click
     // on a cell outside the current selection selects that
     // cell, then opens the menu).
-    this.cellGrid.addEventListener('cell-contextmenu', this.handleCellContextMenu as EventListener);
-    this.cellGrid.addEventListener('cell-comment-commit', this.handleCellCommentCommit as EventListener);
-    this.columnHeader.addEventListener(
-      'column-header-contextmenu',
-      this.handleColumnHeaderContextMenu as EventListener
-    );
+    this.on(this.cellGrid, 'cell-contextmenu', this.handleCellContextMenu);
+    this.on(this.cellGrid, 'cell-comment-commit', this.handleCellCommentCommit);
+    this.on(this.columnHeader, 'column-header-contextmenu', this.handleColumnHeaderContextMenu);
     // Grouping outline. The column header emits
     // `column-grouping-toggle` when the user clicks a +/-
     // button in the grouping gutter; the connector forwards
     // it as `groupingCollapsed` to the server.
-    this.columnHeader.addEventListener('column-grouping-toggle', this.handleColumnGroupingToggle as EventListener);
-    this.rowHeader.addEventListener('row-grouping-toggle', this.handleRowGroupingToggle as EventListener);
-    this.rowHeader.addEventListener('row-header-contextmenu', this.handleRowHeaderContextMenu as EventListener);
+    this.on(this.columnHeader, 'column-grouping-toggle', this.handleColumnGroupingToggle);
+    this.on(this.rowHeader, 'row-grouping-toggle', this.handleRowGroupingToggle);
+    this.on(this.rowHeader, 'row-header-contextmenu', this.handleRowHeaderContextMenu);
     // Header-drag resize. The header elements
     // emit `column-resize-start` / `row-resize-start` from
     // their right-edge / bottom-edge mousedown handles; the
     // connector tracks the drag via document mousemove +
     // mouseup. Live-updates colWidths/rowHeights for the
     // current drag column/row.
-    this.columnHeader.addEventListener('column-resize-start', this.handleColumnResizeStart as EventListener);
-    this.rowHeader.addEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
-    this.columnHeader.addEventListener('column-autofit', this.handleColumnAutofit as EventListener);
-    this.rowHeader.addEventListener('row-autofit', this.handleRowAutofit as EventListener);
+    this.on(this.columnHeader, 'column-resize-start', this.handleColumnResizeStart);
+    this.on(this.rowHeader, 'row-resize-start', this.handleRowResizeStart);
+    this.on(this.columnHeader, 'column-autofit', this.handleColumnAutofit);
+    this.on(this.rowHeader, 'row-autofit', this.handleRowAutofit);
     // Header click delegation. Each header element
     // emits its own custom event with the col / row coordinate;
     // the connector translates them into whole-column / whole-
     // row range selections.
-    this.columnHeader.addEventListener('column-header-click', this.handleColumnHeaderClick as EventListener);
-    this.rowHeader.addEventListener('row-header-click', this.handleRowHeaderClick as EventListener);
+    this.on(this.columnHeader, 'column-header-click', this.handleColumnHeaderClick);
+    this.on(this.rowHeader, 'row-header-click', this.handleRowHeaderClick);
     // Keyboard navigation. Listen on the scroll
     // container so arrow keys + shift+arrow work whenever the
     // spreadsheet has focus. preventDefault() in the handler
     // stops the browser from scrolling the viewport via the
     // arrow keys.
-    this.scrollContainer.addEventListener('keydown', this.handleKeyDown as EventListener);
-    this.scrollContainer.addEventListener('pointerdown', this.handleHostedEditorPointerDown);
+    this.on(this.scrollContainer, 'keydown', this.handleKeyDown);
+    this.on(this.scrollContainer, 'pointerdown', this.handleHostedEditorPointerDown);
     // Safari on iOS opens no menu on a long press; the GWT client made one
     // a right-click there, on the cells and the headers alike.
     this.stopLongPress = Spreadsheet.platform.isIOS() ? listenForLongPress(this.scrollContainer) : () => {};
@@ -945,12 +945,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.pageListeners = new AbortController();
-    const options = { signal: this.pageListeners.signal };
-    document.addEventListener('pointerdown', this.handleDocumentPointerDown, options);
-    document.addEventListener('keydown', this.handleContextMenuKeyDown, options);
-    document.addEventListener('mouseup', this.handleDocumentMouseUp, options);
-    document.addEventListener('keyup', this.handleDocumentKeyUp, options);
-    document.addEventListener('mousemove', this.handleDocumentMouseMove, options);
+    const { signal } = this.pageListeners;
+    listen(document, 'pointerdown', this.handleDocumentPointerDown, signal);
+    listen(document, 'keydown', this.handleContextMenuKeyDown, signal);
+    listen(document, 'mouseup', this.handleDocumentMouseUp, signal);
+    listen(document, 'keyup', this.handleDocumentKeyUp, signal);
+    listen(document, 'mousemove', this.handleDocumentMouseMove, signal);
     this.resizeObserver.observe(this.scrollContainer);
     if (this.hostClassObserver !== null) {
       this.hostClassObserver.observe(this.host, { attributes: true, attributeFilter: ['class', 'theme'] });
@@ -958,6 +958,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.applyHostHideClasses();
       this.applyHostTheme();
     }
+  }
+
+  /** Listen to one of the sheet's own elements until {@link dispose}. */
+  private on<E extends Event>(target: EventTarget, type: string, listener: (event: E) => void): void {
+    listen(target, type, listener, this.ownListeners.signal);
   }
 
   /** Stop listening to the page; see {@link connect}. */
@@ -2700,64 +2705,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   dispose(): void {
     this.renderQueued = false;
-    this.scrollContainer.removeEventListener('scroll', this.handleScroll);
-    this.scrollContainer.removeEventListener('focusin', this.handleSheetFocusChange);
-    this.scrollContainer.removeEventListener('focusout', this.handleSheetFocusChange);
-    this.scrollContainer.removeEventListener('keydown', this.handleKeyDown as EventListener);
-    this.scrollContainer.removeEventListener('pointerdown', this.handleHostedEditorPointerDown);
+    this.ownListeners.abort();
     this.stopLongPress();
-    this.scrollContainer.removeEventListener('copy', this.handleCopy as EventListener);
-    this.scrollContainer.removeEventListener('cut', this.handleCut as EventListener);
-    this.scrollContainer.removeEventListener('paste', this.handlePaste as EventListener);
-    this.cellGrid.removeEventListener('cell-click', this.handleCellClick as EventListener);
     this.overlayComponents.clear();
     this.cellComponents.clear();
     this.cellEditors.clear();
     this.popupContents.clear();
     this.actionIcons.clear();
-    this.contextMenu.removeEventListener('context-menu-action', this.handleContextMenuAction as EventListener);
-    this.contextMenu.removeEventListener('context-menu-dismiss', this.handleContextMenuDismiss);
-    this.cellGrid.removeEventListener('cell-doubleclick', this.handleCellDoubleClick as EventListener);
-    this.cellGrid.removeEventListener('cell-editor-commit', this.handleCellEditorCommit as EventListener);
-    this.cellGrid.removeEventListener('cell-editor-cancel', this.handleCellEditorCancel as EventListener);
-    this.cellGrid.removeEventListener('cell-editor-input', this.handleCellEditorInput as EventListener);
-    this.cellGrid.removeEventListener('cell-editor-arrow', this.handleEditorArrow as EventListener);
-    this.cellGrid.removeEventListener('cell-editor-caret', this.handleDraftCaret as EventListener);
-    this.columnHeader.removeEventListener('column-header-click', this.handleColumnHeaderClick as EventListener);
-    this.rowHeader.removeEventListener('row-header-click', this.handleRowHeaderClick as EventListener);
-    this.sheetTabs.removeEventListener('sheet-tab-click', this.handleSheetTabClick as EventListener);
-    this.sheetTabs.removeEventListener('sheet-tabs-scroll', this.handleSheetTabsScroll as EventListener);
-    this.sheetTabs.removeEventListener('sheet-tab-add', this.handleSheetTabAdd);
-    this.sheetTabs.removeEventListener('sheet-tab-rename-start', this.handleSheetRenameStart as EventListener);
-    this.sheetTabs.removeEventListener('sheet-tab-rename', this.handleSheetRename as EventListener);
-    this.sheetTabs.removeEventListener('sheet-tab-rename-cancel', this.handleSheetRenameCancel);
-    this.cellGrid.removeEventListener('cell-mousedown', this.handleCellMouseDown as EventListener);
-    this.cellGrid.removeEventListener('cell-mouseover', this.handleCellMouseOver as EventListener);
-    this.cellGrid.removeEventListener('grid-mouseleave', this.hideLinkTooltip);
-    this.cellGrid.removeEventListener('selection-paint-start', this.handleSelectionPaintStart);
-    this.cellGrid.removeEventListener('popup-button-click', this.handlePopupButtonClick as EventListener);
-    this.cellGrid.removeEventListener('cell-contextmenu', this.handleCellContextMenu as EventListener);
-    this.cellGrid.removeEventListener('cell-comment-commit', this.handleCellCommentCommit as EventListener);
-    this.columnHeader.removeEventListener(
-      'column-header-contextmenu',
-      this.handleColumnHeaderContextMenu as EventListener
-    );
-    this.columnHeader.removeEventListener('column-grouping-toggle', this.handleColumnGroupingToggle as EventListener);
-    this.rowHeader.removeEventListener('row-grouping-toggle', this.handleRowGroupingToggle as EventListener);
-    this.rowHeader.removeEventListener('row-header-contextmenu', this.handleRowHeaderContextMenu as EventListener);
-    this.columnHeader.removeEventListener('column-resize-start', this.handleColumnResizeStart as EventListener);
-    this.rowHeader.removeEventListener('row-resize-start', this.handleRowResizeStart as EventListener);
-    this.columnHeader.removeEventListener('column-autofit', this.handleColumnAutofit as EventListener);
-    this.rowHeader.removeEventListener('row-autofit', this.handleRowAutofit as EventListener);
     this.disconnect();
     hideFromTopLayer(this.popupOverlay);
     this.hostClassObserver = null;
-    this.formulaBar.removeEventListener('sheet-address-changed', this.handleSheetAddressChanged as EventListener);
-    this.formulaBar.removeEventListener('formula-commit', this.handleFormulaCommit as EventListener);
-    this.formulaBar.removeEventListener('formula-input', this.handleFormulaInput as EventListener);
-    this.formulaBar.removeEventListener('formula-arrow', this.handleFormulaArrow as EventListener);
-    this.formulaBar.removeEventListener('formula-caret', this.handleDraftCaret as EventListener);
-    this.formulaBar.removeEventListener('formula-cancel', this.handleFormulaCancel);
   }
 
   /**

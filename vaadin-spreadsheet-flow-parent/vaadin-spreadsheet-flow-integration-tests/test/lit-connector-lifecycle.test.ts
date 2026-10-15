@@ -86,6 +86,59 @@ describe('Spreadsheet — listening to the page', () => {
   });
 });
 
+/**
+ * A sheet listens to its own parts until it is disposed, and then to none
+ * of them: one of them, the outline level buttons, went on being heard.
+ */
+describe("Spreadsheet — listening to its own parts", () => {
+  let host: HTMLElement;
+  let sheet: Spreadsheet;
+  let sent: string[];
+
+  beforeEach(() => {
+    host = document.createElement('div');
+    host.style.cssText = 'width:400px;height:200px;display:flex;flex-direction:column;';
+    document.body.appendChild(host);
+    sheet = new Spreadsheet(host);
+    sheet.setRows(10);
+    sheet.setCols(5);
+    sent = [];
+    host.addEventListener('spreadsheet-event', (e: Event) => sent.push((e as CustomEvent).detail.type));
+  });
+
+  afterEach(() => {
+    sheet.dispose();
+    host.remove();
+  });
+
+  /** One event from each of three parts, as each part dispatches it. */
+  function useTheParts(): void {
+    sheet.getHeaderCorner().dispatchEvent(
+      new CustomEvent('level-header-click', { detail: { cols: false, level: 1 }, bubbles: true, composed: true })
+    );
+    sheet.getColumnHeader().dispatchEvent(
+      new CustomEvent('column-grouping-toggle', { detail: { uniqueIndex: 1, collapsed: true }, bubbles: true, composed: true })
+    );
+    sheet.getScrollContainer().dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, metaKey: true, bubbles: true, cancelable: true })
+    );
+  }
+
+  it('hears its parts while it lives', () => {
+    useTheParts();
+
+    expect(sent).to.eql(['levelHeaderClicked', 'groupingCollapsed', 'onUndo']);
+  });
+
+  it('hears none of them once disposed', () => {
+    sheet.dispose();
+
+    useTheParts();
+
+    expect(sent).to.be.empty;
+  });
+});
+
 describe('<vaadin-spreadsheet> — joining and leaving the page', () => {
   type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
 
