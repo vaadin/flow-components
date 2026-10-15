@@ -283,12 +283,15 @@ class GridMultiSelectionModelTest {
                 .filter(child -> child.getTag()
                         .equals("vaadin-grid-flow-selection-column"))
                 .findFirst().orElseThrow();
+        Assertions.assertFalse(selectionModel.isSelectionColumnFrozen());
         Assertions.assertFalse(selectionColumn.getProperty("frozen", false));
 
         selectionModel.setSelectionColumnFrozen(true);
+        Assertions.assertTrue(selectionModel.isSelectionColumnFrozen());
         Assertions.assertTrue(selectionColumn.getProperty("frozen", false));
 
         selectionModel.setSelectionColumnFrozen(false);
+        Assertions.assertFalse(selectionModel.isSelectionColumnFrozen());
         Assertions.assertFalse(selectionColumn.getProperty("frozen", true));
     }
 
