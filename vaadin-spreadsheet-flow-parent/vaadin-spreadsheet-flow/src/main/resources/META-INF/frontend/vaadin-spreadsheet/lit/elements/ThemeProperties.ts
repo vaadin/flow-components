@@ -63,7 +63,7 @@ export const formulabarFontSize = css`var(--vaadin-spreadsheet-formulabar-font-s
 /** Background of a grouping toggle. */
 export const groupingToggleBg = css`var(--vaadin-spreadsheet-grouping-toggle-bg, var(--_vaadin-spreadsheet-grouping-toggle-bg, #c7c7c7))`;
 
-/** Border of a grouping toggle. */
+/** Color of a grouping toggle's border. */
 export const groupingToggleBorderColor = css`var(--vaadin-spreadsheet-grouping-toggle-border-color, var(--_vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7))`;
 
 /** Background of the row and column header strips. */
@@ -117,7 +117,7 @@ export const tabsActiveFg = css`var(--vaadin-spreadsheet-tabs-active-fg, var(--_
 /** Background of the sheet-tab strip. */
 export const tabsBg = css`var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa))`;
 
-/** Border of the sheet-tab strip. */
+/** Color of the sheet-tab strip's border. */
 export const tabsBorder = css`var(--vaadin-spreadsheet-tabs-border, var(--_vaadin-spreadsheet-tabs-border, #c7c7c7))`;
 
 /** Color of sheet-tab text. */
