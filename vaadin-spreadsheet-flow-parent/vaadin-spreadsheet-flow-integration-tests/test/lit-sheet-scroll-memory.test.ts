@@ -87,6 +87,30 @@ describe('Spreadsheet — each sheet remembers where it was scrolled', () => {
     expect(asked[0].lastRow).to.be.at.least(101);
   });
 
+  it('leaves a sheet where it is when a sheet before it goes', () => {
+    // Sheet two, left at 150 once, is shown and scrolled to 600. The server
+    // deletes or hides sheet one: sheet two is now the first, still shown.
+    serverShows(2, [0, 150], [0, 0]);
+    const scroller = sheet.getScrollContainer();
+    scroller.scrollTop = 600;
+
+    sheet.setSheetNames(['Two']);
+    serverShows(1, [150], [0]);
+
+    expect(scroller.scrollTop).to.equal(600);
+  });
+
+  it('leaves a sheet where it is when it is renamed', () => {
+    serverShows(2, [0, 150], [0, 0]);
+    const scroller = sheet.getScrollContainer();
+    scroller.scrollTop = 600;
+
+    sheet.setSheetNames(['One', 'Renamed']);
+    sheet.notifyStateChanges(['sheetNames'], false);
+
+    expect(scroller.scrollTop).to.equal(600);
+  });
+
   it('does not scroll on the first batch', () => {
     const fresh = document.createElement('div');
     fresh.style.cssText = host.style.cssText;

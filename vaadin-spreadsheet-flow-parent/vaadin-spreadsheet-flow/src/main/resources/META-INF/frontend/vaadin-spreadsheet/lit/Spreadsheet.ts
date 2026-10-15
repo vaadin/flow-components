@@ -385,6 +385,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private horizontalScrollPositions: NumberList = [];
   /** The offsets the next render scrolls to, for a sheet shown again. */
   private pendingSheetScroll: { top: number; left: number } | null = null;
+  /** The sheet the last batch showed, by name, which is unique in a workbook. */
+  private shownSheetName: string | null = null;
 
   /**
    * Cells currently known to the client, keyed by
@@ -3793,13 +3795,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Still one render per batch: this is called once, after every changed
     // property has been forwarded. The first batch renders even when it is
     // empty, so the sheet is drawn once it is in the page.
-    if (!firstUpdate && changedPropertyNames.includes('sheetIndex')) {
-      const index = this.sheetIndex - 1;
+    // A sheet shown again goes back to where it was scrolled. The sheet
+    // shown can also get another index without changing, when a sheet
+    // before it is deleted, hidden or shown again: it stays where it is.
+    const index = this.sheetIndex - 1;
+    const shownSheetName = this.sheetNames[index] ?? null;
+    if (!firstUpdate && changedPropertyNames.includes('sheetIndex') && shownSheetName !== this.shownSheetName) {
       this.pendingSheetScroll = {
         top: this.verticalScrollPositions[index] ?? 0,
         left: this.horizontalScrollPositions[index] ?? 0
       };
     }
+    this.shownSheetName = shownSheetName;
     if (changedPropertyNames.length > 0 || firstUpdate) {
       this.flushRender();
     }
