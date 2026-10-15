@@ -13,6 +13,7 @@ import { showInTopLayer } from '../dom/TopLayer.js';
 import { animateIn, animateOut, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { actionIconSlotName } from '../dom/VirtualChildren.js';
 import type { SpreadsheetActionDetails } from '../types/wire.js';
+import { contextmenuBg, contextmenuBorder, contextmenuHoverBg } from './ThemeProperties.js';
 
 /**
  * Input state for the {@link SpreadsheetContextMenu} element.
@@ -115,16 +116,11 @@ export class SpreadsheetContextMenu extends LitElement {
         overflow: hidden auto;
         padding: 4px;
         box-sizing: border-box;
-        background: var(--vaadin-spreadsheet-contextmenu-bg, var(--_vaadin-spreadsheet-contextmenu-bg, #fff));
+        background: ${contextmenuBg};
         border: 0;
         border-radius: 4px;
         /* The edge is the last shadow, a hairline that takes no room. */
-        box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
-          0 0 0 1px
-            var(
-              --vaadin-spreadsheet-contextmenu-border,
-              var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
-            );
+        box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px ${contextmenuBorder};
         font: inherit;
         color: #474747;
         outline: none;
@@ -165,10 +161,7 @@ export class SpreadsheetContextMenu extends LitElement {
        sets its text through ::part(context-menu-item). */
       .item:hover,
       .item:focus {
-        background: var(
-          --vaadin-spreadsheet-contextmenu-hover-bg,
-          var(--_vaadin-spreadsheet-contextmenu-hover-bg, linear-gradient(to bottom, #1b87e3 2%, #166ed6 98%))
-        );
+        background: ${contextmenuHoverBg};
         color: #ecf2f8;
         outline: none;
       }
@@ -190,12 +183,7 @@ export class SpreadsheetContextMenu extends LitElement {
         padding: var(--lumo-space-xs);
         border-radius: var(--lumo-border-radius-s);
         color: var(--lumo-body-text-color);
-        box-shadow: var(--lumo-box-shadow-s),
-          0 0 0 1px
-            var(
-              --vaadin-spreadsheet-contextmenu-border,
-              var(--_vaadin-spreadsheet-contextmenu-border, rgba(0, 0, 0, 0.09))
-            );
+        box-shadow: var(--lumo-box-shadow-s), 0 0 0 1px ${contextmenuBorder};
       }
 
       :host([theme~='lumo']) .item {

@@ -13,6 +13,15 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { columnIndexToLetters } from '../algorithms/CellRef.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
+import {
+  groupingToggleBg,
+  groupingToggleBorderColor,
+  headerBg,
+  headerBorderColor,
+  headerFont,
+  headerFontSize,
+  headerSelectedBg
+} from './ThemeProperties.js';
 
 /**
  * Input state for the {@link SpreadsheetColumnHeader} element.
@@ -233,11 +242,10 @@ export class SpreadsheetColumnHeader extends LitElement {
       top: 0;
       z-index: 5;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, Helvetica));
-      font-size: var(--vaadin-spreadsheet-header-font-size, var(--_vaadin-spreadsheet-header-font-size, 13px));
+      background: ${headerBg};
+      border-bottom: 1px solid ${headerBorderColor};
+      font-family: ${headerFont};
+      font-size: ${headerFontSize};
     }
 
     :host([hidden]) {
@@ -274,8 +282,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       top: 0;
       box-sizing: border-box;
       border-right: 1px solid #6a6a6a;
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px solid ${headerBorderColor};
       pointer-events: none;
     }
 
@@ -310,15 +317,9 @@ export class SpreadsheetColumnHeader extends LitElement {
       box-sizing: border-box;
       overflow: hidden;
       text-align: center;
-      box-shadow: inset -1px 0 0 var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      background: linear-gradient(
-        to bottom in srgb,
-        var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 2%,
-        color-mix(in srgb, var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 96%, #000)
-          98%
-      );
+      box-shadow: inset -1px 0 0 ${headerBorderColor};
+      border-bottom: 1px solid ${headerBorderColor};
+      background: linear-gradient(to bottom in srgb, ${headerBg} 2%, color-mix(in srgb, ${headerBg} 96%, #000) 98%);
       cursor: s-resize;
     }
 
@@ -327,7 +328,7 @@ export class SpreadsheetColumnHeader extends LitElement {
        client painted; the cell also carries the documented
        ::part(header-selected) for consumers who want another one. */
     .col-header-cell[part~='header-selected'] {
-      background: var(--vaadin-spreadsheet-header-selected-bg, var(--_vaadin-spreadsheet-header-selected-bg, #e6edf4));
+      background: ${headerSelectedBg};
       /* The GWT client's marker along the edge that faces the cells. */
       border-bottom: 2px solid #63b1ff;
     }
@@ -350,17 +351,14 @@ export class SpreadsheetColumnHeader extends LitElement {
     .col-grouping-line {
       position: absolute;
       height: 7px;
-      border-top: 2px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      border-left: 2px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-top: 2px solid ${headerBorderColor};
+      border-left: 2px solid ${headerBorderColor};
       pointer-events: none;
     }
 
     .col-grouping-line.inversed {
       border-left: none;
-      border-right: 2px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-right: 2px solid ${headerBorderColor};
     }
 
     /* The sign sits where the GWT client's did, on an 11px line at the
@@ -375,13 +373,9 @@ export class SpreadsheetColumnHeader extends LitElement {
       padding: 0 0 1px;
       margin: 0;
       border: 0;
-      box-shadow: inset 0 0 0 1px
-        var(
-          --vaadin-spreadsheet-grouping-toggle-border-color,
-          var(--_vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7)
-        );
+      box-shadow: inset 0 0 0 1px ${groupingToggleBorderColor};
       border-radius: 50%;
-      background: var(--vaadin-spreadsheet-grouping-toggle-bg, var(--_vaadin-spreadsheet-grouping-toggle-bg, #c7c7c7));
+      background: ${groupingToggleBg};
       color: #fff;
       font: inherit;
       font-size: 12px;
@@ -396,8 +390,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       left: 0;
       top: 0;
       box-sizing: border-box;
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px solid ${headerBorderColor};
       pointer-events: none;
     }
 
@@ -407,8 +400,7 @@ export class SpreadsheetColumnHeader extends LitElement {
       position: absolute;
       z-index: 3;
       height: 0;
-      border-bottom: 1px dotted
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px dotted ${headerBorderColor};
       pointer-events: none;
     }
 
@@ -423,7 +415,7 @@ export class SpreadsheetColumnHeader extends LitElement {
        Lumo ground, as in the GWT client, so a frozen column's letter
        covers the scrolled one under it. */
     :host([theme~='lumo']) .col-header-cell {
-      background-color: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
+      background-color: ${headerBg};
       background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     }
 
@@ -434,10 +426,7 @@ export class SpreadsheetColumnHeader extends LitElement {
     }
 
     :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {
-      background-color: var(
-        --vaadin-spreadsheet-header-selected-bg,
-        var(--_vaadin-spreadsheet-header-selected-bg, #e6edf4)
-      );
+      background-color: ${headerSelectedBg};
       background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
       border-bottom-color: var(--lumo-primary-color-50pct);
     }

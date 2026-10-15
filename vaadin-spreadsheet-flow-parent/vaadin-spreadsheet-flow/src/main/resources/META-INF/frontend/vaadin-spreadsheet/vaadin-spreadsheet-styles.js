@@ -8,6 +8,7 @@
  * license.
  */
 import { css } from 'lit';
+import { borderColor, cellBackground, textColor } from './lit/elements/ThemeProperties.js';
 
 /**
  * The stylesheet of the {@code <vaadin-spreadsheet>} element.
@@ -68,14 +69,11 @@ export const spreadsheetStyles = css`
        grid because custom properties inherit through the shadow
        boundary. No backticks in this comment — the whole stylesheet is
        a template literal and one would end it. */
-    --default-background-color: var(
-      --vaadin-spreadsheet-cell-background,
-      var(--_vaadin-spreadsheet-cell-background, #fff)
-    );
+    --default-background-color: ${cellBackground};
     --default-color: #000;
     --default-font-family: Helvetica;
     --default-font-size: 11pt;
-    color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
+    color: ${textColor};
     /* No font here. The GWT client set its own font on the sheet's parts
        and left the rest to the page: a comment, the context menu and a
        pop-up are drawn in the page's font, as they were then. */
@@ -95,7 +93,7 @@ export const spreadsheetStyles = css`
      root div was. The root's sizing is set on the element itself; only
      the theming lives here. */
   .spreadsheet-root {
-    border: 1px solid var(--vaadin-spreadsheet-border-color, var(--_vaadin-spreadsheet-border-color, #c7c7c7));
+    border: 1px solid ${borderColor};
   }
 
   /* A header being dragged, as the GWT client showed it: a line across the
@@ -181,7 +179,7 @@ export const spreadsheetStyles = css`
     --_vaadin-spreadsheet-popup-button-bg: var(--lumo-base-color);
     --_vaadin-spreadsheet-popup-button-fg: var(--lumo-body-text-color);
     --_vaadin-spreadsheet-popup-button-active-bg: var(--lumo-base-color);
-    --default-color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
+    --default-color: ${textColor};
     background-color: var(--lumo-base-color);
   }
 

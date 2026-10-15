@@ -19,6 +19,7 @@ import {
   ROW_GROUPING_LEVEL_PX,
   rowGroupingGutterPx
 } from './SpreadsheetColumnHeader.js';
+import { headerBg, headerBorderColor, headerFont, textColor } from './ThemeProperties.js';
 
 export interface HeaderCornerRenderState {
   /** Width of the row-header column, 0 when the headers are hidden. */
@@ -73,13 +74,11 @@ export class SpreadsheetHeaderCorner extends LitElement {
       display: block;
       position: relative;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      background: ${headerBg};
+      border-right: 1px solid ${headerBorderColor};
+      border-bottom: 1px solid ${headerBorderColor};
       /* The headers' font, for the outline level numbers. */
-      font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, Helvetica));
+      font-family: ${headerFont};
     }
 
     :host([hidden]) {
@@ -98,26 +97,19 @@ export class SpreadsheetHeaderCorner extends LitElement {
        are, blended in sRGB as they are. Its right and bottom edges are the
        host's border. */
     .corner {
-      background: linear-gradient(
-        to bottom in srgb,
-        var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 2%,
-        color-mix(in srgb, var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa)) 96%, #000)
-          98%
-      );
+      background: linear-gradient(to bottom in srgb, ${headerBg} 2%, color-mix(in srgb, ${headerBg} 96%, #000) 98%);
     }
 
     /* The column levels, one under the other at the right. */
     .col-group-summary {
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px solid ${headerBorderColor};
     }
 
     /* The row levels, side by side in a line of the sheet's own font as
        tall as the letters, which sets how far down they sit, as it did in
        the GWT client. */
     .row-group-summary {
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-right: 1px solid ${headerBorderColor};
       font-size: 14px;
       white-space: nowrap;
     }
@@ -125,11 +117,9 @@ export class SpreadsheetHeaderCorner extends LitElement {
     /* Where the gutters meet: over the dotted lines that run in under it. */
     .grouping-corner {
       z-index: 1;
-      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      border-bottom: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      background: ${headerBg};
+      border-right: 1px solid ${headerBorderColor};
+      border-bottom: 1px solid ${headerBorderColor};
     }
 
     /* The dotted lines between the levels, carried on from the gutters
@@ -145,15 +135,13 @@ export class SpreadsheetHeaderCorner extends LitElement {
     .level-separator.cols {
       left: 0;
       height: 0;
-      border-bottom: 1px dotted
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 1px dotted ${headerBorderColor};
     }
 
     .level-separator.rows {
       top: 0;
       width: 0;
-      border-right: 1px dotted
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-right: 1px dotted ${headerBorderColor};
     }
 
     /* Plain numbers, as the GWT client drew them. */
@@ -206,7 +194,7 @@ export class SpreadsheetHeaderCorner extends LitElement {
     }
 
     :host([theme~='lumo']) .level-header {
-      color: var(--vaadin-spreadsheet-text-color, var(--_vaadin-spreadsheet-text-color, #474747));
+      color: ${textColor};
       font-size: var(--lumo-font-size-s);
       cursor: var(--lumo-clickable-cursor);
     }

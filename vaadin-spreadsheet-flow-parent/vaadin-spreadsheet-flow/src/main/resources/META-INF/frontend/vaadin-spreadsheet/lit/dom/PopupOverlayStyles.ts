@@ -9,6 +9,7 @@
  */
 
 import { overlayAnimationStyles } from './OverlayAnimation.js';
+import { popupBackground, popupBorderColor } from '../elements/ThemeProperties.js';
 
 /**
  * The rules a popup button's popup carries with it.
@@ -42,10 +43,10 @@ export function popupOverlayRules(): HTMLStyleElement {
       border: 0;
       border-radius: 4px;
       color: #474747;
-      background: var(--vaadin-spreadsheet-popup-background, var(--_vaadin-spreadsheet-popup-background, #fff));
+      background: ${popupBackground};
       /* The edge is the last shadow, a hairline that takes no room. */
       box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
-        0 0 0 1px var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
+        0 0 0 1px ${popupBorderColor};
     }
     .popup-header {
       position: relative;
@@ -85,7 +86,7 @@ export function popupOverlayRules(): HTMLStyleElement {
     }
     :host([theme~='lumo']) .popup-overlay {
       padding: var(--lumo-space-xs);
-      border: 1px solid var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
+      border: 1px solid ${popupBorderColor};
       border-radius: var(--lumo-border-radius-m);
       color: var(--lumo-body-text-color);
       box-shadow: var(--lumo-box-shadow-s);

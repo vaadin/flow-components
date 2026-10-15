@@ -18,6 +18,15 @@ import {
   rowGroupingGutterPx
 } from './SpreadsheetColumnHeader.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
+import {
+  groupingToggleBg,
+  groupingToggleBorderColor,
+  headerBg,
+  headerBorderColor,
+  headerFont,
+  headerFontSize,
+  headerSelectedBg
+} from './ThemeProperties.js';
 
 /**
  * Input state for the {@link SpreadsheetRowHeader} element. The
@@ -185,17 +194,14 @@ export class SpreadsheetRowHeader extends LitElement {
     .row-grouping-line {
       position: absolute;
       width: 8px;
-      border-top: 2px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      border-left: 2px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-top: 2px solid ${headerBorderColor};
+      border-left: 2px solid ${headerBorderColor};
       pointer-events: none;
     }
 
     .row-grouping-line.inversed {
       border-top: none;
-      border-bottom: 2px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-bottom: 2px solid ${headerBorderColor};
     }
 
     /* The sign sits where the GWT client's did, on an 11px line at the
@@ -210,13 +216,9 @@ export class SpreadsheetRowHeader extends LitElement {
       padding: 0 0 1px;
       margin: 0;
       border: 0;
-      box-shadow: inset 0 0 0 1px
-        var(
-          --vaadin-spreadsheet-grouping-toggle-border-color,
-          var(--_vaadin-spreadsheet-grouping-toggle-border-color, #c7c7c7)
-        );
+      box-shadow: inset 0 0 0 1px ${groupingToggleBorderColor};
       border-radius: 50%;
-      background: var(--vaadin-spreadsheet-grouping-toggle-bg, var(--_vaadin-spreadsheet-grouping-toggle-bg, #c7c7c7));
+      background: ${groupingToggleBg};
       color: #fff;
       font: inherit;
       font-size: 12px;
@@ -231,8 +233,7 @@ export class SpreadsheetRowHeader extends LitElement {
       left: 0;
       top: 0;
       box-sizing: border-box;
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-right: 1px solid ${headerBorderColor};
       pointer-events: none;
     }
 
@@ -242,8 +243,7 @@ export class SpreadsheetRowHeader extends LitElement {
       position: absolute;
       z-index: 3;
       width: 0;
-      border-right: 1px dotted
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-right: 1px dotted ${headerBorderColor};
       pointer-events: none;
     }
 
@@ -253,11 +253,10 @@ export class SpreadsheetRowHeader extends LitElement {
       left: 0;
       z-index: 4;
       box-sizing: border-box;
-      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      font-family: var(--vaadin-spreadsheet-header-font, var(--_vaadin-spreadsheet-header-font, Helvetica));
-      font-size: var(--vaadin-spreadsheet-header-font-size, var(--_vaadin-spreadsheet-header-font-size, 13px));
+      background: ${headerBg};
+      border-right: 1px solid ${headerBorderColor};
+      font-family: ${headerFont};
+      font-size: ${headerFontSize};
     }
 
     :host([hidden]) {
@@ -298,8 +297,7 @@ export class SpreadsheetRowHeader extends LitElement {
       left: 0;
       top: 0;
       box-sizing: border-box;
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      border-right: 1px solid ${headerBorderColor};
       border-bottom: 1px solid #6a6a6a;
       pointer-events: none;
     }
@@ -347,10 +345,9 @@ export class SpreadsheetRowHeader extends LitElement {
       justify-content: center;
       line-height: 100%;
       text-align: center;
-      background: var(--vaadin-spreadsheet-header-bg, var(--_vaadin-spreadsheet-header-bg, #fafafa));
-      box-shadow: inset 0 -1px 0 var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      border-right: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
+      background: ${headerBg};
+      box-shadow: inset 0 -1px 0 ${headerBorderColor};
+      border-right: 1px solid ${headerBorderColor};
       cursor: e-resize;
     }
 
@@ -359,7 +356,7 @@ export class SpreadsheetRowHeader extends LitElement {
        client painted; the cell also carries the documented
        ::part(header-selected) for consumers who want another one. */
     .row-header-cell[part~='header-selected'] {
-      background: var(--vaadin-spreadsheet-header-selected-bg, var(--_vaadin-spreadsheet-header-selected-bg, #e6edf4));
+      background: ${headerSelectedBg};
       /* The GWT client's marker along the edge that faces the cells. */
       border-right: 2px solid #63b1ff;
     }

@@ -10,6 +10,17 @@
 
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { composing } from '../algorithms/KeyboardMoves.js';
+import {
+  headerBorderColor,
+  tabButtonBg,
+  tabsActiveBg,
+  tabsActiveFg,
+  tabsBg,
+  tabsBorder,
+  tabsFg,
+  tabsFont,
+  tabsFontSize
+} from './ThemeProperties.js';
 
 /**
  * Input state for the {@link SpreadsheetSheetTabs} element.
@@ -148,7 +159,7 @@ export class SpreadsheetSheetTabs extends LitElement {
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: var(--vaadin-spreadsheet-tab-button-bg, var(--_vaadin-spreadsheet-tab-button-bg, #464646));
+      color: ${tabButtonBg};
     }
 
     .sheet-tabsheet-options > div::before {
@@ -202,10 +213,10 @@ export class SpreadsheetSheetTabs extends LitElement {
       align-items: flex-start;
       box-sizing: border-box;
       height: 29px;
-      background: var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa));
-      border-top: 1px solid var(--vaadin-spreadsheet-tabs-border, var(--_vaadin-spreadsheet-tabs-border, #c7c7c7));
-      font-family: var(--vaadin-spreadsheet-tabs-font, var(--_vaadin-spreadsheet-tabs-font, Helvetica));
-      font-size: var(--vaadin-spreadsheet-tabs-font-size, var(--_vaadin-spreadsheet-tabs-font-size, 14px));
+      background: ${tabsBg};
+      border-top: 1px solid ${tabsBorder};
+      font-family: ${tabsFont};
+      font-size: ${tabsFontSize};
       overflow: hidden;
     }
 
@@ -224,13 +235,13 @@ export class SpreadsheetSheetTabs extends LitElement {
       max-width: 200px;
       margin-left: 5px;
       padding: 2px 6px;
-      border: 1px solid var(--vaadin-spreadsheet-tabs-border, var(--_vaadin-spreadsheet-tabs-border, #c7c7c7));
+      border: 1px solid ${tabsBorder};
       border-top: none;
       border-radius: 0 0 5px 5px;
       cursor: pointer;
       user-select: none;
-      background: var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa));
-      color: var(--vaadin-spreadsheet-tabs-fg, var(--_vaadin-spreadsheet-tabs-fg, #6a6a6a));
+      background: ${tabsBg};
+      color: ${tabsFg};
       font-weight: 300;
       line-height: 20px;
       text-align: center;
@@ -243,8 +254,8 @@ export class SpreadsheetSheetTabs extends LitElement {
        colour, and as wide as its name needs. */
     .sheet-tab.active {
       max-width: none;
-      background: var(--vaadin-spreadsheet-tabs-active-bg, var(--_vaadin-spreadsheet-tabs-active-bg, #fff));
-      color: var(--vaadin-spreadsheet-tabs-active-fg, var(--_vaadin-spreadsheet-tabs-active-fg, #2584e2));
+      background: ${tabsActiveBg};
+      color: ${tabsActiveFg};
       cursor: default;
     }
 
@@ -258,9 +269,8 @@ export class SpreadsheetSheetTabs extends LitElement {
       width: 200px;
       height: 100%;
       padding: 0 5px;
-      border-left: 1px solid
-        var(--vaadin-spreadsheet-header-border-color, var(--_vaadin-spreadsheet-header-border-color, #c7c7c7));
-      background: var(--vaadin-spreadsheet-tabs-bg, var(--_vaadin-spreadsheet-tabs-bg, #fafafa));
+      border-left: 1px solid ${headerBorderColor};
+      background: ${tabsBg};
       font-weight: bold;
       font-size: 11px;
       line-height: 29px;
@@ -285,7 +295,7 @@ export class SpreadsheetSheetTabs extends LitElement {
     }
 
     :host([theme~='lumo']) .sheet-tabsheet-options > div:hover {
-      color: var(--vaadin-spreadsheet-tab-button-bg, var(--_vaadin-spreadsheet-tab-button-bg, #464646));
+      color: ${tabButtonBg};
       background: var(--lumo-primary-color-10pct);
     }
 

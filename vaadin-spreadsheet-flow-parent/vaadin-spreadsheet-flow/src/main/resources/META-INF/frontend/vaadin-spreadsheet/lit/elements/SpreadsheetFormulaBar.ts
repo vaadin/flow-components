@@ -11,6 +11,7 @@
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { live } from 'lit/directives/live.js';
 import { composing } from '../algorithms/KeyboardMoves.js';
+import { borderColor, formulabarBg, formulabarFont, formulabarFontSize, headerBorderColor } from './ThemeProperties.js';
 
 /**
  * Input state for the {@link SpreadsheetFormulaBar} element.
@@ -93,16 +94,13 @@ export class SpreadsheetFormulaBar extends LitElement {
       align-items: stretch;
       box-sizing: border-box;
       height: var(--vaadin-spreadsheet-formulabar-height, 30px);
-      background: var(--vaadin-spreadsheet-formulabar-bg, var(--_vaadin-spreadsheet-formulabar-bg, #fff));
+      background: ${formulabarBg};
       /* The bar's own border colour, or each line in the documented colour
          the GWT client drew it in: this one in the header border colour. */
-      --_line-color: var(
-        --vaadin-spreadsheet-header-border-color,
-        var(--_vaadin-spreadsheet-header-border-color, #c7c7c7)
-      );
+      --_line-color: ${headerBorderColor};
       border-bottom: 1px solid var(--vaadin-spreadsheet-formulabar-border, var(--_line-color));
-      font-family: var(--vaadin-spreadsheet-formulabar-font, var(--_vaadin-spreadsheet-formulabar-font, Helvetica));
-      font-size: var(--vaadin-spreadsheet-formulabar-font-size, var(--_vaadin-spreadsheet-formulabar-font-size, 14px));
+      font-family: ${formulabarFont};
+      font-size: ${formulabarFontSize};
     }
 
     :host([hidden]) {
@@ -130,7 +128,7 @@ export class SpreadsheetFormulaBar extends LitElement {
       width: 176px;
       height: 100%;
       /* The divider in the sheet's border colour, as the GWT client drew it. */
-      --_line-color: var(--vaadin-spreadsheet-border-color, var(--_vaadin-spreadsheet-border-color, #c7c7c7));
+      --_line-color: ${borderColor};
       border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, var(--_line-color));
       background: #fafafa;
     }
@@ -218,10 +216,7 @@ export class SpreadsheetFormulaBar extends LitElement {
 
     /* In Lumo the GWT client drew the divider in the header border colour. */
     :host([theme~='lumo']) .address-panel {
-      --_line-color: var(
-        --vaadin-spreadsheet-header-border-color,
-        var(--_vaadin-spreadsheet-header-border-color, #c7c7c7)
-      );
+      --_line-color: ${headerBorderColor};
       background: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct)) var(--lumo-base-color);
     }
 

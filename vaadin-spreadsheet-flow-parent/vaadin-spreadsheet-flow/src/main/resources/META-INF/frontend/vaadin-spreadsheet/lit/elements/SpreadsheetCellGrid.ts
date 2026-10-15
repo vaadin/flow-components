@@ -20,6 +20,22 @@ import { ANIMATE_IN_CLASS, animateIn, animateOut, overlayAnimationStyles } from 
 import { isCellEditorSlot, overlayComponentSlotName } from '../dom/VirtualChildren.js';
 import { isActiveCell, isCellSelected, isCoherentSelection } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
+import {
+  cellBackground,
+  cellBorderColor,
+  cellRangeBg,
+  commentBg,
+  commentOverlayBg,
+  commentOverlayBorderColor,
+  editorBorder,
+  headerBorderColor,
+  invalidformulaBg,
+  popupButtonActiveBg,
+  popupButtonBg,
+  popupButtonFg,
+  selectionBorderColor,
+  selectionColor
+} from './ThemeProperties.js';
 
 /**
  * Internal cell-grid Lit element. Renders absolutely-positioned cell
@@ -114,11 +130,9 @@ export class SpreadsheetCellGrid extends LitElement {
          white rather than transparent, and a cell under a merge or an
          overlay does not show what is behind the sheet. A cs<N> or
          cf<N> rule wins over this, being the more specific selector. */
-        background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
-        border-right: 1px solid
-          var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
-        border-bottom: 1px solid
-          var(--vaadin-spreadsheet-cell-border-color, var(--_vaadin-spreadsheet-cell-border-color, #c7c7c7));
+        background: ${cellBackground};
+        border-right: 1px solid ${cellBorderColor};
+        border-bottom: 1px solid ${cellBorderColor};
         /* Unset, the workbook's default font, which its default style
          declares on every cell - and until the styles arrive, the default
          the host declares for it. */
@@ -152,7 +166,7 @@ export class SpreadsheetCellGrid extends LitElement {
        rule wins over this, being the more specific selector, so a styled
        merge keeps its own background. */
       .merged-cell {
-        background: var(--vaadin-spreadsheet-cell-background, var(--_vaadin-spreadsheet-cell-background, #fff));
+        background: ${cellBackground};
       }
 
       /* Dropping into place as it appears and fading out as it goes, as
@@ -175,16 +189,12 @@ export class SpreadsheetCellGrid extends LitElement {
         box-sizing: border-box;
         pointer-events: none;
         color: #474747;
-        background: var(--vaadin-spreadsheet-comment-overlay-bg, var(--_vaadin-spreadsheet-comment-overlay-bg, #fff));
+        background: ${commentOverlayBg};
         border: 0;
         border-radius: 4px;
         /* The edge is the last shadow, a hairline that takes no room. */
         box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
-          0 0 0 1px
-            var(
-              --vaadin-spreadsheet-comment-overlay-border-color,
-              var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
-            );
+          0 0 0 1px ${commentOverlayBorderColor};
       }
 
       .v-spreadsheet-comment-overlay .comment-overlay-label,
@@ -266,8 +276,7 @@ export class SpreadsheetCellGrid extends LitElement {
         position: absolute;
         pointer-events: none;
         box-sizing: border-box;
-        border: 2px solid
-          var(--vaadin-spreadsheet-selection-border-color, var(--_vaadin-spreadsheet-selection-border-color, #40b527));
+        border: 2px solid ${selectionBorderColor};
         background: rgba(235, 247, 233, 0.8);
         z-index: 2;
       }
@@ -289,7 +298,7 @@ export class SpreadsheetCellGrid extends LitElement {
         left: 0;
         width: 100%;
         height: 2px;
-        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        background: ${selectionColor};
         /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
@@ -303,7 +312,7 @@ export class SpreadsheetCellGrid extends LitElement {
         left: 0;
         width: 100%;
         height: 2px;
-        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        background: ${selectionColor};
         /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
@@ -317,7 +326,7 @@ export class SpreadsheetCellGrid extends LitElement {
         left: 0;
         width: 2px;
         height: 100%;
-        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        background: ${selectionColor};
         /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
@@ -331,7 +340,7 @@ export class SpreadsheetCellGrid extends LitElement {
         right: 0;
         width: 2px;
         height: 100%;
-        background: var(--vaadin-spreadsheet-selection-color, var(--_vaadin-spreadsheet-selection-color, #197de1));
+        background: ${selectionColor};
         /* Above the cells, which carry z-index 1 and paint an
          opaque background. Without this the outline is in the DOM,
          correctly sized, and invisible - every cell covers it. No
@@ -349,10 +358,7 @@ export class SpreadsheetCellGrid extends LitElement {
         bottom: -1px;
         width: 6px;
         height: 6px;
-        background: var(
-          --vaadin-spreadsheet-selection-border-color,
-          var(--_vaadin-spreadsheet-selection-border-color, #40b527)
-        );
+        background: ${selectionBorderColor};
         outline: 2px solid #fff;
         cursor: crosshair;
         pointer-events: auto;
@@ -375,8 +381,7 @@ export class SpreadsheetCellGrid extends LitElement {
       /* The default tint turns a white cell the GWT client's range colour,
        rgb(237, 245, 253), while a fill underneath still shows through. */
       .cell.cell-range {
-        box-shadow: inset 0 0 0 9999px
-          var(--vaadin-spreadsheet-cell-range-bg, var(--_vaadin-spreadsheet-cell-range-bg, rgba(75, 155, 235, 0.1)));
+        box-shadow: inset 0 0 0 9999px ${cellRangeBg};
       }
 
       /* The active cell of a selection of several ranges, as the GWT client
@@ -502,7 +507,7 @@ export class SpreadsheetCellGrid extends LitElement {
         top: 0;
         width: 9px;
         height: 9px;
-        background: var(--vaadin-spreadsheet-invalidformula-bg, var(--_vaadin-spreadsheet-invalidformula-bg, #ed473b));
+        background: ${invalidformulaBg};
         clip-path: polygon(0 0, 100% 0, 100% 100%);
         z-index: 5;
         pointer-events: none;
@@ -516,7 +521,7 @@ export class SpreadsheetCellGrid extends LitElement {
         top: 0;
         width: 9px;
         height: 9px;
-        background: var(--vaadin-spreadsheet-comment-bg, var(--_vaadin-spreadsheet-comment-bg, #ffcf16));
+        background: ${commentBg};
         clip-path: polygon(0 0, 100% 0, 100% 100%);
         z-index: 5;
         pointer-events: none;
@@ -543,8 +548,8 @@ export class SpreadsheetCellGrid extends LitElement {
         justify-content: center;
         border: 1px solid #d3d3d3;
         border-radius: 2px;
-        background: var(--vaadin-spreadsheet-popup-button-bg, var(--_vaadin-spreadsheet-popup-button-bg, #fff));
-        color: var(--vaadin-spreadsheet-popup-button-fg, var(--_vaadin-spreadsheet-popup-button-fg, #808080));
+        background: ${popupButtonBg};
+        color: ${popupButtonFg};
         cursor: pointer;
         font-size: 9px;
         line-height: 1;
@@ -553,10 +558,7 @@ export class SpreadsheetCellGrid extends LitElement {
       }
       /* A filter in use, marked along the top. */
       .popup-button.active {
-        background: var(
-          --vaadin-spreadsheet-popup-button-active-bg,
-          var(--_vaadin-spreadsheet-popup-button-active-bg, #fff)
-        );
+        background: ${popupButtonActiveBg};
         box-shadow: inset 0 2px 0 0 rgb(0, 171, 238);
       }
 
@@ -577,8 +579,7 @@ export class SpreadsheetCellGrid extends LitElement {
         box-sizing: border-box;
         z-index: 10;
         border: 0;
-        outline: 1px solid
-          var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, transparent));
+        outline: 1px solid ${editorBorder};
         box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.75);
         font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
         font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
@@ -648,10 +649,7 @@ export class SpreadsheetCellGrid extends LitElement {
       :host([theme~='lumo']) .popup-button {
         width: calc(var(--_cell-height, 20px) + 1px);
         height: calc(var(--_cell-height, 20px) + 1px);
-        border-color: var(
-          --vaadin-spreadsheet-header-border-color,
-          var(--_vaadin-spreadsheet-header-border-color, #c7c7c7)
-        );
+        border-color: ${headerBorderColor};
         background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
         border-radius: var(--lumo-border-radius-s);
         font-size: var(--lumo-font-size-s);
@@ -670,11 +668,7 @@ export class SpreadsheetCellGrid extends LitElement {
 
       :host([theme~='lumo']) .v-spreadsheet-comment-overlay {
         padding: var(--lumo-space-s);
-        border: 1px solid
-          var(
-            --vaadin-spreadsheet-comment-overlay-border-color,
-            var(--_vaadin-spreadsheet-comment-overlay-border-color, rgba(0, 0, 0, 0.09))
-          );
+        border: 1px solid ${commentOverlayBorderColor};
         border-radius: var(--lumo-border-radius-m);
         color: var(--lumo-body-text-color);
         box-shadow: var(--lumo-box-shadow-m);
