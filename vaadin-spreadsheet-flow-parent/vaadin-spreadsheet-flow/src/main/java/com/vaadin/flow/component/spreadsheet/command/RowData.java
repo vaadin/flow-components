@@ -195,9 +195,7 @@ class RowData implements Serializable {
             case FORMULA -> cellFormula = cell.getCellFormula();
             case NUMERIC -> {
                 if (DateUtil.isCellDateFormatted(cell)) {
-                    if (DateUtil.isCellDateFormatted(cell)) {
-                        dateCellValue = cell.getDateCellValue();
-                    }
+                    dateCellValue = cell.getDateCellValue();
                 } else {
                     numericCellValue = cell.getNumericCellValue();
                 }
