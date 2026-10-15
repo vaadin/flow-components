@@ -9,7 +9,10 @@
 
 import { expect } from 'chai';
 
-import { buildSelectionEvent } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
+import {
+    buildSelectionEvent,
+    selectedCellSetBy
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
 
 /**
  * Pure helper that classifies a selection shape and
@@ -137,5 +140,54 @@ describe('buildSelectionEvent — ambiguity at 1x1 grid', () => {
         // Document the deterministic choice (column-first per the
         // detection order in buildSelectionEvent).
         expect(event.type).to.equal('columnSelected');
+    });
+});
+
+/**
+ * The cell an event makes the server's selected cell: the starting point of
+ * its ranges, which a range grown from it need not carry.
+ */
+describe('selectedCellSetBy', () => {
+    it('is the cell a cellSelected names, whether or not it drops the old ranges', () => {
+        expect(selectedCellSetBy({ type: 'cellSelected', data: { row: 7, column: 5, oldSelectionRangeDiscarded: true } }))
+            .to.deep.equal({ col: 5, row: 7 });
+        expect(selectedCellSetBy({ type: 'cellSelected', data: { row: 2, column: 3, oldSelectionRangeDiscarded: false } }))
+            .to.deep.equal({ col: 3, row: 2 });
+    });
+
+    it('is the cell a Ctrl-click adds', () => {
+        expect(selectedCellSetBy({ type: 'cellAddedToSelectionAndSelected', data: { row: 4, column: 6 } }))
+            .to.deep.equal({ col: 6, row: 4 });
+    });
+
+    it('is the starting point a painted range carries', () => {
+        expect(selectedCellSetBy({
+            type: 'cellRangePainted',
+            data: { selectedCellRow: 3, selectedCellColumn: 2, row1: 1, col1: 1, row2: 5, col2: 5 }
+        })).to.deep.equal({ col: 2, row: 3 });
+    });
+
+    it('is the first cell of a selected or added column', () => {
+        expect(selectedCellSetBy({ type: 'columnSelected', data: { column: 4, firstRowIndex: 1 } }))
+            .to.deep.equal({ col: 4, row: 1 });
+        expect(selectedCellSetBy({ type: 'columnAddedToSelection', data: { column: 6, firstRowIndex: 2 } }))
+            .to.deep.equal({ col: 6, row: 2 });
+    });
+
+    it('is the first cell of a selected or added row', () => {
+        expect(selectedCellSetBy({ type: 'rowSelected', data: { row: 9, firstColumnIndex: 1 } }))
+            .to.deep.equal({ col: 1, row: 9 });
+        expect(selectedCellSetBy({ type: 'rowAddedToRangeSelection', data: { row: 8, firstColumnIndex: 3 } }))
+            .to.deep.equal({ col: 3, row: 8 });
+    });
+
+    it('leaves the cell as it was for a range grown from it, and for anything else', () => {
+        expect(selectedCellSetBy({ type: 'cellRangeSelected', data: { row1: 1, col1: 1, row2: 2, col2: 2 } })).to.equal(null);
+        expect(selectedCellSetBy({ type: 'cellsAddedToRangeSelection', data: { row1: 1, col1: 1, row2: 2, col2: 2 } }))
+            .to.equal(null);
+        expect(selectedCellSetBy({
+            type: 'onSheetScroll',
+            data: { firstRow: 1, firstColumn: 1, lastRow: 20, lastColumn: 10 }
+        })).to.equal(null);
     });
 });

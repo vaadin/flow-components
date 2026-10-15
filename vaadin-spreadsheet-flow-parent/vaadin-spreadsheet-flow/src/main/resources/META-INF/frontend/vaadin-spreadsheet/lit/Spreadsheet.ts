@@ -23,6 +23,7 @@ import {
   type CellRange,
   isCellInSelection,
   normalizedRange,
+  selectedCellSetBy,
   selectedColumnSet,
   selectedRowSet,
   selectionSizeLabel,
@@ -31,6 +32,7 @@ import {
 } from './state/SelectionState.js';
 import type {
   SpreadsheetEvent,
+  CellRangePaintedData,
   CellRangeSelectedData,
   CellAddedToSelectionData,
   CellSelectedData,
@@ -139,10 +141,14 @@ function styleIndexOf(cellStyle: string | undefined): number | null {
 
 /**
  * What a press on the cells is doing until its button comes up: dragging
- * out a range, pointing one out for the formula being written, or dragging
- * the fill handle - from the selection it started with, painting a strip.
+ * out a range - `crossed` once the pointer has gone into another cell -,
+ * pointing one out for the formula being written, or dragging the fill
+ * handle - from the selection it started with, painting a strip.
  */
-type CellDrag = { kind: 'select' } | { kind: 'point' } | { kind: 'fill'; from: CellRect; outcome: PaintOutcome };
+type CellDrag =
+  | { kind: 'select'; crossed: boolean }
+  | { kind: 'point' }
+  | { kind: 'fill'; from: CellRect; outcome: PaintOutcome };
 
 /**
  * A sheet's row and column sizes as they are drawn, in pixels, with what
@@ -211,6 +217,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Selection state. */
   private selection: SelectionState = selectSingleCell(1, 1);
+
+  /**
+   * The cell the server holds as selected, as far as this client knows: the
+   * one it last told the server, or the server told it. Null before either,
+   * and after a reload. See {@link dispatchSelectionEvent}.
+   */
+  private serverSelectedCell: { col: number; row: number } | null = null;
+
+  /**
+   * Whether the release of the press under way reported the range it
+   * selected. A shift-click is a press, which selects the range, and a
+   * click: reported on both, the server heard the same range twice.
+   */
+  private rangeReportedOnRelease = false;
 
   /**
    * The cell a click or an arrow asked for when the selection is a merged
@@ -976,7 +996,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
         auxRanges: this.selection.auxRanges
       };
       this.recomputeViewport();
-      this.reportRangeSelection();
+      if (!this.rangeReportedOnRelease) {
+        this.reportRangeSelection();
+      }
       return;
     } else {
       this.selectCellOrMerge(col, row);
@@ -1098,7 +1120,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // out with Ctrl with one rectangle.
       return;
     }
-    this.drag = { kind: 'select' };
+    this.drag = { kind: 'select', crossed: false };
     if (shiftKey) {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
@@ -1150,6 +1172,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (drag?.kind !== 'select') {
       return;
     }
+    drag.crossed = true;
     const { col, row } = e.detail;
     // Same as shift-arrow: keep activeCell as anchor, move
     // the extend corner.
@@ -1198,8 +1221,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (drag.kind === 'select' && this.selectsRange()) {
       // Multi-cell range — dispatch the server-bound
       // selection event so the server learns the final
-      // dragged range.
-      this.reportRangeSelection();
+      // dragged range: with the cell the drag started on, when it went
+      // into other cells. One that stayed in its cell was a shift-click,
+      // which grows the range from the selected cell.
+      this.reportRangeSelection(drag.crossed);
+      // The click that may follow the release reports nothing more.
+      this.rangeReportedOnRelease = true;
+      setTimeout(() => (this.rangeReportedOnRelease = false));
     }
     // Single-cell drag (mousedown + mouseup on the same cell
     // with no mouseover-extension) is handled by the existing
@@ -1839,7 +1867,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         auxRanges: []
       };
       this.recomputeViewport();
-      this.dispatchSelectionEvent();
+      this.dispatchSelectionEvent(true);
       return;
     }
 
@@ -2144,6 +2172,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private sendToServer(detail: SpreadsheetEvent): void {
     this.host.dispatchEvent(new CustomEvent('spreadsheet-event', { detail }));
+    this.serverSelectedCell = selectedCellSetBy(detail) ?? this.serverSelectedCell;
   }
 
   /** The cells the grid draws, its drawing buffer included; null before anything is measured. */
@@ -2456,12 +2485,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Anything then acting on the selection - a context-menu action, a
    * delete - misses them.
    */
-  private reportRangeSelection(): void {
+  private reportRangeSelection(startsAnew = false): void {
     if (this.selection.auxRanges.length > 0) {
       this.dispatchCellsAddedToRangeSelection(this.selection.activeRange);
       return;
     }
-    this.dispatchSelectionEvent();
+    this.dispatchSelectionEvent(startsAnew);
   }
 
   /** Tell the server a whole range joined a non-coherent selection. */
@@ -2542,8 +2571,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * The server receives {@code spreadsheet-event} through a
    * {@code @DomEvent}; the detail's {@code type} + {@code data} follow the
    * server's SpreadsheetHandler signatures as a wire contract.
+   *
+   * A range goes in one event, as in earlier versions. Grown from the cell
+   * the server holds as selected - a shift-click, Shift+arrow - it is
+   * `cellRangeSelected`, which keeps that cell. With a starting point of its
+   * own - a drag, select all - or grown from a cell the server does not
+   * hold, it is `cellRangePainted`, which carries the starting point:
+   * `cellRangeSelected` would leave the server's selected cell elsewhere, or
+   * null. Telling the server the starting point first, in a `cellSelected`,
+   * made it report a selection of that one cell in between, which every
+   * selection listener of the application saw.
+   *
+   * @param startsAnew whether the range has a starting point of its own,
+   *   even one that is the selected cell already
    */
-  private dispatchSelectionEvent(): void {
+  private dispatchSelectionEvent(startsAnew = false): void {
     const { activeCell } = this.selection;
     // A merge is one cell: the server hears that cell, rather than a range
     // it would offer to merge again.
@@ -2552,19 +2594,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
         ? this.selection.activeRange
         : { c1: activeCell.col, c2: activeCell.col, r1: activeCell.row, r2: activeCell.row };
     const event = buildSelectionEvent(activeCell, range, this.rows, this.cols);
-    if (event.type === 'cellRangeSelected') {
-      // `onCellRangeSelected` takes only the four corners and reads the
-      // anchor from the selection the server already holds — unlike its
-      // sibling `onCellRangePainted`, which is given a starting point. So
-      // the anchor is reported first, as a `cellSelected`, before the range.
-      // Without it the server dereferences a null selectedCellReference.
-      const anchor = this.selection.activeCell;
-      const anchorData: CellSelectedData = {
-        row: anchor.row,
-        column: anchor.col,
-        oldSelectionRangeDiscarded: true
+    const held = this.serverSelectedCell;
+    const grownFromHeld = held !== null && held.col === activeCell.col && held.row === activeCell.row;
+    if (event.type === 'cellRangeSelected' && (startsAnew || !grownFromHeld)) {
+      const data: CellRangePaintedData = {
+        selectedCellRow: activeCell.row,
+        selectedCellColumn: activeCell.col,
+        ...event.data
       };
-      this.sendToServer({ type: 'cellSelected', data: anchorData });
+      this.sendToServer({ type: 'cellRangePainted', data });
+      return;
     }
     this.sendToServer(event);
   }
@@ -3376,6 +3415,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const sizeLabel = selectionSizeLabel(this.selection.activeRange);
     const before = this.selection.activeCell;
     this.selection = selectSingleCell(col, row);
+    this.serverSelectedCell = { col, row };
     this.changeFormulaBar({ address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }) });
     this.showServerValueInFormulaField(
       formula && cellValue !== '' ? `=${cellValue}` : cellValue,
@@ -3436,6 +3476,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeRange: normalizedRange(c1, r1, c2, r2),
       auxRanges: this.selection.auxRanges
     };
+    this.serverSelectedCell = { col, row };
     this.changeFormulaBar({
       // As in updateFormulaBar: the server names a selection only when
       // it has a name, and leaves an ordinary one to the client. While
@@ -3711,6 +3752,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // is never mentioned again and the old value would show through.
       this.cellDataByKey.clear();
       this.viewportAnnounced = false;
+      // Its selected cell too, until it says which one it has now.
+      this.serverSelectedCell = null;
       // What it was asked to load is gone too: load again, even the same
       // range.
       this.viewportLoader.reset();

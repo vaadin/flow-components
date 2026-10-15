@@ -1382,16 +1382,12 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
             composed: true,
         }));
 
-        // The anchor goes first: onCellRangeSelected reads the active cell
-        // from the selection the server already holds, so it has to be told
-        // about it before the range arrives.
-        expect(received).to.have.length(2);
-        expect(received[0].type).to.equal('cellSelected');
+        // The range alone: the server holds its starting point, the cell
+        // clicked before. Told the point again first, the server reported
+        // a selection of that one cell in between.
+        expect(received).to.have.length(1);
+        expect(received[0].type).to.equal('cellRangeSelected');
         expect(received[0].data).to.deep.equal({
-            row: 2, column: 2, oldSelectionRangeDiscarded: true,
-        });
-        expect(received[1].type).to.equal('cellRangeSelected');
-        expect(received[1].data).to.deep.equal({
             row1: 2, col1: 2, row2: 4, col2: 5,
         });
         cleanup();
@@ -1660,7 +1656,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
-    it('mouseup ends the drag and dispatches cellRangeSelected for multi-cell ranges', () => {
+    it('mouseup ends the drag and dispatches cellRangePainted, with where it started', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);
         sheet.setCols(10);
@@ -1680,19 +1676,18 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
             composed: true,
         }));
 
-        let received: { type: string; data: Record<string, unknown> } | undefined;
+        const received: { type: string; data: Record<string, unknown> }[] = [];
         host.addEventListener('spreadsheet-event', (e: Event) => {
-            const detail = (e as CustomEvent).detail;
-            if (detail.type === 'cellRangeSelected') {
-                received = detail;
-            }
+            received.push((e as CustomEvent).detail);
         });
 
         document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
 
-        expect(received).to.exist;
-        expect(received!.data).to.deep.equal({
-            row1: 2, col1: 2, row2: 4, col2: 5,
+        // One event, carrying the cell the drag started on, which the
+        // server has not heard of.
+        expect(received.map((e) => e.type)).to.deep.equal(['cellRangePainted']);
+        expect(received[0].data).to.deep.equal({
+            selectedCellRow: 2, selectedCellColumn: 2, row1: 2, col1: 2, row2: 4, col2: 5,
         });
         cleanup();
     });
@@ -1958,7 +1953,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         let received: { type: string; data: Record<string, unknown> } | undefined;
         host.addEventListener('spreadsheet-event', (e: Event) => {
             const detail = (e as CustomEvent).detail;
-            if (detail.type === 'cellRangeSelected') {
+            if (detail.type === 'cellRangePainted') {
                 received = detail;
             }
         });
@@ -1976,8 +1971,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         expect(sheet.getSelection().activeRange).to.deep.equal({
             c1: 1, c2: 10, r1: 1, r2: 20,
         });
+        // With A1 as its starting point, as the GWT client sent it.
         expect(received!.data).to.deep.equal({
-            row1: 1, col1: 1, row2: 20, col2: 10,
+            selectedCellRow: 1, selectedCellColumn: 1, row1: 1, col1: 1, row2: 20, col2: 10,
         });
         cleanup();
     });
@@ -2157,7 +2153,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         });
 
         expect(sheet.getSelection().activeRange).to.deep.equal({ c1: 1, c2: 1, r1: 1, r2: 1 });
-        expect(types.filter((t) => ['onUndo', 'onRedo', 'cellRangeSelected'].includes(t))).to.be.empty;
+        expect(types.filter((t) => ['onUndo', 'onRedo', 'cellRangeSelected', 'cellRangePainted'].includes(t))).to.be.empty;
         cleanup();
     });
 
@@ -2607,7 +2603,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         // No new selection event since the click was inside the
         // existing selection.
         const selEvents = events.filter(e =>
-            e.type === 'cellSelected' || e.type === 'cellRangeSelected'
+            e.type === 'cellSelected' || e.type === 'cellRangeSelected' || e.type === 'cellRangePainted'
         );
         expect(selEvents).to.have.length(0);
         cleanup();

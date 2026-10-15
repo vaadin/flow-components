@@ -149,6 +149,16 @@ describe('Spreadsheet — client-to-server payload contract', () => {
     expect(expectConforms(ctx.sent)).to.include('cellRangeSelected');
   });
 
+  it('conforms when a range is dragged out', () => {
+    const press = { col: 2, row: 2, shiftKey: false, ctrlKey: false, metaKey: false, altKey: false };
+    const grid = ctx.sheet.getCellGrid();
+    grid.dispatchEvent(new CustomEvent('cell-mousedown', { detail: press, bubbles: true, composed: true }));
+    grid.dispatchEvent(new CustomEvent('cell-mouseover', { detail: { col: 4, row: 5 }, bubbles: true, composed: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+    expect(expectConforms(ctx.sent)).to.include('cellRangePainted');
+  });
+
   it('conforms when cells are ctrl-added to the selection', () => {
     cellClick(ctx.sheet, 2, 2, {});
     cellClick(ctx.sheet, 4, 5, { ctrlKey: true });

@@ -290,3 +290,27 @@ export function buildSelectionEvent(
   };
   return { type: 'cellRangeSelected', data };
 }
+
+/**
+ * The cell an event makes the server's selected cell, or null when the event
+ * leaves that cell as it was. The server keeps one selected cell, the
+ * starting point of its ranges: a range grown from it can go without one,
+ * and any other range has to carry it.
+ */
+export function selectedCellSetBy(event: SpreadsheetEvent): CellPosition | null {
+  switch (event.type) {
+    case 'cellSelected':
+    case 'cellAddedToSelectionAndSelected':
+      return { col: event.data.column, row: event.data.row };
+    case 'cellRangePainted':
+      return { col: event.data.selectedCellColumn, row: event.data.selectedCellRow };
+    case 'columnSelected':
+    case 'columnAddedToSelection':
+      return { col: event.data.column, row: event.data.firstRowIndex };
+    case 'rowSelected':
+    case 'rowAddedToRangeSelection':
+      return { col: event.data.firstColumnIndex, row: event.data.row };
+    default:
+      return null;
+  }
+}

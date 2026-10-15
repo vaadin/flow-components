@@ -277,9 +277,8 @@ describe('Spreadsheet non-coherent selection — server events', () => {
     ctx.events.length = 0;
     clickCell(ctx.sheet, 4, 4, { shiftKey: true });
 
-    expect(new Set(ctx.events.map((e: any) => e.type))).to.eql(
-      new Set(['cellSelected', 'cellRangeSelected'])
-    );
+    // Once, though the press and the click both select it.
+    expect(ctx.events.map((e: any) => e.type)).to.eql(['cellRangeSelected']);
   });
 
   it('Ctrl-shift-click reports the added range', () => {

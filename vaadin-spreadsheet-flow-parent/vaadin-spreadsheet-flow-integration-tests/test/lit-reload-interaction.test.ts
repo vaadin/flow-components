@@ -144,6 +144,7 @@ describe('Spreadsheet — a reload ends what the user was doing', () => {
 
     expect(sheet.getSelection().activeRange).to.eql({ c1: 2, c2: 2, r1: 2, r2: 2 });
     expect(types()).to.not.include('cellRangeSelected');
+    expect(types()).to.not.include('cellRangePainted');
   });
 
   it('ends a fill drag without painting', async () => {
