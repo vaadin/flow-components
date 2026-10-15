@@ -2138,6 +2138,23 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         return el.shadowRoot!.querySelector<HTMLElement>('.cell')!;
     }
 
+    it('forgets a run-on that fits once the server gives the cell none', async () => {
+        // A short value the server guessed would run on: it fits, measured.
+        const state = stateWithSpill(60);
+        state.cellData.set('col1 row1', { ...state.cellData.get('col1 row1')!, value: '12' });
+        const el = await attachWithState(state);
+        await el.updateComplete;
+        expect(el.fittingSpills.has('col1 row1')).to.be.true;
+
+        const a1 = el.renderState.cellData.get('col1 row1')!;
+        el.renderState = { ...el.renderState, cellData: new Map([['col1 row1', { ...a1, overflowWidth: 0 }]]) };
+        await el.updateComplete;
+        await el.updateComplete;
+
+        expect(el.fittingSpills.has('col1 row1')).to.be.false;
+        cleanup(el);
+    });
+
     function rightAligned(state: CellGridRenderState): CellGridRenderState {
         const a1 = state.cellData.get('col1 row1')!;
         return { ...state, cellData: new Map([['col1 row1', { ...a1, cellStyle: 'cs0 r' }]]) };
@@ -2411,6 +2428,56 @@ describe('SpreadsheetCellGrid — a value too wide for its column', () => {
         el.renderState = { ...el.renderState, colWidths: [300], viewport: { ...el.renderState.viewport, lastColumnPosition: 300 } };
 
         expect(await a1Text(el)).to.equal('$246 913 578');
+        cleanup(el);
+    });
+
+    it('shows the hashes of a flagged cell that scrolls into view in the same drawing', async () => {
+        const el = await attachWithState(stateWith(false));
+        await el.updateComplete;
+        const a5 = { ...makeCellData(1, 5, '$246 913 578 024 690,00'), needsMeasure: true };
+        const cellData = new Map(el.renderState.cellData);
+        cellData.set('col1 row5', a5);
+
+        el.renderState = {
+            ...el.renderState,
+            cellData,
+            viewport: { ...el.renderState.viewport, firstRowIndex: 5, lastRowIndex: 5 },
+        };
+        // One drawing: judged before it, while the rules it is measured in
+        // are already in the page.
+        await el.updateComplete;
+
+        expect(el.shadowRoot!.querySelector('.cell.row5')!.textContent!.trim()).to.equal('###');
+        cleanup(el);
+    });
+
+    it('judges a cell in the styles of the drawing it is in, not the ones before', async () => {
+        // A style of its own: the default style's size goes through the
+        // documented property, which the workbook's own rule cannot override.
+        const state = withA1(stateWith(true), '1234567890', 100);
+        state.cellData.set('col1 row1', { ...state.cellData.get('col1 row1')!, cellStyle: 'cs1' });
+        const el = await attachWithState({ ...state, cellStyleToCSSStyle: { 1: 'font-size:10px;' } });
+        expect(await a1Text(el)).to.equal('1234567890');
+
+        el.renderState = { ...el.renderState, cellStyleToCSSStyle: { 1: 'font-size:40px;' } };
+
+        expect(await a1Text(el)).to.equal('###');
+        cleanup(el);
+    });
+
+    it('forgets a cell once the server no longer flags it', async () => {
+        const el = await attachWithState(withA1(stateWith(true), '$246 913 578 024 690,00', 50));
+        expect(await a1Text(el)).to.equal('###');
+
+        const a1 = el.renderState.cellData.get('col1 row1')!;
+        el.renderState = {
+            ...el.renderState,
+            cellData: new Map([['col1 row1', { ...a1, needsMeasure: false }]]),
+        };
+        await el.updateComplete;
+        await el.updateComplete;
+
+        expect(el.tooNarrowCells.has('col1 row1')).to.be.false;
         cleanup(el);
     });
 
@@ -4184,6 +4251,25 @@ describe('SpreadsheetCellGrid — measuring each value once', () => {
             });
 
             expect(probes).to.equal(40);
+            expect(el.tooNarrowCells.size).to.equal(40);
+        } finally {
+            cleanup(el);
+        }
+    });
+
+    it('measures a value many cells hold once', async () => {
+        const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
+        document.body.appendChild(el);
+        try {
+            const state = stateWith(40);
+            for (const [key, data] of state.cellData) {
+                state.cellData.set(key, { ...data, value: 'the same long value' });
+            }
+            const probes = await probesDuring(el, () => {
+                el.renderState = state;
+            });
+
+            expect(probes).to.equal(1);
             expect(el.tooNarrowCells.size).to.equal(40);
         } finally {
             cleanup(el);
