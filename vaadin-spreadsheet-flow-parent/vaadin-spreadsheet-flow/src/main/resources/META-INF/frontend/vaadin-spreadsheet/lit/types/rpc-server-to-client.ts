@@ -23,6 +23,12 @@ import type { CellData, GroupingData, MergedRegion, OverlayInfo, SpreadsheetActi
  * directly or through a {@link MirroredProperty};
  * {@code ClientApiContractTest} checks that each one has a setter.
  */
+/**
+ * A value the server sends as JSON text, through {@code Serializer}; the
+ * connector also takes it already parsed.
+ */
+export type Json<T> = T | string;
+
 export interface SpreadsheetClientApi {
   // ====================================================================
   // Initial setup / lifecycle
@@ -49,7 +55,7 @@ export interface SpreadsheetClientApi {
   updateTopLeftCellValues(cellData: CellData[]): void;
   updateTopRightCellValues(cellData: CellData[]): void;
   updateBottomLeftCellValues(cellData: CellData[]): void;
-  updateFormulaBar(possibleName: string, col: number, row: number): void;
+  updateFormulaBar(possibleName: string | null, col: number, row: number): void;
   invalidCellAddress(): void;
   showSelectedCell(
     name: string,
@@ -89,29 +95,29 @@ export interface SpreadsheetClientApi {
   // Sheet-level dimensions + visibility
   setDefRowH(heightInPoints: number): void;
   setDefColW(widthInPixels: number): void;
-  setRowH(rowHeightsInPoints: number[] | Float32Array): void;
-  setColW(colWidthsInPixels: number[] | Int32Array): void;
-  setHiddenColumnIndexes(indexes: number[]): void;
-  setHiddenRowIndexes(indexes: number[]): void;
-  setLockedColumnIndexes(indexes: number[]): void;
-  setLockedRowIndexes(indexes: number[]): void;
+  setRowH(rowHeightsInPoints: Json<number[] | Float32Array>): void;
+  setColW(colWidthsInPixels: Json<number[] | Int32Array>): void;
+  setHiddenColumnIndexes(indexes: Json<number[]>): void;
+  setHiddenRowIndexes(indexes: Json<number[]>): void;
+  setLockedColumnIndexes(indexes: Json<number[]>): void;
+  setLockedRowIndexes(indexes: Json<number[]>): void;
 
   // Sheet navigation
   setSheetIndex(index: number): void;
-  setSheetNames(names: string[]): void;
-  setVerticalScrollPositions(positions: number[]): void;
-  setHorizontalScrollPositions(positions: number[]): void;
+  setSheetNames(names: Json<string[]>): void;
+  setVerticalScrollPositions(positions: Json<number[]>): void;
+  setHorizontalScrollPositions(positions: Json<number[]>): void;
 
   // CSS styling
-  setCellStyleToCSSStyle(map: Record<number, string>): void;
-  setRowIndexToStyleIndex(map: Record<number, number>): void;
-  setColumnIndexToStyleIndex(map: Record<number, number>): void;
-  setShiftedCellBorderStyles(cssRules: string[]): void;
-  setConditionalFormattingStyles(map: Record<number, string>): void;
+  setCellStyleToCSSStyle(map: Json<Record<number, string>>): void;
+  setRowIndexToStyleIndex(map: Json<Record<number, number>>): void;
+  setColumnIndexToStyleIndex(map: Json<Record<number, number>>): void;
+  setShiftedCellBorderStyles(cssRules: Json<string[]>): void;
+  setConditionalFormattingStyles(map: Json<Record<number, string>>): void;
 
   // Grouping (outline)
-  setColGroupingData(groups: GroupingData[]): void;
-  setRowGroupingData(groups: GroupingData[]): void;
+  setColGroupingData(groups: Json<GroupingData[]>): void;
+  setRowGroupingData(groups: Json<GroupingData[]>): void;
   setColGroupingMax(level: number): void;
   setRowGroupingMax(level: number): void;
   setColGroupingInversed(inversed: boolean): void;
@@ -121,17 +127,17 @@ export interface SpreadsheetClientApi {
   setReload(triggerReload: boolean): void;
   setSheetProtected(isProtected: boolean): void;
   setWorkbookProtected(isProtected: boolean): void;
-  setMergedRegions(regions: MergedRegion[]): void;
-  setCellKeysToEditorIdMap(map: Record<string, string>): void;
+  setMergedRegions(regions: Json<MergedRegion[]>): void;
+  setCellKeysToEditorIdMap(map: Json<Record<string, string>>): void;
   setComponentIDtoCellKeysMap(map: Record<string, string>): void;
-  setCellComments(map: Record<string, string>): void;
-  setCellCommentAuthors(map: Record<string, string>): void;
-  setVisibleCellComments(keys: string[]): void;
-  setInvalidFormulaCells(keys: Set<string>): void;
-  setOverlays(map: Record<string, OverlayInfo>): void;
+  setCellComments(map: Json<Record<string, string>>): void;
+  setCellCommentAuthors(map: Json<Record<string, string>>): void;
+  setVisibleCellComments(keys: Json<string[]>): void;
+  setInvalidFormulaCells(keys: Json<string[]>): void;
+  setOverlays(map: Json<Record<string, OverlayInfo>>): void;
   setShowCustomEditorOnFocus(show: boolean): void;
   setInvalidFormulaErrorMessage(message: string | null): void;
-  setNamedRanges(names: string[]): void;
+  setNamedRanges(names: Json<string[]>): void;
   setResources(host: HTMLElement, jsonString: string): void;
 
   // Freeze pane split positions
@@ -148,7 +154,7 @@ export interface SpreadsheetClientApi {
 
   // Display content
   setInfoLabelValue(label: string): void;
-  setHyperlinksTooltips(tooltips: Record<string, string>): void;
+  setHyperlinksTooltips(tooltips: Json<Record<string, string>>): void;
   setId(id: string): void;
 
   // ====================================================================
@@ -161,7 +167,7 @@ export interface SpreadsheetClientApi {
    * {@code callJsFunction("onPopupButtonOpen", ...)}, and a client method
    * under any other name is simply never called.
    */
-  onPopupButtonOpen(row: number, column: number, contentId: string, appId: string): void;
+  onPopupButtonOpen(row: number, column: number, contentId: number, appId: string): void;
   closePopup(row: number, column: number): void;
   addPopupButton(rawState: string): void;
   removePopupButton(rawState: string): void;

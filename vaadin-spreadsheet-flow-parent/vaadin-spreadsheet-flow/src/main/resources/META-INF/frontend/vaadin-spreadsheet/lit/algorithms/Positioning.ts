@@ -47,7 +47,7 @@ export function computePositionedPopupButtons(
       leftPx: left,
       topPx: top,
       cellHeightPx: rowHeight(state.row),
-      active: state.active
+      active: state.active === true
     };
   });
 }

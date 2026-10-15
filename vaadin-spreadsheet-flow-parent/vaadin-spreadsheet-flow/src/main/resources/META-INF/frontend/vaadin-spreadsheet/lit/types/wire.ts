@@ -43,14 +43,17 @@ export interface CellData {
   formulaValue?: string;
   /** Raw underlying value (locale-independent). */
   originalValue?: string;
-  /** CSS class index for this cell's style. Default `"cs0"`. */
+  /**
+   * CSS class index for this cell's style, `"cs0"` by default. Always on
+   * the wire: the serializer drops only null and empty strings.
+   */
   cellStyle: string;
   /** Override text color (hex RGB, no leading `#`). */
   textColor?: string;
-  /** When true, the cell can't be edited regardless of selection. */
-  locked: boolean;
-  /** Hint to the renderer that this cell needs a width measurement. */
-  needsMeasure: boolean;
+  /** When true, the cell can't be edited regardless of selection; absent when false. */
+  locked?: boolean;
+  /** Hint to the renderer that this cell needs a width measurement; absent when false. */
+  needsMeasure?: boolean;
   /**
    * Width in pixels to draw this cell's text at when it is too wide for its
    * column, absent when it fits. It covers the cell's own column and the
@@ -62,8 +65,8 @@ export interface CellData {
    * serializer drops default values.
    */
   overflowWidth?: number;
-  /** True if the cell's number format includes `%`. */
-  isPercentage: boolean;
+  /** True if the cell's number format includes `%`; absent when false. */
+  isPercentage?: boolean;
 }
 
 /**
@@ -135,10 +138,11 @@ export interface PopupButtonState {
   col: number;
   /** 1-based row index. */
   row: number;
-  active: boolean;
-  headerHidden: boolean;
-  popupHeight: string | null;
-  popupWidth: string | null;
+  /** Absent when false, as are the other defaults the serializer drops. */
+  active?: boolean;
+  headerHidden?: boolean;
+  popupHeight?: string | null;
+  popupWidth?: string | null;
   sheet: string;
 }
 

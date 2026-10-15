@@ -16,7 +16,7 @@ import type {
   PopupButtonState,
   SpreadsheetActionDetails
 } from './types/wire.js';
-import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
+import type { Json, SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
   addAuxRange,
   buildSelectionEvent,
@@ -30,6 +30,7 @@ import {
   selectSingleCell
 } from './state/SelectionState.js';
 import type {
+  SpreadsheetEvent,
   CellRangeSelectedData,
   CellAddedToSelectionData,
   CellSelectedData,
@@ -1558,7 +1559,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     const cellData = this.cellDataByKey.get(toKey(col, row));
     if (cellData !== undefined) {
-      return cellData.locked;
+      return cellData.locked === true;
     }
     return this.lockedColumns.has(col) && this.lockedRows.has(row);
   }
@@ -2513,7 +2514,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * spreadsheet this one sits in - as popup content, a custom editor or a
    * cell's component - which applied it to its own cells.
    */
-  private sendToServer(detail: { type: string; data: unknown }): void {
+  private sendToServer(detail: SpreadsheetEvent): void {
     this.host.dispatchEvent(new CustomEvent('spreadsheet-event', { detail }));
   }
 
@@ -4208,22 +4209,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setDefColW(widthInPixels: number): void {
     this.defColWidth = widthInPixels;
   }
-  setRowH(rowHeightsInPoints: number[] | Float32Array): void {
+  setRowH(rowHeightsInPoints: Json<number[] | Float32Array>): void {
     this.rowHeights = coerceNumberArray(rowHeightsInPoints);
   }
-  setColW(colWidthsInPixels: number[] | Int32Array): void {
+  setColW(colWidthsInPixels: Json<number[] | Int32Array>): void {
     this.colWidths = coerceNumberArray(colWidthsInPixels);
   }
-  setHiddenColumnIndexes(indexes: number[]): void {
+  setHiddenColumnIndexes(indexes: Json<number[]>): void {
     this.hiddenColumns = new Set(coerceArray<number>(indexes));
   }
-  setHiddenRowIndexes(indexes: number[]): void {
+  setHiddenRowIndexes(indexes: Json<number[]>): void {
     this.hiddenRows = new Set(coerceArray<number>(indexes));
   }
-  setLockedColumnIndexes(indexes: number[]): void {
+  setLockedColumnIndexes(indexes: Json<number[]>): void {
     this.lockedColumns = new Set(coerceArray<number>(indexes));
   }
-  setLockedRowIndexes(indexes: number[]): void {
+  setLockedRowIndexes(indexes: Json<number[]>): void {
     this.lockedRows = new Set(coerceArray<number>(indexes));
   }
   setSheetIndex(index: number): void {
@@ -4232,7 +4233,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // the server's chosen sheet.
     this.syncSheetTabs();
   }
-  setSheetNames(names: string[]): void {
+  setSheetNames(names: Json<string[]>): void {
     this.sheetNames = coerceArray(names);
     // Re-render the sheet-tabs strip with the new names list.
     this.syncSheetTabs();
@@ -4242,35 +4243,35 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * keeps it: a sheet shown again goes back there. The GWT client meant to
    * and did not.
    */
-  setVerticalScrollPositions(positions: number[] | string): void {
+  setVerticalScrollPositions(positions: Json<number[]>): void {
     this.verticalScrollPositions = coerceNumberArray(positions);
   }
   /** See {@link setVerticalScrollPositions}. */
-  setHorizontalScrollPositions(positions: number[] | string): void {
+  setHorizontalScrollPositions(positions: Json<number[]>): void {
     this.horizontalScrollPositions = coerceNumberArray(positions);
   }
-  setCellStyleToCSSStyle(map: Record<number, string>): void {
+  setCellStyleToCSSStyle(map: Json<Record<number, string>>): void {
     this.cellStyleToCSSStyle = coerceObject(map);
     // The server sizes General-format numbers against how wide a digit is
     // in each style, and only the client can measure that.
     this.styleWidthRatiosStale = true;
   }
-  setRowIndexToStyleIndex(map: Record<number, number>): void {
+  setRowIndexToStyleIndex(map: Json<Record<number, number>>): void {
     this.rowIndexToStyleIndex = coerceObject(map);
   }
-  setColumnIndexToStyleIndex(map: Record<number, number>): void {
+  setColumnIndexToStyleIndex(map: Json<Record<number, number>>): void {
     this.columnIndexToStyleIndex = coerceObject(map);
   }
-  setShiftedCellBorderStyles(cssRules: string[]): void {
+  setShiftedCellBorderStyles(cssRules: Json<string[]>): void {
     this.shiftedCellBorderStyles = coerceArray(cssRules);
   }
-  setConditionalFormattingStyles(map: Record<number, string>): void {
+  setConditionalFormattingStyles(map: Json<Record<number, string>>): void {
     this.conditionalFormattingStyles = coerceObject(map);
   }
-  setColGroupingData(groups: GroupingData[]): void {
+  setColGroupingData(groups: Json<GroupingData[]>): void {
     this.colGroupingData = coerceArray(groups);
   }
-  setRowGroupingData(groups: GroupingData[]): void {
+  setRowGroupingData(groups: Json<GroupingData[]>): void {
     this.rowGroupingData = coerceArray(groups);
   }
   setColGroupingMax(level: number): void {
@@ -4432,30 +4433,29 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setSheetProtected(isProtected: boolean): void {
     this.sheetProtected = isProtected;
   }
-  setMergedRegions(regions: MergedRegion[]): void {
+  setMergedRegions(regions: Json<MergedRegion[]>): void {
     this.mergedRegions = coerceArray(regions);
   }
-  setCellKeysToEditorIdMap(map: Record<string, string>): void {
+  setCellKeysToEditorIdMap(map: Json<Record<string, string>>): void {
     this.cellKeysToEditorIdMap = coerceObject(map);
   }
   setComponentIDtoCellKeysMap(map: Record<string, string>): void {
     this.componentIDtoCellKeysMap = coerceObject(map);
   }
-  setCellComments(map: Record<string, string>): void {
+  setCellComments(map: Json<Record<string, string>>): void {
     this.cellComments = coerceObject(map);
   }
-  setCellCommentAuthors(map: Record<string, string>): void {
+  setCellCommentAuthors(map: Json<Record<string, string>>): void {
     this.cellCommentAuthors = coerceObject(map);
   }
-  setVisibleCellComments(keys: string[]): void {
+  setVisibleCellComments(keys: Json<string[]>): void {
     this.visibleCellComments = coerceArray(keys);
   }
-  setInvalidFormulaCells(keys: Set<string> | string[] | string): void {
-    // Server may push as a JSON-encoded array; tolerate both.
-    const arr = coerceArray(keys as unknown as string[] | string | null | undefined);
+  setInvalidFormulaCells(keys: Json<string[]>): void {
+    const arr = coerceArray(keys);
     this.invalidFormulaCells = new Set(arr);
   }
-  setOverlays(map: Record<string, OverlayInfo>): void {
+  setOverlays(map: Json<Record<string, OverlayInfo>>): void {
     this.overlays = coerceObject(map);
   }
   setShowCustomEditorOnFocus(show: boolean): void {
@@ -4464,7 +4464,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setInvalidFormulaErrorMessage(message: string | null): void {
     this.invalidFormulaErrorMessage = message;
   }
-  setNamedRanges(names: string[]): void {
+  setNamedRanges(names: Json<string[]>): void {
     this.namedRanges = coerceArray(names);
     // Refresh the bar directly: the named-range list arrives on the property
     // lane, which repaints the grid but does not rebuild the formula bar.
@@ -4570,7 +4570,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.infoLabelValue = label ?? null;
     this.syncSheetTabs();
   }
-  setHyperlinksTooltips(tooltips: Record<string, string>): void {
+  setHyperlinksTooltips(tooltips: Json<Record<string, string>>): void {
     this.hyperlinksTooltips = coerceObject(tooltips);
   }
   /**
@@ -4600,7 +4600,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * element, which may belong to a different application than the sheet
    * when several are on the page.
    */
-  onPopupButtonOpen(row: number, column: number, contentId: string, appId: string): void {
+  onPopupButtonOpen(row: number, column: number, contentId: number | string, appId: string): void {
     const nodeId = String(contentId);
     // Opened again while it shows, the GWT client's popup stayed put.
     const showing = this.openPopup !== null && this.openPopup.row === row && this.openPopup.col === column;

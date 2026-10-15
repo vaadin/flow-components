@@ -232,59 +232,77 @@ export interface ContextMenuOpenData {
   column: number;
 }
 
+/** No data: the event itself is the message. */
+export type NoData = Record<string, never>;
+
 /**
- * The discriminated-union map. Use as
- * {@code event: SpreadsheetEvent} where
- * {@code event.detail.type === 'cellSelected'} narrows
- * {@code event.detail.data} to {@code CellSelectedData}.
- *
- * Events whose data shape isn't typed here carry the generic
- * {@code Record<string, unknown>} payload of
- * {@code SpreadsheetEventDetail<T>}.
+ * The data each event carries, by its type. Every type in
+ * {@link SpreadsheetEventType} has an entry, and
+ * {@link SERVER_EVENT_PAYLOAD_KEYS} names only keys these declare.
  */
-export type SpreadsheetEvent =
-  | { type: 'onSheetScroll'; data: OnSheetScrollData }
-  | { type: 'cellSelected'; data: CellSelectedData }
-  | { type: 'cellRangeSelected'; data: CellRangeSelectedData }
-  | { type: 'cellAddedToSelectionAndSelected'; data: CellSelectedData }
-  | { type: 'cellsAddedToRangeSelection'; data: CellRangeSelectedData }
-  | { type: 'rowSelected'; data: RowSelectedData }
-  | { type: 'rowAddedToRangeSelection'; data: RowSelectedData }
-  | { type: 'columnSelected'; data: ColumnSelectedData }
-  | { type: 'columnAddedToSelection'; data: ColumnSelectedData }
-  | { type: 'cellRangePainted'; data: CellRangePaintedData }
-  | { type: 'selectionIncreasePainted'; data: SelectionIncreasePaintedData }
-  | { type: 'selectionDecreasePainted'; data: SelectionDecreasePaintedData }
-  | { type: 'cellValueEdited'; data: CellValueEditedData }
-  | { type: 'sheetSelected'; data: SheetSelectedData }
-  | { type: 'sheetRenamed'; data: SheetRenamedData }
-  | { type: 'sheetCreated'; data: SheetCreatedData }
-  | { type: 'sheetAddressChanged'; data: { value: string } }
-  | { type: 'linkCellClicked'; data: LinkCellClickedData }
-  | { type: 'rowsResized'; data: RowsResizedData }
-  | { type: 'columnResized'; data: ColumnResizedData }
-  | { type: 'onRowAutofit'; data: { rowIndex: number } }
-  | { type: 'onColumnAutofit'; data: { columnIndex: number } }
-  | { type: 'setCellStyleWidthRatios'; data: { ratios: Record<number, number> } }
-  | { type: 'onPaste'; data: OnPasteData }
-  | { type: 'clearSelectedCellsOnCut'; data: Record<string, never> }
-  | { type: 'onUndo'; data: Record<string, never> }
-  | { type: 'onRedo'; data: Record<string, never> }
-  | { type: 'onConnectorInit'; data: Record<string, never> }
-  | { type: 'protectedCellWriteAttempted'; data: Record<string, never> }
-  | { type: 'updateCellComment'; data: { row: number; col: number; text: string } }
-  | { type: 'deleteSelectedCells'; data: Record<string, never> }
-  | { type: 'groupingCollapsed'; data: GroupingCollapsedData }
-  | { type: 'levelHeaderClicked'; data: LevelHeaderClickedData }
-  | { type: 'contextMenuOpenOnSelection'; data: ContextMenuOpenData }
-  | { type: 'rowHeaderContextMenuOpen'; data: { rowIndex: number } }
-  | { type: 'columnHeaderContextMenuOpen'; data: { columnIndex: number } }
-  | { type: 'actionOnCurrentSelection'; data: ActionData }
-  | { type: 'actionOnRowHeader'; data: ActionData }
-  | { type: 'actionOnColumnHeader'; data: ActionData }
-  | { type: 'contextMenuClosed'; data: Record<string, never> }
-  | { type: 'popupButtonClick'; data: PopupButtonEventData }
-  | { type: 'popupClose'; data: PopupButtonEventData };
+export interface SpreadsheetEventData {
+  onSheetScroll: OnSheetScrollData;
+  cellSelected: CellSelectedData;
+  cellRangeSelected: CellRangeSelectedData;
+  cellAddedToSelectionAndSelected: CellAddedToSelectionData;
+  cellsAddedToRangeSelection: CellRangeSelectedData;
+  rowSelected: RowSelectedData;
+  rowAddedToRangeSelection: RowSelectedData;
+  columnSelected: ColumnSelectedData;
+  columnAddedToSelection: ColumnSelectedData;
+  cellRangePainted: CellRangePaintedData;
+  selectionIncreasePainted: SelectionIncreasePaintedData;
+  selectionDecreasePainted: SelectionDecreasePaintedData;
+  cellValueEdited: CellValueEditedData;
+  sheetSelected: SheetSelectedData;
+  sheetRenamed: SheetRenamedData;
+  sheetCreated: SheetCreatedData;
+  sheetAddressChanged: { value: string };
+  linkCellClicked: LinkCellClickedData;
+  rowsResized: RowsResizedData;
+  columnResized: ColumnResizedData;
+  onRowAutofit: { rowIndex: number };
+  onColumnAutofit: { columnIndex: number };
+  setCellStyleWidthRatios: CellStyleWidthRatiosData;
+  onPaste: OnPasteData;
+  clearSelectedCellsOnCut: NoData;
+  onUndo: NoData;
+  onRedo: NoData;
+  onConnectorInit: NoData;
+  protectedCellWriteAttempted: NoData;
+  updateCellComment: { row: number; col: number; text: string };
+  deleteSelectedCells: NoData;
+  groupingCollapsed: GroupingCollapsedData;
+  levelHeaderClicked: LevelHeaderClickedData;
+  contextMenuOpenOnSelection: ContextMenuOpenData;
+  rowHeaderContextMenuOpen: { rowIndex: number };
+  columnHeaderContextMenuOpen: { columnIndex: number };
+  actionOnCurrentSelection: ActionData;
+  actionOnRowHeader: ActionData;
+  actionOnColumnHeader: ActionData;
+  contextMenuClosed: NoData;
+  popupButtonClick: PopupButtonEventData;
+  popupClose: PopupButtonEventData;
+}
+
+/**
+ * An event for the server: its type, and the data that type carries. The
+ * connector sends nothing else, so the compiler holds every dispatch to its
+ * type's data.
+ */
+export type SpreadsheetEvent = {
+  [T in SpreadsheetEventType]: { type: T; data: SpreadsheetEventData[T] };
+}[SpreadsheetEventType];
+
+/**
+ * Payload for {@code setCellStyleWidthRatios}: how wide one character is in
+ * each cell style, as two lists in step - the style indexes and their
+ * pixels-per-character ratios.
+ */
+export interface CellStyleWidthRatiosData {
+  styleIndexes: number[];
+  ratios: number[];
+}
 
 /**
  * Payload for {@code popupButtonClick} and {@code popupClose}.
@@ -316,7 +334,11 @@ export interface PopupButtonEventData {
  *
  * An empty list means the event carries no payload.
  */
-export const SERVER_EVENT_PAYLOAD_KEYS: Record<SpreadsheetEventType, readonly string[]> = {
+export const SERVER_EVENT_PAYLOAD_KEYS: {
+  readonly [T in SpreadsheetEventType]: ReadonlyArray<
+    SpreadsheetEventData[T] extends NoData ? never : keyof SpreadsheetEventData[T] & string
+  >;
+} = {
   onConnectorInit: [],
   onSheetScroll: ['firstRow', 'firstColumn', 'lastRow', 'lastColumn'],
   sheetAddressChanged: ['value'],
