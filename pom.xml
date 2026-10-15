@@ -11,6 +11,12 @@
         <version>3.0.0</version>
     </parent>
     <url>https://vaadin.com/components</url>
+    <licenses>
+        <license>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
+        </license>
+    </licenses>
     <properties>
         <flow.version>24.4-SNAPSHOT</flow.version>
         <testbench.version>9.3.7</testbench.version>
@@ -27,13 +33,13 @@
         <maven.failsafe.plugin.version>3.2.5</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <spotless.plugin.version>2.43.0</spotless.plugin.version>
-        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
         <failIfNoTests>false</failIfNoTests>
         <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
         <cvdlName></cvdlName>
         <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
