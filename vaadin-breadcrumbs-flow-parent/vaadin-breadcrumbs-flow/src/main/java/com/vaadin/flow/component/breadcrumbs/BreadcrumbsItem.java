@@ -271,11 +271,7 @@ public class BreadcrumbsItem extends Component
     }
 
     private void doSetPath(String path) {
-        if (path == null) {
-            getElement().removeAttribute("path");
-        } else {
-            getElement().setAttribute("path", path);
-        }
+        getElement().setAttribute("path", path);
     }
 
     /**

@@ -236,12 +236,7 @@ public class Avatar extends Component
      */
     public void setImage(String url) {
         imageResource = null;
-
-        if (url == null) {
-            getElement().removeAttribute("img");
-        } else {
-            getElement().setAttribute("img", url);
-        }
+        getElement().setAttribute("img", url);
     }
 
     /**
@@ -258,11 +253,6 @@ public class Avatar extends Component
     @Deprecated(since = "24.8", forRemoval = true)
     public void setImageResource(AbstractStreamResource resource) {
         imageResource = resource;
-        if (resource == null) {
-            getElement().removeAttribute("img");
-            return;
-        }
-
         getElement().setAttribute("img", resource);
     }
 
