@@ -390,6 +390,11 @@ export class SpreadsheetContextMenu extends LitElement {
     e.stopPropagation();
   };
 
+  /** Whether the menu, or one of its items, has the keyboard. */
+  hasFocus(): boolean {
+    return this.shadowRoot?.activeElement != null;
+  }
+
   private panel(): HTMLElement | null {
     return this.shadowRoot?.querySelector<HTMLElement>('.menu') ?? null;
   }

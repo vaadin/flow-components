@@ -789,6 +789,14 @@ describe('Spreadsheet context menu — what assistive technology is told', () =>
     expect((await items(ctx.sheet)).map((item) => item.tabIndex)).to.eql([-1, -1]);
   });
 
+  it('says whether it has the keyboard', async () => {
+    expect(ctx.sheet.getContextMenu().hasFocus()).to.be.true;
+
+    ctx.sheet.getScrollContainer().focus();
+
+    expect(ctx.sheet.getContextMenu().hasFocus()).to.be.false;
+  });
+
   it('still takes the items with the arrows', () => {
     press(ctx.sheet, 'ArrowDown');
 

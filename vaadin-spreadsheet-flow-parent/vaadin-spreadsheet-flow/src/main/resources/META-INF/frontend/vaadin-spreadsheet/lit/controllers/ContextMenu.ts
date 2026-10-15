@@ -195,7 +195,7 @@ export class ContextMenu {
     }
     // The menu had the keyboard; the GWT client gave it back to where it
     // had been. A click elsewhere still moves it on, once this is done.
-    const menuHadFocus = this.element.shadowRoot?.activeElement != null;
+    const menuHadFocus = this.element.hasFocus();
     this.element.renderState = emptyContextMenuRenderState();
     this.icons.clear();
     if (menuHadFocus) {

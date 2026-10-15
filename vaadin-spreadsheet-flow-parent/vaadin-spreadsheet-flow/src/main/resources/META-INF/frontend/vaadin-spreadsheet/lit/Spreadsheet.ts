@@ -1543,14 +1543,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** What the cell editor holds and where its caret is, while it is open. */
   private editorDraft(): { value: string; caret: number } | null {
-    if (this.editor === null) {
-      return null;
-    }
-    const input = this.cellGrid.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;
-    if (input === null) {
-      return null;
-    }
-    return { value: input.value, caret: input.selectionStart ?? input.value.length };
+    return this.editor === null ? null : this.cellGrid.editorDraft();
   }
 
   /** The cell the formula being written is for. */
@@ -2215,23 +2208,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     ]
       .filter((index) => Number.isFinite(index))
       .sort((a, b) => a - b);
-    const root = this.cellGrid.shadowRoot;
-    if (styleIndexes.length === 0 || root === null) {
+    if (styleIndexes.length === 0) {
       return;
     }
-
-    const probe = document.createElement('span');
-    // Out of flow and off-screen so measuring never disturbs the sheet.
-    // `width:auto` overrides nothing in `.cell` but guards a theme that
-    // sets one.
-    probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
-    probe.textContent = WIDTH_PROBE_TEXT;
-    root.appendChild(probe);
-    const ratios = styleIndexes.map((index) => {
-      probe.className = `cell cs${index}`;
-      return probe.clientWidth / WIDTH_PROBE_TEXT.length;
-    });
-    probe.remove();
+    const ratios = this.cellGrid
+      .textWidths(
+        styleIndexes.map((index) => `cs${index}`),
+        WIDTH_PROBE_TEXT
+      )
+      .map((width) => width / WIDTH_PROBE_TEXT.length);
 
     if (ratios.every((ratio) => ratio === 0)) {
       // Nothing was laid out — the sheet is hidden, or the styles have not

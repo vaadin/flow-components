@@ -977,11 +977,7 @@ export class SpreadsheetCellGrid extends LitElement {
     }
     const probes: Array<[string, HTMLSpanElement]> = [];
     for (const [key, { cellStyle, value }] of missing) {
-      const probe = document.createElement('span');
-      probe.style.cssText = VALUE_PROBE_STYLE;
-      probe.className = `cell ${cellStyle}`;
-      probe.textContent = value;
-      probes.push([key, probe]);
+      probes.push([key, createValueProbe(cellStyle, value)]);
     }
     this.shadowRoot!.append(...probes.map(([, probe]) => probe));
     for (const [key, probe] of probes) {
@@ -1070,14 +1066,40 @@ export class SpreadsheetCellGrid extends LitElement {
   /** What a value would be drawn at, in its own style. */
   private measureValue(cellStyle: string, value: string): number {
     if (this.valueProbe === null) {
-      const probe = document.createElement('span');
-      probe.style.cssText = VALUE_PROBE_STYLE;
-      this.shadowRoot!.appendChild(probe);
-      this.valueProbe = probe;
+      this.valueProbe = createValueProbe(cellStyle, value);
+      this.shadowRoot!.appendChild(this.valueProbe);
     }
     this.valueProbe.className = `cell ${cellStyle}`;
     this.valueProbe.textContent = value;
     return this.valueProbe.clientWidth;
+  }
+
+  /**
+   * How wide a text is drawn in each of the given cell styles, in pixels:
+   * measured in one layout, and leaving nothing behind. 0 each while
+   * nothing is laid out - the grid is hidden, or not yet in the page.
+   */
+  textWidths(cellStyles: readonly string[], text: string): number[] {
+    const root = this.shadowRoot;
+    if (root === null) {
+      return cellStyles.map(() => 0);
+    }
+    const probes = cellStyles.map((cellStyle) => createValueProbe(cellStyle, text));
+    root.append(...probes);
+    const widths = probes.map((probe) => probe.clientWidth);
+    for (const probe of probes) {
+      probe.remove();
+    }
+    return widths;
+  }
+
+  /** What the cell editor holds and where its caret is; null while none is open. */
+  editorDraft(): { value: string; caret: number } | null {
+    const input = this.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;
+    if (input === null) {
+      return null;
+    }
+    return { value: input.value, caret: input.selectionStart ?? input.value.length };
   }
 
   /** The popup button drawn on a cell, or null when there is none in view. */
@@ -2257,6 +2279,15 @@ function cellBoxOnGrid(
 
 /** A value probe: out of flow and off-screen, so measuring never disturbs the sheet. */
 const VALUE_PROBE_STYLE = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
+
+/** A span that draws a value as a cell in the given style would, to measure it in. */
+function createValueProbe(cellStyle: string, value: string): HTMLSpanElement {
+  const probe = document.createElement('span');
+  probe.style.cssText = VALUE_PROBE_STYLE;
+  probe.className = `cell ${cellStyle}`;
+  probe.textContent = value;
+  return probe;
+}
 
 /** How many measured widths are kept before starting over. */
 const MEASURED_WIDTHS_LIMIT = 50000;

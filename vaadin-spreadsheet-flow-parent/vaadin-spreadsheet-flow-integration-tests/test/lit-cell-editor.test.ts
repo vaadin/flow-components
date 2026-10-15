@@ -960,6 +960,60 @@ describe('SpreadsheetCellGrid — the editor and an input method', () => {
     });
 });
 
+/**
+ * The grid answers for its own parts: what its editor holds, and how wide a
+ * text is drawn in a style. The connector asked its shadow root for both.
+ */
+describe('SpreadsheetCellGrid — what it tells the sheet', () => {
+    it('tells what the editor holds and where its caret is', async () => {
+        const el = await attachCellGridWithState(buildEditorState({ col: 2, row: 2, initialValue: 'abc' }));
+        const input = el.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement;
+        input.value = 'abcd';
+        input.setSelectionRange(2, 2);
+
+        expect(el.editorDraft()).to.eql({ value: 'abcd', caret: 2 });
+        el.remove();
+    });
+
+    it('tells nothing while no editor is open', async () => {
+        const el = await attachCellGridWithState({ ...buildEditorState({ col: 2, row: 2, initialValue: '' }), editor: null });
+
+        expect(el.editorDraft()).to.equal(null);
+        el.remove();
+    });
+
+    it('measures a text in each style, in the order asked, wider for a longer text', async () => {
+        const el = await attachCellGridWithState({
+            ...buildEditorState({ col: 2, row: 2, initialValue: '' }),
+            cellStyleToCSSStyle: { 1: 'font-size:30px;' },
+        });
+
+        const [five, fiveLarge] = el.textWidths(['cs0', 'cs1'], '55555');
+        const [ten] = el.textWidths(['cs0'], '5555555555');
+
+        expect(five).to.be.greaterThan(0);
+        expect(fiveLarge).to.be.greaterThan(five);
+        expect(ten).to.be.greaterThan(five);
+        el.remove();
+    });
+
+    it('leaves nothing behind after measuring', async () => {
+        const el = await attachCellGridWithState(buildEditorState({ col: 2, row: 2, initialValue: '' }));
+        const before = el.shadowRoot!.childNodes.length;
+
+        el.textWidths(['cs0', 'cs1'], '55555');
+
+        expect(el.shadowRoot!.childNodes.length).to.equal(before);
+        el.remove();
+    });
+
+    it('measures nothing while it is not in the page', () => {
+        const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
+
+        expect(el.textWidths(['cs0', 'cs1'], '55555')).to.eql([0, 0]);
+    });
+});
+
 describe('Spreadsheet — cell editor lifecycle through the connector', () => {
     it('cell-doubleclick activates the editor at the dbl-clicked cell', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
