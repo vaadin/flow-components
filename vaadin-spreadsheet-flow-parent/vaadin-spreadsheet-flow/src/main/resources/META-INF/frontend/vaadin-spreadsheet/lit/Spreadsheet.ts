@@ -372,6 +372,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Display content. The status label, or null while there is none. */
   private infoLabelValue: string | null = null;
 
+  /** Where each sheet was last scrolled to; see {@link setVerticalScrollPositions}. */
+  private verticalScrollPositions: NumberList = [];
+  private horizontalScrollPositions: NumberList = [];
+  /** The offsets the next render scrolls to, for a sheet shown again. */
+  private pendingSheetScroll: { top: number; left: number } | null = null;
+
   /**
    * Cells currently known to the client, keyed by
    * {@code toKey(col, row)}. Filled by the {@code update*CellValues}
@@ -2617,6 +2623,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * force a re-render without going through the scroll surface.
    */
   recomputeViewport(): void {
+    if (this.pendingSheetScroll !== null) {
+      // A sheet shown again goes back to where it was scrolled. The grid is
+      // sized for it first: against the last sheet's size the browser would
+      // cut the offsets short.
+      const { top, left } = this.pendingSheetScroll;
+      this.pendingSheetScroll = null;
+      this.applyRenderState({
+        scrollLeft: 0,
+        scrollTop: 0,
+        viewportWidth: this.scrollContainer.clientWidth,
+        viewportHeight: this.scrollContainer.clientHeight
+      });
+      this.scrollContainer.scrollTop = top;
+      this.scrollContainer.scrollLeft = left;
+    }
     this.applyRenderState({
       scrollLeft: this.scrollContainer.scrollLeft,
       scrollTop: this.scrollContainer.scrollTop,
@@ -3753,6 +3774,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Still one render per batch: this is called once, after every changed
     // property has been forwarded. The first batch renders even when it is
     // empty, so the sheet is drawn once it is in the page.
+    if (!firstUpdate && changedPropertyNames.includes('sheetIndex')) {
+      const index = this.sheetIndex - 1;
+      this.pendingSheetScroll = {
+        top: this.verticalScrollPositions[index] ?? 0,
+        left: this.horizontalScrollPositions[index] ?? 0
+      };
+    }
     if (changedPropertyNames.length > 0 || firstUpdate) {
       this.flushRender();
     }
@@ -4144,16 +4172,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.syncSheetTabs();
   }
   /**
-   * Where each sheet was last scrolled to, as the server keeps it. Not
-   * applied: returning to a sheet does not scroll back to where it was,
-   * here or in the GWT client.
+   * Where each sheet was last scrolled to, by visible sheet, as the server
+   * keeps it: a sheet shown again goes back there. The GWT client meant to
+   * and did not.
    */
-  setVerticalScrollPositions(_positions: number[]): void {
-    // See above.
+  setVerticalScrollPositions(positions: number[] | string): void {
+    this.verticalScrollPositions = coerceNumberArray(positions);
   }
   /** See {@link setVerticalScrollPositions}. */
-  setHorizontalScrollPositions(_positions: number[]): void {
-    // See setVerticalScrollPositions.
+  setHorizontalScrollPositions(positions: number[] | string): void {
+    this.horizontalScrollPositions = coerceNumberArray(positions);
   }
   setCellStyleToCSSStyle(map: Record<number, string>): void {
     this.cellStyleToCSSStyle = coerceObject(map);
