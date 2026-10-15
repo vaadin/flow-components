@@ -168,17 +168,12 @@ public class ConditionalFormatter implements Serializable {
                         css.append("color:" + fontColorCSS);
                     }
 
-                    // we can't have both underline and line-through in the same
-                    // DIV element, so use the first one that matches.
-
                     // HSSF might return 255 for 'none'...
-                    if (fontFormatting.getUnderlineType() != Font.U_NONE
-                            && fontFormatting.getUnderlineType() != 255) {
-                        css.append("text-decoration: underline;");
-                    }
-                    if (POIReflectionTools.hasStrikeThrough(fontFormatting)) {
-                        css.append("text-decoration: line-through;");
-                    }
+                    css.append(FontStyleComposer.textDecoration(
+                            fontFormatting.getUnderlineType() != Font.U_NONE
+                                    && fontFormatting.getUnderlineType() != 255,
+                            POIReflectionTools
+                                    .hasStrikeThrough(fontFormatting)));
 
                     if (fontFormatting.getFontHeight() != -1) {
                         // POI returns height in 1/20th points, convert

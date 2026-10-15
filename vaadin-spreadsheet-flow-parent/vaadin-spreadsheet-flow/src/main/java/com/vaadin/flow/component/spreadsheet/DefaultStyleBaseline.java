@@ -88,11 +88,9 @@ final class DefaultStyleBaseline implements Serializable {
             sb.append("--default-font-size:");
             sb.append(defaultFontHeightInPoints);
             sb.append("pt;");
-            if (defaultFont.getUnderline() != Font.U_NONE) {
-                sb.append("text-decoration:underline;");
-            } else if (defaultFont.getStrikeout()) {
-                sb.append("text-decoration:overline;");
-            }
+            sb.append(FontStyleComposer.textDecoration(
+                    defaultFont.getUnderline() != Font.U_NONE,
+                    defaultFont.getStrikeout()));
         }
     }
 }

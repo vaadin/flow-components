@@ -73,11 +73,8 @@ final class FontStyleComposer implements Serializable {
                 sb.append(fontheight);
                 sb.append("pt;");
             }
-            if (font.getUnderline() != Font.U_NONE) {
-                sb.append("text-decoration:underline;");
-            } else if (font.getStrikeout()) {
-                sb.append("text-decoration:overline;");
-            }
+            sb.append(textDecoration(font.getUnderline() != Font.U_NONE,
+                    font.getStrikeout()));
         } catch (IndexOutOfBoundsException ioobe) {
             // somehow workbook doesn't have all the fonts the cells have???
             LOGGER.warn(
@@ -162,5 +159,20 @@ final class FontStyleComposer implements Serializable {
             }
         });
         return quoted.append('"').toString();
+    }
+
+    /**
+     * The {@code text-decoration} declaration for an underline, a
+     * strikethrough, both or neither (then empty). Both together are one
+     * declaration: a second one would replace the first.
+     */
+    static String textDecoration(boolean underline, boolean strikeout) {
+        if (underline && strikeout) {
+            return "text-decoration:underline line-through;";
+        }
+        if (underline) {
+            return "text-decoration:underline;";
+        }
+        return strikeout ? "text-decoration:line-through;" : "";
     }
 }

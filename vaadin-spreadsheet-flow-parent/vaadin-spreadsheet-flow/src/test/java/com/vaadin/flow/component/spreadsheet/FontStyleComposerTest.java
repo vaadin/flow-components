@@ -130,10 +130,9 @@ class FontStyleComposerTest {
     }
 
     @Test
-    void appendFontStyle_strikeout_emitsTextDecorationOverline() {
-        // Pin: the helper treats strikethrough as "overline" (a quirk of the
-        // original CSS scheme — pin it, don't fix it). Underline takes
-        // precedence if both are set.
+    void appendFontStyle_strikeout_emitsLineThrough() {
+        // Drawn as an overline until the major release, which looked like
+        // neither Excel nor the workbook.
         Font strike = workbook.createFont();
         strike.setStrikeout(true);
         CellStyle style = workbook.createCellStyle();
@@ -142,15 +141,27 @@ class FontStyleComposerTest {
         StringBuilder sb = new StringBuilder();
         composer.appendFontStyle(sb, style);
 
-        assertTrue(sb.toString().contains("text-decoration:overline;"),
-                "Strikeout font should emit text-decoration:overline; got: "
+        assertTrue(sb.toString().contains("text-decoration:line-through;"),
+                "Strikeout font should emit text-decoration:line-through; got: "
                         + sb);
     }
 
     @Test
-    void appendFontStyle_underlineAndStrikeout_underlineWins() {
-        // Pin precedence: underline check happens first, strikeout is
-        // mutually exclusive in the emit path.
+    void textDecoration_oneDeclarationForEachCombination() {
+        // One declaration also when both are set: conditional formatting
+        // wrote two, and the second replaced the first.
+        assertEquals("", FontStyleComposer.textDecoration(false, false));
+        assertEquals("text-decoration:underline;",
+                FontStyleComposer.textDecoration(true, false));
+        assertEquals("text-decoration:line-through;",
+                FontStyleComposer.textDecoration(false, true));
+        assertEquals("text-decoration:underline line-through;",
+                FontStyleComposer.textDecoration(true, true));
+    }
+
+    @Test
+    void appendFontStyle_underlineAndStrikeout_drawsBoth() {
+        // As Excel does. The strikethrough used to be dropped.
         Font font = workbook.createFont();
         font.setUnderline(Font.U_SINGLE);
         font.setStrikeout(true);
@@ -160,11 +171,10 @@ class FontStyleComposerTest {
         StringBuilder sb = new StringBuilder();
         composer.appendFontStyle(sb, style);
 
-        assertTrue(sb.toString().contains("text-decoration:underline;"),
-                "Underline should win over strikeout; got: " + sb);
-        assertFalse(sb.toString().contains("text-decoration:overline;"),
-                "Strikeout overline should not appear when underline is set; got: "
-                        + sb);
+        assertTrue(
+                sb.toString()
+                        .contains("text-decoration:underline line-through;"),
+                "Both should be drawn; got: " + sb);
     }
 
     @Test
