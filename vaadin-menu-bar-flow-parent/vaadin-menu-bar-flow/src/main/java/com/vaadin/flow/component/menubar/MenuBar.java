@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
+import com.vaadin.flow.component.contextmenu.MenuDownloadManager;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuItemsArrayGenerator;
 import com.vaadin.flow.component.contextmenu.MenuManager;
@@ -61,6 +62,9 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
 
+    private final MenuDownloadManager downloadManager = new MenuDownloadManager(
+            this, this::getItems, item -> item);
+
     private MenuBarI18n i18n;
 
     // When calling `generateItems` without arguments, it will use
@@ -83,6 +87,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
             @Override
             public void run() {
                 resetContent();
+                downloadManager.update();
             }
         };
         menuManager = new MenuManager<>(this, resetContent,
@@ -457,6 +462,10 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     void updateButtons() {
         buttonsUpdate.schedule();
+    }
+
+    MenuDownloadManager getDownloadManager() {
+        return downloadManager;
     }
 
     private void initConnector() {

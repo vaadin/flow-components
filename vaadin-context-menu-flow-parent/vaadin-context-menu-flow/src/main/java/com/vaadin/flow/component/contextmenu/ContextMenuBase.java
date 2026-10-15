@@ -137,6 +137,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
         this.target = target;
         updateListenOn();
+        onTargetChange();
 
         if (target == null) {
             return;
@@ -579,6 +580,12 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             target.getElement().callJsFunction(
                     "$contextMenuTargetConnector.openMenu", getElement());
         }
+    }
+
+    /**
+     * Called after the target of this context menu has changed.
+     */
+    void onTargetChange() {
     }
 
     private void initConnector() {
