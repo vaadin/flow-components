@@ -100,10 +100,10 @@ import {
   typesCharacter
 } from './algorithms/KeyboardMoves.js';
 import { resolveSheetRename } from './algorithms/SheetName.js';
-import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { animateIn, animateOut } from './dom/OverlayAnimation.js';
 import { listen } from './dom/Listen.js';
+import { listenToClipboard } from './controllers/Clipboard.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
 import { linkTooltipPosition, popupPlacement } from './algorithms/Placement.js';
@@ -848,13 +848,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.on(this.scrollContainer, 'scroll', this.handleScroll);
     this.on(this.scrollContainer, 'focusin', this.handleSheetFocusChange);
     this.on(this.scrollContainer, 'focusout', this.handleSheetFocusChange);
-    // Clipboard integration. The browser routes
-    // copy/cut/paste events to the focused element when the
-    // user presses Ctrl+C / Ctrl+X / Ctrl+V. The scroll
-    // container is the focus host (tabindex=0).
-    this.on(this.scrollContainer, 'copy', this.handleCopy);
-    this.on(this.scrollContainer, 'cut', this.handleCut);
-    this.on(this.scrollContainer, 'paste', this.handlePaste);
+    listenToClipboard(
+      this.scrollContainer,
+      {
+        isEditing: () => this.editor !== null,
+        activeRange: () => this.selection.activeRange,
+        valueAt: (col, row) => this.cellDataByKey.get(toKey(col, row))?.value,
+        send: (event) => this.sendToServer(event)
+      },
+      this.ownListeners.signal
+    );
     // Cell-click delegation: the cell-grid dispatches
     // a `cell-click` custom event with detail = { col, row,
     // shiftKey, ctrlKey, metaKey, altKey }. The connector updates
@@ -2376,87 +2379,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (top !== sc.scrollTop) {
       sc.scrollTop = top;
     }
-  }
-
-  /**
-   * Copy handler. Serializes the current selection
-   * range to TSV via {@code serializeToTsv} + writes to the
-   * browser's clipboard via {@code event.clipboardData}. No
-   * server-bound event — the server doesn't track the
-   * clipboard. Returns early when the editor is open (the
-   * input's own copy handler takes over).
-   */
-  private readonly handleCopy = (e: ClipboardEvent): void => {
-    if (this.editor !== null) {
-      return;
-    }
-    const tsv = this.selectionToTsv();
-    if (tsv === null) {
-      return;
-    }
-    e.preventDefault();
-    e.clipboardData?.setData('text/plain', tsv);
-  };
-
-  /**
-   * Cut handler. Same as copy + dispatches
-   * {@code clearSelectedCellsOnCut} to the server so it can
-   * clear the cells (the visual update comes back via
-   * {@code update*CellValues}).
-   */
-  private readonly handleCut = (e: ClipboardEvent): void => {
-    if (this.editor !== null) {
-      return;
-    }
-    const tsv = this.selectionToTsv();
-    if (tsv === null) {
-      return;
-    }
-    e.preventDefault();
-    e.clipboardData?.setData('text/plain', tsv);
-    this.sendToServer({ type: 'clearSelectedCellsOnCut', data: {} });
-  };
-
-  /**
-   * Paste handler. Reads the clipboard's text/plain
-   * payload + forwards to the server via {@code onPaste}.
-   * The server parses the TSV and writes cells starting at the
-   * active cell.
-   */
-  private readonly handlePaste = (e: ClipboardEvent): void => {
-    if (this.editor !== null) {
-      return;
-    }
-    const text = e.clipboardData?.getData('text/plain') ?? '';
-    if (text === '') {
-      return;
-    }
-    e.preventDefault();
-    this.sendToServer({ type: 'onPaste', data: { text } });
-  };
-
-  /**
-   * Serialize the active range's cell values to TSV (tab-
-   * separated values). Returns null when the selection's range
-   * is invalid or no cells exist. Uses
-   * {@link cellDataByKey} as the source of truth — cells
-   * without data are emitted as empty strings.
-   */
-  private selectionToTsv(): string | null {
-    const range = this.selection.activeRange;
-    if (range.c1 > range.c2 || range.r1 > range.r2) {
-      return null;
-    }
-    const rows: (string | null)[][] = [];
-    for (let r = range.r1; r <= range.r2; r++) {
-      const row: (string | null)[] = [];
-      for (let c = range.c1; c <= range.c2; c++) {
-        const data = this.cellDataByKey.get(toKey(c, r));
-        row.push(data?.value ?? '');
-      }
-      rows.push(row);
-    }
-    return serializeToTsv(rows);
   }
 
   /**
