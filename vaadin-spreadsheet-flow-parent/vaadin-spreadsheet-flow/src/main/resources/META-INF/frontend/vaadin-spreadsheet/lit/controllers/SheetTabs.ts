@@ -86,8 +86,10 @@ export class SheetTabs {
     this.sync();
   }
 
+  /** Whether the workbook is protected: the strip then offers no + button. */
   setWorkbookProtected(isProtected: boolean): void {
     this.workbookProtected = isProtected;
+    this.sync();
   }
 
   /** The status label, or null for none. */

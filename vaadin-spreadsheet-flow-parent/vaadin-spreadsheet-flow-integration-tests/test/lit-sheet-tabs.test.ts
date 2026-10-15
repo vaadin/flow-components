@@ -1065,3 +1065,51 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
         el.remove();
     });
 });
+
+/**
+ * A protected workbook takes no new sheet, and shows no + button for one,
+ * as the GWT client did: the button was there, and did nothing.
+ */
+describe('Spreadsheet — the + button of a protected workbook', () => {
+    let host: HTMLElement;
+    let sheet: Spreadsheet;
+
+    beforeEach(async () => {
+        host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        sheet = new Spreadsheet(host);
+        sheet.setSheetNames(['One', 'Two']);
+        sheet.setSheetIndex(1);
+        await sheet.getSheetTabs().updateComplete;
+    });
+
+    afterEach(() => {
+        sheet.dispose();
+        host.remove();
+    });
+
+    async function addButton(): Promise<Element | null> {
+        await sheet.getSheetTabs().updateComplete;
+        return sheet.getSheetTabs().shadowRoot!.querySelector('.add-new-tab');
+    }
+
+    it('shows the button in a workbook that is not protected', async () => {
+        expect(await addButton()).to.not.be.null;
+    });
+
+    it('takes the button away as soon as the workbook is protected', async () => {
+        sheet.setWorkbookProtected(true);
+
+        expect(await addButton()).to.be.null;
+    });
+
+    it('brings it back once the workbook is unprotected', async () => {
+        sheet.setWorkbookProtected(true);
+        await addButton();
+
+        sheet.setWorkbookProtected(false);
+
+        expect(await addButton()).to.not.be.null;
+    });
+});

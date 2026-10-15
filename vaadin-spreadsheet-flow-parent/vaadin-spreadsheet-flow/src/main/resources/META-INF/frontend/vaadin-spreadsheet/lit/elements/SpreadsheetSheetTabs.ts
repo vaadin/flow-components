@@ -570,7 +570,11 @@ export class SpreadsheetSheetTabs extends LitElement {
           part=${scrollPart(canScrollForward, 'scroll-tabs-to-end-button')}
           data-scroll="end"
         ></div>
-        <div class="add-new-tab" part="new-tab-button" data-new-tab></div>
+        ${
+          // A protected workbook takes no new sheet, and shows no button
+          // for one, as the GWT client did.
+          this.renderState.readOnly ? nothing : html`<div class="add-new-tab" part="new-tab-button" data-new-tab></div>`
+        }
       </div>
     `;
   }
