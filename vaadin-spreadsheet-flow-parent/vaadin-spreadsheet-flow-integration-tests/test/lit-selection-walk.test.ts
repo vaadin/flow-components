@@ -8,14 +8,8 @@
  */
 
 import { expect } from 'chai';
-import {
-    isMultiCellRange,
-    walkInsideSelection,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/SelectionWalk.js';
-import {
-    inSelectionWalkDirection,
-    Spreadsheet,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { isMultiCellRange, walkInsideSelection, inSelectionWalkDirection } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/SelectionWalk.js';
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
  * With a block of cells selected, Enter and Tab do not leave it: they walk

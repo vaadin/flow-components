@@ -7,6 +7,13 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+import type {
+  CellRangeSelectedData,
+  CellSelectedData,
+  ColumnSelectedData,
+  RowSelectedData,
+  SpreadsheetEvent
+} from '../types/rpc-client-to-server.js';
 
 /**
  * Pure-state model for the spreadsheet's cell selection.
@@ -162,4 +169,127 @@ export function isActiveCell(state: SelectionState, col: number, row: number): b
  */
 export function containsCell(range: CellRange, col: number, row: number): boolean {
   return col >= range.c1 && col <= range.c2 && row >= range.r1 && row <= range.r2;
+}
+
+/**
+ * Pure helper: return the set of column indices that intersect
+ * the active range of the selection, fed to the
+ * column-header element so each cell whose column is inside the
+ * active range emits {@code part="column-header header-selected"}.
+ */
+export function selectedColumnSet(selection: SelectionState): Set<number> {
+  // Every range's columns, as the GWT client marked them - not only the
+  // last one added.
+  const set = new Set<number>();
+  for (const range of [selection.activeRange, ...selection.auxRanges]) {
+    for (let c = Math.min(range.c1, range.c2); c <= Math.max(range.c1, range.c2); c++) {
+      set.add(c);
+    }
+  }
+  return set;
+}
+
+/**
+ * Pure helper: symmetric row variant of {@link selectedColumnSet}.
+ */
+export function selectedRowSet(selection: SelectionState): Set<number> {
+  const set = new Set<number>();
+  for (const range of [selection.activeRange, ...selection.auxRanges]) {
+    for (let r = Math.min(range.r1, range.r2); r <= Math.max(range.r1, range.r2); r++) {
+      set.add(r);
+    }
+  }
+  return set;
+}
+
+/**
+ * Pure helper: is the given (col, row) inside the active range OR
+ * any aux range of the current selection? A right-click outside the
+ * selection moves the selection to the clicked cell, as in Excel.
+ */
+export function isCellInSelection(col: number, row: number, selection: SelectionState): boolean {
+  const inRange = (range: CellRange): boolean => {
+    const cMin = Math.min(range.c1, range.c2);
+    const cMax = Math.max(range.c1, range.c2);
+    const rMin = Math.min(range.r1, range.r2);
+    const rMax = Math.max(range.r1, range.r2);
+    return col >= cMin && col <= cMax && row >= rMin && row <= rMax;
+  };
+  if (inRange(selection.activeRange)) {
+    return true;
+  }
+  for (const aux of selection.auxRanges) {
+    if (inRange(aux)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * How Excel's name box counts a block being selected: rows first, then
+ * columns, as in "3R x 3C".
+ */
+export function selectionSizeLabel(range: CellRange): string {
+  const rows = Math.abs(range.r2 - range.r1) + 1;
+  const cols = Math.abs(range.c2 - range.c1) + 1;
+  return `${rows}R x ${cols}C`;
+}
+
+/**
+ * Pure helper: classify a selection shape and build the matching
+ * server-bound {@link SpreadsheetEvent}.
+ *
+ * Detection order (specific → general):
+ *   1. whole column: r1=1, r2=rows, c1=c2 → {@code columnSelected}
+ *   2. whole row:    c1=1, c2=cols, r1=r2 → {@code rowSelected}
+ *   3. single cell:  c1=c2, r1=r2         → {@code cellSelected}
+ *   4. otherwise:                          → {@code cellRangeSelected}
+ *
+ * Note: when `rows`/`cols` is 0 (uninitialized grid) the "whole
+ * column / row" branches collapse to cellSelected since the
+ * full-axis match can't succeed against a zero-width axis.
+ */
+export function buildSelectionEvent(
+  activeCell: { col: number; row: number },
+  range: CellRange,
+  rows: number,
+  cols: number
+): SpreadsheetEvent {
+  const isSingleCol = range.c1 === range.c2;
+  const isSingleRow = range.r1 === range.r2;
+  const isWholeCol = cols > 0 && rows > 0 && isSingleCol && range.r1 === 1 && range.r2 === rows;
+  const isWholeRow = cols > 0 && rows > 0 && isSingleRow && range.c1 === 1 && range.c2 === cols;
+
+  if (isWholeCol) {
+    const data: ColumnSelectedData = {
+      column: range.c1,
+      firstRowIndex: range.r1
+    };
+    return { type: 'columnSelected', data };
+  }
+  if (isWholeRow) {
+    const data: RowSelectedData = {
+      row: range.r1,
+      firstColumnIndex: range.c1
+    };
+    return { type: 'rowSelected', data };
+  }
+  if (isSingleCol && isSingleRow) {
+    const data: CellSelectedData = {
+      row: activeCell.row,
+      column: activeCell.col,
+      // A plain selection replaces every earlier range;
+      // Ctrl-click sends events of its own.
+      oldSelectionRangeDiscarded: true
+    };
+    return { type: 'cellSelected', data };
+  }
+  const data: CellRangeSelectedData = {
+    row1: range.r1,
+    col1: range.c1,
+    row2: range.r2,
+    col2: range.c2
+  };
+  return { type: 'cellRangeSelected', data };
 }

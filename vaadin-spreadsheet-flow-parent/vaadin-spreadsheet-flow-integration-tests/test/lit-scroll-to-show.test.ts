@@ -9,10 +9,8 @@
 
 import { expect } from 'chai';
 
-import {
-  scrollToShow,
-  Spreadsheet
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { scrollToShow } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 
 /**
  * Scrolling a cell into view, by the GWT client's rule: a frozen cell or one

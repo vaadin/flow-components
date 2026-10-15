@@ -9,13 +9,9 @@
 
 import { expect } from 'chai';
 
-import {
-    Spreadsheet,
-    computePositionedOverlays,
-    computePositionedPopupButtons,
-    freezeGap,
-    pastFreeze,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { computePositionedOverlays, computePositionedPopupButtons } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/Positioning.js';
+import { freezeGap, pastFreeze } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 import type {
     OverlayInfo, PopupButtonState,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';

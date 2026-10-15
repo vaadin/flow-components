@@ -8,11 +8,8 @@
  */
 
 import { expect } from 'chai';
-import {
-  Spreadsheet,
-  computeCellSlots,
-  visibleCellSlots
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { computeCellSlots, visibleCellSlots } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/VirtualChildren.js';
 
 /**
  * Server-side elements rendered inside a cell.

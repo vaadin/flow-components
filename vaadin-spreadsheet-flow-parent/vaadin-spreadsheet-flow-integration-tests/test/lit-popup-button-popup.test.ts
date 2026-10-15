@@ -9,10 +9,8 @@
 
 import { expect } from 'chai';
 import { sendKeys } from '@web/test-runner-commands';
-import {
-  popupPlacement,
-  Spreadsheet
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { popupPlacement } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/Placement.js';
 import type {
   CellData,
   PopupButtonState

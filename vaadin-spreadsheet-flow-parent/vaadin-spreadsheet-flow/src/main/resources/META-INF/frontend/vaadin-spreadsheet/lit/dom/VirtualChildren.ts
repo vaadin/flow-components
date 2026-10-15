@@ -7,6 +7,7 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+import { toKey } from '../algorithms/CellKeys.js';
 
 /**
  * Placing server-side Vaadin components inside the sheet.
@@ -282,4 +283,120 @@ function forwarderFor(name: string): HTMLSlotElement {
   forwarder.setAttribute('name', name);
   forwarder.setAttribute('slot', name);
   return forwarder;
+}
+
+/**
+ * What a cell shows in place of its own text: a server-side component, or
+ * the custom editor for that cell.
+ */
+export interface CellSlotAssignment {
+  /** Flow node id of the element to project. */
+  nodeId: string;
+  /** Slot name the cell renders and the element is assigned to. */
+  slot: string;
+  /** Which holder owns the element. */
+  kind: 'component' | 'editor';
+}
+
+/**
+ * Decide, per cell, which server-side element the sheet should show.
+ *
+ * Two sources feed this. `setComponent` puts a component in a cell
+ * outright. A custom editor is attached to a cell too, but
+ * `showCustomEditorOnFocus` decides when it appears: by default every
+ * editor is shown in its cell, and when the flag is set only the selected
+ * cell's editor is.
+ *
+ * Editors are applied after components, so an editor wins a cell that has
+ * both — the same order the GWT client mounted them in, and the one that
+ * makes sense: the editor is the interactive thing.
+ */
+export function computeCellSlots(input: {
+  componentIdToCellKey: Readonly<Record<string, string>>;
+  cellKeyToEditorId: Readonly<Record<string, string>>;
+  showCustomEditorOnFocus: boolean;
+  activeCellKey: string | null;
+}): Record<string, CellSlotAssignment> {
+  const assignments: Record<string, CellSlotAssignment> = {};
+
+  for (const [nodeId, cellKey] of Object.entries(input.componentIdToCellKey)) {
+    if (cellKey) {
+      // Two components claiming one cell cannot both be shown; the later
+      // entry wins, matching what a single slot per cell can render.
+      assignments[cellKey] = {
+        nodeId,
+        slot: cellComponentSlotName(nodeId),
+        kind: 'component'
+      };
+    }
+  }
+
+  for (const [cellKey, nodeId] of Object.entries(input.cellKeyToEditorId)) {
+    if (!nodeId) {
+      continue;
+    }
+    if (input.showCustomEditorOnFocus && cellKey !== input.activeCellKey) {
+      continue;
+    }
+    assignments[cellKey] = {
+      nodeId,
+      slot: cellEditorSlotName(nodeId),
+      kind: 'editor'
+    };
+  }
+
+  return assignments;
+}
+
+/**
+ * The subset of {@link computeCellSlots} whose cells the sheet renders.
+ *
+ * A cell off screen renders no slot, so parenting its element would take
+ * it out of the document for nothing. Scrolling back renders the slot
+ * again and the next repaint places it.
+ *
+ * "On screen" is not just the scrolling viewport: a frozen row or column
+ * stays rendered whatever the scroll position, in its own quadrant. An
+ * editor pinned in a frozen row was never placed while only the viewport
+ * counted.
+ */
+export function visibleCellSlots(
+  assignments: Readonly<Record<string, CellSlotAssignment>>,
+  state: {
+    viewport: {
+      firstRowIndex: number;
+      lastRowIndex: number;
+      firstColumnIndex: number;
+      lastColumnIndex: number;
+    };
+    verticalSplitPosition: number;
+    horizontalSplitPosition: number;
+  }
+): CellSlotAssignment[] {
+  const { viewport } = state;
+  const rows = new Set<number>();
+  for (let row = 1; row <= state.verticalSplitPosition; row++) {
+    rows.add(row);
+  }
+  for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
+    rows.add(row);
+  }
+  const cols = new Set<number>();
+  for (let col = 1; col <= state.horizontalSplitPosition; col++) {
+    cols.add(col);
+  }
+  for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
+    cols.add(col);
+  }
+
+  const visible: CellSlotAssignment[] = [];
+  for (const row of rows) {
+    for (const col of cols) {
+      const assignment = assignments[toKey(col, row)];
+      if (assignment !== undefined) {
+        visible.push(assignment);
+      }
+    }
+  }
+  return visible;
 }

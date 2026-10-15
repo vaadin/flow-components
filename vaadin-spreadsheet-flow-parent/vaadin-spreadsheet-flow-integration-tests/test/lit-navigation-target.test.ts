@@ -7,10 +7,7 @@
  * license.
  */
 import { expect } from 'chai';
-import {
-  homeEndTarget,
-  keyDirection
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { homeEndTarget, keyDirection } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/KeyboardMoves.js';
 
 /**
  * Which way a key moves the selection. Where the step lands - over hidden

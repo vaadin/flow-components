@@ -19,10 +19,15 @@ import type {
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
   addAuxRange,
-  normalizedRange,
-  selectSingleCell,
+  buildSelectionEvent,
   type CellRange,
-  type SelectionState
+  isCellInSelection,
+  normalizedRange,
+  selectedColumnSet,
+  selectedRowSet,
+  selectionSizeLabel,
+  type SelectionState,
+  selectSingleCell
 } from './state/SelectionState.js';
 import type {
   CellRangeSelectedData,
@@ -30,29 +35,36 @@ import type {
   CellSelectedData,
   CellValueEditedData,
   ColumnSelectedData,
-  RowSelectedData,
-  SpreadsheetEvent
+  RowSelectedData
 } from './types/rpc-client-to-server.js';
-import type { CellEditorState, MergedRegionBox, PositionedOverlay, PositionedPopupButton } from './elements/types.js';
+import type { CellEditorState } from './elements/types.js';
 import {
   computeTotalGridSize,
   computeViewportBounds,
+  convertPointsToPixel,
   FALLBACK_PPI,
+  freezeGap,
   getDefaultRowHeightPx,
-  convertPointsToPixel
+  pagedViewInset,
+  pixelsToPoints,
+  scrollToShow,
+  withSize
 } from './algorithms/ViewportMath.js';
 import { initialEditValue } from './algorithms/PercentageEntry.js';
 import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
 import {
-  SlottedVirtualChildren,
   actionIconSlotName,
   cellComponentSlotName,
   cellEditorSlotName,
+  type CellSlotAssignment,
+  computeCellSlots,
   flowVirtualChildResolver,
   namedSlot,
   overlayComponentSlotName,
-  popupContentSlotName
+  popupContentSlotName,
+  SlottedVirtualChildren,
+  visibleCellSlots
 } from './dom/VirtualChildren.js';
 import {
   computePaintRectangle,
@@ -62,7 +74,11 @@ import {
   type PaintOutcome
 } from './algorithms/SelectionPaint.js';
 import { expandToMergedRegions } from './algorithms/MergedSelection.js';
-import { isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
+import {
+  inSelectionWalkDirection,
+  isMultiCellRange,
+  walkInsideSelection
+} from './algorithms/SelectionWalk.js';
 import {
   canPoint,
   formulaReferences,
@@ -72,8 +88,9 @@ import {
   referenceText
 } from './algorithms/FormulaPointing.js';
 import {
-  type Direction,
+  homeEndTarget,
   isSingleMerge,
+  keyDirection,
   moveActiveCell,
   moveRangeEdge,
   selectCellAt,
@@ -82,14 +99,24 @@ import {
   typesCharacter
 } from './algorithms/KeyboardMoves.js';
 import { resolveSheetRename } from './algorithms/SheetName.js';
-import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
-import { animateIn, animateOut, overlayAnimationStyles } from './dom/OverlayAnimation.js';
-import { isIOS, listenForLongPress } from './dom/LongPress.js';
+import { animateIn, animateOut } from './dom/OverlayAnimation.js';
+import { listenForLongPress } from './dom/LongPress.js';
+import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
+import { linkTooltipPosition, popupPlacement } from './algorithms/Placement.js';
+import {
+  computeMergedRegionBoxes,
+  computePositionedColGroupings,
+  computePositionedOverlays,
+  computePositionedPopupButtons
+} from './algorithms/Positioning.js';
+import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
+import { isIOS, isMacPlatform } from './dom/Platform.js';
+import { popupOverlayRules } from './dom/PopupOverlayStyles.js';
+import { coerceArray, coerceJson, coerceNumberArray, coerceObject, type NumberList } from './wire/Coerce.js';
 import {
   columnGroupingGutterPx,
-  type PositionedGrouping,
   rowGroupingGutterPx,
   SpreadsheetColumnHeader
 } from './elements/SpreadsheetColumnHeader.js';
@@ -100,45 +127,6 @@ import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
 import { emptyContextMenuRenderState, SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
 import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
-
-/**
- * Which way a key moves the selection: an arrow the way it points, Tab
- * right and Enter down - shift reversing those two. Null for any other key.
- */
-export function keyDirection(key: string, shiftKey: boolean): Direction | null {
-  switch (key) {
-    case 'ArrowUp':
-      return 'up';
-    case 'ArrowDown':
-      return 'down';
-    case 'ArrowLeft':
-      return 'left';
-    case 'ArrowRight':
-      return 'right';
-    case 'Tab':
-      return shiftKey ? 'left' : 'right';
-    case 'Enter':
-      return shiftKey ? 'up' : 'down';
-    default:
-      return null;
-  }
-}
-
-/**
- * Which way Enter or Tab walks the active cell inside a selected range.
- *
- * Only those two keys walk: an arrow key means "leave this selection and
- * go there", which is a different gesture. Returns null for anything else.
- */
-export function inSelectionWalkDirection(key: string | undefined, shiftKey: boolean): WalkDirection | null {
-  if (key === 'Enter') {
-    return shiftKey ? 'up' : 'down';
-  }
-  if (key === 'Tab') {
-    return shiftKey ? 'left' : 'right';
-  }
-  return null;
-}
 
 /**
  * Sample the cell-style width measurement uses: ten digits, matching what
@@ -4943,462 +4931,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 }
 
-/**
- * Where a popup goes, by the GWT client's rule, in screen coordinates.
- *
- * Under the button's cell, its right edge on the cell's right edge - or
- * starting at that edge instead, when ending there would take it past the
- * left side of the scrolling pane. Above the cell when it runs past the
- * pane's bottom, and never above the pane's top: a popup too tall for
- * either side hangs from the top and runs past the bottom.
- */
-export function popupPlacement(
-  cell: { readonly top: number; readonly right: number; readonly bottom: number },
-  pane: { readonly left: number; readonly top: number; readonly bottom: number },
-  width: number,
-  height: number
-): { left: number; top: number } {
-  let left = cell.right - width;
-  if (left < pane.left) {
-    left = cell.right;
-  }
-  let top = cell.bottom;
-  if (top + height > pane.bottom) {
-    top = cell.top - height;
-  }
-  if (top < pane.top) {
-    top = pane.top;
-  }
-  return { left, top };
-}
-
-/**
- * Put a popover in the top layer. A no-op for one already there, or one
- * the browser cannot show - not in the document, or no popover support -
- * which then stays where the page puts it.
- */
-function showInTopLayer(el: HTMLElement): void {
-  try {
-    if (el.isConnected && !el.matches(':popover-open')) {
-      el.showPopover();
-    }
-  } catch {
-    // Shown in place instead.
-  }
-}
-
-/** Take a popover out of the top layer, if it is there. */
-function hideFromTopLayer(el: HTMLElement): void {
-  try {
-    if (el.matches(':popover-open')) {
-      el.hidePopover();
-    }
-  } catch {
-    // Not in the top layer.
-  }
-}
-
-/**
- * Where the scroll position along one axis goes to show the column or row
- * at a 1-based index, by the GWT client's rule. A frozen one, or one
- * already in full view, leaves it where it is. One before the first whole
- * one in view scrolls back past it by one more, and one after the last
- * whole one in view scrolls on by one more - so holding an arrow key
- * scrolls two at a time and keeps one in view beyond the one selected.
- *
- * `scroll` is the current scroll offset and `view` the length of the
- * cells' part of the view, frozen ones included; `sizeOf` is a column's
- * width or a row's height, 0 when it is hidden. The ones past the frozen
- * ones are drawn past the freeze line's own pixel.
- */
-export function scrollToShow(
-  index: number,
-  frozen: number,
-  count: number,
-  scroll: number,
-  view: number,
-  sizeOf: (i: number) => number
-): number {
-  const gap = freezeGap(frozen);
-  if (index <= frozen || index > count) {
-    return scroll;
-  }
-  // Start of each one, from the start of the first: starts[i] for 1-based i.
-  const starts: number[] = [0, 0];
-  const startOf = (i: number): number => {
-    while (starts.length <= i) {
-      const last = starts.length - 1;
-      starts.push(starts[last] + sizeOf(last));
-    }
-    return starts[i];
-  };
-  const frozenExtent = startOf(frozen + 1);
-  // The first whole one in view past the frozen ones.
-  let first = frozen + 1;
-  while (first < count && startOf(first) - scroll < frozenExtent) {
-    first++;
-  }
-  if (index < first) {
-    let back = 0;
-    for (let i = first - 1; i >= index - 1 && i > 0; i--) {
-      back += sizeOf(i);
-    }
-    return Math.max(0, scroll - back);
-  }
-  // The last whole one in view.
-  let last = first;
-  while (last < count && startOf(last + 1) + sizeOf(last + 1) + gap - scroll <= view) {
-    last++;
-  }
-  if (index > last) {
-    let on = 0;
-    for (let i = last + 1; i <= index + 1 && i <= count; i++) {
-      on += sizeOf(i);
-    }
-    return scroll + on;
-  }
-  return scroll;
-}
-
-/**
- * Where a link cell's tooltip goes, in viewport pixels, by the GWT client's
- * rule for it: left-aligned under the cell; right-aligned with the cell
- * when it is wider than the cell and would run off the right of the window
- * but fits that way; and above the cell when there is no room below but
- * room above.
- */
-export function linkTooltipPosition(
-  cell: { left: number; top: number; right: number; bottom: number },
-  size: { width: number; height: number },
-  view: { width: number; height: number }
-): { left: number; top: number } {
-  let left = cell.left;
-  const wider = size.width - (cell.right - cell.left);
-  if (wider > 0 && view.width - left < size.width && left >= wider) {
-    left -= wider;
-  }
-  let top = cell.bottom;
-  if (view.height - cell.bottom < size.height && cell.top >= size.height) {
-    top = cell.top - size.height;
-  }
-  return { left, top };
-}
-
-/** Whether the page runs on a Mac, where shortcuts take Cmd rather than Ctrl. */
-export function isMacPlatform(): boolean {
-  return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-}
-
-/** Pixels in points, as the GWT client converted the height of a row being dragged. */
-function pixelsToPoints(px: number, ppi: number = FALLBACK_PPI): number {
-  return (px * 72) / ppi;
-}
-
-/**
- * Column or row sizes with the one at a 1-based index changed. Those past
- * the end take the default, so the gap up to a size set past it is filled
- * with the default.
- */
-function withSize(sizes: ArrayLike<number>, index: number, size: number, fallback: number): number[] {
-  const out = Array.from(sizes);
-  while (out.length < index - 1) {
-    out.push(fallback);
-  }
-  out[index - 1] = size;
-  return out;
-}
-
-/**
- * The popup's card, header and close box, as rules the popup carries.
- *
- * The overlay is the connector's own element in the host's tree, where no
- * internal element's stylesheet reaches, and a rule says what an inline
- * style cannot: "on hover", and "under the Lumo theme". The GWT client's
- * card is white, rounded and softly shadowed, with an 18px header whose
- * close box sits at its left, grey until pointed at, and whose caption is
- * centred; its Lumo popup put the close box at the right, under a rule, as
- * Lumo's cross, and the caption at the left in bold.
- */
-function popupOverlayRules(): HTMLStyleElement {
-  const rules = document.createElement('style');
-  rules.textContent = `
-    ${overlayAnimationStyles.cssText}
-    .popup-overlay.animate-out {
-      animation: overlay-animate-out 120ms;
-    }
-
-    .popup-overlay.animate-in {
-      animation: overlay-animate-in 120ms;
-    }
-    .popup-overlay {
-      outline: none;
-      padding: 4px;
-      border: 0;
-      border-radius: 4px;
-      color: #474747;
-      background: var(--vaadin-spreadsheet-popup-background, var(--_vaadin-spreadsheet-popup-background, #fff));
-      /* The edge is the last shadow, a hairline that takes no room. */
-      box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05),
-        0 0 0 1px var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
-    }
-    .popup-header {
-      position: relative;
-      height: 18px;
-      padding-bottom: 7px;
-    }
-    .popup-close {
-      position: absolute;
-      left: 0;
-      top: 0;
-      box-sizing: border-box;
-      width: 18px;
-      height: 18px;
-      padding: 0 4px 0 0;
-      border: 0;
-      border-radius: 0 4px 0 4px;
-      background: transparent;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 21px;
-      line-height: 18px;
-      text-align: center;
-      color: #999;
-    }
-    .popup-close::before {
-      content: '\\00d7';
-    }
-    .popup-close:hover {
-      color: #197de1;
-    }
-    .header-caption {
-      margin: 0 18px;
-      height: 18px;
-      line-height: 18px;
-      text-align: center;
-      color: var(--lumo-body-text-color);
-    }
-    :host([theme~='lumo']) .popup-overlay {
-      padding: var(--lumo-space-xs);
-      border: 1px solid var(--vaadin-spreadsheet-popup-border-color, var(--_vaadin-spreadsheet-popup-border-color, rgba(0, 0, 0, 0.09)));
-      border-radius: var(--lumo-border-radius-m);
-      color: var(--lumo-body-text-color);
-      box-shadow: var(--lumo-box-shadow-s);
-    }
-    :host([theme~='lumo']) .header-caption {
-      margin-left: var(--lumo-space-xs);
-      font-weight: bold;
-      text-align: left;
-    }
-    :host([theme~='lumo']) .popup-header {
-      padding-bottom: var(--lumo-space-xs);
-      border-bottom: 1px solid var(--lumo-contrast-20pct);
-      margin-bottom: var(--lumo-space-xs);
-    }
-    :host([theme~='lumo']) .popup-close {
-      left: auto;
-      right: 0;
-      padding-right: var(--lumo-space-xs);
-      border-radius: 0 var(--lumo-border-radius-m) 0 var(--lumo-border-radius-m);
-      font-size: var(--lumo-font-size-xl);
-      color: var(--lumo-contrast-50pct);
-      cursor: var(--lumo-clickable-cursor);
-    }
-    :host([theme~='lumo']) .popup-close::before {
-      content: var(--lumo-icons-cross);
-      font-family: 'lumo-icons';
-    }
-    :host([theme~='lumo']) .popup-close:hover {
-      color: var(--lumo-primary-color);
-    }
-  `;
-  return rules;
-}
-
-/**
- * The pixel the freeze line takes between the frozen columns or rows and the
- * rest, as the GWT client's frozen pane border did: 1 when any are frozen.
- */
-export function freezeGap(frozen: number): number {
-  return frozen > 0 ? 1 : 0;
-}
-
-/**
- * How much further on a column or row is drawn for the freeze line before
- * it: the line's pixel when it lies past the frozen ones, nothing otherwise.
- */
-export function pastFreeze(index: number, frozen: number): number {
-  return index > frozen ? freezeGap(frozen) : 0;
-}
-
-/**
- * How far the headers and frozen panes reach into the scroll container's
- * view: the browser leaves that much out of the view it pages, with Page Up,
- * Page Down or a click in a scrollbar's track, given it as `scroll-padding`.
- * The GWT client paged its pane of scrolling cells, which started past the
- * headers, the frozen panes and the freeze line, and ran a pixel under the
- * top border of the sheet tabs; while the tabs show, a page here is a pixel
- * taller for it too.
- */
-export function pagedViewInset(
-  corner: { width: number; height: number },
-  frozen: { width: number; columns: number; height: number; rows: number },
-  tabsShown: boolean
-): { top: number; left: number } {
-  return {
-    top: Math.max(0, corner.height + frozen.height + freezeGap(frozen.rows) - (tabsShown ? 1 : 0)),
-    left: corner.width + frozen.width + freezeGap(frozen.columns)
-  };
-}
-
-/**
- * Pure helper: build the positioned-popup-button list from the
- * server-pushed `PopupButtonState` list. Each button anchors at
- * the bottom-right corner of its target cell — pixel position =
- * (sum of widths 1..col + col width, sum of heights 1..row + row
- * height).
- */
-export function computePositionedPopupButtons(
-  states: ReadonlyArray<PopupButtonState>,
-  colWidth: (col: number) => number,
-  rowHeight: (row: number) => number,
-  split: { cols: number; rows: number } = { cols: 0, rows: 0 }
-): PositionedPopupButton[] {
-  return states.map((state) => {
-    let left = pastFreeze(state.col, split.cols);
-    for (let c = 1; c <= state.col; c++) {
-      left += colWidth(c);
-    }
-    let top = pastFreeze(state.row, split.rows);
-    for (let r = 1; r <= state.row; r++) {
-      top += rowHeight(r);
-    }
-    return {
-      col: state.col,
-      row: state.row,
-      leftPx: left,
-      topPx: top,
-      cellHeightPx: rowHeight(state.row),
-      active: state.active
-    };
-  });
-}
-
-/**
- * What a cell shows in place of its own text: a server-side component, or
- * the custom editor for that cell.
- */
-export interface CellSlotAssignment {
-  /** Flow node id of the element to project. */
-  nodeId: string;
-  /** Slot name the cell renders and the element is assigned to. */
-  slot: string;
-  /** Which holder owns the element. */
-  kind: 'component' | 'editor';
-}
-
-/**
- * Decide, per cell, which server-side element the sheet should show.
- *
- * Two sources feed this. `setComponent` puts a component in a cell
- * outright. A custom editor is attached to a cell too, but
- * `showCustomEditorOnFocus` decides when it appears: by default every
- * editor is shown in its cell, and when the flag is set only the selected
- * cell's editor is.
- *
- * Editors are applied after components, so an editor wins a cell that has
- * both — the same order the GWT client mounted them in, and the one that
- * makes sense: the editor is the interactive thing.
- */
-export function computeCellSlots(input: {
-  componentIdToCellKey: Readonly<Record<string, string>>;
-  cellKeyToEditorId: Readonly<Record<string, string>>;
-  showCustomEditorOnFocus: boolean;
-  activeCellKey: string | null;
-}): Record<string, CellSlotAssignment> {
-  const assignments: Record<string, CellSlotAssignment> = {};
-
-  for (const [nodeId, cellKey] of Object.entries(input.componentIdToCellKey)) {
-    if (cellKey) {
-      // Two components claiming one cell cannot both be shown; the later
-      // entry wins, matching what a single slot per cell can render.
-      assignments[cellKey] = {
-        nodeId,
-        slot: cellComponentSlotName(nodeId),
-        kind: 'component'
-      };
-    }
-  }
-
-  for (const [cellKey, nodeId] of Object.entries(input.cellKeyToEditorId)) {
-    if (!nodeId) {
-      continue;
-    }
-    if (input.showCustomEditorOnFocus && cellKey !== input.activeCellKey) {
-      continue;
-    }
-    assignments[cellKey] = {
-      nodeId,
-      slot: cellEditorSlotName(nodeId),
-      kind: 'editor'
-    };
-  }
-
-  return assignments;
-}
-
-/**
- * The subset of {@link computeCellSlots} whose cells the sheet renders.
- *
- * A cell off screen renders no slot, so parenting its element would take
- * it out of the document for nothing. Scrolling back renders the slot
- * again and the next repaint places it.
- *
- * "On screen" is not just the scrolling viewport: a frozen row or column
- * stays rendered whatever the scroll position, in its own quadrant. An
- * editor pinned in a frozen row was never placed while only the viewport
- * counted.
- */
-export function visibleCellSlots(
-  assignments: Readonly<Record<string, CellSlotAssignment>>,
-  state: {
-    viewport: {
-      firstRowIndex: number;
-      lastRowIndex: number;
-      firstColumnIndex: number;
-      lastColumnIndex: number;
-    };
-    verticalSplitPosition: number;
-    horizontalSplitPosition: number;
-  }
-): CellSlotAssignment[] {
-  const { viewport } = state;
-  const rows = new Set<number>();
-  for (let row = 1; row <= state.verticalSplitPosition; row++) {
-    rows.add(row);
-  }
-  for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-    rows.add(row);
-  }
-  const cols = new Set<number>();
-  for (let col = 1; col <= state.horizontalSplitPosition; col++) {
-    cols.add(col);
-  }
-  for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-    cols.add(col);
-  }
-
-  const visible: CellSlotAssignment[] = [];
-  for (const row of rows) {
-    for (const col of cols) {
-      const assignment = assignments[toKey(col, row)];
-      if (assignment !== undefined) {
-        visible.push(assignment);
-      }
-    }
-  }
-  return visible;
-}
-
 /** Whether a key goes to a button, which the key itself is pressing. */
 function pressesButton(e: KeyboardEvent): boolean {
   const target = e.composedPath()[0];
@@ -5408,434 +4940,4 @@ function pressesButton(e: KeyboardEvent): boolean {
 /** Two popup-button states describe the same button when they share a cell. */
 function samePopupButtonCell(a: PopupButtonState, b: PopupButtonState): boolean {
   return a.col === b.col && a.row === b.row;
-}
-
-/**
- * Whether Flow is waiting for the server to answer the application the
- * host belongs to. False when there is no Flow client to ask.
- */
-function flowRequestInFlight(host: HTMLElement): boolean {
-  const clients = (
-    window as unknown as { Vaadin?: { Flow?: { clients?: Record<string, { isActive?: () => boolean }> } } }
-  ).Vaadin?.Flow?.clients;
-  return clients?.[overlayComponentAppId(host)]?.isActive?.() === true;
-}
-
-/**
- * The Flow application the sheet belongs to.
- *
- * The server pushes it as an {@code appId} property on the host — the
- * component is registered against one running application, and looking a
- * virtual child up in the wrong one silently finds nothing.
- */
-export function overlayComponentAppId(host: HTMLElement): string {
-  return String((host as unknown as { appId?: string }).appId ?? '');
-}
-
-/**
- * Pure helper: build the positioned-overlay list from the server-
- * pushed `OverlayInfo` map + resource map. Each overlay's pixel
- * position is `anchor cell's left/top` (cumulative sums of col/
- * row sizes 1..anchor-1) + the overlay's `dx`/`dy` offset.
- *
- * The two axes do not share a unit. POI measures anything vertical in
- * points, so `height` and `dy` are points while `width` and `dx` are
- * already pixels — the same split the row heights come through with.
- * Treating the vertical pair as pixels makes every overlay 25% too short
- * and seats it too high.
- *
- * The points are converted exactly, fractions kept, as the GWT client
- * left them to the browser in `pt`. Cut down to whole pixels, a picture
- * sat up to a pixel high and a pixel short, and a chart drew itself for
- * a pixel less height.
- *
- * Pure (no DOM, no instance state) so it's straightforward to
- * unit-test in isolation.
- */
-export function computePositionedOverlays(
-  overlays: Record<string, OverlayInfo>,
-  resources: Record<string, string>,
-  colWidth: (col: number) => number,
-  rowHeight: (row: number) => number,
-  ppi: number = FALLBACK_PPI,
-  split: { cols: number; rows: number } = { cols: 0, rows: 0 }
-): PositionedOverlay[] {
-  const result: PositionedOverlay[] = [];
-  for (const [id, info] of Object.entries(overlays)) {
-    let left = pastFreeze(info.col, split.cols);
-    for (let c = 1; c < info.col; c++) {
-      left += colWidth(c);
-    }
-    let top = pastFreeze(info.row, split.rows);
-    for (let r = 1; r < info.row; r++) {
-      top += rowHeight(r);
-    }
-    const positioned: PositionedOverlay = {
-      col: info.col,
-      row: info.row,
-      id,
-      type: info.type,
-      src: info.type === 'IMAGE' ? resources[id] : undefined,
-      leftPx: left + info.dx,
-      topPx: top + (info.dy * ppi) / 72,
-      widthPx: info.width,
-      heightPx: (info.height * ppi) / 72
-    };
-    result.push(positioned);
-  }
-  return result;
-}
-
-/**
- * Coerce a value that may be either an array or a JSON-encoded
- * string into an array. The Flow runtime serializes server-side
- * property values to JSON strings when they reach the
- * {@code <vaadin-spreadsheet>} element's attribute lane, and they
- * arrive at the connector's setters as strings; the GWT-side
- * client used to JSON-parse them on the way in.
- */
-export function coerceArray<T>(value: T[] | string | null | undefined): T[] {
-  if (value == null) {
-    return [];
-  }
-  if (Array.isArray(value)) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-  // Typed arrays (Int32Array, Float32Array) — already array-like;
-  // convert to a real array for downstream `.map` etc. compatibility.
-  if (typeof (value as any).length === 'number') {
-    return Array.from(value as any);
-  }
-  return [];
-}
-
-/**
- * One object the server sends, as it is or as the JSON string Flow may send
- * it as; null for anything else.
- */
-function coerceJson<T extends object>(value: T | string | null | undefined): T | null {
-  if (value == null) {
-    return null;
-  }
-  if (typeof value !== 'string') {
-    return value;
-  }
-  try {
-    const parsed: unknown = JSON.parse(value);
-    return parsed !== null && typeof parsed === 'object' ? (parsed as T) : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Object-shaped variant of {@link coerceArray}. The same JSON-string-
- * coming-from-Flow-attribute path applies to record/map setters.
- */
-export function coerceObject<V>(value: Record<string, V> | string | null | undefined): Record<string, V> {
-  if (value == null) {
-    return {};
-  }
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch {
-      return {};
-    }
-  }
-  return value;
-}
-
-/** The sizes the server sends: a plain array, or a typed one. */
-type NumberList = number[] | Int32Array | Float32Array;
-
-/**
- * Numeric-array variant. Typed arrays (Int32Array, Float32Array)
- * arrive intact when pushed via Flow's typed-array support; JSON
- * strings get parsed.
- */
-export function coerceNumberArray(value: NumberList | string | null | undefined): NumberList {
-  if (value == null) {
-    return [];
-  }
-  if (Array.isArray(value) || value instanceof Int32Array || value instanceof Float32Array) {
-    return value;
-  }
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
-/**
- * Pure helper: return the set of column indices that intersect
- * the active range of the selection, fed to the
- * column-header element so each cell whose column is inside the
- * active range emits {@code part="column-header header-selected"}.
- */
-export function selectedColumnSet(selection: SelectionState): Set<number> {
-  // Every range's columns, as the GWT client marked them - not only the
-  // last one added.
-  const set = new Set<number>();
-  for (const range of [selection.activeRange, ...selection.auxRanges]) {
-    for (let c = Math.min(range.c1, range.c2); c <= Math.max(range.c1, range.c2); c++) {
-      set.add(c);
-    }
-  }
-  return set;
-}
-
-/**
- * Pure helper: symmetric row variant of {@link selectedColumnSet}.
- */
-export function selectedRowSet(selection: SelectionState): Set<number> {
-  const set = new Set<number>();
-  for (const range of [selection.activeRange, ...selection.auxRanges]) {
-    for (let r = Math.min(range.r1, range.r2); r <= Math.max(range.r1, range.r2); r++) {
-      set.add(r);
-    }
-  }
-  return set;
-}
-
-/**
- * Pure helper: is the given (col, row) inside the active range OR
- * any aux range of the current selection? A right-click outside the
- * selection moves the selection to the clicked cell, as in Excel.
- */
-export function isCellInSelection(col: number, row: number, selection: SelectionState): boolean {
-  const inRange = (range: CellRange): boolean => {
-    const cMin = Math.min(range.c1, range.c2);
-    const cMax = Math.max(range.c1, range.c2);
-    const rMin = Math.min(range.r1, range.r2);
-    const rMax = Math.max(range.r1, range.r2);
-    return col >= cMin && col <= cMax && row >= rMin && row <= rMax;
-  };
-  if (inRange(selection.activeRange)) {
-    return true;
-  }
-  for (const aux of selection.auxRanges) {
-    if (inRange(aux)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Where each merged region is drawn: its box in the sheet's own pixel
- * coordinates, frozen rows and columns included.
- *
- * Every region gets one, not only those whose top-left cell is on screen: a
- * merge whose first rows have scrolled away is still showing the rest. A
- * region that starts among the frozen rows or columns and runs past the split
- * is drawn pinned with them, as the GWT client drew it, the part beyond the
- * split shortened by how far the sheet has scrolled underneath.
- *
- * @param split the number of frozen rows and columns
- * @param scroll how far the sheet has scrolled
- */
-export function computeMergedRegionBoxes(
-  regions: ReadonlyArray<MergedRegion>,
-  split: { rows: number; cols: number },
-  scroll: { left: number; top: number },
-  colWidthAt: (col: number) => number,
-  rowHeightAt: (row: number) => number
-): MergedRegionBox[] {
-  let lastCol = split.cols;
-  let lastRow = split.rows;
-  for (const region of regions) {
-    lastCol = Math.max(lastCol, region.col2);
-    lastRow = Math.max(lastRow, region.row2);
-  }
-  // starts[n] is where row or column n begins; starts[1] is 0.
-  const startsOf = (last: number, sizeAt: (index: number) => number): Float64Array => {
-    const starts = new Float64Array(last + 2);
-    for (let index = 1; index <= last; index++) {
-      starts[index + 1] = starts[index] + sizeAt(index);
-    }
-    return starts;
-  };
-  const colStarts = startsOf(lastCol, colWidthAt);
-  const rowStarts = startsOf(lastRow, rowHeightAt);
-  // A region across the split keeps its frozen part pinned and shows what
-  // has not scrolled away of the rest, which starts past the freeze line.
-  const extent = (starts: Float64Array, from: number, to: number, frozen: number, scrolled: number): number => {
-    const whole = starts[to + 1] - starts[from];
-    if (from > frozen || to <= frozen) {
-      return whole;
-    }
-    const pinned = starts[frozen + 1] - starts[from];
-    const rest = whole - pinned - scrolled;
-    return rest > 0 ? pinned + freezeGap(frozen) + rest : pinned;
-  };
-  return regions.map((region) => ({
-    left: colStarts[region.col1] + pastFreeze(region.col1, split.cols),
-    top: rowStarts[region.row1] + pastFreeze(region.row1, split.rows),
-    width: extent(colStarts, region.col1, region.col2, split.cols, scroll.left),
-    height: extent(rowStarts, region.row1, region.row2, split.rows, scroll.top)
-  }));
-}
-
-/**
- * Pure helper: convert {@link GroupingData} entries into
- * {@link PositionedGrouping} entries - where each group's bracket runs and
- * where its button sits, along the axis the sizes are for - as the GWT client
- * laid them out.
- *
- * A group's summary row or column holds its button: by default the one after
- * the group, so the bracket runs from just inside the group's first header
- * ({@code startPaddingPx} in) to the middle of the next one, where the button
- * is. Inversed, the summary is the one before: the bracket runs from the
- * middle of that header to the group's end, and the button sits at its start.
- *
- * Both indices are 0-based in the wire format (server-side
- * `GroupingData.startIndex`/`endIndex` use POI's 0-based row/col
- * indices). The connector's `colWidths` array is 0-indexed too.
- *
- * @param startPaddingPx how far into its first header a group's bracket
- * starts - the GWT client's 5px for columns, 2px for rows
- * @param shiftPx how far back along the axis every bracket and button is
- * drawn - a pixel while the other outline gutter shows, which
- * the GWT client measured without its border
- */
-export function computePositionedColGroupings(
-  groupings: ReadonlyArray<GroupingData>,
-  colWidths: ArrayLike<number>,
-  inversed: boolean,
-  defColWidthPx: number,
-  startPaddingPx = 0,
-  shiftPx = 0
-): PositionedGrouping[] {
-  const widthAt = (col0: number): number => {
-    if (col0 < 0) {
-      return 0;
-    }
-    return col0 < colWidths.length ? colWidths[col0] : defColWidthPx;
-  };
-  const positions: PositionedGrouping[] = [];
-  for (const g of groupings) {
-    let groupStart = 0;
-    for (let i = 0; i < g.startIndex; i++) {
-      groupStart += widthAt(i);
-    }
-    let groupEnd = groupStart;
-    for (let i = g.startIndex; i <= g.endIndex; i++) {
-      groupEnd += widthAt(i);
-    }
-    const summaryBefore = groupStart - widthAt(g.startIndex - 1) / 2;
-    const summaryAfter = groupEnd + widthAt(g.endIndex + 1) / 2;
-    positions.push({
-      uniqueIndex: g.uniqueIndex,
-      level: g.level,
-      startPx: (inversed ? summaryBefore : groupStart + startPaddingPx) - shiftPx,
-      endPx: (inversed ? groupEnd : summaryAfter) - shiftPx,
-      buttonPx: (inversed ? summaryBefore : summaryAfter) - shiftPx,
-      collapsed: g.collapsed
-    });
-  }
-  return positions;
-}
-
-/**
- * How Excel's name box counts a block being selected: rows first, then
- * columns, as in "3R x 3C".
- */
-export function selectionSizeLabel(range: CellRange): string {
-  const rows = Math.abs(range.r2 - range.r1) + 1;
-  const cols = Math.abs(range.c2 - range.c1) + 1;
-  return `${rows}R x ${cols}C`;
-}
-
-/**
- * Pure helper: classify a selection shape and build the matching
- * server-bound {@link SpreadsheetEvent}.
- *
- * Detection order (specific → general):
- *   1. whole column: r1=1, r2=rows, c1=c2 → {@code columnSelected}
- *   2. whole row:    c1=1, c2=cols, r1=r2 → {@code rowSelected}
- *   3. single cell:  c1=c2, r1=r2         → {@code cellSelected}
- *   4. otherwise:                          → {@code cellRangeSelected}
- *
- * Note: when `rows`/`cols` is 0 (uninitialized grid) the "whole
- * column / row" branches collapse to cellSelected since the
- * full-axis match can't succeed against a zero-width axis.
- */
-export function buildSelectionEvent(
-  activeCell: { col: number; row: number },
-  range: CellRange,
-  rows: number,
-  cols: number
-): SpreadsheetEvent {
-  const isSingleCol = range.c1 === range.c2;
-  const isSingleRow = range.r1 === range.r2;
-  const isWholeCol = cols > 0 && rows > 0 && isSingleCol && range.r1 === 1 && range.r2 === rows;
-  const isWholeRow = cols > 0 && rows > 0 && isSingleRow && range.c1 === 1 && range.c2 === cols;
-
-  if (isWholeCol) {
-    const data: ColumnSelectedData = {
-      column: range.c1,
-      firstRowIndex: range.r1
-    };
-    return { type: 'columnSelected', data };
-  }
-  if (isWholeRow) {
-    const data: RowSelectedData = {
-      row: range.r1,
-      firstColumnIndex: range.c1
-    };
-    return { type: 'rowSelected', data };
-  }
-  if (isSingleCol && isSingleRow) {
-    const data: CellSelectedData = {
-      row: activeCell.row,
-      column: activeCell.col,
-      // A plain selection replaces every earlier range;
-      // Ctrl-click sends events of its own.
-      oldSelectionRangeDiscarded: true
-    };
-    return { type: 'cellSelected', data };
-  }
-  const data: CellRangeSelectedData = {
-    row1: range.r1,
-    col1: range.c1,
-    row2: range.r2,
-    col2: range.c2
-  };
-  return { type: 'cellRangeSelected', data };
-}
-
-/**
- * Where Home and End take the active cell: the first or last column of its
- * row, or with Ctrl (Cmd on a Mac) the first cell of the sheet or the last.
- * Null for any other key.
- */
-export function homeEndTarget(
-  key: string,
-  toSheetCorner: boolean,
-  activeCell: { col: number; row: number },
-  cols: number,
-  rows: number
-): { col: number; row: number } | null {
-  if (key === 'Home') {
-    return { col: 1, row: toSheetCorner ? 1 : activeCell.row };
-  }
-  if (key === 'End') {
-    return { col: Math.max(1, cols), row: toSheetCorner ? Math.max(1, rows) : activeCell.row };
-  }
-  return null;
 }

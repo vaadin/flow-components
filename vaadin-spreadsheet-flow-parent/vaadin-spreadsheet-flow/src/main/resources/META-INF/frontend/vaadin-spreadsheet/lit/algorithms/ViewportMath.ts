@@ -247,3 +247,120 @@ export function computeTotalGridSize(input: TotalGridSizeInput): {
   }
   return { totalWidthPx, totalHeightPx };
 }
+
+/**
+ * The pixel the freeze line takes between the frozen columns or rows and the
+ * rest, as the GWT client's frozen pane border did: 1 when any are frozen.
+ */
+export function freezeGap(frozen: number): number {
+  return frozen > 0 ? 1 : 0;
+}
+
+/**
+ * How much further on a column or row is drawn for the freeze line before
+ * it: the line's pixel when it lies past the frozen ones, nothing otherwise.
+ */
+export function pastFreeze(index: number, frozen: number): number {
+  return index > frozen ? freezeGap(frozen) : 0;
+}
+
+/**
+ * How far the headers and frozen panes reach into the scroll container's
+ * view: the browser leaves that much out of the view it pages, with Page Up,
+ * Page Down or a click in a scrollbar's track, given it as `scroll-padding`.
+ * The GWT client paged its pane of scrolling cells, which started past the
+ * headers, the frozen panes and the freeze line, and ran a pixel under the
+ * top border of the sheet tabs; while the tabs show, a page here is a pixel
+ * taller for it too.
+ */
+export function pagedViewInset(
+  corner: { width: number; height: number },
+  frozen: { width: number; columns: number; height: number; rows: number },
+  tabsShown: boolean
+): { top: number; left: number } {
+  return {
+    top: Math.max(0, corner.height + frozen.height + freezeGap(frozen.rows) - (tabsShown ? 1 : 0)),
+    left: corner.width + frozen.width + freezeGap(frozen.columns)
+  };
+}
+
+/**
+ * Where the scroll position along one axis goes to show the column or row
+ * at a 1-based index, by the GWT client's rule. A frozen one, or one
+ * already in full view, leaves it where it is. One before the first whole
+ * one in view scrolls back past it by one more, and one after the last
+ * whole one in view scrolls on by one more - so holding an arrow key
+ * scrolls two at a time and keeps one in view beyond the one selected.
+ *
+ * `scroll` is the current scroll offset and `view` the length of the
+ * cells' part of the view, frozen ones included; `sizeOf` is a column's
+ * width or a row's height, 0 when it is hidden. The ones past the frozen
+ * ones are drawn past the freeze line's own pixel.
+ */
+export function scrollToShow(
+  index: number,
+  frozen: number,
+  count: number,
+  scroll: number,
+  view: number,
+  sizeOf: (i: number) => number
+): number {
+  const gap = freezeGap(frozen);
+  if (index <= frozen || index > count) {
+    return scroll;
+  }
+  // Start of each one, from the start of the first: starts[i] for 1-based i.
+  const starts: number[] = [0, 0];
+  const startOf = (i: number): number => {
+    while (starts.length <= i) {
+      const last = starts.length - 1;
+      starts.push(starts[last] + sizeOf(last));
+    }
+    return starts[i];
+  };
+  const frozenExtent = startOf(frozen + 1);
+  // The first whole one in view past the frozen ones.
+  let first = frozen + 1;
+  while (first < count && startOf(first) - scroll < frozenExtent) {
+    first++;
+  }
+  if (index < first) {
+    let back = 0;
+    for (let i = first - 1; i >= index - 1 && i > 0; i--) {
+      back += sizeOf(i);
+    }
+    return Math.max(0, scroll - back);
+  }
+  // The last whole one in view.
+  let last = first;
+  while (last < count && startOf(last + 1) + sizeOf(last + 1) + gap - scroll <= view) {
+    last++;
+  }
+  if (index > last) {
+    let on = 0;
+    for (let i = last + 1; i <= index + 1 && i <= count; i++) {
+      on += sizeOf(i);
+    }
+    return scroll + on;
+  }
+  return scroll;
+}
+
+/** Pixels in points, as the GWT client converted the height of a row being dragged. */
+export function pixelsToPoints(px: number, ppi: number = FALLBACK_PPI): number {
+  return (px * 72) / ppi;
+}
+
+/**
+ * Column or row sizes with the one at a 1-based index changed. Those past
+ * the end take the default, so the gap up to a size set past it is filled
+ * with the default.
+ */
+export function withSize(sizes: ArrayLike<number>, index: number, size: number, fallback: number): number[] {
+  const out = Array.from(sizes);
+  while (out.length < index - 1) {
+    out.push(fallback);
+  }
+  out[index - 1] = size;
+  return out;
+}

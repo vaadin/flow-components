@@ -87,3 +87,19 @@ export function walkInsideSelection(input: WalkInput): { col: number; row: numbe
   }
   return { col: input.col, row: input.row };
 }
+
+/**
+ * Which way Enter or Tab walks the active cell inside a selected range.
+ *
+ * Only those two keys walk: an arrow key means "leave this selection and
+ * go there", which is a different gesture. Returns null for anything else.
+ */
+export function inSelectionWalkDirection(key: string | undefined, shiftKey: boolean): WalkDirection | null {
+  if (key === 'Enter') {
+    return shiftKey ? 'up' : 'down';
+  }
+  if (key === 'Tab') {
+    return shiftKey ? 'left' : 'right';
+  }
+  return null;
+}

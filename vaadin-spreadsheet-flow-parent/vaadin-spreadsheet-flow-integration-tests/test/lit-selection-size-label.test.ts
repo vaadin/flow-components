@@ -8,10 +8,8 @@
  */
 
 import { expect } from 'chai';
-import {
-    selectionSizeLabel,
-    Spreadsheet,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { selectionSizeLabel } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
 
 /**
  * While a selection is being grown with shift, Excel's name box counts

@@ -8,14 +8,8 @@
  */
 
 import { expect } from 'chai';
-import {
-  computeMergedRegionBoxes,
-  computePositionedColGroupings,
-  isCellInSelection,
-  overlayComponentAppId,
-  selectedColumnSet,
-  selectedRowSet
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { computeMergedRegionBoxes, computePositionedColGroupings } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/Positioning.js';
+import { overlayComponentAppId } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/FlowClient.js';
 import {
   columnGroupingGutterPx,
   rowGroupingGutterPx
@@ -26,12 +20,7 @@ import {
   isCellEditorSlot,
   overlayComponentSlotName
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/VirtualChildren.js';
-import {
-  addAuxRange,
-  normalizedRange,
-  type SelectionState,
-  selectSingleCell
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
+import { addAuxRange, normalizedRange, type SelectionState, selectSingleCell, isCellInSelection, selectedColumnSet, selectedRowSet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
 
 /** A range selection from one corner to the other, the active cell at the first. */
 function selectRange(col1: number, row1: number, col2: number, row2: number): SelectionState {

@@ -8,11 +8,7 @@
  */
 
 import { expect } from 'chai';
-import {
-  coerceArray,
-  coerceNumberArray,
-  coerceObject
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { coerceArray, coerceNumberArray, coerceObject } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/wire/Coerce.js';
 
 /**
  * Taking a collection off the wire.

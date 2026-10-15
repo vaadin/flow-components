@@ -14,23 +14,6 @@ export const LONG_PRESS_MS = 750;
 /** How far a finger may drift during a long press, in CSS pixels. */
 const DRIFT_PX = 10;
 
-/** The parts of the browser {@link isIOS} looks at. */
-export interface PlatformInfo {
-  userAgent: string;
-  maxTouchPoints: number;
-}
-
-/**
- * Whether this is iOS or iPadOS, where Safari opens no context menu on a
- * long press: it fires no `contextmenu` event. iPadOS presents itself as a
- * Mac, and only its touch points tell it apart.
- */
-export function isIOS(platform: PlatformInfo = navigator): boolean {
-  return (
-    /iPad|iPhone|iPod/.test(platform.userAgent) || (/Macintosh/.test(platform.userAgent) && platform.maxTouchPoints > 1)
-  );
-}
-
 /**
  * Makes a long press on the target a `contextmenu` event at the point pressed,
  * as the GWT client did on iOS: one finger that stays put for

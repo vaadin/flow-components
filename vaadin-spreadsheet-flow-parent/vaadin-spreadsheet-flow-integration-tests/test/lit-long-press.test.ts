@@ -9,11 +9,8 @@
 
 import { expect } from 'chai';
 import { resetMouse, sendMouse } from '@web/test-runner-commands';
-import {
-  isIOS,
-  listenForLongPress,
-  LONG_PRESS_MS
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/LongPress.js';
+import { listenForLongPress, LONG_PRESS_MS } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/LongPress.js';
+import { isIOS } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/Platform.js';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 function wait(ms: number): Promise<void> {

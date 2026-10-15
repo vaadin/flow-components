@@ -9,7 +9,7 @@
 
 import { expect } from 'chai';
 
-import { buildSelectionEvent } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { buildSelectionEvent } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
 
 /**
  * Pure helper that classifies a selection shape and

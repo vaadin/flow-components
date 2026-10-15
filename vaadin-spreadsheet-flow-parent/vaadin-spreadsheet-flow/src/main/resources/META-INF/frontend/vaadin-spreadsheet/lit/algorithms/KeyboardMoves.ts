@@ -330,3 +330,47 @@ export interface ComposedKey {
 export function composing(e: ComposedKey): boolean {
   return e.isComposing === true || e.keyCode === 229;
 }
+
+/**
+ * Which way a key moves the selection: an arrow the way it points, Tab
+ * right and Enter down - shift reversing those two. Null for any other key.
+ */
+export function keyDirection(key: string, shiftKey: boolean): Direction | null {
+  switch (key) {
+    case 'ArrowUp':
+      return 'up';
+    case 'ArrowDown':
+      return 'down';
+    case 'ArrowLeft':
+      return 'left';
+    case 'ArrowRight':
+      return 'right';
+    case 'Tab':
+      return shiftKey ? 'left' : 'right';
+    case 'Enter':
+      return shiftKey ? 'up' : 'down';
+    default:
+      return null;
+  }
+}
+
+/**
+ * Where Home and End take the active cell: the first or last column of its
+ * row, or with Ctrl (Cmd on a Mac) the first cell of the sheet or the last.
+ * Null for any other key.
+ */
+export function homeEndTarget(
+  key: string,
+  toSheetCorner: boolean,
+  activeCell: { col: number; row: number },
+  cols: number,
+  rows: number
+): { col: number; row: number } | null {
+  if (key === 'Home') {
+    return { col: 1, row: toSheetCorner ? 1 : activeCell.row };
+  }
+  if (key === 'End') {
+    return { col: Math.max(1, cols), row: toSheetCorner ? Math.max(1, rows) : activeCell.row };
+  }
+  return null;
+}

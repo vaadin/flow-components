@@ -10,10 +10,8 @@
 import { expect } from 'chai';
 import { sendKeys } from '@web/test-runner-commands';
 
-import {
-  Spreadsheet,
-  pagedViewInset
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { pagedViewInset } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 
 /**
  * Page Up and Page Down, as the GWT client paged.
