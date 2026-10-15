@@ -779,6 +779,16 @@ describe('Formula bar — dragging out a range', () => {
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('1R x 1C');
   });
 
+  it('stops growing the range once the button is up', () => {
+    drag([8, 10], [9, 10]);
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    ctx.sheet.getCellGrid().dispatchEvent(
+      new CustomEvent('cell-mouseover', { detail: { col: 12, row: 14 }, bubbles: true, composed: true })
+    );
+
+    expect(ctx.sheet.getSelection().activeRange).to.eql({ c1: 8, c2: 9, r1: 10, r2: 10 });
+  });
+
   it('says nothing on a hover with no button down', () => {
     // The grid emits cell-mouseover on every hover.
     clickCell(ctx.sheet, 2, 2);

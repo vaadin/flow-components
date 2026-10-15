@@ -202,6 +202,18 @@ describe('Spreadsheet — dragging the fill handle', () => {
     expect(paints(ctx.sent)).to.be.empty;
   });
 
+  it('stops painting once the button is up, and selects nothing after', () => {
+    grabHandle();
+    dragOver(4, 9);
+    release();
+    ctx.sent.length = 0;
+    dragOver(4, 12);
+    release();
+
+    expect(paints(ctx.sent)).to.be.empty;
+    expect(ctx.sheet.getSelection().activeRange).to.eql({ c1: 2, c2: 4, r1: 3, r2: 6 });
+  });
+
   it('does not extend the selection the way a plain drag would', () => {
     grabHandle();
     dragOver(4, 9);

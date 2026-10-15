@@ -119,6 +119,33 @@ describe('Spreadsheet — the tooltip of a link cell', () => {
     expect(tooltip().hidden).to.be.true;
   });
 
+  it('stays away while a range is dragged out over a link cell', () => {
+    cell(4, 4).dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
+    hover(2, 2);
+
+    expect(tooltip().hidden).to.be.true;
+  });
+
+  it('stays away while the fill handle is dragged over a link cell', async () => {
+    sheet.setSelectedCellAndRange('D4', 4, 4, 4, 4, 4, 4, false);
+    await sheet.getCellGrid().updateComplete;
+    sheet
+      .getCellGrid()
+      .shadowRoot!.querySelector('.selection-corner')!
+      .dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
+    hover(2, 2);
+
+    expect(tooltip().hidden).to.be.true;
+  });
+
+  it('comes back once the drag is over', () => {
+    cell(4, 4).dispatchEvent(new MouseEvent('mousedown', { bubbles: true, composed: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    hover(2, 2);
+
+    expect(tooltip().hidden).to.be.false;
+  });
+
   it('shows nothing over a cell without a link', () => {
     hover(4, 4);
 

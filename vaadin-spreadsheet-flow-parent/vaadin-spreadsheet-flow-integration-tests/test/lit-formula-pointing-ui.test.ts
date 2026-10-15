@@ -193,6 +193,15 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(input.value).to.equal('=SUM(E7:F9');
   });
 
+  it('stops stretching the reference once the button is up', async () => {
+    const input = await startTyping('=SUM(');
+    mouse('mousedown', cell(5, 7));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    mouse('mouseover', cell(6, 9));
+
+    expect(input.value).to.equal('=SUM(E7');
+  });
+
   it('replaces the clicked reference with the next click', async () => {
     const input = await startTyping('=');
     mouse('mousedown', cell(5, 7));

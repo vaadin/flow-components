@@ -214,6 +214,17 @@ describe('Spreadsheet — dragging a column edge, as the GWT client did', () => 
     expect(sheetColumnLetters(ctx)).to.deep.equal(['A', 'C', 'D', 'E']);
   });
 
+  it('tells the server once: a second release is no drag', () => {
+    const { left, y } = dragB(columnLetter(ctx.sheet, 2).left + 80);
+
+    release(left + 80, y);
+    move(left + 120, y);
+    release(left + 120, y);
+
+    expect(ctx.sent.filter((e) => e.type === 'columnResized')).to.have.length(1);
+    expect(line(ctx).hidden).to.be.true;
+  });
+
   it('tells the server nothing when let go at the width the column has', () => {
     const { left, y } = dragB(columnLetter(ctx.sheet, 2).left + 50);
 
