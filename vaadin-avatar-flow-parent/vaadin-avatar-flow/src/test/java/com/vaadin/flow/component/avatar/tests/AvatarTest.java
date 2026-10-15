@@ -15,14 +15,22 @@
  */
 package com.vaadin.flow.component.avatar.tests;
 
+import java.io.ByteArrayInputStream;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.tests.MockUIExtension;
 
 class AvatarTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private Avatar avatar;
 
@@ -55,6 +63,24 @@ class AvatarTest {
     void setImgLink_getImgLink() {
         avatar.setImage("https://vaadin.com/");
         Assertions.assertEquals("https://vaadin.com/", avatar.getImage());
+    }
+
+    @Test
+    void setImageNull_imgAttributeRemoved() {
+        avatar.setImage("https://vaadin.com/");
+        avatar.setImage(null);
+        Assertions.assertNull(avatar.getImage());
+        Assertions.assertFalse(avatar.getElement().hasAttribute("img"));
+    }
+
+    @Test
+    @SuppressWarnings("removal")
+    void setImageResourceNull_imgAttributeRemoved() {
+        avatar.setImageResource(new StreamResource("image.png",
+                () -> new ByteArrayInputStream(new byte[0])));
+        avatar.setImageResource(null);
+        Assertions.assertNull(avatar.getImageResource());
+        Assertions.assertFalse(avatar.getElement().hasAttribute("img"));
     }
 
     @Test
