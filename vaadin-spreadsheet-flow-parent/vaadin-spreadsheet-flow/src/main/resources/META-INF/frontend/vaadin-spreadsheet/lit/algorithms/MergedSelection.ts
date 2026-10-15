@@ -21,7 +21,7 @@ import type { CellRect } from './SelectionPaint.js';
  *
  * The rule is not "union the rectangle with every merge it intersects" done
  * once: growing to take in one merge can bring the rectangle's edge over a
- * second, so the sweep repeats until an pass changes nothing. Coordinates
+ * second, so the sweep repeats until a pass changes nothing. Coordinates
  * are 1-based throughout, matching the wire.
  */
 
@@ -33,22 +33,11 @@ export interface MergedRect {
   row2: number;
 }
 
-/** The merge covering a cell, or null when it is an ordinary cell. */
-function mergeAt(regions: ReadonlyArray<MergedRect>, col: number, row: number): MergedRect | null {
-  for (const region of regions) {
-    if (col >= region.col1 && col <= region.col2 && row >= region.row1 && row <= region.row2) {
-      return region;
-    }
-  }
-  return null;
-}
-
 /**
  * The smallest rectangle that contains {@code selection} and every merged
  * region it touches.
  *
- * Returns the selection unchanged when it touches none, so the common case
- * costs one sweep of the edges and allocates nothing.
+ * Returns the selection itself when the sheet has no merges.
  */
 export function expandToMergedRegions(selection: CellRect, regions: ReadonlyArray<MergedRect>): CellRect {
   if (regions.length === 0) {
@@ -57,14 +46,18 @@ export function expandToMergedRegions(selection: CellRect, regions: ReadonlyArra
 
   let { c1, c2, r1, r2 } = selection;
 
-  // Each pass walks the four edges, taking in any merge it meets. Taking
-  // one in can push an edge over another, so keep sweeping until a pass
-  // changes nothing. Bounded by the region count: every pass that changes
-  // anything has absorbed at least one more merge.
+  // Each pass takes in every merge that is partly inside: one taken in can
+  // reach another, so keep going until a pass takes in none. A merge that
+  // is partly inside crosses an edge, so this is the merges the edges
+  // meet, found without walking the edges cell by cell. Bounded by the
+  // region count: every pass that changes anything has taken in one more.
   for (let pass = 0; pass <= regions.length; pass++) {
     let grew = false;
-
-    const absorb = (region: MergedRect): void => {
+    for (const region of regions) {
+      const overlaps = region.col1 <= c2 && region.col2 >= c1 && region.row1 <= r2 && region.row2 >= r1;
+      if (!overlaps) {
+        continue;
+      }
       if (region.col1 < c1) {
         c1 = region.col1;
         grew = true;
@@ -81,29 +74,7 @@ export function expandToMergedRegions(selection: CellRect, regions: ReadonlyArra
         r2 = region.row2;
         grew = true;
       }
-    };
-
-    for (let col = c1; col <= c2; col++) {
-      const top = mergeAt(regions, col, r1);
-      if (top !== null) {
-        absorb(top);
-      }
-      const bottom = mergeAt(regions, col, r2);
-      if (bottom !== null) {
-        absorb(bottom);
-      }
     }
-    for (let row = r1; row <= r2; row++) {
-      const left = mergeAt(regions, c1, row);
-      if (left !== null) {
-        absorb(left);
-      }
-      const right = mergeAt(regions, c2, row);
-      if (right !== null) {
-        absorb(right);
-      }
-    }
-
     if (!grew) {
       break;
     }
