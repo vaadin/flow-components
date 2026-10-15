@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.ss.util.WorkbookUtil;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.ProtectedEditEvent;
@@ -73,8 +74,17 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 discardOldRangeSelection);
     }
 
+    /*
+     * The client always sends the text fields of its events. One that is
+     * missing reaches a handler as null, and the event then does nothing rather
+     * than fail the request.
+     */
+
     @Override
     public void sheetAddressChanged(String value) {
+        if (value == null) {
+            return;
+        }
         spreadsheet.getCellSelectionManager().onSheetAddressChanged(value,
                 false);
     }
@@ -144,6 +154,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void cellValueEdited(int row, int col, String value) {
+        if (value == null) {
+            return;
+        }
         if (spreadsheet.isCellLocked(new CellAddress(row - 1, col - 1))) {
             protectedCellWriteAttempted();
             return;
@@ -158,11 +171,39 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void sheetRenamed(int sheetIndex, String sheetName) {
+        // The client offers no renaming in a protected workbook, and checks
+        // a name as POI does; a request that still gets here is left alone.
+        if (spreadsheet.isWorkbookStructureLocked()
+                || !isNewNameFor(sheetIndex, sheetName)) {
+            return;
+        }
         spreadsheet.onSheetRename(sheetIndex, sheetName);
+    }
+
+    /**
+     * Whether POI takes this name for the visible sheet at the given index: a
+     * valid name no other sheet has, whatever its case.
+     */
+    private boolean isNewNameFor(int sheetIndex, String sheetName) {
+        if (sheetName == null || sheetIndex < 0
+                || sheetIndex >= spreadsheet.getNumberOfVisibleSheets()) {
+            return false;
+        }
+        try {
+            WorkbookUtil.validateSheetName(sheetName);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        int existing = spreadsheet.getWorkbook().getSheetIndex(sheetName);
+        return existing < 0
+                || existing == spreadsheet.getVisibleSheetPOIIndex(sheetIndex);
     }
 
     @Override
     public void sheetCreated(int scrollLeft, int scrollTop) {
+        if (spreadsheet.isWorkbookStructureLocked()) {
+            return;
+        }
         spreadsheet.onNewSheetCreated(scrollLeft, scrollTop);
     }
 
@@ -196,17 +237,26 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void actionOnCurrentSelection(String actionKey) {
+        if (actionKey == null) {
+            return;
+        }
         spreadsheet.getContextMenuManager()
                 .onActionOnCurrentSelection(actionKey);
     }
 
     @Override
     public void actionOnRowHeader(String actionKey) {
+        if (actionKey == null) {
+            return;
+        }
         spreadsheet.getContextMenuManager().onActionOnRowHeader(actionKey);
     }
 
     @Override
     public void actionOnColumnHeader(String actionKey) {
+        if (actionKey == null) {
+            return;
+        }
         spreadsheet.getContextMenuManager().onActionOnColumnHeader(actionKey);
     }
 
@@ -218,22 +268,34 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void rowsResized(Map<Integer, Float> newRowSizes, int row1, int col1,
             int row2, int col2) {
+        if (!spreadsheet.mayResizeFromClient(false)) {
+            return;
+        }
         spreadsheet.onRowResized(newRowSizes, row1, col1, row2, col2);
     }
 
     @Override
     public void columnResized(Map<Integer, Integer> newColumnSizes, int row1,
             int col1, int row2, int col2) {
+        if (!spreadsheet.mayResizeFromClient(true)) {
+            return;
+        }
         spreadsheet.onColumnResized(newColumnSizes, row1, col1, row2, col2);
     }
 
     @Override
     public void onRowAutofit(int rowIndex) {
+        if (!spreadsheet.mayResizeFromClient(false)) {
+            return;
+        }
         spreadsheet.onRowHeaderDoubleClick(rowIndex - 1);
     }
 
     @Override
     public void onColumnAutofit(int columnIndex) {
+        if (!spreadsheet.mayResizeFromClient(true)) {
+            return;
+        }
         spreadsheet.onColumnAutofit(columnIndex - 1);
     }
 
@@ -266,6 +328,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void onPaste(String text) {
+        if (text == null) {
+            return;
+        }
         Workbook workbook = spreadsheet.getWorkbook();
         Sheet activesheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
 
@@ -478,6 +543,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     @Override
     public void updateCellComment(String text, int col, int row) {
+        if (text == null) {
+            return;
+        }
         if (spreadsheet.isCellLocked(new CellAddress(row - 1, col - 1))) {
             protectedCellWriteAttempted();
             return;

@@ -67,7 +67,10 @@ export function resolveSheetRename(input: SheetRenameInput): SheetRenameOutcome 
   if (names[index] === proposed) {
     return { kind: 'revert', reason: 'unchanged' };
   }
-  if (names.some((name, i) => i !== index && name === proposed)) {
+  // Taken whatever its case, as Excel and POI see it: POI refused such a
+  // rename on the server while the tab already showed it.
+  const lower = proposed.toLowerCase();
+  if (names.some((name, i) => i !== index && name.toLowerCase() === lower)) {
     return { kind: 'revert', reason: 'taken' };
   }
   return { kind: 'rename', name: proposed };

@@ -57,6 +57,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jspecify.annotations.Nullable;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -3235,6 +3236,34 @@ public class Spreadsheet extends Component
      */
     public boolean isActiveSheetProtected() {
         return isSheetProtected();
+    }
+
+    /**
+     * Whether the workbook's structure is protected, so that its sheets are not
+     * added or renamed from the client, which also offers neither.
+     */
+    boolean isWorkbookStructureLocked() {
+        Workbook workbook = getWorkbook();
+        if (workbook instanceof XSSFWorkbook xssf) {
+            return xssf.isStructureLocked();
+        }
+        return workbook instanceof HSSFWorkbook hssf && hssf.isWriteProtected();
+    }
+
+    /**
+     * Whether the user may resize the active sheet's columns, or its rows, from
+     * the client: not on a protected sheet that locks their formatting, by the
+     * rule the client resizes by.
+     */
+    boolean mayResizeFromClient(boolean columns) {
+        if (!isActiveSheetProtected()
+                || !(getActiveSheet() instanceof XSSFSheet xssf)) {
+            return true;
+        }
+        CTSheetProtection protection = xssf.getCTWorksheet()
+                .getSheetProtection();
+        return protection == null || !(columns ? protection.getFormatColumns()
+                : protection.getFormatRows());
     }
 
     /**

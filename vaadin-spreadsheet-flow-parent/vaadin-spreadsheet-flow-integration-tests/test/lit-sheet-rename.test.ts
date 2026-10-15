@@ -73,6 +73,19 @@ describe('resolveSheetRename', () => {
             resolveSheetRename({ proposed: 'Notes', index: 1, names })
         ).to.eql({ kind: 'revert', reason: 'taken' });
     });
+
+    it('leaves a name another sheet has taken in another case', () => {
+        // POI refused it on the server while the tab already showed it.
+        expect(
+            resolveSheetRename({ proposed: 'NOTES', index: 1, names })
+        ).to.eql({ kind: 'revert', reason: 'taken' });
+    });
+
+    it('lets a sheet change the case of its own name', () => {
+        expect(
+            resolveSheetRename({ proposed: 'BUDGET', index: 1, names })
+        ).to.eql({ kind: 'rename', name: 'BUDGET' });
+    });
 });
 
 describe('Spreadsheet — renaming a sheet tab', () => {
