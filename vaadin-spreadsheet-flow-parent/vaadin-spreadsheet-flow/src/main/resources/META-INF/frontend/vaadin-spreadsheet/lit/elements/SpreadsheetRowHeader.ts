@@ -241,6 +241,9 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       left: 0;
       z-index: 4;
       box-sizing: border-box;
+      /* The frozen strip moves with the scroll; past the header's end it
+         would make the sheet's scroll area grow with every scroll. */
+      overflow: clip;
       background: ${headerBg};
       border-right: 1px solid ${headerBorderColor};
       font-family: ${headerFont};

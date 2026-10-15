@@ -564,3 +564,51 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(ctx.sheet.getRowHeader().shadowRoot!.querySelector('.freeze-line')).to.be.null;
   });
 });
+
+describe('Frozen panes — the scroll area stays the size of the sheet', () => {
+  // The strip that keeps the frozen headers in place is moved by the
+  // scroll, and it reached past the end of the sheet: every scroll to the
+  // bottom made the scroll area longer, into empty space.
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function scrollTo(top: number, left: number): Promise<void> {
+    const pane = ctx.sheet.getScrollContainer();
+    pane.scrollTop = top;
+    pane.scrollLeft = left;
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getRowHeader().updateComplete;
+    await ctx.sheet.getColumnHeader().updateComplete;
+  }
+
+  it('keeps the sheet as tall as it is when scrolled to the bottom with rows frozen', async () => {
+    ctx.sheet.setVerticalSplitPosition(5);
+    await scrollTo(0, 0);
+    const pane = ctx.sheet.getScrollContainer();
+    const tall = pane.scrollHeight;
+
+    await scrollTo(tall, 0);
+    await scrollTo(tall, 0);
+
+    expect(pane.scrollHeight).to.equal(tall);
+  });
+
+  it('keeps the sheet as wide as it is when scrolled to the end with columns frozen', async () => {
+    ctx.sheet.setHorizontalSplitPosition(3);
+    await scrollTo(0, 0);
+    const pane = ctx.sheet.getScrollContainer();
+    const wide = pane.scrollWidth;
+
+    await scrollTo(0, wide);
+    await scrollTo(0, wide);
+
+    expect(pane.scrollWidth).to.equal(wide);
+  });
+});
