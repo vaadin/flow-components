@@ -92,7 +92,7 @@ export class SpreadsheetFormulaBar extends LitElement {
       display: flex;
       align-items: stretch;
       box-sizing: border-box;
-      height: var(--vaadin-spreadsheet-formulabar-height, var(--_vaadin-spreadsheet-formulabar-height, 30px));
+      height: var(--vaadin-spreadsheet-formulabar-height, 30px);
       background: var(--vaadin-spreadsheet-formulabar-bg, var(--_vaadin-spreadsheet-formulabar-bg, #fff));
       /* The bar's own border colour, or each line in the documented colour
          the GWT client drew it in: this one in the header border colour. */

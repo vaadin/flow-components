@@ -118,14 +118,8 @@ export class SpreadsheetCellGrid extends LitElement {
         /* Unset, the workbook's default font, which its default style
          declares on every cell - and until the styles arrive, the default
          the host declares for it. */
-        font-family: var(
-          --vaadin-spreadsheet-cell-font,
-          var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
-        );
-        font-size: var(
-          --vaadin-spreadsheet-cell-font-size,
-          var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
-        );
+        font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
+        font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
       }
 
       /* The server appends an "r" to a cell's class list when the value is
@@ -582,14 +576,8 @@ export class SpreadsheetCellGrid extends LitElement {
         outline: 1px solid
           var(--vaadin-spreadsheet-editor-border, var(--_vaadin-spreadsheet-editor-border, transparent));
         box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.75);
-        font-family: var(
-          --vaadin-spreadsheet-cell-font,
-          var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))
-        );
-        font-size: var(
-          --vaadin-spreadsheet-cell-font-size,
-          var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))
-        );
+        font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family));
+        font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size));
         padding: 0;
       }
 
@@ -2681,8 +2669,8 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
   if (styles[0] !== undefined) {
     rules.push(
       `.cell.cell { ${styles[0]} ` +
-        'font-family: var(--vaadin-spreadsheet-cell-font, var(--_vaadin-spreadsheet-cell-font, var(--default-font-family))); ' +
-        'font-size: var(--vaadin-spreadsheet-cell-font-size, var(--_vaadin-spreadsheet-cell-font-size, var(--default-font-size))); }'
+        'font-family: var(--vaadin-spreadsheet-cell-font, var(--default-font-family)); ' +
+        'font-size: var(--vaadin-spreadsheet-cell-font-size, var(--default-font-size)); }'
     );
   }
   // Links: --vaadin-spreadsheet-link-fg when an application sets it, for a
@@ -2690,9 +2678,9 @@ function buildCellStyleBlock(state: CellGridRenderState): TemplateResult | strin
   // as the GWT client showed every link. After the default rule, before the
   // cell styles, so a workbook's styled link keeps its own colour.
   rules.push(
-    `.cell.link-cell { color: var(--vaadin-spreadsheet-link-fg, var(--_vaadin-spreadsheet-link-fg, ${
+    `.cell.link-cell { color: var(--vaadin-spreadsheet-link-fg, ${
       lastValueOf(styles[0], 'color') ?? 'var(--default-color)'
-    })); }`
+    }); }`
   );
   // A whole row or column formatted in the workbook styles those of its
   // cells that have no style of their own - which wear cs0.
