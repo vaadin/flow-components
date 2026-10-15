@@ -147,6 +147,10 @@ export function computeViewportBounds(input: ViewportInput): ViewportBounds {
   let firstRowPosition = 0;
   let firstColumnIndex = input.horizontalSplitPosition > 0 ? input.horizontalSplitPosition + 1 : 1;
   let firstColumnPosition = 0;
+  // Rows are 1-based, so the last defined row is definedRows itself. The
+  // GWT client's `>=` gave that row the default height.
+  const rowHeight = (row: number): number =>
+    row > input.definedRows ? input.defaultRowHeightPx : input.getRowHeight(row);
 
   while (firstColumnPosition < input.scrollLeft - input.columnBufferSize) {
     firstColumnPosition += input.getColWidthActual(firstColumnIndex);
@@ -156,12 +160,11 @@ export function computeViewportBounds(input: ViewportInput): ViewportBounds {
   let lastColumnPosition = firstColumnPosition + input.getColWidthActual(firstColumnIndex);
 
   while (firstRowPosition < input.scrollTop - input.rowBufferSize) {
-    firstRowPosition +=
-      firstRowIndex >= input.definedRows ? input.defaultRowHeightPx : input.getRowHeight(firstRowIndex);
+    firstRowPosition += rowHeight(firstRowIndex);
     firstRowIndex++;
   }
   let lastRowIndex = firstRowIndex;
-  let lastRowPosition = firstRowPosition + input.getRowHeight(lastRowIndex);
+  let lastRowPosition = firstRowPosition + rowHeight(lastRowIndex);
 
   while (
     lastColumnPosition < input.scrollLeft + input.scrollViewWidth + input.columnBufferSize &&
@@ -176,7 +179,7 @@ export function computeViewportBounds(input: ViewportInput): ViewportBounds {
     lastRowIndex < input.maxRows
   ) {
     lastRowIndex++;
-    lastRowPosition += lastRowIndex >= input.definedRows ? input.defaultRowHeightPx : input.getRowHeight(lastRowIndex);
+    lastRowPosition += rowHeight(lastRowIndex);
   }
 
   return {

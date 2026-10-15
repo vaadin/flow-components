@@ -194,7 +194,7 @@ describe('ViewportMath — computeViewportBounds — freeze panes', () => {
 });
 
 describe('ViewportMath — computeViewportBounds — rows beyond definedRows', () => {
-    it('uses defaultRowHeightPx for rows >= definedRows during advance', () => {
+    it('uses defaultRowHeightPx for rows past definedRows during advance', () => {
         const r = computeViewportBounds({
             scrollLeft: 0,
             scrollTop: 100, // scroll past first 5 rows
@@ -211,17 +211,11 @@ describe('ViewportMath — computeViewportBounds — rows beyond definedRows', (
             getColWidthActual: () => 50,
             getRowHeight: () => 20, // for rows 1-3
         });
-        // firstRowPosition advances while < 100, then firstRowIndex++.
-        // The >= definedRows check is on the CURRENT firstRowIndex,
-        // BEFORE the post-iter increment.
-        // Iter 1: 0 < 100; idx 1 >= 3? no → getRowHeight(1)=20. pos=20, idx=2.
-        // Iter 2: 20 < 100; idx 2 >= 3? no → 20. pos=40, idx=3.
-        // Iter 3: 40 < 100; idx 3 >= 3? YES → default 25. pos=65, idx=4.
-        // Iter 4: 65 < 100; idx 4 >= 3? YES → 25. pos=90, idx=5.
-        // Iter 5: 90 < 100; idx 5 >= 3? YES → 25. pos=115, idx=6.
-        //   115 < 100? no. Stop.
+        // Rows 1-3 are 20 high, row 3 included: the GWT client's
+        // `>= definedRows` gave the last defined row the default height.
+        // 20 + 20 + 20 + 25 + 25 = 110 is the first position past 100.
         expect(r.firstRowIndex).to.equal(6);
-        expect(r.firstRowPosition).to.equal(115);
+        expect(r.firstRowPosition).to.equal(110);
     });
 });
 
