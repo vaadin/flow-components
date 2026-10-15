@@ -11,11 +11,9 @@ package com.vaadin.flow.component.spreadsheet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -337,20 +335,15 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         CellReference selectedCellReference = spreadsheet
                 .getSelectedCellReference();
 
-        String[] lines;
-        if (text.indexOf("\r\n") > -1) {
-            lines = text.split("\r\n");
-        } else if (text.indexOf("\n") > -1) {
-            lines = text.split("\n");
-        } else {
-            lines = text.split("\r");
+        List<List<String>> lines = ClipboardText.parse(text);
+        if (lines.isEmpty()) {
+            return;
         }
 
-        int pasteHeight = lines.length;
+        int pasteHeight = lines.size();
         int pasteWidth = 1;
-        for (String line : lines) {
-            String[] tokens = splitOnTab(line);
-            pasteWidth = Math.max(pasteWidth, tokens.length);
+        for (List<String> line : lines) {
+            pasteWidth = Math.max(pasteWidth, line.size());
         }
 
         int rowIndex = selectedCellReference.getRow();
@@ -375,19 +368,18 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         command.captureCellRangeValues(affectedRange);
 
         for (int i = 0; i < pasteHeight; i++) {
-            String line = lines[i];
+            List<String> tokens = lines.get(i);
             Row row = activesheet.getRow(rowIndex + i);
             if (row == null) {
                 row = activesheet.createRow(rowIndex + i);
             }
-            String[] tokens = splitOnTab(line);
             for (int j = 0; j < pasteWidth; j++) {
                 Cell cell = row.getCell(colIndex + j);
                 if (cell == null) {
                     cell = row.createCell(colIndex + j);
                 }
-                if (j < tokens.length) {
-                    String cellContent = tokens[j];
+                if (j < tokens.size()) {
+                    String cellContent = tokens.get(j);
                     Double numVal = SpreadsheetUtil.parseNumber(cell,
                             cellContent, spreadsheet.getLocale());
                     if (numVal != null) {
@@ -430,64 +422,6 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
     private void fireCellValueChangeEvent(Set<CellReference> cells) {
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
-    }
-
-    /**
-     * Splits tab-delimited string into an array of Strings, inserting empty
-     * strings between any tab characters and the beginning and end of the line
-     * if it would be a tab. Length of array will equal number of tabs + 1.
-     * <p>
-     * E.g.<br/>
-     * "1\t2" - {"1","2"}<br/>
-     * "\t\t" - {"","",""}<br/>
-     *
-     * @param line
-     *            input
-     * @return output string parts split at tabs
-     */
-    private static String[] splitOnTab(String line) {
-
-        List<String> list = new LinkedList<String>();
-        StringTokenizer tokenizer = new StringTokenizer(line, "\t", true);
-
-        // marker for when last token is a tab, meaning we need one
-        // additional empty string
-        boolean lastCharWasTab = false;
-
-        while (tokenizer.hasMoreTokens()) {
-
-            String content = tokenizer.nextToken();
-
-            if (content.equals("\t")) {
-                // empty content; insert empty string here
-                content = "";
-
-                if (!tokenizer.hasMoreTokens()) {
-                    lastCharWasTab = true;
-                }
-
-            } else {
-                // normal cell content, value in 'content'
-
-                // skip to next content by skipping tab token
-                // (we process 'content\t' on the same loop)
-                if (tokenizer.countTokens() > 1) {
-                    tokenizer.nextToken();
-                } else if (tokenizer.countTokens() == 1) {
-                    // if the tab is the last char we need to mark it
-                    tokenizer.nextToken();
-                    lastCharWasTab = true;
-                }
-            }
-
-            list.add(content);
-
-            if (lastCharWasTab) {
-                list.add("");
-            }
-        }
-
-        return list.toArray(new String[list.size()]);
     }
 
     @Override

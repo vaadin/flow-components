@@ -19,29 +19,35 @@
  * {@code CopyPasteHandlerImpl.getClipboardText}: the server parses what
  * is pasted.
  *
- * IMPORTANT: TSV has no escaping convention for tabs or newlines INSIDE
- * a cell value. If a cell contains `\t` or `\n`, the copy is
- * lossy. The GWT version doesn't escape; neither does this port.
- * Cells containing newlines will round-trip wrong; this is the
- * documented Excel-clipboard quirk. Use cell-display-value (which
- * doesn't usually contain control chars) rather than raw cell content
- * for the serialize input.
+ * A cell that holds a tab, a line break or a double quote is written in
+ * double quotes, with its own quotes doubled, as spreadsheets put such
+ * cells on the clipboard; the server's {@code ClipboardText} reads them
+ * back the same way. The GWT client wrote them as they were, so a cell
+ * with a line break pasted as two rows.
  */
 
 /**
  * Serialize a 2D array of cell values into TSV format.
  *
- * Algorithm ported from
- * {@code CopyPasteHandlerImpl.getClipboardText} (GWT client, slice
- * 119's survey). Byte-equivalent: `null` values emit as empty strings
- * (no token); column separator is `\t`; row separator is `\n`; no
- * trailing newline on the last row.
+ * As the GWT client's {@code CopyPasteHandlerImpl.getClipboardText} did,
+ * apart from the quoting: `null` values emit as empty strings; column
+ * separator is `\t`; row separator is `\n`; no trailing newline on the
+ * last row.
  *
  * @param values  2D row-major array. Outer is rows, inner is columns.
  *                `null` cells emit as empty strings (the column tab
  *                still fires).
  * @returns The TSV-formatted text.
  */
+/**
+ * A cell as spreadsheets put it on the clipboard: in double quotes, with its
+ * own quotes doubled, when it holds a tab, a line break or a quote. Left as
+ * it was, a cell with a line break pasted as two rows.
+ */
+function quoted(cell: string): string {
+  return /[\t\n\r"]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell;
+}
+
 export function serializeToTsv(values: readonly (string | null)[][]): string {
   if (values.length === 0) {
     return '';
@@ -52,7 +58,7 @@ export function serializeToTsv(values: readonly (string | null)[][]): string {
     // column separators correctly (n-1 tabs for n cells, no
     // trailing tab — matching the Java version's
     // `if (col != xMax) sb.append("\t")` behavior).
-    rows.push(row.map((cell) => cell ?? '').join('\t'));
+    rows.push(row.map((cell) => quoted(cell ?? '')).join('\t'));
   }
   return rows.join('\n');
 }

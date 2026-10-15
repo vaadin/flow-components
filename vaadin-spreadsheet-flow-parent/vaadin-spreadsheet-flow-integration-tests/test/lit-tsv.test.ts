@@ -58,3 +58,26 @@ describe('Tsv — serializeToTsv', () => {
         expect(serializeToTsv([])).to.equal('');
     });
 });
+
+/**
+ * A cell holding a tab, a line break or a double quote goes in double
+ * quotes, its own quotes doubled, as spreadsheets put such cells on the
+ * clipboard. Written as it was, a cell with a line break pasted as two rows.
+ */
+describe('Tsv — quoting cells that would break the grid', () => {
+    it('quotes a cell with a line break', () => {
+        expect(serializeToTsv([['a\nb', 'c']])).to.equal('"a\nb"\tc');
+    });
+
+    it('quotes a cell with a tab', () => {
+        expect(serializeToTsv([['a\tb']])).to.equal('"a\tb"');
+    });
+
+    it('quotes a cell with a quote, and doubles the quote', () => {
+        expect(serializeToTsv([['say "hi"']])).to.equal('"say ""hi"""');
+    });
+
+    it('leaves every other cell as it is', () => {
+        expect(serializeToTsv([['plain', '1,5', '']])).to.equal('plain\t1,5\t');
+    });
+});
