@@ -508,6 +508,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * same way, its auto-hide taking the press on the button.
    */
   private popupClosedByItsButton: { row: number; col: number } | null = null;
+  /** The popup whose button was pressed from the keyboard, until it opens. */
+  private popupOpenedFromKeyboard: { row: number; col: number } | null = null;
 
   /**
    * Places the open popup again when its size changes: its content is
@@ -697,6 +699,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // past it rather than scrolling. Drawn by the rules the overlay carries
     // - see popupOverlayRules.
     this.popupOverlay.popover = 'manual';
+    // Takes the keyboard when it opens from it without a close box.
+    this.popupOverlay.tabIndex = -1;
     this.popupOverlay.style.cssText = 'position:absolute;inset:auto;margin:0;overflow:visible;box-sizing:border-box;';
     this.popupResizeObserver = new ResizeObserver(() => this.positionPopupOverlay());
     this.actionIcons = new SlottedVirtualChildren(host, this.contextMenu, resolveVirtualChild, actionIconSlotName);
@@ -1189,13 +1193,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * `popupButtonClick` spreadsheet-event so the server can
    * open the popup component.
    */
-  private readonly handlePopupButtonClick = (e: CustomEvent<{ col: number; row: number }>): void => {
-    const { col, row } = e.detail;
+  private readonly handlePopupButtonClick = (
+    e: CustomEvent<{ col: number; row: number; keyboard?: boolean }>
+  ): void => {
+    const { col, row, keyboard } = e.detail;
     const closed = this.popupClosedByItsButton;
     this.popupClosedByItsButton = null;
     if (closed !== null && closed.row === row && closed.col === col) {
       return;
     }
+    this.popupOpenedFromKeyboard = keyboard === true ? { row, col } : null;
     this.sendToServer({
       type: 'popupButtonClick',
       data: { row, column: col }
@@ -4055,6 +4062,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.closeContextMenu();
   };
 
+  /** Whether the focus is in the popup: its card, or the content it shows. */
+  private popupHasFocus(): boolean {
+    let el: Element | null = document.activeElement;
+    while (el?.shadowRoot?.activeElement) {
+      el = el.shadowRoot.activeElement;
+    }
+    for (let node: Node | null = el; node !== null; ) {
+      if (node === this.popupOverlay || this.popupContents.owns(node)) {
+        return true;
+      }
+      node = node.parentNode instanceof ShadowRoot ? node.parentNode.host : node.parentNode;
+    }
+    return false;
+  }
+
   /** Whether an event path passes through the button of the open popup. */
   private hitOpenPopupButton(path: EventTarget[]): boolean {
     const open = this.openPopup;
@@ -4591,6 +4613,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.popupResizeObserver.observe(this.popupOverlay);
     this.scheduleRender();
+    // Opened from the keyboard, the keyboard goes into it: to its close
+    // box, or to the card itself, from where Tab reaches the content. With
+    // the pointer the focus stays where it is.
+    const fromKeyboard = this.popupOpenedFromKeyboard;
+    this.popupOpenedFromKeyboard = null;
+    if (fromKeyboard !== null && fromKeyboard.row === row && fromKeyboard.col === column) {
+      const target = this.popupOverlay.querySelector<HTMLElement>('.popup-close') ?? this.popupOverlay;
+      target.focus({ preventScroll: true });
+    }
   }
 
   /**
@@ -4659,10 +4690,23 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * is the order the GWT client released them in then.
    */
   private hidePopup(releaseContentFirst: boolean): void {
+    const closing = this.openPopup;
+    // The keyboard was in the popup: it goes back to the button, or to the
+    // sheet when the button has gone, rather than to nowhere.
+    const hadFocus = this.popupHasFocus();
     this.openPopup = null;
     this.popupResizeObserver.unobserve(this.popupOverlay);
     if (releaseContentFirst) {
       this.popupContents.clear();
+    }
+    if (hadFocus && closing !== null) {
+      const stays = this.popupButtonStates.some((b) => b.row === closing.row && b.col === closing.col);
+      const button = stays
+        ? this.cellGrid.shadowRoot?.querySelector<HTMLElement>(
+            `.popup-button[data-col="${closing.col}"][data-row="${closing.row}"]`
+          )
+        : null;
+      (button ?? this.scrollContainer).focus({ preventScroll: true });
     }
     const overlay = this.popupOverlay;
     animateOut(overlay, () => {
@@ -4831,10 +4875,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (state === null || typeof state.col !== 'number') {
       return;
     }
+    // The button goes first, so that a popup closing with it does not give
+    // the keyboard back to it.
+    this.popupButtonStates = this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state));
     if (this.openPopup !== null && this.openPopup.row === state.row && this.openPopup.col === state.col) {
       this.dismissPopup(true);
     }
-    this.popupButtonStates = this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state));
     this.scheduleRender();
   }
 
@@ -5062,6 +5108,7 @@ function popupOverlayRules(): HTMLStyleElement {
       animation: overlay-animate-in 120ms;
     }
     .popup-overlay {
+      outline: none;
       padding: 4px;
       border: 0;
       border-radius: 4px;

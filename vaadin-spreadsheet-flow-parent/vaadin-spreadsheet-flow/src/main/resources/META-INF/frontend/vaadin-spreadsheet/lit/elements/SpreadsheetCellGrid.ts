@@ -3031,24 +3031,41 @@ function buildPopupButtons(state: CellGridRenderState, quadrant: QuadrantRenderO
     // The row's height rides along for a theme whose button is as tall as
     // its cell.
     const style = `left:${b.leftPx}px;top:${b.topPx}px;--_cell-height:${b.cellHeightPx ?? 20}px;`;
-    const onClick = (e: Event) => {
-      e.stopPropagation();
-      (e.currentTarget as Element).dispatchEvent(
+    const press = (button: Element, keyboard: boolean) => {
+      button.dispatchEvent(
         new CustomEvent('popup-button-click', {
-          detail: { col: b.col, row: b.row },
+          detail: { col: b.col, row: b.row, keyboard },
           bubbles: true,
           composed: true
         })
       );
     };
+    const onClick = (e: Event) => {
+      e.stopPropagation();
+      press(e.currentTarget as Element, false);
+    };
+    // A button to assistive technology and the keyboard, as the GWT
+    // client's was, and pressed with Enter or Space like any button. The
+    // keys are its own: the sheet would edit the cell with them.
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') {
+        return;
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      press(e.currentTarget as Element, true);
+    };
     return html`
       <div
         class=${className}
         part="popup-button"
+        role="button"
+        tabindex="0"
         style=${style}
         data-col=${b.col}
         data-row=${b.row}
         @click=${onClick}
+        @keydown=${onKeyDown}
       ></div>
     `;
   });

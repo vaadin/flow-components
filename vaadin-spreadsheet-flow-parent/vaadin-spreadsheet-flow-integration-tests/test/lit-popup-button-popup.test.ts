@@ -8,6 +8,7 @@
  */
 
 import { expect } from 'chai';
+import { sendKeys } from '@web/test-runner-commands';
 import {
   popupPlacement,
   Spreadsheet
@@ -809,5 +810,127 @@ describe("popupPlacement — the GWT client's rule", () => {
 
   it("hangs from the pane's top when it fits neither below nor above", () => {
     expect(popupPlacement({ top: 150, right: 300, bottom: 170 }, pane, 150, 300)).to.deep.equal({ left: 150, top: 50 });
+  });
+});
+
+/**
+ * The popup button is a button to assistive technology and the keyboard, as
+ * the GWT client's was: it takes the focus, and Enter or Space press it. A
+ * popup opened from the keyboard takes the keyboard, and gives it back to
+ * its button when it closes.
+ */
+describe('Spreadsheet — the popup button and the keyboard', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+  const originalVaadin = (window as any).Vaadin;
+
+  beforeEach(async () => {
+    ctx = attachSheet();
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.addPopupButton(buttonState(4, 1));
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+    ctx.sent.length = 0;
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+    (window as any).Vaadin = originalVaadin;
+  });
+
+  function button(): HTMLElement {
+    return ctx.sheet.getCellGrid().shadowRoot!.querySelector<HTMLElement>('.popup-button[data-col="4"][data-row="1"]')!;
+  }
+
+  function focused(): Element | null {
+    let el = document.activeElement;
+    while (el?.shadowRoot?.activeElement) {
+      el = el.shadowRoot.activeElement;
+    }
+    return el;
+  }
+
+  function clicks(): number {
+    return ctx.sent.filter((e) => e.type === 'popupButtonClick').length;
+  }
+
+  it('is a button that takes the focus', () => {
+    expect(button().getAttribute('role')).to.equal('button');
+    expect(button().tabIndex).to.equal(0);
+  });
+
+  it('is pressed with Enter', async () => {
+    button().focus();
+
+    await sendKeys({ press: 'Enter' });
+
+    expect(ctx.sent).to.deep.include({ type: 'popupButtonClick', data: { row: 1, column: 4 } });
+  });
+
+  it('is pressed with Space', async () => {
+    button().focus();
+
+    await sendKeys({ press: 'Space' });
+
+    expect(clicks()).to.equal(1);
+  });
+
+  it('keeps the keys from the sheet, which would edit the cell with them', async () => {
+    button().focus();
+
+    await sendKeys({ press: 'Enter' });
+    await sendKeys({ press: 'Space' });
+
+    expect(ctx.sheet.getCellGrid().renderState.editor ?? null).to.equal(null);
+  });
+
+  it('takes the keyboard into a popup it opened', async () => {
+    button().focus();
+    await sendKeys({ press: 'Enter' });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    expect(focused()).to.equal(ctx.sheet.getPopupOverlay().querySelector('.popup-close'));
+  });
+
+  it('takes the keyboard to the card when the popup has no header', async () => {
+    ctx.sheet.addPopupButton({ ...buttonState(4, 1), headerHidden: true });
+    button().focus();
+    await sendKeys({ press: 'Enter' });
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    expect(focused()).to.equal(ctx.sheet.getPopupOverlay());
+  });
+
+  it('leaves the focus where it is for a popup opened with the pointer', () => {
+    ctx.sheet.getScrollContainer().focus();
+    button().dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    expect(focused()).to.equal(ctx.sheet.getScrollContainer());
+  });
+
+  it('gives the keyboard back to its button when the popup closes', async () => {
+    button().focus();
+    await sendKeys({ press: 'Enter' });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    await sendKeys({ press: 'Escape' });
+
+    expect(ctx.sent).to.deep.include({ type: 'popupClose', data: { row: 1, column: 4 } });
+    expect(focused()).to.equal(button());
+  });
+
+  it('gives the keyboard to the sheet when its button went with the popup', async () => {
+    button().focus();
+    await sendKeys({ press: 'Enter' });
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    ctx.sheet.removePopupButton(buttonState(4, 1));
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getCellGrid().updateComplete;
+
+    expect(focused()).to.equal(ctx.sheet.getScrollContainer());
   });
 });
