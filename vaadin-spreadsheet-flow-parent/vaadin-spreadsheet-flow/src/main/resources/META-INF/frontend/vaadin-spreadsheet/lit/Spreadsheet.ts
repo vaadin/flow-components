@@ -86,6 +86,7 @@ import type { WalkDirection } from './algorithms/SelectionWalk.js';
 import { serializeToTsv } from './algorithms/Tsv.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { animateIn, animateOut, overlayAnimationStyles } from './dom/OverlayAnimation.js';
+import { isIOS, listenForLongPress } from './dom/LongPress.js';
 import {
   columnGroupingGutterPx,
   type PositionedGrouping,
@@ -173,6 +174,12 @@ const DEFAULT_HEADER_COLUMN_WIDTH = 50;
  * sends. The element creates one per element, as its {@code $connector}.
  */
 export class Spreadsheet implements SpreadsheetClientApi {
+  /**
+   * What the sheet asks about the platform when it is made. Tests, which do
+   * not run on iOS, stand in for it here.
+   */
+  static platform = { isIOS };
+
   // ====================================================================
   // Internal state
   // ====================================================================
@@ -653,6 +660,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * empty default state assigned in the constructor.
    */
   private readonly resizeObserver: ResizeObserver;
+  /** Stops the long press opening the menu, on iOS; see listenForLongPress. */
+  private readonly stopLongPress: () => void;
 
   constructor(host: HTMLElement, renderTarget?: HTMLElement | ShadowRoot) {
     this.host = host;
@@ -927,6 +936,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // arrow keys.
     this.scrollContainer.addEventListener('keydown', this.handleKeyDown as EventListener);
     this.scrollContainer.addEventListener('pointerdown', this.handleHostedEditorPointerDown);
+    // Safari on iOS opens no menu on a long press; the GWT client made one
+    // a right-click there, on the cells and the headers alike.
+    this.stopLongPress = Spreadsheet.platform.isIOS() ? listenForLongPress(this.scrollContainer) : () => {};
     this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
     this.connect();
   }
@@ -2704,6 +2716,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.scrollContainer.removeEventListener('focusout', this.handleSheetFocusChange);
     this.scrollContainer.removeEventListener('keydown', this.handleKeyDown as EventListener);
     this.scrollContainer.removeEventListener('pointerdown', this.handleHostedEditorPointerDown);
+    this.stopLongPress();
     this.scrollContainer.removeEventListener('copy', this.handleCopy as EventListener);
     this.scrollContainer.removeEventListener('cut', this.handleCut as EventListener);
     this.scrollContainer.removeEventListener('paste', this.handlePaste as EventListener);
