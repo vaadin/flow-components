@@ -105,7 +105,6 @@ export class ContextMenu {
     });
   };
 
-
   /**
    * Right-click on a column header: asks the server for the
    * column's actions with {@code columnHeaderContextMenuOpen}.
@@ -129,7 +128,6 @@ export class ContextMenu {
     });
   };
 
-
   /**
    * Right-click on a row header. Mirror of the column
    * variant — dispatches {@code rowHeaderContextMenuOpen}.
@@ -151,7 +149,6 @@ export class ContextMenu {
     });
   };
 
-
   /** The actions the server offers for the right-click: the menu opens with them. */
   showActions(actions: SpreadsheetActionDetails[]): void {
     this.element.renderState = {
@@ -171,7 +168,6 @@ export class ContextMenu {
     void this.element.updateComplete.then(() => this.icons.sync(iconIds));
   }
 
-
   /**
    * Note where a right-click landed. The menu is placed here once the server
    * answers with the actions it offers.
@@ -189,7 +185,6 @@ export class ContextMenu {
       y: (detail.clientY ?? 0) - origin.top - this.root.clientTop
     };
   }
-
 
   /**
    * Close the context menu and tell the server, unless it is already closed.
@@ -209,7 +204,6 @@ export class ContextMenu {
     this.host.send({ type: 'contextMenuClosed', data: {} });
   }
 
-
   /** An item was picked: report it against whatever the menu was opened on. */
   private readonly handleContextMenuAction = (e: CustomEvent<{ key: string; type: number }>): void => {
     const { key, type } = e.detail;
@@ -223,7 +217,6 @@ export class ContextMenu {
     this.host.returnFocusToSheet();
     this.host.send({ type: eventType, data: { actionKey: key } });
   };
-
 
   /** Left or Tab in the menu closes it, as in the GWT client. */
   private readonly handleContextMenuDismiss = (): void => {

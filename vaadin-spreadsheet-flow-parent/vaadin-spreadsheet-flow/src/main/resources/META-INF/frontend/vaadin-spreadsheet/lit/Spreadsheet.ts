@@ -72,11 +72,7 @@ import {
   type PaintOutcome
 } from './algorithms/SelectionPaint.js';
 import { expandToMergedRegions } from './algorithms/MergedSelection.js';
-import {
-  inSelectionWalkDirection,
-  isMultiCellRange,
-  walkInsideSelection
-} from './algorithms/SelectionWalk.js';
+import { inSelectionWalkDirection, isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
 import {
   canPoint,
   formulaReferences,
@@ -335,7 +331,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Display flags. */
   private displayGridlines = true;
 
-
   /** Where each sheet was last scrolled to; see {@link setVerticalScrollPositions}. */
   private verticalScrollPositions: NumberList = [];
   private horizontalScrollPositions: NumberList = [];
@@ -377,7 +372,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly menu: ContextMenu;
   /** The popup buttons and the popup one opens; see {@link Popup}. */
   private readonly popup: Popup;
-
 
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;

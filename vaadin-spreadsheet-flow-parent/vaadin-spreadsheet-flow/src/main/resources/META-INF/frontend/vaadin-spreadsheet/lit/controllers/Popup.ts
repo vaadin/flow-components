@@ -292,7 +292,9 @@ export class Popup {
    * Popup-button click handler. Translates the cell-grid's local event into
    * a `popupButtonClick` for the server, which opens the popup.
    */
-  private readonly handlePopupButtonClick = (e: CustomEvent<{ col: number; row: number; keyboard?: boolean }>): void => {
+  private readonly handlePopupButtonClick = (
+    e: CustomEvent<{ col: number; row: number; keyboard?: boolean }>
+  ): void => {
     const { col, row, keyboard } = e.detail;
     const closed = this.closedByItsButton;
     this.closedByItsButton = null;

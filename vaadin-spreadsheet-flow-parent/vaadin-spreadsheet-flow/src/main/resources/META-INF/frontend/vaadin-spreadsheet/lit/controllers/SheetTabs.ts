@@ -56,11 +56,7 @@ export class SheetTabs {
   /** The status label, or null while there is none. */
   private infoLabel: string | null = null;
 
-  constructor(
-    private readonly strip: SpreadsheetSheetTabs,
-    private readonly host: SheetTabsHost,
-    signal: AbortSignal
-  ) {
+  constructor(private readonly strip: SpreadsheetSheetTabs, private readonly host: SheetTabsHost, signal: AbortSignal) {
     listen(strip, 'sheet-tab-click', this.handleSheetTabClick, signal);
     listen(strip, 'sheet-tabs-scroll', this.handleSheetTabsScroll, signal);
     listen(strip, 'sheet-tab-add', this.handleSheetTabAdd, signal);
