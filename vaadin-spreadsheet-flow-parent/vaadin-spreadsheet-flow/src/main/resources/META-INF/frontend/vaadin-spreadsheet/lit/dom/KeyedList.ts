@@ -60,6 +60,12 @@ class KeyedListDirective extends Directive {
       this.keys = newKeys;
       return newValues;
     }
+    // The same items as before, in the same order - a drawing that did not
+    // scroll - is only the items' values to update.
+    if (sameKeys(this.keys, newKeys)) {
+      (oldParts as ChildPart[]).forEach((part, index) => setChildPartValue(part, newValues[index]));
+      return noChange;
+    }
     const partByKey = new Map<unknown, ChildPart>();
     this.keys.forEach((key, index) => partByKey.set(key, (oldParts as ChildPart[])[index]));
     const wanted = new Set(newKeys);
@@ -83,6 +89,11 @@ class KeyedListDirective extends Directive {
     this.keys = newKeys;
     return noChange;
   }
+}
+
+/** Whether two lists of keys hold the same keys in the same order. */
+function sameKeys(a: readonly unknown[], b: readonly unknown[]): boolean {
+  return a.length === b.length && a.every((key, index) => key === b[index]);
 }
 
 /**
