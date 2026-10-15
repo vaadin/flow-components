@@ -187,3 +187,82 @@ describe('Scrolled lists keep the elements still in view', () => {
     header.remove();
   });
 });
+
+/** Every comment node in an element's shadow tree: lit-html's markers among them. */
+function markers(el: HTMLElement): number {
+  let count = 0;
+  const walker = document.createTreeWalker(el.shadowRoot!, NodeFilter.SHOW_COMMENT);
+  while (walker.nextNode()) {
+    count++;
+  }
+  return count;
+}
+
+/**
+ * Since lit-html 3.3.1, `repeat` leaves a comment behind for each item it
+ * drops (https://github.com/lit/lit/issues/5298): every row, cell and header
+ * scrolled past stayed in the page as one, without bound.
+ */
+describe('Scrolled lists leave nothing behind', () => {
+  async function roundTrips<E extends HTMLElement & { renderState: unknown; updateComplete: Promise<boolean> }>(
+    el: E,
+    there: unknown,
+    back: unknown
+  ): Promise<void> {
+    for (let i = 0; i < 5; i++) {
+      await show(el, there);
+      await show(el, back);
+    }
+  }
+
+  it('as rows scroll past', async () => {
+    const grid = await attach<SpreadsheetCellGrid>('vaadin-spreadsheet-internal-cell-grid', gridAt(1, 1));
+    const before = markers(grid);
+
+    await roundTrips(grid, gridAt(1, 8), gridAt(1, 1));
+
+    expect(markers(grid)).to.equal(before);
+    grid.remove();
+  });
+
+  it('as columns scroll past', async () => {
+    const grid = await attach<SpreadsheetCellGrid>('vaadin-spreadsheet-internal-cell-grid', gridAt(1, 1));
+    const before = markers(grid);
+
+    await roundTrips(grid, gridAt(8, 1), gridAt(1, 1));
+
+    expect(markers(grid)).to.equal(before);
+    grid.remove();
+  });
+
+  it('as pictures come and go', async () => {
+    const both = gridAt(1, 1, { overlays: [picture('a', 1), picture('b', 3)] });
+    const grid = await attach<SpreadsheetCellGrid>('vaadin-spreadsheet-internal-cell-grid', both);
+    const before = markers(grid);
+
+    await roundTrips(grid, { ...both, overlays: [picture('b', 3)] }, both);
+
+    expect(markers(grid)).to.equal(before);
+    grid.remove();
+  });
+
+  it('as column letters scroll past', async () => {
+    const header = await attach<SpreadsheetColumnHeader>('vaadin-spreadsheet-internal-column-header', lettersAt(1));
+    const before = markers(header);
+
+    await roundTrips(header, lettersAt(8), lettersAt(1));
+
+    expect(markers(header)).to.equal(before);
+    header.remove();
+  });
+
+  it('as row numbers scroll past', async () => {
+    const header = await attach<SpreadsheetRowHeader>('vaadin-spreadsheet-internal-row-header', numbersAt(1));
+    const before = markers(header);
+
+    await roundTrips(header, numbersAt(8), numbersAt(1));
+
+    expect(markers(header)).to.equal(before);
+    header.remove();
+  });
+});

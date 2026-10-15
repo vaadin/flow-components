@@ -10,7 +10,7 @@
 
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
-import { repeat } from 'lit/directives/repeat.js';
+import { keyedList } from '../dom/KeyedList.js';
 import { isFormula } from '../algorithms/FormulaPointing.js';
 import { composing } from '../algorithms/KeyboardMoves.js';
 
@@ -2021,12 +2021,12 @@ function renderQuadrant(opts: QuadrantRenderOpts): unknown {
   // row that left the view one by one, which took most of a frame while
   // scrolling fast; matched by position instead, every cell was rewritten -
   // its class, place and text - and restyled on every step.
-  return repeat(
+  return keyedList(
     rows,
     (group) => group.row,
     (group) =>
       html`<div class="cell-row"
-        >${repeat(
+        >${keyedList(
           group.cells,
           (cell) => cell.key,
           (cell) => cell.template
@@ -3038,7 +3038,7 @@ function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRender
     (overlay) =>
       quadrantOf(overlay.col, overlay.row, state.horizontalSplitPosition, state.verticalSplitPosition) === quadrant
   );
-  return repeat(
+  return keyedList(
     overlays,
     (overlay) => overlay.id,
     (overlay) => {

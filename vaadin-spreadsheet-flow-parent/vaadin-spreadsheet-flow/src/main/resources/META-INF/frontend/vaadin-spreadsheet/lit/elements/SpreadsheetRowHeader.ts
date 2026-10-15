@@ -11,7 +11,7 @@
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { indexedTarget } from '../dom/IndexedTarget.js';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
-import { repeat } from 'lit/directives/repeat.js';
+import { keyedList } from '../dom/KeyedList.js';
 
 import {
   GROUPING_BUTTON_SIZE_PX,
@@ -694,11 +694,11 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
         </button>
       `);
     }
-    return html`${groupingEls}${repeat(
+    return html`${groupingEls}${keyedList(
       cells,
       (cell) => cell.key,
       (cell) => cell.template
-    )}${repeat(
+    )}${keyedList(
       handles,
       (handle) => handle.key,
       (handle) => handle.template

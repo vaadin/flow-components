@@ -11,7 +11,7 @@
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { indexedTarget } from '../dom/IndexedTarget.js';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
-import { repeat } from 'lit/directives/repeat.js';
+import { keyedList } from '../dom/KeyedList.js';
 
 import { columnIndexToLetters } from '../algorithms/CellRef.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
@@ -745,11 +745,11 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
         </button>
       `);
     }
-    return html`${groupingEls}${repeat(
+    return html`${groupingEls}${keyedList(
       cells,
       (cell) => cell.key,
       (cell) => cell.template
-    )}${repeat(
+    )}${keyedList(
       handles,
       (handle) => handle.key,
       (handle) => handle.template
