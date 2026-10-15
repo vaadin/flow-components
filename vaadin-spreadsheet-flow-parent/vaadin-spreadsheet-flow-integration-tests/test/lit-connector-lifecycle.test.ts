@@ -169,6 +169,49 @@ describe('<vaadin-spreadsheet> — joining and leaving the page', () => {
   });
 });
 
+describe('<vaadin-spreadsheet> — changing size', () => {
+  type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
+
+  function frames(count: number): Promise<void> {
+    return new Promise((resolve) => {
+      const step = (left: number): void => {
+        if (left === 0) {
+          resolve();
+          return;
+        }
+        requestAnimationFrame(() => step(left - 1));
+      };
+      step(count);
+    });
+  }
+
+  it('draws once when it changes size', async () => {
+    const el = document.createElement('vaadin-spreadsheet') as Element;
+    el.style.cssText = 'display:flex;flex-direction:column;width:400px;height:300px;';
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const connector = el.$connector;
+    connector.setRows(20);
+    connector.setCols(10);
+    connector.setColW(new Array(10).fill(50));
+    connector.setRowH(new Array(20).fill(15));
+    await frames(3);
+    let draws = 0;
+    const draw = connector.recomputeViewport.bind(connector);
+    connector.recomputeViewport = () => {
+      draws++;
+      draw();
+    };
+
+    el.style.width = '500px';
+    await frames(3);
+
+    expect(draws).to.equal(1);
+    el.remove();
+    connector.dispose();
+  });
+});
+
 describe('Spreadsheet — its events to the server', () => {
   it('keeps them to its own element, so a sheet inside another does not drive the outer one', () => {
     // Flow listens on the host. A bubbling event also reached the server

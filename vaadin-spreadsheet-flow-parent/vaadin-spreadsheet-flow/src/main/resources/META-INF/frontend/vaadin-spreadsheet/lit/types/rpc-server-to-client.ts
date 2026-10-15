@@ -38,8 +38,6 @@ export interface SpreadsheetClientApi {
   setWidth(width: string): void;
   /** Set the spreadsheet's height as a CSS dimension string. */
   setHeight(height: string): void;
-  /** Re-measure on container size change. */
-  resize(): void;
   /**
    * Inform the client that the given properties just changed in this
    * Lit-update cycle. Called after the wrapper has finished applying

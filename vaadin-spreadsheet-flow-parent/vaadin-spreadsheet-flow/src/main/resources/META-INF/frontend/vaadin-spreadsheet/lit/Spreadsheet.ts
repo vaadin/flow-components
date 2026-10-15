@@ -556,6 +556,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * with the new {@code clientWidth} / {@code clientHeight}. The
    * initial fire also serves as the first render, replacing the
    * empty default state assigned in the constructor.
+   *
+   * The only one needed: the scroll container changes size with the
+   * host, and also when the formula bar, the tabs or the headings come
+   * and go.
    */
   private readonly resizeObserver: ResizeObserver;
   /** Stops the long press opening the menu, on iOS; see listenForLongPress. */
@@ -3170,14 +3174,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   setHeight(height: string): void {
     this.root.style.height = height;
-  }
-
-  resize(): void {
-    // The wrapper's `spreadsheetResizeObserver` calls this
-    // on container size changes. We also have our own
-    // ResizeObserver on the scroll container —
-    // calling recomputeViewport here is idempotent + cheap.
-    this.recomputeViewport();
   }
 
   notifyStateChanges(changedPropertyNames: string[], firstUpdate: boolean): void {

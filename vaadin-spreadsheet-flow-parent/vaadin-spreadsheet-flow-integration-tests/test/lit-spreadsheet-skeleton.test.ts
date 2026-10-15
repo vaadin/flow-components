@@ -2190,20 +2190,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         host.remove();
     });
 
-    it('repaints on resize()', () => {
-        const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
-        sheet.setRows(10);
-        sheet.setCols(10);
-        sheet.setColW(new Array(10).fill(50));
-        sheet.setRowH(new Array(10).fill(15));
-
-        const before = sheet.getCellGrid().renderState;
-        sheet.resize();
-        expect(sheet.getCellGrid().renderState === before).to.be.false;
-
-        cleanup();
-    });
-
     it('draws the first property batch even when it is empty', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(10);

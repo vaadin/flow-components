@@ -11,10 +11,6 @@ import { LitElement } from 'lit';
 import { Spreadsheet } from './lit/Spreadsheet.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
-const spreadsheetResizeObserver = new ResizeObserver((entries) => {
-  entries.forEach((entry) => entry.target.$connector.resize());
-});
-
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -175,7 +171,6 @@ export class VaadinSpreadsheet extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    spreadsheetResizeObserver.observe(this);
     if (!this.$connector) {
       window.Vaadin.Flow.spreadsheetConnector.initLazy(this);
 
@@ -198,7 +193,6 @@ export class VaadinSpreadsheet extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    spreadsheetResizeObserver.unobserve(this);
     // The connector's page listeners hold it, and this element with it:
     // released, a sheet removed from the page can be collected.
     this.$connector?.disconnect();
