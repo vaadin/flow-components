@@ -257,6 +257,12 @@ export class SpreadsheetFormulaBar extends LitElement {
    */
   private editingFormula = false;
 
+  /**
+   * Whether the formula field has been typed into since it took the
+   * keyboard. Only the user sets it: a value the sheet puts there does not.
+   */
+  private formulaTyped = false;
+
   firstUpdated(): void {
     // When the user presses Enter inside the
     // address field, dispatch `sheet-address-changed` with
@@ -292,6 +298,7 @@ export class SpreadsheetFormulaBar extends LitElement {
       const target = e.target;
       if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
         this.editingFormula = true;
+        this.formulaTyped = false;
       }
     });
     // Clicking away keeps what was typed, as leaving a cell editor does.
@@ -310,6 +317,7 @@ export class SpreadsheetFormulaBar extends LitElement {
     root.addEventListener('input', (e: Event) => {
       const target = e.target;
       if (target instanceof HTMLInputElement && target.classList.contains('formula')) {
+        this.formulaTyped = true;
         this.dispatchEvent(
           new CustomEvent('formula-input', {
             detail: { value: target.value, caret: target.selectionStart ?? 0 },
@@ -450,12 +458,21 @@ export class SpreadsheetFormulaBar extends LitElement {
     }
     field.value = value;
     field.setSelectionRange(caret, caret);
+    this.formulaTyped = true;
     this.alignHighlights();
   }
 
   /** Whether the formula field has the keyboard. */
   formulaFieldHasFocus(): boolean {
     return this.shadowRoot?.activeElement?.classList.contains('formula') === true;
+  }
+
+  /**
+   * Whether the user is writing in the formula field: it has the keyboard,
+   * and has been typed into, or pointed from, since it took it.
+   */
+  formulaFieldEdited(): boolean {
+    return this.formulaTyped && this.formulaFieldHasFocus();
   }
 
   /**

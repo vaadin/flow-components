@@ -47,6 +47,21 @@ function attachSheet(): {
   };
 }
 
+/**
+ * The user clicks a cell: the client moves there at once, and the server's
+ * answer, updateFormulaBar, names it afterwards. The server only ever
+ * answers about the cell it has selected.
+ */
+function clickCell(sheet: Spreadsheet, col: number, row: number): void {
+  sheet.getCellGrid().dispatchEvent(
+    new CustomEvent('cell-click', {
+      detail: { col, row, shiftKey: false, ctrlKey: false, metaKey: false, altKey: false },
+      bubbles: true,
+      composed: true
+    })
+  );
+}
+
 describe('Spreadsheet server-driven selection', () => {
   let ctx: ReturnType<typeof attachSheet>;
 
@@ -325,18 +340,21 @@ describe('Formula bar — the address field', () => {
     // or a sheet-qualified reference. For an ordinary cell it sends null
     // and leaves the address to the client, which is every selection a
     // user makes by clicking.
+    clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar(null as any, 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B2');
   });
 
   it('prefers the name the server sent', () => {
+    clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar('Sales', 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('Sales');
   });
 
   it('works out a two-letter column', () => {
+    clickCell(ctx.sheet, 28, 5);
     ctx.sheet.updateFormulaBar(null as any, 28, 5);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('AB5');
@@ -348,6 +366,7 @@ describe('Formula bar — the address field', () => {
     ctx.sheet.updateBottomRightCellValues([
       { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any
     ]);
+    clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar(null as any, 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=SUM(B1:B9)');
@@ -360,6 +379,7 @@ describe('Formula bar — the address field', () => {
     ctx.sheet.updateBottomRightCellValues([
       { row: 4, col: 2, value: 'abc', originalValue: "'abc", cellStyle: 'cs0' } as any
     ]);
+    clickCell(ctx.sheet, 2, 4);
     ctx.sheet.updateFormulaBar(null as any, 2, 4);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal("'abc");
@@ -369,6 +389,7 @@ describe('Formula bar — the address field', () => {
     ctx.sheet.updateBottomRightCellValues([
       { row: 5, col: 2, value: 'plain', cellStyle: 'cs0' } as any
     ]);
+    clickCell(ctx.sheet, 2, 5);
     ctx.sheet.updateFormulaBar(null as any, 2, 5);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('plain');
@@ -378,7 +399,9 @@ describe('Formula bar — the address field', () => {
     ctx.sheet.updateBottomRightCellValues([
       { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any
     ]);
+    clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    clickCell(ctx.sheet, 9, 9);
     ctx.sheet.updateFormulaBar(null as any, 9, 9);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
@@ -391,6 +414,7 @@ describe('Formula bar — the address field', () => {
       { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any,
       { row: 5, col: 3, value: 'hello', cellStyle: 'cs0' } as any
     ]);
+    clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar(null as any, 2, 2);
     ctx.sheet.setSelectedCellAndRange('C5', 3, 5, 3, 3, 5, 5, true);
 
@@ -422,9 +446,221 @@ describe('Formula bar — the address field', () => {
         formulaValue: 'SUM(B1:B9)', originalValue: '42', cellStyle: 'cs0'
       } as any
     ]);
+    clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar(null as any, 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=SUM(B1:B9)');
+  });
+});
+
+describe('Formula bar — what the server says while the user moves on or writes', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: 'two', originalValue: 'two', cellStyle: 'cs0' } as any,
+      { row: 3, col: 2, value: 'three', originalValue: 'three', cellStyle: 'cs0' } as any,
+      { row: 5, col: 3, value: 'hello', originalValue: 'hello', cellStyle: 'cs0' } as any
+    ]);
+    clickCell(ctx.sheet, 2, 2);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  function bar() {
+    return ctx.sheet.getFormulaBar();
+  }
+
+  function key(target: EventTarget, k: string): void {
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, composed: true, cancelable: true }));
+  }
+
+  async function formulaField(): Promise<HTMLInputElement> {
+    await bar().updateComplete;
+    return bar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+  }
+
+  /** Types into the formula field as the user does: it has the keyboard, and an input event follows. */
+  async function typeInField(value: string): Promise<HTMLInputElement> {
+    const field = await formulaField();
+    field.focus();
+    field.value = value;
+    field.setSelectionRange(value.length, value.length);
+    field.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    return field;
+  }
+
+  /** Types into the cell editor, which the formula field mirrors. */
+  function typeInEditor(value: string): void {
+    key(ctx.sheet.getScrollContainer(), value[0]);
+    ctx.sheet.getCellGrid().dispatchEvent(
+      new CustomEvent('cell-editor-input', { detail: { value, caret: value.length }, bubbles: true, composed: true })
+    );
+  }
+
+  it('drops an answer about a cell the keyboard has already left, as the GWT client did', () => {
+    key(ctx.sheet.getScrollContainer(), 'ArrowDown');
+    // The answer about B2 the server sent before it heard of the move.
+    ctx.sheet.updateFormulaBar('Old', 2, 2);
+
+    expect(bar().renderState.address).to.equal('B3');
+
+    ctx.sheet.updateFormulaBar(null, 2, 3);
+
+    expect([bar().renderState.address, bar().renderState.formula]).to.eql(['B3', 'three']);
+  });
+
+  it('keeps what is typed into the cell editor when the server names the cell it is on', () => {
+    typeInEditor('xyz');
+
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+    ctx.sheet.showSelectedCell(null, 2, 2, 'two', false, false, false);
+
+    expect(bar().renderState.formula).to.equal('xyz');
+  });
+
+  it('keeps what is typed into the formula field when the server names the cell it is on', async () => {
+    const field = await typeInField('typed');
+    // The cell changes underneath, and the server names it again.
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: 'TWO', originalValue: 'TWO', cellStyle: 'cs0' } as any
+    ]);
+
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+    await bar().updateComplete;
+    const afterAnswer = field.value;
+    ctx.sheet.showSelectedCell(null, 2, 2, 'TWO!', false, false, false);
+    await bar().updateComplete;
+
+    expect([afterAnswer, field.value]).to.eql(['typed', 'typed']);
+  });
+
+  it('shows a cell changed underneath a formula field with nothing typed in it', async () => {
+    // Left as it was, the old value would go back into the cell when the
+    // field is left.
+    const field = await formulaField();
+    field.focus();
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: 'TWO', originalValue: 'TWO', cellStyle: 'cs0' } as any
+    ]);
+
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+    await bar().updateComplete;
+
+    expect(field.value).to.equal('TWO');
+  });
+
+  it('keeps the colours of a formula being written when the server names the cell it is on', () => {
+    typeInEditor('=A1+C3');
+    expect(bar().renderState.highlights?.references).to.have.length(2);
+
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+    ctx.sheet.showSelectedCell(null, 2, 2, 'two', false, false, false);
+    ctx.sheet.setSelectedCellAndRange(null as any, 2, 2, 2, 2, 2, 2, false);
+
+    expect(bar().renderState.highlights?.references).to.have.length(2);
+  });
+
+  it('keeps the colours of a formula the field shows when the server names its cell again', async () => {
+    ctx.sheet.updateBottomRightCellValues([
+      { row: 2, col: 2, value: '1', formulaValue: 'A1', cellStyle: 'cs0' } as any
+    ]);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+    (await formulaField()).focus();
+    expect(bar().renderState.highlights?.references).to.have.length(1);
+
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+
+    expect(bar().renderState.highlights?.references).to.have.length(1);
+  });
+
+  it('keeps the named ranges when the server names a cell', () => {
+    ctx.sheet.setNamedRanges(['john']);
+
+    ctx.sheet.updateFormulaBar(null, 2, 2);
+    ctx.sheet.showSelectedCell(null, 3, 5, 'hello', false, false, false);
+
+    expect(bar().renderState.namedRanges).to.eql(['john']);
+  });
+
+  it('shows the cell the server moves the selection to, over a formula typed in the field', async () => {
+    // The field commits into the selected cell; the text written for B2
+    // would otherwise go into C5.
+    await typeInField('=A1');
+    expect(bar().renderState.highlights).to.not.equal(null);
+
+    ctx.sheet.setSelectedCellAndRange('C5', 3, 5, 3, 3, 5, 5, false);
+    await bar().updateComplete;
+
+    expect((await formulaField()).value).to.equal('hello');
+    expect(bar().renderState.highlights ?? null).to.equal(null);
+  });
+
+  it('shows the cell showSelectedCell moves the selection to, over a formula typed in the field', async () => {
+    await typeInField('=A1');
+
+    ctx.sheet.showSelectedCell('C5', 3, 5, 'hello', false, false, false);
+    await bar().updateComplete;
+
+    expect((await formulaField()).value).to.equal('hello');
+    expect(bar().renderState.highlights ?? null).to.equal(null);
+  });
+});
+
+describe('Formula bar — whether the formula field is being written in', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('is written in only once typed into while it has the keyboard', async () => {
+    const bar = ctx.sheet.getFormulaBar();
+    await bar.updateComplete;
+    const field = bar.shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+
+    field.focus();
+    const focused = bar.formulaFieldEdited();
+    field.value = 'a';
+    field.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    const typed = bar.formulaFieldEdited();
+    field.blur();
+    const left = bar.formulaFieldEdited();
+    field.focus();
+    const again = bar.formulaFieldEdited();
+
+    expect([focused, typed, left, again]).to.eql([false, true, false, false]);
+  });
+
+  it('is written in once a reference is pointed into it', async () => {
+    const bar = ctx.sheet.getFormulaBar();
+    await bar.updateComplete;
+    const field = bar.shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+    field.focus();
+
+    bar.setFormulaFieldValue('=A1', 3);
+
+    expect(bar.formulaFieldEdited()).to.equal(true);
+  });
+
+  it('is not written in when the sheet puts a value there', async () => {
+    const bar = ctx.sheet.getFormulaBar();
+    await bar.updateComplete;
+    const field = bar.shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+    field.focus();
+
+    bar.renderState = { ...bar.renderState, formula: 'from the sheet' };
+    await bar.updateComplete;
+
+    expect(bar.formulaFieldEdited()).to.equal(false);
   });
 });
 
@@ -545,6 +781,7 @@ describe('Formula bar — dragging out a range', () => {
 
   it('says nothing on a hover with no button down', () => {
     // The grid emits cell-mouseover on every hover.
+    clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar(null as any, 2, 2);
     ctx.sheet.getCellGrid().dispatchEvent(
       new CustomEvent('cell-mouseover', {
@@ -568,6 +805,7 @@ describe('Formula bar — dragging out a range', () => {
     ctx.sheet.updateBottomRightCellValues([
       { row: 10, col: 8, value: 'x', originalValue: 'x', cellStyle: 'cs0' } as any
     ]);
+    clickCell(ctx.sheet, 8, 10);
     ctx.sheet.updateFormulaBar(null as any, 8, 10);
     drag([8, 10], [9, 10]);
 

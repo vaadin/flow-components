@@ -119,7 +119,7 @@ import {
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetHeaderCorner } from './elements/SpreadsheetHeaderCorner.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
-import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
+import { type FormulaBarRenderState, SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
 import { SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
 import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
@@ -305,7 +305,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   // pushes it when an application replaces the default, and until then a
   // null message means the cell explains nothing at all.
   private invalidFormulaErrorMessage: string | null = 'Invalid formula';
-  private namedRanges: string[] = [];
   private cellComments: Record<string, string> = {};
   private cellCommentAuthors: Record<string, string> = {};
   private visibleCellComments: string[] = [];
@@ -1161,10 +1160,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * answers the finished selection.
    */
   private showRangeSizeInAddressField(): void {
-    this.formulaBar.renderState = {
-      ...this.formulaBar.renderState,
-      address: selectionSizeLabel(this.selection.activeRange)
-    };
+    this.changeFormulaBar({ address: selectionSizeLabel(this.selection.activeRange) });
   }
 
   /**
@@ -1568,13 +1564,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.formulaDraft = draft;
     const refs = draft === null ? [] : formulaReferences(draft.text, this.activeSheetName());
-    this.formulaBar.renderState = {
-      ...this.formulaBar.renderState,
+    this.changeFormulaBar({
       highlights:
         draft === null
           ? null
           : { text: draft.text, references: refs.map((ref) => ({ start: ref.start, end: ref.end, color: ref.color })) }
-    };
+    });
     this.recomputeViewport();
   }
 
@@ -1597,9 +1592,35 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return refs.map((ref) => ({ range: ref.range, color: ref.color, atCaret: ref === atCaret }));
   }
 
+  /**
+   * Changes what the formula bar shows. Every change goes through here, so
+   * what one does not name stays as it is - the colours of a formula being
+   * written among it.
+   */
+  private changeFormulaBar(change: Partial<FormulaBarRenderState>): void {
+    this.formulaBar.renderState = { ...this.formulaBar.renderState, ...change };
+  }
+
   /** What the formula field shows - the cell editor's value, while it is open. */
   private showInFormulaField(value: string): void {
-    this.formulaBar.renderState = { ...this.formulaBar.renderState, formula: value };
+    this.changeFormulaBar({ formula: value });
+  }
+
+  /**
+   * Shows the value of a cell the server named in the formula field, unless
+   * the user is writing one: in the cell editor, which the field mirrors,
+   * or in the field itself, for the cell they are still on. A formula being
+   * written in the field whose text this replaces is over, and so are its
+   * colours.
+   */
+  private showServerValueInFormulaField(value: string, sameCell: boolean): void {
+    if (this.editor !== null || (sameCell && this.formulaBar.formulaFieldEdited())) {
+      return;
+    }
+    if (this.formulaDraft !== null && this.formulaDraft.text !== value) {
+      this.endFormulaPointing();
+    }
+    this.showInFormulaField(value);
   }
 
   /**
@@ -1993,10 +2014,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private moveSelectionTo(next: SingleCellSelection): void {
     this.extendingSelection = false;
     this.applySingleSelection(next);
-    this.formulaBar.renderState = {
-      ...this.formulaBar.renderState,
-      address: cellCoordToAddress(next.activeCell)
-    };
+    this.changeFormulaBar({ address: cellCoordToAddress(next.activeCell) });
     this.scrollCellIntoView(next.activeCell);
   }
 
@@ -3006,10 +3024,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.extendingSelection = false;
-    this.formulaBar.renderState = {
-      ...this.formulaBar.renderState,
-      address: cellCoordToAddress(this.selection.activeCell)
-    };
+    this.changeFormulaBar({ address: cellCoordToAddress(this.selection.activeCell) });
   };
 
   /**
@@ -3074,10 +3089,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly handleFormulaCancel = (): void => {
     this.endFormulaPointing();
     const { col, row } = this.selection.activeCell;
-    this.formulaBar.renderState = {
-      ...this.formulaBar.renderState,
-      formula: this.formulaFieldValueFor(col, row)
-    };
+    this.showInFormulaField(this.formulaFieldValueFor(col, row));
     if (this.editor !== null) {
       this.editor = null;
       this.recomputeViewport();
@@ -3243,21 +3255,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
   }
   updateFormulaBar(possibleName: string | null, col: number, row: number): void {
+    // The answer about a cell the user has already left - the keyboard
+    // moves on without waiting for the server - is out of date. The GWT
+    // client dropped it too.
+    const active = this.selection.activeCell;
+    if (active.col !== col || active.row !== row) {
+      return;
+    }
     // The server only sends a name when the selection has one — a named
     // range, or a sheet-qualified reference. For an ordinary cell it
     // sends null and leaves the address to the client, which is the
     // common case: without this the address field sits empty for every
     // selection the user makes.
-    this.formulaBar.renderState = {
+    this.changeFormulaBar({
       // While the user is still growing a selection the address field
       // counts the block out, and this is the server naming the anchor
       // of the range they are in the middle of making.
       address: this.extendingSelection
         ? selectionSizeLabel(this.selection.activeRange)
-        : possibleName ?? cellCoordToAddress({ col, row }),
-      formula: this.formulaFieldValueFor(col, row),
-      namedRanges: this.namedRanges
-    };
+        : possibleName ?? cellCoordToAddress({ col, row })
+    });
+    this.showServerValueInFormulaField(this.formulaFieldValueFor(col, row), true);
   }
 
   /**
@@ -3329,12 +3347,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // counting the block out, and this is the server answering the
     // anchor of the range they are in the middle of making.
     const sizeLabel = selectionSizeLabel(this.selection.activeRange);
+    const before = this.selection.activeCell;
     this.selection = selectSingleCell(col, row);
-    this.formulaBar.renderState = {
-      address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }),
-      formula: formula && cellValue !== '' ? `=${cellValue}` : cellValue,
-      namedRanges: this.namedRanges
-    };
+    this.changeFormulaBar({ address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }) });
+    this.showServerValueInFormulaField(
+      formula && cellValue !== '' ? `=${cellValue}` : cellValue,
+      before.col === col && before.row === row
+    );
     // The server moves the selection for the user: a hyperlink followed,
     // an address typed into the address field, a named range picked, a
     // sheet operation landing somewhere else. Somewhere the user cannot
@@ -3390,7 +3409,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeRange: normalizedRange(c1, r1, c2, r2),
       auxRanges: this.selection.auxRanges
     };
-    this.formulaBar.renderState = {
+    this.changeFormulaBar({
       // As in updateFormulaBar: the server names a selection only when
       // it has a name, and leaves an ordinary one to the client. While
       // the user is still growing the selection, though, the count is
@@ -3398,18 +3417,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // range they are in the middle of making.
       address: this.extendingSelection
         ? selectionSizeLabel(this.selection.activeRange)
-        : name ?? cellCoordToAddress({ col, row }),
-      // A new active cell shows in the field, as the GWT client's
-      // updateSelectedCellValues showed it - unless an edit is open, whose
-      // text stays where the user is typing it. The same cell keeps what
-      // the field has: the server may have just sent its value along with
-      // showSelectedCell, for a cell this client holds no data for.
-      formula:
-        moved && this.editor === null && !this.formulaBar.formulaFieldHasFocus()
-          ? this.formulaFieldValueFor(col, row)
-          : this.formulaBar.renderState.formula,
-      namedRanges: this.namedRanges
-    };
+        : name ?? cellCoordToAddress({ col, row })
+    });
+    // A new active cell shows in the field, as the GWT client's
+    // updateSelectedCellValues showed it. The same cell keeps what the
+    // field has: the server may have just sent its value along with
+    // showSelectedCell, for a cell this client holds no data for.
+    if (moved) {
+      this.showServerValueInFormulaField(this.formulaFieldValueFor(col, row), false);
+    }
     if (scroll) {
       this.scrollCellIntoView({ col, row });
     }
@@ -3711,13 +3727,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.invalidFormulaErrorMessage = message;
   }
   setNamedRanges(names: Json<string[]>): void {
-    this.namedRanges = coerceArray(names);
-    // Refresh the bar directly: the named-range list arrives on the property
-    // lane, which repaints the grid but does not rebuild the formula bar.
-    this.formulaBar.renderState = {
-      ...this.formulaBar.renderState,
-      namedRanges: this.namedRanges
-    };
+    this.changeFormulaBar({ namedRanges: coerceArray(names) });
   }
   setResources(host: HTMLElement, keys: string[] | string): void {
     // The server sends the resource KEYS here and puts each URL on the host

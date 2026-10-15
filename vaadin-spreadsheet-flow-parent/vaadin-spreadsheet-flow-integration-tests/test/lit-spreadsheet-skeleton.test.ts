@@ -3218,6 +3218,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
 
     it('updateFormulaBar sets the address-field value', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setSelectedCellAndRange(null, 2, 7, 2, 2, 7, 7, false);
         sheet.updateFormulaBar('B7', 2, 7);
         await sheet.getFormulaBar().updateComplete;
         const addr = sheet.getFormulaBar().shadowRoot!.querySelector(

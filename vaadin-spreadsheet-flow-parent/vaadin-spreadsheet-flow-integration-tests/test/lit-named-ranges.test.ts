@@ -162,6 +162,7 @@ describe('Spreadsheet — named-range picker', () => {
     await ctx.sheet.getFormulaBar().updateComplete;
     expect(namedRangeBox(ctx.sheet)!.value).to.equal('john');
 
+    ctx.sheet.setSelectedCellAndRange(null, 8, 12, 8, 8, 12, 12, false);
     ctx.sheet.updateFormulaBar(null, 8, 12);
     await ctx.sheet.getFormulaBar().updateComplete;
     expect(namedRangeBox(ctx.sheet)!.value).to.equal('');
@@ -176,6 +177,7 @@ describe('Spreadsheet — named-range picker', () => {
     box.value = 'john';
     box.dispatchEvent(new Event('change'));
 
+    ctx.sheet.setSelectedCellAndRange(null, 8, 12, 8, 8, 12, 12, false);
     ctx.sheet.updateFormulaBar(null, 8, 12);
     await ctx.sheet.getFormulaBar().updateComplete;
 
