@@ -104,6 +104,7 @@ import { animateIn, animateOut } from './dom/OverlayAnimation.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
 import { SheetTabs } from './controllers/SheetTabs.js';
+import { ContextMenu } from './controllers/ContextMenu.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
 import { linkTooltipPosition, popupPlacement } from './algorithms/Placement.js';
@@ -126,7 +127,7 @@ import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetHeaderCorner } from './elements/SpreadsheetHeaderCorner.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
-import { emptyContextMenuRenderState, SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
+import { SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
 import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
@@ -367,7 +368,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private displayGridlines = true;
   private lockFormatColumns = false;
   private lockFormatRows = false;
-  private hasActions = false;
 
 
   /** Where each sheet was last scrolled to; see {@link setVerticalScrollPositions}. */
@@ -407,13 +407,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** The context menu shown on right-click. Empty until the server answers. */
   private readonly contextMenu: SpreadsheetContextMenu;
+  /** The context menu's state and what it does; see {@link ContextMenu}. */
+  private readonly menu: ContextMenu;
 
-  /**
-   * Viewport position of the most recent right-click, so `showActions` can
-   * place the menu where the user clicked. The contextmenu event and the
-   * server's answer arrive in separate turns.
-   */
-  private lastContextMenuPosition: { x: number; y: number } = { x: 0, y: 0 };
 
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
@@ -850,8 +846,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // its selection + re-renders. Bubble + composed = true so the
     // event crosses the cell-grid's shadow DOM boundary.
     this.on(this.cellGrid, 'cell-click', this.handleCellClick);
-    this.on(this.contextMenu, 'context-menu-action', this.handleContextMenuAction);
-    this.on(this.contextMenu, 'context-menu-dismiss', this.handleContextMenuDismiss);
     // Cell editor lifecycle events. The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
@@ -881,16 +875,31 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // after first updating the selection (Excel: right-click
     // on a cell outside the current selection selects that
     // cell, then opens the menu).
-    this.on(this.cellGrid, 'cell-contextmenu', this.handleCellContextMenu);
+    this.menu = new ContextMenu(
+      this.contextMenu,
+      this.actionIcons,
+      this.root,
+      { cells: this.cellGrid, columnHeader: this.columnHeader, rowHeader: this.rowHeader },
+      {
+        selectForMenu: (col, row) => {
+          if (!isCellInSelection(col, row, this.selection)) {
+            this.selectCellOrMerge(col, row);
+            this.recomputeViewport();
+            this.dispatchSelectionEvent();
+          }
+        },
+        returnFocusToSheet: () => this.returnFocusToSheet(),
+        send: (event) => this.sendToServer(event)
+      },
+      this.ownListeners.signal
+    );
     this.on(this.cellGrid, 'cell-comment-commit', this.handleCellCommentCommit);
-    this.on(this.columnHeader, 'column-header-contextmenu', this.handleColumnHeaderContextMenu);
     // Grouping outline. The column header emits
     // `column-grouping-toggle` when the user clicks a +/-
     // button in the grouping gutter; the connector forwards
     // it as `groupingCollapsed` to the server.
     this.on(this.columnHeader, 'column-grouping-toggle', this.handleColumnGroupingToggle);
     this.on(this.rowHeader, 'row-grouping-toggle', this.handleRowGroupingToggle);
-    this.on(this.rowHeader, 'row-header-contextmenu', this.handleRowHeaderContextMenu);
     // Header-drag resize. The header elements
     // emit `column-resize-start` / `row-resize-start` from
     // their right-edge / bottom-edge mousedown handles; the
@@ -1205,81 +1214,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.sendToServer({
       type: 'popupButtonClick',
       data: { row, column: col }
-    });
-  };
-
-  /**
-   * Right-click on a cell. Excel behavior: if the
-   * clicked cell is outside the current selection, move selection
-   * to it first (firing a selection event), then dispatch
-   * {@code contextMenuOpenOnSelection}. If inside the existing
-   * selection, leave the selection alone and dispatch the event
-   * with the clicked cell's coordinates.
-   */
-  private readonly handleCellContextMenu = (
-    e: CustomEvent<{ col: number; row: number; clientX?: number; clientY?: number }>
-  ): void => {
-    const { col, row } = e.detail;
-    // Without actions there is no menu, and the GWT client left the
-    // selection alone.
-    if (!this.hasActions) {
-      return;
-    }
-    // Taken for the sheet's own menu: the browser's stays closed.
-    e.preventDefault();
-    this.rememberContextMenuPosition(e.detail);
-    if (!isCellInSelection(col, row, this.selection)) {
-      this.selectCellOrMerge(col, row);
-      this.recomputeViewport();
-      this.dispatchSelectionEvent();
-    }
-    this.sendToServer({
-      type: 'contextMenuOpenOnSelection',
-      data: { row, column: col }
-    });
-  };
-
-  /**
-   * Right-click on a column header: asks the server for the
-   * column's actions with {@code columnHeaderContextMenuOpen}.
-   */
-  private readonly handleColumnHeaderContextMenu = (
-    e: CustomEvent<{ col: number; clientX?: number; clientY?: number }>
-  ): void => {
-    const { col } = e.detail;
-    // The menu acts on the column whatever is selected, so the selection
-    // stays as it is, as in the GWT client - and there is no menu without
-    // actions.
-    if (!this.hasActions) {
-      return;
-    }
-    // Taken for the sheet's own menu: the browser's stays closed.
-    e.preventDefault();
-    this.rememberContextMenuPosition(e.detail);
-    this.sendToServer({
-      type: 'columnHeaderContextMenuOpen',
-      data: { columnIndex: col }
-    });
-  };
-
-  /**
-   * Right-click on a row header. Mirror of the column
-   * variant — dispatches {@code rowHeaderContextMenuOpen}.
-   */
-  private readonly handleRowHeaderContextMenu = (
-    e: CustomEvent<{ row: number; clientX?: number; clientY?: number }>
-  ): void => {
-    const { row } = e.detail;
-    // As for a column: the selection stays, and no actions means no menu.
-    if (!this.hasActions) {
-      return;
-    }
-    // Taken for the sheet's own menu: the browser's stays closed.
-    e.preventDefault();
-    this.rememberContextMenuPosition(e.detail);
-    this.sendToServer({
-      type: 'rowHeaderContextMenuOpen',
-      data: { rowIndex: row }
     });
   };
 
@@ -3686,80 +3620,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.scheduleRender();
   }
-  showActions(actionDetails: SpreadsheetActionDetails[]): void {
-    const actions = coerceArray<SpreadsheetActionDetails>(actionDetails);
-    this.contextMenu.renderState = {
-      open: true,
-      x: this.lastContextMenuPosition.x,
-      y: this.lastContextMenuPosition.y,
-      // Arrives JSON-serialized through the Flow lane, like the
-      // collection-shaped properties.
-      actions
-    };
-    // An action can carry an icon component; 0 means it has none. The
-    // slots that show them are in the menu's template, so place the
-    // elements only once that has rendered.
-    const iconIds = actions
-      .filter((action) => Number(action.iconNodeId) > 0)
-      .map((action) => String(action.iconNodeId));
-    void this.contextMenu.updateComplete.then(() => this.actionIcons.sync(iconIds));
-  }
-
-  /**
-   * Note where a right-click landed. The menu is placed here once the server
-   * answers with the actions it offers.
-   */
-  private rememberContextMenuPosition(detail: { clientX?: number; clientY?: number }): void {
-    // Kept relative to the sheet's own box, because that is the space
-    // the menu is placed in. Viewport coordinates stop meaning the
-    // viewport as soon as an ancestor has a transform - a dialog
-    // overlay has one while it animates - and the menu then opens
-    // somewhere other than where the user clicked.
-    // From inside the root's border, where the menu's space starts.
-    const origin = this.root.getBoundingClientRect();
-    this.lastContextMenuPosition = {
-      x: (detail.clientX ?? 0) - origin.left - this.root.clientLeft,
-      y: (detail.clientY ?? 0) - origin.top - this.root.clientTop
-    };
-  }
-
-  /**
-   * Close the context menu and tell the server, unless it is already closed.
-   */
-  private closeContextMenu(): void {
-    if (!this.contextMenu.renderState.open) {
-      return;
-    }
-    // The menu had the keyboard; the GWT client gave it back to where it
-    // had been. A click elsewhere still moves it on, once this is done.
-    const menuHadFocus = this.contextMenu.shadowRoot?.activeElement != null;
-    this.contextMenu.renderState = emptyContextMenuRenderState();
-    this.actionIcons.clear();
-    if (menuHadFocus) {
-      this.returnFocusToSheet();
-    }
-    this.sendToServer({ type: 'contextMenuClosed', data: {} });
-  }
-
-  /** An item was picked: report it against whatever the menu was opened on. */
-  private readonly handleContextMenuAction = (e: CustomEvent<{ key: string; type: number }>): void => {
-    const { key, type } = e.detail;
-    // 0 = cell, 1 = row, 2 = column, matching SpreadsheetActionDetails.
-    const eventType =
-      type === 1 ? 'actionOnRowHeader' : type === 2 ? 'actionOnColumnHeader' : 'actionOnCurrentSelection';
-    this.contextMenu.renderState = emptyContextMenuRenderState();
-    this.actionIcons.clear();
-    // The menu item had the focus; picking it is done, so the keyboard
-    // goes back to the sheet.
-    this.returnFocusToSheet();
-    this.sendToServer({ type: eventType, data: { actionKey: key } });
-  };
-
-  /** Left or Tab in the menu closes it, as in the GWT client. */
-  private readonly handleContextMenuDismiss = (): void => {
-    this.closeContextMenu();
-  };
-
   /** Any click outside the menu dismisses it, as a native menu would. */
   private readonly handleDocumentPointerDown = (e: Event): void => {
     const path = e.composedPath();
@@ -3776,13 +3636,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (open !== null && !insidePopup) {
       this.dismissPopup();
     }
-    if (!this.contextMenu.renderState.open) {
-      return;
-    }
-    if (path.includes(this.contextMenu)) {
-      return;
-    }
-    this.closeContextMenu();
+    this.menu.closeUnlessPressedIn(path);
   };
 
   /** Whether the focus is in the popup: its card, or the content it shows. */
@@ -3820,8 +3674,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.dismissPopup();
-    this.closeContextMenu();
+    this.menu.close();
   };
+  showActions(actionDetails: Json<SpreadsheetActionDetails[]>): void {
+    this.menu.showActions(coerceArray<SpreadsheetActionDetails>(actionDetails));
+  }
   setSelectedCellAndRange(
     name: string,
     col: number,
@@ -4256,7 +4113,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.lockFormatRows = locked;
   }
   setHasActions(hasActions: boolean): void {
-    this.hasActions = hasActions;
+    this.menu.setHasActions(hasActions);
   }
   /**
    * The server flips this on loading another workbook. The change alone is

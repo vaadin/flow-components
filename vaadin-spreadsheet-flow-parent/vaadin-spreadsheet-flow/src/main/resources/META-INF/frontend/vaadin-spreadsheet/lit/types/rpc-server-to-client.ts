@@ -67,7 +67,7 @@ export interface SpreadsheetClientApi {
     initialSelection: boolean,
     keepView?: boolean
   ): void;
-  showActions(actionDetails: SpreadsheetActionDetails[]): void;
+  showActions(actionDetails: Json<SpreadsheetActionDetails[]>): void;
   setSelectedCellAndRange(
     name: string,
     col: number,
