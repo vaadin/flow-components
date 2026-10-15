@@ -121,6 +121,69 @@ describe('Spreadsheet — cell-style width ratios', () => {
     expect(second[0]).to.be.greaterThan(first[0]);
   });
 
+  it('reports the ratios before the viewport, so the server builds the first cells once', async () => {
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    await settle(ctx.sheet);
+
+    // The server builds the cells it sends against the ratios, and builds
+    // the ones in view again when new ratios come: after the viewport,
+    // they doubled the first screen of every workbook.
+    const types = ctx.sent.map((e) => e.type);
+    expect(types.indexOf('setCellStyleWidthRatios'), 'no ratios').to.be.at.least(0);
+    expect(types.indexOf('setCellStyleWidthRatios')).to.be.lessThan(types.indexOf('onConnectorInit'));
+    expect(types.indexOf('setCellStyleWidthRatios')).to.be.lessThan(types.indexOf('onSheetScroll'));
+  });
+
+  it('reports new ratios before the next viewport of a sheet already shown', async () => {
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    await settle(ctx.sheet);
+    ctx.sheet.setReload(true);
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:12px;', 1: 'font-size:20px;' });
+    ctx.sent.length = 0;
+
+    await settle(ctx.sheet);
+
+    const types = ctx.sent.map((e) => e.type);
+    expect(types.indexOf('setCellStyleWidthRatios'), 'no ratios').to.be.at.least(0);
+    expect(types.indexOf('setCellStyleWidthRatios')).to.be.lessThan(types.indexOf('onSheetScroll'));
+  });
+
+  it('reports the ratios and the viewport in the same task, so one request carries both', async () => {
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    ctx.sheet.recomputeViewport();
+    // Microtasks only: Flow sends what was queued once the task is over.
+    for (let i = 0; i < 10; i++) {
+      await Promise.resolve();
+    }
+
+    const types = ctx.sent.map((e) => e.type);
+    expect(types).to.include('setCellStyleWidthRatios');
+    expect(types).to.include('onSheetScroll');
+  });
+
+  it('measures once for repaints that come before the grid has painted', async () => {
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    ctx.sheet.recomputeViewport();
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:12px;' });
+    await settle(ctx.sheet);
+
+    expect(ctx.sent.filter((e) => e.type === 'setCellStyleWidthRatios')).to.have.length(1);
+  });
+
+  it('tells the server where the sheet is at once while no measurement waits', async () => {
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    await settle(ctx.sheet);
+    ctx.sent.length = 0;
+
+    // Further down than the rows loaded so far, so there is a load to ask for.
+    ctx.sheet.setRows(500);
+    ctx.sheet.setRowH(new Array(500).fill(15));
+    ctx.sheet.getScrollContainer().scrollTop = 4000;
+    ctx.sheet.recomputeViewport();
+
+    expect(ctx.sent.map((e) => e.type)).to.include('onSheetScroll');
+  });
+
   it('does not re-measure on a render that changed no style', async () => {
     ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
     await settle(ctx.sheet);

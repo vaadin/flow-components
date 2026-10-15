@@ -463,6 +463,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Whether the cell styles have changed since the last width measurement. */
   private styleWidthRatiosStale = false;
+
+  /** The width measurement waiting for the grid to paint, which the viewport goes after. */
+  private pendingRatioReport: Promise<void> | null = null;
   /** The style indexes last reported to the server with a width ratio. */
   private measuredStyleIndexes: ReadonlySet<number> = new Set();
 
@@ -2332,13 +2335,25 @@ export class Spreadsheet implements SpreadsheetClientApi {
       viewportWidth: this.scrollContainer.clientWidth,
       viewportHeight: this.scrollContainer.clientHeight
     });
-    this.announceViewport();
-    if (this.styleWidthRatiosStale) {
-      this.styleWidthRatiosStale = false;
+    if (this.styleWidthRatiosStale && this.pendingRatioReport === null) {
       // Measured once the grid has painted the rules that were just
-      // handed to it, not against the ones it is replacing.
-      void this.cellGrid.updateComplete.then(() => this.reportCellStyleWidthRatios());
+      // handed to it, not against the ones it is replacing - and so
+      // against whatever else changed while it waited.
+      this.pendingRatioReport = this.cellGrid.updateComplete.then(() => {
+        this.pendingRatioReport = null;
+        this.styleWidthRatiosStale = false;
+        this.reportCellStyleWidthRatios();
+      });
     }
+    // The viewport goes after the ratios, as in earlier versions: the
+    // server builds the cells it sends against the ratios, and builds the
+    // ones in view again when new ratios arrive - before, the first screen
+    // of every workbook went out twice. Both still go in one request.
+    if (this.pendingRatioReport !== null) {
+      void this.pendingRatioReport.then(() => this.announceViewport());
+      return;
+    }
+    this.announceViewport();
   }
 
   /**
