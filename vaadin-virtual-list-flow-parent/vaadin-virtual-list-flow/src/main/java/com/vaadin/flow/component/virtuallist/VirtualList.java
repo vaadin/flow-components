@@ -147,11 +147,9 @@ public class VirtualList<T> extends Component
         // Using Page.executeJs to ensure this runs before any other
         // executeJs calls scheduled on the component that require the
         // connector.
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached VirtualList"))
-                .getPage().executeJs(
-                        "if ($0) window.Vaadin.Flow.virtualListConnector.initLazy($0)",
-                        getElement());
+        getUIOrThrow().getPage().executeJs(
+                "if ($0) window.Vaadin.Flow.virtualListConnector.initLazy($0)",
+                getElement());
     }
 
     private void generateItemAccessibleName(T item, ObjectNode jsonObject) {

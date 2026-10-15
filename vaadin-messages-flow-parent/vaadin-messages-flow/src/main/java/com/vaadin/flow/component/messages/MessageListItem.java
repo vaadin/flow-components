@@ -677,7 +677,7 @@ public class MessageListItem implements Serializable {
     private VaadinSession getSession() {
         NodeOwner owner = getHost().getElement().getNode().getOwner();
         assert owner instanceof StateTree;
-        return ((StateTree) owner).getUI().getSession();
+        return ((StateTree) owner).getUI().getSessionOrThrow();
     }
 
     private void propsChanged() {
