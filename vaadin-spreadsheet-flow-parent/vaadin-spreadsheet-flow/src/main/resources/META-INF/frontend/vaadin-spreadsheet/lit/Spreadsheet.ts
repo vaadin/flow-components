@@ -251,6 +251,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private editor: CellEditorState | null = null;
 
   /**
+   * Whether the editor opened on a character typed into a percentage cell,
+   * with the % it was given still to come off once the entry turns into a
+   * formula. See {@link pointAt}.
+   */
+  private autoPercentEntry = false;
+
+  /**
    * Mouse-drag state. True between mousedown on a
    * cell and the subsequent mouseup (anywhere). While true,
    * {@code cell-mouseover} events extend the active range from
@@ -1513,6 +1520,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const initialValue = this.formulaFieldValueFor(col, row);
     // Opening the existing value to change it: arrows move the caret.
     this.editor = { col, row, initialValue, mode: 'edit' };
+    this.autoPercentEntry = false;
     this.showInFormulaField(initialValue);
     this.recomputeViewport();
   };
@@ -1799,6 +1807,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
     span: { start: number; end: number } | null,
     source: 'cell' | 'field'
   ): void {
+    if (this.autoPercentEntry && value.endsWith('%')) {
+      // The % a sign typed into a percentage cell was given belongs to a
+      // number. Pointing makes the entry a formula, where "+A1%" would take
+      // a hundredth of A1: a GWT bug.
+      value = value.slice(0, -1);
+      caret = Math.min(caret, value.length);
+    }
+    this.autoPercentEntry = false;
     const placed = placeReference(value, caret, span, referenceText(anchor, end));
     this.pointer = { anchor, end, span: { start: placed.start, end: placed.end } };
     this.lastPointed = end;
@@ -2141,6 +2157,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // F2 opens the existing value, so arrows move the caret.
         mode: 'edit'
       };
+      this.autoPercentEntry = false;
       this.showInFormulaField(this.editor.initialValue);
       this.recomputeViewport();
       return;
@@ -2171,6 +2188,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         initialValue: key === ' ' ? '' : initialEditValue(key, this.cellDataByKey.get(toKey(col, row))),
         mode: 'enter'
       };
+      this.autoPercentEntry = key !== ' ' && this.editor.initialValue !== key;
       this.showInFormulaField(this.editor.initialValue);
       this.recomputeViewport();
       return;

@@ -80,6 +80,30 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     return e;
   }
 
+  it('drops the % a percentage cell gave a typed + once a cell is pointed at', async () => {
+    // A + typed into a percentage cell opens on "+%", ready for a number.
+    // Pointing made it "+C4%", which takes a hundredth of C4: a GWT bug.
+    sheet.updateBottomRightCellValues([
+      { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
+    ] as never);
+    const input = await startTyping('+');
+    expect(input.value).to.equal('+%');
+
+    press(input, 'ArrowDown');
+
+    expect(input.value).to.equal('+C4');
+  });
+
+  it('keeps the % for a number typed into a percentage cell', async () => {
+    sheet.updateBottomRightCellValues([
+      { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
+    ] as never);
+
+    const input = await startTyping('7');
+
+    expect(input.value).to.equal('7%');
+  });
+
   it('puts a reference to the next cell over into the formula on an arrow after =', async () => {
     const input = await startTyping('=');
 
