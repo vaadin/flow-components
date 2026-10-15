@@ -1080,6 +1080,11 @@ export class SpreadsheetCellGrid extends LitElement {
     return this.valueProbe.clientWidth;
   }
 
+  /** The popup button drawn on a cell, or null when there is none in view. */
+  popupButton(col: number, row: number): HTMLElement | null {
+    return this.shadowRoot?.querySelector<HTMLElement>(`.popup-button[data-col="${col}"][data-row="${row}"]`) ?? null;
+  }
+
   /**
    * Where a cell is drawn on screen, frozen panes included - what the GWT
    * client read off the cell's element. Null while the cell is outside the

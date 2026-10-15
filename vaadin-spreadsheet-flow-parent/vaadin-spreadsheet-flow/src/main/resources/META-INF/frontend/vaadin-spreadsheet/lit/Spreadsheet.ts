@@ -60,9 +60,7 @@ import {
   type CellSlotAssignment,
   computeCellSlots,
   flowVirtualChildResolver,
-  namedSlot,
   overlayComponentSlotName,
-  popupContentSlotName,
   SlottedVirtualChildren,
   visibleCellSlots
 } from './dom/VirtualChildren.js';
@@ -99,15 +97,15 @@ import {
   typesCharacter
 } from './algorithms/KeyboardMoves.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
-import { animateIn, animateOut } from './dom/OverlayAnimation.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
 import { SheetTabs } from './controllers/SheetTabs.js';
 import { ContextMenu } from './controllers/ContextMenu.js';
 import { HeaderResize } from './controllers/HeaderResize.js';
+import { Popup } from './controllers/Popup.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
-import { linkTooltipPosition, popupPlacement } from './algorithms/Placement.js';
+import { linkTooltipPosition } from './algorithms/Placement.js';
 import {
   computeMergedRegionBoxes,
   computePositionedColGroupings,
@@ -116,7 +114,6 @@ import {
 } from './algorithms/Positioning.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
-import { popupOverlayRules } from './dom/PopupOverlayStyles.js';
 import { coerceArray, coerceJson, coerceNumberArray, coerceObject, type NumberList } from './wire/Coerce.js';
 import {
   columnGroupingGutterPx,
@@ -327,8 +324,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private resourceKeys: string[] = [];
   /** The element the `resource-<id>` attributes live on. */
   private resourceHost: HTMLElement | null = null;
-  /** The popup buttons the server has added, one per cell. */
-  private popupButtonStates: PopupButtonState[] = [];
   private cellKeysToEditorIdMap: Record<string, string> = {};
   private componentIDtoCellKeysMap: Record<string, string> = {};
   private hyperlinksTooltips: Record<string, string> = {};
@@ -380,6 +375,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly contextMenu: SpreadsheetContextMenu;
   /** The context menu's state and what it does; see {@link ContextMenu}. */
   private readonly menu: ContextMenu;
+  /** The popup buttons and the popup one opens; see {@link Popup}. */
+  private readonly popup: Popup;
 
 
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
@@ -426,41 +423,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly cellEditors: SlottedVirtualChildren;
 
   /**
-   * Content of the popup a popup button opens. The server attaches it as a
-   * virtual child of the popup button, so it needs placing like any other
-   * hosted component; it goes in its own holder because it is shown in an
-   * overlay rather than in the grid.
-   */
-  private readonly popupContents: SlottedVirtualChildren;
-
-  /**
    * Icons on context-menu actions. Server-side components attached to the
    * action, so they need placing like any other; a fourth holder because
    * they live in the context menu's shadow root rather than the grid's.
    */
   private readonly actionIcons: SlottedVirtualChildren;
-
-  /** The overlay the open popup's content is shown in. */
-  private readonly popupOverlay: HTMLElement;
-
-  /** The popup that is open, or null when none is. */
-  private openPopup: { row: number; col: number; nodeId: string } | null = null;
-
-  /**
-   * The button whose press has just closed its own popup: the click that
-   * follows is not to open it again. The GWT client's popup closed the
-   * same way, its auto-hide taking the press on the button.
-   */
-  private popupClosedByItsButton: { row: number; col: number } | null = null;
-  /** The popup whose button was pressed from the keyboard, until it opens. */
-  private popupOpenedFromKeyboard: { row: number; col: number } | null = null;
-
-  /**
-   * Places the open popup again when its size changes: its content is
-   * Flow's components, which render after they are attached, so the size
-   * the popup opens at is seldom the one it settles at.
-   */
-  private readonly popupResizeObserver: ResizeObserver;
 
   /** Whether the cell styles have changed since the last width measurement. */
   private styleWidthRatiosStale = false;
@@ -633,28 +600,20 @@ export class Spreadsheet implements SpreadsheetClientApi {
     );
     this.cellComponents = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellComponentSlotName);
     this.cellEditors = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellEditorSlotName);
-    // The popup overlay is our own element inside the connector's shadow
-    // root, one boundary from the host's light DOM, so the slot it renders
-    // projects the content directly — no forwarder, hence the same element
-    // for both hosts.
-    this.popupOverlay = document.createElement('div');
-    this.popupOverlay.className = 'popup-overlay';
-    this.popupOverlay.setAttribute('part', 'popup-overlay');
-    this.popupOverlay.hidden = true;
-    // In the top layer while open, as the GWT client's popover was: no
-    // edge of the sheet or of the page around it cuts it off. Absolutely
-    // placed there, so in page coordinates and moving with the page. The
-    // inset, margin and overflow undo the browser's popover defaults, as
-    // the GWT client's overlay did: content taller than a set height shows
-    // past it rather than scrolling. Drawn by the rules the overlay carries
-    // - see popupOverlayRules.
-    this.popupOverlay.popover = 'manual';
-    // Takes the keyboard when it opens from it without a close box.
-    this.popupOverlay.tabIndex = -1;
-    this.popupOverlay.style.cssText = 'position:absolute;inset:auto;margin:0;overflow:visible;box-sizing:border-box;';
-    this.popupResizeObserver = new ResizeObserver(() => this.positionPopupOverlay());
     this.actionIcons = new SlottedVirtualChildren(host, this.contextMenu, resolveVirtualChild, actionIconSlotName);
-    this.popupContents = new SlottedVirtualChildren(host, this.popupOverlay, resolveVirtualChild, popupContentSlotName);
+    this.popup = new Popup(
+      host,
+      resolveVirtualChild,
+      this.cellGrid,
+      {
+        cellValue: (col, row) => this.cellDataByKey.get(toKey(col, row))?.value ?? '',
+        paneClientRect: () => this.scrollingPaneClientRect(),
+        focusSheet: () => this.scrollContainer.focus({ preventScroll: true }),
+        scheduleRender: () => this.scheduleRender(),
+        send: (event) => this.sendToServer(event)
+      },
+      this.ownListeners.signal
+    );
     // A flex column holding the formula bar, the sheet, and the tabs.
     // `flex:1 1 auto` fills a host that has a definite height and
     // content-sizes against one that does not; a percentage height
@@ -755,7 +714,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // the sheet: the keys typed into a filter's fields and the clicks on
     // its check boxes are the popup's, not the sheet's shortcuts. Beside
     // the context menu, the other overlay.
-    this.contextMenu.after(this.popupOverlay);
+    this.contextMenu.after(this.popup.overlay);
     this.headerResize = new HeaderResize(
       this.root,
       { columnHeader: this.columnHeader, rowHeader: this.rowHeader },
@@ -786,7 +745,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.linkTooltip.className = 'link-tooltip';
     this.linkTooltip.popover = 'manual';
     this.linkTooltip.hidden = true;
-    this.popupOverlay.after(...this.headerResize.elements(), this.linkTooltip);
+    this.popup.overlay.after(...this.headerResize.elements(), this.linkTooltip);
     this.renderTarget.appendChild(this.root);
     // Honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
@@ -849,7 +808,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Popup-button click → dispatch popupButtonClick. The
     // server's `onPopupButtonClick` opens the associated popup
     // component.
-    this.on(this.cellGrid, 'popup-button-click', this.handlePopupButtonClick);
     // Context-menu wiring. Right-click on a cell
     // / column-header / row-header dispatches the matching
     // local event from the element; the connector forwards it
@@ -947,7 +905,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.pageListeners?.abort();
     this.pageListeners = null;
     this.resizeObserver.disconnect();
-    this.popupResizeObserver.disconnect();
+    this.popup.disconnect();
     this.hostClassObserver?.disconnect();
     this.viewportLoader.dispose();
   }
@@ -1066,28 +1024,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.linkTooltip.hidden = true;
     hideFromTopLayer(this.linkTooltip);
-  };
-
-  /**
-   * Popup-button click handler. Translates the
-   * cell-grid's local event into a server-bound
-   * `popupButtonClick` spreadsheet-event so the server can
-   * open the popup component.
-   */
-  private readonly handlePopupButtonClick = (
-    e: CustomEvent<{ col: number; row: number; keyboard?: boolean }>
-  ): void => {
-    const { col, row, keyboard } = e.detail;
-    const closed = this.popupClosedByItsButton;
-    this.popupClosedByItsButton = null;
-    if (closed !== null && closed.row === row && closed.col === col) {
-      return;
-    }
-    this.popupOpenedFromKeyboard = keyboard === true ? { row, col } : null;
-    this.sendToServer({
-      type: 'popupButtonClick',
-      data: { row, column: col }
-    });
   };
 
   /**
@@ -2142,7 +2078,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.viewportLoader.scrolled(this.scrollContainer.scrollTop, this.scrollContainer.scrollLeft);
     this.recomputeViewport();
     // The GWT client moved an open popup along with its cell.
-    this.positionPopupOverlay();
+    this.popup.reposition();
   };
 
   /**
@@ -2383,10 +2319,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.overlayComponents.clear();
     this.cellComponents.clear();
     this.cellEditors.clear();
-    this.popupContents.clear();
+    this.popup.dispose();
     this.actionIcons.clear();
     this.disconnect();
-    hideFromTopLayer(this.popupOverlay);
     this.hostClassObserver = null;
   }
 
@@ -2493,7 +2428,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** Test-only accessor: the overlay an open popup button's content is in. */
   getPopupOverlay(): HTMLElement {
-    return this.popupOverlay;
+    return this.popup.overlay;
   }
 
   /**
@@ -2980,7 +2915,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Compute positioned popup buttons. Each
     // button anchors at its cell's bottom-right corner.
     const positionedPopupButtons = computePositionedPopupButtons(
-      this.popupButtonStates,
+      this.popup.buttons(),
       colWidthForIndex,
       rowHeightForIndex,
       split
@@ -3434,57 +3369,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Any click outside the menu dismisses it, as a native menu would. */
   private readonly handleDocumentPointerDown = (e: Event): void => {
     const path = e.composedPath();
-    // A click inside the popup belongs to the popup's content. A press on
-    // the button that opened it closes it, as in the GWT client, and the
-    // click that follows is then not to open it again.
-    // The content is a light child of the host projected into the overlay,
-    // so the path reaches the overlay through the slot — except before the
-    // projection settles, hence the second check.
-    const insidePopup = path.includes(this.popupOverlay) || path.some((target) => this.popupContents.owns(target));
-    const open = this.openPopup;
-    this.popupClosedByItsButton =
-      open !== null && this.hitOpenPopupButton(path) ? { row: open.row, col: open.col } : null;
-    if (open !== null && !insidePopup) {
-      this.dismissPopup();
-    }
+    this.popup.pressed(path);
     this.menu.closeUnlessPressedIn(path);
   };
-
-  /** Whether the focus is in the popup: its card, or the content it shows. */
-  private popupHasFocus(): boolean {
-    let el: Element | null = document.activeElement;
-    while (el?.shadowRoot?.activeElement) {
-      el = el.shadowRoot.activeElement;
-    }
-    for (let node: Node | null = el; node !== null; ) {
-      if (node === this.popupOverlay || this.popupContents.owns(node)) {
-        return true;
-      }
-      node = node.parentNode instanceof ShadowRoot ? node.parentNode.host : node.parentNode;
-    }
-    return false;
-  }
-
-  /** Whether an event path passes through the button of the open popup. */
-  private hitOpenPopupButton(path: EventTarget[]): boolean {
-    const open = this.openPopup;
-    if (open === null) {
-      return false;
-    }
-    return path.some(
-      (target) =>
-        target instanceof Element &&
-        target.classList.contains('popup-button') &&
-        target.getAttribute('data-col') === String(open.col) &&
-        target.getAttribute('data-row') === String(open.row)
-    );
-  }
 
   private readonly handleContextMenuKeyDown = (e: Event): void => {
     if ((e as KeyboardEvent).key !== 'Escape') {
       return;
     }
-    this.dismissPopup();
+    this.popup.dismiss();
     this.menu.close();
   };
   showActions(actionDetails: Json<SpreadsheetActionDetails[]>): void {
@@ -3958,150 +3851,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   // Popup-button lifecycle
   // ====================================================================
 
-  /**
-   * Show a popup button's content.
-   *
-   * Called by {@code PopupButton.openPopup()} — which the server also runs
-   * when it handles the button's own click, so this is the only path that
-   * ever opens a popup, whether the user clicked the button or application
-   * code asked for it.
-   *
-   * The content arrives as a Flow node id: the server attached it with
-   * {@code appendVirtualChild}, so the element exists on the client but is
-   * not in the document until we place it. `appId` names the Flow
-   * application to resolve it against — this is the popup button's own
-   * element, which may belong to a different application than the sheet
-   * when several are on the page.
-   */
-  onPopupButtonOpen(row: number, column: number, contentId: number | string, appId: string): void {
-    const nodeId = String(contentId);
-    // Opened again while it shows, the GWT client's popup stayed put.
-    const showing = this.openPopup !== null && this.openPopup.row === row && this.openPopup.col === column;
-    this.openPopup = { row, col: column, nodeId };
-    // A resolver per call rather than the sheet's own: the id belongs to
-    // the application the button reports, not necessarily the sheet's.
-    this.popupContents.setResolver(flowVirtualChildResolver(appId));
-    this.popupContents.sync([nodeId]);
-    const state = this.popupButtonStates.find((b) => b.row === row && b.col === column);
-    const parts: Node[] = [popupOverlayRules()];
-    if (!state?.headerHidden) {
-      parts.push(this.buildPopupHeader(this.cellDataByKey.get(toKey(column, row))?.value ?? ''));
-    }
-    parts.push(namedSlot(popupContentSlotName(nodeId)));
-    this.popupOverlay.replaceChildren(...parts);
-    this.popupOverlay.hidden = false;
-    showInTopLayer(this.popupOverlay);
-    this.positionPopupOverlay();
-    if (!showing) {
-      animateIn(this.popupOverlay);
-    }
-    this.popupResizeObserver.observe(this.popupOverlay);
-    this.scheduleRender();
-    // Opened from the keyboard, the keyboard goes into it: to its close
-    // box, or to the card itself, from where Tab reaches the content. With
-    // the pointer the focus stays where it is.
-    const fromKeyboard = this.popupOpenedFromKeyboard;
-    this.popupOpenedFromKeyboard = null;
-    if (fromKeyboard !== null && fromKeyboard.row === row && fromKeyboard.col === column) {
-      const target = this.popupOverlay.querySelector<HTMLElement>('.popup-close') ?? this.popupOverlay;
-      target.focus({ preventScroll: true });
-    }
-  }
-
-  /**
-   * The popup's header strip: its close box and, as in the GWT client, the
-   * text of the cell the button is on - a filter's column title.
-   *
-   * Shown unless the button asked for {@code headerHidden}, which is what
-   * {@code PopupButton.setHeaderHidden(true)} sets: a popup with no header
-   * has to be dismissed by clicking away from it.
-   */
-  private buildPopupHeader(caption: string): HTMLElement {
-    const header = document.createElement('div');
-    header.className = 'popup-header';
-    header.setAttribute('part', 'popup-header');
-    const close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'popup-close';
-    close.setAttribute('part', 'popup-close');
-    close.setAttribute('aria-label', 'Close');
-    close.addEventListener('click', () => this.dismissPopup());
-    const text = document.createElement('div');
-    text.className = 'header-caption';
-    text.setAttribute('part', 'popup-caption');
-    text.textContent = caption;
-    header.append(close, text);
-    return header;
-  }
-
-  /**
-   * Hide the open popup at the given cell.
-   *
-   * A no-op when the popup that is open belongs to another cell: the
-   * server closes popups one by one and a stale close must not take down
-   * the one the user just opened.
-   */
-  closePopup(row: number, column: number): void {
-    if (this.openPopup === null || this.openPopup.row !== row || this.openPopup.col !== column) {
-      return;
-    }
-    this.hidePopup(true);
-  }
-
-  /**
-   * Take the popup down and tell the server. Used for every client-side
-   * dismissal — clicking away, Escape, scrolling the anchor out of view.
-   * Its content fades out with it unless asked to go first - see hidePopup.
-   */
-  private dismissPopup(releaseContentFirst = false): void {
-    const closing = this.openPopup;
-    if (closing === null) {
-      return;
-    }
-    this.hidePopup(releaseContentFirst);
-    this.sendToServer({
-      type: 'popupClose',
-      data: { row: closing.row, column: closing.col }
-    });
-  }
-
-  /**
-   * Hide the overlay and release its content, without telling the server.
-   *
-   * The card fades out and then goes, as the GWT client's did. What it held
-   * fades with it when the user closed it; when the server did, or took
-   * the button away, the content goes first and the empty card fades, which
-   * is the order the GWT client released them in then.
-   */
-  private hidePopup(releaseContentFirst: boolean): void {
-    const closing = this.openPopup;
-    // The keyboard was in the popup: it goes back to the button, or to the
-    // sheet when the button has gone, rather than to nowhere.
-    const hadFocus = this.popupHasFocus();
-    this.openPopup = null;
-    this.popupResizeObserver.unobserve(this.popupOverlay);
-    if (releaseContentFirst) {
-      this.popupContents.clear();
-    }
-    if (hadFocus && closing !== null) {
-      const stays = this.popupButtonStates.some((b) => b.row === closing.row && b.col === closing.col);
-      const button = stays
-        ? this.cellGrid.shadowRoot?.querySelector<HTMLElement>(
-            `.popup-button[data-col="${closing.col}"][data-row="${closing.row}"]`
-          )
-        : null;
-      (button ?? this.scrollContainer).focus({ preventScroll: true });
-    }
-    const overlay = this.popupOverlay;
-    animateOut(overlay, () => {
-      this.popupContents.clear();
-      overlay.replaceChildren();
-      overlay.hidden = true;
-      hideFromTopLayer(overlay);
-    });
-    this.scheduleRender();
-  }
-
   /** The sheet as the arrow keys see it. */
   private sheetShape(): SheetShape {
     return {
@@ -4174,36 +3923,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Place the overlay at its button by the GWT client's rule - see
-   * {@link popupPlacement} - against the cell as it is drawn now and the
-   * scrolling pane around it.
-   *
-   * While the cell is outside the rendered range the overlay stays where it
-   * is, as the GWT client's did.
-   */
-  private positionPopupOverlay(): void {
-    if (this.openPopup === null) {
-      return;
-    }
-    const { row, col } = this.openPopup;
-    const state = this.popupButtonStates.find((b) => b.row === row && b.col === col);
-    const overlay = this.popupOverlay;
-    overlay.style.width = state?.popupWidth ?? '';
-    overlay.style.height = state?.popupHeight ?? '';
-    const cell = this.cellGrid.cellClientRect(col, row);
-    if (cell === null) {
-      return;
-    }
-    // Measured at the page's corner, where nothing squeezes it: next to the
-    // right edge of the page an overlay of no set width wraps to fit.
-    overlay.style.left = '0px';
-    overlay.style.top = '0px';
-    const place = popupPlacement(cell, this.scrollingPaneClientRect(), overlay.offsetWidth, overlay.offsetHeight);
-    overlay.style.left = `${place.left + window.scrollX}px`;
-    overlay.style.top = `${place.top + window.scrollY}px`;
-  }
-
-  /**
    * The scrolling pane on screen: the cells under the column letters and
    * right of the row numbers, past the frozen rows and columns. The GWT
    * client's popups kept to this, its bottom-right pane, whose bottom is the
@@ -4229,43 +3948,30 @@ export class Spreadsheet implements SpreadsheetClientApi {
       bottom: box.bottom
     };
   }
-  /**
-   * A popup (filter) button was attached to a cell.
-   *
-   * These arrive one at a time over the RPC lane rather than as a list
-   * property, because on the server each is a real component with its
-   * own lifecycle. The connector keeps them in the same list the
-   * renderer already positions, keyed by their cell.
-   */
-  addPopupButton(rawState: PopupButtonState | string): void {
-    const state = coerceJson(rawState);
-    if (state === null || typeof state.col !== 'number') {
-      return;
-    }
-    this.popupButtonStates = [...this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state)), state];
-    this.scheduleRender();
+  /** Show a popup button's content; see {@link Popup.open}. */
+  onPopupButtonOpen(row: number, column: number, contentId: number | string, appId: string): void {
+    this.popup.open(row, column, contentId, appId);
   }
 
-  /**
-   * The button's cell is what identifies it; the rest of the state may
-   * differ.
-   *
-   * The server takes a button away once its cell has scrolled out of view,
-   * and when the sheet changes. The GWT client's popup closed with its
-   * button and told the server it had.
-   */
+  /** Hide the open popup at the given cell; see {@link Popup.close}. */
+  closePopup(row: number, column: number): void {
+    this.popup.close(row, column);
+  }
+
+  /** A popup (filter) button was attached to a cell. */
+  addPopupButton(rawState: PopupButtonState | string): void {
+    const state = coerceJson(rawState);
+    if (state !== null && typeof state.col === 'number') {
+      this.popup.addButton(state);
+    }
+  }
+
+  /** A popup button was taken away, and its popup closes with it. */
   removePopupButton(rawState: PopupButtonState | string): void {
     const state = coerceJson(rawState);
-    if (state === null || typeof state.col !== 'number') {
-      return;
+    if (state !== null && typeof state.col === 'number') {
+      this.popup.removeButton(state);
     }
-    // The button goes first, so that a popup closing with it does not give
-    // the keyboard back to it.
-    this.popupButtonStates = this.popupButtonStates.filter((b) => !samePopupButtonCell(b, state));
-    if (this.openPopup !== null && this.openPopup.row === state.row && this.openPopup.col === state.col) {
-      this.dismissPopup(true);
-    }
-    this.scheduleRender();
   }
 
   // ====================================================================
@@ -4308,9 +4014,4 @@ export class Spreadsheet implements SpreadsheetClientApi {
 function pressesButton(e: KeyboardEvent): boolean {
   const target = e.composedPath()[0];
   return target instanceof HTMLElement && (target.localName === 'button' || target.getAttribute('role') === 'button');
-}
-
-/** Two popup-button states describe the same button when they share a cell. */
-function samePopupButtonCell(a: PopupButtonState, b: PopupButtonState): boolean {
-  return a.col === b.col && a.row === b.row;
 }

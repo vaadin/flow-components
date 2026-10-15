@@ -851,6 +851,11 @@ describe('Spreadsheet — the popup button and the keyboard', () => {
     return ctx.sent.filter((e) => e.type === 'popupButtonClick').length;
   }
 
+  it('is found on its cell, and nowhere else', () => {
+    expect(ctx.sheet.getCellGrid().popupButton(4, 1) === button()).to.be.true;
+    expect(ctx.sheet.getCellGrid().popupButton(5, 1)).to.equal(null);
+  });
+
   it('is a button that takes the focus', () => {
     expect(button().getAttribute('role')).to.equal('button');
     expect(button().tabIndex).to.equal(0);
