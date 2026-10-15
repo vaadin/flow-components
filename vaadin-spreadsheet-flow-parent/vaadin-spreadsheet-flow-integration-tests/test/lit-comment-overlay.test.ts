@@ -105,6 +105,36 @@ describe('Spreadsheet — cell comment overlays', () => {
     expect(labels(ctx.sheet)).to.eql(['Always Visible Comment.']);
   });
 
+  it('draws nothing again for a hover that shows nothing', async () => {
+    // Hovering decides only whether a note or a formula's error shows: the
+    // pointer crossing other cells repainted the whole sheet.
+    ctx.sheet.setCellComments({ [B2]: 'a note' });
+    ctx.sheet.setInvalidFormulaCells(['col3 row3']);
+    await paint(ctx.sheet);
+    const grid = ctx.sheet.getCellGrid();
+    const cell = (col: number, row: number) =>
+      grid.shadowRoot!.querySelector<HTMLElement>(`.cell[data-col="${col}"][data-row="${row}"]`)!;
+    const over = (col: number, row: number): boolean => {
+      cell(col, row).dispatchEvent(new MouseEvent('mouseover', { bubbles: true, composed: true }));
+      return grid.isUpdatePending;
+    };
+
+    const plain = over(4, 4);
+    const ontoNote = over(2, 2);
+    await grid.updateComplete;
+    const offNote = over(4, 5);
+    await grid.updateComplete;
+    const ontoError = over(3, 3);
+    await grid.updateComplete;
+
+    expect({ plain, ontoNote, offNote, ontoError }).to.eql({
+      plain: false,
+      ontoNote: true,
+      offNote: true,
+      ontoError: true
+    });
+  });
+
   it('keeps a comment hidden until its cell is hovered', async () => {
     ctx.sheet.setCellComments({ [B2]: 'first cell comment' });
     await paint(ctx.sheet);

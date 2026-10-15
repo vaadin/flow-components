@@ -1389,8 +1389,21 @@ export class SpreadsheetCellGrid extends LitElement {
     if (this.hoveredKey === key) {
       return;
     }
+    const before = this.hoveredKey;
     this.hoveredKey = key;
-    this.requestUpdate();
+    // Only a cell with a note or an invalid formula shows anything while
+    // hovered: moving between other cells changes nothing that is drawn.
+    if (this.showsOnHover(before) || this.showsOnHover(key)) {
+      this.requestUpdate();
+    }
+  }
+
+  /** Whether hovering a cell shows something: its note, or its formula's error. */
+  private showsOnHover(key: string | null): boolean {
+    const { commentText, invalidFormulaCells } = this.renderState;
+    return (
+      key !== null && ((commentText !== undefined && key in commentText) || invalidFormulaCells?.has(key) === true)
+    );
   }
 
   private readonly handleGridMouseLeave = (): void => {
