@@ -14,6 +14,7 @@ import type {
   MergedRegion,
   OverlayInfo,
   PopupButtonState,
+  SizeRuns,
   SpreadsheetActionDetails
 } from './types/wire.js';
 import type { Json, SpreadsheetClientApi } from './types/rpc-server-to-client.js';
@@ -113,7 +114,14 @@ import {
 } from './algorithms/Positioning.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
-import { coerceArray, coerceJson, coerceNumberArray, coerceObject, type NumberList } from './wire/Coerce.js';
+import {
+  coerceArray,
+  coerceJson,
+  coerceNumberArray,
+  coerceObject,
+  coerceSizes,
+  type NumberList
+} from './wire/Coerce.js';
 import {
   columnGroupingGutterPx,
   rowGroupingGutterPx,
@@ -3558,11 +3566,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setDefColW(widthInPixels: number): void {
     this.defColWidth = widthInPixels;
   }
-  setRowH(rowHeightsInPoints: Json<number[] | Float32Array>): void {
-    this.rowHeights = coerceNumberArray(rowHeightsInPoints);
+  setRowH(rowHeightsInPoints: Json<number[] | Float32Array | SizeRuns>): void {
+    this.rowHeights = coerceSizes(rowHeightsInPoints);
   }
-  setColW(colWidthsInPixels: Json<number[] | Int32Array>): void {
-    this.colWidths = coerceNumberArray(colWidthsInPixels);
+  setColW(colWidthsInPixels: Json<number[] | Int32Array | SizeRuns>): void {
+    this.colWidths = coerceSizes(colWidthsInPixels);
   }
   setHiddenColumnIndexes(indexes: Json<number[]>): void {
     this.hiddenColumns = new Set(coerceArray<number>(indexes));

@@ -8,7 +8,12 @@
  */
 
 import { expect } from 'chai';
-import { coerceArray, coerceNumberArray, coerceObject } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/wire/Coerce.js';
+import {
+  coerceArray,
+  coerceNumberArray,
+  coerceObject,
+  coerceSizes
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/wire/Coerce.js';
 
 /**
  * Taking a collection off the wire.
@@ -127,5 +132,69 @@ describe('coerceNumberArray', () => {
 
   it('reads a JSON value that is not an array as empty', () => {
     expect(coerceNumberArray('{"a":1}')).to.deep.equal([]);
+  });
+});
+
+describe('coerceSizes', () => {
+  // The server sends row heights and column widths as runs of equal sizes:
+  // one size per row came to 5.6 MB for the largest sheet.
+  it('spells out the runs the server sends', () => {
+    expect(coerceSizes('{"runs":[15.0,3,30.0,1,15.0,2]}')).to.deep.equal([15, 15, 15, 30, 15, 15]);
+  });
+
+  it('spells out runs already parsed', () => {
+    expect(coerceSizes({ runs: [50, 2, 120, 1] })).to.deep.equal([50, 50, 120]);
+  });
+
+  it('spells out a million rows from one run', () => {
+    const sizes = coerceSizes('{"runs":[15.0,1048576]}');
+    expect(sizes.length).to.equal(1_048_576);
+    expect(sizes[0]).to.equal(15);
+    expect(sizes[1_048_575]).to.equal(15);
+  });
+
+  it('keeps hidden rows, of no height, among the others', () => {
+    expect(coerceSizes({ runs: [15, 1, 0, 2, 15, 1] })).to.deep.equal([15, 0, 0, 15]);
+  });
+
+  it('reads no runs as no sizes', () => {
+    expect(coerceSizes('{"runs":[]}')).to.deep.equal([]);
+  });
+
+  it('passes a plain list through', () => {
+    const input = [1, 2];
+    expect(coerceSizes(input)).to.equal(input);
+    expect(coerceSizes('[1,2.5]')).to.deep.equal([1, 2.5]);
+    const typed = Float32Array.from([1.5]);
+    expect(coerceSizes(typed)).to.equal(typed);
+  });
+
+  it('reads null, empty and malformed text as no sizes', () => {
+    expect(coerceSizes(null)).to.deep.equal([]);
+    expect(coerceSizes(undefined)).to.deep.equal([]);
+    expect(coerceSizes('')).to.deep.equal([]);
+    expect(coerceSizes('{"runs":[1,')).to.deep.equal([]);
+    expect(coerceSizes('{"other":[1,2]}')).to.deep.equal([]);
+    expect(coerceSizes('7')).to.deep.equal([]);
+  });
+
+  const malformed: Array<[string, unknown[]]> = [
+    ['a size without its count', [15, 2, 30]],
+    ['a count that is not a whole number', [15, 1.5]],
+    ['a count below zero', [15, -1]],
+    ['a count that is not a number', [15, '2']],
+    ['a size that is not a number', ['15', 2]],
+    ['a size that is not finite', [Number.POSITIVE_INFINITY, 2]]
+  ];
+  for (const [what, runs] of malformed) {
+    it(`reads runs with ${what} as no sizes`, () => {
+      expect(coerceSizes({ runs } as never)).to.deep.equal([]);
+    });
+  }
+
+  it('reads runs spelling out more sizes than any sheet has as no sizes', () => {
+    // 2^24 is the most; one more is not spelled out at all.
+    expect(coerceSizes({ runs: [15, 1 << 24] }).length).to.equal(1 << 24);
+    expect(coerceSizes({ runs: [15, 1 << 24, 15, 1] }).length).to.equal(0);
   });
 });

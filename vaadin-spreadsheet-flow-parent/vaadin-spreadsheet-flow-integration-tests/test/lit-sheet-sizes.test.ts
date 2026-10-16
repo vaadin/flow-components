@@ -100,6 +100,21 @@ describe('Spreadsheet — the sizes the sheet is drawn with', () => {
     expect(width()).to.equal(1100);
   });
 
+  // The server sends them as runs of equal sizes.
+  it('takes the row heights as runs', () => {
+    sheet.setRowH('{"runs":[30.0,1,15.0,99]}');
+    sheet.recomputeViewport();
+
+    expect(height()).to.equal(2020);
+  });
+
+  it('takes the column widths as runs', () => {
+    sheet.setColW('{"runs":[150,1,50,19]}');
+    sheet.recomputeViewport();
+
+    expect(width()).to.equal(1100);
+  });
+
   it('draws from past the hidden rows a scroll has gone by', () => {
     sheet.setRows(200);
     sheet.setRowH(new Array(200).fill(15));
@@ -127,7 +142,7 @@ describe('Spreadsheet — the sizes the sheet is drawn with', () => {
 
   it('finds the rows to draw far down a sheet of a million rows', () => {
     sheet.setRows(1_048_576);
-    sheet.setRowH(new Array(1_048_576).fill(15));
+    sheet.setRowH('{"runs":[15.0,1048576]}');
     sheet.recomputeViewport();
 
     sheet.getScrollContainer().scrollTop = 20_000_000;

@@ -106,6 +106,33 @@ class SheetDimensionsTest {
     }
 
     @Test
+    void setRowH_mirrorsTheHeightsAsRuns() {
+        dims.setRowH(new float[] { 15f, 15f, 30f });
+
+        verify(element).setProperty(eq("rowH"),
+                eq("{\"runs\":[15.0,2,30.0,1]}"));
+    }
+
+    @Test
+    void setColW_mirrorsTheWidthsAsRuns() {
+        dims.setColW(new int[] { 50, 75, 75 });
+
+        verify(element).setProperty(eq("colW"), eq("{\"runs\":[50,1,75,2]}"));
+    }
+
+    @Test
+    void setRowH_aMillionRowsOfOneHeight_mirrorAsAFewBytes() {
+        // One height per row came to 5.6 MB for the largest sheet.
+        float[] rowH = new float[1_048_576];
+        java.util.Arrays.fill(rowH, 15f);
+
+        dims.setRowH(rowH);
+
+        verify(element).setProperty(eq("rowH"),
+                eq("{\"runs\":[15.0,1048576]}"));
+    }
+
+    @Test
     void setHiddenColumnIndexes_storesList_andMirrorsSerializedString() {
         ArrayList<Integer> indexes = new ArrayList<>();
         indexes.add(2);

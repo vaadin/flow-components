@@ -8,6 +8,8 @@
  * license.
  */
 
+import type { SizeRuns } from '../types/wire.js';
+
 /**
  * Values as the server sends them, read into what the client works with:
  * Flow passes collections either as they are or as JSON text.
@@ -105,4 +107,46 @@ export function coerceNumberArray(value: NumberList | string | null | undefined)
     }
   }
   return [];
+}
+
+/** The most sizes runs may spell out: far more than a sheet has rows. */
+const MAX_SIZES = 1 << 24;
+
+/**
+ * The size of each row or column. The server sends them as runs of equal
+ * sizes - as one size per row they came to 5.6 MB for the largest sheet - and
+ * a plain list is taken as it is. Malformed runs read as no sizes at all.
+ */
+export function coerceSizes(value: NumberList | SizeRuns | string | null | undefined): NumberList {
+  const parsed = typeof value === 'string' ? coerceJson<NumberList | SizeRuns>(value) : value;
+  if (Array.isArray(parsed) || parsed instanceof Int32Array || parsed instanceof Float32Array) {
+    return parsed;
+  }
+  if (parsed != null && Array.isArray((parsed as SizeRuns).runs)) {
+    return spellOut((parsed as SizeRuns).runs);
+  }
+  return [];
+}
+
+function spellOut(runs: unknown[]): number[] {
+  let total = 0;
+  for (let i = 0; i < runs.length; i += 2) {
+    const count = runs[i + 1];
+    // A size that is no number, or a count missing, not whole or below zero.
+    if (!Number.isFinite(runs[i]) || !Number.isInteger(count) || (count as number) < 0) {
+      return [];
+    }
+    total += count as number;
+    if (total > MAX_SIZES) {
+      return [];
+    }
+  }
+  const sizes = new Array<number>(total);
+  let at = 0;
+  for (let i = 0; i < runs.length; i += 2) {
+    const count = runs[i + 1] as number;
+    sizes.fill(runs[i] as number, at, at + count);
+    at += count;
+  }
+  return sizes;
 }

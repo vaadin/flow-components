@@ -8,7 +8,7 @@
  * license.
  */
 
-import type { CellData, GroupingData, MergedRegion, OverlayInfo, SpreadsheetActionDetails } from './wire.js';
+import type { CellData, GroupingData, MergedRegion, OverlayInfo, SizeRuns, SpreadsheetActionDetails } from './wire.js';
 
 /**
  * The methods the connector exposes to the {@code <vaadin-spreadsheet>}
@@ -93,8 +93,8 @@ export interface SpreadsheetClientApi {
   // Sheet-level dimensions + visibility
   setDefRowH(heightInPoints: number): void;
   setDefColW(widthInPixels: number): void;
-  setRowH(rowHeightsInPoints: Json<number[] | Float32Array>): void;
-  setColW(colWidthsInPixels: Json<number[] | Int32Array>): void;
+  setRowH(rowHeightsInPoints: Json<number[] | Float32Array | SizeRuns>): void;
+  setColW(colWidthsInPixels: Json<number[] | Int32Array | SizeRuns>): void;
   setHiddenColumnIndexes(indexes: Json<number[]>): void;
   setHiddenRowIndexes(indexes: Json<number[]>): void;
   setLockedColumnIndexes(indexes: Json<number[]>): void;

@@ -159,3 +159,12 @@ export interface GroupingData {
   uniqueIndex: number;
   collapsed: boolean;
 }
+
+/**
+ * Sizes of rows or columns, as runs of equal ones: each size followed by how
+ * many rows or columns in a row have it. The 1,048,576 rows of the largest
+ * sheet are one run unless their heights differ.
+ */
+export interface SizeRuns {
+  runs: number[];
+}

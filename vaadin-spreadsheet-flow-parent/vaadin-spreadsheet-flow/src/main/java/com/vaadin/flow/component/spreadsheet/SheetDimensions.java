@@ -66,7 +66,7 @@ final class SheetDimensions implements Serializable {
     void setRowH(float[] rowH) {
         this.rowH = rowH;
         spreadsheet.getElement().setProperty("rowH",
-                Serializer.serialize(rowH));
+                Serializer.serialize(rowH == null ? null : SizeRuns.of(rowH)));
     }
 
     int[] getColW() {
@@ -76,7 +76,7 @@ final class SheetDimensions implements Serializable {
     void setColW(int[] colW) {
         this.colW = colW;
         spreadsheet.getElement().setProperty("colW",
-                Serializer.serialize(colW));
+                Serializer.serialize(colW == null ? null : SizeRuns.of(colW)));
     }
 
     ArrayList<Integer> getHiddenColumnIndexes() {
