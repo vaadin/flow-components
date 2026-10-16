@@ -11,6 +11,7 @@ package com.vaadin.flow.component.ai.form;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.List;
 
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
@@ -145,13 +146,38 @@ final class FormFieldSchema {
             target.put("queryable", true);
             return;
         }
-        var items = FormValueConverter.listDataProviderItems(field);
-        if (items.isEmpty()) {
+        var labels = itemLabels(field, hints);
+        if (labels.isEmpty()) {
             return;
         }
         var arr = target.putArray("enum");
-        items.stream().limit(ENUM_MAX_ITEMS)
-                .forEach(item -> arr.add(renderItem(field, hints, item)));
+        labels.forEach(arr::add);
+    }
+
+    /**
+     * Returns the labels of a selection field's in-memory items, the options
+     * {@code get_form_state} lists under {@code enum} for a field with no
+     * {@code fieldValueOptions} registration. Empty for a field of any other
+     * type.
+     *
+     * @param descriptor
+     *            the field, not {@code null}
+     * @return the option labels, empty when the field lists none
+     */
+    static List<String> listedOptions(FormFieldDescriptor descriptor) {
+        var type = descriptor.type();
+        if (type != FormFieldType.SINGLE_SELECT
+                && type != FormFieldType.MULTI_SELECT) {
+            return List.of();
+        }
+        return itemLabels(descriptor.field(), descriptor.hints());
+    }
+
+    private static List<String> itemLabels(HasValue<?, ?> field,
+            FormFieldHints hints) {
+        return FormValueConverter.listDataProviderItems(field).stream()
+                .limit(ENUM_MAX_ITEMS)
+                .map(item -> renderItem(field, hints, item)).toList();
     }
 
     private static void applyValue(ObjectNode node, HasValue<?, ?> field,
