@@ -43,14 +43,13 @@ final class RowSizeOperations implements Serializable {
     }
 
     void setHeights(Map<Integer, Float> rowIndexToHeight) {
-        AtomicBoolean isAnyHidden = new AtomicBoolean();
+        AtomicBoolean visibilityChanged = new AtomicBoolean();
         rowIndexToHeight.forEach((key, value) -> {
-            applyHeight(key, value);
-            if (value == 0.0F) {
-                isAnyHidden.set(true);
+            if (applyHeight(key, value)) {
+                visibilityChanged.set(true);
             }
         });
-        spreadsheet.reloadSheetStyles(true, isAnyHidden.get());
+        spreadsheet.reloadSheetStyles(true, visibilityChanged.get());
     }
 
     void setHidden(int rowIndex, boolean hidden) {

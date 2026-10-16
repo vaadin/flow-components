@@ -113,6 +113,14 @@ class SpreadsheetHiddenRowFormulasTest {
     }
 
     @Test
+    void aHiddenRowDraggedOpen() {
+        // The client numbers the rows from 1.
+        assertEquals(List.of(),
+                harness.check(spreadsheet -> harness.clientEvent("rowsResized",
+                        "{\"rowIndexes\": [2], \"newHeights\": [20]}")));
+    }
+
+    @Test
     void rowsFilteredOut() {
         // As a filter hides the rows it leaves out.
         assertEquals(List.of(), harness.check(spreadsheet -> spreadsheet
