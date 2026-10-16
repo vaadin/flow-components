@@ -373,7 +373,9 @@ describe('ViewportLoader', () => {
     expect(t.loads).to.have.length(2);
   });
 
-  // In a production build, frames are 25 ms apart five times slower.
+  // In a production build six times slower, frames are 40-60 ms apart and a
+  // fling's events about 60 ms: frames under 50 ms counted as a fast
+  // machine's, and the fling loaded 10 times.
 
   /** Scroll on by ten rows in 100 ms, the two frames after it this many ms apart. */
   function scrollOn(t: ReturnType<typeof setUp>, step: number, frameMs: number) {
@@ -384,6 +386,20 @@ describe('ViewportLoader', () => {
     t.loader.check();
   }
 
+  it('on a machine drawing fewer than 30 frames a second, holds back while the sheet scrolls', () => {
+    const t = setUp();
+    t.loader.check();
+
+    for (let step = 1; step <= 8; step++) {
+      scrollOn(t, step, 45);
+    }
+    expect(t.loads, 'asked while scrolling').to.have.length(1);
+
+    t.time.advance(400);
+
+    expect(t.loads).to.have.length(2);
+  });
+
   it('on a machine drawing 30 frames a second or more, asks on the way', () => {
     const t = setUp();
     t.loader.check();
@@ -393,6 +409,61 @@ describe('ViewportLoader', () => {
     }
 
     expect(t.loads.length, 'asked while scrolling').to.be.greaterThan(1);
+  });
+
+  it('takes a fast machine with one long frame, a load being drawn, for a fast machine still', () => {
+    const t = setUp();
+    t.loader.check();
+    scrollOn(t, 1, 16);
+
+    // A frame 100 ms long, the sheet scrolling on.
+    t.time.setFrameInterval(100);
+    t.loader.scrolled(1000, 0);
+    t.time.advance(150);
+    t.loader.scrolled(1100, 0);
+    t.time.advance(51);
+    t.show({ r1: 56, c1: 1, r2: 85, c2: 10 });
+    t.loader.check();
+
+    expect(t.loads, 'asked on the way').to.have.length(2);
+  });
+
+  it('takes a fast machine slowing down for a slow one from its second slow frame', () => {
+    const t = setUp();
+    t.loader.check();
+    for (let step = 1; step <= 3; step++) {
+      scrollOn(t, step, 16);
+    }
+
+    scrollOn(t, 4, 45);
+    scrollOn(t, 5, 45);
+
+    expect(t.loads, 'asked while scrolling').to.have.length(1);
+  });
+
+  it('counts a machine whose frames were not timed yet as a fast one', () => {
+    const t = setUp();
+    t.loader.check();
+    t.time.setFrameInterval(Number.POSITIVE_INFINITY);
+
+    t.loader.scrolled(200, 0);
+    t.time.advance(100);
+    t.loader.scrolled(400, 0);
+    t.show({ r1: 51, c1: 1, r2: 80, c2: 10 });
+    t.loader.check();
+
+    expect(t.loads, 'asked on the way').to.have.length(2);
+  });
+
+  it('takes a slow machine with one short frame for a slow machine still', () => {
+    const t = setUp();
+    t.loader.check();
+
+    for (let step = 1; step <= 8; step++) {
+      scrollOn(t, step, step === 5 ? 28 : 45);
+    }
+
+    expect(t.loads, 'asked while scrolling').to.have.length(1);
   });
 
   it('counts the sheet as stopped a second after its last scroll event, with no frames drawn', () => {

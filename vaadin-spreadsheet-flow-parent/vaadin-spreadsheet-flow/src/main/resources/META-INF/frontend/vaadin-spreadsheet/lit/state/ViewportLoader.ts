@@ -67,8 +67,14 @@ const FRAMES_TO_STOP = 2;
 /** However long frames take, the sheet has stopped this long after its last scroll event. */
 const LONGEST_WAIT_TO_STOP_MS = 1000;
 
-/** A machine drawing a scroll's frames slower than this cannot draw cells loaded on the way. */
-const SLOW_FRAME_MS = 50;
+/**
+ * A machine drawing a scroll's frames further apart than this, fewer than 30
+ * a second, cannot draw cells loaded on the way.
+ */
+const SLOW_FRAME_MS = 1000 / 30;
+
+/** How many of a scroll's last frames are timed to tell a slow machine. */
+const FRAMES_TIMED = 3;
 
 /**
  * Decides when the server is asked for cells as the sheet scrolls, and for
@@ -103,11 +109,13 @@ const SLOW_FRAME_MS = 50;
  * <li>On a slow connection the margin shrinks to a quarter screen, so what
  * is on screen arrives sooner.
  * <li>On a slow machine nothing is loaded until the scrolling stops, as in
- * GWT. With frames 100-190 ms apart, a scroll's events come that far apart
- * too: counted in milliseconds, a fling stopped between every two of them,
- * and loaded 11-47 times, each load slowing the next frames further. A
- * scroll stops once two frames are drawn without a scroll event, as well
- * as 100 ms, and a machine is slow while its frames take over 50 ms.
+ * GWT: a fling loaded 10-49 times, each load slowing the next frames
+ * further. A machine is slow while it draws a scroll's frames fewer than 30
+ * a second; six times slower than a fast one, they were 40-60 ms apart. Its
+ * scroll events come as far apart as its frames, so a scroll stops once two
+ * frames are drawn without a scroll event, as well as 100 ms: counted in
+ * milliseconds alone, a fling with frames 100-190 ms apart stopped between
+ * every two of them.
  * </ul>
  */
 export class ViewportLoader {
@@ -128,8 +136,8 @@ export class ViewportLoader {
   private framesSinceScroll = 0;
   private countingFrames = false;
   private lastFrameAt: number | null = null;
-  /** How long the last frame of a scroll took, in ms. */
-  private frameMs = 0;
+  /** How long the last {@link FRAMES_TIMED} frames of a scroll took, in ms. */
+  private readonly frameTimes: number[] = [];
   private disposed = false;
 
   constructor(private readonly host: ViewportLoaderHost, private readonly clock: ViewportLoaderClock = realClock) {}
@@ -290,7 +298,10 @@ export class ViewportLoader {
 
   private readonly frameDrawn = (time: number): void => {
     if (this.lastFrameAt !== null) {
-      this.frameMs = time - this.lastFrameAt;
+      this.frameTimes.push(time - this.lastFrameAt);
+      if (this.frameTimes.length > FRAMES_TIMED) {
+        this.frameTimes.shift();
+      }
     }
     this.lastFrameAt = time;
     this.framesSinceScroll++;
@@ -308,7 +319,7 @@ export class ViewportLoader {
     if (first === undefined || last === undefined || first === last || !this.moving()) {
       return false;
     }
-    if (this.frameMs > SLOW_FRAME_MS) {
+    if (this.slowMachine()) {
       return true;
     }
     const sheet = this.host.sheet();
@@ -318,6 +329,18 @@ export class ViewportLoader {
     const rowMargin = this.rowDirection < 0 ? drawn.r1 - target.r1 : target.r2 - drawn.r2;
     const colMargin = this.columnDirection < 0 ? drawn.c1 - target.c1 : target.c2 - drawn.c2;
     return rowsMoved > Math.max(rowMargin, 1) || (colsMoved > 0 && colsMoved > Math.max(colMargin, 1));
+  }
+
+  /**
+   * Whether the machine draws a scroll's frames too slowly to draw cells
+   * loaded on the way. The lower median of the last frames: one long frame,
+   * a load being drawn, does not make a fast machine slow, nor one short
+   * frame a slow machine fast.
+   */
+  private slowMachine(): boolean {
+    const sorted = [...this.frameTimes].sort((a, b) => a - b);
+    // Until a scroll's frames are timed, a machine counts as fast.
+    return (sorted[Math.floor((sorted.length - 1) / 2)] ?? 0) > SLOW_FRAME_MS;
   }
 
   /**
