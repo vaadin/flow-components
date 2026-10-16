@@ -1074,13 +1074,7 @@ public class Spreadsheet extends Component
     protected final MergedRegionContainer mergedRegionContainer = new MergedRegionLookup(
             this::getMergedRegions);
 
-    private final MergedRegionCascade mergedRegionCascade = new MergedRegionCascade(
-            this);
-
-    private final MergedRegionOperations mergedRegionOperations = new MergedRegionOperations(
-            this, mergedRegionCascade);
-
-    private final MergedRegionSynchronizer mergedRegionSynchronizer = new MergedRegionSynchronizer(
+    final MergedRegionOperations mergedRegionOperations = new MergedRegionOperations(
             this);
 
     /**
@@ -2571,7 +2565,7 @@ public class Spreadsheet extends Component
     }
 
     void updateMergedRegions() {
-        mergedRegionSynchronizer.rebuildFromPoi();
+        mergedRegionOperations.reload();
     }
 
     /**
@@ -2702,7 +2696,7 @@ public class Spreadsheet extends Component
      * {@link #reloadActiveSheetStyles()}.
      */
     public void reloadAllMergedRegions() {
-        SpreadsheetFactory.loadMergedRegions(this);
+        mergedRegionOperations.load();
     }
 
     /**

@@ -68,7 +68,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 
 /**
@@ -386,7 +385,7 @@ public class SpreadsheetFactory implements Serializable {
             calculateSheetSizes(spreadsheet, sheet);
             loadSheetOverlays(spreadsheet);
             loadSheetTables(spreadsheet);
-            loadMergedRegions(spreadsheet);
+            spreadsheet.mergedRegionOperations.load();
             loadFreezePane(spreadsheet);
             loadGrouping(spreadsheet);
             loadNamedRanges(spreadsheet);
@@ -1028,36 +1027,6 @@ public class SpreadsheetFactory implements Serializable {
             return hssf.getDrawingPatriarch();
         }
         return null;
-    }
-
-    /**
-     * Loads merged region(s) configuration for the currently active sheet and
-     * sets it into the shared state.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     */
-    static void loadMergedRegions(Spreadsheet spreadsheet) {
-        final Sheet sheet = spreadsheet.getActiveSheet();
-        spreadsheet.setMergedRegions(null);
-        spreadsheet.mergedRegionCounter = 0;
-        // All at once: XSSF finds a region by its index by going through
-        // those before it, so reading 20,000 regions one by one took 0.7 s.
-        List<CellRangeAddress> regions = sheet.getMergedRegions();
-        if (!regions.isEmpty()) {
-            ArrayList<MergedRegion> _mergedRegions = new ArrayList<MergedRegion>(
-                    regions.size());
-            for (CellRangeAddress cra : regions) {
-                MergedRegion mergedRegion = new MergedRegion();
-                mergedRegion.col1 = cra.getFirstColumn() + 1;
-                mergedRegion.col2 = cra.getLastColumn() + 1;
-                mergedRegion.row1 = cra.getFirstRow() + 1;
-                mergedRegion.row2 = cra.getLastRow() + 1;
-                mergedRegion.id = spreadsheet.mergedRegionCounter++;
-                _mergedRegions.add(mergedRegion);
-            }
-            spreadsheet.setMergedRegions(_mergedRegions);
-        }
     }
 
     /**
