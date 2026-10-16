@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
@@ -95,6 +96,37 @@ class QueryFieldOptionsToolTest {
                 resultFieldWithoutOptions.contains(unregisteredId),
                 "Error message should echo the offending id, got: "
                         + resultFieldWithoutOptions);
+    }
+
+    @Test
+    void queryFieldOptionsAnswersSelectFromItsListedItems() {
+        // A select with in-memory items lists its options inline in
+        // get_form_state; a lookup the LLM makes anyway gets the same labels,
+        // filtered, rather than an unknown-field error
+        var select = new SingleSelectField<String>();
+        select.setItems("A+", "A-", "AB+", "O+");
+        var controller = new FormAIController(new Div(select));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("A+\nAB+\nO+\n",
+                executeQueryFieldOptions(controller, select, "+", 10));
+        Assertions.assertEquals("AB+\n",
+                executeQueryFieldOptions(controller, select, "ab", 10));
+        Assertions.assertEquals("(no matches)\n",
+                executeQueryFieldOptions(controller, select, "Z", 10));
+    }
+
+    @Test
+    void queryFieldOptionsAnswersMultiSelectFromItsListedItems() {
+        var multi = new MultiSelectField<String>();
+        multi.setItems("Penicillin", "Latex", "Shellfish");
+        var controller = new FormAIController(new Div(multi));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("Shellfish\n",
+                executeQueryFieldOptions(controller, multi, "shell", 10));
+        Assertions.assertEquals("(no matches)\n",
+                executeQueryFieldOptions(controller, multi, "gluten", 10));
     }
 
     @Test
