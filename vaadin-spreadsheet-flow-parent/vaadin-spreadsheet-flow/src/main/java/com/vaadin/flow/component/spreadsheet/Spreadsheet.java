@@ -2549,9 +2549,18 @@ public class Spreadsheet extends Component
         for (int i = startRow; i <= endRow; i++) {
             Row row = sheet.getRow(i);
             if (row != null) {
-                getActiveSheet().removeRow(row);
+                // POI keeps a removed cell's link on the sheet, where a cell
+                // made at the same address later picks it up.
+                for (Cell cell : row) {
+                    cell.removeHyperlink();
+                    cell.removeCellComment();
+                }
+                sheet.removeRow(row);
             }
         }
+        // The formula evaluator still holds the cells removed, and a cell
+        // taken off its row fails when it is read.
+        getFormulaEvaluator().clearAllCachedResultValues();
         float[] _rowH = RowSizeOperations.heightsCovering(this, endRow);
         for (int i = startRow; i <= endRow; i++) {
             _rowH[i] = sheet.getDefaultRowHeightInPoints();
