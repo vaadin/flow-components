@@ -33,10 +33,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.internal.NodeOwner;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
@@ -68,9 +65,7 @@ public class MessageListItem implements Serializable {
     private String userImage;
     private Integer userColorIndex;
 
-    private StreamRegistration resourceRegistration;
-    private Registration pendingRegistration;
-    private Command pendingHandle;
+    private Registration resourceRegistration;
     private AbstractStreamResource imageResource;
 
     private Set<String> themeNames = new LinkedHashSet<>();
@@ -306,7 +301,7 @@ public class MessageListItem implements Serializable {
      * @see MessageListItem#setUserImageHandler(DownloadHandler)
      */
     public void setUserImage(String userImage) {
-        unsetResource();
+        setResource(null);
         this.userImage = userImage;
         propsChanged();
     }
@@ -546,7 +541,7 @@ public class MessageListItem implements Serializable {
      */
     public void setUserImageHandler(DownloadHandler downloadHandler) {
         if (downloadHandler == null) {
-            unsetResource();
+            setUserImageResource(null);
             return;
         }
         if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
@@ -573,21 +568,11 @@ public class MessageListItem implements Serializable {
      */
     @Deprecated(since = "24.8", forRemoval = true)
     public void setUserImageResource(AbstractStreamResource resource) {
-        imageResource = resource;
-
-        if (resource == null) {
-            unsetResource();
-            return;
-        }
-
-        // The following is the copy of functionality from the
-        // ElementAttributeMap and AvatarGroupItem.
-        doSetResource(resource);
-        if (getHost() != null
-                && getHost().getElement().getNode().isAttached()) {
-            registerResource(resource);
+        setResource(resource);
+        if (resource != null) {
+            doSetResource(resource);
         } else {
-            deferRegistration(resource);
+            this.userImage = null;
         }
         propsChanged();
     }
@@ -604,80 +589,30 @@ public class MessageListItem implements Serializable {
         this.userImage = targetUri.toASCIIString();
     }
 
-    private void unregisterResource() {
-        StreamRegistration registration = resourceRegistration;
-        Registration handle = pendingRegistration;
-        if (handle != null) {
-            handle.remove();
-        }
-        if (registration != null) {
-            registration.unregister();
-        }
-        this.userImage = null;
+    private void setResource(AbstractStreamResource resource) {
+        imageResource = resource;
+        bindResource();
     }
 
-    private void deferRegistration(AbstractStreamResource resource) {
-        if (pendingRegistration != null) {
+    /**
+     * Registers the image resource with the session of the host while the host
+     * is attached, and unregisters it when the host is detached, the item is
+     * removed from the host, or the resource is replaced.
+     */
+    private void bindResource() {
+        if (resourceRegistration != null) {
+            resourceRegistration.remove();
+            resourceRegistration = null;
+        }
+        if (getHost() == null || imageResource == null) {
             return;
         }
-
-        pendingHandle = () -> {
-            doSetResource(resource);
-            registerResource(resource);
-        };
-
-        if (getHost() != null) {
-            attachPendingRegistration(pendingHandle);
-            pendingHandle = null;
-        }
-    }
-
-    private void attachPendingRegistration(Command pendingHandle) {
-        if (getHost().getElement().getNode().isAttached()) {
-            pendingHandle.execute();
-            return;
-        }
-        Registration handle = getHost().getElement().getNode()
-                // Do not convert to lambda
-                .addAttachListener(pendingHandle);
-        pendingRegistration = handle;
-    }
-
-    private void registerResource(AbstractStreamResource resource) {
-        assert resourceRegistration == null;
-        StreamRegistration registration = getSession().getResourceRegistry()
-                .registerResource(resource);
-        resourceRegistration = registration;
-        Registration handle = pendingRegistration;
-        if (handle != null) {
-            handle.remove();
-        }
-        pendingRegistration = getHost().getElement().getNode()
-                .addDetachListener(
-                        // Do not convert to lambda
-                        new Command() {
-                            @Override
-                            public void execute() {
-                                MessageListItem.this.unsetResource();
-                            }
-                        });
-    }
-
-    private void unsetResource() {
-        imageResource = null;
-        StreamRegistration registration = resourceRegistration;
-        Optional<AbstractStreamResource> resource = Optional.empty();
-        if (registration != null) {
-            resource = Optional.ofNullable(registration.getResource());
-        }
-        unregisterResource();
-        resource.ifPresent(this::deferRegistration);
-    }
-
-    private VaadinSession getSession() {
-        NodeOwner owner = getHost().getElement().getNode().getOwner();
-        assert owner instanceof StateTree;
-        return ((StateTree) owner).getUI().getSessionOrThrow();
+        AbstractStreamResource resource = imageResource;
+        resourceRegistration = getHost().getElement().whenAttached(ui -> {
+            StreamRegistration registration = ui.getSessionOrThrow()
+                    .getResourceRegistry().registerResource(resource);
+            return registration::unregister;
+        });
     }
 
     private void propsChanged() {
@@ -688,10 +623,7 @@ public class MessageListItem implements Serializable {
 
     void setHost(MessageList host) {
         this.host = host;
-        if (pendingHandle != null) {
-            attachPendingRegistration(pendingHandle);
-            pendingHandle = null;
-        }
+        bindResource();
     }
 
     @JsonIgnore
