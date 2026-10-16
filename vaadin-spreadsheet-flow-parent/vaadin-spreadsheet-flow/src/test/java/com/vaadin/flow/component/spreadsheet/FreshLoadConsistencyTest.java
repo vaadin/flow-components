@@ -219,7 +219,14 @@ class FreshLoadConsistencyTest {
                     c -> c.known("property cellComment")),
             Map.entry("a hidden row given a height",
                     c -> c.known("property cellComment")),
-            Map.entry("a column hidden", c -> c.known("property cellComment")));
+            Map.entry("a column hidden", c -> c.known("property cellComment")),
+            Map.entry("a column dragged to nothing", c -> c.waste(POPUPS, 2)),
+            Map.entry("a row dragged to nothing", c -> c.waste(POPUPS, 2)),
+            Map.entry("a hidden row dragged open", c -> c.waste(POPUPS, 2)),
+            Map.entry("a hidden column given a width",
+                    c -> c.known("property cellComment", "property colW",
+                            "property overlays")
+                            .waste(AGAIN, 4, NOT_THERE, 7)));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -252,6 +259,14 @@ class FreshLoadConsistencyTest {
                                 "{\"colIndexes\": [6], \"newWidths\": [120]}")),
                 op("a row resized", event("rowsResized",
                         "{\"rowIndexes\": [11], \"newHeights\": [40]}")),
+                op("a column dragged to nothing",
+                        event("columnResized",
+                                "{\"colIndexes\": [7], \"newWidths\": [0]}")),
+                op("a row dragged to nothing",
+                        event("rowsResized",
+                                "{\"rowIndexes\": [19], \"newHeights\": [0]}")),
+                op("a hidden row dragged open", event("rowsResized",
+                        "{\"rowIndexes\": [18], \"newHeights\": [20]}")),
                 op("a column autofitted",
                         event("onColumnAutofit", "{\"columnIndex\": 7}")),
                 op("a row autofitted",
@@ -313,6 +328,9 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setRowHeight(17, 20f)),
                 op("a column hidden",
                         spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                steps("a hidden column given a width", api(
+                        spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                        api(spreadsheet -> spreadsheet.setColumnWidth(6, 80))),
                 op("a column's width set",
                         spreadsheet -> spreadsheet.setColumnWidth(5, 150)),
                 op("a row's height set",
