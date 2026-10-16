@@ -157,7 +157,8 @@ public class Tooltip implements Serializable {
             // auto-attached
             var tooltipHost = UI.getCurrentOrThrow().getElement();
             tooltipHost.appendChild(tooltip.tooltipElement);
-            tooltip.tooltipElement.executeJs("this.target = $0;", element);
+            tooltip.tooltipElement.executeJs(TooltipJs.class)
+                    .setTarget(element);
         };
         element.addAttachListener(e -> onTargetAttach.run());
         if (element.getNode().isAttached()) {

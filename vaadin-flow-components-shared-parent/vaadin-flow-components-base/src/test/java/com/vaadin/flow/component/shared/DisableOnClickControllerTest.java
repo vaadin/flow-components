@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.shared;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,6 +32,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
@@ -470,10 +472,12 @@ class DisableOnClickControllerTest {
 
     private List<Object> dumpClientSideDisabledValues() {
         return ui.dumpPendingJavaScriptInvocations().stream()
+                .filter(pending -> pending.getOwner() == component.getElement()
+                        .getNode())
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("this.disabled = $0"))
-                .map(invocation -> invocation.getParameters().get(0)).toList();
+                .map(JavaScriptInvocation::getJsCall).filter(Objects::nonNull)
+                .filter(call -> call.methodName().equals("setDisabled"))
+                .map(call -> call.arguments().get(0)).toList();
     }
 
     @Tag("test-parent")
