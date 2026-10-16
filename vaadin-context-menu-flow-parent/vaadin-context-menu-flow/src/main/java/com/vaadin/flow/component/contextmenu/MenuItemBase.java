@@ -277,6 +277,10 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         return disableOnClickController.isDisableOnClick();
     }
 
+    boolean isDisabledByClick() {
+        return disableOnClickController.isDisabledByClick();
+    }
+
     @Override
     public void setEnabled(boolean enabled) {
         HasComponents.super.setEnabled(enabled);
