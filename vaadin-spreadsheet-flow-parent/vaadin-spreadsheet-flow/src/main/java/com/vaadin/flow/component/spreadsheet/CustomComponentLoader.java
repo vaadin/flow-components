@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.poi.ss.util.CellReference;
+
 import com.vaadin.flow.component.Component;
 
 /**
@@ -125,6 +127,8 @@ final class CustomComponentLoader implements Serializable {
                 rowsWithComponents, nextCellKeyToEditor,
                 nextComponentIDtoCellKeysMap, firstRow, firstColumn, lastRow,
                 lastColumn);
+        dropEditorsOfCellsNotLoaded(nextCellKeyToEditor, verticalSplit,
+                horizontalSplit, firstRow, firstColumn, lastRow, lastColumn);
 
         // Keep registered custom editors that still claim a cell key, even
         // if they're not in the new scan output; unregister the rest.
@@ -150,6 +154,49 @@ final class CustomComponentLoader implements Serializable {
         if (!rowsWithComponents.isEmpty()) {
             rowSizer.applyHeightsFor(rowsWithComponents);
         }
+    }
+
+    /**
+     * Forgets the editors of cells no longer loaded, so that they are let go
+     * of: an editor is kept for its cell so that what the user typed into it
+     * survives the cell being drawn again, and keeping the editor of every cell
+     * ever loaded made the page grow without bound as the sheet scrolled - 161
+     * MB after 600 rows of a sheet with an editor in every cell. The selected
+     * cell keeps its editor wherever it is: what the user is typing into it is
+     * in no cell yet.
+     */
+    private void dropEditorsOfCellsNotLoaded(Map<String, Component> editors,
+            int verticalSplit, int horizontalSplit, int firstRow,
+            int firstColumn, int lastRow, int lastColumn) {
+        if (firstRow < 1 || firstColumn < 1 || lastRow < firstRow
+                || lastColumn < firstColumn) {
+            // Where the client is has not been reported yet.
+            return;
+        }
+        String selected = selectedCellKey();
+        editors.keySet().removeIf(key -> {
+            if (key.equals(selected)) {
+                return false;
+            }
+            int col = SpreadsheetUtil.getColumnIndexFromKey(key);
+            int row = SpreadsheetUtil.getRowFromKey(key);
+            boolean inLoadedRows = row >= firstRow && row <= lastRow;
+            boolean inFrozenRows = row <= verticalSplit;
+            boolean inLoadedColumns = col >= firstColumn && col <= lastColumn;
+            boolean inFrozenColumns = col <= horizontalSplit;
+            return !((inLoadedRows || inFrozenRows)
+                    && (inLoadedColumns || inFrozenColumns));
+        });
+    }
+
+    /** The selected cell's key, or null when no cell is selected. */
+    private String selectedCellKey() {
+        CellSelectionManager selection = spreadsheet.getCellSelectionManager();
+        CellReference selected = selection == null ? null
+                : selection.getSelectedCellReference();
+        return selected == null ? null
+                : SpreadsheetUtil.toKey(selected.getCol() + 1,
+                        selected.getRow() + 1);
     }
 
     /**

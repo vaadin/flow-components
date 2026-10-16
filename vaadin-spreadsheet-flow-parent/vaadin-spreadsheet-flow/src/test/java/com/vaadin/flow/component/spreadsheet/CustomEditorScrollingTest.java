@@ -8,7 +8,10 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -112,5 +115,47 @@ class CustomEditorScrollingTest {
 
         assertSame(b2, editorOf("col2 row2"));
         assertTrue(registered(b2));
+    }
+
+    // The page grew without bound when every editor ever made was kept: 161
+    // MB after 600 rows of a sheet with an editor in every cell.
+
+    @Test
+    void scrollingDown_letsGoOfTheEditorsOfTheRowsLeftBehind() {
+        for (int first = 1; first <= 271; first += 30) {
+            scrollTo(first, first + 29);
+        }
+
+        // 3,000 made, those of the last 30 rows by 10 columns kept.
+        assertEquals(3000, handedOut.size());
+        assertEquals(300, spreadsheet.getCellKeyToEditorMap().size());
+        assertEquals(300, handedOut.stream().filter(this::registered).count());
+    }
+
+    @Test
+    void aCellScrolledBackTo_isGivenANewEditor() {
+        scrollTo(1, 30);
+        Component b2 = editorOf("col2 row2");
+
+        scrollTo(101, 130);
+        assertFalse(registered(b2));
+        scrollTo(1, 30);
+
+        assertNotSame(b2, editorOf("col2 row2"));
+        assertTrue(registered(editorOf("col2 row2")));
+    }
+
+    @Test
+    void frozenRows_keepTheirEditorsAsTheRestScrolls() {
+        spreadsheet.createFreezePane(2, 0);
+        scrollTo(3, 30);
+        Component a1 = editorOf("col1 row1");
+        Component a10 = editorOf("col1 row10");
+
+        scrollTo(101, 130);
+
+        assertSame(a1, editorOf("col1 row1"));
+        assertTrue(registered(a1));
+        assertFalse(registered(a10));
     }
 }

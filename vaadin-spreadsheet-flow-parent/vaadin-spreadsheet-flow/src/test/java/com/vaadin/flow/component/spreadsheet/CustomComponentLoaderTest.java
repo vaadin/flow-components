@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -27,9 +29,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
@@ -213,6 +217,103 @@ class CustomComponentLoaderTest {
 
         verify(spreadsheet, never()).unRegisterCustomComponent(comp1);
         assertTrue(loader.getCustomComponents().contains(comp1));
+    }
+
+    // ----- load(): editors of cells no longer loaded ------------------------
+    // Keeping the editor of every cell ever loaded made the page grow without
+    // bound as the sheet scrolled.
+
+    /** Seeds the loader with one registered editor per cell key given. */
+    @SuppressWarnings("unchecked")
+    private Map<String, Component> seedEditors(String... keys) {
+        Map<String, Component> editors = new HashMap<>();
+        for (String key : keys) {
+            editors.put(key, mock(Component.class));
+        }
+        loader.setFactory(factory);
+        org.mockito.Mockito.doAnswer((Answer<Void>) inv -> {
+            HashSet<Component> next = inv.getArgument(2);
+            next.addAll(editors.values());
+            return null;
+        }).when(scanner).scan(any(), any(), any(), any(), any(), any(),
+                anyInt(), anyInt(), anyInt(), anyInt());
+        loader.load();
+        org.mockito.Mockito.reset(scanner);
+        when(spreadsheet.getCellKeyToEditorMap())
+                .thenReturn(new HashMap<>(editors));
+        org.mockito.Mockito.clearInvocations(spreadsheet);
+        return editors;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Component> editorMapSent() {
+        ArgumentCaptor<Map<String, Component>> sent = ArgumentCaptor
+                .forClass(Map.class);
+        verify(spreadsheet).setCellKeyToEditorMap(sent.capture());
+        return sent.getValue();
+    }
+
+    @Test
+    void load_editorOfACellNoLongerLoaded_isLetGo() {
+        Map<String, Component> editors = seedEditors("col9 row9",
+                "col20 row20");
+
+        loader.load();
+
+        assertEquals(Set.of("col9 row9"), editorMapSent().keySet());
+        verify(spreadsheet)
+                .unRegisterCustomComponent(editors.get("col20 row20"));
+        verify(spreadsheet, never())
+                .unRegisterCustomComponent(editors.get("col9 row9"));
+    }
+
+    @Test
+    void load_editorOfTheSelectedCell_isKeptWhereverItsCellIs() {
+        Map<String, Component> editors = seedEditors("col20 row20");
+        CellSelectionManager selection = mock(CellSelectionManager.class);
+        when(selection.getSelectedCellReference())
+                .thenReturn(new CellReference(19, 19));
+        when(spreadsheet.getCellSelectionManager()).thenReturn(selection);
+
+        loader.load();
+
+        assertEquals(Set.of("col20 row20"), editorMapSent().keySet());
+        verify(spreadsheet, never())
+                .unRegisterCustomComponent(editors.get("col20 row20"));
+    }
+
+    @Test
+    void load_editorsOfCellsInEveryPaneShown_areKept() {
+        // Rows 1-3 and columns A-B frozen; rows and columns 20-30 loaded.
+        when(spreadsheet.getLastFrozenRow()).thenReturn(3);
+        when(spreadsheet.getLastFrozenColumn()).thenReturn(2);
+        when(spreadsheet.getFirstRow()).thenReturn(20);
+        when(spreadsheet.getLastRow()).thenReturn(30);
+        when(spreadsheet.getFirstColumn()).thenReturn(20);
+        when(spreadsheet.getLastColumn()).thenReturn(30);
+        seedEditors("col1 row2", "col25 row2", "col1 row25", "col25 row25",
+                "col10 row10", "col25 row10", "col10 row25");
+
+        loader.load();
+
+        assertEquals(
+                Set.of("col1 row2", "col25 row2", "col1 row25", "col25 row25"),
+                editorMapSent().keySet());
+    }
+
+    @Test
+    void load_beforeTheClientHasSaidWhatItShows_letsNoEditorGo() {
+        when(spreadsheet.getFirstRow()).thenReturn(-1);
+        when(spreadsheet.getLastRow()).thenReturn(-1);
+        when(spreadsheet.getFirstColumn()).thenReturn(-1);
+        when(spreadsheet.getLastColumn()).thenReturn(-1);
+        Map<String, Component> editors = seedEditors("col20 row20");
+
+        loader.load();
+
+        assertEquals(Set.of("col20 row20"), editorMapSent().keySet());
+        verify(spreadsheet, never())
+                .unRegisterCustomComponent(editors.get("col20 row20"));
     }
 
     @Test
