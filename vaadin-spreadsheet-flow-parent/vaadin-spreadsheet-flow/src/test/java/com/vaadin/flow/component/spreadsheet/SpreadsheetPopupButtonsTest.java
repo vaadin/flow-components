@@ -48,6 +48,7 @@ class SpreadsheetPopupButtonsTest {
         ui.add(spreadsheet);
         clientShowsRows(1, 20);
         clientCalls();
+        clientPaintsNow();
     }
 
     /** As the client reports the rows it shows, of columns A-J. */
@@ -75,6 +76,16 @@ class SpreadsheetPopupButtonsTest {
         return calls;
     }
 
+    /**
+     * Whether the client was told to paint at the end of the round trip, since
+     * the last look, rather than a frame later.
+     */
+    private boolean clientPaintsNow() {
+        boolean dirty = spreadsheet.getElement().hasProperty("dirty");
+        spreadsheet.getElement().removeProperty("dirty");
+        return dirty;
+    }
+
     private boolean onTheSheet(PopupButton button) {
         return spreadsheet.getElement().equals(button.getElement().getParent());
     }
@@ -93,6 +104,22 @@ class SpreadsheetPopupButtonsTest {
 
         assertTrue(onTheSheet(button));
         assertEquals(List.of("addPopupButton"), clientCalls());
+    }
+
+    @Test
+    void settingAndRemovingAButtonShown_makesTheClientPaintAtOnce() {
+        spreadsheet.setPopup("B2", button());
+        assertTrue(clientPaintsNow());
+
+        spreadsheet.setPopup("B2", null);
+        assertTrue(clientPaintsNow());
+    }
+
+    @Test
+    void aButtonOnACellNotShown_doesNotMakeTheClientPaint() {
+        spreadsheet.setPopup("B100", button());
+
+        assertFalse(clientPaintsNow());
     }
 
     @Test
