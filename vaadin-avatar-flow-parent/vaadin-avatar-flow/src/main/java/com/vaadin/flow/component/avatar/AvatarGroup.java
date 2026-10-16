@@ -187,6 +187,10 @@ public class AvatarGroup extends Component
 
         /**
          * Gets the image url that was set for the avatar.
+         * <p>
+         * When the image is set with {@link #setImageHandler(DownloadHandler)},
+         * this returns the URL that the handler is served from. The URL changes
+         * when the item is added to another avatar group.
          *
          * @return the image url
          */
@@ -197,6 +201,10 @@ public class AvatarGroup extends Component
 
         /**
          * Gets the image that was set for the avatar.
+         * <p>
+         * When the image is set with {@link #setImageHandler(DownloadHandler)},
+         * this returns the resource that serves the handler. A new resource is
+         * created when the item is added to another avatar group.
          *
          * @return the image resource value or {@code null} if the resource has
          *         not been set
@@ -237,6 +245,12 @@ public class AvatarGroup extends Component
          * <code>inline</code> for pre-defined download handlers, created by
          * factory methods in {@link DownloadHandler}, as well as for other
          * {@link AbstractDownloadHandler} implementations.
+         * <p>
+         * The handler is registered as a resource of the avatar group that the
+         * item belongs to while the group is attached, and is unregistered when
+         * the group is detached or the item is removed from the group. When the
+         * item is added to another avatar group, the handler is served from a
+         * new resource with a new URL.
          *
          * @see AvatarGroupItem#setImage(String)
          * @param downloadHandler
@@ -261,6 +275,10 @@ public class AvatarGroup extends Component
          * <p>
          * Setting the image as a resource with this method resets the image URL
          * that was set with {@link AvatarGroupItem#setImage(String)}
+         * <p>
+         * The resource is registered with the session while the avatar group
+         * that the item belongs to is attached, and is unregistered when the
+         * group is detached or the item is removed from the group.
          *
          * @see AvatarGroupItem#setImage(String)
          * @param resource

@@ -279,7 +279,8 @@ public class MessageListItem implements Serializable {
      * <p>
      * If the image is set as a stream resource with
      * {@link MessageListItem#setUserImageHandler(DownloadHandler)}, this method
-     * will return a URL that is generated for that resource.
+     * will return a URL that is generated for that resource. The URL changes
+     * when the item is added to another message list.
      *
      * @return the URL to the message sender's image, or {@code null} if none is
      *         set
@@ -513,6 +514,10 @@ public class MessageListItem implements Serializable {
 
     /**
      * Gets the image resource of the message sender's avatar.
+     * <p>
+     * When the image is set with {@link #setUserImageHandler(DownloadHandler)},
+     * this returns the resource that serves the handler. A new resource is
+     * created when the item is added to another message list.
      *
      * @return the image resource value, or {@code null} if the image has not
      *         been set, or if the image is set with a URL by using
@@ -533,6 +538,12 @@ public class MessageListItem implements Serializable {
      * for pre-defined download handlers, created by factory methods in
      * {@link DownloadHandler}, as well as for other
      * {@link AbstractDownloadHandler} implementations.
+     * <p>
+     * The handler is registered as a resource of the message list that the item
+     * belongs to while the list is attached, and is unregistered when the list
+     * is detached or the item is removed from the list. When the item is added
+     * to another message list, the handler is served from a new resource with a
+     * new URL.
      *
      * @param downloadHandler
      *            download handler for the image resource, or {@code null} to
@@ -555,6 +566,10 @@ public class MessageListItem implements Serializable {
      * <p>
      * Setting the image as a resource with this method overrides the image URL
      * set with {@link MessageListItem#setUserImage(String)}.
+     * <p>
+     * The resource is registered with the session while the message list that
+     * the item belongs to is attached, and is unregistered when the list is
+     * detached or the item is removed from the list.
      *
      * @param resource
      *            the image resource, or {@code null} to remove the resource
