@@ -797,59 +797,52 @@ public class CellValueManager implements Serializable {
      */
     protected void loadCellData(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
-        try {
-            int verticalSplitPosition = spreadsheet.getLastFrozenRow();
-            int horizontalSplitPosition = spreadsheet.getLastFrozenColumn();
-            if (verticalSplitPosition > 0 && horizontalSplitPosition > 0
-                    && !topLeftCellsLoaded) { // top left pane
-                ArrayList<CellData> topLeftData = loadCellDataForRowAndColumnRange(
-                        1, 1, verticalSplitPosition, horizontalSplitPosition);
-                topLeftCellsLoaded = true;
-                if (!topLeftData.isEmpty()) {
-                    spreadsheet.getRpcProxy()
-                            .updateTopLeftCellValues(topLeftData);
-                }
+        int verticalSplitPosition = spreadsheet.getLastFrozenRow();
+        int horizontalSplitPosition = spreadsheet.getLastFrozenColumn();
+        if (verticalSplitPosition > 0 && horizontalSplitPosition > 0
+                && !topLeftCellsLoaded) { // top left pane
+            ArrayList<CellData> topLeftData = loadCellDataForRowAndColumnRange(
+                    1, 1, verticalSplitPosition, horizontalSplitPosition);
+            topLeftCellsLoaded = true;
+            if (!topLeftData.isEmpty()) {
+                spreadsheet.getRpcProxy().updateTopLeftCellValues(topLeftData);
             }
+        }
 
-            // The other panes follow the rows and columns shown, which are
-            // not known until the client reports them.
-            if (verticalSplitPosition > 0) { // top right pane
-                ViewportBounds.scanOnTheSheet(1, firstColumn,
-                        verticalSplitPosition, lastColumn, (r1, c1, r2, c2) -> {
-                            ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
-                                    r1, c1, r2, c2);
-                            if (!topRightData.isEmpty()) {
-                                spreadsheet.getRpcProxy()
-                                        .updateTopRightCellValues(topRightData);
-                            }
-                        });
-            }
-            if (horizontalSplitPosition > 0) { // bottom left pane
-                ViewportBounds.scanOnTheSheet(firstRow, 1, lastRow,
-                        horizontalSplitPosition, (r1, c1, r2, c2) -> {
-                            ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
-                                    r1, c1, r2, c2);
-                            if (!bottomLeftData.isEmpty()) {
-                                spreadsheet.getRpcProxy()
-                                        .updateBottomLeftCellValues(
-                                                bottomLeftData);
-                            }
-                        });
-            }
-
-            ViewportBounds.scanOnTheSheet(firstRow, firstColumn, lastRow,
+        // The other panes follow the rows and columns shown, which are
+        // not known until the client reports them.
+        if (verticalSplitPosition > 0) { // top right pane
+            ViewportBounds.scanOnTheSheet(1, firstColumn, verticalSplitPosition,
                     lastColumn, (r1, c1, r2, c2) -> {
-                        ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
+                        ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
                                 r1, c1, r2, c2);
-                        if (!bottomRightData.isEmpty()) {
+                        if (!topRightData.isEmpty()) {
                             spreadsheet.getRpcProxy()
-                                    .updateBottomRightCellValues(
-                                            bottomRightData);
+                                    .updateTopRightCellValues(topRightData);
                         }
                     });
-        } catch (NullPointerException npe) {
-            LOGGER.trace(npe.getMessage(), npe);
         }
+        if (horizontalSplitPosition > 0) { // bottom left pane
+            ViewportBounds.scanOnTheSheet(firstRow, 1, lastRow,
+                    horizontalSplitPosition, (r1, c1, r2, c2) -> {
+                        ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
+                                r1, c1, r2, c2);
+                        if (!bottomLeftData.isEmpty()) {
+                            spreadsheet.getRpcProxy()
+                                    .updateBottomLeftCellValues(bottomLeftData);
+                        }
+                    });
+        }
+
+        ViewportBounds.scanOnTheSheet(firstRow, firstColumn, lastRow,
+                lastColumn, (r1, c1, r2, c2) -> {
+                    ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
+                            r1, c1, r2, c2);
+                    if (!bottomRightData.isEmpty()) {
+                        spreadsheet.getRpcProxy()
+                                .updateBottomRightCellValues(bottomRightData);
+                    }
+                });
     }
 
     /**
