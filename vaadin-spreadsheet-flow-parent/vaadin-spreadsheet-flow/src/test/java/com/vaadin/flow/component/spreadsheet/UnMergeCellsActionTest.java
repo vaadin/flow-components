@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.flow.component.spreadsheet.action.UnMergeCellsAction;
@@ -93,5 +95,34 @@ class UnMergeCellsActionTest {
 
         assertEquals(List.of("A1:B2", "G1:H1"), poiRegions());
         assertEquals(List.of("A1:B2", "G1:H1"), clientRegions());
+    }
+
+    @Test
+    void unmerging_removesEveryRegionStartingAtTheCell_alsoOneRightAfterIt() {
+        // Removing a region moved the next one back to its index, and that
+        // one was passed over.
+        open(List.of("A1:B2", "D4:E5", "D4:F6", "G1:H1"));
+
+        unmerge("D4:E5");
+
+        assertEquals(List.of("A1:B2", "G1:H1"), poiRegions());
+        assertEquals(List.of("A1:B2", "G1:H1"), clientRegions());
+    }
+
+    @Test
+    void unmerging_readsPoisRegionsAllAtOnce() {
+        // XSSF finds a region by its index by going through those before it.
+        Sheet spied = Mockito.spy(new XSSFWorkbook().createSheet());
+        for (String region : REGIONS) {
+            spied.addMergedRegion(CellRangeAddress.valueOf(region));
+        }
+        Mockito.clearInvocations(spied);
+        spreadsheet = Mockito.mock(Spreadsheet.class);
+        Mockito.when(spreadsheet.getActiveSheet()).thenReturn(spied);
+
+        unmerge("D4:E5");
+
+        Mockito.verify(spreadsheet).removeMergedRegion(1);
+        Mockito.verify(spied, Mockito.never()).getMergedRegion(anyInt());
     }
 }

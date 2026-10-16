@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.command.RowInsertOrDeleteCommand;
@@ -76,5 +78,22 @@ class MergedRegionRowUndoTest {
         List<String> all = List.of("A1:B1", "A3:B3", "A6:C6", "D3:E3");
         assertEquals(all, poiRegions());
         assertEquals(all, clientRegions());
+    }
+
+    @Test
+    void rowDeleted_poisRegionsAreReadAllAtOnce() {
+        // XSSF finds a region by its index by going through those before it.
+        Sheet spied = Mockito.spy(new XSSFWorkbook().createSheet());
+        for (String region : List.of("A1:B1", "A3:B3", "D3:E3")) {
+            spied.addMergedRegion(CellRangeAddress.valueOf(region));
+        }
+        Mockito.clearInvocations(spied);
+        Spreadsheet mocked = Mockito.mock(Spreadsheet.class);
+        Mockito.when(mocked.getActiveSheet()).thenReturn(spied);
+
+        new RowInsertOrDeleteCommand(mocked, new CellRangeAddress(2, 2, 0, 0))
+                .execute();
+
+        Mockito.verify(spied, Mockito.never()).getMergedRegion(anyInt());
     }
 }

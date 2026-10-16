@@ -70,8 +70,9 @@ class RowData implements Serializable {
         }
 
         Sheet sheet = spreadsheet.getActiveSheet();
-        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
-            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+        // All at once: XSSF finds a region by its index, and counts them, by
+        // going through them from the start.
+        for (CellRangeAddress mergedRegion : sheet.getMergedRegions()) {
             if (mergedRegion.getFirstRow() == rowIndex) {
                 mergedCells.add(mergedRegion);
             }

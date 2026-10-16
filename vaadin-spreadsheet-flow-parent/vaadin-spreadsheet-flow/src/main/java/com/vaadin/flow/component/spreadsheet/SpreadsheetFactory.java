@@ -1042,7 +1042,7 @@ public class SpreadsheetFactory implements Serializable {
         spreadsheet.setMergedRegions(null);
         spreadsheet.mergedRegionCounter = 0;
         // All at once: XSSF finds a region by its index by going through
-        // those before it, which took seconds for 20,000 regions.
+        // those before it, so reading 20,000 regions one by one took 0.7 s.
         List<CellRangeAddress> regions = sheet.getMergedRegions();
         if (!regions.isEmpty()) {
             ArrayList<MergedRegion> _mergedRegions = new ArrayList<MergedRegion>(

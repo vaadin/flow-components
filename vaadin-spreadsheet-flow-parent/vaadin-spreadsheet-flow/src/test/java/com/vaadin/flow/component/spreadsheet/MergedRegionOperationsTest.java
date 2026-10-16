@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -300,6 +301,18 @@ class MergedRegionOperationsTest {
 
         assertEquals(List.of("A1:B2", "D1:E2", "C1:C2"), poiRegions());
         assertEquals(List.of("A1:B2", "D1:E2", "C1:C2"), clientRegions());
+    }
+
+    @Test
+    void addRegion_readsPoisRegionsAllAtOnce() {
+        // XSSF finds a region by its index by going through those before it:
+        // read one by one, merging cells on a sheet of 20,000 regions took
+        // 3.5 s.
+        bothHave(range(0, 0, 1, 1), range(0, 3, 1, 4), range(3, 0, 4, 1));
+
+        operations.addRegion(range(0, 0, 5, 2));
+
+        verify(sheet, never()).getMergedRegion(anyInt());
     }
 
     // ----- removeRegion -----------------------------------------------------

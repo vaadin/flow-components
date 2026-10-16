@@ -50,9 +50,12 @@ final class MergedRegionOperations implements Serializable {
      */
     void addRegion(CellRangeAddress range) {
         Sheet sheet = spreadsheet.getActiveSheet();
+        // All at once: XSSF finds a region by its index, and counts them, by
+        // going through them from the start, so merging cells on a sheet of
+        // 20,000 regions took 3.5 s. The index is where the region is now
+        // that those removed before it are gone.
         int index = 0;
-        while (index < sheet.getNumMergedRegions()) {
-            CellRangeAddress existing = sheet.getMergedRegion(index);
+        for (CellRangeAddress existing : sheet.getMergedRegions()) {
             int intersect = CellRangeUtil.intersect(range, existing);
             if (intersect == CellRangeUtil.INSIDE) {
                 removeRegionFromPoiAndCache(index);

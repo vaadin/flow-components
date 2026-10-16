@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet.action;
 
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -65,14 +67,20 @@ public class UnMergeCellsAction extends SpreadsheetAction {
             SelectionChangeEvent event) {
         CellRangeAddress selectedCellReference = event
                 .getSelectedCellMergedRegion();
-        Sheet sheet = spreadsheet.getActiveSheet();
-        for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
-            CellRangeAddress mergedRegion = sheet.getMergedRegion(i);
+        // All at once: XSSF finds a region by its index, and counts them, by
+        // going through them from the start. Each one removed moves those
+        // after it back by one.
+        List<CellRangeAddress> mergedRegions = spreadsheet.getActiveSheet()
+                .getMergedRegions();
+        int removed = 0;
+        for (int i = 0; i < mergedRegions.size(); i++) {
+            CellRangeAddress mergedRegion = mergedRegions.get(i);
             if (selectedCellReference.getFirstColumn() == mergedRegion
                     .getFirstColumn()
                     && selectedCellReference.getFirstRow() == mergedRegion
                             .getFirstRow()) {
-                spreadsheet.removeMergedRegion(i);
+                spreadsheet.removeMergedRegion(i - removed);
+                removed++;
             }
         }
     }
