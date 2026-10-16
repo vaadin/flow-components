@@ -16,6 +16,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRow;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -285,15 +286,9 @@ class GroupingUtil implements Serializable {
     }
 
     private static boolean isRowsInverted(XSSFSheet sheet) {
-        boolean inverted = false;
-        try {
-            inverted = sheet.getCTWorksheet().getSheetPr().getOutlinePr()
-                    .isSetSummaryBelow();
-        } catch (NullPointerException IGNORE) {
-            // fine
-        }
-
-        return inverted;
+        CTSheetPr properties = sheet.getCTWorksheet().getSheetPr();
+        return properties != null && properties.getOutlinePr() != null
+                && properties.getOutlinePr().isSetSummaryBelow();
     }
 
     private static int writeHidden(XSSFSheet sheet, XSSFRow xRow, int rowIndex,

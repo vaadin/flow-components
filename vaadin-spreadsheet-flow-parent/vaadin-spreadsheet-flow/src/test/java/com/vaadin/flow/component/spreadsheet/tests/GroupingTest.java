@@ -9,11 +9,14 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetPr;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
@@ -35,6 +38,22 @@ class GroupingTest {
 
     @Test
     void collapseRow_rowHidden() {
+        setActiveSheet(SHEET9);
+
+        collapseRow(SHEET9_ROW_GROUP);
+        Assertions.assertTrue(spreadsheet.isRowHidden(SHEET9_ROW));
+    }
+
+    @Test
+    void collapseRow_onASheetWithPropertiesButNoOutlineSettings_rowHidden() {
+        XSSFSheet sheet = (XSSFSheet) spreadsheet.getWorkbook()
+                .getSheetAt(SHEET9);
+        CTWorksheet worksheet = sheet.getCTWorksheet();
+        CTSheetPr properties = worksheet.isSetSheetPr() ? worksheet.getSheetPr()
+                : worksheet.addNewSheetPr();
+        if (properties.isSetOutlinePr()) {
+            properties.unsetOutlinePr();
+        }
         setActiveSheet(SHEET9);
 
         collapseRow(SHEET9_ROW_GROUP);
