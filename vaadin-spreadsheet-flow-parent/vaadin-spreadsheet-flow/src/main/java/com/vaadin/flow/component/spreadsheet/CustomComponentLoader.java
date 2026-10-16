@@ -41,20 +41,11 @@ final class CustomComponentLoader implements Serializable {
 
     private final Spreadsheet spreadsheet;
     private Set<Component> customComponents = new HashSet<>();
-    private SpreadsheetComponentFactory factory;
     /** The rows grown for components on the last load, 0-based. */
     private Set<Integer> grownRows;
 
     CustomComponentLoader(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-    }
-
-    SpreadsheetComponentFactory getFactory() {
-        return factory;
-    }
-
-    void setFactory(SpreadsheetComponentFactory factory) {
-        this.factory = factory;
     }
 
     Set<Component> getCustomComponents() {
@@ -80,7 +71,7 @@ final class CustomComponentLoader implements Serializable {
             // for the selected cell.
             spreadsheet.setCellKeyToEditorMap(null);
         }
-        if (factory == null) {
+        if (spreadsheet.getSpreadsheetComponentFactory() == null) {
             // No factory -> clear all
             spreadsheet.setCellKeyToEditorMap(null);
             spreadsheet.setComponentIDtoCellKeysMap(null);
@@ -140,6 +131,8 @@ final class CustomComponentLoader implements Serializable {
             Map<String, Component> cellKeyToEditor,
             HashMap<String, String> componentIDtoCellKeysMap, int row1,
             int col1, int row2, int col2) {
+        SpreadsheetComponentFactory factory = spreadsheet
+                .getSpreadsheetComponentFactory();
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = spreadsheet.getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {

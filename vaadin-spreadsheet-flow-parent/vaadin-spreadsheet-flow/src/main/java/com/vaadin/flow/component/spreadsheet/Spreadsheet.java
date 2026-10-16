@@ -951,8 +951,6 @@ public class Spreadsheet extends Component
      */
     private CellValueManager valueManager;
 
-    private final ViewportBounds viewportBounds = new ViewportBounds();
-
     private final CellRangeNormalizer cellRangeNormalizer = new CellRangeNormalizer(
             this);
 
@@ -979,9 +977,10 @@ public class Spreadsheet extends Component
     /** What lives as long as the workbook shown, made anew for each. */
     private WorkbookScope workbookScope;
 
-    /** image sizes need to be recalculated on column/row resizing */
-    final SheetOverlayManager sheetOverlayManager = new SheetOverlayManager(
-            this);
+    /** What lives as long as the sheet shown, made anew for each. */
+    private SheetScope sheetScope = new SheetScope(this);
+
+    private SpreadsheetComponentFactory componentFactory;
 
     private String defaultPercentageFormat = "0.00%";
 
@@ -1006,9 +1005,6 @@ public class Spreadsheet extends Component
             this);
 
     private final ColumnAutofitter columnAutofitter = new ColumnAutofitter(
-            this);
-
-    private final CustomComponentLoader customComponentLoader = new CustomComponentLoader(
             this);
 
     private final SheetOperations sheetOperations = new SheetOperations(this);
@@ -1355,7 +1351,7 @@ public class Spreadsheet extends Component
      * @return Index of first visible column, 1-based
      */
     public int getFirstColumn() {
-        return viewportBounds.getFirstColumn();
+        return sheetScope.viewport.getFirstColumn();
     }
 
     /**
@@ -1364,7 +1360,7 @@ public class Spreadsheet extends Component
      * @return Index of last visible column, 1-based
      */
     public int getLastColumn() {
-        return viewportBounds.getLastColumn();
+        return sheetScope.viewport.getLastColumn();
     }
 
     /**
@@ -1373,7 +1369,7 @@ public class Spreadsheet extends Component
      * @return Index of first visible row, 1-based
      */
     public int getFirstRow() {
-        return viewportBounds.getFirstRow();
+        return sheetScope.viewport.getFirstRow();
     }
 
     /**
@@ -1382,7 +1378,7 @@ public class Spreadsheet extends Component
      * @return Index of last visible row, 1-based
      */
     public int getLastRow() {
-        return viewportBounds.getLastRow();
+        return sheetScope.viewport.getLastRow();
     }
 
     /**
@@ -1425,8 +1421,8 @@ public class Spreadsheet extends Component
      */
     public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
-        sheetOverlayManager.clear();
-        sheetOverlayManager.loadOrUpdate();
+        sheetScope.overlays.clear();
+        sheetScope.overlays.loadOrUpdate();
     }
 
     /**
@@ -1524,9 +1520,10 @@ public class Spreadsheet extends Component
         lastColumn = lastWithShownCount(firstColumn, lastColumn,
                 MAX_SHOWN_COLUMNS_PER_SCROLL,
                 column -> isColumnHidden(column - 1));
-        if (reloadCellDataOnNextScroll || viewportBounds.hasChanged(firstRow,
-                lastRow, firstColumn, lastColumn)) {
-            viewportBounds.update(firstRow, lastRow, firstColumn, lastColumn);
+        if (reloadCellDataOnNextScroll || sheetScope.viewport
+                .hasChanged(firstRow, lastRow, firstColumn, lastColumn)) {
+            sheetScope.viewport.update(firstRow, lastRow, firstColumn,
+                    lastColumn);
             loadCells(firstRow, firstColumn, lastRow, lastColumn);
         }
         if (initialSheetSelection != null) {
@@ -1680,7 +1677,7 @@ public class Spreadsheet extends Component
             // may no longer be valid after a detach/attach. Remove all
             // overlays and reload them (with updated node id's).
             overlays.get().clear();
-            sheetOverlayManager.loadOrUpdate();
+            sheetScope.overlays.loadOrUpdate();
         }
 
         if (!componentIDtoCellKeysMap.get().isEmpty()
@@ -2558,8 +2555,8 @@ public class Spreadsheet extends Component
         updateMergedRegions();
         valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);
 
-        if (sheetOverlayManager.hasOverlays()) {
-            sheetOverlayManager.markReloadFromPoi();
+        if (sheetScope.overlays.hasOverlays()) {
+            sheetScope.overlays.markReloadFromPoi();
         }
         // Deleting rows moves cells, and an editor is cached against a cell
         // key — one left in place would end up on the wrong cell.
@@ -2748,12 +2745,12 @@ public class Spreadsheet extends Component
             SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
             // The heights read from the sheet leave out the room the rows
             // with components were given.
-            customComponentLoader.regrowRows();
+            sheetScope.components.regrowRows();
         }
         if (visibilityChanged) {
-            if (sheetOverlayManager.hasOverlays()) {
-                sheetOverlayManager.markReloadFromPoi();
-                sheetOverlayManager.loadOrUpdate();
+            if (sheetScope.overlays.hasOverlays()) {
+                sheetScope.overlays.markReloadFromPoi();
+                sheetScope.overlays.loadOrUpdate();
             }
             cellCommentLoader.load();
         }
@@ -2950,10 +2947,11 @@ public class Spreadsheet extends Component
      *            to keep the existing ones so their state survives
      */
     void reloadVisibleCellContents(boolean recreateEditors) {
-        customComponentLoader.load(recreateEditors);
-        updateRowAndColumnRangeCellData(viewportBounds.getFirstRow(),
-                viewportBounds.getFirstColumn(), viewportBounds.getLastRow(),
-                viewportBounds.getLastColumn());
+        sheetScope.components.load(recreateEditors);
+        updateRowAndColumnRangeCellData(sheetScope.viewport.getFirstRow(),
+                sheetScope.viewport.getFirstColumn(),
+                sheetScope.viewport.getLastRow(),
+                sheetScope.viewport.getLastColumn());
     }
 
     /*
@@ -2989,7 +2987,6 @@ public class Spreadsheet extends Component
         valueManager.clearCachedContent();
         selectionManager.clear();
         historyManager.clear();
-        sheetOverlayManager.clear();
     }
 
     void setInternalWorkbook(Workbook workbook) {
@@ -3019,6 +3016,11 @@ public class Spreadsheet extends Component
      */
     void showSheet(int poiIndex) {
         sheetOperations.showSheet(poiIndex);
+    }
+
+    /** The overlays of the sheet shown. */
+    SheetOverlayManager overlays() {
+        return sheetScope.overlays;
     }
 
     /** The pop-up buttons of the workbook shown. */
@@ -3068,8 +3070,9 @@ public class Spreadsheet extends Component
         selectionManager.clear();
         valueManager.clearCachedContent();
 
-        viewportBounds.update(-1, -1, -1, -1);
-        sheetOverlayManager.clear();
+        // What the client has of the last sheet goes with its scope.
+        sheetScope.close();
+        sheetScope = new SheetScope(this);
 
         clientReloadFlag.markPending(this);
 
@@ -3085,8 +3088,6 @@ public class Spreadsheet extends Component
         setCellCommentAuthors(null);
         setVisibleCellComments(null);
         setInvalidFormulaCells(null);
-
-        customComponentLoader.unloadAll();
 
         popupButtons().detachAll();
 
@@ -3122,8 +3123,7 @@ public class Spreadsheet extends Component
         }
         CellReference selectedCellReference = selectionManager
                 .getSelectedCellReference();
-        SpreadsheetComponentFactory factory = customComponentLoader
-                .getFactory();
+        SpreadsheetComponentFactory factory = componentFactory;
         if (selectedCellReference != null && factory != null) {
             final short col = selectedCellReference.getCol();
             final int row = selectedCellReference.getRow();
@@ -3381,7 +3381,7 @@ public class Spreadsheet extends Component
         // etc. always
         hyperlinkLoader.load();
         cellCommentLoader.load();
-        sheetOverlayManager.loadOrUpdate();
+        sheetScope.overlays.loadOrUpdate();
         loadPopupButtons();
         // custom components not updated here on purpose
 
@@ -3406,7 +3406,7 @@ public class Spreadsheet extends Component
         loadCustomComponents();
         hyperlinkLoader.load();
         cellCommentLoader.load();
-        sheetOverlayManager.loadOrUpdate();
+        sheetScope.overlays.loadOrUpdate();
         loadTables();
         loadPopupButtons();
         valueManager.loadCellData(firstRow, firstColumn, lastRow, lastColumn);
@@ -3471,7 +3471,7 @@ public class Spreadsheet extends Component
      * new ones.
      */
     void loadCustomComponents() {
-        customComponentLoader.load(false);
+        sheetScope.components.load(false);
     }
 
     /**
@@ -3480,7 +3480,7 @@ public class Spreadsheet extends Component
      * {@link CustomComponentLoader#load(boolean)}.
      */
     void loadCustomComponentsRecreatingEditors() {
-        customComponentLoader.load(true);
+        sheetScope.components.load(true);
     }
 
     static String getComponentNodeId(Component component) {
@@ -3500,17 +3500,17 @@ public class Spreadsheet extends Component
      */
     /** Scans the cells shown, pane by pane. */
     void forEachPaneShown(ViewportBounds.PaneScan scan) {
-        viewportBounds.forEachPane(getLastFrozenRow(), getLastFrozenColumn(),
-                scan);
+        sheetScope.viewport.forEachPane(getLastFrozenRow(),
+                getLastFrozenColumn(), scan);
     }
 
     boolean isCellVisible(int row, int col) {
         int verticalSplitPosition = getLastFrozenRow();
         int horizontalSplitPosition = getLastFrozenColumn();
-        int firstRow = viewportBounds.getFirstRow();
-        int lastRow = viewportBounds.getLastRow();
-        int firstColumn = viewportBounds.getFirstColumn();
-        int lastColumn = viewportBounds.getLastColumn();
+        int firstRow = sheetScope.viewport.getFirstRow();
+        int lastRow = sheetScope.viewport.getLastRow();
+        int firstColumn = sheetScope.viewport.getFirstColumn();
+        int lastColumn = sheetScope.viewport.getLastColumn();
         return (col >= firstColumn && col <= lastColumn && row >= firstRow
                 && row <= lastRow)
                 || (col >= 1 && col <= horizontalSplitPosition && row >= 1
@@ -3545,17 +3545,17 @@ public class Spreadsheet extends Component
      */
     public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
-        customComponentLoader.setFactory(customComponentFactory);
+        componentFactory = customComponentFactory;
         // The factory is asked about every cell loaded: the client then
         // loads only the cells it draws.
         hasComponentFactory.set(customComponentFactory != null);
-        if (viewportBounds.getFirstRow() != -1) {
+        if (sheetScope.viewport.getFirstRow() != -1) {
             // A new factory produces its own editors, so recreate them rather
             // than reuse the previous factory's by cell key.
             loadCustomComponentsRecreatingEditors();
             loadCustomEditorOnSelectedCell();
         } else {
-            customComponentLoader.unloadAll();
+            sheetScope.components.unloadAll();
         }
     }
 
@@ -3565,7 +3565,7 @@ public class Spreadsheet extends Component
      * @return The currently used component factory.
      */
     SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
-        return customComponentLoader.getFactory();
+        return componentFactory;
     }
 
     /**
@@ -4596,9 +4596,9 @@ public class Spreadsheet extends Component
         SpreadsheetFactory.calculateSheetSizes(this, activeSheet);
         SpreadsheetFactory.loadGrouping(this);
         reloadActiveSheetStyles();
-        if (sheetOverlayManager.hasOverlays()) {
-            sheetOverlayManager.markReloadFromPoi();
-            sheetOverlayManager.loadOrUpdate();
+        if (sheetScope.overlays.hasOverlays()) {
+            sheetScope.overlays.markReloadFromPoi();
+            sheetScope.overlays.loadOrUpdate();
         }
         updateMarkedCells();
     }
@@ -4757,7 +4757,7 @@ public class Spreadsheet extends Component
     }
 
     public void addSheetOverlay(SheetOverlayWrapper image) {
-        sheetOverlayManager.add(image);
+        sheetScope.overlays.add(image);
     }
 
     /**

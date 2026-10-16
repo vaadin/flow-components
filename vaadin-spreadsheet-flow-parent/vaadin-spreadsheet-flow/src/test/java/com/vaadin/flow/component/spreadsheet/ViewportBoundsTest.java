@@ -36,14 +36,13 @@ class ViewportBoundsTest {
     }
 
     @Test
-    void freshBounds_allFourIndicesAreZero() {
-        // Pin: a never-updated ViewportBounds starts with primitive int
-        // defaults (0). Spreadsheet.reloadActiveSheetData treats this as
-        // "viewport not yet known" by calling update(-1, -1, -1, -1).
-        assertEquals(0, bounds.getFirstRow());
-        assertEquals(0, bounds.getLastRow());
-        assertEquals(0, bounds.getFirstColumn());
-        assertEquals(0, bounds.getLastColumn());
+    void freshBounds_areNotReported_everyBoundIsMinusOne() {
+        // A sheet shown has a new ViewportBounds, which stays at -1 until
+        // the client reports where it is.
+        assertEquals(-1, bounds.getFirstRow());
+        assertEquals(-1, bounds.getLastRow());
+        assertEquals(-1, bounds.getFirstColumn());
+        assertEquals(-1, bounds.getLastColumn());
     }
 
     @Test

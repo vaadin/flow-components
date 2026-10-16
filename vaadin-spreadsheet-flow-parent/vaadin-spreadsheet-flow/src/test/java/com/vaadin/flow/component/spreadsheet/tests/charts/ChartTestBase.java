@@ -88,12 +88,15 @@ public class ChartTestBase {
     private Set<SheetOverlayWrapper> getSheetOverlays(Spreadsheet spreadsheet)
             throws NoSuchFieldException, SecurityException,
             IllegalArgumentException, IllegalAccessException {
-        // The overlays are kept by the sheetOverlayManager of the
-        // Spreadsheet.
-        Field managerField = spreadsheet.getClass()
-                .getDeclaredField("sheetOverlayManager");
+        // The overlays are kept by the overlay manager of the scope of the
+        // sheet shown.
+        Field scopeField = spreadsheet.getClass()
+                .getDeclaredField("sheetScope");
+        scopeField.setAccessible(true);
+        Object scope = scopeField.get(spreadsheet);
+        Field managerField = scope.getClass().getDeclaredField("overlays");
         managerField.setAccessible(true);
-        Object manager = managerField.get(spreadsheet);
+        Object manager = managerField.get(scope);
         Field overlaysField = manager.getClass().getDeclaredField("overlays");
         overlaysField.setAccessible(true);
         return (Set<SheetOverlayWrapper>) overlaysField.get(manager);

@@ -30,7 +30,9 @@ final class ViewportBounds implements Serializable {
     private int firstColumn;
     private int lastColumn;
 
+    /** Not reported yet: every bound is -1. */
     ViewportBounds() {
+        update(-1, -1, -1, -1);
     }
 
     int getFirstRow() {

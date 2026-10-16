@@ -85,9 +85,9 @@ final class ColumnAutofitter implements Serializable {
                 spreadsheet.getLastRow(), columnIndex + 1);
         spreadsheet.getCellValueManager().resendTextRunningInto(columnIndex);
 
-        if (spreadsheet.sheetOverlayManager.hasOverlays()) {
-            spreadsheet.sheetOverlayManager.markReloadFromPoi();
-            spreadsheet.sheetOverlayManager.loadOrUpdate();
+        if (spreadsheet.overlays().hasOverlays()) {
+            spreadsheet.overlays().markReloadFromPoi();
+            spreadsheet.overlays().loadOrUpdate();
         }
     }
 

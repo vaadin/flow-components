@@ -96,22 +96,15 @@ class RowShiftOrchestratorTest {
         lenient().when(spreadsheet.getLastRow()).thenReturn(10);
         lenient().when(spreadsheet.getLastColumn()).thenReturn(3);
 
-        // sheetOverlayManager is a package-private final field on
-        // Spreadsheet — wire via reflection on the mock; the pop-up buttons
-        // and invalid formula marks come from the workbook's scope.
-        wireField("sheetOverlayManager", sheetOverlayManager);
+        // The overlays come from the sheet's scope; the pop-up buttons and
+        // invalid formula marks from the workbook's.
+        lenient().when(spreadsheet.overlays()).thenReturn(sheetOverlayManager);
         lenient().when(spreadsheet.popupButtons())
                 .thenReturn(popupButtonRegistry);
         lenient().when(spreadsheet.invalidFormulas())
                 .thenReturn(invalidFormulaTracker);
 
         orchestrator = new RowShiftOrchestrator(spreadsheet);
-    }
-
-    private void wireField(String name, Object value) throws Exception {
-        java.lang.reflect.Field f = Spreadsheet.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.set(spreadsheet, value);
     }
 
     @AfterEach

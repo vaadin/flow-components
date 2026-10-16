@@ -51,10 +51,6 @@ import com.vaadin.flow.component.spreadsheet.tests.ExpectWarnings;
  * autofit).</li>
  * </ul>
  *
- * <p>
- * Direct field access on {@code Spreadsheet.sheetOverlayManager} works on a
- * Mockito mock — Mockito creates a real subclass instance and the
- * package-private field is writable from the test.
  */
 class ColumnAutofitterTest {
 
@@ -75,12 +71,8 @@ class ColumnAutofitterTest {
     void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         autofitter = new ColumnAutofitter(spreadsheet);
-        // sheetOverlayManager is a final field; set via reflection so the
-        // autofit() code path doesn't NPE on spreadsheet.sheetOverlayManager.
-        java.lang.reflect.Field f = Spreadsheet.class
-                .getDeclaredField("sheetOverlayManager");
-        f.setAccessible(true);
-        f.set(spreadsheet, overlayManager);
+        // The overlays of the sheet shown, which autofit() asks about.
+        lenient().when(spreadsheet.overlays()).thenReturn(overlayManager);
         lenient().when(spreadsheet.getActiveSheet()).thenReturn(sheet);
         lenient().when(spreadsheet.getCellValueManager())
                 .thenReturn(valueManager);

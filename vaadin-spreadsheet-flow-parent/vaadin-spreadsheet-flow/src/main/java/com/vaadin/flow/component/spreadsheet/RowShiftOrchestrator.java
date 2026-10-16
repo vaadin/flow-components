@@ -86,8 +86,8 @@ final class RowShiftOrchestrator implements Serializable {
             spreadsheet.setRowH(rowH);
         }
 
-        if (spreadsheet.sheetOverlayManager.hasOverlays()) {
-            spreadsheet.sheetOverlayManager.markReloadFromPoi();
+        if (spreadsheet.overlays().hasOverlays()) {
+            spreadsheet.overlays().markReloadFromPoi();
         }
         // need to shift the cell styles, clear and update
         // need to go -1 and +1 because of shifted borders..
