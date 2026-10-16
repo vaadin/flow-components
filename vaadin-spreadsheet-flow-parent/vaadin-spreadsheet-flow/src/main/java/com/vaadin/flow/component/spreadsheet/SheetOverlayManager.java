@@ -10,40 +10,37 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.util.Units;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 
 /**
- * Orchestrates loading and refreshing the active sheet's overlays (images,
- * charts, embedded components placed on cells). Composes
- * {@link SheetOverlayStorage} (the wrappers), {@link SheetOverlayVisibility}
- * (is this overlay in the viewport?), and {@link SheetOverlayInfoBuilder} (turn
- * a wrapper into the client-side {@code OverlayInfo} payload).
- *
+ * The overlays of the active sheet (pictures, charts and other components
+ * placed on cells), and giving the client those shown: where each starts and
+ * how big it is, its image and its component.
  * <p>
- * The {@code reloadFromPoi} flag is set externally (after row/column resizing
- * on POI) to force a full reload on the next call to {@link #loadOrUpdate}.
+ * The overlays are read from POI when there are none, and again after
+ * {@link #markReloadFromPoi}, as rows or columns were resized.
  */
 final class SheetOverlayManager implements Serializable {
 
     private final Spreadsheet spreadsheet;
-    private final SheetOverlayStorage storage;
-    private final SheetOverlayVisibility visibility;
-    private final SheetOverlayInfoBuilder infoBuilder;
+    private final Set<SheetOverlayWrapper> overlays = new HashSet<>();
     private boolean reloadFromPoi;
 
-    SheetOverlayManager(Spreadsheet spreadsheet, SheetOverlayStorage storage,
-            SheetOverlayVisibility visibility,
-            SheetOverlayInfoBuilder infoBuilder) {
+    SheetOverlayManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        this.storage = storage;
-        this.visibility = visibility;
-        this.infoBuilder = infoBuilder;
     }
 
     boolean hasOverlays() {
-        return !storage.isEmpty();
+        return !overlays.isEmpty();
     }
 
     void markReloadFromPoi() {
@@ -51,7 +48,7 @@ final class SheetOverlayManager implements Serializable {
     }
 
     void add(SheetOverlayWrapper overlay) {
-        storage.add(overlay);
+        overlays.add(overlay);
     }
 
     void loadOrUpdate() {
@@ -60,10 +57,6 @@ final class SheetOverlayManager implements Serializable {
         // to be found.
         if (!hasOverlays()) {
             SpreadsheetFactory.loadSheetOverlays(spreadsheet);
-        }
-
-        if (!hasOverlays()) {
-            return;
         }
 
         if (reloadFromPoi) {
@@ -75,26 +68,33 @@ final class SheetOverlayManager implements Serializable {
             reloadFromPoi = false;
         }
 
-        for (final SheetOverlayWrapper overlay : storage.all()) {
-            if (visibility.isVisible(overlay)) {
-                addOverlayData(overlay);
-                overlay.setVisible(true);
-            } else if (overlay.isVisible()) {
-                // was visible but went out of visibility
+        HashMap<String, OverlayInfo> shown = new HashMap<>();
+        for (final SheetOverlayWrapper overlay : overlays) {
+            boolean visible = isVisible(overlay);
+            if (visible) {
+                addOverlayData(overlay, shown);
+            } else {
                 removeOverlayData(overlay);
-                overlay.setVisible(false);
             }
+            overlay.setVisible(visible);
         }
+        spreadsheet.setOverlays(shown);
     }
 
+    /**
+     * Takes the images and components of the overlays off the client, and
+     * forgets the overlays. Whoever clears them gives the client the overlays
+     * left right after.
+     */
     void clear() {
-        for (SheetOverlayWrapper image : storage.all()) {
-            removeOverlayData(image);
+        for (SheetOverlayWrapper overlay : overlays) {
+            removeOverlayData(overlay);
         }
-        storage.clearOverlays();
+        overlays.clear();
     }
 
-    private void addOverlayData(SheetOverlayWrapper overlay) {
+    private void addOverlayData(SheetOverlayWrapper overlay,
+            HashMap<String, OverlayInfo> shown) {
         if (overlay.getComponent(true) != null) {
             spreadsheet.registerCustomComponent(overlay.getComponent(true));
         }
@@ -106,35 +106,128 @@ final class SheetOverlayManager implements Serializable {
         }
 
         if (overlay.getId() != null) {
-            HashMap<String, OverlayInfo> updated = spreadsheet
-                    .getOverlays() != null
-                            ? new HashMap<>(spreadsheet.getOverlays())
-                            : new HashMap<>();
-            updated.put(overlay.getId(), infoBuilder.build(overlay));
-            spreadsheet.setOverlays(updated);
-
-            overlay.setOverlayChangeListener(new OverlayChangeListener() {
-                @Override
-                public void overlayChanged() {
-                    loadOrUpdate();
-                }
-            });
+            shown.put(overlay.getId(), buildInfo(overlay));
+            overlay.setOverlayChangeListener(this::loadOrUpdate);
         }
     }
 
     private void removeOverlayData(SheetOverlayWrapper overlay) {
         if (overlay.getId() != null) {
-            if (spreadsheet.getOverlays() != null) {
-                HashMap<String, OverlayInfo> updated = spreadsheet
-                        .getOverlays();
-                updated.remove(overlay.getId());
-                spreadsheet.setOverlays(updated);
-            }
             spreadsheet.setResource(overlay.getId(), null);
         }
 
         if (overlay.getComponent(false) != null) {
             spreadsheet.unRegisterCustomComponent(overlay.getComponent(false));
         }
+    }
+
+    /** Whether a pane shown shows the overlay. */
+    private boolean isVisible(SheetOverlayWrapper overlay) {
+        var anchor = overlay.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (isFixedXssf(anchor)) {
+            // Since there's no way to know if an arbitrary x/y coordinate is
+            // inside the current viewport, always return true for these
+            // anchors.
+            return true;
+        }
+
+        int col1 = anchor.getCol1();
+        int col2 = anchor.getCol2();
+        int row1 = anchor.getRow1();
+        int row2 = anchor.getRow2();
+
+        // type=2 doesn't size with cells
+        final boolean isType2 = (col2 == 0 && row2 == 0);
+
+        if (!isType2) {
+            // to ensure compatibility with grouping/hidden columns
+            if (isColumnRangeHidden(col1, col2)
+                    || isRowRangeHidden(row1, row2)) {
+                return false;
+            }
+        }
+
+        boolean[] visible = { false };
+        spreadsheet.forEachPaneShown((r1, c1, r2,
+                c2) -> visible[0] |= overlay.isVisible(r1, c1, r2, c2));
+        return visible[0];
+    }
+
+    private static boolean isFixedXssf(ClientAnchor anchor) {
+        return AnchorType.DONT_MOVE_AND_RESIZE.equals(anchor.getAnchorType())
+                && anchor instanceof XSSFClientAnchor;
+    }
+
+    private boolean isRowRangeHidden(int row1, int row2) {
+        for (int row = row1; row <= row2; row++) {
+            if (!spreadsheet.isRowHidden(row)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isColumnRangeHidden(int col1, int col2) {
+        for (int col = col1; col <= col2; col++) {
+            if (!spreadsheet.isColumnHidden(col)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Where the overlay starts and how big it is, as the client has it. */
+    private OverlayInfo buildInfo(SheetOverlayWrapper overlayWrapper) {
+        OverlayInfo info = new OverlayInfo(overlayWrapper.getType());
+        Sheet sheet = spreadsheet.getActiveSheet();
+        var anchor = overlayWrapper.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (isFixedXssf(anchor)) {
+            info.col = 1;
+            info.row = 1;
+            var xssfAnchor = (XSSFClientAnchor) anchor;
+            info.dx = (Long) xssfAnchor.getPosition().getX()
+                    / Units.EMU_PER_PIXEL;
+            info.dy = (Long) xssfAnchor.getPosition().getY()
+                    / Units.EMU_PER_POINT;
+            info.width = xssfAnchor.getSize().getCx() / Units.EMU_PER_PIXEL;
+            info.height = xssfAnchor.getSize().getCy() / Units.EMU_PER_POINT;
+            return info;
+        }
+
+        int col = anchor.getCol1();
+        while (spreadsheet.isColumnHidden(col)) {
+            col++;
+        }
+        int row = anchor.getRow1();
+        while (spreadsheet.isRowHidden(row)) {
+            row++;
+        }
+
+        info.col = col + 1; // 1-based
+        info.row = row + 1; // 1-based
+
+        info.height = overlayWrapper.getHeight(sheet, spreadsheet.getRowH());
+        info.width = overlayWrapper.getWidth(sheet, spreadsheet.getColW(),
+                spreadsheet.getDefColW());
+
+        // FIXME: height and width can be -1, it is never handled anywhere
+
+        // if original start row/column is hidden, use 0 dy/dx
+        if (col == anchor.getCol1()) {
+            info.dx = overlayWrapper.getDx1(sheet);
+        }
+        if (row == anchor.getRow1()) {
+            info.dy = overlayWrapper.getDy1(sheet);
+        }
+
+        return info;
     }
 }

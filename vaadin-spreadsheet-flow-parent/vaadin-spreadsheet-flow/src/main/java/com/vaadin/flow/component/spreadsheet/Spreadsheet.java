@@ -984,17 +984,8 @@ public class Spreadsheet extends Component
     SheetState sheetState = new SheetState(this);
 
     /** image sizes need to be recalculated on column/row resizing */
-    private final SheetOverlayStorage sheetOverlayStorage = new SheetOverlayStorage();
-
-    private final SheetOverlayVisibility sheetOverlayVisibility = new SheetOverlayVisibility(
-            this);
-
-    private final SheetOverlayInfoBuilder sheetOverlayInfoBuilder = new SheetOverlayInfoBuilder(
-            this);
-
     final SheetOverlayManager sheetOverlayManager = new SheetOverlayManager(
-            this, sheetOverlayStorage, sheetOverlayVisibility,
-            sheetOverlayInfoBuilder);
+            this);
 
     private String defaultPercentageFormat = "0.00%";
 
@@ -1131,7 +1122,6 @@ public class Spreadsheet extends Component
     private void init() {
         updateAppId();
         valueManager = createCellValueManager();
-        sheetOverlayStorage.initialize();
         setSpreadsheetHandler(createDefaultHandler());
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);

@@ -88,16 +88,15 @@ public class ChartTestBase {
     private Set<SheetOverlayWrapper> getSheetOverlays(Spreadsheet spreadsheet)
             throws NoSuchFieldException, SecurityException,
             IllegalArgumentException, IllegalAccessException {
-        // The overlays storage moved from a direct Spreadsheet field into the
-        // SheetOverlayStorage helper. Reflect through both fields to recover
-        // the same Set the test previously read directly.
-        Field storageField = spreadsheet.getClass()
-                .getDeclaredField("sheetOverlayStorage");
-        storageField.setAccessible(true);
-        Object storage = storageField.get(spreadsheet);
-        Field overlaysField = storage.getClass().getDeclaredField("overlays");
+        // The overlays are kept by the sheetOverlayManager of the
+        // Spreadsheet.
+        Field managerField = spreadsheet.getClass()
+                .getDeclaredField("sheetOverlayManager");
+        managerField.setAccessible(true);
+        Object manager = managerField.get(spreadsheet);
+        Field overlaysField = manager.getClass().getDeclaredField("overlays");
         overlaysField.setAccessible(true);
-        return (Set<SheetOverlayWrapper>) overlaysField.get(storage);
+        return (Set<SheetOverlayWrapper>) overlaysField.get(manager);
     }
 
     protected void assertData(List<Series> seriesList, Number[] data) {
