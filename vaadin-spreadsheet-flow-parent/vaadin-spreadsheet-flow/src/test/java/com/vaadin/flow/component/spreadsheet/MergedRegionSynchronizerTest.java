@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -168,12 +169,14 @@ class MergedRegionSynchronizerTest {
     }
 
     @Test
-    void rebuildFromPoi_emptySheet_skipsPerRegionLookups() {
-        // Pin: zero-region path doesn't even read the POI regions.
+    void rebuildFromPoi_readsPoisRegionsAllAtOnce() {
+        // XSSF finds a region by its index by going through those before it:
+        // read one by one, 20,000 regions took 0.7 s whenever rows moved.
+        poiHas(range(0, 0, 1, 1), range(5, 5, 7, 7), range(9, 0, 9, 3));
+
         sync.rebuildFromPoi();
 
-        verify(sheet, never()).getMergedRegion(0);
-        // setMergedRegions(null) fires exactly once.
-        verify(spreadsheet, times(1)).setMergedRegions(isNull());
+        verify(sheet, never()).getMergedRegion(anyInt());
+        verify(sheet, times(1)).getMergedRegions();
     }
 }

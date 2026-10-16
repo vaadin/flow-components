@@ -1041,12 +1041,13 @@ public class SpreadsheetFactory implements Serializable {
         final Sheet sheet = spreadsheet.getActiveSheet();
         spreadsheet.setMergedRegions(null);
         spreadsheet.mergedRegionCounter = 0;
-        int numMergedRegions = sheet.getNumMergedRegions();
-        if (numMergedRegions > 0) {
+        // All at once: XSSF finds a region by its index by going through
+        // those before it, which took seconds for 20,000 regions.
+        List<CellRangeAddress> regions = sheet.getMergedRegions();
+        if (!regions.isEmpty()) {
             ArrayList<MergedRegion> _mergedRegions = new ArrayList<MergedRegion>(
-                    numMergedRegions);
-            for (int i = 0; i < numMergedRegions; i++) {
-                CellRangeAddress cra = sheet.getMergedRegion(i);
+                    regions.size());
+            for (CellRangeAddress cra : regions) {
                 MergedRegion mergedRegion = new MergedRegion();
                 mergedRegion.col1 = cra.getFirstColumn() + 1;
                 mergedRegion.col2 = cra.getLastColumn() + 1;

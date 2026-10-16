@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -33,15 +34,16 @@ final class MergedRegionSynchronizer implements Serializable {
      * Rebuild the cached region list to match POI's current state.
      */
     void rebuildFromPoi() {
-        int poiRegionCount = spreadsheet.getActiveSheet().getNumMergedRegions();
-        if (poiRegionCount == 0) {
+        // All at once: XSSF finds a region by its index by going through
+        // those before it, which took seconds for 20,000 regions.
+        List<CellRangeAddress> poiRegions = spreadsheet.getActiveSheet()
+                .getMergedRegions();
+        if (poiRegions.isEmpty()) {
             spreadsheet.setMergedRegions(null);
             return;
         }
         ArrayList<MergedRegion> rebuilt = new ArrayList<>();
-        for (int i = 0; i < poiRegionCount; i++) {
-            CellRangeAddress poiRegion = spreadsheet.getActiveSheet()
-                    .getMergedRegion(i);
+        for (CellRangeAddress poiRegion : poiRegions) {
             MergedRegion region = new MergedRegion();
             region.col1 = poiRegion.getFirstColumn() + 1;
             region.col2 = poiRegion.getLastColumn() + 1;

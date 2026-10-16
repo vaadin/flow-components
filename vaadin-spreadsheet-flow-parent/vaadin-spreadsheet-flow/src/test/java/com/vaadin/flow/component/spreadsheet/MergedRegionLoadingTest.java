@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +20,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
@@ -73,6 +76,24 @@ class MergedRegionLoadingTest {
 
         assertEquals(List.of("C3:D4", "A1:B2", "F10:F12"), clientRegions());
         assertEquals(List.of(0, 1, 2), ids());
+    }
+
+    @Test
+    void aSheetShown_readsPoisRegionsAllAtOnce() {
+        // XSSF finds a region by its index by going through those before it:
+        // read one by one, 20,000 regions took 0.7 s to show.
+        Sheet spied = Mockito.spy(new XSSFWorkbook().createSheet());
+        for (String region : List.of("C3:D4", "A1:B2", "F10:F12")) {
+            spied.addMergedRegion(CellRangeAddress.valueOf(region));
+        }
+        Mockito.clearInvocations(spied);
+        Spreadsheet mocked = Mockito.mock(Spreadsheet.class);
+        Mockito.when(mocked.getActiveSheet()).thenReturn(spied);
+
+        SpreadsheetFactory.loadMergedRegions(mocked);
+
+        Mockito.verify(spied, Mockito.never()).getMergedRegion(anyInt());
+        Mockito.verify(spied, Mockito.times(1)).getMergedRegions();
     }
 
     @ParameterizedTest
