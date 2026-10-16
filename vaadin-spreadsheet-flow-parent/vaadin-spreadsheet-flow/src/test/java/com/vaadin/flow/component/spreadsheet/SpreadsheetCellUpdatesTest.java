@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
@@ -179,6 +180,27 @@ class SpreadsheetCellUpdatesTest {
         spreadsheet.refreshCells(cell("A1"));
 
         assertEquals(List.of("A1=5", "B1=10", "refreshCellStyles"), calls());
+    }
+
+    @Test
+    void theFormulasWorkedOutToSomethingElse_areToldToTheListeners() {
+        formulaInB1();
+        show();
+        List<Set<CellReference>> told = new ArrayList<>();
+        spreadsheet.addFormulaValueChangeListener(
+                event -> told.add(event.getChangedCells()));
+
+        cell("A1").setCellValue(5);
+        spreadsheet.refreshCells(cell("A1"));
+        cell("A1").setCellValue(6);
+        spreadsheet.refreshCells(cell("A1"));
+        // B1 stays as it was.
+        cell("C1").setCellValue("new");
+        spreadsheet.refreshCells(cell("C1"));
+
+        // Each listener keeps the cells it was told of.
+        Set<CellReference> b1 = Set.of(new CellReference(cell("B1")));
+        assertEquals(List.of(b1, b1), told);
     }
 
     @Test
