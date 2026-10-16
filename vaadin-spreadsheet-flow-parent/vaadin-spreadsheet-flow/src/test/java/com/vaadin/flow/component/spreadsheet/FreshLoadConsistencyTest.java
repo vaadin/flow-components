@@ -415,10 +415,6 @@ class FreshLoadConsistencyTest {
      */
     private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
             .ofEntries(
-                    Map.entry("rows deleted, before ATTACHED",
-                            List.of("threw java.lang.NullPointerException")),
-                    Map.entry("rows deleted, before FIRST_RESPONSE",
-                            List.of("threw java.lang.NullPointerException")),
                     Map.entry("the sheet protected, before ATTACHED",
                             List.of("property lockFormatColumns",
                                     "property lockFormatRows",

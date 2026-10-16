@@ -2575,12 +2575,13 @@ public class Spreadsheet extends Component
         // Deleting rows moves cells, and an editor is cached against a cell
         // key — one left in place would end up on the wrong cell.
         updateMarkedCellsRecreatingEditors();
+        // Nothing is selected until the client has shown the sheet.
         CellReference selectedCellReference = getSelectedCellReference();
-        if (selectedCellReference.getRow() >= startRow
+        if (selectedCellReference != null
+                && selectedCellReference.getRow() >= startRow
                 && selectedCellReference.getRow() <= endRow) {
             selectionManager.reSelectSelectedCell();
         }
-
     }
 
     /**
