@@ -86,8 +86,9 @@ final class MergedRegionCascade implements Serializable {
                             .cellStyleUpdated(cell, false);
                     spreadsheet.getCellValueManager().markCellForUpdate(cell);
                 } else {
-                    spreadsheet.getSpreadsheetStyleFactory().clearCellStyle(r,
-                            c);
+                    // 0-based
+                    spreadsheet.getSpreadsheetStyleFactory()
+                            .clearCellStyle(r - 1, c - 1);
                 }
             }
         }

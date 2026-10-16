@@ -198,7 +198,8 @@ class MergedRegionCascadeTest {
     void afterUnmerge_missingCell_clearsStyleByCoordinatesInstead() {
         // Pin the dual-mode branch within an existing row: cells that don't
         // exist on the sheet get clearCellStyle(row, col) called with the
-        // 1-based coordinates. The method DOES NOT skip — it explicitly
+        // 0-based coordinates the method takes. The method DOES NOT skip — it
+        // explicitly
         // clears the cached style for that coordinate. This matters because
         // the merge may have stored style state for a cell that never had
         // a POI Cell object. (The row-level skip is asserted separately;
@@ -213,8 +214,8 @@ class MergedRegionCascadeTest {
         // for the missing (c=2,r=1) and (c=2,r=2).
         verify(styleFactory, times(2)).cellStyleUpdated(any(Cell.class),
                 eq(false));
-        verify(styleFactory).clearCellStyle(1, 2);
-        verify(styleFactory).clearCellStyle(2, 2);
+        verify(styleFactory).clearCellStyle(0, 1);
+        verify(styleFactory).clearCellStyle(1, 1);
         verify(valueManager, times(2)).markCellForUpdate(any(Cell.class));
     }
 

@@ -349,6 +349,37 @@ class SpreadsheetMergedRegionsTest {
     }
 
     @Test
+    void unmerging_withTheFirstCellMissing_leavesNoBordersOfTheMergedCell() {
+        fillBut("A1");
+        style("B2", style -> {
+            style.setBorderRight(BorderStyle.DASHED);
+            style.setBorderBottom(BorderStyle.DASHED);
+        });
+        show();
+        spreadsheet.addMergedRegion("A1:B2");
+        assertEquals(
+                List.of("border-right:dashed 1pt", "border-bottom:dashed 1pt"),
+                borders("A1"));
+
+        spreadsheet.removeMergedRegion(0);
+
+        assertEquals(List.of(), borders("A1"));
+    }
+
+    @Test
+    void unmerging_withACellMissing_leavesTheBordersOfTheCellsAround() {
+        // D2's left border is drawn on C2.
+        fillBut("B1");
+        style("D2", style -> style.setBorderLeft(BorderStyle.THICK));
+        show("A1:B2");
+        assertEquals(List.of("border-right:solid 3pt"), borders("C2"));
+
+        spreadsheet.removeMergedRegion(0);
+
+        assertEquals(List.of("border-right:solid 3pt"), borders("C2"));
+    }
+
+    @Test
     void merging_overTheSelectedCell_selectsTheMergedCell() {
         fillBut();
         show();
