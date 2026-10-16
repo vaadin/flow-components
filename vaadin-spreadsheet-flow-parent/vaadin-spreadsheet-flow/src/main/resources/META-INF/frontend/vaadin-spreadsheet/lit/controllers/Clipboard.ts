@@ -21,6 +21,13 @@ export interface ClipboardHost {
   activeRange(): CellRange;
   /** The value of a cell, if the client has one. */
   valueAt(col: number, row: number): string | null | undefined;
+  /** Whether the client has every cell of a range. */
+  hasCells(range: CellRange): boolean;
+  /**
+   * Puts the server's text for a range on the clipboard, once it comes; false
+   * when it cannot - no server to ask, or no clipboard to write to later.
+   */
+  copyLater(range: CellRange): boolean;
   /** Tells the server. */
   send(event: SpreadsheetEvent): void;
 }
@@ -32,6 +39,11 @@ export interface ClipboardHost {
  * active cell. While a cell is edited, all three are the editor's. The
  * browser sends them to the focused element, so the target is the one the
  * sheet takes the focus with. Listens until the signal is aborted.
+ *
+ * A range the client has goes on the clipboard at once; the text of one it
+ * does not have comes from the server, and goes on the clipboard when it
+ * comes. The server used to send every selection to the client in case it
+ * was copied: 10 MB for one column of 100,000 rows.
  */
 export function listenToClipboard(target: EventTarget, host: ClipboardHost, signal: AbortSignal): void {
   // Whether the range went on the clipboard.
@@ -39,12 +51,11 @@ export function listenToClipboard(target: EventTarget, host: ClipboardHost, sign
     if (host.isEditing()) {
       return false;
     }
-    const tsv = rangeAsTsv(host);
-    if (tsv === null) {
-      return false;
-    }
+    const range = host.activeRange();
     e.preventDefault();
-    e.clipboardData?.setData('text/plain', tsv);
+    if (host.hasCells(range) || !host.copyLater(range)) {
+      e.clipboardData?.setData('text/plain', rangeAsTsv(host, range));
+    }
     return true;
   };
   listen(target, 'copy', copy, signal);
@@ -76,15 +87,8 @@ export function listenToClipboard(target: EventTarget, host: ClipboardHost, sign
   );
 }
 
-/**
- * The active range's values as tab-separated text, a cell without a value
- * as empty; null when the range holds no cells.
- */
-function rangeAsTsv(host: ClipboardHost): string | null {
-  const range = host.activeRange();
-  if (range.c1 > range.c2 || range.r1 > range.r2) {
-    return null;
-  }
+/** A range's values as tab-separated text, a cell without a value as empty. */
+function rangeAsTsv(host: ClipboardHost, range: CellRange): string {
   const rows: (string | null)[][] = [];
   for (let r = range.r1; r <= range.r2; r++) {
     const row: (string | null)[] = [];

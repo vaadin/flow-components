@@ -136,4 +136,161 @@ describe('Spreadsheet — the clipboard', () => {
     expect(copy.data.getData('text/plain')).to.equal('');
     expect(clipboardEvents()).to.be.empty;
   });
+
+  // The server no longer sends a selection to the client in case it is
+  // copied - 10 MB for one column of 100,000 rows. The client copies the
+  // cells it has, and asks the server for the text of a range it does not
+  // have, which goes on the clipboard when it comes.
+  describe('a range the client does not have', () => {
+    type Server = { clipboardText(...range: number[]): Promise<string | null> };
+    let written: ClipboardItem[];
+
+    beforeEach(() => {
+      written = [];
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: {
+          write: (items: ClipboardItem[]) => {
+            written.push(...items);
+            return Promise.resolve();
+          }
+        }
+      });
+    });
+
+    afterEach(() => {
+      delete (navigator as unknown as Record<string, unknown>).clipboard;
+    });
+
+    /** As Flow gives the host its server's methods; returns the ranges asked for. */
+    function serverAnswers(text: string | null, log: string[] = []): number[][] {
+      const asked: number[][] = [];
+      (host as HTMLElement & { $server?: Server }).$server = {
+        clipboardText: (...range: number[]) => {
+          asked.push(range);
+          log.push('text');
+          return Promise.resolve(text);
+        }
+      };
+      return asked;
+    }
+
+    it('asks the server for its text, and puts that on the clipboard when it comes', async () => {
+      const asked = serverAnswers('from the server');
+      click(1, 1);
+      click(2, 3, { shiftKey: true });
+
+      const { event, data } = clipboard('copy');
+
+      expect(event.defaultPrevented).to.be.true;
+      expect(data.getData('text/plain'), 'nothing at once').to.equal('');
+      // Columns, then rows.
+      expect(asked).to.eql([[1, 1, 2, 3]]);
+      const blob = await written[0].getType('text/plain');
+      expect(await blob.text()).to.equal('from the server');
+    });
+
+    it('copies a range the client has at once, without asking the server', async () => {
+      const asked = serverAnswers('from the server');
+      sheet.recomputeViewport();
+      // The first screen, then the cells past it, both answered.
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      click(1, 1);
+      click(2, 2, { shiftKey: true });
+
+      const { data } = clipboard('copy');
+
+      expect(data.getData('text/plain')).to.equal('A1\t\nA2\t');
+      expect(asked).to.be.empty;
+      expect(written).to.be.empty;
+    });
+
+    it('cuts: asks the server for the text before asking it to clear the range', () => {
+      const log: string[] = [];
+      serverAnswers('A2', log);
+      host.addEventListener('spreadsheet-event', (e: Event) => {
+        if ((e as CustomEvent).detail.type === 'clearSelectedCellsOnCut') {
+          log.push('clear');
+        }
+      });
+      click(1, 2);
+
+      clipboard('cut');
+
+      expect(log).to.eql(['text', 'clear']);
+    });
+
+    it('leaves the clipboard as it was when the range is no longer selected on the server', async () => {
+      serverAnswers(null);
+      click(1, 1);
+
+      clipboard('copy');
+
+      let refused = false;
+      await written[0].getType('text/plain').catch(() => {
+        refused = true;
+      });
+      expect(refused).to.be.true;
+    });
+
+    it('leaves no refusal of the browser unhandled', async () => {
+      serverAnswers(null);
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { write: () => Promise.reject(new Error('refused')) }
+      });
+      const unhandled: unknown[] = [];
+      const listener = (e: PromiseRejectionEvent) => {
+        unhandled.push(e.reason);
+        e.preventDefault();
+      };
+      window.addEventListener('unhandledrejection', listener);
+      try {
+        click(1, 1);
+
+        clipboard('copy');
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        expect(unhandled).to.be.empty;
+      } finally {
+        window.removeEventListener('unhandledrejection', listener);
+      }
+    });
+
+    it('copies the cells it has when the browser cannot write the clipboard later', () => {
+      const asked = serverAnswers('from the server');
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+      click(1, 1);
+
+      const { data } = clipboard('copy');
+
+      expect(data.getData('text/plain')).to.equal('A1');
+      expect(asked).to.be.empty;
+    });
+
+    it('copies the cells it has when the browser has no clipboard items', () => {
+      const asked = serverAnswers('from the server');
+      const items = Object.getOwnPropertyDescriptor(window, 'ClipboardItem')!;
+      delete (window as unknown as Record<string, unknown>).ClipboardItem;
+      try {
+        click(1, 1);
+
+        const { data } = clipboard('copy');
+
+        expect(data.getData('text/plain')).to.equal('A1');
+        expect(asked).to.be.empty;
+      } finally {
+        Object.defineProperty(window, 'ClipboardItem', items);
+      }
+    });
+
+    it('copies the cells it has when there is no server to ask', () => {
+      click(1, 1);
+
+      const { data } = clipboard('copy');
+
+      expect(data.getData('text/plain')).to.equal('A1');
+      expect(written).to.be.empty;
+    });
+  });
 });

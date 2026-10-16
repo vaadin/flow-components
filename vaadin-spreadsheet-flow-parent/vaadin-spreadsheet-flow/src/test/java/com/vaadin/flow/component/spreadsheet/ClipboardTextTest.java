@@ -98,4 +98,64 @@ class ClipboardTextTest {
                 .getStringCellValue());
         assertEquals(null, spreadsheet.getCell(new CellReference("A2")));
     }
+
+    // Written as the client writes the cells it copies: the server writes the
+    // text of those the client does not have.
+
+    private static String write(List<List<String>> rows) {
+        return ClipboardText.write(rows.size(),
+                rows.isEmpty() ? 0 : rows.get(0).size(),
+                (row, column) -> rows.get(row).get(column));
+    }
+
+    @Test
+    void writesCellsAndRows() {
+        assertEquals("a\tb\nc\td",
+                write(List.of(List.of("a", "b"), List.of("c", "d"))));
+    }
+
+    @Test
+    void writesNoValueAsAnEmptyCell() {
+        assertEquals("a\t\tc",
+                write(List.of(java.util.Arrays.asList("a", null, "c"))));
+    }
+
+    @Test
+    void writesNoLineBreakAfterTheLastRow() {
+        assertEquals("a\nb", write(List.of(List.of("a"), List.of("b"))));
+    }
+
+    @Test
+    void writesNothingForNoRows() {
+        assertEquals("", write(List.of()));
+    }
+
+    @Test
+    void quotesACellWithALineBreak() {
+        assertEquals("\"a\nb\"\tc", write(List.of(List.of("a\nb", "c"))));
+    }
+
+    @Test
+    void quotesACellWithACarriageReturn() {
+        assertEquals("\"a\rb\"", write(List.of(List.of("a\rb"))));
+    }
+
+    @Test
+    void quotesACellWithATab() {
+        assertEquals("\"a\tb\"", write(List.of(List.of("a\tb"))));
+    }
+
+    @Test
+    void quotesACellWithAQuote_doublingIt() {
+        assertEquals("\"say \"\"hi\"\"\"",
+                write(List.of(List.of("say \"hi\""))));
+    }
+
+    @Test
+    void readsBackWhatItWrites() {
+        List<List<String>> rows = List.of(List.of("a\tb", "say \"hi\""),
+                List.of("line 1\nline 2", "plain"));
+
+        assertEquals(rows, ClipboardText.parse(write(rows)));
+    }
 }

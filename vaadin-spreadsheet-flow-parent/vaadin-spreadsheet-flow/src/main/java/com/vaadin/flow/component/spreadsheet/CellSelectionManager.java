@@ -83,6 +83,28 @@ public class CellSelectionManager implements Serializable {
     }
 
     /**
+     * Whether a range is one the client may copy: the selected cell, its merged
+     * region, or one of the selected ranges.
+     */
+    boolean isSelectedRange(CellRangeAddress range) {
+        if (cellRangeAddresses.contains(range)) {
+            return true;
+        }
+        if (selectedCellReference == null) {
+            return false;
+        }
+        int row = selectedCellReference.getRow();
+        int col = selectedCellReference.getCol();
+        MergedRegion region = spreadsheet.getMergedRegionContainer()
+                .getMergedRegionStartingFrom(col + 1, row + 1);
+        if (region != null && range.equals(new CellRangeAddress(region.row1 - 1,
+                region.row2 - 1, region.col1 - 1, region.col2 - 1))) {
+            return true;
+        }
+        return range.equals(new CellRangeAddress(row, row, col, col));
+    }
+
+    /**
      * Returns the currently selected area in case there is only one area
      * selected.
      *
@@ -196,7 +218,6 @@ public class CellSelectionManager implements Serializable {
                 paintedCellRange = spreadsheet.createCorrectCellRangeAddress(
                         row, column, row, column);
             }
-            ensureClientHasSelectionData();
             fireNewSelectionChangeEvent();
         }
     }
@@ -302,7 +323,6 @@ public class CellSelectionManager implements Serializable {
             }
             individualSelectedCells.clear();
             spreadsheet.loadCustomEditorOnSelectedCell();
-            ensureClientHasSelectionData();
             fireNewSelectionChangeEvent();
         } catch (Exception e) {
             spreadsheet.getRpcProxy().invalidCellAddress();
@@ -470,7 +490,7 @@ public class CellSelectionManager implements Serializable {
         if (col1 != col2 || row1 != row2) {
             cellRangeAddresses.add(cellsToSelect);
         }
-        ensureClientHasSelectionData();
+        spreadsheet.loadCustomEditorOnSelectedCell();
         fireNewSelectionChangeEvent();
     }
 
@@ -495,7 +515,6 @@ public class CellSelectionManager implements Serializable {
         if (col1 != col2 || row1 != row2) {
             cellRangeAddresses.add(cra);
         }
-        ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
     }
 
@@ -532,7 +551,7 @@ public class CellSelectionManager implements Serializable {
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
 
-        ensureClientHasSelectionData();
+        spreadsheet.loadCustomEditorOnSelectedCell();
         fireNewSelectionChangeEvent();
     }
 
@@ -574,7 +593,6 @@ public class CellSelectionManager implements Serializable {
                     individualSelectedCells.indexOf(selectedCellReference));
         }
         paintedCellRange = null;
-        ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
     }
 
@@ -604,7 +622,6 @@ public class CellSelectionManager implements Serializable {
 
         cellRangeAddresses.add(newRange);
         paintedCellRange = null;
-        ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
     }
 
@@ -628,7 +645,6 @@ public class CellSelectionManager implements Serializable {
                 row, spreadsheet.getColumns());
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
-        ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
     }
 
@@ -660,7 +676,6 @@ public class CellSelectionManager implements Serializable {
         cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(row, 1,
                 row, spreadsheet.getColumns()));
         paintedCellRange = null;
-        ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
     }
 
@@ -684,7 +699,6 @@ public class CellSelectionManager implements Serializable {
                 column, spreadsheet.getRows(), column);
         paintedCellRange = cra;
         cellRangeAddresses.add(cra);
-        ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
     }
 
@@ -716,7 +730,6 @@ public class CellSelectionManager implements Serializable {
         cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(1,
                 column, spreadsheet.getRows(), column));
         paintedCellRange = null;
-        ensureClientHasSelectionData();
         fireNewSelectionChangeEvent();
     }
 
@@ -781,21 +794,7 @@ public class CellSelectionManager implements Serializable {
         if (region.isInRange(selectedCellReference.getRow(),
                 selectedCellReference.getCol())) {
             cellRangeAddresses.add(region);
-            ensureClientHasSelectionData();
             fireNewSelectionChangeEvent();
-        }
-    }
-
-    /**
-     * Make sure that the selected ranges are available on the client side.
-     */
-    private void ensureClientHasSelectionData() {
-        // Make sure data for the selection has been loaded so it can be copied
-        for (CellRangeAddress cellRangeAddress : cellRangeAddresses) {
-            spreadsheet.loadCells(cellRangeAddress.getFirstRow() + 1,
-                    cellRangeAddress.getFirstColumn() + 1,
-                    cellRangeAddress.getLastRow() + 1,
-                    cellRangeAddress.getLastColumn() + 1);
         }
     }
 

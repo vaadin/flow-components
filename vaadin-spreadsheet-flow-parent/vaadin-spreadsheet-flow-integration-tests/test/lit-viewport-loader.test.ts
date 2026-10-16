@@ -79,7 +79,7 @@ function fakeClock() {
   };
 }
 
-function setUp(sheet: Partial<{ rows: number; frozenRows: number; noMargin: boolean }> = {}) {
+function setUp(sheet: Partial<{ rows: number; frozenRows: number; frozenCols: number; noMargin: boolean }> = {}) {
   const time = fakeClock();
   const loads: LoadRange[] = [];
   let drawn: LoadRange | null = { r1: 1, c1: 1, r2: 30, c2: 10 };
@@ -92,7 +92,7 @@ function setUp(sheet: Partial<{ rows: number; frozenRows: number; noMargin: bool
         rows: sheet.rows ?? 1000,
         cols: 50,
         frozenRows: sheet.frozenRows ?? 0,
-        frozenCols: 0,
+        frozenCols: sheet.frozenCols ?? 0,
         rowPx: 20,
         colPx: 64,
         noMargin: sheet.noMargin ?? false
@@ -124,12 +124,12 @@ function setUp(sheet: Partial<{ rows: number; frozenRows: number; noMargin: bool
     },
     /**
      * Open the sheet: its first screen is asked for, then, once it is in -
-     * at once here, as no server keeps it waiting - the margin around it.
-     * The requests are counted from there.
+     * at once here, as no server keeps it waiting - the margin around it,
+     * and that is in too. The requests are counted from there.
      */
     open() {
       loader.check();
-      time.advance(30);
+      time.advance(60);
       loads.length = 0;
     },
     /** Scroll to a row at a reading pace, then stop. */
@@ -748,6 +748,72 @@ describe('ViewportLoader', () => {
 
     expect(t.loads).to.have.length(2);
     expect(t.loads[1]).to.eql(t.loads[0]);
+  });
+
+  // Whether the client has every cell of a range: a copy writes the cells
+  // the client has, and asks the server for the text of the others.
+
+  it('has no cells before anything is loaded', () => {
+    const t = setUp();
+
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 1, c2: 1 })).to.be.false;
+  });
+
+  it('has the cells of the range last loaded, to its edges, and no others', () => {
+    const t = setUp();
+    t.open();
+
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 75, c2: 10 }), 'all of it').to.be.true;
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 76, c2: 10 }), 'a row past it').to.be.false;
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 10, c2: 11 }), 'a column past it').to.be.false;
+  });
+
+  it('has no cells of rows or columns before those last loaded', () => {
+    const t = setUp();
+    t.open();
+    t.scrollTo(0, 0);
+    t.scrollTo(6000, 1920);
+    t.show({ r1: 301, c1: 31, r2: 330, c2: 40 });
+    t.loader.check();
+    t.time.advance(60);
+
+    expect(t.loader.hasLoaded({ r1: 286, c1: 26, r2: 300, c2: 30 }), 'from the first loaded').to.be.true;
+    expect(t.loader.hasLoaded({ r1: 285, c1: 26, r2: 300, c2: 30 }), 'a row before').to.be.false;
+    expect(t.loader.hasLoaded({ r1: 286, c1: 25, r2: 300, c2: 30 }), 'a column before').to.be.false;
+  });
+
+  it('has none while a request is on its way', () => {
+    const t = setUp();
+    t.serverAnswersAfterEachLoad();
+    t.loader.check();
+
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 1, c2: 1 })).to.be.false;
+  });
+
+  it('has the cells of frozen rows and columns, as well as those loaded beside them', () => {
+    const t = setUp({ frozenRows: 3, frozenCols: 2 });
+    t.show({ r1: 4, c1: 3, r2: 33, c2: 12 });
+    t.loader.check();
+    t.time.advance(60);
+
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 3, c2: 2 }), 'frozen alone').to.be.true;
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 20, c2: 12 }), 'frozen and loaded').to.be.true;
+  });
+
+  it('has no cells past a gap between the frozen rows and those loaded', () => {
+    const t = setUp({ frozenRows: 3 });
+    t.show({ r1: 4, c1: 1, r2: 33, c2: 10 });
+    t.loader.check();
+    t.time.advance(60);
+    t.scrollTo(0);
+    t.scrollTo(4000);
+    t.show({ r1: 201, c1: 1, r2: 230, c2: 10 });
+    t.loader.check();
+    t.time.advance(60);
+
+    expect(t.loader.hasLoaded({ r1: 3, c1: 1, r2: 3, c2: 10 }), 'the last frozen row').to.be.true;
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 4, c2: 10 }), 'the row after them').to.be.false;
+    expect(t.loader.hasLoaded({ r1: 3, c1: 1, r2: 201, c2: 10 }), 'across the gap').to.be.false;
   });
 
   it('asks nothing before anything is drawn', () => {

@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
@@ -3745,6 +3746,40 @@ public class Spreadsheet extends Component
      */
     private void loadTables() {
         tableLoader.loadForActiveSheet();
+    }
+
+    /**
+     * The text a copy puts on the clipboard for a range of the selection: the
+     * values of its cells as they are shown, as the client writes the cells it
+     * has. The selected cells are not sent to the client in case they are
+     * copied, as they were: one column of 100,000 rows sent 10 MB, and
+     * selecting everything kept the server busy for seconds.
+     *
+     * @param col1
+     *            first column of the range, 1-based
+     * @param row1
+     *            first row of the range, 1-based
+     * @param col2
+     *            last column of the range, 1-based
+     * @param row2
+     *            last row of the range, 1-based
+     * @return the text, or {@code null} for a range not selected
+     */
+    @ClientCallable
+    String clipboardText(int col1, int row1, int col2, int row2) {
+        if (col2 < col1 || row2 < row1 || !selectionManager.isSelectedRange(
+                new CellRangeAddress(row1 - 1, row2 - 1, col1 - 1, col2 - 1))) {
+            return null;
+        }
+        Sheet sheet = getActiveSheet();
+        return ClipboardText.write(row2 - row1 + 1, col2 - col1 + 1,
+                (row, column) -> {
+                    Row poiRow = sheet.getRow(row1 - 1 + row);
+                    Cell cell = poiRow == null ? null
+                            : poiRow.getCell(col1 - 1 + column);
+                    return cell == null ? null
+                            : valueManager.createCellDataForCell(cell).value;
+                });
     }
 
     /**

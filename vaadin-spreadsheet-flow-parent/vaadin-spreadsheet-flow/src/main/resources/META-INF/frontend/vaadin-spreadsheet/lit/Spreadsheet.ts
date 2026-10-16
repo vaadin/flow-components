@@ -193,6 +193,11 @@ const DEFAULT_HEADER_COLUMN_WIDTH = 50;
  * the user does into events for the server and applies what the server
  * sends. The element creates one per element, as its {@code $connector}.
  */
+/** The server methods Flow gives the sheet's host element; see the server's {@code Spreadsheet#clipboardText}. */
+type ServerHost = HTMLElement & {
+  $server?: { clipboardText(col1: number, row1: number, col2: number, row2: number): Promise<string | null> };
+};
+
 /**
  * Whether a key pressed in a custom editor takes the keyboard back to the
  * sheet. Enter does, unless the editor used it: for a new line in a text
@@ -843,6 +848,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         isEditing: () => this.editor !== null,
         activeRange: () => this.selection.activeRange,
         valueAt: (col, row) => this.cellDataByKey.get(toKey(col, row))?.value,
+        hasCells: (range) => this.viewportLoader.hasLoaded(range),
+        copyLater: (range) => this.copyLater(range),
         send: (event) => this.sendToServer(event)
       },
       this.ownListeners.signal
@@ -2264,6 +2271,31 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * Nothing can have been written in the formula field for the cell yet: the
    * selection has only just been made.
    */
+  /**
+   * Puts the server's text for a range on the clipboard once it comes; see
+   * {@link listenToClipboard}. Asked for and written now, while the copy is
+   * the user's, with the text to follow. False when there is no server to
+   * ask or no clipboard to write to later.
+   */
+  private copyLater(range: CellRange): boolean {
+    const server = (this.host as ServerHost).$server;
+    if (server === undefined || typeof ClipboardItem === 'undefined' || navigator.clipboard?.write === undefined) {
+      return false;
+    }
+    const text = server.clipboardText(range.c1, range.r1, range.c2, range.r2).then((value) => {
+      if (value === null) {
+        throw new Error('The range is no longer selected');
+      }
+      return new Blob([value], { type: 'text/plain' });
+    });
+    // The selection had changed, or the browser would not write: the
+    // clipboard keeps what it had. The browser may refuse without reading
+    // the text, so its refusal is handled here too.
+    text.catch(() => undefined);
+    navigator.clipboard.write([new ClipboardItem({ 'text/plain': text })]).catch(() => undefined);
+    return true;
+  }
+
   private showSelectedCellInFormulaBar(cell: CellPosition): void {
     this.changeFormulaBar({
       address: this.extendingSelection ? selectionSizeLabel(this.selection.activeRange) : cellCoordToAddress(cell)

@@ -278,6 +278,23 @@ export class ViewportLoader {
     this.cancelTimer();
   }
 
+  /**
+   * Whether the client has every cell of a range: each in the frozen rows or
+   * the rows last loaded, and in the frozen columns or the columns last
+   * loaded, with no request still on its way.
+   */
+  hasLoaded(range: LoadRange): boolean {
+    const loaded = this.loaded;
+    if (loaded === null || this.inFlightSince !== null) {
+      return false;
+    }
+    const sheet = this.host.sheet();
+    return (
+      covers(range.r1, range.r2, sheet.frozenRows, loaded.r1, loaded.r2) &&
+      covers(range.c1, range.c2, sheet.frozenCols, loaded.c1, loaded.c2)
+    );
+  }
+
   /** How long a load takes, smoothed over the round trips so far, in ms. */
   get loadRoundTrip(): number {
     return this.roundTrip;
@@ -445,6 +462,12 @@ export class ViewportLoader {
       this.timer = null;
     }
   }
+}
+
+/** Whether rows or columns from first to last are each frozen or among those loaded. */
+function covers(first: number, last: number, frozen: number, loadedFirst: number, loadedLast: number): boolean {
+  const scrolling = Math.max(first, frozen + 1);
+  return scrolling > last || (scrolling >= loadedFirst && last <= loadedLast);
 }
 
 function sameRange(a: LoadRange, b: LoadRange | null): boolean {

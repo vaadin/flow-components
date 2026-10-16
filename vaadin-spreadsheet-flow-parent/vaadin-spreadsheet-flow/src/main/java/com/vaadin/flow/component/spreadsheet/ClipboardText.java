@@ -12,10 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reads pasted text into rows of cell values, the way spreadsheets put cells on
- * the clipboard: cells separated by tabs, rows by line breaks, and a cell that
- * holds a tab, a line break or a double quote written in double quotes, with
- * its own quotes doubled.
+ * Cells as spreadsheets put them on the clipboard: cells separated by tabs,
+ * rows by line breaks, and a cell that holds a tab, a line break or a double
+ * quote written in double quotes, with its own quotes doubled.
  * <p>
  * Split on line breaks and tabs alone, a cell with a line break in it was
  * pasted as two rows.
@@ -23,6 +22,44 @@ import java.util.List;
 final class ClipboardText {
 
     private ClipboardText() {
+    }
+
+    /** The value of a cell, by 0-based row and column; null for none. */
+    @FunctionalInterface
+    interface Values {
+        String at(int row, int column);
+    }
+
+    /**
+     * Writes cells the way {@link #parse(String)} reads them, as the client
+     * writes the cells it copies. No line break after the last row.
+     */
+    static String write(int rows, int columns, Values values) {
+        StringBuilder text = new StringBuilder();
+        for (int row = 0; row < rows; row++) {
+            if (row > 0) {
+                text.append('\n');
+            }
+            for (int column = 0; column < columns; column++) {
+                if (column > 0) {
+                    text.append('\t');
+                }
+                String value = values.at(row, column);
+                if (value != null) {
+                    appendCell(text, value);
+                }
+            }
+        }
+        return text.toString();
+    }
+
+    private static void appendCell(StringBuilder text, String value) {
+        if (value.indexOf('\t') < 0 && value.indexOf('\n') < 0
+                && value.indexOf('\r') < 0 && value.indexOf('"') < 0) {
+            text.append(value);
+        } else {
+            text.append('"').append(value.replace("\"", "\"\"")).append('"');
+        }
     }
 
     /**

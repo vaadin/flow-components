@@ -92,10 +92,7 @@ class CustomEditorCallbackTest {
         spreadsheet.setSelection(address);
     }
 
-    /**
-     * The callback fires from the cell reload, not from the selection write
-     * itself, so a test that only selects sees nothing yet.
-     */
+    /** Selects a cell, and then reloads the cells as a scroll does. */
     private void selectAndReload(String address) {
         spreadsheet.setSelection(address);
         repaint();
@@ -108,6 +105,24 @@ class CustomEditorCallbackTest {
         // so nudge them and come back.
         scrollTo(1, 11);
         scrollTo(1, 10);
+    }
+
+    @Test
+    void selectEditorCell_callbackFiresAtOnce() {
+        // Without the cells being reloaded: selecting no longer loads the
+        // selected cells to the client, which used to reload the editors.
+        select("B2");
+
+        assertEquals(List.of("1,1"), displayed);
+    }
+
+    @Test
+    void paintRangeFromEditorCell_callbackFiresAtOnce() {
+        TestHelper.fireClientEvent(spreadsheet, "cellRangePainted",
+                "{\"selectedCellRow\": 2, \"selectedCellColumn\": 2,"
+                        + " \"row1\": 2, \"col1\": 2, \"row2\": 3, \"col2\": 3}");
+
+        assertEquals(List.of("1,1"), displayed);
     }
 
     @Test
