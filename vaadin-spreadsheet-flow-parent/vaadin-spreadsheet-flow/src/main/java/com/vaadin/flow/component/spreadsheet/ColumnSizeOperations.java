@@ -68,7 +68,18 @@ final class ColumnSizeOperations implements Serializable {
     }
 
     void setDefaultWidthPixels(int widthPX) {
+        int[] before = spreadsheet.getColW();
         spreadsheet.setDefColW(widthPX);
+        // The columns without a width of their own are shown at it.
+        SpreadsheetFactory.readColumnSizes(spreadsheet,
+                spreadsheet.getActiveSheet(), before.length);
+        int[] after = spreadsheet.getColW();
+        for (int column = 0; column < after.length; column++) {
+            if (after[column] != before[column]) {
+                cellsResized(column);
+            }
+        }
+        spreadsheet.overlays().loadOrUpdate();
     }
 
     void onClientResized(Map<Integer, Integer> newColumnSizes, int row1,
@@ -109,12 +120,20 @@ final class ColumnSizeOperations implements Serializable {
             ((XSSFSheet) spreadsheet.getActiveSheet()).getColumnHelper()
                     .cleanColumns();
         }
+        cellsResized(index);
+        return shown;
+    }
+
+    /**
+     * The cells of a column that changed width, and the text running into it,
+     * are sent again: how far text runs over depends on the width.
+     */
+    private void cellsResized(int index) {
         spreadsheet.getCellValueManager().clearCacheForColumn(index + 1);
         spreadsheet.getCellValueManager().loadCellData(
                 spreadsheet.getFirstRow(), index + 1, spreadsheet.getLastRow(),
                 index + 1);
         spreadsheet.getCellValueManager().resendTextRunningInto(index);
-        return shown;
     }
 
     private void applyHidden(int columnIndex, boolean hidden) {

@@ -270,6 +270,8 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setRowHeight(17, 20f)),
                 op("a column hidden",
                         spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                op("the default row height set",
+                        spreadsheet -> spreadsheet.setDefaultRowHeight(20f)),
                 steps("a hidden column given a width", api(
                         spreadsheet -> spreadsheet.setColumnHidden(6, true)),
                         api(spreadsheet -> spreadsheet.setColumnWidth(6, 80))),
@@ -337,6 +339,12 @@ class FreshLoadConsistencyTest {
                             FreshLoadFixture.configure(spreadsheet);
                             spreadsheet.setMaxRows(300);
                             spreadsheet.setMaxColumns(60);
+                        }),
+                reconfigured("the default column width set",
+                        spreadsheet -> spreadsheet.setDefaultColumnWidth(90),
+                        spreadsheet -> {
+                            FreshLoadFixture.configure(spreadsheet);
+                            spreadsheet.setDefaultColumnWidth(90);
                         }),
                 reconfigured("the component factory taken away",
                         spreadsheet -> spreadsheet

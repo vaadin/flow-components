@@ -10,6 +10,10 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -17,10 +21,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
+import com.vaadin.tests.MockUIExtension;
 
 /**
  * Columns without a width of their own are shown at the default width of the
@@ -30,6 +37,9 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
  * another, and HSSF read its columns wider than the component's default.
  */
 class SpreadsheetDefaultColumnWidthTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     /** The default width of the component, ten characters. */
     private static final int DEFAULT_WIDTH = 70;
@@ -62,6 +72,67 @@ class SpreadsheetDefaultColumnWidthTest {
 
         assertEquals(DEFAULT_WIDTH, spreadsheet.getDefaultColumnWidth());
         assertEquals(DEFAULT_WIDTH, spreadsheet.getColW()[3]);
+    }
+
+    @ParameterizedTest
+    @MethodSource("formats")
+    void aDefaultWidthSetByTheApplication_leavesTheSheetsAsItIs(
+            Supplier<Workbook> format) {
+        Spreadsheet spreadsheet = show(format);
+
+        spreadsheet.setDefaultColumnWidth(90);
+
+        assertEquals(90, spreadsheet.getDefaultColumnWidth());
+        assertEquals(12, spreadsheet.getActiveSheet().getDefaultColumnWidth());
+    }
+
+    @Test
+    void textRunningOverColumnsWithoutAWidth_runsOverAsFarAsTheDefaultWidthSet() {
+        // As the client reports how wide a character of each style is, which
+        // the cells need to know how far their text runs over.
+        HashMap<Integer, Float> ratios = new HashMap<>();
+        ratios.put(0, 7f);
+        Consumer<Spreadsheet> configure = spreadsheet -> {
+            spreadsheet.setLocale(Locale.US);
+            spreadsheet.getCellValueManager()
+                    .onCellStyleWidthRatioUpdate(ratios);
+        };
+        FreshLoadHarness harness = new FreshLoadHarness(ui, configure,
+                new FreshLoadHarness.Viewport(1, 1, 10, 10));
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet().createRow(0).createCell(0)
+                .setCellValue("a text long enough to run over some columns");
+        harness.show(workbook);
+        Consumer<Spreadsheet> wider = spreadsheet -> spreadsheet
+                .setDefaultColumnWidth(200);
+
+        assertEquals(List.of(), harness.check(wider, configure.andThen(wider)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("formats")
+    void columnsWithoutAWidth_areShownAtTheDefaultWidthSet(
+            Supplier<Workbook> format) {
+        Spreadsheet spreadsheet = show(format);
+        spreadsheet.setColumnWidth(4, 100);
+
+        spreadsheet.setDefaultColumnWidth(90);
+
+        assertEquals(90, spreadsheet.getColW()[3]);
+        assertEquals(100, spreadsheet.getColW()[4]);
+    }
+
+    @ParameterizedTest
+    @MethodSource("formats")
+    void theDefaultWidthSet_staysWhenAnotherSheetIsShown(
+            Supplier<Workbook> format) {
+        Spreadsheet spreadsheet = show(format);
+        spreadsheet.setDefaultColumnWidth(90);
+
+        spreadsheet.createNewSheet("Second", 20, 10);
+
+        assertEquals(90, spreadsheet.getDefaultColumnWidth());
+        assertEquals(90, spreadsheet.getColW()[3]);
     }
 
     @ParameterizedTest

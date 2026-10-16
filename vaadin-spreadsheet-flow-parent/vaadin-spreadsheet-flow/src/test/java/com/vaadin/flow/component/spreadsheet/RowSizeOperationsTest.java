@@ -199,11 +199,8 @@ class RowSizeOperationsTest {
 
         verify(sheet).setDefaultRowHeightInPoints(18f);
         verify(spreadsheet).setDefRowH(18f);
-        // No reloadSheetStyles call — default-height isn't a per-row
-        // change requiring a style reload.
-        verify(spreadsheet, never()).reloadSheetStyles(
-                org.mockito.ArgumentMatchers.anyBoolean(),
-                org.mockito.ArgumentMatchers.anyBoolean());
+        // The rows without a height of their own change height with it.
+        verify(spreadsheet).reloadSheetStyles(true, false);
     }
 
     @Test

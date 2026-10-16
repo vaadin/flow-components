@@ -504,6 +504,15 @@ public class SpreadsheetFactory implements Serializable {
      */
     static void readSizes(Spreadsheet spreadsheet, Sheet sheet, int rows,
             int cols) {
+        readRowSizes(spreadsheet, sheet, rows);
+        readColumnSizes(spreadsheet, sheet, cols);
+    }
+
+    /**
+     * Reads the heights of the first rows of the sheet, and which of them are
+     * hidden.
+     */
+    static void readRowSizes(Spreadsheet spreadsheet, Sheet sheet, int rows) {
         float[] rowHeights = new float[rows];
         ArrayList<Integer> hiddenRowIndexes = new ArrayList<>();
         for (int i = 0; i < rows; i++) {
@@ -513,6 +522,16 @@ public class SpreadsheetFactory implements Serializable {
             }
             rowHeights[i] = SpreadsheetUtil.rowHeightShown(sheet, i);
         }
+        spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
+        spreadsheet.setRowH(rowHeights);
+    }
+
+    /**
+     * Reads the widths of the first columns of the sheet, and which of them are
+     * hidden.
+     */
+    static void readColumnSizes(Spreadsheet spreadsheet, Sheet sheet,
+            int cols) {
         int[] colWidths = new int[cols];
         ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>();
         for (int i = 0; i < cols; i++) {
@@ -522,8 +541,6 @@ public class SpreadsheetFactory implements Serializable {
             colWidths[i] = SpreadsheetUtil.columnWidthShown(sheet, i,
                     spreadsheet.getDefColW());
         }
-        spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
-        spreadsheet.setRowH(rowHeights);
         spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
         spreadsheet.setColW(colWidths);
     }
@@ -1064,10 +1081,13 @@ public class SpreadsheetFactory implements Serializable {
 
     /**
      * Gives the columns without a width of their own the default width of the
-     * component, leaving the default width of the sheet as it is.
+     * component, unless the application set another, leaving the default width
+     * of the sheet as it is.
      */
     private static void setDefaultColumnWidth(Spreadsheet spreadsheet) {
-        spreadsheet.setDefColW(SpreadsheetUtil.getDefaultColumnWidthInPx());
+        if (spreadsheet.getDefColW() <= 0) {
+            spreadsheet.setDefColW(SpreadsheetUtil.getDefaultColumnWidthInPx());
+        }
     }
 
     /**

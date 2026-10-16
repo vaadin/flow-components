@@ -2365,9 +2365,9 @@ public class Spreadsheet extends Component
 
     /**
      * Gets the default column width: the width of the columns that have no
-     * width of their own. Showing a sheet sets it to the default width of the
-     * component, 10 characters, and leaves the default column width of the
-     * sheet ({@link Sheet#getDefaultColumnWidth()}) as it is.
+     * width of their own, on any sheet. It is 10 characters unless set with
+     * {@link #setDefaultColumnWidth(int)}, whatever the default column width of
+     * the sheet ({@link Sheet#getDefaultColumnWidth()}).
      *
      * @return The default column width in PX
      */
@@ -2376,9 +2376,10 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Sets the default column width in pixels that the component uses, this
-     * doesn't change the default column width of the underlying sheet, returned
-     * by {@link #getActiveSheet()} and {@link Sheet#getDefaultColumnWidth()}.
+     * Sets the default column width in pixels: the columns without a width of
+     * their own are shown at it, on any sheet. This doesn't change the default
+     * column width of the underlying sheet, returned by
+     * {@link #getActiveSheet()} and {@link Sheet#getDefaultColumnWidth()}.
      *
      * @param widthPX
      *            The default column width in pixels
@@ -2405,7 +2406,8 @@ public class Spreadsheet extends Component
 
     /**
      * Sets the default row height in points for this Spreadsheet and the
-     * currently active sheet, returned by {@link #getActiveSheet()}.
+     * currently active sheet, returned by {@link #getActiveSheet()}: the rows
+     * of the sheet without a height of their own are shown at it.
      *
      * @param heightPT
      *            New default row height in points.

@@ -64,8 +64,13 @@ final class RowSizeOperations implements Serializable {
     }
 
     void setDefaultHeightPoints(float heightPT) {
-        spreadsheet.getActiveSheet().setDefaultRowHeightInPoints(heightPT);
+        Sheet sheet = spreadsheet.getActiveSheet();
+        sheet.setDefaultRowHeightInPoints(heightPT);
         spreadsheet.setDefRowH(heightPT);
+        // The rows without a height of their own are shown at it.
+        SpreadsheetFactory.readRowSizes(spreadsheet, sheet,
+                spreadsheet.getRowH().length);
+        spreadsheet.reloadSheetStyles(true, false);
     }
 
     void onClientResized(Map<Integer, Float> newRowSizes, int row1, int col1,

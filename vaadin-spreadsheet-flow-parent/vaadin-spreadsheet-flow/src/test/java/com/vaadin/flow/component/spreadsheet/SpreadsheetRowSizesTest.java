@@ -93,6 +93,25 @@ class SpreadsheetRowSizesTest {
     }
 
     @Test
+    void aDefaultHeightSetByTheApplication_isTheSheetsToo() {
+        spreadsheet.setDefaultRowHeight(30f);
+
+        assertEquals(30f, spreadsheet.getDefaultRowHeight());
+        assertEquals(30f,
+                spreadsheet.getActiveSheet().getDefaultRowHeightInPoints());
+    }
+
+    @Test
+    void rowsWithoutAHeight_areShownAtTheDefaultHeightSet() {
+        spreadsheet.setRowHeight(4, 50f);
+
+        spreadsheet.setDefaultRowHeight(30f);
+
+        assertEquals(30f, spreadsheet.getRowH()[3]);
+        assertEquals(50f, spreadsheet.getRowH()[4]);
+    }
+
+    @Test
     void aRowGivenNoHeight_isHidden() {
         spreadsheet.setRowHeight(4, 0f);
 
