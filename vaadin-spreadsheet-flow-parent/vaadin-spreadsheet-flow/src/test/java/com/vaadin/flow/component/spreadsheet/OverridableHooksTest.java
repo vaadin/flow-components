@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -255,6 +256,25 @@ class OverridableHooksTest {
         String styles = String.join("",
                 spreadsheet.getConditionalFormattingStyles().values());
         assertTrue(styles.contains("border-right-color:#c0ffee;"), styles);
+    }
+
+    @Test
+    void reloadingTheSheetData_findsTheConditionalFormatterOfTheNewWorkbook() {
+        List<ConditionalFormatter> seen = new ArrayList<>();
+        Spreadsheet spreadsheet = new Spreadsheet() {
+            @Override
+            protected void reloadActiveSheetData() {
+                seen.add(getConditionalFormatter());
+                super.reloadActiveSheetData();
+            }
+        };
+        XSSFWorkbook next = new XSSFWorkbook();
+        next.createSheet();
+        seen.clear();
+
+        spreadsheet.setWorkbook(next);
+
+        assertSame(spreadsheet.getConditionalFormatter(), seen.get(0));
     }
 
     /**

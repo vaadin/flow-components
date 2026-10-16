@@ -32,6 +32,8 @@ final class WorkbookScope implements Serializable {
     final SheetState sheetState;
     final InvalidFormulaTracker invalidFormulas;
     final PopupButtonRegistry popupButtons;
+    /** How wide a character is in each cell style, as the client measures. */
+    final CellFitCalculator fitCalculator = new CellFitCalculator();
     SpreadsheetStyleFactory styler;
     ConditionalFormatter conditionalFormatter;
 

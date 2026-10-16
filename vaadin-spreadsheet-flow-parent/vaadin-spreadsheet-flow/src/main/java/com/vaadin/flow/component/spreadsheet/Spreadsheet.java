@@ -2998,9 +2998,11 @@ public class Spreadsheet extends Component
             workbookScope.close();
         }
         workbookScope = new WorkbookScope(this, workbook);
-        // Through the method an application may override, once the scope is
-        // in place for it to read.
+        // Through the methods an application may override, once the scope is
+        // in place for them to read, and before the sheet, which reads them,
+        // is loaded.
         workbookScope.styler = createSpreadsheetStyleFactory();
+        workbookScope.conditionalFormatter = createConditionalFormatter();
 
         reloadActiveSheetData();
         if (workbook instanceof HSSFWorkbook hssf) {
@@ -3008,8 +3010,6 @@ public class Spreadsheet extends Component
         } else if (workbook instanceof XSSFWorkbook xssf) {
             setWorkbookProtected(xssf.isStructureLocked());
         }
-
-        workbookScope.conditionalFormatter = createConditionalFormatter();
 
         setWorkbookChangeToggle(!isWorkbookChangeToggle());
     }

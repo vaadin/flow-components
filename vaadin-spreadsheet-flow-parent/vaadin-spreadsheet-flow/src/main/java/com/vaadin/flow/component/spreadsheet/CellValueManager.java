@@ -80,11 +80,9 @@ public class CellValueManager implements Serializable {
 
     final CellNumericFormatter numericFormatter = new CellNumericFormatter();
 
-    private final CellFitCalculator fitCalculator = new CellFitCalculator();
-
-    /** How wide a character is in each cell style, as the client measures. */
+    /** How wide a character is in each cell style of the workbook shown. */
     CellFitCalculator fitCalculator() {
-        return fitCalculator;
+        return spreadsheet.workbookScope().fitCalculator;
     }
 
     private final CellDeletionGuard deletionGuard = new CellDeletionGuard(this);

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.Invocation;
@@ -166,5 +167,18 @@ class WidthRatioRefreshTest {
             }
         }
         return all;
+    }
+
+    @Test
+    void theRatiosOfAWorkbook_areNotTakenForTheNext() {
+        spreadsheet.getCellValueManager()
+                .onCellStyleWidthRatioUpdate(ratios(10f));
+
+        XSSFWorkbook next = new XSSFWorkbook();
+        next.createSheet();
+        spreadsheet.setWorkbook(next);
+
+        assertNull(spreadsheet.getCellValueManager().fitCalculator()
+                .getRatioForStyleIndex(0));
     }
 }
