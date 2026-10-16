@@ -20,10 +20,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -44,11 +46,11 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * {@link Spreadsheet}.
  *
  * <p>
- * Mocks the {@link Spreadsheet}, the underlying {@link Sheet}, the
- * {@link MergedRegionCascade}, and the {@link CellSelectionManager}. Uses an
- * {@link AtomicReference} as the source-of-truth for the cached merged-region
- * list so the stateful getter/setter pair on the parent can be reproduced
- * without a real Spreadsheet instance.
+ * Mocks the {@link Spreadsheet}, the {@link MergedRegionCascade}, and the
+ * {@link CellSelectionManager}. The {@link Sheet} is a POI sheet, spied on.
+ * Uses an {@link AtomicReference} as the source-of-truth for the cached
+ * merged-region list so the stateful getter/setter pair on the parent can be
+ * reproduced without a real Spreadsheet instance.
  */
 class MergedRegionOperationsTest {
 
@@ -57,9 +59,9 @@ class MergedRegionOperationsTest {
     @Mock
     private MergedRegionCascade cascade;
     @Mock
-    private Sheet sheet;
-    @Mock
     private CellSelectionManager selectionManager;
+
+    private Sheet sheet;
 
     private AtomicReference<ArrayList<MergedRegion>> cachedRegions;
     private MergedRegionOperations operations;
@@ -67,6 +69,7 @@ class MergedRegionOperationsTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        sheet = Mockito.spy(new XSSFWorkbook().createSheet());
         cachedRegions = new AtomicReference<>(null);
         when(spreadsheet.getActiveSheet()).thenReturn(sheet);
         when(spreadsheet.getCellSelectionManager())
@@ -85,12 +88,44 @@ class MergedRegionOperationsTest {
         return new CellRangeAddress(r1, r2, c1, c2);
     }
 
+    /** Gives the sheet these merged regions, in this order. */
+    private void poiHas(CellRangeAddress... regions) {
+        for (CellRangeAddress region : regions) {
+            sheet.addMergedRegion(region);
+        }
+        Mockito.clearInvocations(sheet);
+    }
+
+    /** Gives the sheet and the client the same regions, in this order. */
+    private void bothHave(CellRangeAddress... regions) {
+        poiHas(regions);
+        ArrayList<MergedRegion> cached = new ArrayList<>();
+        for (CellRangeAddress region : regions) {
+            cached.add(new MergedRegion(region.getFirstColumn() + 1,
+                    region.getFirstRow() + 1, region.getLastColumn() + 1,
+                    region.getLastRow() + 1));
+        }
+        cachedRegions.set(cached);
+    }
+
+    private List<String> poiRegions() {
+        return sheet.getMergedRegions().stream()
+                .map(CellRangeAddress::formatAsString).toList();
+    }
+
+    private List<String> clientRegions() {
+        return cachedRegions.get().stream()
+                .map(region -> new CellRangeAddress(region.row1 - 1,
+                        region.row2 - 1, region.col1 - 1, region.col2 - 1)
+                        .formatAsString())
+                .toList();
+    }
+
     // ----- addRegion: happy path --------------------------------------------
 
     @Test
     @SuppressWarnings("unchecked")
     void addRegion_onEmptySheet_mutatesPoi_buildsRegion_andFiresCascade() {
-        when(sheet.getNumMergedRegions()).thenReturn(0);
         CellRangeAddress r = range(0, 0, 1, 1);
 
         operations.addRegion(r);
@@ -126,7 +161,6 @@ class MergedRegionOperationsTest {
         // and appends; the prior list reference is not mutated in place.
         // This matters because the cache is a serialized property — any
         // in-place mutation would skip the mirror to the client.
-        when(sheet.getNumMergedRegions()).thenReturn(0);
         ArrayList<MergedRegion> existing = new ArrayList<>();
         MergedRegion seed = new MergedRegion(10, 10, 11, 11);
         seed.id = 5;
@@ -150,7 +184,6 @@ class MergedRegionOperationsTest {
         // Pin: mergedRegionCounter on the parent Spreadsheet is read via
         // direct field access (not a getter), so the post-increment ++
         // is observable from outside. Two adds → ids 0 and 1.
-        when(sheet.getNumMergedRegions()).thenReturn(0);
 
         operations.addRegion(range(0, 0, 1, 1));
         operations.addRegion(range(5, 5, 6, 6));
@@ -174,8 +207,7 @@ class MergedRegionOperationsTest {
         // Pin: OVERLAP (partial intersection) is rejected. No POI mutation,
         // no cascade fire, no cache update.
         CellRangeAddress existing = range(0, 0, 2, 2);
-        when(sheet.getNumMergedRegions()).thenReturn(1);
-        when(sheet.getMergedRegion(0)).thenReturn(existing);
+        poiHas(existing);
 
         CellRangeAddress candidate = range(1, 1, 3, 3);
 
@@ -192,8 +224,7 @@ class MergedRegionOperationsTest {
         // Pin: ENCLOSES (the existing region wholly contains the candidate)
         // is rejected with a different message. Distinct from OVERLAP.
         CellRangeAddress existing = range(0, 0, 5, 5);
-        when(sheet.getNumMergedRegions()).thenReturn(1);
-        when(sheet.getMergedRegion(0)).thenReturn(existing);
+        poiHas(existing);
 
         CellRangeAddress candidate = range(1, 1, 2, 2);
 
@@ -213,8 +244,7 @@ class MergedRegionOperationsTest {
         CellRangeAddress candidate = range(0, 0, 5, 5);
         MergedRegion existingCached = new MergedRegion(2, 2, 3, 3);
         existingCached.id = 11;
-        when(sheet.getNumMergedRegions()).thenReturn(1, 0, 0);
-        when(sheet.getMergedRegion(0)).thenReturn(existing);
+        poiHas(existing);
         cachedRegions.set(new ArrayList<>(
                 java.util.Collections.singletonList(existingCached)));
 
@@ -250,12 +280,34 @@ class MergedRegionOperationsTest {
         assertEquals(6, merged.getValue().col2);
     }
 
+    @Test
+    void addRegion_discardsEveryRegionInside_keepingTheOthersInOrder() {
+        // A1:B2 and A4:B5 lie inside A1:C6, D1:E2 and H1:H2 do not.
+        bothHave(range(0, 0, 1, 1), range(0, 3, 1, 4), range(3, 0, 4, 1),
+                range(0, 7, 1, 7));
+
+        operations.addRegion(range(0, 0, 5, 2));
+
+        assertEquals(List.of("D1:E2", "H1:H2", "A1:C6"), poiRegions());
+        assertEquals(List.of("D1:E2", "H1:H2", "A1:C6"), clientRegions());
+    }
+
+    @Test
+    void addRegion_nextToTheOthers_keepsThemAll() {
+        bothHave(range(0, 0, 1, 1), range(0, 3, 1, 4));
+
+        operations.addRegion(range(0, 2, 1, 2));
+
+        assertEquals(List.of("A1:B2", "D1:E2", "C1:C2"), poiRegions());
+        assertEquals(List.of("A1:B2", "D1:E2", "C1:C2"), clientRegions());
+    }
+
     // ----- removeRegion -----------------------------------------------------
 
     @Test
     void removeRegion_capturesRange_thenMutatesPoi_andFiresUnmergeCascade() {
         CellRangeAddress existing = range(0, 0, 1, 1);
-        when(sheet.getMergedRegion(0)).thenReturn(existing);
+        poiHas(existing);
         MergedRegion cached = new MergedRegion(1, 1, 2, 2);
         cached.id = 42;
         cachedRegions.set(
@@ -283,7 +335,7 @@ class MergedRegionOperationsTest {
         // the POI and cache orderings are aligned — the operation
         // doesn't verify alignment.
         CellRangeAddress existing = range(5, 5, 6, 6);
-        when(sheet.getMergedRegion(2)).thenReturn(existing);
+        poiHas(range(0, 0, 1, 1), range(2, 2, 3, 3), existing);
         ArrayList<MergedRegion> cache = new ArrayList<>();
         cache.add(new MergedRegion(0, 0, 1, 1));
         cache.add(new MergedRegion(2, 2, 3, 3));
