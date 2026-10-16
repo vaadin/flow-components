@@ -217,6 +217,15 @@ class SpreadsheetCellUpdatesTest {
     }
 
     @Test
+    void aFormulaAddedBelowTheRowsShown_isSent() {
+        show();
+
+        spreadsheet.refreshCells(spreadsheet.createFormulaCell(49, 3, "A1*3"));
+
+        assertTrue(calls().contains("D50=3"));
+    }
+
+    @Test
     void aCellFormattedOnAnotherCell_isSentWhenItsFormattingChanges() {
         SheetConditionalFormatting formatting = sheet
                 .getSheetConditionalFormatting();
