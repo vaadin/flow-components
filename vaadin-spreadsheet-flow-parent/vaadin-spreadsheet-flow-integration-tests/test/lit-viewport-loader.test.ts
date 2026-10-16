@@ -17,7 +17,15 @@ function fakeClock() {
   let now = 0;
   let nextId = 1;
   const timers: Array<{ at: number; fn: () => void; id: number }> = [];
+  // Frames are drawn every 16 ms, at fixed times, as the screen refreshes.
+  let frameInterval = 16;
+  let nextFrame = frameInterval;
+  let frameCallbacks: Array<(time: number) => void> = [];
+  let framesRequested = 0;
   return {
+    get framesRequested() {
+      return framesRequested;
+    },
     clock: {
       now: () => now,
       setTimeout: (fn: () => void, delay: number) => {
@@ -30,26 +38,47 @@ function fakeClock() {
         if (index >= 0) {
           timers.splice(index, 1);
         }
+      },
+      requestFrame: (fn: (time: number) => void) => {
+        framesRequested++;
+        frameCallbacks.push(fn);
       }
+    },
+    /** Frames come this many ms apart from now on; Infinity for none at all. */
+    setFrameInterval(ms: number) {
+      frameInterval = ms;
+      nextFrame = now + ms;
     },
     advance(ms: number) {
       const end = now + ms;
       for (;;) {
+        while (nextFrame <= now) {
+          nextFrame += frameInterval;
+        }
         timers.sort((a, b) => a.at - b.at);
-        const next = timers[0];
-        if (next === undefined || next.at > end) {
+        const timer = timers[0];
+        const frameAt = frameCallbacks.length > 0 ? nextFrame : Number.POSITIVE_INFINITY;
+        const timerAt = timer === undefined ? Number.POSITIVE_INFINITY : timer.at;
+        if (Math.min(frameAt, timerAt) > end) {
           break;
         }
-        timers.shift();
-        now = next.at;
-        next.fn();
+        if (frameAt <= timerAt) {
+          now = frameAt;
+          const callbacks = frameCallbacks;
+          frameCallbacks = [];
+          callbacks.forEach((fn) => fn(now));
+          nextFrame += frameInterval;
+        } else {
+          timers.shift();
+          now = timer!.at;
+          timer!.fn();
+        }
       }
       now = end;
     }
   };
 }
 
-/** A sheet of 1,000 rows by 50 columns, showing 30 rows by 10 columns. */
 function setUp(sheet: Partial<{ rows: number; frozenRows: number }> = {}) {
   const time = fakeClock();
   const loads: LoadRange[] = [];
@@ -252,6 +281,115 @@ describe('ViewportLoader', () => {
     expect(t.loads[1].r1).to.equal(186);
   });
 
+  // On a slow machine frames are 100-190 ms apart, and so are a scroll's
+  // events: a fling counted as stopped between every two of them, and
+  // loaded 11-47 times, each load slowing the next frames further.
+
+  it('on a machine drawing slow frames, holds back while the sheet scrolls, and asks once it stops', () => {
+    const t = setUp();
+    t.loader.check();
+    t.time.setFrameInterval(120);
+
+    // 10 rows a frame: slow enough to load on the way on a fast machine.
+    for (let step = 1; step <= 8; step++) {
+      t.loader.scrolled(step * 200, 0);
+      t.time.advance(120);
+      t.show({ r1: 1 + step * 10, c1: 1, r2: 30 + step * 10, c2: 10 });
+      t.loader.check();
+    }
+    expect(t.loads, 'asked while scrolling').to.have.length(1);
+
+    t.time.advance(400);
+
+    expect(t.loads).to.have.length(2);
+    expect(t.loads[1].r1).to.be.lessThan(81);
+    expect(t.loads[1].r2).to.be.greaterThan(110);
+  });
+
+  it('on a fast machine, asks on the way when the sheet scrolls slowly enough', () => {
+    const t = setUp();
+    t.loader.check();
+
+    for (let step = 1; step <= 8; step++) {
+      t.loader.scrolled(step * 200, 0);
+      t.time.advance(80);
+      t.show({ r1: 1 + step * 10, c1: 1, r2: 30 + step * 10, c2: 10 });
+      t.loader.check();
+    }
+
+    expect(t.loads.length, 'asked while scrolling').to.be.greaterThan(1);
+  });
+
+  it('at a fast frame rate, waits 100 ms before the sheet counts as stopped', () => {
+    // Two frames are 32 ms at 60 Hz: the pause between two turns of a wheel
+    // would count as a stop, and each would ask the server again.
+    const t = setUp();
+    t.loader.check();
+    t.scrollTo(0);
+    t.loader.scrolled(400, 0);
+    t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
+    t.loader.check();
+
+    t.time.advance(60);
+    expect(t.loads, 'stopped after two frames').to.have.length(1);
+    t.time.advance(100);
+
+    expect(t.loads).to.have.length(2);
+  });
+
+  it('times the frames of a scroll afresh, after a pause', () => {
+    // A frame timed from the last one of a scroll seconds ago would look
+    // like a slow machine's, and hold back what a fast one loads on the way.
+    const t = setUp();
+    t.loader.check();
+    t.scrollTo(0);
+    t.time.advance(2000);
+
+    t.loader.scrolled(1000, 0);
+    t.time.advance(16);
+    t.show({ r1: 51, c1: 1, r2: 80, c2: 10 });
+    t.loader.check();
+
+    expect(t.loads).to.have.length(2);
+  });
+
+  it('counts the time between slow frames as scrolling, not as a stop', () => {
+    const t = setUp();
+    t.loader.check();
+    t.scrollTo(0);
+    t.time.setFrameInterval(150);
+
+    // Inside what was loaded: the only request would be the stop's.
+    for (let step = 1; step <= 4; step++) {
+      t.loader.scrolled(step * 40, 0);
+      t.time.advance(140);
+      t.show({ r1: 1 + step * 2, c1: 1, r2: 30 + step * 2, c2: 10 });
+      t.loader.check();
+    }
+    expect(t.loads, 'stopped on the way').to.have.length(1);
+
+    t.time.advance(400);
+
+    expect(t.loads).to.have.length(2);
+  });
+
+  it('counts the sheet as stopped a second after its last scroll event, with no frames drawn', () => {
+    // A tab in the background draws no frames.
+    const t = setUp();
+    t.loader.check();
+    t.scrollTo(0);
+    t.time.setFrameInterval(Number.POSITIVE_INFINITY);
+    t.loader.scrolled(400, 0);
+    t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
+    t.loader.check();
+
+    t.time.advance(500);
+    expect(t.loads, 'stopped without frames').to.have.length(1);
+    t.time.advance(600);
+
+    expect(t.loads).to.have.length(2);
+  });
+
   it('times the round trips and loads a quarter screen ahead on a slow connection', () => {
     const t = setUp();
     t.serverAnswersAfterEachLoad();
@@ -324,6 +462,15 @@ describe('ViewportLoader', () => {
     t.time.advance(1000);
 
     expect(t.loads).to.have.length(1);
+  });
+
+  it('counts no frames once disposed', () => {
+    const t = setUp();
+    t.loader.dispose();
+
+    t.loader.scrolled(400, 0);
+
+    expect(t.time.framesRequested).to.equal(0);
   });
 
   it('asks at once while the server answers something else, for Flow to send next', () => {

@@ -28,17 +28,22 @@ export interface ViewportLoaderHost {
   load(range: LoadRange): void;
 }
 
-/** Clock and timers, replaceable in tests. */
+/** Clock, timers and frames, replaceable in tests. */
 export interface ViewportLoaderClock {
   now(): number;
   setTimeout(callback: () => void, delay: number): unknown;
   clearTimeout(handle: unknown): void;
+  /** Call back as the next frame is drawn, with the frame's time. */
+  requestFrame(callback: (time: number) => void): void;
 }
 
 const realClock: ViewportLoaderClock = {
   now: () => performance.now(),
   setTimeout: (callback, delay) => setTimeout(callback, delay),
-  clearTimeout: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>)
+  clearTimeout: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>),
+  requestFrame: (callback) => {
+    requestAnimationFrame(callback);
+  }
 };
 
 /** A first guess at a load's round trip, before one has been timed. */
@@ -53,8 +58,17 @@ const RECHECK_MS = 30;
 /** Scroll positions older than this do not count towards the scrolling speed. */
 const SPEED_WINDOW_MS = 150;
 
-/** With no scroll event for this long, the sheet has stopped. */
+/** With no scroll event for this long, and for two frames, the sheet has stopped. */
 const STOPPED_AFTER_MS = 100;
+
+/** Frames drawn without a scroll event, besides {@link STOPPED_AFTER_MS}, before the sheet has stopped. */
+const FRAMES_TO_STOP = 2;
+
+/** However long frames take, the sheet has stopped this long after its last scroll event. */
+const LONGEST_WAIT_TO_STOP_MS = 1000;
+
+/** A machine drawing a scroll's frames slower than this cannot draw cells loaded on the way. */
+const SLOW_FRAME_MS = 50;
 
 /**
  * Decides when the server is asked for cells as the sheet scrolls, and for
@@ -88,6 +102,12 @@ const STOPPED_AFTER_MS = 100;
  * or stops.
  * <li>On a slow connection the margin shrinks to a quarter screen, so what
  * is on screen arrives sooner.
+ * <li>On a slow machine nothing is loaded until the scrolling stops, as in
+ * GWT. With frames 100-190 ms apart, a scroll's events come that far apart
+ * too: counted in milliseconds, a fling stopped between every two of them,
+ * and loaded 11-47 times, each load slowing the next frames further. A
+ * scroll stops once two frames are drawn without a scroll event, as well
+ * as 100 ms, and a machine is slow while its frames take over 50 ms.
  * </ul>
  */
 export class ViewportLoader {
@@ -104,6 +124,13 @@ export class ViewportLoader {
   private rowDirection = 0;
   private columnDirection = 0;
   private timer: unknown = null;
+  /** Frames drawn since the last scroll event, counted until {@link FRAMES_TO_STOP}. */
+  private framesSinceScroll = 0;
+  private countingFrames = false;
+  private lastFrameAt: number | null = null;
+  /** How long the last frame of a scroll took, in ms. */
+  private frameMs = 0;
+  private disposed = false;
 
   constructor(private readonly host: ViewportLoaderHost, private readonly clock: ViewportLoaderClock = realClock) {}
 
@@ -124,6 +151,8 @@ export class ViewportLoader {
     while (this.samples.length > 2 && now - this.samples[0].t > SPEED_WINDOW_MS) {
       this.samples.shift();
     }
+    this.framesSinceScroll = 0;
+    this.countFrames();
   }
 
   /**
@@ -182,6 +211,7 @@ export class ViewportLoader {
 
   /** Stop looking again. */
   dispose(): void {
+    this.disposed = true;
     this.cancelTimer();
   }
 
@@ -235,19 +265,51 @@ export class ViewportLoader {
     };
   }
 
-  /** Whether a scroll event came in only just now. */
+  /**
+   * Whether the sheet may still be moving: a scroll event came in only just
+   * now, or fewer than two frames ago.
+   */
   private moving(): boolean {
     const last = this.samples[this.samples.length - 1];
-    return last !== undefined && this.clock.now() - last.t <= STOPPED_AFTER_MS;
+    if (last === undefined) {
+      return false;
+    }
+    const since = this.clock.now() - last.t;
+    return since <= STOPPED_AFTER_MS || (this.framesSinceScroll < FRAMES_TO_STOP && since <= LONGEST_WAIT_TO_STOP_MS);
   }
+
+  /** Count the frames drawn after the last scroll event, and time them. */
+  private countFrames(): void {
+    if (this.countingFrames || this.disposed) {
+      return;
+    }
+    this.countingFrames = true;
+    this.lastFrameAt = null;
+    this.clock.requestFrame(this.frameDrawn);
+  }
+
+  private readonly frameDrawn = (time: number): void => {
+    if (this.lastFrameAt !== null) {
+      this.frameMs = time - this.lastFrameAt;
+    }
+    this.lastFrameAt = time;
+    this.framesSinceScroll++;
+    if (this.framesSinceScroll < FRAMES_TO_STOP) {
+      this.clock.requestFrame(this.frameDrawn);
+    } else {
+      this.countingFrames = false;
+    }
+  };
 
   /** Whether the sheet moves past the target's margin before a load could come back. */
   private tooFast(drawn: LoadRange, target: LoadRange): boolean {
-    const now = this.clock.now();
     const first = this.samples[0];
     const last = this.samples[this.samples.length - 1];
-    if (first === undefined || last === undefined || first === last || now - last.t > STOPPED_AFTER_MS) {
+    if (first === undefined || last === undefined || first === last || !this.moving()) {
       return false;
+    }
+    if (this.frameMs > SLOW_FRAME_MS) {
+      return true;
     }
     const sheet = this.host.sheet();
     const elapsed = Math.max(1, last.t - first.t);
