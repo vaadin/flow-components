@@ -1744,11 +1744,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   ): void => {
     const { col, shiftKey, ctrlKey, metaKey } = e.detail;
     const rows = this.rows > 0 ? this.rows : 1;
+    const row = this.firstRowOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole column joins the selection as a further range.
-      this.selection = addAuxRange(this.selection, col, 1, col, rows);
+      this.selection = addAuxRange(this.selection, col, 1, col, rows, { col, row });
       this.recomputeViewport();
-      const data: ColumnSelectedData = { column: col, firstRowIndex: 1 };
+      const data: ColumnSelectedData = { column: col, firstRowIndex: row };
       this.sendToServer({ type: 'columnAddedToSelection', data });
       return;
     }
@@ -1762,7 +1763,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       };
     } else {
       this.selection = {
-        activeCell: { col, row: 1 },
+        activeCell: { col, row },
         activeRange: normalizedRange(col, 1, col, rows),
         auxRanges: []
       };
@@ -1770,6 +1771,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
+
+  /**
+   * The row a click on a column letter makes active: the first one whose top
+   * is on screen, as in GWT, or row 1 when rows are frozen. Row 1 of a sheet
+   * scrolled far down is off screen, and the keys went there.
+   */
+  private firstRowOnScreen(): number {
+    if (this.verticalSplitPosition > 0 || this.rows <= 0) {
+      return 1;
+    }
+    let row = this.sheetSizes().rows.reach(1, this.scrollContainer.scrollTop);
+    while (row < this.rows && this.hiddenRows.has(row)) {
+      row++;
+    }
+    return row;
+  }
+
+  /** The column a click on a row number makes active; see {@link firstRowOnScreen}. */
+  private firstColumnOnScreen(): number {
+    if (this.horizontalSplitPosition > 0 || this.cols <= 0) {
+      return 1;
+    }
+    let col = this.sheetSizes().columns.reach(1, this.scrollContainer.scrollLeft);
+    while (col < this.cols && this.hiddenColumns.has(col)) {
+      col++;
+    }
+    return col;
+  }
 
   /**
    * Row-header click handler. Mirror of the column
@@ -1786,11 +1815,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
   ): void => {
     const { row, shiftKey, ctrlKey, metaKey } = e.detail;
     const cols = this.cols > 0 ? this.cols : 1;
+    const col = this.firstColumnOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole row joins the selection as a further range.
-      this.selection = addAuxRange(this.selection, 1, row, cols, row);
+      this.selection = addAuxRange(this.selection, 1, row, cols, row, { col, row });
       this.recomputeViewport();
-      const data: RowSelectedData = { row, firstColumnIndex: 1 };
+      const data: RowSelectedData = { row, firstColumnIndex: col };
       this.sendToServer({ type: 'rowAddedToRangeSelection', data });
       return;
     }
@@ -1804,7 +1834,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       };
     } else {
       this.selection = {
-        activeCell: { col: 1, row },
+        activeCell: { col, row },
         activeRange: normalizedRange(1, row, cols, row),
         auxRanges: []
       };

@@ -125,10 +125,17 @@ export function isCoherentSelection(state: SelectionState): boolean {
  * The active range and active cell shift to the new range — matches
  * Excel's "Ctrl-click moves focus" behavior.
  */
-export function addAuxRange(state: SelectionState, c1: number, r1: number, c2: number, r2: number): SelectionState {
+export function addAuxRange(
+  state: SelectionState,
+  c1: number,
+  r1: number,
+  c2: number,
+  r2: number,
+  activeCell: CellPosition = { col: c1, row: r1 }
+): SelectionState {
   const newActive = normalizedRange(c1, r1, c2, r2);
   return {
-    activeCell: { col: c1, row: r1 },
+    activeCell,
     activeRange: newActive,
     // The old active range becomes an aux range — joining the
     // previous aux list.
@@ -258,17 +265,19 @@ export function buildSelectionEvent(
   const isWholeCol = cols > 0 && rows > 0 && isSingleCol && range.r1 === 1 && range.r2 === rows;
   const isWholeRow = cols > 0 && rows > 0 && isSingleRow && range.c1 === 1 && range.c2 === cols;
 
+  // The server makes the cell the selection starts from its selected cell:
+  // the active cell, wherever it is in the column or the row.
   if (isWholeCol) {
     const data: ColumnSelectedData = {
       column: range.c1,
-      firstRowIndex: range.r1
+      firstRowIndex: activeCell.row
     };
     return { type: 'columnSelected', data };
   }
   if (isWholeRow) {
     const data: RowSelectedData = {
       row: range.r1,
-      firstColumnIndex: range.c1
+      firstColumnIndex: activeCell.col
     };
     return { type: 'rowSelected', data };
   }

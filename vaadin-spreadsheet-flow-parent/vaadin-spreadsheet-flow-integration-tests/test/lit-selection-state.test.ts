@@ -100,6 +100,14 @@ describe('SelectionState — addAuxRange', () => {
         expect(s2.auxRanges).to.have.length(2);
     });
 
+    it('makes the cell given the active one, in the range it adds', () => {
+        // A column added with Ctrl-click: active on the first row on screen.
+        const added = addAuxRange(selectSingleCell(1, 1), 4, 1, 4, 100, { col: 4, row: 51 });
+
+        expect(added.activeCell).to.deep.equal({ col: 4, row: 51 });
+        expect(added.activeRange).to.deep.equal({ c1: 4, c2: 4, r1: 1, r2: 100 });
+    });
+
     it('breaks coherence', () => {
         const s0 = selectSingleCell(1, 1);
         expect(isCoherentSelection(s0)).to.be.true;

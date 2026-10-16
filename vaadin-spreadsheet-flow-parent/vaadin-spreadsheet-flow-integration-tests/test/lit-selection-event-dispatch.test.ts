@@ -97,6 +97,17 @@ describe('buildSelectionEvent — columnSelected', () => {
         });
     });
 
+    it('names the row of the active cell, which the server makes its selected cell', () => {
+        // A column selected from a sheet scrolled down: active on row 51.
+        const event = buildSelectionEvent(
+            { col: 3, row: 51 },
+            { c1: 3, c2: 3, r1: 1, r2: 100 },
+            100,
+            5
+        );
+        expect(event).to.deep.equal({ type: 'columnSelected', data: { column: 3, firstRowIndex: 51 } });
+    });
+
     it('NOT columnSelected if rows is 0 (uninitialized grid → falls back to cellSelected)', () => {
         const event = buildSelectionEvent(
             { col: 1, row: 1 },
@@ -121,6 +132,16 @@ describe('buildSelectionEvent — rowSelected', () => {
             row: 4,
             firstColumnIndex: 1,
         });
+    });
+
+    it('names the column of the active cell, which the server makes its selected cell', () => {
+        const event = buildSelectionEvent(
+            { col: 11, row: 4 },
+            { c1: 1, c2: 20, r1: 4, r2: 4 },
+            10,
+            20
+        );
+        expect(event).to.deep.equal({ type: 'rowSelected', data: { row: 4, firstColumnIndex: 11 } });
     });
 });
 
