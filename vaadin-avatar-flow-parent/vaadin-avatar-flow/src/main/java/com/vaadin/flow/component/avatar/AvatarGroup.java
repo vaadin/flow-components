@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,10 +44,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.NodeOwner;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
@@ -95,9 +91,7 @@ public class AvatarGroup extends Component
         private Set<String> classNames = new LinkedHashSet<>();
 
         private AvatarGroup host;
-        private StreamRegistration resourceRegistration;
-        private Registration pendingRegistration;
-        private Command pendingHandle;
+        private Registration resourceRegistration;
 
         private AbstractStreamResource imageResource;
 
@@ -223,7 +217,7 @@ public class AvatarGroup extends Component
          *            the image url
          */
         public void setImage(String url) {
-            unsetResource();
+            setResource(null);
 
             this.img = url;
             if (getHost() != null) {
@@ -250,7 +244,7 @@ public class AvatarGroup extends Component
          */
         public void setImageHandler(DownloadHandler downloadHandler) {
             if (downloadHandler == null) {
-                unsetResource();
+                setImageResource(null);
                 return;
             }
             if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
@@ -277,21 +271,11 @@ public class AvatarGroup extends Component
          */
         @Deprecated(since = "24.8", forRemoval = true)
         public void setImageResource(AbstractStreamResource resource) {
-            imageResource = resource;
-
-            if (resource == null) {
-                unsetResource();
-                return;
-            }
-
-            // The following is the copy of functionality from the
-            // ElementAttributeMap
-            doSetResource(resource);
-            if (getHost() != null
-                    && getHost().getElement().getNode().isAttached()) {
-                registerResource(resource);
+            setResource(resource);
+            if (resource != null) {
+                doSetResource(resource);
             } else {
-                deferRegistration(resource);
+                this.img = null;
             }
             if (getHost() != null) {
                 getHost().clientItemsUpdate.schedule();
@@ -310,80 +294,30 @@ public class AvatarGroup extends Component
             this.img = targetUri.toASCIIString();
         }
 
-        private void unregisterResource() {
-            StreamRegistration registration = resourceRegistration;
-            Registration handle = pendingRegistration;
-            if (handle != null) {
-                handle.remove();
-            }
-            if (registration != null) {
-                registration.unregister();
-            }
-            this.img = null;
+        private void setResource(AbstractStreamResource resource) {
+            imageResource = resource;
+            bindResource();
         }
 
-        private void deferRegistration(AbstractStreamResource resource) {
-            if (pendingRegistration != null) {
+        /**
+         * Registers the image resource with the session of the host while the
+         * host is attached, and unregisters it when the host is detached, the
+         * item is removed from the host, or the resource is replaced.
+         */
+        private void bindResource() {
+            if (resourceRegistration != null) {
+                resourceRegistration.remove();
+                resourceRegistration = null;
+            }
+            if (getHost() == null || imageResource == null) {
                 return;
             }
-
-            pendingHandle = () -> {
-                doSetResource(resource);
-                registerResource(resource);
-            };
-
-            if (getHost() != null) {
-                attachPendingRegistration(pendingHandle);
-                pendingHandle = null;
-            }
-        }
-
-        private void attachPendingRegistration(Command pendingHandle) {
-            if (getHost().getElement().getNode().isAttached()) {
-                pendingHandle.execute();
-                return;
-            }
-            Registration handle = getHost().getElement().getNode()
-                    // Do not convert to lambda
-                    .addAttachListener(pendingHandle);
-            pendingRegistration = handle;
-        }
-
-        private void registerResource(AbstractStreamResource resource) {
-            assert resourceRegistration == null;
-            StreamRegistration registration = getSession().getResourceRegistry()
-                    .registerResource(resource);
-            resourceRegistration = registration;
-            Registration handle = pendingRegistration;
-            if (handle != null) {
-                handle.remove();
-            }
-            pendingRegistration = getHost().getElement().getNode()
-                    .addDetachListener(
-                            // Do not convert to lambda
-                            new Command() {
-                                @Override
-                                public void execute() {
-                                    AvatarGroupItem.this.unsetResource();
-                                }
-                            });
-        }
-
-        private void unsetResource() {
-            imageResource = null;
-            StreamRegistration registration = resourceRegistration;
-            Optional<AbstractStreamResource> resource = Optional.empty();
-            if (registration != null) {
-                resource = Optional.ofNullable(registration.getResource());
-            }
-            unregisterResource();
-            resource.ifPresent(this::deferRegistration);
-        }
-
-        private VaadinSession getSession() {
-            NodeOwner owner = getHost().getElement().getNode().getOwner();
-            assert owner instanceof StateTree;
-            return ((StateTree) owner).getUI().getSessionOrThrow();
+            AbstractStreamResource resource = imageResource;
+            resourceRegistration = getHost().getElement().whenAttached(ui -> {
+                StreamRegistration registration = ui.getSessionOrThrow()
+                        .getResourceRegistry().registerResource(resource);
+                return registration::unregister;
+            });
         }
 
         /**
@@ -462,10 +396,7 @@ public class AvatarGroup extends Component
 
         private void setHost(AvatarGroup host) {
             this.host = host;
-            if (pendingHandle != null) {
-                attachPendingRegistration(pendingHandle);
-                pendingHandle = null;
-            }
+            bindResource();
         }
     }
 
