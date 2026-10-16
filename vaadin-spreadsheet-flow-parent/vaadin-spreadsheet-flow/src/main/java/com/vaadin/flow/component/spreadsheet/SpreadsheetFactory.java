@@ -287,20 +287,11 @@ public class SpreadsheetFactory implements Serializable {
             // If the file exists beforehand, it needs to be deleted first
             file.delete();
         }
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(file);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             workbook.write(fos);
-            fos.close();
-            if (workbook instanceof SXSSFWorkbook sxssf) {
-                sxssf.dispose();
-            }
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage(), e);
-        } finally {
-            if (fos != null) {
-                fos.close();
-            }
+        }
+        if (workbook instanceof SXSSFWorkbook sxssf) {
+            sxssf.dispose();
         }
         Workbook wb = WorkbookFactory.create(file);
         spreadsheet.setInternalWorkbook(wb);
