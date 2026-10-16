@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.shared;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.IntConsumer;
 
 import org.junit.jupiter.api.AfterEach;
@@ -25,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.tests.MockUIExtension;
@@ -74,22 +71,13 @@ class TooltipConfigurationTest {
             String methodName) {
         setter.accept(1234);
 
-        List<JsCall> calls = dumpTooltipCalls();
+        List<JsCall> calls = ui.dumpJsCalls(ui.getUI().getElement(),
+                TooltipJs.class);
         Assertions.assertEquals("initConfiguration", calls.get(0).methodName());
         Assertions.assertEquals(List.of(), calls.get(0).arguments());
         List<JsCall> delayCalls = calls.stream()
                 .filter(call -> call.methodName().equals(methodName)).toList();
         Assertions.assertEquals(1, delayCalls.size());
         Assertions.assertEquals(List.of(1234), delayCalls.get(0).arguments());
-    }
-
-    private List<JsCall> dumpTooltipCalls() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(pending -> pending.getOwner() == ui.getUI().getElement()
-                        .getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(JavaScriptInvocation::getJsCall).filter(Objects::nonNull)
-                .filter(call -> call.definitionType() == TooltipJs.class)
-                .toList();
     }
 }

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.shared;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
@@ -27,8 +26,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.component.shared.Tooltip.AriaLinkMode;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.dom.Element;
@@ -291,20 +288,12 @@ class TooltipTest {
         Tooltip.forComponent(component);
         ui.add(component);
 
-        List<JsCall> calls = dumpTooltipCalls(getTooltipElement().get());
+        List<JsCall> calls = ui.dumpJsCalls(getTooltipElement().get(),
+                TooltipJs.class);
         Assertions.assertEquals(1, calls.size());
         Assertions.assertEquals("setTarget", calls.get(0).methodName());
         Assertions.assertEquals(List.of(component.getElement()),
                 calls.get(0).arguments());
-    }
-
-    private List<JsCall> dumpTooltipCalls(Element owner) {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(pending -> pending.getOwner() == owner.getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(JavaScriptInvocation::getJsCall).filter(Objects::nonNull)
-                .filter(call -> call.definitionType() == TooltipJs.class)
-                .toList();
     }
 
     private Optional<Element> getTooltipElement() {

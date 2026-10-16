@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.shared;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +24,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
@@ -84,22 +81,13 @@ class HasValidationPropertiesTest {
         component.setInvalid(true);
         component.setInvalid(false);
 
-        List<JsCall> calls = dumpValidationCalls();
+        List<JsCall> calls = ui.dumpJsCalls(component.getElement(),
+                ValidationJs.class);
         Assertions.assertEquals(2, calls.size());
         Assertions.assertEquals("setInvalid", calls.get(0).methodName());
         Assertions.assertEquals(List.of(true), calls.get(0).arguments());
         Assertions.assertEquals("setInvalid", calls.get(1).methodName());
         Assertions.assertEquals(List.of(false), calls.get(1).arguments());
-    }
-
-    private List<JsCall> dumpValidationCalls() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(pending -> pending.getOwner() == component.getElement()
-                        .getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(JavaScriptInvocation::getJsCall).filter(Objects::nonNull)
-                .filter(call -> call.definitionType() == ValidationJs.class)
-                .toList();
     }
 
     @Tag("test")
