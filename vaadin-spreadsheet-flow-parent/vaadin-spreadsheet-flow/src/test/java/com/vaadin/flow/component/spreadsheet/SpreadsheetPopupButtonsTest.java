@@ -390,10 +390,43 @@ class SpreadsheetPopupButtonsTest {
         spreadsheet.setPopup("B3", button);
         spreadsheet.setSelection("A1");
         spreadsheet.shiftRows(3, 30, -1, true, true);
+        clientCalls();
+
         spreadsheet.setPopup("D5", button);
+
+        assertTrue(onTheSheet(button));
+        assertEquals(List.of("addPopupButton"), clientCalls());
+    }
+
+    @Test
+    void aButtonTheClientHas_isNotSentAgainAsItScrolls() {
+        spreadsheet.setPopup("B2", button());
         clientCalls();
 
         clientShowsRows(2, 21);
+
+        assertEquals(List.of(), clientCalls());
+    }
+
+    @Test
+    void aButtonWhoseStateChanged_isSentAgain() {
+        PopupButton button = button();
+        spreadsheet.setPopup("B2", button);
+        clientCalls();
+
+        button.markActive(true);
+        clientShowsRows(2, 21);
+
+        assertEquals(List.of("addPopupButton"), clientCalls());
+    }
+
+    @Test
+    void aClientStartedAnew_getsTheButtonsAgain() {
+        spreadsheet.setPopup("B2", button());
+        clientCalls();
+
+        TestHelper.fireClientEvent(spreadsheet, "onConnectorInit", "{}");
+        clientShowsRows(1, 20);
 
         assertEquals(List.of("addPopupButton"), clientCalls());
     }

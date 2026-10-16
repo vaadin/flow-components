@@ -11,9 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.poi.ss.util.CellReference;
 
@@ -31,7 +29,8 @@ final class PopupButtonRegistry implements Serializable {
 
     private final Spreadsheet spreadsheet;
     private final Map<CellReference, PopupButton> buttonsByCell = new HashMap<>();
-    private final Set<PopupButton> onTheClient = new HashSet<>();
+    /** The buttons on the client, with the state each was last sent in. */
+    private final Map<PopupButton, String> onTheClient = new HashMap<>();
 
     PopupButtonRegistry(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -66,8 +65,8 @@ final class PopupButtonRegistry implements Serializable {
      * and takes the others of that sheet off. Called whenever the cells shown
      * may have changed.
      * <p>
-     * A button already on the client is sent again: that is how changes to its
-     * state, such as {@link PopupButton#markActive(boolean)}, reach it.
+     * A button already on the client is sent again only when its state, such as
+     * {@link PopupButton#markActive(boolean)}, has changed since.
      */
     void refresh() {
         String sheetName = spreadsheet.getActiveSheet().getSheetName();
@@ -116,9 +115,14 @@ final class PopupButtonRegistry implements Serializable {
 
     /** Takes every button off the client, as when another sheet is shown. */
     void detachAll() {
-        for (PopupButton button : new ArrayList<>(onTheClient)) {
+        for (PopupButton button : new ArrayList<>(onTheClient.keySet())) {
             detach(button);
         }
+    }
+
+    /** The client has started anew, with none of the buttons sent before. */
+    void forgetClient() {
+        onTheClient.clear();
     }
 
     /** Forgets every button, as when another workbook is set. */
@@ -132,16 +136,19 @@ final class PopupButtonRegistry implements Serializable {
     }
 
     private void attach(PopupButton button) {
-        onTheClient.add(button);
-        spreadsheet.getElement().callJsFunction("addPopupButton",
-                Serializer.serialize(button.getState()));
+        String state = Serializer.serialize(button.getState());
+        if (state.equals(onTheClient.put(button, state))) {
+            // The client has it as it is.
+            return;
+        }
+        spreadsheet.getElement().callJsFunction("addPopupButton", state);
         if (!spreadsheet.getElement().equals(button.getElement().getParent())) {
             spreadsheet.getElement().appendVirtualChild(button.getElement());
         }
     }
 
     private void detach(PopupButton button) {
-        if (!onTheClient.remove(button)) {
+        if (onTheClient.remove(button) == null) {
             // Not on the client, so there is nothing to take off.
             return;
         }

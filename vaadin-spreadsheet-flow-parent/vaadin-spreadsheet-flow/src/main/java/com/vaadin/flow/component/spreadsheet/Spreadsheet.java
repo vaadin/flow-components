@@ -4313,6 +4313,7 @@ public class Spreadsheet extends Component
     protected void onConnectorInit() {
         reloadCellDataOnNextScroll = true;
         valueManager.clearCachedContent();
+        popupButtonRegistry.forgetClient();
     }
 
     /**
