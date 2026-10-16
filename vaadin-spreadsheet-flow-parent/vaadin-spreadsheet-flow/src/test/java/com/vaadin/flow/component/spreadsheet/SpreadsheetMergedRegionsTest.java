@@ -222,6 +222,20 @@ class SpreadsheetMergedRegionsTest {
     }
 
     @Test
+    void merging_refused_changesNothing() {
+        // A1:A2 is inside the range, and C1:D1 overlaps it.
+        fillBut();
+        show("A1:A2", "C1:D1");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> spreadsheet.addMergedRegion("A1:C2"));
+
+        assertEquals(List.of("A1:A2", "C1:D1"), poiRegions());
+        assertEquals(List.of("A1:A2", "C1:D1"), clientRegions());
+        assertEquals(Set.of(), sent().withValues());
+    }
+
+    @Test
     void merging_aRegionAgain_replacesIt() {
         fillBut();
         show("A1:C3", "E1:E2");

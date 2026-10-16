@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -44,28 +45,34 @@ final class MergedRegionOperations implements Serializable {
     }
 
     /**
-     * Merges {@code range} into a new merged region. Discards any existing
-     * regions that lie entirely inside it. Throws if it would overlap or
-     * enclose any existing region.
+     * Merges {@code range} into a new merged region, in place of the regions
+     * inside it. Throws if a region overlaps or encloses it, before changing
+     * anything.
      */
     void addRegion(CellRangeAddress range) {
         Sheet sheet = spreadsheet.getActiveSheet();
         // All at once: XSSF finds a region by its index, and counts them, by
         // going through them from the start, so merging cells on a sheet of
-        // 20,000 regions took 3.5 s. The index is where the region is now
-        // that those removed before it are gone.
-        int index = 0;
-        for (CellRangeAddress existing : sheet.getMergedRegions()) {
+        // 20,000 regions took 3.5 s.
+        List<CellRangeAddress> regions = sheet.getMergedRegions();
+        for (CellRangeAddress existing : regions) {
             int intersect = CellRangeUtil.intersect(range, existing);
-            if (intersect == CellRangeUtil.INSIDE) {
-                removeRegionFromPoiAndCache(index);
-            } else if (intersect == CellRangeUtil.OVERLAP
+            if (intersect == CellRangeUtil.OVERLAP
                     || intersect == CellRangeUtil.ENCLOSES) {
                 throw new IllegalArgumentException("An existing region "
                         + existing + " "
                         + (intersect == CellRangeUtil.OVERLAP ? "overlaps "
                                 : "encloses ")
                         + "the given region " + range);
+            }
+        }
+        // The index of a region is where it is now that those removed before
+        // it are gone.
+        int index = 0;
+        for (CellRangeAddress existing : regions) {
+            if (CellRangeUtil.intersect(range,
+                    existing) == CellRangeUtil.INSIDE) {
+                removeRegionFromPoiAndCache(index);
             } else {
                 index++;
             }
