@@ -120,7 +120,14 @@ final class ColumnSizeOperations implements Serializable {
     }
 
     private void applyHidden(int columnIndex, boolean hidden) {
-        spreadsheet.getActiveSheet().setColumnHidden(columnIndex, hidden);
+        Sheet sheet = spreadsheet.getActiveSheet();
+        int units = sheet.getColumnWidth(columnIndex);
+        sheet.setColumnHidden(columnIndex, hidden);
+        if (sheet.getColumnWidth(columnIndex) != units) {
+            // HSSF gives a column it hides a width of its own, when it has
+            // none: the column keeps the width it has.
+            sheet.setColumnWidth(columnIndex, units);
+        }
         ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>(
                 spreadsheet.getHiddenColumnIndexes());
         int[] colW = widthsCovering(spreadsheet, columnIndex);
@@ -130,8 +137,8 @@ final class ColumnSizeOperations implements Serializable {
         } else if (!hidden && hiddenColumnIndexes.contains(columnIndex + 1)) {
             hiddenColumnIndexes
                     .remove(hiddenColumnIndexes.indexOf(columnIndex + 1));
-            colW[columnIndex] = (int) spreadsheet.getActiveSheet()
-                    .getColumnWidthInPixels(columnIndex);
+            colW[columnIndex] = SpreadsheetUtil.columnWidthShown(sheet,
+                    columnIndex, spreadsheet.getDefColW());
             spreadsheet.getCellValueManager()
                     .clearCacheForColumn(columnIndex + 1);
             spreadsheet.getCellValueManager().loadCellData(
@@ -147,7 +154,7 @@ final class ColumnSizeOperations implements Serializable {
      * A copy of the column widths long enough to hold the column at
      * {@code index}. The widths stop at the columns the sheet had when it was
      * loaded, and {@link Spreadsheet#setMaxColumns(int)} can add more: those
-     * take their widths from POI, as loading gives them.
+     * take the widths loading gives them.
      */
     static int[] widthsCovering(Spreadsheet spreadsheet, int index) {
         int[] current = spreadsheet.getColW();
@@ -155,8 +162,8 @@ final class ColumnSizeOperations implements Serializable {
                 Math.max(current.length, index + 1));
         Sheet sheet = spreadsheet.getActiveSheet();
         for (int column = current.length; column < colW.length; column++) {
-            colW[column] = sheet.isColumnHidden(column) ? 0
-                    : (int) sheet.getColumnWidthInPixels(column);
+            colW[column] = SpreadsheetUtil.columnWidthShown(sheet, column,
+                    spreadsheet.getDefColW());
         }
         return colW;
     }

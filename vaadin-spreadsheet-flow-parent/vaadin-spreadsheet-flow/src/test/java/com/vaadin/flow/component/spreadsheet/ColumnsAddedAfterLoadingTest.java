@@ -35,11 +35,9 @@ class ColumnsAddedAfterLoadingTest {
 
         int[] colW = spreadsheet.getColW();
         assertEquals(120, colW[8]);
-        // The ones in between keep their widths, rather than read as hidden.
-        int width = (int) spreadsheet.getActiveSheet()
-                .getColumnWidthInPixels(6);
-        assertTrue(width > 0);
-        assertEquals(width, colW[6]);
+        // The ones in between have the default width, rather than read as
+        // hidden.
+        assertEquals(spreadsheet.getDefaultColumnWidth(), colW[6]);
     }
 
     @Test

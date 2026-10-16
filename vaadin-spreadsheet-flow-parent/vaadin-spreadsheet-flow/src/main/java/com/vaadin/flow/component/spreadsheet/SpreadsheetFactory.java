@@ -41,7 +41,6 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.AreaReference;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.PaneInformation;
-import org.apache.poi.util.Units;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
@@ -345,8 +344,7 @@ public class SpreadsheetFactory implements Serializable {
         logMemoryUsage();
         // What POI cannot read of a sheet is left out, and the rest loaded.
         loadPart("row height", () -> setDefaultRowHeight(spreadsheet, sheet));
-        loadPart("column width",
-                () -> setDefaultColumnWidth(spreadsheet, sheet));
+        loadPart("column width", () -> setDefaultColumnWidth(spreadsheet));
         loadPart("sizes", () -> calculateSheetSizes(spreadsheet, sheet));
         loadPart("overlays", () -> loadSheetOverlays(spreadsheet));
         loadPart("tables", () -> loadSheetTables(spreadsheet));
@@ -553,11 +551,10 @@ public class SpreadsheetFactory implements Serializable {
         final ArrayList<Integer> hiddenColumnIndexes = new ArrayList<Integer>();
         for (int i = 0; i < cols; i++) {
             if (sheet.isColumnHidden(i)) {
-                colWidths[i] = 0;
                 hiddenColumnIndexes.add(i + 1);
-            } else {
-                colWidths[i] = (int) sheet.getColumnWidthInPixels(i);
             }
+            colWidths[i] = SpreadsheetUtil.columnWidthShown(sheet, i,
+                    spreadsheet.getDefColW());
         }
         spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
         spreadsheet.setColW(colWidths);
@@ -1097,19 +1094,12 @@ public class SpreadsheetFactory implements Serializable {
         }
     }
 
-    private static void setDefaultColumnWidth(Spreadsheet spreadsheet,
-            final Sheet sheet) {
-
-        // Formula taken from XSSFSheet.getColumnWidthInPixels
-        int charactersToPixels = (int) (sheet.getDefaultColumnWidth() / 256.0
-                * Units.DEFAULT_CHARACTER_WIDTH);
-
-        if (charactersToPixels > 0) {
-            spreadsheet.setDefColW(charactersToPixels);
-        } else {
-            spreadsheet.setDefColW(SpreadsheetUtil.getDefaultColumnWidthInPx());
-            sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
-        }
+    /**
+     * Gives the columns without a width of their own the default width of the
+     * component, leaving the default width of the sheet as it is.
+     */
+    private static void setDefaultColumnWidth(Spreadsheet spreadsheet) {
+        spreadsheet.setDefColW(SpreadsheetUtil.getDefaultColumnWidthInPx());
     }
 
     /**

@@ -37,6 +37,8 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 
 /**
  * Utility class for miscellaneous Spreadsheet operations.
@@ -237,6 +239,39 @@ public class SpreadsheetUtil implements Serializable {
             units++;
         }
         return units;
+    }
+
+    /**
+     * The width a column is shown at, in pixels: none when it is hidden, its
+     * own width in the sheet, or the default width given when it has none of
+     * its own, whatever the default width of the sheet.
+     *
+     * @param sheet
+     *            the sheet of the column
+     * @param column
+     *            the column index, 0-based
+     * @param defaultWidth
+     *            the default width of the component, in pixels
+     * @return the width in pixels
+     */
+    static int columnWidthShown(Sheet sheet, int column, int defaultWidth) {
+        if (sheet.isColumnHidden(column)) {
+            return 0;
+        }
+        return hasOwnWidth(sheet, column)
+                ? (int) sheet.getColumnWidthInPixels(column)
+                : defaultWidth;
+    }
+
+    private static boolean hasOwnWidth(Sheet sheet, int column) {
+        if (sheet instanceof XSSFSheet xssfSheet) {
+            CTCol col = xssfSheet.getColumnHelper().getColumn(column, false);
+            return col != null && col.isSetWidth();
+        }
+        // HSSF reads a column of just the default width as one without a
+        // width of its own, which is all it tells them apart by.
+        return sheet.getColumnWidth(column) != sheet.getDefaultColumnWidth()
+                * EXCEL_COLUMN_WIDTH_FACTOR;
     }
 
     /**

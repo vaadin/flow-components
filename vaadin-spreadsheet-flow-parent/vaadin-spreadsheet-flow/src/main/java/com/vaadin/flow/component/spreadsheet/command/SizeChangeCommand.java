@@ -12,6 +12,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
+import com.vaadin.flow.component.spreadsheet.ColumnWidths;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
@@ -121,11 +122,7 @@ public class SizeChangeCommand extends SpreadsheetCommand {
      */
     private Object getCurrentValue(int index) {
         if (type == Type.COLUMN) {
-            if (getSheet().isColumnHidden(index)) {
-                return 0;
-            } else {
-                return getSheet().getColumnWidthInPixels(index);
-            }
+            return ColumnWidths.shown(spreadsheet, getSheet(), index);
         } else if (type == Type.ROW) {
             Row row = getSheet().getRow(index);
             // null rows use default row height

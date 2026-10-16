@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 
 /**
  * Setting column widths and hiding columns with {@link ColumnSizeOperations}.
@@ -252,10 +254,14 @@ class ColumnSizeOperationsTest {
     @Test
     void setHidden_false_removesFromHiddenList_andRestoresColW() {
         // Pin: un-hide restores the colW from the POI sheet's column
-        // width AND clears + reloads the cell cache.
+        // width, the column having one of its own, AND clears + reloads the
+        // cell cache.
         ArrayList<Integer> hidden = new ArrayList<>();
         hidden.add(2);
         when(spreadsheet.getHiddenColumnIndexes()).thenReturn(hidden);
+        CTCol col = mock(CTCol.class);
+        when(col.isSetWidth()).thenReturn(true);
+        when(columnHelper.getColumn(1, false)).thenReturn(col);
         when(sheet.getColumnWidthInPixels(1)).thenReturn(75f);
 
         ops.setHidden(1, false);

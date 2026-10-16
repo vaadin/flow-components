@@ -2364,9 +2364,10 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Gets the default column width for the currently active sheet. This is
-     * derived from the active sheet's ({@link #getActiveSheet()}) default
-     * column width (Sheet {@link #getDefaultColumnWidth()}).
+     * Gets the default column width: the width of the columns that have no
+     * width of their own. Showing a sheet sets it to the default width of the
+     * component, 10 characters, and leaves the default column width of the
+     * sheet ({@link Sheet#getDefaultColumnWidth()}) as it is.
      *
      * @return The default column width in PX
      */
