@@ -85,6 +85,21 @@ describe('Spreadsheet — the sizes the sheet is drawn with', () => {
     });
   }
 
+  // The server sends the sizes as JSON text, which Flow passes on as it is.
+  it('takes the row heights as the text the server sends', () => {
+    sheet.setRowH(JSON.stringify([30, ...new Array(99).fill(15)]));
+    sheet.recomputeViewport();
+
+    expect(height()).to.equal(2020);
+  });
+
+  it('takes the column widths as the text the server sends', () => {
+    sheet.setColW(JSON.stringify([150, ...new Array(19).fill(50)]));
+    sheet.recomputeViewport();
+
+    expect(width()).to.equal(1100);
+  });
+
   it('draws from past the hidden rows a scroll has gone by', () => {
     sheet.setRows(200);
     sheet.setRowH(new Array(200).fill(15));
