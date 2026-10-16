@@ -58,6 +58,23 @@ class SpreadsheetPicturesTest {
     }
 
     @Test
+    void thePicture_isKept_whenTheUserDragsAColumnUnderIt() {
+        // The client numbers the columns from 1: G.
+        harness.clientEvent("columnResized",
+                "{\"colIndexes\": [7], \"newWidths\": [150]}");
+
+        assertEquals(keys, spreadsheet.getResources().keySet());
+    }
+
+    @Test
+    void thePicture_isKept_whenTheUserDragsARowUnderIt() {
+        harness.clientEvent("rowsResized",
+                "{\"rowIndexes\": [15], \"newHeights\": [40]}");
+
+        assertEquals(keys, spreadsheet.getResources().keySet());
+    }
+
+    @Test
     void thePicture_isKept_whenARowUnderItIsGivenAHeight() {
         spreadsheet.setRowHeight(14, 30f);
 

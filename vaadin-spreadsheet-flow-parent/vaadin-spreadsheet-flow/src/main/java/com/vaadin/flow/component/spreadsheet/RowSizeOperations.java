@@ -77,9 +77,7 @@ final class RowSizeOperations implements Serializable {
         spreadsheet.getSpreadsheetHistoryManager().addCommand(command);
         setHeights(newRowSizes.entrySet().stream().collect(Collectors
                 .toMap(entry -> entry.getKey() - 1, Map.Entry::getValue)));
-        if (spreadsheet.overlays().hasOverlays()) {
-            spreadsheet.overlays().markReloadFromPoi();
-        }
+        // Loading the cells sizes the overlays from the rows again.
         spreadsheet.loadCells(row1, col1, row2, col2);
     }
 

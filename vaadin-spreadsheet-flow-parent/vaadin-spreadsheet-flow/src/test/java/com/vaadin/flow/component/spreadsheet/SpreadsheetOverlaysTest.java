@@ -360,13 +360,18 @@ class SpreadsheetOverlaysTest {
     }
 
     @Test
-    void aPictureAddedInPoi_isShownOnceTheClientResizesAColumn() {
+    void aPictureAddedInPoi_isShownOnceTheSpreadsheetIsReloaded() {
         picture("F12:F12");
         show();
         picture("G13:G13");
-
+        // A column resized sizes the pictures shown, rather than read them
+        // all from POI again, which gave the client each under a new key.
         TestHelper.fireClientEvent(spreadsheet, "columnResized",
                 "{\"colIndexes\": [8], \"newWidths\": [80]}");
+        assertEquals(List.of("F12"), startCells());
+
+        spreadsheet.reload();
+        showRows(10, 20);
 
         assertEquals(List.of("F12", "G13"), startCells());
     }
