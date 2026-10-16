@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.StringFieldWithItems;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
 
@@ -127,6 +128,35 @@ class QueryFieldOptionsToolTest {
                 executeQueryFieldOptions(controller, multi, "shell", 10));
         Assertions.assertEquals("(no matches)\n",
                 executeQueryFieldOptions(controller, multi, "gluten", 10));
+    }
+
+    @Test
+    void queryFieldOptionsAnswersEachSelectFromItsOwnItems() {
+        var bloodType = new SingleSelectField<String>();
+        bloodType.setItems("A+", "O+");
+        var allergies = new MultiSelectField<String>();
+        allergies.setItems("Latex", "Shellfish");
+        var controller = new FormAIController(new Div(bloodType, allergies));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("A+\nO+\n",
+                executeQueryFieldOptions(controller, bloodType, "", 10));
+        Assertions.assertEquals("Latex\nShellfish\n",
+                executeQueryFieldOptions(controller, allergies, "", 10));
+    }
+
+    @Test
+    void queryFieldOptionsDoesNotAnswerNonSelectFromItsItems() {
+        // get_form_state lists no options for a field that is not a select,
+        // so a lookup must not answer from items the field happens to expose
+        var field = new StringFieldWithItems();
+        var controller = new FormAIController(new Div(field));
+        controller.onRequest(requestEvent());
+
+        var result = executeQueryFieldOptions(controller, field, "", 10);
+
+        Assertions.assertTrue(result.startsWith("Error"), result);
+        Assertions.assertFalse(result.contains("Red"), result);
     }
 
     @Test
