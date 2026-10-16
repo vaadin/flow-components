@@ -107,8 +107,8 @@ final class RowSizeOperations implements Serializable {
     /**
      * A copy of the row heights long enough to hold the row at {@code index}.
      * The heights stop at the rows the sheet had when it was loaded, and
-     * {@link Spreadsheet#setMaxRows(int)} can add more: those take their
-     * heights from POI, as loading gives them.
+     * {@link Spreadsheet#setMaxRows(int)} can add more: those take the heights
+     * loading gives them.
      */
     static float[] heightsCovering(Spreadsheet spreadsheet, int index) {
         float[] current = spreadsheet.getRowH();
@@ -116,9 +116,7 @@ final class RowSizeOperations implements Serializable {
                 Math.max(current.length, index + 1));
         Sheet sheet = spreadsheet.getActiveSheet();
         for (int r = current.length; r < rowH.length; r++) {
-            Row row = sheet.getRow(r);
-            rowH[r] = row == null ? sheet.getDefaultRowHeightInPoints()
-                    : row.getZeroHeight() ? 0f : row.getHeightInPoints();
+            rowH[r] = SpreadsheetUtil.rowHeightShown(sheet, r);
         }
         return rowH;
     }

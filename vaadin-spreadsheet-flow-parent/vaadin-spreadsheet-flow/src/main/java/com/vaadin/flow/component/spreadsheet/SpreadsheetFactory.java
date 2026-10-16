@@ -467,88 +467,54 @@ public class SpreadsheetFactory implements Serializable {
     }
 
     /**
-     * Calculate size-related values for the sheet. Includes row and column
-     * counts, actual row heights and column widths, and hidden row and column
-     * indexes.
+     * Loads the size of the sheet: how many rows and columns it has, at least
+     * the default counts, and their heights and widths.
      *
      * @param spreadsheet
+     *            Target Spreadsheet
      * @param sheet
+     *            the sheet shown
      */
     static void calculateSheetSizes(final Spreadsheet spreadsheet,
             final Sheet sheet) {
-        int maxCellsAcrossRows = calculateRowHeights(spreadsheet, sheet);
-        calculateColumnWidths(spreadsheet, sheet, maxCellsAcrossRows);
-    }
-
-    /**
-     * Sizes the row-height array for {@code sheet}, computes per-row heights
-     * (using sheet defaults for empty rows past the last populated row, 0.0f
-     * for {@code getZeroHeight()} rows), and records the row indices that came
-     * back hidden. Returns the maximum {@code row.getLastCellNum()} observed —
-     * the column-width pass needs it to size its own array.
-     */
-    private static int calculateRowHeights(final Spreadsheet spreadsheet,
-            final Sheet sheet) {
-        // Always have at least the default amount of rows
-        int rows = sheet.getLastRowNum() + 1;
-        if (rows < spreadsheet.getDefaultRowCount()) {
-            rows = spreadsheet.getDefaultRowCount();
+        int rows = Math.max(sheet.getLastRowNum() + 1,
+                spreadsheet.getDefaultRowCount());
+        int cols = spreadsheet.getDefaultColumnCount();
+        for (Row row : sheet) {
+            cols = Math.max(cols, row.getLastCellNum());
         }
         spreadsheet.setRows(rows);
-
-        final float[] rowHeights = new float[rows];
-        int cols = 0;
-        int tempRowIndex = -1;
-        final ArrayList<Integer> hiddenRowIndexes = new ArrayList<Integer>();
-        for (Row row : sheet) {
-            int rIndex = row.getRowNum();
-            // set the empty rows to have the default row width
-            while (++tempRowIndex != rIndex) {
-                rowHeights[tempRowIndex] = spreadsheet.getDefRowH();
-            }
-            if (row.getZeroHeight()) {
-                rowHeights[rIndex] = 0.0F;
-                hiddenRowIndexes.add(rIndex + 1);
-            } else {
-                rowHeights[rIndex] = row.getHeightInPoints();
-            }
-            int c = row.getLastCellNum();
-            if (c > cols) {
-                cols = c;
-            }
-        }
-        if (rows > sheet.getLastRowNum() + 1) {
-            float defaultRowHeightInPoints = sheet
-                    .getDefaultRowHeightInPoints();
-
-            // The rows after the last, all of them for a sheet without rows,
-            // for which POI gives -1 as the last.
-            for (int i = sheet.getLastRowNum() + 1; i < rows; i++) {
-                rowHeights[i] = defaultRowHeightInPoints;
-            }
-        }
-        spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
-        spreadsheet.setRowH(rowHeights);
-        return cols;
+        spreadsheet.setCols(cols);
+        readSizes(spreadsheet, sheet, rows, cols);
     }
 
     /**
-     * Sizes the column-width array (using {@code maxCellsAcrossRows} as the
-     * floor, bumped up to the default column count if smaller), and reads each
-     * column's width in pixels from POI, recording the column indices that are
-     * hidden as 0-width.
+     * Reads the heights of the first rows and the widths of the first columns
+     * of the sheet, and which of them are hidden, leaving the counts of rows
+     * and columns as they are.
+     *
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param sheet
+     *            the sheet shown
+     * @param rows
+     *            how many rows to read
+     * @param cols
+     *            how many columns to read
      */
-    private static void calculateColumnWidths(final Spreadsheet spreadsheet,
-            final Sheet sheet, int maxCellsAcrossRows) {
-        int cols = maxCellsAcrossRows;
-        // Always have at least the default amount of columns
-        if (cols < spreadsheet.getDefaultColumnCount()) {
-            cols = spreadsheet.getDefaultColumnCount();
+    static void readSizes(Spreadsheet spreadsheet, Sheet sheet, int rows,
+            int cols) {
+        float[] rowHeights = new float[rows];
+        ArrayList<Integer> hiddenRowIndexes = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            Row row = sheet.getRow(i);
+            if (row != null && row.getZeroHeight()) {
+                hiddenRowIndexes.add(i + 1);
+            }
+            rowHeights[i] = SpreadsheetUtil.rowHeightShown(sheet, i);
         }
-        spreadsheet.setCols(cols);
-
-        final int[] colWidths = new int[cols];
-        final ArrayList<Integer> hiddenColumnIndexes = new ArrayList<Integer>();
+        int[] colWidths = new int[cols];
+        ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>();
         for (int i = 0; i < cols; i++) {
             if (sheet.isColumnHidden(i)) {
                 hiddenColumnIndexes.add(i + 1);
@@ -556,6 +522,8 @@ public class SpreadsheetFactory implements Serializable {
             colWidths[i] = SpreadsheetUtil.columnWidthShown(sheet, i,
                     spreadsheet.getDefColW());
         }
+        spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
+        spreadsheet.setRowH(rowHeights);
         spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
         spreadsheet.setColW(colWidths);
     }

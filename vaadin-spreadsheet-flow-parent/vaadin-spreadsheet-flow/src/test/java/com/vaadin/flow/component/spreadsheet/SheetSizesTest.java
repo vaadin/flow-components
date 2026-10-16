@@ -21,6 +21,19 @@ import org.junit.jupiter.api.Test;
 class SheetSizesTest {
 
     @Test
+    void aSheetOfMoreRowsAndColumnsThanTheDefaults_isShownWithAllOfThem() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet().createRow(299).createCell(69);
+
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+
+        assertEquals(300, spreadsheet.getRows());
+        assertEquals(300, spreadsheet.getRowH().length);
+        assertEquals(70, spreadsheet.getColumns());
+        assertEquals(70, spreadsheet.getColW().length);
+    }
+
+    @Test
     void theOnlyRow_isShownAtItsOwnHeight() {
         XSSFWorkbook workbook = new XSSFWorkbook();
         workbook.createSheet().createRow(0).setHeightInPoints(20);

@@ -199,7 +199,7 @@ final class FreshLoadFixture {
         return cell;
     }
 
-    private static byte[] png() {
+    static byte[] png() {
         BufferedImage image = new BufferedImage(4, 4,
                 BufferedImage.TYPE_INT_RGB);
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();

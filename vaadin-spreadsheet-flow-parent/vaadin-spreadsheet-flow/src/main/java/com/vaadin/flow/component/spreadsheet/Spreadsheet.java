@@ -4588,13 +4588,12 @@ public class Spreadsheet extends Component
                 GroupingUtil.expandRow(activeSheet, index);
             }
         }
-        SpreadsheetFactory.calculateSheetSizes(this, activeSheet);
+        // The rows and columns the group hid or showed are read again, as
+        // many as the client has.
+        SpreadsheetFactory.readSizes(this, activeSheet, getRowH().length,
+                getColW().length);
         SpreadsheetFactory.loadGrouping(this);
-        reloadActiveSheetStyles();
-        if (sheetScope.overlays.hasOverlays()) {
-            sheetScope.overlays.markReloadFromPoi();
-            sheetScope.overlays.loadOrUpdate();
-        }
+        reloadSheetStyles(true, true);
         updateMarkedCells();
     }
 

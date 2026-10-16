@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -239,6 +240,25 @@ public class SpreadsheetUtil implements Serializable {
             units++;
         }
         return units;
+    }
+
+    /**
+     * The height a row is shown at, in points: none when it is hidden, its own
+     * height in the sheet, or the default height of the sheet when the sheet
+     * has no such row.
+     *
+     * @param sheet
+     *            the sheet of the row
+     * @param row
+     *            the row index, 0-based
+     * @return the height in points
+     */
+    static float rowHeightShown(Sheet sheet, int row) {
+        Row poiRow = sheet.getRow(row);
+        if (poiRow == null) {
+            return sheet.getDefaultRowHeightInPoints();
+        }
+        return poiRow.getZeroHeight() ? 0f : poiRow.getHeightInPoints();
     }
 
     /**
