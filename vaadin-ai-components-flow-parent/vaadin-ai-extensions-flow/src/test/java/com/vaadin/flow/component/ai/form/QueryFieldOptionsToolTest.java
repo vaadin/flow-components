@@ -131,6 +131,34 @@ class QueryFieldOptionsToolTest {
     }
 
     @Test
+    void queryFieldOptionsSearchesListedItemsPastTheEnumCap() {
+        // get_form_state caps "enum" at 200 entries, but fill_form accepts
+        // any of the items, so a lookup must search them all
+        var select = new SingleSelectField<String>();
+        var items = new ArrayList<String>();
+        for (var i = 1; i <= 250; i++) {
+            items.add("item-" + i);
+        }
+        select.setItems(items);
+        var controller = new FormAIController(new Div(select));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("item-250\n",
+                executeQueryFieldOptions(controller, select, "item-250", 10));
+    }
+
+    @Test
+    void queryFieldOptionsSignalsTruncatedListedItems() {
+        var select = new SingleSelectField<String>();
+        select.setItems("A+", "A-", "AB+", "O+");
+        var controller = new FormAIController(new Div(select));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("A+\nA-\n(truncated to 2 items)\n",
+                executeQueryFieldOptions(controller, select, "", 2));
+    }
+
+    @Test
     void queryFieldOptionsAnswersEachSelectFromItsOwnItems() {
         var bloodType = new SingleSelectField<String>();
         bloodType.setItems("A+", "O+");
