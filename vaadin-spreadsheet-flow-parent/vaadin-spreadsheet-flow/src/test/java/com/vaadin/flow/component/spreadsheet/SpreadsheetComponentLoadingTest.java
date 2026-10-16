@@ -131,8 +131,9 @@ class SpreadsheetComponentLoadingTest {
 
     @Test
     void theCellsUnderAMergedCell_haveNoComponents_butTheMergedCellHas() {
-        sheet.addMergedRegion(CellRangeAddress.valueOf("E12:G12"));
-        components.addAll(Set.of("First!E12", "First!F12", "First!H12"));
+        sheet.addMergedRegion(CellRangeAddress.valueOf("E12:G13"));
+        components.addAll(
+                Set.of("First!E12", "First!F12", "First!E13", "First!H12"));
 
         show();
 
@@ -211,6 +212,7 @@ class SpreadsheetComponentLoadingTest {
 
         assertTrue(spreadsheet.getComponentIDtoCellKeysMap().isEmpty());
         assertTrue(spreadsheet.getCellKeyToEditorMap().isEmpty());
+        assertEquals(sheet.getDefaultRowHeightInPoints(), heightOfRow(12));
     }
 
     @Test
