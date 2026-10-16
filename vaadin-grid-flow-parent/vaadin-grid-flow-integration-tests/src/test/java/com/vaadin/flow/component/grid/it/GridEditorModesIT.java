@@ -21,8 +21,11 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -42,19 +45,18 @@ public class GridEditorModesIT extends AbstractComponentIT {
         GridTHTDElement subscriberCell = grid.getCell(0, 1);
         String personName = nameCell.getText();
 
-        clickFirstButton(grid, 0, 2);
-        assertEditButtonDisabled(grid, 1, 2);
+        getButton(grid, 0, 2, 0).click();
+        Assert.assertFalse(getButton(grid, 1, 2, 0).isEnabled());
 
-        TestBenchElement subscriberCheckbox = subscriberCell
-                .$("vaadin-checkbox").first();
-        boolean isSubscriber = subscriberCheckbox.hasAttribute("checked");
+        CheckboxElement checkbox = getCheckbox(subscriberCell);
+        boolean isSubscriber = checkbox.isChecked();
 
-        TestBenchElement nameInput = getInput(nameCell);
-        Assert.assertTrue(nameInput.isFocused());
-        nameInput.sendKeys(Keys.END, "foo", Keys.ENTER);
-        subscriberCheckbox.click();
+        TextFieldElement nameField = getTextField(nameCell);
+        Assert.assertTrue(nameField.hasAttribute("focused"));
+        nameField.sendKeys(Keys.END, "foo", Keys.ENTER);
+        checkbox.click();
 
-        clickFirstButton(grid, 0, 2);
+        getButton(grid, 0, 2, 0).click();
 
         Assert.assertEquals("", $("div").id("validation").getText());
         Assert.assertEquals(personName + "foo", nameCell.getText());
@@ -65,35 +67,57 @@ public class GridEditorModesIT extends AbstractComponentIT {
     }
 
     @Test
+    public void bufferedEditor_invalidName_saveRejected_cancelRestoresValue() {
+        GridElement grid = $(GridElement.class).id("buffered-editor");
+        GridTHTDElement nameCell = grid.getCell(0, 0);
+        String personName = nameCell.getText();
+        TestBenchElement message = $("div").id("buffered-editor-msg");
+
+        getButton(grid, 0, 2, 0).click();
+        getTextField(nameCell).setValue("foo");
+
+        // Save
+        getButton(grid, 0, 2, 0).click();
+        Assert.assertEquals("Name should start with Person",
+                $("div").id("validation").getText());
+        Assert.assertTrue("The editor should stay open",
+                nameCell.$(TextFieldElement.class).exists());
+        Assert.assertEquals("", message.getText());
+
+        // Cancel
+        getButton(grid, 0, 2, 1).click();
+        Assert.assertFalse("The editor should be closed",
+                nameCell.$(TextFieldElement.class).exists());
+        Assert.assertEquals(personName, nameCell.getText());
+        Assert.assertEquals("", message.getText());
+    }
+
+    @Test
     public void bufferedDynamicEditor_toggleSubscriber_emailEditorSwapped() {
         GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
         GridTHTDElement emailCell = grid.getCell(0, 2);
 
-        clickFirstButton(grid, 0, 3);
-        assertEditButtonDisabled(grid, 1, 3);
+        getButton(grid, 0, 3, 0).click();
+        Assert.assertFalse(getButton(grid, 1, 3, 0).isEnabled());
 
-        TestBenchElement nameInput = getInput(grid.getCell(0, 0));
-        Assert.assertTrue(nameInput.isFocused());
-        nameInput.sendKeys(Keys.END, "foo", Keys.ENTER);
+        TextFieldElement nameField = getTextField(grid.getCell(0, 0));
+        Assert.assertTrue(nameField.hasAttribute("focused"));
+        nameField.sendKeys(Keys.END, "foo", Keys.ENTER);
 
-        TestBenchElement emailInput = getInput(emailCell);
-        emailInput.clear();
-        emailInput.sendKeys("bar", Keys.ENTER);
-        clickFirstButton(grid, 0, 3);
+        getTextField(emailCell).setValue("bar");
+        getButton(grid, 0, 3, 0).click();
         Assert.assertEquals("Invalid email",
                 $("div").id("email-validation").getText());
 
         // A non-subscriber gets a read-only email field
         toggleSubscriber(grid);
-        emailInput = getInput(emailCell);
-        Assert.assertTrue(emailInput.hasAttribute("readonly"));
-        Assert.assertEquals("Not a subscriber",
-                emailInput.getDomProperty("value"));
+        TextFieldElement emailField = getTextField(emailCell);
+        Assert.assertTrue(emailField.getPropertyBoolean("readonly"));
+        Assert.assertEquals("Not a subscriber", emailField.getValue());
 
         toggleSubscriber(grid);
-        emailInput = getInput(emailCell);
-        emailInput.sendKeys("@example.com", Keys.ENTER);
-        clickFirstButton(grid, 0, 3);
+        getTextField(emailCell).sendKeys("@example.com", Keys.ENTER);
+        getButton(grid, 0, 3, 0).click();
 
         TestBenchElement message = $("div").id("buffered-dynamic-editor-msg");
         waitUntil(driver -> !message.getText().isEmpty());
@@ -105,28 +129,24 @@ public class GridEditorModesIT extends AbstractComponentIT {
     public void bufferedDynamicEditor_toggleSubscriber_navigateWithKeyboard() {
         GridElement grid = $(GridElement.class).id("buffered-dynamic-editor");
 
-        clickFirstButton(grid, 0, 3);
+        getButton(grid, 0, 3, 0).click();
         toggleSubscriber(grid);
 
-        TestBenchElement nameInput = getInput(grid.getCell(0, 0));
-        nameInput.focus();
-        Assert.assertTrue(nameInput.isFocused());
+        TextFieldElement nameField = getTextField(grid.getCell(0, 0));
+        nameField.focus();
+        Assert.assertTrue(nameField.hasAttribute("focused"));
 
         // Skip the checkbox and focus the read-only email field
-        nameInput.sendKeys(Keys.TAB);
-        new Actions(getDriver()).sendKeys(Keys.TAB).perform();
+        new Actions(getDriver()).sendKeys(Keys.TAB, Keys.TAB).perform();
 
-        TestBenchElement emailField = grid.getCell(0, 2).$("vaadin-text-field")
-                .first();
+        TextFieldElement emailField = getTextField(grid.getCell(0, 2));
         Assert.assertTrue(emailField.hasAttribute("focused"));
-        Assert.assertEquals("Not a subscriber",
-                emailField.getDomProperty("value"));
+        Assert.assertEquals("Not a subscriber", emailField.getValue());
 
         toggleSubscriber(grid);
 
-        nameInput = getInput(grid.getCell(0, 0));
-        nameInput.click();
-        nameInput.focus();
+        nameField = getTextField(grid.getCell(0, 0));
+        nameField.focus();
         new Actions(getDriver()).sendKeys(Keys.END, "foo").perform();
 
         // Skip the checkbox, change the email to .org, then save with Enter
@@ -152,19 +172,17 @@ public class GridEditorModesIT extends AbstractComponentIT {
 
         grid.getRow(0).doubleClick();
 
-        TestBenchElement nameInput = getInput(nameCell);
-        Assert.assertTrue(nameInput.isFocused());
-        nameInput.sendKeys(Keys.END, "foo", Keys.ENTER);
-        Assert.assertTrue(emailCell.$("vaadin-text-field").exists());
+        TextFieldElement nameField = getTextField(nameCell);
+        Assert.assertTrue(nameField.hasAttribute("focused"));
+        nameField.sendKeys(Keys.END, "foo", Keys.ENTER);
+        Assert.assertTrue(emailCell.$(TextFieldElement.class).exists());
 
-        TestBenchElement checkbox = subscriberCell.$("vaadin-checkbox").first();
+        CheckboxElement checkbox = getCheckbox(subscriberCell);
         checkbox.click();
-        Assert.assertFalse(emailCell.$("vaadin-text-field").exists());
+        Assert.assertFalse(emailCell.$(TextFieldElement.class).exists());
 
         checkbox.click();
-        TestBenchElement emailInput = getInput(emailCell);
-        emailInput.clear();
-        emailInput.sendKeys("bar@example.com", Keys.ENTER);
+        getTextField(emailCell).setValue("bar@example.com");
 
         grid.getRow(1).click(10, 10);
 
@@ -175,22 +193,22 @@ public class GridEditorModesIT extends AbstractComponentIT {
                 $("div").id("not-buffered-dynamic-editor-msg").getText());
     }
 
-    private TestBenchElement getInput(GridTHTDElement cell) {
-        return cell.$("vaadin-text-field").first().$("input").first();
+    private TextFieldElement getTextField(GridTHTDElement cell) {
+        return cell.$(TextFieldElement.class).first();
+    }
+
+    private CheckboxElement getCheckbox(GridTHTDElement cell) {
+        return cell.$(CheckboxElement.class).first();
     }
 
     private void toggleSubscriber(GridElement grid) {
-        grid.getCell(0, 1).$("vaadin-checkbox").first().click();
+        getCheckbox(grid.getCell(0, 1)).click();
     }
 
-    // Clicks Edit, or Save when the editor is open
-    private void clickFirstButton(GridElement grid, int row, int column) {
-        grid.getCell(row, column).$("vaadin-button").first().click();
-    }
-
-    private void assertEditButtonDisabled(GridElement grid, int row,
-            int column) {
-        Assert.assertTrue(grid.getCell(row, column).$("vaadin-button").first()
-                .hasAttribute("disabled"));
+    // In the editor column, button 0 is Edit, or Save when the editor is
+    // open. Button 1 is Cancel.
+    private ButtonElement getButton(GridElement grid, int row, int column,
+            int index) {
+        return grid.getCell(row, column).$(ButtonElement.class).get(index);
     }
 }
