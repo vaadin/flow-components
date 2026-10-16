@@ -13,7 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -102,6 +104,27 @@ class SpreadsheetPopupButtonsTest {
         clientShowsRows(90, 110);
 
         assertTrue(onTheSheet(button));
+    }
+
+    @Test
+    void aButton_isOnTheSheetOnlyWhileItsCellIsShown() {
+        clientShowsRows(2, 21);
+        Map<String, PopupButton> buttons = new LinkedHashMap<>();
+        for (String cell : List.of("B1", "B2", "B3", "B21", "B22", "B23", "J5",
+                "K5")) {
+            buttons.put(cell, button());
+            spreadsheet.setPopup(cell, buttons.get(cell));
+        }
+        assertEquals(List.of("B2", "B3", "B21", "J5"), onTheSheet(buttons));
+
+        clientShowsRows(3, 22);
+
+        assertEquals(List.of("B3", "B21", "B22", "J5"), onTheSheet(buttons));
+    }
+
+    private List<String> onTheSheet(Map<String, PopupButton> buttons) {
+        return buttons.keySet().stream()
+                .filter(cell -> onTheSheet(buttons.get(cell))).toList();
     }
 
     @Test
