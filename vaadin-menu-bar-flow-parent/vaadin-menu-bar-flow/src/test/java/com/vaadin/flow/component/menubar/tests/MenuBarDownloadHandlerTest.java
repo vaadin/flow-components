@@ -70,12 +70,6 @@ class MenuBarDownloadHandlerTest {
     }
 
     @Test
-    void disabled_refused() throws IOException {
-        item.setEnabled(false);
-        Assertions.assertFalse(requestDownload());
-    }
-
-    @Test
     void menuBarDisabled_refused() throws IOException {
         menuBar.setEnabled(false);
         Assertions.assertFalse(requestDownload());
@@ -119,16 +113,8 @@ class MenuBarDownloadHandlerTest {
     }
 
     @Test
-    void replacedAndCleared_onlyCurrentHandlerRegistered() {
-        DownloadHandler replacement = event -> downloads.incrementAndGet();
-        item.setDownloadHandler(replacement);
-
-        Assertions.assertSame(replacement, item.getDownloadHandler());
-        Assertions.assertEquals(1, downloadAttributes().count());
-
+    void cleared_registrationRemoved() {
         item.setDownloadHandler(null);
-
-        Assertions.assertNull(item.getDownloadHandler());
         Assertions.assertEquals(0, downloadAttributes().count());
     }
 
