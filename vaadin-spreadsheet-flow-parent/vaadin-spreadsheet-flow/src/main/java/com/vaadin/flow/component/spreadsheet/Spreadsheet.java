@@ -2734,21 +2734,16 @@ public class Spreadsheet extends Component
      * Rows or columns changed size, or were hidden or shown: the overlays over
      * them are sized again, and the cell styles reloaded.
      *
-     * @param calculateSheetSizes
-     *            whether the row heights are read again from the sheet
+     * @param rowsChanged
+     *            whether rows changed height, which the rows with components
+     *            are grown for again
      * @param visibilityChanged
      *            whether rows or columns were hidden or shown: the comments,
      *            left out of hidden ones, are loaded again
      */
-    void reloadSheetStyles(boolean calculateSheetSizes,
-            boolean visibilityChanged) {
-        if (calculateSheetSizes) {
-            // can't assume the state already had room for the row in its
-            // arrays, it may have been created recently. This avoids
-            // ArrayIndexOutOfBoundsException
-            SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
-            // The heights read from the sheet leave out the room the rows
-            // with components were given.
+    void reloadSheetStyles(boolean rowsChanged, boolean visibilityChanged) {
+        if (rowsChanged) {
+            // A row with a component given a height is grown for it again.
             sheetScope.components.regrowRows();
         }
         // The overlays are sized from the rows and columns under them.

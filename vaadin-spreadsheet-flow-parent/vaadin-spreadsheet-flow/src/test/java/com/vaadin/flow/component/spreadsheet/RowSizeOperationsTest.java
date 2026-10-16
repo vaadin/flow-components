@@ -68,6 +68,8 @@ class RowSizeOperationsTest {
         lenient().when(spreadsheet.getActiveSheet()).thenReturn(sheet);
         lenient().when(spreadsheet.getHiddenRowIndexes())
                 .thenReturn(new ArrayList<>());
+        // The heights the sizes are changed in.
+        lenient().when(spreadsheet.getRowH()).thenReturn(new float[20]);
         lenient().when(sheet.getRow(org.mockito.ArgumentMatchers.anyInt()))
                 .thenReturn(row);
     }

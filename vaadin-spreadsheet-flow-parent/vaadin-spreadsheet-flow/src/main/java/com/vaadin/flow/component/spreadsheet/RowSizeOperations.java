@@ -99,7 +99,10 @@ final class RowSizeOperations implements Serializable {
         // A row given a height is shown.
         row.setZeroHeight(false);
         row.setHeightInPoints(height);
+        float[] rowH = heightsCovering(spreadsheet, index);
+        rowH[index] = height;
         spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
+        spreadsheet.setRowH(rowH);
         return shown;
     }
 
@@ -129,5 +132,15 @@ final class RowSizeOperations implements Serializable {
             row = activeSheet.createRow(rowIndex);
         }
         row.setZeroHeight(hidden);
+        ArrayList<Integer> hiddenRowIndexes = new ArrayList<>(
+                spreadsheet.getHiddenRowIndexes());
+        hiddenRowIndexes.remove(Integer.valueOf(rowIndex + 1));
+        if (hidden) {
+            hiddenRowIndexes.add(rowIndex + 1);
+        }
+        float[] rowH = heightsCovering(spreadsheet, rowIndex);
+        rowH[rowIndex] = hidden ? 0f : row.getHeightInPoints();
+        spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
+        spreadsheet.setRowH(rowH);
     }
 }

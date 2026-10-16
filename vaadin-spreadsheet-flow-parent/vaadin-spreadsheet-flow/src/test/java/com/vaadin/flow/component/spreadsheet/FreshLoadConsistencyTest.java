@@ -274,6 +274,8 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setColumnWidth(6, 150)),
                 op("a row's height set",
                         spreadsheet -> spreadsheet.setRowHeight(12, 30f)),
+                op("the row of a component given too little height",
+                        spreadsheet -> spreadsheet.setRowHeight(12, 10f)),
                 op("the height of a row under a picture set",
                         spreadsheet -> spreadsheet.setRowHeight(14, 30f)),
                 op("a column autofitted by the application",
@@ -311,6 +313,26 @@ class FreshLoadConsistencyTest {
                 op("another workbook shown",
                         spreadsheet -> spreadsheet
                                 .setWorkbook(FreshLoadFixture.workbook())),
+                reconfigured("a row given a height, the size of the sheet set",
+                        spreadsheet -> {
+                            spreadsheet.setMaxRows(300);
+                            spreadsheet.setMaxColumns(60);
+                            spreadsheet.setRowHeight(12, 30f);
+                        }, spreadsheet -> {
+                            FreshLoadFixture.configure(spreadsheet);
+                            spreadsheet.setMaxRows(300);
+                            spreadsheet.setMaxColumns(60);
+                        }),
+                reconfigured("a row hidden, the size of the sheet set",
+                        spreadsheet -> {
+                            spreadsheet.setMaxRows(300);
+                            spreadsheet.setMaxColumns(60);
+                            spreadsheet.setRowHidden(12, true);
+                        }, spreadsheet -> {
+                            FreshLoadFixture.configure(spreadsheet);
+                            spreadsheet.setMaxRows(300);
+                            spreadsheet.setMaxColumns(60);
+                        }),
                 reconfigured("the component factory taken away",
                         spreadsheet -> spreadsheet
                                 .setSpreadsheetComponentFactory(null),

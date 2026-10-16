@@ -61,6 +61,38 @@ class SpreadsheetRowSizesTest {
     }
 
     @Test
+    void aRowGivenAHeight_leavesTheRowsAndColumnsAsSet() {
+        spreadsheet.setMaxRows(500);
+        spreadsheet.setMaxColumns(80);
+
+        spreadsheet.setRowHeight(2, 20f);
+
+        assertEquals(500, spreadsheet.getRows());
+        assertEquals(80, spreadsheet.getColumns());
+    }
+
+    @Test
+    void aRowHidden_leavesTheRowsAndColumnsAsSet() {
+        spreadsheet.setMaxRows(500);
+        spreadsheet.setMaxColumns(80);
+
+        spreadsheet.setRowHidden(2, true);
+
+        assertEquals(500, spreadsheet.getRows());
+        assertEquals(80, spreadsheet.getColumns());
+    }
+
+    @Test
+    void aRowAddedLater_isGivenItsHeight() {
+        spreadsheet.setMaxRows(500);
+
+        spreadsheet.setRowHeight(400, 20f);
+
+        assertEquals(20f, spreadsheet.getRowH()[400]);
+        assertEquals(500, spreadsheet.getRows());
+    }
+
+    @Test
     void aRowGivenNoHeight_isHidden() {
         spreadsheet.setRowHeight(4, 0f);
 

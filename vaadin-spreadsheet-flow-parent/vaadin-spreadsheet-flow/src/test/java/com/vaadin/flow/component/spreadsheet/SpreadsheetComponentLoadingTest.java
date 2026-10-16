@@ -330,6 +330,17 @@ class SpreadsheetComponentLoadingTest {
     }
 
     @Test
+    void aRowWithAComponent_givenLessHeightThanItNeeds_keepsItsRoom() {
+        components.add("First!F12");
+        show();
+
+        spreadsheet.setRowHeight(11, 10f);
+
+        assertEquals(spreadsheet.getMinimumRowHeightForComponents(),
+                heightOfRow(12));
+    }
+
+    @Test
     void theRowsGrownOnASheet_areNotGrownOnTheNext() {
         workbook.createSheet("Second");
         components.add("First!F12");
