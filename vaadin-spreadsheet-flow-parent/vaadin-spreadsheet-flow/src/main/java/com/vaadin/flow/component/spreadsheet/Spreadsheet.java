@@ -2730,9 +2730,14 @@ public class Spreadsheet extends Component
     }
 
     /**
+     * Rows or columns changed size, or were hidden or shown: the overlays over
+     * them are sized again, and the cell styles reloaded.
+     *
+     * @param calculateSheetSizes
+     *            whether the row heights are read again from the sheet
      * @param visibilityChanged
-     *            whether rows or columns were hidden or shown: what is left out
-     *            of hidden ones, overlays and comments, is loaded again
+     *            whether rows or columns were hidden or shown: the comments,
+     *            left out of hidden ones, are loaded again
      */
     void reloadSheetStyles(boolean calculateSheetSizes,
             boolean visibilityChanged) {
@@ -2745,11 +2750,9 @@ public class Spreadsheet extends Component
             // with components were given.
             sheetScope.components.regrowRows();
         }
+        // The overlays are sized from the rows and columns under them.
+        sheetScope.overlays.loadOrUpdate();
         if (visibilityChanged) {
-            if (sheetScope.overlays.hasOverlays()) {
-                sheetScope.overlays.markReloadFromPoi();
-                sheetScope.overlays.loadOrUpdate();
-            }
             cellCommentLoader.load();
         }
         getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();

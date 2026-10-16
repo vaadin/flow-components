@@ -63,6 +63,8 @@ class ColumnSizeOperationsTest {
     private ColumnHelper columnHelper;
     @Mock
     private CellValueManager valueManager;
+    @Mock
+    private SheetOverlayManager overlayManager;
 
     private ColumnSizeOperations ops;
 
@@ -71,6 +73,8 @@ class ColumnSizeOperationsTest {
         MockitoAnnotations.openMocks(this);
         ops = new ColumnSizeOperations(spreadsheet);
         lenient().when(spreadsheet.getActiveSheet()).thenReturn(sheet);
+        // The overlays of the sheet shown, which a width sizes again.
+        lenient().when(spreadsheet.overlays()).thenReturn(overlayManager);
         lenient().when(spreadsheet.getCellValueManager())
                 .thenReturn(valueManager);
         lenient().when(spreadsheet.getHiddenColumnIndexes())

@@ -38,6 +38,9 @@ final class ColumnSizeOperations implements Serializable {
     void setWidth(int index, int width) {
         if (applyWidth(index, width)) {
             spreadsheet.reloadSheetStyles(false, true);
+        } else {
+            // The overlays are sized from the columns under them.
+            spreadsheet.overlays().loadOrUpdate();
         }
     }
 
