@@ -202,7 +202,6 @@ class FreshLoadConsistencyTest {
                     c -> c.waste(POPUPS, 2, AGAIN, 3, TWICE, 3, NOT_THERE, 3)),
             Map.entry("cells unmerged",
                     c -> c.waste(POPUPS, 2, AGAIN, 4, NOT_THERE, 8)),
-            Map.entry("a row hidden", c -> c.known("property cellComment")),
             Map.entry("a column's width set",
                     c -> c.waste(AGAIN, 6, NOT_THERE, 6)),
             Map.entry("a column autofitted by the application",
@@ -215,18 +214,22 @@ class FreshLoadConsistencyTest {
                     c -> c.waste(POPUPS, 2, NOT_THERE, 24)),
             Map.entry("another workbook shown",
                     c -> c.waste(POPUPS, 2, NOT_THERE, 24)),
-            Map.entry("a hidden row shown",
-                    c -> c.known("property cellComment")),
-            Map.entry("a hidden row given a height",
-                    c -> c.known("property cellComment")),
-            Map.entry("a column hidden", c -> c.known("property cellComment")),
             Map.entry("a column dragged to nothing", c -> c.waste(POPUPS, 2)),
             Map.entry("a row dragged to nothing", c -> c.waste(POPUPS, 2)),
             Map.entry("a hidden row dragged open", c -> c.waste(POPUPS, 2)),
             Map.entry("a hidden column given a width",
                     c -> c.known("property cellComment", "property colW",
-                            "property overlays")
-                            .waste(AGAIN, 4, NOT_THERE, 7)));
+                            "property overlays").waste(AGAIN, 4, NOT_THERE, 7)),
+            Map.entry("a row hidden", c -> c.known("property cellComment")),
+            Map.entry("a hidden row shown",
+                    c -> c.known("property cellComment")),
+            Map.entry("a hidden row given a height",
+                    c -> c.known("property cellComment")),
+            Map.entry("a column hidden", c -> c.known("property cellComment")),
+            Map.entry("a row given no height",
+                    c -> c.known("property cellComment")),
+            Map.entry("a column given no width",
+                    c -> c.known("property cellComment")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -324,6 +327,10 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setRowHidden(11, true)),
                 op("a hidden row shown",
                         spreadsheet -> spreadsheet.setRowHidden(17, false)),
+                op("a row given no height",
+                        spreadsheet -> spreadsheet.setRowHeight(11, 0f)),
+                op("a column given no width",
+                        spreadsheet -> spreadsheet.setColumnWidth(6, 0)),
                 op("a hidden row given a height",
                         spreadsheet -> spreadsheet.setRowHeight(17, 20f)),
                 op("a column hidden",
