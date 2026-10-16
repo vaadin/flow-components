@@ -622,6 +622,9 @@ public class MessageListItem implements Serializable {
     }
 
     void setHost(MessageList host) {
+        if (this.host == host) {
+            return;
+        }
         this.host = host;
         bindResource();
     }

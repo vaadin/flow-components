@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -395,6 +396,9 @@ public class AvatarGroup extends Component
         }
 
         private void setHost(AvatarGroup host) {
+            if (this.host == host) {
+                return;
+            }
             this.host = host;
             bindResource();
         }
@@ -565,7 +569,12 @@ public class AvatarGroup extends Component
     }
 
     private void updateItems(Collection<AvatarGroupItem> items) {
-        this.items.forEach(item -> item.setHost(null));
+        var newItems = new HashSet<>(items);
+        // Only release the items that were removed, and only when this group
+        // still hosts them, so that the others keep their image resource
+        this.items.stream().filter(
+                item -> !newItems.contains(item) && item.getHost() == this)
+                .forEach(item -> item.setHost(null));
         this.items = new ArrayList<>(items);
         this.items.forEach(item -> item.setHost(this));
         clientItemsUpdate.schedule();

@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -224,6 +225,38 @@ class MessageListItemImageTest {
         item.setUserImageHandler(createImageHandler());
 
         messageList.setItems(item);
+
+        assertImageIsServed(item.getUserImage());
+    }
+
+    @Test
+    void setItems_sameItem_imageNotRegisteredAgain() {
+        // The registry reads the ID of a resource each time it is registered
+        var idReads = new AtomicInteger();
+        item.setUserImageResource(
+                new StreamResource("alice.png", () -> new ByteArrayInputStream(
+                        "image".getBytes(StandardCharsets.UTF_8))) {
+                    @Override
+                    public String getId() {
+                        idReads.incrementAndGet();
+                        return super.getId();
+                    }
+                });
+        idReads.set(0);
+
+        messageList.setItems(item);
+
+        Assertions.assertEquals(0, idReads.get());
+    }
+
+    @Test
+    void setItems_itemMovedToOtherList_imageStillServed() {
+        var otherList = new MessageList();
+        ui.add(otherList);
+        item.setUserImageResource(createImageResource());
+        otherList.addItem(item);
+
+        messageList.setItems();
 
         assertImageIsServed(item.getUserImage());
     }

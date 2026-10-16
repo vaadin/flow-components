@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -223,6 +224,38 @@ class AvatarGroupItemImageTest {
         item.setImageHandler(createImageHandler());
 
         avatarGroup.setItems(item);
+
+        assertImageIsServed(item.getImage());
+    }
+
+    @Test
+    void setItems_sameItem_imageNotRegisteredAgain() {
+        // The registry reads the ID of a resource each time it is registered
+        var idReads = new AtomicInteger();
+        item.setImageResource(
+                new StreamResource("alice.png", () -> new ByteArrayInputStream(
+                        "image".getBytes(StandardCharsets.UTF_8))) {
+                    @Override
+                    public String getId() {
+                        idReads.incrementAndGet();
+                        return super.getId();
+                    }
+                });
+        idReads.set(0);
+
+        avatarGroup.setItems(item);
+
+        Assertions.assertEquals(0, idReads.get());
+    }
+
+    @Test
+    void setItems_itemMovedToOtherGroup_imageStillServed() {
+        var otherGroup = new AvatarGroup();
+        ui.add(otherGroup);
+        item.setImageResource(createImageResource());
+        otherGroup.add(item);
+
+        avatarGroup.setItems();
 
         assertImageIsServed(item.getImage());
     }
