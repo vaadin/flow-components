@@ -302,7 +302,7 @@ public class MessageListItem implements Serializable {
      * @see MessageListItem#setUserImageHandler(DownloadHandler)
      */
     public void setUserImage(String userImage) {
-        setResource(null);
+        setImageSource(null, null);
         this.userImage = userImage;
         propsChanged();
     }
@@ -541,25 +541,13 @@ public class MessageListItem implements Serializable {
      * @since 24.8
      */
     public void setUserImageHandler(DownloadHandler downloadHandler) {
-        if (downloadHandler == null) {
-            setUserImageResource(null);
-            return;
-        }
         if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
             // change disposition to inline in pre-defined handlers,
             // where it is 'attachment' by default
             handler.inline();
         }
-
-        setUserImageResource(createHandlerResource(downloadHandler));
-        imageHandler = downloadHandler;
-    }
-
-    private AbstractStreamResource createHandlerResource(
-            DownloadHandler downloadHandler) {
-        return new StreamResourceRegistry.ElementStreamResource(downloadHandler,
-                getHost() != null ? getHost().getElement()
-                        : UI.getCurrentOrThrow().getElement());
+        setImageSource(downloadHandler, null);
+        propsChanged();
     }
 
     /**
@@ -575,12 +563,7 @@ public class MessageListItem implements Serializable {
      */
     @Deprecated(since = "24.8", forRemoval = true)
     public void setUserImageResource(AbstractStreamResource resource) {
-        setResource(resource);
-        if (resource != null) {
-            doSetResource(resource);
-        } else {
-            this.userImage = null;
-        }
+        setImageSource(null, resource);
         propsChanged();
     }
 
@@ -596,23 +579,38 @@ public class MessageListItem implements Serializable {
         this.userImage = targetUri.toASCIIString();
     }
 
-    private void setResource(AbstractStreamResource resource) {
-        imageHandler = null;
+    /**
+     * Replaces the image handler or the image resource of this item. At most
+     * one of them is set.
+     */
+    private void setImageSource(DownloadHandler handler,
+            AbstractStreamResource resource) {
+        unbindImage();
+        imageHandler = handler;
         imageResource = resource;
-        bindResource();
+        this.userImage = null;
+        bindImage();
     }
 
     /**
-     * Registers the image resource with the session of the host while the host
-     * is attached, and unregisters it when the host is detached, the item is
-     * removed from the host, or the resource is replaced.
+     * Binds the image to the current host. An image handler is wrapped in a
+     * resource owned by the host, and the resource is registered with the
+     * session of the host while the host is attached.
      */
-    private void bindResource() {
-        if (resourceRegistration != null) {
-            resourceRegistration.remove();
-            resourceRegistration = null;
+    private void bindImage() {
+        if (imageHandler != null) {
+            // Requests for a handler resource are rejected while its owner
+            // element is detached, so the resource is created for the current
+            // host
+            imageResource = new StreamResourceRegistry.ElementStreamResource(
+                    imageHandler, getHost() != null ? getHost().getElement()
+                            : UI.getCurrentOrThrow().getElement());
         }
-        if (getHost() == null || imageResource == null) {
+        if (imageResource == null) {
+            return;
+        }
+        doSetResource(imageResource);
+        if (getHost() == null) {
             return;
         }
         AbstractStreamResource resource = imageResource;
@@ -621,6 +619,13 @@ public class MessageListItem implements Serializable {
                     .getResourceRegistry().registerResource(resource);
             return registration::unregister;
         });
+    }
+
+    private void unbindImage() {
+        if (resourceRegistration != null) {
+            resourceRegistration.remove();
+            resourceRegistration = null;
+        }
     }
 
     private void propsChanged() {
@@ -633,15 +638,11 @@ public class MessageListItem implements Serializable {
         if (this.host == host) {
             return;
         }
+        unbindImage();
         this.host = host;
-        if (host != null && imageHandler != null) {
-            // Requests for a handler resource are rejected while its owner
-            // element is detached, so the resource must be owned by the
-            // current host
-            imageResource = createHandlerResource(imageHandler);
-            doSetResource(imageResource);
+        if (host != null) {
+            bindImage();
         }
-        bindResource();
     }
 
     @JsonIgnore

@@ -219,7 +219,7 @@ public class AvatarGroup extends Component
          *            the image url
          */
         public void setImage(String url) {
-            setResource(null);
+            setImageSource(null, null);
 
             this.img = url;
             if (getHost() != null) {
@@ -245,25 +245,15 @@ public class AvatarGroup extends Component
          * @since 24.8
          */
         public void setImageHandler(DownloadHandler downloadHandler) {
-            if (downloadHandler == null) {
-                setImageResource(null);
-                return;
-            }
             if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
                 // change disposition to inline in pre-defined handlers,
                 // where it is 'attachment' by default
                 handler.inline();
             }
-
-            setImageResource(createHandlerResource(downloadHandler));
-            imageHandler = downloadHandler;
-        }
-
-        private AbstractStreamResource createHandlerResource(
-                DownloadHandler downloadHandler) {
-            return new StreamResourceRegistry.ElementStreamResource(
-                    downloadHandler, getHost() != null ? getHost().getElement()
-                            : UI.getCurrentOrThrow().getElement());
+            setImageSource(downloadHandler, null);
+            if (getHost() != null) {
+                getHost().clientItemsUpdate.schedule();
+            }
         }
 
         /**
@@ -279,12 +269,7 @@ public class AvatarGroup extends Component
          */
         @Deprecated(since = "24.8", forRemoval = true)
         public void setImageResource(AbstractStreamResource resource) {
-            setResource(resource);
-            if (resource != null) {
-                doSetResource(resource);
-            } else {
-                this.img = null;
-            }
+            setImageSource(null, resource);
             if (getHost() != null) {
                 getHost().clientItemsUpdate.schedule();
             }
@@ -302,23 +287,39 @@ public class AvatarGroup extends Component
             this.img = targetUri.toASCIIString();
         }
 
-        private void setResource(AbstractStreamResource resource) {
-            imageHandler = null;
+        /**
+         * Replaces the image handler or the image resource of this item. At
+         * most one of them is set.
+         */
+        private void setImageSource(DownloadHandler handler,
+                AbstractStreamResource resource) {
+            unbindImage();
+            imageHandler = handler;
             imageResource = resource;
-            bindResource();
+            this.img = null;
+            bindImage();
         }
 
         /**
-         * Registers the image resource with the session of the host while the
-         * host is attached, and unregisters it when the host is detached, the
-         * item is removed from the host, or the resource is replaced.
+         * Binds the image to the current host. An image handler is wrapped in a
+         * resource owned by the host, and the resource is registered with the
+         * session of the host while the host is attached.
          */
-        private void bindResource() {
-            if (resourceRegistration != null) {
-                resourceRegistration.remove();
-                resourceRegistration = null;
+        private void bindImage() {
+            if (imageHandler != null) {
+                // Requests for a handler resource are rejected while its owner
+                // element is detached, so the resource is created for the
+                // current
+                // host
+                imageResource = new StreamResourceRegistry.ElementStreamResource(
+                        imageHandler, getHost() != null ? getHost().getElement()
+                                : UI.getCurrentOrThrow().getElement());
             }
-            if (getHost() == null || imageResource == null) {
+            if (imageResource == null) {
+                return;
+            }
+            doSetResource(imageResource);
+            if (getHost() == null) {
                 return;
             }
             AbstractStreamResource resource = imageResource;
@@ -327,6 +328,13 @@ public class AvatarGroup extends Component
                         .getResourceRegistry().registerResource(resource);
                 return registration::unregister;
             });
+        }
+
+        private void unbindImage() {
+            if (resourceRegistration != null) {
+                resourceRegistration.remove();
+                resourceRegistration = null;
+            }
         }
 
         /**
@@ -407,15 +415,11 @@ public class AvatarGroup extends Component
             if (this.host == host) {
                 return;
             }
+            unbindImage();
             this.host = host;
-            if (host != null && imageHandler != null) {
-                // Requests for a handler resource are rejected while its owner
-                // element is detached, so the resource must be owned by the
-                // current host
-                imageResource = createHandlerResource(imageHandler);
-                doSetResource(imageResource);
+            if (host != null) {
+                bindImage();
             }
-            bindResource();
         }
     }
 
