@@ -278,6 +278,9 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setRowHeight(14, 30f)),
                 op("a column autofitted by the application",
                         spreadsheet -> spreadsheet.autofitColumn(4)),
+                steps("a hidden column autofitted by the application", api(
+                        spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                        api(spreadsheet -> spreadsheet.autofitColumn(6))),
                 op("the sheet protected",
                         spreadsheet -> spreadsheet.setActiveSheetProtected("")),
                 steps("the sheet protected, then not", api(

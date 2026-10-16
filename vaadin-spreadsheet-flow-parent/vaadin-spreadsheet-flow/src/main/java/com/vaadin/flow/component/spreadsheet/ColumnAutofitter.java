@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -71,24 +70,14 @@ final class ColumnAutofitter implements Serializable {
             LOGGER.warn("Could not autofit column {}", columnIndex + 1, e);
             return;
         }
-        int columnPixelWidth = computePixelWidthWithFilterPadding(columnIndex,
+        int width = withRoomForFilterButton(columnIndex,
                 (int) activeSheet.getColumnWidthInPixels(columnIndex));
-
-        int[] colW = ColumnSizeOperations.widthsCovering(spreadsheet,
-                columnIndex);
-        colW[columnIndex] = columnPixelWidth;
-        spreadsheet.setColW(colW);
-
-        spreadsheet.getCellValueManager().clearCacheForColumn(columnIndex + 1);
-        spreadsheet.getCellValueManager().loadCellData(
-                spreadsheet.getFirstRow(), columnIndex + 1,
-                spreadsheet.getLastRow(), columnIndex + 1);
-        spreadsheet.getCellValueManager().resendTextRunningInto(columnIndex);
-
-        if (spreadsheet.overlays().hasOverlays()) {
-            spreadsheet.overlays().markReloadFromPoi();
-            spreadsheet.overlays().loadOrUpdate();
-        }
+        autofittedColumnWidths.put(new CellReference(activeSheet.getSheetName(),
+                0, columnIndex, true, true), width);
+        // Through the component, so the workbook holds the width the client
+        // is given, the overlays over the column are sized again, and an
+        // override applies.
+        spreadsheet.setColumnWidth(columnIndex, width);
     }
 
     /**
@@ -119,28 +108,17 @@ final class ColumnAutofitter implements Serializable {
     }
 
     /**
-     * Filter columns reserve extra width so the popup button doesn't truncate
-     * when the column autofits to its content.
+     * The width, with room for the button of a filter in the column, which is
+     * in the header row of its table, so the button does not cover the text.
      */
-    private int computePixelWidthWithFilterPadding(int columnIndex,
-            int autofitWidth) {
-        List<SpreadsheetTable> tablesForActiveSheet = spreadsheet
-                .getTablesForActiveSheet();
-        CellReference cr = new CellReference(
-                spreadsheet.getActiveSheet().getSheetName(), 0, columnIndex,
-                true, true);
-        autofittedColumnWidths.put(cr, autofitWidth);
-        for (SpreadsheetTable st : tablesForActiveSheet) {
-            if (!(st instanceof SpreadsheetFilterTable)) {
-                continue;
-            }
-            SpreadsheetFilterTable ft = (SpreadsheetFilterTable) st;
-            PopupButton popupButton = ft.getPopupButton(cr);
-            if (popupButton != null) {
-                return autofitWidth + FILTER_BUTTON_PIXEL_WIDTH
+    private int withRoomForFilterButton(int columnIndex, int width) {
+        for (SpreadsheetTable table : spreadsheet.getTablesForActiveSheet()) {
+            if (table instanceof SpreadsheetFilterTable
+                    && table.getPopupButton(columnIndex) != null) {
+                return width + FILTER_BUTTON_PIXEL_WIDTH
                         + FILTER_BUTTON_PIXEL_PADDING;
             }
         }
-        return autofitWidth;
+        return width;
     }
 }
