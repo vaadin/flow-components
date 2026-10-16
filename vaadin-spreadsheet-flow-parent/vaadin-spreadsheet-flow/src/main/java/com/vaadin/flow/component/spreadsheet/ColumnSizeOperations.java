@@ -36,8 +36,7 @@ final class ColumnSizeOperations implements Serializable {
     }
 
     void setWidth(int index, int width) {
-        applyWidth(index, width);
-        if (width == 0) {
+        if (applyWidth(index, width)) {
             spreadsheet.reloadSheetStyles(false, true);
         }
     }
@@ -84,19 +83,18 @@ final class ColumnSizeOperations implements Serializable {
         spreadsheet.loadCells(row1, col1, row2, col2);
     }
 
-    private void applyWidth(int index, int width) {
+    /** Whether the column is hidden by the width, or shown by it. */
+    private boolean applyWidth(int index, int width) {
         if (width == 0) {
             applyHidden(index, true);
-            return;
+            return true;
         }
         // No wider than POI holds, so the sheet and the workbook agree.
         width = Math.min(width, SpreadsheetUtil.MAX_COLUMN_WIDTH_PX);
         ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>(
                 spreadsheet.getHiddenColumnIndexes());
         int[] colW = widthsCovering(spreadsheet, index);
-        if (hiddenColumnIndexes.contains(Integer.valueOf(index + 1))) {
-            hiddenColumnIndexes.remove(Integer.valueOf(index + 1));
-        }
+        boolean shown = hiddenColumnIndexes.remove(Integer.valueOf(index + 1));
         if (spreadsheet.getActiveSheet().isColumnHidden(index)) {
             spreadsheet.getActiveSheet().setColumnHidden(index, false);
         }
@@ -115,6 +113,7 @@ final class ColumnSizeOperations implements Serializable {
                 spreadsheet.getFirstRow(), index + 1, spreadsheet.getLastRow(),
                 index + 1);
         spreadsheet.getCellValueManager().resendTextRunningInto(index);
+        return shown;
     }
 
     private void applyHidden(int columnIndex, boolean hidden) {

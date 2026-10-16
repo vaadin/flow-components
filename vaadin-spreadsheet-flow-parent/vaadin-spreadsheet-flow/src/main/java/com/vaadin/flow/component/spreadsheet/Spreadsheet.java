@@ -2745,8 +2745,13 @@ public class Spreadsheet extends Component
         rowSizeOperations.setRowsHidden(rowIndexToHidden);
     }
 
+    /**
+     * @param visibilityChanged
+     *            whether rows or columns were hidden or shown: what is left out
+     *            of hidden ones, overlays and comments, is loaded again
+     */
     void reloadSheetStyles(boolean calculateSheetSizes,
-            boolean updateOverlays) {
+            boolean visibilityChanged) {
         if (calculateSheetSizes) {
             // can't assume the state already had room for the row in its
             // arrays, it may have been created recently. This avoids
@@ -2756,9 +2761,12 @@ public class Spreadsheet extends Component
             // with components were given.
             customComponentLoader.regrowRows();
         }
-        if (updateOverlays && sheetOverlayManager.hasOverlays()) {
-            sheetOverlayManager.markReloadFromPoi();
-            sheetOverlayManager.loadOrUpdate();
+        if (visibilityChanged) {
+            if (sheetOverlayManager.hasOverlays()) {
+                sheetOverlayManager.markReloadFromPoi();
+                sheetOverlayManager.loadOrUpdate();
+            }
+            cellCommentLoader.load();
         }
         getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }

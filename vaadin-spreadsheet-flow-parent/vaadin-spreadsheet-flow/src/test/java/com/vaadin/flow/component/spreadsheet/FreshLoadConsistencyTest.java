@@ -218,18 +218,9 @@ class FreshLoadConsistencyTest {
             Map.entry("a row dragged to nothing", c -> c.waste(POPUPS, 2)),
             Map.entry("a hidden row dragged open", c -> c.waste(POPUPS, 2)),
             Map.entry("a hidden column given a width",
-                    c -> c.known("property cellComment", "property colW",
-                            "property overlays").waste(AGAIN, 4, NOT_THERE, 7)),
-            Map.entry("a row hidden", c -> c.known("property cellComment")),
-            Map.entry("a hidden row shown",
-                    c -> c.known("property cellComment")),
-            Map.entry("a hidden row given a height",
-                    c -> c.known("property cellComment")),
-            Map.entry("a column hidden", c -> c.known("property cellComment")),
-            Map.entry("a row given no height",
-                    c -> c.known("property cellComment")),
-            Map.entry("a column given no width",
-                    c -> c.known("property cellComment")));
+                    c -> c.known("property colW",
+                            "property overlays: [0] .width")
+                            .waste(AGAIN, 4, NOT_THERE, 7)));
 
     static Stream<Case> cases() {
         return Stream.of(

@@ -234,20 +234,4 @@ class RowSizeOperationsTest {
         assertEquals(1, existing.size());
         assertEquals(Integer.valueOf(3), existing.get(0));
     }
-
-    @Test
-    void setHeight_useOneBasedConvention_forHiddenIndexesList() {
-        // Pin: the hidden list uses 1-based indexing (index+1). Setting
-        // height on POI row index 2 (i.e. 0-based) checks for "3" in the
-        // hidden list, not "2".
-        ArrayList<Integer> existing = new ArrayList<>();
-        existing.add(2); // 1-based equivalent of POI row index 1
-        when(spreadsheet.getHiddenRowIndexes()).thenReturn(existing);
-
-        ops.setHeight(2, 20f); // POI row index 2 → 1-based 3
-
-        // The existing index 2 is NOT removed (corresponds to a different
-        // row); the call to setZeroHeight(false) doesn't fire.
-        verify(row, never()).setZeroHeight(false);
-    }
 }

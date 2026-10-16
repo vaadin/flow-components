@@ -39,9 +39,7 @@ final class RowSizeOperations implements Serializable {
     }
 
     void setHeight(int index, float height) {
-        applyHeight(index, height);
-        boolean isRowHidden = height == 0.0F;
-        spreadsheet.reloadSheetStyles(true, isRowHidden);
+        spreadsheet.reloadSheetStyles(true, applyHeight(index, height));
     }
 
     void setHeights(Map<Integer, Float> rowIndexToHeight) {
@@ -85,25 +83,24 @@ final class RowSizeOperations implements Serializable {
         spreadsheet.loadCells(row1, col1, row2, col2);
     }
 
-    private void applyHeight(int index, float height) {
+    /** Whether the row is hidden by the height, or shown by it. */
+    private boolean applyHeight(int index, float height) {
         if (height == 0.0F) {
             applyHidden(index, true);
-            return;
+            return true;
         }
-        Row row = spreadsheet.getActiveSheet().getRow(index);
         ArrayList<Integer> hiddenRowIndexes = new ArrayList<>(
                 spreadsheet.getHiddenRowIndexes());
-        if (hiddenRowIndexes.contains(Integer.valueOf(index + 1))) {
-            hiddenRowIndexes.remove(Integer.valueOf(index + 1));
-            if (row != null && row.getZeroHeight()) {
-                row.setZeroHeight(false);
-            }
-        }
+        boolean shown = hiddenRowIndexes.remove(Integer.valueOf(index + 1));
+        Row row = spreadsheet.getActiveSheet().getRow(index);
         if (row == null) {
             row = spreadsheet.getActiveSheet().createRow(index);
         }
+        // A row given a height is shown.
+        row.setZeroHeight(false);
         row.setHeightInPoints(height);
         spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
+        return shown;
     }
 
     /**
