@@ -736,9 +736,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
                 int pointIndex, Series drilldownSeries) {
-            getElement().executeJs(
-                    "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)",
-                    "addSeriesAsDrilldown", seriesIndex, pointIndex,
+            getElement().executeJs(ChartJs.class).addSeriesAsDrilldown(
+                    seriesIndex, pointIndex,
                     toJsonValue((AbstractConfigurationObject) drilldownSeries));
         }
 
