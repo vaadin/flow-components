@@ -17,6 +17,10 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
+import org.apache.poi.hssf.usermodel.HSSFPatriarch;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -325,6 +329,24 @@ class SpreadsheetOverlaysTest {
         assertEquals(List.of(1, 1, 30, 40, 50, 60),
                 List.of(info.col, info.row, (int) info.dx, (int) info.dy,
                         (int) info.width, (int) info.height));
+    }
+
+    @Test
+    void aPictureOfAnOldWorkbookNotMovedWithItsCells_isShownAtItsCell() {
+        HSSFWorkbook old = new HSSFWorkbook();
+        HSSFSheet oldSheet = old.createSheet();
+        HSSFPatriarch patriarch = oldSheet.createDrawingPatriarch();
+        HSSFClientAnchor anchor = patriarch.createAnchor(0, 0, 0, 0, 5, 11, 6,
+                12);
+        anchor.setAnchorType(AnchorType.DONT_MOVE_AND_RESIZE);
+        patriarch.createPicture(anchor,
+                old.addPicture(PNG, Workbook.PICTURE_TYPE_PNG));
+        spreadsheet = new Spreadsheet(old);
+        ui.add(spreadsheet);
+
+        showRows(10, 20);
+
+        assertEquals(List.of("F12"), startCells());
     }
 
     @Test
