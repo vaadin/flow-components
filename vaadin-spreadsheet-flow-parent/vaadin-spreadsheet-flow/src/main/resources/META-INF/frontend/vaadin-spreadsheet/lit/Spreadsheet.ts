@@ -21,6 +21,7 @@ import type { Json, SpreadsheetClientApi } from './types/rpc-server-to-client.js
 import {
   addAuxRange,
   buildSelectionEvent,
+  type CellPosition,
   type CellRange,
   isCellInSelection,
   normalizedRange,
@@ -2084,16 +2085,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
   };
 
   /**
-   * Move the selection to one cell - or merge - from the keyboard, naming
-   * it in the address field straight away rather than waiting for the
-   * server to: the address field is how the user knows where the keyboard
-   * has taken them. The cell is scrolled into view before the render -
-   * see {@link scrollToShow}.
+   * Move the selection to one cell - or merge - from the keyboard. The cell
+   * is scrolled into view before the render - see {@link scrollToShow} - and
+   * named in the address field as the server hears of it.
    */
   private moveSelectionTo(next: SingleCellSelection): void {
     this.extendingSelection = false;
     this.applySingleSelection(next);
-    this.changeFormulaBar({ address: cellCoordToAddress(next.activeCell) });
     this.scrollCellIntoView(next.activeCell);
   }
 
@@ -2213,7 +2211,29 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private sendToServer(detail: SpreadsheetEvent): void {
     this.host.dispatchEvent(new CustomEvent('spreadsheet-event', { detail }));
-    this.serverSelectedCell = selectedCellSetBy(detail) ?? this.serverSelectedCell;
+    const selected = selectedCellSetBy(detail);
+    if (selected !== null) {
+      this.serverSelectedCell = selected;
+      this.showSelectedCellInFormulaBar(selected);
+    }
+  }
+
+  /**
+   * Names the selected cell in the address field and shows what it holds in
+   * the formula field, from the cells the client has, as GWT did on every
+   * click and key. Waiting for the server's answer, which only confirms them,
+   * had both fields trail every click by a round trip: a third of a second
+   * on a slow network. The answer still names a named range, and fills in a
+   * cell not loaded yet.
+   *
+   * Nothing can have been written in the formula field for the cell yet: the
+   * selection has only just been made.
+   */
+  private showSelectedCellInFormulaBar(cell: CellPosition): void {
+    this.changeFormulaBar({
+      address: this.extendingSelection ? selectionSizeLabel(this.selection.activeRange) : cellCoordToAddress(cell)
+    });
+    this.showServerValueInFormulaField(this.formulaFieldValueFor(cell.col, cell.row), false);
   }
 
   /** The cells the grid draws, its drawing buffer included; null before anything is measured. */
