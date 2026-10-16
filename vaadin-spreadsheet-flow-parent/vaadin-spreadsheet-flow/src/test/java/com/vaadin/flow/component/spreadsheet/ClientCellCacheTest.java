@@ -188,4 +188,28 @@ class ClientCellCacheTest {
         // "col3 r".
         assertTrue(cache.containsNormal("col30 row1"));
     }
+
+    @Test
+    void aCellNotMarked_isNotMarkedForUpdate() {
+        assertFalse(cache.isMarkedForUpdate("col1 row1"));
+    }
+
+    @Test
+    void markForUpdate_marksTheCell_once() {
+        cache.markForUpdate("col5 row2");
+        cache.markForUpdate("col5 row2");
+
+        assertTrue(cache.isMarkedForUpdate("col5 row2"));
+    }
+
+    @Test
+    void clear_forgetsTheMarksToo() {
+        cache.markForUpdate("col5 row2");
+        cache.markNormalSent("col5 row2");
+
+        cache.clear();
+
+        assertFalse(cache.isMarkedForUpdate("col5 row2"));
+        assertFalse(cache.containsNormal("col5 row2"));
+    }
 }

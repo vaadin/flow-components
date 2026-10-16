@@ -81,9 +81,7 @@ public class CellValueManager implements Serializable {
     final CellNumericFormatter numericFormatter = new CellNumericFormatter();
     final CellFitCalculator fitCalculator = new CellFitCalculator();
     private final CellDeletionGuard deletionGuard = new CellDeletionGuard(this);
-    private final ClientCellCache clientCache = new ClientCellCache();
-    final ClientFlushQueue flushQueue = new ClientFlushQueue();
-    private final ClientCacheFlusher cacheFlusher;
+    final ClientCellCache clientCache = new ClientCellCache();
 
     private boolean topLeftCellsLoaded;
 
@@ -99,8 +97,6 @@ public class CellValueManager implements Serializable {
      */
     public CellValueManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        this.cacheFlusher = new ClientCacheFlusher(spreadsheet, this,
-                clientCache, flushQueue);
 
         UI current = UI.getCurrent();
         if (current != null) {
@@ -116,7 +112,6 @@ public class CellValueManager implements Serializable {
      * Clears all cached data.
      */
     public void clearCachedContent() {
-        flushQueue.clear();
         clientCache.clear();
         hyperlinkStyleIndex = -1;
         topLeftCellsLoaded = false;
@@ -307,7 +302,7 @@ public class CellValueManager implements Serializable {
      *            Cell to mark for updates
      */
     protected void markCellForUpdate(Cell cell) {
-        flushQueue.markForUpdate(SpreadsheetUtil.toKey(cell));
+        clientCache.markForUpdate(SpreadsheetUtil.toKey(cell));
     }
 
     /**
@@ -341,7 +336,7 @@ public class CellValueManager implements Serializable {
         CellData cd = new CellData();
         cd.col = cell.getColumnIndex() + 1;
         cd.row = cell.getRowIndex() + 1;
-        flushQueue.enqueueRemoval(cd);
+        clientCache.enqueueRemoval(cd);
         clearCellCache(cellKey);
     }
 
@@ -595,7 +590,7 @@ public class CellValueManager implements Serializable {
             CellData cd = new CellData();
             cd.col = col;
             cd.row = row;
-            flushQueue.enqueueRemoval(cd);
+            clientCache.enqueueRemoval(cd);
             clearCellCache(SpreadsheetUtil.toKey(col, row));
         } else {
             spreadsheet.markCellAsUpdated(cell, true);
@@ -912,7 +907,7 @@ public class CellValueManager implements Serializable {
      *
      */
     protected void updateMarkedCellValues() {
-        cacheFlusher.flush();
+        clientCache.flush(spreadsheet, this);
     }
 
     /**
@@ -926,7 +921,7 @@ public class CellValueManager implements Serializable {
      */
     protected void updateDeletedRowsInClientCache(int startRow, int endRow) {
         for (CellData cd : clientCache.pruneRowsRange(startRow, endRow)) {
-            flushQueue.enqueueRemoval(cd);
+            clientCache.enqueueRemoval(cd);
         }
     }
 
@@ -975,9 +970,9 @@ public class CellValueManager implements Serializable {
                             CellData cd = new CellData();
                             cd.col = j + 1;
                             cd.row = i + 1;
-                            flushQueue.enqueueRemoval(cd);
+                            clientCache.enqueueRemoval(cd);
                         } else {
-                            flushQueue.markForUpdate(key);
+                            clientCache.markForUpdate(key);
                         }
                         cell.setCellValue((String) null);
                         getFormulaEvaluator().notifyUpdateCell(cell);
@@ -1017,9 +1012,9 @@ public class CellValueManager implements Serializable {
                 final String key = SpreadsheetUtil.toKey(colIndex, rowIndex);
                 if (clearRemovedCellStyle
                         || cell.getCellStyle().getIndex() == 0) {
-                    flushQueue.enqueueRemoval(cd);
+                    clientCache.enqueueRemoval(cd);
                 } else {
-                    flushQueue.markForUpdate(key);
+                    clientCache.markForUpdate(key);
                 }
                 clientCache.dropSent(key);
                 // POI (3.9) doesn't have a method for removing a hyperlink !!!

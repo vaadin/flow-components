@@ -68,7 +68,7 @@ class CellDataBuilderTest {
     private CellNumericFormatter numericFormatter;
     private FormulaFormatter formulaFormatter;
     private CellFitCalculator fitCalculator;
-    private ClientFlushQueue flushQueue;
+    private ClientCellCache clientCache;
     private CellDataBuilder builder;
 
     @BeforeEach
@@ -83,7 +83,7 @@ class CellDataBuilderTest {
         numericFormatter.updateLocale(Locale.US);
         formulaFormatter = new FormulaFormatter();
         fitCalculator = new CellFitCalculator();
-        flushQueue = new ClientFlushQueue();
+        clientCache = new ClientCellCache();
 
         // Wire the package-private fields the builder reads on the
         // manager via reflection (Mockito mocks have the fields but
@@ -92,7 +92,7 @@ class CellDataBuilderTest {
         wireField("numericFormatter", numericFormatter);
         wireField("formulaFormatter", formulaFormatter);
         wireField("fitCalculator", fitCalculator);
-        wireField("flushQueue", flushQueue);
+        wireField("clientCache", clientCache);
 
         // Mocked methods the builder calls back through.
         org.mockito.Mockito.lenient().when(manager.getFormulaEvaluator())
@@ -212,7 +212,7 @@ class CellDataBuilderTest {
     @Test
     void createCellDataForCell_withConditionalFormatting_appendsCfIndexAndMarksForUpdate() {
         // Pin: when ConditionalFormatter returns non-empty indexes, each
-        // index is appended to cellStyle as " cf<N>" AND the flushQueue
+        // index is appended to cellStyle as " cf<N>" AND the clientCache
         // is marked for update with the cell key. A regression skipping
         // either part would break CF rendering on the client.
         Cell cell = newStringCell(0, 0, "v");
@@ -229,10 +229,10 @@ class CellDataBuilderTest {
         // gate is the non-empty cellStyle OR style index 0; with a
         // non-empty value AND style index 0, both paths enter the
         // value block, and the CF branch fires markForUpdate.
-        // Pin the markForUpdate side effect via the flushQueue's
-        // observable state (flushQueue.isMarkedForUpdate returns true).
-        assertTrue(flushQueue.isMarkedForUpdate(SpreadsheetUtil.toKey(cell)),
-                "flushQueue MUST hold the cell key for CF-marked cells");
+        // Pin the markForUpdate side effect via the clientCache's
+        // observable state (clientCache.isMarkedForUpdate returns true).
+        assertTrue(clientCache.isMarkedForUpdate(SpreadsheetUtil.toKey(cell)),
+                "clientCache MUST hold the cell key for CF-marked cells");
     }
 
     @Test
@@ -246,7 +246,7 @@ class CellDataBuilderTest {
         assertFalse(result.cellStyle.contains(" cf"),
                 "cellStyle MUST NOT contain ' cf' without CF indexes; got: "
                         + result.cellStyle);
-        assertFalse(flushQueue.isMarkedForUpdate(SpreadsheetUtil.toKey(cell)));
+        assertFalse(clientCache.isMarkedForUpdate(SpreadsheetUtil.toKey(cell)));
     }
 
     // ----- display-zero preference (private helper exposed indirectly) ----

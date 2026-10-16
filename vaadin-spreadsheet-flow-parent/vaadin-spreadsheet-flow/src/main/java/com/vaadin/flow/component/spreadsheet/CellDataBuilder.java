@@ -27,7 +27,7 @@ import com.vaadin.flow.component.spreadsheet.client.CellData;
  * Builds the {@link CellData} transport object for a single POI cell. Reads
  * through {@link CellValueManager} for the formatter chain
  * ({@code numericFormatter}, {@code fitCalculator}, {@code formulaFormatter},
- * {@code flushQueue}) and through {@link Spreadsheet} for context (locale,
+ * {@code clientCache}) and through {@link Spreadsheet} for context (locale,
  * locked / hidden checks, invalid-formula marks, conditional-formatting
  * indexes, column widths).
  *
@@ -71,7 +71,7 @@ final class CellDataBuilder implements Serializable {
                                         manager.getFormulaEvaluator(),
                                         manager.getConditionalFormattingEvaluator());
                         if (!newValue.equals(oldValue)) {
-                            manager.flushQueue.addChangedFormulaCell(
+                            manager.clientCache.addChangedFormulaCell(
                                     new CellReference(cell));
                         }
                     } catch (RuntimeException rte) {
@@ -213,7 +213,7 @@ final class CellDataBuilder implements Serializable {
                     cellData.cellStyle = cellData.cellStyle + " cf" + i;
                 }
 
-                manager.flushQueue.markForUpdate(SpreadsheetUtil.toKey(cell));
+                manager.clientCache.markForUpdate(SpreadsheetUtil.toKey(cell));
             }
 
             if (cell.getCellType() == CellType.NUMERIC

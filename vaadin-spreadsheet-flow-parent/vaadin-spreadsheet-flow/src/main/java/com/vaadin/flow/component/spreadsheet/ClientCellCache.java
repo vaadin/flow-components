@@ -12,39 +12,51 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 
 /**
- * Tracks which cells the server has already pushed to the client and is
- * therefore safe to assume cached there.
- *
+ * The cells the client has, those to send it on the next update, and sending
+ * them with {@link #flush}.
  * <p>
- * Two parallel sets — one for plain cells, one for formula cells — keyed by the
- * cell key string ({@link SpreadsheetUtil#toKey}). Formula cells are tracked
- * separately because they get re-pushed every flush (formula re-evaluation may
- * change the displayed value even though the formula text is unchanged),
- * whereas plain cells only get pushed when their value is marked dirty.
- *
- * <p>
- * Prune operations match the {@link SpreadsheetUtil} cell-key format
- * ({@code "col<N> row<M>"}); they're how the cache participates in row-range
- * deletions and column-clear events. The cache surface up to this point only
- * stores and queries strings — it does not invoke RPC or talk to the client;
- * that's {@link ClientCacheFlusher}'s job.
+ * Cells are known by their keys ({@link SpreadsheetUtil#toKey}). Formula cells
+ * the client has are kept apart from the other cells: they are sent again on
+ * every update, as what they work out to may have changed although they did
+ * not. Other cells are sent again only when they are marked for update.
  */
 final class ClientCellCache implements Serializable {
 
     private final HashSet<String> sentCells = new HashSet<String>();
     private final HashSet<String> sentFormulaCells = new HashSet<String>();
 
-    ClientCellCache() {
-    }
+    /** Cells whose values have changed and are to be sent again. */
+    private final HashSet<String> markedCells = new HashSet<String>();
+    /** Cells to take off the client: a row and column, and no value. */
+    private final HashSet<CellData> removedCells = new HashSet<CellData>();
+    /**
+     * Formula cells that work out to something else than when they were last
+     * sent, for the formula change event of the next update.
+     */
+    private HashSet<CellReference> changedFormulaCells = new HashSet<CellReference>();
 
+    /**
+     * Forgets the cells the client has and those to send it. A cell taken off
+     * the client is sent at once, so none is waiting here then.
+     */
     void clear() {
         sentCells.clear();
         sentFormulaCells.clear();
+        markedCells.clear();
     }
 
     boolean containsNormal(String key) {
@@ -130,6 +142,123 @@ final class ClientCellCache implements Serializable {
             String key = iterator.next();
             if (key.startsWith(columnKey)) {
                 iterator.remove();
+            }
+        }
+    }
+
+    void markForUpdate(String key) {
+        markedCells.add(key);
+    }
+
+    boolean isMarkedForUpdate(String key) {
+        return markedCells.contains(key);
+    }
+
+    void enqueueRemoval(CellData cd) {
+        removedCells.add(cd);
+    }
+
+    void addChangedFormulaCell(CellReference ref) {
+        changedFormulaCells.add(ref);
+    }
+
+    /**
+     * Sends the client the cells marked for update, the formula cells it has,
+     * and the cells whose text may run into one of those, and takes the cells
+     * queued for removal off it. Fires the formula change event first when a
+     * formula works out to something else.
+     */
+    void flush(Spreadsheet spreadsheet, CellValueManager manager) {
+        ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
+        Sheet sheet = spreadsheet.getActiveSheet();
+        addSpillSources(sheet, manager, updatedCellData);
+
+        // it is unnecessary to worry about having custom components in the
+        // cell because the client side handles it — it will not replace a
+        // custom component with a cell value
+
+        // update all cached formula cell values on client side because they
+        // might have changed; also push every cell that is currently marked.
+        Iterator<Row> rows = sheet.rowIterator();
+        while (rows.hasNext()) {
+            Row r = rows.next();
+            Iterator<Cell> cells = r.cellIterator();
+            while (cells.hasNext()) {
+                Cell cell = cells.next();
+                String key = SpreadsheetUtil.toKey(cell.getColumnIndex() + 1,
+                        cell.getRowIndex() + 1);
+
+                if (spreadsheet.getConditionalFormatter()
+                        .getCellFormattingIndex(cell) != null) {
+                    markForUpdate(key);
+                }
+
+                if (cell.getCellType() == CellType.FORMULA) {
+                    if (containsFormula(key) || isMarkedForUpdate(key)) {
+                        markFormulaSent(key);
+                        updatedCellData
+                                .add(manager.createCellDataForCell(cell));
+                    }
+                } else if (isMarkedForUpdate(key)) {
+                    markNormalSent(key);
+                    updatedCellData.add(manager.createCellDataForCell(cell));
+                }
+            }
+        }
+        if (!changedFormulaCells.isEmpty()) {
+            // A new set rather than a cleared one, so a listener can go
+            // through the cells while new changes are recorded.
+            Set<CellReference> changed = changedFormulaCells;
+            changedFormulaCells = new HashSet<CellReference>();
+            manager.fireFormulaValueChangeEvent(changed);
+        }
+        // empty cells have cell data with just col and row
+        updatedCellData.addAll(removedCells);
+        if (!updatedCellData.isEmpty()) {
+            spreadsheet.getRpcProxy().cellsUpdated(updatedCellData);
+            spreadsheet.getRpcProxy().refreshCellStyles();
+        }
+        markedCells.clear();
+        removedCells.clear();
+    }
+
+    /**
+     * Adds the cells whose text may run into a cell about to be sent.
+     * <p>
+     * Text too wide for its column runs on into the empty cells to its right
+     * and stops at the first one holding a value. A cell that gets or loses a
+     * value therefore changes how far the nearest cell to its left runs, and
+     * the client has that from when the cell was sent. Text that fits its
+     * column runs nowhere, so such a cell is not sent again; nor is one sent
+     * below anyway, being marked or a formula the client has.
+     */
+    private void addSpillSources(Sheet sheet, CellValueManager manager,
+            List<CellData> updatedCellData) {
+        Map<String, Cell> sources = new LinkedHashMap<>();
+        for (String key : markedCells) {
+            addSpillSource(sheet, SpreadsheetUtil.getColumnIndexFromKey(key),
+                    SpreadsheetUtil.getRowFromKey(key), sources);
+        }
+        for (CellData removed : removedCells) {
+            addSpillSource(sheet, removed.col, removed.row, sources);
+        }
+        for (Cell source : sources.values()) {
+            CellData cellData = manager.createCellDataForCell(source);
+            if (cellData.overflowWidth > 0) {
+                updatedCellData.add(cellData);
+            }
+        }
+    }
+
+    /** Column and row are 1-based. */
+    private void addSpillSource(Sheet sheet, int column, int row,
+            Map<String, Cell> sources) {
+        Cell source = CellDataBuilder.spillSourceOf(sheet.getRow(row - 1),
+                column - 1);
+        if (source != null) {
+            String key = SpreadsheetUtil.toKey(source);
+            if (containsNormal(key) && !isMarkedForUpdate(key)) {
+                sources.put(key, source);
             }
         }
     }
