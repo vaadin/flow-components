@@ -10,15 +10,27 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 /**
  * Columns given a width: the workbook holds the width the client is given, so
@@ -62,6 +74,54 @@ class SpreadsheetColumnWidthsTest {
                     SpreadsheetUtil.columnWidthUnits(sheet, pixels));
 
             assertEquals(pixels, (int) sheet.getColumnWidthInPixels(0));
+        }
+    }
+
+    @Test
+    void aColumnOfARangeGivenAWidth_leavesTheOthersOfTheRangeAsWide() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet();
+        // Columns B to E as one range, as Excel writes columns alike.
+        CTWorksheet worksheet = sheet.getCTWorksheet();
+        CTCols cols = worksheet.sizeOfColsArray() == 0 ? worksheet.addNewCols()
+                : worksheet.getColsArray(0);
+        CTCol range = cols.addNewCol();
+        range.setMin(2);
+        range.setMax(5);
+        range.setWidth(20);
+        range.setCustomWidth(true);
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        int wide = spreadsheet.getColW()[1];
+
+        spreadsheet.setColumnWidth(2, 100);
+
+        int[] expected = { wide, 100, wide, wide };
+        assertArrayEquals(expected,
+                Arrays.copyOfRange(spreadsheet.getColW(), 1, 5));
+        assertArrayEquals(expected,
+                Arrays.copyOfRange(new Spreadsheet(workbook).getColW(), 1, 5),
+                "shown again");
+        assertArrayEquals(expected,
+                Arrays.copyOfRange(
+                        new Spreadsheet(writtenAndRead(workbook)).getColW(), 1,
+                        5),
+                "written and read");
+        // Written as Excel reads columns: in order, and apart.
+        long last = 0;
+        for (CTCol col : worksheet.getColsArray(0).getColArray()) {
+            assertTrue(col.getMin() > last, "columns in order");
+            last = col.getMax();
+        }
+    }
+
+    private static Workbook writtenAndRead(Workbook workbook) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            return WorkbookFactory
+                    .create(new ByteArrayInputStream(out.toByteArray()));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

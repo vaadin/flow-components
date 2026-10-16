@@ -34,6 +34,18 @@ class SheetSizesTest {
     }
 
     @Test
+    void aMillionRowsOfOneHeight_goToTheClientInAFewBytes() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet().createRow(1_048_575);
+
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+
+        assertEquals(1_048_576, spreadsheet.getRowH().length);
+        String rowH = spreadsheet.getElement().getProperty("rowH");
+        assertTrue(rowH.length() < 100, rowH);
+    }
+
+    @Test
     void theOnlyRow_isShownAtItsOwnHeight() {
         XSSFWorkbook workbook = new XSSFWorkbook();
         workbook.createSheet().createRow(0).setHeightInPoints(20);

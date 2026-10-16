@@ -205,6 +205,14 @@ class FreshLoadConsistencyTest {
                                 "{\"rowIndexes\": [19], \"newHeights\": [0]}")),
                 op("a hidden row dragged open", event("rowsResized",
                         "{\"rowIndexes\": [18], \"newHeights\": [20]}")),
+                op("rows dragged, one to nothing", event("rowsResized",
+                        "{\"rowIndexes\": [11, 12], \"newHeights\": [0, 40]}")),
+                op("columns dragged, one to nothing", event("columnResized",
+                        "{\"colIndexes\": [6, 7], \"newWidths\": [0, 120]}")),
+                steps("a hidden column dragged open", api(
+                        spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                        event("columnResized",
+                                "{\"colIndexes\": [7], \"newWidths\": [120]}")),
                 op("a column autofitted",
                         event("onColumnAutofit", "{\"columnIndex\": 7}")),
                 op("a row autofitted",
@@ -270,6 +278,16 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setRowHeight(17, 20f)),
                 op("a column hidden",
                         spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                steps("a column hidden twice", api(
+                        spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                        api(spreadsheet -> spreadsheet.setColumnHidden(6,
+                                true))),
+                steps("a hidden column shown", api(
+                        spreadsheet -> spreadsheet.setColumnHidden(6, true)),
+                        api(spreadsheet -> spreadsheet.setColumnHidden(6,
+                                false))),
+                op("a column shown that was not hidden",
+                        spreadsheet -> spreadsheet.setColumnHidden(5, false)),
                 op("the default row height set",
                         spreadsheet -> spreadsheet.setDefaultRowHeight(20f)),
                 steps("a hidden column given a width", api(
