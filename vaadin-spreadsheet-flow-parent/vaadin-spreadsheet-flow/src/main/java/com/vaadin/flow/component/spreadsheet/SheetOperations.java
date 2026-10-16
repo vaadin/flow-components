@@ -149,7 +149,10 @@ final class SheetOperations implements Serializable {
         }
         Workbook workbook = spreadsheet.workbook;
         workbook.removeSheetAt(poiSheetIndex);
-        spreadsheet.forgetScrollPositionOfDeletedSheet(poiSheetIndex);
+        // What is kept of each sheet by its index moves with the sheets.
+        WorkbookScope scope = spreadsheet.workbookScope();
+        scope.scrollMemory.sheetDeleted(poiSheetIndex);
+        scope.invalidFormulas.sheetDeleted(poiSheetIndex);
         // POI keeps the sheet shown active, or in place of a deleted one
         // makes the next one active, or the one before when it was the last.
         // That one can be hidden. The sheet shown is loaded again either way,

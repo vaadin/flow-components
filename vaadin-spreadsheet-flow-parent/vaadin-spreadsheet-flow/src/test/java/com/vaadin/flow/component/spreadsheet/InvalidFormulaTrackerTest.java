@@ -30,7 +30,6 @@ import org.mockito.MockitoAnnotations;
  * <li>{@code mark} / {@code isMarked} / {@code removeMark} consult the
  * workbook's active sheet index on every call — a sheet switch hides marks made
  * under the previous sheet.</li>
- * <li>{@code clearAll} empties the per-sheet map across all sheets.</li>
  * <li>{@code shiftActiveSheetRows} re-keys marks on the active sheet after
  * {@code shiftRows(startRow, endRow, n)}: marks on the shifted rows move by
  * {@code n}, marks on the rows the shift overwrites are dropped, in both
@@ -169,29 +168,6 @@ class InvalidFormulaTrackerTest {
         // After the false read, a subsequent mark+check still works.
         tracker.mark(1, 1);
         assertTrue(tracker.isMarked(1, 1));
-    }
-
-    // ----- clearAll ---------------------------------------------------------
-
-    @Test
-    void clearAll_emptiesMarksAcrossAllSheets() {
-        when(workbook.getActiveSheetIndex()).thenReturn(0);
-        tracker.mark(1, 1);
-        when(workbook.getActiveSheetIndex()).thenReturn(1);
-        tracker.mark(2, 2);
-
-        tracker.clearAll();
-
-        when(workbook.getActiveSheetIndex()).thenReturn(0);
-        assertFalse(tracker.isMarked(1, 1));
-        when(workbook.getActiveSheetIndex()).thenReturn(1);
-        assertFalse(tracker.isMarked(2, 2));
-    }
-
-    @Test
-    void clearAll_onEmptyTracker_doesNotThrow() {
-        org.junit.jupiter.api.Assertions
-                .assertDoesNotThrow(() -> tracker.clearAll());
     }
 
     // ----- shiftActiveSheetRows: empty / no-op branches --------------------

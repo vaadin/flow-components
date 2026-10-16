@@ -3177,14 +3177,6 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Forgets where the sheet at the given POI index was scrolled to, as it has
-     * been deleted.
-     */
-    void forgetScrollPositionOfDeletedSheet(int poiSheetIndex) {
-        workbookScope.scrollMemory.sheetDeleted(poiSheetIndex);
-    }
-
-    /**
      * Returns POI model based index for the given Spreadsheet sheet index.
      *
      * @param visibleSheetIndex

@@ -29,8 +29,8 @@ import java.util.Map;
  * row-shift moves their row positions. Marks whose row is removed are dropped;
  * marks within the shifted range have their row index translated. Marks outside
  * the range stay as-is.</li>
- * <li>{@link #clearAll} — flush every sheet's marks. Called from the full-sheet
- * reload path.</li>
+ * <li>{@link #sheetDeleted} — drops the marks of a sheet deleted, and moves
+ * those of the sheets after it to their new indexes.</li>
  * </ul>
  *
  * <p>
@@ -98,8 +98,21 @@ final class InvalidFormulaTracker implements Serializable {
         invalidFormulas.put(activeSheetIndex, updated);
     }
 
-    void clearAll() {
+    /**
+     * The sheet at the POI index was deleted: its marks go, and those of the
+     * sheets after it move with them to the index before.
+     */
+    void sheetDeleted(int poiIndex) {
+        Map<Integer, HashSet<String>> moved = new HashMap<>();
+        invalidFormulas.forEach((index, marks) -> {
+            if (index < poiIndex) {
+                moved.put(index, marks);
+            } else if (index > poiIndex) {
+                moved.put(index - 1, marks);
+            }
+        });
         invalidFormulas.clear();
+        invalidFormulas.putAll(moved);
     }
 
     private int activeSheetIndex() {
