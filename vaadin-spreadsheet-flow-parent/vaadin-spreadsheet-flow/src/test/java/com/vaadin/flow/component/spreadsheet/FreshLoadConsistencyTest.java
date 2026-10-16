@@ -173,8 +173,8 @@ class FreshLoadConsistencyTest {
                     c -> c.waste(POPUPS, 2, AGAIN, 3)),
             Map.entry("cells pasted", c -> c.waste(POPUPS, 2, AGAIN, 3)),
             Map.entry("cells cut",
-                    c -> c.waste(POPUPS, 8, AGAIN, 17, TWICE, 14, NOT_THERE,
-                            25)),
+                    c -> c.waste(POPUPS, 8, AGAIN, 18, TWICE, 14, NOT_THERE,
+                            24)),
             Map.entry("an edit undone", c -> c.waste(POPUPS, 4, AGAIN, 4)),
             Map.entry("an edit undone and redone",
                     c -> c.waste(POPUPS, 6, AGAIN, 6)),
@@ -182,7 +182,7 @@ class FreshLoadConsistencyTest {
                     c -> c.waste(POPUPS, 2, AGAIN, 6, NOT_THERE, 6)),
             Map.entry("a row resized", c -> c.waste(POPUPS, 2)),
             Map.entry("a column autofitted",
-                    c -> c.waste(AGAIN, 3, NOT_THERE, 8)),
+                    c -> c.waste(AGAIN, 4, NOT_THERE, 7)),
             Map.entry("a sheet not shown renamed",
                     c -> c.known("cell H10: .formulaValue")),
             Map.entry("a cell created", c -> c.waste(POPUPS, 2, AGAIN, 3)),
@@ -212,9 +212,14 @@ class FreshLoadConsistencyTest {
             Map.entry("a protected sheet shown again, then left",
                     c -> c.waste(POPUPS, 4)),
             Map.entry("panes frozen elsewhere",
-                    c -> c.waste(POPUPS, 2, NOT_THERE, 25)),
+                    c -> c.waste(POPUPS, 2, NOT_THERE, 24)),
             Map.entry("another workbook shown",
-                    c -> c.waste(POPUPS, 2, NOT_THERE, 25)));
+                    c -> c.waste(POPUPS, 2, NOT_THERE, 24)),
+            Map.entry("a hidden row shown",
+                    c -> c.known("property cellComment")),
+            Map.entry("a hidden row given a height",
+                    c -> c.known("property cellComment")),
+            Map.entry("a column hidden", c -> c.known("property cellComment")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -304,6 +309,8 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setRowHidden(11, true)),
                 op("a hidden row shown",
                         spreadsheet -> spreadsheet.setRowHidden(17, false)),
+                op("a hidden row given a height",
+                        spreadsheet -> spreadsheet.setRowHeight(17, 20f)),
                 op("a column hidden",
                         spreadsheet -> spreadsheet.setColumnHidden(6, true)),
                 op("a column's width set",

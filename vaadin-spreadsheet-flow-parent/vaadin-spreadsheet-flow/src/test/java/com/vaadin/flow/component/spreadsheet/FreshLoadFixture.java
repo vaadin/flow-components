@@ -45,8 +45,9 @@ import com.vaadin.flow.component.html.Span;
 /**
  * A workbook with something of every kind in every pane, for
  * {@link FreshLoadHarness}: values, formulas, styles, a comment, links, a
- * merge, a hidden row, a filter with its pop-up buttons, conditional
- * formatting, a named range, a picture, and cells with components and editors.
+ * merge, a hidden row with a comment, a filter with its pop-up buttons,
+ * conditional formatting, a named range, a picture, and cells with components
+ * and editors.
  * <p>
  * Sheet "First" is frozen at two rows and two columns, and the client shows
  * rows 10-20 of columns E-H. Sheet "Second" holds what a formula on "First"
@@ -126,6 +127,9 @@ final class FreshLoadFixture {
 
         set(first, "E18", "hidden row");
         first.getRow(17).setZeroHeight(true);
+        comment(first, drawing, "E18", "on a hidden row");
+        set(first, "G19", "noted");
+        comment(first, drawing, "G19", "in column G");
 
         set(first, "E19", "Name");
         set(first, "F19", "Value");
@@ -158,6 +162,21 @@ final class FreshLoadFixture {
         set(second, "A1", 21);
         set(second, "B2", "second");
         return workbook;
+    }
+
+    private static void comment(Sheet sheet, Drawing<?> drawing, String name,
+            String text) {
+        CreationHelper helper = sheet.getWorkbook().getCreationHelper();
+        CellReference reference = new CellReference(name);
+        ClientAnchor anchor = helper.createClientAnchor();
+        anchor.setRow1(reference.getRow());
+        anchor.setCol1(reference.getCol());
+        anchor.setRow2(reference.getRow() + 2);
+        anchor.setCol2(reference.getCol() + 2);
+        Comment comment = drawing.createCellComment(anchor);
+        comment.setString(helper.createRichTextString(text));
+        comment.setAuthor("author");
+        cell(sheet, name).setCellComment(comment);
     }
 
     static Cell cell(Sheet sheet, String name) {
