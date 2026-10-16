@@ -2752,6 +2752,9 @@ public class Spreadsheet extends Component
             // arrays, it may have been created recently. This avoids
             // ArrayIndexOutOfBoundsException
             SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
+            // The heights read from the sheet leave out the room the rows
+            // with components were given.
+            customComponentLoader.regrowRows();
         }
         if (updateOverlays && sheetOverlayManager.hasOverlays()) {
             sheetOverlayManager.markReloadFromPoi();

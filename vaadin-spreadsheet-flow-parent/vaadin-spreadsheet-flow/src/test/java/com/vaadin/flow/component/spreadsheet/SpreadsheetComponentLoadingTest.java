@@ -305,4 +305,40 @@ class SpreadsheetComponentLoadingTest {
         assertEquals(spreadsheet.getMinimumRowHeightForComponents(),
                 heightOfRow(12));
     }
+
+    @Test
+    void aRowWithAComponent_keepsItsRoom_whenAnotherRowIsHidden() {
+        components.add("First!F12");
+        show();
+
+        spreadsheet.setRowHidden(10, true);
+
+        assertEquals(spreadsheet.getMinimumRowHeightForComponents(),
+                heightOfRow(12));
+    }
+
+    @Test
+    void aRowWithAComponent_keepsItsRoom_whenAnotherRowGetsAHeight() {
+        components.add("First!F12");
+        show();
+
+        spreadsheet.setRowHeight(14, 30f);
+
+        assertEquals(spreadsheet.getMinimumRowHeightForComponents(),
+                heightOfRow(12));
+        assertEquals(30f, heightOfRow(15));
+    }
+
+    @Test
+    void theRowsGrownOnASheet_areNotGrownOnTheNext() {
+        workbook.createSheet("Second");
+        components.add("First!F12");
+        show();
+        spreadsheet.setActiveSheetIndex(1);
+
+        spreadsheet.setRowHidden(10, true);
+
+        assertEquals(workbook.getSheet("Second").getDefaultRowHeightInPoints(),
+                heightOfRow(12));
+    }
 }

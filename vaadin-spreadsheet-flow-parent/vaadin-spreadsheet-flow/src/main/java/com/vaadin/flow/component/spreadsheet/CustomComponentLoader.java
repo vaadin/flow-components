@@ -289,6 +289,16 @@ final class CustomComponentLoader implements Serializable {
         grownRows = rowsWithComponents;
     }
 
+    /**
+     * Makes the rows with components tall enough for them again, after their
+     * heights were read anew from the sheet.
+     */
+    void regrowRows() {
+        if (grownRows != null) {
+            applyHeightsFor(grownRows);
+        }
+    }
+
     private static int lastOf(Set<Integer> rows) {
         return rows == null || rows.isEmpty() ? -1 : Collections.max(rows);
     }
@@ -306,5 +316,8 @@ final class CustomComponentLoader implements Serializable {
             }
             customComponents.clear();
         }
+        // The rows are another sheet's, or not loaded yet: their heights are
+        // read from the sheet, with no room for components in them.
+        grownRows = null;
     }
 }
