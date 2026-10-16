@@ -629,7 +629,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     private void checkTypingIndicatorFeatureFlag(UI ui) {
         var featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
+                .get(ui.getSessionOrThrow().getService().getContext());
         if (!featureFlags.isEnabled(
                 MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID)
                 && !featureFlags.isEnabled(AI_COMPONENTS_FEATURE_FLAG_ID)) {

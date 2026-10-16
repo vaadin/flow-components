@@ -815,7 +815,8 @@ public class Button extends Component
             return false;
         }
 
-        return FeatureFlags.get(ui.getSession().getService().getContext())
+        return FeatureFlags
+                .get(ui.getSessionOrThrow().getService().getContext())
                 .isEnabled(feature);
     }
 

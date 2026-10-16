@@ -145,7 +145,7 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
         if (newMode == Mode.ROUTER) {
             // MANUAL -> ROUTER: start listening for navigation.
             if (isAttached()) {
-                registerNavigationListener(getUI().orElseThrow());
+                registerNavigationListener(getUIOrThrow());
             }
         } else {
             // ROUTER -> MANUAL: stop listening for navigation.
