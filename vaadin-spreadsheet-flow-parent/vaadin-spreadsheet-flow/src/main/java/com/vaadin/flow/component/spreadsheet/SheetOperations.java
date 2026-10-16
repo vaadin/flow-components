@@ -227,10 +227,15 @@ final class SheetOperations implements Serializable {
         workbook.getSheetAt(sheetPOIIndex).protectSheet(password);
         spreadsheet
                 .setSheetProtected(spreadsheet.getActiveSheet().getProtect());
-        // If the currently active sheet was protected, the protection for
-        // the currently selected cell might have changed.
+        // What the protection of the sheet shown locks reaches the client
+        // with the sheet: resizing, the rows and columns styled as locked,
+        // and every cell, the one selected among them.
         if (sheetPOIIndex == workbook.getActiveSheetIndex()) {
-            spreadsheet.loadCustomComponents();
+            SpreadsheetFactory.loadSheetProtection(spreadsheet);
+            spreadsheet.getSpreadsheetStyleFactory()
+                    .reloadActiveSheetColumnRowStyles();
+            spreadsheet.getCellValueManager().clearCachedContent();
+            spreadsheet.reloadVisibleCellContents(false);
             spreadsheet.getCellSelectionManager().reSelectSelectedCell();
         }
     }

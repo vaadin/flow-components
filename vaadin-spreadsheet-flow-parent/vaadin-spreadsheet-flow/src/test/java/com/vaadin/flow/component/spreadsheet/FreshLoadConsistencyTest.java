@@ -210,19 +210,10 @@ class FreshLoadConsistencyTest {
             Map.entry("a row's height set", c -> c.known("property rowH")),
             Map.entry("a column autofitted by the application",
                     c -> c.waste(AGAIN, 8, NOT_THERE, 3)),
-            Map.entry("the sheet protected",
-                    c -> c.known("property lockFormatColumns",
-                            "property lockFormatRows",
-                            "property lockedRowIndexes", "locked")),
-            Map.entry("the sheet protected, then not",
-                    c -> c.known("property lockFormatColumns",
-                            "property lockFormatRows",
-                            "property lockedRowIndexes", "locked")),
+            Map.entry("the sheet protected", c -> c.waste(POPUPS, 2)),
+            Map.entry("the sheet protected, then not", c -> c.waste(POPUPS, 4)),
             Map.entry("a protected sheet shown again, then left",
-                    c -> c.known("property lockFormatColumns",
-                            "property lockFormatRows",
-                            "property lockedRowIndexes", "locked")
-                            .waste(POPUPS, 2)),
+                    c -> c.waste(POPUPS, 4)),
             Map.entry("panes frozen elsewhere",
                     c -> c.waste(POPUPS, 2, NOT_THERE, 25)),
             Map.entry("another workbook shown",
@@ -432,15 +423,7 @@ class FreshLoadConsistencyTest {
      * the client has not seen the spreadsheet yet, by case name and when.
      */
     private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
-            .ofEntries(
-                    Map.entry("the sheet protected, before ATTACHED",
-                            List.of("property lockFormatColumns",
-                                    "property lockFormatRows",
-                                    "property lockedRowIndexes")),
-                    Map.entry("the sheet protected, before FIRST_RESPONSE",
-                            List.of("property lockFormatColumns",
-                                    "property lockFormatRows",
-                                    "property lockedRowIndexes")));
+            .of();
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")

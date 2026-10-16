@@ -387,6 +387,7 @@ public class SpreadsheetFactory implements Serializable {
             loadSheetTables(spreadsheet);
             spreadsheet.mergedRegionOperations.load();
             loadFreezePane(spreadsheet);
+            loadSheetProtection(spreadsheet);
             loadGrouping(spreadsheet);
             loadNamedRanges(spreadsheet);
         } catch (NullPointerException npe) {
@@ -599,14 +600,31 @@ public class SpreadsheetFactory implements Serializable {
     }
 
     /**
+     * Gives the client what the protection of the sheet shown locks: resizing
+     * its columns and its rows. Nothing is locked on a sheet not protected, nor
+     * on an HSSF one, whose protection POI does not read that far.
+     */
+    static void loadSheetProtection(Spreadsheet spreadsheet) {
+        CTSheetProtection protection = spreadsheet
+                .getActiveSheet() instanceof XSSFSheet xssfSheet
+                        ? xssfSheet.getCTWorksheet().getSheetProtection()
+                        : null;
+        boolean isProtected = protection != null && protection.getSheet();
+        spreadsheet.setLockFormatColumns(
+                isProtected && protection.getFormatColumns());
+        spreadsheet
+                .setLockFormatRows(isProtected && protection.getFormatRows());
+    }
+
+    /**
      * Loads all data relating to grouping if the current sheet is a
      * {@link XSSFSheet}.
      *
      * <p>
-     * Top-level orchestrator: bail out for HSSF, capture sheet-protection /
-     * outline-pr settings, then process the column and row outlines separately.
-     * The two outline-processing branches are independent (they touch different
-     * POI types and different Spreadsheet setters), so they live in dedicated
+     * Top-level orchestrator: bail out for HSSF, capture outline-pr settings,
+     * then process the column and row outlines separately. The two
+     * outline-processing branches are independent (they touch different POI
+     * types and different Spreadsheet setters), so they live in dedicated
      * helpers below.
      */
     static void loadGrouping(Spreadsheet spreadsheet) {
@@ -617,13 +635,6 @@ public class SpreadsheetFactory implements Serializable {
         }
 
         CTWorksheet ctWorksheet = xssfSheet.getCTWorksheet();
-        CTSheetProtection sheetProtection = ctWorksheet.getSheetProtection();
-        if (sheetProtection != null) {
-            spreadsheet
-                    .setLockFormatColumns(sheetProtection.getFormatColumns());
-            spreadsheet.setLockFormatRows(sheetProtection.getFormatRows());
-        }
-
         spreadsheet.setColGroupingMax(0);
         spreadsheet.setRowGroupingMax(0);
 
