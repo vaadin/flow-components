@@ -109,6 +109,12 @@ const FRAMES_TIMED = 3;
  * all loaded. The server uses the
  * range it was last given for more than cells: it closes the popup of a
  * button scrolled out of it, and lets go of pictures and components.
+ * <li>Cells drawn anew without a scroll - rows changing height, the sheet
+ * resized - are asked for only when some of them are not loaded. The server
+ * makes rows of components taller as it loads them, and lets them shrink as
+ * it lets go of them: told of each change, it let go of the rows that had
+ * grown out of the range, and loaded them again, round trip after round
+ * trip.
  * <li>One request of its own at a time. While the server answers, the sheet
  * may move on, and only the latest position is asked for: positions passed
  * while waiting are never loaded.
@@ -144,6 +150,8 @@ export class ViewportLoader {
   private reportedDrawn: LoadRange | null = null;
   /** Whether the last request was for the drawn cells alone, and their margin is still to be asked for. */
   private marginToFollow = false;
+  /** Whether the sheet has scrolled since the server was last told where it is. */
+  private unreportedScroll = false;
   private inFlightSince: number | null = null;
   /** Whether the request in flight was seen to keep the server busy, so its round trip means something. */
   private sawBusy = false;
@@ -178,6 +186,7 @@ export class ViewportLoader {
       }
     }
     this.samples.push({ t: now, top, left });
+    this.unreportedScroll = true;
     while (this.samples.length > 2 && now - this.samples[0].t > SPEED_WINDOW_MS) {
       this.samples.shift();
     }
@@ -206,6 +215,10 @@ export class ViewportLoader {
     }
     const loaded = this.isLoaded(drawn);
     if (loaded && sameRange(drawn, this.reportedDrawn)) {
+      // However the sheet got here, the server knows where it is.
+      this.unreportedScroll = false;
+    }
+    if (loaded && !this.unreportedScroll) {
       if (this.marginToFollow) {
         if (this.inFlightSince === null && !this.moving()) {
           // The drawn cells are in: now their margin.
@@ -240,6 +253,7 @@ export class ViewportLoader {
     this.loaded = range;
     this.reportedDrawn = drawn;
     this.marginToFollow = false;
+    this.unreportedScroll = false;
     this.inFlightSince = this.clock.now();
     this.host.load(range);
     // Flow sends the request as the event is dispatched, or as soon as the

@@ -199,6 +199,46 @@ describe('ViewportLoader', () => {
     ]);
   });
 
+  it('tells the server nothing of cells drawn anew without a scroll, all of them loaded', () => {
+    // Rows of components grow as the server loads their components, and
+    // fewer of them are drawn: told of it, the server let go of the rows no
+    // longer drawn, they shrank, and were loaded again, round trip after
+    // round trip.
+    const t = setUp();
+    t.open();
+
+    t.show({ r1: 1, c1: 1, r2: 25, c2: 10 });
+    t.loader.check();
+    t.time.advance(400);
+
+    expect(t.loads).to.be.empty;
+  });
+
+  it('tells the server nothing of cells drawn anew right after it was told where the sheet stopped', () => {
+    const t = setUp();
+    t.open();
+    t.loader.scrolled(400, 0);
+    t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
+    t.loader.check();
+    t.time.advance(120);
+    expect(t.loads, 'told where it stopped').to.have.length(1);
+
+    t.show({ r1: 21, c1: 1, r2: 45, c2: 10 });
+    t.loader.check();
+
+    expect(t.loads).to.have.length(1);
+  });
+
+  it('still asks for the margin of the first screen, drawn anew before it went', () => {
+    const t = setUp();
+    t.loader.check();
+
+    t.show({ r1: 1, c1: 1, r2: 25, c2: 10 });
+    t.time.advance(30);
+
+    expect(t.loads[1]).to.eql({ r1: 1, c1: 1, r2: 63, c2: 10 });
+  });
+
   it('waits for the drawn cells to be in before asking for their margin', () => {
     const t = setUp();
     t.serverAnswersAfterEachLoad();

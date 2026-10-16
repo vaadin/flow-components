@@ -385,6 +385,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private horizontalScrollPositions: NumberList = [];
   /** The offsets the next render scrolls to, for a sheet shown again. */
   private pendingSheetScroll: { top: number; left: number } | null = null;
+  /**
+   * The first scrolling row with its top on screen when the server changed
+   * the row heights, and how far below the top of the screen that top was:
+   * the next render puts it back there. See {@link setRowH}.
+   */
+  private rowAnchor: { row: number; below: number } | null = null;
+  /** Where {@link keepRowAnchored} scrolled to, until its scroll event comes. */
+  private anchoredScrollTop: number | null = null;
   /** The sheet the last batch showed, by name, which is unique in a workbook. */
   private shownSheetName: string | null = null;
 
@@ -2159,7 +2167,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@link ViewportLoader}.
    */
   private readonly handleScroll = (): void => {
-    this.viewportLoader.scrolled(this.scrollContainer.scrollTop, this.scrollContainer.scrollLeft);
+    const anchored = this.anchoredScrollTop;
+    this.anchoredScrollTop = null;
+    // The sheet keeping a row in place is not the user scrolling.
+    if (this.scrollContainer.scrollTop !== anchored) {
+      // The user has moved on: no row to keep where it was.
+      this.rowAnchor = null;
+      this.viewportLoader.scrolled(this.scrollContainer.scrollTop, this.scrollContainer.scrollLeft);
+    }
     this.recomputeViewport();
     // An open popup moves along with its cell.
     this.popup.reposition();
@@ -2381,6 +2396,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // cut the offsets short.
       const { top, left } = this.pendingSheetScroll;
       this.pendingSheetScroll = null;
+      // The rows are another sheet's: there is no row to keep in place.
+      this.rowAnchor = null;
       this.applyRenderState({
         scrollLeft: 0,
         scrollTop: 0,
@@ -2390,6 +2407,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.scrollContainer.scrollTop = top;
       this.scrollContainer.scrollLeft = left;
     }
+    this.keepRowAnchored();
     this.applyRenderState({
       scrollLeft: this.scrollContainer.scrollLeft,
       scrollTop: this.scrollContainer.scrollTop,
@@ -3619,8 +3637,52 @@ export class Spreadsheet implements SpreadsheetClientApi {
   setDefColW(widthInPixels: number): void {
     this.defColWidth = widthInPixels;
   }
+  /**
+   * Row heights from the server. Rows above the screen grow and shrink as
+   * their components are loaded and let go of; the first row with its top
+   * on screen stays where it is, and so does what is on screen. Moved, the
+   * rows on screen were others than those loaded, and loading those moved
+   * them on again: 8 requests after one jump, to GWT's 3.
+   */
   setRowH(rowHeightsInPoints: Json<number[] | Float32Array | SizeRuns>): void {
+    this.rowAnchor ??= this.firstRowWithTopOnScreen();
     this.rowHeights = coerceSizes(rowHeightsInPoints);
+  }
+
+  /** The first scrolling row whose top is on screen, and how far below the top of the screen. */
+  private firstRowWithTopOnScreen(): { row: number; below: number } {
+    const top = this.scrollContainer.scrollTop;
+    const rows = this.sheetSizes().rows;
+    const origin = this.verticalSplitPosition + 1;
+    const row = rows.reach(origin, top);
+    return { row, below: rows.start(row) - rows.start(origin) - top };
+  }
+
+  /**
+   * Puts the row {@link setRowH} keeps back where it was on screen, now that
+   * the rows above it have their new heights.
+   */
+  private keepRowAnchored(): void {
+    const anchor = this.rowAnchor;
+    if (anchor === null) {
+      return;
+    }
+    this.rowAnchor = null;
+    const rows = this.sheetSizes().rows;
+    const top = rows.start(anchor.row) - rows.start(this.verticalSplitPosition + 1) - anchor.below;
+    if (top === this.scrollContainer.scrollTop) {
+      return;
+    }
+    // Sized for the new heights first: against the old ones the browser
+    // would cut the offset short.
+    this.applyRenderState({
+      scrollLeft: this.scrollContainer.scrollLeft,
+      scrollTop: this.scrollContainer.scrollTop,
+      viewportWidth: this.scrollContainer.clientWidth,
+      viewportHeight: this.scrollContainer.clientHeight
+    });
+    this.scrollContainer.scrollTop = top;
+    this.anchoredScrollTop = this.scrollContainer.scrollTop;
   }
   setColW(colWidthsInPixels: Json<number[] | Int32Array | SizeRuns>): void {
     this.colWidths = coerceSizes(colWidthsInPixels);
@@ -3828,6 +3890,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // is never mentioned again and the old value would show through.
       this.cellDataByKey.clear();
       this.viewportAnnounced = false;
+      // Its row heights are those of whatever it shows now.
+      this.rowAnchor = null;
       // Its selected cell too, until it says which one it has now.
       this.serverSelectedCell = null;
       // What it was asked to load is gone too: load again, even the same
