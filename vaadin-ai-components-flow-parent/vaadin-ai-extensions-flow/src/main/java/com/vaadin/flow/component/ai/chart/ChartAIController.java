@@ -9,8 +9,12 @@
 package com.vaadin.flow.component.ai.chart;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -220,11 +224,12 @@ public class ChartAIController implements AIController {
                 // rejected within the turn. A DatabaseProvider that
                 // throws ToolException gets its message relayed to the
                 // LLM so it can fix the query; any other exception is
-                // replaced with a generic error. Results are discarded
+                // replaced with a generic error. Results are only checked
                 // here; they will be re-executed at render time in
                 // ChartRenderer.
-                for (String q : queries) {
-                    databaseProvider.executeQuery(q);
+                for (var i = 0; i < queries.size(); i++) {
+                    checkHierarchy(i + 1,
+                            databaseProvider.executeQuery(queries.get(i)));
                 }
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingQueries(queries);
@@ -236,6 +241,63 @@ public class ChartAIController implements AIController {
             }
         }));
         return tools;
+    }
+
+    /**
+     * Rejects a query result whose {@code _parent} column cannot link any row
+     * to another, which leaves a hierarchy such as an organization chart
+     * without a single connection while the turn reports success. A row links
+     * to the row whose {@code _id} its {@code _parent} holds, so a
+     * {@code _parent} needs an {@code _id} column, and at least one of its
+     * values has to match an {@code _id}.
+     *
+     * @param queryNumber
+     *            the position of the query in the tool call, from 1
+     * @param rows
+     *            the rows the query returned
+     */
+    private static void checkHierarchy(int queryNumber,
+            List<Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            return;
+        }
+        String idColumn = null;
+        String parentColumn = null;
+        for (var column : rows.getFirst().keySet()) {
+            var name = column.toLowerCase(Locale.ENGLISH);
+            if (name.equals(ColumnNames.ID)) {
+                idColumn = column;
+            } else if (name.equals(ColumnNames.PARENT)) {
+                parentColumn = column;
+            }
+        }
+        if (parentColumn == null) {
+            return;
+        }
+        var fix = " Set " + ColumnNames.PARENT + " to the " + ColumnNames.ID
+                + " of the parent row, or NULL for a root.";
+        if (idColumn == null) {
+            throw new ToolException("Query " + queryNumber + " has a "
+                    + ColumnNames.PARENT + " column but no " + ColumnNames.ID
+                    + " column, so no row can be linked to a parent. Give "
+                    + "every row an " + ColumnNames.ID + "." + fix);
+        }
+        var ids = new LinkedHashSet<String>();
+        var parents = new ArrayList<String>();
+        for (var row : rows) {
+            Optional.ofNullable(row.get(idColumn)).map(String::valueOf)
+                    .ifPresent(ids::add);
+            Optional.ofNullable(row.get(parentColumn)).map(String::valueOf)
+                    .ifPresent(parents::add);
+        }
+        if (!parents.isEmpty() && parents.stream().noneMatch(ids::contains)) {
+            throw new ToolException("Query " + queryNumber + ": no "
+                    + ColumnNames.PARENT + " value matches an " + ColumnNames.ID
+                    + " of the rows (" + ColumnNames.PARENT + " '"
+                    + parents.getFirst() + "', " + ColumnNames.ID + " '"
+                    + ids.stream().findFirst().orElse("NULL")
+                    + "'), so no row is linked to a parent." + fix);
+        }
     }
 
     private LLMProvider.ToolSpec createInstructionsTool() {
