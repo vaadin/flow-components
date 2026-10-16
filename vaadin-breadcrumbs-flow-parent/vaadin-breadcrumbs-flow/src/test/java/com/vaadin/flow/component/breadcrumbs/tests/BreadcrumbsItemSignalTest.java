@@ -15,28 +15,25 @@
  */
 package com.vaadin.flow.component.breadcrumbs.tests;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
 class BreadcrumbsItemSignalTest extends AbstractSignalsTest {
 
-    @Test
-    void bindText_updatesTextReactively() {
-        var signal = new ValueSignal<>("foo");
-        var item = new BreadcrumbsItem("init");
-        item.bindText(signal);
-        ui.add(item);
-
-        Assertions.assertEquals("foo", item.getText());
-
-        signal.set("bar");
-        Assertions.assertEquals("bar", item.getText());
+    @TestFactory
+    Stream<DynamicTest> bindText() {
+        return generateBindingTests(() -> new BreadcrumbsItem("init"),
+                BreadcrumbsItem::bindText, BreadcrumbsItem::getText,
+                BreadcrumbsItem::setText, "foo", "bar");
     }
 
     @Test
@@ -51,15 +48,5 @@ class BreadcrumbsItemSignalTest extends AbstractSignalsTest {
         signal.set("bar");
         Assertions.assertEquals("bar", item.getText());
         Assertions.assertEquals(prefix, item.getPrefixComponent());
-    }
-
-    @Test
-    void bindText_setTextThrows() {
-        var signal = new ValueSignal<>("foo");
-        var item = new BreadcrumbsItem("init");
-        item.bindText(signal);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> item.setText("bar"));
     }
 }

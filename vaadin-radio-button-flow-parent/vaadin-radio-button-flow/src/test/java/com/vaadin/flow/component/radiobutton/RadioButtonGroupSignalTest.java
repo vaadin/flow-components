@@ -16,12 +16,14 @@
 package com.vaadin.flow.component.radiobutton;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
@@ -30,43 +32,11 @@ class RadioButtonGroupSignalTest extends AbstractSignalsTest {
     private final ValueSignal<Boolean> readonlySignal = new ValueSignal<>(
             false);
 
-    @Test
-    void bindReadOnly_elementAttached_updatesWithSignal() {
-        UI.getCurrent().add(group);
-        group.bindReadOnly(readonlySignal);
-
-        Assertions.assertFalse(group.isReadOnly());
-
-        readonlySignal.set(true);
-        Assertions.assertTrue(group.isReadOnly());
-    }
-
-    @Test
-    void bindReadOnly_elementNotAttached_initialValueApplied() {
-        readonlySignal.set(true);
-        group.bindReadOnly(readonlySignal);
-
-        // Initial value is applied immediately (effect runs on creation)
-        Assertions.assertTrue(group.isReadOnly());
-
-        UI.getCurrent().add(group);
-        Assertions.assertTrue(group.isReadOnly());
-    }
-
-    @Test
-    void setReadOnly_whileBound_throwsException() {
-        UI.getCurrent().add(group);
-        group.bindReadOnly(readonlySignal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> group.setReadOnly(true));
-    }
-
-    @Test
-    void bindReadOnly_whileBound_throwsException() {
-        UI.getCurrent().add(group);
-        group.bindReadOnly(readonlySignal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> group.bindReadOnly(new ValueSignal<>(true)));
+    @TestFactory
+    Stream<DynamicTest> bindReadOnly() {
+        return generateBindingTests(RadioButtonGroup<String>::new,
+                RadioButtonGroup::bindReadOnly, RadioButtonGroup::isReadOnly,
+                RadioButtonGroup::setReadOnly, true, false);
     }
 
     @Test

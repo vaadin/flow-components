@@ -25,7 +25,9 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -44,7 +46,7 @@ public class ItemClickListenerIT extends AbstractComponentIT {
     @Test
     public void doubleClickGoesWithSingleClicks() throws InterruptedException {
         GridTRElement firstRow = grid.getRow(0);
-        firstRow.doubleClick();
+        grid.getCell(0, 0).doubleClick();
 
         Assert.assertEquals("foofoo", getClickMessage());
 
@@ -122,6 +124,54 @@ public class ItemClickListenerIT extends AbstractComponentIT {
         Assert.assertEquals("", getClickMessage());
     }
 
+    @Test
+    public void doubleClickHeaderCell_noEventsFired() {
+        grid.getHeaderCell(0).doubleClick();
+        Assert.assertEquals("", getClickMessage());
+        Assert.assertEquals("", getDoubleClickMessage());
+    }
+
+    @Test
+    public void clickPreventedElementInCell_noItemClickEventFired() {
+        getCell("Action").$("span").first().click();
+        Assert.assertEquals("", getClickMessage());
+    }
+
+    @Test
+    public void clickIconInButtonInCell_noItemClickEventFired() {
+        getCell("Button").$("vaadin-icon").first().click();
+        Assert.assertEquals("", getClickMessage());
+    }
+
+    @Test
+    public void selectItemInSelectOverlay_noItemClickEventFired() {
+        SelectElement select = getCell("Select").$(SelectElement.class).first();
+        // Open with a click: selectByText opens the overlay programmatically,
+        // which activates the row, see
+        // https://github.com/vaadin/web-components/issues/13113
+        select.click();
+        select.getItems().stream()
+                .filter(item -> item.getText().equals("Second")).findFirst()
+                .orElseThrow().click();
+        Assert.assertEquals("Second", select.getSelectedText());
+        Assert.assertEquals("", getClickMessage());
+    }
+
+    @Test
+    public void clickCellOutsideViewport_itemClickEventFired() {
+        $("button").id("resize-grid").click();
+        getCell("Upper").click();
+        Assert.assertEquals("foo", getClickMessage());
+        Assert.assertEquals("Upper", getColumnClickMessage());
+    }
+
+    @Test
+    public void doubleClickCellOutsideViewport_itemDoubleClickEventFired() {
+        $("button").id("resize-grid").click();
+        getCell("Upper").doubleClick();
+        Assert.assertEquals("Upper", getColumnDoubleClickMessage());
+    }
+
     // Regression test for this issue:
     // https://github.com/vaadin/flow-components/issues/2247
     @Test
@@ -151,6 +201,10 @@ public class ItemClickListenerIT extends AbstractComponentIT {
 
         TestBenchElement span = $("span").id("item-click-event-log");
         Assert.assertEquals("", span.getText());
+    }
+
+    private GridTHTDElement getCell(String header) {
+        return grid.getRow(0).getCell(grid.getColumn(header));
     }
 
     private String getColumnDoubleClickMessage() {

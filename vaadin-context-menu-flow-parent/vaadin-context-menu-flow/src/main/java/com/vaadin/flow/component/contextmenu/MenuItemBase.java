@@ -189,8 +189,8 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         // A menu that stays open after a click (keepOpen) does not re-render
         // its items, so the connector toggles the checkmark attribute directly.
         executeJsWhenAttached(
-                "window.Vaadin.Flow.contextMenuConnector.setChecked($0, $1)",
-                getElement(), checked);
+                "window.Vaadin.Flow.contextMenuConnector.setChecked(this, $0)",
+                checked);
     }
 
     /**
@@ -277,14 +277,14 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         return disableOnClickController.isDisableOnClick();
     }
 
+    boolean isDisabledByClick() {
+        return disableOnClickController.isDisabledByClick();
+    }
+
     @Override
     public void setEnabled(boolean enabled) {
         HasComponents.super.setEnabled(enabled);
         disableOnClickController.onSetEnabled();
-    }
-
-    DisableOnClickController<MenuItemBase<C, I, S>> getDisableOnClickController() {
-        return disableOnClickController;
     }
 
     /**

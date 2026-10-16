@@ -17,11 +17,9 @@ package com.vaadin.flow.component.contextmenu;
 
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.download.Download;
-import com.vaadin.flow.component.shared.internal.DownloadUtil;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Item component used inside {@link ContextMenu} and {@link SubMenu}. This
@@ -38,7 +36,6 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
 
     private final SerializableRunnable contentReset;
     private DownloadHandler downloadHandler;
-    private Registration downloadRegistration;
 
     public MenuItem(ContextMenu contextMenu,
             SerializableRunnable contentReset) {
@@ -49,6 +46,30 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
     @Override
     protected SubMenu createSubMenu() {
         return new SubMenu(this, contentReset);
+    }
+
+    /**
+     * Sets the menu item explicitly disabled or enabled. When disabled, menu
+     * items are rendered as "dimmed".
+     * <p>
+     * By default, disabled items are not focusable and don't react to hover. As
+     * a result, they are hidden from assistive technologies, and it's not
+     * possible to show a tooltip to explain why they are disabled. This can be
+     * addressed by enabling the feature flag
+     * {@code accessibleDisabledMenuItems}, which makes disabled items focusable
+     * and hoverable, while still preventing them from being activated. To
+     * enable this feature flag, add the following line to
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledMenuItems = true
+     * </pre>
+     * 
+     * @since 25.2
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
     }
 
     /**
@@ -79,22 +100,30 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * whenComplete}, to react on the server when the transfer has finished or
      * failed.
      * <p>
-     * The file is only served while the item is attached, visible and enabled,
-     * so hiding or removing the item in a click listener makes the download
-     * fail. The exception is an item with {@link #setDisableOnClick(boolean)
-     * disable on click}: it disables itself before the browser requests the
-     * file, so the file is also served while the item is disabled by the click.
-     * Once the enabled state is set explicitly, for example with
-     * {@code setEnabled(false)}, or a parent is disabled, the file is no longer
-     * served while the item is disabled. To serve the file regardless of the
-     * enabled state, pass {@link DownloadHandler#allowDisabled()
-     * handler.allowDisabled()}.
+     * The file is only served while the item is in its menu, visible and
+     * enabled, so hiding or removing the item in a click listener makes the
+     * download fail. The exception is an item with
+     * {@link #setDisableOnClick(boolean) disable on click}: it disables itself
+     * before the browser requests the file, so the file is also served while
+     * the item is disabled by the click. Once the enabled state is set
+     * explicitly, for example with {@code setEnabled(false)}, or the menu is
+     * disabled, the file is no longer served while the item is disabled. To
+     * serve the file regardless of the enabled state, pass
+     * {@link DownloadHandler#allowDisabled() handler.allowDisabled()}.
      * <p>
-     * Downloads are supported for items of a {@code MenuBar}. Items of a
-     * {@link ContextMenu} do not support them.
+     * For an item of a {@link ContextMenu}, the file is served on behalf of the
+     * target of the menu, so the download only works while the menu has a
+     * target that is attached. Closing the menu does not affect the download.
+     * The URL of the file stays valid while the target is attached, also when
+     * the menu is closed, so hide or disable the item to stop serving the file.
+     * The {@link DownloadEvent#getOwningComponent() owning component} of the
+     * download is the target of the menu.
+     * <p>
+     * Items of a {@code MenuBar} do not support download handlers yet, and
+     * throw an {@link UnsupportedOperationException}.
      *
      * <pre>{@code
-     * MenuItem export = menuBar.addItem("Export");
+     * MenuItem export = menu.addItem("Export");
      * export.setDownloadHandler(
      *         DownloadHandler.fromInputStream(event -> createReport()));
      * }</pre>
@@ -102,49 +131,27 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * @param downloadHandler
      *            the handler that produces the file, or {@code null} to not
      *            start a download on click
-     * @throws UnsupportedOperationException
-     *             if the item belongs to a {@link ContextMenu}
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
-        if (getContextMenu() != null) {
-            throw new UnsupportedOperationException(
-                    "Context menu items do not support downloads");
-        }
-        if (downloadRegistration != null) {
-            downloadRegistration.remove();
-            downloadRegistration = null;
-        }
         this.downloadHandler = downloadHandler;
-        if (downloadHandler != null) {
-            downloadRegistration = Download.onClick(this,
-                    DownloadUtil.allowDisabledByClick(this,
-                            getDisableOnClickController(), downloadHandler));
+        MenuDownloadManager downloadManager = getMenuDownloadManager();
+        if (downloadManager != null) {
+            downloadManager.update();
         }
     }
 
     /**
-     * Sets the menu item explicitly disabled or enabled. When disabled, menu
-     * items are rendered as "dimmed".
+     * Gets the manager for the download registrations of the menu that this
+     * item belongs to.
      * <p>
-     * By default, disabled items are not focusable and don't react to hover. As
-     * a result, they are hidden from assistive technologies, and it's not
-     * possible to show a tooltip to explain why they are disabled. This can be
-     * addressed by enabling the feature flag
-     * {@code accessibleDisabledMenuItems}, which makes disabled items focusable
-     * and hoverable, while still preventing them from being activated. To
-     * enable this feature flag, add the following line to
-     * {@code src/main/resources/vaadin-featureflags.properties}:
+     * For internal use only. May be renamed or removed in a future release.
      *
-     * <pre>
-     * com.vaadin.experimental.accessibleDisabledMenuItems = true
-     * </pre>
-     * 
-     * @since 25.2
+     * @return the manager for the download registrations, or {@code null} if
+     *         the item does not belong to a menu
      */
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
+    protected MenuDownloadManager getMenuDownloadManager() {
+        return getContextMenu() != null ? getContextMenu().getDownloadManager()
+                : null;
     }
-
 }

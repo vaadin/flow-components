@@ -1000,7 +1000,7 @@ public class AIOrchestrator implements Serializable {
             return;
         }
         FeatureFlags featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
+                .get(ui.getSessionOrThrow().getService().getContext());
         if (!featureFlags.isEnabled(FEATURE_FLAG_ID)) {
             throw new AIComponentsExperimentalFeatureException(
                     "AIOrchestrator");

@@ -27,21 +27,22 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.bean.PeopleGenerator;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid-it-demo/sorting")
-public class GridViewSortingPage extends LegacyTestView {
+@Route("vaadin-grid/multi-sort")
+public class GridMultiSortPage extends Div {
 
-    public GridViewSortingPage() {
+    public GridMultiSortPage() {
         createSorting();
     }
 
     private void createSorting() {
         Div messageDiv = new Div();
         Grid<Person> grid = new Grid<>();
-        grid.setItems(getItems());
+        grid.setItems(new PeopleGenerator().generatePeople(50));
         grid.setSelectionMode(SelectionMode.NONE);
 
         Grid.Column<Person> nameColumn = grid
@@ -126,8 +127,8 @@ public class GridViewSortingPage extends LegacyTestView {
         toggleFirstColumnAndReset.setId("grid-sortable-columns-toggle-first");
         sortByTwoColumns.setId("grid-sortable-columns-sort-by-two");
         messageDiv.setId("grid-sortable-columns-message");
-        addCard("Sorting", "Grid with sortable columns", grid, multiSort,
-                multiSortPriority, invertAllSortings, resetAllSortings,
-                toggleFirstColumnAndReset, sortByTwoColumns, messageDiv);
+        add(grid, multiSort, multiSortPriority, invertAllSortings,
+                resetAllSortings, toggleFirstColumnAndReset, sortByTwoColumns,
+                messageDiv);
     }
 }
