@@ -1051,11 +1051,6 @@ public class Spreadsheet extends Component
 
     private final TableRegistry tableRegistry = new TableRegistry();
 
-    private final TableLoader tableLoader = new TableLoader(this,
-            tableRegistry);
-
-    private final TableLifecycle tableLifecycle = new TableLifecycle(this);
-
     private final ActiveSheetSelector activeSheetSelector = new ActiveSheetSelector(
             this);
 
@@ -3059,7 +3054,7 @@ public class Spreadsheet extends Component
             setWorkbookProtected(xssf.isStructureLocked());
         }
         // clear all tables from memory
-        tableRegistry.getAll().clear();
+        tableRegistry.clear();
 
         conditionalFormatter = createConditionalFormatter();
 
@@ -3718,7 +3713,18 @@ public class Spreadsheet extends Component
      *            The table to delete
      */
     public void deleteTable(SpreadsheetTable table) {
-        tableLifecycle.delete(table);
+        // Through the component, so an override of it applies.
+        unregisterTable(table);
+        if (!table.isTableSheetCurrentlyActive()) {
+            return;
+        }
+        for (PopupButton popupButton : table.getPopupButtons()) {
+            setPopup(popupButton.getCellReference(), null);
+        }
+        if (table instanceof SpreadsheetFilterTable filterTable) {
+            filterTable.clearAllFilters();
+        }
+        table.clear();
     }
 
     /**
@@ -3745,7 +3751,7 @@ public class Spreadsheet extends Component
      * Reload tables for current sheet
      */
     private void loadTables() {
-        tableLoader.loadForActiveSheet();
+        tableRegistry.reloadForSheet(getActiveSheet());
     }
 
     /**

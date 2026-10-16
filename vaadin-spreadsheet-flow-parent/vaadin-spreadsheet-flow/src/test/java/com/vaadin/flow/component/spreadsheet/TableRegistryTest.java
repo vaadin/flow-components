@@ -12,6 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -22,21 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Storing, removing and listing tables in {@link TableRegistry}, and its loaded
- * latch.
- *
- * <p>
- * Pure storage class with a single latch ({@code tablesLoaded}). Pins:
- *
- * <ul>
- * <li>HashSet add/remove/getAll semantics.</li>
- * <li>{@code getForSheet} filters by sheet identity (via {@code equals}), so
- * two tables on the same sheet both come back together while a table on a
- * different sheet does not.</li>
- * <li>The {@code tablesLoaded} latch is initially false, flips true via
- * {@code markLoadedForActiveSheet}, and flips back to false via
- * {@code markNeedsReload}.</li>
- * </ul>
+ * Storing, removing, listing and reloading tables in {@link TableRegistry}. The
+ * tables are mocks; how a table reloads is its own business.
  */
 class TableRegistryTest {
 
@@ -61,9 +51,8 @@ class TableRegistryTest {
     }
 
     @Test
-    void freshRegistry_isEmpty_andNotLoaded() {
+    void freshRegistry_isEmpty() {
         assertTrue(registry.getAll().isEmpty());
-        assertFalse(registry.isLoadedForActiveSheet());
     }
 
     @Test
@@ -139,31 +128,48 @@ class TableRegistryTest {
     }
 
     @Test
-    void tablesLoadedLatch_initiallyFalse() {
-        assertFalse(registry.isLoadedForActiveSheet());
-    }
-
-    @Test
-    void markLoadedForActiveSheet_flipsLatchTrue() {
-        registry.markLoadedForActiveSheet();
-        assertTrue(registry.isLoadedForActiveSheet());
-    }
-
-    @Test
-    void markNeedsReload_flipsLatchFalse() {
-        registry.markLoadedForActiveSheet();
-        registry.markNeedsReload();
-        assertFalse(registry.isLoadedForActiveSheet());
-    }
-
-    @Test
-    void latchAndTables_areIndependent() {
-        // Pin: add/remove don't affect the latch; markLoaded* doesn't
-        // affect the tables set. The two pieces of state are orthogonal.
-        registry.markLoadedForActiveSheet();
+    void clear_forgetsEveryTable() {
         registry.add(table1);
-        registry.remove(table1);
-        assertTrue(registry.isLoadedForActiveSheet());
+        registry.add(table3);
+
+        registry.clear();
+
         assertTrue(registry.getAll().isEmpty());
+    }
+
+    @Test
+    void reloadForSheet_reloadsTheTablesOfThatSheetAlone() {
+        registry.add(table1);
+        registry.add(table2);
+        registry.add(table3);
+
+        registry.reloadForSheet(sheetA);
+
+        verify(table1).reload();
+        verify(table2).reload();
+        verify(table3, never()).reload();
+    }
+
+    @Test
+    void reloadForSheet_reloadsOnce_untilAnotherSheetIsShown() {
+        registry.add(table1);
+
+        registry.reloadForSheet(sheetA);
+        registry.reloadForSheet(sheetA);
+        verify(table1, times(1)).reload();
+
+        registry.markNeedsReload();
+        registry.reloadForSheet(sheetA);
+        verify(table1, times(2)).reload();
+    }
+
+    @Test
+    void reloadForSheet_withNoTables_stillCountsAsReloaded() {
+        registry.reloadForSheet(sheetA);
+        registry.add(table1);
+
+        registry.reloadForSheet(sheetA);
+
+        verify(table1, never()).reload();
     }
 }

@@ -16,14 +16,17 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Sheet;
 
 /**
- * Holds the set of {@link SpreadsheetTable}s registered with a
- * {@link Spreadsheet} and the per-sheet-change latch used to defer table-reload
- * work to a single pass.
+ * The {@link SpreadsheetTable}s registered with a {@link Spreadsheet}, and
+ * their reload: the tables of the sheet shown are reloaded once each time it is
+ * shown, not each time its cells are loaded.
  */
 final class TableRegistry implements Serializable {
 
     private final HashSet<SpreadsheetTable> tables = new HashSet<>();
-    private boolean tablesLoaded;
+    /**
+     * Whether the tables of the sheet shown were reloaded since it was shown.
+     */
+    private boolean reloaded;
 
     void add(SpreadsheetTable table) {
         tables.add(table);
@@ -33,6 +36,7 @@ final class TableRegistry implements Serializable {
         tables.remove(table);
     }
 
+    /** The tables, as {@link Spreadsheet#getTables()} hands them out. */
     HashSet<SpreadsheetTable> getAll() {
         return tables;
     }
@@ -47,15 +51,26 @@ final class TableRegistry implements Serializable {
         return out;
     }
 
-    boolean isLoadedForActiveSheet() {
-        return tablesLoaded;
+    /** Forgets every table, as for another workbook. */
+    void clear() {
+        tables.clear();
     }
 
-    void markLoadedForActiveSheet() {
-        this.tablesLoaded = true;
-    }
-
+    /** Another sheet is shown: its tables are to be reloaded. */
     void markNeedsReload() {
-        this.tablesLoaded = false;
+        reloaded = false;
+    }
+
+    /** Reloads the tables of the sheet shown, unless they were since it was. */
+    void reloadForSheet(Sheet shown) {
+        if (reloaded) {
+            return;
+        }
+        for (SpreadsheetTable table : tables) {
+            if (table.getSheet().equals(shown)) {
+                table.reload();
+            }
+        }
+        reloaded = true;
     }
 }
