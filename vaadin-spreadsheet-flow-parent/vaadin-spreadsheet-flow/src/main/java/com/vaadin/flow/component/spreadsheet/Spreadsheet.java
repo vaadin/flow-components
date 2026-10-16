@@ -2549,9 +2549,14 @@ public class Spreadsheet extends Component
         // taken off its row fails when it is read.
         getFormulaEvaluator().clearAllCachedResultValues();
         float[] _rowH = RowSizeOperations.heightsCovering(this, endRow);
+        ArrayList<Integer> hiddenRowIndexes = new ArrayList<>(
+                getHiddenRowIndexes());
         for (int i = startRow; i <= endRow; i++) {
             _rowH[i] = sheet.getDefaultRowHeightInPoints();
+            // A row deleted is hidden no longer.
+            hiddenRowIndexes.remove(Integer.valueOf(i + 1));
         }
+        setHiddenRowIndexes(hiddenRowIndexes);
         setRowH(_rowH);
         updateMergedRegions();
         valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);

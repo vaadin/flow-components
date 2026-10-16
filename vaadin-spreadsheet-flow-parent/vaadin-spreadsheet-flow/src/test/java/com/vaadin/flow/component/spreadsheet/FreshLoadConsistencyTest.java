@@ -269,6 +269,12 @@ class FreshLoadConsistencyTest {
                         api(spreadsheet -> spreadsheet.shiftRows(10, 13, 1))),
                 op("rows deleted",
                         spreadsheet -> spreadsheet.deleteRows(11, 12)),
+                steps("a hidden row deleted",
+                        api(spreadsheet -> spreadsheet.setRowHidden(11, true)),
+                        api(spreadsheet -> spreadsheet.deleteRows(11, 11))),
+                steps("a row of its own height deleted",
+                        api(spreadsheet -> spreadsheet.setRowHeight(11, 40f)),
+                        api(spreadsheet -> spreadsheet.deleteRows(11, 11))),
                 op("cells merged",
                         spreadsheet -> spreadsheet.addMergedRegion(
                                 CellRangeAddress.valueOf("F13:G14"))),
