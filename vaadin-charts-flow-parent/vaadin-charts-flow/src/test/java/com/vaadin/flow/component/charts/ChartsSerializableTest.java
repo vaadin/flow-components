@@ -18,6 +18,7 @@ class ChartsSerializableTest extends ClassesSerializableTest {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
                 ".*\\Serializer(Modifier)?$",
                 "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\.BeanSerializationDelegate",
-                "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\.BeanSerializerDelegator"));
+                "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\.BeanSerializerDelegator",
+                "com\\.vaadin\\.flow\\.component\\.charts\\.internal\\.ChartFunctionScanner(\\$.*)?"));
     }
 }
