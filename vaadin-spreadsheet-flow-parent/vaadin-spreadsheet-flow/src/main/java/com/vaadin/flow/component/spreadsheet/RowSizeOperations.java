@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -103,6 +104,25 @@ final class RowSizeOperations implements Serializable {
         }
         row.setHeightInPoints(height);
         spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
+    }
+
+    /**
+     * A copy of the row heights long enough to hold the row at {@code index}.
+     * The heights stop at the rows the sheet had when it was loaded, and
+     * {@link Spreadsheet#setMaxRows(int)} can add more: those take their
+     * heights from POI, as loading gives them.
+     */
+    static float[] heightsCovering(Spreadsheet spreadsheet, int index) {
+        float[] current = spreadsheet.getRowH();
+        float[] rowH = Arrays.copyOf(current,
+                Math.max(current.length, index + 1));
+        Sheet sheet = spreadsheet.getActiveSheet();
+        for (int r = current.length; r < rowH.length; r++) {
+            Row row = sheet.getRow(r);
+            rowH[r] = row == null ? sheet.getDefaultRowHeightInPoints()
+                    : row.getZeroHeight() ? 0f : row.getHeightInPoints();
+        }
+        return rowH;
     }
 
     private void applyHidden(int rowIndex, boolean hidden) {

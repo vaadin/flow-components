@@ -9,7 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -32,8 +32,11 @@ final class CustomComponentRowSizer implements Serializable {
     }
 
     void applyHeightsFor(Set<Integer> nextRowsWithComponents) {
-        float[] updatedHeights = Arrays.copyOf(spreadsheet.getRowH(),
-                spreadsheet.getRowH().length);
+        // Components can be on rows setMaxRows added past the loaded ones.
+        int lastRow = Math.max(lastOf(nextRowsWithComponents),
+                lastOf(currentRowsWithComponents));
+        float[] updatedHeights = RowSizeOperations.heightsCovering(spreadsheet,
+                lastRow);
         int minHeight = spreadsheet.getMinimumRowHeightForComponents();
 
         // Grow rows that now host a component
@@ -64,5 +67,9 @@ final class CustomComponentRowSizer implements Serializable {
         }
         spreadsheet.setRowH(updatedHeights);
         this.currentRowsWithComponents = nextRowsWithComponents;
+    }
+
+    private static int lastOf(Set<Integer> rows) {
+        return rows == null || rows.isEmpty() ? -1 : Collections.max(rows);
     }
 }

@@ -2604,7 +2604,7 @@ public class Spreadsheet extends Component
                 getActiveSheet().removeRow(row);
             }
         }
-        float[] _rowH = Arrays.copyOf(getRowH(), getRowH().length);
+        float[] _rowH = RowSizeOperations.heightsCovering(this, endRow);
         for (int i = startRow; i <= endRow; i++) {
             _rowH[i] = sheet.getDefaultRowHeightInPoints();
         }
