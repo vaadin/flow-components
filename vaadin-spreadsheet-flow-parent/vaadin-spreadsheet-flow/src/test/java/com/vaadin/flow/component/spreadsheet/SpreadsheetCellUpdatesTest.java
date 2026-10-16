@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
@@ -28,6 +30,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
@@ -147,6 +150,73 @@ class SpreadsheetCellUpdatesTest {
         spreadsheet.refreshCells(spreadsheet.createCell(0, 4, "added"));
 
         assertEquals(List.of("E1=added", "refreshCellStyles"), calls());
+    }
+
+    @Test
+    void aCellDeleted_isTakenOffTheClientOnce() {
+        show();
+        spreadsheet.deleteCell(0, 2);
+        assertEquals(List.of("C1=", "refreshCellStyles"), calls());
+
+        cell("A1").setCellValue(5);
+        spreadsheet.refreshCells(cell("A1"));
+
+        assertEquals(List.of("A1=5", "refreshCellStyles"), calls());
+    }
+
+    @Test
+    void aCellRemovedInPoi_andMarkedAsDeleted_isTakenOffTheClient() {
+        show();
+        Cell text = cell("C1");
+        sheet.getRow(0).removeCell(text);
+
+        spreadsheet.markCellAsDeleted(text, false);
+
+        assertEquals(List.of("C1=", "refreshCellStyles"), calls());
+    }
+
+    @Test
+    void aFormulaUsingACellDeleted_isWorkedOutAgain() {
+        formulaInB1();
+        show();
+
+        spreadsheet.deleteCell(0, 0);
+
+        assertTrue(calls().contains("B1=0"));
+    }
+
+    @Test
+    void aFormulaUsingACellRemovedInPoi_isWorkedOutAgain() {
+        formulaInB1();
+        show();
+        Cell value = cell("A1");
+        sheet.getRow(0).removeCell(value);
+
+        spreadsheet.markCellAsDeleted(value, false);
+
+        assertTrue(calls().contains("B1=0"));
+    }
+
+    @Test
+    void aCellEmptiedByAFill_isToldToTheFormulaEvaluatorOnItsOwn()
+            throws ReflectiveOperationException {
+        // A2 is empty, in a row of cells, and A4 is not: filling A1:A2 down
+        // to A4 empties A4.
+        sheet.createRow(1).createCell(1).setCellValue("B2");
+        sheet.createRow(3).createCell(0).setCellValue(7);
+        show();
+        // Rather than every formula worked out again.
+        Field field = Spreadsheet.class.getDeclaredField("formulaEvaluator");
+        field.setAccessible(true);
+        FormulaEvaluator evaluator = Mockito
+                .spy((FormulaEvaluator) field.get(spreadsheet));
+        field.set(spreadsheet, evaluator);
+        spreadsheet.setSelection("A1:A2");
+
+        TestHelper.fireClientEvent(spreadsheet, "selectionIncreasePainted",
+                "{\"r1\": 1, \"c1\": 1, \"r2\": 4, \"c2\": 1}");
+
+        Mockito.verify(evaluator).notifyDeleteCell(sheet.getRow(3).getCell(0));
     }
 
     @Test

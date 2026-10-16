@@ -127,20 +127,19 @@ class CellMarkUpdaterTest {
     @Test
     void markCellAsDeleted_stylePropagateTrue_dispatchesStylerAndRefreshes() {
         // Pin: cellStyleUpdated=true triggers the deleted path AND the
-        // styler AND the spreadsheet refreshCells(cell) call. The
-        // refresh is what re-renders the deleted cell on the client.
+        // styler AND the update that sends the deletion to the client.
         updater.markCellAsDeleted(cell, true);
 
         verify(valueManager).cellDeleted(cell);
         verify(styler).cellStyleUpdated(cell, true);
-        verify(spreadsheet).refreshCells(cell);
+        verify(spreadsheet).updateMarkedCells();
     }
 
     @Test
     void markCellAsDeleted_stylePropagateFalse_skipsStyler_stillRefreshes() {
-        // Pin: refreshCells fires regardless of cellStyleUpdated, but
+        // Pin: the update fires regardless of cellStyleUpdated, but
         // the styler call is guarded by the flag. A regression that
-        // tied refreshCells to the flag would silently break the
+        // tied the update to the flag would silently break the
         // refresh path for value-only deletes.
         updater.markCellAsDeleted(cell, false);
 
@@ -148,7 +147,7 @@ class CellMarkUpdaterTest {
         verify(styler, never()).cellStyleUpdated(
                 org.mockito.ArgumentMatchers.any(Cell.class),
                 org.mockito.ArgumentMatchers.anyBoolean());
-        verify(spreadsheet).refreshCells(cell);
+        verify(spreadsheet).updateMarkedCells();
     }
 
     // ----- deleteCell ------------------------------------------------------
@@ -157,7 +156,7 @@ class CellMarkUpdaterTest {
     void deleteCell_cellExists_dispatchesFullChain() {
         // Pin: cell != null path triggers styler.cellStyleUpdated(cell,
         // true) → row.removeCell(cell) → valueManager.cellDeleted(cell)
-        // → spreadsheet.refreshCells(cell). The order matters: the
+        // → spreadsheet.updateMarkedCells(). The order matters: the
         // styler must be notified BEFORE the cell is removed from the
         // row (so the styler can still see the cell's pre-delete style
         // map). The InOrder verify pins this.
@@ -171,7 +170,7 @@ class CellMarkUpdaterTest {
         inOrder.verify(styler).cellStyleUpdated(cell, true);
         inOrder.verify(row).removeCell(cell);
         inOrder.verify(valueManager).cellDeleted(cell);
-        inOrder.verify(spreadsheet).refreshCells(cell);
+        inOrder.verify(spreadsheet).updateMarkedCells();
     }
 
     @Test

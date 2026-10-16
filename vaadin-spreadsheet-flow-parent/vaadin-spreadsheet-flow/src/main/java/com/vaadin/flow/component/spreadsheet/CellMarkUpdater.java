@@ -60,7 +60,9 @@ final class CellMarkUpdater implements Serializable {
             spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
                     true);
         }
-        spreadsheet.refreshCells(cell);
+        // Not refreshCells(cell), which reads the cell: it is out of its row
+        // already, where an XSSF cell can no longer be read.
+        spreadsheet.updateMarkedCells();
     }
 
     void deleteCell(int row, int col) {
@@ -74,7 +76,9 @@ final class CellMarkUpdater implements Serializable {
                     true);
             activeSheet.getRow(row).removeCell(cell);
             spreadsheet.getCellValueManager().cellDeleted(cell);
-            spreadsheet.refreshCells(cell);
+            // Not refreshCells(cell), which reads the cell: it is out of its
+            // row, where an XSSF cell can no longer be read.
+            spreadsheet.updateMarkedCells();
         }
     }
 

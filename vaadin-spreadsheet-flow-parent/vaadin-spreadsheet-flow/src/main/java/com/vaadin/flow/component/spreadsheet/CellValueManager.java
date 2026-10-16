@@ -317,7 +317,14 @@ public class CellValueManager implements Serializable {
      *            Deleted cell
      */
     protected void cellDeleted(Cell cell) {
-        getFormulaEvaluator().notifyDeleteCell(cell);
+        if (cell.getRow().getCell(cell.getColumnIndex()) == cell) {
+            getFormulaEvaluator().notifyDeleteCell(cell);
+        } else {
+            // Out of its row: an XSSF cell can no longer be read then, and
+            // the evaluator would still find it where it was. Every formula
+            // is worked out again instead.
+            getFormulaEvaluator().clearAllCachedResultValues();
+        }
         spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
                 cell.getRowIndex() + 1);
         markCellForRemove(cell);
