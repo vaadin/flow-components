@@ -86,7 +86,7 @@ class TableRegistryTest {
         // defensive copy). Mutations through the returned reference
         // affect the registry — this is INTENTIONAL per the source
         // comment in TableRegistry, kept for performance (the registry
-        // is read-heavy from SpreadsheetFactory and SheetChangeDispatcher).
+        // is read-heavy from SpreadsheetFactory and SheetOperations).
         // A future refactor that adds a defensive copy here would break
         // existing callers that rely on the live mutation. If we ever
         // want to harden the API, the change must come WITH a sweep of

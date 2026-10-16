@@ -1043,23 +1043,11 @@ public class Spreadsheet extends Component
 
     private final TableRegistry tableRegistry = new TableRegistry();
 
-    private final ActiveSheetSelector activeSheetSelector = new ActiveSheetSelector(
-            this);
-
     private final SheetScrollMemory sheetScrollMemory = new SheetScrollMemory(
             this);
 
-    private final SheetChangeDispatcher sheetChangeDispatcher = new SheetChangeDispatcher(
-            this, sheetScrollMemory);
-
-    private final SheetLifecycleOperations sheetLifecycleOperations = new SheetLifecycleOperations(
-            this, activeSheetSelector);
-
-    private final SheetMetadataOperations sheetMetadataOperations = new SheetMetadataOperations(
-            this);
-
-    private final SheetVisibilityOperations sheetVisibilityOperations = new SheetVisibilityOperations(
-            this);
+    private final SheetOperations sheetOperations = new SheetOperations(this,
+            sheetScrollMemory);
 
     final InvalidFormulaTracker invalidFormulaTracker = new InvalidFormulaTracker(
             this);
@@ -1758,7 +1746,7 @@ public class Spreadsheet extends Component
      */
     public void setSheetHidden(int sheetPOIIndex, SheetVisibility visibility)
             throws IllegalArgumentException {
-        sheetVisibilityOperations.setSheetHidden(sheetPOIIndex, visibility);
+        sheetOperations.setSheetHidden(sheetPOIIndex, visibility);
     }
 
     /**
@@ -1789,7 +1777,7 @@ public class Spreadsheet extends Component
      */
     public void setSheetName(int sheetIndex, String sheetName)
             throws IllegalArgumentException {
-        sheetMetadataOperations.setSheetName(sheetIndex, sheetName);
+        sheetOperations.setSheetName(sheetIndex, sheetName);
     }
 
     /**
@@ -1807,7 +1795,7 @@ public class Spreadsheet extends Component
      */
     public void setSheetNameWithPOIIndex(int sheetIndex, String sheetName)
             throws IllegalArgumentException {
-        sheetMetadataOperations.setSheetNameWithPOIIndex(sheetIndex, sheetName);
+        sheetOperations.setSheetNameWithPOIIndex(sheetIndex, sheetName);
     }
 
     /**
@@ -1821,7 +1809,7 @@ public class Spreadsheet extends Component
      *            to remove the protection.
      */
     public void setSheetProtected(int sheetPOIIndex, String password) {
-        sheetVisibilityOperations.setSheetProtected(sheetPOIIndex, password);
+        sheetOperations.setSheetProtected(sheetPOIIndex, password);
     }
 
     /**
@@ -1833,7 +1821,7 @@ public class Spreadsheet extends Component
      *            to remove the protection.
      */
     public void setActiveSheetProtected(String password) {
-        sheetVisibilityOperations.setActiveSheetProtected(password);
+        sheetOperations.setActiveSheetProtected(password);
     }
 
     /**
@@ -1855,7 +1843,7 @@ public class Spreadsheet extends Component
      */
     public void createNewSheet(String sheetName, int rows, int columns)
             throws IllegalArgumentException {
-        sheetLifecycleOperations.createNewSheet(sheetName, rows, columns);
+        sheetOperations.createNewSheet(sheetName, rows, columns);
     }
 
     /**
@@ -1872,7 +1860,7 @@ public class Spreadsheet extends Component
      */
     public void deleteSheetWithPOIIndex(int poiSheetIndex)
             throws IllegalArgumentException {
-        sheetLifecycleOperations.deleteSheetWithPOIIndex(poiSheetIndex);
+        sheetOperations.deleteSheetWithPOIIndex(poiSheetIndex);
     }
 
     /**
@@ -1888,7 +1876,7 @@ public class Spreadsheet extends Component
      *             index is invalid.
      */
     public void deleteSheet(int sheetIndex) throws IllegalArgumentException {
-        sheetLifecycleOperations.deleteSheet(sheetIndex);
+        sheetOperations.deleteSheet(sheetIndex);
     }
 
     /**
@@ -1931,7 +1919,7 @@ public class Spreadsheet extends Component
      * @return Index of the active sheet, 0-based
      */
     public int getActiveSheetIndex() {
-        return activeSheetSelector.getActiveSheetIndex();
+        return getSheetIndex() - 1;
     }
 
     /**
@@ -1941,7 +1929,7 @@ public class Spreadsheet extends Component
      * @return POI model index of the active sheet, 0-based
      */
     public int getActiveSheetPOIIndex() {
-        return activeSheetSelector.getActiveSheetPOIIndex();
+        return getVisibleSheetPOIIndex(getSheetIndex() - 1);
     }
 
     /**
@@ -1954,7 +1942,7 @@ public class Spreadsheet extends Component
      */
     public void setActiveSheetIndex(int sheetIndex)
             throws IllegalArgumentException {
-        activeSheetSelector.setActiveSheetIndex(sheetIndex);
+        sheetOperations.setActiveSheetIndex(sheetIndex);
     }
 
     /**
@@ -1969,7 +1957,7 @@ public class Spreadsheet extends Component
      */
     public void setActiveSheetWithPOIIndex(int sheetIndex)
             throws IllegalArgumentException {
-        activeSheetSelector.setActiveSheetWithPOIIndex(sheetIndex);
+        sheetOperations.setActiveSheetWithPOIIndex(sheetIndex);
     }
 
     /**
@@ -1984,7 +1972,7 @@ public class Spreadsheet extends Component
      */
     protected void onSheetSelected(int tabIndex, int scrollLeft,
             int scrollTop) {
-        sheetChangeDispatcher.onSheetSelected(tabIndex, scrollLeft, scrollTop);
+        sheetOperations.onSheetSelected(tabIndex, scrollLeft, scrollTop);
     }
 
     /**
@@ -1997,7 +1985,7 @@ public class Spreadsheet extends Component
      *            Current vertical scroll position
      */
     protected void onNewSheetCreated(int scrollLeft, int scrollTop) {
-        sheetChangeDispatcher.onNewSheetCreated(scrollLeft, scrollTop);
+        sheetOperations.onNewSheetCreated(scrollLeft, scrollTop);
     }
 
     /**
@@ -2009,7 +1997,7 @@ public class Spreadsheet extends Component
      *            New name for the sheet.
      */
     protected void onSheetRename(int sheetIndex, String sheetName) {
-        sheetChangeDispatcher.onSheetRename(sheetIndex, sheetName);
+        sheetOperations.onSheetRename(sheetIndex, sheetName);
     }
 
     /**
