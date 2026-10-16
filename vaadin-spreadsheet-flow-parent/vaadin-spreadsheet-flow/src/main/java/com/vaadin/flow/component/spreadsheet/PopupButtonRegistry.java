@@ -9,55 +9,146 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.ss.util.CellReference;
 
 /**
- * Owns the by-cell map of pop-up buttons for the currently active sheet. Pure
- * storage — no DOM attachment, no JS bridging, no event firing.
- *
+ * The pop-up buttons of a spreadsheet by their cells, and which of them are on
+ * the client. A button is on the client while its cell is shown on the active
+ * sheet: its element is a virtual child of the spreadsheet's, and the client
+ * has been sent its state with {@code addPopupButton}.
  * <p>
- * Cell references stored here are <strong>absolute</strong> (sheet-qualified)
- * so they survive sheet-name changes; callers are responsible for converting
- * relative references via {@code SpreadsheetUtil.relativeToAbsolute} before
- * calling.
+ * Cells are absolute (sheet-qualified) references, as made by
+ * {@code SpreadsheetUtil.relativeToAbsolute}, so they survive sheet-name
+ * changes.
  */
 final class PopupButtonRegistry implements Serializable {
 
-    private Map<CellReference, PopupButton> buttonsByCell = new HashMap<>();
+    private final Spreadsheet spreadsheet;
+    private final Map<CellReference, PopupButton> buttonsByCell = new HashMap<>();
+    private final Set<PopupButton> onTheClient = new HashSet<>();
 
-    PopupButton get(CellReference absoluteCellReference) {
-        return buttonsByCell.get(absoluteCellReference);
+    PopupButtonRegistry(Spreadsheet spreadsheet) {
+        this.spreadsheet = spreadsheet;
     }
 
-    void put(CellReference absoluteCellReference, PopupButton button) {
-        buttonsByCell.put(absoluteCellReference, button);
+    PopupButton get(CellReference cell) {
+        return buttonsByCell.get(cell);
     }
 
-    PopupButton remove(CellReference absoluteCellReference) {
-        return buttonsByCell.remove(absoluteCellReference);
+    /**
+     * Puts the button on the cell in place of the one there, and on the client
+     * if the cell is shown. A {@code null} button removes the one there.
+     */
+    void set(CellReference cell, PopupButton button) {
+        PopupButton existing = buttonsByCell.remove(cell);
+        if (existing != null) {
+            detach(existing);
+            spreadsheet.markAsDirty();
+        }
+        if (button != null) {
+            button.setCellReference(cell);
+            buttonsByCell.put(cell, button);
+            if (isShown(button)) {
+                attach(button);
+                spreadsheet.markAsDirty();
+            }
+        }
     }
 
-    Collection<PopupButton> values() {
-        return buttonsByCell.values();
+    /**
+     * Puts the buttons of the active sheet whose cells are shown on the client,
+     * and takes the others of that sheet off. Called whenever the cells shown
+     * may have changed.
+     * <p>
+     * A button already on the client is sent again: that is how changes to its
+     * state, such as {@link PopupButton#markActive(boolean)}, reach it.
+     */
+    void refresh() {
+        String sheetName = spreadsheet.getActiveSheet().getSheetName();
+        for (PopupButton button : buttonsByCell.values()) {
+            if (!sheetName.equals(button.getCellReference().getSheetName())) {
+                continue;
+            }
+            if (isShown(button)) {
+                attach(button);
+            } else {
+                detach(button);
+            }
+        }
     }
 
-    boolean isEmpty() {
-        return buttonsByCell.isEmpty();
+    /**
+     * Moves the buttons of the active sheet with their rows after
+     * {@code Sheet.shiftRows(startRow, endRow, n)}, and drops those of the rows
+     * the shift overwrote. A button that moves or goes is taken off the client
+     * first, where it is still known by its old cell; the refresh after the
+     * shift puts the moved ones back on. Rows are 0-based.
+     */
+    void shiftRows(int startRow, int endRow, int n) {
+        String sheetName = spreadsheet.getActiveSheet().getSheetName();
+        Map<CellReference, PopupButton> updated = new HashMap<>();
+        for (PopupButton button : buttonsByCell.values()) {
+            CellReference cell = button.getCellReference();
+            int newRow = RowShiftOrchestrator.rowAfterShift(cell.getRow(),
+                    startRow, endRow, n);
+            if (!sheetName.equals(cell.getSheetName())
+                    || newRow == cell.getRow()) {
+                updated.put(cell, button);
+                continue;
+            }
+            detach(button);
+            if (newRow != RowShiftOrchestrator.OVERWRITTEN) {
+                CellReference newCell = new CellReference(sheetName, newRow,
+                        cell.getCol(), true, true);
+                button.setCellReference(newCell);
+                updated.put(newCell, button);
+            }
+        }
+        buttonsByCell.clear();
+        buttonsByCell.putAll(updated);
     }
 
+    /** Takes every button off the client, as when another sheet is shown. */
+    void detachAll() {
+        for (PopupButton button : new ArrayList<>(onTheClient)) {
+            detach(button);
+        }
+    }
+
+    /** Forgets every button, as when another workbook is set. */
     void clear() {
         buttonsByCell.clear();
     }
 
-    /**
-     * Atomically replaces the underlying map. Used by
-     * {@link PopupButtonRowShifter} when row indices are remapped en masse.
-     */
-    void replaceAll(Map<CellReference, PopupButton> updated) {
-        this.buttonsByCell = updated;
+    private boolean isShown(PopupButton button) {
+        return spreadsheet.isCellVisible(button.getRow() + 1,
+                button.getColumn() + 1);
+    }
+
+    private void attach(PopupButton button) {
+        onTheClient.add(button);
+        spreadsheet.getElement().callJsFunction("addPopupButton",
+                Serializer.serialize(button.getState()));
+        if (!spreadsheet.getElement().equals(button.getElement().getParent())) {
+            spreadsheet.getElement().appendVirtualChild(button.getElement());
+        }
+    }
+
+    private void detach(PopupButton button) {
+        if (!onTheClient.remove(button)) {
+            // Not on the client, so there is nothing to take off.
+            return;
+        }
+        spreadsheet.getElement().callJsFunction("removePopupButton",
+                Serializer.serialize(button.getState()));
+        if (spreadsheet.getElement().equals(button.getElement().getParent())) {
+            spreadsheet.getElement().removeVirtualChild(button.getElement());
+        }
     }
 }

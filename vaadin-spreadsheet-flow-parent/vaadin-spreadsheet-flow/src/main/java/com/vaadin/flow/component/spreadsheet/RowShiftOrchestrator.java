@@ -36,7 +36,7 @@ import org.apache.poi.ss.util.CellReference;
  * reference for read/write into the host's many collaborator handles
  * ({@code valueManager}, {@code styler}, {@code sheetOverlayManager},
  * {@code selectionManager}, {@code viewportBounds},
- * {@code popupButtonRowShifter}, {@code invalidFormulaTracker}).
+ * {@code popupButtonRegistry}, {@code invalidFormulaTracker}).
  */
 final class RowShiftOrchestrator implements Serializable {
 
@@ -134,7 +134,7 @@ final class RowShiftOrchestrator implements Serializable {
         }
         // POI moves and removes the merged regions itself, and
         // updateMergedRegions() below passes its result to the client.
-        spreadsheet.popupButtonRowShifter.shift(startRow, endRow, n);
+        spreadsheet.popupButtonRegistry.shiftRows(startRow, endRow, n);
         spreadsheet.invalidFormulaTracker.shiftActiveSheetRows(startRow, endRow,
                 n);
 

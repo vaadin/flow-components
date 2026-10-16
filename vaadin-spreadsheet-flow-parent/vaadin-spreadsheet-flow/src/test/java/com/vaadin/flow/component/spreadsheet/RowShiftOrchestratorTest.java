@@ -57,7 +57,7 @@ class RowShiftOrchestratorTest {
     @Mock
     private SheetOverlayManager sheetOverlayManager;
     @Mock
-    private PopupButtonRowShifter popupButtonRowShifter;
+    private PopupButtonRegistry popupButtonRegistry;
     @Mock
     private InvalidFormulaTracker invalidFormulaTracker;
     @Mock
@@ -96,11 +96,11 @@ class RowShiftOrchestratorTest {
         lenient().when(spreadsheet.getLastRow()).thenReturn(10);
         lenient().when(spreadsheet.getLastColumn()).thenReturn(3);
 
-        // sheetOverlayManager, popupButtonRowShifter, invalidFormulaTracker
+        // sheetOverlayManager, popupButtonRegistry, invalidFormulaTracker
         // are package-private final fields on Spreadsheet — wire via
         // reflection on the mock.
         wireField("sheetOverlayManager", sheetOverlayManager);
-        wireField("popupButtonRowShifter", popupButtonRowShifter);
+        wireField("popupButtonRegistry", popupButtonRegistry);
         wireField("invalidFormulaTracker", invalidFormulaTracker);
 
         orchestrator = new RowShiftOrchestrator(spreadsheet);
@@ -182,16 +182,16 @@ class RowShiftOrchestratorTest {
         verify(spreadsheet, never()).removeMergedRegion(anyInt());
     }
 
-    // ----- popupButtonRowShifter + invalidFormulaTracker dispatch ----------
+    // ----- popupButtonRegistry + invalidFormulaTracker dispatch ------------
 
     @Test
-    void shift_alwaysCallsPopupButtonRowShifter_andInvalidFormulaTrackerShift() {
-        // Pin: the shift is passed on to popupButtonRowShifter and
+    void shift_alwaysShiftsThePopupButtons_andTheInvalidFormulaMarks() {
+        // Pin: the shift is passed on to popupButtonRegistry and
         // invalidFormulaTracker, with the arguments POI got. Both must fire
         // regardless of n sign.
         orchestrator.shift(2, 5, 1, false, false);
 
-        verify(popupButtonRowShifter).shift(2, 5, 1);
+        verify(popupButtonRegistry).shiftRows(2, 5, 1);
         verify(invalidFormulaTracker).shiftActiveSheetRows(2, 5, 1);
     }
 
@@ -199,7 +199,7 @@ class RowShiftOrchestratorTest {
     void shift_negativeN_passesTheShiftToTheHelpers() {
         orchestrator.shift(5, 7, -2, false, false);
 
-        verify(popupButtonRowShifter).shift(5, 7, -2);
+        verify(popupButtonRegistry).shiftRows(5, 7, -2);
         verify(invalidFormulaTracker).shiftActiveSheetRows(5, 7, -2);
     }
 

@@ -1038,16 +1038,8 @@ public class Spreadsheet extends Component
     private final CustomComponentLoader customComponentLoader = new CustomComponentLoader(
             this, customComponentRangeScanner, customComponentRowSizer);
 
-    private final PopupButtonRegistry popupButtonRegistry = new PopupButtonRegistry();
-
-    private final PopupButtonBinding popupButtonBinding = new PopupButtonBinding(
+    final PopupButtonRegistry popupButtonRegistry = new PopupButtonRegistry(
             this);
-
-    final PopupButtonRowShifter popupButtonRowShifter = new PopupButtonRowShifter(
-            this, popupButtonRegistry, popupButtonBinding);
-
-    private final PopupButtonRefresher popupButtonRefresher = new PopupButtonRefresher(
-            this, popupButtonRegistry, popupButtonBinding);
 
     private final TableRegistry tableRegistry = new TableRegistry();
 
@@ -3109,7 +3101,7 @@ public class Spreadsheet extends Component
 
         customComponentLoader.unloadAll();
 
-        popupButtonBinding.detachAll();
+        popupButtonRegistry.detachAll();
 
         // clear all tables, possible tables for new/changed sheet are added
         // after first round trip.
@@ -3634,23 +3626,9 @@ public class Spreadsheet extends Component
      *            removes the pop-up button for the target cell.
      */
     public void setPopup(CellReference cellReference, PopupButton popupButton) {
-        CellReference absoluteCellReference = SpreadsheetUtil
-                .relativeToAbsolute(this, cellReference);
-        PopupButton existing = popupButtonRegistry
-                .remove(absoluteCellReference);
-        if (existing != null) {
-            popupButtonBinding.detach(existing);
-            markAsDirty();
-        }
-        if (popupButton != null) {
-            popupButton.setCellReference(absoluteCellReference);
-            popupButtonRegistry.put(absoluteCellReference, popupButton);
-            if (isCellVisible(absoluteCellReference.getRow() + 1,
-                    absoluteCellReference.getCol() + 1)) {
-                popupButtonBinding.attach(popupButton);
-                markAsDirty();
-            }
-        }
+        popupButtonRegistry.set(
+                SpreadsheetUtil.relativeToAbsolute(this, cellReference),
+                popupButton);
     }
 
     /**
@@ -3658,7 +3636,7 @@ public class Spreadsheet extends Component
      * visible cells.
      */
     void loadPopupButtons() {
-        popupButtonRefresher.refresh();
+        popupButtonRegistry.refresh();
     }
 
     /**
