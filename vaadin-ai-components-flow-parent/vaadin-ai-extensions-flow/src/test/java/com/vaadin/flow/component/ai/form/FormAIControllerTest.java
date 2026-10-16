@@ -145,6 +145,8 @@ class FormAIControllerTest {
             for (var anchor : List.of("get_form_state", "fill_form",
                     "query_field_options", "queryable", "enum", "rejected",
                     ".ignoreField()", "SAME turn", "newly-appeared",
+                    // a near-miss option must not replace the user's value
+                    "similar-looking",
                     // bean-level cross-field rejections key on the "__form__"
                     // sentinel id, not a real field id.
                     "__form__", "cross-field")) {
