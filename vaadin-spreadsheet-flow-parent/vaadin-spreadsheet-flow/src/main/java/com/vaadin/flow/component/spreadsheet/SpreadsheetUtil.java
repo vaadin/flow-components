@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -49,16 +50,12 @@ public class SpreadsheetUtil implements Serializable {
 
     private static final short EXCEL_COLUMN_WIDTH_FACTOR = 256;
 
-    private static final int UNIT_OFFSET_LENGTH = 7;
-
-    private static final int[] UNIT_OFFSET_MAP = new int[] { 0, 36, 73, 109,
-            146, 182, 219 };
-
     /**
-     * The widest column POI holds, 255 characters, in pixels: 255 times the
-     * pixels {@link #pixel2WidthUnits(int)} counts per character.
+     * The widest column POI holds, 255 characters, in the whole pixels POI
+     * reads it as.
      */
-    static final int MAX_COLUMN_WIDTH_PX = 255 * UNIT_OFFSET_LENGTH;
+    static final int MAX_COLUMN_WIDTH_PX = (int) (255
+            * Units.DEFAULT_CHARACTER_WIDTH);
 
     /**
      * Translates cell coordinates to a cell key used to identify cells in the
@@ -217,20 +214,29 @@ public class SpreadsheetUtil implements Serializable {
     }
 
     /**
-     * Converts pixel units to Excel width units (one Excel width unit is
-     * 1/256th of a character width)
+     * Converts a column width in pixels to the units POI holds it in, 1/256 of
+     * a character, so that POI reads the width back as the same pixels: the
+     * client is given the width a fresh load reads.
      *
-     * @param pxs
-     *            Pixel value to convert
-     * @return Value in Excel width units
+     * @param sheet
+     *            the sheet of the column
+     * @param pixels
+     *            the width in pixels
+     * @return the width in POI's units
      */
-    static int pixel2WidthUnits(int pxs) {
-        // An int: as a short, every width from 896 pixels on overflowed.
-        int widthUnits = EXCEL_COLUMN_WIDTH_FACTOR * (pxs / UNIT_OFFSET_LENGTH);
-
-        widthUnits += UNIT_OFFSET_MAP[(pxs % UNIT_OFFSET_LENGTH)];
-
-        return widthUnits;
+    static int columnWidthUnits(Sheet sheet, int pixels) {
+        // POI reads the units as a fraction of a pixel, which is cut to whole
+        // pixels: the fewest units that reach the pixels.
+        int units = (int) Math.ceil(pixels * EXCEL_COLUMN_WIDTH_FACTOR
+                / Units.DEFAULT_CHARACTER_WIDTH);
+        // HSSF reads just the default width of the sheet as a column of the
+        // default width, which is drawn wider. A unit more is read as the same
+        // pixels, on any sheet.
+        if (units == sheet.getDefaultColumnWidth()
+                * EXCEL_COLUMN_WIDTH_FACTOR) {
+            units++;
+        }
+        return units;
     }
 
     /**

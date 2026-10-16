@@ -101,8 +101,8 @@ final class ColumnSizeOperations implements Serializable {
         colW[index] = width;
         spreadsheet.setColW(colW);
         spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
-        spreadsheet.getActiveSheet().setColumnWidth(index,
-                SpreadsheetUtil.pixel2WidthUnits(width));
+        spreadsheet.getActiveSheet().setColumnWidth(index, SpreadsheetUtil
+                .columnWidthUnits(spreadsheet.getActiveSheet(), width));
 
         if (spreadsheet.getActiveSheet() instanceof XSSFSheet) {
             ((XSSFSheet) spreadsheet.getActiveSheet()).getColumnHelper()

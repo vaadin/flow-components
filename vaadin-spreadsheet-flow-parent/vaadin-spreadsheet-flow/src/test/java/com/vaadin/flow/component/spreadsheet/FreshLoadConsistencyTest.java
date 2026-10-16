@@ -159,8 +159,7 @@ class FreshLoadConsistencyTest {
      * without it.
      */
     private static final Map<String, UnaryOperator<Case>> KNOWN = Map
-            .ofEntries(Map.entry("a hidden column given a width", c -> c
-                    .known("property colW", "property overlays: [0] .width")));
+            .ofEntries();
 
     static Stream<Case> cases() {
         return Stream.of(

@@ -43,8 +43,9 @@ class WideColumnsTest {
     void columnWiderThanTheWorkbookHolds_isKeptAtTheWidestItHolds() {
         spreadsheet.setColumnWidth(1, 5000);
 
-        // 255 characters, the most POI holds.
-        assertEquals(255 * 256, spreadsheet.getActiveSheet().getColumnWidth(1));
+        // 255 characters, the most POI holds, which it reads as 1785 pixels.
+        assertEquals(1785,
+                (int) spreadsheet.getActiveSheet().getColumnWidthInPixels(1));
         assertEquals(1785, spreadsheet.getColW()[1]);
     }
 
@@ -54,6 +55,7 @@ class WideColumnsTest {
                 "{\"colIndexes\": [2], \"newWidths\": [3000]}");
 
         assertEquals(1785, spreadsheet.getColW()[1]);
-        assertEquals(255 * 256, spreadsheet.getActiveSheet().getColumnWidth(1));
+        assertEquals(1785,
+                (int) spreadsheet.getActiveSheet().getColumnWidthInPixels(1));
     }
 }
