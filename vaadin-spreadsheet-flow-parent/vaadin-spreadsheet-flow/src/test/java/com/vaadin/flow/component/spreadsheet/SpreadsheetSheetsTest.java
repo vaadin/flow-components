@@ -33,6 +33,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDxf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTNumFmt;
 
@@ -362,16 +364,75 @@ class SpreadsheetSheetsTest {
         assertEquals(List.of("A", "B"), sheetNames());
     }
 
-    @Test
-    void theSheetShownDeleted_givesWayToTheNextOneShown() {
+    @ParameterizedTest
+    @EnumSource(names = { "HIDDEN", "VERY_HIDDEN" })
+    void theSheetShownDeleted_givesWayToTheNextOneShown(
+            SheetVisibility hidden) {
         sheets("A", "B", "C");
-        hide("B", SheetVisibility.HIDDEN);
+        hide("B", hidden);
         show();
 
         spreadsheet.deleteSheetWithPOIIndex(0);
 
         assertEquals("C", shown());
         assertEquals(List.of("C"), tabs());
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = { "HIDDEN", "VERY_HIDDEN" })
+    void theLastSheetShownDeleted_givesWayToTheOneBefore(
+            SheetVisibility hidden) {
+        sheets("A", "B", "C", "D");
+        hide("B", hidden);
+        hide("D", hidden);
+        show();
+        spreadsheet.setActiveSheetIndex(1);
+
+        spreadsheet.deleteSheetWithPOIIndex(2);
+
+        assertEquals("A", shown());
+    }
+
+    @Test
+    void aSheetDeleted_hasTheFormulasOfTheSheetShownWorkedOutAgain() {
+        sheets("A", "B");
+        workbook.getSheet("A").createRow(0).createCell(0).setCellValue(1);
+        Cell formula = workbook.getSheet("B").createRow(0).createCell(0);
+        formula.setCellFormula("A!A1*10");
+        show();
+        spreadsheet.setActiveSheetIndex(1);
+        clientShowsRows();
+        assertEquals("10", spreadsheet.getCellValue(formula));
+
+        spreadsheet.deleteSheetWithPOIIndex(0);
+        clientShowsRows();
+
+        // Its sheet is gone.
+        assertTrue(spreadsheet.isMarkedAsInvalidFormula(1, 1));
+    }
+
+    @Test
+    void aSheetBeforeTheOneShownDeleted_leavesItShown() {
+        sheets("A", "B", "C", "D");
+        show();
+        spreadsheet.setActiveSheetIndex(2);
+
+        spreadsheet.deleteSheetWithPOIIndex(0);
+
+        assertEquals("C", shown());
+    }
+
+    @Test
+    void theSheetShownDeleted_givesWayToTheNextOne_withItsFrozenPanes() {
+        sheets("A", "B");
+        workbook.getSheet("B").createFreezePane(1, 2);
+        show();
+
+        spreadsheet.deleteSheetWithPOIIndex(0);
+
+        assertEquals("B", shown());
+        assertEquals(2, spreadsheet.getLastFrozenRow());
+        assertEquals(1, spreadsheet.getLastFrozenColumn());
     }
 
     @Test

@@ -21,9 +21,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 final class SheetLifecycleOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;
+    private final ActiveSheetSelector selector;
 
-    SheetLifecycleOperations(Spreadsheet spreadsheet) {
+    SheetLifecycleOperations(Spreadsheet spreadsheet,
+            ActiveSheetSelector selector) {
         this.spreadsheet = spreadsheet;
+        this.selector = selector;
     }
 
     void createNewSheet(String sheetName, int rows, int columns) {
@@ -52,28 +55,36 @@ final class SheetLifecycleOperations implements Serializable {
                     "A workbook must contain at least one visible worksheet");
         }
         Workbook workbook = spreadsheet.workbook;
-        int removedVisibleIndex = spreadsheet
-                .getSpreadsheetSheetIndex(poiSheetIndex);
         workbook.removeSheetAt(poiSheetIndex);
         spreadsheet.forgetScrollPositionOfDeletedSheet(poiSheetIndex);
+        // POI keeps the sheet shown active, or in place of a deleted one
+        // makes the next one active, or the one before when it was the last.
+        // That one can be hidden. The sheet shown is loaded again either way,
+        // as the deleted sheet may have been in its formulas.
+        selector.setActiveSheetWithPOIIndex(
+                nearestShown(workbook, workbook.getActiveSheetIndex()));
+    }
 
-        // POI doesn't seem to shift the active sheet index ...
-        // TODO: This no longer seems to be the case. Remove the following
-        // logic?
-        int oldIndex = spreadsheet.getSheetIndex() - 1;
-        if (removedVisibleIndex <= oldIndex) { // removed before current
-            if (oldIndex == spreadsheet.getNumberOfVisibleSheets()) {
-                // need to shift index backwards if the current sheet is last
-                workbook.setActiveSheet(
-                        spreadsheet.getVisibleSheetPOIIndex(oldIndex - 1));
-            } else {
-                workbook.setActiveSheet(
-                        spreadsheet.getVisibleSheetPOIIndex(oldIndex));
+    /**
+     * The sheet at the index if it is shown, or else the nearest one shown
+     * after it, or else before it.
+     */
+    private static int nearestShown(Workbook workbook, int index) {
+        for (int i = index; i < workbook.getNumberOfSheets(); i++) {
+            if (isShown(workbook, i)) {
+                return i;
             }
         }
-        // reload everything because there is ALWAYS a chance that the
-        // removed sheet affects the currently visible sheet (formulas etc.)
-        spreadsheet.reloadActiveSheetData();
+        int i = index;
+        while (!isShown(workbook, i)) {
+            i--;
+        }
+        return i;
+    }
+
+    private static boolean isShown(Workbook workbook, int index) {
+        return !workbook.isSheetHidden(index)
+                && !workbook.isSheetVeryHidden(index);
     }
 
     void deleteSheet(int sheetIndex) {

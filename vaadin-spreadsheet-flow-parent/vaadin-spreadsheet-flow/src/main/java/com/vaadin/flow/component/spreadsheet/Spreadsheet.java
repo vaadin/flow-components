@@ -1053,7 +1053,7 @@ public class Spreadsheet extends Component
             this, sheetScrollMemory);
 
     private final SheetLifecycleOperations sheetLifecycleOperations = new SheetLifecycleOperations(
-            this);
+            this, activeSheetSelector);
 
     private final SheetMetadataOperations sheetMetadataOperations = new SheetMetadataOperations(
             this);

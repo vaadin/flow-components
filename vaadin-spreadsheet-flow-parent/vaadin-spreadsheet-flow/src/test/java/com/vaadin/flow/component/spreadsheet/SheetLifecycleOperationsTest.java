@@ -9,11 +9,9 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +58,8 @@ class SheetLifecycleOperationsTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        ops = new SheetLifecycleOperations(spreadsheet);
+        ops = new SheetLifecycleOperations(spreadsheet,
+                org.mockito.Mockito.mock(ActiveSheetSelector.class));
         spreadsheet.workbook = workbook;
         lenient().when(spreadsheet.isSheetNameExisting(anyString()))
                 .thenReturn(false);
@@ -142,65 +141,6 @@ class SheetLifecycleOperationsTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> ops.deleteSheetWithPOIIndex(0));
-    }
-
-    @Test
-    void deleteSheetWithPOIIndex_removesFromWorkbook_andReloads() {
-        when(spreadsheet.getNumberOfVisibleSheets()).thenReturn(3);
-        when(spreadsheet.getSpreadsheetSheetIndex(1)).thenReturn(1);
-        when(spreadsheet.getSheetIndex()).thenReturn(3);
-        when(spreadsheet.getVisibleSheetPOIIndex(anyInt())).thenReturn(2);
-
-        ops.deleteSheetWithPOIIndex(1);
-
-        verify(workbook).removeSheetAt(1);
-        verify(spreadsheet).reloadActiveSheetData();
-    }
-
-    @Test
-    void deleteSheetWithPOIIndex_removedBeforeCurrent_shiftsActiveSheet() {
-        // Pin: when the removed sheet's visible index is at-or-before
-        // the current sheet index, the active sheet is shifted to keep
-        // the user on a still-existing sheet.
-        when(spreadsheet.getNumberOfVisibleSheets()).thenReturn(3);
-        when(spreadsheet.getSpreadsheetSheetIndex(1)).thenReturn(1);
-        when(spreadsheet.getSheetIndex()).thenReturn(3); // oldIndex = 2
-        when(spreadsheet.getVisibleSheetPOIIndex(2)).thenReturn(2);
-
-        ops.deleteSheetWithPOIIndex(1);
-
-        verify(workbook).setActiveSheet(2);
-    }
-
-    @Test
-    void deleteSheetWithPOIIndex_removedAfterCurrent_doesNotShiftActive() {
-        // Pin: when the removed sheet is AFTER the current one, no
-        // active-sheet shift is needed.
-        when(spreadsheet.getNumberOfVisibleSheets()).thenReturn(3);
-        when(spreadsheet.getSpreadsheetSheetIndex(2)).thenReturn(2);
-        when(spreadsheet.getSheetIndex()).thenReturn(1); // oldIndex = 0
-
-        ops.deleteSheetWithPOIIndex(2);
-
-        verify(workbook, never()).setActiveSheet(anyInt());
-    }
-
-    @Test
-    void deleteSheetWithPOIIndex_currentSheetIsLast_shiftsBackwards() {
-        // Pin the boundary: when the user is on the LAST visible sheet
-        // and an earlier sheet is removed, the active sheet shifts to
-        // (oldIndex - 1).
-        when(spreadsheet.getNumberOfVisibleSheets()).thenReturn(3);
-        when(spreadsheet.getSpreadsheetSheetIndex(0)).thenReturn(0);
-        when(spreadsheet.getSheetIndex()).thenReturn(4); // oldIndex = 3
-        // After remove, numberOfVisibleSheets is read again (returns 3
-        // because it's a mock). oldIndex (3) == numberOfVisibleSheets (3)
-        // → shift backwards.
-        when(spreadsheet.getVisibleSheetPOIIndex(2)).thenReturn(2);
-
-        ops.deleteSheetWithPOIIndex(0);
-
-        verify(workbook).setActiveSheet(2);
     }
 
     // ----- deleteSheet (visible-index variant) ------------------------------
