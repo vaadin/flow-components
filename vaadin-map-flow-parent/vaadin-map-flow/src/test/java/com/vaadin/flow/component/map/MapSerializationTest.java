@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
@@ -30,6 +31,7 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -185,12 +187,13 @@ class MapSerializationTest {
 
     private ArrayNode getSynchronizedItems() {
         var syncInvocation = ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(invocation -> invocation.getInvocation().getExpression()
-                        .contains("$connector.synchronize"))
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> "$connector.synchronize"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
                 .findFirst().orElseThrow(() -> new AssertionError(
                         "No synchronize invocation found"));
 
-        return (ArrayNode) syncInvocation.getInvocation().getParameters()
+        return (ArrayNode) JsFunctionCallUtil.getArguments(syncInvocation)
                 .get(0);
     }
 

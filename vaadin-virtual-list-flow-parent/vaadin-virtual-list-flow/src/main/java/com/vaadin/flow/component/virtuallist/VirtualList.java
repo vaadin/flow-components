@@ -323,9 +323,9 @@ public class VirtualList<T> extends Component
      * @since 24.3
      */
     public void scrollToIndex(int rowIndex) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0)", rowIndex)));
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                ctx -> getElement().callJsFunction("scrollToIndex", rowIndex)));
     }
 
     /**

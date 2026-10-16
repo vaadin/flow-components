@@ -27,6 +27,7 @@ import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider.HierarchyFormat;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -65,7 +66,7 @@ class TreeGridScrollToIndexTest {
         treeGrid.scrollToIndex(5);
         treeGrid.scrollToIndex(5);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
+        assertSingleJavaScriptScrollCall("scrollToIndex", 5);
     }
 
     @Test
@@ -74,7 +75,7 @@ class TreeGridScrollToIndexTest {
         treeGrid.scrollToIndex(5);
         ui.add(treeGrid);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex", 5);
+        assertSingleJavaScriptScrollCall("scrollToIndex", 5);
     }
 
     @Test
@@ -83,8 +84,7 @@ class TreeGridScrollToIndexTest {
         treeGrid.scrollToIndex(1, 2);
         treeGrid.scrollToIndex(1, 2);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex",
-                new int[] { 1, 2 });
+        assertSingleJavaScriptScrollCall("scrollToIndex", 1, 2);
     }
 
     @Test
@@ -93,8 +93,7 @@ class TreeGridScrollToIndexTest {
         treeGrid.scrollToIndex(1, 2);
         ui.add(treeGrid);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation("scrollToIndex",
-                new int[] { 1, 2 });
+        assertSingleJavaScriptScrollCall("scrollToIndex", 1, 2);
     }
 
     @Test
@@ -103,8 +102,8 @@ class TreeGridScrollToIndexTest {
         treeGrid.scrollToEnd();
         treeGrid.scrollToEnd();
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation(
-                "scrollToIndex(...Array(10).fill(-1))");
+        assertSingleJavaScriptScrollCall("scrollToIndex", -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1);
     }
 
     @Test
@@ -113,8 +112,8 @@ class TreeGridScrollToIndexTest {
         treeGrid.scrollToEnd();
         ui.add(treeGrid);
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation(
-                "scrollToIndex(...Array(10).fill(-1))");
+        assertSingleJavaScriptScrollCall("scrollToIndex", -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1);
     }
 
     @Test
@@ -129,30 +128,31 @@ class TreeGridScrollToIndexTest {
         treeGrid.scrollToStart();
         treeGrid.scrollToEnd();
         ui.fakeClientCommunication();
-        assertSingleJavaScriptScrollInvocation(
-                "scrollToIndex(...Array(10).fill(-1))");
+        assertSingleJavaScriptScrollCall("scrollToIndex", -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, -1);
     }
 
-    private void assertSingleJavaScriptScrollInvocation(
-            String expectedExpression, Object... expectedParams) {
+    private void assertSingleJavaScriptScrollCall(String expectedFunction,
+            Object... expectedArguments) {
         var invocations = getJavaScriptScrollInvocations();
         Assertions.assertEquals(1, invocations.size());
 
         var invocation = invocations.get(0);
-        Assertions.assertTrue(
-                invocation.getExpression().contains(expectedExpression));
-
-        var params = invocation.getParameters();
-        for (int i = 1; i < expectedParams.length; i++) {
-            Assertions.assertEquals(expectedParams[i], params.get(i));
-        }
+        Assertions.assertEquals(expectedFunction,
+                JsFunctionCallUtil.getFunctionName(invocation));
+        Assertions.assertEquals(List.of(expectedArguments),
+                JsFunctionCallUtil.getArguments(invocation));
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("scroll"))
-                .toList();
+                .filter(invocation -> {
+                    var functionName = JsFunctionCallUtil
+                            .getFunctionName(invocation);
+                    return functionName != null
+                            ? functionName.contains("scroll")
+                            : invocation.getExpression().contains("scroll");
+                }).toList();
     }
 }

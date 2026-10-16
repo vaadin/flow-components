@@ -69,7 +69,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     // item properties on render.
     private final BeforeClientResponseAction buttonsUpdate = new BeforeClientResponseAction(
             this,
-            () -> getElement().executeJs("this.$connector.generateItems()"));
+            () -> getElement().callJsFunction("$connector.generateItems"));
 
     /**
      * Creates an empty menu bar component.

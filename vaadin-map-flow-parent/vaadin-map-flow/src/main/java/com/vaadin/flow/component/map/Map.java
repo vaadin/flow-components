@@ -373,10 +373,11 @@ public class Map extends MapBase {
         // with beforeClientResponse to ensure that the client-side connector
         // has been initialized beforehand.
         getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        context -> getElement().executeJs(
-                                "this.$connector.zoomToFit($0, $1)", featureIds,
-                                options)));
+                .runWhenAttached(
+                        ui -> ui.beforeClientResponse(this,
+                                context -> getElement().callJsFunction(
+                                        "$connector.zoomToFit", featureIds,
+                                        options)));
     }
 
     /**
