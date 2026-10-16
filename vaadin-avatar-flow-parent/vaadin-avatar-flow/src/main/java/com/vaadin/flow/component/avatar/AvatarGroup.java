@@ -95,6 +95,7 @@ public class AvatarGroup extends Component
         private Registration resourceRegistration;
 
         private AbstractStreamResource imageResource;
+        private DownloadHandler imageHandler;
 
         /**
          * Creates a new empty avatar group item.
@@ -254,9 +255,15 @@ public class AvatarGroup extends Component
                 handler.inline();
             }
 
-            setImageResource(new StreamResourceRegistry.ElementStreamResource(
+            setImageResource(createHandlerResource(downloadHandler));
+            imageHandler = downloadHandler;
+        }
+
+        private AbstractStreamResource createHandlerResource(
+                DownloadHandler downloadHandler) {
+            return new StreamResourceRegistry.ElementStreamResource(
                     downloadHandler, getHost() != null ? getHost().getElement()
-                            : UI.getCurrentOrThrow().getElement()));
+                            : UI.getCurrentOrThrow().getElement());
         }
 
         /**
@@ -296,6 +303,7 @@ public class AvatarGroup extends Component
         }
 
         private void setResource(AbstractStreamResource resource) {
+            imageHandler = null;
             imageResource = resource;
             bindResource();
         }
@@ -400,6 +408,13 @@ public class AvatarGroup extends Component
                 return;
             }
             this.host = host;
+            if (host != null && imageHandler != null) {
+                // Requests for a handler resource are rejected while its owner
+                // element is detached, so the resource must be owned by the
+                // current host
+                imageResource = createHandlerResource(imageHandler);
+                doSetResource(imageResource);
+            }
             bindResource();
         }
     }

@@ -32,11 +32,16 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.tests.MockUIExtension;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 class AvatarGroupItemImageTest {
 
@@ -277,6 +282,45 @@ class AvatarGroupItemImageTest {
         }
     }
 
+    @Test
+    void setImageHandlerNull_clientItemsUpdated() {
+        item.setImageHandler(createImageHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertTrue(clientItem().hasNonNull("img"));
+
+        item.setImageHandler(null);
+        ui.fakeClientCommunication();
+
+        Assertions.assertFalse(clientItem().hasNonNull("img"));
+    }
+
+    @Test
+    void setImageHandler_itemMovedToOtherGroup_previousGroupDetached_imageOwnedByOtherGroup() {
+        var otherGroup = new AvatarGroup();
+        ui.add(otherGroup);
+        item.setImageHandler(createImageHandler());
+        avatarGroup.remove(item);
+        otherGroup.add(item);
+
+        ui.remove(avatarGroup);
+
+        assertImageIsServed(item.getImage());
+        Assertions.assertSame(otherGroup.getElement(),
+                getOwner(item.getImageResource()));
+    }
+
+    @Test
+    void setImageHandler_itemAddedToGroupLater_imageOwnedByGroup() {
+        var newItem = new AvatarGroupItem("Bob");
+        newItem.setImageHandler(createImageHandler());
+
+        avatarGroup.add(newItem);
+
+        assertImageIsServed(newItem.getImage());
+        Assertions.assertSame(avatarGroup.getElement(),
+                getOwner(newItem.getImageResource()));
+    }
+
     private DownloadHandler createImageHandler() {
         return DownloadHandler.fromInputStream(event -> new DownloadResponse(
                 new ByteArrayInputStream(
@@ -287,6 +331,15 @@ class AvatarGroupItemImageTest {
     private StreamResource createImageResource() {
         return new StreamResource("alice.png", () -> new ByteArrayInputStream(
                 "image".getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private JsonNode clientItem() {
+        return ((ArrayNode) avatarGroup.getElement().getPropertyRaw("items"))
+                .get(0);
+    }
+
+    private Element getOwner(AbstractStreamResource resource) {
+        return ((ElementStreamResource) resource).getOwner();
     }
 
     private void assertImageIsServed(String imageUrl) {

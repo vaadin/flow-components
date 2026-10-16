@@ -67,6 +67,7 @@ public class MessageListItem implements Serializable {
 
     private Registration resourceRegistration;
     private AbstractStreamResource imageResource;
+    private DownloadHandler imageHandler;
 
     private Set<String> themeNames = new LinkedHashSet<>();
     private Set<String> classNames = new LinkedHashSet<>();
@@ -550,9 +551,15 @@ public class MessageListItem implements Serializable {
             handler.inline();
         }
 
-        setUserImageResource(new StreamResourceRegistry.ElementStreamResource(
-                downloadHandler, getHost() != null ? getHost().getElement()
-                        : UI.getCurrentOrThrow().getElement()));
+        setUserImageResource(createHandlerResource(downloadHandler));
+        imageHandler = downloadHandler;
+    }
+
+    private AbstractStreamResource createHandlerResource(
+            DownloadHandler downloadHandler) {
+        return new StreamResourceRegistry.ElementStreamResource(downloadHandler,
+                getHost() != null ? getHost().getElement()
+                        : UI.getCurrentOrThrow().getElement());
     }
 
     /**
@@ -590,6 +597,7 @@ public class MessageListItem implements Serializable {
     }
 
     private void setResource(AbstractStreamResource resource) {
+        imageHandler = null;
         imageResource = resource;
         bindResource();
     }
@@ -626,6 +634,13 @@ public class MessageListItem implements Serializable {
             return;
         }
         this.host = host;
+        if (host != null && imageHandler != null) {
+            // Requests for a handler resource are rejected while its owner
+            // element is detached, so the resource must be owned by the
+            // current host
+            imageResource = createHandlerResource(imageHandler);
+            doSetResource(imageResource);
+        }
         bindResource();
     }
 

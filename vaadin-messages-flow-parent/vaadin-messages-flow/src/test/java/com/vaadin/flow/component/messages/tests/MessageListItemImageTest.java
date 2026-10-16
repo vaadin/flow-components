@@ -32,11 +32,16 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry.ElementStreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.tests.MockUIExtension;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 class MessageListItemImageTest {
 
@@ -278,6 +283,43 @@ class MessageListItemImageTest {
         }
     }
 
+    @Test
+    void setUserImageHandlerNull_clientItemsUpdated() {
+        item.setUserImageHandler(createImageHandler());
+        Assertions.assertTrue(clientItem().hasNonNull("userImg"));
+
+        item.setUserImageHandler(null);
+
+        Assertions.assertFalse(clientItem().hasNonNull("userImg"));
+    }
+
+    @Test
+    void setUserImageHandler_itemMovedToOtherList_previousListDetached_imageOwnedByOtherList() {
+        var otherList = new MessageList();
+        ui.add(otherList);
+        item.setUserImageHandler(createImageHandler());
+        messageList.setItems();
+        otherList.addItem(item);
+
+        ui.remove(messageList);
+
+        assertImageIsServed(item.getUserImage());
+        Assertions.assertSame(otherList.getElement(),
+                getOwner(item.getUserImageResource()));
+    }
+
+    @Test
+    void setUserImageHandler_itemAddedToListLater_imageOwnedByList() {
+        var newItem = new MessageListItem("Hello", null, "Bob");
+        newItem.setUserImageHandler(createImageHandler());
+
+        messageList.addItem(newItem);
+
+        assertImageIsServed(newItem.getUserImage());
+        Assertions.assertSame(messageList.getElement(),
+                getOwner(newItem.getUserImageResource()));
+    }
+
     private DownloadHandler createImageHandler() {
         return DownloadHandler.fromInputStream(event -> new DownloadResponse(
                 new ByteArrayInputStream(
@@ -288,6 +330,18 @@ class MessageListItemImageTest {
     private StreamResource createImageResource() {
         return new StreamResource("alice.png", () -> new ByteArrayInputStream(
                 "image".getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private JsonNode clientItem() {
+        var invocations = ui.dumpPendingJavaScriptInvocations();
+        Assertions.assertEquals(1, invocations.size());
+        var items = (ArrayNode) invocations.getFirst().getInvocation()
+                .getParameters().getFirst();
+        return items.get(0);
+    }
+
+    private Element getOwner(AbstractStreamResource resource) {
+        return ((ElementStreamResource) resource).getOwner();
     }
 
     private void assertImageIsServed(String imageUrl) {
