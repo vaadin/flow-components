@@ -178,6 +178,9 @@ final class SheetOperations implements Serializable {
         }
         workbook.setSheetName(sheetIndex, sheetName);
         spreadsheet.reloadSheetNames();
+        // The formulas that name the sheet now name it anew, and the client
+        // shows the formulas of its cells.
+        spreadsheet.updateMarkedCells();
     }
 
     /** Shows, hides or very hides the sheet at the POI index. */

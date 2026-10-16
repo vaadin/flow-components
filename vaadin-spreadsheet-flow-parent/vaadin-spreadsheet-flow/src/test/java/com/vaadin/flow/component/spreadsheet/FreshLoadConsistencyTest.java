@@ -184,7 +184,7 @@ class FreshLoadConsistencyTest {
             Map.entry("a column autofitted",
                     c -> c.waste(AGAIN, 4, NOT_THERE, 7)),
             Map.entry("a sheet not shown renamed",
-                    c -> c.known("cell H10: .formulaValue")),
+                    c -> c.waste(POPUPS, 2, AGAIN, 2)),
             Map.entry("a cell created", c -> c.waste(POPUPS, 2, AGAIN, 3)),
             Map.entry("a cell's value set", c -> c.waste(POPUPS, 2, AGAIN, 3)),
             Map.entry("a cell's style set", c -> c.waste(POPUPS, 2, AGAIN, 3)),
