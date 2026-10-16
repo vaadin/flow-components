@@ -321,17 +321,21 @@ public class CellSelectionManager implements Serializable {
                 spreadsheet.getRpcProxy().invalidCellAddress();
                 return;
             }
-            if (selectedCellReference == null) {
-                // A named range of another sheet: that sheet is shown, and
-                // its cells are selected once the client has it.
-                return;
-            }
-            individualSelectedCells.clear();
-            spreadsheet.loadCustomEditorOnSelectedCell();
-            fireNewSelectionChangeEvent();
-        } catch (Exception e) {
+        } catch (IllegalArgumentException invalid) {
+            // POI's word for a reference or a name it cannot read
             spreadsheet.getRpcProxy().invalidCellAddress();
+            return;
         }
+        if (selectedCellReference == null) {
+            // A named range of another sheet: that sheet is shown, and its
+            // cells are selected once the client has it.
+            return;
+        }
+        // What the listeners throw is theirs, and reaches the error handler,
+        // as anything a listener throws does.
+        individualSelectedCells.clear();
+        spreadsheet.loadCustomEditorOnSelectedCell();
+        fireNewSelectionChangeEvent();
     }
 
     private void handleCellAddressChange(int rowIndex, int colIndex,

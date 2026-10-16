@@ -9,14 +9,26 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 
 /**
@@ -126,5 +138,52 @@ class InvalidCellAddressTest {
 
         assertEquals("Other", spreadsheet.getActiveSheet().getSheetName());
         verify(rpc, never()).invalidCellAddress();
+    }
+
+    @Test
+    void whatASelectionListenerThrows_goesThrough_andTheAddressStandsValid() {
+        IllegalArgumentException thrown = new IllegalArgumentException(
+                "the listener's");
+        spreadsheet.addSelectionChangeListener(event -> {
+            throw thrown;
+        });
+
+        assertSame(thrown, assertThrows(IllegalArgumentException.class,
+                () -> typeAddress("C3")));
+        verify(rpc, never()).invalidCellAddress();
+    }
+
+    @Test
+    void aFailureNotAboutTheAddress_goesThrough() {
+        doThrow(new IllegalStateException("broken")).when(rpc).showSelectedCell(
+                any(), anyInt(), anyInt(), any(), anyBoolean(), anyBoolean(),
+                anyBoolean());
+
+        assertThrows(IllegalStateException.class, () -> typeAddress("C3"));
+        verify(rpc, never()).invalidCellAddress();
+    }
+
+    @Test
+    void anAddressThatThrowsOutOfTheClassifier_firesNoSelectionEvent() {
+        List<SelectionChangeEvent> fired = new ArrayList<>();
+        spreadsheet.addSelectionChangeListener(fired::add);
+
+        typeAddress("!!!");
+
+        assertEquals(List.of(), fired);
+    }
+
+    @Test
+    void anAddressThatThrowsOutOfTheClassifier_keepsTheCellsAddedToTheSelection() {
+        spreadsheet.getCellSelectionManager().onCellAddToSelectionAndSelected(4,
+                4);
+        List<CellReference> added = new ArrayList<>(spreadsheet
+                .getCellSelectionManager().getIndividualSelectedCells());
+
+        typeAddress("!!!");
+
+        assertFalse(added.isEmpty());
+        assertEquals(added, spreadsheet.getCellSelectionManager()
+                .getIndividualSelectedCells());
     }
 }
