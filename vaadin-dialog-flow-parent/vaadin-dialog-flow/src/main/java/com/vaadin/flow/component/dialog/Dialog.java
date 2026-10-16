@@ -1420,9 +1420,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private void applyModality() {
         getUI().ifPresent(ui -> {
-            boolean modal = isOpened() && isVisible()
-                    && modality == ModalityMode.STRICT;
-            ui.setChildComponentModal(this, modal);
+            ModalityMode mode = isOpened() && isVisible() ? modality
+                    : ModalityMode.MODELESS;
+            ui.setChildComponentModal(this, mode);
         });
     }
 
