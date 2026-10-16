@@ -268,6 +268,52 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateData_parentWithoutId_rejected() {
+            databaseProvider.results = List.of(orgRow(null, "Liisa", null),
+                    orgRow(null, "Tomas", 1));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertNull(controller.getState(),
+                    "a rejected query must not be rendered");
+        }
+
+        @Test
+        void updateData_linkedHierarchy_rendered() {
+            databaseProvider.results = List.of(orgRow(1, "Liisa", null),
+                    orgRow(2, "Tomas", 1), orgRow(3, "Priya", 1));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
+            var org = (NodeSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(2, org.getData().size());
+        }
+
+        @Test
+        void updateData_rootsOnlyHierarchy_rendered() {
+            databaseProvider.results = List.of(orgRow(1, "Liisa", null),
+                    orgRow(2, "Tomas", null));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
+            Assertions.assertNotNull(controller.getState(),
+                    "a hierarchy of roots only is valid and must be rendered");
+        }
+
+        @Test
         void onResponse_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
