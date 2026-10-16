@@ -10,7 +10,6 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -62,29 +61,14 @@ final class RowShiftOrchestrator implements Serializable {
                 .updateDeletedRowsInClientCache(start + 1, end + 1);
         int firstAffectedRow = n < 0 ? startRow + n : startRow;
         int lastAffectedRow = n < 0 ? endRow : endRow + n;
-        if (copyRowHeight || resetOriginalRowHeight) {
-            // might need to increase the size of the row heights array
-            int oldLength = spreadsheet.getRowH().length;
-            int neededLength = endRow + n + 1;
-            float[] rowH = Arrays.copyOf(spreadsheet.getRowH(),
-                    spreadsheet.getRowH().length);
-            if (n > 0 && oldLength < neededLength) {
-                rowH = Arrays.copyOf(rowH, neededLength);
-            }
-            for (int i = firstAffectedRow; i <= lastAffectedRow; i++) {
-                Row row = sheet.getRow(i);
-                if (row != null) {
-                    if (row.getZeroHeight()) {
-                        rowH[i] = 0f;
-                    } else {
-                        rowH[i] = row.getHeightInPoints();
-                    }
-                } else {
-                    rowH[i] = sheet.getDefaultRowHeightInPoints();
-                }
-            }
-            spreadsheet.setRowH(rowH);
+        // The rows moved with their heights, whether hidden or not, and the
+        // rows they left are empty.
+        float[] rowH = RowSizeOperations.heightsCovering(spreadsheet,
+                lastAffectedRow);
+        for (int i = firstAffectedRow; i <= lastAffectedRow; i++) {
+            rowH[i] = SpreadsheetUtil.rowHeightShown(sheet, i);
         }
+        spreadsheet.setRowH(rowH);
 
         if (spreadsheet.overlays().hasOverlays()) {
             spreadsheet.overlays().markReloadFromPoi();

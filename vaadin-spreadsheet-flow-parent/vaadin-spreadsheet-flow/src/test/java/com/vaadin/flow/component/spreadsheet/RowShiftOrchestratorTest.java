@@ -305,12 +305,12 @@ class RowShiftOrchestratorTest {
     }
 
     @Test
-    void shift_copyRowHeightFalse_doesNotUpdateRowHArray() {
-        // Pin: without copyRowHeight or resetOriginalRowHeight, the rowH
-        // array is left untouched. setRowH must not fire.
+    void shift_copyRowHeightFalse_stillUpdatesRowHArray() {
+        // Pin: POI moves the rows with their heights whether or not it
+        // copies them, so the heights shown follow either way.
         orchestrator.shift(0, 2, 5, false, false);
 
-        verify(spreadsheet, never()).setRowH(any());
+        verify(spreadsheet).setRowH(any());
     }
 
     // ----- pre-shift style invalidation for cellsToUpdate ------------------
