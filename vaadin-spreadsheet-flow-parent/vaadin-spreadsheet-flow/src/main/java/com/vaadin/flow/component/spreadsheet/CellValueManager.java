@@ -79,7 +79,14 @@ public class CellValueManager implements Serializable {
     private CellDeletionHandler customCellDeletionHandler;
 
     final CellNumericFormatter numericFormatter = new CellNumericFormatter();
-    final CellFitCalculator fitCalculator = new CellFitCalculator();
+
+    private final CellFitCalculator fitCalculator = new CellFitCalculator();
+
+    /** How wide a character is in each cell style, as the client measures. */
+    CellFitCalculator fitCalculator() {
+        return fitCalculator;
+    }
+
     private final CellDeletionGuard deletionGuard = new CellDeletionGuard(this);
     final ClientCellCache clientCache = new ClientCellCache();
 
@@ -182,7 +189,7 @@ public class CellValueManager implements Serializable {
     }
 
     boolean doesValueFit(Cell cell, String value) {
-        return fitCalculator.doesValueFit(cell, value, getCellWidth(cell));
+        return fitCalculator().doesValueFit(cell, value, getCellWidth(cell));
     }
 
     /**
@@ -1094,7 +1101,7 @@ public class CellValueManager implements Serializable {
      */
     public void onCellStyleWidthRatioUpdate(
             HashMap<Integer, Float> cellStyleWidthRatioMap) {
-        boolean changed = fitCalculator
+        boolean changed = fitCalculator()
                 .onWidthRatioUpdate(cellStyleWidthRatioMap);
         if (changed && spreadsheet.getFirstColumn() != -1) {
             // Whether a value fits its column - and so whether it is

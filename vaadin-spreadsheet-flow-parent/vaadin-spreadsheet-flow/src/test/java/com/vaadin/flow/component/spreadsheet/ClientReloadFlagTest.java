@@ -77,13 +77,7 @@ class ClientReloadFlagTest {
         lenient().when(spreadsheet.getCellSelectionManager())
                 .thenReturn(selectionManager);
 
-        // sheetState is a package-private field on Spreadsheet — wire it
-        // via reflection on the mock (same pattern as CellDeletionGuardTest
-        // and CellMarkUpdaterTest).
-        java.lang.reflect.Field f = Spreadsheet.class
-                .getDeclaredField("sheetState");
-        f.setAccessible(true);
-        f.set(spreadsheet, sheetState);
+        lenient().when(spreadsheet.sheetState()).thenReturn(sheetState);
 
         flag = new ClientReloadFlag();
     }

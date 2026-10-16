@@ -91,10 +91,11 @@ class CellDataBuilderTest {
         wireField("spreadsheet", spreadsheet);
         wireField("numericFormatter", numericFormatter);
         wireField("formulaFormatter", formulaFormatter);
-        wireField("fitCalculator", fitCalculator);
         wireField("clientCache", clientCache);
 
         // Mocked methods the builder calls back through.
+        org.mockito.Mockito.lenient().when(manager.fitCalculator())
+                .thenReturn(fitCalculator);
         org.mockito.Mockito.lenient().when(manager.getFormulaEvaluator())
                 .thenReturn(formulaEvaluator);
         org.mockito.Mockito.lenient()

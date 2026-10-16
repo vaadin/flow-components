@@ -26,11 +26,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 final class SheetOperations implements Serializable {
 
     private final Spreadsheet spreadsheet;
-    private final SheetScrollMemory scrollMemory;
 
-    SheetOperations(Spreadsheet spreadsheet, SheetScrollMemory scrollMemory) {
+    SheetOperations(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        this.scrollMemory = scrollMemory;
     }
 
     /** Shows the sheet of the tab at the index. */
@@ -77,8 +75,8 @@ final class SheetOperations implements Serializable {
      * when it is shown again.
      */
     void onSheetSelected(int tabIndex, int scrollLeft, int scrollTop) {
-        scrollMemory.rememberForSheetAtIndex(spreadsheet.getSheetIndex() - 1,
-                scrollLeft, scrollTop);
+        spreadsheet.workbookScope().scrollMemory.rememberForSheetAtIndex(
+                spreadsheet.getSheetIndex() - 1, scrollLeft, scrollTop);
         Sheet oldSheet = spreadsheet.getActiveSheet();
         spreadsheet.setActiveSheetIndex(tabIndex);
         spreadsheet.fireSheetChangeEvent(oldSheet,
@@ -87,8 +85,8 @@ final class SheetOperations implements Serializable {
 
     /** The client added a sheet, of the size new sheets have. */
     void onNewSheetCreated(int scrollLeft, int scrollTop) {
-        scrollMemory.rememberForSheetAtIndex(spreadsheet.getSheetIndex() - 1,
-                scrollLeft, scrollTop);
+        spreadsheet.workbookScope().scrollMemory.rememberForSheetAtIndex(
+                spreadsheet.getSheetIndex() - 1, scrollLeft, scrollTop);
         spreadsheet.createNewSheet(null, spreadsheet.defaultNewSheetRows,
                 spreadsheet.defaultNewSheetColumns);
     }

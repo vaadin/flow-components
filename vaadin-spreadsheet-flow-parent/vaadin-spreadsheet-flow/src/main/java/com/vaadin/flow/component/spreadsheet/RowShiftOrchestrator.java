@@ -134,9 +134,8 @@ final class RowShiftOrchestrator implements Serializable {
         }
         // POI moves and removes the merged regions itself, and
         // updateMergedRegions() below passes its result to the client.
-        spreadsheet.popupButtonRegistry.shiftRows(startRow, endRow, n);
-        spreadsheet.invalidFormulaTracker.shiftActiveSheetRows(startRow, endRow,
-                n);
+        spreadsheet.popupButtons().shiftRows(startRow, endRow, n);
+        spreadsheet.invalidFormulas().shiftActiveSheetRows(startRow, endRow, n);
 
         for (Cell cell : cellsToUpdate) {
             styler.cellStyleUpdated(cell, false);

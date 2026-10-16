@@ -206,11 +206,12 @@ class SpreadsheetCellUpdatesTest {
         sheet.createRow(3).createCell(0).setCellValue(7);
         show();
         // Rather than every formula worked out again.
-        Field field = Spreadsheet.class.getDeclaredField("formulaEvaluator");
+        WorkbookScope scope = spreadsheet.workbookScope();
+        Field field = WorkbookScope.class.getDeclaredField("formulaEvaluator");
         field.setAccessible(true);
         FormulaEvaluator evaluator = Mockito
-                .spy((FormulaEvaluator) field.get(spreadsheet));
-        field.set(spreadsheet, evaluator);
+                .spy((FormulaEvaluator) field.get(scope));
+        field.set(scope, evaluator);
         spreadsheet.setSelection("A1:A2");
 
         TestHelper.fireClientEvent(spreadsheet, "selectionIncreasePainted",

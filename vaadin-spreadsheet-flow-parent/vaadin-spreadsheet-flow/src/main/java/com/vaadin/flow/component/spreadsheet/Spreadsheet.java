@@ -33,7 +33,6 @@ import java.util.UUID;
 import java.util.function.IntPredicate;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -632,7 +631,7 @@ public class Spreadsheet extends Component
     }
 
     void onPopupButtonClick(int row, int column) {
-        PopupButton popup = popupButtonRegistry
+        PopupButton popup = popupButtons()
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
                         new CellReference(getActiveSheet().getSheetName(),
                                 row - 1, column - 1, false, false)));
@@ -642,7 +641,7 @@ public class Spreadsheet extends Component
     }
 
     void onPopupClose(int row, int column) {
-        PopupButton popup = popupButtonRegistry
+        PopupButton popup = popupButtons()
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
                         new CellReference(getActiveSheet().getSheetName(),
                                 row - 1, column - 1, false, false)));
@@ -702,13 +701,11 @@ public class Spreadsheet extends Component
     /**
      * A common formula evaluator for this Spreadsheet
      */
-    private FormulaEvaluator formulaEvaluator;
 
     /**
      * A common conditional formatting formula evaluator for this Spreadsheet
      * needed for proper value string conversions
      */
-    private ConditionalFormattingEvaluator conditionalFormattingEvaluator;
 
     private SpreadsheetClientRpc clientRpc = new SpreadsheetClientRpc() {
         @Override
@@ -938,7 +935,6 @@ public class Spreadsheet extends Component
         public String getHyperlinkFunctionTarget(Cell cell);
     }
 
-    private SpreadsheetStyleFactory styler;
     private HyperlinkCellClickHandler hyperlinkCellClickHandler;
 
     private final CellSelectionManager selectionManager = new CellSelectionManager(
@@ -949,7 +945,6 @@ public class Spreadsheet extends Component
             this);
     private final SpreadsheetHistoryManager historyManager = new SpreadsheetHistoryManager(
             this);
-    private ConditionalFormatter conditionalFormatter;
 
     /**
      * caches data, so it needs to be stable for the life of a given workbook
@@ -981,7 +976,8 @@ public class Spreadsheet extends Component
 
     Workbook workbook;
 
-    SheetState sheetState = new SheetState(this);
+    /** What lives as long as the workbook shown, made anew for each. */
+    private WorkbookScope workbookScope;
 
     /** image sizes need to be recalculated on column/row resizing */
     final SheetOverlayManager sheetOverlayManager = new SheetOverlayManager(
@@ -1015,19 +1011,7 @@ public class Spreadsheet extends Component
     private final CustomComponentLoader customComponentLoader = new CustomComponentLoader(
             this);
 
-    final PopupButtonRegistry popupButtonRegistry = new PopupButtonRegistry(
-            this);
-
-    private final TableRegistry tableRegistry = new TableRegistry();
-
-    private final SheetScrollMemory sheetScrollMemory = new SheetScrollMemory(
-            this);
-
-    private final SheetOperations sheetOperations = new SheetOperations(this,
-            sheetScrollMemory);
-
-    final InvalidFormulaTracker invalidFormulaTracker = new InvalidFormulaTracker(
-            this);
+    private final SheetOperations sheetOperations = new SheetOperations(this);
 
     private final RowShiftOrchestrator rowShiftOrchestrator = new RowShiftOrchestrator(
             this);
@@ -2520,7 +2504,7 @@ public class Spreadsheet extends Component
      * @return the common {@link FormulaEvaluator} instance.
      */
     public FormulaEvaluator getFormulaEvaluator() {
-        return formulaEvaluator;
+        return workbookScope.formulaEvaluator;
     }
 
     /**
@@ -2530,7 +2514,7 @@ public class Spreadsheet extends Component
      * @return the common {@link ConditionalFormattingEvaluator} instance.
      */
     public ConditionalFormattingEvaluator getConditionalFormattingEvaluator() {
-        return conditionalFormattingEvaluator;
+        return workbookScope.formattingEvaluator;
     }
 
     void updateMergedRegions() {
@@ -2682,7 +2666,7 @@ public class Spreadsheet extends Component
      * Reloads all the styles for the currently active sheet.
      */
     public void reloadActiveSheetStyles() {
-        styler.reloadActiveSheetCellStyles();
+        workbookScope.styler.reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3001,40 +2985,52 @@ public class Spreadsheet extends Component
 
     void clearSheetServerSide() {
         workbook = null;
-        styler = null;
 
         valueManager.clearCachedContent();
         selectionManager.clear();
         historyManager.clear();
-        invalidFormulaTracker.clearAll();
-        popupButtonRegistry.clear();
-        sheetState.clear();
         sheetOverlayManager.clear();
     }
 
     void setInternalWorkbook(Workbook workbook) {
         this.workbook = workbook;
-        formulaEvaluator = workbook.getCreationHelper()
-                .createFormulaEvaluator();
-        // currently all formula implementations extend BaseFormulaEvaluator
-        conditionalFormattingEvaluator = new ConditionalFormattingEvaluator(
-                workbook, (BaseFormulaEvaluator) formulaEvaluator);
+        if (workbookScope != null) {
+            workbookScope.close();
+        }
+        workbookScope = new WorkbookScope(this, workbook);
+        // Through the method an application may override, once the scope is
+        // in place for it to read.
+        workbookScope.styler = createSpreadsheetStyleFactory();
 
-        styler = createSpreadsheetStyleFactory();
-
-        sheetScrollMemory.clear();
         reloadActiveSheetData();
         if (workbook instanceof HSSFWorkbook hssf) {
             setWorkbookProtected(hssf.isWriteProtected());
         } else if (workbook instanceof XSSFWorkbook xssf) {
             setWorkbookProtected(xssf.isStructureLocked());
         }
-        // clear all tables from memory
-        tableRegistry.clear();
 
-        conditionalFormatter = createConditionalFormatter();
+        workbookScope.conditionalFormatter = createConditionalFormatter();
 
         setWorkbookChangeToggle(!isWorkbookChangeToggle());
+    }
+
+    /** The pop-up buttons of the workbook shown. */
+    PopupButtonRegistry popupButtons() {
+        return workbookScope.popupButtons;
+    }
+
+    /** The cells of the workbook shown marked as holding invalid formulas. */
+    InvalidFormulaTracker invalidFormulas() {
+        return workbookScope.invalidFormulas;
+    }
+
+    /** What each sheet of the workbook shown was left with. */
+    SheetState sheetState() {
+        return workbookScope.sheetState;
+    }
+
+    WorkbookScope workbookScope() {
+        return workbookScope;
     }
 
     /**
@@ -3085,15 +3081,15 @@ public class Spreadsheet extends Component
 
         customComponentLoader.unloadAll();
 
-        popupButtonRegistry.detachAll();
+        popupButtons().detachAll();
 
         // clear all tables, possible tables for new/changed sheet are added
         // after first round trip.
-        tableRegistry.markNeedsReload();
+        workbookScope.tables.markNeedsReload();
 
         reloadSheetNames();
         updateMergedRegions();
-        styler.reloadActiveSheetColumnRowStyles();
+        workbookScope.styler.reloadActiveSheetColumnRowStyles();
         setDisplayGridlines(getActiveSheet().isDisplayGridlines());
         setDisplayRowColHeadings(getActiveSheet().isDisplayRowColHeadings());
 
@@ -3164,7 +3160,7 @@ public class Spreadsheet extends Component
         }
         setSheetNames(
                 sheetNamesList.toArray(new String[sheetNamesList.size()]));
-        sheetScrollMemory.publish();
+        workbookScope.scrollMemory.publish();
     }
 
     /**
@@ -3172,7 +3168,7 @@ public class Spreadsheet extends Component
      * been deleted.
      */
     void forgetScrollPositionOfDeletedSheet(int poiSheetIndex) {
-        sheetScrollMemory.sheetDeleted(poiSheetIndex);
+        workbookScope.scrollMemory.sheetDeleted(poiSheetIndex);
     }
 
     /**
@@ -3323,7 +3319,7 @@ public class Spreadsheet extends Component
      * @return The current style factory.
      */
     public SpreadsheetStyleFactory getSpreadsheetStyleFactory() {
-        return styler;
+        return workbookScope.styler;
     }
 
     /**
@@ -3616,7 +3612,7 @@ public class Spreadsheet extends Component
      *            removes the pop-up button for the target cell.
      */
     public void setPopup(CellReference cellReference, PopupButton popupButton) {
-        popupButtonRegistry.set(
+        popupButtons().set(
                 SpreadsheetUtil.relativeToAbsolute(this, cellReference),
                 popupButton);
     }
@@ -3626,7 +3622,7 @@ public class Spreadsheet extends Component
      * visible cells.
      */
     void loadPopupButtons() {
-        popupButtonRegistry.refresh();
+        popupButtons().refresh();
     }
 
     /**
@@ -3650,7 +3646,7 @@ public class Spreadsheet extends Component
      *            The table to register
      */
     public void registerTable(SpreadsheetTable table) {
-        tableRegistry.add(table);
+        workbookScope.tables.add(table);
         if (table instanceof SpreadsheetFilterTable filterTable) {
             columnAutofitter.refreshAutofittedColumnsInTable(filterTable);
         }
@@ -3668,7 +3664,7 @@ public class Spreadsheet extends Component
      *            The table to unregister
      */
     public void unregisterTable(SpreadsheetTable table) {
-        tableRegistry.remove(table);
+        workbookScope.tables.remove(table);
     }
 
     /**
@@ -3702,7 +3698,7 @@ public class Spreadsheet extends Component
      * @return All tables for this spreadsheet
      */
     public HashSet<SpreadsheetTable> getTables() {
-        return tableRegistry.getAll();
+        return workbookScope.tables.getAll();
     }
 
     /**
@@ -3712,14 +3708,14 @@ public class Spreadsheet extends Component
      * @return All tables for the currently active sheet
      */
     public List<SpreadsheetTable> getTablesForActiveSheet() {
-        return tableRegistry.getForSheet(getActiveSheet());
+        return workbookScope.tables.getForSheet(getActiveSheet());
     }
 
     /**
      * Reload tables for current sheet
      */
     private void loadTables() {
-        tableRegistry.reloadForSheet(getActiveSheet());
+        workbookScope.tables.reloadForSheet(getActiveSheet());
     }
 
     /**
@@ -4313,7 +4309,7 @@ public class Spreadsheet extends Component
     protected void onConnectorInit() {
         reloadCellDataOnNextScroll = true;
         valueManager.clearCachedContent();
-        popupButtonRegistry.forgetClient();
+        popupButtons().forgetClient();
     }
 
     /**
@@ -4396,7 +4392,7 @@ public class Spreadsheet extends Component
      * @return the {@link ConditionalFormatter} used by this {@link Spreadsheet}
      */
     public ConditionalFormatter getConditionalFormatter() {
-        return conditionalFormatter;
+        return workbookScope.conditionalFormatter;
     }
 
     /**
@@ -4732,7 +4728,7 @@ public class Spreadsheet extends Component
      *            row index, 1-based
      */
     void markInvalidFormula(int col, int row) {
-        invalidFormulaTracker.mark(col, row);
+        invalidFormulas().mark(col, row);
     }
 
     /**
@@ -4746,11 +4742,11 @@ public class Spreadsheet extends Component
      * @see #markInvalidFormula(int, int)
      */
     boolean isMarkedAsInvalidFormula(int col, int row) {
-        return invalidFormulaTracker.isMarked(col, row);
+        return invalidFormulas().isMarked(col, row);
     }
 
     void removeInvalidFormulaMark(int col, int row) {
-        invalidFormulaTracker.removeMark(col, row);
+        invalidFormulas().removeMark(col, row);
     }
 
     public void addSheetOverlay(SheetOverlayWrapper image) {

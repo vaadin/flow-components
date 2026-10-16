@@ -78,7 +78,7 @@ final class ClientReloadFlag implements Serializable {
                 System.currentTimeMillis());
         pending = false;
         if (spreadsheet.initialSheetSelection == null) {
-            String selectedCellsOnSheet = spreadsheet.sheetState
+            String selectedCellsOnSheet = spreadsheet.sheetState()
                     .getSelectedCellsOnSheet(spreadsheet.getActiveSheet());
             spreadsheet.initialSheetSelection = selectedCellsOnSheet == null
                     ? "A1"

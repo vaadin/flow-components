@@ -96,12 +96,14 @@ class RowShiftOrchestratorTest {
         lenient().when(spreadsheet.getLastRow()).thenReturn(10);
         lenient().when(spreadsheet.getLastColumn()).thenReturn(3);
 
-        // sheetOverlayManager, popupButtonRegistry, invalidFormulaTracker
-        // are package-private final fields on Spreadsheet — wire via
-        // reflection on the mock.
+        // sheetOverlayManager is a package-private final field on
+        // Spreadsheet — wire via reflection on the mock; the pop-up buttons
+        // and invalid formula marks come from the workbook's scope.
         wireField("sheetOverlayManager", sheetOverlayManager);
-        wireField("popupButtonRegistry", popupButtonRegistry);
-        wireField("invalidFormulaTracker", invalidFormulaTracker);
+        lenient().when(spreadsheet.popupButtons())
+                .thenReturn(popupButtonRegistry);
+        lenient().when(spreadsheet.invalidFormulas())
+                .thenReturn(invalidFormulaTracker);
 
         orchestrator = new RowShiftOrchestrator(spreadsheet);
     }

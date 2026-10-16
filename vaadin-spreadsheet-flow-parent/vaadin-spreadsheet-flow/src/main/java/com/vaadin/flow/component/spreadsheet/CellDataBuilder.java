@@ -152,7 +152,7 @@ final class CellDataBuilder implements Serializable {
                                         .getScientificNotationStringForNumericCell(
                                                 cell.getNumericCellValue(),
                                                 formattedCellValue,
-                                                manager.fitCalculator
+                                                manager.fitCalculator()
                                                         .getRatioForStyleIndex(
                                                                 (int) cell
                                                                         .getCellStyle()
@@ -258,7 +258,7 @@ final class CellDataBuilder implements Serializable {
      */
     private int spillWidth(Cell cell, String value) {
         Spreadsheet spreadsheet = manager.spreadsheet;
-        int textWidth = manager.fitCalculator.estimateWidth(cell, value);
+        int textWidth = manager.fitCalculator().estimateWidth(cell, value);
         if (textWidth < 0) {
             // No width ratio reported yet, so there is nothing to measure
             // against. The client asks again once it has one.
