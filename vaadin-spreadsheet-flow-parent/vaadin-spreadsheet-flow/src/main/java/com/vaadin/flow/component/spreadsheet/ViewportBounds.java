@@ -88,8 +88,12 @@ final class ViewportBounds implements Serializable {
         scanOnTheSheet(firstRow, firstColumn, lastRow, lastColumn, scan);
     }
 
-    private static void scanOnTheSheet(int firstRow, int firstColumn,
-            int lastRow, int lastColumn, PaneScan scan) {
+    /**
+     * Scans the cells of a pane, unless it starts before the first row or
+     * column: where the client is has not been reported.
+     */
+    static void scanOnTheSheet(int firstRow, int firstColumn, int lastRow,
+            int lastColumn, PaneScan scan) {
         if (firstRow >= 1 && firstColumn >= 1) {
             scan.scan(firstRow, firstColumn, lastRow, lastColumn);
         }

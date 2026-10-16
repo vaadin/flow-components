@@ -414,48 +414,11 @@ class FreshLoadConsistencyTest {
      * the client has not seen the spreadsheet yet, by case name and when.
      */
     private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
-            .ofEntries(Map.entry("a cell created, before ATTACHED", List.of(
-                    "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("a cell created, before FIRST_RESPONSE", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("a cell's value set, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("a cell's value set, before FIRST_RESPONSE", List
-                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("a cell's style set, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("a cell's style set, before FIRST_RESPONSE", List
-                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("a cell deleted, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("a cell deleted, before FIRST_RESPONSE", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("rows shifted up, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("rows shifted up, before FIRST_RESPONSE", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("rows deleted, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("rows deleted, before FIRST_RESPONSE", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("cells merged, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("cells merged, before FIRST_RESPONSE", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("cells unmerged, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("cells unmerged, before FIRST_RESPONSE", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("the cells shown reloaded, before ATTACHED", List
-                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("the cells shown reloaded, before FIRST_RESPONSE",
-                            List.of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
-                    Map.entry("rows shifted down, before ATTACHED", List.of(
-                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0",
-                            "property mergedRegions")),
-                    Map.entry("rows shifted down, before FIRST_RESPONSE", List
-                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0",
-                                    "property mergedRegions")),
+            .ofEntries(
+                    Map.entry("rows deleted, before ATTACHED",
+                            List.of("threw java.lang.NullPointerException")),
+                    Map.entry("rows deleted, before FIRST_RESPONSE",
+                            List.of("threw java.lang.NullPointerException")),
                     Map.entry("the sheet protected, before ATTACHED",
                             List.of("property lockFormatColumns",
                                     "property lockFormatRows",
