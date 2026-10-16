@@ -512,6 +512,21 @@ class SpreadsheetSheetsTest {
         assertEquals(List.of("A", "B"), tabs());
     }
 
+    @ParameterizedTest
+    @EnumSource(names = { "HIDDEN", "VERY_HIDDEN" })
+    void theLastTabsSheetHidden_givesWayToTheOneBefore_pastHiddenSheets(
+            SheetVisibility hidden) {
+        sheets("A", "B", "C");
+        hide("C", hidden);
+        show();
+        spreadsheet.setActiveSheetIndex(1);
+
+        spreadsheet.setSheetHidden(1, SheetVisibility.HIDDEN);
+
+        assertEquals("A", shown());
+        assertEquals(List.of("A"), tabs());
+    }
+
     @Test
     void theSheetShownHidden_givesWayToTheNextOne_withItsFrozenPanesAndBorders() {
         sheets("A", "B");

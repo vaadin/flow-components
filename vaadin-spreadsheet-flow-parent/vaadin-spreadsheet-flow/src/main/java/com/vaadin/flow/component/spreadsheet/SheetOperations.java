@@ -204,21 +204,10 @@ final class SheetOperations implements Serializable {
             spreadsheet.setSheetIndex(
                     spreadsheet.getSpreadsheetSheetIndex(activeSheetIndex) + 1);
         } else {
-            // the active sheet can only be hidden (not "made visible to
-            // become active") through this branch
-            int oldVisibleSheetIndex = spreadsheet.getSheetIndex() - 1;
-            if (!shown
-                    && activeSheetIndex == (workbook.getNumberOfSheets() - 1)) {
-                // hiding the active sheet, and it was the last sheet
-                oldVisibleSheetIndex--;
-            }
-            int newActiveSheetIndex = spreadsheet
-                    .getVisibleSheetPOIIndex(oldVisibleSheetIndex);
-            workbook.setActiveSheet(newActiveSheetIndex);
-            spreadsheet.reloadActiveSheetData();
-            SpreadsheetFactory.reloadSpreadsheetData(spreadsheet,
-                    spreadsheet.getActiveSheet());
-            spreadsheet.reloadSheetStyles(false, false);
+            // The sheet shown was hidden: the next sheet shown takes its
+            // place, or else the one before.
+            setActiveSheetWithPOIIndex(
+                    nearestShown(workbook, activeSheetIndex));
         }
     }
 
