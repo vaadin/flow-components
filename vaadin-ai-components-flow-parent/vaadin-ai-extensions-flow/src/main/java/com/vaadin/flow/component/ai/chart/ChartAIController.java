@@ -9,7 +9,7 @@
 package com.vaadin.flow.component.ai.chart;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -282,7 +282,7 @@ public class ChartAIController implements AIController {
                     + " column, so no row can be linked to a parent. Give "
                     + "every row an " + ColumnNames.ID + "." + fix);
         }
-        var ids = new LinkedHashSet<String>();
+        var ids = new HashSet<String>();
         var parents = new ArrayList<String>();
         for (var row : rows) {
             Optional.ofNullable(row.get(idColumn)).map(String::valueOf)
@@ -290,13 +290,12 @@ public class ChartAIController implements AIController {
             Optional.ofNullable(row.get(parentColumn)).map(String::valueOf)
                     .ifPresent(parents::add);
         }
+        // Describes the mismatch without quoting a value: like the rest of
+        // the query results, row values never reach the LLM
         if (!parents.isEmpty() && parents.stream().noneMatch(ids::contains)) {
             throw new ToolException("Query " + queryNumber + ": no "
                     + ColumnNames.PARENT + " value matches an " + ColumnNames.ID
-                    + " of the rows (" + ColumnNames.PARENT + " '"
-                    + parents.getFirst() + "', " + ColumnNames.ID + " '"
-                    + ids.stream().findFirst().orElse("NULL")
-                    + "'), so no row is linked to a parent." + fix);
+                    + " of the rows, so no row is linked to a parent." + fix);
         }
     }
 

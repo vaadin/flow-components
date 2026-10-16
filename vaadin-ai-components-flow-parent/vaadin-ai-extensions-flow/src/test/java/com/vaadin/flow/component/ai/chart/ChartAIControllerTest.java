@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -248,6 +249,22 @@ class ChartAIControllerTest {
             Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
             Assertions.assertFalse(result.contains("internal detail"),
                     "The cause must not reach the LLM, got: " + result);
+        }
+
+        @Test
+        void updateData_unlinkedHierarchy_errorKeepsRowValuesFromLlm() {
+            // _id holds names while _parent holds numeric manager ids
+            databaseProvider.results = List.of(
+                    orgRow("Liisa Kallio", "Liisa Kallio", null),
+                    orgRow("Tomas Novak", "Tomas Novak", 1));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertFalse(result.contains("Liisa Kallio"), result);
+            Assertions.assertFalse(result.contains("Tomas Novak"), result);
         }
 
         @Test
@@ -1107,6 +1124,17 @@ class ChartAIControllerTest {
 
     private static JsonNode json(String json) {
         return JacksonUtils.readTree(json);
+    }
+
+    /** A row of organization chart data; {@code null} leaves a column empty. */
+    private static Map<String, Object> orgRow(Object id, String name,
+            Object parent) {
+        var row = new LinkedHashMap<String, Object>();
+        row.put("_id", id);
+        row.put("_name", name);
+        row.put("_parent", parent);
+        row.put("_title", "Staff");
+        return row;
     }
 
     private static class TestDatabaseProvider implements DatabaseProvider {
