@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -535,9 +536,16 @@ class SpreadsheetSheetsTest {
                 () -> spreadsheet.setSheetProtected(-1, "secret"));
     }
 
-    /** Shows A and B, with an editor for every cell, and B2 selected. */
+    /**
+     * Shows A and B, with an editor for every cell, and B2 selected. C3 of A is
+     * not locked.
+     */
     private void showWithEditors() {
         sheets("A", "B");
+        CellStyle unlocked = workbook.createCellStyle();
+        unlocked.setLocked(false);
+        workbook.getSheet("A").createRow(2).createCell(2)
+                .setCellStyle(unlocked);
         spreadsheet = new Spreadsheet(workbook);
         spreadsheet.setSpreadsheetComponentFactory(
                 new SpreadsheetComponentFactory() {
@@ -568,8 +576,36 @@ class SpreadsheetSheetsTest {
     }
 
     private Component editorOfB2() {
+        return editorOf(2, 2);
+    }
+
+    private Component editorOf(int column, int row) {
         return spreadsheet.getCellKeyToEditorMap()
-                .get(SpreadsheetUtil.toKey(2, 2));
+                .get(SpreadsheetUtil.toKey(column, row));
+    }
+
+    @Test
+    void theSheetShownProtected_takesTheEditorsOffItsLockedCellsOnly() {
+        showWithEditors();
+        Component editor = editorOfB2();
+        assertNotNull(editor);
+        assertNotNull(editorOf(3, 3));
+
+        spreadsheet.setActiveSheetProtected("secret");
+
+        assertNull(editorOfB2());
+        assertNull(editor.getElement().getParent(), "and it is off the sheet");
+        assertNotNull(editorOf(3, 3), "C3 is not locked");
+    }
+
+    @Test
+    void theSheetShownUnprotected_putsTheEditorsBack() {
+        showWithEditors();
+        spreadsheet.setActiveSheetProtected("secret");
+
+        spreadsheet.setActiveSheetProtected(null);
+
+        assertNotNull(editorOfB2());
     }
 
     @Test

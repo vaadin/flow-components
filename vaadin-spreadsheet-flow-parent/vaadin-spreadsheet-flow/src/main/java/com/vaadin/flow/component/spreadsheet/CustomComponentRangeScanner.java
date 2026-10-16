@@ -103,6 +103,11 @@ final class CustomComponentRangeScanner implements Serializable {
                                 newCustomComponents.add(customEditor);
                                 rowsWithComponents.add(r);
                             }
+                        } else {
+                            // Locked now, as when the sheet is protected: the
+                            // editor it had goes.
+                            cellKeyToEditor.remove(
+                                    SpreadsheetUtil.toKey(c + 1, r + 1));
                         }
                     } catch (Exception e) {
                         LOGGER.warn(
