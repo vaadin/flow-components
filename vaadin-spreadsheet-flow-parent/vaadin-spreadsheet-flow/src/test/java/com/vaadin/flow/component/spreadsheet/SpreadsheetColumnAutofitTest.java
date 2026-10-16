@@ -10,7 +10,10 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.ref.WeakReference;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -155,6 +158,45 @@ class SpreadsheetColumnAutofitTest {
         putFilterOver("B3:B5");
 
         assertEquals(width, spreadsheet.getColW()[1]);
+    }
+
+    @Test
+    void anAutofittedColumn_isAutofittedAgain_afterTheGarbageIsCollected() {
+        spreadsheet.autofitColumn(0);
+        spreadsheet.autofitColumn(1);
+        collectGarbage();
+
+        putFilterOver("B3:B5");
+
+        assertEquals(spreadsheet.getColW()[0] + FILTER_BUTTON,
+                spreadsheet.getColW()[1]);
+    }
+
+    @Test
+    void aColumnAutofittedInAnotherWorkbook_isNotAutofitted_whenAFilterIsPutOverIt() {
+        spreadsheet.autofitColumn(1);
+        int width = spreadsheet.getColW()[1];
+        // A workbook of a sheet of the same name, with a column B as wide.
+        XSSFWorkbook other = new XSSFWorkbook();
+        Sheet sheet = other.createSheet(workbook.getSheetName(0));
+        for (int row = 2; row < 5; row++) {
+            sheet.createRow(row).createCell(1).setCellValue("x");
+        }
+        sheet.setColumnWidth(1, SpreadsheetUtil.columnWidthUnits(sheet, width));
+        spreadsheet.setWorkbook(other);
+
+        putFilterOver("B3:B5");
+
+        assertEquals(width, spreadsheet.getColW()[1]);
+    }
+
+    /** Collects the garbage: what is held only weakly is let go. */
+    private static void collectGarbage() {
+        WeakReference<Object> weak = new WeakReference<>(new Object());
+        for (int i = 0; weak.get() != null && i < 100; i++) {
+            System.gc();
+        }
+        assertNull(weak.get(), "the garbage is collected");
     }
 
     @Test

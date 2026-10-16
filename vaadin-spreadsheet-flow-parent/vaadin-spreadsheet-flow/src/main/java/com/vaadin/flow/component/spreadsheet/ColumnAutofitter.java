@@ -9,8 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
@@ -23,12 +21,9 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
  * Runs POI's {@code Sheet.autoSizeColumn} on a column and applies the resulting
  * pixel width. Adds padding for filter-popup-button columns so the autofit
  * doesn't truncate the button itself.
- *
  * <p>
- * Owns the per-Spreadsheet cache of autofitted widths keyed by absolute
- * {@code CellReference} (anchored at the column's row 0). The cache is a
- * {@link WeakHashMap} so cell references held only by the cache don't prevent
- * GC.
+ * The widths the columns were autofitted to are kept with the workbook, for a
+ * filter put over a column to autofit it again.
  */
 final class ColumnAutofitter implements Serializable {
 
@@ -44,7 +39,6 @@ final class ColumnAutofitter implements Serializable {
     private static final int FILTER_BUTTON_PIXEL_PADDING = 2;
 
     private final Spreadsheet spreadsheet;
-    private final Map<CellReference, Integer> autofittedColumnWidths = new WeakHashMap<>();
 
     ColumnAutofitter(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -72,8 +66,8 @@ final class ColumnAutofitter implements Serializable {
         }
         int width = withRoomForFilterButton(columnIndex,
                 (int) activeSheet.getColumnWidthInPixels(columnIndex));
-        autofittedColumnWidths.put(new CellReference(activeSheet.getSheetName(),
-                0, columnIndex, true, true), width);
+        spreadsheet.workbookScope().autofittedWidths.put(new CellReference(
+                activeSheet.getSheetName(), 0, columnIndex, true, true), width);
         // Through the component, so the workbook holds the width the client
         // is given, the overlays over the column are sized again, and an
         // override applies.
@@ -95,10 +89,11 @@ final class ColumnAutofitter implements Serializable {
         for (int i = firstColumn; i <= lastColumn; i++) {
             CellReference cr = new CellReference(filteredSheet.getSheetName(),
                     0, i, true, true);
-            if (!autofittedColumnWidths.containsKey(cr)) {
+            Integer autofittedWidth = spreadsheet
+                    .workbookScope().autofittedWidths.get(cr);
+            if (autofittedWidth == null) {
                 continue;
             }
-            Integer autofittedWidth = autofittedColumnWidths.get(cr);
             int currentWidth = (int) filteredSheet
                     .getColumnWidthInPixels(cr.getCol());
             if (currentWidth == autofittedWidth) {

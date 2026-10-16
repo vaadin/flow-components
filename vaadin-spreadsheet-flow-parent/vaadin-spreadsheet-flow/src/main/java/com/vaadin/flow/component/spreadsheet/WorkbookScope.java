@@ -9,11 +9,14 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellReference;
 
 /**
  * What lives as long as one workbook is shown, and only as long: made anew for
@@ -34,6 +37,11 @@ final class WorkbookScope implements Serializable {
     final PopupButtonRegistry popupButtons;
     /** How wide a character is in each cell style, as the client measures. */
     final CellFitCalculator fitCalculator = new CellFitCalculator();
+    /**
+     * The widths the columns were autofitted to, by sheet and column, for a
+     * filter put over them to autofit them again.
+     */
+    final Map<CellReference, Integer> autofittedWidths = new HashMap<>();
     SpreadsheetStyleFactory styler;
     ConditionalFormatter conditionalFormatter;
 
