@@ -550,15 +550,9 @@ public class SpreadsheetFactory implements Serializable {
             float defaultRowHeightInPoints = sheet
                     .getDefaultRowHeightInPoints();
 
-            int lastRowNum = sheet.getLastRowNum();
-            // if sheet is empty, also set height for 'last row' (index
-            // zero)
-            if (lastRowNum == 0) {
-                rowHeights[0] = defaultRowHeightInPoints;
-            }
-
-            // set default height for the rest
-            for (int i = lastRowNum + 1; i < rows; i++) {
+            // The rows after the last, all of them for a sheet without rows,
+            // for which POI gives -1 as the last.
+            for (int i = sheet.getLastRowNum() + 1; i < rows; i++) {
                 rowHeights[i] = defaultRowHeightInPoints;
             }
         }
