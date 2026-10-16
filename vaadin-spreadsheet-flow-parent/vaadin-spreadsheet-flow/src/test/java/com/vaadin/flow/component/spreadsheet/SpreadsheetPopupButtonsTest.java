@@ -227,6 +227,64 @@ class SpreadsheetPopupButtonsTest {
         assertEquals("removePopupButton", calls.get(0));
         assertTrue(calls.subList(1, calls.size()).stream()
                 .allMatch("addPopupButton"::equals), calls.toString());
+        List<String> events = new ArrayList<>();
+        button.addPopupOpenListener(e -> events.add("open"));
+        TestHelper.fireClientEvent(spreadsheet, "popupButtonClick",
+                "{\"row\": 4, \"column\": 2}");
+        assertEquals(List.of("open"), events, "opened from its new cell");
+    }
+
+    @Test
+    void aButtonAboveTheRowsThatMove_staysOnTheSheet() {
+        PopupButton button = button();
+        spreadsheet.setPopup("B2", button);
+        spreadsheet.setSelection("A1");
+        clientCalls();
+
+        // Rows 3-31 move down by one.
+        spreadsheet.shiftRows(2, 30, 1, true, true);
+
+        assertEquals(
+                new CellReference(spreadsheet.getActiveSheet().getSheetName(),
+                        1, 1, true, true),
+                button.getCellReference());
+        assertTrue(onTheSheet(button));
+        assertFalse(clientCalls().contains("removePopupButton"));
+    }
+
+    /** A button on a cell of the sheet "Second", which is then left. */
+    private PopupButton buttonOnTheSecondSheet(String cell) {
+        spreadsheet.setActiveSheetIndex(1);
+        PopupButton button = button();
+        spreadsheet.setPopup(cell, button);
+        spreadsheet.setActiveSheetIndex(0);
+        clientShowsRows(2, 21);
+        spreadsheet.setSelection("A1");
+        clientCalls();
+        return button;
+    }
+
+    @Test
+    void aButtonOfAnotherSheet_staysWhereItIsWhenRowsMoveOnTheSheetShown() {
+        PopupButton button = buttonOnTheSecondSheet("B3");
+
+        spreadsheet.shiftRows(1, 30, 1, true, true);
+
+        assertEquals(new CellReference("Second", 2, 1, true, true),
+                button.getCellReference());
+        assertFalse(onTheSheet(button));
+        assertEquals(List.of(), clientCalls());
+    }
+
+    @Test
+    void aButtonOfAnotherSheet_isKeptWhenItsRowIsOverwrittenOnTheSheetShown() {
+        PopupButton button = buttonOnTheSecondSheet("B3");
+
+        spreadsheet.shiftRows(3, 30, -1, true, true);
+        spreadsheet.setActiveSheetIndex(1);
+        clientShowsRows(1, 20);
+
+        assertTrue(onTheSheet(button));
     }
 
     @Test
