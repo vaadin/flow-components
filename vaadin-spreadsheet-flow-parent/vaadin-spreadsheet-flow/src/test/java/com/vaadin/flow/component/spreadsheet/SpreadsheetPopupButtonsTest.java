@@ -382,4 +382,19 @@ class SpreadsheetPopupButtonsTest {
         assertFalse(onTheSheet(button));
         assertEquals(List.of("removePopupButton"), clientCalls());
     }
+
+    @Test
+    void aButtonRemovedWithItsRow_canBeSetAgain() {
+        // As a filter table does with its buttons when it is reloaded.
+        PopupButton button = button();
+        spreadsheet.setPopup("B3", button);
+        spreadsheet.setSelection("A1");
+        spreadsheet.shiftRows(3, 30, -1, true, true);
+        spreadsheet.setPopup("D5", button);
+        clientCalls();
+
+        clientShowsRows(2, 21);
+
+        assertEquals(List.of("addPopupButton"), clientCalls());
+    }
 }
