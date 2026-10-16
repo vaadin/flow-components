@@ -44,7 +44,10 @@ final class PopupButtonBinding implements Serializable {
     }
 
     void detach(PopupButton button) {
-        attachedButtons.remove(button);
+        if (!attachedButtons.remove(button)) {
+            // Not on the client, so there is nothing to take off.
+            return;
+        }
         spreadsheet.getElement().callJsFunction("removePopupButton",
                 Serializer.serialize(button.getState()));
         if (spreadsheet.getElement().equals(button.getElement().getParent())) {
@@ -57,12 +60,8 @@ final class PopupButtonBinding implements Serializable {
      * cleanup.
      */
     void detachAll() {
-        if (attachedButtons.isEmpty()) {
-            return;
-        }
         for (PopupButton button : new ArrayList<>(attachedButtons)) {
             detach(button);
         }
-        attachedButtons.clear();
     }
 }

@@ -128,6 +128,39 @@ class SpreadsheetPopupButtonsTest {
     }
 
     @Test
+    void aButtonScrolledAway_isTakenOffOnce() {
+        PopupButton button = button();
+        spreadsheet.setPopup("B2", button);
+        clientShowsRows(50, 70);
+        clientCalls();
+
+        clientShowsRows(80, 100);
+
+        assertEquals(List.of(), clientCalls());
+    }
+
+    @Test
+    void aButtonMovedOffTheSheetElsewhere_isStillTakenOffTheClient() {
+        PopupButton button = button();
+        spreadsheet.setPopup("B2", button);
+        button.getElement().removeFromTree();
+        clientCalls();
+
+        clientShowsRows(50, 70);
+
+        assertEquals(List.of("removePopupButton"), clientCalls());
+    }
+
+    @Test
+    void aButtonNeverShown_isNotTakenOffTheClientWhenRemoved() {
+        spreadsheet.setPopup("B100", button());
+
+        spreadsheet.setPopup("B100", null);
+
+        assertEquals(List.of(), clientCalls());
+    }
+
+    @Test
     void aButtonTakenOff_isNotTakenOffAgainWhenAnotherSheetIsShown() {
         PopupButton button = button();
         spreadsheet.setPopup("B2", button);
