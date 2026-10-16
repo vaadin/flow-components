@@ -152,6 +152,19 @@ final class FreshLoadHarness {
     }
 
     /**
+     * Takes the spreadsheet out of the UI and puts it back, as an application
+     * moving it does. The browser gets a new element, which has nothing until
+     * it tells the server it is there and reports its viewport.
+     */
+    void reattach() {
+        ui.remove(spreadsheet);
+        ui.add(spreadsheet);
+        client = new ClientModel();
+        TestHelper.fireClientEvent(spreadsheet, "onConnectorInit", "{}");
+        settle(spreadsheet, client, true, null);
+    }
+
+    /**
      * The client sends an event, its data as JSON, after changing what it
      * changes at once without waiting for the server: a value typed into a
      * cell, or a comment written, show at once. Sizes changed by dragging a

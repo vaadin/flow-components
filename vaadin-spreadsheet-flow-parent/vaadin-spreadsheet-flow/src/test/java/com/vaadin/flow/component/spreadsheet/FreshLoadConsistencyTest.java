@@ -220,7 +220,9 @@ class FreshLoadConsistencyTest {
             Map.entry("a hidden column given a width",
                     c -> c.known("property colW",
                             "property overlays: [0] .width")
-                            .waste(AGAIN, 4, NOT_THERE, 7)));
+                            .waste(AGAIN, 4, NOT_THERE, 7)),
+            Map.entry("the spreadsheet moved in the UI",
+                    c -> c.known("property (resources the client finds)")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -375,6 +377,8 @@ class FreshLoadConsistencyTest {
                 op("every cell value refreshed",
                         spreadsheet -> spreadsheet.refreshAllCellValues(),
                         Allowance.RESEND),
+                op("the spreadsheet moved in the UI",
+                        (harness, spreadsheet) -> harness.reattach()),
                 op("a cell selected by the application",
                         spreadsheet -> spreadsheet.setSelection("G10")))
                 .map(operation -> KNOWN.getOrDefault(operation.name(),
