@@ -144,8 +144,9 @@ final class SheetOperations implements Serializable {
         // POI keeps the sheet shown active, or in place of a deleted one
         // makes the next one active, or the one before when it was the last.
         // That one can be hidden. The sheet shown is loaded again either way,
-        // as the deleted sheet may have been in its formulas.
-        setActiveSheetWithPOIIndex(
+        // as the deleted sheet may have been in its formulas. Through the
+        // component, so an override of it applies.
+        spreadsheet.setActiveSheetWithPOIIndex(
                 nearestShown(workbook, workbook.getActiveSheetIndex()));
     }
 
@@ -205,8 +206,9 @@ final class SheetOperations implements Serializable {
                     spreadsheet.getSpreadsheetSheetIndex(activeSheetIndex) + 1);
         } else {
             // The sheet shown was hidden: the next sheet shown takes its
-            // place, or else the one before.
-            setActiveSheetWithPOIIndex(
+            // place, or else the one before. Through the component, so an
+            // override of it applies.
+            spreadsheet.setActiveSheetWithPOIIndex(
                     nearestShown(workbook, activeSheetIndex));
         }
     }

@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
+import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -69,6 +70,38 @@ class OverridableHooksTest {
         spreadsheet.deleteSheet(1);
 
         assertEquals(List.of("deleteSheetWithPOIIndex 1"), calls);
+    }
+
+    /** A spreadsheet of two sheets, the second shown, with the calls. */
+    private Spreadsheet showingTheSecondOfTwoSheets() {
+        Spreadsheet spreadsheet = new Spreadsheet() {
+            @Override
+            public void setActiveSheetWithPOIIndex(int sheetIndex) {
+                calls.add("setActiveSheetWithPOIIndex " + sheetIndex);
+                super.setActiveSheetWithPOIIndex(sheetIndex);
+            }
+        };
+        spreadsheet.createNewSheet("Second", 5, 5);
+        calls.clear();
+        return spreadsheet;
+    }
+
+    @Test
+    void deletingTheSheetShown_showsTheNextThroughSetActiveSheetWithPOIIndex() {
+        Spreadsheet spreadsheet = showingTheSecondOfTwoSheets();
+
+        spreadsheet.deleteSheetWithPOIIndex(1);
+
+        assertEquals(List.of("setActiveSheetWithPOIIndex 0"), calls);
+    }
+
+    @Test
+    void hidingTheSheetShown_showsTheNextThroughSetActiveSheetWithPOIIndex() {
+        Spreadsheet spreadsheet = showingTheSecondOfTwoSheets();
+
+        spreadsheet.setSheetHidden(1, SheetVisibility.HIDDEN);
+
+        assertEquals(List.of("setActiveSheetWithPOIIndex 0"), calls);
     }
 
     @Test
