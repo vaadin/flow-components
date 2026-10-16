@@ -1739,7 +1739,9 @@ public class FormAIController implements AIController {
             if (options.isEmpty()) {
                 throw new ToolException("Unknown field id: " + fieldId);
             }
-            return filterLabels(options, filter, limit);
+            // Every match goes back, so the tool cuts the result to the
+            // limit and tells the LLM when more options match
+            return filterLabels(options, filter, Integer.MAX_VALUE);
         }
 
         @Override
