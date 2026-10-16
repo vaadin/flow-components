@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -28,6 +29,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import com.vaadin.flow.component.spreadsheet.tests.CapturedLogs;
+import com.vaadin.flow.component.spreadsheet.tests.ExpectWarnings;
 
 /**
  * Fitting a column to its content with {@link ColumnAutofitter}.
@@ -111,17 +115,24 @@ class ColumnAutofitterTest {
     }
 
     @Test
-    void autofit_npeFromPoi_silentlyAborts_noColWUpdate() {
-        // Pin: POI's autoSizeColumn can throw NPE (known POI bug); the
-        // autofitter catches it, logs at trace level, and returns
-        // without touching colW or cell-value-manager.
+    @ExpectWarnings
+    void autofit_npeFromPoi_abortsWithAWarning_noColWUpdate() {
+        // POI's autoSizeColumn can throw NPE where fonts are missing; the
+        // autofitter reports it and returns without touching colW or the
+        // cell value manager.
         org.mockito.Mockito.doThrow(new NullPointerException("poi")).when(sheet)
                 .autoSizeColumn(1);
 
-        autofitter.autofit(1);
+        List<CapturedLogs.Entry> logged;
+        try (CapturedLogs.Capture logs = CapturedLogs.capture()) {
+            autofitter.autofit(1);
+            logged = logs.entries();
+        }
 
         verify(spreadsheet, never()).setColW(any());
         verify(valueManager, never()).clearCacheForColumn(anyInt());
+        assertEquals(List.of("Could not autofit column 2"),
+                logged.stream().map(CapturedLogs.Entry::message).toList());
     }
 
     @Test

@@ -66,11 +66,9 @@ final class ColumnAutofitter implements Serializable {
         try {
             activeSheet.autoSizeColumn(columnIndex);
         } catch (NullPointerException e) {
-            // NullPointerException is being thrown in POI. Catch to prevent
-            // breaking the UI.
-            LOGGER.trace(
-                    "Poi threw NullPointerException when trying to autofit column",
-                    e);
+            // POI's measuring of text can fail where fonts are missing: the
+            // column keeps its width.
+            LOGGER.warn("Could not autofit column {}", columnIndex + 1, e);
             return;
         }
         int columnPixelWidth = computePixelWidthWithFilterPadding(columnIndex,
