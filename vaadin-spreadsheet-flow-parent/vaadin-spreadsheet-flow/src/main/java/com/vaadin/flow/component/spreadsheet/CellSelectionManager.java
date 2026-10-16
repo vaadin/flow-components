@@ -321,6 +321,11 @@ public class CellSelectionManager implements Serializable {
                 spreadsheet.getRpcProxy().invalidCellAddress();
                 return;
             }
+            if (selectedCellReference == null) {
+                // A named range of another sheet: that sheet is shown, and
+                // its cells are selected once the client has it.
+                return;
+            }
             individualSelectedCells.clear();
             spreadsheet.loadCustomEditorOnSelectedCell();
             fireNewSelectionChangeEvent();

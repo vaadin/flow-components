@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import org.apache.poi.ss.usermodel.Name;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -110,6 +111,20 @@ class InvalidCellAddressTest {
     void aRange_isAccepted() {
         typeAddress("B2:C3");
 
+        verify(rpc, never()).invalidCellAddress();
+    }
+
+    @Test
+    void aNamedRangeOfAnotherSheet_showsThatSheet_andIsNotInvalid() {
+        spreadsheet.createNewSheet("Other", 5, 5);
+        spreadsheet.setActiveSheetIndex(0);
+        Name elsewhere = spreadsheet.getWorkbook().createName();
+        elsewhere.setNameName("Elsewhere");
+        elsewhere.setRefersToFormula("Other!$B$2");
+
+        typeAddress("Elsewhere");
+
+        assertEquals("Other", spreadsheet.getActiveSheet().getSheetName());
         verify(rpc, never()).invalidCellAddress();
     }
 }
