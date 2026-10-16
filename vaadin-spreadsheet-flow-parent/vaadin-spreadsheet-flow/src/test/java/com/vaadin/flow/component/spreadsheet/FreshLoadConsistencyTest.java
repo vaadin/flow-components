@@ -214,6 +214,15 @@ class FreshLoadConsistencyTest {
                     c -> c.known("property lockFormatColumns",
                             "property lockFormatRows",
                             "property lockedRowIndexes", "locked")),
+            Map.entry("the sheet protected, then not",
+                    c -> c.known("property lockFormatColumns",
+                            "property lockFormatRows",
+                            "property lockedRowIndexes", "locked")),
+            Map.entry("a protected sheet shown again, then left",
+                    c -> c.known("property lockFormatColumns",
+                            "property lockFormatRows",
+                            "property lockedRowIndexes", "locked")
+                            .waste(POPUPS, 2)),
             Map.entry("panes frozen elsewhere",
                     c -> c.waste(POPUPS, 2, NOT_THERE, 25)),
             Map.entry("another workbook shown",
@@ -317,6 +326,15 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.autofitColumn(4)),
                 op("the sheet protected",
                         spreadsheet -> spreadsheet.setActiveSheetProtected("")),
+                steps("the sheet protected, then not", api(
+                        spreadsheet -> spreadsheet.setActiveSheetProtected("")),
+                        api(spreadsheet -> spreadsheet
+                                .setActiveSheetProtected(null))),
+                steps("a protected sheet shown again, then left", api(
+                        spreadsheet -> spreadsheet.setActiveSheetProtected("")),
+                        api(spreadsheet -> spreadsheet.setActiveSheetIndex(1)),
+                        api(spreadsheet -> spreadsheet.setActiveSheetIndex(0)),
+                        api(spreadsheet -> spreadsheet.setActiveSheetIndex(1))),
                 op("panes frozen elsewhere",
                         spreadsheet -> spreadsheet.createFreezePane(3, 3)),
                 op("another sheet shown",
