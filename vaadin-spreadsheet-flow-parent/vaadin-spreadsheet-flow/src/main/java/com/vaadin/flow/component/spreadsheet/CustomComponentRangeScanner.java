@@ -53,6 +53,11 @@ final class CustomComponentRangeScanner implements Serializable {
             Map<String, Component> cellKeyToEditor,
             HashMap<String, String> componentIDtoCellKeysMap, int row1,
             int col1, int row2, int col2) {
+        if (row1 < 1 || col1 < 1) {
+            // Not a range of the sheet: where the client is has not been
+            // reported yet.
+            return;
+        }
         for (int r = row1 - 1; r < row2; r++) {
             final Row row = spreadsheet.getActiveSheet().getRow(r);
             for (int c = col1 - 1; c < col2; c++) {

@@ -140,6 +140,43 @@ class SpreadsheetComponentLoadingTest {
     }
 
     @Test
+    void theFactory_isAskedOnlyOfCellsOfTheSheet_beforeTheClientSaysWhichItShows() {
+        // The frozen corner is known; the rest is not.
+        sheet.createFreezePane(2, 2);
+        List<String> asked = new java.util.ArrayList<>();
+        spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setSpreadsheetComponentFactory(
+                new SpreadsheetComponentFactory() {
+                    @Override
+                    public Component getCustomComponentForCell(Cell cell,
+                            int rowIndex, int columnIndex,
+                            Spreadsheet spreadsheet, Sheet sheet) {
+                        asked.add(rowIndex + "," + columnIndex);
+                        return null;
+                    }
+
+                    @Override
+                    public Component getCustomEditorForCell(Cell cell,
+                            int rowIndex, int columnIndex,
+                            Spreadsheet spreadsheet, Sheet sheet) {
+                        return null;
+                    }
+
+                    @Override
+                    public void onCustomEditorDisplayed(Cell cell, int rowIndex,
+                            int columnIndex, Spreadsheet spreadsheet,
+                            Sheet sheet, Component customEditor) {
+                    }
+                });
+        ui.add(spreadsheet);
+
+        spreadsheet.reloadVisibleCellContents();
+
+        assertEquals(List.of("0,0", "0,1", "1,0", "1,1"),
+                asked.stream().sorted().toList());
+    }
+
+    @Test
     void reloadingTheCellsShown_asksTheFactoryForNewEditors() {
         editors.add("First!F12");
         show();
