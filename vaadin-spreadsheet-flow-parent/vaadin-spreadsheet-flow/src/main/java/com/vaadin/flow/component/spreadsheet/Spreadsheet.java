@@ -1686,6 +1686,11 @@ public class Spreadsheet extends Component
 
         updateAppId();
 
+        if (!resources.isEmpty()) {
+            // A new element has none of the resource keys sent to the last.
+            getElement().executeJs("this.resources=$0", resources.keySet());
+        }
+
         if (overlays.get() != null) {
             // The node id's of component overlays attached as virtual children
             // may no longer be valid after a detach/attach. Remove all

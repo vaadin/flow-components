@@ -220,9 +220,7 @@ class FreshLoadConsistencyTest {
             Map.entry("a hidden column given a width",
                     c -> c.known("property colW",
                             "property overlays: [0] .width")
-                            .waste(AGAIN, 4, NOT_THERE, 7)),
-            Map.entry("the spreadsheet moved in the UI",
-                    c -> c.known("property (resources the client finds)")));
+                            .waste(AGAIN, 4, NOT_THERE, 7)));
 
     static Stream<Case> cases() {
         return Stream.of(
