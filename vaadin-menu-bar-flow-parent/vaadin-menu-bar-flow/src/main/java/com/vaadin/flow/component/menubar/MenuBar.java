@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
+import com.vaadin.flow.component.contextmenu.MenuDownloadManager;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuItemsArrayGenerator;
 import com.vaadin.flow.component.contextmenu.MenuManager;
@@ -63,6 +64,11 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     private MenuBarI18n i18n;
 
+    // The menu bar stays attached while its items can be clicked, also when a
+    // sub menu closes, so it owns the download registrations of all items
+    private final MenuDownloadManager downloadManager = new MenuDownloadManager(
+            this, this::getItems, item -> this);
+
     // When calling `generateItems` without arguments, it will use
     // the previously generated items tree, re-filtering hidden items and
     // re-rendering the root items = the menu bar buttons, which snapshot the
@@ -83,6 +89,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
             @Override
             public void run() {
                 resetContent();
+                downloadManager.update();
             }
         };
         menuManager = new MenuManager<>(this, resetContent,
@@ -448,6 +455,10 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
         getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    MenuDownloadManager getDownloadManager() {
+        return downloadManager;
     }
 
     void resetContent() {
