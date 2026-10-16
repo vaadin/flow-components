@@ -985,6 +985,93 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  // Enter in a custom editor gives the keyboard back to the sheet, as in
+  // GWT, once the editor has had it: a text field has committed what was
+  // typed. In GWT this came from redrawing the cell under the editor.
+
+  /** An editor in B2, B2 selected and the editor focused. */
+  async function typingInto(editor: HTMLElement) {
+    const attached = attachSheet({ '77': editor });
+    attached.sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    attached.sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
+    attached.sheet.recomputeViewport();
+    await attached.sheet.getCellGrid().updateComplete;
+    editor.focus();
+    return attached;
+  }
+
+  function pressEnter(target: HTMLElement): void {
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, composed: true, cancelable: true }));
+  }
+
+  it('gives focus back to the sheet on Enter, leaving the selection where it is', async () => {
+    const editor = field();
+    const { sheet, cleanup } = await typingInto(editor);
+
+    pressEnter(editor);
+    await sheet.getCellGrid().updateComplete;
+
+    expect(document.activeElement).to.not.equal(editor);
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+    cleanup();
+  });
+
+  it('keeps Enter in a text area, where it starts a new line', async () => {
+    const editor = document.createElement('textarea');
+    const { cleanup } = await typingInto(editor);
+
+    pressEnter(editor);
+
+    expect(document.activeElement).to.equal(editor);
+    cleanup();
+  });
+
+  it('keeps Enter in rich text, where it starts a new line', async () => {
+    const editor = document.createElement('div');
+    editor.contentEditable = 'true';
+    const { cleanup } = await typingInto(editor);
+
+    pressEnter(editor);
+
+    expect(document.activeElement).to.equal(editor);
+    cleanup();
+  });
+
+  it('keeps an Enter that the editor used itself, as a list picks an item with it', async () => {
+    const editor = field();
+    editor.addEventListener('keydown', (e) => e.preventDefault());
+    const { cleanup } = await typingInto(editor);
+
+    pressEnter(editor);
+
+    expect(document.activeElement).to.equal(editor);
+    cleanup();
+  });
+
+  it('keeps other keys in the editor', async () => {
+    const editor = field();
+    const { cleanup } = await typingInto(editor);
+
+    editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true, composed: true }));
+
+    expect(document.activeElement).to.equal(editor);
+    cleanup();
+  });
+
+  it('keeps Enter inside an in-cell component', async () => {
+    const widget = document.createElement('input');
+    const { sheet, cleanup } = attachSheet({ '31': widget });
+    sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    widget.focus();
+
+    pressEnter(widget);
+
+    expect(document.activeElement).to.equal(widget);
+    cleanup();
+  });
+
   it('keeps Escape inside an in-cell component', async () => {
     // Only editors have a way out to give back — a component in a cell
     // is not something the sheet took the keyboard from.

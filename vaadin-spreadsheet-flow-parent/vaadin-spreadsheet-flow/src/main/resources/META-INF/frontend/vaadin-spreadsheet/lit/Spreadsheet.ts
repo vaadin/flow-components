@@ -193,6 +193,22 @@ const DEFAULT_HEADER_COLUMN_WIDTH = 50;
  * the user does into events for the server and applies what the server
  * sends. The element creates one per element, as its {@code $connector}.
  */
+/**
+ * Whether a key pressed in a custom editor takes the keyboard back to the
+ * sheet. Enter does, unless the editor used it: for a new line in a text
+ * area or in rich text, or to pick from a list it has open.
+ */
+function leavesEditor(e: KeyboardEvent): boolean {
+  if (e.key === 'Escape' || e.key === 'Tab') {
+    return true;
+  }
+  if (e.key !== 'Enter' || e.defaultPrevented) {
+    return false;
+  }
+  const target = e.composedPath()[0];
+  return !(target instanceof HTMLTextAreaElement) && !(target instanceof HTMLElement && target.isContentEditable);
+}
+
 export class Spreadsheet implements SpreadsheetClientApi {
   /**
    * What the sheet asks about the platform when it is made. Tests, which do
@@ -1874,15 +1890,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // on it as a sheet shortcut moves the selection out from under a
       // custom editor mid-edit, which takes the editor off the sheet.
       //
-      // Two keys are the way back out of a custom editor, so they are the
-      // sheet's after all: Escape returns the focus, and Tab returns it
-      // and then moves on to the next cell.
+      // Three keys are the way back out of a custom editor, so they are the
+      // sheet's after all: Escape returns the focus, Tab returns it and then
+      // moves on to the next cell, and Enter returns it once the editor has
+      // had it, leaving the cell selected, as in GWT.
       const fromEditor = this.eventCameFromCellEditor(e);
-      if (!fromEditor || (e.key !== 'Escape' && e.key !== 'Tab')) {
+      if (!fromEditor || !leavesEditor(e)) {
         return;
       }
       this.scrollContainer.focus();
-      if (e.key === 'Escape') {
+      if (e.key !== 'Tab') {
         return;
       }
       e.preventDefault();
