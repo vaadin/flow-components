@@ -307,10 +307,9 @@ public class AvatarGroup extends Component
          */
         private void bindImage() {
             if (imageHandler != null) {
-                // Requests for a handler resource are rejected while its owner
-                // element is detached, so the resource is created for the
-                // current
-                // host
+                // Requests for a handler resource are rejected while its
+                // owner element is detached, so the resource is created for
+                // the current host
                 imageResource = new StreamResourceRegistry.ElementStreamResource(
                         imageHandler, getHost() != null ? getHost().getElement()
                                 : UI.getCurrentOrThrow().getElement());
