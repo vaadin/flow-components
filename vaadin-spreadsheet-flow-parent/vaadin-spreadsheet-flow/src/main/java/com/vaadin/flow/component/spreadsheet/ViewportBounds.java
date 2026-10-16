@@ -67,4 +67,31 @@ final class ViewportBounds implements Serializable {
         this.firstColumn = firstColumn;
         this.lastColumn = lastColumn;
     }
+
+    /** A range of cells to scan, 1-based and inclusive. */
+    @FunctionalInterface
+    interface PaneScan extends Serializable {
+        void scan(int firstRow, int firstColumn, int lastRow, int lastColumn);
+    }
+
+    /**
+     * Scans the cells shown, pane by pane: the frozen corner, the frozen rows
+     * over the columns shown, the frozen columns beside the rows shown, and the
+     * rows and columns shown. A pane without frozen rows or columns holds no
+     * cells, and one of the rows or columns shown is left out while where the
+     * client is has not been reported.
+     */
+    void forEachPane(int frozenRows, int frozenColumns, PaneScan scan) {
+        scanOnTheSheet(1, 1, frozenRows, frozenColumns, scan);
+        scanOnTheSheet(1, firstColumn, frozenRows, lastColumn, scan);
+        scanOnTheSheet(firstRow, 1, lastRow, frozenColumns, scan);
+        scanOnTheSheet(firstRow, firstColumn, lastRow, lastColumn, scan);
+    }
+
+    private static void scanOnTheSheet(int firstRow, int firstColumn,
+            int lastRow, int lastColumn, PaneScan scan) {
+        if (firstRow >= 1 && firstColumn >= 1) {
+            scan.scan(firstRow, firstColumn, lastRow, lastColumn);
+        }
+    }
 }

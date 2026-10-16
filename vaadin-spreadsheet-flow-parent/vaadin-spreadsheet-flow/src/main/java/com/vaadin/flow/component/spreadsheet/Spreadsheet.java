@@ -1008,17 +1008,9 @@ public class Spreadsheet extends Component
      */
     boolean initialSheetSelectionKeepsView;
 
-    private final CellCommentRangeScanner cellCommentRangeScanner = new CellCommentRangeScanner(
-            this);
+    final CellCommentLoader cellCommentLoader = new CellCommentLoader(this);
 
-    final CellCommentLoader cellCommentLoader = new CellCommentLoader(this,
-            cellCommentRangeScanner);
-
-    private final HyperlinkRangeScanner hyperlinkRangeScanner = new HyperlinkRangeScanner(
-            this);
-
-    private final HyperlinkLoader hyperlinkLoader = new HyperlinkLoader(this,
-            hyperlinkRangeScanner);
+    private final HyperlinkLoader hyperlinkLoader = new HyperlinkLoader(this);
 
     private final RowSizeOperations rowSizeOperations = new RowSizeOperations(
             this);
@@ -1029,14 +1021,8 @@ public class Spreadsheet extends Component
     private final ColumnAutofitter columnAutofitter = new ColumnAutofitter(
             this);
 
-    private final CustomComponentRangeScanner customComponentRangeScanner = new CustomComponentRangeScanner(
-            this);
-
-    private final CustomComponentRowSizer customComponentRowSizer = new CustomComponentRowSizer(
-            this);
-
     private final CustomComponentLoader customComponentLoader = new CustomComponentLoader(
-            this, customComponentRangeScanner, customComponentRowSizer);
+            this);
 
     final PopupButtonRegistry popupButtonRegistry = new PopupButtonRegistry(
             this);
@@ -3493,6 +3479,12 @@ public class Spreadsheet extends Component
      *
      * @return True if the cell is visible, false otherwise
      */
+    /** Scans the cells shown, pane by pane. */
+    void forEachPaneShown(ViewportBounds.PaneScan scan) {
+        viewportBounds.forEachPane(getLastFrozenRow(), getLastFrozenColumn(),
+                scan);
+    }
+
     boolean isCellVisible(int row, int col) {
         int verticalSplitPosition = getLastFrozenRow();
         int horizontalSplitPosition = getLastFrozenColumn();

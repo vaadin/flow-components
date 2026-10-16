@@ -12,25 +12,27 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellAddress;
+
+import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
 /**
- * Orchestrates loading of cell comments (and invalid-formula markers) for the
- * currently visible cells. Resets the four state maps and walks each viewport
- * pane via {@link CellCommentRangeScanner}.
- *
- * <p>
- * Every pane is scanned on every load, the frozen top-left one included, as the
- * maps are emptied first.
+ * Gives the client the comments of the cells shown, with their authors and
+ * whether they are shown always, and which of the cells have invalid formulas.
+ * Hidden rows and columns are left out, and so are the cells a merged cell
+ * covers but its first.
  */
 final class CellCommentLoader implements Serializable {
 
     private final Spreadsheet spreadsheet;
-    private final CellCommentRangeScanner scanner;
 
-    CellCommentLoader(Spreadsheet spreadsheet,
-            CellCommentRangeScanner scanner) {
+    CellCommentLoader(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        this.scanner = scanner;
     }
 
     void load() {
@@ -38,33 +40,58 @@ final class CellCommentLoader implements Serializable {
             // Spreadsheet not loaded. This method will be called again.
             return;
         }
+        HashMap<String, String> comments = new HashMap<>();
+        HashMap<String, String> authors = new HashMap<>();
+        ArrayList<String> visible = new ArrayList<>();
+        Set<String> invalidFormulas = new HashSet<>();
+        spreadsheet.forEachPaneShown((r1, c1, r2, c2) -> scan(comments, authors,
+                visible, invalidFormulas, r1, c1, r2, c2));
+        spreadsheet.setCellComments(comments);
+        spreadsheet.setCellCommentAuthors(authors);
+        spreadsheet.setVisibleCellComments(visible);
+        spreadsheet.setInvalidFormulaCells(invalidFormulas);
+    }
 
-        // Reset the four state maps to empty (preserving the property-write
-        // semantics) before scanning the panes.
-        spreadsheet.setCellComments(new HashMap<>());
-        spreadsheet.setCellCommentAuthors(new HashMap<>());
-        spreadsheet.setVisibleCellComments(new ArrayList<>());
-        spreadsheet.setInvalidFormulaCells(new HashSet<>());
+    private void scan(HashMap<String, String> comments,
+            HashMap<String, String> authors, ArrayList<String> visible,
+            Set<String> invalidFormulas, int r1, int c1, int r2, int c2) {
+        Sheet sheet = spreadsheet.getActiveSheet();
+        for (int r = r1 - 1; r < r2; r++) {
+            Row row = sheet.getRow(r);
+            if (row != null && row.getZeroHeight()) {
+                continue;
+            }
+            for (int c = c1 - 1; c < c2; c++) {
+                if (sheet.isColumnHidden(c)) {
+                    continue;
+                }
+                int c_one_based = c + 1;
+                int row_one_based = r + 1;
 
-        int verticalSplit = spreadsheet.getLastFrozenRow();
-        int horizontalSplit = spreadsheet.getLastFrozenColumn();
-        int firstRow = spreadsheet.getFirstRow();
-        int lastRow = spreadsheet.getLastRow();
-        int firstColumn = spreadsheet.getFirstColumn();
-        int lastColumn = spreadsheet.getLastColumn();
-
-        // The frozen corner every time, like every other pane: the maps were
-        // just emptied, so a corner scanned only once lost its comments on
-        // the next scroll or refresh.
-        if (verticalSplit > 0 && horizontalSplit > 0) {
-            scanner.scan(1, 1, verticalSplit, horizontalSplit);
+                MergedRegion region = spreadsheet.getMergedRegionContainer()
+                        .getMergedRegion(c_one_based, row_one_based);
+                // do not add comments that are "below" merged regions.
+                // client side handles cases where comment "moves" (because
+                // shifting etc.) from merged cell into basic or vice versa.
+                if (region == null || (region.col1 == c_one_based
+                        && region.row1 == row_one_based)) {
+                    Comment comment = sheet
+                            .getCellComment(new CellAddress(r, c));
+                    String key = SpreadsheetUtil.toKey(c_one_based,
+                            row_one_based);
+                    if (comment != null) {
+                        comments.put(key, comment.getString().getString());
+                        authors.put(key, comment.getAuthor());
+                        if (comment.isVisible()) {
+                            visible.add(key);
+                        }
+                    }
+                    if (spreadsheet.isMarkedAsInvalidFormula(c_one_based,
+                            row_one_based)) {
+                        invalidFormulas.add(key);
+                    }
+                }
+            }
         }
-        if (verticalSplit > 0) {
-            scanner.scan(1, firstColumn, verticalSplit, lastColumn);
-        }
-        if (horizontalSplit > 0) {
-            scanner.scan(firstRow, 1, lastRow, horizontalSplit);
-        }
-        scanner.scan(firstRow, firstColumn, lastRow, lastColumn);
     }
 }
