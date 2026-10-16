@@ -144,14 +144,10 @@ final class RowShiftOrchestrator implements Serializable {
         }
         styler.loadCustomBorderStylesToState();
 
-        // Shifting moves cells, and an editor is cached against a cell key —
-        // one left in place would end up on the wrong cell.
-        spreadsheet.updateMarkedCellsRecreatingEditors(); // deleted and formula
-                                                          // cells and
-        // style selectors
-        spreadsheet.updateRowAndColumnRangeCellData(spreadsheet.getFirstRow(),
-                spreadsheet.getFirstColumn(), spreadsheet.getLastRow(),
-                spreadsheet.getLastColumn());
+        // Sends the cells marked above and reloads the ones shown. Shifting
+        // moves cells, and an editor is cached against a cell key — one left
+        // in place would end up on the wrong cell.
+        spreadsheet.updateMarkedCellsRecreatingEditors();
         spreadsheet.updateMergedRegions();
 
         CellReference selectedCellReference = spreadsheet

@@ -230,12 +230,10 @@ class RowShiftOrchestratorTest {
     // ----- post-shift orchestration ----------------------------------------
 
     @Test
-    void shift_callsUpdateMarkedCells_andUpdateRowAndColumnRangeCellData_andUpdateMergedRegions() {
+    void shift_callsUpdateMarkedCells_andUpdateMergedRegions() {
         // Pin the post-shift orchestration: updateMarkedCells flushes any
-        // cell updates queued during the shift, then the viewport range
-        // gets reloaded (uses the current viewport bounds, not the
-        // shifted range), then merged regions update. All three fire in
-        // order.
+        // cell updates queued during the shift and reloads the cells shown,
+        // then merged regions update.
         //
         // The editors are recreated rather than reused: a shift moves
         // cells, and an editor is cached against a cell key, so one left
@@ -244,8 +242,6 @@ class RowShiftOrchestratorTest {
 
         org.mockito.InOrder inOrder = org.mockito.Mockito.inOrder(spreadsheet);
         inOrder.verify(spreadsheet).updateMarkedCellsRecreatingEditors();
-        inOrder.verify(spreadsheet).updateRowAndColumnRangeCellData(1, 1, 10,
-                3);
         inOrder.verify(spreadsheet).updateMergedRegions();
     }
 

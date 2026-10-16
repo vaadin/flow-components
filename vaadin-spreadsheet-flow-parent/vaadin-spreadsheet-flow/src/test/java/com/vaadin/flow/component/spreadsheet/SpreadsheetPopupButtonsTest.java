@@ -223,10 +223,8 @@ class SpreadsheetPopupButtonsTest {
                 button.getCellReference());
         assertTrue(onTheSheet(button));
         // Taken off where it was, and put on where it is now.
-        List<String> calls = clientCalls();
-        assertEquals("removePopupButton", calls.get(0));
-        assertTrue(calls.subList(1, calls.size()).stream()
-                .allMatch("addPopupButton"::equals), calls.toString());
+        assertEquals(List.of("removePopupButton", "addPopupButton"),
+                clientCalls());
         List<String> events = new ArrayList<>();
         button.addPopupOpenListener(e -> events.add("open"));
         TestHelper.fireClientEvent(spreadsheet, "popupButtonClick",
