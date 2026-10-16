@@ -77,6 +77,7 @@ class CustomComponentsTest {
         Assertions.assertFalse(customComponent.getParent().isPresent());
     }
 
+    @ExpectWarnings
     @Test
     void factoryThrowsForOneCell_otherCellsStillLoad() {
         var goodComponent = new Span("Good component");
@@ -125,6 +126,7 @@ class CustomComponentsTest {
                 goodComponent.getParent().get());
     }
 
+    @ExpectWarnings
     @Test
     void onCustomEditorDisplayedThrows_doesNotPropagate() {
         var editor = new Span("Editor");

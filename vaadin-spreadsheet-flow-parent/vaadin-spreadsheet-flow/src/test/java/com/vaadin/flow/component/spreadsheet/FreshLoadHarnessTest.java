@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.tests.CapturedLogs;
+import com.vaadin.flow.component.spreadsheet.tests.ExpectWarnings;
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
@@ -117,6 +118,7 @@ class FreshLoadHarnessTest {
         assertReported(problems, "pop-up button AD30 taken off the client");
     }
 
+    @ExpectWarnings
     @Test
     void aWarningLogged_isReported() {
         List<String> problems = harness.check(spreadsheet -> LoggerFactory
@@ -170,6 +172,7 @@ class FreshLoadHarnessTest {
                         .callJsFunction("somethingNew")));
     }
 
+    @ExpectWarnings
     @Test
     void theLogs_areKeptOnlyWhileCaptured_withWhatWasThrown() {
         IllegalStateException thrown = new IllegalStateException("broken");
@@ -409,6 +412,7 @@ class FreshLoadHarnessTest {
                 "showing the workbook in a new spreadsheet changed it");
     }
 
+    @ExpectWarnings
     @Test
     void theAllowances_letAnOperationDoWhatTheyName() {
         assertEquals(List.of(),

@@ -32,6 +32,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.spreadsheet.tests.ExpectWarnings;
+
 /**
  * The POI internals {@link POIReflectionTools} reads by reflection.
  *
@@ -89,6 +91,7 @@ class POIReflectionToolsTest {
         assertEquals(42, POIReflectionTools.getFieldVal(pojo, "numericField"));
     }
 
+    @ExpectWarnings
     @Test
     void getFieldVal_missingField_returnsNull_andLogsError() {
         // Pin the soft-fail contract: a missing field doesn't throw, it

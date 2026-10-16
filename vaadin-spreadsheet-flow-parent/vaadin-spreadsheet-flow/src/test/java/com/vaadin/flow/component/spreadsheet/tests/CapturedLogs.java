@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.Marker;
@@ -25,7 +26,8 @@ import org.slf4j.helpers.MessageFormatter;
  * <p>
  * The tests run without a logging backend; {@code org.slf4j.impl}'s binder in
  * the test sources makes this class the backend. Nothing is printed, and
- * nothing is kept while no capture is open.
+ * nothing is kept while no capture is open. Captures may be open inside each
+ * other: each keeps what is logged while it is open.
  */
 public final class CapturedLogs {
 
@@ -39,7 +41,8 @@ public final class CapturedLogs {
         }
     }
 
-    private static volatile Capture current;
+    /** The captures open, each of which keeps what is logged. */
+    private static final List<Capture> OPEN = new CopyOnWriteArrayList<>();
 
     private CapturedLogs() {
     }
@@ -50,7 +53,7 @@ public final class CapturedLogs {
      */
     public static Capture capture() {
         Capture capture = new Capture();
-        current = capture;
+        OPEN.add(capture);
         return capture;
     }
 
@@ -70,9 +73,7 @@ public final class CapturedLogs {
 
         @Override
         public void close() {
-            if (current == this) {
-                current = null;
-            }
+            OPEN.remove(this);
         }
     }
 
@@ -102,8 +103,7 @@ public final class CapturedLogs {
     }
 
     private static void keep(String logger, String level, Object[] args) {
-        Capture capture = current;
-        if (capture == null) {
+        if (OPEN.isEmpty()) {
             return;
         }
         // The variants with a marker take it first.
@@ -115,7 +115,10 @@ public final class CapturedLogs {
         }
         FormattingTuple formatted = MessageFormatter.arrayFormat(format,
                 parameters);
-        capture.entries.add(new Entry(logger, level, formatted.getMessage(),
-                formatted.getThrowable()));
+        Entry entry = new Entry(logger, level, formatted.getMessage(),
+                formatted.getThrowable());
+        for (Capture capture : OPEN) {
+            capture.entries.add(entry);
+        }
     }
 }
