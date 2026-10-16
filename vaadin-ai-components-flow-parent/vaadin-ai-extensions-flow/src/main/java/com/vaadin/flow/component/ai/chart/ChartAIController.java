@@ -10,6 +10,7 @@ package com.vaadin.flow.component.ai.chart;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,6 +27,12 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.GanttSeries;
+import com.vaadin.flow.component.charts.model.HeatSeries;
+import com.vaadin.flow.component.charts.model.NodeSeries;
+import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -220,11 +227,12 @@ public class ChartAIController implements AIController {
                 // rejected within the turn. A DatabaseProvider that
                 // throws ToolException gets its message relayed to the
                 // LLM so it can fix the query; any other exception is
-                // replaced with a generic error. Results are discarded
+                // replaced with a generic error. Results are only checked
                 // here; they will be re-executed at render time in
                 // ChartRenderer.
-                for (String q : queries) {
-                    databaseProvider.executeQuery(q);
+                for (var i = 0; i < queries.size(); i++) {
+                    checkPlottable(i + 1,
+                            databaseProvider.executeQuery(queries.get(i)));
                 }
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingQueries(queries);
@@ -236,6 +244,47 @@ public class ChartAIController implements AIController {
             }
         }));
         return tools;
+    }
+
+    /**
+     * Rejects a query whose rows convert to series without any point, which
+     * happens when the columns the chart reads as numbers hold text or nulls.
+     * The chart would otherwise render empty while the turn reports success.
+     */
+    private void checkPlottable(int queryNumber,
+            List<Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            return;
+        }
+        var series = dataConverter.convertToSeries(rows);
+        if (!series.isEmpty()
+                && series.stream().allMatch(ChartAIController::hasNoPoints)) {
+            throw new ToolException("Query " + queryNumber
+                    + " returned rows, but none of them can be plotted: the"
+                    + " columns the chart reads as numbers, such as "
+                    + ColumnNames.X + ", " + ColumnNames.Y + " or "
+                    + ColumnNames.VALUE + ", hold text or nulls. Return"
+                    + " numbers in them; for a label, return its position on"
+                    + " the axis, starting at 0, and list the labels in that"
+                    + " order in the axis categories.");
+        }
+    }
+
+    /**
+     * Returns whether a series has nothing to draw. A series of a type not
+     * handled here counts as drawable, so a custom converter is never rejected
+     * for a series this check cannot inspect.
+     */
+    private static boolean hasNoPoints(Series series) {
+        return switch (series) {
+        case DataSeries data -> data.getData().isEmpty();
+        case HeatSeries heat -> heat.getData() == null;
+        case TreeSeries tree -> tree.getData().isEmpty();
+        case NodeSeries nodes ->
+            nodes.getData().isEmpty() && nodes.getNodes().isEmpty();
+        case GanttSeries gantt -> gantt.getData().isEmpty();
+        default -> false;
+        };
     }
 
     private LLMProvider.ToolSpec createInstructionsTool() {

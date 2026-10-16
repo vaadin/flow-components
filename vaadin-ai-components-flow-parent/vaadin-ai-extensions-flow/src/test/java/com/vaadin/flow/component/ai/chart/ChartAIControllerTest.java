@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,6 +33,7 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.HeatSeries;
 import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
@@ -248,6 +250,73 @@ class ChartAIControllerTest {
             Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
             Assertions.assertFalse(result.contains("internal detail"),
                     "The cause must not reach the LLM, got: " + result);
+        }
+
+        @Test
+        void updateData_heatmapRowsWithTextCoordinates_rejected() {
+            databaseProvider.results = List.of(
+                    Map.of("_x", "Monday", "_y", 9, "_value", 120),
+                    Map.of("_x", "Tuesday", "_y", 9, "_value", 80));
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+            Assertions.assertFalse(result.contains("Monday"),
+                    "Row values must not reach the LLM: " + result);
+            controller.onResponse(AITurnEvents.success());
+            Assertions.assertNull(controller.getState(),
+                    "The rejected query must not be applied");
+        }
+
+        @Test
+        void updateData_ohlcRowsWithTextPrices_rejected() {
+            databaseProvider.results = List.of(Map.of("_open", "n/a", "_high",
+                    "n/a", "_low", "n/a", "_close", "n/a"));
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+        }
+
+        @Test
+        void updateData_heatmapRowsWithNumericCoordinates_rendered() {
+            databaseProvider.results = List.of(
+                    Map.of("_x", 0, "_y", 9, "_value", 120),
+                    Map.of("_x", 1, "_y", 9, "_value", 80));
+
+            completeTurn("{\"chart\": {\"type\": \"heatmap\"}}");
+
+            var heat = (HeatSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(2, heat.getData().length);
+        }
+
+        @Test
+        void updateData_organizationOfRootsOnly_accepted() {
+            var root = new LinkedHashMap<String, Object>();
+            root.put("_id", 1);
+            root.put("_name", "Ada");
+            root.put("_parent", null);
+            root.put("_title", "CEO");
+            databaseProvider.results = List.of(root);
+
+            var result = updateData();
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
+        }
+
+        @Test
+        void updateData_rowsPlottedByCustomConverter_accepted() {
+            databaseProvider.results = List
+                    .of(Map.of("_x", "Monday", "_y", 9, "_value", 120));
+            controller.setDataConverter(data -> List
+                    .of(new HeatSeries("visits", new Number[] { 0, 9, 120 })));
+
+            var result = updateData();
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
         }
 
         @Test
@@ -1092,6 +1161,11 @@ class ChartAIControllerTest {
         findTool(tools, "update_chart_data_source")
                 .execute(json("{\"queries\": [\"SELECT 1\"]}"));
         controller.onResponse(AITurnEvents.success());
+    }
+
+    private String updateData() {
+        return findTool(controller.getTools(), "update_chart_data_source")
+                .execute(json("{\"queries\": [\"SELECT 1\"]}"));
     }
 
     private String chartState() {
