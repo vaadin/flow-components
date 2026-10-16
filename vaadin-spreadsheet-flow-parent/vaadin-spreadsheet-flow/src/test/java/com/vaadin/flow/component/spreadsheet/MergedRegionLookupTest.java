@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -15,7 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -195,5 +198,134 @@ class MergedRegionLookupTest {
         // Swap to a different list entirely — also visible.
         ref.set(Collections.emptyList());
         assertNull(lookup.getMergedRegion(1, 1));
+    }
+
+    // The queries run for every cell of every range the server loads.
+
+    @Test
+    void queries_agreeWithAScanOfTheWholeList() {
+        // Regions of every size, overlapping ones and some reaching across
+        // many rows, so that the first one in the list has to win.
+        Random random = new Random(42);
+        List<MergedRegion> regions = new ArrayList<>();
+        for (int i = 0; i < 300; i++) {
+            int c1 = 1 + random.nextInt(30);
+            int r1 = 1 + random.nextInt(400);
+            int width = random.nextInt(4);
+            int height = random.nextInt(10) == 0 ? random.nextInt(200)
+                    : random.nextInt(3);
+            regions.add(region(i, c1, r1, c1 + width, r1 + height));
+        }
+        MergedRegionLookup lookup = new MergedRegionLookup(() -> regions);
+
+        for (int row = 1; row <= 620; row++) {
+            for (int col = 1; col <= 36; col++) {
+                assertSame(scanFor(regions, col, row),
+                        lookup.getMergedRegion(col, row), col + "," + row);
+                assertSame(scanStartingFrom(regions, col, row),
+                        lookup.getMergedRegionStartingFrom(col, row),
+                        col + "," + row);
+            }
+        }
+    }
+
+    private static MergedRegion scanFor(List<MergedRegion> regions, int col,
+            int row) {
+        for (MergedRegion r : regions) {
+            if (r.col1 <= col && r.row1 <= row && r.col2 >= col
+                    && r.row2 >= row) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    private static MergedRegion scanStartingFrom(List<MergedRegion> regions,
+            int col, int row) {
+        for (MergedRegion r : regions) {
+            if (r.col1 == col && r.row1 == row) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    /** A list that counts how many of its elements are read. */
+    private static final class CountingList extends ArrayList<MergedRegion> {
+        private int reads;
+
+        @Override
+        public MergedRegion get(int index) {
+            reads++;
+            return super.get(index);
+        }
+
+        @Override
+        public Iterator<MergedRegion> iterator() {
+            Iterator<MergedRegion> it = super.iterator();
+            return new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return it.hasNext();
+                }
+
+                @Override
+                public MergedRegion next() {
+                    reads++;
+                    return it.next();
+                }
+            };
+        }
+    }
+
+    @Test
+    void queries_readTheListOnlyOnce() {
+        // 20,000 merged regions made a screen of cells cost the server
+        // seconds when every query read through all of them.
+        CountingList regions = new CountingList();
+        for (int i = 0; i < 1_000; i++) {
+            regions.add(region(i, 1 + (i % 50) * 2, 1 + (i / 50) * 2,
+                    2 + (i % 50) * 2, 2 + (i / 50) * 2));
+        }
+        MergedRegionLookup lookup = new MergedRegionLookup(() -> regions);
+        assertNotNull(lookup.getMergedRegion(3, 3));
+        int afterFirst = regions.reads;
+
+        for (int row = 1; row <= 40; row++) {
+            for (int col = 1; col <= 100; col++) {
+                lookup.getMergedRegion(col, row);
+                lookup.getMergedRegionStartingFrom(col, row);
+            }
+        }
+
+        assertEquals(afterFirst, regions.reads);
+    }
+
+    @Test
+    void aRegionAddedToTheList_isFound() {
+        List<MergedRegion> regions = new ArrayList<>();
+        regions.add(region(1, 1, 1, 2, 2));
+        MergedRegionLookup lookup = new MergedRegionLookup(() -> regions);
+        assertNull(lookup.getMergedRegion(5, 5));
+
+        MergedRegion added = region(2, 5, 5, 6, 6);
+        regions.add(added);
+
+        assertSame(added, lookup.getMergedRegion(5, 5));
+        assertSame(added, lookup.getMergedRegionStartingFrom(5, 5));
+    }
+
+    @Test
+    void aListReplacedByAnotherOfTheSameSize_isIndexedAgain() {
+        AtomicReference<List<MergedRegion>> ref = new AtomicReference<>(
+                List.of(region(1, 1, 1, 2, 2)));
+        MergedRegionLookup lookup = new MergedRegionLookup(ref::get);
+        assertNotNull(lookup.getMergedRegion(1, 1));
+
+        MergedRegion other = region(2, 5, 5, 6, 6);
+        ref.set(List.of(other));
+
+        assertNull(lookup.getMergedRegion(1, 1));
+        assertSame(other, lookup.getMergedRegion(6, 6));
     }
 }

@@ -53,6 +53,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueHandler;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.FormulaValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
+import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.command.CellValueCommand;
 
 /**
@@ -209,18 +210,42 @@ public class CellValueManager implements Serializable {
      * @return cell width, including widths of any merged columns
      */
     protected int getCellWidth(Cell cell) {
+        int[] colW = spreadsheet.getColW();
+        int[] merged = mergedColumnsOf(cell);
+        if (merged == null) {
+            return colW[cell.getColumnIndex()];
+        }
+        int w = 0;
+        for (int c = merged[0]; c <= merged[1]; c++) {
+            w += colW[c];
+        }
+        return w;
+    }
+
+    /**
+     * The first and the last column, 0-based, of the merged region the cell is
+     * in, or {@code null} when it is in none.
+     * <p>
+     * On the active sheet, from the spreadsheet's own merged regions, which are
+     * indexed. POI builds its list of a sheet's merged regions from the sheet's
+     * XML on every call: with 20,000 of them, asking for every cell of a screen
+     * took seconds.
+     */
+    int[] mergedColumnsOf(Cell cell) {
+        if (cell.getSheet() == spreadsheet.getActiveSheet()) {
+            MergedRegion region = spreadsheet.getMergedRegionContainer()
+                    .getMergedRegion(cell.getColumnIndex() + 1,
+                            cell.getRowIndex() + 1);
+            return region == null ? null
+                    : new int[] { region.col1 - 1, region.col2 - 1 };
+        }
         for (CellRangeAddress range : cell.getSheet().getMergedRegions()) {
             if (range.isInRange(cell)) {
-                int w = 0;
-                for (int c = range.getFirstColumn(); c <= range
-                        .getLastColumn(); c++) {
-                    w += spreadsheet.getColW()[c];
-                }
-                return w;
+                return new int[] { range.getFirstColumn(),
+                        range.getLastColumn() };
             }
         }
-        // if we get here, cell is not in a merged region
-        return spreadsheet.getColW()[cell.getColumnIndex()];
+        return null;
     }
 
     /**

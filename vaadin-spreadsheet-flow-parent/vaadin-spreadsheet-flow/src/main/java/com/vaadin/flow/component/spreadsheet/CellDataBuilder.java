@@ -18,7 +18,6 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.slf4j.LoggerFactory;
 
@@ -265,12 +264,10 @@ final class CellDataBuilder implements Serializable {
             // against. The client asks again once it has one.
             return 0;
         }
-        for (CellRangeAddress merged : cell.getSheet().getMergedRegions()) {
-            if (merged.isInRange(cell)) {
-                // A merged cell already owns the columns it spans, and the
-                // cells it would run into are its own.
-                return 0;
-            }
+        if (manager.mergedColumnsOf(cell) != null) {
+            // A merged cell already owns the columns it spans, and the
+            // cells it would run into are its own.
+            return 0;
         }
         Row row = cell.getRow();
         return CellOverflowCalculator.spillWidth(cell.getColumnIndex(),
