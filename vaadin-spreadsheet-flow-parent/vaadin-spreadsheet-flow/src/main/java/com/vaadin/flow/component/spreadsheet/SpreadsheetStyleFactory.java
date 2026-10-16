@@ -343,10 +343,13 @@ public class SpreadsheetStyleFactory implements Serializable {
             _shiftedCellBorderStyles.remove(style);
         }
 
-        // TODO May need optimizing since the client side might already have
-        // this cell style
+        // Most cells are given a style the client has already: only a style
+        // whose CSS is new or has changed goes out again.
         CellStyle cellStyle = cell.getCellStyle();
-        addCellStyleCSS(cellStyle);
+        if (addCellStyleCSS(cellStyle)) {
+            spreadsheet.setCellStyleToCSSStyle(
+                    spreadsheet.getCellStyleToCSSStyle());
+        }
 
         borderStyleBuilder.resetAccumulators();
         // custom styles
@@ -431,11 +434,19 @@ public class SpreadsheetStyleFactory implements Serializable {
         return map;
     }
 
-    private void addCellStyleCSS(CellStyle cellStyle) {
+    /**
+     * Puts the style's CSS in the style map. Leaves sending the map to the
+     * caller: each send serializes the whole map, and a workbook's styles are
+     * added one by one - 20,000 of them took the server half a minute when each
+     * was sent on its own.
+     *
+     * @return whether the map changed: the style is new, or its CSS is
+     */
+    private boolean addCellStyleCSS(CellStyle cellStyle) {
 
         if (cellStyle.getIndex() == 0) {
             // default cell style, do not change.
-            return;
+            return false;
         }
 
         StringBuilder sb = new StringBuilder();
@@ -467,10 +478,9 @@ public class SpreadsheetStyleFactory implements Serializable {
             sb.append("padding-left: " + cellStyle.getIndention() + "em;");
         }
 
-        HashMap<Integer, String> _cellStyleToCSSStyle = spreadsheet
-                .getCellStyleToCSSStyle();
-        _cellStyleToCSSStyle.put((int) cellStyle.getIndex(), sb.toString());
-        spreadsheet.setCellStyleToCSSStyle(_cellStyleToCSSStyle);
+        String css = sb.toString();
+        return !css.equals(spreadsheet.getCellStyleToCSSStyle()
+                .put((int) cellStyle.getIndex(), css));
     }
 
     private <K> void styleOut(StringBuilder sb, String attr, K key,

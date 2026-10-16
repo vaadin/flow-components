@@ -11,10 +11,17 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,6 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -125,5 +133,67 @@ class StyleMapPublishTest {
         String after = published(spreadsheet).get((int) style.getIndex());
         assertNotEquals(before, after);
         assertTrue(after.contains("rgba(1, 2, 3, 1.0)"), after);
+    }
+
+    // Each send serializes the whole map: a workbook's styles, added one by
+    // one, cost the server half a minute for 20,000 when each was sent alone.
+
+    @Test
+    void reloadingTheStyles_serializesTheMapOnce() {
+        Spreadsheet spreadsheet = new Spreadsheet(workbookWithStyles(50));
+        HashMap<Integer, String> map = spreadsheet.getCellStyleToCSSStyle();
+
+        try (MockedStatic<Serializer> serializer = mockStatic(Serializer.class,
+                CALLS_REAL_METHODS)) {
+            spreadsheet.getSpreadsheetStyleFactory().reloadWorkbookStyles();
+
+            serializer.verify(() -> Serializer.serialize(same(map)), times(1));
+        }
+    }
+
+    @Test
+    void cellsGivenAStyleTheClientHasAlready_serializeNothing() {
+        XSSFWorkbook workbook = workbookWithStyles(3);
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        HashMap<Integer, String> map = spreadsheet.getCellStyleToCSSStyle();
+        Sheet sheet = workbook.getSheetAt(0);
+        CellStyle shared = sheet.getRow(0).getCell(1).getCellStyle();
+        Row row = sheet.createRow(1);
+
+        try (MockedStatic<Serializer> serializer = mockStatic(Serializer.class,
+                CALLS_REAL_METHODS)) {
+            for (int c = 0; c < 20; c++) {
+                Cell cell = row.createCell(c);
+                cell.setCellStyle(shared);
+                spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
+                        true);
+            }
+
+            serializer.verify(() -> Serializer.serialize(same(map)), never());
+        }
+    }
+
+    @Test
+    void aStyleChangedInPlace_serializesTheMapOnce() {
+        XSSFWorkbook workbook = workbookWithStyles(3);
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        HashMap<Integer, String> map = spreadsheet.getCellStyleToCSSStyle();
+        Row row = workbook.getSheetAt(0).getRow(0);
+        XSSFCellStyle style = (XSSFCellStyle) row.getCell(1).getCellStyle();
+        style.setFillForegroundColor(
+                new XSSFColor(new byte[] { 1, 2, 3 }, null));
+
+        try (MockedStatic<Serializer> serializer = mockStatic(Serializer.class,
+                CALLS_REAL_METHODS)) {
+            // The changed style, then a second cell sharing it.
+            Cell second = row.createCell(9);
+            second.setCellStyle(style);
+            spreadsheet.getSpreadsheetStyleFactory()
+                    .cellStyleUpdated(row.getCell(1), true);
+            spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(second,
+                    true);
+
+            serializer.verify(() -> Serializer.serialize(same(map)), times(1));
+        }
     }
 }
