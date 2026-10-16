@@ -218,6 +218,51 @@ final class FreshLoadHarness {
         return problems;
     }
 
+    /** When an operation is run on a spreadsheet its client has not seen. */
+    enum Before {
+        /** Before the spreadsheet is in the UI. */
+        ATTACHED,
+        /** In the UI, before the first response. */
+        FIRST_RESPONSE
+    }
+
+    /**
+     * Makes a spreadsheet on the workbook and runs the operation before its
+     * client has seen it, as an application setting a spreadsheet up does; then
+     * the client is shown it. Returns the rules broken: what was thrown or
+     * logged, and how the client differs from a new spreadsheet on the workbook
+     * as it is afterwards.
+     */
+    List<String> checkBeforeShown(Workbook workbook, Before before,
+            Consumer<Spreadsheet> operation,
+            Consumer<Spreadsheet> configureFresh) {
+        List<String> problems = new ArrayList<>();
+        spreadsheet = new Spreadsheet(workbook);
+        configure.accept(spreadsheet);
+        client = new ClientModel();
+        try (CapturedLogs.Capture logs = CapturedLogs.capture()) {
+            if (before == Before.FIRST_RESPONSE) {
+                ui.add(spreadsheet);
+            }
+            try {
+                operation.accept(spreadsheet);
+            } catch (RuntimeException failure) {
+                problems.add("threw " + failure);
+            }
+            if (before == Before.ATTACHED) {
+                ui.add(spreadsheet);
+            }
+            try {
+                settle(spreadsheet, client, true, null);
+            } catch (RuntimeException failure) {
+                problems.add("the first response threw " + failure);
+            }
+            logs.entries().forEach(entry -> problems.add("logged " + entry));
+        }
+        problems.addAll(compareWithFresh(configureFresh));
+        return problems;
+    }
+
     /**
      * Runs an operation that is to be refused, and returns what it changed
      * anyway, in the workbook and on the client. A refusal may throw.

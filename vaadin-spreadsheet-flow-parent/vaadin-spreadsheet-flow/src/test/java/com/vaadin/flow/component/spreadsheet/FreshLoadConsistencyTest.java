@@ -27,6 +27,7 @@ import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.vaadin.flow.component.spreadsheet.FreshLoadHarness.Allowance;
@@ -68,11 +69,12 @@ class FreshLoadConsistencyTest {
     record Case(String name, List<Step> steps,
             Consumer<Spreadsheet> configureFresh, Allowance[] allowances,
             boolean refused, List<String> knownProblems,
-            Map<String, Integer> knownWaste) {
+            Map<String, Integer> knownWaste,
+            Consumer<Spreadsheet> application) {
 
         Case known(String... problems) {
             return new Case(name, steps, configureFresh, allowances, refused,
-                    List.of(problems), knownWaste);
+                    List.of(problems), knownWaste, application);
         }
 
         /** Kinds of {@link FreshLoadHarness#wasteKind}, each with a count. */
@@ -83,7 +85,7 @@ class FreshLoadConsistencyTest {
                         (Integer) kindsAndCounts[i + 1]);
             }
             return new Case(name, steps, configureFresh, allowances, refused,
-                    knownProblems, waste);
+                    knownProblems, waste, application);
         }
 
         @Override
@@ -99,28 +101,29 @@ class FreshLoadConsistencyTest {
 
     private static Case op(String name, Step step, Allowance... allowances) {
         return new Case(name, List.of(step), FreshLoadFixture::configure,
-                allowances, false, List.of(), Map.of());
+                allowances, false, List.of(), Map.of(), null);
     }
 
     private static Case op(String name, Consumer<Spreadsheet> action,
             Allowance... allowances) {
-        return op(name, api(action), allowances);
+        return new Case(name, List.of(api(action)), FreshLoadFixture::configure,
+                allowances, false, List.of(), Map.of(), action);
     }
 
     private static Case steps(String name, Step... steps) {
         return new Case(name, Arrays.asList(steps), FreshLoadFixture::configure,
-                new Allowance[0], false, List.of(), Map.of());
+                new Allowance[0], false, List.of(), Map.of(), null);
     }
 
     private static Case refused(String name, Consumer<Spreadsheet> action) {
         return new Case(name, List.of(api(action)), FreshLoadFixture::configure,
-                new Allowance[0], true, List.of(), Map.of());
+                new Allowance[0], true, List.of(), Map.of(), null);
     }
 
     private static Case reconfigured(String name, Consumer<Spreadsheet> action,
             Consumer<Spreadsheet> configureFresh) {
         return new Case(name, List.of(api(action)), configureFresh,
-                new Allowance[0], false, List.of(), Map.of());
+                new Allowance[0], false, List.of(), Map.of(), action);
     }
 
     /** The client sends an event, its data as JSON. */
@@ -396,5 +399,92 @@ class FreshLoadConsistencyTest {
                                         .filter(problem -> FreshLoadHarness
                                                 .wasteKind(problem) != null)
                                         .toList()));
+    }
+
+    /** The operations an application does, to run before the client is. */
+    static Stream<Arguments> applicationCases() {
+        return cases().filter(operation -> operation.application() != null)
+                .flatMap(operation -> Stream
+                        .of(FreshLoadHarness.Before.values())
+                        .map(before -> Arguments.of(operation, before)));
+    }
+
+    /**
+     * What the operations of an application are known to do wrong today when
+     * the client has not seen the spreadsheet yet, by case name and when.
+     */
+    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
+            .ofEntries(Map.entry("a cell created, before ATTACHED", List.of(
+                    "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("a cell created, before FIRST_RESPONSE", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("a cell's value set, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("a cell's value set, before FIRST_RESPONSE", List
+                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("a cell's style set, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("a cell's style set, before FIRST_RESPONSE", List
+                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("a cell deleted, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("a cell deleted, before FIRST_RESPONSE", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("rows shifted up, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("rows shifted up, before FIRST_RESPONSE", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("rows deleted, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("rows deleted, before FIRST_RESPONSE", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("cells merged, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("cells merged, before FIRST_RESPONSE", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("cells unmerged, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("cells unmerged, before FIRST_RESPONSE", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("the cells shown reloaded, before ATTACHED", List
+                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("the cells shown reloaded, before FIRST_RESPONSE",
+                            List.of("threw java.lang.IllegalArgumentException: Cell index must be >= 0")),
+                    Map.entry("rows shifted down, before ATTACHED", List.of(
+                            "threw java.lang.IllegalArgumentException: Cell index must be >= 0",
+                            "property mergedRegions")),
+                    Map.entry("rows shifted down, before FIRST_RESPONSE", List
+                            .of("threw java.lang.IllegalArgumentException: Cell index must be >= 0",
+                                    "property mergedRegions")),
+                    Map.entry("the sheet protected, before ATTACHED",
+                            List.of("property lockFormatColumns",
+                                    "property lockFormatRows",
+                                    "property lockedRowIndexes")),
+                    Map.entry("the sheet protected, before FIRST_RESPONSE",
+                            List.of("property lockFormatColumns",
+                                    "property lockFormatRows",
+                                    "property lockedRowIndexes")));
+
+    @ParameterizedTest(name = "{0}, before {1}")
+    @MethodSource("applicationCases")
+    void anApplication_canDoItBeforeTheClientHasSeenTheSpreadsheet(
+            Case operation, FreshLoadHarness.Before before) {
+        List<String> problems = harness.checkBeforeShown(
+                FreshLoadFixture.workbook(), before, operation.application(),
+                operation.configureFresh());
+
+        List<String> known = KNOWN_BEFORE_SHOWN.getOrDefault(
+                operation.name() + ", before " + before, List.of());
+        List<String> unknown = problems.stream()
+                .filter(problem -> known.stream().noneMatch(problem::contains))
+                .toList();
+        List<String> gone = known.stream().filter(
+                part -> problems.stream().noneMatch(p -> p.contains(part)))
+                .toList();
+        assertAll(
+                () -> assertEquals(List.of(), unknown,
+                        "Problems not known to happen"),
+                () -> assertEquals(List.of(), gone,
+                        "Known problems that no longer happen: take them out"));
     }
 }

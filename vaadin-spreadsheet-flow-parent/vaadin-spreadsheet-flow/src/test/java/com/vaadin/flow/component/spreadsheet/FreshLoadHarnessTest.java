@@ -450,4 +450,36 @@ class FreshLoadHarnessTest {
                 FreshLoadHarness.describe(MAPPER.readTree("[1]"),
                         MAPPER.readTree("[1,2]"), "before it had"));
     }
+
+    @Test
+    void anOperationBeforeTheClient_runsOutOfTheUi_orBeforeTheFirstResponse() {
+        List<String> seen = new ArrayList<>();
+        for (FreshLoadHarness.Before before : FreshLoadHarness.Before
+                .values()) {
+            List<String> problems = harness
+                    .checkBeforeShown(FreshLoadFixture.workbook(), before,
+                            spreadsheet -> seen.add(before + " "
+                                    + spreadsheet.getUI().isPresent() + " "
+                                    + spreadsheet.getElement()
+                                            .getPropertyRaw("reload")),
+                            FreshLoadFixture::configure);
+            assertEquals(List.of(), problems);
+        }
+
+        assertEquals(List.of("ATTACHED false null", "FIRST_RESPONSE true null"),
+                seen);
+    }
+
+    @Test
+    void anOperationBeforeTheClientThatThrows_isReported() {
+        List<String> problems = harness.checkBeforeShown(
+                FreshLoadFixture.workbook(),
+                FreshLoadHarness.Before.FIRST_RESPONSE, spreadsheet -> {
+                    throw new IllegalStateException("too early");
+                }, FreshLoadFixture::configure);
+
+        assertEquals(
+                List.of("threw java.lang.IllegalStateException: too early"),
+                problems);
+    }
 }
