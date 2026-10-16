@@ -314,6 +314,37 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateData_rootsWithoutIdColumn_rejected() {
+            // Every _parent is NULL, so only the missing _id column is wrong
+            var row = new LinkedHashMap<String, Object>();
+            row.put("_name", "Liisa");
+            row.put("_parent", null);
+            databaseProvider.results = List.of(row);
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertNull(controller.getState(),
+                    "a rejected query must not be rendered");
+        }
+
+        @Test
+        void updateData_unlinkedHierarchyInUpperCase_rejected() {
+            // Databases such as H2 return unquoted aliases in upper case
+            databaseProvider.results = List.of(Map.of("_ID", 1, "_NAME",
+                    "Liisa", "_PARENT", 3, "_TITLE", "Staff"));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+        }
+
+        @Test
         void onResponse_renderFails_propagates() {
             databaseProvider.results = List
                     .of(Map.of("category", "A", "value", 10));
