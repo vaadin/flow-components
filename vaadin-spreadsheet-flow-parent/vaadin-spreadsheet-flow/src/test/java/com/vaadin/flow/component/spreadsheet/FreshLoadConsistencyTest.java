@@ -158,47 +158,9 @@ class FreshLoadConsistencyTest {
      * they send for nothing. A fix takes out what it fixes, so the test fails
      * without it.
      */
-    private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
-            Map.entry("a value typed into a cell", c -> c.waste(AGAIN, 2)),
-            Map.entry("a value typed into an empty cell",
-                    c -> c.waste(AGAIN, 3)),
-            Map.entry("a formula typed into a cell", c -> c.waste(AGAIN, 3)),
-            Map.entry("a cell's value typed away", c -> c.waste(AGAIN, 3)),
-            Map.entry("the selected cells deleted",
-                    c -> c.waste(AGAIN, 2, TWICE, 3)),
-            Map.entry("a selection filled down", c -> c.waste(AGAIN, 3)),
-            Map.entry("cells pasted", c -> c.waste(AGAIN, 3)),
-            Map.entry("cells cut",
-                    c -> c.waste(AGAIN, 18, TWICE, 14, NOT_THERE, 24)),
-            Map.entry("an edit undone", c -> c.waste(AGAIN, 4)),
-            Map.entry("an edit undone and redone", c -> c.waste(AGAIN, 6)),
-            Map.entry("a column resized", c -> c.waste(AGAIN, 6, NOT_THERE, 6)),
-            Map.entry("a column autofitted",
-                    c -> c.waste(AGAIN, 4, NOT_THERE, 7)),
-            Map.entry("a sheet not shown renamed", c -> c.waste(AGAIN, 2)),
-            Map.entry("a cell created", c -> c.waste(AGAIN, 3)),
-            Map.entry("a cell's value set", c -> c.waste(AGAIN, 3)),
-            Map.entry("a cell's style set", c -> c.waste(AGAIN, 3)),
-            Map.entry("a cell deleted", c -> c.waste(AGAIN, 2, TWICE, 1)),
-            Map.entry("rows shifted down",
-                    c -> c.waste(AGAIN, 4, TWICE, 4, NOT_THERE, 297)),
-            Map.entry("rows shifted up",
-                    c -> c.waste(AGAIN, 4, TWICE, 4, NOT_THERE, 300)),
-            Map.entry("rows deleted",
-                    c -> c.waste(AGAIN, 2, TWICE, 7, NOT_THERE, 4)),
-            Map.entry("cells merged",
-                    c -> c.waste(AGAIN, 3, TWICE, 3, NOT_THERE, 3)),
-            Map.entry("cells unmerged", c -> c.waste(AGAIN, 4, NOT_THERE, 8)),
-            Map.entry("a column's width set",
-                    c -> c.waste(AGAIN, 6, NOT_THERE, 6)),
-            Map.entry("a column autofitted by the application",
-                    c -> c.waste(AGAIN, 8, NOT_THERE, 3)),
-            Map.entry("panes frozen elsewhere", c -> c.waste(NOT_THERE, 24)),
-            Map.entry("another workbook shown", c -> c.waste(NOT_THERE, 24)),
-            Map.entry("a hidden column given a width",
-                    c -> c.known("property colW",
-                            "property overlays: [0] .width")
-                            .waste(AGAIN, 4, NOT_THERE, 7)));
+    private static final Map<String, UnaryOperator<Case>> KNOWN = Map
+            .ofEntries(Map.entry("a hidden column given a width", c -> c
+                    .known("property colW", "property overlays: [0] .width")));
 
     static Stream<Case> cases() {
         return Stream.of(

@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -82,6 +83,8 @@ class SpreadsheetMergedRegionsTest {
         }
         spreadsheet = new Spreadsheet(workbook);
         ui.add(spreadsheet);
+        // The client reports where it is once it has the sheet.
+        sent();
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
                 "{\"firstRow\": 1, \"firstColumn\": 1, \"lastRow\": 20, \"lastColumn\": 10}");
         sent();
@@ -276,47 +279,59 @@ class SpreadsheetMergedRegionsTest {
     }
 
     @Test
-    void merging_takesTheCellsItHidesOffTheClient() {
+    void merging_sendsNothingForTheCellsItHides() {
+        // The client keeps them, as a new spreadsheet gives them too, and
+        // draws the merged cell over them.
         fillBut();
         show();
 
         spreadsheet.addMergedRegion("A1:B2");
 
-        assertEquals(Set.of("A2", "B1", "B2"), sent().takenOff());
+        Sent sent = sent();
+        assertEquals(Set.of(), sent.takenOff());
+        assertTrue(Collections.disjoint(Set.of("A2", "B1", "B2"),
+                sent.withValues()), sent.withValues().toString());
     }
 
     @Test
-    void mergingOverMissingRowsAndCells_takesOffTheCellsThereAre() {
+    void mergingOverMissingRowsAndCells_sendsNothingForTheCellsThereAre() {
         fillBut("B1");
         sheet.removeRow(sheet.getRow(1));
         show();
 
         spreadsheet.addMergedRegion("A1:B3");
 
-        assertEquals(Set.of("A3", "B3"), sent().takenOff());
+        Sent sent = sent();
+        assertEquals(Set.of(), sent.takenOff());
+        assertTrue(Collections.disjoint(Set.of("A3", "B3"), sent.withValues()),
+                sent.withValues().toString());
     }
 
     @Test
-    void unmerging_givesTheClientTheCellsBack() {
+    void unmerging_sendsNothingForTheCellsTheClientHas() {
         fillBut();
         show("A1:B2");
 
         spreadsheet.removeMergedRegion(0);
 
-        assertTrue(sent().withValues().containsAll(Set.of("A2", "B1", "B2")));
+        Sent sent = sent();
+        assertEquals(Set.of(), sent.takenOff());
+        assertTrue(Collections.disjoint(Set.of("A2", "B1", "B2"),
+                sent.withValues()), sent.withValues().toString());
     }
 
     @Test
-    void unmergingOverMissingRowsAndCells_givesBackTheCellsThereAre() {
+    void unmergingOverMissingRowsAndCells_sendsNothingForTheCellsThereAre() {
         fillBut("B1");
         sheet.removeRow(sheet.getRow(1));
         show("A1:B3");
 
         spreadsheet.removeMergedRegion(0);
 
-        Set<String> withValues = sent().withValues();
-        assertTrue(withValues.containsAll(Set.of("A1", "A3", "B3")),
-                withValues.toString());
+        Sent sent = sent();
+        assertEquals(Set.of(), sent.takenOff());
+        assertTrue(Collections.disjoint(Set.of("A1", "A3", "B3"),
+                sent.withValues()), sent.withValues().toString());
     }
 
     /**

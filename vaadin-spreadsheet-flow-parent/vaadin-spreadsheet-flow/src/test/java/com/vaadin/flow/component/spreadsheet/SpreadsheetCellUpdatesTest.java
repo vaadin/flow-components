@@ -70,6 +70,8 @@ class SpreadsheetCellUpdatesTest {
         spreadsheet = new Spreadsheet(workbook);
         spreadsheet.setLocale(Locale.US);
         ui.add(spreadsheet);
+        // The client reports where it is once it has the sheet.
+        calls();
         showRows(1, 20);
         calls();
     }

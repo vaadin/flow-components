@@ -77,6 +77,8 @@ final class ClientReloadFlag implements Serializable {
         spreadsheet.getElement().setProperty("reload",
                 System.currentTimeMillis());
         pending = false;
+        // The client forgets its cells with the reload.
+        spreadsheet.forgetClientCells();
         if (spreadsheet.initialSheetSelection == null) {
             String selectedCellsOnSheet = spreadsheet.sheetState()
                     .getSelectedCellsOnSheet(spreadsheet.getActiveSheet());

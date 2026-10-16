@@ -59,6 +59,13 @@ class FreshLoadHarnessTest {
         return data;
     }
 
+    /** Sends the client cells as they are, as the spreadsheet would not. */
+    private static void sendPastTheSpreadsheet(Spreadsheet spreadsheet,
+            CellData... cells) {
+        spreadsheet.getElement().callJsFunction("cellsUpdated",
+                Serializer.serialize(List.of(cells)));
+    }
+
     private static void assertReported(List<String> problems, String expected) {
         assertTrue(problems.stream().anyMatch(p -> p.contains(expected)),
                 "Expected a problem with '" + expected + "' in " + problems);
@@ -80,11 +87,11 @@ class FreshLoadHarnessTest {
 
     @Test
     void aCellSentTwiceInOneResponse_isReported() {
+        // Past the spreadsheet, which sends each cell once.
         List<String> problems = harness.check(spreadsheet -> {
             CellData changed = data(10, 5);
             changed.value = "x";
-            spreadsheet.getRpcProxy()
-                    .cellsUpdated(new ArrayList<>(List.of(changed, changed)));
+            sendPastTheSpreadsheet(spreadsheet, changed, changed);
         });
 
         assertReported(problems, "E10 sent twice in one response");
@@ -92,18 +99,20 @@ class FreshLoadHarnessTest {
 
     @Test
     void aCellSentAgainAsTheClientHasIt_isReported() {
-        List<String> problems = harness
-                .check(spreadsheet -> spreadsheet.refreshCells(FreshLoadFixture
-                        .cell(spreadsheet.getActiveSheet(), "F11")));
+        String asTheClientHasIt = "[" + harness.clientModel().cells.get("F11")
+                + "]";
+
+        List<String> problems = harness.check(spreadsheet -> spreadsheet
+                .getElement().callJsFunction("cellsUpdated", asTheClientHasIt));
 
         assertReported(problems, "F11 sent again as the client has it");
     }
 
     @Test
     void aCellTakenOffTheClientThatDoesNotHaveIt_isReported() {
-        List<String> problems = harness
-                .check(spreadsheet -> spreadsheet.getRpcProxy()
-                        .cellsUpdated(new ArrayList<>(List.of(data(30, 30)))));
+        List<String> problems = harness.check(spreadsheet -> {
+            sendPastTheSpreadsheet(spreadsheet, data(30, 30));
+        });
 
         assertReported(problems,
                 "AD30 taken off the client, which does not have it");

@@ -173,6 +173,9 @@ public class Spreadsheet extends Component
     /** should the sheet be reloaded on client side */
     private final ClientReloadFlag clientReloadFlag = new ClientReloadFlag();
 
+    /** What the client has of each cell; every cell sent goes through it. */
+    final ClientCellMirror clientCells = new ClientCellMirror(this);
+
     /** 1-based */
     private final MirroredProperty<Integer> sheetIndex = MirroredProperty
             .integer(this, "sheetIndex", 1);
@@ -710,26 +713,22 @@ public class Spreadsheet extends Component
     private SpreadsheetClientRpc clientRpc = new SpreadsheetClientRpc() {
         @Override
         public void updateBottomRightCellValues(ArrayList<CellData> cellData) {
-            getElement().callJsFunction("updateBottomRightCellValues",
-                    Serializer.serialize(cellData));
+            clientCells.send(cellData);
         }
 
         @Override
         public void updateTopLeftCellValues(ArrayList<CellData> cellData) {
-            getElement().callJsFunction("updateTopLeftCellValues",
-                    Serializer.serialize(cellData));
+            clientCells.send(cellData);
         }
 
         @Override
         public void updateTopRightCellValues(ArrayList<CellData> cellData) {
-            getElement().callJsFunction("updateTopRightCellValues",
-                    Serializer.serialize(cellData));
+            clientCells.send(cellData);
         }
 
         @Override
         public void updateBottomLeftCellValues(ArrayList<CellData> cellData) {
-            getElement().callJsFunction("updateBottomLeftCellValues",
-                    Serializer.serialize(cellData));
+            clientCells.send(cellData);
         }
 
         @Override
@@ -771,13 +770,12 @@ public class Spreadsheet extends Component
 
         @Override
         public void cellsUpdated(ArrayList<CellData> cellData) {
-            getElement().callJsFunction("cellsUpdated",
-                    Serializer.serialize(cellData));
+            clientCells.send(cellData);
         }
 
         @Override
         public void refreshCellStyles() {
-            getElement().callJsFunction("refreshCellStyles");
+            clientCells.refreshStyles();
         }
 
         @Override
@@ -3018,6 +3016,11 @@ public class Spreadsheet extends Component
         sheetOperations.showSheet(poiIndex);
     }
 
+    /** The client has no cells: it is reloaded, or new. */
+    void forgetClientCells() {
+        clientCells.reload();
+    }
+
     /** The overlays of the sheet shown. */
     SheetOverlayManager overlays() {
         return sheetScope.overlays;
@@ -4317,6 +4320,7 @@ public class Spreadsheet extends Component
         reloadCellDataOnNextScroll = true;
         valueManager.clearCachedContent();
         popupButtons().forgetClient();
+        clientCells.reload();
     }
 
     /**
