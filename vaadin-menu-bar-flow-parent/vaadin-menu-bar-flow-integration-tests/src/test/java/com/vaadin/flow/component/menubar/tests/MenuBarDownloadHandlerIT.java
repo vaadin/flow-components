@@ -36,7 +36,7 @@ public class MenuBarDownloadHandlerIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        menuBar = $(MenuBarElement.class).waitForFirst();
+        menuBar = $(MenuBarElement.class).single();
         // Replace the client-side download helper with a shim that only
         // records the URL, so no save dialog opens
         executeScript("""
@@ -55,8 +55,8 @@ public class MenuBarDownloadHandlerIT extends AbstractComponentIT {
 
     @Test
     public void clickSubMenuItem_downloadsFileFromHandler() {
-        menuBar.getButtons().get(1).openSubMenu();
-        MenuBarItemElement item = menuBar.getSubMenuItems().get(0);
+        MenuBarItemElement item = menuBar.getButtons().get(1).openSubMenu()
+                .getMenuItems().get(0);
         Assert.assertEquals(DOWNLOADED, clickAndDownload(item));
     }
 
