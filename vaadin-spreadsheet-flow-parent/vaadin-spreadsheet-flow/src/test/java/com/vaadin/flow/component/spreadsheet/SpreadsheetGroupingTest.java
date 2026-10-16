@@ -49,7 +49,8 @@ class SpreadsheetGroupingTest {
 
     /**
      * A sheet of values with rows 6 to 8 and columns D and E grouped, a picture
-     * over F6:G8, a comment on B7, and the component of the fixture on H13.
+     * over F6:G8, a comment on B7, the component of the fixture on H13, and on
+     * J1 the sum of the rows of the group that are shown.
      */
     private static Workbook workbook() {
         XSSFWorkbook workbook = new XSSFWorkbook();
@@ -61,6 +62,8 @@ class SpreadsheetGroupingTest {
                 cells.createCell(col).setCellValue(row * 10 + col);
             }
         }
+        // Leaves the hidden rows out of its sum.
+        sheet.getRow(0).getCell(9).setCellFormula("SUBTOTAL(109,A6:A8)");
         sheet.groupRow(5, 7);
         sheet.groupColumn(3, 4);
         XSSFDrawing drawing = sheet.createDrawingPatriarch();

@@ -2739,7 +2739,8 @@ public class Spreadsheet extends Component
      *            are grown for again
      * @param visibilityChanged
      *            whether rows or columns were hidden or shown: the comments,
-     *            left out of hidden ones, are loaded again
+     *            left out of hidden ones, are loaded again, and for rows the
+     *            formulas, which can leave hidden rows out
      */
     void reloadSheetStyles(boolean rowsChanged, boolean visibilityChanged) {
         if (rowsChanged) {
@@ -2750,6 +2751,14 @@ public class Spreadsheet extends Component
         sheetScope.overlays.loadOrUpdate();
         if (visibilityChanged) {
             cellCommentLoader.load();
+        }
+        if (rowsChanged && visibilityChanged) {
+            // Formulas such as SUBTOTAL(109, ...) leave hidden rows out: the
+            // values, and the formatting that follows them, are worked out
+            // again.
+            getFormulaEvaluator().clearAllCachedResultValues();
+            getConditionalFormattingEvaluator().clearAllCachedValues();
+            updateMarkedCells();
         }
         getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
@@ -4594,7 +4603,6 @@ public class Spreadsheet extends Component
                 getColW().length);
         SpreadsheetFactory.loadGrouping(this);
         reloadSheetStyles(true, true);
-        updateMarkedCells();
     }
 
     private void updateExpandedRegion(XSSFSheet sheet, int columnIndex,
