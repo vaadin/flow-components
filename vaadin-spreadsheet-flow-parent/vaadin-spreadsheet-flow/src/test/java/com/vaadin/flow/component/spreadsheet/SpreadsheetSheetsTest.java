@@ -644,4 +644,34 @@ class SpreadsheetSheetsTest {
         assertNotNull(editorOfB2());
         assertFalse(clientCalled("updateFormulaBar"));
     }
+
+    /** A workbook saved with its active sheet hidden, as POI allows. */
+    private static XSSFWorkbook activeSheetHidden() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet("Hidden").setDefaultRowHeightInPoints(30);
+        workbook.createSheet("Shown").createRow(0).setHeightInPoints(20);
+        workbook.setActiveSheet(0);
+        workbook.setSheetHidden(0, true);
+        return workbook;
+    }
+
+    @Test
+    void aWorkbookWhoseActiveSheetIsHidden_showsTheNextOne_withItsRows() {
+        Spreadsheet shown = new Spreadsheet(activeSheetHidden());
+
+        assertEquals("Shown", shown.getActiveSheet().getSheetName());
+        assertEquals(1, shown.getElement().getProperty("sheetIndex", 0));
+        assertEquals(20f, shown.getRowH()[0]);
+    }
+
+    @Test
+    void aWorkbookWhoseActiveSheetIsHidden_setLater_showsTheNextOne() {
+        Spreadsheet shown = new Spreadsheet();
+
+        shown.setWorkbook(activeSheetHidden());
+
+        assertEquals("Shown", shown.getActiveSheet().getSheetName());
+        assertEquals(1, shown.getElement().getProperty("sheetIndex", 0));
+        assertEquals(20f, shown.getRowH()[0]);
+    }
 }

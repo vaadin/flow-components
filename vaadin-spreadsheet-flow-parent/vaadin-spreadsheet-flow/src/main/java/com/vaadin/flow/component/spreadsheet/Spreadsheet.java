@@ -3004,7 +3004,6 @@ public class Spreadsheet extends Component
         workbookScope.styler = createSpreadsheetStyleFactory();
         workbookScope.conditionalFormatter = createConditionalFormatter();
 
-        reloadActiveSheetData();
         if (workbook instanceof HSSFWorkbook hssf) {
             setWorkbookProtected(hssf.isWriteProtected());
         } else if (workbook instanceof XSSFWorkbook xssf) {
@@ -3012,6 +3011,14 @@ public class Spreadsheet extends Component
         }
 
         setWorkbookChangeToggle(!isWorkbookChangeToggle());
+    }
+
+    /**
+     * Shows the sheet at the POI index, or the nearest one shown if it is
+     * hidden. See {@link SheetOperations#showSheet(int)}.
+     */
+    void showSheet(int poiIndex) {
+        sheetOperations.showSheet(poiIndex);
     }
 
     /** The pop-up buttons of the workbook shown. */

@@ -126,23 +126,12 @@ public class SpreadsheetFactory implements Serializable {
     static void loadSpreadsheetWith(Spreadsheet spreadsheet, Workbook workbook,
             int rowCount, int columnCount) {
         spreadsheet.clearSheetServerSide();
-        final Sheet sheet;
         if (workbook == null) {
             workbook = new XSSFWorkbook();
-            sheet = createNewSheet(workbook);
-            spreadsheet.setInternalWorkbook(workbook);
-            generateNewSpreadsheet(spreadsheet, sheet, rowCount, columnCount);
-        } else {
-            int activeSheetIndex = workbook.getActiveSheetIndex();
-            if (workbook.isSheetHidden(activeSheetIndex)
-                    || workbook.isSheetVeryHidden(activeSheetIndex)) {
-                workbook.setActiveSheet(
-                        SpreadsheetUtil.getFirstVisibleSheetPOIIndex(workbook));
-            }
-            sheet = workbook.getSheetAt(activeSheetIndex);
-            spreadsheet.setInternalWorkbook(workbook);
-            reloadSpreadsheetData(spreadsheet, sheet);
+            prepareNewSheet(createNewSheet(workbook), rowCount, columnCount);
         }
+        spreadsheet.setInternalWorkbook(workbook);
+        spreadsheet.showSheet(workbook.getActiveSheetIndex());
         loadWorkbookStyles(spreadsheet);
     }
 
@@ -159,12 +148,11 @@ public class SpreadsheetFactory implements Serializable {
             sxssf.dispose();
         }
         final XSSFWorkbook newWorkbook = new XSSFWorkbook();
-        final Sheet sheet = createNewSheet(newWorkbook);
+        prepareNewSheet(createNewSheet(newWorkbook), DEFAULT_ROWS,
+                DEFAULT_COLUMNS);
         spreadsheet.clearSheetServerSide();
         spreadsheet.setInternalWorkbook(newWorkbook);
-        generateNewSpreadsheet(spreadsheet, sheet, DEFAULT_ROWS,
-                DEFAULT_COLUMNS);
-        setDefaultRowHeight(spreadsheet, sheet);
+        spreadsheet.showSheet(0);
         loadWorkbookStyles(spreadsheet);
     }
 
@@ -191,11 +179,8 @@ public class SpreadsheetFactory implements Serializable {
         } else {
             sheet = workbook.createSheet(sheetName);
         }
-        int sheetIndex = workbook.getSheetIndex(sheet);
-        workbook.setActiveSheet(sheetIndex);
-        spreadsheet.reloadActiveSheetData();
-        spreadsheet.reloadActiveSheetStyles();
-        generateNewSpreadsheet(spreadsheet, sheet, rows, columns);
+        prepareNewSheet(sheet, rows, columns);
+        spreadsheet.showSheet(workbook.getSheetIndex(sheet));
     }
 
     /**
@@ -252,9 +237,8 @@ public class SpreadsheetFactory implements Serializable {
                 sxssf.dispose();
             }
         }
-        final Sheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
         spreadsheet.setInternalWorkbook(workbook);
-        reloadSpreadsheetData(spreadsheet, sheet);
+        spreadsheet.showSheet(workbook.getActiveSheetIndex());
         loadWorkbookStyles(spreadsheet);
     }
 
@@ -295,6 +279,7 @@ public class SpreadsheetFactory implements Serializable {
         }
         Workbook wb = WorkbookFactory.create(file);
         spreadsheet.setInternalWorkbook(wb);
+        spreadsheet.showSheet(wb.getActiveSheetIndex());
         return file;
     }
 
@@ -338,25 +323,13 @@ public class SpreadsheetFactory implements Serializable {
     }
 
     /**
-     * Sets the size, default row height and default column width for the given
-     * new Sheet in the target Spreadsheet. Finally loads the sheet.
-     *
-     * @param spreadsheet
-     *            Target spreadsheet
-     * @param sheet
-     *            Target sheet
-     * @param rows
-     *            Amount of rows
-     * @param columns
-     *            Amount of columns
+     * Gives a new sheet its size and Excel's default column width, rather than
+     * POI's, for it to be shown.
      */
-    static void generateNewSpreadsheet(final Spreadsheet spreadsheet,
-            final Sheet sheet, int rows, int columns) {
+    private static void prepareNewSheet(final Sheet sheet, int rows,
+            int columns) {
         sheet.createRow(rows - 1).createCell(columns - 1);
-        setDefaultRowHeight(spreadsheet, sheet);
-        // use excel default column width instead of Apache POI default (8)
         sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
-        reloadSpreadsheetData(spreadsheet, sheet);
     }
 
     /**

@@ -54,10 +54,21 @@ final class SheetOperations implements Serializable {
                     "Cannot set a hidden or very hidden sheet as the active sheet. Given index: "
                             + sheetIndex);
         }
-        workbook.setActiveSheet(sheetIndex);
-        // assume since the UI doesn't allow multiple sheet selections
-        // active sheet == selected tab
-        workbook.setSelectedTab(sheetIndex);
+        showSheet(sheetIndex);
+    }
+
+    /**
+     * Shows the sheet at the POI index, or the nearest one shown if it is
+     * hidden: the client has nothing of the last sheet any more, and everything
+     * of this one is loaded. Every way of showing a sheet comes here: switching
+     * to it, adding it, and loading a workbook.
+     */
+    void showSheet(int poiIndex) {
+        Workbook workbook = spreadsheet.workbook;
+        int shown = nearestShown(workbook, poiIndex);
+        workbook.setActiveSheet(shown);
+        // The UI selects one sheet at a time: the active one.
+        workbook.setSelectedTab(shown);
 
         // formulas defined relative to the sheet may need recalculation
         spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
@@ -65,7 +76,7 @@ final class SheetOperations implements Serializable {
 
         spreadsheet.reloadActiveSheetData();
         SpreadsheetFactory.reloadSpreadsheetData(spreadsheet,
-                workbook.getSheetAt(sheetIndex));
+                workbook.getSheetAt(shown));
         spreadsheet.reloadActiveSheetStyles();
         spreadsheet.loadPopupButtons();
     }
