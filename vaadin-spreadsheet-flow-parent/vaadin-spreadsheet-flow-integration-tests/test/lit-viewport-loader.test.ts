@@ -79,7 +79,7 @@ function fakeClock() {
   };
 }
 
-function setUp(sheet: Partial<{ rows: number; frozenRows: number }> = {}) {
+function setUp(sheet: Partial<{ rows: number; frozenRows: number; noMargin: boolean }> = {}) {
   const time = fakeClock();
   const loads: LoadRange[] = [];
   let drawn: LoadRange | null = { r1: 1, c1: 1, r2: 30, c2: 10 };
@@ -94,7 +94,8 @@ function setUp(sheet: Partial<{ rows: number; frozenRows: number }> = {}) {
         frozenRows: sheet.frozenRows ?? 0,
         frozenCols: 0,
         rowPx: 20,
-        colPx: 64
+        colPx: 64,
+        noMargin: sheet.noMargin ?? false
       }),
       serverBusy: () => busy,
       load: (range) => {
@@ -213,6 +214,36 @@ describe('ViewportLoader', () => {
     t.loader.check();
 
     expect(t.loads[1]).to.eql({ r1: 46, c1: 1, r2: 135, c2: 10 });
+  });
+
+  it('loads the drawn cells alone on a sheet that loads no margin', () => {
+    const t = setUp({ noMargin: true });
+
+    t.loader.check();
+
+    expect(t.loads).to.deep.equal([{ r1: 1, c1: 1, r2: 30, c2: 10 }]);
+  });
+
+  it('with no margin, holds back while the sheet scrolls, and asks for the drawn cells once it stops', () => {
+    const t = setUp({ noMargin: true });
+    t.loader.check();
+
+    // Ten rows every 80 ms: past any margin before a load could come back.
+    // The first scroll event's speed is not known yet, and it is asked for.
+    for (let step = 1; step <= 8; step++) {
+      t.loader.scrolled(step * 200, 0);
+      t.time.advance(80);
+      t.show({ r1: 1 + step * 10, c1: 1, r2: 30 + step * 10, c2: 10 });
+      t.loader.check();
+    }
+    expect(t.loads, 'asked while scrolling').to.deep.equal([
+      { r1: 1, c1: 1, r2: 30, c2: 10 },
+      { r1: 11, c1: 1, r2: 40, c2: 10 }
+    ]);
+
+    t.time.advance(400);
+
+    expect(t.loads[2]).to.deep.equal({ r1: 81, c1: 1, r2: 110, c2: 10 });
   });
 
   it('loads ahead upwards when scrolling up', () => {

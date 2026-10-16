@@ -156,7 +156,8 @@ export class VaadinSpreadsheet extends LitElement {
 
       theme: { type: String, reflectToAttribute: true },
 
-      showCustomEditorOnFocus: { type: Boolean }
+      showCustomEditorOnFocus: { type: Boolean },
+      hasComponentFactory: { type: Boolean }
     };
   }
 

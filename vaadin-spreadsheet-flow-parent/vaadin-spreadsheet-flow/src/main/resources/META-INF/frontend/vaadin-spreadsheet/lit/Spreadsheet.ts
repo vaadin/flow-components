@@ -348,6 +348,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Misc. */
   private sheetProtected = false;
   private showCustomEditorOnFocus = false;
+  /** Whether the server asks a factory for a component or an editor for each cell it loads. */
+  private hasComponentFactory = false;
   // The message a cell with a formula the workbook cannot make sense of
   // shows on hover. Held here rather than waited for: the server only
   // pushes it when an application replaces the default, and until then a
@@ -492,7 +494,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       frozenRows: this.verticalSplitPosition,
       frozenCols: this.horizontalSplitPosition,
       rowPx: getDefaultRowHeightPx(this.defRowHeight, FALLBACK_PPI),
-      colPx: this.defColWidth
+      colPx: this.defColWidth,
+      noMargin: this.hasComponentFactory
     }),
     serverBusy: () => flowRequestInFlight(this.host),
     load: (range) => this.sendLoad(range)
@@ -3890,6 +3893,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
   setShowCustomEditorOnFocus(show: boolean): void {
     this.showCustomEditorOnFocus = show;
+  }
+  setHasComponentFactory(has: boolean): void {
+    this.hasComponentFactory = has;
   }
   setInvalidFormulaErrorMessage(message: string | null): void {
     this.invalidFormulaErrorMessage = message;

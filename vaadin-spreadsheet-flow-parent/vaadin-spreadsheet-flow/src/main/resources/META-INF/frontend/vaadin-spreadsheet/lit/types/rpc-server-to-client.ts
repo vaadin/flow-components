@@ -134,6 +134,7 @@ export interface SpreadsheetClientApi {
   setInvalidFormulaCells(keys: Json<string[]>): void;
   setOverlays(map: Json<Record<string, OverlayInfo>>): void;
   setShowCustomEditorOnFocus(show: boolean): void;
+  setHasComponentFactory(has: boolean): void;
   setInvalidFormulaErrorMessage(message: string | null): void;
   setNamedRanges(names: Json<string[]>): void;
   setResources(host: HTMLElement, jsonString: string): void;

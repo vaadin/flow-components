@@ -195,6 +195,8 @@ public class Spreadsheet extends Component
 
     private final MirroredProperty<Boolean> showCustomEditorOnFocus = MirroredProperty
             .bool(this, "showCustomEditorOnFocus", false);
+    private final MirroredProperty<Boolean> hasComponentFactory = MirroredProperty
+            .bool(this, "hasComponentFactory", false);
 
     /**
      * The editor shown in each cell, by cell key. A cell keeps its editor
@@ -3563,6 +3565,9 @@ public class Spreadsheet extends Component
     public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         customComponentLoader.setFactory(customComponentFactory);
+        // The factory is asked about every cell loaded: the client then
+        // loads only the cells it draws.
+        hasComponentFactory.set(customComponentFactory != null);
         if (viewportBounds.getFirstRow() != -1) {
             // A new factory produces its own editors, so recreate them rather
             // than reuse the previous factory's by cell key.

@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/vaadin-spreadsheet.js';
 
 type LoadEvent = { firstRow: number; firstColumn: number; lastRow: number; lastColumn: number };
 
@@ -60,5 +61,50 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     await open();
 
     expect(Math.max(...loads.map((l) => l.lastRow))).to.be.greaterThan(drawn().lastRow);
+  });
+
+  // The server makes and sends a component or an editor for each cell it
+  // loads that has one: with a margin, a sheet opened with 2.5 times GWT's.
+
+  it('on a sheet whose server has a component factory, asks for the cells it draws alone', async () => {
+    sheet.setHasComponentFactory(true);
+
+    await open();
+
+    expect(loads).to.deep.equal([drawn()]);
+  });
+
+  it('asks for rows past them again once the factory is gone', async () => {
+    sheet.setHasComponentFactory(true);
+    sheet.setHasComponentFactory(false);
+
+    await open();
+
+    expect(Math.max(...loads.map((l) => l.lastRow))).to.be.greaterThan(drawn().lastRow);
+  });
+});
+
+describe('<vaadin-spreadsheet> — the component factory flag', () => {
+  type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean>; hasComponentFactory: boolean };
+
+  it('passes on what the server says about its component factory', async () => {
+    const el = document.createElement('vaadin-spreadsheet') as Element;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    const received: boolean[] = [];
+    const connector = el.$connector;
+    const original = connector.setHasComponentFactory.bind(connector);
+    connector.setHasComponentFactory = (has: boolean) => {
+      received.push(has);
+      original(has);
+    };
+
+    // As Flow sets it.
+    el.hasComponentFactory = true;
+    await el.updateComplete;
+
+    expect(received).to.eql([true]);
+    el.remove();
+    connector.dispose();
   });
 });

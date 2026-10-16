@@ -20,8 +20,20 @@ export interface LoadRange {
 export interface ViewportLoaderHost {
   /** The cells drawn now, the drawing buffer included; null before anything is measured. */
   drawnRange(): LoadRange | null;
-  /** The sheet's size, its frozen panes, and the height and width of a default row and column in pixels. */
-  sheet(): { rows: number; cols: number; frozenRows: number; frozenCols: number; rowPx: number; colPx: number };
+  /**
+   * The sheet's size, its frozen panes, the height and width of a default
+   * row and column in pixels, and whether to load the drawn cells alone,
+   * with no margin.
+   */
+  sheet(): {
+    rows: number;
+    cols: number;
+    frozenRows: number;
+    frozenCols: number;
+    rowPx: number;
+    colPx: number;
+    noMargin: boolean;
+  };
   /** Whether the server is answering a request right now. */
   serverBusy(): boolean;
   /** Ask the server for the cells of a range. */
@@ -108,6 +120,10 @@ const FRAMES_TIMED = 3;
  * or stops.
  * <li>On a slow connection the margin shrinks to a quarter screen, so what
  * is on screen arrives sooner.
+ * <li>A sheet whose cells may hold components or editors loads no margin,
+ * as GWT did: the server asks its factory about each cell loaded, and makes
+ * and sends what it returns. With a margin, a sheet opened with 2.5 times
+ * GWT's components.
  * <li>On a slow machine nothing is loaded until the scrolling stops, as in
  * GWT: a fling loaded 10-49 times, each load slowing the next frames
  * further. A machine is slow while it draws a scroll's frames fewer than 30
@@ -256,8 +272,8 @@ export class ViewportLoader {
     const slow = this.roundTrip > SLOW_ROUND_TRIP_MS;
     // A screen and a half ahead and half a screen behind on the axis that
     // scrolls; a quarter screen ahead on a slow connection.
-    const ahead = (n: number) => (slow ? Math.ceil(n / 4) : n + Math.ceil(n / 2));
-    const behind = (n: number) => (slow ? 0 : Math.ceil(n / 2));
+    const ahead = (n: number) => (sheet.noMargin ? 0 : slow ? Math.ceil(n / 4) : n + Math.ceil(n / 2));
+    const behind = (n: number) => (sheet.noMargin || slow ? 0 : Math.ceil(n / 2));
     const down = this.rowDirection >= 0;
     const rowsBack = down ? behind(rows) : ahead(rows);
     const rowsAhead = down ? ahead(rows) : behind(rows);
