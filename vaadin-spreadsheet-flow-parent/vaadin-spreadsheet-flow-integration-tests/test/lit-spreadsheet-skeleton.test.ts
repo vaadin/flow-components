@@ -1879,7 +1879,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
-    it('vertical scroll asks for the rows scrolled into view and a margin beyond them', () => {
+    it('vertical scroll asks for the rows scrolled into view and a margin beyond them', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(50);
         sheet.setCols(20);
@@ -1903,8 +1903,11 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         const scroller = sheet.getScrollContainer();
         scroller.scrollTop = 200; // 10 rows down (20px each)
         scroller.dispatchEvent(new Event('scroll'));
+        // None of them was loaded: they are asked for first, and once the
+        // scroll has stopped, the cells past them.
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
-        // Rows 11 to 15 are in view. The request covers them and loads
+        // Rows from 11 are in view. The request covers them and loads
         // ahead, so the next steps of a scroll need no request of their own.
         expect(received).to.exist;
         expect(received!.data.firstRow).to.be.at.most(11);

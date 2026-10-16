@@ -101,6 +101,10 @@ const FRAMES_TIMED = 3;
  * <li>Ask only when the drawn cells are not all loaded, and then load a
  * margin ahead in the direction of scrolling, so a steady scroll needs a
  * request only every screen or so.
+ * <li>When none of the drawn cells are loaded - the first screen, or after
+ * a jump - ask for them alone first, and for the margin once they are in.
+ * On a slow network the first screen came 0.3-1 s after GWT's, and the
+ * first jump took twice as long, while the margin came along.
  * <li>Once the sheet stops, tell the server where, even when its cells are
  * all loaded. The server uses the
  * range it was last given for more than cells: it closes the popup of a
@@ -138,6 +142,8 @@ export class ViewportLoader {
   private loaded: LoadRange | null = null;
   /** The drawn range the last request was made for. */
   private reportedDrawn: LoadRange | null = null;
+  /** Whether the last request was for the drawn cells alone, and their margin is still to be asked for. */
+  private marginToFollow = false;
   private inFlightSince: number | null = null;
   /** Whether the request in flight was seen to keep the server busy, so its round trip means something. */
   private sawBusy = false;
@@ -200,6 +206,14 @@ export class ViewportLoader {
     }
     const loaded = this.isLoaded(drawn);
     if (loaded && sameRange(drawn, this.reportedDrawn)) {
+      if (this.marginToFollow) {
+        if (this.inFlightSince === null && !this.moving()) {
+          // The drawn cells are in: now their margin.
+          this.load(this.target(drawn), drawn);
+        } else {
+          this.checkLater();
+        }
+      }
       return;
     }
     if (loaded && this.moving()) {
@@ -212,11 +226,22 @@ export class ViewportLoader {
       this.checkLater();
       return;
     }
+    if (!this.overlapsLoaded(drawn) && !sameRange(target, drawn)) {
+      this.load(drawn, drawn);
+      this.marginToFollow = true;
+      return;
+    }
+    this.load(target, drawn);
+  }
+
+  /** Ask for a range, for the drawn cells given. */
+  private load(range: LoadRange, drawn: LoadRange): void {
     this.timed = this.inFlightSince === null && !this.host.serverBusy();
-    this.loaded = target;
+    this.loaded = range;
     this.reportedDrawn = drawn;
+    this.marginToFollow = false;
     this.inFlightSince = this.clock.now();
-    this.host.load(target);
+    this.host.load(range);
     // Flow sends the request as the event is dispatched, or as soon as the
     // answer it waits for is in.
     this.sawBusy = this.host.serverBusy();
@@ -261,6 +286,18 @@ export class ViewportLoader {
       loaded.c1 <= range.c1 &&
       loaded.r2 >= range.r2 &&
       loaded.c2 >= range.c2
+    );
+  }
+
+  /** Whether any of a range is loaded. */
+  private overlapsLoaded(range: LoadRange): boolean {
+    const loaded = this.loaded;
+    return (
+      loaded !== null &&
+      loaded.r1 <= range.r2 &&
+      loaded.c1 <= range.c2 &&
+      loaded.r2 >= range.r1 &&
+      loaded.c2 >= range.c1
     );
   }
 

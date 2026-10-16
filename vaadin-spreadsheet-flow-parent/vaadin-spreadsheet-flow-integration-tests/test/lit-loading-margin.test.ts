@@ -63,6 +63,15 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     expect(Math.max(...loads.map((l) => l.lastRow))).to.be.greaterThan(drawn().lastRow);
   });
 
+  it('asks for the cells it draws first, and for those past them after', async () => {
+    // On a slow network, the first screen came 0.3-1 s after GWT's while
+    // the margin came along.
+    await open();
+
+    expect(loads[0]).to.eql(drawn());
+    expect(loads[1].lastRow).to.be.greaterThan(drawn().lastRow);
+  });
+
   // The server makes and sends a component or an editor for each cell it
   // loads that has one: with a margin, a sheet opened with 2.5 times GWT's.
 

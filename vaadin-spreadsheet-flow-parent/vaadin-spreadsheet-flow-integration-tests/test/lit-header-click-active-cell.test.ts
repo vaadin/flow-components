@@ -34,6 +34,9 @@ describe('Spreadsheet — the cell a header click makes active', () => {
     sheet.setCols(20);
     sheet.setColW(new Array(20).fill(50));
     sheet.setRowH(new Array(100).fill(15));
+    // The server is asked for the first screen, and on the next draw for the
+    // cells past it.
+    sheet.recomputeViewport();
     sheet.recomputeViewport();
     sent = [];
     host.addEventListener('spreadsheet-event', (e) => sent.push((e as CustomEvent).detail));
@@ -47,6 +50,7 @@ describe('Spreadsheet — the cell a header click makes active', () => {
   function scrollTo(top: number, left: number): void {
     sheet.getScrollContainer().scrollTop = top;
     sheet.getScrollContainer().scrollLeft = left;
+    sheet.recomputeViewport();
     sheet.recomputeViewport();
     sent.length = 0;
   }

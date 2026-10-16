@@ -52,6 +52,9 @@ function attachSheet(): {
   sheet.setColW(new Array(20).fill(50));
   // 15pt rows are 20px at 96ppi.
   sheet.setRowH(new Array(200).fill(15));
+  // The server is asked for the first screen, and on the next draw for the
+  // cells past it.
+  sheet.recomputeViewport();
   sheet.recomputeViewport();
 
   const sent: { type: string; data: Record<string, unknown> }[] = [];
