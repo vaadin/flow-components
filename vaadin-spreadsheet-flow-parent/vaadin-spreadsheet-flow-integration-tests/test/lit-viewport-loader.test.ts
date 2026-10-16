@@ -373,6 +373,28 @@ describe('ViewportLoader', () => {
     expect(t.loads).to.have.length(2);
   });
 
+  // In a production build, frames are 25 ms apart five times slower.
+
+  /** Scroll on by ten rows in 100 ms, the two frames after it this many ms apart. */
+  function scrollOn(t: ReturnType<typeof setUp>, step: number, frameMs: number) {
+    t.time.setFrameInterval(frameMs);
+    t.loader.scrolled(step * 200, 0);
+    t.time.advance(100);
+    t.show({ r1: 1 + step * 10, c1: 1, r2: 30 + step * 10, c2: 10 });
+    t.loader.check();
+  }
+
+  it('on a machine drawing 30 frames a second or more, asks on the way', () => {
+    const t = setUp();
+    t.loader.check();
+
+    for (let step = 1; step <= 8; step++) {
+      scrollOn(t, step, 28);
+    }
+
+    expect(t.loads.length, 'asked while scrolling').to.be.greaterThan(1);
+  });
+
   it('counts the sheet as stopped a second after its last scroll event, with no frames drawn', () => {
     // A tab in the background draws no frames.
     const t = setUp();
