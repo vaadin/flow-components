@@ -15,8 +15,6 @@ import java.util.LinkedList;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
@@ -33,9 +31,6 @@ import com.vaadin.flow.dom.Element;
  * @since 23.1
  */
 public class ContextMenuManager implements Serializable {
-
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(ContextMenuManager.class);
 
     private LinkedList<Handler> actionHandlers;
 
@@ -129,25 +124,23 @@ public class ContextMenuManager implements Serializable {
      *            Column index at context menu target, 1-based
      */
     public void onContextMenuOpenOnSelection(int row, int column) {
-        try {
-            // update the selection if the context menu wasn't triggered on
-            // top of any of the cells inside the current selection.
-            boolean keepSelection = spreadsheet.getCellSelectionManager()
-                    .isCellInsideSelection(row, column);
+        // update the selection if the context menu wasn't triggered on
+        // top of any of the cells inside the current selection.
+        boolean keepSelection = spreadsheet.getCellSelectionManager()
+                .isCellInsideSelection(row, column);
 
-            if (!keepSelection) {
-                // click was on top of a cell that is not the selected cell,
-                // not one of the individual cells nor part of any cell
-                // ranges -> set as the selected cell
-                spreadsheet.getCellSelectionManager().onCellSelected(row,
-                        column, true);
-            }
-            ArrayList<SpreadsheetActionDetails> actions = createActionsListForSelection();
-            if (!actions.isEmpty()) {
-                spreadsheet.getRpcProxy().showActions(actions);
-            }
-        } catch (Exception e) {
-            LOGGER.trace(e.getMessage(), e);
+        if (!keepSelection) {
+            // click was on top of a cell that is not the selected cell,
+            // not one of the individual cells nor part of any cell
+            // ranges -> set as the selected cell
+            spreadsheet.getCellSelectionManager().onCellSelected(row, column,
+                    true);
+        }
+        // What an action handler throws is its own, and reaches the error
+        // handler.
+        ArrayList<SpreadsheetActionDetails> actions = createActionsListForSelection();
+        if (!actions.isEmpty()) {
+            spreadsheet.getRpcProxy().showActions(actions);
         }
     }
 
