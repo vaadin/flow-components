@@ -370,21 +370,27 @@ public class SpreadsheetFactory implements Serializable {
     static void reloadSpreadsheetData(final Spreadsheet spreadsheet,
             final Sheet sheet) {
         logMemoryUsage();
-        try {
-            setDefaultRowHeight(spreadsheet, sheet);
-            setDefaultColumnWidth(spreadsheet, sheet);
-            calculateSheetSizes(spreadsheet, sheet);
-            loadSheetOverlays(spreadsheet);
-            loadSheetTables(spreadsheet);
-            spreadsheet.mergedRegionOperations.load();
-            loadFreezePane(spreadsheet);
-            loadSheetProtection(spreadsheet);
-            loadGrouping(spreadsheet);
-            loadNamedRanges(spreadsheet);
-        } catch (NullPointerException npe) {
-            LOGGER.warn(npe.getMessage(), npe);
-        }
+        // What POI cannot read of a sheet is left out, and the rest loaded.
+        loadPart("row height", () -> setDefaultRowHeight(spreadsheet, sheet));
+        loadPart("column width",
+                () -> setDefaultColumnWidth(spreadsheet, sheet));
+        loadPart("sizes", () -> calculateSheetSizes(spreadsheet, sheet));
+        loadPart("overlays", () -> loadSheetOverlays(spreadsheet));
+        loadPart("tables", () -> loadSheetTables(spreadsheet));
+        loadPart("merged cells", spreadsheet.mergedRegionOperations::load);
+        loadPart("frozen panes", () -> loadFreezePane(spreadsheet));
+        loadPart("protection", () -> loadSheetProtection(spreadsheet));
+        loadPart("grouping", () -> loadGrouping(spreadsheet));
+        loadPart("named ranges", () -> loadNamedRanges(spreadsheet));
         logMemoryUsage();
+    }
+
+    private static void loadPart(String part, Runnable load) {
+        try {
+            load.run();
+        } catch (RuntimeException failure) {
+            LOGGER.warn("Could not load the {} of the sheet", part, failure);
+        }
     }
 
     static void loadNamedRanges(Spreadsheet spreadsheet) {
