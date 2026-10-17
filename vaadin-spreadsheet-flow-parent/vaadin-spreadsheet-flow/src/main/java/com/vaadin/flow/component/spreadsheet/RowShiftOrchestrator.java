@@ -29,6 +29,12 @@ final class RowShiftOrchestrator implements Serializable {
             boolean resetOriginalRowHeight) {
         spreadsheet.getActiveSheet().shiftRows(startRow, endRow, n,
                 copyRowHeight, resetOriginalRowHeight);
+        // Rows moved past the last row shown are shown, as a load shows
+        // them; nothing moved there, the sheet keeps its size.
+        int rowsNeeded = spreadsheet.getActiveSheet().getLastRowNum() + 1;
+        if (rowsNeeded > spreadsheet.getRows()) {
+            spreadsheet.setMaxRows(rowsNeeded);
+        }
         // POI moves the cells, heights and merged regions of the rows; their
         // pop-up buttons and invalid formula marks go with them.
         spreadsheet.popupButtons().shiftRows(startRow, endRow, n);

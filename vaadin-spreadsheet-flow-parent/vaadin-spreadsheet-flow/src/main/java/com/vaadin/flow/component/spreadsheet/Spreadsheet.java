@@ -2573,8 +2573,9 @@ public class Spreadsheet extends Component
         // whose ranges POI moved with the rows, are read again with the
         // cells sent below.
         getFormulaEvaluator().clearAllCachedResultValues();
-        // The rows have the heights POI moved with them, or none.
-        sheetSizes.readRows(firstRow, lastRow);
+        // The rows have the heights POI moved with them, or none; those past
+        // the last row shown have none to show.
+        sheetSizes.readRows(firstRow, Math.min(lastRow, getRows() - 1));
         updateMergedRegions();
         // Once the merged regions are where POI put them: the cells draw
         // their borders on the cells before them, and the rows hidden moved.

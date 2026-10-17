@@ -184,7 +184,7 @@ class FreshLoadConsistencyTest {
             Map.entry("a row deleted, undone and redone",
                     c -> c.known("property rows", "pop-up button")),
             Map.entry("rows shifted down over the filter",
-                    c -> c.known("property rowH", "pop-up button")));
+                    c -> c.known("pop-up button")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -596,9 +596,9 @@ class FreshLoadConsistencyTest {
      */
     private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map.of(
             "rows shifted down over the filter, before ATTACHED",
-            List.of("property rowH", "pop-up button"),
+            List.of("pop-up button"),
             "rows shifted down over the filter, before FIRST_RESPONSE",
-            List.of("property rowH", "pop-up button"));
+            List.of("pop-up button"));
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")

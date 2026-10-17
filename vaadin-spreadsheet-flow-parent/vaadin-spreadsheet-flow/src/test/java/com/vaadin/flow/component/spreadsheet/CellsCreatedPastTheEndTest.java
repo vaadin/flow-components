@@ -20,9 +20,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.tests.MockUIExtension;
 
 /**
- * Cells created past the last row or column shown: the sheet grows to show
- * them, with the styles and locks of the rows and columns it grows by, as
- * loading the workbook shows it.
+ * Cells created, or rows shifted, past the last row or column shown: the sheet
+ * grows to show them, with the styles and locks of the rows and columns it
+ * grows by, as loading the workbook shows it.
  */
 class CellsCreatedPastTheEndTest {
 
@@ -54,6 +54,25 @@ class CellsCreatedPastTheEndTest {
 
         assertEquals(List.of(), harness.check(spreadsheet -> spreadsheet
                 .refreshCells(spreadsheet.createCell(196, 52, "column 53"))));
+    }
+
+    @Test
+    void aRowShiftedPastTheLastRow() {
+        XSSFWorkbook workbook = workbook();
+        workbook.getSheetAt(0).createRow(199).createCell(0)
+                .setCellValue("last");
+        harness.show(workbook);
+
+        assertEquals(List.of(), harness
+                .check(spreadsheet -> spreadsheet.shiftRows(199, 199, 1)));
+    }
+
+    @Test
+    void emptyRowsShiftedPastTheLastRow() {
+        harness.show(workbook());
+
+        assertEquals(List.of(), harness
+                .check(spreadsheet -> spreadsheet.shiftRows(150, 199, 5)));
     }
 
     @Test

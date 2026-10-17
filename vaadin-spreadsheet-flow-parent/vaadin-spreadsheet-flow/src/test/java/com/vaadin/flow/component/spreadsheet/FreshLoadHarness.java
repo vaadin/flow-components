@@ -388,9 +388,9 @@ final class FreshLoadHarness {
     private void settle(Spreadsheet target, ClientModel model, boolean announce,
             List<String> waste) {
         for (int round = 0;; round++) {
-            if (round == 5) {
+            if (round == 8) {
                 throw new AssertionError(
-                        "The client was still being reloaded after five responses");
+                        "The client was still being reloaded after eight responses");
             }
             Response response = respond(target);
             boolean reloaded = response.properties().contains("reload");
@@ -412,7 +412,11 @@ final class FreshLoadHarness {
                 TestHelper.fireClientEvent(target, "setCellStyleWidthRatios",
                         model.widthRatios(target));
             }
-            if (reloaded || announce) {
+            // The client draws the rows and columns the sheet has: given more
+            // or fewer, it says again where it is, and loads what it draws.
+            boolean resized = response.properties().contains("rows")
+                    || response.properties().contains("cols");
+            if (reloaded || announce || resized) {
                 announce = false;
                 TestHelper.fireClientEvent(target, "onSheetScroll",
                         viewport.json());
