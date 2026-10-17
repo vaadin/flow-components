@@ -203,7 +203,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         spreadsheet.setCellStyleToCSSStyle(spreadsheet.cellStyleToCSSStyle);
         reloadActiveSheetColumnRowStyles();
         // Styles changed in place change what their cells draw on other
-        // cells. The first time, the sheet finds that when it is shown.
+        // cells. Only then, as finding that goes through every cell, and not
+        // the first time: the sheet finds it when it is shown.
         if (stylesLoaded
                 && !bordersBefore.equals(borderStyleBuilder.sidesOfStyles())) {
             borderStyleBuilder.load();
@@ -335,19 +336,19 @@ public class SpreadsheetStyleFactory implements Serializable {
         if (sides == borderStyleBuilder.sides(cellStyle.getIndex())) {
             borderStyleBuilder.cellChanged(cell);
         } else {
-            // A style changed in place changes what all its cells draw.
+            // A style changed in place changes what all its cells draw. Only
+            // then, as finding that goes through every cell.
             borderStyleBuilder.load();
         }
         sendBordersAction.schedule();
     }
 
     /**
-     * Gives the client the borders the cells draw on other cells than their
-     * own, before the next response. The methods that change them do so
-     * themselves.
+     * Does nothing: the borders the cells draw on other cells than their own
+     * reach the client before the next response after each change to them.
      */
     public void loadCustomBorderStylesToState() {
-        sendBordersAction.schedule();
+        // nothing to do
     }
 
     /**
@@ -377,10 +378,7 @@ public class SpreadsheetStyleFactory implements Serializable {
     }
 
     private void sendBorders() {
-        // Another workbook shown since has a style factory of its own.
-        if (spreadsheet.getSpreadsheetStyleFactory() == this) {
-            spreadsheet.setShiftedCellBorderStyles(borderRules());
-        }
+        spreadsheet.setShiftedCellBorderStyles(borderRules());
     }
 
     @SuppressWarnings({ "unchecked" })

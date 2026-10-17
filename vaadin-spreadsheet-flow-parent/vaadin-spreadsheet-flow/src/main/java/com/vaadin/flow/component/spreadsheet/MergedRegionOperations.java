@@ -161,8 +161,6 @@ final class MergedRegionOperations implements Serializable {
                 }
             }
         }
-        spreadsheet.getSpreadsheetStyleFactory()
-                .loadCustomBorderStylesToState();
     }
 
     /**
@@ -190,7 +188,5 @@ final class MergedRegionOperations implements Serializable {
                 }
             }
         }
-        spreadsheet.getSpreadsheetStyleFactory()
-                .loadCustomBorderStylesToState();
     }
 }
