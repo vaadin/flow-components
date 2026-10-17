@@ -174,23 +174,6 @@ class CommandReplayerTest {
     }
 
     @Test
-    void changeSelection_nullSelection_callsReSelectSelectedCell() {
-        // Pin the "null selection" branch: routes to reSelectSelectedCell
-        // (per the source comment: "selected cell value might have changed,
-        // formula field needs refresh"). Not the two-arg path.
-        when(spreadsheet.isRerenderPending()).thenReturn(false);
-        Command command = stubCommand(0, null, null);
-
-        replayer.changeSelection(command);
-
-        verify(selectionManager).reSelectSelectedCell();
-        verify(selectionManager, never()).onSheetAddressChanged(any(),
-                org.mockito.ArgumentMatchers.anyBoolean());
-        verify(selectionManager, never()).handleCellRangeSelection(any(), any(),
-                org.mockito.ArgumentMatchers.anyBoolean());
-    }
-
-    @Test
     void changeSelection_singleCell_callsOnSheetAddressChanged_withFalseInteractive() {
         // Pin the "single cell, no range" branch: routes to
         // onSheetAddressChanged with the cell's formatted address and

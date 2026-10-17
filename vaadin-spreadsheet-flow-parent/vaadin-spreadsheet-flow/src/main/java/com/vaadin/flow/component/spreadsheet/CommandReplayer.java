@@ -25,7 +25,7 @@ import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
  * match the command and seed the initial selection address.</li>
  * <li>{@link #changeSelection(Command)} — route the selection update through
  * the {@link CellSelectionManager} based on whether the command carries a
- * single cell, a range, or neither.</li>
+ * single cell or a range.</li>
  * <li>{@link #fireCellValueChangeEvent(Command)} — emit a
  * {@link CellValueChangeEvent} when the command implements
  * {@link ValueChangeCommand}.</li>
@@ -82,6 +82,8 @@ final class CommandReplayer implements Serializable {
      * {@link CellSelectionManager}. Skips when a full rerender is already
      * pending — in that case the seeded initialSheetSelection (set by
      * {@link #makeSureCorrectSheetActive}) handles the post-rerender selection.
+     * A command that selects nothing leaves the selection: what it changes in
+     * the cells refreshes the formula bar, as any change of cells does.
      */
     void changeSelection(Command command) {
         if (spreadsheet.isRerenderPending()) {
@@ -91,10 +93,9 @@ final class CommandReplayer implements Serializable {
                 .getSelectedCellReference();
         CellRangeAddress paintedCellRange = command.getPaintedCellRange();
         if (selectedCellReference == null) {
-            // The selected cell value might have changed, so the formula
-            // field needs to be refreshed.
-            spreadsheet.getCellSelectionManager().reSelectSelectedCell();
-        } else if (paintedCellRange == null) {
+            return;
+        }
+        if (paintedCellRange == null) {
             // Without the sheet's name, as computeInitialSelection.
             spreadsheet.getCellSelectionManager().onSheetAddressChanged(
                     selectedCellReference.formatAsString(false), false);

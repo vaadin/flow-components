@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.component.spreadsheet.command.Command;
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
@@ -164,6 +167,44 @@ class SelectionAfterUndoTest {
 
         assertEquals(List.of("setSelectedCellAndRange B2 in B2:C3 into view"),
                 selections(respond()));
+    }
+
+    @Test
+    void anUndoOfACommandThatSelectsNothing_refreshesTheFormulaBarOnce() {
+        // A command of the application's own, which puts a value into D4.
+        Cell d4 = spreadsheet.createCell(3, 3, "before");
+        spreadsheet.getSpreadsheetHistoryManager().addCommand(new Command() {
+            @Override
+            public void execute() {
+                d4.setCellValue("after");
+                spreadsheet.refreshCells(d4);
+            }
+
+            @Override
+            public int getActiveSheetIndex() {
+                return 0;
+            }
+
+            @Override
+            public void setActiveSheetIndex(int index) {
+            }
+
+            @Override
+            public CellReference getSelectedCellReference() {
+                return null;
+            }
+
+            @Override
+            public CellRangeAddress getPaintedCellRange() {
+                return null;
+            }
+        });
+        select(4, 4);
+        respond();
+
+        undo();
+
+        assertEquals(List.of("updateFormulaBar D4"), respond());
     }
 
     @Test
