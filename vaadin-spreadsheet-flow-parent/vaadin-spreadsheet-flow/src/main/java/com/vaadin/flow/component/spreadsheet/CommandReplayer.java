@@ -62,13 +62,18 @@ final class CommandReplayer implements Serializable {
         }
     }
 
+    /**
+     * The command's selection as an address of the sheet shown: without the
+     * sheet's name, which the commands put in their cell references and the
+     * address field does not read.
+     */
     private static String computeInitialSelection(Command command) {
         CellRangeAddress paintedCellRange = command.getPaintedCellRange();
         CellReference selectedCellReference = command
                 .getSelectedCellReference();
         return paintedCellRange != null ? paintedCellRange.formatAsString()
                 : selectedCellReference != null
-                        ? selectedCellReference.formatAsString()
+                        ? selectedCellReference.formatAsString(false)
                         : "A1";
     }
 
@@ -90,8 +95,9 @@ final class CommandReplayer implements Serializable {
             // field needs to be refreshed.
             spreadsheet.getCellSelectionManager().reSelectSelectedCell();
         } else if (paintedCellRange == null) {
+            // Without the sheet's name, as computeInitialSelection.
             spreadsheet.getCellSelectionManager().onSheetAddressChanged(
-                    selectedCellReference.formatAsString(), false);
+                    selectedCellReference.formatAsString(false), false);
         } else {
             spreadsheet.getCellSelectionManager().handleCellRangeSelection(
                     selectedCellReference, paintedCellRange, true);

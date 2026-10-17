@@ -143,6 +143,18 @@ class SelectionAfterUndoTest {
     }
 
     @Test
+    void anUndo_selectsTheCellTypedIn() {
+        type(2, 2, "x");
+        select(4, 4);
+        respond();
+
+        undo();
+
+        assertEquals(List.of("showSelectedCell B2 into view"),
+                selections(respond()));
+    }
+
+    @Test
     void anUndo_selectsTheRangeValuesWereDeletedFrom() {
         deleteB2ToC3();
         select(5, 5);
@@ -152,6 +164,22 @@ class SelectionAfterUndoTest {
 
         assertEquals(List.of("setSelectedCellAndRange B2 in B2:C3 into view"),
                 selections(respond()));
+    }
+
+    @Test
+    void anUndoOnAnotherSheet_selectsTheCellTypedIn_onceTheClientHasIt() {
+        // The sheet is left with D4 selected, not B2.
+        type(2, 2, "x");
+        select(4, 4);
+        respond();
+        showTheSecondSheet();
+
+        undo();
+
+        assertEquals(0, spreadsheet.getActiveSheetIndex());
+        assertEquals(List.of(), selections(respond()));
+        assertEquals(List.of("showSelectedCell B2 into view"),
+                selections(clientReportsWhereItIs()));
     }
 
     @Test
