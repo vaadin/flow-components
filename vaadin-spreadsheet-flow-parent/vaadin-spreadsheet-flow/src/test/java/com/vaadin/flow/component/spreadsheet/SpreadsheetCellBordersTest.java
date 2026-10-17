@@ -204,9 +204,7 @@ class SpreadsheetCellBordersTest {
      * they are run: a part of the text of each problem. A fix takes out what it
      * fixes, so the test fails without it.
      */
-    private static final Map<String, List<String>> KNOWN = Map.ofEntries(
-            Map.entry("rows with borders shifted down", List.of(BORDERS)),
-            Map.entry("rows shifted up under a top border", List.of(BORDERS)));
+    private static final Map<String, List<String>> KNOWN = Map.of();
 
     private static void assertKnown(List<String> known, List<String> problems) {
         assertAll(

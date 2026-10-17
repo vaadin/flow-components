@@ -307,16 +307,17 @@ class RowShiftOrchestratorTest {
         verify(sizes).readRows(2, 6);
     }
 
-    // ----- pre-shift style invalidation for cellsToUpdate ------------------
+    // ----- borders drawn on other cells ------------------------------------
 
     @Test
-    void shift_alwaysCallsLoadCustomBorderStylesToState() {
-        // Pin: after the row-walk, custom border styles are reloaded.
-        // This carries over any cell-style border edges that need to
-        // be re-emitted on the client side. A regression skipping this
-        // call would leave the client showing pre-shift border layout.
+    void shift_reloadsTheBordersOnceTheMergedRegionsAreMoved() {
+        // Pin: the borders the cells draw on other cells are found again
+        // after the merged regions are passed on, as POI moves those too.
         orchestrator.shift(0, 2, 1, false, false);
 
-        verify(styler).loadCustomBorderStylesToState();
+        org.mockito.InOrder inOrder = org.mockito.Mockito.inOrder(spreadsheet,
+                styler);
+        inOrder.verify(spreadsheet).updateMergedRegions();
+        inOrder.verify(styler).reloadBorders();
     }
 }

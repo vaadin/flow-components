@@ -68,11 +68,7 @@ final class RowShiftOrchestrator implements Serializable {
         if (spreadsheet.overlays().hasOverlays()) {
             spreadsheet.overlays().markReloadFromPoi();
         }
-        // need to shift the cell styles, clear and update
-        // need to go -1 and +1 because of shifted borders..
         final ArrayList<Cell> cellsToUpdate = new ArrayList<>();
-        SpreadsheetStyleFactory styler = spreadsheet
-                .getSpreadsheetStyleFactory();
         for (int r = (firstAffectedRow - 1); r <= (lastAffectedRow + 1); r++) {
             if (r < 0) {
                 r = 0;
@@ -82,14 +78,10 @@ final class RowShiftOrchestrator implements Serializable {
             if (row == null) {
                 spreadsheet.getCellValueManager()
                         .updateDeletedRowsInClientCache(rowIndex, rowIndex);
-                for (int c = 0; c < spreadsheet.getCols(); c++) {
-                    styler.clearCellStyle(r, c);
-                }
             } else {
                 for (int c = 0; c < spreadsheet.getCols(); c++) {
                     Cell cell = row.getCell(c);
                     if (cell == null) {
-                        styler.clearCellStyle(r, c);
                         if (r <= lastNonBlankRow + n) {
                             // There might be a pre-shift value for this
                             // cell in client-side and should be overwritten
@@ -108,16 +100,17 @@ final class RowShiftOrchestrator implements Serializable {
         spreadsheet.invalidFormulas().shiftActiveSheetRows(startRow, endRow, n);
 
         for (Cell cell : cellsToUpdate) {
-            styler.cellStyleUpdated(cell, false);
             spreadsheet.markCellAsUpdated(cell, false);
         }
-        styler.loadCustomBorderStylesToState();
 
         // Sends the cells marked above and reloads the ones shown. Shifting
         // moves cells, and an editor is cached against a cell key — one left
         // in place would end up on the wrong cell.
         spreadsheet.updateMarkedCellsRecreatingEditors();
         spreadsheet.updateMergedRegions();
+        // Once the merged regions are where POI moved them: the cells draw
+        // their borders on the cells before them, and the rows hidden moved.
+        spreadsheet.getSpreadsheetStyleFactory().reloadBorders();
 
         CellReference selectedCellReference = spreadsheet
                 .getCellSelectionManager().getSelectedCellReference();
