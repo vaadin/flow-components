@@ -186,6 +186,14 @@ public class CellValueCommand extends SpreadsheetCommand
         }
         if (!spreadsheet.isRerenderPending()) {
             spreadsheet.refreshCells(cellsToUpdate);
+        } else {
+            // The client is shown the sheet again after this: the formulas
+            // reading these values, and the formats following both, are
+            // worked out again. They were as the sheet was shown, before the
+            // values were put back.
+            spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
+            spreadsheet.getConditionalFormatter()
+                    .createConditionalFormatterRules();
         }
     }
 

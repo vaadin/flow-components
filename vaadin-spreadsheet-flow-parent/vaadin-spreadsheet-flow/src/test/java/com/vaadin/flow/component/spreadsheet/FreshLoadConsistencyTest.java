@@ -182,9 +182,7 @@ class FreshLoadConsistencyTest {
             Map.entry("a row deleted, then undone",
                     c -> c.known("property rows", "pop-up button")),
             Map.entry("a row deleted, undone and redone",
-                    c -> c.known("property rows", "pop-up button")),
-            Map.entry("an edit undone from another sheet",
-                    c -> c.known("cell E10", "cell G10")));
+                    c -> c.known("property rows", "pop-up button")));
 
     static Stream<Case> cases() {
         return Stream.of(
