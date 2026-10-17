@@ -170,7 +170,10 @@ class FreshLoadConsistencyTest {
             Map.entry("a hidden row deleted",
                     c -> c.known("property shiftedCellBorderStyles")),
             Map.entry("a row of its own height deleted",
-                    c -> c.known("property shiftedCellBorderStyles")));
+                    c -> c.known("property shiftedCellBorderStyles")),
+            Map.entry("a row shifted down past rows not shifted",
+                    c -> c.known("cell A12", "cell E12", "cell E13", "cell F12",
+                            "cell F13", "cell G12", "cell H12")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -267,6 +270,8 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.shiftRows(10, 13, 1)),
                 op("rows shifted up",
                         spreadsheet -> spreadsheet.shiftRows(11, 14, -1)),
+                op("a row shifted down past rows not shifted",
+                        spreadsheet -> spreadsheet.shiftRows(10, 10, 3)),
                 steps("rows of their own heights shifted down",
                         api(spreadsheet -> spreadsheet.setRowHeight(10, 40f)),
                         api(spreadsheet -> spreadsheet.setRowHeight(13, 50f)),
