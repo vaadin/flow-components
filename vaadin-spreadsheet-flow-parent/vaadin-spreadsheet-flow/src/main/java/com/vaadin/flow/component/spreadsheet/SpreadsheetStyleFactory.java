@@ -145,6 +145,9 @@ public class SpreadsheetStyleFactory implements Serializable {
     /** Gives the client the borders drawn on other cells, once a response. */
     private final BeforeClientResponseAction sendBordersAction;
 
+    /** Whether the styles of the workbook have been loaded once. */
+    private boolean stylesLoaded;
+
     /**
      * Constructs a new SpreadsheetStyleFactory for the given Spreadsheet
      *
@@ -175,6 +178,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         } else {
             spreadsheet.cellStyleToCSSStyle.clear();
         }
+        Map<Integer, Integer> bordersBefore = borderStyleBuilder
+                .sidesOfStyles();
         borderStyleBuilder.resetStyles();
 
         // get default text alignments
@@ -197,6 +202,14 @@ public class SpreadsheetStyleFactory implements Serializable {
         }
         spreadsheet.setCellStyleToCSSStyle(spreadsheet.cellStyleToCSSStyle);
         reloadActiveSheetColumnRowStyles();
+        // Styles changed in place change what their cells draw on other
+        // cells. The first time, the sheet finds that when it is shown.
+        if (stylesLoaded
+                && !bordersBefore.equals(borderStyleBuilder.sidesOfStyles())) {
+            borderStyleBuilder.load();
+        }
+        stylesLoaded = true;
+        sendBordersAction.schedule();
     }
 
     public void reloadActiveSheetColumnRowStyles() {

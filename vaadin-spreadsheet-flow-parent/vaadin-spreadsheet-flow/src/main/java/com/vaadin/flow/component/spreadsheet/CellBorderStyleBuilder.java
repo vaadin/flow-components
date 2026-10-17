@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -189,6 +190,16 @@ final class CellBorderStyleBuilder implements Serializable {
                 | (leftBorders.containsKey(style) ? 2 : 0)
                 | (rightBorders.containsKey(style) ? 4 : 0)
                 | (bottomBorders.containsKey(style) ? 8 : 0);
+    }
+
+    /** Which of its borders each style has, by style. */
+    Map<Integer, Integer> sidesOfStyles() {
+        Map<Integer, Integer> sides = new HashMap<>();
+        for (Map<Integer, String> borders : List.of(topBorders, leftBorders,
+                rightBorders, bottomBorders)) {
+            borders.keySet().forEach(style -> sides.put(style, sides(style)));
+        }
+        return sides;
     }
 
     /** Finds what every cell of the sheet shown draws on other cells. */

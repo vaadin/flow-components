@@ -161,6 +161,22 @@ class SpreadsheetCellBordersTest {
                                     .setBorderTop(BorderStyle.THICK);
                             spreadsheet.refreshCells(filled);
                         }),
+                byApplication(
+                        "a style's top border taken off in place, the workbook's styles reloaded",
+                        spreadsheet -> {
+                            cell(spreadsheet, "B2").getCellStyle()
+                                    .setBorderTop(BorderStyle.NONE);
+                            spreadsheet.getSpreadsheetStyleFactory()
+                                    .reloadWorkbookStyles();
+                        }),
+                byApplication(
+                        "a style given a top border in place, the workbook's styles reloaded",
+                        spreadsheet -> {
+                            cell(spreadsheet, "H2").getCellStyle()
+                                    .setBorderTop(BorderStyle.THICK);
+                            spreadsheet.getSpreadsheetStyleFactory()
+                                    .reloadWorkbookStyles();
+                        }),
                 byApplication("cells merged before a cell with a left border",
                         spreadsheet -> spreadsheet.addMergedRegion("B3:C4")),
                 byApplication("cells unmerged before a cell with a left border",
