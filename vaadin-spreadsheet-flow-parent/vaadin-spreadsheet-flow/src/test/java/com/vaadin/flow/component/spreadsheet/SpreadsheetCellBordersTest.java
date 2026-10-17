@@ -31,11 +31,14 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
 
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
@@ -372,11 +375,13 @@ class SpreadsheetCellBordersTest {
 
     @Test
     void aLeftBorderWithOnlyColumnsHiddenBeforeIt_isDrawnOnNoCell() {
+        // B10's, with column A hidden.
         XSSFWorkbook workbook = workbook();
         workbook.getSheetAt(0).setColumnHidden(0, true);
 
         Spreadsheet spreadsheet = shown(workbook);
 
+        assertEquals("", drawnOn(spreadsheet, "A10"));
         assertTrue(
                 rules(spreadsheet).stream()
                         .noneMatch(rule -> rule.contains(".col0.")),
@@ -385,11 +390,14 @@ class SpreadsheetCellBordersTest {
 
     @Test
     void aTopBorderWithOnlyRowsHiddenAboveIt_isDrawnOnNoCell() {
+        // B2's and E2's, with row 1 hidden.
         XSSFWorkbook workbook = workbook();
         workbook.getSheetAt(0).getRow(0).setZeroHeight(true);
 
         Spreadsheet spreadsheet = shown(workbook);
 
+        assertEquals("", drawnOn(spreadsheet, "B1"));
+        assertEquals("", drawnOn(spreadsheet, "E1"));
         assertTrue(
                 rules(spreadsheet).stream()
                         .noneMatch(rule -> rule.contains(".row0,")
@@ -421,6 +429,51 @@ class SpreadsheetCellBordersTest {
         assertTrue(
                 cssOf(spreadsheet, "F6").contains("border-bottom:solid 3pt;"),
                 cssOf(spreadsheet, "F6"));
+    }
+
+    @Test
+    void aStyleNotApplyingABorderEntryWithoutSides_drawsNoBorder() {
+        // Only a diagonal, which is not drawn: an entry without sides is
+        // taken for the first one, of sides without lines.
+        XSSFWorkbook workbook = workbook();
+        CTBorder entry = CTBorder.Factory.newInstance();
+        entry.addNewDiagonal().setStyle(STBorderStyle.THIN);
+        int empty = workbook.getStylesSource()
+                .putBorder(new XSSFCellBorder(entry));
+        XSSFCellStyle style = workbook.createCellStyle();
+        style.getCoreXf().setBorderId(empty);
+        style.getCoreXf().setApplyBorder(false);
+        set(workbook.getSheetAt(0), "F6", "no sides").setCellStyle(style);
+
+        Spreadsheet spreadsheet = shown(workbook);
+
+        assertFalse(cssOf(spreadsheet, "F6").contains("border"),
+                cssOf(spreadsheet, "F6"));
+        assertEquals("", drawnOn(spreadsheet, "F5"));
+        assertEquals("", drawnOn(spreadsheet, "E6"));
+    }
+
+    @Test
+    void aMergedCellWithOneSideInsideIt_isGivenOnlyThatSide() {
+        // The bottom border of I3 inside I2:I3, the right one of H6 inside
+        // G6:H6.
+        XSSFWorkbook workbook = workbook();
+        Sheet sheet = workbook.getSheetAt(0);
+        FreshLoadFixture.cell(sheet, "H6")
+                .setCellStyle(cell(workbook, "G2").getCellStyle());
+        sheet.addMergedRegion(CellRangeAddress.valueOf("I2:I3"));
+        sheet.addMergedRegion(CellRangeAddress.valueOf("G6:H6"));
+
+        Spreadsheet spreadsheet = shown(workbook);
+
+        assertEquals(
+                "border-bottom:dashed 1pt;"
+                        + "border-bottom-color:var(--default-color);",
+                drawnOn(spreadsheet, "I2"));
+        assertEquals(
+                "border-right:solid 2pt;"
+                        + "border-right-color:var(--default-color);",
+                drawnOn(spreadsheet, "G6"));
     }
 
     @Test
