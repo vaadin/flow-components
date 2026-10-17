@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -248,6 +249,99 @@ class ChartAIControllerTest {
             Assertions.assertTrue(result.startsWith("Error"), "Got: " + result);
             Assertions.assertFalse(result.contains("internal detail"),
                     "The cause must not reach the LLM, got: " + result);
+        }
+
+        @Test
+        void updateData_unlinkedHierarchy_errorKeepsRowValuesFromLlm() {
+            // _id holds names while _parent holds numeric manager ids
+            databaseProvider.results = List.of(
+                    orgRow("Liisa Kallio", "Liisa Kallio", null),
+                    orgRow("Tomas Novak", "Tomas Novak", 1));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertFalse(result.contains("Liisa Kallio"), result);
+            Assertions.assertFalse(result.contains("Tomas Novak"), result);
+        }
+
+        @Test
+        void updateData_parentWithoutId_rejected() {
+            databaseProvider.results = List.of(orgRow(null, "Liisa", null),
+                    orgRow(null, "Tomas", 1));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertNull(controller.getState(),
+                    "a rejected query must not be rendered");
+        }
+
+        @Test
+        void updateData_linkedHierarchy_rendered() {
+            databaseProvider.results = List.of(orgRow(1, "Liisa", null),
+                    orgRow(2, "Tomas", 1), orgRow(3, "Priya", 1));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
+            var org = (NodeSeries) chart.getConfiguration().getSeries()
+                    .getFirst();
+            Assertions.assertEquals(2, org.getData().size());
+        }
+
+        @Test
+        void updateData_rootsOnlyHierarchy_rendered() {
+            databaseProvider.results = List.of(orgRow(1, "Liisa", null),
+                    orgRow(2, "Tomas", null));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertFalse(result.startsWith("Error"), result);
+            Assertions.assertNotNull(controller.getState(),
+                    "a hierarchy of roots only is valid and must be rendered");
+        }
+
+        @Test
+        void updateData_rootsWithoutIdColumn_rejected() {
+            // Every _parent is NULL, so only the missing _id column is wrong
+            var row = new LinkedHashMap<String, Object>();
+            row.put("_name", "Liisa");
+            row.put("_parent", null);
+            databaseProvider.results = List.of(row);
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+            controller.onResponse(AITurnEvents.success());
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertNull(controller.getState(),
+                    "a rejected query must not be rendered");
+        }
+
+        @Test
+        void updateData_unlinkedHierarchyInUpperCase_rejected() {
+            // Databases such as H2 return unquoted aliases in upper case
+            databaseProvider.results = List.of(Map.of("_ID", 1, "_NAME",
+                    "Liisa", "_PARENT", 3, "_TITLE", "Staff"));
+
+            var result = findTool(controller.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"SELECT 1\"]}"));
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
         }
 
         @Test
@@ -1107,6 +1201,17 @@ class ChartAIControllerTest {
 
     private static JsonNode json(String json) {
         return JacksonUtils.readTree(json);
+    }
+
+    /** A row of organization chart data; {@code null} leaves a column empty. */
+    private static Map<String, Object> orgRow(Object id, String name,
+            Object parent) {
+        var row = new LinkedHashMap<String, Object>();
+        row.put("_id", id);
+        row.put("_name", name);
+        row.put("_parent", parent);
+        row.put("_title", "Staff");
+        return row;
     }
 
     private static class TestDatabaseProvider implements DatabaseProvider {
