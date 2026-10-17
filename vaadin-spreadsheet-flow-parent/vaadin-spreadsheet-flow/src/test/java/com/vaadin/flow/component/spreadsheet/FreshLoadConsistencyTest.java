@@ -434,6 +434,14 @@ class FreshLoadConsistencyTest {
                 op("every cell value refreshed",
                         spreadsheet -> spreadsheet.refreshAllCellValues(),
                         Allowance.RESEND),
+                steps("a value set after every cell value was refreshed",
+                        api(spreadsheet -> spreadsheet.refreshAllCellValues()),
+                        api(spreadsheet -> {
+                            var cell = FreshLoadFixture
+                                    .cell(spreadsheet.getActiveSheet(), "F11");
+                            cell.setCellValue("after the refresh");
+                            spreadsheet.refreshCells(cell);
+                        })),
                 op("the spreadsheet moved in the UI",
                         (harness, spreadsheet) -> harness.reattach()),
                 op("a cell selected by the application",
