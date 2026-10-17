@@ -55,7 +55,7 @@ class RangeSequenceDetectorTest {
         sheet.getRow(0).createCell(1).setCellValue(2d);
         sheet.getRow(0).createCell(2).setCellValue(3d);
 
-        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 0, 0, 2);
 
         assertEquals(Double.valueOf(1), inc);
     }
@@ -66,7 +66,7 @@ class RangeSequenceDetectorTest {
         sheet.getRow(0).createCell(1).setCellValue("Item 2");
         sheet.getRow(0).createCell(2).setCellValue("Item 3");
 
-        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 0, 0, 2);
 
         assertEquals(Double.valueOf(1), inc);
     }
@@ -74,14 +74,14 @@ class RangeSequenceDetectorTest {
     @Test
     void getRowIncrement_missingRow_returnsNull() {
         // Pin the early-out: no row at the target index means no sequence.
-        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 0, 0, 2);
         assertNull(inc);
     }
 
     @Test
     void getRowIncrement_missingLeadingCell_returnsNull() {
         sheet.createRow(0); // row exists, but no cells
-        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 0, 0, 2);
         assertNull(inc);
     }
 
@@ -91,7 +91,7 @@ class RangeSequenceDetectorTest {
         // FORMULA / BOOLEAN / etc. fall through to null even if the formula's
         // cached value would be numeric.
         sheet.createRow(0).createCell(0).setCellFormula("1+1");
-        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 0, 0, 2);
         assertNull(inc);
     }
 
@@ -102,7 +102,7 @@ class RangeSequenceDetectorTest {
         sheet.getRow(0).createCell(2).setCellValue(5d); // breaks the
                                                         // progression
 
-        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 0, 0, 2);
 
         assertNull(inc);
     }
@@ -115,7 +115,7 @@ class RangeSequenceDetectorTest {
         sheet.createRow(1).createCell(0).setCellValue(20d);
         sheet.createRow(2).createCell(0).setCellValue(30d);
 
-        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 0, 0, 2);
 
         assertEquals(Double.valueOf(10), inc);
     }
@@ -126,7 +126,7 @@ class RangeSequenceDetectorTest {
         sheet.createRow(1).createCell(0).setCellValue("A2");
         sheet.createRow(2).createCell(0).setCellValue("A3");
 
-        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 0, 0, 2);
 
         assertEquals(Double.valueOf(1), inc);
     }
@@ -136,14 +136,14 @@ class RangeSequenceDetectorTest {
         // Pin: if the row at r1 doesn't exist, no sequence regardless of
         // later rows. Mirrors getRowIncrement's missing-row behavior.
         sheet.createRow(2).createCell(0).setCellValue(30d);
-        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 0, 0, 2);
         assertNull(inc);
     }
 
     @Test
     void getColumnIncrement_missingLeadingCell_returnsNull() {
         sheet.createRow(0); // r1 exists but the target column is empty
-        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 0, 0, 2);
         assertNull(inc);
     }
 
@@ -155,7 +155,7 @@ class RangeSequenceDetectorTest {
         sheet.createRow(1).createCell(0).setCellValue(20d);
         sheet.createRow(2).createCell(0).setCellValue(10d);
 
-        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 1, 1, 3);
+        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 0, 0, 2);
 
         assertEquals(Double.valueOf(-10), inc);
     }
@@ -166,7 +166,7 @@ class RangeSequenceDetectorTest {
         // treated as the start of an arithmetic-progression-by-1.
         sheet.createRow(0).createCell(0).setCellValue("A1");
 
-        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 1, 1, 1);
+        Double inc = RangeSequenceDetector.getColumnIncrement(sheet, 0, 0, 0);
 
         assertEquals(Double.valueOf(1), inc);
     }
@@ -182,7 +182,7 @@ class RangeSequenceDetectorTest {
         sheet.getRow(0).createCell(1).setCellValue(5d);
         sheet.getRow(0).createCell(2).setCellValue(10d);
 
-        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 1, 2, 3);
+        Double inc = RangeSequenceDetector.getRowIncrement(sheet, 0, 1, 2);
 
         assertEquals(Double.valueOf(5), inc);
     }

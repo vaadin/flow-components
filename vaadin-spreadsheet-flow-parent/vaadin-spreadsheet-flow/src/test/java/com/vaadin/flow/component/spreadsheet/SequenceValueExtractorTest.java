@@ -64,7 +64,7 @@ class SequenceValueExtractorTest {
         row.createCell(1).setCellValue(2d);
         row.createCell(2).setCellValue(3d);
 
-        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 1, 3);
+        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 0, 2);
 
         assertArrayEquals(new Double[] { 1d, 2d, 3d }, actual);
     }
@@ -76,7 +76,7 @@ class SequenceValueExtractorTest {
         row.createCell(1).setCellValue("oops");
         row.createCell(2).setCellValue(3d);
 
-        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 1, 3);
+        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 0, 2);
 
         assertArrayEquals(new Double[] { 1d, null, null }, actual);
     }
@@ -88,7 +88,7 @@ class SequenceValueExtractorTest {
         // index 1 deliberately left empty
         row.createCell(2).setCellValue(3d);
 
-        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 1, 3);
+        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 0, 2);
 
         assertArrayEquals(new Double[] { 1d, null, null }, actual);
     }
@@ -100,7 +100,7 @@ class SequenceValueExtractorTest {
         row.createCell(1).setCellValue("b");
         row.createCell(2).setCellValue("c");
 
-        String[] actual = SequenceValueExtractor.extractRowString(row, 1, 3);
+        String[] actual = SequenceValueExtractor.extractRowString(row, 0, 2);
 
         assertArrayEquals(new String[] { "a", "b", "c" }, actual);
     }
@@ -112,7 +112,7 @@ class SequenceValueExtractorTest {
         row.createCell(1).setCellValue(2d);
         row.createCell(2).setCellValue("c");
 
-        String[] actual = SequenceValueExtractor.extractRowString(row, 1, 3);
+        String[] actual = SequenceValueExtractor.extractRowString(row, 0, 2);
 
         assertArrayEquals(new String[] { "a", null, null }, actual);
     }
@@ -125,8 +125,8 @@ class SequenceValueExtractorTest {
         sheet.createRow(1).createCell(0).setCellValue(20d);
         sheet.createRow(2).createCell(0).setCellValue(30d);
 
-        Double[] actual = SequenceValueExtractor.extractColumnNumeric(sheet, 1,
-                1, 3);
+        Double[] actual = SequenceValueExtractor.extractColumnNumeric(sheet, 0,
+                0, 2);
 
         assertArrayEquals(new Double[] { 10d, 20d, 30d }, actual);
     }
@@ -137,8 +137,8 @@ class SequenceValueExtractorTest {
         // row index 1 deliberately not created
         sheet.createRow(2).createCell(0).setCellValue(30d);
 
-        Double[] actual = SequenceValueExtractor.extractColumnNumeric(sheet, 1,
-                1, 3);
+        Double[] actual = SequenceValueExtractor.extractColumnNumeric(sheet, 0,
+                0, 2);
 
         assertArrayEquals(new Double[] { 10d, null, null }, actual);
     }
@@ -149,8 +149,8 @@ class SequenceValueExtractorTest {
         sheet.createRow(1).createCell(0).setCellValue("twenty");
         sheet.createRow(2).createCell(0).setCellValue(30d);
 
-        Double[] actual = SequenceValueExtractor.extractColumnNumeric(sheet, 1,
-                1, 3);
+        Double[] actual = SequenceValueExtractor.extractColumnNumeric(sheet, 0,
+                0, 2);
 
         assertArrayEquals(new Double[] { 10d, null, null }, actual);
     }
@@ -161,8 +161,8 @@ class SequenceValueExtractorTest {
         sheet.createRow(1).createCell(0).setCellValue("y");
         sheet.createRow(2).createCell(0).setCellValue("z");
 
-        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 1,
-                1, 3);
+        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 0,
+                0, 2);
 
         assertArrayEquals(new String[] { "x", "y", "z" }, actual);
     }
@@ -173,8 +173,8 @@ class SequenceValueExtractorTest {
         sheet.createRow(1).createCell(0).setCellValue(2d);
         sheet.createRow(2).createCell(0).setCellValue("z");
 
-        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 1,
-                1, 3);
+        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 0,
+                0, 2);
 
         assertArrayEquals(new String[] { "x", null, null }, actual);
     }
@@ -185,18 +185,18 @@ class SequenceValueExtractorTest {
         // row index 1 deliberately not created
         sheet.createRow(2).createCell(0).setCellValue("z");
 
-        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 1,
-                1, 3);
+        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 0,
+                0, 2);
 
         assertArrayEquals(new String[] { "x", null, null }, actual);
     }
 
-    // ----- 1-based indexing pin ----------------------------------------------
+    // ----- a range not starting at the first column
+    // ---------------------------
 
     @Test
-    void extractRowNumeric_oneBasedRange_offsetsCorrectly() {
-        // 1-based indexing: extractRowNumeric(row, 2, 4) should read POI
-        // columns 1..3 (zero-based), not 2..4.
+    void extractRowNumeric_rangeAfterTheFirstColumn_readsItsOwnCells() {
+        // 0-based, as POI: extractRowNumeric(row, 1, 3) reads columns 1..3.
         Row row = sheet.createRow(0);
         row.createCell(0).setCellValue(99d); // outside range
         row.createCell(1).setCellValue(2d);
@@ -204,7 +204,7 @@ class SequenceValueExtractorTest {
         row.createCell(3).setCellValue(4d);
         row.createCell(4).setCellValue(99d); // outside range
 
-        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 2, 4);
+        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 1, 3);
 
         assertArrayEquals(new Double[] { 2d, 3d, 4d }, actual);
     }
@@ -214,7 +214,7 @@ class SequenceValueExtractorTest {
         Row row = sheet.createRow(0);
         row.createCell(0).setCellValue(42d);
 
-        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 1, 1);
+        Double[] actual = SequenceValueExtractor.extractRowNumeric(row, 0, 0);
 
         assertArrayEquals(new Double[] { 42d }, actual);
     }
@@ -225,8 +225,8 @@ class SequenceValueExtractorTest {
         // immediately. Use assertArrayEquals so a regression that returns
         // a shorter array (e.g. only the null prefix) still fails — the
         // three-assertNull form would silently pass if length dropped to 1.
-        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 1,
-                1, 3);
+        String[] actual = SequenceValueExtractor.extractColumnString(sheet, 0,
+                0, 2);
 
         assertArrayEquals(new String[] { null, null, null }, actual);
     }

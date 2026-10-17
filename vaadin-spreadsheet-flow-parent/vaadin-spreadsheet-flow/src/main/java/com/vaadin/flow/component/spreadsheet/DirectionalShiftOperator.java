@@ -21,9 +21,9 @@ import org.apache.poi.ss.util.CellRangeAddress;
  * repeated, or counted on as {@link RangeSequenceDetector} finds, into the
  * cells it lines up with, and a cell of the range that is empty empties them.
  * <p>
- * Rows and columns are 1-based here; POI calls subtract one. Up and left, the
- * range is repeated mirrored, the cell nearest the range filled from the cell
- * at its edge, as it always has been.
+ * Rows and columns are 0-based, as POI numbers them. Up and left, the range is
+ * repeated mirrored, the cell nearest the range filled from the cell at its
+ * edge, as it always has been.
  */
 final class DirectionalShiftOperator implements Serializable {
 
@@ -36,33 +36,17 @@ final class DirectionalShiftOperator implements Serializable {
         this.cellValueShifter = cellValueShifter;
     }
 
-    void shiftRowsDown(int newLastRow) {
-        fillRows(1, newLastRow);
-    }
-
-    void shiftRowsUp(int newFirstRow) {
-        fillRows(-1, newFirstRow);
-    }
-
-    void shiftColumnsRight(int newRightMostColumn) {
-        fillColumns(1, newRightMostColumn);
-    }
-
-    void shiftColumnsLeft(int newLeftMostColumn) {
-        fillColumns(-1, newLeftMostColumn);
-    }
-
     /**
      * Fills the rows below the range (direction 1) down to the last row, or
      * above it (direction -1) up to the first row, column by column.
      */
-    private void fillRows(int direction, int lastRowFilled) {
+    void fillRows(int direction, int lastRowFilled) {
         CellRangeAddress range = spreadsheet.getCellSelectionManager()
                 .getSelectedCellRange();
-        int r1 = range.getFirstRow() + 1;
-        int r2 = range.getLastRow() + 1;
-        int c1 = range.getFirstColumn() + 1;
-        int c2 = range.getLastColumn() + 1;
+        int r1 = range.getFirstRow();
+        int r2 = range.getLastRow();
+        int c1 = range.getFirstColumn();
+        int c2 = range.getLastColumn();
         Sheet sheet = spreadsheet.getActiveSheet();
         Double[] increments = new Double[c2 - c1 + 1];
         for (int c = c1; c <= c2; c++) {
@@ -70,23 +54,24 @@ final class DirectionalShiftOperator implements Serializable {
                     c, r1, r2);
         }
         for (int source = r1; source <= r2; source++) {
-            Row sourceRow = sheet.getRow(source - 1);
+            Row sourceRow = sheet.getRow(source);
             int target = direction > 0 ? r2 + 1 + (source - r1)
                     : r1 - 1 - (source - r1);
             for (; direction > 0 ? target <= lastRowFilled
                     : target >= lastRowFilled; target += direction
                             * (r2 - r1 + 1)) {
                 if (sourceRow == null) {
-                    spreadsheet.getCellValueManager().removeCells(target, c1,
-                            target, c2, true);
+                    // The value manager numbers rows and columns from 1.
+                    spreadsheet.getCellValueManager().removeCells(target + 1,
+                            c1 + 1, target + 1, c2 + 1, true);
                     continue;
                 }
-                Row targetRow = sheet.getRow(target - 1);
+                Row targetRow = sheet.getRow(target);
                 if (targetRow == null) {
-                    targetRow = sheet.createRow(target - 1);
+                    targetRow = sheet.createRow(target);
                 }
                 for (int c = c1; c <= c2; c++) {
-                    fill(sourceRow.getCell(c - 1), targetRow, c - 1,
+                    fill(sourceRow.getCell(c), targetRow, c,
                             increments[c - c1]);
                 }
             }
@@ -98,16 +83,16 @@ final class DirectionalShiftOperator implements Serializable {
      * left of it (direction -1) to the first column, row by row. A row with no
      * cells has none to fill from, nor any filled.
      */
-    private void fillColumns(int direction, int lastColumnFilled) {
+    void fillColumns(int direction, int lastColumnFilled) {
         CellRangeAddress range = spreadsheet.getCellSelectionManager()
                 .getSelectedCellRange();
-        int r1 = range.getFirstRow() + 1;
-        int r2 = range.getLastRow() + 1;
-        int c1 = range.getFirstColumn() + 1;
-        int c2 = range.getLastColumn() + 1;
+        int r1 = range.getFirstRow();
+        int r2 = range.getLastRow();
+        int c1 = range.getFirstColumn();
+        int c2 = range.getLastColumn();
         Sheet sheet = spreadsheet.getActiveSheet();
         for (int r = r1; r <= r2; r++) {
-            Row row = sheet.getRow(r - 1);
+            Row row = sheet.getRow(r);
             if (row == null) {
                 continue;
             }
@@ -119,15 +104,15 @@ final class DirectionalShiftOperator implements Serializable {
                 for (; direction > 0 ? target <= lastColumnFilled
                         : target >= lastColumnFilled; target += direction
                                 * (c2 - c1 + 1)) {
-                    fill(row.getCell(source - 1), row, target - 1, increment);
+                    fill(row.getCell(source), row, target, increment);
                 }
             }
         }
     }
 
     /**
-     * Fills the cell of the row at the 0-based column from the source cell, or
-     * empties it, style and all, when there is no source cell.
+     * Fills the cell of the row at the column from the source cell, or empties
+     * it, style and all, when there is no source cell.
      */
     private void fill(Cell source, Row targetRow, int column,
             Double increment) {

@@ -80,24 +80,26 @@ public class CellSelectionShifter implements Serializable {
                     changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             r2 - 1, c1 - 1,
                             paintedCellRange.getFirstColumn() - 1);
-                    fill = () -> directionalShiftOperator.shiftColumnsLeft(c1);
+                    fill = () -> directionalShiftOperator.fillColumns(-1,
+                            c1 - 1);
                 } else if (c2 != paintedCellRange.getLastColumn() + 1) {
                     // shift right
                     changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             r2 - 1, paintedCellRange.getLastColumn() + 1,
                             c2 - 1);
-                    fill = () -> directionalShiftOperator.shiftColumnsRight(c2);
+                    fill = () -> directionalShiftOperator.fillColumns(1,
+                            c2 - 1);
                 } else if (r1 != paintedCellRange.getFirstRow() + 1) {
                     // shift top
                     changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             paintedCellRange.getFirstRow() - 1, c1 - 1, c2 - 1);
-                    fill = () -> directionalShiftOperator.shiftRowsUp(r1);
+                    fill = () -> directionalShiftOperator.fillRows(-1, r1 - 1);
                 } else if (r2 != paintedCellRange.getLastRow() + 1) {
                     // shift bottom
                     changedCellRangeAddress = new CellRangeAddress(
                             paintedCellRange.getLastRow() + 1, r2 - 1, c1 - 1,
                             c2 - 1);
-                    fill = () -> directionalShiftOperator.shiftRowsDown(r2);
+                    fill = () -> directionalShiftOperator.fillRows(1, r2 - 1);
                 }
                 if (fill != null) {
                     // The values filled over are kept first, for undo.

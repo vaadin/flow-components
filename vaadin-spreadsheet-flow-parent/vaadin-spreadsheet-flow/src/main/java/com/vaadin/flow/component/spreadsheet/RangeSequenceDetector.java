@@ -25,8 +25,8 @@ import org.apache.poi.ss.usermodel.Sheet;
  * missing leading cell, FORMULA, BOOLEAN, etc.).
  *
  * <p>
- * Pure static methods; 1-based indexing convention is preserved. Used by
- * {@link DirectionalShiftOperator} to drive Excel autofill on a per-row or
+ * Pure static methods; rows and columns are 0-based, as POI numbers them. Used
+ * by {@link DirectionalShiftOperator} to drive Excel autofill on a per-row or
  * per-column basis.
  */
 final class RangeSequenceDetector {
@@ -41,11 +41,11 @@ final class RangeSequenceDetector {
      */
     static Double getRowIncrement(Sheet activeSheet, int rIndex, int c1,
             int c2) {
-        Row row = activeSheet.getRow(rIndex - 1);
+        Row row = activeSheet.getRow(rIndex);
         if (row == null) {
             return null;
         }
-        Cell firstCell = row.getCell(c1 - 1);
+        Cell firstCell = row.getCell(c1);
         if (firstCell == null) {
             return null;
         }
@@ -67,11 +67,11 @@ final class RangeSequenceDetector {
      */
     static Double getColumnIncrement(Sheet activeSheet, int cIndex, int r1,
             int r2) {
-        Row row = activeSheet.getRow(r1 - 1);
+        Row row = activeSheet.getRow(r1);
         if (row == null) {
             return null;
         }
-        Cell firstCell = row.getCell(cIndex - 1);
+        Cell firstCell = row.getCell(cIndex);
         if (firstCell == null) {
             return null;
         }

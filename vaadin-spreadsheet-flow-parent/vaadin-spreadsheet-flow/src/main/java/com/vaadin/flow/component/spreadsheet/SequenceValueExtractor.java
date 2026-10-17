@@ -24,8 +24,7 @@ import org.apache.poi.ss.usermodel.Sheet;
  * {@link SequenceIncrement}.
  *
  * <p>
- * Indexing convention follows the rest of the spreadsheet code base: all row /
- * column bounds are <strong>1-based</strong>; internal calls to POI subtract 1.
+ * Rows and columns are 0-based, as POI numbers them.
  */
 final class SequenceValueExtractor {
 
@@ -40,7 +39,7 @@ final class SequenceValueExtractor {
     static Double[] extractRowNumeric(Row row, int c1, int c2) {
         Double[] result = new Double[c2 - c1 + 1];
         for (int i = c1; i <= c2; i++) {
-            Cell cell = row.getCell(i - 1);
+            Cell cell = row.getCell(i);
             if (cell != null && cell.getCellType() == CellType.NUMERIC) {
                 result[i - c1] = cell.getNumericCellValue();
             } else {
@@ -58,7 +57,7 @@ final class SequenceValueExtractor {
     static String[] extractRowString(Row row, int c1, int c2) {
         String[] result = new String[c2 - c1 + 1];
         for (int i = c1; i <= c2; i++) {
-            Cell cell = row.getCell(i - 1);
+            Cell cell = row.getCell(i);
             if (cell != null && cell.getCellType() == CellType.STRING) {
                 result[i - c1] = cell.getStringCellValue();
             } else {
@@ -77,11 +76,11 @@ final class SequenceValueExtractor {
             int r1, int r2) {
         Double[] result = new Double[r2 - r1 + 1];
         for (int i = r1; i <= r2; i++) {
-            Row row = activeSheet.getRow(i - 1);
+            Row row = activeSheet.getRow(i);
             if (row == null) {
                 break;
             }
-            Cell cell = row.getCell(columnIndex - 1);
+            Cell cell = row.getCell(columnIndex);
             if (cell != null && cell.getCellType() == CellType.NUMERIC) {
                 result[i - r1] = cell.getNumericCellValue();
             } else {
@@ -100,11 +99,11 @@ final class SequenceValueExtractor {
             int r1, int r2) {
         String[] result = new String[r2 - r1 + 1];
         for (int i = r1; i <= r2; i++) {
-            Row row = activeSheet.getRow(i - 1);
+            Row row = activeSheet.getRow(i);
             if (row == null) {
                 break;
             }
-            Cell cell = row.getCell(columnIndex - 1);
+            Cell cell = row.getCell(columnIndex);
             if (cell != null && cell.getCellType() == CellType.STRING) {
                 result[i - r1] = cell.getStringCellValue();
             } else {
