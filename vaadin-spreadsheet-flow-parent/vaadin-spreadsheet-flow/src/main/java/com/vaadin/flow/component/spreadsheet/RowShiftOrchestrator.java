@@ -34,8 +34,8 @@ final class RowShiftOrchestrator implements Serializable {
         spreadsheet.popupButtons().shiftRows(startRow, endRow, n);
         spreadsheet.invalidFormulas().shiftActiveSheetRows(startRow, endRow, n);
         // The rows moved, where they were and where they went.
-        spreadsheet.rowsChanged(n < 0 ? startRow + n : startRow,
-                n < 0 ? endRow : endRow + n);
+        spreadsheet.rowsChanged(Math.min(startRow, startRow + n),
+                Math.max(endRow, endRow + n));
     }
 
     /**

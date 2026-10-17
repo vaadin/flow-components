@@ -2549,13 +2549,18 @@ public class Spreadsheet extends Component
         // Once the merged regions are where POI put them: the cells draw
         // their borders on the cells before them, and the rows hidden moved.
         workbookScope.styler.reloadBorders();
-        valueManager.rowsChanged(firstRow, lastRow);
-        // An editor is cached against a cell key: one left in place would
-        // end up on the wrong cell.
+        // The cells the client has of the rows are taken off; those POI has
+        // there now are sent below, with the other cells shown.
+        valueManager.updateDeletedRowsInClientCache(firstRow + 1, lastRow + 1);
+        // The cells shown sent, and their editors made again: an editor is
+        // cached against a cell key, and one left in place would end up on
+        // the wrong cell.
         updateMarkedCellsRecreatingEditors();
         // Made again where it was, over the merged regions there now, by an
         // address without the sheet's name, which the address field takes.
-        // Nothing is selected until the client has shown the sheet.
+        // Nothing is selected until the client has shown the sheet. A
+        // selection away from the rows is left as it is: made again, it
+        // would lose its ranges.
         CellReference selected = getSelectedCellReference();
         if (selected != null && selected.getRow() >= firstRow
                 && selected.getRow() <= lastRow) {

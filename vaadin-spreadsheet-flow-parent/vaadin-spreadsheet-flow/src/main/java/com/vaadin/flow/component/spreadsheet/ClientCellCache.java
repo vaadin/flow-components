@@ -153,11 +153,10 @@ final class ClientCellCache implements Serializable {
     /**
      * Sends the cell again on the next update, unless it is taken off the
      * client after this: of a removal and an update of a cell, the last is the
-     * one.
+     * one. A removal queued before is dropped when the cell is sent.
      */
     void markForUpdate(String key) {
         markedCells.add(key);
-        removedCells.remove(removalOf(key));
     }
 
     boolean isMarkedForUpdate(String key) {
