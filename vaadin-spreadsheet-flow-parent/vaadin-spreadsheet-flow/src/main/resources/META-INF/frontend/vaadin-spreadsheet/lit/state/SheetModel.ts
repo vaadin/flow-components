@@ -53,6 +53,8 @@ export const SHEET_PROPERTIES = {
   defRowH: plain(15),
   /** The width of a column the server gives none, in pixels. */
   defColW: plain(64),
+  /** Row heights in points. */
+  rowH: collection(coerceSizes),
   /** Column widths in pixels. */
   colW: collection(coerceSizes),
   /*
@@ -72,6 +74,8 @@ export const SHEET_PROPERTIES = {
   verticalScrollPositions: collection(coerceNumberArray),
   horizontalScrollPositions: collection(coerceNumberArray),
 
+  /** The CSS of each cell style, by its index. */
+  cellStyleToCSSStyle: collection(coerceObject<string>),
   rowIndexToStyleIndex: collection(coerceObject<number>),
   columnIndexToStyleIndex: collection(coerceObject<number>),
   shiftedCellBorderStyles: collection(coerceArray<string>),
@@ -106,7 +110,18 @@ export const SHEET_PROPERTIES = {
   /** The frozen rows and columns. */
   verticalSplitPosition: plain(0),
   horizontalSplitPosition: plain(0),
-  hyperlinksTooltips: collection(coerceObject<string>)
+  hyperlinksTooltips: collection(coerceObject<string>),
+  /*
+   * The overlays the server has published a resource for, by id. The URLs
+   * are not held: they are on the element as `resource-<id>` attributes, read
+   * each time the sheet is drawn.
+   */
+  resources: collection(coerceArray<string>),
+
+  /** Whether the lines between the cells are drawn. */
+  displayGridlines: plain(true),
+  /** Whether the column letters and the row numbers are shown. */
+  displayRowColHeadings: plain(true)
 };
 
 type Properties = typeof SHEET_PROPERTIES;

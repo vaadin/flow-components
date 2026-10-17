@@ -26,6 +26,7 @@ import { VaadinSpreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resour
 describe('Spreadsheet model of the server properties', () => {
   /** A value of each collection, as the server sends it parsed, and as read in. */
   const collections: Record<string, { sent: unknown; read: unknown }> = {
+    rowH: { sent: { runs: [15, 1, 30, 2] }, read: [15, 30, 30] },
     colW: { sent: { runs: [50, 2, 80, 1] }, read: [50, 50, 80] },
     hiddenColumnIndexes: { sent: [2, 5], read: new Set([2, 5]) },
     hiddenRowIndexes: { sent: [3], read: new Set([3]) },
@@ -33,6 +34,7 @@ describe('Spreadsheet model of the server properties', () => {
     lockedRowIndexes: { sent: [4], read: new Set([4]) },
     verticalScrollPositions: { sent: [0, 600], read: [0, 600] },
     horizontalScrollPositions: { sent: [10, 0], read: [10, 0] },
+    cellStyleToCSSStyle: { sent: { 0: 'color:black;', 1: 'color:red;' }, read: { 0: 'color:black;', 1: 'color:red;' } },
     rowIndexToStyleIndex: { sent: { 3: 1 }, read: { 3: 1 } },
     columnIndexToStyleIndex: { sent: { 2: 4 }, read: { 2: 4 } },
     shiftedCellBorderStyles: { sent: ['.col2.row3::after{}'], read: ['.col2.row3::after{}'] },
@@ -59,7 +61,8 @@ describe('Spreadsheet model of the server properties', () => {
       sent: { img: { id: 'img', type: 'IMAGE', col: 1, row: 1, width: 10, height: 10, dx: 0, dy: 0 } },
       read: { img: { id: 'img', type: 'IMAGE', col: 1, row: 1, width: 10, height: 10, dx: 0, dy: 0 } }
     },
-    hyperlinksTooltips: { sent: { col1row1: 'https://vaadin.com' }, read: { col1row1: 'https://vaadin.com' } }
+    hyperlinksTooltips: { sent: { col1row1: 'https://vaadin.com' }, read: { col1row1: 'https://vaadin.com' } },
+    resources: { sent: ['img'], read: ['img'] }
   };
 
   const plainValues: Record<string, unknown> = {
@@ -78,7 +81,9 @@ describe('Spreadsheet model of the server properties', () => {
     hasComponentFactory: true,
     invalidFormulaErrorMessage: null,
     verticalSplitPosition: 2,
-    horizontalSplitPosition: 1
+    horizontalSplitPosition: 1,
+    displayGridlines: false,
+    displayRowColHeadings: false
   };
 
   function write(name: string, value: unknown) {
@@ -99,6 +104,7 @@ describe('Spreadsheet model of the server properties', () => {
       cols: 0,
       defRowH: 15,
       defColW: 64,
+      rowH: [],
       colW: [],
       hiddenColumnIndexes: new Set(),
       hiddenRowIndexes: new Set(),
@@ -106,6 +112,7 @@ describe('Spreadsheet model of the server properties', () => {
       lockedRowIndexes: new Set(),
       verticalScrollPositions: [],
       horizontalScrollPositions: [],
+      cellStyleToCSSStyle: {},
       rowIndexToStyleIndex: {},
       columnIndexToStyleIndex: {},
       shiftedCellBorderStyles: [],
@@ -130,7 +137,10 @@ describe('Spreadsheet model of the server properties', () => {
       invalidFormulaErrorMessage: 'Invalid formula',
       verticalSplitPosition: 0,
       horizontalSplitPosition: 0,
-      hyperlinksTooltips: {}
+      hyperlinksTooltips: {},
+      resources: [],
+      displayGridlines: true,
+      displayRowColHeadings: true
     });
   });
 
@@ -199,18 +209,11 @@ describe('Spreadsheet model of the server properties', () => {
       // Not passed on to the sheet.
       'dirty',
       'theme',
-      // Taken by methods of their own.
-      'reload',
-      'resources',
       // Nothing to hold.
+      'reload',
       'id',
       'workbookChangeToggle',
       'popupbuttons',
-      // Doing more than holding the value.
-      'rowH',
-      'cellStyleToCSSStyle',
-      'displayGridlines',
-      'displayRowColHeadings',
       // Held by the parts that draw them.
       'sheetIndex',
       'sheetNames',

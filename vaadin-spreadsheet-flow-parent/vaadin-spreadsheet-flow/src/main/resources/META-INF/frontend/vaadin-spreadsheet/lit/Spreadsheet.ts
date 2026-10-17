@@ -124,7 +124,7 @@ import {
 } from './algorithms/Positioning.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
-import { coerceArray, coerceJson, coerceObject, coerceSizes, type NumberList } from './wire/Coerce.js';
+import { coerceArray, coerceJson } from './wire/Coerce.js';
 import {
   columnGroupingGutterPx,
   rowGroupingGutterPx,
@@ -329,26 +329,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Resizing columns and rows by their header edges; see {@link HeaderResize}. */
   private readonly headerResize: HeaderResize;
 
-  /** Row heights in points, as the server sends them; see {@link setRowH}. */
-  private rowHeights: NumberList = [];
   /** The sizes worked out from the geometry, and what they were worked out from; see {@link sheetSizes}. */
   private sizesCache: { inputs: readonly unknown[]; sizes: SheetSizes } | null = null;
 
-  /** The CSS of each cell style, by its index. */
-  private cellStyleToCSSStyle: Record<number, string> = {};
-
-  /**
-   * Overlay IDs the server has published a resource for, from
-   * {@link setResources}. The URLs themselves are not kept: they live on
-   * the host as `resource-<id>` attributes and are read at render time by
-   * {@link resolveResources}.
-   */
-  private resourceKeys: string[] = [];
-  /** The element the `resource-<id>` attributes live on. */
+  /** The element the `resource-<id>` attributes live on; see {@link setResources}. */
   private resourceHost: HTMLElement | null = null;
-
-  /** Whether the lines between the cells are drawn. */
-  private displayGridlines = true;
 
   /** The offsets the next render scrolls to, for a sheet shown again. */
   private pendingSheetScroll: { top: number; left: number } | null = null;
@@ -536,13 +521,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * included. {@code 0} when the sheet hides its headings, which
    * collapses the strip.
    */
-  private headerRowHeight = DEFAULT_HEADER_ROW_HEIGHT;
+  private get headerRowHeight(): number {
+    return this.model.displayRowColHeadings ? DEFAULT_HEADER_ROW_HEIGHT : 0;
+  }
 
   /**
    * Width of the row-header strip in pixels, its right border included.
    * {@code 0} when the sheet hides its headings.
    */
-  private headerColumnWidth = DEFAULT_HEADER_COLUMN_WIDTH;
+  private get headerColumnWidth(): number {
+    return this.model.displayRowColHeadings ? DEFAULT_HEADER_COLUMN_WIDTH : 0;
+  }
 
   /**
    * The component's own root inside {@link renderTarget}.
@@ -738,7 +727,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         sheetProtected: () => this.model.sheetProtected,
         colWidthPx: (col) => this.colWidthPx(col),
         rowHeightPx: (row) => this.rowHeightPx(row),
-        rowHeightPt: (row) => (row - 1 < this.rowHeights.length ? this.rowHeights[row - 1] : this.model.defRowH),
+        rowHeightPt: (row) => (row - 1 < this.model.rowH.length ? this.model.rowH[row - 1] : this.model.defRowH),
         // A column or row dragged to nothing is hidden, as the server will
         // have it. One already hidden has no edge to drag.
         setColumnWidth: (col, width) => {
@@ -749,7 +738,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
           this.recomputeViewport();
         },
         setRowHeight: (row, height) => {
-          this.rowHeights = withSize(this.rowHeights, row, height, this.model.defRowH);
+          this.change({ rowH: withSize(this.model.rowH, row, height, this.model.defRowH) });
           if (height === 0) {
             this.change({ hiddenRowIndexes: new Set([...this.model.hiddenRowIndexes, row]) });
           }
@@ -2356,7 +2345,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // a ratio the server judges every value in it as fitting. Unstyled, it
     // measures as the default does.
     const styleIndexes = [
-      ...new Set([...Object.keys(this.cellStyleToCSSStyle).map(Number), ...this.styleIndexesInUse()])
+      ...new Set([...Object.keys(this.model.cellStyleToCSSStyle).map(Number), ...this.styleIndexesInUse()])
     ]
       .filter((index) => Number.isFinite(index))
       .sort((a, b) => a - b);
@@ -2747,7 +2736,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private sheetSizes(): SheetSizes {
     const inputs = [
-      this.rowHeights,
+      this.model.rowH,
       this.model.colW,
       this.model.hiddenRowIndexes,
       this.model.hiddenColumnIndexes,
@@ -2762,7 +2751,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     const ppi = FALLBACK_PPI;
     const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, ppi);
-    const rowHeightsPx = Array.from(this.rowHeights, (points) => convertPointsToPixel(points, ppi));
+    const rowHeightsPx = Array.from(this.model.rowH, (points) => convertPointsToPixel(points, ppi));
     const {
       hiddenRowIndexes: hiddenRows,
       hiddenColumnIndexes: hiddenColumns,
@@ -2981,7 +2970,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, ppi);
     const hiddenRowSet = this.model.hiddenRowIndexes;
 
-    const definedRowsLength = this.rowHeights.length;
+    const definedRowsLength = this.model.rowH.length;
     const rowHeightForIndex = (row: number): number => {
       if (hiddenRowSet.has(row)) {
         return 0;
@@ -2989,7 +2978,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       if (row > definedRowsLength) {
         return defaultRowHeightPx;
       }
-      return convertPointsToPixel(this.rowHeights[row - 1], ppi);
+      return convertPointsToPixel(this.model.rowH[row - 1], ppi);
     };
 
     const hiddenColSet = this.model.hiddenColumnIndexes;
@@ -3121,8 +3110,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       rowY,
       colWidths,
       rowHeights,
-      cellStyleToCSSStyle: this.cellStyleToCSSStyle,
-      displayGridlines: this.displayGridlines,
+      cellStyleToCSSStyle: this.model.cellStyleToCSSStyle,
+      displayGridlines: this.model.displayGridlines,
       rowIndexToStyleIndex: this.model.rowIndexToStyleIndex,
       columnIndexToStyleIndex: this.model.columnIndexToStyleIndex,
       cellSlots: Object.fromEntries(Object.entries(slots).map(([cellKey, a]) => [cellKey, a.slot])),
@@ -3691,7 +3680,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   setRowH(rowHeightsInPoints: Json<number[] | Float32Array | SizeRuns>): void {
     this.rowAnchor ??= this.firstRowWithTopOnScreen();
-    this.rowHeights = coerceSizes(rowHeightsInPoints);
+    this.write('rowH', rowHeightsInPoints);
   }
 
   /** The first scrolling row whose top is on screen, and how far below the top of the screen. */
@@ -3762,7 +3751,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.write('horizontalScrollPositions', positions);
   }
   setCellStyleToCSSStyle(map: Json<Record<number, string>>): void {
-    this.cellStyleToCSSStyle = coerceObject(map);
+    this.write('cellStyleToCSSStyle', map);
     // The server sizes General-format numbers against how wide a digit is
     // in each style, and only the client can measure that.
     this.styleWidthRatiosStale = true;
@@ -4018,7 +4007,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // (Spreadsheet.setResource). Resolving them means reading the
     // attributes, not parsing a map out of this argument.
     this.resourceHost = host;
-    this.resourceKeys = coerceArray<string>(keys);
+    this.write('resources', keys);
     this.scheduleRender();
   }
 
@@ -4038,7 +4027,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return {};
     }
     const resolved: Record<string, string> = {};
-    for (const key of this.resourceKeys) {
+    for (const key of this.model.resources) {
       const url = host.getAttribute(`resource-${key}`);
       if (url) {
         resolved[key] = url;
@@ -4060,7 +4049,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   // Display flags
   setDisplayGridlines(visible: boolean): void {
-    this.displayGridlines = visible;
+    this.write('displayGridlines', visible);
     // Turned off or on from the server on its own, with no cell data to
     // carry a repaint along.
     this.scheduleRender();
@@ -4070,17 +4059,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // they get their default sizes back; hidden, they collapse. They are
     // drawn with the rest of the batch this came in, as every property is,
     // not halfway through it.
-    if (visible) {
-      if (this.headerRowHeight === 0) {
-        this.headerRowHeight = DEFAULT_HEADER_ROW_HEIGHT;
-      }
-      if (this.headerColumnWidth === 0) {
-        this.headerColumnWidth = DEFAULT_HEADER_COLUMN_WIDTH;
-      }
-    } else {
-      this.headerRowHeight = 0;
-      this.headerColumnWidth = 0;
-    }
+    this.write('displayRowColHeadings', visible);
   }
   setLockFormatColumns(locked: boolean): void {
     this.headerResize.setLockFormatColumns(locked);
@@ -4192,9 +4171,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.model.hiddenRowIndexes.has(row)) {
       return 0;
     }
-    return row > this.rowHeights.length
+    return row > this.model.rowH.length
       ? getDefaultRowHeightPx(this.model.defRowH, ppi)
-      : convertPointsToPixel(this.rowHeights[row - 1], ppi);
+      : convertPointsToPixel(this.model.rowH[row - 1], ppi);
   }
 
   /**
