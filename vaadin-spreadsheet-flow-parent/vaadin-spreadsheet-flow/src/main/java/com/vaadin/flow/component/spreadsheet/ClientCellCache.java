@@ -212,11 +212,6 @@ final class ClientCellCache implements Serializable {
                     continue;
                 }
 
-                if (spreadsheet.getConditionalFormatter()
-                        .getCellFormattingIndex(cell) != null) {
-                    markForUpdate(key);
-                }
-
                 if (cell.getCellType() == CellType.FORMULA) {
                     if (containsFormula(key) || isMarkedForUpdate(key)) {
                         markFormulaSent(key);

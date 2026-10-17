@@ -106,7 +106,7 @@ public class ConditionalFormatter implements Serializable {
 
     /**
      * Creates the necessary CSS rules and runs evaluations on all affected
-     * cells.
+     * cells. The cells whose formats change are sent again.
      */
     public void createConditionalFormatterRules() {
         // The number formats of the rules come from POI's evaluator, which
@@ -118,19 +118,8 @@ public class ConditionalFormatter implements Serializable {
         evaluator.clearAllCachedFormats();
         evaluator.clearAllCachedValues();
 
-        // make sure old styles are cleared
-        if (cellToIndex != null) {
-            for (String key : cellToIndex.keySet()) {
-                int col = SpreadsheetUtil.getColumnIndexFromKey(key) - 1;
-                int row = SpreadsheetUtil.getRowFromKey(key) - 1;
-                Cell cell = spreadsheet.getCell(row, col);
-                if (cell != null) {
-                    spreadsheet.markCellAsUpdated(cell, true);
-                }
-            }
-        }
-
-        cellToIndex.clear();
+        Map<String, Set<Integer>> before = cellToIndex;
+        cellToIndex = new HashMap<>();
         borderTracker.clear();
         HashMap<Integer, String> conditionalFormattingStyles = new HashMap<>();
 
@@ -231,7 +220,37 @@ public class ConditionalFormatter implements Serializable {
             }
         }
 
+        sendCellsChanged(before);
         spreadsheet.setConditionalFormattingStyles(conditionalFormattingStyles);
+    }
+
+    /**
+     * Sends again the cells whose formats changed: those that gained or lost a
+     * format. Only those: sending the others again changes nothing on the
+     * client, but building them again takes as long as the rest of an update on
+     * a sheet with many formatted cells. Only sent: their values and styles are
+     * as they were, and marked as updated, every formula reading them would be
+     * worked out again.
+     */
+    private void sendCellsChanged(Map<String, Set<Integer>> before) {
+        before.forEach((key, formats) -> {
+            if (!formats.equals(cellToIndex.get(key))) {
+                send(key);
+            }
+        });
+        cellToIndex.keySet().forEach(key -> {
+            if (!before.containsKey(key)) {
+                send(key);
+            }
+        });
+    }
+
+    private void send(String key) {
+        Cell cell = spreadsheet.getCell(SpreadsheetUtil.getRowFromKey(key) - 1,
+                SpreadsheetUtil.getColumnIndexFromKey(key) - 1);
+        if (cell != null) {
+            spreadsheet.getCellValueManager().markCellForUpdate(cell);
+        }
     }
 
     /**

@@ -208,12 +208,9 @@ final class CellDataBuilder implements Serializable {
             Set<Integer> cellFormattingIndexes = spreadsheet
                     .getConditionalFormatter().getCellFormattingIndex(cell);
             if (cellFormattingIndexes != null) {
-
                 for (Integer i : cellFormattingIndexes) {
                     cellData.cellStyle = cellData.cellStyle + " cf" + i;
                 }
-
-                manager.clientCache.markForUpdate(SpreadsheetUtil.toKey(cell));
             }
 
             if (cell.getCellType() == CellType.NUMERIC

@@ -211,11 +211,11 @@ class CellDataBuilderTest {
     // ----- conditional-formatting branch ----------------------------------
 
     @Test
-    void createCellDataForCell_withConditionalFormatting_appendsCfIndexAndMarksForUpdate() {
+    void createCellDataForCell_withConditionalFormatting_appendsCfIndexOnly() {
         // Pin: when ConditionalFormatter returns non-empty indexes, each
-        // index is appended to cellStyle as " cf<N>" AND the clientCache
-        // is marked for update with the cell key. A regression skipping
-        // either part would break CF rendering on the client.
+        // index is appended to cellStyle as " cf<N>". Building the data
+        // marks nothing for the next update: the cells whose formats change
+        // are sent when the rules are built again.
         Cell cell = newStringCell(0, 0, "v");
         HashSet<Integer> cfIndexes = new HashSet<>();
         cfIndexes.add(7);
@@ -226,14 +226,8 @@ class CellDataBuilderTest {
 
         assertTrue(result.cellStyle.contains(" cf7"),
                 "cellStyle MUST contain ' cf7'; got: " + result.cellStyle);
-        // Default style has index 0 → key = "col1 row1"; the value
-        // gate is the non-empty cellStyle OR style index 0; with a
-        // non-empty value AND style index 0, both paths enter the
-        // value block, and the CF branch fires markForUpdate.
-        // Pin the markForUpdate side effect via the clientCache's
-        // observable state (clientCache.isMarkedForUpdate returns true).
-        assertTrue(clientCache.isMarkedForUpdate(SpreadsheetUtil.toKey(cell)),
-                "clientCache MUST hold the cell key for CF-marked cells");
+        assertFalse(clientCache.isMarkedForUpdate(SpreadsheetUtil.toKey(cell)),
+                "building the data of a formatted cell marks nothing");
     }
 
     @Test
