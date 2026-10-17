@@ -183,7 +183,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         borderStyleBuilder.resetStyles();
 
         // get default text alignments
-        CellStyle cellStyle = workbook.getCellStyleAt((short) 0);
+        CellStyle cellStyle = workbook.getCellStyleAt(0);
         defaultStyleBaseline.setDefaultTextAlign(cellStyle.getAlignment());
         // defaultVerticalAlign = cellStyle.getVerticalAlignment();
 
@@ -196,7 +196,7 @@ public class SpreadsheetStyleFactory implements Serializable {
                 sb.toString());
 
         // 0 is default style, create all styles indexed from 1 and upwards
-        for (short i = 1; i < workbook.getNumCellStyles(); i++) {
+        for (int i = 1; i < workbook.getNumCellStyles(); i++) {
             cellStyle = workbook.getCellStyleAt(i);
             addCellStyleCSS(cellStyle);
         }

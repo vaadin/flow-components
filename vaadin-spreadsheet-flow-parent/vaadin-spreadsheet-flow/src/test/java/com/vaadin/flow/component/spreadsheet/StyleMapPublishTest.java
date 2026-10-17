@@ -91,6 +91,27 @@ class StyleMapPublishTest {
     }
 
     @Test
+    void aWorkbookOfMoreStylesThanAShortCounts_publishesTheCssOfEach() {
+        // Excel allows 64,000 styles; POI numbers those past 32,767 below 0.
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet().createRow(0).createCell(0);
+        for (int i = 0; i <= Short.MAX_VALUE; i++) {
+            workbook.createCellStyle().setIndention((short) 1);
+        }
+        CellStyle last = workbook
+                .getCellStyleAt(workbook.getNumCellStyles() - 1);
+        workbook.getSheetAt(0).getRow(0).getCell(0).setCellStyle(last);
+
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+
+        Map<Integer, String> published = published(spreadsheet);
+        assertEquals(workbook.getNumCellStyles(), published.size());
+        assertTrue(
+                published.get((int) last.getIndex()).contains("padding-left"),
+                published.get((int) last.getIndex()));
+    }
+
+    @Test
     void reloadingTheStyles_publishesTheSameCss() {
         Spreadsheet spreadsheet = new Spreadsheet(workbookWithStyles(5));
         Map<Integer, String> before = published(spreadsheet);
