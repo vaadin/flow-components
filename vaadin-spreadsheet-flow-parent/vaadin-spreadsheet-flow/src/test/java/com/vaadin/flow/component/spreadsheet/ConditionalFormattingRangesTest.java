@@ -8,7 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -49,6 +51,26 @@ class ConditionalFormattingRangesTest {
                 new CellRangeAddress[] { CellRangeAddress.valueOf(range) },
                 set);
         return workbook;
+    }
+
+    @Test
+    void aRuleOverMoreRowsThanShown_growsNeitherTheSheetNorTheWorkbook() {
+        XSSFWorkbook workbook = filledWhileC1IsSet("A1:A100000");
+
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+
+        assertEquals(200, spreadsheet.getRows());
+        assertTrue(workbook.getSheetAt(0).getLastRowNum() < 200);
+    }
+
+    @Test
+    void aRuleOverMoreColumnsThanShown_growsNeitherTheSheetNorTheWorkbook() {
+        XSSFWorkbook workbook = filledWhileC1IsSet("A2:ZZ2");
+
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+
+        assertEquals(52, spreadsheet.getColumns());
+        assertTrue(workbook.getSheetAt(0).getRow(1).getLastCellNum() <= 52);
     }
 
     @Test

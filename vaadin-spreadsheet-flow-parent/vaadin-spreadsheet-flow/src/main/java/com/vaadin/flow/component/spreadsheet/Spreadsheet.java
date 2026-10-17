@@ -2358,7 +2358,8 @@ public class Spreadsheet extends Component
 
     /**
      * The sheet shows another number of rows or columns: those added have the
-     * sizes, styles and locks loading the sheet gives them.
+     * sizes, styles, locks and conditional formats loading the sheet gives
+     * them.
      */
     private void sizeChanged() {
         // Done now, so not again before the response.
@@ -2367,6 +2368,7 @@ public class Spreadsheet extends Component
         }
         sheetSizes.grown();
         workbookScope.styler.reloadActiveSheetColumnRowStyles();
+        getConditionalFormatter().createConditionalFormatterRules();
     }
 
     /**

@@ -278,11 +278,16 @@ public class ConditionalFormatter implements Serializable {
             ConditionalFormattingRule rule, int classNameIndex) {
         final int firstColumn = cf.getFormattingRanges()[0].getFirstColumn();
         final int firstRow = cf.getFormattingRanges()[0].getFirstRow();
+        // Only the cells the sheet shows: a rule over whole columns would
+        // make a cell for each of their million rows, and grow the sheet to
+        // show them all. Rows and columns added later are matched then.
+        final int lastRowShown = spreadsheet.getRows() - 1;
+        final int lastColumnShown = spreadsheet.getColumns() - 1;
         for (CellRangeAddress cra : cf.getFormattingRanges()) {
-
-            for (int row = cra.getFirstRow(); row <= cra.getLastRow(); row++) {
-                for (int col = cra.getFirstColumn(); col <= cra
-                        .getLastColumn(); col++) {
+            int lastRow = Math.min(cra.getLastRow(), lastRowShown);
+            int lastColumn = Math.min(cra.getLastColumn(), lastColumnShown);
+            for (int row = cra.getFirstRow(); row <= lastRow; row++) {
+                for (int col = cra.getFirstColumn(); col <= lastColumn; col++) {
 
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell == null) {
