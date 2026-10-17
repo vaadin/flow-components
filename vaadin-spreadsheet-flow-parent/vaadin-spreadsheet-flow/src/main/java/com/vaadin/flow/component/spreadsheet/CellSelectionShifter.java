@@ -71,6 +71,7 @@ public class CellSelectionShifter implements Serializable {
             if (spreadsheet.isRangeEditable(paintedCellRange) && spreadsheet
                     .isRangeEditable(r1 - 1, c1 - 1, r2 - 1, c2 - 1)) {
                 CellRangeAddress changedCellRangeAddress = null;
+                Runnable fill = null;
                 // store values
                 CellValueCommand command = new CellShiftValuesCommand(
                         spreadsheet, false);
@@ -79,31 +80,29 @@ public class CellSelectionShifter implements Serializable {
                     changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             r2 - 1, c1 - 1,
                             paintedCellRange.getFirstColumn() - 1);
-                    command.captureCellRangeValues(changedCellRangeAddress);
-                    directionalShiftOperator.shiftColumnsLeft(c1);
-                    spreadsheet.updateMarkedCells();
+                    fill = () -> directionalShiftOperator.shiftColumnsLeft(c1);
                 } else if (c2 != paintedCellRange.getLastColumn() + 1) {
                     // shift right
                     changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             r2 - 1, paintedCellRange.getLastColumn() + 1,
                             c2 - 1);
-                    command.captureCellRangeValues(changedCellRangeAddress);
-                    directionalShiftOperator.shiftColumnsRight(c2);
-                    spreadsheet.updateMarkedCells();
+                    fill = () -> directionalShiftOperator.shiftColumnsRight(c2);
                 } else if (r1 != paintedCellRange.getFirstRow() + 1) {
                     // shift top
                     changedCellRangeAddress = new CellRangeAddress(r1 - 1,
                             paintedCellRange.getFirstRow() - 1, c1 - 1, c2 - 1);
-                    command.captureCellRangeValues(changedCellRangeAddress);
-                    directionalShiftOperator.shiftRowsUp(r1);
-                    spreadsheet.updateMarkedCells();
+                    fill = () -> directionalShiftOperator.shiftRowsUp(r1);
                 } else if (r2 != paintedCellRange.getLastRow() + 1) {
                     // shift bottom
                     changedCellRangeAddress = new CellRangeAddress(
                             paintedCellRange.getLastRow() + 1, r2 - 1, c1 - 1,
                             c2 - 1);
+                    fill = () -> directionalShiftOperator.shiftRowsDown(r2);
+                }
+                if (fill != null) {
+                    // The values filled over are kept first, for undo.
                     command.captureCellRangeValues(changedCellRangeAddress);
-                    directionalShiftOperator.shiftRowsDown(r2);
+                    fill.run();
                     spreadsheet.updateMarkedCells();
                 }
                 CellRangeAddress newPaintedCellRange = spreadsheet
