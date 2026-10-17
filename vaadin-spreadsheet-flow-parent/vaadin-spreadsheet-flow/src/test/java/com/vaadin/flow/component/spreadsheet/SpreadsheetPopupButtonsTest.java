@@ -155,6 +155,23 @@ class SpreadsheetPopupButtonsTest {
     }
 
     @Test
+    void buttonsOnFrozenRowsAndColumns_stayOnTheSheetAsTheRestScrolls() {
+        // Rows 1-2 and columns A-B frozen, and the client scrolled to rows
+        // 50-70 of columns E-J.
+        spreadsheet.createFreezePane(2, 2);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "{\"firstRow\": 50, \"firstColumn\": 5, \"lastRow\": 70, \"lastColumn\": 10}");
+        Map<String, PopupButton> buttons = new LinkedHashMap<>();
+        for (String cell : List.of("A1", "E1", "C1", "A60", "A80", "E60", "C60",
+                "C3")) {
+            buttons.put(cell, button());
+            spreadsheet.setPopup(cell, buttons.get(cell));
+        }
+
+        assertEquals(List.of("A1", "E1", "A60", "E60"), onTheSheet(buttons));
+    }
+
+    @Test
     void aButtonOfTheSheetShownBefore_isNotPutOnTheSheetShownNow() {
         PopupButton button = button();
         spreadsheet.setPopup("B100", button);
