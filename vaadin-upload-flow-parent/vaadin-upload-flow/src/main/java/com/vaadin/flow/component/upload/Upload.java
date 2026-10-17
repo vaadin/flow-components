@@ -78,6 +78,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
     private int activeUploads = 0;
     private boolean uploading;
+    private boolean uploadHandlerAllowsInert;
 
     private UploadI18N i18n;
 
@@ -127,8 +128,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         }).addEventData(eventDetailFileName);
 
         // If client aborts upload mark upload as interrupted on server also
-        getElement().addEventListener("upload-abort",
-                event -> interruptUpload());
+        getElement()
+                .addEventListener("upload-abort", event -> interruptUpload())
+                .allowInert();
 
         setUploadHandler(new UploadHelper.FailFastUploadHandler());
 
@@ -143,15 +145,23 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
             this.uploading = isUploading;
         };
 
-        getElement().addEventListener("upload-start",
-                e -> this.uploading = true);
+        // An upload started before a modal component made the upload inert
+        // is allowed to finish: the requests of its queued files are received
+        // while it is in progress, and its end is tracked for an inert upload
+        // too. An upload can not be started while inert, unless the upload
+        // handler allows it.
+        getElement().addEventListener("upload-start", e -> {
+            if (!getElement().getNode().isInert() || uploadHandlerAllowsInert) {
+                this.uploading = true;
+            }
+        }).allowInert();
 
         getElement().addEventListener("upload-success", allFinishedListener)
-                .addEventData(filesUploading);
+                .addEventData(filesUploading).allowInert();
         getElement().addEventListener("upload-error", allFinishedListener)
-                .addEventData(filesUploading);
+                .addEventData(filesUploading).allowInert();
         getElement().addEventListener("upload-abort", allFinishedListener)
-                .addEventData(filesUploading);
+                .addEventData(filesUploading).allowInert();
 
         defaultUploadButton = new Button();
         // Ensure the flag is set before the element is added to the slot
@@ -953,6 +963,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         } else {
             setMaxFiles(1);
         }
+        // A receiver gets the upload regardless of the inert state
+        uploadHandlerAllowsInert = true;
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 new StreamReceiver(getElement().getNode(), "upload",
                         getStreamVariable())));
@@ -994,7 +1006,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
     public void setUploadHandler(UploadHandler handler, String targetName) {
         var elementStreamResource = UploadHelper.createTargetResource(handler,
                 getElement(), targetName, () -> acceptedMimeTypes,
-                () -> acceptedFileExtensions);
+                () -> acceptedFileExtensions, () -> uploading);
+        uploadHandlerAllowsInert = handler.isAllowInert();
         var failFast = handler instanceof UploadHelper.FailFastUploadHandler;
         if (!failFast) {
             handlerExplicitlyConfigured = true;

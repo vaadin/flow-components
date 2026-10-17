@@ -143,7 +143,7 @@ public class UploadHelper implements Serializable {
      * Creates the stream resource to set as the upload {@code target}
      * attribute. Validates the handler and target name, wraps the handler with
      * file type validation (see
-     * {@link #wrapHandlerWithFileTypeValidation(UploadHandler, SerializableSupplier, SerializableSupplier)})
+     * {@link #wrapHandlerWithFileTypeValidation(UploadHandler, SerializableSupplier, SerializableSupplier, SerializableSupplier)})
      * and uses the given target name as the last path segment of the generated
      * upload URL.
      *
@@ -159,12 +159,16 @@ public class UploadHelper implements Serializable {
      * @param extensionsSupplier
      *            supplier for the current list of accepted file extensions, not
      *            {@code null}
+     * @param uploadInProgressSupplier
+     *            supplier for whether an upload started while the owner was not
+     *            inert is still in progress, not {@code null}
      * @return the stream resource to set as the {@code target} attribute
      */
     static StreamResourceRegistry.ElementStreamResource createTargetResource(
             UploadHandler handler, Element ownerElement, String targetName,
             SerializableSupplier<List<String>> mimeTypesSupplier,
-            SerializableSupplier<List<String>> extensionsSupplier) {
+            SerializableSupplier<List<String>> extensionsSupplier,
+            SerializableSupplier<Boolean> uploadInProgressSupplier) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
         Objects.requireNonNull(targetName, "The target name cannot be null");
         if (targetName.isBlank()) {
@@ -172,7 +176,8 @@ public class UploadHelper implements Serializable {
                     "The target name cannot be blank");
         }
         var validatingHandler = wrapHandlerWithFileTypeValidation(handler,
-                mimeTypesSupplier, extensionsSupplier);
+                mimeTypesSupplier, extensionsSupplier,
+                uploadInProgressSupplier);
         return new StreamResourceRegistry.ElementStreamResource(
                 validatingHandler, ownerElement) {
             @Override
@@ -280,6 +285,12 @@ public class UploadHelper implements Serializable {
      * provided suppliers, so changes made after wrapping are reflected
      * immediately.
      * <p>
+     * An upload request for an inert owner is also received while an upload
+     * started before the owner became inert is in progress, so that a modal
+     * component opened during an upload does not reject the files still queued
+     * on the client. An upload can not be started while the owner is inert,
+     * unless the original handler allows it.
+     * <p>
      * NOTE: If new methods are added to {@link UploadHandler} or
      * {@link com.vaadin.flow.server.streams.ElementRequestHandler}, they must
      * be explicitly delegated here.
@@ -292,13 +303,17 @@ public class UploadHelper implements Serializable {
      * @param extensionsSupplier
      *            supplier for the current list of accepted file extensions
      *            (including the leading dot), not {@code null}
+     * @param uploadInProgressSupplier
+     *            supplier for whether an upload started while the owner was not
+     *            inert is still in progress, not {@code null}
      * @return a new {@link UploadHandler} that validates file types before
      *         delegating to the original handler
      */
     static UploadHandler wrapHandlerWithFileTypeValidation(
             UploadHandler delegate,
             SerializableSupplier<List<String>> mimeTypesSupplier,
-            SerializableSupplier<List<String>> extensionsSupplier) {
+            SerializableSupplier<List<String>> extensionsSupplier,
+            SerializableSupplier<Boolean> uploadInProgressSupplier) {
         return new UploadHandler() {
             @Override
             public void handleUploadRequest(UploadEvent event)
@@ -344,7 +359,8 @@ public class UploadHelper implements Serializable {
 
             @Override
             public boolean isAllowInert() {
-                return delegate.isAllowInert();
+                return delegate.isAllowInert()
+                        || uploadInProgressSupplier.get();
             }
 
             @Override

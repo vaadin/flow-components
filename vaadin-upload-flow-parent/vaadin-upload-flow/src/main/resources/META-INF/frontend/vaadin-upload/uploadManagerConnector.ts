@@ -86,6 +86,9 @@ class UploadManagerConnector extends HTMLElement {
 
     // Track upload state to detect when all uploads finish
     this.manager.addEventListener('upload-start', () => {
+      if (!this.uploading) {
+        this.dispatchEvent(new CustomEvent('upload-start', { bubbles: false }));
+      }
       this.uploading = true;
     });
 

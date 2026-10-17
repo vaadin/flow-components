@@ -75,6 +75,8 @@ public class UploadManager implements Serializable {
 
     // Upload state tracking
     private final AtomicInteger activeUploads = new AtomicInteger(0);
+    private volatile boolean uploadInProgress;
+    private boolean uploadHandlerAllowsInert;
 
     // Accepted file type restrictions (used for both client hints and
     // server-side validation)
@@ -146,11 +148,26 @@ public class UploadManager implements Serializable {
         }).addEventData(eventDetailFileName)
                 .addEventData(eventDetailErrorMessage);
 
+        // An upload started before a modal component made the owner inert is
+        // allowed to finish: the requests of its queued files are received
+        // while it is in progress, and its end is reported for an inert owner
+        // too. An upload can not be started while inert, unless the upload
+        // handler allows it.
+        connector.getElement().addEventListener("upload-start", event -> {
+            if (!event.getSource().getNode().isInert()
+                    || uploadHandlerAllowsInert) {
+                uploadInProgress = true;
+            }
+        }).allowInert();
+
         // Listen for all-finished event from client (triggered when all
         // uploads are complete, including success, error, or abort)
-        connector.getElement().addEventListener("all-finished",
-                event -> ComponentUtil.fireEvent(owner,
-                        new AllFinishedEvent(owner)));
+        connector.getElement().addEventListener("all-finished", event -> {
+            if (uploadInProgress || !event.getSource().getNode().isInert()) {
+                ComponentUtil.fireEvent(owner, new AllFinishedEvent(owner));
+            }
+            uploadInProgress = false;
+        }).allowInert();
 
         // Register internal listeners for upload state tracking
         ComponentUtil.addListener(connector, UploadStartEvent.class,
@@ -194,7 +211,8 @@ public class UploadManager implements Serializable {
     public void setUploadHandler(UploadHandler handler, String targetName) {
         var elementStreamResource = UploadHelper.createTargetResource(handler,
                 connector.getElement(), targetName, () -> acceptedMimeTypes,
-                () -> acceptedFileExtensions);
+                () -> acceptedFileExtensions, () -> uploadInProgress);
+        uploadHandlerAllowsInert = handler.isAllowInert();
         if (!(handler instanceof UploadHelper.FailFastUploadHandler)) {
             handlerExplicitlyConfigured.set(true);
         }
