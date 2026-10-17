@@ -147,4 +147,14 @@ class SpreadsheetConditionalFormatsTest {
             spreadsheet.refreshAllCellValues();
         }));
     }
+
+    @Test
+    void aRuleRemoved() {
+        // The border below C3 goes.
+        assertEquals(List.of(), harness.check(spreadsheet -> {
+            spreadsheet.getActiveSheet().getSheetConditionalFormatting()
+                    .removeConditionalFormatting(1);
+            spreadsheet.refreshAllCellValues();
+        }));
+    }
 }

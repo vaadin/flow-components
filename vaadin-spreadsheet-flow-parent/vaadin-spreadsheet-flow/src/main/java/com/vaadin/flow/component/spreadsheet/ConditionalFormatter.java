@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.apache.poi.hssf.usermodel.HSSFSheetConditionalFormatting;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ConditionalFormatting;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
@@ -108,6 +109,14 @@ public class ConditionalFormatter implements Serializable {
      * cells.
      */
     public void createConditionalFormatterRules() {
+        // The number formats of the rules come from POI's evaluator, which
+        // keeps the rules and what they hold for: a value changed anywhere
+        // can change that, and a rule removed would leave it one it can no
+        // longer read.
+        ConditionalFormattingEvaluator evaluator = spreadsheet
+                .getConditionalFormattingEvaluator();
+        evaluator.clearAllCachedFormats();
+        evaluator.clearAllCachedValues();
 
         // make sure old styles are cleared
         if (cellToIndex != null) {
