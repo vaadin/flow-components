@@ -169,7 +169,7 @@ public class ConditionalFormatter implements Serializable {
                     }
 
                     // HSSF might return 255 for 'none'...
-                    css.append(FontStyleComposer.textDecoration(
+                    css.append(SpreadsheetStyleFactory.textDecoration(
                             fontFormatting.getUnderlineType() != Font.U_NONE
                                     && fontFormatting.getUnderlineType() != 255,
                             POIReflectionTools

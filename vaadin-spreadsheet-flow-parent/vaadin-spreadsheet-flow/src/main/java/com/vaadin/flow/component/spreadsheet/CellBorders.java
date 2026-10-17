@@ -44,7 +44,7 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * removed takes its borders with it, and the rules the client is given are made
  * from what the cells draw now, the same however they came to draw it.
  */
-final class CellBorderStyleBuilder implements Serializable {
+final class CellBorders implements Serializable {
 
     /** A cell, 0-based, in the order of the rows, then of the columns. */
     record CellKey(int row,
@@ -84,8 +84,7 @@ final class CellBorderStyleBuilder implements Serializable {
     /** By cell, what it draws on other cells, for the cells that do. */
     private final TreeMap<CellKey, Drawn> drawn = new TreeMap<>();
 
-    CellBorderStyleBuilder(Spreadsheet spreadsheet,
-            ColorConverter colorConverter) {
+    CellBorders(Spreadsheet spreadsheet, ColorConverter colorConverter) {
         this.spreadsheet = spreadsheet;
         this.colorConverter = colorConverter;
     }

@@ -14,17 +14,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.FontFamily;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,9 +141,16 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private Spreadsheet spreadsheet;
 
-    private DefaultStyleBaseline defaultStyleBaseline;
-    private FontStyleComposer fontStyleComposer;
-    private CellBorderStyleBuilder borderStyleBuilder;
+    private final CellBorders borders;
+
+    /**
+     * The font and the alignment of the default style, style 0: the other
+     * styles set only what differs from them.
+     */
+    private Font defaultFont;
+    private String defaultFontFamily;
+    private short defaultFontHeightInPoints;
+    private HorizontalAlignment defaultTextAlign;
 
     /** Gives the client the borders drawn on other cells, once a response. */
     private final BeforeClientResponseAction sendBordersAction;
@@ -157,11 +167,7 @@ public class SpreadsheetStyleFactory implements Serializable {
     public SpreadsheetStyleFactory(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
         setupColorMap();
-        this.defaultStyleBaseline = new DefaultStyleBaseline(spreadsheet);
-        this.fontStyleComposer = new FontStyleComposer(spreadsheet,
-                defaultStyleBaseline);
-        this.borderStyleBuilder = new CellBorderStyleBuilder(spreadsheet,
-                colorConverter);
+        borders = new CellBorders(spreadsheet, colorConverter);
         sendBordersAction = new BeforeClientResponseAction(spreadsheet,
                 this::sendBorders);
     }
@@ -178,19 +184,15 @@ public class SpreadsheetStyleFactory implements Serializable {
         } else {
             spreadsheet.cellStyleToCSSStyle.clear();
         }
-        Map<Integer, Integer> bordersBefore = borderStyleBuilder
-                .sidesOfStyles();
-        borderStyleBuilder.resetStyles();
-
-        // get default text alignments
-        CellStyle cellStyle = workbook.getCellStyleAt(0);
-        defaultStyleBaseline.setDefaultTextAlign(cellStyle.getAlignment());
-        // defaultVerticalAlign = cellStyle.getVerticalAlignment();
+        Map<Integer, Integer> bordersBefore = borders.sidesOfStyles();
+        borders.resetStyles();
 
         // create default style (cell style 0)
+        CellStyle cellStyle = workbook.getCellStyleAt(0);
+        defaultTextAlign = cellStyle.getAlignment();
         StringBuilder sb = new StringBuilder();
-        borderStyleBuilder.appendBorderStyles(sb, cellStyle);
-        defaultStyleBaseline.captureDefaultStyle(cellStyle, sb);
+        borders.appendBorderStyles(sb, cellStyle);
+        defaultFontStyle(cellStyle, sb);
         colorConverter.defaultColorStyles(cellStyle, sb);
         spreadsheet.cellStyleToCSSStyle.put((int) cellStyle.getIndex(),
                 sb.toString());
@@ -205,9 +207,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         // Styles changed in place change what their cells draw on other
         // cells. Only then, as finding that goes through every cell, and not
         // the first time: the sheet finds it when it is shown.
-        if (stylesLoaded
-                && !bordersBefore.equals(borderStyleBuilder.sidesOfStyles())) {
-            borderStyleBuilder.load();
+        if (stylesLoaded && !bordersBefore.equals(borders.sidesOfStyles())) {
+            borders.load();
         }
         stylesLoaded = true;
         sendBordersAction.schedule();
@@ -287,10 +288,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         Workbook wb = spreadsheet.getWorkbook();
         CellStyle hlink_style = wb.createCellStyle();
         Font hlink_font = wb.createFont();
-        hlink_font.setFontName(
-                defaultStyleBaseline.getDefaultFont().getFontName());
-        hlink_font.setFontHeightInPoints(
-                defaultStyleBaseline.getDefaultFontHeightInPoints());
+        hlink_font.setFontName(defaultFont.getFontName());
+        hlink_font.setFontHeightInPoints(defaultFontHeightInPoints);
         hlink_font.setUnderline(Font.U_SINGLE);
         hlink_font.setColor(IndexedColors.BLUE.getIndex());
         hlink_style.setFont(hlink_font);
@@ -310,7 +309,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      *            0-based
      */
     public void clearCellStyle(int oldRowIndex, int oldColumnIndex) {
-        borderStyleBuilder.cellRemoved(oldRowIndex, oldColumnIndex);
+        borders.cellRemoved(oldRowIndex, oldColumnIndex);
         sendBordersAction.schedule();
     }
 
@@ -326,19 +325,19 @@ public class SpreadsheetStyleFactory implements Serializable {
      */
     public void cellStyleUpdated(Cell cell, boolean updateCustomBorders) {
         CellStyle cellStyle = cell.getCellStyle();
-        int sides = borderStyleBuilder.sides(cellStyle.getIndex());
+        int sides = borders.sides(cellStyle.getIndex());
         // Most cells are given a style the client has already: only a style
         // whose CSS is new or has changed goes out again.
         if (addCellStyleCSS(cellStyle)) {
             spreadsheet.setCellStyleToCSSStyle(
                     spreadsheet.getCellStyleToCSSStyle());
         }
-        if (sides == borderStyleBuilder.sides(cellStyle.getIndex())) {
-            borderStyleBuilder.cellChanged(cell);
+        if (sides == borders.sides(cellStyle.getIndex())) {
+            borders.cellChanged(cell);
         } else {
             // A style changed in place changes what all its cells draw. Only
             // then, as finding that goes through every cell.
-            borderStyleBuilder.load();
+            borders.load();
         }
         sendBordersAction.schedule();
     }
@@ -355,7 +354,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      * Reloads all styles for the currently active sheet.
      */
     public void reloadActiveSheetCellStyles() {
-        borderStyleBuilder.load();
+        borders.load();
         sendBordersAction.schedule();
         // conditional formatting
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
@@ -366,7 +365,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      * moves or removes cells, rows or merged regions.
      */
     void reloadBorders() {
-        borderStyleBuilder.load();
+        borders.load();
         sendBordersAction.schedule();
     }
 
@@ -374,7 +373,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      * The rules of the borders the cells draw on other cells than their own.
      */
     ArrayList<String> borderRules() {
-        return borderStyleBuilder.rules();
+        return borders.rules();
     }
 
     private void sendBorders() {
@@ -407,11 +406,10 @@ public class SpreadsheetStyleFactory implements Serializable {
 
         StringBuilder sb = new StringBuilder();
 
-        fontStyleComposer.appendFontStyle(sb, cellStyle);
+        fontStyle(sb, cellStyle);
         colorConverter.colorStyles(cellStyle, sb);
-        borderStyleBuilder.appendBorderStyles(sb, cellStyle);
-        if (cellStyle.getAlignment() != defaultStyleBaseline
-                .getDefaultTextAlign()) {
+        borders.appendBorderStyles(sb, cellStyle);
+        if (cellStyle.getAlignment() != defaultTextAlign) {
             styleOut(sb, "text-align", cellStyle.getAlignment(), ALIGN);
             // TODO For correct overflow, rtl should be used for right align
             // if (cellStyle.getAlignment() == ALIGN_RIGHT) {
@@ -437,6 +435,161 @@ public class SpreadsheetStyleFactory implements Serializable {
         String css = sb.toString();
         return !css.equals(spreadsheet.getCellStyleToCSSStyle()
                 .put((int) cellStyle.getIndex(), css));
+    }
+
+    /**
+     * The font of the default style, as its CSS. Kept to compare the fonts of
+     * the other styles with.
+     */
+    private void defaultFontStyle(CellStyle cellStyle, StringBuilder sb) {
+        defaultFont = spreadsheet.getWorkbook()
+                .getFontAt(cellStyle.getFontIndexAsInt());
+        defaultFontFamily = fontFamily(defaultFont);
+        defaultFontHeightInPoints = defaultFont.getFontHeightInPoints();
+        sb.append(defaultFontFamily);
+        if (defaultFont.getBold()) {
+            sb.append("font-weight:bold;");
+        }
+        if (defaultFont.getItalic()) {
+            sb.append("font-style:italic;");
+        }
+        sb.append("font-size: var(--default-font-size);");
+        sb.append("--default-font-size:");
+        sb.append(defaultFontHeightInPoints);
+        sb.append("pt;");
+        sb.append(textDecoration(defaultFont.getUnderline() != Font.U_NONE,
+                defaultFont.getStrikeout()));
+    }
+
+    /**
+     * The font of the style, as CSS of what differs from the font of the
+     * default style. Catches and warn-logs an {@link IndexOutOfBoundsException}
+     * from POI when the workbook's font table is missing an index the cell
+     * points to.
+     */
+    private void fontStyle(StringBuilder sb, CellStyle cellStyle) {
+        try {
+            Font font = spreadsheet.getWorkbook()
+                    .getFontAt(cellStyle.getFontIndexAsInt());
+            if (font.getIndexAsInt() == defaultFont.getIndexAsInt()) {
+                // uses default font, no need to add styles
+                return;
+            }
+            String fontFamily = fontFamily(font);
+            if (!fontFamily.equals(defaultFontFamily)) {
+                sb.append(fontFamily);
+            }
+            if (font.getBold()) {
+                sb.append("font-weight:bold;");
+            }
+            if (font.getItalic()) {
+                sb.append("font-style:italic;");
+            }
+            final int fontheight = font.getFontHeightInPoints();
+            if (fontheight != defaultFontHeightInPoints) {
+                sb.append("font-size:");
+                sb.append(fontheight);
+                sb.append("pt;");
+            }
+            sb.append(textDecoration(font.getUnderline() != Font.U_NONE,
+                    font.getStrikeout()));
+        } catch (IndexOutOfBoundsException ioobe) {
+            // somehow workbook doesn't have all the fonts the cells have???
+            LOGGER.warn(
+                    "Font missing, " + cellStyle.getFontIndexAsInt() + " / "
+                            + cellStyle.getClass() + ", " + ioobe.getMessage(),
+                    ioobe);
+        }
+    }
+
+    /**
+     * CSS rule for a font's family.
+     * <p>
+     * A font with no name, which POI reports for a {@code <name/>} without a
+     * value, sets no family at all: its cells keep the family they would have
+     * without it, the workbook default's or the theme's.
+     */
+    private static String fontFamily(Font font) {
+        String name = font.getFontName();
+        if (name == null || name.isBlank()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("font-family: var(--default-font-family);");
+        sb.append("--default-font-family:");
+        sb.append(cssFontName(name));
+        sb.append(",");
+        if (font instanceof XSSFFont xssfFont) {
+            FontFamily family = FontFamily.valueOf(xssfFont.getFamily());
+            switch (family) {
+            case ROMAN:
+                sb.append("roman,");
+                break;
+            case SWISS:
+                sb.append("swiss,");
+                break;
+            case MODERN:
+                sb.append("modern,");
+                break;
+            case SCRIPT:
+                sb.append("script,");
+                break;
+            case DECORATIVE:
+                sb.append("decorative,");
+                break;
+            case NOT_APPLICABLE:
+                break;
+            default:
+                break;
+            }
+        }
+        sb.append("Helvetica,arial;");
+        return sb.toString();
+    }
+
+    /**
+     * A plain font name: letters and digits of any script, spaces, hyphens and
+     * underscores.
+     */
+    private static final Pattern PLAIN_FONT_NAME = Pattern
+            .compile("[\\p{L}\\p{N} _-]+");
+
+    /**
+     * A font's name as CSS. A workbook names its own fonts, and the client puts
+     * the rule the name is written into in a style block. A plain name goes in
+     * as it is, quoted when it has a space. Any other is quoted, with what
+     * could end the string or the style block escaped, so that it cannot add
+     * rules or markup of its own.
+     */
+    private static String cssFontName(String name) {
+        if (PLAIN_FONT_NAME.matcher(name).matches()) {
+            return name.contains(" ") ? "\"" + name + "\"" : name;
+        }
+        StringBuilder quoted = new StringBuilder("\"");
+        name.codePoints().forEach(c -> {
+            if (c < 0x20 || c == 0x7f || c == '"' || c == '\\' || c == '<'
+                    || c == '>') {
+                quoted.append('\\').append(Integer.toHexString(c)).append(' ');
+            } else {
+                quoted.appendCodePoint(c);
+            }
+        });
+        return quoted.append('"').toString();
+    }
+
+    /**
+     * The {@code text-decoration} declaration for an underline, a
+     * strikethrough, both or neither (then empty). Both together are one
+     * declaration: a second one would replace the first.
+     */
+    static String textDecoration(boolean underline, boolean strikeout) {
+        if (underline && strikeout) {
+            return "text-decoration:underline line-through;";
+        }
+        if (underline) {
+            return "text-decoration:underline;";
+        }
+        return strikeout ? "text-decoration:line-through;" : "";
     }
 
     private <K> void styleOut(StringBuilder sb, String attr, K key,

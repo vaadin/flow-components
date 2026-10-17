@@ -17,17 +17,19 @@ import java.util.Set;
  * Per-sheet CSS-style index maps mirrored to the client.
  *
  * <p>
- * Six fields, all populated by {@code SpreadsheetStyleFactory} during a
- * style-load pass and mirrored to the client as the source of truth for cell
- * appearance:
+ * Six properties, populated by {@code SpreadsheetStyleFactory} and
+ * {@code ConditionalFormatter} and mirrored to the client as the source of
+ * truth for cell appearance:
  *
  * <ul>
  * <li>{@code rowIndexToStyleIndex} / {@code columnIndexToStyleIndex} — row /
  * column index → POI style index (overrides per row / column).</li>
  * <li>{@code lockedColumnIndexes} / {@code lockedRowIndexes} — the indexes that
  * are locked for editing.</li>
- * <li>{@code shiftedCellBorderStyles} — CSS rules describing the marching-ants
- * border around a shifted (copy / paste) selection.</li>
+ * <li>{@code shiftedCellBorderStyles} — CSS rules of the borders the cells draw
+ * on other cells than their own: a top border at the bottom of the cell above,
+ * a left one at the right of the cell before, and those inside a merged region
+ * on the merged cell. Only sent: the style factory keeps them.</li>
  * <li>{@code conditionalFormattingStyles} — CSS rules for conditional-format
  * highlights (rule index → CSS body).</li>
  * </ul>
@@ -49,7 +51,6 @@ final class SheetCssStyleMaps implements Serializable {
     private HashMap<Integer, Integer> columnIndexToStyleIndex;
     private Set<Integer> lockedColumnIndexes;
     private Set<Integer> lockedRowIndexes;
-    private ArrayList<String> shiftedCellBorderStyles;
     private HashMap<Integer, String> conditionalFormattingStyles;
 
     SheetCssStyleMaps(Spreadsheet spreadsheet) {
@@ -98,12 +99,7 @@ final class SheetCssStyleMaps implements Serializable {
                 Serializer.serialize(lockedRowIndexes));
     }
 
-    ArrayList<String> getShiftedCellBorderStyles() {
-        return shiftedCellBorderStyles;
-    }
-
     void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
-        this.shiftedCellBorderStyles = shiftedCellBorderStyles;
         spreadsheet.getElement().setProperty("shiftedCellBorderStyles",
                 Serializer.serialize(shiftedCellBorderStyles));
     }

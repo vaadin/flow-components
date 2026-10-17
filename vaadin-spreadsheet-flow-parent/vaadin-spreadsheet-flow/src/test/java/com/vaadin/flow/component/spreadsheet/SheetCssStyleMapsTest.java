@@ -60,7 +60,6 @@ class SheetCssStyleMapsTest {
         assertNull(maps.getColumnIndexToStyleIndex());
         assertNull(maps.getLockedColumnIndexes());
         assertNull(maps.getLockedRowIndexes());
-        assertNull(maps.getShiftedCellBorderStyles());
         assertNull(maps.getConditionalFormattingStyles());
     }
 
@@ -111,13 +110,12 @@ class SheetCssStyleMapsTest {
     }
 
     @Test
-    void setShiftedCellBorderStyles_storesAndMirrors() {
+    void setShiftedCellBorderStyles_mirrors() {
         ArrayList<String> data = new ArrayList<>();
         data.add(".col1.row1{border-right:1px;}");
 
         maps.setShiftedCellBorderStyles(data);
 
-        assertSame(data, maps.getShiftedCellBorderStyles());
         verify(element).setProperty(eq("shiftedCellBorderStyles"), anyString());
     }
 
