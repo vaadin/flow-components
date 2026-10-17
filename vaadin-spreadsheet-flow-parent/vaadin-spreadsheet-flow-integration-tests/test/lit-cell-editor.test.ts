@@ -1536,36 +1536,65 @@ describe('Spreadsheet — cell editor lifecycle through the connector', () => {
         cleanup();
     });
 
-    it('F2 does NOT open editor on a locked cell when sheet is protected', () => {
-        const { host, sheet, cleanup } = attachSheet(200, 100);
-        sheet.setRows(5);
-        sheet.setCols(5);
-        sheet.setColW([50, 50, 50, 50, 50]);
-        sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setSheetProtected(true);
-        // Default-locked: no CellData entry at the active cell.
-        sheet.recomputeViewport();
+    /**
+     * A protected sheet whose column A and row 2 are locked: an empty cell,
+     * which has no flag of its own, is locked where both its column and its
+     * row are.
+     */
+    function protectedSheet(): ReturnType<typeof attachSheet> {
+        const attached = attachSheet(200, 100);
+        attached.sheet.setRows(5);
+        attached.sheet.setCols(5);
+        attached.sheet.setColW([50, 50, 50, 50, 50]);
+        attached.sheet.setRowH([15, 15, 15, 15, 15]);
+        attached.sheet.setSheetProtected(true);
+        attached.sheet.setLockedColumnIndexes([1]);
+        attached.sheet.setLockedRowIndexes([2]);
+        attached.sheet.recomputeViewport();
+        return attached;
+    }
 
-        host.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'F2', bubbles: true, composed: true,
+    function pressOnSheet(sheet: Spreadsheet, key: string): void {
+        sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
+            key, bubbles: true, composed: true,
         }));
+    }
+
+    it('F2 opens no editor on an empty cell whose column and row are locked', () => {
+        const { sheet, cleanup } = protectedSheet();
+        sheet.setSelectedCellAndRange('', 1, 2, 1, 1, 2, 2, false);
+
+        pressOnSheet(sheet, 'F2');
 
         expect(sheet.getCellGrid().renderState.editor).to.be.null;
         cleanup();
     });
 
-    it('type-to-edit does NOT open editor on a locked cell when sheet is protected', () => {
-        const { host, sheet, cleanup } = attachSheet(200, 100);
-        sheet.setRows(5);
-        sheet.setCols(5);
-        sheet.setColW([50, 50, 50, 50, 50]);
-        sheet.setRowH([15, 15, 15, 15, 15]);
-        sheet.setSheetProtected(true);
-        sheet.recomputeViewport();
+    it('F2 opens the editor on an empty cell whose column alone is locked', () => {
+        const { sheet, cleanup } = protectedSheet();
+        sheet.setSelectedCellAndRange('', 1, 1, 1, 1, 1, 1, false);
 
-        host.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'a', bubbles: true, composed: true,
-        }));
+        pressOnSheet(sheet, 'F2');
+
+        expect(sheet.getCellGrid().renderState.editor).to.not.be.null;
+        cleanup();
+    });
+
+    it('F2 opens the editor on an empty cell whose row alone is locked', () => {
+        const { sheet, cleanup } = protectedSheet();
+        sheet.setSelectedCellAndRange('', 2, 2, 2, 2, 2, 2, false);
+
+        pressOnSheet(sheet, 'F2');
+
+        expect(sheet.getCellGrid().renderState.editor).to.not.be.null;
+        cleanup();
+    });
+
+    it('type-to-edit opens no editor on an empty cell whose column and row are locked', () => {
+        const { sheet, cleanup } = protectedSheet();
+        sheet.setSelectedCellAndRange('', 1, 2, 1, 1, 2, 2, false);
+
+        pressOnSheet(sheet, 'a');
 
         expect(sheet.getCellGrid().renderState.editor).to.be.null;
         cleanup();
