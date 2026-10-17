@@ -55,6 +55,8 @@ import {
   withSize
 } from './algorithms/ViewportMath.js';
 import { AxisSizes } from './algorithms/AxisSizes.js';
+import { SheetData } from './state/SheetData.js';
+import { ViewState } from './state/ViewState.js';
 import {
   initialSheetModel,
   type SHEET_PROPERTIES,
@@ -253,13 +255,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private selection: SelectionState = selectSingleCell(1, 1);
 
   /**
-   * The cell the server holds as selected, as far as this client knows: the
-   * one it last told the server, or the server told it. Null before either,
-   * and after a reload. See {@link dispatchSelectionEvent}.
-   */
-  private serverSelectedCell: { col: number; row: number } | null = null;
-
-  /**
    * Whether the release of the press under way reported the range it
    * selected. A shift-click is a press, which selects the range, and a
    * click: reported on both, the server heard the same range twice.
@@ -335,26 +330,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The element the `resource-<id>` attributes live on; see {@link setResources}. */
   private resourceHost: HTMLElement | null = null;
 
-  /** The offsets the next render scrolls to, for a sheet shown again. */
-  private pendingSheetScroll: { top: number; left: number } | null = null;
   /**
-   * The first scrolling row with its top on screen when the server changed
-   * the row heights, and how far below the top of the screen that top was:
-   * the next render puts it back there. See {@link setRowH}.
+   * What the client knows of the sheet the server shows: its cells, the cell
+   * the server holds as selected, and whether the server was told where the
+   * sheet is. Replaced whole on a reload; see {@link setReload}.
    */
-  private rowAnchor: { row: number; below: number } | null = null;
-  /** Where {@link keepRowAnchored} scrolled to, until its scroll event comes. */
-  private anchoredScrollTop: number | null = null;
-  /** The sheet the last batch showed, by name, which is unique in a workbook. */
-  private shownSheetName: string | null = null;
+  private sheetData = new SheetData();
 
   /**
-   * Cells currently known to the client, keyed by
-   * {@code toKey(col, row)}. Filled by the {@code update*CellValues}
-   * RPC methods and {@code cellsUpdated}, and by a committed edit until
-   * the server answers.
+   * What the view remembers from one drawing to the next: the row to keep in
+   * place, the scroll to restore, the cell style widths measured.
    */
-  private cellDataByKey: Map<string, CellData> = new Map();
+  private readonly view = new ViewState();
 
   /**
    * Whether a coalesced repaint is already queued.
@@ -368,12 +355,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * does not come through here: the scroll handler repaints directly.
    */
   private renderQueued = false;
-
-  /**
-   * Whether the server has been told the connector is live and where the
-   * viewport starts. See {@link announceViewport}.
-   */
-  private viewportAnnounced = false;
 
   /** The context menu shown on right-click. Empty until the server answers. */
   private readonly contextMenu: SpreadsheetContextMenu;
@@ -431,14 +412,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * they live in the context menu's shadow root rather than the grid's.
    */
   private readonly actionIcons: SlottedVirtualChildren;
-
-  /** Whether the cell styles have changed since the last width measurement. */
-  private styleWidthRatiosStale = false;
-
-  /** The width measurement waiting for the grid to paint, which the viewport goes after. */
-  private pendingRatioReport: Promise<void> | null = null;
-  /** The style indexes last reported to the server with a width ratio. */
-  private measuredStyleIndexes: ReadonlySet<number> = new Set();
 
   /** The listeners on the page while the sheet is in it; see {@link connect}. */
   private pageListeners: AbortController | null = null;
@@ -553,16 +526,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly scrollContainer: HTMLElement;
 
   /**
-   * The headers' and frozen panes' sizes at the last render, which the
-   * scroll container leaves out of the view it pages - see
-   * {@link pagedViewInset}.
-   */
-  private pagedViewParts = {
-    corner: { width: 0, height: 0 },
-    frozen: { width: 0, columns: 0, height: 0, rows: 0 }
-  };
-
-  /**
    * Resize observer on the scroll container. Fires when the host's
    * box size changes — either initially when the host is attached
    * + given dimensions, or later when the parent layout changes
@@ -615,7 +578,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       resolveVirtualChild,
       this.cellGrid,
       {
-        cellValue: (col, row) => this.cellDataByKey.get(toKey(col, row))?.value ?? '',
+        cellValue: (col, row) => this.sheetData.cells.get(toKey(col, row))?.value ?? '',
         paneClientRect: () => this.scrollingPaneClientRect(),
         focusSheet: () => this.scrollContainer.focus({ preventScroll: true }),
         scheduleRender: () => this.scheduleRender(),
@@ -784,7 +747,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       {
         isEditing: () => this.editor !== null,
         activeRange: () => this.selection.activeRange,
-        valueAt: (col, row) => this.cellDataByKey.get(toKey(col, row))?.value,
+        valueAt: (col, row) => this.sheetData.cells.get(toKey(col, row))?.value,
         hasCells: (range) => this.viewportLoader.hasLoaded(range),
         copyLater: (range) => this.copyLater(range),
         send: (event) => this.sendToServer(event)
@@ -1261,7 +1224,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (!this.model.sheetProtected) {
       return false;
     }
-    const cellData = this.cellDataByKey.get(toKey(col, row));
+    const cellData = this.sheetData.cells.get(toKey(col, row));
     if (cellData !== undefined) {
       return cellData.locked === true;
     }
@@ -1660,8 +1623,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     const cellKey = toKey(col, row);
-    const previous = this.cellDataByKey.get(cellKey);
-    this.cellDataByKey.set(cellKey, {
+    const previous = this.sheetData.cells.get(cellKey);
+    this.sheetData.cells.set(cellKey, {
       col,
       row,
       value,
@@ -1964,7 +1927,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.editor = {
         col,
         row,
-        initialValue: key === ' ' ? '' : initialEditValue(key, this.cellDataByKey.get(toKey(col, row))),
+        initialValue: key === ' ' ? '' : initialEditValue(key, this.sheetData.cells.get(toKey(col, row))),
         mode: 'enter'
       };
       this.autoPercentEntry = key !== ' ' && this.editor.initialValue !== key;
@@ -2148,12 +2111,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@link ViewportLoader}.
    */
   private readonly handleScroll = (): void => {
-    const anchored = this.anchoredScrollTop;
-    this.anchoredScrollTop = null;
+    const anchored = this.view.anchoredScrollTop;
+    this.view.anchoredScrollTop = null;
     // The sheet keeping a row in place is not the user scrolling.
     if (this.scrollContainer.scrollTop !== anchored) {
       // The user has moved on: no row to keep where it was.
-      this.rowAnchor = null;
+      this.view.rowAnchor = null;
       this.viewportLoader.scrolled(this.scrollContainer.scrollTop, this.scrollContainer.scrollLeft);
     }
     this.recomputeViewport();
@@ -2195,8 +2158,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Nothing measured yet; try again after the next render.
       return;
     }
-    if (!this.viewportAnnounced) {
-      this.viewportAnnounced = true;
+    if (!this.sheetData.viewportAnnounced) {
+      this.sheetData.viewportAnnounced = true;
       this.sendToServer({ type: 'onConnectorInit', data: {} });
     }
     this.viewportLoader.check();
@@ -2212,7 +2175,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.host.dispatchEvent(new CustomEvent('spreadsheet-event', { detail }));
     const selected = selectedCellSetBy(detail);
     if (selected !== null) {
-      this.serverSelectedCell = selected;
+      this.sheetData.serverSelectedCell = selected;
       this.showSelectedCellInFormulaBar(selected);
     }
   }
@@ -2363,11 +2326,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // Nothing was laid out — the sheet is hidden, or the styles have not
       // been applied yet. A zero ratio would tell the server every value
       // fits in no space at all, so say nothing and measure again later.
-      this.styleWidthRatiosStale = true;
+      this.view.styleWidthRatiosStale = true;
       return;
     }
 
-    this.measuredStyleIndexes = new Set(styleIndexes);
+    this.view.measuredStyleIndexes = new Set(styleIndexes);
     this.sendToServer({
       type: 'setCellStyleWidthRatios',
       data: { styleIndexes, ratios }
@@ -2377,7 +2340,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The style indexes the cells loaded so far wear, from their cs<N> class. */
   private styleIndexesInUse(): Set<number> {
     const indexes = new Set<number>();
-    for (const cell of this.cellDataByKey.values()) {
+    for (const cell of this.sheetData.cells.values()) {
       const index = styleIndexOf(cell.cellStyle);
       if (index !== null) {
         indexes.add(index);
@@ -2396,14 +2359,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * force a re-render without going through the scroll surface.
    */
   recomputeViewport(): void {
-    if (this.pendingSheetScroll !== null) {
+    if (this.view.pendingSheetScroll !== null) {
       // A sheet shown again goes back to where it was scrolled. The grid is
       // sized for it first: against the last sheet's size the browser would
       // cut the offsets short.
-      const { top, left } = this.pendingSheetScroll;
-      this.pendingSheetScroll = null;
+      const { top, left } = this.view.pendingSheetScroll;
+      this.view.pendingSheetScroll = null;
       // The rows are another sheet's: there is no row to keep in place.
-      this.rowAnchor = null;
+      this.view.rowAnchor = null;
       this.applyRenderState({
         scrollLeft: 0,
         scrollTop: 0,
@@ -2420,13 +2383,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
       viewportWidth: this.scrollContainer.clientWidth,
       viewportHeight: this.scrollContainer.clientHeight
     });
-    if (this.styleWidthRatiosStale && this.pendingRatioReport === null) {
+    if (this.view.styleWidthRatiosStale && this.view.pendingRatioReport === null) {
       // Measured once the grid has painted the rules that were just
       // handed to it, not against the ones it is replacing - and so
       // against whatever else changed while it waited.
-      this.pendingRatioReport = this.cellGrid.updateComplete.then(() => {
-        this.pendingRatioReport = null;
-        this.styleWidthRatiosStale = false;
+      this.view.pendingRatioReport = this.cellGrid.updateComplete.then(() => {
+        this.view.pendingRatioReport = null;
+        this.view.styleWidthRatiosStale = false;
         this.reportCellStyleWidthRatios();
       });
     }
@@ -2434,8 +2397,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // server builds the cells it sends against the ratios, and builds the
     // ones in view again when new ratios arrive - before, the first screen
     // of every workbook went out twice. Both still go in one request.
-    if (this.pendingRatioReport !== null) {
-      void this.pendingRatioReport.then(() => this.announceViewport());
+    if (this.view.pendingRatioReport !== null) {
+      void this.view.pendingRatioReport.then(() => this.announceViewport());
       return;
     }
     this.announceViewport();
@@ -2483,7 +2446,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * whole scroll container, they would move them a header further.
    */
   private applyPagedViewInset(): void {
-    const { corner, frozen } = this.pagedViewParts;
+    const { corner, frozen } = this.view.pagedViewParts;
     const inset = pagedViewInset(corner, frozen, !this.sheetTabs.hidden);
     this.scrollContainer.style.scrollPaddingTop = `${inset.top}px`;
     this.scrollContainer.style.scrollPaddingLeft = `${inset.left}px`;
@@ -2694,7 +2657,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         ? this.selection.activeRange
         : { c1: activeCell.col, c2: activeCell.col, r1: activeCell.row, r2: activeCell.row };
     const event = buildSelectionEvent(activeCell, range, this.model.rows, this.model.cols);
-    const held = this.serverSelectedCell;
+    const held = this.sheetData.serverSelectedCell;
     const grownFromHeld = held !== null && held.col === activeCell.col && held.row === activeCell.row;
     if (event.type === 'cellRangeSelected' && (startsAnew || !grownFromHeld)) {
       const data: CellRangePaintedData = {
@@ -2932,7 +2895,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.headerCorner.hidden = cornerWidth === 0 && cornerHeight === 0;
     this.headerCorner.style.width = `${cornerWidth}px`;
     this.headerCorner.style.height = `${cornerHeight}px`;
-    this.pagedViewParts = {
+    this.view.pagedViewParts = {
       corner: { width: cornerWidth, height: cornerHeight },
       frozen: {
         width: state.frozenColWidths.reduce((sum, w) => sum + w, 0),
@@ -3105,7 +3068,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     return {
       viewport,
-      cellData: this.cellDataByKey,
+      cellData: this.sheetData.cells,
       colX,
       rowY,
       colWidths,
@@ -3155,7 +3118,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * {@code toKey(col, row)}.
    */
   getCellData(): ReadonlyMap<string, CellData> {
-    return this.cellDataByKey;
+    return this.sheetData.cells;
   }
 
   /** Test-only accessor: resource id to currently resolved URL. */
@@ -3373,13 +3336,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // before it is deleted, hidden or shown again: it stays where it is.
     const index = this.tabs.sheetIndex - 1;
     const shownSheetName = this.tabs.sheetNames[index] ?? null;
-    if (!firstUpdate && changedPropertyNames.includes('sheetIndex') && shownSheetName !== this.shownSheetName) {
-      this.pendingSheetScroll = {
+    if (!firstUpdate && changedPropertyNames.includes('sheetIndex') && shownSheetName !== this.view.shownSheetName) {
+      this.view.pendingSheetScroll = {
         top: this.model.verticalScrollPositions[index] ?? 0,
         left: this.model.horizontalScrollPositions[index] ?? 0
       };
     }
-    this.shownSheetName = shownSheetName;
+    this.view.shownSheetName = shownSheetName;
     if (changedPropertyNames.length > 0 || firstUpdate) {
       this.flushRender();
     }
@@ -3407,8 +3370,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   /**
-   * Stash each cell's data into {@link cellDataByKey} keyed by
-   * its wire-format key. All four quadrants share the one map; the
+   * Stash each cell's data into the sheet's cells, keyed by its
+   * wire-format key. All four quadrants share the one map; the
    * cell-grid picks out what each pane draws.
    */
   private storeCellData(cellData: CellData[] | string): void {
@@ -3417,12 +3380,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // character, which quietly files one entry under
     // "colundefined rowundefined" and drops every value on the sheet.
     for (const cell of coerceArray<CellData>(cellData)) {
-      this.cellDataByKey.set(toKey(cell.col, cell.row), cell);
+      this.sheetData.cells.set(toKey(cell.col, cell.row), cell);
       // A style no ratio has been measured for yet: measure again after
       // the next render.
       const index = styleIndexOf(cell.cellStyle);
-      if (index !== null && !this.measuredStyleIndexes.has(index)) {
-        this.styleWidthRatiosStale = true;
+      if (index !== null && !this.view.measuredStyleIndexes.has(index)) {
+        this.view.styleWidthRatiosStale = true;
       }
     }
   }
@@ -3462,7 +3425,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * stores it.
    */
   private formulaFieldValueFor(col: number, row: number): string {
-    const data = this.cellDataByKey.get(toKey(col, row));
+    const data = this.sheetData.cells.get(toKey(col, row));
     if (data === undefined) {
       return '';
     }
@@ -3520,7 +3483,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const sizeLabel = selectionSizeLabel(this.selection.activeRange);
     const before = this.selection.activeCell;
     this.selection = selectSingleCell(col, row);
-    this.serverSelectedCell = { col, row };
+    this.sheetData.serverSelectedCell = { col, row };
     this.changeFormulaBar({ address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }) });
     this.showServerValueInFormulaField(
       formula && cellValue !== '' ? `=${cellValue}` : cellValue,
@@ -3581,7 +3544,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       activeRange: normalizedRange(c1, r1, c2, r2),
       auxRanges: this.selection.auxRanges
     };
-    this.serverSelectedCell = { col, row };
+    this.sheetData.serverSelectedCell = { col, row };
     this.changeFormulaBar({
       // As in updateFormulaBar: the server names a selection only when
       // it has a name, and leaves an ordinary one to the client. While
@@ -3613,7 +3576,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * be out of date. Those are sent again when they are shown.
    */
   cellsReplaced(cellData: CellData[]): void {
-    this.cellDataByKey.clear();
+    this.sheetData.cells.clear();
     this.storeCellData(cellData);
     this.scheduleRender();
   }
@@ -3679,7 +3642,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * them on again: 8 requests after one jump, to GWT's 3.
    */
   setRowH(rowHeightsInPoints: Json<number[] | Float32Array | SizeRuns>): void {
-    this.rowAnchor ??= this.firstRowWithTopOnScreen();
+    this.view.rowAnchor ??= this.firstRowWithTopOnScreen();
     this.write('rowH', rowHeightsInPoints);
   }
 
@@ -3697,11 +3660,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * the rows above it have their new heights.
    */
   private keepRowAnchored(): void {
-    const anchor = this.rowAnchor;
+    const anchor = this.view.rowAnchor;
     if (anchor === null) {
       return;
     }
-    this.rowAnchor = null;
+    this.view.rowAnchor = null;
     const rows = this.sheetSizes().rows;
     const top = rows.start(anchor.row) - rows.start(this.model.verticalSplitPosition + 1) - anchor.below;
     if (top === this.scrollContainer.scrollTop) {
@@ -3716,7 +3679,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       viewportHeight: this.scrollContainer.clientHeight
     });
     this.scrollContainer.scrollTop = top;
-    this.anchoredScrollTop = this.scrollContainer.scrollTop;
+    this.view.anchoredScrollTop = this.scrollContainer.scrollTop;
   }
   setColW(colWidthsInPixels: Json<number[] | Int32Array | SizeRuns>): void {
     this.write('colW', colWidthsInPixels);
@@ -3754,7 +3717,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.write('cellStyleToCSSStyle', map);
     // The server sizes General-format numbers against how wide a digit is
     // in each style, and only the client can measure that.
-    this.styleWidthRatiosStale = true;
+    this.view.styleWidthRatiosStale = true;
   }
   setRowIndexToStyleIndex(map: Json<Record<number, number>>): void {
     this.write('rowIndexToStyleIndex', map);
@@ -3922,12 +3885,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
       // the previous sheet's, and the server only ever sends cells that
       // have something in them, so a cell that is empty on the new sheet
       // is never mentioned again and the old value would show through.
-      this.cellDataByKey.clear();
-      this.viewportAnnounced = false;
+      // So is the cell it holds as selected, until it says which one it has
+      // now, and what it was told of where the sheet is.
+      this.sheetData = new SheetData();
       // Its row heights are those of whatever it shows now.
-      this.rowAnchor = null;
-      // Its selected cell too, until it says which one it has now.
-      this.serverSelectedCell = null;
+      this.view.rowAnchor = null;
       // What it was asked to load is gone too: load again, even the same
       // range.
       this.viewportLoader.reset();
