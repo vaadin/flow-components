@@ -63,6 +63,32 @@ class SpreadsheetRowShiftTest {
     }
 
     @Test
+    void aSelectionAboveTheRowsShifted_isKept() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet().createRow(5).createCell(0).setCellValue("a6");
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setSelection("A1:B2");
+
+        spreadsheet.shiftRows(5, 5, 1);
+
+        assertEquals("A1:B2", spreadsheet.getCellSelectionManager()
+                .getSelectedCellRange().formatAsString());
+    }
+
+    @Test
+    void aSelectionBelowTheRowsShifted_isKept() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet().createRow(0).createCell(0).setCellValue("a1");
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setSelection("A5:B6");
+
+        spreadsheet.shiftRows(0, 0, 1);
+
+        assertEquals("A5:B6", spreadsheet.getCellSelectionManager()
+                .getSelectedCellRange().formatAsString());
+    }
+
+    @Test
     void shiftingTheRowOfTheSelectedCell_tellsTheClientOfNoInvalidAddress() {
         XSSFWorkbook workbook = new XSSFWorkbook();
         workbook.createSheet().createRow(1).createCell(1).setCellValue("b2");

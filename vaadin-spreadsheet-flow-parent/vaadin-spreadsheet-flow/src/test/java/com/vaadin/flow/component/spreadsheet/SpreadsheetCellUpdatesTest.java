@@ -168,6 +168,20 @@ class SpreadsheetCellUpdatesTest {
     }
 
     @Test
+    void aRowShiftedOntoARowTheClientHas_isSentOnce() {
+        // Row 1 down onto row 2: A2 is sent, not taken off first, and A1 and
+        // C1 are taken off.
+        sheet.createRow(1).createCell(0).setCellValue("below");
+        show();
+
+        spreadsheet.shiftRows(0, 0, 1);
+
+        assertEquals(
+                List.of("A1=", "A2=1", "C1=", "C2=text", "refreshCellStyles"),
+                calls().stream().sorted().toList());
+    }
+
+    @Test
     void aCellMarkedAgainAfterItWasToBeTakenOff_staysOnTheClient() {
         // Of a removal and an update of a cell, the last is the one.
         show();
