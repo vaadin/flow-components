@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -114,6 +115,19 @@ class SpreadsheetHyperlinkTooltipsTest {
                 Map.of("A1", "Corner", "A12", "Frozen columns", "F1",
                         "https://frozen-rows", "F12", "https://scrolled"),
                 tooltips());
+    }
+
+    @Test
+    void theLinksOnTheEdgesOfEachPane_haveTheirTooltips_andNoneBeyond() {
+        for (String name : List.of("B2", "H2", "B20", "H20", "E10", "I20",
+                "H21", "C10", "E3")) {
+            link(name, "https://" + name.toLowerCase(), name);
+        }
+
+        show();
+
+        assertEquals(Map.of("B2", "B2", "B20", "B20", "E10", "E10", "H2", "H2",
+                "H20", "H20"), tooltips());
     }
 
     @Test

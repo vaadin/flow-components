@@ -131,6 +131,19 @@ class SpreadsheetCommentsTest {
     }
 
     @Test
+    void theCommentsOnTheEdgesOfEachPane_areShown_andNoneBeyond() {
+        for (String name : List.of("B2", "H2", "B20", "H20", "E10", "I20",
+                "H21", "C10", "E3")) {
+            comment(name);
+        }
+
+        show();
+
+        assertEquals(List.of("B2", "B20", "E10", "H2", "H20"),
+                names(spreadsheet.getCellComments().keySet()));
+    }
+
+    @Test
     void theCommentsShownAlways_areListed() {
         comment("F12", true);
         comment("F13", false);

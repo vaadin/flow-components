@@ -122,6 +122,18 @@ class SpreadsheetOverlaysTest {
     }
 
     @Test
+    void thePicturesOnTheEdgesOfEachPane_areGivenToTheClient_andNoneBeyond() {
+        for (String cell : List.of("B2", "H2", "B20", "H20", "E10", "I20",
+                "H21", "C10", "E3")) {
+            picture(cell + ":" + cell);
+        }
+
+        show();
+
+        assertEquals(List.of("B2", "B20", "E10", "H2", "H20"), startCells());
+    }
+
+    @Test
     void aPictureShown_startsWhereItsAnchorDoes_withItsOffsetAndSize() {
         picture("F12:G13");
 
