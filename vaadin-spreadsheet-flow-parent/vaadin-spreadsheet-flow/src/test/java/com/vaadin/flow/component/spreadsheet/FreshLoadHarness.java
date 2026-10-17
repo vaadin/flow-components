@@ -489,8 +489,9 @@ final class FreshLoadHarness {
     static final class ClientModel {
 
         private static final Set<String> CELL_CALLS = Set.of("cellsUpdated",
-                "updateTopLeftCellValues", "updateTopRightCellValues",
-                "updateBottomLeftCellValues", "updateBottomRightCellValues");
+                "cellsReplaced", "updateTopLeftCellValues",
+                "updateTopRightCellValues", "updateBottomLeftCellValues",
+                "updateBottomRightCellValues");
 
         /** Calls that leave nothing the model keeps. */
         private static final Set<String> OTHER_CALLS = Set.of(
@@ -605,6 +606,10 @@ final class FreshLoadHarness {
             Set<String> sentNow = new HashSet<>();
             for (Call call : calls) {
                 String function = call.function();
+                if ("cellsReplaced".equals(function)) {
+                    // The client drops every cell it has for those sent.
+                    cells.clear();
+                }
                 if (CELL_CALLS.contains(function)) {
                     for (JsonNode sent : MAPPER
                             .readTree((String) call.arguments().get(0))) {

@@ -77,6 +77,7 @@ export interface SpreadsheetClientApi {
     scroll: boolean
   ): void;
   cellsUpdated(updatedCellData: CellData[]): void;
+  cellsReplaced(cellData: CellData[]): void;
   refreshCellStyles(): void;
   editCellComment(col: number, row: number): void;
 

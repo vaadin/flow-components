@@ -41,6 +41,9 @@ final class ClientCellMirror implements Serializable {
     /** Whether the client is to draw its cells' styles again. */
     private boolean refreshStyles;
 
+    /** Whether the cells sent this round trip are all the client is to have. */
+    private boolean replacing;
+
     private BeforeClientResponseAction flushAction;
 
     ClientCellMirror(Spreadsheet spreadsheet) {
@@ -77,7 +80,21 @@ final class ClientCellMirror implements Serializable {
         onTheClient.clear();
         pending.clear();
         refreshStyles = false;
+        // A replacement asked for in a round trip that reloads the client is
+        // done by the reload: the cells the client then reports it shows.
+        replacing = false;
         spreadsheet.getCellValueManager().clearCachedContent();
+    }
+
+    /**
+     * The client is to drop every cell it has, and to have only the cells sent
+     * from now to the end of the round trip, which go in one call.
+     */
+    void replace() {
+        onTheClient.clear();
+        pending.clear();
+        replacing = true;
+        schedule();
     }
 
     private void flush() {
@@ -104,7 +121,11 @@ final class ClientCellMirror implements Serializable {
             }
         }
         pending.clear();
-        if (!changed.isEmpty()) {
+        if (replacing) {
+            replacing = false;
+            spreadsheet.getElement().callJsFunction("cellsReplaced",
+                    Serializer.serialize(changed));
+        } else if (!changed.isEmpty()) {
             spreadsheet.getElement().callJsFunction("cellsUpdated",
                     Serializer.serialize(changed));
         }

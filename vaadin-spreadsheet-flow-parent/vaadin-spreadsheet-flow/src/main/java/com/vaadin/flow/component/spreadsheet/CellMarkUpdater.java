@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellReference;
 
 /**
  * Orchestrates the cell-state update lifecycle on the active sheet. Five
@@ -117,8 +118,21 @@ final class CellMarkUpdater implements Serializable {
             // client will request cells soon, no need for reload now
             return;
         }
-        spreadsheet.updateRowAndColumnRangeCellData(1, 1, spreadsheet.getRows(),
-                spreadsheet.getColumns());
+        // The cells shown, in place of every cell the client has: those
+        // further away would be out of date, and sending them all sent 8 MB
+        // for a sheet of 100,000 cells. They are sent once they are shown.
+        spreadsheet.clientCells.replace();
+        spreadsheet.updateRowAndColumnRangeCellData(spreadsheet.getFirstRow(),
+                spreadsheet.getFirstColumn(), spreadsheet.getLastRow(),
+                spreadsheet.getLastColumn());
+        // The selected cell too, wherever it is: the formula bar shows it.
+        CellReference selected = spreadsheet.getSelectedCellReference();
+        Cell selectedCell = selected == null ? null
+                : spreadsheet.getCell(selected.getRow(), selected.getCol());
+        if (selectedCell != null) {
+            spreadsheet.getCellValueManager().markCellForUpdate(selectedCell);
+            spreadsheet.getCellValueManager().updateMarkedCellValues();
+        }
         // if the selected cell is of type formula, there is a chance that
         // the formula has been changed.
         spreadsheet.getCellSelectionManager().reSelectSelectedCell();

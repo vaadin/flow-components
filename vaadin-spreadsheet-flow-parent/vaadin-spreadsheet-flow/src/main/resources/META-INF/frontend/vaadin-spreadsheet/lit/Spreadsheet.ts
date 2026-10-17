@@ -3649,6 +3649,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.storeCellData(updatedCellData);
     this.scheduleRender();
   }
+  /**
+   * The cells to have, in place of every cell there is: the server worked
+   * them all out again and sent those shown, and any other kept here would
+   * be out of date. Those are sent again when they are shown.
+   */
+  cellsReplaced(cellData: CellData[]): void {
+    this.cellDataByKey.clear();
+    this.storeCellData(cellData);
+    this.scheduleRender();
+  }
   refreshCellStyles(): void {
     this.scheduleRender();
   }

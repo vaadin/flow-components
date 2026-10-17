@@ -93,8 +93,9 @@ class SpreadsheetCellUpdatesTest {
 
     /** The calls that send cells: those changed, and those shown. */
     private static final List<String> CELL_CALLS = List.of("cellsUpdated",
-            "updateTopLeftCellValues", "updateTopRightCellValues",
-            "updateBottomLeftCellValues", "updateBottomRightCellValues");
+            "cellsReplaced", "updateTopLeftCellValues",
+            "updateTopRightCellValues", "updateBottomLeftCellValues",
+            "updateBottomRightCellValues");
 
     /**
      * The client calls since the last look: the cells sent as "B1=2", or "B1=2
@@ -117,6 +118,9 @@ class SpreadsheetCellUpdatesTest {
             }
             if (CELL_CALLS.stream().noneMatch(parameters::contains)) {
                 continue;
+            }
+            if (parameters.contains("cellsReplaced")) {
+                calls.add("cellsReplaced");
             }
             for (Object parameter : parameters) {
                 if (parameter instanceof String text && text.startsWith("[")) {
@@ -329,6 +333,46 @@ class SpreadsheetCellUpdatesTest {
         List<String> calls = calls();
         assertTrue(calls.contains("A1=7"), calls.toString());
         assertTrue(calls.contains("B1=14"), calls.toString());
+    }
+
+    @Test
+    void aFullRefresh_sendsTheCellsShown_inPlaceOfThoseTheClientHas() {
+        // A30 is below the rows shown: it is sent once it is shown.
+        sheet.createRow(29).createCell(0).setCellValue(30);
+        show();
+
+        spreadsheet.refreshAllCellValues();
+
+        assertEquals(List.of("cellsReplaced", "A1=1", "C1=text",
+                "refreshCellStyles"), calls());
+    }
+
+    @Test
+    void aFullRefresh_sendsTheCellsShown_withoutOneSentJustBefore() {
+        // A30, below the rows shown, sent earlier in the same round trip:
+        // it was built before the refresh, and is sent once it is shown.
+        sheet.createRow(29).createCell(0).setCellValue(30);
+        show();
+        cell("A30").setCellValue(31);
+        spreadsheet.refreshCells(cell("A30"));
+
+        spreadsheet.refreshAllCellValues();
+
+        assertEquals(List.of("cellsReplaced", "A1=1", "C1=text",
+                "refreshCellStyles"), calls());
+    }
+
+    @Test
+    void aFullRefresh_sendsTheSelectedCellToo_whereverItIs() {
+        // The formula bar shows the selected cell.
+        sheet.createRow(29).createCell(0).setCellValue(30);
+        show();
+        spreadsheet.setSelection("A30");
+        calls();
+
+        spreadsheet.refreshAllCellValues();
+
+        assertTrue(calls().contains("A30=30"));
     }
 
     @Test

@@ -287,6 +287,11 @@ export class VaadinSpreadsheet extends LitElement {
     this.$connector.cellsUpdated(updatedCellData);
   }
 
+  cellsReplaced(cellData) {
+    this._flush();
+    this.$connector.cellsReplaced(cellData);
+  }
+
   refreshCellStyles() {
     this._flush();
     this.$connector.refreshCellStyles();

@@ -99,6 +99,21 @@ describe('Spreadsheet render scheduling — server pushes repaint', () => {
         expect(ctx.sheet.getCellData().get('col1 row1')?.value).to.equal('42');
     });
 
+    it('cellsReplaced keeps only the cells it is given, and repaints', async () => {
+        ctx.sheet.cellsUpdated([cell(1, 1, 'old'), cell(9, 90, 'far away')]);
+        await afterFrame();
+        const before = ctx.paints();
+
+        ctx.sheet.cellsReplaced([cell(1, 1, 'fresh')]);
+        await afterFrame();
+
+        expect(ctx.paints()).to.equal(before + 1);
+        expect(ctx.sheet.getCellData().get('col1 row1')?.value).to.equal(
+            'fresh'
+        );
+        expect(ctx.sheet.getCellData().has('col9 row90')).to.equal(false);
+    });
+
     it('cellsUpdated overwrites the value already held for a cell', async () => {
         ctx.sheet.updateBottomRightCellValues([cell(1, 1, 'stale')]);
         await afterFrame();
