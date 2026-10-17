@@ -169,6 +169,71 @@ describe('<vaadin-spreadsheet> — joining and leaving the page', () => {
   });
 });
 
+describe('<vaadin-spreadsheet> — listening to the page as it comes and goes', () => {
+  type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
+
+  let el: Element;
+  let resized: unknown[];
+
+  beforeEach(async () => {
+    el = document.createElement('vaadin-spreadsheet') as Element;
+    el.style.cssText = 'display:flex;flex-direction:column;width:400px;height:200px;';
+    document.body.appendChild(el);
+    await el.updateComplete;
+    el.$connector.setRows(10);
+    el.$connector.setCols(5);
+    el.$connector.setColW([50, 50, 50, 50, 50]);
+    el.$connector.setRowH(new Array(10).fill(15));
+    el.$connector.recomputeViewport();
+    resized = [];
+    el.addEventListener('spreadsheet-event', (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.type === 'columnResized') {
+        resized.push(detail.data);
+      }
+    });
+  });
+
+  afterEach(() => {
+    el.remove();
+    el.$connector.dispose();
+  });
+
+  /** Drag column 2's edge 20px right; the drag ends on the page, not on the sheet. */
+  function dragColumnEdge(): void {
+    el.$connector
+      .getColumnHeader()
+      .dispatchEvent(
+        new CustomEvent('column-resize-start', { detail: { col: 2, clientX: 100 }, bubbles: true, composed: true })
+      );
+    document.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+  }
+
+  it('follows a drag across the page from the start', () => {
+    dragColumnEdge();
+
+    expect(resized).to.eql([{ colIndexes: [2], newWidths: [70] }]);
+  });
+
+  it('follows no drag across the page once removed from it', () => {
+    el.remove();
+
+    dragColumnEdge();
+
+    expect(resized).to.be.empty;
+  });
+
+  it('follows a drag across the page again, once, when put back', () => {
+    el.remove();
+    document.body.appendChild(el);
+
+    dragColumnEdge();
+
+    expect(resized).to.eql([{ colIndexes: [2], newWidths: [70] }]);
+  });
+});
+
 describe('<vaadin-spreadsheet> — changing size', () => {
   type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
 
