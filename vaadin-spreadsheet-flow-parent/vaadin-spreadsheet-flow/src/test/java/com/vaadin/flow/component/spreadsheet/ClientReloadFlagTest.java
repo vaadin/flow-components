@@ -17,6 +17,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,24 +121,16 @@ class ClientReloadFlagTest {
     // ----- flush: timestamp push -------------------------------------------
 
     @Test
-    void flush_pushesFreshTimestampToElementReloadProperty() {
-        // Pin: flush MUST push the epoch-millis timestamp into
-        // element.setProperty("reload", double). Vaadin's Element only
-        // offers setProperty for boolean / double / String, so the long
-        // from System.currentTimeMillis() widens to double.
-        long before = System.currentTimeMillis();
-
+    void flush_pushesANewValueToElementReloadProperty_eachTime() {
+        flag.flush(spreadsheet);
         flag.flush(spreadsheet);
 
-        long after = System.currentTimeMillis();
         ArgumentCaptor<Double> valueCaptor = ArgumentCaptor
                 .forClass(Double.class);
-        verify(element).setProperty(org.mockito.ArgumentMatchers.eq("reload"),
+        verify(element, org.mockito.Mockito.times(2)).setProperty(
+                org.mockito.ArgumentMatchers.eq("reload"),
                 valueCaptor.capture());
-        double timestamp = valueCaptor.getValue();
-        assertTrue(timestamp >= before && timestamp <= after,
-                "Timestamp must be a System.currentTimeMillis() value "
-                        + "from inside the flush window. Got: " + timestamp);
+        assertEquals(List.of(1.0, 2.0), valueCaptor.getAllValues());
     }
 
     @Test

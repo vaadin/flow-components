@@ -43,6 +43,13 @@ final class ClientReloadFlag implements Serializable {
 
     private boolean pending;
 
+    /**
+     * The reloads asked of the client so far, which its {@code reload} property
+     * takes: a new value each time, as a timestamp was not when two reloads
+     * came in the same millisecond, and the second never reached the client.
+     */
+    private int reloads;
+
     /** Runs {@link #flush(Spreadsheet)}; made on the first mark. */
     private BeforeClientResponseAction flushAction;
 
@@ -65,17 +72,15 @@ final class ClientReloadFlag implements Serializable {
     }
 
     /**
-     * Pushes a fresh timestamp into the client {@code reload} property, clears
-     * the pending flag, and seeds {@code spreadsheet.initialSheetSelection}
-     * when not already set — either to the active sheet's remembered selection
-     * or, failing that, to {@code "A1"}. A seeded selection leaves the view
-     * where it is, unless cells were selected after the reload; one that was
-     * already set, by a hyperlink, a named range or an undo, is brought into
-     * view.
+     * Pushes a new value into the client {@code reload} property, clears the
+     * pending flag, and seeds {@code spreadsheet.initialSheetSelection} when
+     * not already set — either to the active sheet's remembered selection or,
+     * failing that, to {@code "A1"}. A seeded selection leaves the view where
+     * it is, unless cells were selected after the reload; one that was already
+     * set, by a hyperlink, a named range or an undo, is brought into view.
      */
     void flush(Spreadsheet spreadsheet) {
-        spreadsheet.getElement().setProperty("reload",
-                System.currentTimeMillis());
+        spreadsheet.getElement().setProperty("reload", ++reloads);
         pending = false;
         // The client forgets its cells with the reload.
         spreadsheet.forgetClientCells();

@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -90,6 +91,10 @@ class SheetReloadTest {
         return respond();
     }
 
+    private Object reload() {
+        return spreadsheet.getElement().getPropertyRaw("reload");
+    }
+
     @Test
     void cellsChangedAsASheetIsShown_areSentOnceTheClientReportsWhereItIs() {
         spreadsheet.setActiveSheetIndex(1);
@@ -99,5 +104,17 @@ class SheetReloadTest {
 
         assertEquals(Set.of("B2=new", "showSelectedCell A1"),
                 new HashSet<>(clientReportsWhereItIs()));
+    }
+
+    @Test
+    void aSheetShownAnewManyTimes_hasTheClientReloadItEveryTime() {
+        for (int time = 0; time < 200; time++) {
+            Object before = reload();
+
+            spreadsheet.setActiveSheetIndex((time + 1) % 2);
+            respond();
+
+            assertNotEquals(before, reload(), "shown anew, time " + time);
+        }
     }
 }
