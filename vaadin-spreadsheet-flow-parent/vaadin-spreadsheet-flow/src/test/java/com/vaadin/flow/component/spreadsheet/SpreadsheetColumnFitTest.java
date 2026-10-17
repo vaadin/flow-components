@@ -23,9 +23,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.tests.MockUIExtension;
 
 /**
- * A number that does not fit its column shows hashes, and one that fits shows
- * its value: the cells of a column are sent again when its width changes, as
- * the client has what a fresh load gives it.
+ * A number that does not fit its column shows hashes, one that fits shows its
+ * value, and text runs over the empty columns shown after it: the cells of a
+ * column are sent again when its width changes, as the client has what a fresh
+ * load gives it.
  */
 class SpreadsheetColumnFitTest {
 
@@ -60,5 +61,43 @@ class SpreadsheetColumnFitTest {
 
         assertEquals(List.of(), harness
                 .check(spreadsheet -> spreadsheet.setColumnWidth(1, 10)));
+    }
+
+    @Test
+    void aColumnHiddenWhenLoaded_isShownWithItsNumbers() {
+        XSSFWorkbook workbook = workbook();
+        workbook.getSheetAt(0).setColumnHidden(1, true);
+        harness.show(workbook);
+
+        assertEquals(List.of(), harness
+                .check(spreadsheet -> spreadsheet.setColumnHidden(1, false)));
+    }
+
+    @Test
+    void aColumnOfAGroupCollapsedWhenLoaded_isShownWithItsNumbers() {
+        XSSFWorkbook workbook = workbook();
+        workbook.getSheetAt(0).groupColumn(1, 2);
+        workbook.getSheetAt(0).setColumnGroupCollapsed(1, true);
+        harness.show(workbook);
+
+        assertEquals(List.of(),
+                harness.check(spreadsheet -> harness.clientEvent(
+                        "groupingCollapsed",
+                        "{\"cols\": true, \"colIndex\": 1, \"collapsed\": false}")));
+    }
+
+    @Test
+    void textRunningOverAColumnHidden_runsOverTheNextOnes() {
+        // B wider than the others, so the text runs over a width of its own
+        // with B hidden.
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        sheet.createRow(0).createCell(0)
+                .setCellValue("a text long enough to run over some columns");
+        sheet.setColumnWidth(1, SheetSizes.columnWidthUnits(sheet, 150));
+        harness.show(workbook);
+
+        assertEquals(List.of(), harness
+                .check(spreadsheet -> spreadsheet.setColumnHidden(1, true)));
     }
 }

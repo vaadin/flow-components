@@ -397,18 +397,22 @@ final class SheetSizes implements Serializable {
             sheet.setColumnWidth(column, units);
         }
         int[] widths = widthsCovering(column);
+        boolean shown = false;
         if (hidden && hiddenColumns.add(column)) {
             widths[column] = 0;
         } else if (!hidden && hiddenColumns.remove(column)) {
             widths[column] = columnWidthShown(sheet, column, defColW);
-            spreadsheet.getCellValueManager().clearCacheForColumn(column + 1);
-            spreadsheet.getCellValueManager().loadCellData(
-                    spreadsheet.getFirstRow(), column + 1,
-                    spreadsheet.getLastRow(), column + 1);
+            shown = true;
         }
         publishHiddenColumns();
         setColumnWidths(widths);
-        spreadsheet.getCellValueManager().resendTextRunningInto(column);
+        if (shown) {
+            // Its cells, built while it had no width, are built at the width
+            // it is shown at.
+            cellsResized(column);
+        } else {
+            spreadsheet.getCellValueManager().resendTextRunningInto(column);
+        }
     }
 
     /**
