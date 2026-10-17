@@ -204,6 +204,22 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(popup.parentElement).to.equal(ctx.host);
   });
 
+  it('is not placed again while the sheet is out of the page', async () => {
+    withFlowClient({ 42: content('filter') });
+    ctx.sheet.addPopupButton(buttonState(4, 1, { popupWidth: '120px' }));
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    await frames(2);
+    const overlay = ctx.sheet.getPopupOverlay();
+    const placed = [overlay.style.left, overlay.style.top];
+
+    // As the element does, leaving the page.
+    ctx.sheet.disconnect();
+    ctx.host.remove();
+    await frames(3);
+
+    expect([overlay.style.left, overlay.style.top]).to.eql(placed);
+  });
+
   it('resolves the content against the application the button reports', () => {
     const popup = content('filter');
     withFlowClient({ 42: popup }, 'OTHER-APP');
