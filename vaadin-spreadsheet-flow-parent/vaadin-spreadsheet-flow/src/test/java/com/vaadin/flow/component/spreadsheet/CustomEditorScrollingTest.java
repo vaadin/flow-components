@@ -105,6 +105,28 @@ class CustomEditorScrollingTest {
     }
 
     @Test
+    void aCellChanged_leavesTheEditorsAsTheyAre() {
+        // What the user typed into one is in no cell yet.
+        scrollTo(1, 30);
+        Component b2 = editorOf("col2 row2");
+
+        spreadsheet.refreshCells(spreadsheet.createCell(0, 0, "changed"));
+
+        assertSame(b2, editorOf("col2 row2"));
+    }
+
+    @Test
+    void rowsShifted_giveTheirCellsNewEditors() {
+        // An editor left in place would end up on another cell.
+        scrollTo(1, 30);
+        Component b2 = editorOf("col2 row2");
+
+        spreadsheet.shiftRows(1, 1, 1);
+
+        assertNotSame(b2, editorOf("col2 row2"));
+    }
+
+    @Test
     void theSelectedCell_keepsItsEditorWhenItIsScrolledAway() {
         // What the user is typing into it is in no cell yet.
         scrollTo(1, 30);

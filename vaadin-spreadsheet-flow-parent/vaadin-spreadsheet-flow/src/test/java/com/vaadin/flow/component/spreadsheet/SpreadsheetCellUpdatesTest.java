@@ -10,6 +10,8 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
@@ -248,6 +250,88 @@ class SpreadsheetCellUpdatesTest {
                 "{\"r1\": 1, \"c1\": 1, \"r2\": 4, \"c2\": 1}");
 
         Mockito.verify(evaluator).notifyDeleteCell(sheet.getRow(3).getCell(0));
+    }
+
+    @Test
+    void deletingACellThatIsNotThere_sendsNothing() {
+        show();
+
+        spreadsheet.deleteCell(0, 5);
+
+        assertEquals(List.of(), calls());
+    }
+
+    @Test
+    void aCellDeletedOnTheSheetShown_isTakenFromThatSheet() {
+        Sheet second = workbook.createSheet();
+        second.createRow(0).createCell(0).setCellValue("second");
+        show();
+        spreadsheet.setActiveSheetIndex(1);
+        calls();
+
+        spreadsheet.deleteCell(0, 0);
+
+        assertNull(second.getRow(0).getCell(0));
+        assertNotNull(sheet.getRow(0).getCell(0));
+    }
+
+    @Test
+    void theSelectedCellChanged_isShownInTheFormulaBarAgain() {
+        // The client reads the formula bar from the cell when it is told to.
+        show();
+        spreadsheet.setSelection("A1");
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+        cell("A1").setCellValue(5);
+
+        spreadsheet.refreshCells(cell("A1"));
+
+        ui.fakeClientCommunication();
+        assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
+                .anyMatch(call -> call.getInvocation().getExpression()
+                        .contains("updateFormulaBar")));
+    }
+
+    @Test
+    void theSelectedCellChanged_isShownInTheFormulaBarAgain_afterAFullRefresh() {
+        show();
+        spreadsheet.setSelection("A1");
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+        cell("A1").setCellValue(5);
+
+        spreadsheet.refreshAllCellValues();
+
+        ui.fakeClientCommunication();
+        assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
+                .anyMatch(call -> call.getInvocation().getExpression()
+                        .contains("updateFormulaBar")));
+    }
+
+    @Test
+    void aFullRefresh_sendsWhatChangedInPoi_withItsFormulasWorkedOutAgain() {
+        formulaInB1();
+        show();
+        // Changed behind the spreadsheet's back: neither told nor refreshed.
+        cell("A1").setCellValue(7);
+
+        spreadsheet.refreshAllCellValues();
+
+        List<String> calls = calls();
+        assertTrue(calls.contains("A1=7"), calls.toString());
+        assertTrue(calls.contains("B1=14"), calls.toString());
+    }
+
+    @Test
+    void aFullRefresh_beforeTheClientSaysWhereItIs_sendsNoCells() {
+        spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setLocale(Locale.US);
+        ui.add(spreadsheet);
+        calls();
+
+        spreadsheet.refreshAllCellValues();
+
+        assertEquals(List.of(), calls());
     }
 
     @Test
