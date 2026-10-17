@@ -198,6 +198,19 @@ class SpreadsheetFillTest {
     }
 
     @Test
+    void aFillOverTheSameCells_changesNothing() {
+        // The corner dragged out and back again.
+        set("A1", 1);
+        set("A2", 2);
+        show();
+
+        fill(1, 1, 2, 1, 1, 1, 2, 1);
+
+        assertEquals(List.of("1", "2", "<none>"),
+                List.of(value("A1"), value("A2"), value("A3")));
+    }
+
+    @Test
     void aFill_selectsTheCellsFilled() {
         set("A1", 1);
         set("A2", 2);
