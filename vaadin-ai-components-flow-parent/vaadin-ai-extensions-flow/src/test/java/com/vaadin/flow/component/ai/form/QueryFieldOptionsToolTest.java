@@ -23,8 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.Project;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.StringFieldWithItems;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.html.Div;
 
@@ -95,6 +97,94 @@ class QueryFieldOptionsToolTest {
                 resultFieldWithoutOptions.contains(unregisteredId),
                 "Error message should echo the offending id, got: "
                         + resultFieldWithoutOptions);
+    }
+
+    @Test
+    void queryFieldOptionsAnswersSelectFromItsListedItems() {
+        // A select with in-memory items lists its options inline in
+        // get_form_state; a lookup the LLM makes anyway gets the same labels,
+        // filtered, rather than an unknown-field error
+        var select = new SingleSelectField<String>();
+        select.setItems("A+", "A-", "AB+", "O+");
+        var controller = new FormAIController(new Div(select));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("A+\nAB+\nO+\n",
+                executeQueryFieldOptions(controller, select, "+", 10));
+        Assertions.assertEquals("AB+\n",
+                executeQueryFieldOptions(controller, select, "ab", 10));
+        Assertions.assertEquals("(no matches)\n",
+                executeQueryFieldOptions(controller, select, "Z", 10));
+    }
+
+    @Test
+    void queryFieldOptionsAnswersMultiSelectFromItsListedItems() {
+        var multi = new MultiSelectField<String>();
+        multi.setItems("Penicillin", "Latex", "Shellfish");
+        var controller = new FormAIController(new Div(multi));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("Shellfish\n",
+                executeQueryFieldOptions(controller, multi, "shell", 10));
+        Assertions.assertEquals("(no matches)\n",
+                executeQueryFieldOptions(controller, multi, "gluten", 10));
+    }
+
+    @Test
+    void queryFieldOptionsSearchesListedItemsPastTheEnumCap() {
+        // get_form_state caps "enum" at 200 entries, but fill_form accepts
+        // any of the items, so a lookup must search them all
+        var select = new SingleSelectField<String>();
+        var items = new ArrayList<String>();
+        for (var i = 1; i <= 250; i++) {
+            items.add("item-" + i);
+        }
+        select.setItems(items);
+        var controller = new FormAIController(new Div(select));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("item-250\n",
+                executeQueryFieldOptions(controller, select, "item-250", 10));
+    }
+
+    @Test
+    void queryFieldOptionsSignalsTruncatedListedItems() {
+        var select = new SingleSelectField<String>();
+        select.setItems("A+", "A-", "AB+", "O+");
+        var controller = new FormAIController(new Div(select));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("A+\nA-\n(truncated to 2 items)\n",
+                executeQueryFieldOptions(controller, select, "", 2));
+    }
+
+    @Test
+    void queryFieldOptionsAnswersEachSelectFromItsOwnItems() {
+        var bloodType = new SingleSelectField<String>();
+        bloodType.setItems("A+", "O+");
+        var allergies = new MultiSelectField<String>();
+        allergies.setItems("Latex", "Shellfish");
+        var controller = new FormAIController(new Div(bloodType, allergies));
+        controller.onRequest(requestEvent());
+
+        Assertions.assertEquals("A+\nO+\n",
+                executeQueryFieldOptions(controller, bloodType, "", 10));
+        Assertions.assertEquals("Latex\nShellfish\n",
+                executeQueryFieldOptions(controller, allergies, "", 10));
+    }
+
+    @Test
+    void queryFieldOptionsDoesNotAnswerNonSelectFromItsItems() {
+        // get_form_state lists no options for a field that is not a select,
+        // so a lookup must not answer from items the field happens to expose
+        var field = new StringFieldWithItems();
+        var controller = new FormAIController(new Div(field));
+        controller.onRequest(requestEvent());
+
+        var result = executeQueryFieldOptions(controller, field, "", 10);
+
+        Assertions.assertTrue(result.startsWith("Error"), result);
+        Assertions.assertFalse(result.contains("Red"), result);
     }
 
     @Test

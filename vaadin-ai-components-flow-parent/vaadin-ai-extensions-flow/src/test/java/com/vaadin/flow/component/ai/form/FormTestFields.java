@@ -199,6 +199,25 @@ final class FormTestFields {
     }
 
     /**
+     * String-valued field that exposes {@code getDataProvider()} without
+     * implementing {@link HasItems} or a data view interface, so the controller
+     * classifies it as a plain string field although {@link FormValueConverter}
+     * can read its items.
+     */
+    @Tag("string-field-with-items")
+    static class StringFieldWithItems
+            extends StubField<StringFieldWithItems, String> {
+        StringFieldWithItems() {
+            super("");
+        }
+
+        @SuppressWarnings("unused")
+        public ListDataProvider<String> getDataProvider() {
+            return DataProvider.ofItems("Red", "Green");
+        }
+    }
+
+    /**
      * String-valued field that also implements {@link HasLabel} and
      * {@link HasHelper}, used by the description-merging test.
      */

@@ -1722,11 +1722,23 @@ public class FormAIController implements AIController {
         public List<String> queryFieldOptions(String fieldId, String filter,
                 int limit) {
             var hints = hintsById.get(fieldId);
-            if (hints == null || hints.valueOptionsQuery == null) {
+            if (hints != null && hints.valueOptionsQuery != null) {
+                return new ArrayList<>(
+                        hints.valueOptionsQuery.apply(filter, limit));
+            }
+            // A field that lists its options inline is answered from them,
+            // so a lookup the LLM makes anyway confirms whether an option
+            // exists instead of reading as a missing field
+            var options = visibleFields().stream()
+                    .filter(descriptor -> descriptor.id().equals(fieldId))
+                    .findFirst().map(FormFieldSchema::listedOptions)
+                    .orElse(List.of());
+            if (options.isEmpty()) {
                 throw new ToolException("Unknown field id: " + fieldId);
             }
-            return new ArrayList<>(
-                    hints.valueOptionsQuery.apply(filter, limit));
+            // Every match goes back, so the tool cuts the result to the
+            // limit and tells the LLM when more options match
+            return filterLabels(options, filter, Integer.MAX_VALUE);
         }
 
         @Override
