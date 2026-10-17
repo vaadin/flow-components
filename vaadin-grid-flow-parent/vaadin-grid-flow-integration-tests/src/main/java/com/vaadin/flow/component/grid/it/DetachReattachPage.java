@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.stream.IntStream;
+
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridSingleSelectionModel;
@@ -152,12 +154,25 @@ public class DetachReattachPage extends Div {
                 });
         attachAndDetach.setId("attach-and-detach-button");
 
+        Div container = new Div();
+        container.setId("container");
+
+        NativeButton moveToContainer = new NativeButton("Move to container",
+                e -> container.add(grid));
+        moveToContainer.setId("move-to-container-button");
+
+        NativeButton setManyItems = new NativeButton("Set many items",
+                e -> grid.setItems(IntStream.range(0, 200)
+                        .mapToObj(i -> "Item " + i).toList()));
+        setManyItems.setId("set-many-items-button");
+
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
                 toggleDetailsVisibleOnClick, resetSortingButton,
                 selectAndDetachButton, selectMultipleItems,
                 setPageSizeAndDetachButton, setSelectionModeAndDetachButton,
                 sortAndDetachButton, btnHideGrid, btnSelectionModeNone,
                 btnSelectionModeMulti, btnDetachAndReattach, btnShowGrid,
-                attachAndDetach, setItemsAndAttach, grid);
+                attachAndDetach, setItemsAndAttach, moveToContainer,
+                setManyItems, container, grid);
     }
 }
