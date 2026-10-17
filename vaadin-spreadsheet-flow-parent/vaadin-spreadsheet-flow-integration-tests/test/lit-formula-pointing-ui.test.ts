@@ -245,11 +245,15 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     press(input, 'Enter');
     await sheet.getCellGrid().updateComplete;
 
+    events.length = 0;
     mouse('mousedown', cell(6, 9));
     mouse('mouseup', cell(6, 9));
     mouse('click', cell(6, 9));
 
     expect(sheet.getSelection().activeCell).to.eql({ col: 6, row: 9 });
+    expect(events.filter((e) => e.type === 'cellSelected').map((e) => e.data)).to.eql([
+      { row: 9, column: 6, oldSelectionRangeDiscarded: true }
+    ]);
   });
 
   it('stretches the clicked reference into a range by dragging', async () => {
