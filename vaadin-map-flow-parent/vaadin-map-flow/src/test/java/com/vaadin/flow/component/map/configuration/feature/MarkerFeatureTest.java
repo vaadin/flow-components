@@ -40,12 +40,6 @@ class MarkerFeatureTest {
         Assertions.assertEquals(Assets.PIN.getFileName(),
                 markerFeature.getIcon().getImgHandler().getUrlPostfix());
 
-        Assertions.assertNotNull(markerFeature.getIcon().getImgSize());
-        Assertions.assertEquals(Assets.PIN.getWidth(),
-                markerFeature.getIcon().getImgSize().getWidth());
-        Assertions.assertEquals(Assets.PIN.getHeight(),
-                markerFeature.getIcon().getImgSize().getHeight());
-
         Assertions.assertNull(markerFeature.getIcon().getSrc());
     }
 

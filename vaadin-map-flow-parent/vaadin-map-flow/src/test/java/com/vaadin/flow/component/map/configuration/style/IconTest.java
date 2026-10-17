@@ -33,7 +33,8 @@ class IconTest {
         Assertions.assertEquals("test", icon.getSrc());
         Assertions.assertNull(icon.getImg());
         Assertions.assertNull(icon.getImgHandler());
-        Assertions.assertNull(icon.getImgSize());
+        Assertions.assertNull(icon.getWidth());
+        Assertions.assertNull(icon.getHeight());
     }
 
     @Test
@@ -52,6 +53,8 @@ class IconTest {
         options.setAnchorOrigin(anchorOrigin);
         options.setColor(color);
         options.setCrossOrigin(crossOrigin);
+        options.setWidth(40);
+        options.setHeight(30);
         Icon icon = new Icon(options);
 
         Assertions.assertEquals(0.8, icon.getOpacity(), 0.001);
@@ -63,6 +66,8 @@ class IconTest {
         Assertions.assertEquals(anchorOrigin, icon.getAnchorOrigin());
         Assertions.assertEquals(color, icon.getColor());
         Assertions.assertEquals(crossOrigin, icon.getCrossOrigin());
+        Assertions.assertEquals(40, icon.getWidth());
+        Assertions.assertEquals(30, icon.getHeight());
     }
 
     @Test

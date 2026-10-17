@@ -10,6 +10,7 @@ package com.vaadin.flow.component.map.configuration.style;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.map.configuration.Constants;
@@ -34,6 +35,8 @@ public class Icon extends ImageStyle {
     private final StreamResource img;
     private final DownloadHandler imgHandler;
     private final ImageSize imgSize;
+    private final Integer width;
+    private final Integer height;
 
     @Override
     public String getType() {
@@ -158,9 +161,56 @@ public class Icon extends ImageStyle {
      * be set initially by passing an options object to the constructor.
      *
      * @return the size of the image
+     * @deprecated this option has no effect on how the icon is rendered, use
+     *             {@link #getWidth()} and {@link #getHeight()} to control the
+     *             rendered size of the icon instead
      */
+    @Deprecated(since = "25.4")
+    @JsonIgnore
     public ImageSize getImgSize() {
         return imgSize;
+    }
+
+    /**
+     * The width in pixels at which the icon's image is rendered. If only the
+     * width is specified, the height is adjusted to preserve the image's aspect
+     * ratio. If both width and height are specified, the image is stretched to
+     * exactly that size. If neither is specified, the image is rendered at its
+     * natural size.
+     * <p>
+     * The {@link #getScale() scale} is applied on top of this size, for example
+     * a width of {@code 50} combined with a scale of {@code 2} renders the icon
+     * 100 pixels wide.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     *
+     * @return the width in pixels, or {@code null} if not specified
+     * @since 25.4
+     */
+    public Integer getWidth() {
+        return width;
+    }
+
+    /**
+     * The height in pixels at which the icon's image is rendered. If only the
+     * height is specified, the width is adjusted to preserve the image's aspect
+     * ratio. If both width and height are specified, the image is stretched to
+     * exactly that size. If neither is specified, the image is rendered at its
+     * natural size.
+     * <p>
+     * The {@link #getScale() scale} is applied on top of this size, for example
+     * a height of {@code 50} combined with a scale of {@code 2} renders the
+     * icon 100 pixels high.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     *
+     * @return the height in pixels, or {@code null} if not specified
+     * @since 25.4
+     */
+    public Integer getHeight() {
+        return height;
     }
 
     public Icon(Options options) {
@@ -183,6 +233,8 @@ public class Icon extends ImageStyle {
         img = options.img;
         imgHandler = options.imgHandler;
         imgSize = options.imgSize;
+        width = options.width;
+        height = options.height;
     }
 
     public static class Options extends ImageStyle.Options {
@@ -194,6 +246,8 @@ public class Icon extends ImageStyle {
         private StreamResource img;
         private DownloadHandler imgHandler;
         private ImageSize imgSize;
+        private Integer width;
+        private Integer height;
 
         /**
          * @see Icon#getAnchor()
@@ -254,9 +308,30 @@ public class Icon extends ImageStyle {
 
         /**
          * @see Icon#getImgSize()
+         * @deprecated this option has no effect on how the icon is rendered,
+         *             use {@link #setWidth(Integer)} and
+         *             {@link #setHeight(Integer)} to control the rendered size
+         *             of the icon instead
          */
+        @Deprecated(since = "25.4")
         public void setImgSize(ImageSize imgSize) {
             this.imgSize = imgSize;
+        }
+
+        /**
+         * @see Icon#getWidth()
+         * @since 25.4
+         */
+        public void setWidth(Integer width) {
+            this.width = width;
+        }
+
+        /**
+         * @see Icon#getHeight()
+         * @since 25.4
+         */
+        public void setHeight(Integer height) {
+            this.height = height;
         }
     }
 
@@ -285,6 +360,11 @@ public class Icon extends ImageStyle {
         BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT,
     }
 
+    /**
+     * @deprecated only used by the deprecated {@link Icon#getImgSize()} option,
+     *             which has no effect on how the icon is rendered
+     */
+    @Deprecated(since = "25.4")
     public static class ImageSize implements Serializable {
         int width;
         int height;

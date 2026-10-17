@@ -58,11 +58,8 @@ public class MarkerFeature extends PointBasedFeature {
     public static final Icon POINT_ICON;
 
     static {
-        Icon.ImageSize pinImageSize = new Icon.ImageSize(Assets.PIN.getWidth(),
-                Assets.PIN.getHeight());
         Icon.Options pinIconOptions = new Icon.Options();
         pinIconOptions.setImg(Assets.PIN.getHandler());
-        pinIconOptions.setImgSize(pinImageSize);
         pinIconOptions.setScale(0.5f);
         pinIconOptions.setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT);
         // Move image slightly downwards to compensate for whitespace at
@@ -70,11 +67,8 @@ public class MarkerFeature extends PointBasedFeature {
         pinIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.12f));
         PIN_ICON = new StaticIcon(pinIconOptions);
 
-        Icon.ImageSize pointImageSize = new Icon.ImageSize(
-                Assets.POINT.getWidth(), Assets.POINT.getHeight());
         Icon.Options pointIconOptions = new Icon.Options();
         pointIconOptions.setImg(Assets.POINT.getHandler());
-        pointIconOptions.setImgSize(pointImageSize);
         pointIconOptions.setScale(0.25f);
         pointIconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
         pointIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
