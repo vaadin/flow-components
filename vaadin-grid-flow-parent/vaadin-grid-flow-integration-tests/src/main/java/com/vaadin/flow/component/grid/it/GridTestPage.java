@@ -17,19 +17,15 @@ package com.vaadin.flow.component.grid.it;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -64,9 +60,6 @@ public class GridTestPage extends Div {
 
     public GridTestPage() {
         createGridWithComponentRenderers();
-        createGridWithTemplateDetailsRow();
-        createGridWithComponentDetailsRow();
-        createGridWithRemovableColumns();
         createDetachableGrid();
     }
 
@@ -106,8 +99,6 @@ public class GridTestPage extends Div {
                     "grid-with-component-renderers-remove-" + item.getNumber());
             return remove;
         })).setKey("remove");
-        grid.addColumn(LitRenderer.<Item> of("hidden")).setHeader("hidden")
-                .setKey("hidden").setVisible(false);
 
         grid.setId("grid-with-component-renderers");
         grid.setWidth("500px");
@@ -122,93 +113,7 @@ public class GridTestPage extends Div {
             usingFirstList.set(!usingFirstList.get());
         });
         changeList.setId("grid-with-component-renderers-change-list");
-        NativeButton toggleColumnOrdering = new NativeButton(
-                "Toggle column ordering", evt -> {
-                    grid.setColumnReorderingAllowed(
-                            !grid.isColumnReorderingAllowed());
-                });
-        toggleColumnOrdering.setId("toggle-column-ordering");
-
-        NativeButton setReorderListener = new NativeButton(
-                "Set reorder listener", evt -> {
-                    grid.addColumnReorderListener(e -> {
-                        if (e.isFromClient()) {
-                            List<Column<Item>> columnList = new ArrayList<>(
-                                    e.getColumns());
-                            // Reorder columns in the list
-                            Collections.swap(columnList, 1, 2);
-                            grid.setColumnOrder(columnList);
-                        }
-                    });
-                });
-        setReorderListener.setId("set-reorder-listener");
-
-        Span currentColumnOrdering = new Span();
-        currentColumnOrdering.setId("current-column-ordering");
-        grid.addColumnReorderListener(e -> currentColumnOrdering
-                .setText(e.getColumns().stream().map(Column::getKey)
-                        .collect(Collectors.joining(", "))));
-
-        add(grid, changeList, toggleColumnOrdering, setReorderListener,
-                currentColumnOrdering);
-    }
-
-    private void createGridWithTemplateDetailsRow() {
-        Grid<Item> grid = new Grid<>();
-
-        grid.setItems(generateItems(20, 0));
-
-        grid.addColumn(Item::getName);
-        grid.setItemDetailsRenderer(
-                LitRenderer.<Item> of("${item.detailsProperty}").withProperty(
-                        "detailsProperty",
-                        item -> "Details opened! " + item.getNumber()));
-
-        grid.setId("grid-with-template-details-row");
-        grid.setWidth("500px");
-        grid.setHeight("500px");
-        add(grid);
-    }
-
-    private void createGridWithComponentDetailsRow() {
-        Grid<Item> grid = new Grid<>();
-
-        grid.setItems(generateItems(20, 0));
-
-        grid.addColumn(Item::getName);
-        grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                item -> new Span("Details opened! " + item.getNumber())));
-
-        grid.setId("grid-with-component-details-row");
-        grid.setWidth("500px");
-        grid.setHeight("500px");
-        add(grid);
-    }
-
-    private void createGridWithRemovableColumns() {
-        Grid<Item> grid = new Grid<>();
-
-        grid.setItems(generateItems(20, 0));
-
-        Column<Item> removedColumn = grid.addColumn(Item::getName);
-        Column<Item> nameColumn = grid.addColumn(Item::getName);
-        grid.addColumn(Item::getNumber);
-
-        grid.removeColumn(removedColumn);
-
-        NativeButton removeNameColumn = new NativeButton("Remove name column",
-                evt -> {
-                    grid.removeColumn(nameColumn);
-                    // forces refresh of the data
-                    grid.getDataCommunicator().reset();
-                });
-
-        grid.setId("grid-with-removable-columns");
-        grid.setWidth("500px");
-        grid.setHeight("500px");
-        removeNameColumn.setId("remove-name-column-button");
-        add(grid);
-        add(removeNameColumn);
+        add(grid, changeList);
     }
 
     private void createDetachableGrid() {
