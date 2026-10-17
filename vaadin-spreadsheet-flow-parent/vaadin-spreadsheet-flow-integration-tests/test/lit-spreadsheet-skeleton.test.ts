@@ -3234,6 +3234,39 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         document.body.removeChild(host);
     });
 
+    it('honors a hidetabsheet class given while the sheet is out of the page once it is back', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setSheetNames(['Sheet1', 'Sheet2']);
+        sheet.setSheetIndex(1);
+        await sheet.getSheetTabs().updateComplete;
+        // As the element does, leaving the page and coming back.
+        sheet.disconnect();
+        host.remove();
+
+        host.classList.add('hidetabsheet');
+        await Promise.resolve();
+        document.body.appendChild(host);
+        sheet.connect();
+        await Promise.resolve();
+
+        expect(getComputedStyle(sheet.getSheetTabs()).display).to.equal('none');
+        cleanup();
+    });
+
+    it('watches the host classes no more once disposed', async () => {
+        const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setSheetNames(['Sheet1', 'Sheet2']);
+        sheet.setSheetIndex(1);
+        await sheet.getSheetTabs().updateComplete;
+        sheet.dispose();
+
+        host.classList.add('hidetabsheet');
+        await Promise.resolve();
+
+        expect(getComputedStyle(sheet.getSheetTabs()).display).to.not.equal('none');
+        cleanup();
+    });
+
     // ===================================================================
     // Formula bar implementation
     // ===================================================================
