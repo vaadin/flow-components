@@ -130,7 +130,6 @@ public class SpreadsheetFactory implements Serializable {
         }
         spreadsheet.setInternalWorkbook(workbook);
         spreadsheet.showSheet(workbook.getActiveSheetIndex());
-        loadWorkbookStyles(spreadsheet);
     }
 
     /**
@@ -151,7 +150,6 @@ public class SpreadsheetFactory implements Serializable {
         spreadsheet.clearSheetServerSide();
         spreadsheet.setInternalWorkbook(newWorkbook);
         spreadsheet.showSheet(0);
-        loadWorkbookStyles(spreadsheet);
     }
 
     /**
@@ -237,7 +235,6 @@ public class SpreadsheetFactory implements Serializable {
         }
         spreadsheet.setInternalWorkbook(workbook);
         spreadsheet.showSheet(workbook.getActiveSheetIndex());
-        loadWorkbookStyles(spreadsheet);
     }
 
     /**
@@ -307,17 +304,6 @@ public class SpreadsheetFactory implements Serializable {
                 stream.close();
             }
         }
-    }
-
-    /**
-     * Loads styles for the Workbook and the currently active sheet.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     */
-    static void loadWorkbookStyles(Spreadsheet spreadsheet) {
-        spreadsheet.getSpreadsheetStyleFactory().reloadWorkbookStyles();
-        spreadsheet.getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**

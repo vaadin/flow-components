@@ -2954,6 +2954,9 @@ public class Spreadsheet extends Component
         // is loaded.
         workbookScope.styler = createSpreadsheetStyleFactory();
         workbookScope.conditionalFormatter = createConditionalFormatter();
+        // The styles are the workbook's: loaded with it, for the sheet shown
+        // to be styled with them.
+        workbookScope.styler.reloadWorkbookStyles();
 
         if (workbook instanceof HSSFWorkbook hssf) {
             setWorkbookProtected(hssf.isWriteProtected());

@@ -180,13 +180,7 @@ class FreshLoadConsistencyTest {
             Map.entry("a hidden row shifted down", c -> c.known("cell H13")),
             Map.entry("a row shifted down past rows not shifted",
                     c -> c.known("cell A12", "cell E12", "cell E13", "cell F12",
-                            "cell F13", "cell G12", "cell H12")),
-            Map.entry("the workbook written to a file",
-                    c -> c.known("property shiftedCellBorderStyles")),
-            Map.entry("a cell's style set after the workbook is written",
-                    c -> c.known("property shiftedCellBorderStyles",
-                            "threw java.lang.NullPointerException",
-                            "property cellStyleToCSSStyle", "cell F11")));
+                            "cell F13", "cell G12", "cell H12")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -503,11 +497,8 @@ class FreshLoadConsistencyTest {
      * What the operations of an application are known to do wrong today when
      * the client has not seen the spreadsheet yet, by case name and when.
      */
-    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map.of(
-            "the workbook written to a file, before ATTACHED",
-            List.of("property shiftedCellBorderStyles"),
-            "the workbook written to a file, before FIRST_RESPONSE",
-            List.of("property shiftedCellBorderStyles"));
+    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
+            .of();
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")
