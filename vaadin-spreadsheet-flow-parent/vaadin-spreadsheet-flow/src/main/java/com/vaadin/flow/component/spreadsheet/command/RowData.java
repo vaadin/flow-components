@@ -55,7 +55,8 @@ class RowData implements Serializable {
     public void copy(int rowIndex) {
         isCopied = true;
         this.rowIndex = rowIndex;
-        maxCol = spreadsheet.getLastColumn();
+        // The columns of the sheet, wherever the client is scrolled.
+        maxCol = spreadsheet.getColumns();
         cellsData.clear();
         mergedCells.clear();
         commentsWithoutCell.clear();
