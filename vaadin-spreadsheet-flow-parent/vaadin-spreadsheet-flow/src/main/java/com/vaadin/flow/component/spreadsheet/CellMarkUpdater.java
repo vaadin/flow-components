@@ -57,8 +57,10 @@ final class CellMarkUpdater implements Serializable {
     void markCellAsDeleted(Cell cell, boolean cellStyleUpdated) {
         spreadsheet.getCellValueManager().cellDeleted(cell);
         if (cellStyleUpdated) {
-            spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
-                    true);
+            // Its style is not read: out of its row, an XSSF cell can no
+            // longer be read.
+            spreadsheet.getSpreadsheetStyleFactory()
+                    .clearCellStyle(cell.getRowIndex(), cell.getColumnIndex());
         }
         // Not refreshCells(cell), which reads the cell: it is out of its row
         // already, where an XSSF cell can no longer be read.
@@ -71,10 +73,8 @@ final class CellMarkUpdater implements Serializable {
                 .getSheetAt(workbook.getActiveSheetIndex());
         final Cell cell = activeSheet.getRow(row).getCell(col);
         if (cell != null) {
-            // cell.setCellStyle(null); // TODO NPE on HSSF
-            spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
-                    true);
             activeSheet.getRow(row).removeCell(cell);
+            spreadsheet.getSpreadsheetStyleFactory().clearCellStyle(row, col);
             spreadsheet.getCellValueManager().cellDeleted(cell);
             // Not refreshCells(cell), which reads the cell: it is out of its
             // row, where an XSSF cell can no longer be read.

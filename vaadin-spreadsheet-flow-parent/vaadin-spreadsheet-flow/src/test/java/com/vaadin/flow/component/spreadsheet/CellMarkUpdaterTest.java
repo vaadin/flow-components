@@ -126,12 +126,16 @@ class CellMarkUpdaterTest {
 
     @Test
     void markCellAsDeleted_stylePropagateTrue_dispatchesStylerAndRefreshes() {
-        // Pin: cellStyleUpdated=true triggers the deleted path AND the
-        // styler AND the update that sends the deletion to the client.
+        // Pin: cellStyleUpdated=true triggers the deleted path AND clears
+        // the cell's style by its address, as a cell out of its row can no
+        // longer be read, AND the update that sends the deletion.
+        when(cell.getRowIndex()).thenReturn(2);
+        when(cell.getColumnIndex()).thenReturn(3);
+
         updater.markCellAsDeleted(cell, true);
 
         verify(valueManager).cellDeleted(cell);
-        verify(styler).cellStyleUpdated(cell, true);
+        verify(styler).clearCellStyle(2, 3);
         verify(spreadsheet).updateMarkedCells();
     }
 
@@ -144,9 +148,9 @@ class CellMarkUpdaterTest {
         updater.markCellAsDeleted(cell, false);
 
         verify(valueManager).cellDeleted(cell);
-        verify(styler, never()).cellStyleUpdated(
-                org.mockito.ArgumentMatchers.any(Cell.class),
-                org.mockito.ArgumentMatchers.anyBoolean());
+        verify(styler, never()).clearCellStyle(
+                org.mockito.ArgumentMatchers.anyInt(),
+                org.mockito.ArgumentMatchers.anyInt());
         verify(spreadsheet).updateMarkedCells();
     }
 
@@ -154,12 +158,10 @@ class CellMarkUpdaterTest {
 
     @Test
     void deleteCell_cellExists_dispatchesFullChain() {
-        // Pin: cell != null path triggers styler.cellStyleUpdated(cell,
-        // true) → row.removeCell(cell) → valueManager.cellDeleted(cell)
-        // → spreadsheet.updateMarkedCells(). The order matters: the
-        // styler must be notified BEFORE the cell is removed from the
-        // row (so the styler can still see the cell's pre-delete style
-        // map). The InOrder verify pins this.
+        // Pin: cell != null path triggers row.removeCell(cell) →
+        // styler.clearCellStyle(2, 3) → valueManager.cellDeleted(cell) →
+        // spreadsheet.updateMarkedCells(). The cell's style is cleared by its
+        // address once it is out of its row, so what it drew goes with it.
         when(activeSheet.getRow(2)).thenReturn(row);
         when(row.getCell(3)).thenReturn(cell);
 
@@ -167,8 +169,8 @@ class CellMarkUpdaterTest {
 
         org.mockito.InOrder inOrder = org.mockito.Mockito.inOrder(styler, row,
                 valueManager, spreadsheet);
-        inOrder.verify(styler).cellStyleUpdated(cell, true);
         inOrder.verify(row).removeCell(cell);
+        inOrder.verify(styler).clearCellStyle(2, 3);
         inOrder.verify(valueManager).cellDeleted(cell);
         inOrder.verify(spreadsheet).updateMarkedCells();
     }
@@ -184,9 +186,9 @@ class CellMarkUpdaterTest {
 
         updater.deleteCell(2, 3);
 
-        verify(styler, never()).cellStyleUpdated(
-                org.mockito.ArgumentMatchers.any(Cell.class),
-                org.mockito.ArgumentMatchers.anyBoolean());
+        verify(styler, never()).clearCellStyle(
+                org.mockito.ArgumentMatchers.anyInt(),
+                org.mockito.ArgumentMatchers.anyInt());
         verify(row, never())
                 .removeCell(org.mockito.ArgumentMatchers.any(Cell.class));
         verify(valueManager, never())

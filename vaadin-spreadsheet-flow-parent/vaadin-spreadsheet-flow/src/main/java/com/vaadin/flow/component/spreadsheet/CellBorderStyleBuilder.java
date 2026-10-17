@@ -11,62 +11,77 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTXf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STBorderStyle;
 
 import com.vaadin.flow.component.spreadsheet.SpreadsheetStyleFactory.BorderStyle;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 
 /**
- * Builds and maintains the per-cell-style CSS for borders, including the
- * "transferred border" caches that route top / left borders to the bottom /
- * right of the previous cell (Excel's drawing convention is to render those
- * borders on the adjacent cell, not the source cell).
- *
+ * The CSS of the borders of the cell styles, and the borders the cells draw on
+ * other cells than their own.
  * <p>
- * Owns five maps:
- *
- * <ul>
- * <li>{@code shiftedBorderTopStyles}, {@code shiftedBorderLeftStyles} —
- * cell-style index → ready-to-emit CSS rule for the cells that should pick up
- * the transferred bottom / right border.</li>
- * <li>{@code shiftedBorderTopStylesMap}, {@code shiftedBorderLeftStylesMap} —
- * temp accumulators used during a styling pass to collect the row / column
- * index lists that need the transferred border, before being flattened into CSS
- * selectors via {@link #flattenAccumulators()}.</li>
- * <li>{@code mergedCellBorders} — CSS selector (the merged region's top-left
- * cell) → border CSS rules that need to apply to it (right / bottom borders of
- * cells inside the merged region that would otherwise be invisible inside the
- * region).</li>
- * </ul>
- *
+ * Excel draws the top border of a cell at the bottom of the cell above it, and
+ * the left border at the right of the cell before it, past the rows and columns
+ * hidden, and on the merged cell when that cell is in a merged region. It draws
+ * the right and the bottom borders of the cells inside a merged region on the
+ * merged cell, the first of each side in the order of the cells.
  * <p>
- * The bulk of the CSS-composition logic lives here; the parent
- * {@link SpreadsheetStyleFactory} orchestrates the higher-level methods
- * ({@code clearCellStyle}, {@code cellStyleUpdated},
- * {@code reloadActiveSheetCellStyles}, {@code loadCustomBorderStylesToState})
- * but delegates the cache-touching work to this class.
+ * What a cell draws on other cells is kept by the cell, so a cell changed or
+ * removed takes its borders with it, and the rules the client is given are made
+ * from what the cells draw now, the same however they came to draw it.
  */
 final class CellBorderStyleBuilder implements Serializable {
+
+    /** A cell, 0-based, in the order of the rows, then of the columns. */
+    record CellKey(int row,
+            int column) implements Comparable<CellKey>, Serializable {
+
+        @Override
+        public int compareTo(CellKey other) {
+            return row != other.row ? Integer.compare(row, other.row)
+                    : Integer.compare(column, other.column);
+        }
+
+        String selector() {
+            return ".col" + (column + 1) + ".row" + (row + 1);
+        }
+    }
+
+    /**
+     * The cells a cell of the style draws its borders on: its top border, its
+     * left border, and its right and bottom borders on the merged cell it is
+     * in. {@code null} where it draws nothing.
+     */
+    private record Drawn(int style, CellKey top, CellKey left,
+            CellKey merged) implements Serializable {
+    }
 
     private final Spreadsheet spreadsheet;
     private final ColorConverter colorConverter;
 
-    private final HashMap<Integer, String> shiftedBorderTopStyles = new HashMap<Integer, String>();
-    private final HashMap<Integer, String> shiftedBorderLeftStyles = new HashMap<Integer, String>();
-    private final HashMap<String, String> mergedCellBorders = new HashMap<String, String>();
-    private final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderTopStylesMap = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
-    private final HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderLeftStylesMap = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+    /** By style, its top border as the rule of the cell above. */
+    private final Map<Integer, String> topBorders = new HashMap<>();
+    /** By style, its left border as the rule of the cell before. */
+    private final Map<Integer, String> leftBorders = new HashMap<>();
+    /** By style, the declarations of its right border. */
+    private final Map<Integer, String> rightBorders = new HashMap<>();
+    /** By style, the declarations of its bottom border. */
+    private final Map<Integer, String> bottomBorders = new HashMap<>();
+    /** By cell, what it draws on other cells, for the cells that do. */
+    private final TreeMap<CellKey, Drawn> drawn = new TreeMap<>();
 
     CellBorderStyleBuilder(Spreadsheet spreadsheet,
             ColorConverter colorConverter) {
@@ -74,49 +89,25 @@ final class CellBorderStyleBuilder implements Serializable {
         this.colorConverter = colorConverter;
     }
 
-    HashMap<Integer, String> getShiftedBorderTopStyles() {
-        return shiftedBorderTopStyles;
-    }
-
-    HashMap<Integer, String> getShiftedBorderLeftStyles() {
-        return shiftedBorderLeftStyles;
-    }
-
-    HashMap<String, String> getMergedCellBorders() {
-        return mergedCellBorders;
-    }
-
     /**
-     * Resets all five caches. Called by {@code reloadWorkbookStyles} before a
-     * fresh styling pass.
+     * Forgets the borders of the styles, to have them all again. What the cells
+     * draw stays until the cells are loaded again; a cell of a style that no
+     * longer has a border draws nothing with it.
      */
-    void resetAll() {
-        shiftedBorderTopStyles.clear();
-        shiftedBorderLeftStyles.clear();
-        mergedCellBorders.clear();
-        shiftedBorderTopStylesMap.clear();
-        shiftedBorderLeftStylesMap.clear();
+    void resetStyles() {
+        topBorders.clear();
+        leftBorders.clear();
+        rightBorders.clear();
+        bottomBorders.clear();
     }
 
     /**
-     * Resets only the two temp accumulators. Called at the start of an
-     * incremental cell-styling pass (a single cell update or a sheet-wide
-     * reload) — the final {@code shiftedBorder*Styles} maps are preserved
-     * across passes so the next call can find them.
-     */
-    void resetAccumulators() {
-        shiftedBorderTopStylesMap.clear();
-        shiftedBorderLeftStylesMap.clear();
-    }
-
-    /**
-     * Appends border-related CSS to {@code sb} for {@code cellStyle}. As a side
-     * effect, the top and left borders are routed into
-     * {@code shiftedBorderTopStyles} / {@code shiftedBorderLeftStyles} keyed by
-     * the cell-style index, so a later pass can render them on the previous row
-     * / column.
+     * Appends the CSS of the right and the bottom borders of the style, which
+     * are drawn on its own cells, and keeps the CSS of the borders its cells
+     * draw on others.
      */
     void appendBorderStyles(StringBuilder sb, CellStyle cellStyle) {
+        int style = cellStyle.getIndex();
         BorderStyle borderLeft = SpreadsheetStyleFactory.BORDER
                 .get(cellStyle.getBorderLeft());
         BorderStyle borderRight = SpreadsheetStyleFactory.BORDER
@@ -125,483 +116,220 @@ final class CellBorderStyleBuilder implements Serializable {
                 .get(cellStyle.getBorderTop());
         BorderStyle borderBottom = SpreadsheetStyleFactory.BORDER
                 .get(cellStyle.getBorderBottom());
-
         if (cellStyle instanceof XSSFCellStyle xssfCellStyle
                 && !xssfCellStyle.getCoreXf().getApplyBorder()) {
             // borders from theme are not working in POI 3.9
-            final CTXf _cellXf = xssfCellStyle.getCoreXf();
-            int idx = (int) _cellXf.getBorderId();
             CTBorder ct = ((XSSFWorkbook) spreadsheet.getWorkbook())
-                    .getStylesSource().getBorderAt(idx).getCTBorder();
-
-            if (borderLeft == BorderStyle.NONE) {
-                STBorderStyle.Enum ptrn = ct.isSetLeft()
-                        ? ct.getLeft().getStyle()
-                        : null;
-                if (ptrn != null) {
-                    Short key = (short) (ptrn.intValue() - 1);
-                    borderLeft = SpreadsheetStyleFactory.BORDER
-                            .get(org.apache.poi.ss.usermodel.BorderStyle
-                                    .valueOf(key));
-                }
+                    .getStylesSource()
+                    .getBorderAt((int) xssfCellStyle.getCoreXf().getBorderId())
+                    .getCTBorder();
+            if (borderLeft == BorderStyle.NONE && ct.isSetLeft()) {
+                borderLeft = fromTheme(ct.getLeft().getStyle());
             }
-            if (borderRight == BorderStyle.NONE) {
-                STBorderStyle.Enum ptrn = ct.isSetRight()
-                        ? ct.getRight().getStyle()
-                        : null;
-                if (ptrn != null) {
-                    Short key = (short) (ptrn.intValue() - 1);
-                    borderRight = SpreadsheetStyleFactory.BORDER
-                            .get(org.apache.poi.ss.usermodel.BorderStyle
-                                    .valueOf(key));
-                }
+            if (borderRight == BorderStyle.NONE && ct.isSetRight()) {
+                borderRight = fromTheme(ct.getRight().getStyle());
             }
-            if (borderBottom == BorderStyle.NONE) {
-                STBorderStyle.Enum ptrn = ct.isSetBottom()
-                        ? ct.getBottom().getStyle()
-                        : null;
-                if (ptrn != null) {
-                    Short key = (short) (ptrn.intValue() - 1);
-                    borderBottom = SpreadsheetStyleFactory.BORDER
-                            .get(org.apache.poi.ss.usermodel.BorderStyle
-                                    .valueOf(key));
-                }
+            if (borderBottom == BorderStyle.NONE && ct.isSetBottom()) {
+                borderBottom = fromTheme(ct.getBottom().getStyle());
             }
-            if (borderTop == BorderStyle.NONE) {
-                STBorderStyle.Enum ptrn = ct.isSetTop() ? ct.getTop().getStyle()
-                        : null;
-                if (ptrn != null) {
-                    Short key = (short) (ptrn.intValue() - 1);
-                    borderTop = SpreadsheetStyleFactory.BORDER
-                            .get(org.apache.poi.ss.usermodel.BorderStyle
-                                    .valueOf(key));
-                }
+            if (borderTop == BorderStyle.NONE && ct.isSetTop()) {
+                borderTop = fromTheme(ct.getTop().getStyle());
             }
         }
 
-        if (borderRight != BorderStyle.NONE) {
-            sb.append("border-right:");
-            sb.append(borderRight.getBorderAttributeValue());
-            sb.append(colorConverter.getBorderColorCSS(BorderSide.RIGHT,
-                    "border-right-color", cellStyle));
-        }
-        if (borderBottom != BorderStyle.NONE) {
-            sb.append("border-bottom:");
-            sb.append(borderBottom.getBorderAttributeValue());
-            sb.append(colorConverter.getBorderColorCSS(BorderSide.BOTTOM,
-                    "border-bottom-color", cellStyle));
-        }
+        keep(rightBorders, style, declarations(borderRight, "border-right",
+                BorderSide.RIGHT, "border-right-color", cellStyle));
+        keep(bottomBorders, style, declarations(borderBottom, "border-bottom",
+                BorderSide.BOTTOM, "border-bottom-color", cellStyle));
+        sb.append(rightBorders.getOrDefault(style, ""));
+        sb.append(bottomBorders.getOrDefault(style, ""));
+        // the top and left borders are drawn on the cells before
+        keep(topBorders, style, rule(declarations(borderTop, "border-bottom",
+                BorderSide.TOP, "border-bottom-color", cellStyle)));
+        keep(leftBorders, style, rule(declarations(borderLeft, "border-right",
+                BorderSide.LEFT, "border-right-color", cellStyle)));
+    }
 
-        // the top and right borders are transferred to previous cells
-        if (borderTop != BorderStyle.NONE || borderLeft != BorderStyle.NONE) {
-            if (borderTop != BorderStyle.NONE) {
-                final StringBuilder sb2 = new StringBuilder("{border-bottom:");
-                sb2.append(borderTop.getBorderAttributeValue());
-                sb2.append(colorConverter.getBorderColorCSS(BorderSide.TOP,
-                        "border-bottom-color", cellStyle));
-                sb2.append("}");
-                shiftedBorderTopStyles.put((int) cellStyle.getIndex(),
-                        sb2.toString());
-            }
-            if (borderLeft != BorderStyle.NONE) {
-                final StringBuilder sb2 = new StringBuilder("{border-right:");
-                sb2.append(borderLeft.getBorderAttributeValue());
-                sb2.append(colorConverter.getBorderColorCSS(BorderSide.LEFT,
-                        "border-right-color", cellStyle));
-                sb2.append("}");
-                shiftedBorderLeftStyles.put((int) cellStyle.getIndex(),
-                        sb2.toString());
-            }
+    private static BorderStyle fromTheme(STBorderStyle.Enum pattern) {
+        return pattern == null ? BorderStyle.NONE
+                : SpreadsheetStyleFactory.BORDER
+                        .get(org.apache.poi.ss.usermodel.BorderStyle
+                                .valueOf((short) (pattern.intValue() - 1)));
+    }
+
+    private String declarations(BorderStyle border, String property,
+            BorderSide side, String colorProperty, CellStyle cellStyle) {
+        if (border == BorderStyle.NONE) {
+            return "";
+        }
+        return property + ":" + border.getBorderAttributeValue()
+                + colorConverter.getBorderColorCSS(side, colorProperty,
+                        cellStyle);
+    }
+
+    private static String rule(String declarations) {
+        return declarations.isEmpty() ? "" : "{" + declarations + "}";
+    }
+
+    private static void keep(Map<Integer, String> borders, int style,
+            String css) {
+        if (css.isEmpty()) {
+            borders.remove(style);
+        } else {
+            borders.put(style, css);
         }
     }
 
     /**
-     * Per-cell custom-styling pass: handles merged-region border transfer, and
-     * accumulates per-style row / column index lists in the temp maps for later
-     * flattening.
+     * Which of its borders the style has, one bit for each. A change in them
+     * changes what its cells draw on other cells.
      */
-    void processCustomStyling(Cell cell) {
-        CellStyle cellStyle = cell.getCellStyle();
-        final Integer key = (int) cellStyle.getIndex();
-        if (key == 0) { // default style
-            return;
+    int sides(int style) {
+        return (topBorders.containsKey(style) ? 1 : 0)
+                | (leftBorders.containsKey(style) ? 2 : 0)
+                | (rightBorders.containsKey(style) ? 4 : 0)
+                | (bottomBorders.containsKey(style) ? 8 : 0);
+    }
+
+    /** Finds what every cell of the sheet shown draws on other cells. */
+    void load() {
+        drawn.clear();
+        for (Row row : spreadsheet.getActiveSheet()) {
+            for (Cell cell : row) {
+                cellChanged(cell);
+            }
         }
+    }
 
-        // merged regions have their borders in edge cells that are "invisible"
-        // inside the region -> right and bottom cells need to be transferred to
-        // the actual merged cell
-        final int columnIndex = cell.getColumnIndex();
-        final int rowIndex = cell.getRowIndex();
-
-        if (spreadsheet.isColumnHidden(columnIndex)
-                || spreadsheet.isRowHidden(rowIndex)) {
-            return;
+    /** Finds what the cell draws on other cells, as it is now. */
+    void cellChanged(Cell cell) {
+        CellKey key = new CellKey(cell.getRowIndex(), cell.getColumnIndex());
+        Drawn cellDraws = drawnBy(cell);
+        if (cellDraws == null) {
+            drawn.remove(key);
+        } else {
+            drawn.put(key, cellDraws);
         }
+    }
 
+    /** Takes off what a cell no longer there drew on other cells. */
+    void cellRemoved(int row, int column) {
+        drawn.remove(new CellKey(row, column));
+    }
+
+    private Drawn drawnBy(Cell cell) {
+        int style = cell.getCellStyle().getIndex();
+        int row = cell.getRowIndex();
+        int column = cell.getColumnIndex();
+        if (style == 0 || spreadsheet.isColumnHidden(column)
+                || spreadsheet.isRowHidden(row)) {
+            return null;
+        }
+        // 1-based
         MergedRegion region = spreadsheet.mergedRegionContainer
-                .getMergedRegion((columnIndex + 1), (rowIndex + 1));
-        if (region != null) {
-            final String borderRight = getBorderRightStyle(cellStyle);
-            final String borderBottom = getBorderBottomStyle(cellStyle);
-            if ((borderRight != null && !borderRight.isEmpty())
-                    || (borderBottom != null && !borderBottom.isEmpty())) {
-                StringBuilder sb = new StringBuilder(".col");
-                sb.append(region.col1);
-                sb.append(".row");
-                sb.append(region.row1);
-                final String cssKey = sb.toString();
-                final String currentBorders = mergedCellBorders.get(cssKey);
-                StringBuilder style;
-                if (currentBorders != null && !currentBorders.isEmpty()) {
-                    style = new StringBuilder(currentBorders);
-                } else {
-                    style = new StringBuilder();
-                }
-                if (borderRight != null && !borderRight.isEmpty()
-                        && (currentBorders == null
-                                || !currentBorders.contains("border-right"))) {
-                    style.append(borderRight);
-                }
-                if (borderBottom != null && !borderBottom.isEmpty()
-                        && (currentBorders == null
-                                || !currentBorders.contains("border-bottom"))) {
-                    style.append(borderBottom);
-                }
-                final String newBorders = style.toString();
-                if (!newBorders.isEmpty()) {
-                    mergedCellBorders.put(cssKey, newBorders);
-                }
-            }
-
+                .getMergedRegion(column + 1, row + 1);
+        CellKey merged = null;
+        if (region != null && (rightBorders.containsKey(style)
+                || bottomBorders.containsKey(style))) {
+            merged = new CellKey(region.row1 - 1, region.col1 - 1);
         }
-
-        // only take transferred borders into account on the (possible) merged
-        // regions edges
-        if (region == null || region.col1 == (columnIndex + 1)
-                || region.col2 == (columnIndex + 1)
-                || region.row1 == (rowIndex + 1)
-                || region.row2 == (rowIndex + 1)) {
-
-            if (shiftedBorderLeftStyles.containsKey(key)) {
-                // need to add the border right style to previous cell on
-                // left, which might be a merged cell
-                if (columnIndex > 0) {
-                    int row, col;
-
-                    int upperVisibleColumnIndex = columnIndex;
-                    while (spreadsheet
-                            .isColumnHidden(upperVisibleColumnIndex - 1)) {
-                        upperVisibleColumnIndex--;
-                    }
-
-                    MergedRegion previousRegion = spreadsheet.mergedRegionContainer
-                            .getMergedRegion(upperVisibleColumnIndex,
-                                    rowIndex + 1);
-
-                    if (previousRegion != null) {
-                        col = previousRegion.col1;
-                        row = previousRegion.row1;
-                    } else {
-                        col = upperVisibleColumnIndex;
-                        row = rowIndex + 1;
-                    }
-                    insertMapEntryIfNeeded(shiftedBorderLeftStylesMap, key, row,
-                            col);
-                }
+        CellKey top = null;
+        CellKey left = null;
+        // Inside a merged region, only the cells on its edges draw on others.
+        if (region == null || region.col1 == column + 1
+                || region.col2 == column + 1 || region.row1 == row + 1
+                || region.row2 == row + 1) {
+            if (leftBorders.containsKey(style)) {
+                left = cellBefore(row, column);
             }
-            if (shiftedBorderTopStyles.containsKey(key)) {
-                // need to add the border bottom style to cell on previous
-                // row, which might be a merged cell
-                if (rowIndex > 0) {
-                    int row, col;
-
-                    int prevVisibleRowIndex = rowIndex;
-                    while (spreadsheet.isRowHidden(prevVisibleRowIndex - 1)) {
-                        prevVisibleRowIndex--;
-                    }
-
-                    MergedRegion previousRegion = spreadsheet.mergedRegionContainer
-                            .getMergedRegion(columnIndex + 1,
-                                    prevVisibleRowIndex);
-
-                    if (previousRegion != null) {
-                        col = previousRegion.col1;
-                        row = previousRegion.row1;
-                    } else {
-                        col = columnIndex + 1;
-                        row = prevVisibleRowIndex;
-                    }
-                    insertMapEntryIfNeeded(shiftedBorderTopStylesMap, key, row,
-                            col);
-
-                }
+            if (topBorders.containsKey(style)) {
+                top = cellAbove(row, column);
             }
-
         }
+        return top == null && left == null && merged == null ? null
+                : new Drawn(style, top, left, merged);
     }
 
     /**
-     * After {@link #processCustomStyling} has accumulated the temp maps,
-     * flattens them into the final {@code shiftedBorderTopStyles} /
-     * {@code shiftedBorderLeftStyles} CSS selectors.
+     * The cell shown before the cell, or the merged cell it is in; {@code null}
+     * if there is none.
      */
-    void flattenAccumulators() {
-        updateStyleMap(shiftedBorderLeftStylesMap, shiftedBorderLeftStyles);
-        updateStyleMap(shiftedBorderTopStylesMap, shiftedBorderTopStyles);
+    private CellKey cellBefore(int row, int column) {
+        int before = column - 1;
+        while (before >= 0 && spreadsheet.isColumnHidden(before)) {
+            before--;
+        }
+        return before < 0 ? null : mergedCellOf(row, before);
     }
 
     /**
-     * Drops the per-cell selector entries from a list of existing shifted-cell
-     * border CSS rules, used by {@code clearCellStyle} and
-     * {@code cellStyleUpdated}. Each entry in {@code shiftedCellBorderStyles}
-     * is a CSS rule string of the form {@code "<sel>{...}"} or
-     * {@code "<sel>,<sel>,...{...}"}; if the cell's selector appears in any
-     * entry, that selector is removed from the entry, and entries containing
-     * only the cell's selector are removed entirely.
+     * The cell shown above the cell, or the merged cell it is in; {@code null}
+     * if there is none.
      */
-    void removeCellFromShiftedStyles(ArrayList<String> shiftedCellBorderStyles,
-            String cssSelector) {
-        ArrayList<String> add = new ArrayList<String>();
-        Iterator<String> iterator = shiftedCellBorderStyles.iterator();
-        while (iterator.hasNext()) {
-            String style = iterator.next();
-            // only cell with this style -> remove
-            if (style.startsWith(cssSelector + "{")) {
-                iterator.remove();
-            } else if (style.contains(cssSelector)) { // shifted borders
-                iterator.remove();
-                int index = style.indexOf(cssSelector);
-                if (index > 0) { // doesn't start with the selector
-                    style = style.replace(cssSelector + ",", "");
-                    // in case it is the last
-                    style = style.replace("," + cssSelector + "{", "{");
-                } else {
-                    style = style.replace(cssSelector + ",", "");
-                    // in case it is the last
-                    style = style.replace(cssSelector + "{", "{");
-                }
-                if (!style.startsWith(",") && !style.startsWith("{")) {
-                    add.add(style);
-                }
-            }
+    private CellKey cellAbove(int row, int column) {
+        int above = row - 1;
+        while (above >= 0 && spreadsheet.isRowHidden(above)) {
+            above--;
         }
-        shiftedCellBorderStyles.addAll(add);
+        return above < 0 ? null : mergedCellOf(above, column);
+    }
+
+    private CellKey mergedCellOf(int row, int column) {
+        // 1-based
+        MergedRegion region = spreadsheet.mergedRegionContainer
+                .getMergedRegion(column + 1, row + 1);
+        return region == null ? new CellKey(row, column)
+                : new CellKey(region.row1 - 1, region.col1 - 1);
     }
 
     /**
-     * Drops the per-cell selector entries from {@code shiftedBorderLeftStyles}
-     * and {@code shiftedBorderTopStyles}, used by {@code clearCellStyle}. The
-     * map values' format is {@code "<selectors>{<rules>}"} — same selector
-     * splitting rules as {@link #removeCellFromShiftedStyles}.
+     * The rules of the borders the cells draw on other cells, as the client is
+     * given them: the left borders by style, the top borders by style, then the
+     * borders of the merged cells. A merged cell given the same side twice
+     * draws the first.
      */
-    void removeCellFromInternalShiftedMaps(String cssSelector) {
-        removeFromMap(shiftedBorderLeftStyles, cssSelector);
-        removeFromMap(shiftedBorderTopStyles, cssSelector);
-    }
-
-    private static void removeFromMap(HashMap<Integer, String> map,
-            String cssSelector) {
-        HashMap<Integer, String> add = new HashMap<Integer, String>();
-        Iterator<Entry<Integer, String>> iterator = map.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Entry<Integer, String> entry = iterator.next();
-            String style = entry.getValue();
-            if (style.contains(cssSelector)) { // shifted borders
-                iterator.remove();
-                int index = style.indexOf(cssSelector);
-                if (index > 0) { // doesn't start with the selector
-                    style = style.replace(cssSelector + ",", "");
-                    // in case it is the last
-                    style = style.replace("," + cssSelector + "{", "{");
-                } else {
-                    style = style.replace(cssSelector + ",", "");
-                    // in case it is the only
-                    style = style.replace(cssSelector + "{", "{");
+    ArrayList<String> rules() {
+        Map<Integer, TreeSet<CellKey>> lefts = new TreeMap<>();
+        Map<Integer, TreeSet<CellKey>> tops = new TreeMap<>();
+        Map<CellKey, String[]> mergedCells = new TreeMap<>();
+        for (Drawn cellDraws : drawn.values()) {
+            if (cellDraws.left() != null) {
+                lefts.computeIfAbsent(cellDraws.style(),
+                        style -> new TreeSet<>()).add(cellDraws.left());
+            }
+            if (cellDraws.top() != null) {
+                tops.computeIfAbsent(cellDraws.style(),
+                        style -> new TreeSet<>()).add(cellDraws.top());
+            }
+            if (cellDraws.merged() != null) {
+                String[] sides = mergedCells.computeIfAbsent(cellDraws.merged(),
+                        cell -> new String[2]);
+                if (sides[0] == null) {
+                    sides[0] = rightBorders.get(cellDraws.style());
                 }
-                add.put(entry.getKey(), style);
-            }
-        }
-        map.putAll(add);
-    }
-
-    /**
-     * Strips a leading {@code .col<n>.row<m>} (or comma-separated list of them)
-     * from each map value, leaving just the CSS rule body. Used by
-     * {@code reloadActiveSheetCellStyles} as the first step of a sheet reload —
-     * the per-cell selector lists are about to be rebuilt from scratch by
-     * {@link #processCustomStyling}, so any old ones are stale.
-     */
-    void stripLeadingSelectorsFromShiftedMaps() {
-        stripLeadingSelectors(shiftedBorderLeftStyles);
-        stripLeadingSelectors(shiftedBorderTopStyles);
-    }
-
-    private static void stripLeadingSelectors(HashMap<Integer, String> map) {
-        for (Entry<Integer, String> entry : map.entrySet()) {
-            String value = entry.getValue();
-            if (value.startsWith(".col")) {
-                map.put(entry.getKey(), value.substring(value.indexOf("{")));
-            }
-        }
-    }
-
-    /**
-     * Wraps {@code rules} in a CSS block with {@code selector} as the selector.
-     * Handles a few edge cases: trailing-comma stripping, empty selector
-     * replaced with {@code .notusedselector}.
-     */
-    String buildMergedCellBorderCss(String selector, String rules) {
-        if (selector.endsWith(",")) {
-            selector = selector.substring(0, selector.length() - 1);
-        }
-        if (selector.length() < 1) {
-            selector = ".notusedselector";
-        }
-        StringBuilder sb = new StringBuilder(selector);
-        sb.append("{");
-        sb.append(rules);
-        sb.append("}");
-        return sb.toString();
-    }
-
-    /**
-     * Appends the contents of the three border-related caches into
-     * {@code outShiftedCellBorderStyles} as final CSS rule strings. Only
-     * entries whose value starts with {@code .col} (i.e. already-flattened CSS
-     * selectors) are emitted; the rule-body-only entries (which start with
-     * {@code "{"}) are kept in the cache for the next flatten pass.
-     */
-    void appendShiftedStylesToOutput(
-            ArrayList<String> outShiftedCellBorderStyles) {
-        for (String value : shiftedBorderLeftStyles.values()) {
-            if (value.startsWith(".col")) {
-                outShiftedCellBorderStyles.add(value);
-            }
-        }
-        for (String value : shiftedBorderTopStyles.values()) {
-            if (value.startsWith(".col")) {
-                outShiftedCellBorderStyles.add(value);
-            }
-        }
-        for (Entry<String, String> entry : mergedCellBorders.entrySet()) {
-            outShiftedCellBorderStyles.add(
-                    buildMergedCellBorderCss(entry.getKey(), entry.getValue()));
-        }
-    }
-
-    private String getBorderRightStyle(CellStyle cellStyle) {
-        StringBuilder sb = new StringBuilder();
-        BorderStyle borderRight = SpreadsheetStyleFactory.BORDER
-                .get(cellStyle.getBorderRight());
-        if (cellStyle instanceof XSSFCellStyle xssfCellStyle
-                && !xssfCellStyle.getCoreXf().getApplyBorder()) {
-            // borders from theme are not working in POI 3.9
-            final CTXf _cellXf = xssfCellStyle.getCoreXf();
-            int idx = (int) _cellXf.getBorderId();
-            CTBorder ct = ((XSSFWorkbook) spreadsheet.getWorkbook())
-                    .getStylesSource().getBorderAt(idx).getCTBorder();
-            if (borderRight == BorderStyle.NONE) {
-                STBorderStyle.Enum ptrn = ct.isSetRight()
-                        ? ct.getRight().getStyle()
-                        : null;
-                if (ptrn != null) {
-                    Short key = (short) (ptrn.intValue() - 1);
-                    borderRight = SpreadsheetStyleFactory.BORDER
-                            .get(org.apache.poi.ss.usermodel.BorderStyle
-                                    .valueOf(key));
+                if (sides[1] == null) {
+                    sides[1] = bottomBorders.get(cellDraws.style());
                 }
             }
         }
-        if (borderRight != BorderStyle.NONE) {
-            sb.append("border-right:");
-            sb.append(borderRight.getBorderAttributeValue());
-            sb.append(colorConverter.getBorderColorCSS(BorderSide.RIGHT,
-                    "border-right-color", cellStyle));
-        }
-        return sb.toString();
+        ArrayList<String> rules = new ArrayList<>();
+        lefts.forEach((style, cells) -> addRule(rules, cells,
+                leftBorders.get(style)));
+        tops.forEach(
+                (style, cells) -> addRule(rules, cells, topBorders.get(style)));
+        mergedCells.forEach((cell,
+                sides) -> rules.add(cell.selector() + "{"
+                        + (sides[0] == null ? "" : sides[0])
+                        + (sides[1] == null ? "" : sides[1]) + "}"));
+        return rules;
     }
 
-    private String getBorderBottomStyle(CellStyle cellStyle) {
-        StringBuilder sb = new StringBuilder();
-        BorderStyle borderBottom = SpreadsheetStyleFactory.BORDER
-                .get(cellStyle.getBorderBottom());
-        if (cellStyle instanceof XSSFCellStyle xssfCellStyle
-                && !xssfCellStyle.getCoreXf().getApplyBorder()) {
-            // borders from theme are not working in POI 3.9
-            final CTXf _cellXf = xssfCellStyle.getCoreXf();
-            int idx = (int) _cellXf.getBorderId();
-            CTBorder ct = ((XSSFWorkbook) spreadsheet.getWorkbook())
-                    .getStylesSource().getBorderAt(idx).getCTBorder();
-            if (borderBottom == BorderStyle.NONE) {
-                STBorderStyle.Enum ptrn = ct.isSetBottom()
-                        ? ct.getBottom().getStyle()
-                        : null;
-                if (ptrn != null) {
-                    Short key = (short) (ptrn.intValue() - 1);
-                    borderBottom = SpreadsheetStyleFactory.BORDER
-                            .get(org.apache.poi.ss.usermodel.BorderStyle
-                                    .valueOf(key));
-                }
-            }
-        }
-        if (borderBottom != BorderStyle.NONE) {
-            sb.append("border-bottom:");
-            sb.append(borderBottom.getBorderAttributeValue());
-            sb.append(colorConverter.getBorderColorCSS(BorderSide.BOTTOM,
-                    "border-bottom-color", cellStyle));
-        }
-        return sb.toString();
-    }
-
-    private static void insertMapEntryIfNeeded(
-            HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderStylesMap,
-            int key, int row, int col) {
-        HashMap<Integer, HashSet<Integer>> colToRowMap = shiftedBorderStylesMap
-                .get(key);
-        if (colToRowMap == null) {
-            colToRowMap = new HashMap<Integer, HashSet<Integer>>();
-            shiftedBorderStylesMap.put(key, colToRowMap);
-        }
-        HashSet<Integer> rows = colToRowMap.get(col);
-        if (rows == null) {
-            rows = new HashSet<Integer>();
-            colToRowMap.put(col, rows);
-        }
-        rows.add(row);
-    }
-
-    private static void updateStyleMap(
-            HashMap<Integer, HashMap<Integer, HashSet<Integer>>> shiftedBorderStylesMap,
-            HashMap<Integer, String> shiftedBorderStyles) {
-        for (Entry<Integer, HashMap<Integer, HashSet<Integer>>> currentEntry : shiftedBorderStylesMap
-                .entrySet()) {
-            Integer key = currentEntry.getKey();
-            HashMap<Integer, HashSet<Integer>> colToRows = currentEntry
-                    .getValue();
-
-            if (colToRows != null) {
-                String value = shiftedBorderStyles.get(key);
-                StringBuilder sb = new StringBuilder();
-                boolean somethingAdded = false;
-                for (Entry<Integer, HashSet<Integer>> colToRowEntry : colToRows
-                        .entrySet()) {
-                    Integer col = colToRowEntry.getKey();
-                    for (Integer row : colToRowEntry.getValue()) {
-                        if (somethingAdded) {
-                            sb.append(",");
-                        } else {
-                            somethingAdded = true;
-                        }
-                        sb.append(".col").append(col);
-                        sb.append(".row").append(row);
-                    }
-
-                }
-                sb.append(value);
-
-                shiftedBorderStyles.put(key, sb.toString());
-            }
+    /** Adds the rule unless the style has lost the border since. */
+    private static void addRule(ArrayList<String> rules, Set<CellKey> cells,
+            String border) {
+        if (border != null) {
+            rules.add(cells.stream().map(CellKey::selector)
+                    .collect(Collectors.joining(",")) + border);
         }
     }
-
 }

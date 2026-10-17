@@ -159,8 +159,6 @@ class FreshLoadConsistencyTest {
      * without it.
      */
     private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
-            Map.entry("a selection filled down",
-                    c -> c.known("property shiftedCellBorderStyles")),
             Map.entry("rows shifted down", c -> c.known("cell H13")),
             Map.entry("rows of their own heights shifted down",
                     c -> c.known("cell H13")),

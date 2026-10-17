@@ -205,34 +205,9 @@ class SpreadsheetCellBordersTest {
      * fixes, so the test fails without it.
      */
     private static final Map<String, List<String>> KNOWN = Map.ofEntries(
-            Map.entry("a cell given a style with a top border",
-                    List.of(BORDERS)),
-            Map.entry("the top border of a cell taken away", List.of(BORDERS)),
-            Map.entry("a cell given a style where a border is drawn",
-                    List.of(BORDERS)),
-            Map.entry("a cell with a top border deleted", List.of(BORDERS)),
-            Map.entry("a cell a border is drawn on deleted", List.of(BORDERS)),
-            Map.entry(
-                    "a cell with a top border taken out in POI, marked deleted",
-                    List.of("threw org.apache.xmlbeans.impl.values"
-                            + ".XmlValueDisconnectedException", BORDERS)),
-            Map.entry("a style given a top border in place", List.of(BORDERS)),
-            Map.entry("cells merged before a cell with a left border",
-                    List.of(BORDERS)),
-            Map.entry("cells unmerged before a cell with a left border",
-                    List.of(BORDERS)),
             Map.entry("rows with borders shifted down", List.of(BORDERS)),
             Map.entry("rows shifted up under a top border", List.of(BORDERS)),
-            Map.entry("a row with a left border deleted", List.of(BORDERS)),
-            Map.entry("a cell a border is drawn on filled", List.of(BORDERS)));
-
-    /**
-     * What they are known to do wrong only when the client has seen the
-     * spreadsheet, on top of {@link #KNOWN}.
-     */
-    private static final Map<String, List<String>> KNOWN_WHEN_SHOWN = Map.of(
-            "a cell with a top border taken out in POI, marked deleted",
-            List.of("cell B2"));
+            Map.entry("a row with a left border deleted", List.of(BORDERS)));
 
     private static void assertKnown(List<String> known, List<String> problems) {
         assertAll(
@@ -255,11 +230,8 @@ class SpreadsheetCellBordersTest {
     void theClient_hasTheBordersANewSpreadsheetGivesIt(Operation operation) {
         harness.show(workbook());
 
-        List<String> known = new ArrayList<>(
-                KNOWN.getOrDefault(operation.name(), List.of()));
-        known.addAll(
-                KNOWN_WHEN_SHOWN.getOrDefault(operation.name(), List.of()));
-        assertKnown(known, harness.check(operation.action()));
+        assertKnown(KNOWN.getOrDefault(operation.name(), List.of()),
+                harness.check(operation.action()));
     }
 
     static Stream<Arguments> operationsBeforeShown() {

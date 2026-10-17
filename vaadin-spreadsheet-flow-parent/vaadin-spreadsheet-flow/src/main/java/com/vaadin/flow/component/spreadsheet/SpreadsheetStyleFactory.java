@@ -29,6 +29,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
+
 /**
  * SpreadsheetStyleFactory is an utility class for the Spreadsheet component.
  * This class handles converting Apache POI CellStyles to CSS styles.
@@ -140,6 +142,9 @@ public class SpreadsheetStyleFactory implements Serializable {
     private FontStyleComposer fontStyleComposer;
     private CellBorderStyleBuilder borderStyleBuilder;
 
+    /** Gives the client the borders drawn on other cells, once a response. */
+    private final BeforeClientResponseAction sendBordersAction;
+
     /**
      * Constructs a new SpreadsheetStyleFactory for the given Spreadsheet
      *
@@ -154,6 +159,8 @@ public class SpreadsheetStyleFactory implements Serializable {
                 defaultStyleBaseline);
         this.borderStyleBuilder = new CellBorderStyleBuilder(spreadsheet,
                 colorConverter);
+        sendBordersAction = new BeforeClientResponseAction(spreadsheet,
+                this::sendBorders);
     }
 
     /**
@@ -168,7 +175,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         } else {
             spreadsheet.cellStyleToCSSStyle.clear();
         }
-        borderStyleBuilder.resetAll();
+        borderStyleBuilder.resetStyles();
 
         // get default text alignments
         CellStyle cellStyle = workbook.getCellStyleAt((short) 0);
@@ -279,6 +286,9 @@ public class SpreadsheetStyleFactory implements Serializable {
     /**
      * Clears all styles for the given cell. Should be used when i.e. a cell has
      * been shifted (the old location is cleared of all styles).
+     * <p>
+     * The borders the cell drew on other cells are taken off. Those other cells
+     * draw on it stay, as they are drawn whether it is there or not.
      *
      * @param oldRowIndex
      *            0-based
@@ -286,21 +296,8 @@ public class SpreadsheetStyleFactory implements Serializable {
      *            0-based
      */
     public void clearCellStyle(int oldRowIndex, int oldColumnIndex) {
-        final String cssSelector = ".col" + (oldColumnIndex + 1) + ".row"
-                + (oldRowIndex + 1);
-        ArrayList<String> _shiftedCellBorderStyles = spreadsheet
-                .getShiftedCellBorderStyles();
-        borderStyleBuilder.removeCellFromShiftedStyles(_shiftedCellBorderStyles,
-                cssSelector);
-        borderStyleBuilder.removeCellFromInternalShiftedMaps(cssSelector);
-        HashMap<String, String> mergedCellBorders = borderStyleBuilder
-                .getMergedCellBorders();
-        if (mergedCellBorders.containsKey(cssSelector)) {
-            String rules = mergedCellBorders.remove(cssSelector);
-            _shiftedCellBorderStyles.remove(borderStyleBuilder
-                    .buildMergedCellBorderCss(cssSelector, rules));
-        }
-        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
+        borderStyleBuilder.cellRemoved(oldRowIndex, oldColumnIndex);
+        sendBordersAction.schedule();
     }
 
     /**
@@ -310,119 +307,58 @@ public class SpreadsheetStyleFactory implements Serializable {
      * @param cell
      *            Target cell
      * @param updateCustomBorders
-     *            true to also update custom borders
+     *            not used: the borders the cell draws on other cells reach the
+     *            client before the next response either way
      */
     public void cellStyleUpdated(Cell cell, boolean updateCustomBorders) {
-        final String cssSelector = ".col" + (cell.getColumnIndex() + 1) + ".row"
-                + (cell.getRowIndex() + 1);
-        final Integer key = (int) cell.getCellStyle().getIndex();
-        ArrayList<String> _shiftedCellBorderStyles = spreadsheet
-                .getShiftedCellBorderStyles();
-        borderStyleBuilder.removeCellFromShiftedStyles(_shiftedCellBorderStyles,
-                cssSelector);
-
-        // remove the cell's new custom styles from state (will be added again
-        // as this cell is styled)
-        HashMap<Integer, String> shiftedBorderLeftStyles = borderStyleBuilder
-                .getShiftedBorderLeftStyles();
-        HashMap<Integer, String> shiftedBorderTopStyles = borderStyleBuilder
-                .getShiftedBorderTopStyles();
-        HashMap<String, String> mergedCellBorders = borderStyleBuilder
-                .getMergedCellBorders();
-        if (shiftedBorderLeftStyles.containsKey(key)) {
-            final String style = shiftedBorderLeftStyles.get(key);
-            _shiftedCellBorderStyles.remove(style);
-        }
-        if (shiftedBorderTopStyles.containsKey(key)) {
-            final String style = shiftedBorderTopStyles.get(key);
-            _shiftedCellBorderStyles.remove(style);
-        }
-        if (mergedCellBorders.containsKey(cssSelector)) {
-            final String style = borderStyleBuilder.buildMergedCellBorderCss(
-                    cssSelector, mergedCellBorders.remove(cssSelector));
-            _shiftedCellBorderStyles.remove(style);
-        }
-
+        CellStyle cellStyle = cell.getCellStyle();
+        int sides = borderStyleBuilder.sides(cellStyle.getIndex());
         // Most cells are given a style the client has already: only a style
         // whose CSS is new or has changed goes out again.
-        CellStyle cellStyle = cell.getCellStyle();
         if (addCellStyleCSS(cellStyle)) {
             spreadsheet.setCellStyleToCSSStyle(
                     spreadsheet.getCellStyleToCSSStyle());
         }
-
-        borderStyleBuilder.resetAccumulators();
-        // custom styles
-        borderStyleBuilder.processCustomStyling(cell);
-        borderStyleBuilder.flattenAccumulators();
-        if (updateCustomBorders) {
-            if (shiftedBorderLeftStyles.containsKey(key)) {
-                final String style = shiftedBorderLeftStyles.get(key);
-                _shiftedCellBorderStyles.add(style);
-            }
-            if (shiftedBorderTopStyles.containsKey(key)) {
-                final String style = shiftedBorderTopStyles.get(key);
-                _shiftedCellBorderStyles.add(style);
-            }
-            if (mergedCellBorders.containsKey(cssSelector)) {
-                _shiftedCellBorderStyles.add(
-                        borderStyleBuilder.buildMergedCellBorderCss(cssSelector,
-                                mergedCellBorders.get(cssSelector)));
-            }
+        if (sides == borderStyleBuilder.sides(cellStyle.getIndex())) {
+            borderStyleBuilder.cellChanged(cell);
+        } else {
+            // A style changed in place changes what all its cells draw.
+            borderStyleBuilder.load();
         }
-        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
+        sendBordersAction.schedule();
     }
 
     /**
-     * Sets the custom border styles to shared state for sending them to the
-     * client side.
+     * Gives the client the borders the cells draw on other cells than their
+     * own, before the next response. The methods that change them do so
+     * themselves.
      */
     public void loadCustomBorderStylesToState() {
-        ArrayList<String> _shiftedCellBorderStyles = spreadsheet
-                .getShiftedCellBorderStyles();
-        if (_shiftedCellBorderStyles != null) {
-            _shiftedCellBorderStyles.clear();
-        } else {
-            _shiftedCellBorderStyles = new ArrayList<String>();
-        }
-        borderStyleBuilder
-                .appendShiftedStylesToOutput(_shiftedCellBorderStyles);
-        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
+        sendBordersAction.schedule();
     }
 
     /**
      * Reloads all styles for the currently active sheet.
      */
     public void reloadActiveSheetCellStyles() {
-        // need to remove the cell identifiers (css selectors from the shifted
-        // border style rules
-        borderStyleBuilder.stripLeadingSelectorsFromShiftedMaps();
-        borderStyleBuilder.getMergedCellBorders().clear();
-
-        ArrayList<String> _shiftedCellBorderStyles = spreadsheet
-                .getShiftedCellBorderStyles();
-        if (_shiftedCellBorderStyles == null) {
-            _shiftedCellBorderStyles = new ArrayList<String>();
-        } else {
-            _shiftedCellBorderStyles.clear();
-        }
-
-        borderStyleBuilder.resetAccumulators();
-
-        for (Row row : spreadsheet.getActiveSheet()) {
-            for (Cell cell : row) {
-                borderStyleBuilder.processCustomStyling(cell);
-            }
-        }
-        borderStyleBuilder.flattenAccumulators();
-
-        borderStyleBuilder
-                .appendShiftedStylesToOutput(_shiftedCellBorderStyles);
-
+        borderStyleBuilder.load();
+        sendBordersAction.schedule();
         // conditional formatting
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
+    }
 
-        spreadsheet.setShiftedCellBorderStyles(_shiftedCellBorderStyles);
+    /**
+     * The rules of the borders the cells draw on other cells than their own.
+     */
+    ArrayList<String> borderRules() {
+        return borderStyleBuilder.rules();
+    }
+
+    private void sendBorders() {
+        // Another workbook shown since has a style factory of its own.
+        if (spreadsheet.getSpreadsheetStyleFactory() == this) {
+            spreadsheet.setShiftedCellBorderStyles(borderRules());
+        }
     }
 
     @SuppressWarnings({ "unchecked" })

@@ -314,8 +314,12 @@ public class Spreadsheet extends Component
         return cssStyleMaps.getLockedRowIndexes();
     }
 
+    /**
+     * The rules of the borders the cells draw on other cells than their own, as
+     * the client is given them before the next response.
+     */
     ArrayList<String> getShiftedCellBorderStyles() {
-        return cssStyleMaps.getShiftedCellBorderStyles();
+        return workbookScope.styler.borderRules();
     }
 
     HashMap<Integer, String> getConditionalFormattingStyles() {
