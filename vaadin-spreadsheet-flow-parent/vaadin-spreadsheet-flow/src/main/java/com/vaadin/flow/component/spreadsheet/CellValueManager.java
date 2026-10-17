@@ -820,7 +820,7 @@ public class CellValueManager implements Serializable {
         // The other panes follow the rows and columns shown, which are
         // not known until the client reports them.
         if (verticalSplitPosition > 0) { // top right pane
-            ViewportBounds.scanOnTheSheet(1, firstColumn, verticalSplitPosition,
+            Viewport.scanOnTheSheet(1, firstColumn, verticalSplitPosition,
                     lastColumn, (r1, c1, r2, c2) -> {
                         ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
                                 r1, c1, r2, c2);
@@ -831,7 +831,7 @@ public class CellValueManager implements Serializable {
                     });
         }
         if (horizontalSplitPosition > 0) { // bottom left pane
-            ViewportBounds.scanOnTheSheet(firstRow, 1, lastRow,
+            Viewport.scanOnTheSheet(firstRow, 1, lastRow,
                     horizontalSplitPosition, (r1, c1, r2, c2) -> {
                         ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
                                 r1, c1, r2, c2);
@@ -842,8 +842,8 @@ public class CellValueManager implements Serializable {
                     });
         }
 
-        ViewportBounds.scanOnTheSheet(firstRow, firstColumn, lastRow,
-                lastColumn, (r1, c1, r2, c2) -> {
+        Viewport.scanOnTheSheet(firstRow, firstColumn, lastRow, lastColumn,
+                (r1, c1, r2, c2) -> {
                     ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
                             r1, c1, r2, c2);
                     if (!bottomRightData.isEmpty()) {
@@ -1104,7 +1104,7 @@ public class CellValueManager implements Serializable {
             HashMap<Integer, Float> cellStyleWidthRatioMap) {
         boolean changed = fitCalculator()
                 .onWidthRatioUpdate(cellStyleWidthRatioMap);
-        if (changed && spreadsheet.getFirstColumn() != -1) {
+        if (changed && spreadsheet.viewport().isReported()) {
             // Whether a value fits its column - and so whether it is
             // shortened, spills into its neighbours or shows hashes - is
             // judged against these ratios, and the client can only measure
@@ -1112,10 +1112,11 @@ public class CellValueManager implements Serializable {
             // batch of cells was built, so those cells went out judged
             // against nothing: a freshly loaded workbook never spilled its
             // text. Rebuild them now that there is something to judge by -
-            // the ones in view, which are the ones the client has. A cell
-            // further away is built when it is first sent, and by then the
-            // ratios are known; rebuilding the whole sheet here sent every
-            // cell of a 500 x 200 workbook, 9 MB, as it loaded.
+            // the ones in view, which are the ones the client has: none
+            // before it reports where it is, when skipping only saves the
+            // work. A cell further away is built when it is first sent, and
+            // by then the ratios are known; rebuilding the whole sheet here
+            // sent every cell of a 500 x 200 workbook, 9 MB, as it loaded.
             clearCachedContent();
             updateVisibleCellValues();
         }

@@ -114,7 +114,7 @@ final class CellMarkUpdater implements Serializable {
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
 
         // only reload if the cells have been loaded once previously
-        if (spreadsheet.getFirstColumn() == -1) {
+        if (!spreadsheet.viewport().isReported()) {
             // client will request cells soon, no need for reload now
             return;
         }

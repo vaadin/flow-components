@@ -19,11 +19,12 @@ import java.io.Serializable;
 final class SheetScope implements Serializable {
 
     /** The rows and columns the client shows: none until it reports them. */
-    final ViewportBounds viewport = new ViewportBounds();
+    final Viewport viewport;
     final SheetOverlayManager overlays;
     final CustomComponentLoader components;
 
     SheetScope(Spreadsheet spreadsheet) {
+        viewport = new Viewport(new SheetView(spreadsheet));
         overlays = new SheetOverlayManager(spreadsheet);
         components = new CustomComponentLoader(spreadsheet);
     }

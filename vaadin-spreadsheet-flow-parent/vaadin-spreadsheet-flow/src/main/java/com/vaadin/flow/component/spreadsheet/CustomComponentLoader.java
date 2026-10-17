@@ -91,9 +91,10 @@ final class CustomComponentLoader implements Serializable {
         HashSet<Component> nextComponents = new HashSet<>();
         Set<Integer> rowsWithComponents = new HashSet<>();
 
-        spreadsheet.forEachPaneShown((r1, c1, r2, c2) -> scan(nextComponents,
-                rowsWithComponents, nextCellKeyToEditor,
-                nextComponentIDtoCellKeysMap, r1, c1, r2, c2));
+        spreadsheet.viewport()
+                .forEachPane((r1, c1, r2, c2) -> scan(nextComponents,
+                        rowsWithComponents, nextCellKeyToEditor,
+                        nextComponentIDtoCellKeysMap, r1, c1, r2, c2));
         dropEditorsOfCellsNotLoaded(nextCellKeyToEditor);
 
         // Keep registered custom editors that still claim a cell key, even
@@ -208,26 +209,12 @@ final class CustomComponentLoader implements Serializable {
      * in no cell yet.
      */
     private void dropEditorsOfCellsNotLoaded(Map<String, Component> editors) {
-        int verticalSplit = spreadsheet.getLastFrozenRow();
-        int horizontalSplit = spreadsheet.getLastFrozenColumn();
-        int firstRow = spreadsheet.getFirstRow();
-        int lastRow = spreadsheet.getLastRow();
-        int firstColumn = spreadsheet.getFirstColumn();
-        int lastColumn = spreadsheet.getLastColumn();
+        Viewport viewport = spreadsheet.viewport();
         String selected = selectedCellKey();
-        editors.keySet().removeIf(key -> {
-            if (key.equals(selected)) {
-                return false;
-            }
-            int col = SpreadsheetUtil.getColumnIndexFromKey(key);
-            int row = SpreadsheetUtil.getRowFromKey(key);
-            boolean inLoadedRows = row >= firstRow && row <= lastRow;
-            boolean inFrozenRows = row <= verticalSplit;
-            boolean inLoadedColumns = col >= firstColumn && col <= lastColumn;
-            boolean inFrozenColumns = col <= horizontalSplit;
-            return !((inLoadedRows || inFrozenRows)
-                    && (inLoadedColumns || inFrozenColumns));
-        });
+        editors.keySet()
+                .removeIf(key -> !key.equals(selected)
+                        && !viewport.shows(SpreadsheetUtil.getRowFromKey(key),
+                                SpreadsheetUtil.getColumnIndexFromKey(key)));
     }
 
     /** The selected cell's key, or null when no cell is selected. */

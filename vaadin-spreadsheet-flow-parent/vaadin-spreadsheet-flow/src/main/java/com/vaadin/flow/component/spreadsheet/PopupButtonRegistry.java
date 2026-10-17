@@ -131,7 +131,7 @@ final class PopupButtonRegistry implements Serializable {
     }
 
     private boolean isShown(PopupButton button) {
-        return spreadsheet.isCellVisible(button.getRow() + 1,
+        return spreadsheet.viewport().shows(button.getRow() + 1,
                 button.getColumn() + 1);
     }
 

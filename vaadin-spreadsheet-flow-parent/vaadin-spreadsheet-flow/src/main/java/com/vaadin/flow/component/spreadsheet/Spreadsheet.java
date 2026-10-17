@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.IntPredicate;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
@@ -158,8 +157,11 @@ public class Spreadsheet extends Component
 
     // spreadsheetState
 
-    private final ViewportBufferConfig viewportBufferConfig = new ViewportBufferConfig(
-            this);
+    /**
+     * The pixels the client draws past the cells shown, above and below, and
+     * left and right, until set otherwise.
+     */
+    private static final int DEFAULT_BUFFER_SIZE = 200;
 
     private final MirroredProperty<Integer> rows = MirroredProperty
             .integer(this, "rows", 0);
@@ -1453,18 +1455,6 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * The most rows that are not hidden one scroll loads. Well above what the
-     * client asks for in the tallest window, with the rows it loads ahead.
-     */
-    private static final int MAX_SHOWN_ROWS_PER_SCROLL = 2000;
-
-    /**
-     * The most columns that are not hidden one scroll loads. See
-     * {@link #MAX_SHOWN_ROWS_PER_SCROLL}.
-     */
-    private static final int MAX_SHOWN_COLUMNS_PER_SCROLL = 1000;
-
-    /**
      * This method is called when the sheet is scrolled. It takes care of
      * sending newly revealed data to the client side.
      * <p>
@@ -1483,27 +1473,13 @@ public class Spreadsheet extends Component
      */
     protected void onSheetScroll(int firstRow, int firstColumn, int lastRow,
             int lastColumn) {
-        // Every cell of this range is loaded below, so it can only cover
-        // cells the sheet has.
-        int maxRow = Math.max(1, getRows());
-        int maxColumn = Math.max(1, getColumns());
-        firstRow = Math.clamp(firstRow, 1, maxRow);
-        lastRow = Math.clamp(lastRow, firstRow, maxRow);
-        firstColumn = Math.clamp(firstColumn, 1, maxColumn);
-        lastColumn = Math.clamp(lastColumn, firstColumn, maxColumn);
-        // Every cell of the range is visited, so it is no bigger than the
-        // client asks for at most. Hidden rows and columns do not count: a
-        // filtered sheet loads the rows it shows however far apart they are.
-        lastRow = lastWithShownCount(firstRow, lastRow,
-                MAX_SHOWN_ROWS_PER_SCROLL, row -> isRowHidden(row - 1));
-        lastColumn = lastWithShownCount(firstColumn, lastColumn,
-                MAX_SHOWN_COLUMNS_PER_SCROLL,
-                column -> isColumnHidden(column - 1));
-        if (reloadCellDataOnNextScroll || sheetScope.viewport
-                .hasChanged(firstRow, lastRow, firstColumn, lastColumn)) {
-            sheetScope.viewport.update(firstRow, lastRow, firstColumn,
-                    lastColumn);
-            loadCells(firstRow, firstColumn, lastRow, lastColumn);
+        Viewport viewport = sheetScope.viewport;
+        // The same cells reported again are not loaded again, which would
+        // send nothing, the client having them: skipping saves the work.
+        if (viewport.report(firstRow, firstColumn, lastRow, lastColumn)
+                || reloadCellDataOnNextScroll) {
+            loadCells(viewport.getFirstRow(), viewport.getFirstColumn(),
+                    viewport.getLastRow(), viewport.getLastColumn());
         }
         if (initialSheetSelection != null) {
             if (initialSheetSelectionKeepsView) {
@@ -1518,21 +1494,6 @@ public class Spreadsheet extends Component
             selectionManager.reloadCurrentSelection();
         }
         reloadCellDataOnNextScroll = false;
-    }
-
-    /**
-     * The last index from {@code first} to {@code last} up to which no more
-     * than {@code max} indexes are shown.
-     */
-    private static int lastWithShownCount(int first, int last, int max,
-            IntPredicate hidden) {
-        int shown = 0;
-        for (int index = first; index <= last; index++) {
-            if (!hidden.test(index) && ++shown == max) {
-                return index;
-            }
-        }
-        return last;
     }
 
     /**
@@ -2842,7 +2803,7 @@ public class Spreadsheet extends Component
      * @return The current row buffer size
      */
     public int getRowBufferSize() {
-        return viewportBufferConfig.getRowBufferSize();
+        return getElement().getProperty("rowBufferSize", DEFAULT_BUFFER_SIZE);
     }
 
     /**
@@ -2857,7 +2818,7 @@ public class Spreadsheet extends Component
      *            bottom edges of the visible area.
      */
     public void setRowBufferSize(int rowBufferInPixels) {
-        viewportBufferConfig.setRowBufferSize(rowBufferInPixels);
+        getElement().setProperty("rowBufferSize", rowBufferInPixels);
     }
 
     /**
@@ -2870,7 +2831,8 @@ public class Spreadsheet extends Component
      * @return The current column buffer size
      */
     public int getColBufferSize() {
-        return viewportBufferConfig.getColumnBufferSize();
+        return getElement().getProperty("columnBufferSize",
+                DEFAULT_BUFFER_SIZE);
     }
 
     /**
@@ -2886,7 +2848,7 @@ public class Spreadsheet extends Component
      *            right edges of the visible area.
      */
     public void setColBufferSize(int colBufferInPixels) {
-        viewportBufferConfig.setColumnBufferSize(colBufferInPixels);
+        getElement().setProperty("columnBufferSize", colBufferInPixels);
     }
 
     /**
@@ -3508,38 +3470,9 @@ public class Spreadsheet extends Component
         return Integer.toString(component.getElement().getNode().getId());
     }
 
-    /**
-     * Determines if the cell at the given coordinates is currently visible
-     * (rendered) in the browser.
-     *
-     * @param row
-     *            Row index, 1-based
-     * @param col
-     *            Column index, 1-based
-     *
-     * @return True if the cell is visible, false otherwise
-     */
-    /** Scans the cells shown, pane by pane. */
-    void forEachPaneShown(ViewportBounds.PaneScan scan) {
-        sheetScope.viewport.forEachPane(getLastFrozenRow(),
-                getLastFrozenColumn(), scan);
-    }
-
-    boolean isCellVisible(int row, int col) {
-        int verticalSplitPosition = getLastFrozenRow();
-        int horizontalSplitPosition = getLastFrozenColumn();
-        int firstRow = sheetScope.viewport.getFirstRow();
-        int lastRow = sheetScope.viewport.getLastRow();
-        int firstColumn = sheetScope.viewport.getFirstColumn();
-        int lastColumn = sheetScope.viewport.getLastColumn();
-        return (col >= firstColumn && col <= lastColumn && row >= firstRow
-                && row <= lastRow)
-                || (col >= 1 && col <= horizontalSplitPosition && row >= 1
-                        && row <= verticalSplitPosition)
-                || (col >= firstColumn && col <= lastColumn && row >= 1
-                        && row <= verticalSplitPosition)
-                || (col >= 1 && col <= horizontalSplitPosition
-                        && row >= firstRow && row <= lastRow);
+    /** The rows and columns the client shows, and so the cells. */
+    Viewport viewport() {
+        return sheetScope.viewport;
     }
 
     void registerCustomComponent(Component component) {
@@ -3570,7 +3503,7 @@ public class Spreadsheet extends Component
         // The factory is asked about every cell loaded: the client then
         // loads only the cells it draws.
         hasComponentFactory.set(customComponentFactory != null);
-        if (sheetScope.viewport.getFirstRow() != -1) {
+        if (sheetScope.viewport.isReported()) {
             // A new factory produces its own editors, so recreate them rather
             // than reuse the previous factory's by cell key.
             loadCustomComponentsRecreatingEditors();

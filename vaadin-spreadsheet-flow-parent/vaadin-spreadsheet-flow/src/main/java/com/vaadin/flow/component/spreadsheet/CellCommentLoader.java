@@ -36,7 +36,7 @@ final class CellCommentLoader implements Serializable {
     }
 
     void load() {
-        if (spreadsheet.getFirstColumn() == -1) {
+        if (!spreadsheet.viewport().isReported()) {
             // Spreadsheet not loaded. This method will be called again.
             return;
         }
@@ -44,8 +44,8 @@ final class CellCommentLoader implements Serializable {
         HashMap<String, String> authors = new HashMap<>();
         ArrayList<String> visible = new ArrayList<>();
         Set<String> invalidFormulas = new HashSet<>();
-        spreadsheet.forEachPaneShown((r1, c1, r2, c2) -> scan(comments, authors,
-                visible, invalidFormulas, r1, c1, r2, c2));
+        spreadsheet.viewport().forEachPane((r1, c1, r2, c2) -> scan(comments,
+                authors, visible, invalidFormulas, r1, c1, r2, c2));
         spreadsheet.setCellComments(comments);
         spreadsheet.setCellCommentAuthors(authors);
         spreadsheet.setVisibleCellComments(visible);

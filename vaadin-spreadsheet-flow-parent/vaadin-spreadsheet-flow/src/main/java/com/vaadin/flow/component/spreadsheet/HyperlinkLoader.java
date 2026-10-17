@@ -42,7 +42,7 @@ final class HyperlinkLoader implements Serializable {
         HashMap<String, String> tooltips = new HashMap<>();
         HyperlinkCellClickHandler handler = spreadsheet
                 .getHyperlinkCellClickHandler();
-        spreadsheet.forEachPaneShown(
+        spreadsheet.viewport().forEachPane(
                 (r1, c1, r2, c2) -> scan(tooltips, handler, r1, c1, r2, c2));
         spreadsheet.setHyperlinksTooltips(tooltips);
     }
