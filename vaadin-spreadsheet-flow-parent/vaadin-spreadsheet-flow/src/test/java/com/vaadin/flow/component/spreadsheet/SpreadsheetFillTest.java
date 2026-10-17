@@ -154,6 +154,30 @@ class SpreadsheetFillTest {
     }
 
     @Test
+    void aFillRight_stopsAtTheLastColumnPainted() {
+        set("A1", "x");
+        set("D1", "kept");
+        show();
+
+        fill(1, 1, 1, 1, 1, 1, 1, 3);
+
+        assertEquals(List.of("x", "x", "x", "kept"),
+                List.of(value("A1"), value("B1"), value("C1"), value("D1")));
+    }
+
+    @Test
+    void aFillDown_stopsAtTheLastRowPainted() {
+        set("A1", "x");
+        set("A4", "kept");
+        show();
+
+        fill(1, 1, 1, 1, 1, 1, 3, 1);
+
+        assertEquals(List.of("x", "x", "x", "kept"),
+                List.of(value("A1"), value("A2"), value("A3"), value("A4")));
+    }
+
+    @Test
     void numbersFilledDown_countOn_intoRowsTheSheetHasNot() {
         set("A1", 1);
         set("A2", 2);
