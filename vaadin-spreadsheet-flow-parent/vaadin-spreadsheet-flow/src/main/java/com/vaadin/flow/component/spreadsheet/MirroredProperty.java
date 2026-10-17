@@ -9,9 +9,9 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.function.BiConsumer;
 
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableBiConsumer;
 
 /**
  * A server-side cache of a value that mirrors itself to a client element
@@ -28,10 +28,10 @@ import com.vaadin.flow.dom.Element;
  * <p>
  * The {@link #set(Object)} method is the primary surface. Read-back via
  * {@link #get()} returns the last-set value. The mirror strategy is supplied at
- * construction as a {@link BiConsumer} that knows how to push the value to the
- * element (e.g. via {@code setProperty(name, value)} for primitives, or
- * {@code setProperty(name, Serializer.serialize(value))} for objects).
- * Convenience factories below cover the common patterns.
+ * construction as a {@link SerializableBiConsumer} that knows how to push the
+ * value to the element (e.g. via {@code setProperty(name, value)} for
+ * primitives, or {@code setProperty(name, Serializer.serialize(value))} for
+ * objects). Convenience factories below cover the common patterns.
  *
  * @param <T>
  *            the type of the mirrored value
@@ -39,15 +39,15 @@ import com.vaadin.flow.dom.Element;
 final class MirroredProperty<T> implements Serializable {
 
     private final Spreadsheet spreadsheet;
-    private final BiConsumer<Element, T> mirror;
+    private final SerializableBiConsumer<Element, T> mirror;
     private T value;
 
     /**
      * Creates a mirror with an explicit strategy. Use the factory methods
      * ({@link #bool}, {@link #serialized}) for common patterns.
      */
-    MirroredProperty(Spreadsheet spreadsheet, BiConsumer<Element, T> mirror,
-            T initial) {
+    MirroredProperty(Spreadsheet spreadsheet,
+            SerializableBiConsumer<Element, T> mirror, T initial) {
         this.spreadsheet = spreadsheet;
         this.mirror = mirror;
         this.value = initial;

@@ -8,10 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet.shared;
 
+import java.io.Serializable;
+
 /**
  * @since 23.1
  */
-public class PopupButtonState {
+public class PopupButtonState implements Serializable {
 
     /** 1-based */
     public int col;

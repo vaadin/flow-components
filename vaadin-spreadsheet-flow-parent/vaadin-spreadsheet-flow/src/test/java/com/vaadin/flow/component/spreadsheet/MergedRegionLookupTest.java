@@ -20,11 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
+import com.vaadin.flow.function.SerializableSupplier;
 
 /**
  * Finding the merged region of a cell with {@link MergedRegionLookup}.
@@ -185,7 +185,7 @@ class MergedRegionLookupTest {
         List<MergedRegion> backing = new ArrayList<>();
         AtomicReference<List<MergedRegion>> ref = new AtomicReference<>(
                 backing);
-        Supplier<List<MergedRegion>> supplier = ref::get;
+        SerializableSupplier<List<MergedRegion>> supplier = ref::get;
         MergedRegionLookup lookup = new MergedRegionLookup(supplier);
 
         // First call: empty list, returns null.

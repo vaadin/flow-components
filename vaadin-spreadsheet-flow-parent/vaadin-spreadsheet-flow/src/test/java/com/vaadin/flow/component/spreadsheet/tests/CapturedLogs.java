@@ -24,10 +24,10 @@ import org.slf4j.helpers.MessageFormatter;
  * The warnings and errors logged while a test looks, so it can tell when the
  * component reports a problem and goes on.
  * <p>
- * The tests run without a logging backend; {@code org.slf4j.impl}'s binder in
- * the test sources makes this class the backend. Nothing is printed, and
- * nothing is kept while no capture is open. Captures may be open inside each
- * other: each keeps what is logged while it is open.
+ * The tests run without a logging backend; {@link CapturedLogsProvider} makes
+ * this class the backend. Nothing is printed, and nothing is kept while no
+ * capture is open. Captures may be open inside each other: each keeps what is
+ * logged while it is open.
  */
 public final class CapturedLogs {
 

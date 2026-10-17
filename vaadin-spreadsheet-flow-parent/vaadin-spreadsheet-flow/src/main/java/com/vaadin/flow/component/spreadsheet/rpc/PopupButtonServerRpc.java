@@ -8,10 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet.rpc;
 
+import java.io.Serializable;
+
 /**
  * @since 23.1
  */
-public interface PopupButtonServerRpc {
+public interface PopupButtonServerRpc extends Serializable {
 
     /**
      * Called when the button has been clicked, and the pop-up has been opened.

@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
+import com.vaadin.flow.function.SerializableSupplier;
 
 /**
  * Read-only queries over the currently active sheet's merged regions.
@@ -38,7 +38,7 @@ final class MergedRegionLookup implements MergedRegionContainer, Serializable {
     /** Rows per bucket of the index. */
     private static final int ROWS_PER_BUCKET = 64;
 
-    private final Supplier<List<MergedRegion>> regionsSupplier;
+    private final SerializableSupplier<List<MergedRegion>> regionsSupplier;
 
     /** The list the index is of, and its size when it was built. */
     private transient List<MergedRegion> indexed;
@@ -50,7 +50,8 @@ final class MergedRegionLookup implements MergedRegionContainer, Serializable {
     /** The first region in the list to start at each cell. */
     private transient Map<Long, MergedRegion> byStart;
 
-    MergedRegionLookup(Supplier<List<MergedRegion>> regionsSupplier) {
+    MergedRegionLookup(
+            SerializableSupplier<List<MergedRegion>> regionsSupplier) {
         this.regionsSupplier = regionsSupplier;
     }
 

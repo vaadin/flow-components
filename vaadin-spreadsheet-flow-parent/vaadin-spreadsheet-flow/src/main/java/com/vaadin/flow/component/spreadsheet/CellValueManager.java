@@ -855,7 +855,7 @@ public class CellValueManager implements Serializable {
 
     /** A range of cells, 1-based and inclusive. */
     @FunctionalInterface
-    private interface RangeScan {
+    private interface RangeScan extends Serializable {
         void scan(int firstRow, int firstColumn, int lastRow, int lastColumn);
     }
 

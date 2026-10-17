@@ -8,13 +8,15 @@
  */
 package com.vaadin.flow.component.spreadsheet.client;
 
+import java.io.Serializable;
+
 /**
  * The grouping messages the client sends to the server.
  * {@link SpreadsheetHandler} extends it with all the others.
  *
  * @since 23.1
  */
-public interface GroupingHandler {
+public interface GroupingHandler extends Serializable {
     void setGroupingCollapsed(boolean cols, int colIndex, boolean collapsed);
 
     void levelHeaderClicked(boolean cols, int level);

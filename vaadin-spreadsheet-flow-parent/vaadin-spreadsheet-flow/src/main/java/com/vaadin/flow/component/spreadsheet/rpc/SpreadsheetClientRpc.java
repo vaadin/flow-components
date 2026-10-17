@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet.rpc;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -28,7 +29,7 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
  *
  * @since 23.1
  */
-public interface SpreadsheetClientRpc {
+public interface SpreadsheetClientRpc extends Serializable {
 
     void updateBottomRightCellValues(ArrayList<CellData> cellData);
 
