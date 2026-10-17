@@ -8,7 +8,7 @@
  */
 
 import { expect } from 'chai';
-import { attachSheet, type AttachedSheet } from './spreadsheet-harness.js';
+import { attachSheet, rendered, type AttachedSheet } from './spreadsheet-harness.js';
 
 /**
  * One way the sheet is drawn: what a handler of the sheet's own events
@@ -43,6 +43,17 @@ describe('Spreadsheet — one way to draw', () => {
     document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
   }
 
+  it('draws a repaint already asked for no more once the sheet has been drawn', async () => {
+    ctx.sheet.cellsUpdated([
+      { col: 1, row: 1, value: 'x', cellStyle: 'cs0', locked: false, needsMeasure: false, isPercentage: false }
+    ]);
+
+    ctx.sheet.recomputeViewport();
+    await Promise.resolve();
+
+    expect(paints).to.equal(1);
+  });
+
   it('has the header showing a width dragged as soon as the drag ends', () => {
     dragColumnEdge();
 
@@ -55,5 +66,22 @@ describe('Spreadsheet — one way to draw', () => {
     dragColumnEdge();
 
     expect(paints).to.equal(1);
+  });
+
+  it('draws a note written on the sheet before the server is told', async () => {
+    ctx.sheet.editCellComment(1, 1);
+    await rendered(ctx.sheet);
+    const note = ctx.sheet.getCellGrid().shadowRoot!.querySelector<HTMLTextAreaElement>('.comment-overlay-edit')!;
+    note.value = 'Typed';
+    let drawnWhenTold: unknown = 'not told';
+    ctx.host.addEventListener('spreadsheet-event', (e) => {
+      if ((e as CustomEvent).detail.type === 'updateCellComment') {
+        drawnWhenTold = ctx.sheet.getCellGrid().renderState.commentText?.['col2 row2'];
+      }
+    });
+
+    note.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+
+    expect(drawnWhenTold).to.equal('Typed');
   });
 });

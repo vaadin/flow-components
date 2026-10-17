@@ -52,6 +52,7 @@ import {
   withSize
 } from './algorithms/ViewportMath.js';
 import { type CellSlots, Derived, drawnColumnWidth, drawnRowHeight, type SheetSizes } from './state/Derived.js';
+import { RenderScheduler } from './state/RenderScheduler.js';
 import { SheetData } from './state/SheetData.js';
 import { ViewState } from './state/ViewState.js';
 import {
@@ -107,7 +108,7 @@ import {
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
-import { PageListeners } from './controllers/PageListeners.js';
+import { type PageListener, PageListeners } from './controllers/PageListeners.js';
 import { SheetTabs } from './controllers/SheetTabs.js';
 import { ContextMenu } from './controllers/ContextMenu.js';
 import { HeaderResize } from './controllers/HeaderResize.js';
@@ -322,18 +323,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private readonly view = new ViewState();
 
-  /**
-   * Whether a coalesced repaint is already queued.
-   *
-   * The repaint runs on a microtask, not an animation frame. Everything
-   * that queues one is server-driven — a property push or one of the
-   * cell-value RPCs — and those arrive several to a response. A microtask
-   * still folds the whole response into one render, but runs before the
-   * browser leaves the turn that processed it, so the sheet is never a
-   * frame behind the answer a caller has already been given. Scrolling
-   * does not come through here: the scroll handler repaints directly.
-   */
-  private renderQueued = false;
+  /** When the sheet is drawn; see {@link RenderScheduler}. */
+  private readonly renders = new RenderScheduler(() => this.recomputeViewport());
 
   /** The context menu shown on right-click. Empty until the server answers. */
   private readonly contextMenu: SpreadsheetContextMenu;
@@ -682,14 +673,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
           if (width === 0) {
             this.change({ hiddenColumnIndexes: new Set([...this.model.hiddenColumnIndexes, col]) });
           }
-          this.recomputeViewport();
         },
         setRowHeight: (row, height) => {
           this.change({ rowH: withSize(this.model.rowH, row, height, this.model.defRowH) });
           if (height === 0) {
             this.change({ hiddenRowIndexes: new Set([...this.model.hiddenRowIndexes, row]) });
           }
-          this.recomputeViewport();
         },
         send: (event) => this.sendToServer(event)
       },
@@ -823,13 +812,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
     this.parts = [
       this.viewportLoader,
-      new PageListeners([
-        [document, 'pointerdown', this.handleDocumentPointerDown],
-        [document, 'keydown', this.handleContextMenuKeyDown],
-        [document, 'mouseup', this.handleDocumentMouseUp],
-        [document, 'keyup', this.handleDocumentKeyUp],
-        [document, 'mousemove', this.handleDocumentMouseMove]
-      ]),
+      new PageListeners(
+        this.handlingAll([
+          [document, 'pointerdown', this.handleDocumentPointerDown],
+          [document, 'keydown', this.handleContextMenuKeyDown],
+          [document, 'mouseup', this.handleDocumentMouseUp],
+          [document, 'keyup', this.handleDocumentKeyUp],
+          [document, 'mousemove', this.handleDocumentMouseMove]
+        ])
+      ),
       {
         hostConnected: () => this.resizeObserver.observe(this.scrollContainer),
         hostDisconnected: () => this.resizeObserver.disconnect()
@@ -876,7 +867,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   /** Listen to one of the sheet's own elements until {@link dispose}. */
   private on<E extends Event>(target: EventTarget, type: string, listener: (event: E) => void): void {
-    listen(target, type, listener, this.ownListeners.signal);
+    listen(target, type, this.handling(listener), this.ownListeners.signal);
   }
 
   /**
@@ -2157,6 +2148,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * cell's component - which applied it to its own cells.
    */
   private sendToServer(detail: SpreadsheetEvent): void {
+    this.renders.beforeSend();
     this.host.dispatchEvent(new CustomEvent('spreadsheet-event', { detail }));
     const selected = selectedCellSetBy(detail);
     if (selected !== null) {
@@ -2248,30 +2240,21 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * as a single update, so the calls collapse into one repaint.
    */
   private scheduleRender(): void {
-    if (this.renderQueued) {
-      return;
-    }
-    this.renderQueued = true;
-    queueMicrotask(() => {
-      if (!this.renderQueued) {
-        return;
-      }
-      this.renderQueued = false;
-      this.recomputeViewport();
-    });
+    this.renders.schedule();
   }
 
   /**
-   * Repaint now, dropping any repaint already queued.
-   *
-   * The counterpart to {@link scheduleRender}: coalescing is right for
-   * scrolling, where the next frame is the soonest anything can be seen
-   * anyway, and wrong at the end of a server round trip, where the caller
-   * has been told the work is done.
+   * Wraps a handler of the sheet's own events: what it changes is drawn as
+   * the outermost handler running ends, and before anything it tells the
+   * server; see {@link RenderScheduler}.
    */
-  private flushRender(): void {
-    this.renderQueued = false;
-    this.recomputeViewport();
+  private handling<E extends Event>(listener: (event: E) => void): (event: E) => void {
+    return (event) => this.renders.handle(() => listener(event));
+  }
+
+  /** Each listener wrapped as a handler of the sheet's; see {@link handling}. */
+  private handlingAll(listeners: readonly PageListener[]): PageListener[] {
+    return listeners.map(([target, type, listener]) => [target, type, this.handling(listener)]);
   }
 
   /**
@@ -2344,6 +2327,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * force a re-render without going through the scroll surface.
    */
   recomputeViewport(): void {
+    this.renders.drawn();
     if (this.view.pendingSheetScroll !== null) {
       // A sheet shown again goes back to where it was scrolled. The grid is
       // sized for it first: against the last sheet's size the browser would
@@ -2396,7 +2380,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * attached again; tests dispose of the sheets they make.
    */
   dispose(): void {
-    this.renderQueued = false;
+    this.renders.cancel();
     this.ownListeners.abort();
     this.stopLongPress();
     this.overlayComponents.clear();
@@ -3123,7 +3107,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       return;
     }
     this.change({ cellComments: { ...this.model.cellComments, [key as string]: text } });
-    this.scheduleRender();
     this.returnFocusToSheet();
     this.sendToServer({ type: 'updateCellComment', data: { text, col: coord.col, row: coord.row } });
   };
@@ -3203,7 +3186,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     this.view.shownSheetName = shownSheetName;
     if (changedPropertyNames.length > 0 || firstUpdate) {
-      this.flushRender();
+      this.recomputeViewport();
     }
   }
 
@@ -3213,19 +3196,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   updateBottomRightCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
-    this.scheduleRender();
   }
   updateTopLeftCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
-    this.scheduleRender();
   }
   updateTopRightCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
-    this.scheduleRender();
   }
   updateBottomLeftCellValues(cellData: CellData[] | string): void {
     this.storeCellData(cellData);
-    this.scheduleRender();
   }
 
   /**
@@ -3247,6 +3226,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         this.view.styleWidthRatiosStale = true;
       }
     }
+    this.scheduleRender();
   }
   updateFormulaBar(possibleName: string | null, col: number, row: number): void {
     // The answer about a cell the user has already left - the keyboard
@@ -3427,7 +3407,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
   cellsUpdated(updatedCellData: CellData[]): void {
     this.storeCellData(updatedCellData);
-    this.scheduleRender();
   }
   /**
    * The cells to have, in place of every cell there is: the server worked
@@ -3437,7 +3416,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   cellsReplaced(cellData: CellData[]): void {
     this.sheetData.cells.clear();
     this.storeCellData(cellData);
-    this.scheduleRender();
   }
   refreshCellStyles(): void {
     this.scheduleRender();
@@ -3462,17 +3440,23 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   // only hold a value are written through the table in state/SheetModel.ts.
   // ====================================================================
 
-  /** Takes a property as the server sends it; see {@link SHEET_PROPERTIES}. */
+  /**
+   * Takes a property as the server sends it; see {@link SHEET_PROPERTIES}.
+   * It is drawn with the rest of the batch it comes in, once the batch is
+   * all in; see {@link notifyStateChanges}.
+   */
   private write<K extends SheetPropertyName>(name: K, value: SheetPropertyValue<K>): void {
     this.model = withProperty(this.model, name, value);
   }
 
   /**
    * Changes the model with values already read in: the client's own, which
-   * it holds until the server answers.
+   * it holds until the server answers. Drawn as the handler making the
+   * change ends; see {@link handling}.
    */
   private change(values: Partial<SheetModel>): void {
     this.model = withValues(this.model, values);
+    this.scheduleRender();
   }
 
   setRowBufferSize(pixels: number): void {
