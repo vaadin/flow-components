@@ -190,6 +190,31 @@ class FreshLoadConsistencyTest {
                         selectRange(10, 5, 10, 6).andThen(event(
                                 "selectionIncreasePainted",
                                 "{\"r1\": 10, \"c1\": 5, \"r2\": 12, \"c2\": 6}"))),
+                op("a selection filled up",
+                        selectRange(12, 5, 12, 6).andThen(event(
+                                "selectionIncreasePainted",
+                                "{\"r1\": 10, \"c1\": 5, \"r2\": 12, \"c2\": 6}"))),
+                op("a selection filled right",
+                        selectRange(10, 5, 11, 5).andThen(event(
+                                "selectionIncreasePainted",
+                                "{\"r1\": 10, \"c1\": 5, \"r2\": 11, \"c2\": 7}"))),
+                op("a selection filled left",
+                        selectRange(10, 7, 11, 7).andThen(event(
+                                "selectionIncreasePainted",
+                                "{\"r1\": 10, \"c1\": 5, \"r2\": 11, \"c2\": 7}"))),
+                op("a formula filled down",
+                        selectRange(10, 7, 10, 7).andThen(event(
+                                "selectionIncreasePainted",
+                                "{\"r1\": 10, \"c1\": 7, \"r2\": 13, \"c2\": 7}"))),
+                op("a selection filled taken back",
+                        selectRange(10, 5, 12, 6)
+                                .andThen(event(
+                                        "selectionDecreasePainted",
+                                        "{\"row\": 12, \"col\": 5}"))),
+                steps("a fill undone", selectRange(10, 5, 10, 6).andThen(event(
+                        "selectionIncreasePainted",
+                        "{\"r1\": 10, \"c1\": 5, \"r2\": 12, \"c2\": 6}")),
+                        event("onUndo", "{}")),
                 op("cells pasted",
                         select(14, 7).andThen(event("onPaste",
                                 "{\"text\": \"a\\tb\\nc\\td\"}"))),
