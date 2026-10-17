@@ -115,6 +115,25 @@ describe('Spreadsheet store characterization — drawn before the server is told
     expect(editorAtCommit).to.equal(null);
   });
 
+  it('has the editor closed in the cell grid when an edit left for the address field is reported', async () => {
+    ctx = attachSheet();
+    const input = await typeOver(ctx, 2, 2, '123');
+    input.focus();
+    await ctx.sheet.getFormulaBar().updateComplete;
+    let editorAtCommit: unknown = 'not reported';
+    ctx.host.addEventListener('spreadsheet-event', (e) => {
+      if ((e as CustomEvent).detail.type === 'cellValueEdited') {
+        editorAtCommit = ctx.sheet.getCellGrid().renderState.editor;
+      }
+    });
+
+    // The edit ends once the keyboard has settled there.
+    ctx.sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.address')!.focus();
+    await new Promise((resolve) => setTimeout(resolve));
+
+    expect(editorAtCommit).to.equal(null);
+  });
+
   it('has the cell grid showing a reference pointed at with an arrow as soon as the key is handled', async () => {
     ctx = attachSheet();
     const input = await typeOver(ctx, 3, 3, '=');
