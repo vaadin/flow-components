@@ -90,4 +90,11 @@ class SpreadsheetConditionalNumberFormatsTest {
         assertEquals(List.of(),
                 harness.check(spreadsheet -> spreadsheet.shiftRows(2, 3, 1)));
     }
+
+    @Test
+    void aRangeShiftedWithItsRows() {
+        // C3:C4 down to C5:C6, which the rule holds for then.
+        assertEquals(List.of(),
+                harness.check(spreadsheet -> spreadsheet.shiftRows(2, 3, 2)));
+    }
 }
