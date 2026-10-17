@@ -49,6 +49,8 @@ final class CellMarkUpdater implements Serializable {
 
     void markCellAsUpdated(Cell cell, boolean cellStyleUpdated) {
         spreadsheet.getCellValueManager().cellUpdated(cell);
+        // Only when told: a style unchanged changes nothing, and going
+        // through the cell's borders again costs time.
         if (cellStyleUpdated) {
             spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
                     true);
@@ -95,11 +97,8 @@ final class CellMarkUpdater implements Serializable {
         // if the selected cell is of type formula, there is a chance that
         // the formula has been changed.
         spreadsheet.getCellSelectionManager().reSelectSelectedCell();
-        // Update the cell comments as well to show them instantly after
-        // adding them
-        spreadsheet.cellCommentLoader.load();
-
-        // update custom components, editors
+        // update custom components, editors, and the comments, links and
+        // overlays of the cells shown
         spreadsheet.reloadVisibleCellContents(recreateEditors);
     }
 
