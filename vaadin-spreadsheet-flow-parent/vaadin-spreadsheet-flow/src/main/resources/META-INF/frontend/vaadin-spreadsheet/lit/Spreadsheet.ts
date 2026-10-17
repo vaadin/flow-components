@@ -1488,10 +1488,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     span: { start: number; end: number } | null,
     source: 'cell' | 'field'
   ): void {
-    if (this.autoPercentEntry && value.endsWith('%')) {
+    if (this.autoPercentEntry && this.editor !== null && value.endsWith('%')) {
       // The % a sign typed into a percentage cell was given belongs to a
       // number. Pointing makes the entry a formula, where "+A1%" would take
-      // a hundredth of A1.
+      // a hundredth of A1. It goes with the editor that entry opened: a %
+      // in a formula written once that editor has closed is the formula's.
       value = value.slice(0, -1);
       caret = Math.min(caret, value.length);
     }

@@ -110,6 +110,26 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect([editor() !== null, field.value]).to.eql([true, '+C4']);
   });
 
+  it('keeps the % of a formula written in the field once a percentage entry is over', async () => {
+    // The % a percentage cell gave a typed + went with that entry; one
+    // typed into a formula afterwards is the formula's own.
+    sheet.updateBottomRightCellValues([
+      { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
+    ] as never);
+    const input = await startTyping('+');
+    press(input, 'Escape');
+    await sheet.getFormulaBar().updateComplete;
+    const field = sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+    field.focus();
+    field.value = '=SUM()%';
+    field.setSelectionRange(5, 5);
+    field.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+
+    press(field, 'ArrowDown');
+
+    expect(field.value).to.equal('=SUM(C4)%');
+  });
+
   it('keeps the % for a number typed into a percentage cell', async () => {
     sheet.updateBottomRightCellValues([
       { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
