@@ -2928,6 +2928,29 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
+    it('row grouping: inversed puts the button before the group, as for columns', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
+        sheet.setRows(5);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        sheet.setRowH([15, 15, 15, 15, 15]);
+        sheet.setRowGroupingMax(1);
+        sheet.setRowGroupingInversed(true);
+        sheet.setRowGroupingData([
+            { uniqueIndex: 3, level: 1, startIndex: 1, endIndex: 3, collapsed: false },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getRowHeader().updateComplete;
+
+        // The summary row comes before the group: the 12px button is
+        // centred beside the middle of row 1, 15 pt being 20 px.
+        const toggle = sheet.getRowHeader().shadowRoot!.querySelector(
+            '.row-grouping-toggle'
+        ) as HTMLButtonElement;
+        expect(toggle.style.top).to.equal(`${20 / 2 - 6}px`);
+        cleanup();
+    });
+
     // ===================================================================
     // `part` attribute scaffolding for documented styling API
     // ===================================================================
