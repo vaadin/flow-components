@@ -176,8 +176,6 @@ class FreshLoadConsistencyTest {
      * without it.
      */
     private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
-            Map.entry("cells cut, undone and redone", c -> c.known("step 3")),
-            Map.entry("cells pasted, then undone", c -> c.known("changed it")),
             Map.entry("a row inserted, then undone",
                     c -> c.known("property rowH", "property rows",
                             "pop-up button")),

@@ -221,14 +221,14 @@ public class CellValueCommand extends SpreadsheetCommand
         }
 
         if (value == null) { // delete
-            if (cell == null || cell.getCellStyle().getIndex() == 0) {
+            if (cell.getCellStyle().getIndex() == 0) {
+                // Out of its row first, as markCellAsDeleted takes it: told
+                // while still in its row, the formula evaluator kept the cell
+                // where it was, and a formula reading it failed once it left.
+                getSheet().getRow(row).removeCell(cell);
                 if (!spreadsheet.isRerenderPending()) {
-                    // Empty before it is sent: the cell whose text may run
-                    // into this one is sent with it, and has to see it empty.
-                    cell.setBlank();
                     spreadsheet.markCellAsDeleted(cell, false);
                 }
-                getSheet().getRow(row).removeCell(cell);
             } else {
                 cell.setCellValue((String) null);
                 if (!spreadsheet.isRerenderPending()) {
