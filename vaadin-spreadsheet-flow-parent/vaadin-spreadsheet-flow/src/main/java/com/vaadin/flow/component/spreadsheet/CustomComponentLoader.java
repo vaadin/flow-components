@@ -248,8 +248,7 @@ final class CustomComponentLoader implements Serializable {
     private void applyHeightsFor(Set<Integer> rowsWithComponents) {
         // Components can be on rows setMaxRows added past the loaded ones.
         int lastRow = Math.max(lastOf(rowsWithComponents), lastOf(grownRows));
-        float[] updatedHeights = RowSizeOperations.heightsCovering(spreadsheet,
-                lastRow);
+        float[] updatedHeights = spreadsheet.sizes().heightsCovering(lastRow);
         int minHeight = spreadsheet.getMinimumRowHeightForComponents();
 
         // Grow rows that now host a component

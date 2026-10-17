@@ -110,7 +110,7 @@ class RowsAddedByMaxRowsTest {
         sheet.createRow(260).setZeroHeight(true);
         float[] loaded = spreadsheet.getRowH().clone();
 
-        float[] rowH = RowSizeOperations.heightsCovering(spreadsheet, 270);
+        float[] rowH = spreadsheet.sizes().heightsCovering(270);
 
         assertEquals(271, rowH.length);
         assertArrayEquals(loaded, Arrays.copyOf(rowH, loaded.length));
@@ -124,7 +124,7 @@ class RowsAddedByMaxRowsTest {
     void heightsCovering_aLoadedRow_isACopyOfTheHeights() {
         float[] loaded = spreadsheet.getRowH();
 
-        float[] rowH = RowSizeOperations.heightsCovering(spreadsheet, 10);
+        float[] rowH = spreadsheet.sizes().heightsCovering(10);
 
         assertArrayEquals(loaded, rowH);
         rowH[10] = 99;

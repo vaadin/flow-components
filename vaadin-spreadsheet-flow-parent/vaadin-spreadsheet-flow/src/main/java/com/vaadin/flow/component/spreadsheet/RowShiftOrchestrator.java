@@ -63,12 +63,7 @@ final class RowShiftOrchestrator implements Serializable {
         int lastAffectedRow = n < 0 ? endRow : endRow + n;
         // The rows moved with their heights, whether hidden or not, and the
         // rows they left are empty.
-        float[] rowH = RowSizeOperations.heightsCovering(spreadsheet,
-                lastAffectedRow);
-        for (int i = firstAffectedRow; i <= lastAffectedRow; i++) {
-            rowH[i] = SpreadsheetUtil.rowHeightShown(sheet, i);
-        }
-        spreadsheet.setRowH(rowH);
+        spreadsheet.sizes().readRows(firstAffectedRow, lastAffectedRow);
 
         if (spreadsheet.overlays().hasOverlays()) {
             spreadsheet.overlays().markReloadFromPoi();
@@ -84,21 +79,13 @@ final class RowShiftOrchestrator implements Serializable {
             }
             Row row = sheet.getRow(r);
             final Integer rowIndex = r + 1;
-            ArrayList<Integer> hiddenRowIndexes = new ArrayList<>(
-                    spreadsheet.getHiddenRowIndexes());
             if (row == null) {
                 spreadsheet.getCellValueManager()
                         .updateDeletedRowsInClientCache(rowIndex, rowIndex);
-                hiddenRowIndexes.remove(rowIndex);
                 for (int c = 0; c < spreadsheet.getCols(); c++) {
                     styler.clearCellStyle(r, c);
                 }
             } else {
-                if (row.getZeroHeight()) {
-                    hiddenRowIndexes.add(rowIndex);
-                } else {
-                    hiddenRowIndexes.remove(rowIndex);
-                }
                 for (int c = 0; c < spreadsheet.getCols(); c++) {
                     Cell cell = row.getCell(c);
                     if (cell == null) {
@@ -114,7 +101,6 @@ final class RowShiftOrchestrator implements Serializable {
                     }
                 }
             }
-            spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
         }
         // POI moves and removes the merged regions itself, and
         // updateMergedRegions() below passes its result to the client.

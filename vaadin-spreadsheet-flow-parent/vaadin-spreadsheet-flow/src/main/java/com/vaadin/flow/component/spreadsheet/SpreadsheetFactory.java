@@ -34,7 +34,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -343,9 +342,11 @@ public class SpreadsheetFactory implements Serializable {
             final Sheet sheet) {
         logMemoryUsage();
         // What POI cannot read of a sheet is left out, and the rest loaded.
-        loadPart("row height", () -> setDefaultRowHeight(spreadsheet, sheet));
-        loadPart("column width", () -> setDefaultColumnWidth(spreadsheet));
-        loadPart("sizes", () -> calculateSheetSizes(spreadsheet, sheet));
+        loadPart("row height",
+                () -> spreadsheet.sizes().loadDefaultRowHeight(sheet));
+        loadPart("column width",
+                () -> spreadsheet.sizes().loadDefaultColumnWidth());
+        loadPart("sizes", () -> spreadsheet.sizes().load(sheet));
         loadPart("overlays", () -> loadSheetOverlays(spreadsheet));
         loadPart("tables", () -> loadSheetTables(spreadsheet));
         loadPart("merged cells", spreadsheet.mergedRegionOperations::load);
@@ -464,85 +465,6 @@ public class SpreadsheetFactory implements Serializable {
             final int colId = offset + (int) column.getColId();
             sheetFilterTable.getPopupButton(colId).markActive(true);
         }
-    }
-
-    /**
-     * Loads the size of the sheet: how many rows and columns it has, at least
-     * the default counts, and their heights and widths.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param sheet
-     *            the sheet shown
-     */
-    static void calculateSheetSizes(final Spreadsheet spreadsheet,
-            final Sheet sheet) {
-        int rows = Math.max(sheet.getLastRowNum() + 1,
-                spreadsheet.getDefaultRowCount());
-        int cols = spreadsheet.getDefaultColumnCount();
-        for (Row row : sheet) {
-            cols = Math.max(cols, row.getLastCellNum());
-        }
-        spreadsheet.setRows(rows);
-        spreadsheet.setCols(cols);
-        readSizes(spreadsheet, sheet, rows, cols);
-    }
-
-    /**
-     * Reads the heights of the first rows and the widths of the first columns
-     * of the sheet, and which of them are hidden, leaving the counts of rows
-     * and columns as they are.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param sheet
-     *            the sheet shown
-     * @param rows
-     *            how many rows to read
-     * @param cols
-     *            how many columns to read
-     */
-    static void readSizes(Spreadsheet spreadsheet, Sheet sheet, int rows,
-            int cols) {
-        readRowSizes(spreadsheet, sheet, rows);
-        readColumnSizes(spreadsheet, sheet, cols);
-    }
-
-    /**
-     * Reads the heights of the first rows of the sheet, and which of them are
-     * hidden.
-     */
-    static void readRowSizes(Spreadsheet spreadsheet, Sheet sheet, int rows) {
-        float[] rowHeights = new float[rows];
-        ArrayList<Integer> hiddenRowIndexes = new ArrayList<>();
-        for (int i = 0; i < rows; i++) {
-            Row row = sheet.getRow(i);
-            if (row != null && row.getZeroHeight()) {
-                hiddenRowIndexes.add(i + 1);
-            }
-            rowHeights[i] = SpreadsheetUtil.rowHeightShown(sheet, i);
-        }
-        spreadsheet.setHiddenRowIndexes(hiddenRowIndexes);
-        spreadsheet.setRowH(rowHeights);
-    }
-
-    /**
-     * Reads the widths of the first columns of the sheet, and which of them are
-     * hidden.
-     */
-    static void readColumnSizes(Spreadsheet spreadsheet, Sheet sheet,
-            int cols) {
-        int[] colWidths = new int[cols];
-        ArrayList<Integer> hiddenColumnIndexes = new ArrayList<>();
-        for (int i = 0; i < cols; i++) {
-            if (sheet.isColumnHidden(i)) {
-                hiddenColumnIndexes.add(i + 1);
-            }
-            colWidths[i] = SpreadsheetUtil.columnWidthShown(sheet, i,
-                    spreadsheet.getDefColW());
-        }
-        spreadsheet.setHiddenColumnIndexes(hiddenColumnIndexes);
-        spreadsheet.setColW(colWidths);
     }
 
     /**
@@ -1066,28 +988,6 @@ public class SpreadsheetFactory implements Serializable {
             sheetname = "Sheet" + idx;
         }
         return workbook.createSheet(sheetname);
-    }
-
-    private static void setDefaultRowHeight(Spreadsheet spreadsheet,
-            final Sheet sheet) {
-        float defaultRowHeightInPoints = sheet.getDefaultRowHeightInPoints();
-        if (defaultRowHeightInPoints <= 0) {
-            sheet.setDefaultRowHeightInPoints(DEFAULT_ROW_HEIGHT_POINTS);
-            spreadsheet.setDefRowH(DEFAULT_ROW_HEIGHT_POINTS);
-        } else {
-            spreadsheet.setDefRowH(defaultRowHeightInPoints);
-        }
-    }
-
-    /**
-     * Gives the columns without a width of their own the default width of the
-     * component, unless the application set another, leaving the default width
-     * of the sheet as it is.
-     */
-    private static void setDefaultColumnWidth(Spreadsheet spreadsheet) {
-        if (spreadsheet.getDefColW() <= 0) {
-            spreadsheet.setDefColW(SpreadsheetUtil.getDefaultColumnWidthInPx());
-        }
     }
 
     /**

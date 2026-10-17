@@ -269,7 +269,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         if (!spreadsheet.mayResizeFromClient(false)) {
             return;
         }
-        spreadsheet.onRowResized(newRowSizes, row1, col1, row2, col2);
+        spreadsheet.onRowResized(newRowSizes);
     }
 
     @Override
@@ -278,7 +278,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         if (!spreadsheet.mayResizeFromClient(true)) {
             return;
         }
-        spreadsheet.onColumnResized(newColumnSizes, row1, col1, row2, col2);
+        spreadsheet.onColumnResized(newColumnSizes);
     }
 
     @Override

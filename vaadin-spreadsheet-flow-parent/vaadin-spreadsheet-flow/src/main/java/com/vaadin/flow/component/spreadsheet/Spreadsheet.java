@@ -168,7 +168,7 @@ public class Spreadsheet extends Component
 
     private final SheetGrouping sheetGrouping = new SheetGrouping(this);
 
-    private final SheetDimensions sheetDimensions = new SheetDimensions(this);
+    private final SheetSizes sheetSizes = new SheetSizes(this);
 
     /** should the sheet be reloaded on client side */
     private final ClientReloadFlag clientReloadFlag = new ClientReloadFlag();
@@ -271,19 +271,19 @@ public class Spreadsheet extends Component
     }
 
     float getDefRowH() {
-        return sheetDimensions.getDefRowH();
+        return sheetSizes.defaultRowHeight();
     }
 
     int getDefColW() {
-        return sheetDimensions.getDefColW();
+        return sheetSizes.defaultColumnWidth();
     }
 
     float[] getRowH() {
-        return sheetDimensions.getRowH();
+        return sheetSizes.rowHeights();
     }
 
     int[] getColW() {
-        return sheetDimensions.getColW();
+        return sheetSizes.columnWidths();
     }
 
     int getSheetIndex() {
@@ -322,12 +322,14 @@ public class Spreadsheet extends Component
         return cssStyleMaps.getConditionalFormattingStyles();
     }
 
+    /** The columns hidden, counted from 1, as the client counts them. */
     ArrayList<Integer> getHiddenColumnIndexes() {
-        return sheetDimensions.getHiddenColumnIndexes();
+        return sheetSizes.hiddenColumnsFromOne();
     }
 
+    /** The rows hidden, counted from 1, as the client counts them. */
     ArrayList<Integer> getHiddenRowIndexes() {
-        return sheetDimensions.getHiddenRowIndexes();
+        return sheetSizes.hiddenRowsFromOne();
     }
 
     int[] getVerticalScrollPositions() {
@@ -430,20 +432,8 @@ public class Spreadsheet extends Component
         sheetGrouping.setRowGroupingInversed(rowGroupingInversed);
     }
 
-    void setDefRowH(float defRowH) {
-        sheetDimensions.setDefRowH(defRowH);
-    }
-
-    void setDefColW(int defColW) {
-        sheetDimensions.setDefColW(defColW);
-    }
-
     void setRowH(float[] rowH) {
-        sheetDimensions.setRowH(rowH);
-    }
-
-    void setColW(int[] colW) {
-        sheetDimensions.setColW(colW);
+        sheetSizes.setRowHeights(rowH);
     }
 
     void setSheetIndex(int sheetIndex) {
@@ -486,14 +476,6 @@ public class Spreadsheet extends Component
             HashMap<Integer, String> conditionalFormattingStyles) {
         cssStyleMaps
                 .setConditionalFormattingStyles(conditionalFormattingStyles);
-    }
-
-    void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
-        sheetDimensions.setHiddenColumnIndexes(hiddenColumnIndexes);
-    }
-
-    void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
-        sheetDimensions.setHiddenRowIndexes(hiddenRowIndexes);
     }
 
     void setVerticalScrollPositions(int[] verticalScrollPositions) {
@@ -995,15 +977,6 @@ public class Spreadsheet extends Component
     final CellCommentLoader cellCommentLoader = new CellCommentLoader(this);
 
     private final HyperlinkLoader hyperlinkLoader = new HyperlinkLoader(this);
-
-    private final RowSizeOperations rowSizeOperations = new RowSizeOperations(
-            this);
-
-    private final ColumnSizeOperations columnSizeOperations = new ColumnSizeOperations(
-            this);
-
-    private final ColumnAutofitter columnAutofitter = new ColumnAutofitter(
-            this);
 
     private final SheetOperations sheetOperations = new SheetOperations(this);
 
@@ -2390,7 +2363,7 @@ public class Spreadsheet extends Component
                     "Default column width must be over 0, given value: "
                             + widthPX);
         }
-        columnSizeOperations.setDefaultWidthPixels(widthPX);
+        sheetSizes.setDefaultColumnWidth(widthPX);
     }
 
     /**
@@ -2418,7 +2391,7 @@ public class Spreadsheet extends Component
                     "Default row height must be over 0, given value: "
                             + heightPT);
         }
-        rowSizeOperations.setDefaultHeightPoints(heightPT);
+        sheetSizes.setDefaultRowHeight(heightPT);
     }
 
     /**
@@ -2429,7 +2402,7 @@ public class Spreadsheet extends Component
      *            Index of the target column, 0-based
      */
     protected void onColumnAutofit(int columnIndex) {
-        columnAutofitter.onClientAutofit(columnIndex);
+        sheetSizes.onClientAutofit(columnIndex);
     }
 
     /**
@@ -2445,7 +2418,7 @@ public class Spreadsheet extends Component
      *            Index of the target column, 0-based
      */
     public void autofitColumn(int columnIndex) {
-        columnAutofitter.autofit(columnIndex);
+        sheetSizes.autofit(columnIndex);
     }
 
     /**
@@ -2548,16 +2521,8 @@ public class Spreadsheet extends Component
         // The formula evaluator still holds the cells removed, and a cell
         // taken off its row fails when it is read.
         getFormulaEvaluator().clearAllCachedResultValues();
-        float[] _rowH = RowSizeOperations.heightsCovering(this, endRow);
-        ArrayList<Integer> hiddenRowIndexes = new ArrayList<>(
-                getHiddenRowIndexes());
-        for (int i = startRow; i <= endRow; i++) {
-            _rowH[i] = sheet.getDefaultRowHeightInPoints();
-            // A row deleted is hidden no longer.
-            hiddenRowIndexes.remove(Integer.valueOf(i + 1));
-        }
-        setHiddenRowIndexes(hiddenRowIndexes);
-        setRowH(_rowH);
+        // The rows deleted are empty, of the default height, and not hidden.
+        sheetSizes.readRows(startRow, endRow);
         updateMergedRegions();
         valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);
 
@@ -2682,7 +2647,7 @@ public class Spreadsheet extends Component
      *            True to hide the target column, false to show it.
      */
     public void setColumnHidden(int columnIndex, boolean hidden) {
-        columnSizeOperations.setHidden(columnIndex, hidden);
+        sheetSizes.setColumnHidden(columnIndex, hidden);
     }
 
     /**
@@ -2696,7 +2661,7 @@ public class Spreadsheet extends Component
      *            column should be hidden
      */
     void setColumnsHidden(Map<Integer, Boolean> columnIndexToHidden) {
-        columnSizeOperations.setColumnsHidden(columnIndexToHidden);
+        sheetSizes.setColumnsHidden(columnIndexToHidden);
     }
 
     /**
@@ -2720,7 +2685,7 @@ public class Spreadsheet extends Component
      *            True to hide the target row, false to show it.
      */
     public void setRowHidden(int rowIndex, boolean hidden) {
-        rowSizeOperations.setHidden(rowIndex, hidden);
+        sheetSizes.setRowHidden(rowIndex, hidden);
     }
 
     /**
@@ -2734,40 +2699,7 @@ public class Spreadsheet extends Component
      *            should be hidden
      */
     void setRowsHidden(Map<Integer, Boolean> rowIndexToHidden) {
-        rowSizeOperations.setRowsHidden(rowIndexToHidden);
-    }
-
-    /**
-     * Rows or columns changed size, or were hidden or shown: the overlays over
-     * them are sized again, and the cell styles reloaded.
-     *
-     * @param rowsChanged
-     *            whether rows changed height, which the rows with components
-     *            are grown for again
-     * @param visibilityChanged
-     *            whether rows or columns were hidden or shown: the comments,
-     *            left out of hidden ones, are loaded again, and for rows the
-     *            formulas, which can leave hidden rows out
-     */
-    void reloadSheetStyles(boolean rowsChanged, boolean visibilityChanged) {
-        if (rowsChanged) {
-            // A row with a component given a height is grown for it again.
-            sheetScope.components.regrowRows();
-        }
-        // The overlays are sized from the rows and columns under them.
-        sheetScope.overlays.loadOrUpdate();
-        if (visibilityChanged) {
-            cellCommentLoader.load();
-        }
-        if (rowsChanged && visibilityChanged) {
-            // Formulas such as SUBTOTAL(109, ...) leave hidden rows out: the
-            // values, and the formatting that follows them, are worked out
-            // again.
-            getFormulaEvaluator().clearAllCachedResultValues();
-            getConditionalFormattingEvaluator().clearAllCachedValues();
-            updateMarkedCells();
-        }
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+        sheetSizes.setRowsHidden(rowIndexToHidden);
     }
 
     /**
@@ -3039,6 +2971,16 @@ public class Spreadsheet extends Component
     /** The overlays of the sheet shown. */
     SheetOverlayManager overlays() {
         return sheetScope.overlays;
+    }
+
+    /** The custom components of the sheet shown. */
+    CustomComponentLoader components() {
+        return sheetScope.components;
+    }
+
+    /** The sizes of the rows and columns of the sheet shown. */
+    SheetSizes sizes() {
+        return sheetSizes;
     }
 
     /** The pop-up buttons of the workbook shown. */
@@ -3432,9 +3374,9 @@ public class Spreadsheet extends Component
         }
     }
 
-    void onRowResized(Map<Integer, Float> newRowSizes, int row1, int col1,
-            int row2, int col2) {
-        rowSizeOperations.onClientResized(newRowSizes, row1, col1, row2, col2);
+    /** The user resized rows, counted from 1, as the client counts them. */
+    void onRowResized(Map<Integer, Float> newRowSizes) {
+        sheetSizes.onClientRowsResized(newRowSizes);
     }
 
     /**
@@ -3447,13 +3389,14 @@ public class Spreadsheet extends Component
      *            New row height in points
      */
     public void setRowHeight(int index, float height) {
-        rowSizeOperations.setHeight(index, height);
+        sheetSizes.setRowHeight(index, height);
     }
 
-    void onColumnResized(Map<Integer, Integer> newColumnSizes, int row1,
-            int col1, int row2, int col2) {
-        columnSizeOperations.onClientResized(newColumnSizes, row1, col1, row2,
-                col2);
+    /**
+     * The user resized columns, counted from 1, as the client counts them.
+     */
+    void onColumnResized(Map<Integer, Integer> newColumnSizes) {
+        sheetSizes.onClientColumnsResized(newColumnSizes);
     }
 
     /**
@@ -3466,7 +3409,7 @@ public class Spreadsheet extends Component
      *            New column width in pixels
      */
     public void setColumnWidth(int index, int width) {
-        columnSizeOperations.setWidth(index, width);
+        sheetSizes.setColumnWidth(index, width);
     }
 
     void loadHyperLinks() {
@@ -3665,7 +3608,7 @@ public class Spreadsheet extends Component
     public void registerTable(SpreadsheetTable table) {
         workbookScope.tables.add(table);
         if (table instanceof SpreadsheetFilterTable filterTable) {
-            columnAutofitter.refreshAutofittedColumnsInTable(filterTable);
+            sheetSizes.refreshAutofittedColumnsInTable(filterTable);
         }
     }
 
@@ -4604,12 +4547,9 @@ public class Spreadsheet extends Component
                 GroupingUtil.expandRow(activeSheet, index);
             }
         }
-        // The rows and columns the group hid or showed are read again, as
-        // many as the client has.
-        SpreadsheetFactory.readSizes(this, activeSheet, getRowH().length,
-                getColW().length);
         SpreadsheetFactory.loadGrouping(this);
-        reloadSheetStyles(true, true);
+        // The rows and columns the group hid or showed are read again.
+        sheetSizes.groupToggled();
     }
 
     private void updateExpandedRegion(XSSFSheet sheet, int columnIndex,

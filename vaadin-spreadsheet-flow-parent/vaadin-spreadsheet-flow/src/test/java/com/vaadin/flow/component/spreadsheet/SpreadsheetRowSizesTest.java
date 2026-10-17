@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 /**
@@ -109,6 +110,19 @@ class SpreadsheetRowSizesTest {
 
         assertEquals(30f, spreadsheet.getRowH()[3]);
         assertEquals(50f, spreadsheet.getRowH()[4]);
+    }
+
+    @Test
+    void aRowResizedByTheUser_isUndone() {
+        float height = spreadsheet.getRowH()[2];
+        // The client numbers the rows from 1.
+        TestHelper.fireClientEvent(spreadsheet, "rowsResized",
+                "{\"rowIndexes\": [3], \"newHeights\": [40]}");
+        assertEquals(40f, spreadsheet.getRowH()[2]);
+
+        TestHelper.fireClientEvent(spreadsheet, "onUndo", "{}");
+
+        assertEquals(height, spreadsheet.getRowH()[2]);
     }
 
     @Test

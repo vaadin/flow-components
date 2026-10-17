@@ -121,6 +121,14 @@ final class FreshLoadFixture {
         CellStyle bordered = workbook.createCellStyle();
         bordered.setBorderBottom(BorderStyle.THIN);
         set(first, "E13", "bordered").setCellStyle(bordered);
+        // Borders drawn on the cell before them, past hidden rows and columns:
+        // the top of F13 and the left of H12.
+        CellStyle topBorder = workbook.createCellStyle();
+        topBorder.setBorderTop(BorderStyle.THIN);
+        set(first, "F13", "top border").setCellStyle(topBorder);
+        CellStyle leftBorder = workbook.createCellStyle();
+        leftBorder.setBorderLeft(BorderStyle.THIN);
+        set(first, "H12", "left border").setCellStyle(leftBorder);
 
         set(first, "E15", "merged");
         first.addMergedRegion(CellRangeAddress.valueOf("E15:F16"));

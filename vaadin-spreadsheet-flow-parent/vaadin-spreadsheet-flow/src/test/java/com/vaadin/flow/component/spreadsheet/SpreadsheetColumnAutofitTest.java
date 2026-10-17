@@ -182,7 +182,7 @@ class SpreadsheetColumnAutofitTest {
         for (int row = 2; row < 5; row++) {
             sheet.createRow(row).createCell(1).setCellValue("x");
         }
-        sheet.setColumnWidth(1, SpreadsheetUtil.columnWidthUnits(sheet, width));
+        sheet.setColumnWidth(1, SheetSizes.columnWidthUnits(sheet, width));
         spreadsheet.setWorkbook(other);
 
         putFilterOver("B3:B5");

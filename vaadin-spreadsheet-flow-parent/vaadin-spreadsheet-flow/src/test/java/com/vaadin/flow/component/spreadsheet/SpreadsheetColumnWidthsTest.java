@@ -69,12 +69,24 @@ class SpreadsheetColumnWidthsTest {
         HSSFSheet sheet = new HSSFWorkbook().createSheet();
         sheet.setDefaultColumnWidth(defaultWidth);
 
-        for (int pixels = 1; pixels <= SpreadsheetUtil.MAX_COLUMN_WIDTH_PX; pixels++) {
-            sheet.setColumnWidth(0,
-                    SpreadsheetUtil.columnWidthUnits(sheet, pixels));
+        for (int pixels = 1; pixels <= SheetSizes.MAX_COLUMN_WIDTH_PX; pixels++) {
+            sheet.setColumnWidth(0, SheetSizes.columnWidthUnits(sheet, pixels));
 
             assertEquals(pixels, (int) sheet.getColumnWidthInPixels(0));
         }
+    }
+
+    @Test
+    void aColumnGivenNoWidth_isHidden() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet();
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+
+        spreadsheet.setColumnWidth(3, 0);
+
+        assertTrue(spreadsheet.isColumnHidden(3));
+        assertTrue(spreadsheet.getHiddenColumnIndexes().contains(4));
+        assertEquals(0, spreadsheet.getColW()[3]);
     }
 
     @Test
@@ -132,7 +144,7 @@ class SpreadsheetColumnWidthsTest {
         int columns = SpreadsheetVersion.EXCEL97.getMaxColumns();
         workbook.getSheetAt(0).createRow(0).createCell(columns - 1);
         Spreadsheet spreadsheet = new Spreadsheet(workbook);
-        int widest = SpreadsheetUtil.MAX_COLUMN_WIDTH_PX;
+        int widest = SheetSizes.MAX_COLUMN_WIDTH_PX;
         for (int first = 1; first <= widest; first += columns) {
             int[] given = new int[columns];
             for (int column = 0; column < columns; column++) {

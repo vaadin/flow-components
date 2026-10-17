@@ -140,7 +140,7 @@ class SpreadsheetDefaultColumnWidthTest {
     void aColumnWithAWidth_isShownAtIt(Supplier<Workbook> format) {
         Workbook workbook = format.get();
         Sheet sheet = workbook.createSheet();
-        sheet.setColumnWidth(3, SpreadsheetUtil.columnWidthUnits(sheet, 100));
+        sheet.setColumnWidth(3, SheetSizes.columnWidthUnits(sheet, 100));
 
         assertEquals(100, new Spreadsheet(workbook).getColW()[3]);
     }

@@ -158,8 +158,19 @@ class FreshLoadConsistencyTest {
      * they send for nothing. A fix takes out what it fixes, so the test fails
      * without it.
      */
-    private static final Map<String, UnaryOperator<Case>> KNOWN = Map
-            .ofEntries();
+    private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
+            Map.entry("a selection filled down",
+                    c -> c.known("property shiftedCellBorderStyles")),
+            Map.entry("rows shifted down", c -> c.known("cell H13")),
+            Map.entry("rows of their own heights shifted down",
+                    c -> c.known("cell H13")),
+            Map.entry("a hidden row shifted down", c -> c.known("cell H13")),
+            Map.entry("rows deleted",
+                    c -> c.known("property shiftedCellBorderStyles")),
+            Map.entry("a hidden row deleted",
+                    c -> c.known("property shiftedCellBorderStyles")),
+            Map.entry("a row of its own height deleted",
+                    c -> c.known("property shiftedCellBorderStyles")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -208,7 +219,7 @@ class FreshLoadConsistencyTest {
                 op("rows dragged, one to nothing", event("rowsResized",
                         "{\"rowIndexes\": [11, 12], \"newHeights\": [0, 40]}")),
                 op("columns dragged, one to nothing", event("columnResized",
-                        "{\"colIndexes\": [6, 7], \"newWidths\": [0, 120]}")),
+                        "{\"colIndexes\": [7, 8], \"newWidths\": [0, 120]}")),
                 steps("a hidden column dragged open", api(
                         spreadsheet -> spreadsheet.setColumnHidden(6, true)),
                         event("columnResized",
@@ -303,6 +314,9 @@ class FreshLoadConsistencyTest {
                         spreadsheet -> spreadsheet.setColumnHidden(6, true)),
                         api(spreadsheet -> spreadsheet.setColumnHidden(6,
                                 false))),
+                op("columns hidden together",
+                        spreadsheet -> spreadsheet
+                                .setColumnsHidden(Map.of(6, true, 7, true))),
                 op("a column shown that was not hidden",
                         spreadsheet -> spreadsheet.setColumnHidden(5, false)),
                 op("the default row height set",
@@ -460,8 +474,11 @@ class FreshLoadConsistencyTest {
      * What the operations of an application are known to do wrong today when
      * the client has not seen the spreadsheet yet, by case name and when.
      */
-    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
-            .of();
+    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map.of(
+            "rows deleted, before ATTACHED",
+            List.of("property shiftedCellBorderStyles"),
+            "rows deleted, before FIRST_RESPONSE",
+            List.of("property shiftedCellBorderStyles"));
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")

@@ -30,16 +30,11 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 
 /**
  * Utility class for miscellaneous Spreadsheet operations.
@@ -50,15 +45,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 public class SpreadsheetUtil implements Serializable {
 
     private static final Pattern keyParser = Pattern.compile("-?\\d+");
-
-    private static final short EXCEL_COLUMN_WIDTH_FACTOR = 256;
-
-    /**
-     * The widest column POI holds, 255 characters, in the whole pixels POI
-     * reads it as.
-     */
-    static final int MAX_COLUMN_WIDTH_PX = (int) (255
-            * Units.DEFAULT_CHARACTER_WIDTH);
 
     /**
      * Translates cell coordinates to a cell key used to identify cells in the
@@ -214,97 +200,6 @@ public class SpreadsheetUtil implements Serializable {
         matcher.find(); // find first digit (col)
         matcher.find(); // find second digit (row)
         return Integer.valueOf(matcher.group());
-    }
-
-    /**
-     * Converts a column width in pixels to the units POI holds it in, 1/256 of
-     * a character, so that POI reads the width back as the same pixels: the
-     * client is given the width a fresh load reads.
-     *
-     * @param sheet
-     *            the sheet of the column
-     * @param pixels
-     *            the width in pixels
-     * @return the width in POI's units
-     */
-    static int columnWidthUnits(Sheet sheet, int pixels) {
-        // POI reads the units as a fraction of a pixel, which is cut to whole
-        // pixels: the fewest units that reach the pixels.
-        int units = (int) Math.ceil(pixels * EXCEL_COLUMN_WIDTH_FACTOR
-                / Units.DEFAULT_CHARACTER_WIDTH);
-        // HSSF reads just the default width of the sheet as a column of the
-        // default width, which is drawn wider. A unit more is read as the same
-        // pixels, on any sheet.
-        if (units == sheet.getDefaultColumnWidth()
-                * EXCEL_COLUMN_WIDTH_FACTOR) {
-            units++;
-        }
-        return units;
-    }
-
-    /**
-     * The height a row is shown at, in points: none when it is hidden, its own
-     * height in the sheet, or the default height of the sheet when the sheet
-     * has no such row.
-     *
-     * @param sheet
-     *            the sheet of the row
-     * @param row
-     *            the row index, 0-based
-     * @return the height in points
-     */
-    static float rowHeightShown(Sheet sheet, int row) {
-        Row poiRow = sheet.getRow(row);
-        if (poiRow == null) {
-            return sheet.getDefaultRowHeightInPoints();
-        }
-        return poiRow.getZeroHeight() ? 0f : poiRow.getHeightInPoints();
-    }
-
-    /**
-     * The width a column is shown at, in pixels: none when it is hidden, its
-     * own width in the sheet, or the default width given when it has none of
-     * its own, whatever the default width of the sheet.
-     *
-     * @param sheet
-     *            the sheet of the column
-     * @param column
-     *            the column index, 0-based
-     * @param defaultWidth
-     *            the default width of the component, in pixels
-     * @return the width in pixels
-     */
-    static int columnWidthShown(Sheet sheet, int column, int defaultWidth) {
-        if (sheet.isColumnHidden(column)) {
-            return 0;
-        }
-        return hasOwnWidth(sheet, column)
-                ? (int) sheet.getColumnWidthInPixels(column)
-                : defaultWidth;
-    }
-
-    private static boolean hasOwnWidth(Sheet sheet, int column) {
-        if (sheet instanceof XSSFSheet xssfSheet) {
-            CTCol col = xssfSheet.getColumnHelper().getColumn(column, false);
-            return col != null && col.isSetWidth();
-        }
-        // HSSF reads a column of just the default width as one without a
-        // width of its own, which is all it tells them apart by.
-        return sheet.getColumnWidth(column) != sheet.getDefaultColumnWidth()
-                * EXCEL_COLUMN_WIDTH_FACTOR;
-    }
-
-    /**
-     * Gets the default column width for new sheets in pixels. The calculation
-     * is done using POI.
-     *
-     * @return Default column width in PX
-     */
-    static int getDefaultColumnWidthInPx() {
-        // Formula taken from XSSFSheet.getColumnWidthInPixels
-        return (int) (SpreadsheetFactory.DEFAULT_COL_WIDTH_UNITS
-                * EXCEL_COLUMN_WIDTH_FACTOR / 256.0
-                * Units.DEFAULT_CHARACTER_WIDTH);
     }
 
     /**

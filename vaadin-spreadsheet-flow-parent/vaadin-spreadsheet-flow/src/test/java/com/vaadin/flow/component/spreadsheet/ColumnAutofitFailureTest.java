@@ -28,7 +28,7 @@ import com.vaadin.flow.component.spreadsheet.tests.ExpectWarnings;
  * A column POI cannot autofit keeps its width, with a warning. What autofitting
  * does otherwise, {@link SpreadsheetColumnAutofitTest} shows.
  */
-class ColumnAutofitterTest {
+class ColumnAutofitFailureTest {
 
     @Test
     @ExpectWarnings
@@ -41,7 +41,7 @@ class ColumnAutofitterTest {
 
         List<CapturedLogs.Entry> logged;
         try (CapturedLogs.Capture logs = CapturedLogs.capture()) {
-            new ColumnAutofitter(spreadsheet).autofit(1);
+            new SheetSizes(spreadsheet).autofit(1);
             logged = logs.entries();
         }
 

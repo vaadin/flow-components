@@ -35,7 +35,7 @@ public final class ColumnWidths {
      * @return the width in pixels
      */
     public static int shown(Spreadsheet spreadsheet, Sheet sheet, int column) {
-        return SpreadsheetUtil.columnWidthShown(sheet, column,
+        return SheetSizes.columnWidthShown(sheet, column,
                 spreadsheet.getDefColW());
     }
 }

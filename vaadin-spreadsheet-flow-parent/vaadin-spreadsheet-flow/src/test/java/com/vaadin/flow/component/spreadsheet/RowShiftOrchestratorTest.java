@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -67,6 +66,9 @@ class RowShiftOrchestratorTest {
 
     private XSSFWorkbook workbook;
     private Sheet activeSheet;
+    @Mock
+    private SheetSizes sizes;
+
     private RowShiftOrchestrator orchestrator;
 
     @BeforeEach
@@ -99,6 +101,8 @@ class RowShiftOrchestratorTest {
         // The overlays come from the sheet's scope; the pop-up buttons and
         // invalid formula marks from the workbook's.
         lenient().when(spreadsheet.overlays()).thenReturn(sheetOverlayManager);
+        // The sizes of the rows, read again for the rows the shift moved.
+        lenient().when(spreadsheet.sizes()).thenReturn(sizes);
         lenient().when(spreadsheet.popupButtons())
                 .thenReturn(popupButtonRegistry);
         lenient().when(spreadsheet.invalidFormulas())
@@ -288,29 +292,19 @@ class RowShiftOrchestratorTest {
     // ----- copyRowHeight branch --------------------------------------------
 
     @Test
-    void shift_copyRowHeightTrue_growsRowHArrayWhenNeeded() {
-        // Pin: positive n + copyRowHeight=true grows the cached rowH
-        // array when neededLength (endRow + n + 1) exceeds the current
-        // array length. The new array is pushed via setRowH.
-        when(spreadsheet.getRowH()).thenReturn(new float[3]);
-        // startRow=0, endRow=2, n=5 → neededLength = 8 > 3 → grow.
-
+    void shift_down_readsTheHeightsOfTheRowsMovedAndLeftAgain() {
+        // Pin: the rows from the first moved to the last one moved into are
+        // read again, POI having moved them with their heights.
         orchestrator.shift(0, 2, 5, true, false);
 
-        ArgumentCaptor<float[]> rowHCaptor = ArgumentCaptor
-                .forClass(float[].class);
-        verify(spreadsheet).setRowH(rowHCaptor.capture());
-        assertTrue(rowHCaptor.getValue().length >= 8,
-                "rowH array MUST be grown to at least neededLength");
+        verify(sizes).readRows(0, 7);
     }
 
     @Test
-    void shift_copyRowHeightFalse_stillUpdatesRowHArray() {
-        // Pin: POI moves the rows with their heights whether or not it
-        // copies them, so the heights shown follow either way.
-        orchestrator.shift(0, 2, 5, false, false);
+    void shift_up_readsTheHeightsOfTheRowsMovedAndLeftAgain() {
+        orchestrator.shift(4, 6, -2, false, false);
 
-        verify(spreadsheet).setRowH(any());
+        verify(sizes).readRows(2, 6);
     }
 
     // ----- pre-shift style invalidation for cellsToUpdate ------------------
