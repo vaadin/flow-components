@@ -849,6 +849,15 @@ describe('ViewportLoader', () => {
     expect(t.time.framesRequested).to.equal(0);
   });
 
+  it('asks for nothing while paused', () => {
+    const t = setUp();
+    t.loader.pause();
+
+    t.loader.check();
+
+    expect(t.loads).to.be.empty;
+  });
+
   it('counts frames again once resumed, as when the sheet is put back in the page', () => {
     const t = setUp();
     t.loader.pause();

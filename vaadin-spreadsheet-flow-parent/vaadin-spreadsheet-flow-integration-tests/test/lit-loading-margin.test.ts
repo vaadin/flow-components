@@ -89,6 +89,17 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     expect(loads).to.not.be.empty;
   });
 
+  it('tells the server nothing once out of the page', async () => {
+    await open();
+    loads = [];
+
+    scrollTo(300);
+    sheet.disconnect();
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    expect(loads).to.be.empty;
+  });
+
   it('tells the server where a scroll stopped as soon once moved in the page', async () => {
     // Moving the element takes it out of the page and puts it back.
     await open();

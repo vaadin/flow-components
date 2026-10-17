@@ -201,6 +201,9 @@ export class ViewportLoader {
    * drawn range may have changed.
    */
   check(): void {
+    if (this.paused) {
+      return;
+    }
     this.noteAnswered();
     if (this.inFlightSince !== null) {
       // Ours is still out: back once it is answered, to time it - and,
@@ -273,7 +276,10 @@ export class ViewportLoader {
     this.cancelTimer();
   }
 
-  /** Stop looking again while the sheet is out of the page. */
+  /**
+   * Ask for nothing, and stop looking again, while the sheet is out of the
+   * page: a repaint still pending when it left would ask otherwise.
+   */
   pause(): void {
     this.paused = true;
     this.cancelTimer();
