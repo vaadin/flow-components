@@ -92,8 +92,7 @@ final class CellBorderStyleBuilder implements Serializable {
 
     /**
      * Forgets the borders of the styles, to have them all again. What the cells
-     * draw stays until the cells are loaded again; a cell of a style that no
-     * longer has a border draws nothing with it.
+     * draw stays: a style whose borders change has its cells loaded again.
      */
     void resetStyles() {
         topBorders.clear();
@@ -119,22 +118,23 @@ final class CellBorderStyleBuilder implements Serializable {
                 .get(cellStyle.getBorderBottom());
         if (cellStyle instanceof XSSFCellStyle xssfCellStyle
                 && !xssfCellStyle.getCoreXf().getApplyBorder()) {
-            // borders from theme are not working in POI 3.9
+            // POI reads no borders for a style not applying its border entry,
+            // as some files have them: the entry is read instead.
             CTBorder ct = ((XSSFWorkbook) spreadsheet.getWorkbook())
                     .getStylesSource()
                     .getBorderAt((int) xssfCellStyle.getCoreXf().getBorderId())
                     .getCTBorder();
-            if (borderLeft == BorderStyle.NONE && ct.isSetLeft()) {
-                borderLeft = fromTheme(ct.getLeft().getStyle());
+            if (ct.isSetLeft()) {
+                borderLeft = fromEntry(ct.getLeft().getStyle());
             }
-            if (borderRight == BorderStyle.NONE && ct.isSetRight()) {
-                borderRight = fromTheme(ct.getRight().getStyle());
+            if (ct.isSetRight()) {
+                borderRight = fromEntry(ct.getRight().getStyle());
             }
-            if (borderBottom == BorderStyle.NONE && ct.isSetBottom()) {
-                borderBottom = fromTheme(ct.getBottom().getStyle());
+            if (ct.isSetBottom()) {
+                borderBottom = fromEntry(ct.getBottom().getStyle());
             }
-            if (borderTop == BorderStyle.NONE && ct.isSetTop()) {
-                borderTop = fromTheme(ct.getTop().getStyle());
+            if (ct.isSetTop()) {
+                borderTop = fromEntry(ct.getTop().getStyle());
             }
         }
 
@@ -151,11 +151,11 @@ final class CellBorderStyleBuilder implements Serializable {
                 BorderSide.LEFT, "border-right-color", cellStyle)));
     }
 
-    private static BorderStyle fromTheme(STBorderStyle.Enum pattern) {
-        return pattern == null ? BorderStyle.NONE
-                : SpreadsheetStyleFactory.BORDER
-                        .get(org.apache.poi.ss.usermodel.BorderStyle
-                                .valueOf((short) (pattern.intValue() - 1)));
+    /** A side of a border entry, which has no style when it has no line. */
+    private static BorderStyle fromEntry(STBorderStyle.Enum pattern) {
+        return SpreadsheetStyleFactory.BORDER
+                .get(org.apache.poi.ss.usermodel.BorderStyle
+                        .valueOf((short) (pattern.intValue() - 1)));
     }
 
     private String declarations(BorderStyle border, String property,
@@ -266,11 +266,12 @@ final class CellBorderStyleBuilder implements Serializable {
      * if there is none.
      */
     private CellKey cellBefore(int row, int column) {
-        int before = column - 1;
-        while (before >= 0 && spreadsheet.isColumnHidden(before)) {
-            before--;
+        for (int before = column - 1; before >= 0; before--) {
+            if (!spreadsheet.isColumnHidden(before)) {
+                return mergedCellOf(row, before);
+            }
         }
-        return before < 0 ? null : mergedCellOf(row, before);
+        return null;
     }
 
     /**
@@ -278,11 +279,12 @@ final class CellBorderStyleBuilder implements Serializable {
      * if there is none.
      */
     private CellKey cellAbove(int row, int column) {
-        int above = row - 1;
-        while (above >= 0 && spreadsheet.isRowHidden(above)) {
-            above--;
+        for (int above = row - 1; above >= 0; above--) {
+            if (!spreadsheet.isRowHidden(above)) {
+                return mergedCellOf(above, column);
+            }
         }
-        return above < 0 ? null : mergedCellOf(above, column);
+        return null;
     }
 
     private CellKey mergedCellOf(int row, int column) {
@@ -324,10 +326,10 @@ final class CellBorderStyleBuilder implements Serializable {
             }
         }
         ArrayList<String> rules = new ArrayList<>();
-        lefts.forEach((style, cells) -> addRule(rules, cells,
-                leftBorders.get(style)));
-        tops.forEach(
-                (style, cells) -> addRule(rules, cells, topBorders.get(style)));
+        lefts.forEach((style, cells) -> rules
+                .add(selectors(cells) + leftBorders.get(style)));
+        tops.forEach((style, cells) -> rules
+                .add(selectors(cells) + topBorders.get(style)));
         mergedCells.forEach((cell,
                 sides) -> rules.add(cell.selector() + "{"
                         + (sides[0] == null ? "" : sides[0])
@@ -335,12 +337,8 @@ final class CellBorderStyleBuilder implements Serializable {
         return rules;
     }
 
-    /** Adds the rule unless the style has lost the border since. */
-    private static void addRule(ArrayList<String> rules, Set<CellKey> cells,
-            String border) {
-        if (border != null) {
-            rules.add(cells.stream().map(CellKey::selector)
-                    .collect(Collectors.joining(",")) + border);
-        }
+    private static String selectors(Set<CellKey> cells) {
+        return cells.stream().map(CellKey::selector)
+                .collect(Collectors.joining(","));
     }
 }
