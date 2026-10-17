@@ -48,13 +48,15 @@ class SpreadsheetConditionalFormatsTest {
     /**
      * B2:B4 are filled while D2 holds over 5, which it does not: it holds 1.
      * C2:C4 have a border below a value over 0, which C3 holds: 5. F2:F3 are
-     * bold where they hold "x", which F2 does.
+     * bold where they hold "x", which F2 does. G2:G4 are filled while H2 holds
+     * over 5, which it does: it holds 9.
      */
     private static Workbook workbook() {
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet();
         sheet.createRow(1).createCell(3).setCellValue(1);
         sheet.getRow(1).createCell(5).setCellValue("x");
+        sheet.getRow(1).createCell(7).setCellValue(9);
         sheet.createRow(2).createCell(2).setCellValue(5);
         SheetConditionalFormatting formatting = sheet
                 .getSheetConditionalFormatting();
@@ -82,6 +84,15 @@ class SpreadsheetConditionalFormatsTest {
         formatting.addConditionalFormatting(
                 new CellRangeAddress[] { CellRangeAddress.valueOf("F2:F3") },
                 isX);
+
+        ConditionalFormattingRule hOverFive = formatting
+                .createConditionalFormattingRule("$H$2>5");
+        PatternFormatting green = hOverFive.createPatternFormatting();
+        green.setFillBackgroundColor(IndexedColors.GREEN.getIndex());
+        green.setFillPattern(FillPatternType.SOLID_FOREGROUND.getCode());
+        formatting.addConditionalFormatting(
+                new CellRangeAddress[] { CellRangeAddress.valueOf("G2:G4") },
+                hOverFive);
         return workbook;
     }
 
@@ -112,6 +123,12 @@ class SpreadsheetConditionalFormatsTest {
             d2.setCellValue(9);
             spreadsheet.refreshCells(d2);
         }));
+    }
+
+    @Test
+    void aValueTypedThatARuleReads_soItNoLongerHolds() {
+        // 1 into H2: G2:G4 are no longer filled.
+        assertEquals(List.of(), harness.check(spreadsheet -> type(2, 8, "1")));
     }
 
     @Test
