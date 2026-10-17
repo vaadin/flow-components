@@ -463,9 +463,8 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     /**
      * The font of the style, as CSS of what differs from the font of the
-     * default style. Catches and warn-logs an {@link IndexOutOfBoundsException}
-     * from POI when the workbook's font table is missing an index the cell
-     * points to.
+     * default style. A file can give a style a font it has not: its cells are
+     * shown in the font of the default style, with a warning.
      */
     private void fontStyle(StringBuilder sb, CellStyle cellStyle) {
         try {
@@ -493,12 +492,10 @@ public class SpreadsheetStyleFactory implements Serializable {
             }
             sb.append(textDecoration(font.getUnderline() != Font.U_NONE,
                     font.getStrikeout()));
-        } catch (IndexOutOfBoundsException ioobe) {
-            // somehow workbook doesn't have all the fonts the cells have???
+        } catch (IndexOutOfBoundsException missingFont) {
             LOGGER.warn(
-                    "Font missing, " + cellStyle.getFontIndexAsInt() + " / "
-                            + cellStyle.getClass() + ", " + ioobe.getMessage(),
-                    ioobe);
+                    "Cell style {} has font {}, which the workbook has not: its cells are shown in the font of the default style",
+                    cellStyle.getIndex(), cellStyle.getFontIndexAsInt());
         }
     }
 

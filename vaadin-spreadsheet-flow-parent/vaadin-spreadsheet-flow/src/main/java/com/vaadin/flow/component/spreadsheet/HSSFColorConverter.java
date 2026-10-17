@@ -96,12 +96,24 @@ public class HSSFColorConverter implements ColorConverter {
             sb.append(backgroundColor);
         }
 
-        String color = styleColor(cs.getFont(wb).getColor());
+        String color = fontColor(cs);
         if (color != null && !color.equals(defaultColor)) {
             sb.append("color:");
             sb.append(color);
         }
 
+    }
+
+    /**
+     * The colour of the font of the style, or none for a font the workbook has
+     * not, as a file can give a style.
+     */
+    private String fontColor(HSSFCellStyle cs) {
+        try {
+            return styleColor(cs.getFont(wb).getColor());
+        } catch (IndexOutOfBoundsException missingFont) {
+            return null;
+        }
     }
 
     @Override

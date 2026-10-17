@@ -12,10 +12,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.apache.poi.hssf.record.ExtendedFormatRecord;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.FontFamily;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -25,6 +30,9 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.vaadin.flow.component.spreadsheet.tests.CapturedLogs;
+import com.vaadin.flow.component.spreadsheet.tests.ExpectWarnings;
 
 /**
  * The fonts and the alignment of the cell styles, as CSS for the client. The
@@ -252,6 +260,60 @@ class SpreadsheetFontStylesTest {
     void aFontNameThatWouldEndTheRule_isQuoted() {
         assertEquals("\"X;}.cell{color:red}\"",
                 nameInCss("X;}.cell{color:red}"));
+    }
+
+    @Test
+    @ExpectWarnings
+    void aStyleOfAFontTheWorkbookHasNot_isShownInTheDefaultFont_withAWarning() {
+        // A file can give a style a font it has not. Loading it threw.
+        XSSFCellStyle style = workbook.createCellStyle();
+        style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.getCoreXf().setFontId(99);
+        workbook.getSheetAt(0).getRow(0).getCell(0).setCellStyle(style);
+
+        String css;
+        List<CapturedLogs.Entry> logged;
+        try (CapturedLogs.Capture logs = CapturedLogs.capture()) {
+            css = css(style);
+            logged = logs.entries();
+        }
+
+        assertFalse(css.contains("font"), css);
+        assertFalse(css.replace("background-color:", "").contains("color:"),
+                css);
+        assertTrue(css.contains("background-color:"), css);
+        assertEquals(List.of("Cell style " + style.getIndex()
+                + " has font 99, which the workbook has not: its cells are shown in the font of the default style"),
+                logged.stream().map(CapturedLogs.Entry::message).toList());
+    }
+
+    @Test
+    @ExpectWarnings
+    void anXlsStyleOfAFontTheWorkbookHasNot_isShownInTheDefaultFont()
+            throws ReflectiveOperationException {
+        HSSFWorkbook xls = new HSSFWorkbook();
+        xls.createSheet().createRow(0).createCell(0);
+        HSSFCellStyle style = xls.createCellStyle();
+        style.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        // POI gives a style only fonts the workbook has.
+        Field format = HSSFCellStyle.class.getDeclaredField("_format");
+        format.setAccessible(true);
+        ((ExtendedFormatRecord) format.get(style)).setFontIndex((short) 99);
+        xls.getSheetAt(0).getRow(0).getCell(0).setCellStyle(style);
+
+        String css;
+        try (CapturedLogs.Capture logs = CapturedLogs.capture()) {
+            css = new Spreadsheet(xls).getCellStyleToCSSStyle()
+                    .get((int) style.getIndex());
+            assertEquals(1, logs.entries().size(), logs.entries().toString());
+        }
+
+        assertFalse(css.contains("font"), css);
+        assertFalse(css.replace("background-color:", "").contains("color:"),
+                css);
+        assertTrue(css.contains("background-color:"), css);
     }
 
     @Test

@@ -73,13 +73,25 @@ public class XSSFColorConverter implements ColorConverter {
             sb.append(backgroundColor);
         }
 
-        XSSFColor xssfColor = cs.getFont().getXSSFColor();
+        XSSFColor xssfColor = fontColor(cs);
         if (xssfColor != null) {
             String color = styleColor(xssfColor);
             if (color != null && !color.equals(defaultColor)) {
                 sb.append("color:");
                 sb.append(color);
             }
+        }
+    }
+
+    /**
+     * The colour of the font of the style, or none for a font the workbook has
+     * not, as a file can give a style.
+     */
+    private static XSSFColor fontColor(XSSFCellStyle cs) {
+        try {
+            return cs.getFont().getXSSFColor();
+        } catch (IndexOutOfBoundsException missingFont) {
+            return null;
         }
     }
 
