@@ -25,6 +25,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 
 /**
  * An internal controller for handling disabling a component when it is clicked.
@@ -64,8 +66,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     public DisableOnClickController(C component) {
         this.component = Objects.requireNonNull(component);
         clientUpdate = new BeforeClientResponseAction(component,
-                () -> component.getElement().executeJs("this.disabled = $0",
-                        !component.isEnabled()));
+                () -> component.getElement().executeJs(DisableOnClickJs.class)
+                        .setDisabled(!component.isEnabled()));
         enable = new BeforeClientResponseAction(component,
                 () -> setEnabledInternal(true));
 
@@ -194,5 +196,22 @@ public class DisableOnClickController<C extends Component & HasEnabled>
         } finally {
             updatingEnabled = false;
         }
+    }
+
+    /**
+     * The JavaScript that the controller runs in the browser, for
+     * {@link com.vaadin.flow.dom.Element#executeJs(Class)}.
+     */
+    @JsDefinition
+    interface DisableOnClickJs extends Serializable {
+
+        /**
+         * Sets the disabled property of the element.
+         *
+         * @param disabled
+         *            whether the element is disabled
+         */
+        @JsExpression("this.disabled = $0")
+        void setDisabled(boolean disabled);
     }
 }
