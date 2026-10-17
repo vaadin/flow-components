@@ -29,6 +29,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -67,8 +68,10 @@ class SpreadsheetCellBordersTest {
     /**
      * The top borders of B2 and E2, the left borders of D3 and D6, a merged
      * region F2:G3 with a right border inside it on G2 and a bottom one on F3,
-     * a merged region B6:C7 before D6, H2 and H4 of a style without borders,
-     * and the bottom border of I3. Rows 8 and down are empty.
+     * a merged region B6:C7 before D6, H2, H4 and C7 of a style without
+     * borders, and the bottom border of I3. Rows 8 to 11 hold a merged region
+     * B9:D11, the middle cell of each edge and the middle cell inside it with a
+     * top or a left border.
      */
     static XSSFWorkbook workbook() {
         XSSFWorkbook workbook = new XSSFWorkbook();
@@ -100,6 +103,16 @@ class SpreadsheetCellBordersTest {
         set(sheet, "H2", "filled").setCellStyle(filled);
         set(sheet, "H4", "filled too").setCellStyle(filled);
         FreshLoadFixture.cell(sheet, "I3").setCellStyle(bottom);
+        FreshLoadFixture.cell(sheet, "C7").setCellStyle(filled);
+        CellStyle thickLeft = workbook.createCellStyle();
+        thickLeft.setBorderLeft(BorderStyle.THICK);
+        set(sheet, "B9", "edges");
+        FreshLoadFixture.cell(sheet, "B10").setCellStyle(left);
+        FreshLoadFixture.cell(sheet, "C9").setCellStyle(top);
+        FreshLoadFixture.cell(sheet, "D10").setCellStyle(top);
+        FreshLoadFixture.cell(sheet, "C11").setCellStyle(left);
+        FreshLoadFixture.cell(sheet, "C10").setCellStyle(thickLeft);
+        sheet.addMergedRegion(CellRangeAddress.valueOf("B9:D11"));
         return workbook;
     }
 
@@ -159,6 +172,27 @@ class SpreadsheetCellBordersTest {
                             Cell filled = cell(spreadsheet, "H2");
                             filled.getCellStyle()
                                     .setBorderTop(BorderStyle.THICK);
+                            spreadsheet.refreshCells(filled);
+                        }),
+                byApplication("a style given a left border in place",
+                        spreadsheet -> {
+                            Cell filled = cell(spreadsheet, "H2");
+                            filled.getCellStyle()
+                                    .setBorderLeft(BorderStyle.THICK);
+                            spreadsheet.refreshCells(filled);
+                        }),
+                byApplication("a style given a right border in place",
+                        spreadsheet -> {
+                            Cell filled = cell(spreadsheet, "H2");
+                            filled.getCellStyle()
+                                    .setBorderRight(BorderStyle.THICK);
+                            spreadsheet.refreshCells(filled);
+                        }),
+                byApplication("a style given a bottom border in place",
+                        spreadsheet -> {
+                            Cell filled = cell(spreadsheet, "H2");
+                            filled.getCellStyle()
+                                    .setBorderBottom(BorderStyle.THICK);
                             spreadsheet.refreshCells(filled);
                         }),
                 byApplication(
@@ -309,6 +343,87 @@ class SpreadsheetCellBordersTest {
     }
 
     @Test
+    void theBordersDrawnOnOtherCells_areGivenAsOneRuleForEachStyleAndSide() {
+        Spreadsheet spreadsheet = shown(workbook());
+
+        // The left borders, the top borders, then the merged cells, each on
+        // its cells in the order of the rows.
+        assertEquals(List.of(
+                ".col3.row3,.col2.row6,.col2.row9,.col1.row10{border-right:solid 1pt;border-right-color:var(--default-color);}",
+                ".col2.row1,.col5.row1,.col3.row8,.col2.row9{border-bottom:solid 1pt;border-bottom-color:var(--default-color);}",
+                ".col6.row2{border-right:solid 2pt;border-right-color:var(--default-color);border-bottom:dashed 1pt;border-bottom-color:var(--default-color);}"),
+                rules(spreadsheet));
+    }
+
+    @Test
+    void insideAMergedRegion_onlyTheCellsOnItsEdgesDrawOnOtherCells() {
+        Spreadsheet spreadsheet = shown(workbook());
+
+        // B10 on the left edge, C9 on the top edge; D10 on the right edge
+        // and C11 on the bottom edge draw on the merged cell B9.
+        assertTrue(drawnOn(spreadsheet, "A10").startsWith("border-right:"));
+        assertTrue(drawnOn(spreadsheet, "C8").startsWith("border-bottom:"));
+        String merged = drawnOn(spreadsheet, "B9");
+        assertTrue(merged.contains("border-right:solid 1pt;"), merged);
+        assertTrue(merged.contains("border-bottom:solid 1pt;"), merged);
+        // Not the thick left border of C10, inside it.
+        assertFalse(merged.contains("solid 3pt"), merged);
+    }
+
+    @Test
+    void aLeftBorderWithOnlyColumnsHiddenBeforeIt_isDrawnOnNoCell() {
+        XSSFWorkbook workbook = workbook();
+        workbook.getSheetAt(0).setColumnHidden(0, true);
+
+        Spreadsheet spreadsheet = shown(workbook);
+
+        assertTrue(
+                rules(spreadsheet).stream()
+                        .noneMatch(rule -> rule.contains(".col0.")),
+                rules(spreadsheet).toString());
+    }
+
+    @Test
+    void aTopBorderWithOnlyRowsHiddenAboveIt_isDrawnOnNoCell() {
+        XSSFWorkbook workbook = workbook();
+        workbook.getSheetAt(0).getRow(0).setZeroHeight(true);
+
+        Spreadsheet spreadsheet = shown(workbook);
+
+        assertTrue(
+                rules(spreadsheet).stream()
+                        .noneMatch(rule -> rule.contains(".row0,")
+                                || rule.contains(".row0{")),
+                rules(spreadsheet).toString());
+    }
+
+    @Test
+    void theBordersOfAStyleNotApplyingThem_areDrawn() {
+        // Some files leave the borders of a style in its border entry with
+        // applyBorder off, which POI then reads as no border.
+        XSSFWorkbook workbook = workbook();
+        XSSFCellStyle style = workbook.createCellStyle();
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THICK);
+        style.setBorderBottom(BorderStyle.THICK);
+        style.getCoreXf().setApplyBorder(false);
+        set(workbook.getSheetAt(0), "F6", "border entry").setCellStyle(style);
+
+        Spreadsheet spreadsheet = shown(workbook);
+
+        assertTrue(drawnOn(spreadsheet, "F5")
+                .startsWith("border-bottom:solid 1pt;"));
+        assertTrue(drawnOn(spreadsheet, "E6")
+                .startsWith("border-right:solid 1pt;"));
+        assertTrue(cssOf(spreadsheet, "F6").contains("border-right:solid 3pt;"),
+                cssOf(spreadsheet, "F6"));
+        assertTrue(
+                cssOf(spreadsheet, "F6").contains("border-bottom:solid 3pt;"),
+                cssOf(spreadsheet, "F6"));
+    }
+
+    @Test
     void aTopBorder_isDrawnAtTheBottomOfTheCellAbove() {
         Spreadsheet spreadsheet = shown(workbook());
 
@@ -378,16 +493,21 @@ class SpreadsheetCellBordersTest {
 
     @Test
     void ofTheBordersInsideAMergedRegion_theFirstOfEachSideIsDrawn() {
+        // G3, after G2 and F3, with a right and a bottom border of its own.
         XSSFWorkbook workbook = workbook();
         CellStyle thick = workbook.createCellStyle();
         thick.setBorderRight(BorderStyle.THICK);
+        thick.setBorderBottom(BorderStyle.THICK);
         FreshLoadFixture.cell(workbook.getSheetAt(0), "G3").setCellStyle(thick);
 
         Spreadsheet spreadsheet = shown(workbook);
 
-        String merged = drawnOn(spreadsheet, "F2");
-        assertTrue(merged.contains("border-right:solid 2pt;"), merged);
-        assertFalse(merged.contains("border-right:solid 3pt;"), merged);
+        assertEquals(
+                "border-right:solid 2pt;"
+                        + "border-right-color:var(--default-color);"
+                        + "border-bottom:dashed 1pt;"
+                        + "border-bottom-color:var(--default-color);",
+                drawnOn(spreadsheet, "F2"));
     }
 
     @Test
