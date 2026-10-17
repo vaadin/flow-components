@@ -81,7 +81,10 @@ class SpreadsheetRowShiftTest {
     }
 
     @Test
-    void theSelectedCellOfAMergedRegionDeleted_isSelectedAlone() {
+    void aCellOfAMergedRegionSelected_isSelectedWithTheRegion_onceItsRowIsDeleted() {
+        // Deleting rows takes their cells; POI keeps the merged region, and
+        // the selection is made again over it, as a shift and the client
+        // make it.
         XSSFWorkbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet();
         sheet.createRow(2).createCell(1).setCellValue("merged");
@@ -91,7 +94,7 @@ class SpreadsheetRowShiftTest {
 
         spreadsheet.deleteRows(2, 2);
 
-        assertEquals("B3", spreadsheet.getCellSelectionManager()
+        assertEquals("B3:C3", spreadsheet.getCellSelectionManager()
                 .getSelectedCellRange().formatAsString());
     }
 
