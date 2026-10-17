@@ -10,28 +10,12 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellReference;
-
 /**
- * Orchestrates a POI row-shift on the active sheet and propagates the
- * server-side bookkeeping that POI doesn't know about: cached row heights,
- * hidden-row indexes, cell styles for shifted borders, the formula and
- * conditional-formatting evaluator caches, the value-manager's client-cache row
- * mapping, the selection address, the client's list of merged regions, popup
- * buttons rooted in shifted or overwritten rows, and the invalid-formula
- * tracker's per-cell key set.
- *
- * <p>
- * Called from the two public {@code shiftRows} overloads on
- * {@code Spreadsheet}.
- *
- * <p>
- * The orchestrator carries no state of its own; it holds a {@link Spreadsheet}
- * reference for read/write into the host's many collaborator handles
- * ({@code valueManager}, {@code styler}, {@code sheetOverlayManager},
- * {@code selectionManager}, {@code viewportBounds},
- * {@code popupButtonRegistry}, {@code invalidFormulaTracker}).
+ * Rows shifted on the active sheet, as the two public {@code shiftRows}
+ * overloads of {@code Spreadsheet} shift them. POI moves the rows' cells,
+ * heights and merged regions; what is kept for the rows besides moves with
+ * them, and the rows changed are shown again, as
+ * {@link Spreadsheet#rowsChanged} shows them.
  */
 final class RowShiftOrchestrator implements Serializable {
 
@@ -43,44 +27,15 @@ final class RowShiftOrchestrator implements Serializable {
 
     void shift(int startRow, int endRow, int n, boolean copyRowHeight,
             boolean resetOriginalRowHeight) {
-        Sheet sheet = spreadsheet.getActiveSheet();
-        sheet.shiftRows(startRow, endRow, n, copyRowHeight,
-                resetOriginalRowHeight);
-        spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
-        spreadsheet.getConditionalFormattingEvaluator().clearAllCachedValues();
-        // The rows moved, where they were and where they went.
-        int firstAffectedRow = n < 0 ? startRow + n : startRow;
-        int lastAffectedRow = n < 0 ? endRow : endRow + n;
-        // The rows moved with their heights, whether hidden or not, and the
-        // rows they left are empty.
-        spreadsheet.sizes().readRows(firstAffectedRow, lastAffectedRow);
-        // POI moves and removes the merged regions itself, and
-        // updateMergedRegions() below passes its result to the client.
+        spreadsheet.getActiveSheet().shiftRows(startRow, endRow, n,
+                copyRowHeight, resetOriginalRowHeight);
+        // POI moves the cells, heights and merged regions of the rows; their
+        // pop-up buttons and invalid formula marks go with them.
         spreadsheet.popupButtons().shiftRows(startRow, endRow, n);
         spreadsheet.invalidFormulas().shiftActiveSheetRows(startRow, endRow, n);
-        spreadsheet.getCellValueManager().rowsChanged(firstAffectedRow,
-                lastAffectedRow);
-
-        // Sends the cells and reloads the ones shown. Shifting moves cells,
-        // and an editor is cached against a cell key — one left in place
-        // would end up on the wrong cell.
-        spreadsheet.updateMarkedCellsRecreatingEditors();
-        spreadsheet.updateMergedRegions();
-        // Once the merged regions are where POI moved them: the cells draw
-        // their borders on the cells before them, and the rows hidden moved.
-        spreadsheet.getSpreadsheetStyleFactory().reloadBorders();
-
-        CellReference selectedCellReference = spreadsheet
-                .getCellSelectionManager().getSelectedCellReference();
-        if (selectedCellReference != null) {
-            if (selectedCellReference.getRow() >= firstAffectedRow
-                    && selectedCellReference.getRow() <= lastAffectedRow) {
-                // Without the sheet's name, which the address field does
-                // not take.
-                spreadsheet.getCellSelectionManager().onSheetAddressChanged(
-                        selectedCellReference.formatAsString(false), false);
-            }
-        }
+        // The rows moved, where they were and where they went.
+        spreadsheet.rowsChanged(n < 0 ? startRow + n : startRow,
+                n < 0 ? endRow : endRow + n);
     }
 
     /**

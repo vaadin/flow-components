@@ -2522,29 +2522,43 @@ public class Spreadsheet extends Component
                 sheet.removeRow(row);
             }
         }
-        // The formula evaluator still holds the cells removed, and a cell
-        // taken off its row fails when it is read.
-        getFormulaEvaluator().clearAllCachedResultValues();
-        // The rows deleted are empty, of the default height, and not hidden.
-        sheetSizes.readRows(startRow, endRow);
-        updateMergedRegions();
-        // The cells deleted draw no borders, and those below a row hidden
-        // draw theirs on it now.
-        workbookScope.styler.reloadBorders();
-        valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);
+        rowsChanged(startRow, endRow);
+    }
 
-        // Deleting rows moves cells, and an editor is cached against a cell
-        // key — one left in place would end up on the wrong cell.
+    /**
+     * The rows changed in POI, as rows shifted or deleted do. What is shown of
+     * them is read again and sent: their sizes, the merged regions, the borders
+     * the cells draw on other cells, their cells and editors, and the selection
+     * on them.
+     *
+     * @param firstRow
+     *            Index of the first row changed, 0-based
+     * @param lastRow
+     *            Index of the last row changed, 0-based
+     */
+    void rowsChanged(int firstRow, int lastRow) {
+        // The evaluators still hold the cells as they were; a cell taken off
+        // its row fails when it is read.
+        getFormulaEvaluator().clearAllCachedResultValues();
+        getConditionalFormattingEvaluator().clearAllCachedValues();
+        // The rows have the heights POI moved with them, or none.
+        sheetSizes.readRows(firstRow, lastRow);
+        updateMergedRegions();
+        // Once the merged regions are where POI put them: the cells draw
+        // their borders on the cells before them, and the rows hidden moved.
+        workbookScope.styler.reloadBorders();
+        valueManager.rowsChanged(firstRow, lastRow);
+        // An editor is cached against a cell key: one left in place would
+        // end up on the wrong cell.
         updateMarkedCellsRecreatingEditors();
         // Made again where it was, over the merged regions there now, by an
         // address without the sheet's name, which the address field takes.
         // Nothing is selected until the client has shown the sheet.
-        CellReference selectedCellReference = getSelectedCellReference();
-        if (selectedCellReference != null
-                && selectedCellReference.getRow() >= startRow
-                && selectedCellReference.getRow() <= endRow) {
+        CellReference selected = getSelectedCellReference();
+        if (selected != null && selected.getRow() >= firstRow
+                && selected.getRow() <= lastRow) {
             selectionManager.onSheetAddressChanged(
-                    selectedCellReference.formatAsString(false), false);
+                    selected.formatAsString(false), false);
         }
     }
 
