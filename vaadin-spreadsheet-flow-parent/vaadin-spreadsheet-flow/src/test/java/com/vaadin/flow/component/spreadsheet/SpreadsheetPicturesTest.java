@@ -20,9 +20,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.tests.MockUIExtension;
 
 /**
- * A picture over rows and columns that change size, or are hidden or shown, is
- * kept on the client under the key the client has it by, rather than sent to it
- * anew. That it is sized again, {@link FreshLoadConsistencyTest} shows.
+ * A picture over rows and columns that change size, are hidden or shown, or are
+ * shifted or deleted, is kept on the client under the key the client has it by,
+ * rather than sent to it anew. That it is sized again,
+ * {@link FreshLoadConsistencyTest} shows.
  */
 class SpreadsheetPicturesTest {
 
@@ -77,6 +78,22 @@ class SpreadsheetPicturesTest {
     @Test
     void thePicture_isKept_whenARowUnderItIsGivenAHeight() {
         spreadsheet.setRowHeight(14, 30f);
+
+        assertEquals(keys, spreadsheet.getResources().keySet());
+    }
+
+    // POI moves no picture with the rows it shifts or deletes.
+
+    @Test
+    void thePicture_isKept_whenRowsAboveItAreShifted() {
+        spreadsheet.shiftRows(10, 11, 1);
+
+        assertEquals(keys, spreadsheet.getResources().keySet());
+    }
+
+    @Test
+    void thePicture_isKept_whenARowAboveItIsDeleted() {
+        spreadsheet.deleteRows(11, 11);
 
         assertEquals(keys, spreadsheet.getResources().keySet());
     }

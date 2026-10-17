@@ -26,14 +26,14 @@ import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
  * placed on cells), and giving the client those shown: where each starts and
  * how big it is, its image and its component.
  * <p>
- * The overlays are read from POI when there are none, and again after
- * {@link #markReloadFromPoi}, as rows or columns were resized.
+ * The overlays are read from POI when there are none. POI moves none of them
+ * with the rows and columns under them, which are shifted, deleted or resized,
+ * so they are only placed again then, under the keys the client has them by.
  */
 final class SheetOverlayManager implements Serializable {
 
     private final Spreadsheet spreadsheet;
     private final Set<SheetOverlayWrapper> overlays = new HashSet<>();
-    private boolean reloadFromPoi;
 
     SheetOverlayManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -41,10 +41,6 @@ final class SheetOverlayManager implements Serializable {
 
     boolean hasOverlays() {
         return !overlays.isEmpty();
-    }
-
-    void markReloadFromPoi() {
-        this.reloadFromPoi = true;
     }
 
     void add(SheetOverlayWrapper overlay) {
@@ -57,15 +53,6 @@ final class SheetOverlayManager implements Serializable {
         // to be found.
         if (!hasOverlays()) {
             SpreadsheetFactory.loadSheetOverlays(spreadsheet);
-        }
-
-        if (reloadFromPoi) {
-            // reload images from POI because row / column sizes have
-            // changed; currently doesn't affect anything because POI
-            // doesn't update the image anchor data after resizing.
-            clear();
-            SpreadsheetFactory.loadSheetOverlays(spreadsheet);
-            reloadFromPoi = false;
         }
 
         HashMap<String, OverlayInfo> shown = new HashMap<>();

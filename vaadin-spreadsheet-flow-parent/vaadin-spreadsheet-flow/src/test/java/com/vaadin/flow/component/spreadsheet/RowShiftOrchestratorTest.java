@@ -194,30 +194,6 @@ class RowShiftOrchestratorTest {
         verify(invalidFormulaTracker).shiftActiveSheetRows(5, 7, -2);
     }
 
-    // ----- overlay reload-from-POI branch ----------------------------------
-
-    @Test
-    void shift_overlayManagerHasOverlays_marksReloadFromPoi() {
-        // Pin: if the sheet has overlays, the orchestrator triggers a POI
-        // reload. A regression skipping this branch would leave overlay
-        // positions stale (overlays anchored to shifted rows wouldn't
-        // move with them on the next render).
-        when(sheetOverlayManager.hasOverlays()).thenReturn(true);
-
-        orchestrator.shift(0, 2, 1, false, false);
-
-        verify(sheetOverlayManager).markReloadFromPoi();
-    }
-
-    @Test
-    void shift_overlayManagerHasNoOverlays_skipsMarkReloadFromPoi() {
-        when(sheetOverlayManager.hasOverlays()).thenReturn(false);
-
-        orchestrator.shift(0, 2, 1, false, false);
-
-        verify(sheetOverlayManager, never()).markReloadFromPoi();
-    }
-
     // ----- post-shift orchestration ----------------------------------------
 
     @Test

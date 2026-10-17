@@ -54,10 +54,6 @@ final class RowShiftOrchestrator implements Serializable {
         // The rows moved with their heights, whether hidden or not, and the
         // rows they left are empty.
         spreadsheet.sizes().readRows(firstAffectedRow, lastAffectedRow);
-
-        if (spreadsheet.overlays().hasOverlays()) {
-            spreadsheet.overlays().markReloadFromPoi();
-        }
         // POI moves and removes the merged regions itself, and
         // updateMergedRegions() below passes its result to the client.
         spreadsheet.popupButtons().shiftRows(startRow, endRow, n);

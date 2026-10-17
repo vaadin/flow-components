@@ -2533,9 +2533,6 @@ public class Spreadsheet extends Component
         workbookScope.styler.reloadBorders();
         valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);
 
-        if (sheetScope.overlays.hasOverlays()) {
-            sheetScope.overlays.markReloadFromPoi();
-        }
         // Deleting rows moves cells, and an editor is cached against a cell
         // key — one left in place would end up on the wrong cell.
         updateMarkedCellsRecreatingEditors();
