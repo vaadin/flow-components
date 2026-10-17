@@ -119,8 +119,11 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * The {@link DownloadEvent#getOwningComponent() owning component} of the
      * download is the target of the menu.
      * <p>
-     * Items of a {@code MenuBar} do not support download handlers yet, and
-     * throw an {@link UnsupportedOperationException}.
+     * For an item of a {@code MenuBar}, including the items of its sub menus,
+     * the file is served on behalf of the menu bar, so the download only works
+     * while the menu bar is attached. The
+     * {@link DownloadEvent#getOwningComponent() owning component} of the
+     * download is the menu bar.
      *
      * <pre>{@code
      * MenuItem export = menu.addItem("Export");
