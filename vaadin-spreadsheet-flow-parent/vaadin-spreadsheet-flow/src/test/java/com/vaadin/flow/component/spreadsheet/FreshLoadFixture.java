@@ -37,7 +37,9 @@ import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTNumFmt;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
@@ -151,6 +153,13 @@ final class FreshLoadFixture {
                 .createConditionalFormattingRule(ComparisonOperator.GT, "5");
         rule.createFontFormatting()
                 .setFontColorIndex(IndexedColors.RED.getIndex());
+        // With two decimals too, a format only the rule gives: its style is
+        // the last of the workbook's.
+        StylesTable styles = workbook.getStylesSource();
+        CTNumFmt twoDecimals = styles.getDxfAt(styles._getDXfsSize() - 1)
+                .addNewNumFmt();
+        twoDecimals.setNumFmtId(200);
+        twoDecimals.setFormatCode("0.00");
         formatting.addConditionalFormatting(
                 new CellRangeAddress[] { CellRangeAddress.valueOf("E10:H20") },
                 rule);
