@@ -17,6 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.poi.ss.formula.FormulaShifter;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFTable;
@@ -104,10 +105,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
 
         popupButtonToFiltersMap = new HashMap<>();
         popupButtonToClearButtonMap = new HashMap<>();
-        filteringRegion = new CellRangeAddress(
-                fullTableRegion.getFirstRow() + 1, fullTableRegion.getLastRow(),
-                fullTableRegion.getFirstColumn(),
-                fullTableRegion.getLastColumn());
+        filteringRegion = underHeader(fullTableRegion);
 
         if (isTableSheetCurrentlyActive()) {
             initFilters();
@@ -360,5 +358,28 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         if (filters.isEmpty()) {
             popupButtonToFiltersMap.remove(popupButton);
         }
+    }
+
+    @Override
+    void shiftRows(FormulaShifter shifter, int sheetIndex, int startRow,
+            int endRow, int n) {
+        super.shiftRows(shifter, sheetIndex, startRow, endRow, n);
+        filteringRegion = underHeader(getFullTableRegion());
+        for (HashSet<SpreadsheetFilter> filters : popupButtonToFiltersMap
+                .values()) {
+            for (SpreadsheetFilter filter : filters) {
+                if (filter instanceof ItemFilter itemFilter) {
+                    itemFilter.shiftRows(filteringRegion, startRow, endRow, n);
+                }
+            }
+        }
+    }
+
+    /** The rows of a table under its header row, which its filters filter. */
+    private static CellRangeAddress underHeader(
+            CellRangeAddress fullTableRegion) {
+        return new CellRangeAddress(fullTableRegion.getFirstRow() + 1,
+                fullTableRegion.getLastRow(), fullTableRegion.getFirstColumn(),
+                fullTableRegion.getLastColumn());
     }
 }

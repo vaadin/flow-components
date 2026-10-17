@@ -16,7 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.formula.FormulaShifter;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.helpers.BaseRowColShifter;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFTable;
@@ -35,7 +37,13 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
  */
 public class SpreadsheetTable implements Serializable {
 
-    private final CellRangeAddress fullTableRegion;
+    /**
+     * The fewest rows a table or the filter of a sheet shrinks to: its header
+     * row and one under it, as a filter table is loaded.
+     */
+    static final int FEWEST_ROWS = 2;
+
+    private CellRangeAddress fullTableRegion;
     private final Sheet sheet;
     private final Spreadsheet spreadsheet;
     protected final Map<CellReference, PopupButton> popupButtons;
@@ -329,5 +337,48 @@ public class SpreadsheetTable implements Serializable {
      */
     public XSSFTable getXssfTable() {
         return xssfTable;
+    }
+
+    /**
+     * Rows of the sheet shifted: the table is where they took it, and its
+     * pop-up buttons, which moved with their cells, are found there.
+     */
+    void shiftRows(FormulaShifter shifter, int sheetIndex, int startRow,
+            int endRow, int n) {
+        fullTableRegion = shifted(shifter, sheetIndex, fullTableRegion,
+                fewestRows(xssfTable));
+        Map<CellReference, PopupButton> moved = new HashMap<>();
+        for (PopupButton button : popupButtons.values()) {
+            moved.put(button.getCellReference(), button);
+        }
+        popupButtons.clear();
+        popupButtons.putAll(moved);
+    }
+
+    /**
+     * The range where shifted rows take a table, as POI moves the ranges of
+     * conditional formatting. A table they take away whole keeps its place, and
+     * one they shrink keeps the fewest rows given, if it had them.
+     */
+    static CellRangeAddress shifted(FormulaShifter shifter, int sheetIndex,
+            CellRangeAddress range, int fewestRows) {
+        CellRangeAddress moved = BaseRowColShifter.shiftRange(shifter, range,
+                sheetIndex);
+        if (moved == null) {
+            return range;
+        }
+        int rows = Math.min(fewestRows,
+                range.getLastRow() - range.getFirstRow() + 1);
+        return new CellRangeAddress(moved.getFirstRow(),
+                Math.max(moved.getLastRow(), moved.getFirstRow() + rows - 1),
+                moved.getFirstColumn(), moved.getLastColumn());
+    }
+
+    /**
+     * The fewest rows a table shrinks to, with the totals rows of an XSSF table
+     * besides, as POI requires them.
+     */
+    static int fewestRows(XSSFTable table) {
+        return FEWEST_ROWS + (table == null ? 0 : table.getTotalsRowCount());
     }
 }

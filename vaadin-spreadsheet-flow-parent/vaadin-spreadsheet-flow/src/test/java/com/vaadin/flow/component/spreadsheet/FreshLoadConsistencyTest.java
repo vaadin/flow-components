@@ -175,15 +175,8 @@ class FreshLoadConsistencyTest {
      * they send for nothing. A fix takes out what it fixes, so the test fails
      * without it.
      */
-    private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
-            Map.entry("a row inserted, then undone",
-                    c -> c.known("pop-up button")),
-            Map.entry("a row deleted, then undone",
-                    c -> c.known("pop-up button")),
-            Map.entry("a row deleted, undone and redone",
-                    c -> c.known("pop-up button")),
-            Map.entry("rows shifted down over the filter",
-                    c -> c.known("pop-up button")));
+    private static final Map<String, UnaryOperator<Case>> KNOWN = Map
+            .ofEntries();
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -593,11 +586,8 @@ class FreshLoadConsistencyTest {
      * What the operations of an application are known to do wrong today when
      * the client has not seen the spreadsheet yet, by case name and when.
      */
-    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map.of(
-            "rows shifted down over the filter, before ATTACHED",
-            List.of("pop-up button"),
-            "rows shifted down over the filter, before FIRST_RESPONSE",
-            List.of("pop-up button"));
+    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
+            .of();
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")

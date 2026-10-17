@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.poi.ss.formula.FormulaShifter;
 import org.apache.poi.ss.usermodel.Sheet;
 
 /**
@@ -49,6 +50,16 @@ final class TableRegistry implements Serializable {
             }
         }
         return out;
+    }
+
+    /** Rows of the sheet shifted: its tables move with them. */
+    void shiftRows(Sheet sheet, FormulaShifter shifter, int sheetIndex,
+            int startRow, int endRow, int n) {
+        for (SpreadsheetTable table : tables) {
+            if (table.getSheet().equals(sheet)) {
+                table.shiftRows(shifter, sheetIndex, startRow, endRow, n);
+            }
+        }
     }
 
     /** Forgets every table, as for another workbook. */

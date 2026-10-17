@@ -3052,6 +3052,11 @@ public class Spreadsheet extends Component
         return workbookScope.popupButtons;
     }
 
+    /** The tables of the workbook shown. */
+    TableRegistry tables() {
+        return workbookScope.tables;
+    }
+
     /** The cells of the workbook shown marked as holding invalid formulas. */
     InvalidFormulaTracker invalidFormulas() {
         return workbookScope.invalidFormulas;

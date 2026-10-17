@@ -297,4 +297,24 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         filteredRows.clear();
         cancelValueChangeUpdate = false;
     }
+
+    /**
+     * Rows of the sheet shifted: the filter filters its column of the rows of
+     * its table given, and the rows it hides are those where they went.
+     */
+    void shiftRows(CellRangeAddress filteringRegion, int startRow, int endRow,
+            int n) {
+        filterRange = new CellRangeAddress(filteringRegion.getFirstRow(),
+                filteringRegion.getLastRow(), filterRange.getFirstColumn(),
+                filterRange.getLastColumn());
+        Set<Integer> moved = new HashSet<>();
+        for (int row : filteredRows) {
+            int after = RowShiftOrchestrator.rowAfterShift(row, startRow,
+                    endRow, n);
+            if (after != RowShiftOrchestrator.OVERWRITTEN) {
+                moved.add(after);
+            }
+        }
+        filteredRows = moved;
+    }
 }
