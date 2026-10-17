@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.component.spreadsheet.action.DeleteRowAction;
 import com.vaadin.flow.component.spreadsheet.command.Command;
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
@@ -31,7 +32,8 @@ import com.vaadin.tests.MockUIExtension;
  * range values were deleted from, brought into view. Undone on another sheet,
  * that sheet is shown, and the selection comes once the client has the sheet. A
  * command that selects nothing leaves the selection, and the formula bar is
- * refreshed once, by what the command changes.
+ * refreshed once, by what the command changes. A row deleted or inserted is
+ * selected whole, as a click on its header selects it.
  */
 class SelectionAfterUndoTest {
 
@@ -183,6 +185,46 @@ class SelectionAfterUndoTest {
         assertEquals(
                 List.of("updateFormulaBar B2", "showSelectedCell B2 into view"),
                 respond());
+    }
+
+    /** Deletes row 3, as the context menu of its header does. */
+    private void deleteRow3() {
+        new DeleteRowAction().executeActionOnHeader(spreadsheet,
+                new CellRangeAddress(2, 2, -1, -1));
+    }
+
+    /** Row 3 from column A to the last column of the sheet shown. */
+    private String wholeRow3() {
+        return "A3:" + CellReference
+                .convertNumToColString(spreadsheet.getColumns() - 1) + "3";
+    }
+
+    @Test
+    void anUndoOfARowDelete_selectsTheWholeRow() {
+        // E2, above the rows the undo moves.
+        deleteRow3();
+        select(2, 5);
+        respond();
+
+        undo();
+
+        assertEquals(List.of(
+                "setSelectedCellAndRange A3 in " + wholeRow3() + " into view"),
+                selections(respond()));
+    }
+
+    @Test
+    void anUndoOfARowDeleteOnAnotherSheet_selectsTheWholeRow_onceTheClientHasIt() {
+        deleteRow3();
+        respond();
+        showTheSecondSheet();
+
+        undo();
+        respond();
+
+        assertEquals(List.of(
+                "setSelectedCellAndRange A3 in " + wholeRow3() + " into view"),
+                selections(clientReportsWhereItIs()));
     }
 
     @Test

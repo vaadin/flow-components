@@ -50,9 +50,13 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
                 false);
     }
 
+    /**
+     * The whole row, as a click on its header selects it: the columns shown are
+     * those of whichever sheet the client shows, if any yet.
+     */
     @Override
     public CellRangeAddress getPaintedCellRange() {
-        return new CellRangeAddress(row, row, 0, spreadsheet.getLastColumn());
+        return new CellRangeAddress(row, row, 0, spreadsheet.getColumns() - 1);
     }
 
     public void insertNewRow() {
