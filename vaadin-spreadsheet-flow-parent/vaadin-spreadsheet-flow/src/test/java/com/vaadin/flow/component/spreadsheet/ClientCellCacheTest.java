@@ -203,6 +203,19 @@ class ClientCellCacheTest {
     }
 
     @Test
+    void aCellTakenOffAfterItWasMarked_isNoLongerMarked() {
+        // Of a removal and an update of a cell, the last is the one.
+        cache.markForUpdate("col2 row3");
+        CellData removal = new CellData();
+        removal.col = 2;
+        removal.row = 3;
+
+        cache.enqueueRemoval(removal);
+
+        assertFalse(cache.isMarkedForUpdate("col2 row3"));
+    }
+
+    @Test
     void clear_forgetsTheMarksToo() {
         cache.markForUpdate("col5 row2");
         cache.markNormalSent("col5 row2");

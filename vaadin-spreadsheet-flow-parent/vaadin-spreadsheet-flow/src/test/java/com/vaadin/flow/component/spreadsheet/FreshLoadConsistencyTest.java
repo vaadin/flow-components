@@ -177,10 +177,7 @@ class FreshLoadConsistencyTest {
             Map.entry("rows shifted down", c -> c.known("cell H13")),
             Map.entry("rows of their own heights shifted down",
                     c -> c.known("cell H13")),
-            Map.entry("a hidden row shifted down", c -> c.known("cell H13")),
-            Map.entry("a row shifted down past rows not shifted",
-                    c -> c.known("cell A12", "cell E12", "cell E13", "cell F12",
-                            "cell F13", "cell G12", "cell H12")));
+            Map.entry("a hidden row shifted down", c -> c.known("cell H13")));
 
     static Stream<Case> cases() {
         return Stream.of(

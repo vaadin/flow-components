@@ -146,16 +146,35 @@ final class ClientCellCache implements Serializable {
         }
     }
 
+    /**
+     * Sends the cell again on the next update, unless it is taken off the
+     * client after this: of a removal and an update of a cell, the last is the
+     * one.
+     */
     void markForUpdate(String key) {
         markedCells.add(key);
+        removedCells.remove(removalOf(key));
     }
 
     boolean isMarkedForUpdate(String key) {
         return markedCells.contains(key);
     }
 
+    /**
+     * Takes the cell off the client on the next update, unless it is marked for
+     * update after this.
+     */
     void enqueueRemoval(CellData cd) {
         removedCells.add(cd);
+        markedCells.remove(SpreadsheetUtil.toKey(cd.col, cd.row));
+    }
+
+    /** The removal of the cell of the key. */
+    private static CellData removalOf(String key) {
+        CellData removal = new CellData();
+        removal.col = SpreadsheetUtil.getColumnIndexFromKey(key);
+        removal.row = SpreadsheetUtil.getRowFromKey(key);
+        return removal;
     }
 
     void addChangedFormulaCell(CellReference ref) {
