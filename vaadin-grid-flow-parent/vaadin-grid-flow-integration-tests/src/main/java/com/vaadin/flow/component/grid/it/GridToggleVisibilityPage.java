@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -23,17 +24,70 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid/hidden-grid-component-column")
-public class HiddenGridComponentColumnPage extends Div {
-
-    static final int ROW_COUNT = 10;
+@Route("vaadin-grid/toggle-visibility")
+public class GridToggleVisibilityPage extends Div {
 
     private int generation;
 
-    public HiddenGridComponentColumnPage() {
+    public GridToggleVisibilityPage() {
+        createHiddenGrid();
+        createHiddenParentGrid();
+        createComponentGrid();
+    }
+
+    private void createHiddenGrid() {
+        ListDataProvider<String> dataProvider = new ListDataProvider<>(
+                new ArrayList<>(List.of("foo", "bar")));
         Grid<String> grid = new Grid<>();
+        grid.setId("hidden-grid");
+        grid.setItems(dataProvider);
+        grid.addColumn(ValueProvider.identity()).setHeader("Name");
+        grid.setVisible(false);
+
+        NativeButton selectAndShow = new NativeButton("Select and show",
+                event -> {
+                    grid.setVisible(true);
+                    grid.select("foo");
+                });
+        selectAndShow.setId("select-and-show");
+
+        NativeButton refreshAndShow = new NativeButton("Refresh and show",
+                event -> {
+                    dataProvider.getItems().clear();
+                    dataProvider.getItems().add("baz");
+                    dataProvider.refreshAll();
+                    grid.setVisible(true);
+                });
+        refreshAndShow.setId("refresh-and-show");
+
+        add(grid, selectAndShow, refreshAndShow);
+    }
+
+    private void createHiddenParentGrid() {
+        Grid<String> grid = new Grid<>();
+        grid.setId("hidden-parent-grid");
+        grid.setItems(
+                IntStream.range(0, 10).mapToObj(i -> "Item " + i).toList());
+        grid.addColumn(ValueProvider.identity());
+
+        // https://github.com/vaadin/flow/issues/4448
+        Div parent = new Div(grid);
+        parent.setVisible(false);
+
+        NativeButton toggleParent = new NativeButton("Toggle parent",
+                event -> parent.setVisible(!parent.isVisible()));
+        toggleParent.setId("toggle-parent");
+
+        add(parent, toggleParent);
+    }
+
+    private void createComponentGrid() {
+        Grid<String> grid = new Grid<>();
+        grid.setId("component-grid");
         Column<String> textColumn = grid.addColumn(item -> "text of " + item)
                 .setHeader("Text");
         grid.addComponentColumn(item -> new Span("component of " + item))
@@ -77,7 +131,7 @@ public class HiddenGridComponentColumnPage extends Div {
 
     private List<String> nextItems() {
         generation++;
-        return IntStream.rangeClosed(1, ROW_COUNT)
+        return IntStream.rangeClosed(1, 10)
                 .mapToObj(row -> "item " + generation + "." + row).toList();
     }
 }

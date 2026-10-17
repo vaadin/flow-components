@@ -23,25 +23,57 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid/hidden-grid-component-column")
-public class HiddenGridComponentColumnIT extends AbstractComponentIT {
-
-    private GridElement grid;
+@TestPath("vaadin-grid/toggle-visibility")
+public class GridToggleVisibilityIT extends AbstractComponentIT {
 
     @Before
     public void init() {
         open();
-        grid = $(GridElement.class).waitForFirst();
+    }
+
+    @Test
+    public void hiddenGrid_selectAndShow_rowIsSelected() {
+        clickButton("select-and-show");
+
+        GridElement grid = $(GridElement.class).id("hidden-grid");
+        Assert.assertTrue(grid.getRow(0).isSelected());
+        Assert.assertFalse(grid.getRow(1).isSelected());
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void hiddenGrid_refreshAndShow_newItemsAreRendered() {
+        clickButton("refresh-and-show");
+
+        GridElement grid = $(GridElement.class).id("hidden-grid");
+        Assert.assertEquals(1, grid.getRowCount());
+        Assert.assertEquals("baz", grid.getCell(0, 0).getText());
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void hiddenParent_toggleParent_gridIsRendered() {
+        clickButton("toggle-parent");
+
+        GridElement grid = $(GridElement.class).id("hidden-parent-grid");
+        Assert.assertEquals("Item 0", grid.getCell(0, 0).getText());
+
+        clickButton("toggle-parent");
+        clickButton("toggle-parent");
+        Assert.assertEquals("Item 0", grid.getCell(0, 0).getText());
+        checkLogsForErrors();
     }
 
     @Test
     public void hideGrid_setItems_showGrid_componentsAreRendered() {
+        GridElement grid = $(GridElement.class).id("component-grid");
+
         // The second round matters: the first one can pass on a grid that had
         // no rows before
         for (int round = 1; round <= 2; round++) {
-            clickElementWithJs("hide-grid");
-            clickElementWithJs("set-items");
-            clickElementWithJs("show-grid");
+            clickButton("hide-grid");
+            clickButton("set-items");
+            clickButton("show-grid");
 
             int generation = round + 1;
             Assert.assertEquals("round " + round,
@@ -52,8 +84,10 @@ public class HiddenGridComponentColumnIT extends AbstractComponentIT {
 
     @Test
     public void hideGridClearItemsAndHideColumn_showGridWithNewItems_componentsAreRendered() {
-        clickElementWithJs("hide-grid-and-column");
-        clickElementWithJs("show-grid-with-new-items");
+        GridElement grid = $(GridElement.class).id("component-grid");
+
+        clickButton("hide-grid-and-column");
+        clickButton("show-grid-with-new-items");
 
         waitUntil(driver -> grid.getRowCount() > 0);
 
@@ -61,5 +95,9 @@ public class HiddenGridComponentColumnIT extends AbstractComponentIT {
         // left
         Assert.assertEquals("component of item 2.1",
                 grid.getCell(0, 0).getText());
+    }
+
+    private void clickButton(String id) {
+        $("button").id(id).click();
     }
 }
