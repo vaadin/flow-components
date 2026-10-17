@@ -7,7 +7,14 @@ import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import type { GridSorter } from '@vaadin/grid/src/vaadin-grid-sorter.js';
 import type { GridSorterDirection } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import type { GridCellActivateEvent } from '@vaadin/grid/src/vaadin-grid-mixin.js';
-import type { FlowDataProviderController, FlowGrid, Item, ItemRange, SelectionMode } from './vaadin-grid-types.js';
+import type {
+  FlowDataProviderController,
+  FlowGrid,
+  Item,
+  ItemRange,
+  RowMove,
+  SelectionMode
+} from './vaadin-grid-types.js';
 
 const requestDebouncerDelay = 150;
 
@@ -44,6 +51,14 @@ export class GridConnector {
   #preventRowUpdatesActive = 0;
 
   #pendingScrollToItem: { itemKey: string; indexes: number[] } | null = null;
+
+  #draggedItems: Item[] = [];
+
+  // The number of the last drop that the client sent to the server
+  #lastDrop = 0;
+
+  // Row moves that the client applied and the server has not handled yet
+  #pendingRowMoves: RowMove[] = [];
 
   constructor(grid: FlowGrid) {
     this.#grid = grid;
@@ -294,6 +309,7 @@ export class GridConnector {
   }
 
   reset(): void {
+    this.#pendingRowMoves = [];
     this.#dataProviderController.clearCache();
     this.#requestedRange = null;
     this.#requestDebouncer?.cancel();
@@ -309,6 +325,10 @@ export class GridConnector {
   }
 
   confirm(id: number): void {
+    // The data in this batch has the server-side row order, which can be
+    // older than the row moves that the client applied, so apply those again
+    this.#applyPendingRowMoves();
+
     // We're done applying changes from this batch, resolve pending
     // callbacks
     this.resolvePendingCallbacks();
@@ -610,6 +630,7 @@ export class GridConnector {
 
     grid.addEventListener('grid-dragstart', (e) => {
       const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
+      this.#draggedItems = draggedItems;
 
       if (this.#selectedKeys[draggedItems[0].key]) {
         // Dragging selected (possibly multiple) items
@@ -632,6 +653,110 @@ export class GridConnector {
         });
       }
     });
+
+    grid.addEventListener('grid-dragend', () => {
+      this.#draggedItems = [];
+    });
+
+    // Use the capture phase, so that the drop number is in the event detail
+    // before Flow reads the event data in its own listener
+    grid.addEventListener(
+      'grid-drop',
+      (e) => {
+        const draggedItems = this.#draggedItems;
+        this.#draggedItems = [];
+        if (!grid.__optimisticRowReorder || grid.hasAttribute('disabled')) {
+          return;
+        }
+
+        // The server confirms each drop by setting `__dropsHandled` to its
+        // number. Continue from that number when the connector is re-created.
+        this.#lastDrop = Math.max(this.#lastDrop, grid.__dropsHandled ?? 0) + 1;
+        (e.detail as typeof e.detail & { optimisticDropNumber: number }).optimisticDropNumber = this.#lastDrop;
+
+        const move = this.#createRowMove(this.#lastDrop, draggedItems, e.detail.dropTargetItem, e.detail.dropLocation);
+        if (move) {
+          this.#pendingRowMoves.push(move);
+          this.#applyRowMove(move);
+        }
+      },
+      true
+    );
+  }
+
+  #createRowMove(
+    drop: number,
+    draggedItems: Item[],
+    dropTargetItem: Item | undefined,
+    dropLocation: string
+  ): RowMove | null {
+    const draggedKeys = draggedItems.map((item) => item.key);
+    if (
+      !dropTargetItem ||
+      draggedKeys.length === 0 ||
+      draggedKeys.includes(dropTargetItem.key) ||
+      (dropLocation !== 'above' && dropLocation !== 'below')
+    ) {
+      return null;
+    }
+    return { drop, draggedKeys, targetKey: dropTargetItem.key, location: dropLocation };
+  }
+
+  /**
+   * Removes the row moves that the server has handled, and applies the other
+   * ones again. Flow applies property changes before it runs the connector
+   * calls of the same response, so `__dropsHandled` is already up to date
+   * when the data of that response arrives. A handled drop also confirms
+   * all earlier drops, in case one of them never reached the server.
+   */
+  #applyPendingRowMoves(): void {
+    const grid = this.#grid;
+    const dropsHandled = grid.__dropsHandled ?? 0;
+    this.#pendingRowMoves = grid.__optimisticRowReorder
+      ? this.#pendingRowMoves.filter((move) => move.drop > dropsHandled)
+      : [];
+    this.#pendingRowMoves.forEach((move) => this.#applyRowMove(move));
+  }
+
+  /**
+   * Moves the dragged items above or below the target item in the cache.
+   * Applying the same move again has no effect. The move is skipped when the
+   * client cannot know the result: when a sorter is active, when the grid
+   * shows hierarchical data, or when an item in the affected range is not
+   * loaded.
+   */
+  #applyRowMove({ draggedKeys, targetKey, location }: RowMove): void {
+    const grid = this.#grid;
+    const items = this.#dataProviderController.rootCache.items;
+
+    if (grid._getActiveSorters().length > 0) {
+      return;
+    }
+
+    const indexOfKey = (key: string) => items.findIndex((item) => item?.key === key);
+    const targetIndex = indexOfKey(targetKey);
+    const draggedIndexes = draggedKeys.map(indexOfKey);
+    if (targetIndex < 0 || draggedIndexes.includes(-1) || items[targetIndex]!.level !== undefined) {
+      return;
+    }
+
+    const start = Math.min(targetIndex, ...draggedIndexes);
+    const end = Math.max(targetIndex, ...draggedIndexes);
+    const range = items.slice(start, end + 1);
+    if (range.length !== end - start + 1 || range.includes(undefined)) {
+      return;
+    }
+
+    const draggedItems = draggedIndexes.sort((a, b) => a - b).map((index) => items[index]!);
+    const reordered = range.filter((item) => !draggedKeys.includes(item!.key));
+    const targetPosition = reordered.findIndex((item) => item!.key === targetKey);
+    reordered.splice(location === 'above' ? targetPosition : targetPosition + 1, 0, ...draggedItems);
+
+    if (reordered.every((item, i) => item === range[i])) {
+      return;
+    }
+    items.splice(start, reordered.length, ...reordered);
+    grid.__updateVisibleRows(start, end);
   }
 
   #onItemActivate(event: GridCellActivateEvent<Item>): void {
