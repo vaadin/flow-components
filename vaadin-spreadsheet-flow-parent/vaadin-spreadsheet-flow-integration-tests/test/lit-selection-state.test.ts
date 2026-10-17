@@ -11,10 +11,13 @@ import { expect } from 'chai';
 import {
     addAuxRange,
     containsCell,
+    initialSheetSelection,
     isActiveCell,
     isCellSelected,
     isCoherentSelection,
     normalizedRange,
+    pickCell,
+    replaceRange,
     selectSingleCell,
     type SelectionState,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
@@ -151,3 +154,36 @@ describe('SelectionState — isActiveCell', () => {
         expect(isActiveCell(state, 4, 4)).to.be.false; // far corner
     });
 });
+
+describe('SelectionState — the sheet\'s selection and the cell a merge was entered by', () => {
+    // The merge A1:B2 entered by B1.
+    const enteredByB1 = { activeCell: { col: 1, row: 1 }, activeRange: normalizedRange(1, 1, 2, 2), entry: { col: 2, row: 1 } };
+
+    it('starts at A1, no merge entered', () => {
+        expect(initialSheetSelection()).to.deep.equal({ cells: selectSingleCell(1, 1), mergeEntry: null });
+    });
+
+    it('picks one cell or merge, given the whole selection up for, entered by the cell asked for', () => {
+        const picked = pickCell(enteredByB1);
+
+        expect(picked).to.deep.equal({
+            cells: { activeCell: { col: 1, row: 1 }, activeRange: normalizedRange(1, 1, 2, 2), auxRanges: [] },
+            mergeEntry: { col: 2, row: 1 },
+        });
+    });
+
+    it('enters no merge picking an ordinary cell', () => {
+        const picked = pickCell({ ...enteredByB1, activeRange: normalizedRange(1, 1, 1, 1), entry: null });
+
+        expect(picked.mergeEntry).to.equal(null);
+    });
+
+    it('keeps the cell a merge was entered by when other cells are selected', () => {
+        const range = selectRange(1, 1, 2, 2);
+
+        const replaced = replaceRange(pickCell(enteredByB1), range);
+
+        expect(replaced).to.deep.equal({ cells: range, mergeEntry: { col: 2, row: 1 } });
+    });
+});
+

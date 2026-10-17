@@ -100,6 +100,45 @@ export function selectSingleCell(col: number, row: number): SelectionState {
 }
 
 /**
+ * The cells selected, and the cell a merge was entered by while the active
+ * cell is a merge: the arrows leave the merge in that cell's column and row.
+ */
+export interface SheetSelection {
+  readonly cells: SelectionState;
+  /** The cell a click or an arrow asked for inside the merge selected; null when no merge is. */
+  readonly mergeEntry: CellPosition | null;
+}
+
+/** The selection of a sheet nothing has been selected on yet: A1. */
+export function initialSheetSelection(): SheetSelection {
+  return { cells: selectSingleCell(1, 1), mergeEntry: null };
+}
+
+/**
+ * One cell or merge picked, given the whole selection up for: the merge is
+ * entered by the cell asked for, or by none.
+ */
+export function pickCell(next: {
+  activeCell: CellPosition;
+  activeRange: CellRange;
+  entry: CellPosition | null;
+}): SheetSelection {
+  return {
+    cells: { activeCell: next.activeCell, activeRange: next.activeRange, auxRanges: [] },
+    mergeEntry: next.entry
+  };
+}
+
+/**
+ * Other cells selected - a range grown or extended, the selection the server
+ * names - with the merge still entered by the same cell: the arrows leave it
+ * as they would have.
+ */
+export function replaceRange(selection: SheetSelection, cells: SelectionState): SheetSelection {
+  return { cells, mergeEntry: selection.mergeEntry };
+}
+
+/**
  * Build a {@code CellRange} with normalized corners.
  */
 export function normalizedRange(c1: number, r1: number, c2: number, r2: number): CellRange {

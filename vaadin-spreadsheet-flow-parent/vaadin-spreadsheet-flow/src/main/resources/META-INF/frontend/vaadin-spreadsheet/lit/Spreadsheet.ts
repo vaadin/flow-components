@@ -20,6 +20,10 @@ import type {
 } from './types/wire.js';
 import type { Json, SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
+  initialSheetSelection,
+  pickCell,
+  replaceRange,
+  type SheetSelection,
   addAuxRange,
   buildSelectionEvent,
   type CellPosition,
@@ -231,8 +235,16 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private model: SheetModel = initialSheetModel();
 
-  /** Selection state. */
-  private selection: SelectionState = selectSingleCell(1, 1);
+  /**
+   * The cells selected and the cell a merge was entered by; see
+   * {@link SheetSelection}. Changed through {@link select} and {@link pick}.
+   */
+  private sheetSelection: SheetSelection = initialSheetSelection();
+
+  /** The cells selected. */
+  private get selection(): SelectionState {
+    return this.sheetSelection.cells;
+  }
 
   /**
    * Whether the release of the press under way reported the range it
@@ -246,7 +258,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * region: the arrows leave the merge in its column and row. Null when
    * the selection is not a merge.
    */
-  private mergeEntry: { col: number; row: number } | null = null;
+  private get mergeEntry(): { col: number; row: number } | null {
+    return this.sheetSelection.mergeEntry;
+  }
 
   /**
    * The formula being written and where its caret is, while one is: its
@@ -768,13 +782,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.root,
       { cells: this.cellGrid, columnHeader: this.columnHeader, rowHeader: this.rowHeader },
       {
-        selectForMenu: (col, row) => {
-          if (!isCellInSelection(col, row, this.selection)) {
-            this.selectCellOrMerge(col, row);
-            this.recomputeViewport();
-            this.dispatchSelectionEvent();
-          }
-        },
+        // Drawn before the server hears of the cell, as from a handler of
+        // the sheet's own.
+        selectForMenu: (col, row) =>
+          this.renders.handle(() => {
+            if (!isCellInSelection(col, row, this.selection)) {
+              this.selectCellOrMerge(col, row);
+              this.dispatchSelectionEvent();
+            }
+          }),
         returnFocusToSheet: () => this.returnFocusToSheet(),
         send: (event) => this.sendToServer(event)
       },
@@ -904,8 +920,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         activeRange: this.rangeTo(anchor, col, row),
         auxRanges: []
       };
-      this.selection = { ...extended, auxRanges: this.selection.auxRanges };
-      this.recomputeViewport();
+      this.select({ ...extended, auxRanges: this.selection.auxRanges });
       this.dispatchCellsAddedToRangeSelection(extended.activeRange);
       return;
     }
@@ -913,8 +928,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // Non-coherent selection: the clicked cell joins the selection
       // as its own range and becomes active; the previous active
       // range is kept as an aux range.
-      this.selection = addAuxRange(this.selection, col, row, col, row);
-      this.recomputeViewport();
+      this.select(addAuxRange(this.selection, col, row, col, row));
       this.dispatchCellAddedToSelection(col, row);
       return;
     }
@@ -924,12 +938,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // with earlier Ctrl-clicks stay: shift extends the last range,
       // it does not start the selection over.
       const anchor = this.selection.activeCell;
-      this.selection = {
+      this.select({
         activeCell: anchor,
         activeRange: this.rangeTo(anchor, col, row),
         auxRanges: this.selection.auxRanges
-      };
-      this.recomputeViewport();
+      });
       if (!this.rangeReportedOnRelease) {
         this.reportRangeSelection();
       }
@@ -937,7 +950,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     } else {
       this.selectCellOrMerge(col, row);
     }
-    this.recomputeViewport();
     this.dispatchSelectionEvent();
     // Hyperlink cells additionally dispatch `linkCellClicked`
     // after the normal selection event. The
@@ -1061,15 +1073,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // drag start). Standard Excel "shift-drag" behavior.
       // Aux ranges survive, as on a shift-click.
       const anchor = this.selection.activeCell;
-      this.selection = {
+      this.select({
         activeCell: anchor,
         activeRange: this.rangeTo(anchor, col, row),
         auxRanges: this.selection.auxRanges
-      };
+      });
     } else {
       this.selectCellOrMerge(col, row);
     }
-    this.recomputeViewport();
   };
 
   /**
@@ -1113,13 +1124,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // The ranges picked out before stay: a plain press has already let
     // them go, and a Shift-press drags out the range it extends.
     const anchor = this.selection.activeCell;
-    this.selection = {
+    this.select({
       activeCell: anchor,
       activeRange: this.rangeTo(anchor, col, row),
       auxRanges: this.selection.auxRanges
-    };
+    });
     this.showRangeSizeInAddressField();
-    this.recomputeViewport();
   };
 
   /**
@@ -1306,7 +1316,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         ? moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape())
         : null;
     if (next !== null) {
-      this.applySingleSelection(next);
+      this.pick(next);
     }
     if (!walks) {
       this.recomputeViewport();
@@ -1662,8 +1672,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const row = this.firstRowOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole column joins the selection as a further range.
-      this.selection = addAuxRange(this.selection, col, 1, col, rows, { col, row });
-      this.recomputeViewport();
+      this.select(addAuxRange(this.selection, col, 1, col, rows, { col, row }));
       const data: ColumnSelectedData = { column: col, firstRowIndex: row };
       this.sendToServer({ type: 'columnAddedToSelection', data });
       return;
@@ -1671,19 +1680,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (shiftKey) {
       // Extend across columns, keeping ranges added with Ctrl.
       const anchor = this.selection.activeCell;
-      this.selection = {
+      this.select({
         activeCell: anchor,
         activeRange: normalizedRange(anchor.col, 1, col, rows),
         auxRanges: this.selection.auxRanges
-      };
+      });
     } else {
-      this.selection = {
+      this.select({
         activeCell: { col, row },
         activeRange: normalizedRange(col, 1, col, rows),
         auxRanges: []
-      };
+      });
     }
-    this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
 
@@ -1733,8 +1741,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const col = this.firstColumnOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole row joins the selection as a further range.
-      this.selection = addAuxRange(this.selection, 1, row, cols, row, { col, row });
-      this.recomputeViewport();
+      this.select(addAuxRange(this.selection, 1, row, cols, row, { col, row }));
       const data: RowSelectedData = { row, firstColumnIndex: col };
       this.sendToServer({ type: 'rowAddedToRangeSelection', data });
       return;
@@ -1742,19 +1749,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (shiftKey) {
       // Extend across rows, keeping ranges added with Ctrl.
       const anchor = this.selection.activeCell;
-      this.selection = {
+      this.select({
         activeCell: anchor,
         activeRange: normalizedRange(1, anchor.row, cols, row),
         auxRanges: this.selection.auxRanges
-      };
+      });
     } else {
-      this.selection = {
+      this.select({
         activeCell: { col, row },
         activeRange: normalizedRange(1, row, cols, row),
         auxRanges: []
-      };
+      });
     }
-    this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
 
@@ -1818,12 +1824,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       e.preventDefault();
-      this.selection = {
+      this.select({
         activeCell: { col: 1, row: 1 },
         activeRange: normalizedRange(1, 1, this.model.cols, this.model.rows),
         auxRanges: []
-      };
-      this.recomputeViewport();
+      });
       this.dispatchSelectionEvent(true);
       return;
     }
@@ -1968,7 +1973,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         if (grown === null) {
           return;
         }
-        this.selection = { activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] };
+        this.select({ activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] });
         this.extendingSelection = true;
         this.showRangeSizeInAddressField();
         this.scrollCellIntoView(grown.moved);
@@ -1979,7 +1984,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         }
         this.moveSelectionTo(next);
       }
-      this.recomputeViewport();
       this.dispatchSelectionEvent();
       return;
     }
@@ -2001,7 +2005,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     e.preventDefault();
     this.moveSelectionTo(selectCellAt(target.col, target.row, this.model.mergedRegions));
-    this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
 
@@ -2012,7 +2015,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private moveSelectionTo(next: SingleCellSelection): void {
     this.extendingSelection = false;
-    this.applySingleSelection(next);
+    this.pick(next);
     this.scrollCellIntoView(next.activeCell);
   }
 
@@ -2026,13 +2029,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * walking through the block they picked earlier".
    */
   private moveActiveCellInsideSelection(next: { col: number; row: number }): void {
-    this.selection = {
+    this.select({
       activeCell: next,
       activeRange: this.selection.activeRange,
       auxRanges: this.selection.auxRanges
-    };
+    });
     this.scrollCellIntoView(next);
-    this.recomputeViewport();
     const data: CellSelectedData = {
       row: next.row,
       column: next.col,
@@ -3063,9 +3065,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.recomputeViewport();
       return;
     }
-    this.applySingleSelection(next);
+    this.pick(next);
     this.scrollCellIntoView(next.activeCell);
-    this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
 
@@ -3321,7 +3322,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // anchor of the range they are in the middle of making.
     const sizeLabel = selectionSizeLabel(this.selection.activeRange);
     const before = this.selection.activeCell;
-    this.selection = selectSingleCell(col, row);
+    this.select(selectSingleCell(col, row));
     this.sheetData.serverSelectedCell = { col, row };
     this.changeFormulaBar({ address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }) });
     this.showServerValueInFormulaField(
@@ -3336,7 +3337,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (!keepView) {
       this.scrollCellIntoView({ col, row });
     }
-    this.scheduleRender();
   }
   /** Any click outside the menu dismisses it, as a native menu would. */
   private readonly handleDocumentPointerDown = (e: Event): void => {
@@ -3378,11 +3378,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // the current list is also correct for the replace case.
     const before = this.selection.activeCell;
     const moved = before.col !== col || before.row !== row;
-    this.selection = {
+    this.select({
       activeCell: { col, row },
       activeRange: normalizedRange(c1, r1, c2, r2),
       auxRanges: this.selection.auxRanges
-    };
+    });
     this.sheetData.serverSelectedCell = { col, row };
     this.changeFormulaBar({
       // As in updateFormulaBar: the server names a selection only when
@@ -3403,7 +3403,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (scroll) {
       this.scrollCellIntoView({ col, row });
     }
-    this.scheduleRender();
   }
   cellsUpdated(updatedCellData: CellData[]): void {
     this.storeCellData(updatedCellData);
@@ -3631,8 +3630,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.selection.activeCell.col === cell.col && this.selection.activeCell.row === cell.row) {
       return;
     }
-    this.selection = selectSingleCell(cell.col, cell.row);
-    this.recomputeViewport();
+    this.select(selectSingleCell(cell.col, cell.row));
     this.dispatchSelectionEvent();
   };
 
@@ -3923,12 +3921,26 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * top-left cell active, as for a click.
    */
   private selectCellOrMerge(col: number, row: number): void {
-    this.applySingleSelection(selectCellAt(col, row, this.model.mergedRegions));
+    this.pick(selectCellAt(col, row, this.model.mergedRegions));
   }
 
-  private applySingleSelection(next: SingleCellSelection): void {
-    this.selection = { activeCell: next.activeCell, activeRange: next.activeRange, auxRanges: [] };
-    this.mergeEntry = next.entry;
+  /** Picks one cell or merge; see {@link pickCell}. */
+  private pick(next: SingleCellSelection): void {
+    this.changeSelection(pickCell(next));
+  }
+
+  /**
+   * Selects cells, with the merge still entered by the same cell; see
+   * {@link replaceRange}. Drawn as the handler ends, before the server is
+   * told; see {@link handling}.
+   */
+  private select(cells: SelectionState): void {
+    this.changeSelection(replaceRange(this.sheetSelection, cells));
+  }
+
+  private changeSelection(selection: SheetSelection): void {
+    this.sheetSelection = selection;
+    this.scheduleRender();
   }
 
   /**
