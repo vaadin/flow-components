@@ -35,9 +35,9 @@ import com.vaadin.flow.component.spreadsheet.tests.CapturedLogs;
 import com.vaadin.flow.component.spreadsheet.tests.ExpectWarnings;
 
 /**
- * The fonts and the alignment of the cell styles, as CSS for the client. The
- * default style, style 0, sets the font of the sheet; every other style sets
- * only what differs from it.
+ * The fonts, the alignment, the wrapping and the indentation of the cell
+ * styles, as CSS for the client. The default style, style 0, sets the font of
+ * the sheet; every other style sets only what differs from it.
  */
 class SpreadsheetFontStylesTest {
 
@@ -131,6 +131,15 @@ class SpreadsheetFontStylesTest {
 
     @Test
     void aStyleOfTheDefaultFont_setsNoFont() {
+        String css = css(workbook.createCellStyle());
+
+        assertFalse(css.contains("font"), css);
+    }
+
+    @Test
+    void aStyleOfABoldDefaultFont_setsNoFont() {
+        defaultFont(font -> font.setBold(true));
+
         String css = css(workbook.createCellStyle());
 
         assertFalse(css.contains("font"), css);
@@ -257,6 +266,11 @@ class SpreadsheetFontStylesTest {
     }
 
     @Test
+    void aFontNameWithABackslashOrControlCharacters_isAnEscapedString() {
+        assertEquals("\"A\\5c B\\1 C\\7f D\"", nameInCss("A\\B\u0001C\u007fD"));
+    }
+
+    @Test
     void aFontNameThatWouldEndTheRule_isQuoted() {
         assertEquals("\"X;}.cell{color:red}\"",
                 nameInCss("X;}.cell{color:red}"));
@@ -334,6 +348,25 @@ class SpreadsheetFontStylesTest {
         centered.setAlignment(HorizontalAlignment.CENTER);
 
         assertTrue(css(centered).contains("text-align:center;"), css(centered));
+    }
+
+    @Test
+    void aStyleWrappingItsText_setsItToWrap() {
+        XSSFCellStyle wrapped = workbook.createCellStyle();
+        wrapped.setWrapText(true);
+
+        assertTrue(css(wrapped).contains(
+                "overflow:hidden;white-space:normal;word-wrap:break-word;"),
+                css(wrapped));
+        assertFalse(css(workbook.createCellStyle()).contains("white-space"));
+    }
+
+    @Test
+    void anIndentedStyle_setsItsIndentation() {
+        XSSFCellStyle indented = workbook.createCellStyle();
+        indented.setIndention((short) 2);
+
+        assertTrue(css(indented).contains("padding-left: 2em;"), css(indented));
     }
 
     @Test
