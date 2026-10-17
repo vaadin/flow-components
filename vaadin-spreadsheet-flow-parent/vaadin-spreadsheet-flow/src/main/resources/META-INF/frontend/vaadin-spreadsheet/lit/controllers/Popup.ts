@@ -8,6 +8,7 @@
  * license.
  */
 
+import type { ReactiveController } from 'lit';
 import { popupPlacement } from '../algorithms/Placement.js';
 import { listen } from '../dom/Listen.js';
 import { animateIn, animateOut } from '../dom/OverlayAnimation.js';
@@ -46,7 +47,7 @@ export interface PopupHost {
  * its button. Opened from the keyboard, it takes the keyboard and gives it
  * back when it closes.
  */
-export class Popup {
+export class Popup implements ReactiveController {
   /** The overlay the open popup's content is shown in. */
   readonly overlay: HTMLElement;
 
@@ -275,7 +276,7 @@ export class Popup {
   }
 
   /** Stop following the popup's size, as the sheet leaves the page. */
-  disconnect(): void {
+  hostDisconnected(): void {
     this.resizeObserver.disconnect();
   }
 

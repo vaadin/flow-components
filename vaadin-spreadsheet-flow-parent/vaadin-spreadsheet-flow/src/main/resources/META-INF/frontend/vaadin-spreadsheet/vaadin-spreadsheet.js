@@ -171,14 +171,14 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   connectedCallback() {
+    // Moved, or back in the page after leaving it, the connector listens to
+    // the page again: it is one of this element's controllers, which Lit
+    // tells as the element joins the page and leaves it.
     super.connectedCallback();
     if (!this.$connector) {
       window.Vaadin.Flow.spreadsheetConnector.initLazy(this);
 
       this._firstUpdate = true;
-    } else {
-      // Moved, or back in the page after leaving it: listen to it again.
-      this.$connector.connect();
     }
 
     // The filter popup's content is the application's components, in this
@@ -190,13 +190,6 @@ export class VaadinSpreadsheet extends LitElement {
     if (root instanceof ShadowRoot && !root.adoptedStyleSheets.includes(spreadsheetOverlayStyles.styleSheet)) {
       root.adoptedStyleSheets.push(spreadsheetOverlayStyles.styleSheet);
     }
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    // The connector's page listeners hold it, and this element with it:
-    // released, a sheet removed from the page can be collected.
-    this.$connector?.disconnect();
   }
 
   updated(changedProperties) {

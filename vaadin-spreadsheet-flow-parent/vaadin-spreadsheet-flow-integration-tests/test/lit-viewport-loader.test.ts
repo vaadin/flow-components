@@ -825,7 +825,7 @@ describe('ViewportLoader', () => {
     expect(t.loads).to.be.empty;
   });
 
-  it('stops looking again once paused', () => {
+  it('stops looking again once the sheet leaves the page', () => {
     const t = setUp();
     t.serverAnswersAfterEachLoad();
     t.loader.check();
@@ -833,35 +833,35 @@ describe('ViewportLoader', () => {
     t.show({ r1: 201, c1: 1, r2: 230, c2: 10 });
     t.loader.check();
 
-    t.loader.pause();
+    t.loader.hostDisconnected();
     t.answer();
     t.time.advance(1000);
 
     expect(t.loads).to.have.length(1);
   });
 
-  it('counts no frames once paused', () => {
+  it('counts no frames once the sheet leaves the page', () => {
     const t = setUp();
-    t.loader.pause();
+    t.loader.hostDisconnected();
 
     t.loader.scrolled(400, 0);
 
     expect(t.time.framesRequested).to.equal(0);
   });
 
-  it('asks for nothing while paused', () => {
+  it('asks for nothing while the sheet is out of the page', () => {
     const t = setUp();
-    t.loader.pause();
+    t.loader.hostDisconnected();
 
     t.loader.check();
 
     expect(t.loads).to.be.empty;
   });
 
-  it('counts frames again once resumed, as when the sheet is put back in the page', () => {
+  it('counts frames again once the sheet is back in the page', () => {
     const t = setUp();
-    t.loader.pause();
-    t.loader.resume();
+    t.loader.hostDisconnected();
+    t.loader.hostConnected();
 
     t.loader.scrolled(400, 0);
 

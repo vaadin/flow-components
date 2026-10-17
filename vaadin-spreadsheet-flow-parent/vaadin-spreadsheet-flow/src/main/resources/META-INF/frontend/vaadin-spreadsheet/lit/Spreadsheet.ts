@@ -8,6 +8,7 @@
  * license.
  */
 
+import type { ReactiveController, ReactiveControllerHost } from 'lit';
 import type {
   CellData,
   GroupingData,
@@ -106,6 +107,7 @@ import {
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
+import { PageListeners } from './controllers/PageListeners.js';
 import { SheetTabs } from './controllers/SheetTabs.js';
 import { ContextMenu } from './controllers/ContextMenu.js';
 import { HeaderResize } from './controllers/HeaderResize.js';
@@ -195,7 +197,7 @@ function leavesEditor(e: KeyboardEvent): boolean {
   return !(target instanceof HTMLTextAreaElement) && !(target instanceof HTMLElement && target.isContentEditable);
 }
 
-export class Spreadsheet implements SpreadsheetClientApi {
+export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /**
    * What the sheet asks about the platform when it is made. Tests, which do
    * not run on iOS, stand in for it here.
@@ -390,8 +392,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly actionIcons: SlottedVirtualChildren;
 
-  /** The listeners on the page while the sheet is in it; see {@link connect}. */
-  private pageListeners: AbortController | null = null;
+  /**
+   * The parts that follow the sheet into the page and out of it, in the
+   * order they join it; see {@link connect}.
+   */
+  private readonly parts: ReactiveController[];
   /** The listeners on the sheet's own elements, released by {@link dispose}. */
   private readonly ownListeners = new AbortController();
 
@@ -462,9 +467,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * MutationObserver watching the spreadsheet host for class
    * changes: {@code Spreadsheet.HIDE_TABSHEET_STYLE}
    * ("hidetabsheet") and {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE}
-   * ("hidefunctionbar") hide the matching internal elements.
+   * ("hidefunctionbar") hide the matching internal elements. It watches
+   * the host in the page and out of it, until {@link dispose}: a change
+   * made while the host is out of the page is there when it comes back.
    */
-  private hostClassObserver: MutationObserver | null = null;
+  private readonly hostClassObserver: MutationObserver;
 
   /**
    * Height of the column-header strip in pixels, its bottom border
@@ -705,6 +712,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.applyHostHideClasses();
       this.applyHostTheme();
     });
+    this.hostClassObserver.observe(this.host, { attributes: true, attributeFilter: ['class', 'theme'] });
     // Sheet tab click → switch active sheet via spreadsheet-event.
     this.tabs = new SheetTabs(
       this.sheetTabs,
@@ -813,51 +821,62 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // right-click there, on the cells and the headers alike.
     this.stopLongPress = Spreadsheet.platform.isIOS() ? listenForLongPress(this.scrollContainer) : () => {};
     this.resizeObserver = new ResizeObserver(() => this.recomputeViewport());
-    this.connect();
+    this.parts = [
+      this.viewportLoader,
+      new PageListeners([
+        [document, 'pointerdown', this.handleDocumentPointerDown],
+        [document, 'keydown', this.handleContextMenuKeyDown],
+        [document, 'mouseup', this.handleDocumentMouseUp],
+        [document, 'keyup', this.handleDocumentKeyUp],
+        [document, 'mousemove', this.handleDocumentMouseMove]
+      ]),
+      {
+        hostConnected: () => this.resizeObserver.observe(this.scrollContainer),
+        hostDisconnected: () => this.resizeObserver.disconnect()
+      },
+      this.popup
+    ];
+    if (isControllerHost(host)) {
+      // Lit connects the sheet now, the element being in the page, and as
+      // the element joins and leaves it after.
+      host.addController(this);
+    } else {
+      this.connect();
+    }
   }
 
   /**
-   * Start listening to the page and observing the host. Called as the
-   * element joins the page, and again whenever it is moved: these
-   * listeners hold the connector, so {@link disconnect} releases them and a
-   * sheet removed from the page can be collected. Without that every
-   * removed sheet stayed in memory, with its cells, and went on handling
-   * every key press and mouse move in the page.
+   * The sheet joined the page, or came back to it after being moved: its
+   * parts listen to the page and observe the host, once however often it
+   * joins. A {@code <vaadin-spreadsheet>} has Lit call this, the sheet being
+   * one of its controllers.
    */
   connect(): void {
-    if (this.pageListeners !== null) {
-      return;
+    for (const part of this.parts) {
+      part.hostConnected?.();
     }
-    this.pageListeners = new AbortController();
-    this.viewportLoader.resume();
-    const { signal } = this.pageListeners;
-    listen(document, 'pointerdown', this.handleDocumentPointerDown, signal);
-    listen(document, 'keydown', this.handleContextMenuKeyDown, signal);
-    listen(document, 'mouseup', this.handleDocumentMouseUp, signal);
-    listen(document, 'keyup', this.handleDocumentKeyUp, signal);
-    listen(document, 'mousemove', this.handleDocumentMouseMove, signal);
-    this.resizeObserver.observe(this.scrollContainer);
-    if (this.hostClassObserver !== null) {
-      this.hostClassObserver.observe(this.host, { attributes: true, attributeFilter: ['class', 'theme'] });
-      // The host's classes may have changed while it was out of the page.
-      this.applyHostHideClasses();
-      this.applyHostTheme();
+  }
+
+  /** The sheet left the page: its parts stop listening to it; see {@link connect}. */
+  disconnect(): void {
+    for (const part of this.parts) {
+      part.hostDisconnected?.();
     }
+  }
+
+  /** Lit's: the element joined the page. */
+  hostConnected(): void {
+    this.connect();
+  }
+
+  /** Lit's: the element left the page. */
+  hostDisconnected(): void {
+    this.disconnect();
   }
 
   /** Listen to one of the sheet's own elements until {@link dispose}. */
   private on<E extends Event>(target: EventTarget, type: string, listener: (event: E) => void): void {
     listen(target, type, listener, this.ownListeners.signal);
-  }
-
-  /** Stop listening to the page; see {@link connect}. */
-  disconnect(): void {
-    this.pageListeners?.abort();
-    this.pageListeners = null;
-    this.resizeObserver.disconnect();
-    this.popup.disconnect();
-    this.hostClassObserver?.disconnect();
-    this.viewportLoader.pause();
   }
 
   /**
@@ -2386,7 +2405,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.popup.dispose();
     this.actionIcons.clear();
     this.disconnect();
-    this.hostClassObserver = null;
+    this.hostClassObserver.disconnect();
   }
 
   /**
@@ -4055,6 +4074,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   isSheetProtected(): boolean {
     return this.model.sheetProtected;
   }
+}
+
+/** Whether the host is a Lit element, which tells its controllers as it joins and leaves the page. */
+function isControllerHost(host: HTMLElement): host is HTMLElement & ReactiveControllerHost {
+  return typeof (host as Partial<ReactiveControllerHost>).addController === 'function';
 }
 
 /** Whether a key goes to a button, which the key itself is pressing. */

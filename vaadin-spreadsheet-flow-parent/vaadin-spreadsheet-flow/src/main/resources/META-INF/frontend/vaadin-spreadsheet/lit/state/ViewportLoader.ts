@@ -8,6 +8,8 @@
  * license.
  */
 
+import type { ReactiveController } from 'lit';
+
 /** A 1-based, inclusive range of cells. */
 export interface LoadRange {
   r1: number;
@@ -144,7 +146,7 @@ const FRAMES_TIMED = 3;
  * every two of them.
  * </ul>
  */
-export class ViewportLoader {
+export class ViewportLoader implements ReactiveController {
   private loaded: LoadRange | null = null;
   /** The drawn range the last request was made for. */
   private reportedDrawn: LoadRange | null = null;
@@ -276,18 +278,18 @@ export class ViewportLoader {
     this.cancelTimer();
   }
 
+  /** Look again once the sheet is back in the page. */
+  hostConnected(): void {
+    this.paused = false;
+  }
+
   /**
    * Ask for nothing, and stop looking again, while the sheet is out of the
    * page: a repaint still pending when it left would ask otherwise.
    */
-  pause(): void {
+  hostDisconnected(): void {
     this.paused = true;
     this.cancelTimer();
-  }
-
-  /** Look again once the sheet is back in the page. */
-  resume(): void {
-    this.paused = false;
   }
 
   /**
