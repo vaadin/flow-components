@@ -49,12 +49,12 @@ final class HyperlinkLoader implements Serializable {
 
     private void scan(HashMap<String, String> tooltips,
             HyperlinkCellClickHandler handler, int r1, int c1, int r2, int c2) {
-        for (int r = r1 - 1; r < r2; r++) {
+        for (int r = r1; r <= r2; r++) {
             final Row row = spreadsheet.getActiveSheet().getRow(r);
             if (row == null) {
                 continue;
             }
-            for (int c = c1 - 1; c < c2; c++) {
+            for (int c = c1; c <= c2; c++) {
                 Cell cell = row.getCell(c);
                 if (cell == null) {
                     continue;

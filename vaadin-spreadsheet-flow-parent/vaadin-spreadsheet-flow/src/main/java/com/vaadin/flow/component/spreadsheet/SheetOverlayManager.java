@@ -139,8 +139,10 @@ final class SheetOverlayManager implements Serializable {
         }
 
         boolean[] visible = { false };
-        spreadsheet.viewport().forEachPane((r1, c1, r2,
-                c2) -> visible[0] |= overlay.isVisible(r1, c1, r2, c2));
+        // The overlay numbers rows and columns from 1.
+        spreadsheet.viewport()
+                .forEachPane((r1, c1, r2, c2) -> visible[0] |= overlay
+                        .isVisible(r1 + 1, c1 + 1, r2 + 1, c2 + 1));
         return visible[0];
     }
 

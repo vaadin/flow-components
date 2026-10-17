@@ -134,9 +134,9 @@ final class CustomComponentLoader implements Serializable {
             int col1, int row2, int col2) {
         SpreadsheetComponentFactory factory = spreadsheet
                 .getSpreadsheetComponentFactory();
-        for (int r = row1 - 1; r < row2; r++) {
+        for (int r = row1; r <= row2; r++) {
             final Row row = spreadsheet.getActiveSheet().getRow(r);
-            for (int c = col1 - 1; c < col2; c++) {
+            for (int c = col1; c <= col2; c++) {
                 MergedRegion region = spreadsheet.getMergedRegionContainer()
                         .getMergedRegion(c + 1, r + 1);
                 if (region != null
@@ -212,9 +212,9 @@ final class CustomComponentLoader implements Serializable {
         Viewport viewport = spreadsheet.viewport();
         String selected = selectedCellKey();
         editors.keySet()
-                .removeIf(key -> !key.equals(selected)
-                        && !viewport.shows(SpreadsheetUtil.getRowFromKey(key),
-                                SpreadsheetUtil.getColumnIndexFromKey(key)));
+                .removeIf(key -> !key.equals(selected) && !viewport.shows(
+                        SpreadsheetUtil.getRowFromKey(key) - 1,
+                        SpreadsheetUtil.getColumnIndexFromKey(key) - 1));
     }
 
     /** The selected cell's key, or null when no cell is selected. */

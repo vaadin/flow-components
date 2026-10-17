@@ -56,12 +56,12 @@ final class CellCommentLoader implements Serializable {
             HashMap<String, String> authors, ArrayList<String> visible,
             Set<String> invalidFormulas, int r1, int c1, int r2, int c2) {
         Sheet sheet = spreadsheet.getActiveSheet();
-        for (int r = r1 - 1; r < r2; r++) {
+        for (int r = r1; r <= r2; r++) {
             Row row = sheet.getRow(r);
             if (row != null && row.getZeroHeight()) {
                 continue;
             }
-            for (int c = c1 - 1; c < c2; c++) {
+            for (int c = c1; c <= c2; c++) {
                 if (sheet.isColumnHidden(c)) {
                     continue;
                 }

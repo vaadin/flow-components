@@ -1331,7 +1331,7 @@ public class Spreadsheet extends Component
      * @return Index of first visible column, 1-based
      */
     public int getFirstColumn() {
-        return sheetScope.viewport.getFirstColumn();
+        return oneBased(sheetScope.viewport.getFirstColumn());
     }
 
     /**
@@ -1340,7 +1340,7 @@ public class Spreadsheet extends Component
      * @return Index of last visible column, 1-based
      */
     public int getLastColumn() {
-        return sheetScope.viewport.getLastColumn();
+        return oneBased(sheetScope.viewport.getLastColumn());
     }
 
     /**
@@ -1349,7 +1349,7 @@ public class Spreadsheet extends Component
      * @return Index of first visible row, 1-based
      */
     public int getFirstRow() {
-        return sheetScope.viewport.getFirstRow();
+        return oneBased(sheetScope.viewport.getFirstRow());
     }
 
     /**
@@ -1358,7 +1358,12 @@ public class Spreadsheet extends Component
      * @return Index of last visible row, 1-based
      */
     public int getLastRow() {
-        return sheetScope.viewport.getLastRow();
+        return oneBased(sheetScope.viewport.getLastRow());
+    }
+
+    /** A row or column 1-based, as the getters give them; -1 stays -1. */
+    private static int oneBased(int index) {
+        return index < 0 ? -1 : index + 1;
     }
 
     /**
@@ -1477,8 +1482,8 @@ public class Spreadsheet extends Component
         // send nothing, the client having them: skipping saves the work.
         if (viewport.report(firstRow, firstColumn, lastRow, lastColumn)
                 || reloadCellDataOnNextScroll) {
-            loadCells(viewport.getFirstRow(), viewport.getFirstColumn(),
-                    viewport.getLastRow(), viewport.getLastColumn());
+            loadCells(getFirstRow(), getFirstColumn(), getLastRow(),
+                    getLastColumn());
         }
         if (initialSheetSelection != null) {
             if (initialSheetSelectionKeepsView) {
@@ -2909,10 +2914,8 @@ public class Spreadsheet extends Component
      */
     void reloadVisibleCellContents(boolean recreateEditors) {
         sheetScope.components.load(recreateEditors);
-        updateRowAndColumnRangeCellData(sheetScope.viewport.getFirstRow(),
-                sheetScope.viewport.getFirstColumn(),
-                sheetScope.viewport.getLastRow(),
-                sheetScope.viewport.getLastColumn());
+        updateRowAndColumnRangeCellData(getFirstRow(), getFirstColumn(),
+                getLastRow(), getLastColumn());
     }
 
     /*

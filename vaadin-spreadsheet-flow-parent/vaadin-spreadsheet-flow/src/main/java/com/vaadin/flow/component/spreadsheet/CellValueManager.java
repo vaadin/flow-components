@@ -820,8 +820,8 @@ public class CellValueManager implements Serializable {
         // The other panes follow the rows and columns shown, which are
         // not known until the client reports them.
         if (verticalSplitPosition > 0) { // top right pane
-            Viewport.scanOnTheSheet(1, firstColumn, verticalSplitPosition,
-                    lastColumn, (r1, c1, r2, c2) -> {
+            scanIfReported(1, firstColumn, verticalSplitPosition, lastColumn,
+                    (r1, c1, r2, c2) -> {
                         ArrayList<CellData> topRightData = loadCellDataForRowAndColumnRange(
                                 r1, c1, r2, c2);
                         if (!topRightData.isEmpty()) {
@@ -831,8 +831,8 @@ public class CellValueManager implements Serializable {
                     });
         }
         if (horizontalSplitPosition > 0) { // bottom left pane
-            Viewport.scanOnTheSheet(firstRow, 1, lastRow,
-                    horizontalSplitPosition, (r1, c1, r2, c2) -> {
+            scanIfReported(firstRow, 1, lastRow, horizontalSplitPosition,
+                    (r1, c1, r2, c2) -> {
                         ArrayList<CellData> bottomLeftData = loadCellDataForRowAndColumnRange(
                                 r1, c1, r2, c2);
                         if (!bottomLeftData.isEmpty()) {
@@ -842,7 +842,7 @@ public class CellValueManager implements Serializable {
                     });
         }
 
-        Viewport.scanOnTheSheet(firstRow, firstColumn, lastRow, lastColumn,
+        scanIfReported(firstRow, firstColumn, lastRow, lastColumn,
                 (r1, c1, r2, c2) -> {
                     ArrayList<CellData> bottomRightData = loadCellDataForRowAndColumnRange(
                             r1, c1, r2, c2);
@@ -851,6 +851,23 @@ public class CellValueManager implements Serializable {
                                 .updateBottomRightCellValues(bottomRightData);
                     }
                 });
+    }
+
+    /** A range of cells, 1-based and inclusive. */
+    @FunctionalInterface
+    private interface RangeScan {
+        void scan(int firstRow, int firstColumn, int lastRow, int lastColumn);
+    }
+
+    /**
+     * Scans the cells of a pane, 1-based, unless it starts before the first row
+     * or column: where the client is has not been reported.
+     */
+    private static void scanIfReported(int firstRow, int firstColumn,
+            int lastRow, int lastColumn, RangeScan scan) {
+        if (firstRow >= 1 && firstColumn >= 1) {
+            scan.scan(firstRow, firstColumn, lastRow, lastColumn);
+        }
     }
 
     /**

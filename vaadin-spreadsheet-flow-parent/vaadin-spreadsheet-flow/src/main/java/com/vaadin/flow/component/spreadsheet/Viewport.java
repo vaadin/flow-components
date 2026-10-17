@@ -16,7 +16,8 @@ import java.util.function.IntPredicate;
  * it shows: those of four panes, the frozen corner, the frozen rows over the
  * columns shown, the frozen columns beside the rows shown, and the rows and
  * columns shown. None until the client reports where it is, which it does again
- * for every sheet shown. 1-based, as the client numbers them.
+ * for every sheet shown. 0-based, as POI numbers them; the client reports them
+ * 1-based.
  */
 final class Viewport implements Serializable {
 
@@ -47,41 +48,46 @@ final class Viewport implements Serializable {
         return firstRow != -1;
     }
 
+    /** The first row shown, or -1 before the client reports where it is. */
     int getFirstRow() {
         return firstRow;
     }
 
+    /** The last row shown, or -1 before the client reports where it is. */
     int getLastRow() {
         return lastRow;
     }
 
+    /** The first column shown, or -1 before the client reports where it is. */
     int getFirstColumn() {
         return firstColumn;
     }
 
+    /** The last column shown, or -1 before the client reports where it is. */
     int getLastColumn() {
         return lastColumn;
     }
 
     /**
-     * Takes where the client reports it is, limited to the rows and columns of
-     * the sheet, and to at most 2,000 rows and 1,000 columns that are not
-     * hidden: every cell shown is loaded. Hidden ones do not count, so a
-     * filtered sheet shows the rows it has however far apart they are.
+     * Takes where the client reports it is, 1-based as it numbers them, limited
+     * to the rows and columns of the sheet, and to at most 2,000 rows and 1,000
+     * columns that are not hidden: every cell shown is loaded. Hidden ones do
+     * not count, so a filtered sheet shows the rows it has however far apart
+     * they are.
      *
      * @return whether the rows or columns shown changed
      */
     boolean report(int firstRow, int firstColumn, int lastRow, int lastColumn) {
-        int maxRow = Math.max(1, sheet.rows());
-        int maxColumn = Math.max(1, sheet.columns());
-        firstRow = Math.clamp(firstRow, 1, maxRow);
+        int lastRowOfSheet = Math.max(1, sheet.rows()) - 1;
+        int lastColumnOfSheet = Math.max(1, sheet.columns()) - 1;
+        firstRow = Math.clamp(firstRow - 1, 0, lastRowOfSheet);
         lastRow = lastWithShownCount(firstRow,
-                Math.clamp(lastRow, firstRow, maxRow), MAX_SHOWN_ROWS,
-                row -> sheet.isRowHidden(row - 1));
-        firstColumn = Math.clamp(firstColumn, 1, maxColumn);
+                Math.clamp(lastRow - 1, firstRow, lastRowOfSheet),
+                MAX_SHOWN_ROWS, sheet::isRowHidden);
+        firstColumn = Math.clamp(firstColumn - 1, 0, lastColumnOfSheet);
         lastColumn = lastWithShownCount(firstColumn,
-                Math.clamp(lastColumn, firstColumn, maxColumn),
-                MAX_SHOWN_COLUMNS, column -> sheet.isColumnHidden(column - 1));
+                Math.clamp(lastColumn - 1, firstColumn, lastColumnOfSheet),
+                MAX_SHOWN_COLUMNS, sheet::isColumnHidden);
         boolean changed = this.firstRow != firstRow || this.lastRow != lastRow
                 || this.firstColumn != firstColumn
                 || this.lastColumn != lastColumn;
@@ -110,13 +116,13 @@ final class Viewport implements Serializable {
     /** Whether the client shows the cell, in one of the four panes. */
     boolean shows(int row, int column) {
         boolean inRows = row >= firstRow && row <= lastRow
-                || row >= 1 && row <= sheet.frozenRows();
+                || row >= 0 && row < sheet.frozenRows();
         boolean inColumns = column >= firstColumn && column <= lastColumn
-                || column >= 1 && column <= sheet.frozenColumns();
+                || column >= 0 && column < sheet.frozenColumns();
         return inRows && inColumns;
     }
 
-    /** A range of cells to scan, 1-based and inclusive. */
+    /** A range of cells to scan, 0-based and inclusive. */
     @FunctionalInterface
     interface PaneScan extends Serializable {
         void scan(int firstRow, int firstColumn, int lastRow, int lastColumn);
@@ -130,19 +136,19 @@ final class Viewport implements Serializable {
     void forEachPane(PaneScan scan) {
         int frozenRows = sheet.frozenRows();
         int frozenColumns = sheet.frozenColumns();
-        scanOnTheSheet(1, 1, frozenRows, frozenColumns, scan);
-        scanOnTheSheet(1, firstColumn, frozenRows, lastColumn, scan);
-        scanOnTheSheet(firstRow, 1, lastRow, frozenColumns, scan);
-        scanOnTheSheet(firstRow, firstColumn, lastRow, lastColumn, scan);
+        scanShown(0, 0, frozenRows - 1, frozenColumns - 1, scan);
+        scanShown(0, firstColumn, frozenRows - 1, lastColumn, scan);
+        scanShown(firstRow, 0, lastRow, frozenColumns - 1, scan);
+        scanShown(firstRow, firstColumn, lastRow, lastColumn, scan);
     }
 
     /**
      * Scans the cells of a pane, unless it starts before the first row or
      * column: where the client is has not been reported.
      */
-    static void scanOnTheSheet(int firstRow, int firstColumn, int lastRow,
+    private static void scanShown(int firstRow, int firstColumn, int lastRow,
             int lastColumn, PaneScan scan) {
-        if (firstRow >= 1 && firstColumn >= 1) {
+        if (firstRow >= 0 && firstColumn >= 0) {
             scan.scan(firstRow, firstColumn, lastRow, lastColumn);
         }
     }
