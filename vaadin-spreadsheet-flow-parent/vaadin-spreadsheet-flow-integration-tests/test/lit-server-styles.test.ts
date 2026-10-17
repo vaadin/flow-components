@@ -55,6 +55,14 @@ describe('Spreadsheet — the styles the server sends, on the cells', () => {
     expect(style.color).to.equal('rgb(0, 0, 255)');
   });
 
+  it('draws no lines between the cells once the server turns them off', async () => {
+    const shown = (await sendB2('cs0', {})).borderRightWidth;
+
+    const style = await sendB2('cs0', { displayGridlines: false });
+
+    expect([shown, style.borderRightWidth]).to.eql(['1px', '0px']);
+  });
+
   it('draws a border another cell draws on it', async () => {
     const style = await sendB2('cs0', {
       shiftedCellBorderStyles: ['.col2.row2 { border-right: 2px solid rgb(255, 0, 0); }']

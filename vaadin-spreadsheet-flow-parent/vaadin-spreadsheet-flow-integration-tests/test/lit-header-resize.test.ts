@@ -402,14 +402,16 @@ describe('Spreadsheet — dragging a row edge, as the GWT client did', () => {
     expect(ctx.sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 4 });
   });
 
-  it('takes the height to the pointer, in points, when let go', () => {
+  it('takes the height to the pointer, in points, when let go', async () => {
     const { top, x } = drag3(rowNumber(ctx.sheet, 3).top + 24);
 
     release(x, top + 24);
+    await ctx.sheet.getRowHeader().updateComplete;
 
     expect(ctx.sent.filter((e) => e.type === 'rowsResized').map((e) => e.data)).to.deep.equal([
       { rowIndexes: [3], newHeights: [18] }
     ]);
+    expect(rowNumber(ctx.sheet, 3).height).to.equal(24);
   });
 
   it('shows the row resize cursor once the pointer moves', () => {
