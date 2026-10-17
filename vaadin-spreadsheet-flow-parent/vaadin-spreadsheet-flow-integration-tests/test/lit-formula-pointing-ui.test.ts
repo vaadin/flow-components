@@ -130,6 +130,23 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(field.value).to.equal('=SUM(C4)%');
   });
 
+  it('keeps a % typed after the first cell pointed at in a percentage entry', async () => {
+    sheet.updateBottomRightCellValues([
+      { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
+    ] as never);
+    const input = await startTyping('+');
+    press(input, 'ArrowDown');
+    // "+C4", then "*%" typed, the caret put back between them.
+    input.value = '+C4*%';
+    input.setSelectionRange(4, 4);
+    input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+
+    // On from the cell pointed at last.
+    press(input, 'ArrowDown');
+
+    expect(input.value).to.equal('+C4*C5%');
+  });
+
   it('keeps the % for a number typed into a percentage cell', async () => {
     sheet.updateBottomRightCellValues([
       { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
@@ -218,6 +235,21 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(input.value).to.equal('=E7');
     expect(sheet.getSelection().activeCell).to.eql({ col: 3, row: 3 });
     expect(events.filter((e) => e.type === 'cellSelected')).to.be.empty;
+  });
+
+  it('selects with the click after the one a pointing press ends in, once the formula is written', async () => {
+    const input = await startTyping('=');
+    mouse('mousedown', cell(5, 7));
+    mouse('mouseup', cell(5, 7));
+    mouse('click', cell(5, 7));
+    press(input, 'Enter');
+    await sheet.getCellGrid().updateComplete;
+
+    mouse('mousedown', cell(6, 9));
+    mouse('mouseup', cell(6, 9));
+    mouse('click', cell(6, 9));
+
+    expect(sheet.getSelection().activeCell).to.eql({ col: 6, row: 9 });
   });
 
   it('stretches the clicked reference into a range by dragging', async () => {
