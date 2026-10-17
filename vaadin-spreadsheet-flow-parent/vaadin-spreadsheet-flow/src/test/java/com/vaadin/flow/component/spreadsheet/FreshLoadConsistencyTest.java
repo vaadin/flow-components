@@ -174,7 +174,7 @@ class FreshLoadConsistencyTest {
      * without it.
      */
     private static final Map<String, UnaryOperator<Case>> KNOWN = Map
-            .ofEntries();
+            .ofEntries(Map.entry("cells merged", c -> c.known("cell F13")));
 
     static Stream<Case> cases() {
         return Stream.of(

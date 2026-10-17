@@ -403,10 +403,22 @@ final class FreshLoadHarness {
                 model.reload();
             }
             model.apply(response.calls(), waste);
+            // The client measures the styles it was sent CSS for, and those
+            // of cells it has not measured, and says how wide a character of
+            // each is before it says where it is.
+            boolean measure = response.properties().contains(
+                    "cellStyleToCSSStyle") || model.hasUnmeasuredStyles();
+            if (measure) {
+                TestHelper.fireClientEvent(target, "setCellStyleWidthRatios",
+                        model.widthRatios(target));
+            }
             if (reloaded || announce) {
                 announce = false;
                 TestHelper.fireClientEvent(target, "onSheetScroll",
                         viewport.json());
+                continue;
+            }
+            if (measure) {
                 continue;
             }
             return;
@@ -501,10 +513,61 @@ final class FreshLoadHarness {
          */
         final Map<String, String> localComments = new TreeMap<>();
 
+        /** The styles the client has measured, by index. */
+        final Set<Integer> measured = new TreeSet<>();
+
         /** The client was reloaded: it forgets the cells it had. */
         void reload() {
             cells.clear();
+            measured.clear();
         }
+
+        /** Whether a cell the client has wears a style it has not measured. */
+        boolean hasUnmeasuredStyles() {
+            return cells.values().stream().map(ClientModel::styleIndex)
+                    .anyMatch(index -> index != null
+                            && !measured.contains(index));
+        }
+
+        /**
+         * How wide a character of each style is, as the client measures it:
+         * every style it was sent CSS for, and every style its cells wear, as
+         * {@value #WIDTH_RATIO} pixels.
+         */
+        String widthRatios(Spreadsheet target) {
+            Set<Integer> styles = new TreeSet<>();
+            JsonNode css = normalize("cellStyleToCSSStyle",
+                    target.getElement().getPropertyRaw("cellStyleToCSSStyle"));
+            if (css != null) {
+                css.propertyNames()
+                        .forEach(key -> styles.add(Integer.valueOf(key)));
+            }
+            cells.values().stream().map(ClientModel::styleIndex)
+                    .filter(Objects::nonNull).forEach(styles::add);
+            measured.addAll(styles);
+            ArrayNode indexes = MAPPER.createArrayNode();
+            ArrayNode ratios = MAPPER.createArrayNode();
+            styles.forEach(index -> {
+                indexes.add(index);
+                ratios.add(WIDTH_RATIO);
+            });
+            ObjectNode data = MAPPER.createObjectNode();
+            data.set("styleIndexes", indexes);
+            data.set("ratios", ratios);
+            return data.toString();
+        }
+
+        /** How wide a character is, in pixels, in every style. */
+        static final double WIDTH_RATIO = 7;
+
+        private static Integer styleIndex(JsonNode cell) {
+            Matcher style = STYLE_CLASS
+                    .matcher(cell.path("cellStyle").asString(""));
+            return style.find() ? Integer.valueOf(style.group(1)) : null;
+        }
+
+        private static final Pattern STYLE_CLASS = Pattern
+                .compile("\\bcs(\\d+)\\b");
 
         /**
          * A value typed into a cell shows at once, in the cell's style, until

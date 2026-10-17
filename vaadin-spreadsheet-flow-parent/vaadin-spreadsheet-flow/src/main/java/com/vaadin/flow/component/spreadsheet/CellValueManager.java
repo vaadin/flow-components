@@ -187,7 +187,10 @@ public class CellValueManager implements Serializable {
     }
 
     boolean doesValueFit(Cell cell, String value) {
-        return fitCalculator().doesValueFit(cell, value, getCellWidth(cell));
+        int width = getCellWidth(cell);
+        // A cell without width, in a hidden column, is not shown: it is
+        // measured once its column is shown, and built again then.
+        return width == 0 || fitCalculator().doesValueFit(cell, value, width);
     }
 
     /**

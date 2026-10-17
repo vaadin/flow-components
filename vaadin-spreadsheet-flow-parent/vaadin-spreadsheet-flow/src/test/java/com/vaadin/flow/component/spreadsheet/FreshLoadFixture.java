@@ -134,6 +134,10 @@ final class FreshLoadFixture {
 
         set(first, "E15", "merged");
         first.addMergedRegion(CellRangeAddress.valueOf("E15:F16"));
+        // Too wide for their columns: a number shortened, and text running
+        // on over the empty cells to its right.
+        set(first, "G16", 12345678901234d);
+        set(first, "E17", "a long piece of text that runs on");
 
         set(first, "E18", "hidden row");
         first.getRow(17).setZeroHeight(true);
