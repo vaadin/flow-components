@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -106,12 +105,20 @@ class FilterTablesShiftedTest {
                 new AreaReference(range, SpreadsheetVersion.EXCEL2007));
     }
 
-    private static void assertLoadsAgain(XSSFWorkbook workbook)
-            throws IOException {
+    /**
+     * The workbook, saved and loaded again, has the filter and tables of the
+     * given ranges: one the loader cannot read is left out, with a warning.
+     */
+    private static void assertLoadsAgain(XSSFWorkbook workbook,
+            String... ranges) throws IOException {
         ByteArrayOutputStream saved = new ByteArrayOutputStream();
         workbook.write(saved);
-        assertDoesNotThrow(() -> new Spreadsheet(
-                new ByteArrayInputStream(saved.toByteArray())));
+        Spreadsheet loaded = new Spreadsheet(
+                new ByteArrayInputStream(saved.toByteArray()));
+        assertEquals(Set.of(ranges),
+                loaded.getTables().stream().map(
+                        table -> table.getFullTableRegion().formatAsString())
+                        .collect(Collectors.toSet()));
     }
 
     @Test
@@ -283,7 +290,7 @@ class FilterTablesShiftedTest {
 
         assertEquals("B2:C3", sheet.getCTWorksheet().getAutoFilter().getRef());
         assertEquals("E2:F3", table.getCTTable().getRef());
-        assertLoadsAgain(workbook);
+        assertLoadsAgain(workbook, "B2:C3", "E2:F3");
     }
 
     @Test
@@ -312,6 +319,6 @@ class FilterTablesShiftedTest {
         shown.shiftRows(3, 10, -1);
 
         assertEquals("E2:F3", table.getCTTable().getRef());
-        assertLoadsAgain(workbook);
+        assertLoadsAgain(workbook, "E2:F3");
     }
 }
