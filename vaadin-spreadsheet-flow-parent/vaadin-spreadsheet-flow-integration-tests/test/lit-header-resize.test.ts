@@ -94,6 +94,11 @@ function release(x: number, y: number): void {
   document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: x, clientY: y }));
 }
 
+/** Press an arrow key on the sheet. */
+function arrow(sheet: Spreadsheet, key: string): void {
+  sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, composed: true }));
+}
+
 function line(ctx: Sheet): HTMLElement {
   return ctx.shadow.querySelector<HTMLElement>('.resize-line')!;
 }
@@ -212,6 +217,16 @@ describe('Spreadsheet — dragging a column edge, as the GWT client did', () => 
       { colIndexes: [2], newWidths: [0] }
     ]);
     expect(sheetColumnLetters(ctx)).to.deep.equal(['A', 'C', 'D', 'E']);
+  });
+
+  it('has the arrows step over the column hidden so, as over any hidden one', () => {
+    const { left, y } = dragB(columnLetter(ctx.sheet, 2).left - 30);
+    release(left - 30, y);
+    ctx.sheet.setSelectedCellAndRange('', 1, 1, 1, 1, 1, 1, false);
+
+    arrow(ctx.sheet, 'ArrowRight');
+
+    expect(ctx.sheet.getSelection().activeCell).to.deep.equal({ col: 3, row: 1 });
   });
 
   it('tells the server once: a second release is no drag', () => {
@@ -372,6 +387,19 @@ describe('Spreadsheet — dragging a row edge, as the GWT client did', () => {
 
     expect(tooltip(ctx).textContent).to.equal('Hide row');
     expect(line(ctx).getBoundingClientRect().top).to.equal(top - 1);
+  });
+
+  it('hides the row when let go above its top edge, and the arrows step over it', () => {
+    const { top, x } = drag3(rowNumber(ctx.sheet, 3).top - 6);
+    release(x, top - 6);
+    ctx.sheet.setSelectedCellAndRange('', 1, 2, 1, 1, 2, 2, false);
+
+    arrow(ctx.sheet, 'ArrowDown');
+
+    expect(ctx.sent.filter((e) => e.type === 'rowsResized').map((e) => e.data)).to.deep.equal([
+      { rowIndexes: [3], newHeights: [0] }
+    ]);
+    expect(ctx.sheet.getSelection().activeCell).to.deep.equal({ col: 1, row: 4 });
   });
 
   it('takes the height to the pointer, in points, when let go', () => {
