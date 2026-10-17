@@ -2951,6 +2951,30 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
+    it('row grouping: measures a group past the rows the server sized by the default height', async () => {
+        const { sheet, cleanup } = attachSheetForLifecycle(400, 300);
+        sheet.setRows(10);
+        sheet.setCols(5);
+        sheet.setColW([50, 50, 50, 50, 50]);
+        // Rows 1 and 2 are 15 pt, 20 px; past them 30 pt, 40 px.
+        sheet.setRowH([15, 15]);
+        sheet.setDefRowH(30);
+        sheet.setRowGroupingMax(1);
+        sheet.setRowGroupingData([
+            { uniqueIndex: 4, level: 1, startIndex: 4, endIndex: 5, collapsed: false },
+        ]);
+        sheet.recomputeViewport();
+        await sheet.getRowHeader().updateComplete;
+
+        // Rows 5 and 6 grouped, from 120 px down to 200 px; the 12px button
+        // centred beside the middle of row 7 below them.
+        const toggle = sheet.getRowHeader().shadowRoot!.querySelector(
+            '.row-grouping-toggle'
+        ) as HTMLButtonElement;
+        expect(toggle.style.top).to.equal(`${200 + 40 / 2 - 6}px`);
+        cleanup();
+    });
+
     // ===================================================================
     // `part` attribute scaffolding for documented styling API
     // ===================================================================
