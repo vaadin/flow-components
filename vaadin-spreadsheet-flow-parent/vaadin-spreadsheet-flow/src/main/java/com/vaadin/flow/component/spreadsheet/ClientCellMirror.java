@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 
 /**
@@ -44,8 +43,6 @@ final class ClientCellMirror implements Serializable {
     /** Whether the cells sent this round trip are all the client is to have. */
     private boolean replacing;
 
-    private BeforeClientResponseAction flushAction;
-
     ClientCellMirror(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
     }
@@ -65,11 +62,7 @@ final class ClientCellMirror implements Serializable {
     }
 
     private void schedule() {
-        if (flushAction == null) {
-            flushAction = new BeforeClientResponseAction(spreadsheet,
-                    this::flush);
-        }
-        flushAction.schedule();
+        spreadsheet.clientChanges().cells();
     }
 
     /**
@@ -97,13 +90,11 @@ final class ClientCellMirror implements Serializable {
         schedule();
     }
 
-    private void flush() {
-        if (spreadsheet.isRerenderPending()) {
-            // This round trip reloads the client; it gets its cells when it
-            // reports where it is.
-            reload();
-            return;
-        }
+    /**
+     * Sends the cells, as {@link ClientChanges} does at the end of the round
+     * trip: none after a reload, which forgot them.
+     */
+    void flush() {
         List<CellData> changed = new ArrayList<>();
         for (Map.Entry<String, CellData> entry : pending.entrySet()) {
             String key = entry.getKey();

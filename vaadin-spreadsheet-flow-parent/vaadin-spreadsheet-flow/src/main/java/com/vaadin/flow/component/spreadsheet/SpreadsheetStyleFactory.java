@@ -32,8 +32,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
-
 /**
  * SpreadsheetStyleFactory is an utility class for the Spreadsheet component.
  * This class handles converting Apache POI CellStyles to CSS styles.
@@ -152,9 +150,6 @@ public class SpreadsheetStyleFactory implements Serializable {
     private short defaultFontHeightInPoints;
     private HorizontalAlignment defaultTextAlign;
 
-    /** Gives the client the borders drawn on other cells, once a response. */
-    private final BeforeClientResponseAction sendBordersAction;
-
     /** Whether the styles of the workbook have been loaded once. */
     private boolean stylesLoaded;
 
@@ -168,8 +163,6 @@ public class SpreadsheetStyleFactory implements Serializable {
         this.spreadsheet = spreadsheet;
         setupColorMap();
         borders = new CellBorders(spreadsheet, colorConverter);
-        sendBordersAction = new BeforeClientResponseAction(spreadsheet,
-                this::sendBorders);
     }
 
     /**
@@ -211,7 +204,7 @@ public class SpreadsheetStyleFactory implements Serializable {
             borders.load();
         }
         stylesLoaded = true;
-        sendBordersAction.schedule();
+        spreadsheet.clientChanges().borders();
     }
 
     public void reloadActiveSheetColumnRowStyles() {
@@ -310,7 +303,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      */
     public void clearCellStyle(int oldRowIndex, int oldColumnIndex) {
         borders.cellRemoved(oldRowIndex, oldColumnIndex);
-        sendBordersAction.schedule();
+        spreadsheet.clientChanges().borders();
     }
 
     /**
@@ -339,7 +332,7 @@ public class SpreadsheetStyleFactory implements Serializable {
             // then, as finding that goes through every cell.
             borders.load();
         }
-        sendBordersAction.schedule();
+        spreadsheet.clientChanges().borders();
     }
 
     /**
@@ -355,7 +348,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      */
     public void reloadActiveSheetCellStyles() {
         borders.load();
-        sendBordersAction.schedule();
+        spreadsheet.clientChanges().borders();
         // conditional formatting
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
     }
@@ -366,7 +359,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      */
     void reloadBorders() {
         borders.load();
-        sendBordersAction.schedule();
+        spreadsheet.clientChanges().borders();
     }
 
     /**
@@ -376,7 +369,8 @@ public class SpreadsheetStyleFactory implements Serializable {
         return borders.rules();
     }
 
-    private void sendBorders() {
+    /** Gives the client the borders drawn on other cells. */
+    void sendBorders() {
         spreadsheet.setShiftedCellBorderStyles(borderRules());
     }
 

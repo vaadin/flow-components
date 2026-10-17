@@ -73,7 +73,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
@@ -174,10 +173,10 @@ public class Spreadsheet extends Component
     private final SheetSizes sheetSizes = new SheetSizes(this);
 
     /** What follows from cells created past the end, once a round trip. */
-    private BeforeClientResponseAction sizeChangedAction;
 
     /** should the sheet be reloaded on client side */
-    private final ClientReloadFlag clientReloadFlag = new ClientReloadFlag();
+    /** What changed for the client, sent once before the response. */
+    private final ClientChanges clientChanges = new ClientChanges(this);
 
     /** What the client has of each cell; every cell sent goes through it. */
     final ClientCellMirror clientCells = new ClientCellMirror(this);
@@ -1413,7 +1412,7 @@ public class Spreadsheet extends Component
      * @return true if re-render will happen, false otherwise
      */
     public boolean isRerenderPending() {
-        return clientReloadFlag.isPending();
+        return clientChanges.isSheetShown();
     }
 
     /**
@@ -2246,11 +2245,7 @@ public class Spreadsheet extends Component
         if (row >= getRows() || col >= getColumns()) {
             setRows(Math.max(getRows(), row + 1));
             setCols(Math.max(getColumns(), col + 1));
-            if (sizeChangedAction == null) {
-                sizeChangedAction = new BeforeClientResponseAction(this,
-                        this::sizeChanged);
-            }
-            sizeChangedAction.schedule();
+            clientChanges.sizes();
         }
         return cell;
     }
@@ -2322,11 +2317,9 @@ public class Spreadsheet extends Component
      * sizes, styles, locks and conditional formats loading the sheet gives
      * them.
      */
-    private void sizeChanged() {
+    void sizeChanged() {
         // Done now, so not again before the response.
-        if (sizeChangedAction != null) {
-            sizeChangedAction.cancel();
-        }
+        clientChanges.sizesDone();
         sheetSizes.grown();
         workbookScope.styler.reloadActiveSheetColumnRowStyles();
         getConditionalFormatter().createConditionalFormatterRules();
@@ -3014,6 +3007,11 @@ public class Spreadsheet extends Component
         return workbookScope.popupButtons;
     }
 
+    /** What changed for the client, sent once before the response. */
+    ClientChanges clientChanges() {
+        return clientChanges;
+    }
+
     /** The tables of the workbook shown. */
     TableRegistry tables() {
         return workbookScope.tables;
@@ -3065,7 +3063,7 @@ public class Spreadsheet extends Component
         sheetScope.close();
         sheetScope = new SheetScope(this);
 
-        clientReloadFlag.markPending(this);
+        clientChanges.sheetShown();
 
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
