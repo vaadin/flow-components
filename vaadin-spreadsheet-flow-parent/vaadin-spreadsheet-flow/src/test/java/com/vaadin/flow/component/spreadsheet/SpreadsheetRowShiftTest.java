@@ -10,16 +10,25 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+import com.vaadin.tests.MockUIExtension;
 
 /**
- * Rows shifted: the workbook has the rows moved, and nothing else added to it.
- * What the client has afterwards, {@link FreshLoadConsistencyTest} shows.
+ * Rows shifted or deleted: the workbook has the rows moved, and nothing else
+ * added to it, and the selection is made again over the merged regions there
+ * now. What the client has afterwards, {@link FreshLoadConsistencyTest} shows.
  */
 class SpreadsheetRowShiftTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     @Test
     void shiftingRows_addsNoCellsToTheWorkbook() {
@@ -35,6 +44,55 @@ class SpreadsheetRowShiftTest {
         assertNull(sheet.getRow(0));
         assertEquals(1, sheet.getRow(2).getPhysicalNumberOfCells());
         assertEquals(1, sheet.getRow(5).getPhysicalNumberOfCells());
+    }
+
+    @Test
+    void aMergedRegionShiftedOntoTheSelectedCell_isSelectedWithIt() {
+        // B2:C2 shifted down onto B3, which is selected.
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        sheet.createRow(1).createCell(1).setCellValue("merged");
+        sheet.addMergedRegion(CellRangeAddress.valueOf("B2:C2"));
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setSelection("B3");
+
+        spreadsheet.shiftRows(1, 1, 1);
+
+        assertEquals("B3:C3", spreadsheet.getCellSelectionManager()
+                .getSelectedCellRange().formatAsString());
+    }
+
+    @Test
+    void shiftingTheRowOfTheSelectedCell_tellsTheClientOfNoInvalidAddress() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        workbook.createSheet().createRow(1).createCell(1).setCellValue("b2");
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        ui.add(spreadsheet);
+        spreadsheet.setSelection("B2");
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        spreadsheet.shiftRows(1, 1, 1);
+
+        ui.fakeClientCommunication();
+        assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
+                .noneMatch(call -> call.getInvocation().getParameters()
+                        .contains("invalidCellAddress")));
+    }
+
+    @Test
+    void theSelectedCellOfAMergedRegionDeleted_isSelectedAlone() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet();
+        sheet.createRow(2).createCell(1).setCellValue("merged");
+        sheet.addMergedRegion(CellRangeAddress.valueOf("B3:C3"));
+        Spreadsheet spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setSelection("B3");
+
+        spreadsheet.deleteRows(2, 2);
+
+        assertEquals("B3", spreadsheet.getCellSelectionManager()
+                .getSelectedCellRange().formatAsString());
     }
 
     @Test

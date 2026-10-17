@@ -75,8 +75,10 @@ final class RowShiftOrchestrator implements Serializable {
         if (selectedCellReference != null) {
             if (selectedCellReference.getRow() >= firstAffectedRow
                     && selectedCellReference.getRow() <= lastAffectedRow) {
+                // Without the sheet's name, which the address field does
+                // not take.
                 spreadsheet.getCellSelectionManager().onSheetAddressChanged(
-                        selectedCellReference.formatAsString(), false);
+                        selectedCellReference.formatAsString(false), false);
             }
         }
     }
