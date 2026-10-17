@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
@@ -164,6 +165,19 @@ class SpreadsheetCellUpdatesTest {
         spreadsheet.refreshCells(cell("A1"));
 
         assertEquals(List.of("A1=5", "refreshCellStyles"), calls());
+    }
+
+    @Test
+    void aCellMarkedAgainAfterItWasToBeTakenOff_staysOnTheClient() {
+        // Of a removal and an update of a cell, the last is the one.
+        show();
+        CellValueManager values = spreadsheet.getCellValueManager();
+        values.markCellForRemove(cell("C1"));
+        values.markCellForUpdate(cell("C1"));
+
+        spreadsheet.updateMarkedCells();
+
+        assertFalse(calls().contains("C1="));
     }
 
     @Test

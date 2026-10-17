@@ -267,6 +267,18 @@ class FreshLoadConsistencyTest {
                 }),
                 op("a cell deleted",
                         spreadsheet -> spreadsheet.deleteCell(9, 4)),
+                op("a value set in the cell of a component", spreadsheet -> {
+                    var cell = FreshLoadFixture
+                            .cell(spreadsheet.getActiveSheet(), "H13");
+                    cell.setCellValue("under the component");
+                    spreadsheet.refreshCells(cell);
+                }),
+                steps("a highlighted value shifted down", api(spreadsheet -> {
+                    var cell = FreshLoadFixture
+                            .cell(spreadsheet.getActiveSheet(), "F11");
+                    cell.setCellValue(9);
+                    spreadsheet.refreshCells(cell);
+                }), api(spreadsheet -> spreadsheet.shiftRows(10, 11, 1))),
                 op("rows shifted down",
                         spreadsheet -> spreadsheet.shiftRows(10, 13, 1)),
                 op("rows shifted up",
