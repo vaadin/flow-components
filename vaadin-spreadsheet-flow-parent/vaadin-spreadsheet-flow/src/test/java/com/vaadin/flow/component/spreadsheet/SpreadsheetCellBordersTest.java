@@ -206,8 +206,7 @@ class SpreadsheetCellBordersTest {
      */
     private static final Map<String, List<String>> KNOWN = Map.ofEntries(
             Map.entry("rows with borders shifted down", List.of(BORDERS)),
-            Map.entry("rows shifted up under a top border", List.of(BORDERS)),
-            Map.entry("a row with a left border deleted", List.of(BORDERS)));
+            Map.entry("rows shifted up under a top border", List.of(BORDERS)));
 
     private static void assertKnown(List<String> known, List<String> problems) {
         assertAll(

@@ -2528,6 +2528,9 @@ public class Spreadsheet extends Component
         // The rows deleted are empty, of the default height, and not hidden.
         sheetSizes.readRows(startRow, endRow);
         updateMergedRegions();
+        // The cells deleted draw no borders, and those below a row hidden
+        // draw theirs on it now.
+        workbookScope.styler.reloadBorders();
         valueManager.updateDeletedRowsInClientCache(startRow + 1, endRow + 1);
 
         if (sheetScope.overlays.hasOverlays()) {

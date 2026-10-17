@@ -348,6 +348,15 @@ public class SpreadsheetStyleFactory implements Serializable {
     }
 
     /**
+     * Finds again what every cell draws on other cells, after a change that
+     * moves or removes cells, rows or merged regions.
+     */
+    void reloadBorders() {
+        borderStyleBuilder.load();
+        sendBordersAction.schedule();
+    }
+
+    /**
      * The rules of the borders the cells draw on other cells than their own.
      */
     ArrayList<String> borderRules() {

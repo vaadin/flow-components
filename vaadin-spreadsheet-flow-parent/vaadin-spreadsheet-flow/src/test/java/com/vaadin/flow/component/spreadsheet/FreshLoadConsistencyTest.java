@@ -163,12 +163,6 @@ class FreshLoadConsistencyTest {
             Map.entry("rows of their own heights shifted down",
                     c -> c.known("cell H13")),
             Map.entry("a hidden row shifted down", c -> c.known("cell H13")),
-            Map.entry("rows deleted",
-                    c -> c.known("property shiftedCellBorderStyles")),
-            Map.entry("a hidden row deleted",
-                    c -> c.known("property shiftedCellBorderStyles")),
-            Map.entry("a row of its own height deleted",
-                    c -> c.known("property shiftedCellBorderStyles")),
             Map.entry("a row shifted down past rows not shifted",
                     c -> c.known("cell A12", "cell E12", "cell E13", "cell F12",
                             "cell F13", "cell G12", "cell H12")));
@@ -477,11 +471,8 @@ class FreshLoadConsistencyTest {
      * What the operations of an application are known to do wrong today when
      * the client has not seen the spreadsheet yet, by case name and when.
      */
-    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map.of(
-            "rows deleted, before ATTACHED",
-            List.of("property shiftedCellBorderStyles"),
-            "rows deleted, before FIRST_RESPONSE",
-            List.of("property shiftedCellBorderStyles"));
+    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
+            .of();
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")
