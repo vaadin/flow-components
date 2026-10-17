@@ -35,6 +35,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.vaadin.flow.component.spreadsheet.FreshLoadHarness.Allowance;
+import com.vaadin.flow.component.spreadsheet.action.DeleteRowAction;
+import com.vaadin.flow.component.spreadsheet.action.InsertNewRowAction;
 import com.vaadin.tests.MockUIExtension;
 
 /**
@@ -173,8 +175,18 @@ class FreshLoadConsistencyTest {
      * they send for nothing. A fix takes out what it fixes, so the test fails
      * without it.
      */
-    private static final Map<String, UnaryOperator<Case>> KNOWN = Map
-            .ofEntries();
+    private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
+            Map.entry("cells cut, undone and redone", c -> c.known("step 3")),
+            Map.entry("cells pasted, then undone", c -> c.known("changed it")),
+            Map.entry("a row inserted, then undone",
+                    c -> c.known("property rowH", "property rows",
+                            "pop-up button")),
+            Map.entry("a row deleted, then undone",
+                    c -> c.known("property rows", "pop-up button")),
+            Map.entry("a row deleted, undone and redone",
+                    c -> c.known("property rows", "pop-up button")),
+            Map.entry("an edit undone from another sheet",
+                    c -> c.known("cell E10", "cell G10")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -225,6 +237,52 @@ class FreshLoadConsistencyTest {
                         event("onUndo", "{}")),
                 steps("an edit undone and redone", type(10, 5, "7"),
                         event("onUndo", "{}"), event("onRedo", "{}")),
+                steps("cells cut, then undone",
+                        selectRange(10, 5, 10, 6).andThen(
+                                event("clearSelectedCellsOnCut", "{}")),
+                        event("onUndo", "{}")),
+                steps("cells cut, undone and redone",
+                        selectRange(10, 5, 10, 6).andThen(
+                                event("clearSelectedCellsOnCut", "{}")),
+                        event("onUndo", "{}"), event("onRedo", "{}")),
+                steps("cells pasted, then undone",
+                        select(14, 7).andThen(event("onPaste",
+                                "{\"text\": \"a\\tb\\nc\\td\"}")),
+                        event("onUndo", "{}")),
+                steps("the selected cells deleted, then undone",
+                        selectRange(10, 5, 11, 6)
+                                .andThen(event("deleteSelectedCells", "{}")),
+                        event("onUndo", "{}")),
+                steps("a row inserted, then undone",
+                        api(spreadsheet -> new InsertNewRowAction()
+                                .executeActionOnHeader(spreadsheet,
+                                        new CellRangeAddress(10, 10, -1, -1))),
+                        event("onUndo", "{}")),
+                steps("a row deleted, then undone",
+                        api(spreadsheet -> new DeleteRowAction()
+                                .executeActionOnHeader(spreadsheet,
+                                        new CellRangeAddress(10, 10, -1, -1))),
+                        event("onUndo", "{}")),
+                steps("a row deleted, undone and redone",
+                        api(spreadsheet -> new DeleteRowAction()
+                                .executeActionOnHeader(spreadsheet,
+                                        new CellRangeAddress(10, 10, -1, -1))),
+                        event("onUndo", "{}"), event("onRedo", "{}")),
+                steps("a column resized, then undone",
+                        event("columnResized",
+                                "{\"colIndexes\": [6], \"newWidths\": [120]}"),
+                        event("onUndo", "{}")),
+                steps("a row resized, then undone",
+                        event("rowsResized",
+                                "{\"rowIndexes\": [11], \"newHeights\": [40]}"),
+                        event("onUndo", "{}")),
+                steps("a column autofitted, then undone",
+                        event("onColumnAutofit", "{\"columnIndex\": 7}"),
+                        event("onUndo", "{}")),
+                steps("an edit undone from another sheet", type(10, 5, "7"),
+                        event("sheetSelected",
+                                "{\"sheetIndex\": 1, \"scrollLeft\": 0, \"scrollTop\": 0}"),
+                        event("onUndo", "{}")),
                 op("a comment edited", event("updateCellComment",
                         "{\"row\": 12, \"col\": 5, \"text\": \"edited\"}")),
                 op("a column resized",
