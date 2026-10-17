@@ -74,6 +74,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
@@ -169,6 +170,9 @@ public class Spreadsheet extends Component
     private final SheetGrouping sheetGrouping = new SheetGrouping(this);
 
     private final SheetSizes sheetSizes = new SheetSizes(this);
+
+    /** What follows from cells created past the end, once a round trip. */
+    private BeforeClientResponseAction sizeChangedAction;
 
     /** should the sheet be reloaded on client side */
     private final ClientReloadFlag clientReloadFlag = new ClientReloadFlag();
@@ -2274,9 +2278,18 @@ public class Spreadsheet extends Component
             cell.setCellValue(value.toString());
         }
         valueManager.cellUpdated(cell);
-        // if programmatically adding cells, need to make sure they display
-        if (row > getRows()) {
-            setMaxRows(row);
+        // A cell past the last row or column shown is shown, as loading the
+        // workbook shows it. The counts change at once, what follows from them
+        // once before the response: cells are often created one after another,
+        // and each would read every row and column again.
+        if (row >= getRows() || col >= getColumns()) {
+            setRows(Math.max(getRows(), row + 1));
+            setCols(Math.max(getColumns(), col + 1));
+            if (sizeChangedAction == null) {
+                sizeChangedAction = new BeforeClientResponseAction(this,
+                        this::sizeChanged);
+            }
+            sizeChangedAction.schedule();
         }
         return cell;
     }
@@ -2306,6 +2319,7 @@ public class Spreadsheet extends Component
     public void setMaxColumns(int cols) {
         if (getCols() != cols) {
             setCols(cols);
+            sizeChanged();
         }
     }
 
@@ -2323,6 +2337,7 @@ public class Spreadsheet extends Component
     public void setMaxRows(int rows) {
         if (getRows() != rows) {
             setRows(rows);
+            sizeChanged();
         }
     }
 
@@ -2338,6 +2353,20 @@ public class Spreadsheet extends Component
     public void setSheetMaxSize(int rows, int cols) {
         setCols(cols);
         setRows(rows);
+        sizeChanged();
+    }
+
+    /**
+     * The sheet shows another number of rows or columns: those added have the
+     * sizes, styles and locks loading the sheet gives them.
+     */
+    private void sizeChanged() {
+        // Done now, so not again before the response.
+        if (sizeChangedAction != null) {
+            sizeChangedAction.cancel();
+        }
+        sheetSizes.grown();
+        workbookScope.styler.reloadActiveSheetColumnRowStyles();
     }
 
     /**

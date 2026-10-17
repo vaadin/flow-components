@@ -184,6 +184,33 @@ final class SheetSizes implements Serializable {
     }
 
     /**
+     * The sheet shows more rows or columns than it has sizes for: the sizes of
+     * those added are read, as loading the sheet reads them. Rows and columns
+     * no longer shown keep their sizes, which are not sent again.
+     */
+    void grown() {
+        Sheet sheet = spreadsheet.getActiveSheet();
+        int rows = spreadsheet.getRows();
+        if (rowH.length < rows) {
+            float[] heights = Arrays.copyOf(rowH, rows);
+            for (int row = rowH.length; row < rows; row++) {
+                heights[row] = readRow(sheet, row);
+            }
+            setRowHeights(heights);
+            publishHiddenRows();
+        }
+        int cols = spreadsheet.getColumns();
+        if (colW.length < cols) {
+            int[] widths = Arrays.copyOf(colW, cols);
+            for (int column = colW.length; column < cols; column++) {
+                widths[column] = readColumn(sheet, column);
+            }
+            setColumnWidths(widths);
+            publishHiddenColumns();
+        }
+    }
+
+    /**
      * A group of rows or columns was collapsed or expanded in POI: the rows and
      * columns the client has are read again, and what they affect is brought up
      * to date.

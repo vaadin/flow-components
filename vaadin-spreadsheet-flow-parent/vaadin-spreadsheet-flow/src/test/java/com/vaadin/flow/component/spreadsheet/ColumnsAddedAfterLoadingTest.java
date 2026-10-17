@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.apache.poi.ss.usermodel.Sheet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,24 @@ class ColumnsAddedAfterLoadingTest {
     void init() {
         spreadsheet = new Spreadsheet(20, 5);
         spreadsheet.setMaxColumns(10);
+    }
+
+    @Test
+    void columnsAdded_haveTheWidthsAndHiddenColumnsOfPoi() {
+        Spreadsheet fiveColumns = new Spreadsheet(20, 5);
+        Sheet sheet = fiveColumns.getActiveSheet();
+        sheet.setColumnWidth(7, 20 * 256);
+        sheet.setColumnHidden(8, true);
+        int widthOfColumnB = fiveColumns.getColW()[1];
+
+        fiveColumns.setMaxColumns(10);
+
+        int[] colW = fiveColumns.getColW();
+        assertEquals(10, colW.length);
+        assertTrue(colW[7] > widthOfColumnB, "H is 20 characters wide");
+        assertEquals(0, colW[8]);
+        assertEquals(widthOfColumnB, colW[9]);
+        assertTrue(fiveColumns.getHiddenColumnIndexes().contains(9));
     }
 
     @Test

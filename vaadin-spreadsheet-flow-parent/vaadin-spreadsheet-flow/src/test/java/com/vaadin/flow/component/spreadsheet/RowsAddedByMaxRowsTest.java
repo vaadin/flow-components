@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
@@ -104,20 +105,37 @@ class RowsAddedByMaxRowsTest {
     }
 
     @Test
-    void heightsCovering_takesTheAddedRowsHeightsFromPoi() {
-        Sheet sheet = spreadsheet.getActiveSheet();
+    void rowsAdded_haveTheHeightsAndHiddenRowsOfPoi() {
+        Spreadsheet sheetOf200 = new Spreadsheet();
+        Sheet sheet = sheetOf200.getActiveSheet();
         sheet.createRow(250).setHeightInPoints(40);
         sheet.createRow(260).setZeroHeight(true);
-        float[] loaded = spreadsheet.getRowH().clone();
 
-        float[] rowH = spreadsheet.sizes().heightsCovering(270);
+        sheetOf200.setMaxRows(300);
 
-        assertEquals(271, rowH.length);
-        assertArrayEquals(loaded, Arrays.copyOf(rowH, loaded.length));
+        float[] rowH = sheetOf200.getRowH();
+        assertEquals(300, rowH.length);
         assertEquals(40f, rowH[250]);
         assertEquals(0f, rowH[260]);
-        assertEquals(defaultHeight, rowH[255]);
-        assertEquals(defaultHeight, rowH[270]);
+        assertEquals(defaultHeight, rowH[299]);
+        assertTrue(sheetOf200.getHiddenRowIndexes().contains(261));
+    }
+
+    @Test
+    void heightsCovering_takesTheHeightsOfRowsPastTheShownOnesFromPoi() {
+        Sheet sheet = spreadsheet.getActiveSheet();
+        sheet.createRow(1050).setHeightInPoints(40);
+        sheet.createRow(1060).setZeroHeight(true);
+        float[] shown = spreadsheet.getRowH().clone();
+
+        float[] rowH = spreadsheet.sizes().heightsCovering(1070);
+
+        assertEquals(1071, rowH.length);
+        assertArrayEquals(shown, Arrays.copyOf(rowH, shown.length));
+        assertEquals(40f, rowH[1050]);
+        assertEquals(0f, rowH[1060]);
+        assertEquals(defaultHeight, rowH[1055]);
+        assertEquals(defaultHeight, rowH[1070]);
     }
 
     @Test
