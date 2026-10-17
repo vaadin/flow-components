@@ -57,6 +57,17 @@ import {
 } from './algorithms/ViewportMath.js';
 import { type CellSlots, Derived, drawnColumnWidth, drawnRowHeight, type SheetSizes } from './state/Derived.js';
 import { RenderScheduler } from './state/RenderScheduler.js';
+import {
+  type CellPress,
+  closeEditor,
+  type Edit,
+  formulaOf,
+  type FormulaWriting,
+  IDLE,
+  type InteractionState,
+  openEditor,
+  withFormula
+} from './state/Interaction.js';
 import { SheetData } from './state/SheetData.js';
 import { ViewState } from './state/ViewState.js';
 import {
@@ -148,17 +159,6 @@ function styleIndexOf(cellStyle: string | undefined): number | null {
   const match = /(?:^|\s)cs(\d+)(?:\s|$)/.exec(cellStyle ?? '');
   return match ? Number(match[1]) : null;
 }
-
-/**
- * What a press on the cells is doing until its button comes up: dragging
- * out a range - `crossed` once the pointer has gone into another cell -,
- * pointing one out for the formula being written, or dragging the fill
- * handle - from the selection it started with, painting a strip.
- */
-type CellDrag =
-  | { kind: 'select'; crossed: boolean }
-  | { kind: 'point' }
-  | { kind: 'fill'; from: CellRect; outcome: PaintOutcome };
 
 /**
  * Height of the column headers, in pixels: 27, so a sheet starts its first
@@ -263,54 +263,22 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
 
   /**
-   * The formula being written and where its caret is, while one is: its
-   * references are coloured, on the sheet and in the formula field.
+   * What the user is in the middle of on the sheet: an edit and the formula
+   * written in it, a press on the cells, a note; see {@link InteractionState}.
+   * Changed through {@link interact}, which draws the change.
    */
-  private formulaDraft: { text: string; caret: number } | null = null;
+  private interaction: InteractionState = IDLE;
 
-  /**
-   * The reference last pointed at in the formula being written: where the
-   * pointed range starts and ends on
-   * the sheet, and where its text is in the formula, which pointing again
-   * replaces. Null once anything is typed.
-   */
-  private pointer: {
-    anchor: { col: number; row: number };
-    end: { col: number; row: number };
-    span: { start: number; end: number };
-  } | null = null;
+  /** The cell editor while it is open: the cell-grid draws an input on its cell. */
+  private get editor(): CellEditorState | null {
+    const edit = this.interaction.edit;
+    return edit.kind === 'editing' ? edit.editor : null;
+  }
 
-  /**
-   * The cell pointed at last in the formula being written. The next arrow
-   * after an operator starts from it, for the rest of the edit - not from
-   * the cell being edited.
-   */
-  private lastPointed: { col: number; row: number } | null = null;
-
-  /** The press pointed at a cell, so the click it ends in selects nothing. */
-  private pointedByPress = false;
-
-  /**
-   * Cell-editor state. Null when no editor is
-   * active. When set, the cell-grid renders an editable
-   * {@code <input>} at the cell's coordinates; the user types,
-   * then Enter/Tab commits and Escape cancels.
-   */
-  private editor: CellEditorState | null = null;
-
-  /**
-   * Whether the editor opened on a character typed into a percentage cell,
-   * with the % it was given still to come off once the entry turns into a
-   * formula. See {@link pointAt}.
-   */
-  private autoPercentEntry = false;
-
-  /**
-   * The drag a press on the cells started, from the press to the release
-   * anywhere on the page; null between drags. While one runs, the cells the
-   * pointer crosses grow the range, the pointed reference or the strip.
-   */
-  private drag: CellDrag | null = null;
+  /** The formula being written, in the cell editor or the formula field. */
+  private get formula(): FormulaWriting {
+    return formulaOf(this.interaction.edit);
+  }
 
   /** A link cell's tooltip, shown while the pointer is over the cell. */
   private readonly linkTooltip: HTMLElement;
@@ -349,13 +317,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
-
-  /**
-   * The cell whose comment is being written, as a cell key, or null when
-   * none is. The server opens this with editCellComment and hears back
-   * once, when the note is finished.
-   */
-  private editingCommentKey: string | null = null;
 
   /**
    * Whether the user is holding shift and growing the selection.
@@ -904,9 +865,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       altKey: boolean;
     }>
   ): void => {
-    if (this.pointedByPress) {
+    if (this.formula.press !== 'none') {
       // The press pointed at the cell for a formula; it selects nothing.
-      this.pointedByPress = false;
+      this.changeFormula({ press: 'none' });
       return;
     }
     const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
@@ -976,7 +937,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private showLinkTooltip(at: { col: number; row: number; box?: DOMRect }): void {
     const text = this.model.hyperlinksTooltips[toKey(at.col, at.row)];
-    const dragging = this.drag?.kind === 'select' || this.drag?.kind === 'fill';
+    const dragging = this.interaction.press !== null;
     if (text === undefined || at.box === undefined || dragging) {
       this.hideLinkTooltip();
       return;
@@ -1066,7 +1027,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // out with Ctrl with one rectangle.
       return;
     }
-    this.drag = { kind: 'select', crossed: false };
+    this.changePress({ kind: 'select', crossed: false });
     if (shiftKey) {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
@@ -1091,33 +1052,27 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>): void => {
     this.showLinkTooltip(e.detail);
-    const drag = this.drag;
-    if (drag?.kind === 'point' && this.pointer !== null) {
+    const pointer = this.formula.pointer;
+    if (this.formula.press === 'pointing' && pointer !== null) {
       const draft = this.formulaSource() === 'field' ? this.formulaBar.formulaFieldState() : this.editorDraft();
       if (draft !== null) {
         const end = selectCellAt(e.detail.col, e.detail.row, this.model.mergedRegions).activeCell;
-        this.pointAt(
-          this.pointer.anchor,
-          end,
-          draft.value,
-          this.pointer.span.end,
-          this.pointer.span,
-          this.formulaSource() ?? 'cell'
-        );
-        this.recomputeViewport();
+        this.pointAt(pointer.anchor, end, draft.value, pointer.span.end, pointer.span, this.formulaSource() ?? 'cell');
       }
       return;
     }
-    if (drag?.kind === 'fill') {
+    const press = this.interaction.press;
+    if (press?.kind === 'fill') {
       const { col, row } = e.detail;
-      this.drag = { ...drag, outcome: computePaintRectangle(drag.from, col, row) };
-      this.recomputeViewport();
+      this.changePress({ ...press, outcome: computePaintRectangle(press.from, col, row) });
       return;
     }
-    if (drag?.kind !== 'select') {
+    if (press?.kind !== 'select') {
       return;
     }
-    drag.crossed = true;
+    if (!press.crossed) {
+      this.changePress({ kind: 'select', crossed: true });
+    }
     const { col, row } = e.detail;
     // Same as shift-arrow: keep activeCell as anchor, move
     // the extend corner.
@@ -1150,25 +1105,30 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * dispatched `cellSelected`).
    */
   private readonly handleDocumentMouseUp = (): void => {
-    const drag = this.drag;
-    if (drag?.kind === 'fill') {
-      this.finishPainting(drag);
+    const press = this.interaction.press;
+    if (press?.kind === 'fill') {
+      this.finishPainting(press);
       return;
     }
     if (this.headerResize.finish()) {
       return;
     }
-    if (drag === null) {
+    if (this.formula.press === 'pointing') {
+      // The press that pointed is over; the click it ends in is to come.
+      this.changeFormula({ press: 'pointed' });
       return;
     }
-    this.drag = null;
-    if (drag.kind === 'select' && this.selectsRange()) {
+    if (press === null) {
+      return;
+    }
+    this.changePress(null);
+    if (press.kind === 'select' && this.selectsRange()) {
       // Multi-cell range — dispatch the server-bound
       // selection event so the server learns the final
       // dragged range: with the cell the drag started on, when it went
       // into other cells. One that stayed in its cell was a shift-click,
       // which grows the range from the selected cell.
-      this.reportRangeSelection(drag.crossed);
+      this.reportRangeSelection(press.crossed);
       // The click that may follow the release reports nothing more.
       this.rangeReportedOnRelease = true;
       setTimeout(() => (this.rangeReportedOnRelease = false));
@@ -1197,10 +1157,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // is what carries a text cell's leading apostrophe.
     const initialValue = this.formulaFieldValueFor(col, row);
     // Opening the existing value to change it: arrows move the caret.
-    this.editor = { col, row, initialValue, mode: 'edit' };
-    this.autoPercentEntry = false;
+    this.changeEdit(openEditor(this.interaction.edit, { col, row, initialValue, mode: 'edit' }, false));
     this.showInFormulaField(initialValue);
-    this.recomputeViewport();
   };
 
   /**
@@ -1261,11 +1219,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // address field instead, it ends once the keyboard has settled there.
     if (key === undefined && relatedTarget === this.formulaBar) {
       e.preventDefault();
-      setTimeout(() => {
-        if (this.editor?.col === col && this.editor.row === row && !this.formulaBar.formulaFieldHasFocus()) {
-          this.commitCellEdit(col, row, this.cellGrid.editorValue() ?? value, undefined, false, false);
-        }
-      });
+      setTimeout(() =>
+        this.renders.handle(() => {
+          if (this.editor?.col === col && this.editor.row === row && !this.formulaBar.formulaFieldHasFocus()) {
+            this.commitCellEdit(col, row, this.cellGrid.editorValue() ?? value, undefined, false, false);
+          }
+        })
+      );
       return;
     }
     this.commitCellEdit(col, row, value, key, shiftKey === true, true);
@@ -1290,8 +1250,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // input — important to do BEFORE dispatching the server
     // event so the editor doesn't briefly flash on top of the
     // server's response.
-    this.editor = null;
     this.endFormulaPointing();
+    this.changeEdit(closeEditor(this.interaction.edit));
     if (takeKeyboard) {
       this.returnFocusToSheet();
     }
@@ -1317,9 +1277,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         : null;
     if (next !== null) {
       this.pick(next);
-    }
-    if (!walks) {
-      this.recomputeViewport();
     }
     const data: CellValueEditedData = { row, col, value };
     this.sendToServer({ type: 'cellValueEdited', data });
@@ -1349,14 +1306,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private readonly handleCellEditorCancel = (): void => {
     const editor = this.editor;
-    this.editor = null;
     this.endFormulaPointing();
+    this.changeEdit(closeEditor(this.interaction.edit));
     // The formula field showed what was typed; it shows the cell again.
     if (editor !== null) {
       this.showInFormulaField(this.formulaFieldValueFor(editor.col, editor.row));
     }
     this.returnFocusToSheet();
-    this.recomputeViewport();
   };
 
   /** Typed into the cell editor: the formula field shows it as it is typed. */
@@ -1364,7 +1320,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.showInFormulaField(e.detail.value);
     // Typing ends pointing at that reference: the next arrow after an
     // operator points at a new one, from the cell pointed at last.
-    this.pointer = null;
+    this.changeFormula({ pointer: null });
     this.updateFormulaDraft(e.detail.value, e.detail.caret ?? e.detail.value.length);
   };
 
@@ -1376,7 +1332,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.editor !== null) {
       this.cellGrid.setEditorValue(e.detail.value);
     }
-    this.pointer = null;
+    this.changeFormula({ pointer: null });
     this.updateFormulaDraft(e.detail.value, e.detail.caret ?? e.detail.value.length);
   };
 
@@ -1387,9 +1343,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       return;
     }
     const { value, caret } = e.detail;
-    if (this.pointer !== null && caret !== this.pointer.span.end) {
+    if (this.formula.pointer !== null && caret !== this.formula.pointer.span.end) {
       // Moved away from what was pointed at: the next point starts afresh.
-      this.pointer = null;
+      this.changeFormula({ pointer: null });
     }
     this.updateFormulaDraft(value, caret);
   };
@@ -1425,18 +1381,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (!isFormula(value) || this.model.rows <= 0 || this.model.cols <= 0) {
       return;
     }
-    const pointer = this.pointer !== null && caret === this.pointer.span.end ? this.pointer : null;
+    const pointer =
+      this.formula.pointer !== null && caret === this.formula.pointer.span.end ? this.formula.pointer : null;
     if (pointer === null && !canPoint(value, caret)) {
       return;
     }
     e.preventDefault();
-    const from = pointer?.end ?? this.lastPointed ?? this.formulaCell();
+    const from = pointer?.end ?? this.formula.lastPointed ?? this.formulaCell();
     const next = moveActiveCell(from, null, keyDirection(key, false)!, this.sheetShape());
     const end = next?.activeCell ?? from;
     const anchor = shiftKey && pointer !== null ? pointer.anchor : end;
     this.pointAt(anchor, end, value, caret, pointer?.span ?? null, source);
     this.scrollCellIntoView(end);
-    this.recomputeViewport();
   }
 
   /**
@@ -1452,7 +1408,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     let { value, caret } = draft;
     const cell = selectCellAt(col, row, this.model.mergedRegions).activeCell;
-    const pointer = this.pointer !== null && caret === this.pointer.span.end ? this.pointer : null;
+    const pointer =
+      this.formula.pointer !== null && caret === this.formula.pointer.span.end ? this.formula.pointer : null;
     let span: { start: number; end: number } | null;
     let anchor = cell;
     if (add) {
@@ -1474,9 +1431,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       }
     }
     this.pointAt(anchor, cell, value, caret, span, source);
-    this.drag = { kind: 'point' };
-    this.pointedByPress = true;
-    this.recomputeViewport();
+    this.changeFormula({ press: 'pointing' });
   }
 
   /** Puts the reference to a pointed cell or range into the formula being written. */
@@ -1488,7 +1443,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     span: { start: number; end: number } | null,
     source: 'cell' | 'field'
   ): void {
-    if (this.autoPercentEntry && this.editor !== null && value.endsWith('%')) {
+    const edit = this.interaction.edit;
+    if (edit.kind === 'editing' && edit.autoPercent && value.endsWith('%')) {
       // The % a sign typed into a percentage cell was given belongs to a
       // number. Pointing makes the entry a formula, where "+A1%" would take
       // a hundredth of A1. It goes with the editor that entry opened: a %
@@ -1496,10 +1452,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       value = value.slice(0, -1);
       caret = Math.min(caret, value.length);
     }
-    this.autoPercentEntry = false;
+    if (edit.kind === 'editing' && edit.autoPercent) {
+      this.changeEdit({ ...edit, autoPercent: false });
+    }
     const placed = placeReference(value, caret, span, referenceText(anchor, end));
-    this.pointer = { anchor, end, span: { start: placed.start, end: placed.end } };
-    this.lastPointed = end;
+    this.changeFormula({ pointer: { anchor, end, span: { start: placed.start, end: placed.end } }, lastPointed: end });
     if (this.editor !== null) {
       this.cellGrid.setEditorValue(placed.text, source === 'cell' ? placed.end : undefined);
     }
@@ -1538,14 +1495,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** Colours the references of the formula being written, or none when it is not one. */
   private updateFormulaDraft(text: string | null, caret: number): void {
     const draft = text !== null && isFormula(text) ? { text, caret } : null;
-    const before = this.formulaDraft;
+    const before = this.formula.draft;
     if (draft === null && before === null) {
       return;
     }
     if (draft !== null && before !== null && draft.text === before.text && draft.caret === before.caret) {
       return;
     }
-    this.formulaDraft = draft;
+    this.changeFormula({ draft });
     const refs = draft === null ? [] : formulaReferences(draft.text, this.activeSheetName());
     this.changeFormulaBar({
       highlights:
@@ -1553,17 +1510,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
           ? null
           : { text: draft.text, references: refs.map((ref) => ({ start: ref.start, end: ref.end, color: ref.color })) }
     });
-    this.recomputeViewport();
   }
 
   /** The formula is written or thrown away: nothing is pointed at or coloured any more. */
   private endFormulaPointing(): void {
-    this.pointer = null;
-    this.lastPointed = null;
-    if (this.drag?.kind === 'point') {
-      this.drag = null;
-    }
     this.updateFormulaDraft(null, 0);
+    this.changeFormula({ pointer: null, lastPointed: null });
   }
 
   /**
@@ -1591,7 +1543,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.editor !== null || (sameCell && this.formulaBar.formulaFieldEdited())) {
       return;
     }
-    if (this.formulaDraft !== null && this.formulaDraft.text !== value) {
+    if (this.formula.draft !== null && this.formula.draft.text !== value) {
       this.endFormulaPointing();
     }
     this.showInFormulaField(value);
@@ -1875,16 +1827,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       e.preventDefault();
-      this.editor = {
+      const editor: CellEditorState = {
         col,
         row,
         initialValue: this.formulaFieldValueFor(col, row),
         // F2 opens the existing value, so arrows move the caret.
         mode: 'edit'
       };
-      this.autoPercentEntry = false;
-      this.showInFormulaField(this.editor.initialValue);
-      this.recomputeViewport();
+      this.changeEdit(openEditor(this.interaction.edit, editor, false));
+      this.showInFormulaField(editor.initialValue);
       return;
     }
 
@@ -1906,15 +1857,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // A digit typed into a percentage cell means that many percent, so
       // the editor opens on "5%" rather than "5" - see PercentageEntry.
       // Space opens it empty: it starts an edit and types nothing.
-      this.editor = {
+      const editor: CellEditorState = {
         col,
         row,
         initialValue: key === ' ' ? '' : initialEditValue(key, this.sheetData.cells.get(toKey(col, row))),
         mode: 'enter'
       };
-      this.autoPercentEntry = key !== ' ' && this.editor.initialValue !== key;
-      this.showInFormulaField(this.editor.initialValue);
-      this.recomputeViewport();
+      this.changeEdit(openEditor(this.interaction.edit, editor, key !== ' ' && editor.initialValue !== key));
+      this.showInFormulaField(editor.initialValue);
       return;
     }
 
@@ -2558,7 +2508,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private readonly handleSelectionPaintStart = (): void => {
     const { c1, c2, r1, r2 } = this.selection.activeRange;
-    this.drag = { kind: 'fill', from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } };
+    this.changePress({ kind: 'fill', from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } });
   };
 
   /**
@@ -2569,8 +2519,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * shrinking reports only the corner the selection retreats to.
    */
   private finishPainting(painting: { from: CellRect; outcome: PaintOutcome }): void {
-    this.drag = null;
-    this.recomputeViewport();
+    this.changePress(null);
     if (painting.outcome.kind === 'none') {
       return;
     }
@@ -2943,15 +2892,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       scrollLeft: opts.scrollLeft,
       scrollTop: opts.scrollTop,
       editor: this.editor,
-      formulaReferences: this.derived.formulaReferences(this.formulaDraft, this.activeSheetName()),
+      formulaReferences: this.derived.formulaReferences(this.formula.draft, this.activeSheetName()),
       overlays: positionedOverlays,
       // Each at the bottom right corner of its cell.
       popupButtons: this.derived.popupButtons(this.popup.buttons(), model),
-      paintRect: this.drag?.kind === 'fill' && this.drag.outcome.kind !== 'none' ? this.drag.outcome.painted : null,
+      paintRect: this.paintRect(),
       commentText: this.model.cellComments,
       commentAuthors: this.model.cellCommentAuthors,
       visibleCommentKeys: this.model.visibleCellComments,
-      editingCommentKey: this.editingCommentKey,
+      editingCommentKey: this.interaction.comment,
       invalidFormulaMessage: this.model.invalidFormulaErrorMessage,
       commentCells: this.derived.commentCells(model),
       invalidFormulaCells: this.model.invalidFormulaCells,
@@ -3047,23 +2996,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     // An edit started in the cell ends here too: its editor closes, and
     // the cell shows the value, as it does when the edit ends there.
-    const editorWasOpen = this.editor !== null;
-    this.editor = null;
     this.endFormulaPointing();
+    this.changeEdit(closeEditor(this.interaction.edit));
     this.showCommittedValue(col, row, value);
     this.sendToServer({ type: 'cellValueEdited', data: { row, col, value } });
     // shift+Tab stays put.
     const direction = key === undefined || (key === 'Tab' && shiftKey) ? null : keyDirection(key, false);
     if (direction === null) {
-      if (editorWasOpen) {
-        this.recomputeViewport();
-      }
       return;
     }
     this.returnFocusToSheet();
     const next = moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape());
     if (next === null) {
-      this.recomputeViewport();
       return;
     }
     this.pick(next);
@@ -3079,10 +3023,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.endFormulaPointing();
     const { col, row } = this.selection.activeCell;
     this.showInFormulaField(this.formulaFieldValueFor(col, row));
-    if (this.editor !== null) {
-      this.editor = null;
-      this.recomputeViewport();
-    }
+    this.changeEdit(closeEditor(this.interaction.edit));
     this.returnFocusToSheet();
   };
 
@@ -3099,13 +3040,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // Reported once. Finishing the note puts the keyboard back on the
     // sheet, which takes the focus off the textarea and asks again,
     // and the textarea is still there until the next render.
-    if (this.editingCommentKey === null) {
+    if (this.interaction.comment === null) {
       return;
     }
-    this.editingCommentKey = null;
+    this.interact({ ...this.interaction, comment: null });
     const coord = key === undefined ? null : parseColRow(key);
     if (coord === null || coord.col < 1 || coord.row < 1) {
-      this.scheduleRender();
       return;
     }
     this.change({ cellComments: { ...this.model.cellComments, [key as string]: text } });
@@ -3431,8 +3371,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * from 0 where every other cell address here counts from 1.
    */
   editCellComment(col: number, row: number): void {
-    this.editingCommentKey = toKey(col + 1, row + 1);
-    this.scheduleRender();
+    this.interact({ ...this.interaction, comment: toKey(col + 1, row + 1) });
   }
 
   // ====================================================================
@@ -3751,12 +3690,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private abandonInteraction(): void {
     const hadKeyboard = this.host.matches(':focus-within');
-    this.editor = null;
-    this.endFormulaPointing();
-    this.pointedByPress = false;
+    // The formula's colours in the formula field go with it.
+    this.updateFormulaDraft(null, 0);
+    this.interact(IDLE);
     this.formulaBar.abandonFormulaEdit();
-    this.editingCommentKey = null;
-    this.drag = null;
     this.headerResize.cancel();
     this.extendingSelection = false;
     this.menu.close();
@@ -3942,6 +3879,34 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private changeSelection(selection: SheetSelection): void {
     this.sheetSelection = selection;
     this.scheduleRender();
+  }
+
+  /**
+   * Changes what the user is in the middle of. Drawn as the handler ends,
+   * before the server is told; see {@link handling}.
+   */
+  private interact(interaction: InteractionState): void {
+    this.interaction = interaction;
+    this.scheduleRender();
+  }
+
+  private changeEdit(edit: Edit): void {
+    this.interact({ ...this.interaction, edit });
+  }
+
+  /** Changes the formula being written; see {@link withFormula}. */
+  private changeFormula(change: Partial<FormulaWriting>): void {
+    this.changeEdit(withFormula(this.interaction.edit, { ...this.formula, ...change }));
+  }
+
+  private changePress(press: CellPress | null): void {
+    this.interact({ ...this.interaction, press });
+  }
+
+  /** The strip a fill drag paints, while one does. */
+  private paintRect(): CellRect | null {
+    const press = this.interaction.press;
+    return press?.kind === 'fill' && press.outcome.kind !== 'none' ? press.outcome.painted : null;
   }
 
   /**
