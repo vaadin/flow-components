@@ -11,6 +11,10 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -126,6 +130,17 @@ class FreshLoadConsistencyTest {
                 new Allowance[0], false, List.of(), Map.of(), action);
     }
 
+    /** Writes the workbook to a file, which the spreadsheet reads back. */
+    private static void writeToAFile(Spreadsheet spreadsheet) {
+        try {
+            Path file = Files.createTempFile("spreadsheet", ".xlsx");
+            file.toFile().deleteOnExit();
+            spreadsheet.write(file.toString());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     /** The client sends an event, its data as JSON. */
     private static Step event(String type, String data) {
         return (harness, spreadsheet) -> harness.clientEvent(type, data);
@@ -165,7 +180,13 @@ class FreshLoadConsistencyTest {
             Map.entry("a hidden row shifted down", c -> c.known("cell H13")),
             Map.entry("a row shifted down past rows not shifted",
                     c -> c.known("cell A12", "cell E12", "cell E13", "cell F12",
-                            "cell F13", "cell G12", "cell H12")));
+                            "cell F13", "cell G12", "cell H12")),
+            Map.entry("the workbook written to a file",
+                    c -> c.known("property shiftedCellBorderStyles")),
+            Map.entry("a cell's style set after the workbook is written",
+                    c -> c.known("property shiftedCellBorderStyles",
+                            "threw java.lang.NullPointerException",
+                            "property cellStyleToCSSStyle", "cell F11")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -366,6 +387,17 @@ class FreshLoadConsistencyTest {
                 op("another workbook shown",
                         spreadsheet -> spreadsheet
                                 .setWorkbook(FreshLoadFixture.workbook())),
+                op("the workbook written to a file",
+                        FreshLoadConsistencyTest::writeToAFile),
+                steps("a cell's style set after the workbook is written",
+                        api(FreshLoadConsistencyTest::writeToAFile),
+                        api(spreadsheet -> {
+                            var cell = FreshLoadFixture
+                                    .cell(spreadsheet.getActiveSheet(), "F11");
+                            cell.setCellStyle(spreadsheet.getWorkbook()
+                                    .createCellStyle());
+                            spreadsheet.refreshCells(cell);
+                        })),
                 reconfigured("a row given a height, the size of the sheet set",
                         spreadsheet -> {
                             spreadsheet.setMaxRows(300);
@@ -471,8 +503,11 @@ class FreshLoadConsistencyTest {
      * What the operations of an application are known to do wrong today when
      * the client has not seen the spreadsheet yet, by case name and when.
      */
-    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
-            .of();
+    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map.of(
+            "the workbook written to a file, before ATTACHED",
+            List.of("property shiftedCellBorderStyles"),
+            "the workbook written to a file, before FIRST_RESPONSE",
+            List.of("property shiftedCellBorderStyles"));
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")
