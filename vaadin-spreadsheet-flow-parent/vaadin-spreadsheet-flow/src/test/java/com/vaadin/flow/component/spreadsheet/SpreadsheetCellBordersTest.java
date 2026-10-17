@@ -247,6 +247,18 @@ class SpreadsheetCellBordersTest {
                             TestHelper.fireClientEvent(spreadsheet,
                                     "selectionIncreasePainted",
                                     "{\"r1\": 1, \"c1\": 1, \"r2\": 1, \"c2\": 2}");
+                        }, false),
+                // A2, which is empty, filled right over B2: the top border B2
+                // drew goes with its style.
+                new Operation("an empty cell filled over a top border",
+                        spreadsheet -> {
+                            TestHelper.fireClientEvent(spreadsheet,
+                                    "cellSelected",
+                                    "{\"row\": 2, \"column\": 1, "
+                                            + "\"oldSelectionRangeDiscarded\": true}");
+                            TestHelper.fireClientEvent(spreadsheet,
+                                    "selectionIncreasePainted",
+                                    "{\"r1\": 2, \"c1\": 1, \"r2\": 2, \"c2\": 2}");
                         }, false));
     }
 

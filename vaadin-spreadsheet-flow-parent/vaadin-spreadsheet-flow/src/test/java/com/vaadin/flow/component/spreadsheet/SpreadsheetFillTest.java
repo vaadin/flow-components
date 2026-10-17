@@ -297,6 +297,54 @@ class SpreadsheetFillTest {
     }
 
     @Test
+    void twoRowsFilledDownTwice_repeat() {
+        set("A1", "a");
+        set("A2", "b");
+        show();
+
+        fill(1, 1, 2, 1, 1, 1, 6, 1);
+
+        assertEquals(List.of("a", "b", "a", "b"),
+                List.of(value("A3"), value("A4"), value("A5"), value("A6")));
+    }
+
+    @Test
+    void twoColumnsFilledRightTwice_repeat() {
+        set("A1", "a");
+        set("B1", "b");
+        show();
+
+        fill(1, 1, 1, 2, 1, 1, 1, 6);
+
+        assertEquals(List.of("a", "b", "a", "b"),
+                List.of(value("C1"), value("D1"), value("E1"), value("F1")));
+    }
+
+    @Test
+    void aRowWithoutCellsFilledDown_emptiesTheRowItFills() {
+        // Row 2 is not in the sheet: it fills row 4.
+        set("A1", "x");
+        set("A4", "was here");
+        show();
+
+        fill(1, 1, 2, 1, 1, 1, 4, 1);
+
+        assertEquals("x", value("A3"));
+        assertEquals("", value("A4"));
+    }
+
+    @Test
+    void aRowWithoutCellsFilledRight_isLeftWithout() {
+        set("A2", "x");
+        show();
+
+        fill(1, 1, 2, 1, 1, 1, 2, 3);
+
+        assertEquals(List.of("x", "x"), List.of(value("B2"), value("C2")));
+        assertEquals(null, sheet.getRow(0));
+    }
+
+    @Test
     void anEmptyCellFilledDown_overNoCell_addsNone() {
         set("B1", "x");
         show();
