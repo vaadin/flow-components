@@ -207,6 +207,27 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(input.value).to.equal('=C4');
   });
 
+  it('points from nothing pointed at in an edit before', async () => {
+    // "=SUM(C4" pointed at in C3, and the edit committed: C4 is selected.
+    const input = await startTyping('=SUM(');
+    press(input, 'ArrowDown');
+    press(input, 'Enter');
+    sheet.updateBottomRightCellValues([
+      { col: 3, row: 4, value: '', formulaValue: 'SUM(A1', cellStyle: 'cs0', locked: false, needsMeasure: false }
+    ] as never);
+    await sheet.getCellGrid().updateComplete;
+    // The formula of C4 opened with F2, the caret at its end: where the
+    // reference pointed at before ended.
+    sheet
+      .getScrollContainer()
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true, composed: true, cancelable: true }));
+    await sheet.getCellGrid().updateComplete;
+
+    press(editor(), 'ArrowDown');
+
+    expect(editor().value).to.equal('=SUM(A1');
+  });
+
   it('neither points nor commits on an arrow after a reference, as the GWT client did', async () => {
     const input = await startTyping('=A1');
 
