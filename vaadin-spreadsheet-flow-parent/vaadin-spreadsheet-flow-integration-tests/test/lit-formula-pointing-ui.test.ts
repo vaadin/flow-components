@@ -94,6 +94,22 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(input.value).to.equal('+C4');
   });
 
+  it('drops the % a percentage cell gave a typed + when the edit carries on in the formula field', async () => {
+    sheet.updateBottomRightCellValues([
+      { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
+    ] as never);
+    const input = await startTyping('+');
+    input.focus();
+    await sheet.getFormulaBar().updateComplete;
+    const field = sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+    field.focus();
+    field.setSelectionRange(1, 1);
+
+    press(field, 'ArrowDown');
+
+    expect([editor() !== null, field.value]).to.eql([true, '+C4']);
+  });
+
   it('keeps the % for a number typed into a percentage cell', async () => {
     sheet.updateBottomRightCellValues([
       { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
