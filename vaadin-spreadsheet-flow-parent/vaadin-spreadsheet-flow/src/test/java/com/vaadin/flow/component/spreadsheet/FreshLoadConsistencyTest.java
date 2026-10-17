@@ -173,11 +173,8 @@ class FreshLoadConsistencyTest {
      * they send for nothing. A fix takes out what it fixes, so the test fails
      * without it.
      */
-    private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
-            Map.entry("rows shifted down", c -> c.known("cell H13")),
-            Map.entry("rows of their own heights shifted down",
-                    c -> c.known("cell H13")),
-            Map.entry("a hidden row shifted down", c -> c.known("cell H13")));
+    private static final Map<String, UnaryOperator<Case>> KNOWN = Map
+            .ofEntries();
 
     static Stream<Case> cases() {
         return Stream.of(

@@ -191,10 +191,9 @@ final class ClientCellCache implements Serializable {
         ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
         Sheet sheet = spreadsheet.getActiveSheet();
         addSpillSources(sheet, manager, updatedCellData);
-
-        // it is unnecessary to worry about having custom components in the
-        // cell because the client side handles it — it will not replace a
-        // custom component with a cell value
+        // A cell with a component is not sent, as it is not when loaded.
+        Set<String> componentCells = new HashSet<>(
+                spreadsheet.getComponentIDtoCellKeysMap().values());
 
         // update all cached formula cell values on client side because they
         // might have changed; also push every cell that is currently marked.
@@ -206,6 +205,9 @@ final class ClientCellCache implements Serializable {
                 Cell cell = cells.next();
                 String key = SpreadsheetUtil.toKey(cell.getColumnIndex() + 1,
                         cell.getRowIndex() + 1);
+                if (componentCells.contains(key)) {
+                    continue;
+                }
 
                 if (spreadsheet.getConditionalFormatter()
                         .getCellFormattingIndex(cell) != null) {
