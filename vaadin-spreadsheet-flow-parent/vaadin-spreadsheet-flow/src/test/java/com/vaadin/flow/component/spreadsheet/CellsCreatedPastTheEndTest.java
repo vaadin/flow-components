@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,21 @@ class CellsCreatedPastTheEndTest {
         XSSFWorkbook workbook = new XSSFWorkbook();
         workbook.createSheet().createRow(0).createCell(0).setCellValue("a1");
         return workbook;
+    }
+
+    @Test
+    void aCellCreatedPastTheLastRow_givesTheClientTheRowsAdded_inTheResponse() {
+        // Not refreshed, so the rows added are all the response sends.
+        Spreadsheet spreadsheet = new Spreadsheet(20, 10);
+        ui.add(spreadsheet);
+        ui.fakeClientCommunication();
+        Object heights = spreadsheet.getElement().getPropertyRaw("rowH");
+
+        spreadsheet.createCell(25, 0, "row 26");
+        ui.fakeClientCommunication();
+
+        assertNotEquals(heights,
+                spreadsheet.getElement().getPropertyRaw("rowH"));
     }
 
     @Test
