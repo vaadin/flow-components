@@ -952,6 +952,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     this.pageListeners = new AbortController();
+    this.viewportLoader.resume();
     const { signal } = this.pageListeners;
     listen(document, 'pointerdown', this.handleDocumentPointerDown, signal);
     listen(document, 'keydown', this.handleContextMenuKeyDown, signal);
@@ -979,7 +980,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.resizeObserver.disconnect();
     this.popup.disconnect();
     this.hostClassObserver?.disconnect();
-    this.viewportLoader.dispose();
+    this.viewportLoader.pause();
   }
 
   /**

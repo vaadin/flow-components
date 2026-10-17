@@ -72,6 +72,36 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     expect(loads[1].lastRow).to.be.greaterThan(drawn().lastRow);
   });
 
+  /** Scroll the sheet down to the pixel, as the user does. */
+  function scrollTo(top: number): void {
+    const container = sheet.getScrollContainer();
+    container.scrollTop = top;
+    container.dispatchEvent(new Event('scroll'));
+  }
+
+  it('tells the server where a scroll stopped soon after', async () => {
+    await open();
+    loads = [];
+
+    scrollTo(300);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    expect(loads).to.not.be.empty;
+  });
+
+  it('tells the server where a scroll stopped as soon once moved in the page', async () => {
+    // Moving the element takes it out of the page and puts it back.
+    await open();
+    sheet.disconnect();
+    sheet.connect();
+    loads = [];
+
+    scrollTo(300);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    expect(loads).to.not.be.empty;
+  });
+
   // The server makes and sends a component or an editor for each cell it
   // loads that has one: with a margin, a sheet opened with 2.5 times GWT's.
 

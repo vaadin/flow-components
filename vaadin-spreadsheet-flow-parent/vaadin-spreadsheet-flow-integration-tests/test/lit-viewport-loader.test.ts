@@ -825,7 +825,7 @@ describe('ViewportLoader', () => {
     expect(t.loads).to.be.empty;
   });
 
-  it('stops looking again once disposed', () => {
+  it('stops looking again once paused', () => {
     const t = setUp();
     t.serverAnswersAfterEachLoad();
     t.loader.check();
@@ -833,20 +833,30 @@ describe('ViewportLoader', () => {
     t.show({ r1: 201, c1: 1, r2: 230, c2: 10 });
     t.loader.check();
 
-    t.loader.dispose();
+    t.loader.pause();
     t.answer();
     t.time.advance(1000);
 
     expect(t.loads).to.have.length(1);
   });
 
-  it('counts no frames once disposed', () => {
+  it('counts no frames once paused', () => {
     const t = setUp();
-    t.loader.dispose();
+    t.loader.pause();
 
     t.loader.scrolled(400, 0);
 
     expect(t.time.framesRequested).to.equal(0);
+  });
+
+  it('counts frames again once resumed, as when the sheet is put back in the page', () => {
+    const t = setUp();
+    t.loader.pause();
+    t.loader.resume();
+
+    t.loader.scrolled(400, 0);
+
+    expect(t.time.framesRequested).to.equal(1);
   });
 
   it('asks at once while the server answers something else, for Flow to send next', () => {

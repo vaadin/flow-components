@@ -168,7 +168,8 @@ export class ViewportLoader {
   private lastFrameAt: number | null = null;
   /** How long the last {@link FRAMES_TIMED} frames of a scroll took, in ms. */
   private readonly frameTimes: number[] = [];
-  private disposed = false;
+  /** Whether the sheet is out of the page, where it neither scrolls nor loads. */
+  private paused = false;
 
   constructor(private readonly host: ViewportLoaderHost, private readonly clock: ViewportLoaderClock = realClock) {}
 
@@ -272,10 +273,15 @@ export class ViewportLoader {
     this.cancelTimer();
   }
 
-  /** Stop looking again. */
-  dispose(): void {
-    this.disposed = true;
+  /** Stop looking again while the sheet is out of the page. */
+  pause(): void {
+    this.paused = true;
     this.cancelTimer();
+  }
+
+  /** Look again once the sheet is back in the page. */
+  resume(): void {
+    this.paused = false;
   }
 
   /**
@@ -372,7 +378,7 @@ export class ViewportLoader {
 
   /** Count the frames drawn after the last scroll event, and time them. */
   private countFrames(): void {
-    if (this.countingFrames || this.disposed) {
+    if (this.countingFrames || this.paused) {
       return;
     }
     this.countingFrames = true;
