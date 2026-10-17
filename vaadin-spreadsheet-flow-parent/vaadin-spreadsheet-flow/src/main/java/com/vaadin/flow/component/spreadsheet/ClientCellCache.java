@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -198,30 +199,34 @@ final class ClientCellCache implements Serializable {
         Set<String> componentCells = new HashSet<>(
                 spreadsheet.getComponentIDtoCellKeysMap().values());
 
-        // update all cached formula cell values on client side because they
-        // might have changed; also push every cell that is currently marked.
-        Iterator<Row> rows = sheet.rowIterator();
-        while (rows.hasNext()) {
-            Row r = rows.next();
-            Iterator<Cell> cells = r.cellIterator();
-            while (cells.hasNext()) {
-                Cell cell = cells.next();
-                String key = SpreadsheetUtil.toKey(cell.getColumnIndex() + 1,
-                        cell.getRowIndex() + 1);
-                if (componentCells.contains(key)) {
-                    continue;
-                }
-
-                if (cell.getCellType() == CellType.FORMULA) {
-                    if (containsFormula(key) || isMarkedForUpdate(key)) {
-                        markFormulaSent(key);
-                        updatedCellData
-                                .add(manager.createCellDataForCell(cell));
-                    }
-                } else if (isMarkedForUpdate(key)) {
-                    markNormalSent(key);
+        // The formula cells the client has are sent again, as what they work
+        // out to may have changed, and so are the cells marked: only those
+        // are visited, rather than all the cells of the sheet. The client
+        // takes them in any order; the order of the sheet keeps what goes
+        // out the same from one run to the next, as it was.
+        TreeMap<Long, String> visited = new TreeMap<>();
+        for (String key : markedCells) {
+            visited.put(sheetOrder(key), key);
+        }
+        for (String key : sentFormulaCells) {
+            visited.put(sheetOrder(key), key);
+        }
+        for (String key : visited.values()) {
+            Row row = sheet.getRow(SpreadsheetUtil.getRowFromKey(key) - 1);
+            Cell cell = row == null ? null
+                    : row.getCell(
+                            SpreadsheetUtil.getColumnIndexFromKey(key) - 1);
+            if (cell == null || componentCells.contains(key)) {
+                continue;
+            }
+            if (cell.getCellType() == CellType.FORMULA) {
+                if (containsFormula(key) || isMarkedForUpdate(key)) {
+                    markFormulaSent(key);
                     updatedCellData.add(manager.createCellDataForCell(cell));
                 }
+            } else if (isMarkedForUpdate(key)) {
+                markNormalSent(key);
+                updatedCellData.add(manager.createCellDataForCell(cell));
             }
         }
         if (!changedFormulaCells.isEmpty()) {
@@ -239,6 +244,12 @@ final class ClientCellCache implements Serializable {
         }
         markedCells.clear();
         removedCells.clear();
+    }
+
+    /** Orders the keys of cells by row, then column, as the sheet has them. */
+    private static long sheetOrder(String key) {
+        return ((long) SpreadsheetUtil.getRowFromKey(key) << 16)
+                | SpreadsheetUtil.getColumnIndexFromKey(key);
     }
 
     /**
