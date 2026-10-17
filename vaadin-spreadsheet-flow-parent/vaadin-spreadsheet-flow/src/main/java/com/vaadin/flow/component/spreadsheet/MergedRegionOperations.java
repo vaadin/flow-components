@@ -137,9 +137,9 @@ final class MergedRegionOperations implements Serializable {
     }
 
     /**
-     * Takes the cells a merge hides off the client, all but the first, and
-     * styles again the cells of the region and those just past it, whose
-     * borders are drawn on the merged cell now.
+     * Takes the cells a merge hides off the client, all but the first, which is
+     * sent again, and styles again the cells of the region and those just past
+     * it, whose borders are drawn on the merged cell now.
      */
     private void afterMerge(MergedRegion region) {
         Sheet sheet = spreadsheet.getActiveSheet();
@@ -158,6 +158,10 @@ final class MergedRegionOperations implements Serializable {
                 if ((c != region.col1 || r != region.row1) && c <= region.col2
                         && r <= region.row2) {
                     spreadsheet.getCellValueManager().markCellForRemove(cell);
+                } else if (c == region.col1 && r == region.row1) {
+                    // Its value is shown over the whole region now: built
+                    // again for the width of the region.
+                    spreadsheet.getCellValueManager().markCellForUpdate(cell);
                 }
             }
         }
