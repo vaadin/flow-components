@@ -57,7 +57,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  */
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/avatar", version = "25.4.0-alpha3")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
@@ -236,12 +236,7 @@ public class Avatar extends Component
      */
     public void setImage(String url) {
         imageResource = null;
-
-        if (url == null) {
-            getElement().removeAttribute("img");
-        } else {
-            getElement().setAttribute("img", url);
-        }
+        getElement().setAttribute("img", url);
     }
 
     /**
@@ -258,11 +253,6 @@ public class Avatar extends Component
     @Deprecated(since = "24.8", forRemoval = true)
     public void setImageResource(AbstractStreamResource resource) {
         imageResource = resource;
-        if (resource == null) {
-            getElement().removeAttribute("img");
-            return;
-        }
-
         getElement().setAttribute("img", resource);
     }
 

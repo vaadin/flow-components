@@ -52,6 +52,7 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     private final BeforeClientResponseAction enable;
     private boolean updatingEnabled = false;
     private boolean disabledByClick = false;
+    private boolean clientMayDisableItself = false;
 
     /**
      * Creates a new controller for the given component.
@@ -97,6 +98,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     public void setDisableOnClick(boolean disableOnClick) {
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
+            // Never reset, the client may still be disabled from a click
+            clientMayDisableItself = true;
             component.getElement().setAttribute("disableonclick", "true");
         } else {
             component.getElement().removeAttribute("disableonclick");
@@ -156,7 +159,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
      * Forces the client-side component's {@code disabled} property to be
      * updated before the response is sent to the client, so that it matches the
      * component's effective enabled state, including whether any parent is
-     * disabled.
+     * disabled. Does nothing if disable on click has never been turned on for
+     * the component.
      * <p>
      * This method should be called from the component's
      * {@link HasEnabled#setEnabled} method, after the enabled state has been
@@ -170,6 +174,9 @@ public class DisableOnClickController<C extends Component & HasEnabled>
             // don't override it after the round trip.
             enable.cancel();
             disabledByClick = false;
+        }
+        if (!clientMayDisableItself) {
+            return;
         }
         // If the component is disabled and re-enabled during the same round
         // trip, Flow will not detect any changes and the client side component

@@ -15,7 +15,10 @@ describe('grid connector - aria attributes', () => {
 
     init(grid);
 
-    setRootItems(grid.$connector, [{ key: '0', name: 'foo' }]);
+    setRootItems(grid.$connector, [
+      { key: '0', name: 'foo' },
+      { key: '1', name: 'bar' }
+    ]);
     await nextFrame();
   });
 
@@ -78,6 +81,22 @@ describe('grid connector - aria attributes', () => {
       const row = cell.parentElement!;
       expect(row.getAttribute('aria-selected')).to.equal('false');
       expect(cell.getAttribute('aria-selected')).to.equal('false');
+    });
+
+    (['SINGLE', 'MULTI'] as const).forEach((mode) => {
+      it(`should set aria-selected on selected rows and cells in ${mode.toLowerCase()} selection mode`, async () => {
+        grid.$connector.setSelectionMode(mode);
+        grid.$connector.doSelection([{ key: '0' }], false);
+        await nextFrame();
+
+        const selectedCell = getBodyCell(grid, 0, 0)!;
+        expect(selectedCell.parentElement!.getAttribute('aria-selected')).to.equal('true');
+        expect(selectedCell.getAttribute('aria-selected')).to.equal('true');
+
+        const otherCell = getBodyCell(grid, 1, 0)!;
+        expect(otherCell.parentElement!.getAttribute('aria-selected')).to.equal('false');
+        expect(otherCell.getAttribute('aria-selected')).to.equal('false');
+      });
     });
   });
 });

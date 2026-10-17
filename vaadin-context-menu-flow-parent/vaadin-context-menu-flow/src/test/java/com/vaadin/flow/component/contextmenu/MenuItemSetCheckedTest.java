@@ -48,10 +48,11 @@ class MenuItemSetCheckedTest {
 
         var invocations = ui.dumpPendingJavaScriptInvocations();
         Assertions.assertEquals(1, countSetCheckedInvocations(invocations));
-        var parameters = getSetCheckedInvocation(invocations).getInvocation()
-                .getParameters();
-        Assertions.assertEquals(item.getElement(), parameters.get(0));
-        Assertions.assertEquals(true, parameters.get(1));
+        var invocation = getSetCheckedInvocation(invocations);
+        Assertions.assertEquals(item.getElement().getNode(),
+                invocation.getOwner());
+        Assertions.assertEquals(true,
+                invocation.getInvocation().getParameters().get(0));
     }
 
     @Test
@@ -93,9 +94,8 @@ class MenuItemSetCheckedTest {
 
         var invocations = ui.dumpPendingJavaScriptInvocations();
         Assertions.assertEquals(1, countSetCheckedInvocations(invocations));
-        Assertions.assertEquals(newItem.getElement(),
-                getSetCheckedInvocation(invocations).getInvocation()
-                        .getParameters().get(0));
+        Assertions.assertEquals(newItem.getElement().getNode(),
+                getSetCheckedInvocation(invocations).getOwner());
     }
 
     private static long countSetCheckedInvocations(

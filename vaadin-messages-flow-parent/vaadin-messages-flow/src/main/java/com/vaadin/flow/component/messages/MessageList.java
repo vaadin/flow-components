@@ -59,7 +59,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha3")
 public class MessageList extends Component implements HasStyle, HasSize,
         LocaleChangeObserver, HasThemeVariant<MessageListVariant> {
 
@@ -629,7 +629,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     private void checkTypingIndicatorFeatureFlag(UI ui) {
         var featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
+                .get(ui.getSessionOrThrow().getService().getContext());
         if (!featureFlags.isEnabled(
                 MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID)
                 && !featureFlags.isEnabled(AI_COMPONENTS_FEATURE_FLAG_ID)) {

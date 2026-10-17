@@ -55,7 +55,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.4.0-alpha3")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -154,8 +154,7 @@ public class GridPro<E> extends Grid<E> {
             }
         });
         addAttachListener(e -> getElement().executeJs(
-                "window.Vaadin.Flow.gridProConnector.initUpdatingCellAnimation($0);",
-                getElement()));
+                "window.Vaadin.Flow.gridProConnector.initUpdatingCellAnimation(this);"));
     }
 
     /**
@@ -214,8 +213,7 @@ public class GridPro<E> extends Grid<E> {
             addDataGenerator(this::generateCellEditableData);
 
             addAttachListener(e -> this.getElement().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.initCellEditableProvider($0)",
-                    this.getElement()));
+                    "window.Vaadin.Flow.gridProConnector.initCellEditableProvider(this)"));
         }
 
         private void generateCellEditableData(T item, ObjectNode jsonObject) {
@@ -698,8 +696,7 @@ public class GridPro<E> extends Grid<E> {
                     "gridProPreEditValue");
 
             getElement().executeJs(
-                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
-                    getElement());
+                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell(this);");
 
             if (column.getEditorField() != null) {
                 // Custom editor column
