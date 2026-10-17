@@ -102,7 +102,6 @@ final class CellMarkUpdater implements Serializable {
 
     void refreshAllCellValues() {
         spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
-        spreadsheet.getConditionalFormattingEvaluator().clearAllCachedValues();
         spreadsheet.getCellValueManager().clearCachedContent();
         // The rules themselves, not just their cached results: a full
         // refresh follows things that add and remove formattings - loading a

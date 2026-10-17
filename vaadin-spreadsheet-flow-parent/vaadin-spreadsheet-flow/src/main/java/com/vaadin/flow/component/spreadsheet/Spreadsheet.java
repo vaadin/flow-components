@@ -2537,12 +2537,11 @@ public class Spreadsheet extends Component
      *            Index of the last row changed, 0-based
      */
     void rowsChanged(int firstRow, int lastRow) {
-        // The evaluators still hold the cells as they were; a cell taken off
-        // its row fails when it is read. The rules still hold the ranges POI
-        // has since moved with the rows.
+        // The formula evaluator still holds the cells as they were; a cell
+        // taken off its row fails when it is read. The conditional formats,
+        // whose ranges POI moved with the rows, are read again with the
+        // cells sent below.
         getFormulaEvaluator().clearAllCachedResultValues();
-        getConditionalFormattingEvaluator().clearAllCachedValues();
-        getConditionalFormattingEvaluator().clearAllCachedFormats();
         // The rows have the heights POI moved with them, or none.
         sheetSizes.readRows(firstRow, lastRow);
         updateMergedRegions();

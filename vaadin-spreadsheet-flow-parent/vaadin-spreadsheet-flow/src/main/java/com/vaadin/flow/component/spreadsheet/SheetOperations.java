@@ -72,7 +72,6 @@ final class SheetOperations implements Serializable {
 
         // formulas defined relative to the sheet may need recalculation
         spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
-        spreadsheet.getConditionalFormattingEvaluator().clearAllCachedValues();
 
         spreadsheet.reloadActiveSheetData();
         SpreadsheetFactory.reloadSpreadsheetData(spreadsheet,

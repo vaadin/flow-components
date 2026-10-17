@@ -539,8 +539,6 @@ final class SheetSizes implements Serializable {
             // values, and the formatting that follows them, are worked out
             // again.
             spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
-            spreadsheet.getConditionalFormattingEvaluator()
-                    .clearAllCachedValues();
             spreadsheet.updateMarkedCells();
         }
         if (visibilityChanged) {

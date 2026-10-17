@@ -14,7 +14,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -52,8 +51,6 @@ class CellMarkUpdaterTest {
     @Mock
     private FormulaEvaluator formulaEvaluator;
     @Mock
-    private ConditionalFormattingEvaluator condFmtEvaluator;
-    @Mock
     private Workbook workbook;
     @Mock
     private Sheet activeSheet;
@@ -78,8 +75,6 @@ class CellMarkUpdaterTest {
                 .thenReturn(conditionalFormatter);
         lenient().when(spreadsheet.getFormulaEvaluator())
                 .thenReturn(formulaEvaluator);
-        lenient().when(spreadsheet.getConditionalFormattingEvaluator())
-                .thenReturn(condFmtEvaluator);
         lenient().when(spreadsheet.getWorkbook()).thenReturn(workbook);
         lenient().when(workbook.getActiveSheetIndex()).thenReturn(0);
         lenient().when(workbook.getSheetAt(0)).thenReturn(activeSheet);
@@ -257,8 +252,9 @@ class CellMarkUpdaterTest {
         // Pin the loaded-viewport path: firstColumn != -1 (viewport
         // has been loaded at least once) so the reload happens. Order:
         // 1. formulaEvaluator.clearAllCachedResultValues
-        // 2. condFmtEvaluator.clearAllCachedValues
-        // 3. valueManager.clearCachedContent
+        // 2. valueManager.clearCachedContent
+        // 3. conditionalFormatter.createConditionalFormatterRules, which
+        // clears the conditional formatting evaluator's caches
         // 4. spreadsheet.updateRowAndColumnRangeCellData(1, 1, rows, cols)
         // 5. selectionManager.reSelectSelectedCell
         when(spreadsheet.getFirstColumn()).thenReturn(1);
@@ -268,11 +264,11 @@ class CellMarkUpdaterTest {
         updater.refreshAllCellValues();
 
         org.mockito.InOrder inOrder = org.mockito.Mockito.inOrder(
-                formulaEvaluator, condFmtEvaluator, valueManager, spreadsheet,
-                selectionManager);
+                formulaEvaluator, valueManager, conditionalFormatter,
+                spreadsheet, selectionManager);
         inOrder.verify(formulaEvaluator).clearAllCachedResultValues();
-        inOrder.verify(condFmtEvaluator).clearAllCachedValues();
         inOrder.verify(valueManager).clearCachedContent();
+        inOrder.verify(conditionalFormatter).createConditionalFormatterRules();
         inOrder.verify(spreadsheet).updateRowAndColumnRangeCellData(eq(1),
                 eq(1), eq(20), eq(10));
         inOrder.verify(selectionManager).reSelectSelectedCell();
@@ -290,8 +286,8 @@ class CellMarkUpdaterTest {
         updater.refreshAllCellValues();
 
         verify(formulaEvaluator).clearAllCachedResultValues();
-        verify(condFmtEvaluator).clearAllCachedValues();
         verify(valueManager).clearCachedContent();
+        verify(conditionalFormatter).createConditionalFormatterRules();
         verify(spreadsheet, never()).updateRowAndColumnRangeCellData(
                 org.mockito.ArgumentMatchers.anyInt(),
                 org.mockito.ArgumentMatchers.anyInt(),
@@ -302,20 +298,18 @@ class CellMarkUpdaterTest {
 
     @Test
     void refreshAllCellValues_clearOrder_evaluatorsBeforeValueCache() {
-        // Pin: the formula + conditional-formatting evaluator caches
-        // are cleared BEFORE the value-manager cache. The order
-        // matters because valueManager's `clearCachedContent` may
-        // re-trigger formula evaluation in the next update cycle —
-        // doing it before the evaluators are cleared would resurrect
-        // stale formula results.
+        // Pin: the formula evaluator cache is cleared BEFORE the
+        // value-manager cache. The order matters because valueManager's
+        // `clearCachedContent` may re-trigger formula evaluation in the
+        // next update cycle — doing it before the evaluator is cleared
+        // would resurrect stale formula results.
         when(spreadsheet.getFirstColumn()).thenReturn(-1);
 
         updater.refreshAllCellValues();
 
         org.mockito.InOrder inOrder = org.mockito.Mockito
-                .inOrder(formulaEvaluator, condFmtEvaluator, valueManager);
+                .inOrder(formulaEvaluator, valueManager);
         inOrder.verify(formulaEvaluator).clearAllCachedResultValues();
-        inOrder.verify(condFmtEvaluator).clearAllCachedValues();
         inOrder.verify(valueManager).clearCachedContent();
     }
 }
