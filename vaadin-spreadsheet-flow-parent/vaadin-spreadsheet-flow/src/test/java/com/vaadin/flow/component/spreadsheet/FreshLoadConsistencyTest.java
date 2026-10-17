@@ -182,7 +182,9 @@ class FreshLoadConsistencyTest {
             Map.entry("a row deleted, then undone",
                     c -> c.known("property rows", "pop-up button")),
             Map.entry("a row deleted, undone and redone",
-                    c -> c.known("property rows", "pop-up button")));
+                    c -> c.known("property rows", "pop-up button")),
+            Map.entry("rows shifted down over the filter",
+                    c -> c.known("property rowH", "pop-up button")));
 
     static Stream<Case> cases() {
         return Stream.of(
@@ -360,6 +362,8 @@ class FreshLoadConsistencyTest {
                 }), api(spreadsheet -> spreadsheet.shiftRows(10, 11, 1))),
                 op("rows shifted down",
                         spreadsheet -> spreadsheet.shiftRows(10, 13, 1)),
+                op("rows shifted down over the filter",
+                        spreadsheet -> spreadsheet.shiftRows(10, 199, 1)),
                 op("rows shifted up",
                         spreadsheet -> spreadsheet.shiftRows(11, 14, -1)),
                 op("a row shifted down past rows not shifted",
@@ -590,8 +594,11 @@ class FreshLoadConsistencyTest {
      * What the operations of an application are known to do wrong today when
      * the client has not seen the spreadsheet yet, by case name and when.
      */
-    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map
-            .of();
+    private static final Map<String, List<String>> KNOWN_BEFORE_SHOWN = Map.of(
+            "rows shifted down over the filter, before ATTACHED",
+            List.of("property rowH", "pop-up button"),
+            "rows shifted down over the filter, before FIRST_RESPONSE",
+            List.of("property rowH", "pop-up button"));
 
     @ParameterizedTest(name = "{0}, before {1}")
     @MethodSource("applicationCases")
