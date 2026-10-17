@@ -162,13 +162,14 @@ class SpreadsheetPopupButtonsTest {
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
                 "{\"firstRow\": 50, \"firstColumn\": 5, \"lastRow\": 70, \"lastColumn\": 10}");
         Map<String, PopupButton> buttons = new LinkedHashMap<>();
-        for (String cell : List.of("A1", "E1", "C1", "A60", "A80", "E60", "C60",
-                "C3")) {
+        for (String cell : List.of("A1", "E1", "E2", "C1", "A60", "B60", "A80",
+                "E60", "C60", "C3")) {
             buttons.put(cell, button());
             spreadsheet.setPopup(cell, buttons.get(cell));
         }
 
-        assertEquals(List.of("A1", "E1", "A60", "E60"), onTheSheet(buttons));
+        assertEquals(List.of("A1", "E1", "E2", "A60", "B60", "E60"),
+                onTheSheet(buttons));
     }
 
     @Test

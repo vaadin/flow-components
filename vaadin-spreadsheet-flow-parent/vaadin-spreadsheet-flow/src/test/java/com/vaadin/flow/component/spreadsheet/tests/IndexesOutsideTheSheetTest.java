@@ -119,13 +119,13 @@ class IndexesOutsideTheSheetTest {
     @Test
     void hiddenRows_doNotCountTowardsTheRowsOneScrollLoads() {
         spreadsheet = new Spreadsheet(3500, 10);
-        for (int row = 1; row <= 1000; row++) {
+        for (int row = 0; row < 1000; row++) {
             spreadsheet.setRowHidden(row, true);
         }
 
         scroll(1, 1, 3500, 10);
 
-        // Row 1 and rows 1002 to 3000 are the 2,000 shown.
+        // Rows 1001 to 3000 are the 2,000 shown.
         assertEquals(3000, spreadsheet.getLastRow());
     }
 
@@ -142,13 +142,13 @@ class IndexesOutsideTheSheetTest {
     @Test
     void hiddenColumns_doNotCountTowardsTheColumnsOneScrollLoads() {
         spreadsheet = new Spreadsheet(20, 1600);
-        for (int column = 1; column <= 500; column++) {
+        for (int column = 0; column < 500; column++) {
             spreadsheet.setColumnHidden(column, true);
         }
 
         scroll(1, 1, 20, 1600);
 
-        // Column 1 and columns 502 to 1500 are the 1,000 shown.
+        // Columns 501 to 1500 are the 1,000 shown.
         assertEquals(1500, spreadsheet.getLastColumn());
     }
 
