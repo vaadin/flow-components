@@ -2641,6 +2641,8 @@ public class Spreadsheet extends Component
      * Reloads all the styles for the currently active sheet.
      */
     public void reloadActiveSheetStyles() {
+        // For all its rows and columns: a sheet shown has its size by now.
+        workbookScope.styler.reloadActiveSheetColumnRowStyles();
         workbookScope.styler.reloadActiveSheetCellStyles();
     }
 
@@ -3064,7 +3066,6 @@ public class Spreadsheet extends Component
 
         reloadSheetNames();
         updateMergedRegions();
-        workbookScope.styler.reloadActiveSheetColumnRowStyles();
         setDisplayGridlines(getActiveSheet().isDisplayGridlines());
         setDisplayRowColHeadings(getActiveSheet().isDisplayRowColHeadings());
 
