@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -71,9 +72,11 @@ final class CellMarkUpdater implements Serializable {
         Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook
                 .getSheetAt(workbook.getActiveSheetIndex());
-        final Cell cell = activeSheet.getRow(row).getCell(col);
+        // A row with no cells is not in POI at all.
+        final Row poiRow = activeSheet.getRow(row);
+        final Cell cell = poiRow == null ? null : poiRow.getCell(col);
         if (cell != null) {
-            activeSheet.getRow(row).removeCell(cell);
+            poiRow.removeCell(cell);
             spreadsheet.getSpreadsheetStyleFactory().clearCellStyle(row, col);
             spreadsheet.getCellValueManager().cellDeleted(cell);
             // Not refreshCells(cell), which reads the cell: it is out of its

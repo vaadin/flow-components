@@ -262,6 +262,15 @@ class SpreadsheetCellUpdatesTest {
     }
 
     @Test
+    void deletingACellOfARowThatIsNotThere_sendsNothing() {
+        show();
+
+        spreadsheet.deleteCell(30, 0);
+
+        assertEquals(List.of(), calls());
+    }
+
+    @Test
     void aCellDeletedOnTheSheetShown_isTakenFromThatSheet() {
         Sheet second = workbook.createSheet();
         second.createRow(0).createCell(0).setCellValue("second");
