@@ -49,8 +49,6 @@ import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
  * <li>Sheet-swap path: {@code makeSureCorrectSheetActive} flips active sheet
  * and seeds {@code initialSheetSelection} from painted range / selected cell /
  * default {@code "A1"}.</li>
- * <li>{@code changeSelection} routes single-cell vs ranged vs no-selection
- * commands through the right {@link CellSelectionManager} method.</li>
  * <li>{@code setHistorySize} clips the existing history.</li>
  * <li>{@code addCommand} mid-history discards everything after the cursor.</li>
  * <li>{@code getCommand} bounds checking.</li>
@@ -311,19 +309,10 @@ class SpreadsheetHistoryManagerTest {
         assertNull(spreadsheet.initialSheetSelection);
     }
 
-    // 7. changeSelection routing --------------------------------------------
-    //
-    // SpreadsheetHistoryManager.changeSelection routes through
-    // CellSelectionManager based on whether the command carries a
-    // selectedCellReference, a paintedCellRange, both, or neither.
-    //
-    // Testing this routing headless requires a recording proxy or spy around
-    // CellSelectionManager — CellSelectionManager's downstream state is not
-    // populated headlessly, so getCellSelectionManager()
-    // .getSelectedCellReference() returns null even after a successful route.
-    // UndoRedoIT covers the end-to-end behavior.
+    // What an undo selects, as the client is told it, is in
+    // SelectionAfterUndoTest.
 
-    // 8. setHistorySize clips -----------------------------------------------
+    // 7. setHistorySize clips -----------------------------------------------
 
     @Test
     void setHistorySize_smaller_keepsTheLatestSteps_andUndoStillWorks() {
@@ -345,7 +334,7 @@ class SpreadsheetHistoryManagerTest {
         assertEquals(0, history.getHistoryIndex());
     }
 
-    // 9. addCommand mid-history discards future -----------------------------
+    // 8. addCommand mid-history discards future -----------------------------
 
     @Test
     void addCommand_afterUndo_discardsRedoBranch() {
@@ -367,7 +356,7 @@ class SpreadsheetHistoryManagerTest {
         assertFalse(history.canRedo());
     }
 
-    // 10. getCommand bounds -------------------------------------------------
+    // 9. getCommand bounds -------------------------------------------------
 
     @Test
     void getCommand_validIndex_returnsAddedCommand() {

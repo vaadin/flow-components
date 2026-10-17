@@ -170,6 +170,22 @@ class SelectionAfterUndoTest {
     }
 
     @Test
+    void anUndoOntoTheCellARangeIsSelectedFrom_refreshesTheFormulaBarOnce() {
+        // B2 typed in, then B2:C3 selected from B2: the undo puts B2's value
+        // back, which refreshes the formula bar, and selects B2 alone.
+        type(2, 2, "x");
+        TestHelper.fireClientEvent(spreadsheet, "cellRangeSelected",
+                "{\"row1\": 2, \"col1\": 2, \"row2\": 3, \"col2\": 3}");
+        respond();
+
+        undo();
+
+        assertEquals(
+                List.of("updateFormulaBar B2", "showSelectedCell B2 into view"),
+                respond());
+    }
+
+    @Test
     void anUndoOfACommandThatSelectsNothing_refreshesTheFormulaBarOnce() {
         // A command of the application's own, which puts a value into D4.
         Cell d4 = spreadsheet.createCell(3, 3, "before");
