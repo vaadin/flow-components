@@ -250,6 +250,31 @@ describe('Spreadsheet context menu — right-clicking a selection', () => {
   });
 });
 
+describe('Spreadsheet context menu — a cell right-clicked outside the selection', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  it('is drawn selected before the server hears of it', () => {
+    let drawnWhenTold: unknown = 'not told';
+    ctx.host.addEventListener('spreadsheet-event', (e) => {
+      if ((e as CustomEvent).detail.type === 'cellSelected') {
+        drawnWhenTold = ctx.sheet.getCellGrid().renderState.selection?.activeCell;
+      }
+    });
+
+    rightClickCell(ctx.sheet, 4, 3);
+
+    expect(drawnWhenTold).to.eql({ col: 4, row: 3 });
+  });
+});
+
 describe('Spreadsheet context menu — where it lands', () => {
   let ctx: ReturnType<typeof attachSheet>;
 
