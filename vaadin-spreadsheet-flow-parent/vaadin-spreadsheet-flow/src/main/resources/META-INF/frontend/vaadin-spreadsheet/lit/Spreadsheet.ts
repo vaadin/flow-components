@@ -55,6 +55,15 @@ import {
   withSize
 } from './algorithms/ViewportMath.js';
 import { AxisSizes } from './algorithms/AxisSizes.js';
+import {
+  initialSheetModel,
+  type SHEET_PROPERTIES,
+  type SheetModel,
+  type SheetPropertyName,
+  type SheetPropertyValue,
+  withProperty,
+  withValues
+} from './state/SheetModel.js';
 import { initialEditValue } from './algorithms/PercentageEntry.js';
 import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
@@ -115,14 +124,7 @@ import {
 } from './algorithms/Positioning.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
-import {
-  coerceArray,
-  coerceJson,
-  coerceNumberArray,
-  coerceObject,
-  coerceSizes,
-  type NumberList
-} from './wire/Coerce.js';
+import { coerceArray, coerceJson, coerceObject, coerceSizes, type NumberList } from './wire/Coerce.js';
 import {
   columnGroupingGutterPx,
   rowGroupingGutterPx,
@@ -241,9 +243,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private readonly renderTarget: HTMLElement | ShadowRoot;
 
-  /** Total grid dimensions. */
-  private rows = 0;
-  private cols = 0;
+  /**
+   * What the server mirrors onto the element, each property by its name on
+   * the wire; see {@link SheetModel}. Replaced whole on each change.
+   */
+  private model: SheetModel = initialSheetModel();
 
   /** Selection state. */
   private selection: SelectionState = selectSingleCell(1, 1);
@@ -325,62 +329,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Resizing columns and rows by their header edges; see {@link HeaderResize}. */
   private readonly headerResize: HeaderResize;
 
-  /** Row / column geometry. */
+  /** Row heights in points, as the server sends them; see {@link setRowH}. */
   private rowHeights: NumberList = [];
   /** The sizes worked out from the geometry, and what they were worked out from; see {@link sheetSizes}. */
   private sizesCache: { inputs: readonly unknown[]; sizes: SheetSizes } | null = null;
-  private colWidths: NumberList = [];
-  private defRowHeight = 15; // points
-  private defColWidth = 64; // pixels
 
-  // Hidden / locked indexes
-  /*
-   * Sets, not arrays: they are asked about one row or column at a time
-   * inside loops over rows, and on a filtered table with tens of thousands
-   * of hidden rows an array lookup made each arrow key take 200 ms.
-   */
-  private hiddenRows: ReadonlySet<number> = new Set();
-  private hiddenColumns: ReadonlySet<number> = new Set();
-  private lockedRows: ReadonlySet<number> = new Set();
-  private lockedColumns: ReadonlySet<number> = new Set();
-
-  /** Merged regions. */
-  private mergedRegions: MergedRegion[] = [];
-
-  /** CSS styling state. */
+  /** The CSS of each cell style, by its index. */
   private cellStyleToCSSStyle: Record<number, string> = {};
-  private rowIndexToStyleIndex: Record<number, number> = {};
-  private columnIndexToStyleIndex: Record<number, number> = {};
-  private shiftedCellBorderStyles: string[] = [];
-  private conditionalFormattingStyles: Record<number, string> = {};
 
-  /** Grouping (outline) state. */
-  private colGroupingData: GroupingData[] = [];
-  private rowGroupingData: GroupingData[] = [];
-  private colGroupingMax = 0;
-  private rowGroupingMax = 0;
-  private colGroupingInversed = false;
-  private rowGroupingInversed = false;
-
-  /** Buffer + scroll state. */
-  private rowBufferSize = 200;
-  private columnBufferSize = 200;
-
-  /** Misc. */
-  private sheetProtected = false;
-  private showCustomEditorOnFocus = false;
-  /** Whether the server asks a factory for a component or an editor for each cell it loads. */
-  private hasComponentFactory = false;
-  // The message a cell with a formula the workbook cannot make sense of
-  // shows on hover. Held here rather than waited for: the server only
-  // pushes it when an application replaces the default, and until then a
-  // null message means the cell explains nothing at all.
-  private invalidFormulaErrorMessage: string | null = 'Invalid formula';
-  private cellComments: Record<string, string> = {};
-  private cellCommentAuthors: Record<string, string> = {};
-  private visibleCellComments: string[] = [];
-  private invalidFormulaCells: Set<string> = new Set();
-  private overlays: Record<string, OverlayInfo> = {};
   /**
    * Overlay IDs the server has published a resource for, from
    * {@link setResources}. The URLs themselves are not kept: they live on
@@ -390,20 +346,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private resourceKeys: string[] = [];
   /** The element the `resource-<id>` attributes live on. */
   private resourceHost: HTMLElement | null = null;
-  private cellKeysToEditorIdMap: Record<string, string> = {};
-  private componentIDtoCellKeysMap: Record<string, string> = {};
-  private hyperlinksTooltips: Record<string, string> = {};
 
-  /** Freeze pane split positions. */
-  private verticalSplitPosition = 0;
-  private horizontalSplitPosition = 0;
-
-  /** Display flags. */
+  /** Whether the lines between the cells are drawn. */
   private displayGridlines = true;
 
-  /** Where each sheet was last scrolled to; see {@link setVerticalScrollPositions}. */
-  private verticalScrollPositions: NumberList = [];
-  private horizontalScrollPositions: NumberList = [];
   /** The offsets the next render scrolls to, for a sheet shown again. */
   private pendingSheetScroll: { top: number; left: number } | null = null;
   /**
@@ -518,13 +464,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private readonly viewportLoader = new ViewportLoader({
     drawnRange: () => this.drawnRange(),
     sheet: () => ({
-      rows: this.rows,
-      cols: this.cols,
-      frozenRows: this.verticalSplitPosition,
-      frozenCols: this.horizontalSplitPosition,
-      rowPx: getDefaultRowHeightPx(this.defRowHeight, FALLBACK_PPI),
-      colPx: this.defColWidth,
-      noMargin: this.hasComponentFactory
+      rows: this.model.rows,
+      cols: this.model.cols,
+      frozenRows: this.model.verticalSplitPosition,
+      frozenCols: this.model.horizontalSplitPosition,
+      rowPx: getDefaultRowHeightPx(this.model.defRowH, FALLBACK_PPI),
+      colPx: this.model.defColW,
+      noMargin: this.model.hasComponentFactory
     }),
     serverBusy: () => flowRequestInFlight(this.host),
     load: (range) => this.sendLoad(range)
@@ -789,21 +735,23 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.root,
       { columnHeader: this.columnHeader, rowHeader: this.rowHeader },
       {
-        sheetProtected: () => this.sheetProtected,
+        sheetProtected: () => this.model.sheetProtected,
         colWidthPx: (col) => this.colWidthPx(col),
         rowHeightPx: (row) => this.rowHeightPx(row),
-        rowHeightPt: (row) => (row - 1 < this.rowHeights.length ? this.rowHeights[row - 1] : this.defRowHeight),
+        rowHeightPt: (row) => (row - 1 < this.rowHeights.length ? this.rowHeights[row - 1] : this.model.defRowH),
+        // A column or row dragged to nothing is hidden, as the server will
+        // have it. One already hidden has no edge to drag.
         setColumnWidth: (col, width) => {
-          this.colWidths = withSize(this.colWidths, col, width, this.defColWidth);
-          if (width === 0 && !this.hiddenColumns.has(col)) {
-            this.hiddenColumns = new Set([...this.hiddenColumns, col]);
+          this.change({ colW: withSize(this.model.colW, col, width, this.model.defColW) });
+          if (width === 0) {
+            this.change({ hiddenColumnIndexes: new Set([...this.model.hiddenColumnIndexes, col]) });
           }
           this.recomputeViewport();
         },
         setRowHeight: (row, height) => {
-          this.rowHeights = withSize(this.rowHeights, row, height, this.defRowHeight);
-          if (height === 0 && !this.hiddenRows.has(row)) {
-            this.hiddenRows = new Set([...this.hiddenRows, row]);
+          this.rowHeights = withSize(this.rowHeights, row, height, this.model.defRowH);
+          if (height === 0) {
+            this.change({ hiddenRowIndexes: new Set([...this.model.hiddenRowIndexes, row]) });
           }
           this.recomputeViewport();
         },
@@ -1056,7 +1004,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // after the normal selection event. The
     // server's onLinkCellClicked handler opens the URL.
     const cellKey = toKey(col, row);
-    if (this.hyperlinksTooltips[cellKey] !== undefined) {
+    if (this.model.hyperlinksTooltips[cellKey] !== undefined) {
       this.sendToServer({
         type: 'linkCellClicked',
         data: { row, column: col }
@@ -1076,7 +1024,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * drag in progress, takes it away.
    */
   private showLinkTooltip(at: { col: number; row: number; box?: DOMRect }): void {
-    const text = this.hyperlinksTooltips[toKey(at.col, at.row)];
+    const text = this.model.hyperlinksTooltips[toKey(at.col, at.row)];
     const dragging = this.drag?.kind === 'select' || this.drag?.kind === 'fill';
     if (text === undefined || at.box === undefined || dragging) {
       this.hideLinkTooltip();
@@ -1197,7 +1145,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (drag?.kind === 'point' && this.pointer !== null) {
       const draft = this.formulaSource() === 'field' ? this.formulaBar.formulaFieldState() : this.editorDraft();
       if (draft !== null) {
-        const end = selectCellAt(e.detail.col, e.detail.row, this.mergedRegions).activeCell;
+        const end = selectCellAt(e.detail.col, e.detail.row, this.model.mergedRegions).activeCell;
         this.pointAt(
           this.pointer.anchor,
           end,
@@ -1321,14 +1269,14 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * columns, which is most protected sheets.
    */
   private isCellLockedForEdit(col: number, row: number): boolean {
-    if (!this.sheetProtected) {
+    if (!this.model.sheetProtected) {
       return false;
     }
     const cellData = this.cellDataByKey.get(toKey(col, row));
     if (cellData !== undefined) {
       return cellData.locked === true;
     }
-    return this.lockedColumns.has(col) && this.lockedRows.has(row);
+    return this.model.lockedColumnIndexes.has(col) && this.model.lockedRowIndexes.has(row);
   }
 
   /**
@@ -1410,12 +1358,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // Enter and Tab do when nothing is being edited: filling a block
     // cell by cell is the reason the range is selected at all.
     const walkDirection = inSelectionWalkDirection(key, shiftKey);
-    const walks = walkDirection !== null && this.rows > 0 && this.cols > 0 && this.selectsRange();
+    const walks = walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.selectsRange();
     // Moving on goes by the arrows' rules: over hidden rows and columns,
     // and out of a merge on its far side.
     const direction = walks || key === undefined ? null : keyDirection(key, shiftKey);
     const next =
-      direction !== null && this.rows > 0 && this.cols > 0
+      direction !== null && this.model.rows > 0 && this.model.cols > 0
         ? moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape())
         : null;
     if (next !== null) {
@@ -1439,8 +1387,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
           col,
           row,
           direction: walkDirection!,
-          hiddenColumns: this.hiddenColumns,
-          hiddenRows: this.hiddenRows
+          hiddenColumns: this.model.hiddenColumnIndexes,
+          hiddenRows: this.model.hiddenRowIndexes
         })
       );
     }
@@ -1525,7 +1473,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     source: 'cell' | 'field'
   ): void {
     const { key, shiftKey, value, caret } = e.detail;
-    if (!isFormula(value) || this.rows <= 0 || this.cols <= 0) {
+    if (!isFormula(value) || this.model.rows <= 0 || this.model.cols <= 0) {
       return;
     }
     const pointer = this.pointer !== null && caret === this.pointer.span.end ? this.pointer : null;
@@ -1554,7 +1502,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     let { value, caret } = draft;
-    const cell = selectCellAt(col, row, this.mergedRegions).activeCell;
+    const cell = selectCellAt(col, row, this.model.mergedRegions).activeCell;
     const pointer = this.pointer !== null && caret === this.pointer.span.end ? this.pointer : null;
     let span: { start: number; end: number } | null;
     let anchor = cell;
@@ -1767,7 +1715,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Column-header click handler. Selects the entire
-   * column (rows 1..this.rows). The active cell becomes the
+   * column (rows 1..this.model.rows). The active cell becomes the
    * column's row 1. Shift-click extends from the existing anchor
    * column to the clicked column, selecting a whole-column
    * range.
@@ -1782,7 +1730,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }>
   ): void => {
     const { col, shiftKey, ctrlKey, metaKey } = e.detail;
-    const rows = this.rows > 0 ? this.rows : 1;
+    const rows = this.model.rows > 0 ? this.model.rows : 1;
     const row = this.firstRowOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole column joins the selection as a further range.
@@ -1817,11 +1765,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * scrolled far down is off screen, and the keys went there.
    */
   private firstRowOnScreen(): number {
-    if (this.verticalSplitPosition > 0 || this.rows <= 0) {
+    if (this.model.verticalSplitPosition > 0 || this.model.rows <= 0) {
       return 1;
     }
     let row = this.sheetSizes().rows.reach(1, this.scrollContainer.scrollTop);
-    while (row < this.rows && this.hiddenRows.has(row)) {
+    while (row < this.model.rows && this.model.hiddenRowIndexes.has(row)) {
       row++;
     }
     return row;
@@ -1829,11 +1777,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /** The column a click on a row number makes active; see {@link firstRowOnScreen}. */
   private firstColumnOnScreen(): number {
-    if (this.horizontalSplitPosition > 0 || this.cols <= 0) {
+    if (this.model.horizontalSplitPosition > 0 || this.model.cols <= 0) {
       return 1;
     }
     let col = this.sheetSizes().columns.reach(1, this.scrollContainer.scrollLeft);
-    while (col < this.cols && this.hiddenColumns.has(col)) {
+    while (col < this.model.cols && this.model.hiddenColumnIndexes.has(col)) {
       col++;
     }
     return col;
@@ -1841,7 +1789,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   /**
    * Row-header click handler. Mirror of the column
-   * variant — selects an entire row (cols 1..this.cols).
+   * variant — selects an entire row (cols 1..this.model.cols).
    */
   private readonly handleRowHeaderClick = (
     e: CustomEvent<{
@@ -1853,7 +1801,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }>
   ): void => {
     const { row, shiftKey, ctrlKey, metaKey } = e.detail;
-    const cols = this.cols > 0 ? this.cols : 1;
+    const cols = this.model.cols > 0 ? this.model.cols : 1;
     const col = this.firstColumnOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole row joins the selection as a further range.
@@ -1938,13 +1886,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     // Ctrl+A / Cmd+A — select the entire sheet.
     if (shortcut && (key === 'a' || key === 'A')) {
-      if (this.rows <= 0 || this.cols <= 0) {
+      if (this.model.rows <= 0 || this.model.cols <= 0) {
         return;
       }
       e.preventDefault();
       this.selection = {
         activeCell: { col: 1, row: 1 },
-        activeRange: normalizedRange(1, 1, this.cols, this.rows),
+        activeRange: normalizedRange(1, 1, this.model.cols, this.model.rows),
         auxRanges: []
       };
       this.recomputeViewport();
@@ -1981,10 +1929,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       key === 'F2' ||
       (key === 'Enter' &&
         !this.selectsRange() &&
-        !this.hiddenRows.has(this.selection.activeCell.row) &&
-        !this.hiddenColumns.has(this.selection.activeCell.col));
+        !this.model.hiddenRowIndexes.has(this.selection.activeCell.row) &&
+        !this.model.hiddenColumnIndexes.has(this.selection.activeCell.col));
     if (entersEditor && !this.editor) {
-      if (this.rows <= 0 || this.cols <= 0) {
+      if (this.model.rows <= 0 || this.model.cols <= 0) {
         return;
       }
       const { col, row } = this.selection.activeCell;
@@ -2011,7 +1959,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // way: typing directly starts replacing the cell's content. A
     // character typed with AltGr or Option counts; see typesCharacter.
     if (!this.editor && typesCharacter(e, isMacPlatform())) {
-      if (this.rows <= 0 || this.cols <= 0) {
+      if (this.model.rows <= 0 || this.model.cols <= 0) {
         return;
       }
       const { col, row } = this.selection.activeCell;
@@ -2044,7 +1992,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // server's response is the single source of truth. Slice
     // 151.
     if (key === 'Delete' || key === 'Backspace') {
-      if (this.rows <= 0 || this.cols <= 0) {
+      if (this.model.rows <= 0 || this.model.cols <= 0) {
         return;
       }
       e.preventDefault();
@@ -2057,15 +2005,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // both wrapping at the end, shift reversing. The range stays, so the
     // server hears a selection that did not discard its old range.
     const walkDirection = inSelectionWalkDirection(key, e.shiftKey);
-    if (walkDirection !== null && this.rows > 0 && this.cols > 0 && this.selectsRange()) {
+    if (walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.selectsRange()) {
       e.preventDefault();
       const next = walkInsideSelection({
         range: this.selection.activeRange,
         col: this.selection.activeCell.col,
         row: this.selection.activeCell.row,
         direction: walkDirection,
-        hiddenColumns: this.hiddenColumns,
-        hiddenRows: this.hiddenRows
+        hiddenColumns: this.model.hiddenColumnIndexes,
+        hiddenRows: this.model.hiddenRowIndexes
       });
       this.moveActiveCellInsideSelection(next);
       return;
@@ -2078,7 +2026,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // active cell instead.
     const direction = keyDirection(key, e.shiftKey);
     if (direction !== null) {
-      if (this.rows <= 0 || this.cols <= 0) {
+      if (this.model.rows <= 0 || this.model.cols <= 0) {
         return;
       }
       e.preventDefault();
@@ -2110,15 +2058,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     // Home / End go to the first / last column of the row, Ctrl+Home to
     // A1 and Ctrl+End to the last cell.
-    const target = homeEndTarget(key, e.ctrlKey || e.metaKey, this.selection.activeCell, this.cols, this.rows);
+    const target = homeEndTarget(
+      key,
+      e.ctrlKey || e.metaKey,
+      this.selection.activeCell,
+      this.model.cols,
+      this.model.rows
+    );
     if (!target) {
       return;
     }
-    if (this.rows <= 0 || this.cols <= 0) {
+    if (this.model.rows <= 0 || this.model.cols <= 0) {
       return;
     }
     e.preventDefault();
-    this.moveSelectionTo(selectCellAt(target.col, target.row, this.mergedRegions));
+    this.moveSelectionTo(selectCellAt(target.col, target.row, this.model.mergedRegions));
     this.recomputeViewport();
     this.dispatchSelectionEvent();
   };
@@ -2166,7 +2120,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * existing `scroll` listener triggers a fresh recomputeViewport.
    */
   private scrollCellIntoView(target: { col: number; row: number }): void {
-    if (this.rows <= 0 || this.cols <= 0) {
+    if (this.model.rows <= 0 || this.model.cols <= 0) {
       return;
     }
     const sc = this.scrollContainer;
@@ -2174,11 +2128,21 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // left edges, and the cell grid starts where they end.
     const viewWidth = sc.clientWidth - this.cellGrid.offsetLeft;
     const viewHeight = sc.clientHeight - this.cellGrid.offsetTop;
-    const left = scrollToShow(target.col, this.horizontalSplitPosition, this.cols, sc.scrollLeft, viewWidth, (c) =>
-      this.colWidthPx(c)
+    const left = scrollToShow(
+      target.col,
+      this.model.horizontalSplitPosition,
+      this.model.cols,
+      sc.scrollLeft,
+      viewWidth,
+      (c) => this.colWidthPx(c)
     );
-    const top = scrollToShow(target.row, this.verticalSplitPosition, this.rows, sc.scrollTop, viewHeight, (r) =>
-      this.rowHeightPx(r)
+    const top = scrollToShow(
+      target.row,
+      this.model.verticalSplitPosition,
+      this.model.rows,
+      sc.scrollTop,
+      viewHeight,
+      (r) => this.rowHeightPx(r)
     );
     if (left !== sc.scrollLeft) {
       sc.scrollLeft = left;
@@ -2233,7 +2197,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * loaded yet.
    */
   private announceViewport(): void {
-    if (this.rows <= 0 || this.cols <= 0) {
+    if (this.model.rows <= 0 || this.model.cols <= 0) {
       // The sheet's size has not arrived yet. Announcing now would report a
       // viewport that means nothing and the server would load nothing.
       return;
@@ -2740,7 +2704,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.selectsRange() || !isMultiCellRange(this.selection.activeRange)
         ? this.selection.activeRange
         : { c1: activeCell.col, c2: activeCell.col, r1: activeCell.row, r2: activeCell.row };
-    const event = buildSelectionEvent(activeCell, range, this.rows, this.cols);
+    const event = buildSelectionEvent(activeCell, range, this.model.rows, this.model.cols);
     const held = this.serverSelectedCell;
     const grownFromHeld = held !== null && held.col === activeCell.col && held.row === activeCell.row;
     if (event.type === 'cellRangeSelected' && (startsAnew || !grownFromHeld)) {
@@ -2784,22 +2748,27 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private sheetSizes(): SheetSizes {
     const inputs = [
       this.rowHeights,
-      this.colWidths,
-      this.hiddenRows,
-      this.hiddenColumns,
-      this.defRowHeight,
-      this.defColWidth,
-      this.rows,
-      this.cols
+      this.model.colW,
+      this.model.hiddenRowIndexes,
+      this.model.hiddenColumnIndexes,
+      this.model.defRowH,
+      this.model.defColW,
+      this.model.rows,
+      this.model.cols
     ];
     const cached = this.sizesCache;
     if (cached !== null && inputs.every((input, i) => input === cached.inputs[i])) {
       return cached.sizes;
     }
     const ppi = FALLBACK_PPI;
-    const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
+    const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, ppi);
     const rowHeightsPx = Array.from(this.rowHeights, (points) => convertPointsToPixel(points, ppi));
-    const { hiddenRows, hiddenColumns, colWidths, defColWidth } = this;
+    const {
+      hiddenRowIndexes: hiddenRows,
+      hiddenColumnIndexes: hiddenColumns,
+      colW: colWidths,
+      defColW: defColWidth
+    } = this.model;
     const colWidthAt = (col: number): number => {
       if (hiddenColumns.has(col)) {
         return 0;
@@ -2807,8 +2776,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return col > colWidths.length ? defColWidth : colWidths[col - 1];
     };
     const totals = computeTotalGridSize({
-      rows: this.rows,
-      cols: this.cols,
+      rows: this.model.rows,
+      cols: this.model.cols,
       definedRowHeightsPx: rowHeightsPx,
       definedColWidthsPx: Array.from(colWidths),
       hiddenRows,
@@ -2822,7 +2791,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         (row) => (hiddenRows.has(row) ? 0 : rowHeightsPx[row - 1]),
         defaultRowHeightPx
       ),
-      columns: new AxisSizes(Math.max(this.cols, colWidths.length), colWidthAt, defColWidth),
+      columns: new AxisSizes(Math.max(this.model.cols, colWidths.length), colWidthAt, defColWidth),
       totalWidthPx: totals.totalWidthPx,
       totalHeightPx: totals.totalHeightPx,
       rowHeightsPx
@@ -2871,22 +2840,22 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // has an empty notch where the two gutters meet, and the level buttons
     // have nowhere to sit. Its size is how far the strips start from the
     // sheet's edges.
-    const rowGutterPx = rowGroupingGutterPx(this.rowGroupingMax, this.headerColumnWidth > 0);
-    const colGutterPx = columnGroupingGutterPx(this.colGroupingMax, this.headerRowHeight > 0);
+    const rowGutterPx = rowGroupingGutterPx(this.model.rowGroupingMax, this.headerColumnWidth > 0);
+    const colGutterPx = columnGroupingGutterPx(this.model.colGroupingMax, this.headerRowHeight > 0);
     const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
     const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
-    if (this.headerRowHeight > 0 || this.colGroupingMax > 0) {
+    if (this.headerRowHeight > 0 || this.model.colGroupingMax > 0) {
       // Compute positioned column-groupings so the
       // header can render the outline gutter. Pre-resolving
       // pixel positions in the connector keeps the header
       // element independent of the full colWidths array.
       const colGroupings = computePositionedColGroupings(
-        this.colGroupingData,
-        this.colWidths,
-        this.colGroupingInversed,
-        this.defColWidth,
+        this.model.colGroupingData,
+        this.model.colW,
+        this.model.colGroupingInversed,
+        this.model.defColW,
         5,
-        this.rowGroupingMax > 0 ? 1 : 0
+        this.model.rowGroupingMax > 0 ? 1 : 0
       );
       this.columnHeader.hidden = false;
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
@@ -2906,8 +2875,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         frozenColWidths: state.frozenColWidths,
         scrollLeft: state.scrollLeft,
         colGroupings,
-        colGroupingMax: this.colGroupingMax,
-        colGroupingInversed: this.colGroupingInversed,
+        colGroupingMax: this.model.colGroupingMax,
+        colGroupingInversed: this.model.colGroupingInversed,
         leadingPx: cornerWidth,
         // Feed the selected-columns set so the
         // header can emit `part="column-header
@@ -2924,17 +2893,17 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     // Row-header strip. Same opt-in gate as the column
     // header, and the same reason for the grouping half of it.
-    if (this.headerColumnWidth > 0 || this.rowGroupingMax > 0) {
+    if (this.headerColumnWidth > 0 || this.model.rowGroupingMax > 0) {
       // Row groupings mirror the column ones; heights come from the same
       // point-to-pixel conversion the grid uses.
-      const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, FALLBACK_PPI);
+      const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, FALLBACK_PPI);
       const rowGroupings = computePositionedColGroupings(
-        this.rowGroupingData,
+        this.model.rowGroupingData,
         this.sheetSizes().rowHeightsPx,
-        this.rowGroupingInversed,
+        this.model.rowGroupingInversed,
         defaultRowHeightPx,
         2,
-        this.colGroupingMax > 0 ? 1 : 0
+        this.model.colGroupingMax > 0 ? 1 : 0
       );
       this.rowHeader.hidden = false;
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
@@ -2951,8 +2920,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // range.
         selectedRows: selectedRowSet(this.selection),
         rowGroupings,
-        rowGroupingMax: this.rowGroupingMax,
-        rowGroupingInversed: this.rowGroupingInversed,
+        rowGroupingMax: this.model.rowGroupingMax,
+        rowGroupingInversed: this.model.rowGroupingInversed,
         rowGroupingHeadings: this.headerColumnWidth > 0,
         leadingPx: cornerHeight,
         // Frozen rows stay on screen whatever the scroll position, so
@@ -2987,8 +2956,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.headerCorner.renderState = {
       headerWidth: this.headerColumnWidth,
       headerHeight: this.headerRowHeight,
-      colGroupingMax: this.colGroupingMax,
-      rowGroupingMax: this.rowGroupingMax
+      colGroupingMax: this.model.colGroupingMax,
+      rowGroupingMax: this.model.rowGroupingMax
     };
   }
 
@@ -3009,8 +2978,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     slots: Record<string, CellSlotAssignment> = this.cellSlotAssignments()
   ): CellGridRenderState {
     const ppi = FALLBACK_PPI;
-    const defaultRowHeightPx = getDefaultRowHeightPx(this.defRowHeight, ppi);
-    const hiddenRowSet = this.hiddenRows;
+    const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, ppi);
+    const hiddenRowSet = this.model.hiddenRowIndexes;
 
     const definedRowsLength = this.rowHeights.length;
     const rowHeightForIndex = (row: number): number => {
@@ -3023,15 +2992,15 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return convertPointsToPixel(this.rowHeights[row - 1], ppi);
     };
 
-    const hiddenColSet = this.hiddenColumns;
+    const hiddenColSet = this.model.hiddenColumnIndexes;
     const colWidthForIndex = (col: number): number => {
       if (hiddenColSet.has(col)) {
         return 0;
       }
-      if (col > this.colWidths.length) {
-        return this.defColWidth;
+      if (col > this.model.colW.length) {
+        return this.model.defColW;
       }
-      return this.colWidths[col - 1];
+      return this.model.colW[col - 1];
     };
 
     const sizes = this.sheetSizes();
@@ -3040,12 +3009,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
       scrollTop: opts.scrollTop,
       scrollViewWidth: opts.viewportWidth,
       scrollViewHeight: opts.viewportHeight,
-      horizontalSplitPosition: this.horizontalSplitPosition,
-      verticalSplitPosition: this.verticalSplitPosition,
-      columnBufferSize: this.columnBufferSize,
-      rowBufferSize: this.rowBufferSize,
-      maxColumns: this.cols,
-      maxRows: this.rows,
+      horizontalSplitPosition: this.model.horizontalSplitPosition,
+      verticalSplitPosition: this.model.verticalSplitPosition,
+      columnBufferSize: this.model.columnBufferSize,
+      rowBufferSize: this.model.rowBufferSize,
+      maxColumns: this.model.cols,
+      maxRows: this.model.rows,
       columns: sizes.columns,
       rows: sizes.rows
     });
@@ -3055,7 +3024,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const frozenColX: number[] = [];
     const frozenColWidths: number[] = [];
     let frozenCumX = 0;
-    for (let col = 1; col <= this.horizontalSplitPosition; col++) {
+    for (let col = 1; col <= this.model.horizontalSplitPosition; col++) {
       const w = colWidthForIndex(col);
       frozenColX.push(frozenCumX);
       frozenColWidths.push(w);
@@ -3066,7 +3035,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const frozenRowY: number[] = [];
     const frozenRowHeights: number[] = [];
     let frozenCumY = 0;
-    for (let row = 1; row <= this.verticalSplitPosition; row++) {
+    for (let row = 1; row <= this.model.verticalSplitPosition; row++) {
       const h = rowHeightForIndex(row);
       frozenRowY.push(frozenCumY);
       frozenRowHeights.push(h);
@@ -3087,7 +3056,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // The freeze line has a pixel of its own between the frozen columns or
     // rows and the rest, the frozen pane's border, so the scrolling ones start one pixel past it. Drawn over their first pixel
     // instead, the first row after a freeze came out a pixel short.
-    const split = { cols: this.horizontalSplitPosition, rows: this.verticalSplitPosition };
+    const split = { cols: this.model.horizontalSplitPosition, rows: this.model.verticalSplitPosition };
     const gapX = freezeGap(split.cols);
     const gapY = freezeGap(split.rows);
     const colX: number[] = [];
@@ -3120,7 +3089,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     // position is anchor cell's left/top (cumulative col/row
     // widths/heights) + the overlay's dx/dy offset.
     const positionedOverlays = computePositionedOverlays(
-      this.overlays,
+      this.model.overlays,
       this.resolveResources(),
       colWidthForIndex,
       rowHeightForIndex,
@@ -3129,7 +3098,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     );
 
     const mergedRegionBoxes = computeMergedRegionBoxes(
-      this.mergedRegions,
+      this.model.mergedRegions,
       split,
       { left: opts.scrollLeft, top: opts.scrollTop },
       colWidthForIndex,
@@ -3154,16 +3123,16 @@ export class Spreadsheet implements SpreadsheetClientApi {
       rowHeights,
       cellStyleToCSSStyle: this.cellStyleToCSSStyle,
       displayGridlines: this.displayGridlines,
-      rowIndexToStyleIndex: this.rowIndexToStyleIndex,
-      columnIndexToStyleIndex: this.columnIndexToStyleIndex,
+      rowIndexToStyleIndex: this.model.rowIndexToStyleIndex,
+      columnIndexToStyleIndex: this.model.columnIndexToStyleIndex,
       cellSlots: Object.fromEntries(Object.entries(slots).map(([cellKey, a]) => [cellKey, a.slot])),
-      conditionalFormattingStyles: this.conditionalFormattingStyles,
-      shiftedCellBorderStyles: this.shiftedCellBorderStyles,
-      mergedRegions: this.mergedRegions,
+      conditionalFormattingStyles: this.model.conditionalFormattingStyles,
+      shiftedCellBorderStyles: this.model.shiftedCellBorderStyles,
+      mergedRegions: this.model.mergedRegions,
       mergedRegionBoxes,
       selection: this.selection,
-      verticalSplitPosition: this.verticalSplitPosition,
-      horizontalSplitPosition: this.horizontalSplitPosition,
+      verticalSplitPosition: this.model.verticalSplitPosition,
+      horizontalSplitPosition: this.model.horizontalSplitPosition,
       frozenColX,
       frozenColWidths,
       frozenRowY,
@@ -3177,18 +3146,18 @@ export class Spreadsheet implements SpreadsheetClientApi {
       overlays: positionedOverlays,
       popupButtons: positionedPopupButtons,
       paintRect: this.drag?.kind === 'fill' && this.drag.outcome.kind !== 'none' ? this.drag.outcome.painted : null,
-      commentText: this.cellComments,
-      commentAuthors: this.cellCommentAuthors,
-      visibleCommentKeys: this.visibleCellComments,
+      commentText: this.model.cellComments,
+      commentAuthors: this.model.cellCommentAuthors,
+      visibleCommentKeys: this.model.visibleCellComments,
       editingCommentKey: this.editingCommentKey,
-      invalidFormulaMessage: this.invalidFormulaErrorMessage,
+      invalidFormulaMessage: this.model.invalidFormulaErrorMessage,
       // Comment-bearing + hyperlink cell keys.
       // The maps from setCellComments / setHyperlinksTooltips
       // are keyed by the cell-key format already, so a Set
       // of their keys is the right shape for the render.
-      commentCells: new Set(Object.keys(this.cellComments)),
-      invalidFormulaCells: this.invalidFormulaCells,
-      hyperlinkCells: new Set(Object.keys(this.hyperlinksTooltips))
+      commentCells: new Set(Object.keys(this.model.cellComments)),
+      invalidFormulaCells: this.model.invalidFormulaCells,
+      hyperlinkCells: new Set(Object.keys(this.model.hyperlinksTooltips))
     };
   }
 
@@ -3271,7 +3240,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       return;
     }
     const { col, row } = this.selection.activeCell;
-    if (this.rows <= 0 || this.cols <= 0) {
+    if (this.model.rows <= 0 || this.model.cols <= 0) {
       return;
     }
     if (this.isCellLockedForEdit(col, row)) {
@@ -3342,7 +3311,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       this.scheduleRender();
       return;
     }
-    this.cellComments = { ...this.cellComments, [key as string]: text };
+    this.change({ cellComments: { ...this.model.cellComments, [key as string]: text } });
     this.scheduleRender();
     this.returnFocusToSheet();
     this.sendToServer({ type: 'updateCellComment', data: { text, col: coord.col, row: coord.row } });
@@ -3417,8 +3386,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const shownSheetName = this.tabs.sheetNames[index] ?? null;
     if (!firstUpdate && changedPropertyNames.includes('sheetIndex') && shownSheetName !== this.shownSheetName) {
       this.pendingSheetScroll = {
-        top: this.verticalScrollPositions[index] ?? 0,
-        left: this.horizontalScrollPositions[index] ?? 0
+        top: this.model.verticalScrollPositions[index] ?? 0,
+        left: this.model.horizontalScrollPositions[index] ?? 0
       };
     }
     this.shownSheetName = shownSheetName;
@@ -3678,27 +3647,40 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   // ====================================================================
-  // Property mirrors — store the value; downstream phases will USE
-  // these fields when rendering / scrolling / responding to input.
+  // Property mirrors - what the server sets on the element. Those that
+  // only hold a value are written through the table in state/SheetModel.ts.
   // ====================================================================
 
+  /** Takes a property as the server sends it; see {@link SHEET_PROPERTIES}. */
+  private write<K extends SheetPropertyName>(name: K, value: SheetPropertyValue<K>): void {
+    this.model = withProperty(this.model, name, value);
+  }
+
+  /**
+   * Changes the model with values already read in: the client's own, which
+   * it holds until the server answers.
+   */
+  private change(values: Partial<SheetModel>): void {
+    this.model = withValues(this.model, values);
+  }
+
   setRowBufferSize(pixels: number): void {
-    this.rowBufferSize = pixels;
+    this.write('rowBufferSize', pixels);
   }
   setColumnBufferSize(pixels: number): void {
-    this.columnBufferSize = pixels;
+    this.write('columnBufferSize', pixels);
   }
   setRows(count: number): void {
-    this.rows = count;
+    this.write('rows', count);
   }
   setCols(count: number): void {
-    this.cols = count;
+    this.write('cols', count);
   }
   setDefRowH(heightInPoints: number): void {
-    this.defRowHeight = heightInPoints;
+    this.write('defRowH', heightInPoints);
   }
   setDefColW(widthInPixels: number): void {
-    this.defColWidth = widthInPixels;
+    this.write('defColW', widthInPixels);
   }
   /**
    * Row heights from the server. Rows above the screen grow and shrink as
@@ -3716,7 +3698,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private firstRowWithTopOnScreen(): { row: number; below: number } {
     const top = this.scrollContainer.scrollTop;
     const rows = this.sheetSizes().rows;
-    const origin = this.verticalSplitPosition + 1;
+    const origin = this.model.verticalSplitPosition + 1;
     const row = rows.reach(origin, top);
     return { row, below: rows.start(row) - rows.start(origin) - top };
   }
@@ -3732,7 +3714,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
     this.rowAnchor = null;
     const rows = this.sheetSizes().rows;
-    const top = rows.start(anchor.row) - rows.start(this.verticalSplitPosition + 1) - anchor.below;
+    const top = rows.start(anchor.row) - rows.start(this.model.verticalSplitPosition + 1) - anchor.below;
     if (top === this.scrollContainer.scrollTop) {
       return;
     }
@@ -3748,19 +3730,19 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.anchoredScrollTop = this.scrollContainer.scrollTop;
   }
   setColW(colWidthsInPixels: Json<number[] | Int32Array | SizeRuns>): void {
-    this.colWidths = coerceSizes(colWidthsInPixels);
+    this.write('colW', colWidthsInPixels);
   }
   setHiddenColumnIndexes(indexes: Json<number[]>): void {
-    this.hiddenColumns = new Set(coerceArray<number>(indexes));
+    this.write('hiddenColumnIndexes', indexes);
   }
   setHiddenRowIndexes(indexes: Json<number[]>): void {
-    this.hiddenRows = new Set(coerceArray<number>(indexes));
+    this.write('hiddenRowIndexes', indexes);
   }
   setLockedColumnIndexes(indexes: Json<number[]>): void {
-    this.lockedColumns = new Set(coerceArray<number>(indexes));
+    this.write('lockedColumnIndexes', indexes);
   }
   setLockedRowIndexes(indexes: Json<number[]>): void {
-    this.lockedRows = new Set(coerceArray<number>(indexes));
+    this.write('lockedRowIndexes', indexes);
   }
   setSheetIndex(index: number): void {
     this.tabs.setSheetIndex(index);
@@ -3773,11 +3755,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * keeps it: a sheet shown again goes back there.
    */
   setVerticalScrollPositions(positions: Json<number[]>): void {
-    this.verticalScrollPositions = coerceNumberArray(positions);
+    this.write('verticalScrollPositions', positions);
   }
   /** See {@link setVerticalScrollPositions}. */
   setHorizontalScrollPositions(positions: Json<number[]>): void {
-    this.horizontalScrollPositions = coerceNumberArray(positions);
+    this.write('horizontalScrollPositions', positions);
   }
   setCellStyleToCSSStyle(map: Json<Record<number, string>>): void {
     this.cellStyleToCSSStyle = coerceObject(map);
@@ -3786,34 +3768,34 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.styleWidthRatiosStale = true;
   }
   setRowIndexToStyleIndex(map: Json<Record<number, number>>): void {
-    this.rowIndexToStyleIndex = coerceObject(map);
+    this.write('rowIndexToStyleIndex', map);
   }
   setColumnIndexToStyleIndex(map: Json<Record<number, number>>): void {
-    this.columnIndexToStyleIndex = coerceObject(map);
+    this.write('columnIndexToStyleIndex', map);
   }
   setShiftedCellBorderStyles(cssRules: Json<string[]>): void {
-    this.shiftedCellBorderStyles = coerceArray(cssRules);
+    this.write('shiftedCellBorderStyles', cssRules);
   }
   setConditionalFormattingStyles(map: Json<Record<number, string>>): void {
-    this.conditionalFormattingStyles = coerceObject(map);
+    this.write('conditionalFormattingStyles', map);
   }
   setColGroupingData(groups: Json<GroupingData[]>): void {
-    this.colGroupingData = coerceArray(groups);
+    this.write('colGroupingData', groups);
   }
   setRowGroupingData(groups: Json<GroupingData[]>): void {
-    this.rowGroupingData = coerceArray(groups);
+    this.write('rowGroupingData', groups);
   }
   setColGroupingMax(level: number): void {
-    this.colGroupingMax = level;
+    this.write('colGroupingMax', level);
   }
   setRowGroupingMax(level: number): void {
-    this.rowGroupingMax = level;
+    this.write('rowGroupingMax', level);
   }
   setColGroupingInversed(inversed: boolean): void {
-    this.colGroupingInversed = inversed;
+    this.write('colGroupingInversed', inversed);
   }
   setRowGroupingInversed(inversed: boolean): void {
-    this.rowGroupingInversed = inversed;
+    this.write('rowGroupingInversed', inversed);
   }
   /**
    * Whether an event was raised inside a server-side component the sheet
@@ -3923,9 +3905,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
   private cellSlotAssignments(): Record<string, CellSlotAssignment> {
     const active = this.selection.activeCell;
     return computeCellSlots({
-      componentIdToCellKey: this.componentIDtoCellKeysMap,
-      cellKeyToEditorId: this.cellKeysToEditorIdMap,
-      showCustomEditorOnFocus: this.showCustomEditorOnFocus,
+      componentIdToCellKey: this.model.componentIDtoCellKeysMap,
+      cellKeyToEditorId: this.model.cellKeysToEditorIdMap,
+      showCustomEditorOnFocus: this.model.showCustomEditorOnFocus,
       activeCellKey: active === null ? null : toKey(active.col, active.row)
     });
   }
@@ -3991,41 +3973,40 @@ export class Spreadsheet implements SpreadsheetClientApi {
     }
   }
   setSheetProtected(isProtected: boolean): void {
-    this.sheetProtected = isProtected;
+    this.write('sheetProtected', isProtected);
   }
   setMergedRegions(regions: Json<MergedRegion[]>): void {
-    this.mergedRegions = coerceArray(regions);
+    this.write('mergedRegions', regions);
   }
   setCellKeysToEditorIdMap(map: Json<Record<string, string>>): void {
-    this.cellKeysToEditorIdMap = coerceObject(map);
+    this.write('cellKeysToEditorIdMap', map);
   }
   setComponentIDtoCellKeysMap(map: Record<string, string>): void {
-    this.componentIDtoCellKeysMap = coerceObject(map);
+    this.write('componentIDtoCellKeysMap', map);
   }
   setCellComments(map: Json<Record<string, string>>): void {
-    this.cellComments = coerceObject(map);
+    this.write('cellComments', map);
   }
   setCellCommentAuthors(map: Json<Record<string, string>>): void {
-    this.cellCommentAuthors = coerceObject(map);
+    this.write('cellCommentAuthors', map);
   }
   setVisibleCellComments(keys: Json<string[]>): void {
-    this.visibleCellComments = coerceArray(keys);
+    this.write('visibleCellComments', keys);
   }
   setInvalidFormulaCells(keys: Json<string[]>): void {
-    const arr = coerceArray(keys);
-    this.invalidFormulaCells = new Set(arr);
+    this.write('invalidFormulaCells', keys);
   }
   setOverlays(map: Json<Record<string, OverlayInfo>>): void {
-    this.overlays = coerceObject(map);
+    this.write('overlays', map);
   }
   setShowCustomEditorOnFocus(show: boolean): void {
-    this.showCustomEditorOnFocus = show;
+    this.write('showCustomEditorOnFocus', show);
   }
   setHasComponentFactory(has: boolean): void {
-    this.hasComponentFactory = has;
+    this.write('hasComponentFactory', has);
   }
   setInvalidFormulaErrorMessage(message: string | null): void {
-    this.invalidFormulaErrorMessage = message;
+    this.write('invalidFormulaErrorMessage', message);
   }
   setNamedRanges(names: Json<string[]>): void {
     this.changeFormulaBar({ namedRanges: coerceArray(names) });
@@ -4071,10 +4052,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
   // Freeze pane split positions
   setVerticalSplitPosition(value: number): void {
-    this.verticalSplitPosition = value;
+    this.write('verticalSplitPosition', value);
   }
   setHorizontalSplitPosition(value: number): void {
-    this.horizontalSplitPosition = value;
+    this.write('horizontalSplitPosition', value);
   }
 
   // Display flags
@@ -4128,7 +4109,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.tabs.setInfoLabel(label ?? null);
   }
   setHyperlinksTooltips(tooltips: Json<Record<string, string>>): void {
-    this.hyperlinksTooltips = coerceObject(tooltips);
+    this.write('hyperlinksTooltips', tooltips);
   }
   /**
    * The id the server gives the element. The element's own id property
@@ -4145,11 +4126,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** The sheet as the arrow keys see it. */
   private sheetShape(): SheetShape {
     return {
-      cols: this.cols,
-      rows: this.rows,
-      mergedRegions: this.mergedRegions,
-      hiddenColumns: this.hiddenColumns,
-      hiddenRows: this.hiddenRows
+      cols: this.model.cols,
+      rows: this.model.rows,
+      mergedRegions: this.model.mergedRegions,
+      hiddenColumns: this.model.hiddenColumnIndexes,
+      hiddenRows: this.model.hiddenRowIndexes
     };
   }
 
@@ -4158,7 +4139,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * top-left cell active, as for a click.
    */
   private selectCellOrMerge(col: number, row: number): void {
-    this.applySingleSelection(selectCellAt(col, row, this.mergedRegions));
+    this.applySingleSelection(selectCellAt(col, row, this.model.mergedRegions));
   }
 
   private applySingleSelection(next: SingleCellSelection): void {
@@ -4172,7 +4153,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private selectsRange(): boolean {
     const { activeRange, activeCell } = this.selection;
-    return isMultiCellRange(activeRange) && !isSingleMerge(activeRange, activeCell, this.mergedRegions);
+    return isMultiCellRange(activeRange) && !isSingleMerge(activeRange, activeCell, this.model.mergedRegions);
   }
 
   /**
@@ -4185,7 +4166,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
    */
   private rangeTo(anchor: { col: number; row: number }, col: number, row: number): CellRange {
     const range = normalizedRange(anchor.col, anchor.row, col, row);
-    const grown = expandToMergedRegions({ c1: range.c1, c2: range.c2, r1: range.r1, r2: range.r2 }, this.mergedRegions);
+    const grown = expandToMergedRegions(
+      { c1: range.c1, c2: range.c2, r1: range.r1, r2: range.r2 },
+      this.model.mergedRegions
+    );
     return { c1: grown.c1, c2: grown.c2, r1: grown.r1, r2: grown.r2 };
   }
 
@@ -4194,10 +4178,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * sheet's default past the last defined column.
    */
   private colWidthPx(col: number): number {
-    if (this.hiddenColumns.has(col)) {
+    if (this.model.hiddenColumnIndexes.has(col)) {
       return 0;
     }
-    return col > this.colWidths.length ? this.defColWidth : this.colWidths[col - 1];
+    return col > this.model.colW.length ? this.model.defColW : this.model.colW[col - 1];
   }
 
   /**
@@ -4205,11 +4189,11 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * this is the one place the conversion happens.
    */
   private rowHeightPx(row: number, ppi: number = FALLBACK_PPI): number {
-    if (this.hiddenRows.has(row)) {
+    if (this.model.hiddenRowIndexes.has(row)) {
       return 0;
     }
     return row > this.rowHeights.length
-      ? getDefaultRowHeightPx(this.defRowHeight, ppi)
+      ? getDefaultRowHeightPx(this.model.defRowH, ppi)
       : convertPointsToPixel(this.rowHeights[row - 1], ppi);
   }
 
@@ -4228,13 +4212,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
         this.scrollContainer.clientLeft +
         this.cellGrid.offsetLeft +
         frozen.width +
-        freezeGap(this.horizontalSplitPosition),
+        freezeGap(this.model.horizontalSplitPosition),
       top:
         box.top +
         this.scrollContainer.clientTop +
         this.cellGrid.offsetTop +
         frozen.height +
-        freezeGap(this.verticalSplitPosition),
+        freezeGap(this.model.verticalSplitPosition),
       bottom: box.bottom
     };
   }
@@ -4278,10 +4262,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
   }
 
   getRows(): number {
-    return this.rows;
+    return this.model.rows;
   }
   getCols(): number {
-    return this.cols;
+    return this.model.cols;
   }
   getSheetIndex(): number {
     return this.tabs.sheetIndex;
@@ -4293,10 +4277,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
     return this.selection;
   }
   getMergedRegions(): readonly MergedRegion[] {
-    return this.mergedRegions;
+    return this.model.mergedRegions;
   }
   isSheetProtected(): boolean {
-    return this.sheetProtected;
+    return this.model.sheetProtected;
   }
 }
 

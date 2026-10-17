@@ -12,6 +12,7 @@ import {
   coerceArray,
   coerceNumberArray,
   coerceObject,
+  coerceSet,
   coerceSizes
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/wire/Coerce.js';
 
@@ -132,6 +133,22 @@ describe('coerceNumberArray', () => {
 
   it('reads a JSON value that is not an array as empty', () => {
     expect(coerceNumberArray('{"a":1}')).to.deep.equal([]);
+  });
+});
+
+describe('coerceSet', () => {
+  it('holds each value of the list', () => {
+    expect(coerceSet([3, 1, 3])).to.eql(new Set([1, 3]));
+  });
+
+  it('parses the JSON string Flow sends', () => {
+    expect(coerceSet<string>('["col1row2"]')).to.eql(new Set(['col1row2']));
+  });
+
+  it('reads null, empty and malformed as empty', () => {
+    expect(coerceSet(null)).to.eql(new Set());
+    expect(coerceSet('')).to.eql(new Set());
+    expect(coerceSet('[1,')).to.eql(new Set());
   });
 });
 

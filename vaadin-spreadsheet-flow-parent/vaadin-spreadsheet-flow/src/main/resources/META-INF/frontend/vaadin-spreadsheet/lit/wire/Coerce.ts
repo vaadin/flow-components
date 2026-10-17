@@ -83,6 +83,14 @@ export function coerceObject<V>(value: Record<string, V> | string | null | undef
   return value;
 }
 
+/**
+ * A set of what the server sends as a list, as it is or as JSON text: asked
+ * about one value at a time, as hidden rows are inside loops over rows.
+ */
+export function coerceSet<T>(value: T[] | string | null | undefined): ReadonlySet<T> {
+  return new Set(coerceArray(value));
+}
+
 /** The sizes the server sends: a plain array, or a typed one. */
 export type NumberList = number[] | Int32Array | Float32Array;
 
