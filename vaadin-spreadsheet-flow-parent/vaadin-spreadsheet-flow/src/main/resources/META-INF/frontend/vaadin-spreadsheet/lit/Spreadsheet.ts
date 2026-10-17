@@ -26,8 +26,6 @@ import {
   isCellInSelection,
   normalizedRange,
   selectedCellSetBy,
-  selectedColumnSet,
-  selectedRowSet,
   selectionSizeLabel,
   type SelectionState,
   selectSingleCell
@@ -44,9 +42,7 @@ import type {
 } from './types/rpc-client-to-server.js';
 import type { CellEditorState } from './elements/types.js';
 import {
-  computeTotalGridSize,
   computeViewportBounds,
-  convertPointsToPixel,
   FALLBACK_PPI,
   freezeGap,
   getDefaultRowHeightPx,
@@ -54,7 +50,7 @@ import {
   scrollToShow,
   withSize
 } from './algorithms/ViewportMath.js';
-import { AxisSizes } from './algorithms/AxisSizes.js';
+import { type CellSlots, Derived, drawnColumnWidth, drawnRowHeight, type SheetSizes } from './state/Derived.js';
 import { SheetData } from './state/SheetData.js';
 import { ViewState } from './state/ViewState.js';
 import {
@@ -74,7 +70,6 @@ import {
   cellComponentSlotName,
   cellEditorSlotName,
   type CellSlotAssignment,
-  computeCellSlots,
   flowVirtualChildResolver,
   overlayComponentSlotName,
   SlottedVirtualChildren,
@@ -118,12 +113,7 @@ import { Popup } from './controllers/Popup.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
 import { linkTooltipPosition } from './algorithms/Placement.js';
-import {
-  computeMergedRegionBoxes,
-  computePositionedColGroupings,
-  computePositionedOverlays,
-  computePositionedPopupButtons
-} from './algorithms/Positioning.js';
+import { computeMergedRegionBoxes, computePositionedOverlays } from './algorithms/Positioning.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
 import { coerceArray, coerceJson } from './wire/Coerce.js';
@@ -162,19 +152,6 @@ type CellDrag =
   | { kind: 'select'; crossed: boolean }
   | { kind: 'point' }
   | { kind: 'fill'; from: CellRect; outcome: PaintOutcome };
-
-/**
- * A sheet's row and column sizes as they are drawn, in pixels, with what
- * follows from them alone.
- */
-interface SheetSizes {
-  rows: AxisSizes;
-  columns: AxisSizes;
-  totalWidthPx: number;
-  totalHeightPx: number;
-  /** The heights of the rows the server gave one, hidden or not. */
-  rowHeightsPx: number[];
-}
 
 /**
  * Height of the column headers, in pixels: 27, so a sheet starts its first
@@ -324,8 +301,8 @@ export class Spreadsheet implements SpreadsheetClientApi {
   /** Resizing columns and rows by their header edges; see {@link HeaderResize}. */
   private readonly headerResize: HeaderResize;
 
-  /** The sizes worked out from the geometry, and what they were worked out from; see {@link sheetSizes}. */
-  private sizesCache: { inputs: readonly unknown[]; sizes: SheetSizes } | null = null;
+  /** What the sheet draws that is worked out from the model and the selection alone; see {@link Derived}. */
+  private readonly derived = new Derived();
 
   /** The element the `resource-<id>` attributes live on; see {@link setResources}. */
   private resourceHost: HTMLElement | null = null;
@@ -1568,17 +1545,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.updateFormulaDraft(null, 0);
   }
 
-  /** The references of the formula being written, as the cell grid colours them. */
-  private formulaReferencesToDraw(): Array<{ range: CellRange; color: string; atCaret: boolean }> {
-    const draft = this.formulaDraft;
-    if (draft === null) {
-      return [];
-    }
-    const refs = formulaReferences(draft.text, this.activeSheetName());
-    const atCaret = referenceAt(refs, draft.caret);
-    return refs.map((ref) => ({ range: ref.range, color: ref.color, atCaret: ref === atCaret }));
-  }
-
   /**
    * Changes what the formula bar shows. Every change goes through here, so
    * what one does not name stays as it is - the colours of a formula being
@@ -2689,67 +2655,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * @param opts.viewportWidth Viewport pixel width.
    * @param opts.viewportHeight Viewport pixel height.
    */
-  /**
-   * The sheet's row and column sizes as drawn, worked out again only when
-   * one of them changes. A sheet can have a million rows: adding them all
-   * up on every scroll step cost more than the rest of the draw.
-   *
-   * Rows past the ones the server gave a height to are the default height,
-   * hidden or not.
-   */
+  /** The sheet's row and column sizes as drawn; see {@link Derived.sheetSizes}. */
   private sheetSizes(): SheetSizes {
-    const inputs = [
-      this.model.rowH,
-      this.model.colW,
-      this.model.hiddenRowIndexes,
-      this.model.hiddenColumnIndexes,
-      this.model.defRowH,
-      this.model.defColW,
-      this.model.rows,
-      this.model.cols
-    ];
-    const cached = this.sizesCache;
-    if (cached !== null && inputs.every((input, i) => input === cached.inputs[i])) {
-      return cached.sizes;
-    }
-    const ppi = FALLBACK_PPI;
-    const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, ppi);
-    const rowHeightsPx = Array.from(this.model.rowH, (points) => convertPointsToPixel(points, ppi));
-    const {
-      hiddenRowIndexes: hiddenRows,
-      hiddenColumnIndexes: hiddenColumns,
-      colW: colWidths,
-      defColW: defColWidth
-    } = this.model;
-    const colWidthAt = (col: number): number => {
-      if (hiddenColumns.has(col)) {
-        return 0;
-      }
-      return col > colWidths.length ? defColWidth : colWidths[col - 1];
-    };
-    const totals = computeTotalGridSize({
-      rows: this.model.rows,
-      cols: this.model.cols,
-      definedRowHeightsPx: rowHeightsPx,
-      definedColWidthsPx: Array.from(colWidths),
-      hiddenRows,
-      hiddenColumns,
-      defaultRowHeightPx,
-      defaultColWidthPx: defColWidth
-    });
-    const sizes: SheetSizes = {
-      rows: new AxisSizes(
-        rowHeightsPx.length,
-        (row) => (hiddenRows.has(row) ? 0 : rowHeightsPx[row - 1]),
-        defaultRowHeightPx
-      ),
-      columns: new AxisSizes(Math.max(this.model.cols, colWidths.length), colWidthAt, defColWidth),
-      totalWidthPx: totals.totalWidthPx,
-      totalHeightPx: totals.totalHeightPx,
-      rowHeightsPx
-    };
-    this.sizesCache = { inputs, sizes };
-    return sizes;
+    return this.derived.sheetSizes(this.model);
   }
 
   applyRenderState(opts: {
@@ -2758,7 +2666,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     viewportWidth: number;
     viewportHeight: number;
   }): void {
-    const slots = this.cellSlotAssignments();
+    const slots = this.cellSlots();
     const state = this.buildRenderState(opts, slots);
     // Size the cell-grid to the full virtual grid so the scroll
     // surface's scrollWidth / scrollHeight reflect actual extent.
@@ -2776,7 +2684,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     this.overlayComponents.sync(state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id));
     // Only the cells on screen render a slot, so only those elements are
     // placed — one off-screen would be parented with nowhere to project.
-    const visible = visibleCellSlots(slots, state);
+    const visible = visibleCellSlots(slots.assignments, state);
     this.cellComponents.sync(visible.filter((a) => a.kind === 'component').map((a) => a.nodeId));
     this.cellEditors.sync(visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId));
     // Column-header strip. Sized + state-pushed only
@@ -2797,18 +2705,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
     const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
     if (this.headerRowHeight > 0 || this.model.colGroupingMax > 0) {
-      // Compute positioned column-groupings so the
-      // header can render the outline gutter. Pre-resolving
-      // pixel positions in the connector keeps the header
+      // The outline's pixels are worked out here, which keeps the header
       // element independent of the full colWidths array.
-      const colGroupings = computePositionedColGroupings(
-        this.model.colGroupingData,
-        this.model.colW,
-        this.model.colGroupingInversed,
-        this.model.defColW,
-        5,
-        this.model.rowGroupingMax > 0 ? 1 : 0
-      );
+      const colGroupings = this.derived.columnGroupings(this.model);
       this.columnHeader.hidden = false;
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
       this.columnHeader.style.height = `${this.headerRowHeight + colGutterPx}px`;
@@ -2835,7 +2734,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // header-selected"` on cells inside the active
         // range. Pure derivation from
         // {@code selection.activeRange}.
-        selectedColumns: selectedColumnSet(this.selection)
+        selectedColumns: this.derived.selectedColumns(this.selection)
       };
     } else {
       // No headings and no outline: the strip goes altogether, border and
@@ -2848,15 +2747,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     if (this.headerColumnWidth > 0 || this.model.rowGroupingMax > 0) {
       // Row groupings mirror the column ones; heights come from the same
       // point-to-pixel conversion the grid uses.
-      const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, FALLBACK_PPI);
-      const rowGroupings = computePositionedColGroupings(
-        this.model.rowGroupingData,
-        this.sheetSizes().rowHeightsPx,
-        this.model.rowGroupingInversed,
-        defaultRowHeightPx,
-        2,
-        this.model.colGroupingMax > 0 ? 1 : 0
-      );
+      const rowGroupings = this.derived.rowGroupings(this.model);
       this.rowHeader.hidden = false;
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
@@ -2870,7 +2761,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
         // header can emit `part="row-header
         // header-selected"` on rows inside the active
         // range.
-        selectedRows: selectedRowSet(this.selection),
+        selectedRows: this.derived.selectedRows(this.selection),
         rowGroupings,
         rowGroupingMax: this.model.rowGroupingMax,
         rowGroupingInversed: this.model.rowGroupingInversed,
@@ -2927,33 +2818,12 @@ export class Spreadsheet implements SpreadsheetClientApi {
       viewportWidth: number;
       viewportHeight: number;
     },
-    slots: Record<string, CellSlotAssignment> = this.cellSlotAssignments()
+    slots: CellSlots = this.cellSlots()
   ): CellGridRenderState {
     const ppi = FALLBACK_PPI;
-    const defaultRowHeightPx = getDefaultRowHeightPx(this.model.defRowH, ppi);
-    const hiddenRowSet = this.model.hiddenRowIndexes;
-
-    const definedRowsLength = this.model.rowH.length;
-    const rowHeightForIndex = (row: number): number => {
-      if (hiddenRowSet.has(row)) {
-        return 0;
-      }
-      if (row > definedRowsLength) {
-        return defaultRowHeightPx;
-      }
-      return convertPointsToPixel(this.model.rowH[row - 1], ppi);
-    };
-
-    const hiddenColSet = this.model.hiddenColumnIndexes;
-    const colWidthForIndex = (col: number): number => {
-      if (hiddenColSet.has(col)) {
-        return 0;
-      }
-      if (col > this.model.colW.length) {
-        return this.model.defColW;
-      }
-      return this.model.colW[col - 1];
-    };
+    const model = this.model;
+    const rowHeightForIndex = (row: number): number => drawnRowHeight(model, row, ppi);
+    const colWidthForIndex = (col: number): number => drawnColumnWidth(model, col);
 
     const sizes = this.sheetSizes();
     const viewport = computeViewportBounds({
@@ -2971,28 +2841,10 @@ export class Spreadsheet implements SpreadsheetClientApi {
       rows: sizes.rows
     });
 
-    // Frozen columns: cols 1..horizontalSplitPosition (1-based,
-    // inclusive). Empty when no freeze is active.
-    const frozenColX: number[] = [];
-    const frozenColWidths: number[] = [];
-    let frozenCumX = 0;
-    for (let col = 1; col <= this.model.horizontalSplitPosition; col++) {
-      const w = colWidthForIndex(col);
-      frozenColX.push(frozenCumX);
-      frozenColWidths.push(w);
-      frozenCumX += w;
-    }
-
-    // Frozen rows: rows 1..verticalSplitPosition.
-    const frozenRowY: number[] = [];
-    const frozenRowHeights: number[] = [];
-    let frozenCumY = 0;
-    for (let row = 1; row <= this.model.verticalSplitPosition; row++) {
-      const h = rowHeightForIndex(row);
-      frozenRowY.push(frozenCumY);
-      frozenRowHeights.push(h);
-      frozenCumY += h;
-    }
+    // Frozen columns 1..horizontalSplitPosition and rows
+    // 1..verticalSplitPosition, 1-based and inclusive. Empty when nothing
+    // is frozen.
+    const frozen = this.derived.frozenPanes(model);
 
     // Build per-visible-index arrays for colX, rowY, widths, heights.
     //
@@ -3013,7 +2865,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
     const gapY = freezeGap(split.rows);
     const colX: number[] = [];
     const colWidths: number[] = [];
-    let cumulativeX = frozenCumX + gapX + viewport.firstColumnPosition;
+    let cumulativeX = frozen.width + gapX + viewport.firstColumnPosition;
     for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
       const w = colWidthForIndex(col);
       colX.push(cumulativeX);
@@ -3023,7 +2875,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
 
     const rowY: number[] = [];
     const rowHeights: number[] = [];
-    let cumulativeY = frozenCumY + gapY + viewport.firstRowPosition;
+    let cumulativeY = frozen.height + gapY + viewport.firstRowPosition;
     for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
       const h = rowHeightForIndex(row);
       rowY.push(cumulativeY);
@@ -3057,15 +2909,6 @@ export class Spreadsheet implements SpreadsheetClientApi {
       rowHeightForIndex
     );
 
-    // Compute positioned popup buttons. Each
-    // button anchors at its cell's bottom-right corner.
-    const positionedPopupButtons = computePositionedPopupButtons(
-      this.popup.buttons(),
-      colWidthForIndex,
-      rowHeightForIndex,
-      split
-    );
-
     return {
       viewport,
       cellData: this.sheetData.cells,
@@ -3077,7 +2920,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
       displayGridlines: this.model.displayGridlines,
       rowIndexToStyleIndex: this.model.rowIndexToStyleIndex,
       columnIndexToStyleIndex: this.model.columnIndexToStyleIndex,
-      cellSlots: Object.fromEntries(Object.entries(slots).map(([cellKey, a]) => [cellKey, a.slot])),
+      cellSlots: slots.slots,
       conditionalFormattingStyles: this.model.conditionalFormattingStyles,
       shiftedCellBorderStyles: this.model.shiftedCellBorderStyles,
       mergedRegions: this.model.mergedRegions,
@@ -3085,31 +2928,28 @@ export class Spreadsheet implements SpreadsheetClientApi {
       selection: this.selection,
       verticalSplitPosition: this.model.verticalSplitPosition,
       horizontalSplitPosition: this.model.horizontalSplitPosition,
-      frozenColX,
-      frozenColWidths,
-      frozenRowY,
-      frozenRowHeights,
+      frozenColX: frozen.colX,
+      frozenColWidths: frozen.colWidths,
+      frozenRowY: frozen.rowY,
+      frozenRowHeights: frozen.rowHeights,
       totalGridWidthPx: totalWidthPx,
       totalGridHeightPx: totalHeightPx,
       scrollLeft: opts.scrollLeft,
       scrollTop: opts.scrollTop,
       editor: this.editor,
-      formulaReferences: this.formulaReferencesToDraw(),
+      formulaReferences: this.derived.formulaReferences(this.formulaDraft, this.activeSheetName()),
       overlays: positionedOverlays,
-      popupButtons: positionedPopupButtons,
+      // Each at the bottom right corner of its cell.
+      popupButtons: this.derived.popupButtons(this.popup.buttons(), model),
       paintRect: this.drag?.kind === 'fill' && this.drag.outcome.kind !== 'none' ? this.drag.outcome.painted : null,
       commentText: this.model.cellComments,
       commentAuthors: this.model.cellCommentAuthors,
       visibleCommentKeys: this.model.visibleCellComments,
       editingCommentKey: this.editingCommentKey,
       invalidFormulaMessage: this.model.invalidFormulaErrorMessage,
-      // Comment-bearing + hyperlink cell keys.
-      // The maps from setCellComments / setHyperlinksTooltips
-      // are keyed by the cell-key format already, so a Set
-      // of their keys is the right shape for the render.
-      commentCells: new Set(Object.keys(this.model.cellComments)),
+      commentCells: this.derived.commentCells(model),
       invalidFormulaCells: this.model.invalidFormulaCells,
-      hyperlinkCells: new Set(Object.keys(this.model.hyperlinksTooltips))
+      hyperlinkCells: this.derived.hyperlinkCells(model)
     };
   }
 
@@ -3855,13 +3695,13 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * it out once and uses it twice.
    */
   private cellSlotAssignments(): Record<string, CellSlotAssignment> {
+    return this.cellSlots().assignments;
+  }
+
+  /** Which component or editor each cell shows, and the slot the grid draws for it. */
+  private cellSlots(): CellSlots {
     const active = this.selection.activeCell;
-    return computeCellSlots({
-      componentIdToCellKey: this.model.componentIDtoCellKeysMap,
-      cellKeyToEditorId: this.model.cellKeysToEditorIdMap,
-      showCustomEditorOnFocus: this.model.showCustomEditorOnFocus,
-      activeCellKey: active === null ? null : toKey(active.col, active.row)
-    });
+    return this.derived.cellSlots(this.model, active === null ? null : toKey(active.col, active.row));
   }
 
   /**
@@ -4119,10 +3959,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * sheet's default past the last defined column.
    */
   private colWidthPx(col: number): number {
-    if (this.model.hiddenColumnIndexes.has(col)) {
-      return 0;
-    }
-    return col > this.model.colW.length ? this.model.defColW : this.model.colW[col - 1];
+    return drawnColumnWidth(this.model, col);
   }
 
   /**
@@ -4130,12 +3967,7 @@ export class Spreadsheet implements SpreadsheetClientApi {
    * this is the one place the conversion happens.
    */
   private rowHeightPx(row: number, ppi: number = FALLBACK_PPI): number {
-    if (this.model.hiddenRowIndexes.has(row)) {
-      return 0;
-    }
-    return row > this.model.rowH.length
-      ? getDefaultRowHeightPx(this.model.defRowH, ppi)
-      : convertPointsToPixel(this.model.rowH[row - 1], ppi);
+    return drawnRowHeight(this.model, row, ppi);
   }
 
   /**

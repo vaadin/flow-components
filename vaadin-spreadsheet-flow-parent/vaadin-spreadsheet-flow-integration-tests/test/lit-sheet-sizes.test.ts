@@ -36,9 +36,9 @@ describe('Spreadsheet — the sizes the sheet is drawn with', () => {
     host.remove();
   });
 
-  /** What the sizes were last worked out as. */
+  /** What the sizes are worked out as, kept from the last draw while nothing they come from changed. */
   function kept(): unknown {
-    return (sheet as unknown as { sizesCache: { sizes: unknown } | null }).sizesCache?.sizes;
+    return (sheet as unknown as { sheetSizes(): unknown }).sheetSizes();
   }
 
   function height(): number {
