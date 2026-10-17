@@ -67,12 +67,16 @@ final class ClientCellCache implements Serializable {
         return sentFormulaCells.contains(key);
     }
 
+    /** The client has the cell now: it is no longer to be taken off. */
     void markNormalSent(String key) {
         sentCells.add(key);
+        removedCells.remove(removalOf(key));
     }
 
+    /** The client has the formula cell now: it is no longer to be taken off. */
     void markFormulaSent(String key) {
         sentFormulaCells.add(key);
+        removedCells.remove(removalOf(key));
     }
 
     /**

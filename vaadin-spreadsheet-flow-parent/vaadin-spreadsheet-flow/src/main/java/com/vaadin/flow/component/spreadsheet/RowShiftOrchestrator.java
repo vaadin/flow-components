@@ -9,11 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 
@@ -48,17 +44,11 @@ final class RowShiftOrchestrator implements Serializable {
     void shift(int startRow, int endRow, int n, boolean copyRowHeight,
             boolean resetOriginalRowHeight) {
         Sheet sheet = spreadsheet.getActiveSheet();
-        int lastNonBlankRow = getLastNonBlankRow(sheet);
         sheet.shiftRows(startRow, endRow, n, copyRowHeight,
                 resetOriginalRowHeight);
-        // need to re-send the cell values to client
-        // remove all cached cell data that is now empty
         spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
         spreadsheet.getConditionalFormattingEvaluator().clearAllCachedValues();
-        int start = n < 0 ? Math.max(lastNonBlankRow, startRow) : startRow;
-        int end = n < 0 ? endRow : startRow + n - 1;
-        spreadsheet.getCellValueManager()
-                .updateDeletedRowsInClientCache(start + 1, end + 1);
+        // The rows moved, where they were and where they went.
         int firstAffectedRow = n < 0 ? startRow + n : startRow;
         int lastAffectedRow = n < 0 ? endRow : endRow + n;
         // The rows moved with their heights, whether hidden or not, and the
@@ -68,44 +58,16 @@ final class RowShiftOrchestrator implements Serializable {
         if (spreadsheet.overlays().hasOverlays()) {
             spreadsheet.overlays().markReloadFromPoi();
         }
-        final ArrayList<Cell> cellsToUpdate = new ArrayList<>();
-        for (int r = (firstAffectedRow - 1); r <= (lastAffectedRow + 1); r++) {
-            if (r < 0) {
-                r = 0;
-            }
-            Row row = sheet.getRow(r);
-            final Integer rowIndex = r + 1;
-            if (row == null) {
-                spreadsheet.getCellValueManager()
-                        .updateDeletedRowsInClientCache(rowIndex, rowIndex);
-            } else {
-                for (int c = 0; c < spreadsheet.getCols(); c++) {
-                    Cell cell = row.getCell(c);
-                    if (cell == null) {
-                        if (r <= lastNonBlankRow + n) {
-                            // There might be a pre-shift value for this
-                            // cell in client-side and should be overwritten
-                            cell = row.createCell(c);
-                            cellsToUpdate.add(cell);
-                        }
-                    } else {
-                        cellsToUpdate.add(cell);
-                    }
-                }
-            }
-        }
         // POI moves and removes the merged regions itself, and
         // updateMergedRegions() below passes its result to the client.
         spreadsheet.popupButtons().shiftRows(startRow, endRow, n);
         spreadsheet.invalidFormulas().shiftActiveSheetRows(startRow, endRow, n);
+        spreadsheet.getCellValueManager().rowsChanged(firstAffectedRow,
+                lastAffectedRow);
 
-        for (Cell cell : cellsToUpdate) {
-            spreadsheet.markCellAsUpdated(cell, false);
-        }
-
-        // Sends the cells marked above and reloads the ones shown. Shifting
-        // moves cells, and an editor is cached against a cell key — one left
-        // in place would end up on the wrong cell.
+        // Sends the cells and reloads the ones shown. Shifting moves cells,
+        // and an editor is cached against a cell key — one left in place
+        // would end up on the wrong cell.
         spreadsheet.updateMarkedCellsRecreatingEditors();
         spreadsheet.updateMergedRegions();
         // Once the merged regions are where POI moved them: the cells draw
@@ -146,26 +108,5 @@ final class RowShiftOrchestrator implements Serializable {
             return OVERWRITTEN;
         }
         return row;
-    }
-
-    /**
-     * Scan from the sheet's last row down to row 0 to find the highest row
-     * index containing at least one non-blank cell. Returns 0 if no non-blank
-     * cell exists (matches POI's empty-sheet convention).
-     */
-    private int getLastNonBlankRow(Sheet sheet) {
-        for (int r = sheet.getLastRowNum(); r >= 0; r--) {
-            Row row = sheet.getRow(r);
-            if (row != null) {
-                for (short c = row.getFirstCellNum(); c < row
-                        .getLastCellNum(); c++) {
-                    Cell cell = row.getCell(c);
-                    if (cell != null && cell.getCellType() != CellType.BLANK) {
-                        return r;
-                    }
-                }
-            }
-        }
-        return 0;
     }
 }

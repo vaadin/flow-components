@@ -129,30 +129,22 @@ class RowShiftOrchestratorTest {
         verify(condFmtEvaluator).clearAllCachedValues();
     }
 
-    // ----- updateDeletedRowsInClientCache range computation ----------------
+    // ----- the rows the client is sent again -------------------------------
 
     @Test
-    void shift_positiveN_callsUpdateDeletedRowsForFollowingRange() {
-        // Pin the down-shift cache-clear range:
-        // start = startRow (n >= 0)
-        // end = startRow + n - 1
-        // the cache is told to drop rows (start+1 .. end+1) 1-based.
-        // For startRow=0, n=3: cache drops rows 1..3.
+    void shift_down_sendsTheRowsMovedWhereTheyWereAndWhereTheyWent() {
+        // Rows 0-2 down by 3 land on 3-5: rows 0 to 5 change.
         orchestrator.shift(0, 2, 3, false, false);
 
-        verify(valueManager).updateDeletedRowsInClientCache(1, 3);
+        verify(valueManager).rowsChanged(0, 5);
     }
 
     @Test
-    void shift_negativeN_callsUpdateDeletedRowsForRemovedRange() {
-        // Pin the up-shift cache-clear range:
-        // start = max(lastNonBlankRow, startRow) (n < 0)
-        // end = endRow (n < 0)
-        // For an empty sheet (lastNonBlankRow=0), startRow=3, endRow=5,
-        // n=-2: start = max(0, 3) = 3, end = 5; cache drops 4..6.
+    void shift_up_sendsTheRowsMovedWhereTheyWereAndWhereTheyWent() {
+        // Rows 3-5 up by 2 land on 1-3: rows 1 to 5 change.
         orchestrator.shift(3, 5, -2, false, false);
 
-        verify(valueManager).updateDeletedRowsInClientCache(4, 6);
+        verify(valueManager).rowsChanged(1, 5);
     }
 
     // ----- merged regions are left to POI ----------------------------------

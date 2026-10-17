@@ -922,6 +922,21 @@ public class CellValueManager implements Serializable {
     }
 
     /**
+     * The client is to have of the rows what POI has of them now, as loading
+     * them gives it: the cells it has of them are taken off, and those of them
+     * in the cells it has loaded are sent again.
+     *
+     * @param firstRow
+     *            Index of the first row, 0-based
+     * @param lastRow
+     *            Index of the last row, 0-based
+     */
+    void rowsChanged(int firstRow, int lastRow) {
+        updateDeletedRowsInClientCache(firstRow + 1, lastRow + 1);
+        updateVisibleCellValues();
+    }
+
+    /**
      * Makes sure the next {@link Spreadsheet#updateMarkedCells()} call will
      * clear all removed rows from client cache.
      *
