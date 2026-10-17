@@ -177,12 +177,11 @@ class FreshLoadConsistencyTest {
      */
     private static final Map<String, UnaryOperator<Case>> KNOWN = Map.ofEntries(
             Map.entry("a row inserted, then undone",
-                    c -> c.known("property rowH", "property rows",
-                            "pop-up button")),
+                    c -> c.known("pop-up button")),
             Map.entry("a row deleted, then undone",
-                    c -> c.known("property rows", "pop-up button")),
+                    c -> c.known("pop-up button")),
             Map.entry("a row deleted, undone and redone",
-                    c -> c.known("property rows", "pop-up button")),
+                    c -> c.known("pop-up button")),
             Map.entry("rows shifted down over the filter",
                     c -> c.known("pop-up button")));
 

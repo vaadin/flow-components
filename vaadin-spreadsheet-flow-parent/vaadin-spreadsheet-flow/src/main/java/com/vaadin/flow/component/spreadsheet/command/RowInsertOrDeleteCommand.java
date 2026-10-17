@@ -58,8 +58,9 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
     public void insertNewRow() {
         wasDeleted = false;
         int rows = spreadsheet.getRows();
+        // The sheet grows only when a row with something in it is pushed
+        // past its end, as a load would show it.
         spreadsheet.shiftRows(row, (rows - 1), 1, true, true);
-        spreadsheet.setMaxRows(rows + 1);
         restoreOldCellValues();
         spreadsheet.refreshAllCellValues();
     }
@@ -68,13 +69,12 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
         wasDeleted = true;
         int rows = spreadsheet.getRows();
         captureOldValues();
+        // The sheet keeps its size, as a load would show it.
         if (row + 1 > rows - 1) {
-            // if removed last row, just delete it and make sheet smaller
             spreadsheet.deleteRows(row, row);
         } else {
             spreadsheet.shiftRows(row + 1, (rows - 1), -1, true, true);
         }
-        spreadsheet.setMaxRows(rows - 1);
     }
 
     private void captureOldValues() {
