@@ -1739,6 +1739,9 @@ export class Spreadsheet implements SpreadsheetClientApi {
       ...(previous?.originalValue !== undefined ? { originalValue: previous.originalValue } : {}),
       ...(previous?.textColor !== undefined ? { textColor: previous.textColor } : {})
     });
+    // Drawn whichever way the edit was committed: leaving the formula field
+    // asks for no repaint of its own.
+    this.scheduleRender();
   }
 
   /**

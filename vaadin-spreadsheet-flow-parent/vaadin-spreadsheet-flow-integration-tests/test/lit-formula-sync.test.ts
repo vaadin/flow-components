@@ -321,4 +321,36 @@ describe('Spreadsheet — the cell once an edit is committed', () => {
 
     expect(await shown(2, 2)).to.equal('new');
   });
+
+  /** What the cell shows once the sheet has drawn, with no repaint asked for. */
+  async function drawn(col: number, row: number): Promise<string> {
+    await settled(ctx.sheet);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await settled(ctx.sheet);
+    return ctx.sheet.getCellGrid().shadowRoot!.querySelector(`.cell.col${col}.row${row}`)!.textContent!.trim();
+  }
+
+  it('shows text committed by leaving the formula field at once', async () => {
+    await select(ctx, 2, 2, 'old');
+    const field = formulaField(ctx.sheet);
+    field.focus();
+    typeInto(field, 'new');
+
+    field.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+
+    expect(await drawn(2, 2)).to.equal('new');
+  });
+
+  it('shows text committed with shift+Tab in the formula field at once', async () => {
+    await select(ctx, 2, 2, 'old');
+    const field = formulaField(ctx.sheet);
+    field.focus();
+    typeInto(field, 'new');
+
+    field.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, composed: true, cancelable: true })
+    );
+
+    expect(await drawn(2, 2)).to.equal('new');
+  });
 });
