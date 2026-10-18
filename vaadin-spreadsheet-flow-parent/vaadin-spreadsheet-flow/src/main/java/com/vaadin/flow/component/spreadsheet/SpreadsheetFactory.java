@@ -270,11 +270,14 @@ public class SpreadsheetFactory implements Serializable {
             workbook.write(fos);
         }
         if (workbook instanceof SXSSFWorkbook sxssf) {
+            // Writing uses a streaming workbook up: the one shown is read
+            // back from the file. Any other stays as it is, and so does what
+            // the application set on it, such as pop-up buttons.
             sxssf.dispose();
+            Workbook wb = WorkbookFactory.create(file);
+            spreadsheet.setInternalWorkbook(wb);
+            spreadsheet.showSheet(wb.getActiveSheetIndex());
         }
-        Workbook wb = WorkbookFactory.create(file);
-        spreadsheet.setInternalWorkbook(wb);
-        spreadsheet.showSheet(wb.getActiveSheetIndex());
         return file;
     }
 
