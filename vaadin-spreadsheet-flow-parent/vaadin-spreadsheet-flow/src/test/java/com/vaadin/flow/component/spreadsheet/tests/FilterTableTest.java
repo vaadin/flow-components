@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +49,40 @@ class FilterTableTest {
         table = new SpreadsheetFilterTable(spreadsheet, range);
         spreadsheet.registerTable(table);
         spreadsheet.refreshAllCellValues();
+    }
+
+    @Test
+    void aTableForASheetNotShown_belongsToThatSheet_andHasNoButtonsYet() {
+        // The sheet given used to be ignored, and the table landed on the
+        // sheet shown.
+        spreadsheet.createNewSheet("Other", 10, 10);
+        spreadsheet.setActiveSheetIndex(0);
+        Sheet other = spreadsheet.getWorkbook().getSheet("Other");
+
+        SpreadsheetFilterTable onOther = new SpreadsheetFilterTable(spreadsheet,
+                other, new CellRangeAddress(1, 5, 1, 5));
+
+        Assertions.assertSame(other, onOther.getSheet());
+        Assertions.assertFalse(onOther.isTableSheetCurrentlyActive());
+        Assertions.assertTrue(onOther.getPopupButtons().isEmpty());
+    }
+
+    @Test
+    void aTableForASheetNotShown_getsItsButtonsOnceThatSheetIsShown() {
+        spreadsheet.createNewSheet("Other", 10, 10);
+        spreadsheet.setActiveSheetIndex(0);
+        Sheet other = spreadsheet.getWorkbook().getSheet("Other");
+        SpreadsheetFilterTable onOther = new SpreadsheetFilterTable(spreadsheet,
+                other, new CellRangeAddress(1, 5, 1, 5));
+        spreadsheet.registerTable(onOther);
+
+        spreadsheet.setActiveSheetIndex(1);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "{\"firstRow\": 1, \"firstColumn\": 1, \"lastRow\": 10,"
+                        + " \"lastColumn\": 10}");
+
+        Assertions.assertTrue(onOther.isTableSheetCurrentlyActive());
+        Assertions.assertEquals(5, onOther.getPopupButtons().size());
     }
 
     @Test

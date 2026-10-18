@@ -93,8 +93,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
      */
     public SpreadsheetFilterTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion) {
-        this(spreadsheet, spreadsheet.getActiveSheet(), fullTableRegion, null,
-                null);
+        this(spreadsheet, sheet, fullTableRegion, null, null);
     }
 
     public SpreadsheetFilterTable(Spreadsheet spreadsheet, Sheet sheet,
