@@ -518,6 +518,13 @@ final class FreshLoadHarness {
          */
         final Map<String, String> localComments = new TreeMap<>();
 
+        /**
+         * The cells showing a value typed into them until the server sends
+         * them: what it sends then confirms the value, and is no waste even
+         * where it is what the client guessed.
+         */
+        private final Set<String> confirming = new HashSet<>();
+
         /** The styles the client has measured, by index. */
         final Set<Integer> measured = new TreeSet<>();
 
@@ -525,6 +532,7 @@ final class FreshLoadHarness {
         void reload() {
             cells.clear();
             measured.clear();
+            confirming.clear();
         }
 
         /** Whether a cell the client has wears a style it has not measured. */
@@ -600,6 +608,7 @@ final class FreshLoadHarness {
                 }
             }
             cells.put(name, normalizeCell(shown));
+            confirming.add(name);
         }
 
         void writeCommentLocally(int row, int column, String text) {
@@ -629,11 +638,13 @@ final class FreshLoadHarness {
                                     && (had == null || isRemoval(had))) {
                                 waste.add(name + " taken off the client, which"
                                         + " does not have it");
-                            } else if (cell.equals(had)) {
+                            } else if (cell.equals(had)
+                                    && !confirming.contains(name)) {
                                 waste.add(name + " sent again as the client"
                                         + " has it (" + function + ")");
                             }
                         }
+                        confirming.remove(name);
                         cells.put(name, cell);
                     }
                 } else if ("addPopupButton".equals(function)) {

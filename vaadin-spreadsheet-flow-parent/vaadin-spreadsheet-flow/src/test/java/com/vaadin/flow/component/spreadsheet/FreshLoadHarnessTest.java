@@ -344,6 +344,29 @@ class FreshLoadHarnessTest {
     }
 
     @Test
+    void aTypedValueConfirmedAsTheClientShowsIt_isNoWaste_butSentAgainIs() {
+        FreshLoadHarness.ClientModel model = new FreshLoadHarness.ClientModel();
+        List<String> waste = new ArrayList<>();
+        model.apply(
+                List.of(new FreshLoadHarness.Call("cellsUpdated",
+                        List.of(MAPPER.readTree(
+                                "[{\"col\":5,\"row\":10,\"value\":\"1\"}]")))),
+                waste);
+        model.commitLocally(10, 5, "typed");
+        FreshLoadHarness.Call confirmed = new FreshLoadHarness.Call(
+                "cellsUpdated", List.of(MAPPER.readTree(
+                        "[{\"col\":5,\"row\":10,\"value\":\"typed\"}]")));
+
+        model.apply(List.of(confirmed), waste);
+        assertEquals(List.of(), waste);
+
+        model.apply(List.of(confirmed), waste);
+        assertEquals(
+                List.of("E10 sent again as the client has it (cellsUpdated)"),
+                waste);
+    }
+
+    @Test
     void aPopupButtonAddedAgainAsTheClientHasIt_isWaste() {
         FreshLoadHarness.ClientModel model = new FreshLoadHarness.ClientModel();
         List<String> waste = new ArrayList<>();

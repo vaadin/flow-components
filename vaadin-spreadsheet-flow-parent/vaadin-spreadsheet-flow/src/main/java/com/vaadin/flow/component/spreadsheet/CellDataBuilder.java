@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -227,6 +228,15 @@ final class CellDataBuilder implements Serializable {
             }
 
             handleIsDisplayZeroPreference(cell, cellData);
+            // The client edits a formula cell by its formula, and any other by
+            // its value as entered, falling back to the value shown. Sent only
+            // where it says more, as a number's full precision or a leading
+            // apostrophe does: sent for every cell, it doubled what a sheet of
+            // text sent.
+            if (cellData.formulaValue != null
+                    || Objects.equals(cellData.originalValue, cellData.value)) {
+                cellData.originalValue = null;
+            }
         } catch (RuntimeException rte) {
             LOGGER.trace(rte.getMessage(), rte);
             cellData.value = "#VALUE!";
