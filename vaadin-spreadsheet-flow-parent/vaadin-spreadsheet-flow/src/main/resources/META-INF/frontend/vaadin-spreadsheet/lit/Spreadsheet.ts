@@ -20,10 +20,6 @@ import type {
 } from './types/wire.js';
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
-  initialSheetSelection,
-  pickCell,
-  replaceRange,
-  type SheetSelection,
   addAuxRange,
   buildSelectionEvent,
   type CellPosition,
@@ -57,28 +53,11 @@ import {
 } from './algorithms/ViewportMath.js';
 import { type CellSlots, Derived, drawnColumnWidth, drawnRowHeight, type SheetSizes } from './state/Derived.js';
 import { RenderScheduler } from './state/RenderScheduler.js';
-import {
-  type CellPress,
-  closeEditor,
-  type Edit,
-  formulaOf,
-  type FormulaWriting,
-  IDLE,
-  type InteractionState,
-  openEditor,
-  withFormula
-} from './state/Interaction.js';
-import { SheetData } from './state/SheetData.js';
+import { closeEditor, type FormulaWriting, IDLE, type InteractionState, openEditor } from './state/Interaction.js';
+import type { SheetData } from './state/SheetData.js';
+import { SheetStore } from './state/SheetStore.js';
 import { ViewState } from './state/ViewState.js';
-import {
-  initialSheetModel,
-  type SHEET_PROPERTIES,
-  type SheetModel,
-  type SheetPropertyName,
-  type SheetPropertyValue,
-  withProperty,
-  withValues
-} from './state/SheetModel.js';
+import { type SheetModel } from './state/SheetModel.js';
 import { initialEditValue } from './algorithms/PercentageEntry.js';
 import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
@@ -90,7 +69,6 @@ import {
   type CellRect,
   type PaintOutcome
 } from './algorithms/SelectionPaint.js';
-import { expandToMergedRegions } from './algorithms/MergedSelection.js';
 import { inSelectionWalkDirection, isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
 import {
   canPoint,
@@ -102,12 +80,10 @@ import {
 } from './algorithms/FormulaPointing.js';
 import {
   homeEndTarget,
-  isSingleMerge,
   keyDirection,
   moveActiveCell,
   moveRangeEdge,
   selectCellAt,
-  type SheetShape,
   type SingleCellSelection,
   typesCharacter
 } from './algorithms/KeyboardMoves.js';
@@ -219,20 +195,19 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private readonly renderTarget: HTMLElement | ShadowRoot;
 
   /**
-   * What the server mirrors onto the element, each property by its name on
-   * the wire; see {@link SheetModel}. Replaced whole on each change.
+   * What changes as the sheet is used, and the changes that have it drawn;
+   * see {@link SheetStore}.
    */
-  private model: SheetModel = initialSheetModel();
+  private readonly store = new SheetStore(() => this.scheduleRender());
 
-  /**
-   * The cells selected and the cell a merge was entered by; see
-   * {@link SheetSelection}. Changed through {@link select} and {@link pick}.
-   */
-  private sheetSelection: SheetSelection = initialSheetSelection();
+  /** What the server mirrors onto the element; see {@link SheetStore.model}. */
+  private get model(): SheetModel {
+    return this.store.model;
+  }
 
   /** The cells selected. */
   private get selection(): SelectionState {
-    return this.sheetSelection.cells;
+    return this.store.selection;
   }
 
   /**
@@ -248,25 +223,22 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * the selection is not a merge.
    */
   private get mergeEntry(): { col: number; row: number } | null {
-    return this.sheetSelection.mergeEntry;
+    return this.store.mergeEntry;
   }
 
-  /**
-   * What the user is in the middle of on the sheet: an edit and the formula
-   * written in it, a press on the cells, a note; see {@link InteractionState}.
-   * Changed through {@link interact}, which draws the change.
-   */
-  private interaction: InteractionState = IDLE;
+  /** What the user is in the middle of on the sheet; see {@link SheetStore.interaction}. */
+  private get interaction(): InteractionState {
+    return this.store.interaction;
+  }
 
   /** The cell editor while it is open: the cell-grid draws an input on its cell. */
   private get editor(): CellEditorState | null {
-    const edit = this.interaction.edit;
-    return edit.kind === 'editing' ? edit.editor : null;
+    return this.store.editor;
   }
 
   /** The formula being written, in the cell editor or the formula field. */
   private get formula(): FormulaWriting {
-    return formulaOf(this.interaction.edit);
+    return this.store.formula;
   }
 
   /** A link cell's tooltip, shown while the pointer is over the cell; see {@link LinkTooltip}. */
@@ -278,9 +250,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** Resizing columns and rows by their header edges; see {@link HeaderResize}. */
   private readonly headerResize: HeaderResize;
 
-  /** What the sheet draws that is worked out from the model and the selection alone; see {@link Derived}. */
-  private readonly derived = new Derived();
-
   /** The element the `resource-<id>` attributes live on; see {@link setResources}. */
   private resourceHost: HTMLElement | null = null;
 
@@ -289,7 +258,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * cell the server holds as selected. Replaced whole on a reload; see
    * {@link setReload}.
    */
-  private sheetData = new SheetData();
+  private get sheetData(): SheetData {
+    return this.store.sheetData;
+  }
 
   /**
    * What the view remembers from one drawing to the next: the row to keep in
@@ -626,21 +597,21 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       { columnHeader: this.columnHeader, rowHeader: this.rowHeader },
       {
         sheetProtected: () => this.model.sheetProtected,
-        colWidthPx: (col) => this.colWidthPx(col),
-        rowHeightPx: (row) => this.rowHeightPx(row),
+        colWidthPx: (col) => this.store.colWidthPx(col),
+        rowHeightPx: (row) => this.store.rowHeightPx(row),
         rowHeightPt: (row) => (row - 1 < this.model.rowH.length ? this.model.rowH[row - 1] : this.model.defRowH),
         // A column or row dragged to nothing is hidden, as the server will
         // have it. One already hidden has no edge to drag.
         setColumnWidth: (col, width) => {
-          this.change({ colW: withSize(this.model.colW, col, width, this.model.defColW) });
+          this.store.change({ colW: withSize(this.model.colW, col, width, this.model.defColW) });
           if (width === 0) {
-            this.change({ hiddenColumnIndexes: new Set([...this.model.hiddenColumnIndexes, col]) });
+            this.store.change({ hiddenColumnIndexes: new Set([...this.model.hiddenColumnIndexes, col]) });
           }
         },
         setRowHeight: (row, height) => {
-          this.change({ rowH: withSize(this.model.rowH, row, height, this.model.defRowH) });
+          this.store.change({ rowH: withSize(this.model.rowH, row, height, this.model.defRowH) });
           if (height === 0) {
-            this.change({ hiddenRowIndexes: new Set([...this.model.hiddenRowIndexes, row]) });
+            this.store.change({ hiddenRowIndexes: new Set([...this.model.hiddenRowIndexes, row]) });
           }
         },
         send: (event) => this.sendToServer(event)
@@ -732,7 +703,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         selectForMenu: (col, row) =>
           this.renders.handle(() => {
             if (!isCellInSelection(col, row, this.selection)) {
-              this.selectCellOrMerge(col, row);
+              this.store.selectCellOrMerge(col, row);
               this.dispatchSelectionEvent();
             }
           }),
@@ -851,7 +822,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   ): void => {
     if (this.formula.press !== 'none') {
       // The press pointed at the cell for a formula; it selects nothing.
-      this.changeFormula({ press: 'none' });
+      this.store.changeFormula({ press: 'none' });
       return;
     }
     const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
@@ -862,10 +833,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       const anchor = this.selection.activeCell;
       const extended = {
         activeCell: anchor,
-        activeRange: this.rangeTo(anchor, col, row),
+        activeRange: this.store.rangeTo(anchor, col, row),
         auxRanges: []
       };
-      this.select({ ...extended, auxRanges: this.selection.auxRanges });
+      this.store.select({ ...extended, auxRanges: this.selection.auxRanges });
       this.dispatchCellsAddedToRangeSelection(extended.activeRange);
       return;
     }
@@ -873,7 +844,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // Non-coherent selection: the clicked cell joins the selection
       // as its own range and becomes active; the previous active
       // range is kept as an aux range.
-      this.select(addAuxRange(this.selection, col, row, col, row));
+      this.store.select(addAuxRange(this.selection, col, row, col, row));
       this.dispatchCellAddedToSelection(col, row);
       return;
     }
@@ -883,9 +854,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // with earlier Ctrl-clicks stay: shift extends the last range,
       // it does not start the selection over.
       const anchor = this.selection.activeCell;
-      this.select({
+      this.store.select({
         activeCell: anchor,
-        activeRange: this.rangeTo(anchor, col, row),
+        activeRange: this.store.rangeTo(anchor, col, row),
         auxRanges: this.selection.auxRanges
       });
       if (!this.rangeReportedOnRelease) {
@@ -893,7 +864,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       }
       return;
     } else {
-      this.selectCellOrMerge(col, row);
+      this.store.selectCellOrMerge(col, row);
     }
     this.dispatchSelectionEvent();
     // Hyperlink cells additionally dispatch `linkCellClicked`
@@ -953,20 +924,20 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // out with Ctrl with one rectangle.
       return;
     }
-    this.changePress({ kind: 'select', crossed: false });
+    this.store.changePress({ kind: 'select', crossed: false });
     if (shiftKey) {
       // Shift+mousedown: extend existing range to the
       // mousedown coord (treat the existing anchor as the
       // drag start). Standard Excel "shift-drag" behavior.
       // Aux ranges survive, as on a shift-click.
       const anchor = this.selection.activeCell;
-      this.select({
+      this.store.select({
         activeCell: anchor,
-        activeRange: this.rangeTo(anchor, col, row),
+        activeRange: this.store.rangeTo(anchor, col, row),
         auxRanges: this.selection.auxRanges
       });
     } else {
-      this.selectCellOrMerge(col, row);
+      this.store.selectCellOrMerge(col, row);
     }
   };
 
@@ -990,14 +961,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const press = this.interaction.press;
     if (press?.kind === 'fill') {
       const { col, row } = e.detail;
-      this.changePress({ ...press, outcome: computePaintRectangle(press.from, col, row) });
+      this.store.changePress({ ...press, outcome: computePaintRectangle(press.from, col, row) });
       return;
     }
     if (press?.kind !== 'select') {
       return;
     }
     if (!press.crossed) {
-      this.changePress({ kind: 'select', crossed: true });
+      this.store.changePress({ kind: 'select', crossed: true });
     }
     const { col, row } = e.detail;
     // Same as shift-arrow: keep activeCell as anchor, move
@@ -1005,9 +976,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // The ranges picked out before stay: a plain press has already let
     // them go, and a Shift-press drags out the range it extends.
     const anchor = this.selection.activeCell;
-    this.select({
+    this.store.select({
       activeCell: anchor,
-      activeRange: this.rangeTo(anchor, col, row),
+      activeRange: this.store.rangeTo(anchor, col, row),
       auxRanges: this.selection.auxRanges
     });
     this.showRangeSizeInAddressField();
@@ -1041,14 +1012,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     if (this.formula.press === 'pointing') {
       // The press that pointed is over; the click it ends in is to come.
-      this.changeFormula({ press: 'pointed' });
+      this.store.changeFormula({ press: 'pointed' });
       return;
     }
     if (press === null) {
       return;
     }
-    this.changePress(null);
-    if (press.kind === 'select' && this.selectsRange()) {
+    this.store.changePress(null);
+    if (press.kind === 'select' && this.store.selectsRange()) {
       // Multi-cell range — dispatch the server-bound
       // selection event so the server learns the final
       // dragged range: with the cell the drag started on, when it went
@@ -1074,43 +1045,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private readonly handleCellDoubleClick = (e: CustomEvent<{ col: number; row: number }>): void => {
     const { col, row } = e.detail;
-    if (this.isCellLockedForEdit(col, row)) {
+    if (this.store.isCellLockedForEdit(col, row)) {
       this.reportProtectedCellWriteAttempt();
       return;
     }
     // Seeded with what the cell IS, not what it shows — the formula
     // behind a computed cell, and the unformatted value otherwise, which
     // is what carries a text cell's leading apostrophe.
-    const initialValue = this.formulaFieldValueFor(col, row);
+    const initialValue = this.store.formulaFieldValueFor(col, row);
     // Opening the existing value to change it: arrows move the caret.
-    this.changeEdit(openEditor(this.interaction.edit, { col, row, initialValue, mode: 'edit' }, false));
+    this.store.changeEdit(openEditor(this.interaction.edit, { col, row, initialValue, mode: 'edit' }, false));
     this.showInFormulaField(initialValue);
   };
-
-  /**
-   * Excel-style lock check: a cell is uneditable only when the
-   * sheet is protected AND the cell's locked flag is true. POI
-   * defaults every cell's locked flag to true, so a freshly
-   * loaded workbook with sheet protection enabled blocks all
-   * cells; unlocking a region in POI flips the per-cell flag.
-   * When the sheet is unprotected, the flag is meaningless.
-   *
-   * A cell the server has sent no data for — an empty cell — has no flag of
-   * its own, so its row and column styles decide, and it is locked only
-   * when **both** are. Defaulting such a cell to locked instead makes every
-   * empty cell uneditable on a sheet that protects only some rows or
-   * columns, which is most protected sheets.
-   */
-  private isCellLockedForEdit(col: number, row: number): boolean {
-    if (!this.model.sheetProtected) {
-      return false;
-    }
-    const cellData = this.sheetData.cells.get(toKey(col, row));
-    if (cellData !== undefined) {
-      return cellData.locked === true;
-    }
-    return this.model.lockedColumnIndexes.has(col) && this.model.lockedRowIndexes.has(row);
-  }
 
   /**
    * Cell-editor commit. Called when the user presses Enter,
@@ -1177,7 +1123,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // event so the editor doesn't briefly flash on top of the
     // server's response.
     this.endFormulaPointing();
-    this.changeEdit(closeEditor(this.interaction.edit));
+    this.store.changeEdit(closeEditor(this.interaction.edit));
     if (takeKeyboard) {
       this.returnFocusToSheet();
     }
@@ -1193,16 +1139,16 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // Enter and Tab do when nothing is being edited: filling a block
     // cell by cell is the reason the range is selected at all.
     const walkDirection = inSelectionWalkDirection(key, shiftKey);
-    const walks = walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.selectsRange();
+    const walks = walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.store.selectsRange();
     // Moving on goes by the arrows' rules: over hidden rows and columns,
     // and out of a merge on its far side.
     const direction = walks || key === undefined ? null : keyDirection(key, shiftKey);
     const next =
       direction !== null && this.model.rows > 0 && this.model.cols > 0
-        ? moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape())
+        ? moveActiveCell({ col, row }, this.mergeEntry, direction, this.store.sheetShape())
         : null;
     if (next !== null) {
-      this.pick(next);
+      this.store.pick(next);
     }
     const data: CellValueEditedData = { row, col, value };
     this.sendToServer({ type: 'cellValueEdited', data });
@@ -1233,10 +1179,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private readonly handleCellEditorCancel = (): void => {
     const editor = this.editor;
     this.endFormulaPointing();
-    this.changeEdit(closeEditor(this.interaction.edit));
+    this.store.changeEdit(closeEditor(this.interaction.edit));
     // The formula field showed what was typed; it shows the cell again.
     if (editor !== null) {
-      this.showInFormulaField(this.formulaFieldValueFor(editor.col, editor.row));
+      this.showInFormulaField(this.store.formulaFieldValueFor(editor.col, editor.row));
     }
     this.returnFocusToSheet();
   };
@@ -1246,7 +1192,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.showInFormulaField(e.detail.value);
     // Typing ends pointing at that reference: the next arrow after an
     // operator points at a new one, from the cell pointed at last.
-    this.changeFormula({ pointer: null });
+    this.store.changeFormula({ pointer: null });
     this.updateFormulaDraft(e.detail.value, e.detail.caret ?? e.detail.value.length);
   };
 
@@ -1258,7 +1204,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.editor !== null) {
       this.cellGrid.setEditorValue(e.detail.value);
     }
-    this.changeFormula({ pointer: null });
+    this.store.changeFormula({ pointer: null });
     this.updateFormulaDraft(e.detail.value, e.detail.caret ?? e.detail.value.length);
   };
 
@@ -1271,7 +1217,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const { value, caret } = e.detail;
     if (this.formula.pointer !== null && caret !== this.formula.pointer.span.end) {
       // Moved away from what was pointed at: the next point starts afresh.
-      this.changeFormula({ pointer: null });
+      this.store.changeFormula({ pointer: null });
     }
     this.updateFormulaDraft(value, caret);
   };
@@ -1314,7 +1260,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     e.preventDefault();
     const from = pointer?.end ?? this.formula.lastPointed ?? this.formulaCell();
-    const next = moveActiveCell(from, null, keyDirection(key, false)!, this.sheetShape());
+    const next = moveActiveCell(from, null, keyDirection(key, false)!, this.store.sheetShape());
     const end = next?.activeCell ?? from;
     const anchor = shiftKey && pointer !== null ? pointer.anchor : end;
     this.pointAt(anchor, end, value, caret, pointer?.span ?? null, source);
@@ -1357,7 +1303,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       }
     }
     this.pointAt(anchor, cell, value, caret, span, source);
-    this.changeFormula({ press: 'pointing' });
+    this.store.changeFormula({ press: 'pointing' });
   }
 
   /** Puts the reference to a pointed cell or range into the formula being written. */
@@ -1379,10 +1325,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       caret = Math.min(caret, value.length);
     }
     if (edit.kind === 'editing' && edit.autoPercent) {
-      this.changeEdit({ ...edit, autoPercent: false });
+      this.store.changeEdit({ ...edit, autoPercent: false });
     }
     const placed = placeReference(value, caret, span, referenceText(anchor, end));
-    this.changeFormula({ pointer: { anchor, end, span: { start: placed.start, end: placed.end } }, lastPointed: end });
+    this.store.changeFormula({
+      pointer: { anchor, end, span: { start: placed.start, end: placed.end } },
+      lastPointed: end
+    });
     if (this.editor !== null) {
       this.cellGrid.setEditorValue(placed.text, source === 'cell' ? placed.end : undefined);
     }
@@ -1428,7 +1377,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (draft !== null && before !== null && draft.text === before.text && draft.caret === before.caret) {
       return;
     }
-    this.changeFormula({ draft });
+    this.store.changeFormula({ draft });
     const refs = draft === null ? [] : formulaReferences(draft.text, this.activeSheetName());
     this.changeFormulaBar({
       highlights:
@@ -1441,7 +1390,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** The formula is written or thrown away: nothing is pointed at or coloured any more. */
   private endFormulaPointing(): void {
     this.updateFormulaDraft(null, 0);
-    this.changeFormula({ pointer: null, lastPointed: null });
+    this.store.changeFormula({ pointer: null, lastPointed: null });
   }
 
   /**
@@ -1551,7 +1500,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const row = this.firstRowOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole column joins the selection as a further range.
-      this.select(addAuxRange(this.selection, col, 1, col, rows, { col, row }));
+      this.store.select(addAuxRange(this.selection, col, 1, col, rows, { col, row }));
       const data: ColumnSelectedData = { column: col, firstRowIndex: row };
       this.sendToServer({ type: 'columnAddedToSelection', data });
       return;
@@ -1559,13 +1508,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (shiftKey) {
       // Extend across columns, keeping ranges added with Ctrl.
       const anchor = this.selection.activeCell;
-      this.select({
+      this.store.select({
         activeCell: anchor,
         activeRange: normalizedRange(anchor.col, 1, col, rows),
         auxRanges: this.selection.auxRanges
       });
     } else {
-      this.select({
+      this.store.select({
         activeCell: { col, row },
         activeRange: normalizedRange(col, 1, col, rows),
         auxRanges: []
@@ -1620,7 +1569,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const col = this.firstColumnOnScreen();
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole row joins the selection as a further range.
-      this.select(addAuxRange(this.selection, 1, row, cols, row, { col, row }));
+      this.store.select(addAuxRange(this.selection, 1, row, cols, row, { col, row }));
       const data: RowSelectedData = { row, firstColumnIndex: col };
       this.sendToServer({ type: 'rowAddedToRangeSelection', data });
       return;
@@ -1628,13 +1577,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (shiftKey) {
       // Extend across rows, keeping ranges added with Ctrl.
       const anchor = this.selection.activeCell;
-      this.select({
+      this.store.select({
         activeCell: anchor,
         activeRange: normalizedRange(1, anchor.row, cols, row),
         auxRanges: this.selection.auxRanges
       });
     } else {
-      this.select({
+      this.store.select({
         activeCell: { col, row },
         activeRange: normalizedRange(1, row, cols, row),
         auxRanges: []
@@ -1707,7 +1656,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       e.preventDefault();
-      this.select({
+      this.store.select({
         activeCell: { col: 1, row: 1 },
         activeRange: normalizedRange(1, 1, this.model.cols, this.model.rows),
         auxRanges: []
@@ -1744,7 +1693,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const entersEditor =
       key === 'F2' ||
       (key === 'Enter' &&
-        !this.selectsRange() &&
+        !this.store.selectsRange() &&
         !this.model.hiddenRowIndexes.has(this.selection.activeCell.row) &&
         !this.model.hiddenColumnIndexes.has(this.selection.activeCell.col));
     if (entersEditor && !this.editor) {
@@ -1752,7 +1701,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       const { col, row } = this.selection.activeCell;
-      if (this.isCellLockedForEdit(col, row)) {
+      if (this.store.isCellLockedForEdit(col, row)) {
         this.reportProtectedCellWriteAttempt();
         return;
       }
@@ -1760,11 +1709,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       const editor: CellEditorState = {
         col,
         row,
-        initialValue: this.formulaFieldValueFor(col, row),
+        initialValue: this.store.formulaFieldValueFor(col, row),
         // F2 opens the existing value, so arrows move the caret.
         mode: 'edit'
       };
-      this.changeEdit(openEditor(this.interaction.edit, editor, false));
+      this.store.changeEdit(openEditor(this.interaction.edit, editor, false));
       this.showInFormulaField(editor.initialValue);
       return;
     }
@@ -1778,7 +1727,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       const { col, row } = this.selection.activeCell;
-      if (this.isCellLockedForEdit(col, row)) {
+      if (this.store.isCellLockedForEdit(col, row)) {
         this.reportProtectedCellWriteAttempt();
         return;
       }
@@ -1793,7 +1742,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         initialValue: key === ' ' ? '' : initialEditValue(key, this.sheetData.cells.get(toKey(col, row))),
         mode: 'enter'
       };
-      this.changeEdit(openEditor(this.interaction.edit, editor, key !== ' ' && editor.initialValue !== key));
+      this.store.changeEdit(openEditor(this.interaction.edit, editor, key !== ' ' && editor.initialValue !== key));
       this.showInFormulaField(editor.initialValue);
       return;
     }
@@ -1819,7 +1768,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // both wrapping at the end, shift reversing. The range stays, so the
     // server hears a selection that did not discard its old range.
     const walkDirection = inSelectionWalkDirection(key, e.shiftKey);
-    if (walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.selectsRange()) {
+    if (walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.store.selectsRange()) {
       e.preventDefault();
       const next = walkInsideSelection({
         range: this.selection.activeRange,
@@ -1849,17 +1798,17 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
           this.selection.activeRange,
           this.selection.activeCell,
           direction,
-          this.sheetShape()
+          this.store.sheetShape()
         );
         if (grown === null) {
           return;
         }
-        this.select({ activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] });
+        this.store.select({ activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] });
         this.extendingSelection = true;
         this.showRangeSizeInAddressField();
         this.scrollCellIntoView(grown.moved);
       } else {
-        const next = moveActiveCell(this.selection.activeCell, this.mergeEntry, direction, this.sheetShape());
+        const next = moveActiveCell(this.selection.activeCell, this.mergeEntry, direction, this.store.sheetShape());
         if (next === null) {
           return;
         }
@@ -1896,7 +1845,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private moveSelectionTo(next: SingleCellSelection): void {
     this.extendingSelection = false;
-    this.pick(next);
+    this.store.pick(next);
     this.scrollCellIntoView(next.activeCell);
   }
 
@@ -1910,7 +1859,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * walking through the block they picked earlier".
    */
   private moveActiveCellInsideSelection(next: { col: number; row: number }): void {
-    this.select({
+    this.store.select({
       activeCell: next,
       activeRange: this.selection.activeRange,
       auxRanges: this.selection.auxRanges
@@ -1945,7 +1894,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.model.cols,
       sc.scrollLeft,
       viewWidth,
-      (c) => this.colWidthPx(c)
+      (c) => this.store.colWidthPx(c)
     );
     const top = scrollToShow(
       target.row,
@@ -1953,7 +1902,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.model.rows,
       sc.scrollTop,
       viewHeight,
-      (r) => this.rowHeightPx(r)
+      (r) => this.store.rowHeightPx(r)
     );
     if (left !== sc.scrollLeft) {
       sc.scrollLeft = left;
@@ -2039,7 +1988,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.changeFormulaBar({
       address: this.extendingSelection ? selectionSizeLabel(this.selection.activeRange) : cellCoordToAddress(cell)
     });
-    this.showServerValueInFormulaField(this.formulaFieldValueFor(cell.col, cell.row), false);
+    this.showServerValueInFormulaField(this.store.formulaFieldValueFor(cell.col, cell.row), false);
   }
 
   /** The cells the grid draws, its drawing buffer included; null before anything is measured. */
@@ -2308,7 +2257,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private readonly handleSelectionPaintStart = (): void => {
     const { c1, c2, r1, r2 } = this.selection.activeRange;
-    this.changePress({ kind: 'fill', from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } });
+    this.store.changePress({ kind: 'fill', from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } });
   };
 
   /**
@@ -2319,7 +2268,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * shrinking reports only the corner the selection retreats to.
    */
   private finishPainting(painting: { from: CellRect; outcome: PaintOutcome }): void {
-    this.changePress(null);
+    this.store.changePress(null);
     if (painting.outcome.kind === 'none') {
       return;
     }
@@ -2374,7 +2323,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // A merge is one cell: the server hears that cell, rather than a range
     // it would offer to merge again.
     const range =
-      this.selectsRange() || !isMultiCellRange(this.selection.activeRange)
+      this.store.selectsRange() || !isMultiCellRange(this.selection.activeRange)
         ? this.selection.activeRange
         : { c1: activeCell.col, c2: activeCell.col, r1: activeCell.row, r2: activeCell.row };
     const event = buildSelectionEvent(activeCell, range, this.model.rows, this.model.cols);
@@ -2412,7 +2361,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   /** The sheet's row and column sizes as drawn; see {@link Derived.sheetSizes}. */
   private sheetSizes(): SheetSizes {
-    return this.derived.sheetSizes(this.model);
+    return this.store.derived.sheetSizes(this.model);
   }
 
   applyRenderState(opts: {
@@ -2431,7 +2380,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.cellGrid.style.height = `${state.totalGridHeightPx}px`;
     this.cellGrid.renderState = state;
     const { col, row } = this.selection.activeCell;
-    this.formulaBar.formulaLocked = this.isCellLockedForEdit(col, row);
+    this.formulaBar.formulaLocked = this.store.isCellLockedForEdit(col, row);
     this.hosted.place(state, slots.assignments);
     // Column-header strip. Sized + state-pushed only
     // when there is something to draw, so the default opt-out path
@@ -2453,7 +2402,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.headerRowHeight > 0 || this.model.colGroupingMax > 0) {
       // The outline's pixels are worked out here, which keeps the header
       // element independent of the full colWidths array.
-      const colGroupings = this.derived.columnGroupings(this.model);
+      const colGroupings = this.store.derived.columnGroupings(this.model);
       this.columnHeader.hidden = false;
       this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
       this.columnHeader.style.height = `${this.headerRowHeight + colGutterPx}px`;
@@ -2480,7 +2429,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         // header-selected"` on cells inside the active
         // range. Pure derivation from
         // {@code selection.activeRange}.
-        selectedColumns: this.derived.selectedColumns(this.selection)
+        selectedColumns: this.store.derived.selectedColumns(this.selection)
       };
     } else {
       // No headings and no outline: the strip goes altogether, border and
@@ -2493,7 +2442,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.headerColumnWidth > 0 || this.model.rowGroupingMax > 0) {
       // Row groupings mirror the column ones; heights come from the same
       // point-to-pixel conversion the grid uses.
-      const rowGroupings = this.derived.rowGroupings(this.model);
+      const rowGroupings = this.store.derived.rowGroupings(this.model);
       this.rowHeader.hidden = false;
       this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
       this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
@@ -2507,7 +2456,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         // header can emit `part="row-header
         // header-selected"` on rows inside the active
         // range.
-        selectedRows: this.derived.selectedRows(this.selection),
+        selectedRows: this.store.derived.selectedRows(this.selection),
         rowGroupings,
         rowGroupingMax: this.model.rowGroupingMax,
         rowGroupingInversed: this.model.rowGroupingInversed,
@@ -2591,7 +2540,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // Frozen columns 1..horizontalSplitPosition and rows
     // 1..verticalSplitPosition, 1-based and inclusive. Empty when nothing
     // is frozen.
-    const frozen = this.derived.frozenPanes(model);
+    const frozen = this.store.derived.frozenPanes(model);
 
     // Build per-visible-index arrays for colX, rowY, widths, heights.
     //
@@ -2684,19 +2633,19 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       scrollLeft: opts.scrollLeft,
       scrollTop: opts.scrollTop,
       editor: this.editor,
-      formulaReferences: this.derived.formulaReferences(this.formula.draft, this.activeSheetName()),
+      formulaReferences: this.store.derived.formulaReferences(this.formula.draft, this.activeSheetName()),
       overlays: positionedOverlays,
       // Each at the bottom right corner of its cell.
-      popupButtons: this.derived.popupButtons(this.popup.buttons(), model),
-      paintRect: this.paintRect(),
+      popupButtons: this.store.derived.popupButtons(this.popup.buttons(), model),
+      paintRect: this.store.paintRect(),
       commentText: this.model.cellComments,
       commentAuthors: this.model.cellCommentAuthors,
       visibleCommentKeys: this.model.visibleCellComments,
       editingCommentKey: this.interaction.comment,
       invalidFormulaMessage: this.model.invalidFormulaErrorMessage,
-      commentCells: this.derived.commentCells(model),
+      commentCells: this.store.derived.commentCells(model),
       invalidFormulaCells: this.model.invalidFormulaCells,
-      hyperlinkCells: this.derived.hyperlinkCells(model)
+      hyperlinkCells: this.store.derived.hyperlinkCells(model)
     };
   }
 
@@ -2782,14 +2731,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.model.rows <= 0 || this.model.cols <= 0) {
       return;
     }
-    if (this.isCellLockedForEdit(col, row)) {
+    if (this.store.isCellLockedForEdit(col, row)) {
       this.reportProtectedCellWriteAttempt();
       return;
     }
     // An edit started in the cell ends here too: its editor closes, and
     // the cell shows the value, as it does when the edit ends there.
     this.endFormulaPointing();
-    this.changeEdit(closeEditor(this.interaction.edit));
+    this.store.changeEdit(closeEditor(this.interaction.edit));
     this.showCommittedValue(col, row, value);
     this.sendToServer({ type: 'cellValueEdited', data: { row, col, value } });
     // shift+Tab stays put.
@@ -2798,11 +2747,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       return;
     }
     this.returnFocusToSheet();
-    const next = moveActiveCell({ col, row }, this.mergeEntry, direction, this.sheetShape());
+    const next = moveActiveCell({ col, row }, this.mergeEntry, direction, this.store.sheetShape());
     if (next === null) {
       return;
     }
-    this.pick(next);
+    this.store.pick(next);
     this.scrollCellIntoView(next.activeCell);
     this.dispatchSelectionEvent();
   };
@@ -2814,8 +2763,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private readonly handleFormulaCancel = (): void => {
     this.endFormulaPointing();
     const { col, row } = this.selection.activeCell;
-    this.showInFormulaField(this.formulaFieldValueFor(col, row));
-    this.changeEdit(closeEditor(this.interaction.edit));
+    this.showInFormulaField(this.store.formulaFieldValueFor(col, row));
+    this.store.changeEdit(closeEditor(this.interaction.edit));
     this.returnFocusToSheet();
   };
 
@@ -2835,12 +2784,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.interaction.comment === null) {
       return;
     }
-    this.interact({ ...this.interaction, comment: null });
+    this.store.interact({ ...this.interaction, comment: null });
     const coord = key === undefined ? null : parseColRow(key);
     if (coord === null || coord.col < 1 || coord.row < 1) {
       return;
     }
-    this.change({ cellComments: { ...this.model.cellComments, [key as string]: text } });
+    this.store.change({ cellComments: { ...this.model.cellComments, [key as string]: text } });
     this.returnFocusToSheet();
     this.sendToServer({ type: 'updateCellComment', data: { text, col: coord.col, row: coord.row } });
   };
@@ -2952,32 +2901,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         ? selectionSizeLabel(this.selection.activeRange)
         : possibleName ?? cellCoordToAddress({ col, row })
     });
-    this.showServerValueInFormulaField(this.formulaFieldValueFor(col, row), true);
+    this.showServerValueInFormulaField(this.store.formulaFieldValueFor(col, row), true);
   }
 
-  /**
-   * What the formula field shows for a cell.
-   *
-   * The bar shows what the cell *is*, not what it displays: the formula
-   * behind a computed cell, and otherwise the value before formatting.
-   * The unformatted value is what carries a text cell's leading
-   * apostrophe and a number's full precision, both of which the
-   * displayed value has already dropped.
-   *
-   * The server sends a formula without its leading `=`, the way POI
-   * stores it.
-   */
-  private formulaFieldValueFor(col: number, row: number): string {
-    const data = this.sheetData.cells.get(toKey(col, row));
-    if (data === undefined) {
-      return '';
-    }
-    const formula = data.formulaValue;
-    if (formula !== undefined && formula !== null && formula !== '') {
-      return `=${formula}`;
-    }
-    return data.originalValue ?? data.value ?? '';
-  }
   /**
    * The server could not make sense of the address that was typed.
    *
@@ -3025,7 +2951,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // anchor of the range they are in the middle of making.
     const sizeLabel = selectionSizeLabel(this.selection.activeRange);
     const before = this.selection.activeCell;
-    this.select(selectSingleCell(col, row));
+    this.store.select(selectSingleCell(col, row));
     this.sheetData.serverSelectedCell = { col, row };
     this.changeFormulaBar({ address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }) });
     this.showServerValueInFormulaField(
@@ -3081,7 +3007,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // the current list is also correct for the replace case.
     const before = this.selection.activeCell;
     const moved = before.col !== col || before.row !== row;
-    this.select({
+    this.store.select({
       activeCell: { col, row },
       activeRange: normalizedRange(c1, r1, c2, r2),
       auxRanges: this.selection.auxRanges
@@ -3101,7 +3027,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // field has: the server may have just sent its value along with
     // showSelectedCell, for a cell this client holds no data for.
     if (moved) {
-      this.showServerValueInFormulaField(this.formulaFieldValueFor(col, row), false);
+      this.showServerValueInFormulaField(this.store.formulaFieldValueFor(col, row), false);
     }
     if (scroll) {
       this.scrollCellIntoView({ col, row });
@@ -3128,7 +3054,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * from 0 where every other cell address here counts from 1.
    */
   editCellComment(col: number, row: number): void {
-    this.interact({ ...this.interaction, comment: toKey(col + 1, row + 1) });
+    this.store.interact({ ...this.interaction, comment: toKey(col + 1, row + 1) });
   }
 
   // ====================================================================
@@ -3136,42 +3062,23 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   // only hold a value are written through the table in state/SheetModel.ts.
   // ====================================================================
 
-  /**
-   * Takes a property as the server sends it; see {@link SHEET_PROPERTIES}.
-   * It is drawn with the rest of the batch it comes in, once the batch is
-   * all in; see {@link notifyStateChanges}.
-   */
-  private write<K extends SheetPropertyName>(name: K, value: SheetPropertyValue<K>): void {
-    this.model = withProperty(this.model, name, value);
-  }
-
-  /**
-   * Changes the model with values already read in: the client's own, which
-   * it holds until the server answers. Drawn as the handler making the
-   * change ends; see {@link handling}.
-   */
-  private change(values: Partial<SheetModel>): void {
-    this.model = withValues(this.model, values);
-    this.scheduleRender();
-  }
-
   setRowBufferSize(pixels: number): void {
-    this.write('rowBufferSize', pixels);
+    this.store.write('rowBufferSize', pixels);
   }
   setColumnBufferSize(pixels: number): void {
-    this.write('columnBufferSize', pixels);
+    this.store.write('columnBufferSize', pixels);
   }
   setRows(count: number): void {
-    this.write('rows', count);
+    this.store.write('rows', count);
   }
   setCols(count: number): void {
-    this.write('cols', count);
+    this.store.write('cols', count);
   }
   setDefRowH(heightInPoints: number): void {
-    this.write('defRowH', heightInPoints);
+    this.store.write('defRowH', heightInPoints);
   }
   setDefColW(widthInPixels: number): void {
-    this.write('defColW', widthInPixels);
+    this.store.write('defColW', widthInPixels);
   }
   /**
    * Row heights from the server. Rows above the screen grow and shrink as
@@ -3182,7 +3089,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   setRowH(rowHeightsInPoints: number[] | Float32Array | SizeRuns | null): void {
     this.view.rowAnchor ??= this.firstRowWithTopOnScreen();
-    this.write('rowH', rowHeightsInPoints);
+    this.store.write('rowH', rowHeightsInPoints);
   }
 
   /** The first scrolling row whose top is on screen, and how far below the top of the screen. */
@@ -3221,19 +3128,19 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.view.anchoredScrollTop = this.scrollContainer.scrollTop;
   }
   setColW(colWidthsInPixels: number[] | Int32Array | SizeRuns | null): void {
-    this.write('colW', colWidthsInPixels);
+    this.store.write('colW', colWidthsInPixels);
   }
   setHiddenColumnIndexes(indexes: number[] | null): void {
-    this.write('hiddenColumnIndexes', indexes);
+    this.store.write('hiddenColumnIndexes', indexes);
   }
   setHiddenRowIndexes(indexes: number[] | null): void {
-    this.write('hiddenRowIndexes', indexes);
+    this.store.write('hiddenRowIndexes', indexes);
   }
   setLockedColumnIndexes(indexes: number[] | null): void {
-    this.write('lockedColumnIndexes', indexes);
+    this.store.write('lockedColumnIndexes', indexes);
   }
   setLockedRowIndexes(indexes: number[] | null): void {
-    this.write('lockedRowIndexes', indexes);
+    this.store.write('lockedRowIndexes', indexes);
   }
   setSheetIndex(index: number): void {
     this.tabs.setSheetIndex(index);
@@ -3246,45 +3153,45 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * keeps it: a sheet shown again goes back there.
    */
   setVerticalScrollPositions(positions: number[] | null): void {
-    this.write('verticalScrollPositions', positions);
+    this.store.write('verticalScrollPositions', positions);
   }
   /** See {@link setVerticalScrollPositions}. */
   setHorizontalScrollPositions(positions: number[] | null): void {
-    this.write('horizontalScrollPositions', positions);
+    this.store.write('horizontalScrollPositions', positions);
   }
   setCellStyleToCSSStyle(map: Record<number, string> | null): void {
-    this.write('cellStyleToCSSStyle', map);
+    this.store.write('cellStyleToCSSStyle', map);
     this.sync.restyled();
   }
   setRowIndexToStyleIndex(map: Record<number, number> | null): void {
-    this.write('rowIndexToStyleIndex', map);
+    this.store.write('rowIndexToStyleIndex', map);
   }
   setColumnIndexToStyleIndex(map: Record<number, number> | null): void {
-    this.write('columnIndexToStyleIndex', map);
+    this.store.write('columnIndexToStyleIndex', map);
   }
   setShiftedCellBorderStyles(cssRules: string[] | null): void {
-    this.write('shiftedCellBorderStyles', cssRules);
+    this.store.write('shiftedCellBorderStyles', cssRules);
   }
   setConditionalFormattingStyles(map: Record<number, string> | null): void {
-    this.write('conditionalFormattingStyles', map);
+    this.store.write('conditionalFormattingStyles', map);
   }
   setColGroupingData(groups: GroupingData[] | null): void {
-    this.write('colGroupingData', groups);
+    this.store.write('colGroupingData', groups);
   }
   setRowGroupingData(groups: GroupingData[] | null): void {
-    this.write('rowGroupingData', groups);
+    this.store.write('rowGroupingData', groups);
   }
   setColGroupingMax(level: number): void {
-    this.write('colGroupingMax', level);
+    this.store.write('colGroupingMax', level);
   }
   setRowGroupingMax(level: number): void {
-    this.write('rowGroupingMax', level);
+    this.store.write('rowGroupingMax', level);
   }
   setColGroupingInversed(inversed: boolean): void {
-    this.write('colGroupingInversed', inversed);
+    this.store.write('colGroupingInversed', inversed);
   }
   setRowGroupingInversed(inversed: boolean): void {
-    this.write('rowGroupingInversed', inversed);
+    this.store.write('rowGroupingInversed', inversed);
   }
   /**
    * Clicking a custom editor selects the cell it belongs to.
@@ -3308,7 +3215,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.selection.activeCell.col === cell.col && this.selection.activeCell.row === cell.row) {
       return;
     }
-    this.select(selectSingleCell(cell.col, cell.row));
+    this.store.select(selectSingleCell(cell.col, cell.row));
     this.dispatchSelectionEvent();
   };
 
@@ -3327,7 +3234,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** Which component or editor each cell shows, and the slot the grid draws for it. */
   private cellSlots(): CellSlots {
     const active = this.selection.activeCell;
-    return this.derived.cellSlots(this.model, active === null ? null : toKey(active.col, active.row));
+    return this.store.derived.cellSlots(this.model, active === null ? null : toKey(active.col, active.row));
   }
 
   /**
@@ -3353,7 +3260,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // is never mentioned again and the old value would show through.
       // So is the cell it holds as selected, until it says which one it has
       // now.
-      this.sheetData = new SheetData();
+      this.store.resetSheetData();
       // Its row heights are those of whatever it shows now.
       this.view.rowAnchor = null;
       // What it was told of where the sheet is, and asked to load, is gone
@@ -3378,7 +3285,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const hadKeyboard = this.host.matches(':focus-within');
     // The formula's colours in the formula field go with it.
     this.updateFormulaDraft(null, 0);
-    this.interact(IDLE);
+    this.store.interact(IDLE);
     this.formulaBar.abandonFormulaEdit();
     this.headerResize.cancel();
     this.extendingSelection = false;
@@ -3389,40 +3296,40 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
   }
   setSheetProtected(isProtected: boolean): void {
-    this.write('sheetProtected', isProtected);
+    this.store.write('sheetProtected', isProtected);
   }
   setMergedRegions(regions: MergedRegion[] | null): void {
-    this.write('mergedRegions', regions);
+    this.store.write('mergedRegions', regions);
   }
   setCellKeysToEditorIdMap(map: Record<string, string> | null): void {
-    this.write('cellKeysToEditorIdMap', map);
+    this.store.write('cellKeysToEditorIdMap', map);
   }
   setComponentIDtoCellKeysMap(map: Record<string, string>): void {
-    this.write('componentIDtoCellKeysMap', map);
+    this.store.write('componentIDtoCellKeysMap', map);
   }
   setCellComments(map: Record<string, string> | null): void {
-    this.write('cellComments', map);
+    this.store.write('cellComments', map);
   }
   setCellCommentAuthors(map: Record<string, string> | null): void {
-    this.write('cellCommentAuthors', map);
+    this.store.write('cellCommentAuthors', map);
   }
   setVisibleCellComments(keys: string[] | null): void {
-    this.write('visibleCellComments', keys);
+    this.store.write('visibleCellComments', keys);
   }
   setInvalidFormulaCells(keys: string[] | null): void {
-    this.write('invalidFormulaCells', keys);
+    this.store.write('invalidFormulaCells', keys);
   }
   setOverlays(map: Record<string, OverlayInfo> | null): void {
-    this.write('overlays', map);
+    this.store.write('overlays', map);
   }
   setShowCustomEditorOnFocus(show: boolean): void {
-    this.write('showCustomEditorOnFocus', show);
+    this.store.write('showCustomEditorOnFocus', show);
   }
   setHasComponentFactory(has: boolean): void {
-    this.write('hasComponentFactory', has);
+    this.store.write('hasComponentFactory', has);
   }
   setInvalidFormulaErrorMessage(message: string | null): void {
-    this.write('invalidFormulaErrorMessage', message);
+    this.store.write('invalidFormulaErrorMessage', message);
   }
   setNamedRanges(names: string[] | null): void {
     this.changeFormulaBar({ namedRanges: coerceArray(names) });
@@ -3434,7 +3341,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // (Spreadsheet.setResource). Resolving them means reading the
     // attributes, not parsing a map out of this argument.
     this.resourceHost = host;
-    this.write('resources', keys);
+    this.store.write('resources', keys);
     this.scheduleRender();
   }
 
@@ -3468,15 +3375,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   // Freeze pane split positions
   setVerticalSplitPosition(value: number): void {
-    this.write('verticalSplitPosition', value);
+    this.store.write('verticalSplitPosition', value);
   }
   setHorizontalSplitPosition(value: number): void {
-    this.write('horizontalSplitPosition', value);
+    this.store.write('horizontalSplitPosition', value);
   }
 
   // Display flags
   setDisplayGridlines(visible: boolean): void {
-    this.write('displayGridlines', visible);
+    this.store.write('displayGridlines', visible);
     // Turned off or on from the server on its own, with no cell data to
     // carry a repaint along.
     this.scheduleRender();
@@ -3486,7 +3393,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // they get their default sizes back; hidden, they collapse. They are
     // drawn with the rest of the batch this came in, as every property is,
     // not halfway through it.
-    this.write('displayRowColHeadings', visible);
+    this.store.write('displayRowColHeadings', visible);
   }
   setLockFormatColumns(locked: boolean): void {
     this.headerResize.setLockFormatColumns(locked);
@@ -3518,119 +3425,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.tabs.setInfoLabel(label ?? null);
   }
   setHyperlinksTooltips(tooltips: Record<string, string> | null): void {
-    this.write('hyperlinksTooltips', tooltips);
+    this.store.write('hyperlinksTooltips', tooltips);
   }
   // ====================================================================
   // Popup-button lifecycle
   // ====================================================================
-
-  /** The sheet as the arrow keys see it. */
-  private sheetShape(): SheetShape {
-    return {
-      cols: this.model.cols,
-      rows: this.model.rows,
-      mergedRegions: this.model.mergedRegions,
-      hiddenColumns: this.model.hiddenColumnIndexes,
-      hiddenRows: this.model.hiddenRowIndexes
-    };
-  }
-
-  /**
-   * Select one cell - or the whole merge it is part of, with the merge's
-   * top-left cell active, as for a click.
-   */
-  private selectCellOrMerge(col: number, row: number): void {
-    this.pick(selectCellAt(col, row, this.model.mergedRegions));
-  }
-
-  /** Picks one cell or merge; see {@link pickCell}. */
-  private pick(next: SingleCellSelection): void {
-    this.changeSelection(pickCell(next));
-  }
-
-  /**
-   * Selects cells, with the merge still entered by the same cell; see
-   * {@link replaceRange}. Drawn as the handler ends, before the server is
-   * told; see {@link handling}.
-   */
-  private select(cells: SelectionState): void {
-    this.changeSelection(replaceRange(this.sheetSelection, cells));
-  }
-
-  private changeSelection(selection: SheetSelection): void {
-    this.sheetSelection = selection;
-    this.scheduleRender();
-  }
-
-  /**
-   * Changes what the user is in the middle of. Drawn as the handler ends,
-   * before the server is told; see {@link handling}.
-   */
-  private interact(interaction: InteractionState): void {
-    this.interaction = interaction;
-    this.scheduleRender();
-  }
-
-  private changeEdit(edit: Edit): void {
-    this.interact({ ...this.interaction, edit });
-  }
-
-  /** Changes the formula being written; see {@link withFormula}. */
-  private changeFormula(change: Partial<FormulaWriting>): void {
-    this.changeEdit(withFormula(this.interaction.edit, { ...this.formula, ...change }));
-  }
-
-  private changePress(press: CellPress | null): void {
-    this.interact({ ...this.interaction, press });
-  }
-
-  /** The strip a fill drag paints, while one does. */
-  private paintRect(): CellRect | null {
-    const press = this.interaction.press;
-    return press?.kind === 'fill' && press.outcome.kind !== 'none' ? press.outcome.painted : null;
-  }
-
-  /**
-   * Whether a range is selected: more than one cell, and more than the one
-   * merge the active cell is in, which is a single cell to the user.
-   */
-  private selectsRange(): boolean {
-    const { activeRange, activeCell } = this.selection;
-    return isMultiCellRange(activeRange) && !isSingleMerge(activeRange, activeCell, this.model.mergedRegions);
-  }
-
-  /**
-   * The range from the anchor to a target cell, grown to take in whole
-   * merged regions.
-   *
-   * A merged region is one cell to the user, so a selection that ends
-   * inside one has to take all of it; reporting the literal rectangle
-   * leaves the server writing to cells nobody can see.
-   */
-  private rangeTo(anchor: { col: number; row: number }, col: number, row: number): CellRange {
-    const range = normalizedRange(anchor.col, anchor.row, col, row);
-    const grown = expandToMergedRegions(
-      { c1: range.c1, c2: range.c2, r1: range.r1, r2: range.r2 },
-      this.model.mergedRegions
-    );
-    return { c1: grown.c1, c2: grown.c2, r1: grown.r1, r2: grown.r2 };
-  }
-
-  /**
-   * Rendered width of a column in pixels — 0 when it is hidden, the
-   * sheet's default past the last defined column.
-   */
-  private colWidthPx(col: number): number {
-    return drawnColumnWidth(this.model, col);
-  }
-
-  /**
-   * Rendered height of a row in pixels. POI measures rows in points, so
-   * this is the one place the conversion happens.
-   */
-  private rowHeightPx(row: number, ppi: number = FALLBACK_PPI): number {
-    return drawnRowHeight(this.model, row, ppi);
-  }
 
   /**
    * The scrolling pane on screen: the cells under the column letters and
