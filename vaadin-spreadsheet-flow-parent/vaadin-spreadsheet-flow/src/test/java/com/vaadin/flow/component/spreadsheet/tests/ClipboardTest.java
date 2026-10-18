@@ -8,9 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.poi.ss.usermodel.Cell;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -293,6 +296,63 @@ class ClipboardTest {
         Assertions.assertEquals("A1", getCellValue("A1"));
     }
 
+    /** A1 to A3 hold v0, v1 and v2, and are selected from A1. */
+    private void selectThreeValues() {
+        spreadsheet.createCell(0, 0, "v0");
+        spreadsheet.createCell(1, 0, "v1");
+        spreadsheet.createCell(2, 0, "v2");
+        spreadsheet.setSelectionRange(0, 0, 2, 0);
+    }
+
+    /** The text of the cells, "" for one that is empty or not there. */
+    private List<String> texts(String... cellAddresses) {
+        return Arrays.stream(cellAddresses).map(address -> {
+            Cell cell = spreadsheet.getCell(address);
+            return cell == null ? "" : cell.getStringCellValue();
+        }).toList();
+    }
+
+    @Test
+    void cut_undo_redo_cellsAreEmptyAgain() {
+        // The active cell, inside the range cut, was kept twice, so the redo
+        // put its value back.
+        selectThreeValues();
+        cut();
+        undo();
+
+        redo();
+
+        Assertions.assertEquals(List.of("", "", ""), texts("A1", "A2", "A3"));
+    }
+
+    @Test
+    void cut_undo_redo_undo_cellsHaveTheirValuesAgain() {
+        // The second undo used to find the cell taken out of the sheet, and
+        // threw.
+        selectThreeValues();
+        cut();
+        undo();
+        redo();
+
+        undo();
+
+        Assertions.assertEquals(List.of("v0", "v1", "v2"),
+                texts("A1", "A2", "A3"));
+    }
+
+    @Test
+    void cut_ofASingleCell_undo_redo_cellIsEmptyAgain() {
+        spreadsheet.createCell(1, 1, "b2");
+        spreadsheet.setSelection("B2");
+        cut();
+        undo();
+        Assertions.assertEquals(List.of("b2"), texts("B2"));
+
+        redo();
+
+        Assertions.assertEquals(List.of(""), texts("B2"));
+    }
+
     private String getCellValue(String cellAddress) {
         return spreadsheet.getCell(cellAddress).getStringCellValue();
     }
@@ -304,6 +364,10 @@ class ClipboardTest {
         text = text.substring(1, text.length() - 1);
         TestHelper.fireClientEvent(spreadsheet, "onPaste",
                 "{\"text\": " + text + "}");
+    }
+
+    private void redo() {
+        TestHelper.fireClientEvent(spreadsheet, "onRedo", "{}");
     }
 
     private void undo() {

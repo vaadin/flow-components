@@ -446,10 +446,16 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             }
         }
 
-        // clear single cell
+        // clear single cell, unless a range cleared above holds it: kept twice
+        // for undo, a redo would put its value back
         CellReference reference = spreadsheet.getCellSelectionManager()
                 .getSelectedCellReference();
-        Cell cell = spreadsheet.getCell(reference.getRow(), reference.getCol());
+        boolean singleCell = reference != null
+                && cellRangeAddresses.stream().noneMatch(range -> range
+                        .isInRange(reference.getRow(), reference.getCol()));
+        Cell cell = singleCell
+                ? spreadsheet.getCell(reference.getRow(), reference.getCol())
+                : null;
         if (cell != null) {
             if (spreadsheet.isCellLocked(cell.getAddress())) {
                 protectedCellWriteAttempted();
@@ -458,7 +464,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
             targetCells.add(cell);
         }
         CellValueCommand command = new CellValueCommand(spreadsheet);
-        if (reference != null) {
+        if (singleCell) {
             command.captureCellValues(reference);
         }
         for (CellRangeAddress range : cellRangeAddresses) {
