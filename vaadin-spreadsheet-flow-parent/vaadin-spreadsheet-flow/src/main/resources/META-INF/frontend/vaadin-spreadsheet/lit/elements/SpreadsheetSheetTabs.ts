@@ -40,8 +40,9 @@ export interface SheetTabsRenderState {
   activeIndex: number;
   /**
    * Index of the leftmost tab currently shown, 0-based. With more
-   * sheets than fit, the strip scrolls by whole tabs and the scroll
-   * buttons move this, and the server is told about changes so it can restore the position.
+   * sheets than fit, the strip scrolls by whole tabs: the scroll buttons
+   * move this, and so does a change of the active sheet whose tab is not
+   * in view. The server is not told.
    */
   firstVisibleTab: number;
   /**
@@ -330,7 +331,17 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
    */
   private lastFirstTab = 0;
 
-  private readonly resizeObserver = new ResizeObserver(() => this.measureLastFirstTab());
+  /**
+   * The sheets and the active one the strip last brought the active tab
+   * into view for: it does so again only when either changes, so a strip
+   * the buttons scrolled stays where they put it.
+   */
+  private revealedFor: { sheetNames: ReadonlyArray<string>; activeIndex: number } | null = null;
+
+  private readonly resizeObserver = new ResizeObserver(() => {
+    this.measureLastFirstTab();
+    this.revealActiveTab();
+  });
 
   constructor() {
     super();
@@ -373,6 +384,61 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     if (lastFirstTab !== this.lastFirstTab) {
       this.lastFirstTab = lastFirstTab;
       this.requestUpdate();
+    }
+  }
+
+  /**
+   * Bring the active sheet's tab into view once the active sheet or the
+   * sheets changed, as the GWT client did: back to it when it is before the
+   * first tab shown, and forward until it shows whole when the strip cuts it
+   * off. Asked of the controller, which keeps where the strip starts. A
+   * strip not laid out yet has nothing to measure, and tries again once it
+   * is.
+   */
+  private revealActiveTab(): void {
+    const { sheetNames, activeIndex, firstVisibleTab = 0 } = this.renderState;
+    const done = this.revealedFor;
+    if (done !== null && done.sheetNames === sheetNames && done.activeIndex === activeIndex) {
+      return;
+    }
+    if (activeIndex < 1 || activeIndex > sheetNames.length) {
+      return;
+    }
+    const active = activeIndex - 1;
+    let first = firstVisibleTab;
+    if (active < firstVisibleTab) {
+      first = active;
+    } else {
+      const root = this.shadowRoot;
+      const options = root?.querySelector<HTMLElement>('.sheet-tabsheet-options');
+      if (!options || this.offsetWidth === 0) {
+        return;
+      }
+      const label = root!.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
+      let room = this.offsetWidth - options.offsetWidth - (label?.offsetWidth ?? 0);
+      // The tabs are rendered from the first one shown on.
+      const widths = Array.from(root!.querySelectorAll<HTMLElement>('.sheet-tab'))
+        .slice(0, active - firstVisibleTab + 1)
+        .map(tabWidth);
+      if (widths.reduce((sum, width) => sum + width, 0) > room) {
+        let index = widths.length - 1;
+        room -= widths[index];
+        while (index > 0 && room - widths[index - 1] > 0) {
+          index--;
+          room -= widths[index];
+        }
+        first = firstVisibleTab + index;
+      }
+    }
+    this.revealedFor = { sheetNames, activeIndex };
+    if (first !== firstVisibleTab) {
+      this.dispatchEvent(
+        new CustomEvent('sheet-tabs-scroll', {
+          detail: { direction: 'reveal', firstVisibleTab: first },
+          bubbles: true,
+          composed: true
+        })
+      );
     }
   }
 
@@ -481,6 +547,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
       input.select();
     }
     this.measureLastFirstTab();
+    this.revealActiveTab();
   }
 
   private readonly handleShadowClick = (e: Event): void => {

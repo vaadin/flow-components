@@ -210,17 +210,23 @@ export class SheetTabs {
    *
    * The end button goes to the leftmost tab that still shows the last
    * one, which the strip measured: as far as the strip can scroll
-   * without showing empty space after the last tab.
+   * without showing empty space after the last tab. A change of the active
+   * sheet goes to where the strip measured that its tab shows whole.
    */
   private readonly handleSheetTabsScroll = (
-    e: CustomEvent<{ direction: 'start' | 'backward' | 'forward' | 'end'; lastFirstTab?: number }>
+    e: CustomEvent<{
+      direction: 'start' | 'backward' | 'forward' | 'end' | 'reveal';
+      lastFirstTab?: number;
+      firstVisibleTab?: number;
+    }>
   ): void => {
     const last = Math.max(0, this.sheetNames.length - 1);
     const moved = {
       start: 0,
       backward: this.firstVisibleTab - 1,
       forward: this.firstVisibleTab + 1,
-      end: e.detail.lastFirstTab ?? last
+      end: e.detail.lastFirstTab ?? last,
+      reveal: e.detail.firstVisibleTab ?? this.firstVisibleTab
     }[e.detail.direction];
     const next = Math.min(last, Math.max(0, moved));
     if (next === this.firstVisibleTab) {

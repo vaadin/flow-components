@@ -889,6 +889,130 @@ describe('Spreadsheet — scrolling the tab strip', () => {
     });
 });
 
+/**
+ * The tab of the active sheet is scrolled into view whenever the active sheet
+ * changes, as the GWT client did: a workbook that opens on a sheet further
+ * right showed the first tabs, and the active one out of view. 400px leaves
+ * 270px beside the buttons: three whole 69px tabs, and a part of the fourth.
+ */
+describe('Spreadsheet — the strip shows the active sheet', () => {
+    const EIGHT = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
+
+    function attach(): { sheet: Spreadsheet; cleanup: () => void } {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        const sheet = new Spreadsheet(host);
+        return {
+            sheet,
+            cleanup: () => {
+                sheet.dispose();
+                host.remove();
+            },
+        };
+    }
+
+    /** Renders, measures, and renders what the measuring moved. */
+    async function settled(sheet: Spreadsheet): Promise<SpreadsheetSheetTabs> {
+        const tabs = sheet.getSheetTabs();
+        for (let i = 0; i < 4; i++) {
+            await tabs.updateComplete;
+        }
+        return tabs;
+    }
+
+    /** The names of the tabs that show whole within the strip. */
+    function wholeTabs(tabs: SpreadsheetSheetTabs): string[] {
+        const container = tabs.shadowRoot!.querySelector('.sheet-tabsheet-container')!.getBoundingClientRect();
+        return [...tabs.shadowRoot!.querySelectorAll<HTMLElement>('.sheet-tab')]
+            .filter((tab) => {
+                const box = tab.getBoundingClientRect();
+                return box.left >= container.left - 0.5 && box.right <= container.right + 0.5;
+            })
+            .map((tab) => tab.textContent!.trim());
+    }
+
+    it('scrolls to the active sheet of a workbook that opens on one further right', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSheetNames(EIGHT);
+        sheet.setSheetIndex(7);
+
+        const tabs = await settled(sheet);
+
+        expect(tabs.renderState.firstVisibleTab).to.equal(4);
+        expect(wholeTabs(tabs)).to.deep.equal(['Five', 'Six', 'Seven']);
+        cleanup();
+    });
+
+    it('scrolls back to the active sheet when the server shows one before the first tab shown', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSheetNames(EIGHT);
+        sheet.setSheetIndex(7);
+        await settled(sheet);
+
+        sheet.setSheetIndex(2);
+        const tabs = await settled(sheet);
+
+        expect(tabs.renderState.firstVisibleTab).to.equal(1);
+        expect(wholeTabs(tabs)[0]).to.equal('Two');
+        cleanup();
+    });
+
+    it('shows the whole tab of a sheet picked where the strip cuts it off', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSheetNames(EIGHT);
+        sheet.setSheetIndex(1);
+        let tabs = await settled(sheet);
+        expect(wholeTabs(tabs)).to.deep.equal(['One', 'Two', 'Three']);
+
+        tabs.shadowRoot!.querySelector<HTMLElement>('.sheet-tab[data-index="4"]')!.click();
+        tabs = await settled(sheet);
+
+        expect(wholeTabs(tabs)).to.deep.equal(['Two', 'Three', 'Four']);
+        cleanup();
+    });
+
+    it('leaves the strip where the buttons put it while the active sheet stays', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSheetNames(EIGHT);
+        sheet.setSheetIndex(1);
+        let tabs = await settled(sheet);
+
+        tabs.shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-right')!.click();
+        tabs.shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-right')!.click();
+        tabs = await settled(sheet);
+
+        expect(tabs.renderState.firstVisibleTab).to.equal(2);
+        cleanup();
+    });
+
+    it('moves nothing when the active sheet already shows whole', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSheetNames(EIGHT);
+        sheet.setSheetIndex(1);
+        await settled(sheet);
+
+        sheet.setSheetIndex(3);
+        const tabs = await settled(sheet);
+
+        expect(tabs.renderState.firstVisibleTab).to.equal(0);
+        cleanup();
+    });
+
+    it('shows the active sheet of the next workbook, the same index on fewer sheets', async () => {
+        const { sheet, cleanup } = attach();
+        sheet.setSheetNames(EIGHT);
+        sheet.setSheetIndex(7);
+        await settled(sheet);
+
+        sheet.setSheetNames(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+        const tabs = await settled(sheet);
+
+        expect(wholeTabs(tabs)).to.include('G');
+        cleanup();
+    });
+});
+
 describe('Spreadsheet — the status label', () => {
     function attach(): { sheet: Spreadsheet; cleanup: () => void } {
         const host = document.createElement('div');
