@@ -154,6 +154,13 @@ import type { CellGridRenderState } from './elements/types.js';
  */
 const WIDTH_PROBE_TEXT = '5555555555';
 
+/**
+ * The shortest time between two reports of a write to a locked cell, as the
+ * GWT client kept it: the server's ProtectedEditListener promises one event a
+ * second at most.
+ */
+const PROTECTED_WRITE_REPORT_INTERVAL_MS = 1000;
+
 /** The style index a cell's class list names - "cs5 r cf2" is 5 - or null. */
 function styleIndexOf(cellStyle: string | undefined): number | null {
   const match = /(?:^|\s)cs(\d+)(?:\s|$)/.exec(cellStyle ?? '');
@@ -2498,6 +2505,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * user with no idea why nothing happened.
    */
   private reportProtectedCellWriteAttempt(): void {
+    // A burst of keys into a locked cell is one attempt, not a notification
+    // per key: the attempts within a second of the last report go unsaid.
+    const now = performance.now();
+    const last = this.view.protectedWriteReportedAt;
+    if (last !== null && now - last < PROTECTED_WRITE_REPORT_INTERVAL_MS) {
+      return;
+    }
+    this.view.protectedWriteReportedAt = now;
     this.sendToServer({ type: 'protectedCellWriteAttempted', data: {} });
   }
 

@@ -263,6 +263,35 @@ describe('Spreadsheet — a write to a protected cell', () => {
     expect(protectedReports(ctx.sent)).to.have.length(1);
   });
 
+  it('reports a burst of keys into a locked cell once, as the GWT client did', () => {
+    // The server's ProtectedEditListener promises one event a second at most:
+    // the default handler shows a notification for each.
+    typeInto(ctx.sheet, 2, 2, 'a');
+    typeInto(ctx.sheet, 2, 2, 'b');
+    typeInto(ctx.sheet, 2, 2, 'F2');
+
+    expect(protectedReports(ctx.sent)).to.have.length(1);
+  });
+
+  it('reports again once a second has passed since the last report', () => {
+    const realNow = performance.now;
+    let now = 10_000;
+    performance.now = () => now;
+    try {
+      typeInto(ctx.sheet, 2, 2, 'a');
+      now += 999;
+      typeInto(ctx.sheet, 2, 2, 'b');
+      expect(protectedReports(ctx.sent), 'within the second').to.have.length(1);
+
+      now += 1;
+      typeInto(ctx.sheet, 2, 2, 'c');
+
+      expect(protectedReports(ctx.sent)).to.have.length(2);
+    } finally {
+      performance.now = realNow;
+    }
+  });
+
   it('reports F2 on a locked cell', () => {
     typeInto(ctx.sheet, 2, 2, 'F2');
 

@@ -46,4 +46,6 @@ export class ViewState {
 
   /** The style indexes last reported to the server with a width ratio. */
   measuredStyleIndexes: ReadonlySet<number> = new Set();
+  /** When the server was last told of a write to a locked cell, if ever. */
+  protectedWriteReportedAt: number | null = null;
 }
