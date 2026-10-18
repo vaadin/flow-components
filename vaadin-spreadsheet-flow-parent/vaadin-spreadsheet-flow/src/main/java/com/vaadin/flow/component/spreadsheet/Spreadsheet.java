@@ -4543,9 +4543,9 @@ public class Spreadsheet extends Component
             if (collapsed) {
                 GroupingUtil.collapseColumn(activeSheet, index);
             } else {
-                short expandLevel = GroupingUtil.expandColumn(activeSheet,
-                        index);
-                updateExpandedRegion(activeSheet, index, expandLevel);
+                // The cells of the columns shown are sent below, for the
+                // rows on the screen.
+                GroupingUtil.expandColumn(activeSheet, index);
             }
         } else {
             if (collapsed) {
@@ -4557,38 +4557,6 @@ public class Spreadsheet extends Component
         SpreadsheetFactory.loadGrouping(this);
         // The rows and columns the group hid or showed are read again.
         sheetSizes.groupToggled();
-    }
-
-    private void updateExpandedRegion(XSSFSheet sheet, int columnIndex,
-            int expandLevel) {
-        if (expandLevel < 0) {
-            return;
-        }
-        int endIndex = -1;
-        for (GroupingData data : getColGroupingData()) {
-            if (data.level == expandLevel && data.startIndex <= columnIndex
-                    && columnIndex <= data.endIndex) {
-                endIndex = data.endIndex;
-                break;
-            }
-        }
-        if (endIndex < 0) {
-            return;
-        }
-        // update the style for the region cells, effects region + 1 row&col
-        int firstRowNum = sheet.getFirstRowNum();
-        int lastRowNum = sheet.getLastRowNum();
-        for (int r = firstRowNum; r <= lastRowNum; r++) {
-            Row row = sheet.getRow(r);
-            if (row != null) {
-                for (int c = columnIndex; c <= endIndex; c++) {
-                    Cell cell = row.getCell(c);
-                    if (cell != null) {
-                        valueManager.markCellForUpdate(cell);
-                    }
-                }
-            }
-        }
     }
 
     /**
