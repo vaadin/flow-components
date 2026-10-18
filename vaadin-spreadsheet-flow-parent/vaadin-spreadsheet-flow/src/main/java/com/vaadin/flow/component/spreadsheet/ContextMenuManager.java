@@ -32,9 +32,11 @@ import com.vaadin.flow.dom.Element;
  */
 public class ContextMenuManager implements Serializable {
 
-    private LinkedList<Handler> actionHandlers;
+    // Never null: a menu event can still arrive after the last handler went,
+    // sent by a client that had not heard there is no menu.
+    private final LinkedList<Handler> actionHandlers = new LinkedList<>();
 
-    private KeyMapper<Action> actionMapper;
+    private final KeyMapper<Action> actionMapper = new KeyMapper<>();
 
     private final Spreadsheet spreadsheet;
 
@@ -76,14 +78,8 @@ public class ContextMenuManager implements Serializable {
      *            Handler to add
      */
     public void addActionHandler(Handler actionHandler) {
-        if (actionHandler != null) {
-            if (actionHandlers == null) {
-                actionHandlers = new LinkedList<Handler>();
-                actionMapper = new KeyMapper<>();
-            }
-            if (!actionHandlers.contains(actionHandler)) {
-                actionHandlers.add(actionHandler);
-            }
+        if (actionHandler != null && !actionHandlers.contains(actionHandler)) {
+            actionHandlers.add(actionHandler);
         }
     }
 
@@ -95,12 +91,9 @@ public class ContextMenuManager implements Serializable {
      *            Handler to remove
      */
     public void removeActionHandler(Handler actionHandler) {
-        if (actionHandlers != null && actionHandlers.contains(actionHandler)) {
-            actionHandlers.remove(actionHandler);
-            if (actionHandlers.isEmpty()) {
-                actionHandlers = null;
-                actionMapper = null;
-            }
+        if (actionHandlers.remove(actionHandler) && actionHandlers.isEmpty()) {
+            // The keys of the actions offered so far name nothing now.
+            actionMapper.removeAll();
         }
     }
 
@@ -111,7 +104,7 @@ public class ContextMenuManager implements Serializable {
      * @return true if action handlers exist, false otherwise
      */
     public boolean hasActionHandlers() {
-        return actionHandlers != null && actionHandlers.size() > 0;
+        return !actionHandlers.isEmpty();
     }
 
     /**

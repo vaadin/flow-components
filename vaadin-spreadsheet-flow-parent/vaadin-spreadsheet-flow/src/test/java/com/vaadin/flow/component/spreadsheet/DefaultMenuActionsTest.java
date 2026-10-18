@@ -218,6 +218,19 @@ class DefaultMenuActionsTest {
     }
 
     @Test
+    void aMenuOpenedAsTheLastActionHandlerWent_showsNothing() {
+        // Right-clicks the client sent before it heard there is no menu.
+        spreadsheet.removeDefaultActionHandler();
+
+        rightClickRowHeader(3);
+        rightClickColumnHeader(2);
+        rightClickCell(2, 2);
+        pick("actionOnCurrentSelection", "1");
+
+        assertTrue(actionsShown().isEmpty());
+    }
+
+    @Test
     void anOwnActionInADefaultActionHandler_isOfferedWithTheDefaults_andRuns() {
         SpreadsheetDefaultActionHandler handler = new SpreadsheetDefaultActionHandler();
         handler.addSpreadsheetAction(new MarkDone());
