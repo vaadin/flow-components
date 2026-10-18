@@ -154,9 +154,14 @@ describe('Spreadsheet model of the server properties', () => {
   });
 
   for (const [name, { sent, read }] of Object.entries(collections)) {
-    it(`reads ${name} the same from JSON text as already parsed`, () => {
-      expect(write(name, sent)[name as SheetPropertyName], 'parsed').to.eql(read);
-      expect(write(name, JSON.stringify(sent))[name as SheetPropertyName], 'text').to.eql(read);
+    it(`reads ${name} from the JSON the server sends`, () => {
+      expect(write(name, sent)[name as SheetPropertyName]).to.eql(read);
+    });
+
+    it(`reads ${name} given as text as empty, not as its characters`, () => {
+      const empty = initialSheetModel()[name as SheetPropertyName];
+
+      expect(write(name, JSON.stringify(sent))[name as SheetPropertyName]).to.eql(empty);
     });
 
     it(`reads ${name} cleared as empty`, () => {

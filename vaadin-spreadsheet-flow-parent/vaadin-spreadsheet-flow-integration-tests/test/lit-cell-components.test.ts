@@ -357,19 +357,6 @@ describe('Spreadsheet — components inside cells', () => {
     cleanup();
   });
 
-  it('accepts the JSON-serialized map the server sends', async () => {
-    const widget = button('Click me');
-    const { host, sheet, cleanup } = attachSheet({ '31': widget });
-    sheet.setComponentIDtoCellKeysMap(
-      JSON.stringify({ '31': 'col2 row2' }) as any
-    );
-    sheet.recomputeViewport();
-    await sheet.getCellGrid().updateComplete;
-
-    expect(widget.getAttribute('slot')).to.equal('custom-component-31');
-    cleanup();
-  });
-
   it('takes the component back when the server removes it', async () => {
     const widget = button('Click me');
     const { host, sheet, cleanup } = attachSheet({ '31': widget });
@@ -572,17 +559,6 @@ describe('Spreadsheet — custom cell editors', () => {
     expect(editor.parentElement).to.equal(host);
     // The component keeps no slot it cannot project through.
     expect(widget.parentElement).to.be.null;
-    cleanup();
-  });
-
-  it('accepts the JSON-serialized map the server sends', async () => {
-    const editor = field();
-    const { host, sheet, cleanup } = attachSheet({ '77': editor });
-    sheet.setCellKeysToEditorIdMap(JSON.stringify({ 'col2 row2': '77' }) as any);
-    sheet.recomputeViewport();
-    await sheet.getCellGrid().updateComplete;
-
-    expect(editor.getAttribute('slot')).to.equal('custom-editor-77');
     cleanup();
   });
 

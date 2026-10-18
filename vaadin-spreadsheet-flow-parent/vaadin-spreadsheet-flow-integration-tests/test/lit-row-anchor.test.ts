@@ -161,7 +161,7 @@ describe('Spreadsheet — rows above the screen changing height', () => {
     sheet.notifyStateChanges(['sheetNames', 'sheetIndex'], false);
     scrollTo(2000);
 
-    sheet.setVerticalScrollPositions(JSON.stringify([2000, 600]));
+    sheet.setVerticalScrollPositions([2000, 600]);
     sheet.setSheetIndex(2);
     sheet.setRowH(heights({ 50: 30 }));
     sheet.notifyStateChanges(['verticalScrollPositions', 'sheetIndex', 'rowH'], false);

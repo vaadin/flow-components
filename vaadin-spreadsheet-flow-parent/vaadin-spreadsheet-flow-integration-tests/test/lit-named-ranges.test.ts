@@ -91,12 +91,6 @@ describe('Spreadsheet — named-range picker', () => {
     expect(namedRangeBox(ctx.sheet)!.value).to.equal('');
   });
 
-  it('accepts the list as the JSON string Flow sends on the property lane', async () => {
-    ctx.sheet.setNamedRanges('["john","local"]' as unknown as string[]);
-    const rendered = await options(ctx.sheet);
-    expect(rendered.map((o) => o.value)).to.eql(['', 'john', 'local']);
-  });
-
   it('drops the picker again when the ranges are cleared', async () => {
     ctx.sheet.setNamedRanges(['john']);
     expect(await options(ctx.sheet)).to.have.length(2);

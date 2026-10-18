@@ -85,16 +85,16 @@ describe('Spreadsheet — the sizes the sheet is drawn with', () => {
     });
   }
 
-  // The server sends the sizes as JSON text, which Flow passes on as it is.
-  it('takes the row heights as the text the server sends', () => {
-    sheet.setRowH(JSON.stringify([30, ...new Array(99).fill(15)]));
+  // A plain list of sizes is taken as it is.
+  it('takes the row heights as a list', () => {
+    sheet.setRowH([30, ...new Array(99).fill(15)]);
     sheet.recomputeViewport();
 
     expect(height()).to.equal(2020);
   });
 
-  it('takes the column widths as the text the server sends', () => {
-    sheet.setColW(JSON.stringify([150, ...new Array(19).fill(50)]));
+  it('takes the column widths as a list', () => {
+    sheet.setColW([150, ...new Array(19).fill(50)]);
     sheet.recomputeViewport();
 
     expect(width()).to.equal(1100);
@@ -102,14 +102,14 @@ describe('Spreadsheet — the sizes the sheet is drawn with', () => {
 
   // The server sends them as runs of equal sizes.
   it('takes the row heights as runs', () => {
-    sheet.setRowH('{"runs":[30.0,1,15.0,99]}');
+    sheet.setRowH({ runs: [30.0, 1, 15.0, 99] });
     sheet.recomputeViewport();
 
     expect(height()).to.equal(2020);
   });
 
   it('takes the column widths as runs', () => {
-    sheet.setColW('{"runs":[150,1,50,19]}');
+    sheet.setColW({ runs: [150, 1, 50, 19] });
     sheet.recomputeViewport();
 
     expect(width()).to.equal(1100);

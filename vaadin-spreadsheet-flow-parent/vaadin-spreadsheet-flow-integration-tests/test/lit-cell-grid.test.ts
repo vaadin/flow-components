@@ -404,11 +404,10 @@ describe('SpreadsheetCellGrid — cell styling', () => {
         return el.shadowRoot!.querySelector<HTMLElement>('.cell.col1.row1')!;
     }
 
-    it('takes the cell values as the JSON string the server can send', async () => {
-        // Flow hands collections over as a JSON string on some lanes and as
-        // an array on others. Iterating the string walks it character by
-        // character: one entry lands under "colundefined rowundefined" and
-        // every value on the sheet disappears.
+    it('takes no cell values given as text, rather than its characters', async () => {
+        // The server sends the cells as JSON. Text walked character by
+        // character once filed one entry under "colundefined rowundefined",
+        // and every value on the sheet disappeared.
         const host = document.createElement('div');
         host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
@@ -427,18 +426,13 @@ describe('SpreadsheetCellGrid — cell styling', () => {
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
 
-        expect(sheet.getCellData().size).to.equal(2);
-        expect(sheet.getCellData().get('col1 row1')!.value).to.equal('A1');
-        const cell = sheet
-            .getCellGrid()
-            .shadowRoot!.querySelector<HTMLElement>('.cell.col1.row1')!;
-        expect(cell.textContent!.trim()).to.equal('A1');
+        expect(sheet.getCellData().size).to.equal(0);
 
         sheet.dispose();
         host.remove();
     });
 
-    it('still takes the cell values as a plain array', async () => {
+    it('takes the cell values as the server sends them, as JSON', async () => {
         const host = document.createElement('div');
         host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);

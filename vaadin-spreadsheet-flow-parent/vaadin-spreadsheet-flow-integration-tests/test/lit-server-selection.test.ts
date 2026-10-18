@@ -859,13 +859,6 @@ describe('Formula bar — named ranges', () => {
     expect(await box()).to.be.null;
   });
 
-  it('accepts the JSON-serialized list the server sends', async () => {
-    ctx.sheet.setNamedRanges(JSON.stringify(['Sales']) as any);
-
-    const select = await box();
-    expect([...select!.options].map((o) => o.value)).to.deep.equal(['', 'Sales']);
-  });
-
   it('navigates to the range that is picked', async () => {
     ctx.sheet.setNamedRanges(['Sales', 'Costs']);
     const select = await box();

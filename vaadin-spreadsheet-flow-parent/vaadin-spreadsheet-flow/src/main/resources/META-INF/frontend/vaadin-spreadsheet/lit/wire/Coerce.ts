@@ -11,108 +11,48 @@
 import type { SizeRuns } from '../types/wire.js';
 
 /**
- * Values as the server sends them, read into what the client works with:
- * Flow passes collections either as they are or as JSON text.
+ * Values as the server sends them, read into what the client works with. The
+ * server sends collections as JSON values. Anything else reads as none: text
+ * in particular, which a collection never is, would be walked character by
+ * character.
  */
 
-/**
- * Coerce a value that may be either an array or a JSON-encoded
- * string into an array. The Flow runtime serializes server-side
- * property values to JSON strings when they reach the
- * {@code <vaadin-spreadsheet>} element's attribute lane, and they
- * arrive at the connector's setters as strings, to be parsed on the way in.
- */
-export function coerceArray<T>(value: T[] | string | null | undefined): T[] {
-  if (value == null) {
-    return [];
-  }
+/** A list the server sends, as it is; a typed array copied into a plain one. */
+export function coerceArray<T>(value: T[] | null | undefined): T[] {
   if (Array.isArray(value)) {
     return value;
   }
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-  // Typed arrays (Int32Array, Float32Array) — already array-like;
-  // convert to a real array for downstream `.map` etc. compatibility.
-  if (typeof (value as any).length === 'number') {
-    return Array.from(value as any);
+  if (ArrayBuffer.isView(value)) {
+    return Array.from(value as unknown as ArrayLike<T>);
   }
   return [];
 }
 
-/**
- * One object the server sends, as it is or as the JSON string Flow may send
- * it as; null for anything else.
- */
-export function coerceJson<T extends object>(value: T | string | null | undefined): T | null {
-  if (value == null) {
-    return null;
-  }
-  if (typeof value !== 'string') {
-    return value;
-  }
-  try {
-    const parsed: unknown = JSON.parse(value);
-    return parsed !== null && typeof parsed === 'object' ? (parsed as T) : null;
-  } catch {
-    return null;
-  }
+/** One object the server sends, as it is; null for anything else. */
+export function coerceJson<T extends object>(value: T | null | undefined): T | null {
+  return value !== null && typeof value === 'object' ? value : null;
+}
+
+/** A map the server sends, as it is; empty for anything else. */
+export function coerceObject<V>(value: Record<string, V> | null | undefined): Record<string, V> {
+  return value !== null && typeof value === 'object' ? value : {};
 }
 
 /**
- * Object-shaped variant of {@link coerceArray}. The same JSON-string-
- * coming-from-Flow-attribute path applies to record/map setters.
+ * A set of what the server sends as a list: asked about one value at a time,
+ * as hidden rows are inside loops over rows.
  */
-export function coerceObject<V>(value: Record<string, V> | string | null | undefined): Record<string, V> {
-  if (value == null) {
-    return {};
-  }
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch {
-      return {};
-    }
-  }
-  return value;
-}
-
-/**
- * A set of what the server sends as a list, as it is or as JSON text: asked
- * about one value at a time, as hidden rows are inside loops over rows.
- */
-export function coerceSet<T>(value: T[] | string | null | undefined): ReadonlySet<T> {
+export function coerceSet<T>(value: T[] | null | undefined): ReadonlySet<T> {
   return new Set(coerceArray(value));
 }
 
 /** The sizes the server sends: a plain array, or a typed one. */
 export type NumberList = number[] | Int32Array | Float32Array;
 
-/**
- * Numeric-array variant. Typed arrays (Int32Array, Float32Array)
- * arrive intact when pushed via Flow's typed-array support; JSON
- * strings get parsed.
- */
-export function coerceNumberArray(value: NumberList | string | null | undefined): NumberList {
-  if (value == null) {
-    return [];
-  }
+/** A list of numbers, as it is, typed arrays included; empty for anything else. */
+export function coerceNumberArray(value: NumberList | null | undefined): NumberList {
   if (Array.isArray(value) || value instanceof Int32Array || value instanceof Float32Array) {
     return value;
-  }
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
   }
   return [];
 }
@@ -125,13 +65,12 @@ const MAX_SIZES = 1 << 24;
  * sizes - as one size per row they came to 5.6 MB for the largest sheet - and
  * a plain list is taken as it is. Malformed runs read as no sizes at all.
  */
-export function coerceSizes(value: NumberList | SizeRuns | string | null | undefined): NumberList {
-  const parsed = typeof value === 'string' ? coerceJson<NumberList | SizeRuns>(value) : value;
-  if (Array.isArray(parsed) || parsed instanceof Int32Array || parsed instanceof Float32Array) {
-    return parsed;
+export function coerceSizes(value: NumberList | SizeRuns | null | undefined): NumberList {
+  if (Array.isArray(value) || value instanceof Int32Array || value instanceof Float32Array) {
+    return value;
   }
-  if (parsed != null && Array.isArray((parsed as SizeRuns).runs)) {
-    return spellOut((parsed as SizeRuns).runs);
+  if (value !== null && typeof value === 'object' && Array.isArray((value as SizeRuns).runs)) {
+    return spellOut((value as SizeRuns).runs);
   }
   return [];
 }

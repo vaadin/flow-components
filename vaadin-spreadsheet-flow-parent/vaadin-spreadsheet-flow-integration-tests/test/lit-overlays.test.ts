@@ -525,15 +525,6 @@ describe('Spreadsheet — setResources + setOverlays wiring', () => {
         cleanup();
     });
 
-    it('accepts the JSON-serialized key list the server sends', () => {
-        const { host, sheet, cleanup } = attachSheet(300, 200);
-        host.setAttribute('resource-img1', '/img/photo.png');
-        sheet.setResources(host, JSON.stringify(['img1']) as any);
-
-        expect(sheet.getResources().img1).to.equal('/img/photo.png');
-        cleanup();
-    });
-
     it('skips a key with no attribute rather than inventing a URL', () => {
         const { host, sheet, cleanup } = attachSheet(300, 200);
         host.setAttribute('resource-known', '/img/known.png');
@@ -938,9 +929,10 @@ describe('Spreadsheet — popup (filter) buttons', () => {
         cleanup();
     });
 
-    it('accepts the JSON-serialized state the server sends', async () => {
+    it('takes the state the server sends as JSON, and none given as text', async () => {
         const { sheet, cleanup } = attachSheet();
-        sheet.addPopupButton(JSON.stringify(button(2, 3)) as any);
+        sheet.addPopupButton(button(2, 3) as any);
+        sheet.addPopupButton(JSON.stringify(button(4, 3)) as any);
 
         expect(await buttons(sheet)).to.have.length(1);
         cleanup();

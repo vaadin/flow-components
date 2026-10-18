@@ -18,7 +18,7 @@ import type {
   SizeRuns,
   SpreadsheetActionDetails
 } from './types/wire.js';
-import type { Json, SpreadsheetClientApi } from './types/rpc-server-to-client.js';
+import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
   initialSheetSelection,
   pickCell,
@@ -3170,16 +3170,16 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   // 12 explicit RPC methods (server→client action messages)
   // ====================================================================
 
-  updateBottomRightCellValues(cellData: CellData[] | string): void {
+  updateBottomRightCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
   }
-  updateTopLeftCellValues(cellData: CellData[] | string): void {
+  updateTopLeftCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
   }
-  updateTopRightCellValues(cellData: CellData[] | string): void {
+  updateTopRightCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
   }
-  updateBottomLeftCellValues(cellData: CellData[] | string): void {
+  updateBottomLeftCellValues(cellData: CellData[]): void {
     this.storeCellData(cellData);
   }
 
@@ -3188,11 +3188,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * wire-format key. All four quadrants share the one map; the
    * cell-grid picks out what each pane draws.
    */
-  private storeCellData(cellData: CellData[] | string): void {
-    // Flow hands collections over as a JSON string on some lanes and as an
-    // array on others. Iterating the string walks it character by
-    // character, which quietly files one entry under
-    // "colundefined rowundefined" and drops every value on the sheet.
+  private storeCellData(cellData: CellData[]): void {
+    // Anything but a list of cells is none: iterating text would walk it
+    // character by character, filing one entry under
+    // "colundefined rowundefined" and dropping every value on the sheet.
     for (const cell of coerceArray<CellData>(cellData)) {
       this.sheetData.cells.set(toKey(cell.col, cell.row), cell);
       // A style no ratio has been measured for yet: measure again after
@@ -3327,7 +3326,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.popup.dismiss();
     this.menu.close();
   };
-  showActions(actionDetails: Json<SpreadsheetActionDetails[]>): void {
+  showActions(actionDetails: SpreadsheetActionDetails[] | null): void {
     this.menu.showActions(coerceArray<SpreadsheetActionDetails>(actionDetails));
   }
   setSelectedCellAndRange(
@@ -3457,7 +3456,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * rows on screen were others than those loaded, and loading those moved
    * them on again: 8 requests after one jump, to GWT's 3.
    */
-  setRowH(rowHeightsInPoints: Json<number[] | Float32Array | SizeRuns>): void {
+  setRowH(rowHeightsInPoints: number[] | Float32Array | SizeRuns | null): void {
     this.view.rowAnchor ??= this.firstRowWithTopOnScreen();
     this.write('rowH', rowHeightsInPoints);
   }
@@ -3497,60 +3496,60 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.scrollContainer.scrollTop = top;
     this.view.anchoredScrollTop = this.scrollContainer.scrollTop;
   }
-  setColW(colWidthsInPixels: Json<number[] | Int32Array | SizeRuns>): void {
+  setColW(colWidthsInPixels: number[] | Int32Array | SizeRuns | null): void {
     this.write('colW', colWidthsInPixels);
   }
-  setHiddenColumnIndexes(indexes: Json<number[]>): void {
+  setHiddenColumnIndexes(indexes: number[] | null): void {
     this.write('hiddenColumnIndexes', indexes);
   }
-  setHiddenRowIndexes(indexes: Json<number[]>): void {
+  setHiddenRowIndexes(indexes: number[] | null): void {
     this.write('hiddenRowIndexes', indexes);
   }
-  setLockedColumnIndexes(indexes: Json<number[]>): void {
+  setLockedColumnIndexes(indexes: number[] | null): void {
     this.write('lockedColumnIndexes', indexes);
   }
-  setLockedRowIndexes(indexes: Json<number[]>): void {
+  setLockedRowIndexes(indexes: number[] | null): void {
     this.write('lockedRowIndexes', indexes);
   }
   setSheetIndex(index: number): void {
     this.tabs.setSheetIndex(index);
   }
-  setSheetNames(names: Json<string[]>): void {
+  setSheetNames(names: string[] | null): void {
     this.tabs.setSheetNames(coerceArray(names));
   }
   /**
    * Where each sheet was last scrolled to, by visible sheet, as the server
    * keeps it: a sheet shown again goes back there.
    */
-  setVerticalScrollPositions(positions: Json<number[]>): void {
+  setVerticalScrollPositions(positions: number[] | null): void {
     this.write('verticalScrollPositions', positions);
   }
   /** See {@link setVerticalScrollPositions}. */
-  setHorizontalScrollPositions(positions: Json<number[]>): void {
+  setHorizontalScrollPositions(positions: number[] | null): void {
     this.write('horizontalScrollPositions', positions);
   }
-  setCellStyleToCSSStyle(map: Json<Record<number, string>>): void {
+  setCellStyleToCSSStyle(map: Record<number, string> | null): void {
     this.write('cellStyleToCSSStyle', map);
     // The server sizes General-format numbers against how wide a digit is
     // in each style, and only the client can measure that.
     this.view.styleWidthRatiosStale = true;
   }
-  setRowIndexToStyleIndex(map: Json<Record<number, number>>): void {
+  setRowIndexToStyleIndex(map: Record<number, number> | null): void {
     this.write('rowIndexToStyleIndex', map);
   }
-  setColumnIndexToStyleIndex(map: Json<Record<number, number>>): void {
+  setColumnIndexToStyleIndex(map: Record<number, number> | null): void {
     this.write('columnIndexToStyleIndex', map);
   }
-  setShiftedCellBorderStyles(cssRules: Json<string[]>): void {
+  setShiftedCellBorderStyles(cssRules: string[] | null): void {
     this.write('shiftedCellBorderStyles', cssRules);
   }
-  setConditionalFormattingStyles(map: Json<Record<number, string>>): void {
+  setConditionalFormattingStyles(map: Record<number, string> | null): void {
     this.write('conditionalFormattingStyles', map);
   }
-  setColGroupingData(groups: Json<GroupingData[]>): void {
+  setColGroupingData(groups: GroupingData[] | null): void {
     this.write('colGroupingData', groups);
   }
-  setRowGroupingData(groups: Json<GroupingData[]>): void {
+  setRowGroupingData(groups: GroupingData[] | null): void {
     this.write('rowGroupingData', groups);
   }
   setColGroupingMax(level: number): void {
@@ -3739,28 +3738,28 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   setSheetProtected(isProtected: boolean): void {
     this.write('sheetProtected', isProtected);
   }
-  setMergedRegions(regions: Json<MergedRegion[]>): void {
+  setMergedRegions(regions: MergedRegion[] | null): void {
     this.write('mergedRegions', regions);
   }
-  setCellKeysToEditorIdMap(map: Json<Record<string, string>>): void {
+  setCellKeysToEditorIdMap(map: Record<string, string> | null): void {
     this.write('cellKeysToEditorIdMap', map);
   }
   setComponentIDtoCellKeysMap(map: Record<string, string>): void {
     this.write('componentIDtoCellKeysMap', map);
   }
-  setCellComments(map: Json<Record<string, string>>): void {
+  setCellComments(map: Record<string, string> | null): void {
     this.write('cellComments', map);
   }
-  setCellCommentAuthors(map: Json<Record<string, string>>): void {
+  setCellCommentAuthors(map: Record<string, string> | null): void {
     this.write('cellCommentAuthors', map);
   }
-  setVisibleCellComments(keys: Json<string[]>): void {
+  setVisibleCellComments(keys: string[] | null): void {
     this.write('visibleCellComments', keys);
   }
-  setInvalidFormulaCells(keys: Json<string[]>): void {
+  setInvalidFormulaCells(keys: string[] | null): void {
     this.write('invalidFormulaCells', keys);
   }
-  setOverlays(map: Json<Record<string, OverlayInfo>>): void {
+  setOverlays(map: Record<string, OverlayInfo> | null): void {
     this.write('overlays', map);
   }
   setShowCustomEditorOnFocus(show: boolean): void {
@@ -3772,10 +3771,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   setInvalidFormulaErrorMessage(message: string | null): void {
     this.write('invalidFormulaErrorMessage', message);
   }
-  setNamedRanges(names: Json<string[]>): void {
+  setNamedRanges(names: string[] | null): void {
     this.changeFormulaBar({ namedRanges: coerceArray(names) });
   }
-  setResources(host: HTMLElement, keys: string[] | string): void {
+  setResources(host: HTMLElement, keys: string[] | null): void {
     // The server sends the resource KEYS here and puts each URL on the host
     // as a `resource-<key>` attribute, because the URLs are Flow stream
     // resources minted per element rather than plain strings
@@ -3867,7 +3866,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   setInfoLabelValue(label: string | null | undefined): void {
     this.tabs.setInfoLabel(label ?? null);
   }
-  setHyperlinksTooltips(tooltips: Json<Record<string, string>>): void {
+  setHyperlinksTooltips(tooltips: Record<string, string> | null): void {
     this.write('hyperlinksTooltips', tooltips);
   }
   // ====================================================================
@@ -4018,16 +4017,16 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
 
   /** A popup (filter) button was attached to a cell. */
-  addPopupButton(rawState: PopupButtonState | string): void {
-    const state = coerceJson(rawState);
+  addPopupButton(sent: PopupButtonState): void {
+    const state = coerceJson(sent);
     if (state !== null && typeof state.col === 'number') {
       this.popup.addButton(state);
     }
   }
 
   /** A popup button was taken away, and its popup closes with it. */
-  removePopupButton(rawState: PopupButtonState | string): void {
-    const state = coerceJson(rawState);
+  removePopupButton(sent: PopupButtonState): void {
+    const state = coerceJson(sent);
     if (state !== null && typeof state.col === 'number') {
       this.popup.removeButton(state);
     }

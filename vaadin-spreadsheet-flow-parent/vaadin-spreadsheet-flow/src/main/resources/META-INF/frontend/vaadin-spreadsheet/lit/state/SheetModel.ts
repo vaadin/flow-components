@@ -35,10 +35,10 @@ function plain<V>(initial: V): SheetProperty<V, V> {
 }
 
 /**
- * A collection, which the server sends as it is or as JSON text: empty until
- * it is sent, as it is read when the server clears it.
+ * A collection, which the server sends as JSON: empty until it is sent, as it
+ * is read when the server clears it.
  */
-function collection<W, V>(coerce: (value: W | null) => V): SheetProperty<W, V> {
+function collection<W, V>(coerce: (value: W | null) => V): SheetProperty<W | null, V> {
   return { coerce, initial: () => coerce(null) };
 }
 

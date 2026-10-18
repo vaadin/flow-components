@@ -248,14 +248,6 @@ describe('Spreadsheet — cell comment overlays', () => {
     expect(overlays(ctx.sheet)).to.be.empty;
   });
 
-  it('accepts the comment map as the JSON string Flow sends', async () => {
-    ctx.sheet.setCellComments(JSON.stringify({ [A1]: 'from the wire' }) as any);
-    ctx.sheet.setVisibleCellComments(JSON.stringify([A1]) as any);
-    await paint(ctx.sheet);
-
-    expect(labels(ctx.sheet)).to.eql(['from the wire']);
-  });
-
   it('drops the overlay when the comment is removed', async () => {
     ctx.sheet.setCellComments({ [A1]: 'a note' });
     ctx.sheet.setVisibleCellComments([A1]);

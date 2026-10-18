@@ -8,7 +8,15 @@
  * license.
  */
 
-import type { CellData, GroupingData, MergedRegion, OverlayInfo, SizeRuns, SpreadsheetActionDetails } from './wire.js';
+import type {
+  CellData,
+  GroupingData,
+  MergedRegion,
+  OverlayInfo,
+  PopupButtonState,
+  SizeRuns,
+  SpreadsheetActionDetails
+} from './wire.js';
 
 /**
  * The methods the connector exposes to the {@code <vaadin-spreadsheet>}
@@ -23,12 +31,6 @@ import type { CellData, GroupingData, MergedRegion, OverlayInfo, SizeRuns, Sprea
  * directly or through a {@link MirroredProperty};
  * {@code ClientApiContractTest} checks that each one has a setter.
  */
-/**
- * A value the server sends as JSON text, through {@code Serializer}; the
- * connector also takes it already parsed.
- */
-export type Json<T> = T | string;
-
 export interface SpreadsheetClientApi {
   // ====================================================================
   // Initial setup / lifecycle
@@ -65,7 +67,7 @@ export interface SpreadsheetClientApi {
     initialSelection: boolean,
     keepView?: boolean
   ): void;
-  showActions(actionDetails: Json<SpreadsheetActionDetails[]>): void;
+  showActions(actionDetails: SpreadsheetActionDetails[] | null): void;
   setSelectedCellAndRange(
     name: string,
     col: number,
@@ -94,29 +96,29 @@ export interface SpreadsheetClientApi {
   // Sheet-level dimensions + visibility
   setDefRowH(heightInPoints: number): void;
   setDefColW(widthInPixels: number): void;
-  setRowH(rowHeightsInPoints: Json<number[] | Float32Array | SizeRuns>): void;
-  setColW(colWidthsInPixels: Json<number[] | Int32Array | SizeRuns>): void;
-  setHiddenColumnIndexes(indexes: Json<number[]>): void;
-  setHiddenRowIndexes(indexes: Json<number[]>): void;
-  setLockedColumnIndexes(indexes: Json<number[]>): void;
-  setLockedRowIndexes(indexes: Json<number[]>): void;
+  setRowH(rowHeightsInPoints: number[] | Float32Array | SizeRuns | null): void;
+  setColW(colWidthsInPixels: number[] | Int32Array | SizeRuns | null): void;
+  setHiddenColumnIndexes(indexes: number[] | null): void;
+  setHiddenRowIndexes(indexes: number[] | null): void;
+  setLockedColumnIndexes(indexes: number[] | null): void;
+  setLockedRowIndexes(indexes: number[] | null): void;
 
   // Sheet navigation
   setSheetIndex(index: number): void;
-  setSheetNames(names: Json<string[]>): void;
-  setVerticalScrollPositions(positions: Json<number[]>): void;
-  setHorizontalScrollPositions(positions: Json<number[]>): void;
+  setSheetNames(names: string[] | null): void;
+  setVerticalScrollPositions(positions: number[] | null): void;
+  setHorizontalScrollPositions(positions: number[] | null): void;
 
   // CSS styling
-  setCellStyleToCSSStyle(map: Json<Record<number, string>>): void;
-  setRowIndexToStyleIndex(map: Json<Record<number, number>>): void;
-  setColumnIndexToStyleIndex(map: Json<Record<number, number>>): void;
-  setShiftedCellBorderStyles(cssRules: Json<string[]>): void;
-  setConditionalFormattingStyles(map: Json<Record<number, string>>): void;
+  setCellStyleToCSSStyle(map: Record<number, string> | null): void;
+  setRowIndexToStyleIndex(map: Record<number, number> | null): void;
+  setColumnIndexToStyleIndex(map: Record<number, number> | null): void;
+  setShiftedCellBorderStyles(cssRules: string[] | null): void;
+  setConditionalFormattingStyles(map: Record<number, string> | null): void;
 
   // Grouping (outline)
-  setColGroupingData(groups: Json<GroupingData[]>): void;
-  setRowGroupingData(groups: Json<GroupingData[]>): void;
+  setColGroupingData(groups: GroupingData[] | null): void;
+  setRowGroupingData(groups: GroupingData[] | null): void;
   setColGroupingMax(level: number): void;
   setRowGroupingMax(level: number): void;
   setColGroupingInversed(inversed: boolean): void;
@@ -126,19 +128,19 @@ export interface SpreadsheetClientApi {
   setReload(triggerReload: boolean): void;
   setSheetProtected(isProtected: boolean): void;
   setWorkbookProtected(isProtected: boolean): void;
-  setMergedRegions(regions: Json<MergedRegion[]>): void;
-  setCellKeysToEditorIdMap(map: Json<Record<string, string>>): void;
+  setMergedRegions(regions: MergedRegion[] | null): void;
+  setCellKeysToEditorIdMap(map: Record<string, string> | null): void;
   setComponentIDtoCellKeysMap(map: Record<string, string>): void;
-  setCellComments(map: Json<Record<string, string>>): void;
-  setCellCommentAuthors(map: Json<Record<string, string>>): void;
-  setVisibleCellComments(keys: Json<string[]>): void;
-  setInvalidFormulaCells(keys: Json<string[]>): void;
-  setOverlays(map: Json<Record<string, OverlayInfo>>): void;
+  setCellComments(map: Record<string, string> | null): void;
+  setCellCommentAuthors(map: Record<string, string> | null): void;
+  setVisibleCellComments(keys: string[] | null): void;
+  setInvalidFormulaCells(keys: string[] | null): void;
+  setOverlays(map: Record<string, OverlayInfo> | null): void;
   setShowCustomEditorOnFocus(show: boolean): void;
   setHasComponentFactory(has: boolean): void;
   setInvalidFormulaErrorMessage(message: string | null): void;
-  setNamedRanges(names: Json<string[]>): void;
-  setResources(host: HTMLElement, jsonString: string): void;
+  setNamedRanges(names: string[] | null): void;
+  setResources(host: HTMLElement, keys: string[] | null): void;
 
   // Freeze pane split positions
   setVerticalSplitPosition(value: number): void;
@@ -154,7 +156,7 @@ export interface SpreadsheetClientApi {
 
   // Display content
   setInfoLabelValue(label: string): void;
-  setHyperlinksTooltips(tooltips: Json<Record<string, string>>): void;
+  setHyperlinksTooltips(tooltips: Record<string, string> | null): void;
 
   // ====================================================================
   // Popup-button lifecycle
@@ -168,6 +170,6 @@ export interface SpreadsheetClientApi {
    */
   onPopupButtonOpen(row: number, column: number, contentId: number, appId: string): void;
   closePopup(row: number, column: number): void;
-  addPopupButton(rawState: string): void;
-  removePopupButton(rawState: string): void;
+  addPopupButton(state: PopupButtonState): void;
+  removePopupButton(state: PopupButtonState): void;
 }

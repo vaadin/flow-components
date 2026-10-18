@@ -19,15 +19,15 @@ import {
 /**
  * Taking a collection off the wire.
  *
- * Flow hands collections over as a JSON string on some lanes and as the
- * real thing on others, and which lane a given push takes is not
- * something a setter can tell by looking. Every setter that accepts a
- * collection runs it through one of these first.
+ * The server sends collections as JSON values, and null to clear one. Every
+ * setter that accepts a collection runs it through one of these first, which
+ * reads anything else as empty.
  *
- * They are worth pinning on their own: a setter that forgets one does not
- * fail loudly. It iterates the string character by character and quietly
- * produces nonsense — that is how the whole sheet once rendered blank
- * with a single entry keyed "colundefined rowundefined".
+ * They are worth pinning on their own: text that slipped through would not
+ * fail loudly. It would be iterated character by character and quietly
+ * produce nonsense — that is how the whole sheet once rendered blank with a
+ * single entry keyed "colundefined rowundefined". The server sent JSON as
+ * text then; it no longer does, and the client no longer parses text.
  */
 
 describe('coerceArray', () => {
@@ -36,14 +36,9 @@ describe('coerceArray', () => {
     expect(coerceArray(input)).to.equal(input);
   });
 
-  it('parses the JSON string Flow sends', () => {
-    expect(coerceArray('[1,2,3]')).to.deep.equal([1, 2, 3]);
-  });
-
-  it('parses a JSON string of objects', () => {
-    expect(coerceArray('[{"col":1,"row":2}]')).to.deep.equal([
-      { col: 1, row: 2 }
-    ]);
+  it('reads text as empty, never as its characters', () => {
+    expect(coerceArray('[1,2,3]' as any)).to.deep.equal([]);
+    expect(coerceArray('[{"col":1,"row":2}]' as any)).to.deep.equal([]);
   });
 
   it('reads null and undefined as empty', () => {
@@ -53,19 +48,11 @@ describe('coerceArray', () => {
     expect(coerceArray(undefined)).to.deep.equal([]);
   });
 
-  it('reads an empty string as empty', () => {
-    expect(coerceArray('')).to.deep.equal([]);
-  });
-
-  it('reads malformed JSON as empty rather than throwing', () => {
+  it('reads anything that is not a list as empty rather than throwing', () => {
     // A throw here would abort the whole property batch, taking every
     // later push in the same response with it.
-    expect(coerceArray('{oops')).to.deep.equal([]);
-  });
-
-  it('reads a JSON value that is not an array as empty', () => {
-    expect(coerceArray('{"a":1}')).to.deep.equal([]);
-    expect(coerceArray('42')).to.deep.equal([]);
+    expect(coerceArray({ a: 1 } as any)).to.deep.equal([]);
+    expect(coerceArray(42 as any)).to.deep.equal([]);
   });
 
   it('converts a typed array to a real one', () => {
@@ -82,8 +69,8 @@ describe('coerceObject', () => {
     expect(coerceObject(input)).to.equal(input);
   });
 
-  it('parses the JSON string Flow sends', () => {
-    expect(coerceObject('{"a":1,"b":2}')).to.deep.equal({ a: 1, b: 2 });
+  it('reads text as empty', () => {
+    expect(coerceObject('{"a":1,"b":2}' as any)).to.deep.equal({});
   });
 
   it('reads null and undefined as empty', () => {
@@ -91,18 +78,8 @@ describe('coerceObject', () => {
     expect(coerceObject(undefined)).to.deep.equal({});
   });
 
-  it('reads an empty string as empty', () => {
-    // This is what the server sends for a cleared map, and it is not
-    // valid JSON.
-    expect(coerceObject('')).to.deep.equal({});
-  });
-
-  it('reads malformed JSON as empty rather than throwing', () => {
-    expect(coerceObject('{oops')).to.deep.equal({});
-  });
-
-  it('reads a JSON null as empty', () => {
-    expect(coerceObject('null')).to.deep.equal({});
+  it('reads anything that is not an object as empty', () => {
+    expect(coerceObject(42 as any)).to.deep.equal({});
   });
 });
 
@@ -121,18 +98,10 @@ describe('coerceNumberArray', () => {
     expect(coerceNumberArray(input)).to.equal(input);
   });
 
-  it('parses the JSON string Flow sends', () => {
-    expect(coerceNumberArray('[1,2.5]')).to.deep.equal([1, 2.5]);
-  });
-
-  it('reads null, empty and malformed as empty', () => {
+  it('reads null, text and anything that is not a list as empty', () => {
     expect(coerceNumberArray(null)).to.deep.equal([]);
-    expect(coerceNumberArray('')).to.deep.equal([]);
-    expect(coerceNumberArray('[1,')).to.deep.equal([]);
-  });
-
-  it('reads a JSON value that is not an array as empty', () => {
-    expect(coerceNumberArray('{"a":1}')).to.deep.equal([]);
+    expect(coerceNumberArray('[1,2.5]' as any)).to.deep.equal([]);
+    expect(coerceNumberArray({ a: 1 } as any)).to.deep.equal([]);
   });
 });
 
@@ -141,14 +110,9 @@ describe('coerceSet', () => {
     expect(coerceSet([3, 1, 3])).to.eql(new Set([1, 3]));
   });
 
-  it('parses the JSON string Flow sends', () => {
-    expect(coerceSet<string>('["col1row2"]')).to.eql(new Set(['col1row2']));
-  });
-
-  it('reads null, empty and malformed as empty', () => {
+  it('reads null and text as empty', () => {
     expect(coerceSet(null)).to.eql(new Set());
-    expect(coerceSet('')).to.eql(new Set());
-    expect(coerceSet('[1,')).to.eql(new Set());
+    expect(coerceSet('["col1row2"]' as any)).to.eql(new Set());
   });
 });
 
@@ -156,15 +120,12 @@ describe('coerceSizes', () => {
   // The server sends row heights and column widths as runs of equal sizes:
   // one size per row came to 5.6 MB for the largest sheet.
   it('spells out the runs the server sends', () => {
-    expect(coerceSizes('{"runs":[15.0,3,30.0,1,15.0,2]}')).to.deep.equal([15, 15, 15, 30, 15, 15]);
-  });
-
-  it('spells out runs already parsed', () => {
+    expect(coerceSizes({ runs: [15.0, 3, 30.0, 1, 15.0, 2] })).to.deep.equal([15, 15, 15, 30, 15, 15]);
     expect(coerceSizes({ runs: [50, 2, 120, 1] })).to.deep.equal([50, 50, 120]);
   });
 
   it('spells out a million rows from one run', () => {
-    const sizes = coerceSizes('{"runs":[15.0,1048576]}');
+    const sizes = coerceSizes({ runs: [15.0, 1048576] });
     expect(sizes.length).to.equal(1_048_576);
     expect(sizes[0]).to.equal(15);
     expect(sizes[1_048_575]).to.equal(15);
@@ -175,24 +136,22 @@ describe('coerceSizes', () => {
   });
 
   it('reads no runs as no sizes', () => {
-    expect(coerceSizes('{"runs":[]}')).to.deep.equal([]);
+    expect(coerceSizes({ runs: [] })).to.deep.equal([]);
   });
 
   it('passes a plain list through', () => {
     const input = [1, 2];
     expect(coerceSizes(input)).to.equal(input);
-    expect(coerceSizes('[1,2.5]')).to.deep.equal([1, 2.5]);
     const typed = Float32Array.from([1.5]);
     expect(coerceSizes(typed)).to.equal(typed);
   });
 
-  it('reads null, empty and malformed text as no sizes', () => {
+  it('reads null, text and anything without runs as no sizes', () => {
     expect(coerceSizes(null)).to.deep.equal([]);
     expect(coerceSizes(undefined)).to.deep.equal([]);
-    expect(coerceSizes('')).to.deep.equal([]);
-    expect(coerceSizes('{"runs":[1,')).to.deep.equal([]);
-    expect(coerceSizes('{"other":[1,2]}')).to.deep.equal([]);
-    expect(coerceSizes('7')).to.deep.equal([]);
+    expect(coerceSizes('{"runs":[15.0,2]}' as any)).to.deep.equal([]);
+    expect(coerceSizes({ other: [1, 2] } as any)).to.deep.equal([]);
+    expect(coerceSizes(7 as any)).to.deep.equal([]);
   });
 
   const malformed: Array<[string, unknown[]]> = [

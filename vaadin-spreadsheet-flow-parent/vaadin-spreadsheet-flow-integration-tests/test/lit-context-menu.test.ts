@@ -172,20 +172,6 @@ describe('Spreadsheet context menu — opening', () => {
     expect(Math.round(rect.y)).to.equal(90);
   });
 
-  it('accepts the JSON-serialized payload the server actually sends', async () => {
-    // Flow serializes the action list, so it arrives as a string rather
-    // than an array — the same lane the collection-shaped property
-    // pushes come through.
-    ctx.sheet.showActions(
-      JSON.stringify([action('Insert row', 'insert-row', 0)]) as any
-    );
-
-    const rendered = await items(ctx.sheet);
-    expect(rendered.map((i) => i.textContent!.trim())).to.deep.equal([
-      'Insert row'
-    ]);
-  });
-
   it('shows nothing when the server offers no actions', async () => {
     ctx.sheet.showActions([]);
 
@@ -798,20 +784,6 @@ describe('Spreadsheet — context-menu action icons', () => {
     expect(academy.parentElement).to.be.null;
   });
 
-  it('accepts the action list as the JSON string Flow sends', async () => {
-    withIcons({ 7: icon('vaadin:academy-cap') });
-
-    ctx.sheet.showActions(
-      JSON.stringify([{ caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }]) as any
-    );
-    await ctx.sheet.getContextMenu().updateComplete;
-    await ctx.sheet.getContextMenu().updateComplete;
-
-    expect(
-      ctx.sheet.getContextMenu().shadowRoot!.querySelector<HTMLSlotElement>('slot.item-icon')!
-        .assignedElements({ flatten: true })
-    ).to.have.length(1);
-  });
 });
 
 /**

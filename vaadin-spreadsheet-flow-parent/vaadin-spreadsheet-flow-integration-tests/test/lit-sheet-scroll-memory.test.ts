@@ -40,8 +40,8 @@ describe('Spreadsheet — each sheet remembers where it was scrolled', () => {
 
   /** As the server switches: the offsets it keeps, then the sheet. */
   function serverShows(index: number, top: number[], left: number[]): void {
-    sheet.setVerticalScrollPositions(JSON.stringify(top));
-    sheet.setHorizontalScrollPositions(JSON.stringify(left));
+    sheet.setVerticalScrollPositions(top);
+    sheet.setHorizontalScrollPositions(left);
     sheet.setSheetIndex(index);
     sheet.notifyStateChanges(['verticalScrollPositions', 'horizontalScrollPositions', 'sheetIndex'], false);
   }
@@ -130,7 +130,7 @@ describe('Spreadsheet — each sheet remembers where it was scrolled', () => {
       other.setRows(400);
       other.setCols(10);
       other.setRowH(new Array(400).fill(15));
-      other.setVerticalScrollPositions('[600]');
+      other.setVerticalScrollPositions([600]);
       other.setSheetIndex(1);
       other.notifyStateChanges(['rows', 'cols', 'rowH', 'verticalScrollPositions', 'sheetIndex'], true);
 
