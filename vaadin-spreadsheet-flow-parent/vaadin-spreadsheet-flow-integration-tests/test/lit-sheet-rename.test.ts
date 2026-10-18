@@ -13,6 +13,7 @@ import {
     resolveSheetRename,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/SheetName.js';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * Double-clicking the active sheet tab renames it: the name becomes an
@@ -118,7 +119,7 @@ describe('Spreadsheet — renaming a sheet tab', () => {
 
     async function tabs(): Promise<HTMLElement[]> {
         const strip = sheet.getSheetTabs();
-        await strip.updateComplete;
+        await rendered(sheet);
         return Array.from(
             strip.shadowRoot!.querySelectorAll<HTMLElement>('.sheet-tab')
         );
@@ -129,12 +130,12 @@ describe('Spreadsheet — renaming a sheet tab', () => {
         tab.dispatchEvent(
             new MouseEvent('dblclick', { bubbles: true, composed: true })
         );
-        await sheet.getSheetTabs().updateComplete;
+        await rendered(sheet);
     }
 
     async function input(): Promise<HTMLInputElement | null> {
         const strip = sheet.getSheetTabs();
-        await strip.updateComplete;
+        await rendered(sheet);
         return strip.shadowRoot!.querySelector<HTMLInputElement>(
             '.sheet-tab-rename'
         );
@@ -190,6 +191,17 @@ describe('Spreadsheet — renaming a sheet tab', () => {
         expect(events[0].type).to.equal('sheetRenamed');
         // The server counts sheets from 0.
         expect(events[0].data).to.eql({ sheetIndex: 1, newName: 'Q4' });
+    });
+
+    it('reports a rename once, though the input blurs on its way out', async () => {
+        await doubleClick(2);
+        const el = await type('Q4');
+        const reported: unknown[] = [];
+        sheet.getSheetTabs().addEventListener('sheet-tab-rename', (e) => reported.push((e as CustomEvent).detail));
+        press(el, 'Enter');
+        el.dispatchEvent(new FocusEvent('blur'));
+
+        expect(reported).to.eql([{ index: 2, name: 'Q4' }]);
     });
 
     it('shows the new name without waiting for the server', async () => {
@@ -284,7 +296,7 @@ describe('Spreadsheet — renaming a sheet tab', () => {
         // matters: the name this tab is bound to changes underneath the
         // input.
         sheet.setSheetNames(['Sheet1', 'Renamed elsewhere', 'Notes']);
-        await sheet.getSheetTabs().updateComplete;
+        await rendered(sheet);
 
         expect((await input())!.value).to.equal('Half-typed');
         expect(el.isConnected, 'the input was replaced').to.be.true;

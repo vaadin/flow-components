@@ -100,7 +100,9 @@ export async function rendered(sheet: Spreadsheet): Promise<void> {
     sheet.getCellGrid().updateComplete,
     sheet.getColumnHeader().updateComplete,
     sheet.getRowHeader().updateComplete,
-    sheet.getFormulaBar().updateComplete
+    sheet.getFormulaBar().updateComplete,
+    sheet.getSheetTabs().updateComplete,
+    sheet.getContextMenu().updateComplete
   ]);
 }
 

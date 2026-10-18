@@ -3110,7 +3110,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setSheetNames(['One', 'Two', 'Three']);
         sheet.setSheetIndex(2);
-        await sheet.getSheetTabs().updateComplete;
+        await rendered(sheet);
 
         const tabs = sheet.getSheetTabs().shadowRoot!.querySelectorAll('.sheet-tab');
         expect(tabs).to.have.length(3);

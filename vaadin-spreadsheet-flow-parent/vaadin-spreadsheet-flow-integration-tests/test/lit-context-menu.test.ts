@@ -11,6 +11,7 @@ import { expect } from 'chai';
 import { resetMouse, sendMouse } from '@web/test-runner-commands';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import type { SpreadsheetActionDetails } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * The right-click context menu.
@@ -67,7 +68,7 @@ function attachSheet(): {
 
 async function items(sheet: Spreadsheet): Promise<HTMLElement[]> {
   const menu = sheet.getContextMenu();
-  await menu.updateComplete;
+  await rendered(sheet);
   return Array.from(
     menu.shadowRoot!.querySelectorAll<HTMLElement>('.item')
   );
@@ -79,7 +80,7 @@ async function items(sheet: Spreadsheet): Promise<HTMLElement[]> {
  */
 async function itemsOnceClosed(sheet: Spreadsheet): Promise<HTMLElement[]> {
   const menu = sheet.getContextMenu();
-  await menu.updateComplete;
+  await rendered(sheet);
   menu.shadowRoot!.querySelector<HTMLElement>('.menu')?.getAnimations().forEach((a) => a.finish());
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   return items(sheet);
@@ -160,7 +161,7 @@ describe('Spreadsheet context menu — opening', () => {
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
 
     const menu = ctx.sheet.getContextMenu();
-    await menu.updateComplete;
+    await rendered(ctx.sheet);
     const el = menu.shadowRoot!.querySelector<HTMLElement>('.menu')!;
     // Where it comes to rest, once it has dropped into place.
     el.getAnimations().forEach((animation) => animation.finish());
@@ -271,7 +272,7 @@ describe('Spreadsheet context menu — where it lands', () => {
   /** The menu where it comes to rest, once it has dropped into place. */
   async function panel(): Promise<HTMLElement> {
     const menu = ctx.sheet.getContextMenu();
-    await menu.updateComplete;
+    await rendered(ctx.sheet);
     const el = menu.shadowRoot!.querySelector<HTMLElement>('.menu')!;
     el.getAnimations().forEach((animation) => animation.finish());
     return el;
@@ -371,8 +372,9 @@ describe('Spreadsheet context menu — picking an item', () => {
 
   it('reports a cell action against the current selection', async () => {
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    const [item] = await items(ctx.sheet);
     ctx.events.length = 0;
-    (await items(ctx.sheet))[0].click();
+    item.click();
 
     expect(ctx.events[0].type).to.equal('actionOnCurrentSelection');
     expect(ctx.events[0].data).to.deep.equal({ actionKey: 'insert-row' });
@@ -380,8 +382,9 @@ describe('Spreadsheet context menu — picking an item', () => {
 
   it('reports a row action against the row header', async () => {
     ctx.sheet.showActions([action('Hide row', 'hide-row', 1)]);
+    const [item] = await items(ctx.sheet);
     ctx.events.length = 0;
-    (await items(ctx.sheet))[0].click();
+    item.click();
 
     expect(ctx.events[0].type).to.equal('actionOnRowHeader');
     expect(ctx.events[0].data).to.deep.equal({ actionKey: 'hide-row' });
@@ -389,8 +392,9 @@ describe('Spreadsheet context menu — picking an item', () => {
 
   it('reports a column action against the column header', async () => {
     ctx.sheet.showActions([action('Hide column', 'hide-col', 2)]);
+    const [item] = await items(ctx.sheet);
     ctx.events.length = 0;
-    (await items(ctx.sheet))[0].click();
+    item.click();
 
     expect(ctx.events[0].type).to.equal('actionOnColumnHeader');
     expect(ctx.events[0].data).to.deep.equal({ actionKey: 'hide-col' });
@@ -406,8 +410,9 @@ describe('Spreadsheet context menu — picking an item', () => {
   it('tells the server it closed, after the action, as the GWT client did', async () => {
     // The server takes the action icons off when it hears of the close.
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    const [item] = await items(ctx.sheet);
     ctx.events.length = 0;
-    (await items(ctx.sheet))[0].click();
+    item.click();
 
     expect(ctx.events.map((e) => e.type)).to.deep.equal(['actionOnCurrentSelection', 'contextMenuClosed']);
   });
@@ -557,6 +562,7 @@ describe('Spreadsheet context menu — dismissing', () => {
 
   it('closes on a click elsewhere and tells the server', async () => {
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    await rendered(ctx.sheet);
     ctx.events.length = 0;
     document.dispatchEvent(
       new PointerEvent('pointerdown', { bubbles: true, composed: true })
@@ -605,7 +611,7 @@ describe('Spreadsheet context menu — dismissing', () => {
     const panel = await settledMenu();
 
     closeByEscape();
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
 
     expect(menuPanel(ctx.sheet)).to.equal(panel);
     expect((panel.getAnimations() as CSSAnimation[]).map((a) => a.animationName)).to.deep.equal([
@@ -624,7 +630,7 @@ describe('Spreadsheet context menu — dismissing', () => {
     ctx.events.length = 0;
 
     closeByEscape();
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
     document.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
 
     expect(ctx.events.map((e) => e.type)).to.deep.equal(['contextMenuClosed']);
@@ -633,7 +639,7 @@ describe('Spreadsheet context menu — dismissing', () => {
   it('stays open when opened again while it fades', async () => {
     await settledMenu();
     closeByEscape();
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
 
     ctx.sheet.showActions([action('Hide column', 'hide-col', 2)]);
 
@@ -718,8 +724,8 @@ describe('Spreadsheet — context-menu action icons', () => {
     ctx.sheet.showActions([
       { caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }
     ] as any);
-    await ctx.sheet.getContextMenu().updateComplete;
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
+    await rendered(ctx.sheet);
 
     const slot = ctx.sheet
       .getContextMenu()
@@ -734,7 +740,7 @@ describe('Spreadsheet — context-menu action icons', () => {
     ctx.sheet.showActions([
       { caption: 'Plain', type: 0, key: '1', iconNodeId: 0 }
     ] as any);
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
 
     expect(ctx.sheet.getContextMenu().shadowRoot!.querySelector('slot.item-icon')).to.be.null;
   });
@@ -747,8 +753,8 @@ describe('Spreadsheet — context-menu action icons', () => {
       { caption: 'Plain', type: 0, key: '2', iconNodeId: 0 },
       { caption: 'Lumo icon', type: 0, key: '3', iconNodeId: 8 }
     ] as any);
-    await ctx.sheet.getContextMenu().updateComplete;
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
+    await rendered(ctx.sheet);
 
     const slots = ctx.sheet.getContextMenu().shadowRoot!.querySelectorAll('slot.item-icon');
     expect(slots).to.have.length(2);
@@ -761,10 +767,24 @@ describe('Spreadsheet — context-menu action icons', () => {
     ctx.sheet.showActions([
       { caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }
     ] as any);
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
 
     const item = ctx.sheet.getContextMenu().shadowRoot!.querySelector('.item')!;
     expect(item.textContent!.trim()).to.equal('Vaadin icon');
+  });
+
+  it('places no icon for a menu closed before it was drawn', async () => {
+    // The server can offer the actions and show the sheet anew in one
+    // response: the menu closes before anything is drawn.
+    const academy = icon('vaadin:academy-cap');
+    withIcons({ 7: academy });
+
+    ctx.sheet.showActions([{ caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }] as any);
+    ctx.sheet.setReload(true);
+    await rendered(ctx.sheet);
+    await rendered(ctx.sheet);
+
+    expect(academy.parentElement).to.be.null;
   });
 
   it('releases the icons when the menu closes', async () => {
@@ -774,12 +794,12 @@ describe('Spreadsheet — context-menu action icons', () => {
     ctx.sheet.showActions([
       { caption: 'Vaadin icon', type: 0, key: '1', iconNodeId: 7 }
     ] as any);
-    await ctx.sheet.getContextMenu().updateComplete;
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
+    await rendered(ctx.sheet);
     expect(academy.parentElement).to.equal(ctx.host);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
 
     expect(academy.parentElement).to.be.null;
   });

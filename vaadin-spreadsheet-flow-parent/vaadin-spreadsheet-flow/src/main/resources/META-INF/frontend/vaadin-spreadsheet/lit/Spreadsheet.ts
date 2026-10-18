@@ -616,7 +616,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         scrollOffsets: () => this.scrollOffsets(),
         focusSheet: () => this.scrollContainer.focus(),
         returnFocusToSheet: () => this.returnFocusToSheet(),
-        send: (event) => this.sendToServer(event)
+        send: (event) => this.sendToServer(event),
+        scheduleRender: () => this.scheduleRender(),
+        handle: (work) => this.renders.handle(work)
       },
       this.ownListeners.signal
     );
@@ -675,17 +677,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.root,
       { cells: this.cellGrid, columnHeader: this.columnHeader, rowHeader: this.rowHeader },
       {
-        // Drawn before the server hears of the cell, as from a handler of
-        // the sheet's own.
-        selectForMenu: (col, row) =>
-          this.renders.handle(() => {
-            if (!isCellInSelection(col, row, this.selection)) {
-              this.store.selectCellOrMerge(col, row);
-              this.report.selection();
-            }
-          }),
+        // The menu's handlers run as the sheet's own: the cell is drawn
+        // before the server hears of it.
+        selectForMenu: (col, row) => {
+          if (!isCellInSelection(col, row, this.selection)) {
+            this.store.selectCellOrMerge(col, row);
+            this.report.selection();
+          }
+        },
         returnFocusToSheet: () => this.returnFocusToSheet(),
-        send: (event) => this.sendToServer(event)
+        send: (event) => this.sendToServer(event),
+        scheduleRender: () => this.scheduleRender(),
+        handle: (work) => this.renders.handle(work)
       },
       this.ownListeners.signal
     );
@@ -2212,6 +2215,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       draft: this.formula.draft,
       sheetName: this.activeSheetName()
     });
+    this.sheetTabs.renderState = this.tabs.renderState();
+    this.contextMenu.renderState = this.menu.renderState();
+    this.menu.drawn();
     this.hosted.place(state, slots.assignments);
     // Column-header strip. Sized + state-pushed only
     // when there is something to draw, so the default opt-out path

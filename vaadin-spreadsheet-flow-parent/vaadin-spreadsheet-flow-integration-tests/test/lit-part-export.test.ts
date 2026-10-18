@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 import { SpreadsheetPart } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetPart.js';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * The documented `::part()` styling API, exercised the way an application
@@ -86,6 +87,7 @@ describe('::part() reaches out of the nested shadow roots', () => {
     await ctx.sheet.getColumnHeader().updateComplete;
     await ctx.sheet.getRowHeader().updateComplete;
     await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
   }
 
   it('styles a cell', async () => {
@@ -173,7 +175,7 @@ describe('::part() reaches out of the nested shadow roots', () => {
   it('styles a sheet tab', async () => {
     ctx.sheet.setSheetNames(['One', 'Two']);
     ctx.sheet.setSheetIndex(1);
-    await ctx.sheet.getSheetTabs().updateComplete;
+    await rendered(ctx.sheet);
     const tab = ctx.sheet.getSheetTabs().shadowRoot!.querySelector('.sheet-tab')!;
 
     withAppStyle(`${ctx.hostSelector}::part(tab) { color: rgb(22, 23, 24); }`, () => {
@@ -222,6 +224,7 @@ describe('::part() reaches the parts documented with the Lit client', () => {
     ctx.sheet.setNamedRanges(['Totals']);
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
 
     expectStyleable('named-range-box', ctx.sheet.getFormulaBar().shadowRoot!.querySelector('.namedrangebox')!);
   });
@@ -238,12 +241,12 @@ describe('::part() reaches the parts documented with the Lit client', () => {
   it('styles the field a sheet tab is renamed in', async () => {
     ctx.sheet.setSheetNames(['One', 'Two']);
     ctx.sheet.setSheetIndex(1);
-    await ctx.sheet.getSheetTabs().updateComplete;
+    await rendered(ctx.sheet);
     ctx.sheet
       .getSheetTabs()
       .shadowRoot!.querySelector('.sheet-tab')!
       .dispatchEvent(new MouseEvent('dblclick', { bubbles: true, composed: true }));
-    await ctx.sheet.getSheetTabs().updateComplete;
+    await rendered(ctx.sheet);
 
     expectStyleable('tab-rename', ctx.sheet.getSheetTabs().shadowRoot!.querySelector('[part~="tab-rename"]')!);
   });
@@ -284,7 +287,7 @@ describe('::part() reaches the parts documented with the Lit client', () => {
 
   it('styles the context menu and its items', async () => {
     ctx.sheet.showActions([{ caption: 'Insert row', key: '1', type: 0, iconNodeId: 0 }]);
-    await ctx.sheet.getContextMenu().updateComplete;
+    await rendered(ctx.sheet);
 
     const menu = ctx.sheet.getContextMenu().shadowRoot!;
     expectStyleable('context-menu', menu.querySelector('.menu')!);

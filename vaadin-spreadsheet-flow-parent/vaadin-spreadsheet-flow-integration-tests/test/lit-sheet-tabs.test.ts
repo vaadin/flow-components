@@ -16,6 +16,7 @@ import {
     emptySheetTabsRenderState,
     type SheetTabsRenderState,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetSheetTabs.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * Sheet tabs.
@@ -646,18 +647,37 @@ describe('Spreadsheet — sheet tabs lifecycle through the connector', () => {
         cleanup();
     });
 
-    it('setSheetNames pushes the names into the sheet-tabs render state', () => {
+    it('setSheetNames pushes the names into the sheet-tabs render state', async () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setSheetNames(['Inputs', 'Results']);
+        await rendered(sheet);
         const state = sheet.getSheetTabs().renderState;
         expect(Array.from(state.sheetNames)).to.deep.equal(['Inputs', 'Results']);
         cleanup();
     });
 
-    it('setSheetIndex updates the active tab in the strip', () => {
+    it('hands the strip a new state only when what it shows changes', async () => {
+        const { sheet, cleanup } = attachSheet(200, 100);
+        sheet.setSheetNames(['One', 'Two']);
+        sheet.setSheetIndex(1);
+        await rendered(sheet);
+        const drawn = sheet.getSheetTabs().renderState;
+
+        sheet.recomputeViewport();
+        expect(sheet.getSheetTabs().renderState, 'a drawing that changes nothing it shows').to.equal(drawn);
+
+        sheet.setInfoLabelValue('Saved');
+        await rendered(sheet);
+        expect(sheet.getSheetTabs().renderState).to.not.equal(drawn);
+        expect(sheet.getSheetTabs().renderState.infoLabel).to.equal('Saved');
+        cleanup();
+    });
+
+    it('setSheetIndex updates the active tab in the strip', async () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setSheetNames(['One', 'Two', 'Three']);
         sheet.setSheetIndex(3);
+        await rendered(sheet);
         expect(sheet.getSheetTabs().renderState.activeIndex).to.equal(3);
         cleanup();
     });
@@ -741,10 +761,11 @@ describe('Spreadsheet — sheet tabs lifecycle through the connector', () => {
         cleanup();
     });
 
-    it('sheet-tab click optimistically updates the active index BEFORE the server responds', () => {
+    it('sheet-tab click optimistically updates the active index BEFORE the server responds', async () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setSheetNames(['Alpha', 'Beta', 'Gamma']);
         sheet.setSheetIndex(1);
+        await rendered(sheet);
         expect(sheet.getSheetTabs().renderState.activeIndex).to.equal(1);
 
         sheet.getSheetTabs().dispatchEvent(new CustomEvent('sheet-tab-click', {
@@ -876,12 +897,12 @@ describe('Spreadsheet — scrolling the tab strip', () => {
         // button used to scroll all but the last tab out of view.
         const { sheet, cleanup } = attach(['One', 'Two', 'Three', 'Four', 'Five']);
         const tabs = sheet.getSheetTabs();
-        await tabs.updateComplete;
-        await tabs.updateComplete;
+        await rendered(sheet);
+        await rendered(sheet);
 
         tabs.shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-end')!.click();
-        await tabs.updateComplete;
-        await tabs.updateComplete;
+        await rendered(sheet);
+        await rendered(sheet);
 
         expect(tabs.renderState.firstVisibleTab).to.equal(2);
         expect(tabs.shadowRoot!.querySelector('.scroll-tabs-right')!.classList.contains('hidden')).to.be.true;
@@ -916,7 +937,7 @@ describe('Spreadsheet — the strip shows the active sheet', () => {
     async function settled(sheet: Spreadsheet): Promise<SpreadsheetSheetTabs> {
         const tabs = sheet.getSheetTabs();
         for (let i = 0; i < 4; i++) {
-            await tabs.updateComplete;
+            await rendered(sheet);
         }
         return tabs;
     }
@@ -1045,7 +1066,7 @@ describe('Spreadsheet — the sheet tabs from the keyboard', () => {
     async function settled(): Promise<SpreadsheetSheetTabs> {
         const tabs = sheet.getSheetTabs();
         for (let i = 0; i < 4; i++) {
-            await tabs.updateComplete;
+            await rendered(sheet);
         }
         return tabs;
     }
@@ -1240,7 +1261,7 @@ describe('Spreadsheet — the status label', () => {
 
     async function shownLabel(sheet: Spreadsheet): Promise<string | null> {
         const tabs = sheet.getSheetTabs();
-        await tabs.updateComplete;
+        await rendered(sheet);
         return tabs.shadowRoot!.querySelector('.sheet-tabsheet-infolabel')?.textContent ?? null;
     }
 
@@ -1413,7 +1434,7 @@ describe('Spreadsheet — the + button of a protected workbook', () => {
         sheet = new Spreadsheet(host);
         sheet.setSheetNames(['One', 'Two']);
         sheet.setSheetIndex(1);
-        await sheet.getSheetTabs().updateComplete;
+        await rendered(sheet);
     });
 
     afterEach(() => {
@@ -1422,7 +1443,7 @@ describe('Spreadsheet — the + button of a protected workbook', () => {
     });
 
     async function addButton(): Promise<Element | null> {
-        await sheet.getSheetTabs().updateComplete;
+        await rendered(sheet);
         return sheet.getSheetTabs().shadowRoot!.querySelector('.add-new-tab');
     }
 

@@ -8,9 +8,10 @@
  * license.
  */
 
+import { Memo } from '../algorithms/Memo.js';
 import { resolveSheetRename } from '../algorithms/SheetName.js';
 import { listen } from '../dom/Listen.js';
-import type { SpreadsheetSheetTabs } from '../elements/SpreadsheetSheetTabs.js';
+import type { SheetTabsRenderState, SpreadsheetSheetTabs } from '../elements/SpreadsheetSheetTabs.js';
 import type { SpreadsheetEvent } from '../types/rpc-client-to-server.js';
 
 /** What the sheet tabs need of the sheet. */
@@ -23,6 +24,13 @@ export interface SheetTabsHost {
   returnFocusToSheet(): void;
   /** Tells the server. */
   send(event: SpreadsheetEvent): void;
+  /** Asks for the sheet to be drawn, the strip with it; see {@link SheetTabs.renderState}. */
+  scheduleRender(): void;
+  /**
+   * Runs a handler of the strip's events as one of the sheet's own: what it
+   * changes is drawn as it ends, and before it tells the server.
+   */
+  handle(work: () => void): void;
 }
 
 /**
@@ -56,13 +64,18 @@ export class SheetTabs {
   /** The status label, or null while there is none. */
   private infoLabel: string | null = null;
 
-  constructor(private readonly strip: SpreadsheetSheetTabs, private readonly host: SheetTabsHost, signal: AbortSignal) {
-    listen(strip, 'sheet-tab-click', this.handleSheetTabClick, signal);
-    listen(strip, 'sheet-tabs-scroll', this.handleSheetTabsScroll, signal);
-    listen(strip, 'sheet-tab-add', this.handleSheetTabAdd, signal);
-    listen(strip, 'sheet-tab-rename-start', this.handleSheetRenameStart, signal);
-    listen(strip, 'sheet-tab-rename', this.handleSheetRename, signal);
-    listen(strip, 'sheet-tab-rename-cancel', this.handleSheetRenameCancel, signal);
+  /** What the strip draws, kept while nothing it shows changes. */
+  private readonly drawn = new Memo<SheetTabsRenderState>();
+
+  constructor(strip: SpreadsheetSheetTabs, private readonly host: SheetTabsHost, signal: AbortSignal) {
+    const on = <E extends Event>(type: string, listener: (e: E) => void): void =>
+      listen<E>(strip, type, (e) => host.handle(() => listener(e)), signal);
+    on('sheet-tab-click', this.handleSheetTabClick);
+    on('sheet-tabs-scroll', this.handleSheetTabsScroll);
+    on('sheet-tab-add', this.handleSheetTabAdd);
+    on('sheet-tab-rename-start', this.handleSheetRenameStart);
+    on('sheet-tab-rename', this.handleSheetRename);
+    on('sheet-tab-rename-cancel', this.handleSheetRenameCancel);
   }
 
   /** The name of the sheet shown, or '' before there is one. */
@@ -73,25 +86,25 @@ export class SheetTabs {
   /** The visible sheets' names, as the server sends them. */
   setSheetNames(names: string[]): void {
     this.sheetNames = names;
-    this.sync();
+    this.changed();
   }
 
   /** The sheet the server shows, 1-based. */
   setSheetIndex(index: number): void {
     this.sheetIndex = index;
-    this.sync();
+    this.changed();
   }
 
   /** Whether the workbook is protected: the strip then offers no + button. */
   setWorkbookProtected(isProtected: boolean): void {
     this.workbookProtected = isProtected;
-    this.sync();
+    this.changed();
   }
 
   /** The status label, or null for none. */
   setInfoLabel(label: string | null): void {
     this.infoLabel = label;
-    this.sync();
+    this.changed();
   }
 
   /**
@@ -121,7 +134,7 @@ export class SheetTabs {
     // for the server's response. The server's setSheetIndex
     // will overwrite this when it lands.
     this.sheetIndex = index;
-    this.sync();
+    this.changed();
     this.host.send({
       type: 'sheetSelected',
       data: {
@@ -153,13 +166,13 @@ export class SheetTabs {
       return;
     }
     this.renamingIndex = e.detail.index;
-    this.sync();
+    this.changed();
   };
 
   /** Escape: leave the sheet called what it was called. */
   private readonly handleSheetRenameCancel = (): void => {
     this.renamingIndex = 0;
-    this.sync();
+    this.changed();
     this.host.returnFocusToSheet();
   };
 
@@ -176,7 +189,7 @@ export class SheetTabs {
     const { index, name } = e.detail;
     this.renamingIndex = 0;
     if (index < 1 || index > this.sheetNames.length) {
-      this.sync();
+      this.changed();
       return;
     }
     const outcome = resolveSheetRename({
@@ -185,14 +198,14 @@ export class SheetTabs {
       names: this.sheetNames
     });
     if (outcome.kind === 'revert') {
-      this.sync();
+      this.changed();
       this.host.returnFocusToSheet();
       return;
     }
     const renamed = [...this.sheetNames];
     renamed[index - 1] = outcome.name;
     this.sheetNames = renamed;
-    this.sync();
+    this.changed();
     this.host.returnFocusToSheet();
     this.host.send({
       // The server counts sheets from 0; the strip renders from 1.
@@ -233,23 +246,36 @@ export class SheetTabs {
       return;
     }
     this.firstVisibleTab = next;
-    this.sync();
+    this.changed();
   };
 
   /**
-   * Push fresh state to the sheet tabs from the current
-   * {@code sheetNames} + {@code sheetIndex} fields. Called from
-   * the public setters when those change, AND from any caller
-   * that wants to force a re-render.
+   * What the strip draws. The sheet draws it with the rest of the sheet, on
+   * the drawing a change asks for; see {@link changed}.
    */
-  private sync(): void {
-    this.strip.renderState = {
-      sheetNames: this.sheetNames,
-      activeIndex: this.sheetIndex,
-      firstVisibleTab: this.firstVisibleTab,
-      readOnly: this.workbookProtected,
-      renamingIndex: this.renamingIndex,
-      infoLabel: this.infoLabel
-    };
+  renderState(): SheetTabsRenderState {
+    return this.drawn.get(
+      [
+        this.sheetNames,
+        this.sheetIndex,
+        this.firstVisibleTab,
+        this.workbookProtected,
+        this.renamingIndex,
+        this.infoLabel
+      ],
+      () => ({
+        sheetNames: this.sheetNames,
+        activeIndex: this.sheetIndex,
+        firstVisibleTab: this.firstVisibleTab,
+        readOnly: this.workbookProtected,
+        renamingIndex: this.renamingIndex,
+        infoLabel: this.infoLabel
+      })
+    );
+  }
+
+  /** Something the strip shows changed: the sheet is drawn, the strip with it. */
+  private changed(): void {
+    this.host.scheduleRender();
   }
 }

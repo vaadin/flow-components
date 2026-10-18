@@ -590,6 +590,13 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
   };
 
   /**
+   * The rename inputs whose rename is over: Escape threw the name away, or
+   * it was reported; see {@link commitRename}. A new rename brings a new
+   * input.
+   */
+  private readonly endedRenames = new WeakSet<HTMLInputElement>();
+
+  /**
    * The keys that end a rename.
    *
    * Enter and Tab keep what was typed, Escape throws it away. Every
@@ -610,6 +617,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     }
     if (e.key === 'Escape') {
       e.preventDefault();
+      this.endedRenames.add(e.target as HTMLInputElement);
       this.dispatchEvent(new CustomEvent('sheet-tab-rename-cancel', { bubbles: true, composed: true }));
     }
   };
@@ -624,15 +632,17 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
    *
    * Ending a rename takes the input out of the DOM, and an input that
    * had the focus blurs on its way out - so both Escape and Enter are
-   * followed by a blur that would report the rename all over again. By
-   * then the strip has been told no tab is being renamed, which is the
-   * signal that the rename is already over.
+   * followed by a blur that would report the rename all over again. The
+   * strip may not have been told yet that no tab is being renamed: the
+   * sheet draws it with the rest of the sheet. So the input itself is
+   * marked as done with.
    */
   private commitRename(input: HTMLInputElement | null): void {
     const index = this.renderState.renamingIndex ?? 0;
-    if (input === null || index < 1) {
+    if (input === null || index < 1 || this.endedRenames.has(input)) {
       return;
     }
+    this.endedRenames.add(input);
     this.dispatchEvent(
       new CustomEvent('sheet-tab-rename', {
         detail: { index, name: input.value },

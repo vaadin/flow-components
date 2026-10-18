@@ -10,7 +10,11 @@
 
 import { listen } from '../dom/Listen.js';
 import type { SlottedVirtualChildren } from '../dom/VirtualChildren.js';
-import { emptyContextMenuRenderState, type SpreadsheetContextMenu } from '../elements/SpreadsheetContextMenu.js';
+import {
+  type ContextMenuRenderState,
+  emptyContextMenuRenderState,
+  type SpreadsheetContextMenu
+} from '../elements/SpreadsheetContextMenu.js';
 import type { SpreadsheetEvent } from '../types/rpc-client-to-server.js';
 import type { SpreadsheetActionDetails } from '../types/wire.js';
 
@@ -25,6 +29,13 @@ export interface ContextMenuHost {
   returnFocusToSheet(): void;
   /** Tells the server. */
   send(event: SpreadsheetEvent): void;
+  /** Asks for the sheet to be drawn, the menu with it; see {@link ContextMenu.renderState}. */
+  scheduleRender(): void;
+  /**
+   * Runs a handler of the menu's events as one of the sheet's own: what it
+   * changes is drawn as it ends, and before it tells the server.
+   */
+  handle(work: () => void): void;
 }
 
 /** The parts of the sheet a right-click on which opens the menu. */
@@ -51,6 +62,12 @@ export class ContextMenu {
    */
   private position: { x: number; y: number } = { x: 0, y: 0 };
 
+  /** What the menu shows: closed, or open where the click landed with the actions offered. */
+  private state: ContextMenuRenderState = emptyContextMenuRenderState();
+
+  /** The icons of the actions just offered, placed once the menu has drawn them; see {@link drawn}. */
+  private iconsToPlace: string[] | null = null;
+
   constructor(
     private readonly element: SpreadsheetContextMenu,
     private readonly icons: SlottedVirtualChildren,
@@ -59,11 +76,13 @@ export class ContextMenu {
     private readonly host: ContextMenuHost,
     signal: AbortSignal
   ) {
-    listen(targets.cells, 'cell-contextmenu', this.handleCellContextMenu, signal);
-    listen(targets.columnHeader, 'column-header-contextmenu', this.handleColumnHeaderContextMenu, signal);
-    listen(targets.rowHeader, 'row-header-contextmenu', this.handleRowHeaderContextMenu, signal);
-    listen(element, 'context-menu-action', this.handleContextMenuAction, signal);
-    listen(element, 'context-menu-dismiss', this.handleContextMenuDismiss, signal);
+    const on = <E extends Event>(target: EventTarget, type: string, listener: (e: E) => void): void =>
+      listen<E>(target, type, (e) => host.handle(() => listener(e)), signal);
+    on(targets.cells, 'cell-contextmenu', this.handleCellContextMenu);
+    on(targets.columnHeader, 'column-header-contextmenu', this.handleColumnHeaderContextMenu);
+    on(targets.rowHeader, 'row-header-contextmenu', this.handleRowHeaderContextMenu);
+    on(element, 'context-menu-action', this.handleContextMenuAction);
+    on(element, 'context-menu-dismiss', this.handleContextMenuDismiss);
   }
 
   setHasActions(hasActions: boolean): void {
@@ -72,12 +91,31 @@ export class ContextMenu {
 
   /** Whether the menu is open. */
   isOpen(): boolean {
-    return this.element.renderState.open;
+    return this.state.open;
+  }
+
+  /** What the menu draws. The sheet draws it with the rest of the sheet. */
+  renderState(): ContextMenuRenderState {
+    return this.state;
+  }
+
+  /**
+   * The sheet has handed the menu what it draws. An action can carry an icon
+   * component; the slots that show them are in the menu's template, so the
+   * icons of the actions just offered are placed once that has rendered.
+   */
+  drawn(): void {
+    const iconIds = this.iconsToPlace;
+    if (iconIds === null) {
+      return;
+    }
+    this.iconsToPlace = null;
+    void this.element.updateComplete.then(() => this.icons.sync(iconIds));
   }
 
   /** A press somewhere on the page: anywhere but in the menu, it closes it. */
   closeUnlessPressedIn(path: EventTarget[]): void {
-    if (!this.element.renderState.open || path.includes(this.element)) {
+    if (!this.state.open || path.includes(this.element)) {
       return;
     }
     this.close();
@@ -154,21 +192,17 @@ export class ContextMenu {
 
   /** The actions the server offers for the right-click: the menu opens with them. */
   showActions(actions: SpreadsheetActionDetails[]): void {
-    this.element.renderState = {
+    this.state = {
       open: true,
       x: this.position.x,
       y: this.position.y,
-      // Arrives JSON-serialized through the Flow lane, like the
-      // collection-shaped properties.
       actions
     };
-    // An action can carry an icon component; 0 means it has none. The
-    // slots that show them are in the menu's template, so place the
-    // elements only once that has rendered.
-    const iconIds = actions
+    // 0 means an action has no icon; see drawn().
+    this.iconsToPlace = actions
       .filter((action) => Number(action.iconNodeId) > 0)
       .map((action) => String(action.iconNodeId));
-    void this.element.updateComplete.then(() => this.icons.sync(iconIds));
+    this.host.scheduleRender();
   }
 
   /**
@@ -193,14 +227,13 @@ export class ContextMenu {
    * Close the context menu and tell the server, unless it is already closed.
    */
   close(): void {
-    if (!this.element.renderState.open) {
+    if (!this.state.open) {
       return;
     }
     // The menu had the keyboard; it goes back to where it had been. A
     // click elsewhere still moves it on, once this is done.
     const menuHadFocus = this.element.hasFocus();
-    this.element.renderState = emptyContextMenuRenderState();
-    this.icons.clear();
+    this.closeMenu();
     if (menuHadFocus) {
       this.host.returnFocusToSheet();
     }
@@ -213,8 +246,7 @@ export class ContextMenu {
     // 0 = cell, 1 = row, 2 = column, matching SpreadsheetActionDetails.
     const eventType =
       type === 1 ? 'actionOnRowHeader' : type === 2 ? 'actionOnColumnHeader' : 'actionOnCurrentSelection';
-    this.element.renderState = emptyContextMenuRenderState();
-    this.icons.clear();
+    this.closeMenu();
     // The menu item had the focus; picking it is done, so the keyboard
     // goes back to the sheet.
     this.host.returnFocusToSheet();
@@ -228,4 +260,12 @@ export class ContextMenu {
   private readonly handleContextMenuDismiss = (): void => {
     this.close();
   };
+
+  /** Takes the menu and its icons away; drawn with the rest of the sheet. */
+  private closeMenu(): void {
+    this.state = emptyContextMenuRenderState();
+    this.iconsToPlace = null;
+    this.icons.clear();
+    this.host.scheduleRender();
+  }
 }
