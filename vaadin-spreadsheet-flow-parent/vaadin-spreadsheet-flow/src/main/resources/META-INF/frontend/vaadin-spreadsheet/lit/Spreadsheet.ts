@@ -122,6 +122,7 @@ import { Popup } from './controllers/Popup.js';
 import { KeyboardExit } from './controllers/KeyboardExit.js';
 import { LinkTooltip } from './controllers/LinkTooltip.js';
 import { HostedComponents } from './controllers/HostedComponents.js';
+import { ServerSync } from './controllers/ServerSync.js';
 import { Outline } from './controllers/Outline.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { computeMergedRegionBoxes, computePositionedOverlays } from './algorithms/Positioning.js';
@@ -142,23 +143,11 @@ import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /**
- * Sample the cell-style width measurement uses: ten digits, as earlier
- * versions measured, so the ratios keep the same meaning server-side.
- */
-const WIDTH_PROBE_TEXT = '5555555555';
-
-/**
  * The shortest time between two reports of a write to a locked cell, as the
  * GWT client kept it: the server's ProtectedEditListener promises one event a
  * second at most.
  */
 const PROTECTED_WRITE_REPORT_INTERVAL_MS = 1000;
-
-/** The style index a cell's class list names - "cs5 r cf2" is 5 - or null. */
-function styleIndexOf(cellStyle: string | undefined): number | null {
-  const match = /(?:^|\s)cs(\d+)(?:\s|$)/.exec(cellStyle ?? '');
-  return match ? Number(match[1]) : null;
-}
 
 /**
  * Height of the column headers, in pixels: 27, so a sheet starts its first
@@ -296,9 +285,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private resourceHost: HTMLElement | null = null;
 
   /**
-   * What the client knows of the sheet the server shows: its cells, the cell
-   * the server holds as selected, and whether the server was told where the
-   * sheet is. Replaced whole on a reload; see {@link setReload}.
+   * What the client knows of the sheet the server shows: its cells, and the
+   * cell the server holds as selected. Replaced whole on a reload; see
+   * {@link setReload}.
    */
   private sheetData = new SheetData();
 
@@ -360,8 +349,23 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       noMargin: this.model.hasComponentFactory
     }),
     serverBusy: () => flowRequestInFlight(this.host),
-    load: (range) => this.sendLoad(range)
+    load: (range) => this.sync.load(range)
   });
+
+  /** Keeps the server in step with what the sheet shows; see {@link ServerSync}. */
+  private readonly sync = new ServerSync(
+    {
+      size: () => this.model,
+      cellStyles: () => this.model.cellStyleToCSSStyle,
+      cells: () => this.sheetData.cells,
+      drawnRange: () => this.drawnRange(),
+      textWidths: (cellStyles, text) => this.cellGrid.textWidths(cellStyles, text),
+      painted: () => this.cellGrid.updateComplete,
+      scheduleRender: () => this.scheduleRender(),
+      send: (event) => this.sendToServer(event)
+    },
+    this.viewportLoader
+  );
 
   /**
    * The column-header sub-element. Sibling of the cell-grid
@@ -1980,47 +1984,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   };
 
   /**
-   * Complete the startup handshake, once the viewport is known.
-   *
-   * The server only loads overlays, hyperlinks, comments, tables, popup
-   * buttons and custom editors from `loadCells`, and `loadCells` runs off
-   * `onSheetScroll`. Nothing else calls it. Until the client reports a
-   * viewport, none of that content exists — which looks like a sheet that
-   * renders its cells and nothing else.
-   *
-   * `onConnectorInit` first, so the server marks the next scroll as a full
-   * reload rather than diffing against viewport bounds it has never seen.
-   *
-   * The handshake runs once: {@link setReload} clears the latch whenever
-   * the server discards its sheet state, and the next completed viewport
-   * introduces itself again.
-   *
-   * Loading itself is checked again on every repaint, not only on
-   * scrolling: plenty of things resize the sheet without a scroll - a tab
-   * revealing it, a split pane opening, the window resizing. A sheet that
-   * came up 0 wide inside a hidden tab would otherwise keep the viewport it
-   * measured while hidden, and the cells and popup buttons outside it
-   * would never load. The {@link ViewportLoader} asks only for what is not
-   * loaded yet.
-   */
-  private announceViewport(): void {
-    if (this.model.rows <= 0 || this.model.cols <= 0) {
-      // The sheet's size has not arrived yet. Announcing now would report a
-      // viewport that means nothing and the server would load nothing.
-      return;
-    }
-    if (this.drawnRange() === null) {
-      // Nothing measured yet; try again after the next render.
-      return;
-    }
-    if (!this.sheetData.viewportAnnounced) {
-      this.sheetData.viewportAnnounced = true;
-      this.sendToServer({ type: 'onConnectorInit', data: {} });
-    }
-    this.viewportLoader.check();
-  }
-
-  /**
    * Send an event to the server. Dispatched on the host alone, where Flow
    * listens: a bubbling event also reached the server component of a
    * spreadsheet this one sits in - as popup content, a custom editor or a
@@ -2094,22 +2057,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
 
   /**
-   * Ask the server to load the cells, comments, overlays and components of
-   * a range. Its `onSheetScroll` loads what it has not sent before.
-   */
-  private sendLoad(range: LoadRange): void {
-    this.sendToServer({
-      type: 'onSheetScroll',
-      data: {
-        firstRow: range.r1,
-        firstColumn: range.c1,
-        lastRow: range.r2,
-        lastColumn: range.c2
-      }
-    });
-  }
-
-  /**
    * Request a repaint once the current task is done, coalescing repeated
    * calls into a single {@link recomputeViewport}.
    *
@@ -2134,66 +2081,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** Each listener wrapped as a handler of the sheet's; see {@link handling}. */
   private handlingAll(listeners: readonly PageListener[]): PageListener[] {
     return listeners.map(([target, type, listener]) => [target, type, this.handling(listener)]);
-  }
-
-  /**
-   * Tell the server how wide one character is in each cell style.
-   *
-   * A cell under the General format shows as many digits as fit and falls
-   * back to scientific notation when they do not, and the server decides
-   * that: it knows the column width in pixels but not the font, so it needs
-   * a pixels-per-character ratio per style index. Without one it assumes
-   * everything fits and no number is ever shortened.
-   *
-   * Measured as ten digits in a probe carrying the style's class, divided
-   * by ten, as earlier versions measured it, so the server's existing
-   * arithmetic keeps its meaning.
-   */
-  private reportCellStyleWidthRatios(): void {
-    // Every style a cell wears, not only those the style map holds: a style
-    // set on a cell straight through POI never reaches the map, and without
-    // a ratio the server judges every value in it as fitting. Unstyled, it
-    // measures as the default does.
-    const styleIndexes = [
-      ...new Set([...Object.keys(this.model.cellStyleToCSSStyle).map(Number), ...this.styleIndexesInUse()])
-    ]
-      .filter((index) => Number.isFinite(index))
-      .sort((a, b) => a - b);
-    if (styleIndexes.length === 0) {
-      return;
-    }
-    const ratios = this.cellGrid
-      .textWidths(
-        styleIndexes.map((index) => `cs${index}`),
-        WIDTH_PROBE_TEXT
-      )
-      .map((width) => width / WIDTH_PROBE_TEXT.length);
-
-    if (ratios.every((ratio) => ratio === 0)) {
-      // Nothing was laid out — the sheet is hidden, or the styles have not
-      // been applied yet. A zero ratio would tell the server every value
-      // fits in no space at all, so say nothing and measure again later.
-      this.view.styleWidthRatiosStale = true;
-      return;
-    }
-
-    this.view.measuredStyleIndexes = new Set(styleIndexes);
-    this.sendToServer({
-      type: 'setCellStyleWidthRatios',
-      data: { styleIndexes, ratios }
-    });
-  }
-
-  /** The style indexes the cells loaded so far wear, from their cs<N> class. */
-  private styleIndexesInUse(): Set<number> {
-    const indexes = new Set<number>();
-    for (const cell of this.sheetData.cells.values()) {
-      const index = styleIndexOf(cell.cellStyle);
-      if (index !== null) {
-        indexes.add(index);
-      }
-    }
-    return indexes;
   }
 
   /**
@@ -2231,25 +2118,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       viewportWidth: this.scrollContainer.clientWidth,
       viewportHeight: this.scrollContainer.clientHeight
     });
-    if (this.view.styleWidthRatiosStale && this.view.pendingRatioReport === null) {
-      // Measured once the grid has painted the rules that were just
-      // handed to it, not against the ones it is replacing - and so
-      // against whatever else changed while it waited.
-      this.view.pendingRatioReport = this.cellGrid.updateComplete.then(() => {
-        this.view.pendingRatioReport = null;
-        this.view.styleWidthRatiosStale = false;
-        this.reportCellStyleWidthRatios();
-      });
-    }
-    // The viewport goes after the ratios, as in earlier versions: the
-    // server builds the cells it sends against the ratios, and builds the
-    // ones in view again when new ratios arrive - before, the first screen
-    // of every workbook went out twice. Both still go in one request.
-    if (this.view.pendingRatioReport !== null) {
-      void this.view.pendingRatioReport.then(() => this.announceViewport());
-      return;
-    }
-    this.announceViewport();
+    this.sync.drawn();
   }
 
   /**
@@ -3051,38 +2920,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   // ====================================================================
 
   updateBottomRightCellValues(cellData: CellData[]): void {
-    this.storeCellData(cellData);
+    this.sync.store(cellData);
   }
   updateTopLeftCellValues(cellData: CellData[]): void {
-    this.storeCellData(cellData);
+    this.sync.store(cellData);
   }
   updateTopRightCellValues(cellData: CellData[]): void {
-    this.storeCellData(cellData);
+    this.sync.store(cellData);
   }
   updateBottomLeftCellValues(cellData: CellData[]): void {
-    this.storeCellData(cellData);
+    this.sync.store(cellData);
   }
 
-  /**
-   * Stash each cell's data into the sheet's cells, keyed by its
-   * wire-format key. All four quadrants share the one map; the
-   * cell-grid picks out what each pane draws.
-   */
-  private storeCellData(cellData: CellData[]): void {
-    // Anything but a list of cells is none: iterating text would walk it
-    // character by character, filing one entry under
-    // "colundefined rowundefined" and dropping every value on the sheet.
-    for (const cell of coerceArray<CellData>(cellData)) {
-      this.sheetData.cells.set(toKey(cell.col, cell.row), cell);
-      // A style no ratio has been measured for yet: measure again after
-      // the next render.
-      const index = styleIndexOf(cell.cellStyle);
-      if (index !== null && !this.view.measuredStyleIndexes.has(index)) {
-        this.view.styleWidthRatiosStale = true;
-      }
-    }
-    this.scheduleRender();
-  }
   updateFormulaBar(possibleName: string | null, col: number, row: number): void {
     // The answer about a cell the user has already left - the keyboard
     // moves on without waiting for the server - is out of date.
@@ -3259,16 +3108,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
   }
   cellsUpdated(updatedCellData: CellData[]): void {
-    this.storeCellData(updatedCellData);
+    this.sync.store(updatedCellData);
   }
-  /**
-   * The cells to have, in place of every cell there is: the server worked
-   * them all out again and sent those shown, and any other kept here would
-   * be out of date. Those are sent again when they are shown.
-   */
+  /** The cells to have, in place of every cell there is; see {@link ServerSync.replace}. */
   cellsReplaced(cellData: CellData[]): void {
-    this.sheetData.cells.clear();
-    this.storeCellData(cellData);
+    this.sync.replace(cellData);
   }
   refreshCellStyles(): void {
     this.scheduleRender();
@@ -3410,9 +3254,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
   setCellStyleToCSSStyle(map: Record<number, string> | null): void {
     this.write('cellStyleToCSSStyle', map);
-    // The server sizes General-format numbers against how wide a digit is
-    // in each style, and only the client can measure that.
-    this.view.styleWidthRatiosStale = true;
+    this.sync.restyled();
   }
   setRowIndexToStyleIndex(map: Record<number, number> | null): void {
     this.write('rowIndexToStyleIndex', map);
@@ -3510,13 +3352,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // have something in them, so a cell that is empty on the new sheet
       // is never mentioned again and the old value would show through.
       // So is the cell it holds as selected, until it says which one it has
-      // now, and what it was told of where the sheet is.
+      // now.
       this.sheetData = new SheetData();
       // Its row heights are those of whatever it shows now.
       this.view.rowAnchor = null;
-      // What it was asked to load is gone too: load again, even the same
-      // range.
-      this.viewportLoader.reset();
+      // What it was told of where the sheet is, and asked to load, is gone
+      // too: the sheet introduces itself again, and loads again even the
+      // same range.
+      this.sync.reset();
       // So has the selection, and the sheet may be another one: a value, a
       // note or a menu pick still under way would land on whatever sheet
       // the server shows now.
@@ -3662,9 +3505,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * bring no change of the style map that would say so.
    */
   setWorkbookChangeToggle(_toggle: boolean): void {
-    this.view.measuredStyleIndexes = new Set();
-    this.view.styleWidthRatiosStale = true;
-    this.scheduleRender();
+    this.sync.workbookLoaded();
   }
 
   // Display content

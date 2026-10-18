@@ -30,7 +30,4 @@ export class SheetData {
    * one it last told the server, or the server told it. Null before either.
    */
   serverSelectedCell: { col: number; row: number } | null = null;
-
-  /** Whether the server has been told the sheet is drawn and where it is. */
-  viewportAnnounced = false;
 }

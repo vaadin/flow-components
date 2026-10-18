@@ -38,14 +38,6 @@ export class ViewState {
     frozen: { width: 0, columns: 0, height: 0, rows: 0 }
   };
 
-  /** Whether the cell styles have changed since the last width measurement. */
-  styleWidthRatiosStale = false;
-
-  /** The width measurement waiting for the grid to paint, which the viewport goes after. */
-  pendingRatioReport: Promise<void> | null = null;
-
-  /** The style indexes last reported to the server with a width ratio. */
-  measuredStyleIndexes: ReadonlySet<number> = new Set();
   /** When the server was last told of a write to a locked cell, if ever. */
   protectedWriteReportedAt: number | null = null;
 }

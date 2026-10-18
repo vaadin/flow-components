@@ -20,7 +20,7 @@ describe('Spreadsheet — what it knows of the sheet shown', () => {
   it('starts knowing nothing of it', () => {
     const data = new SheetData();
 
-    expect([data.cells.size, data.serverSelectedCell, data.viewportAnnounced]).to.eql([0, null, false]);
+    expect([data.cells.size, data.serverSelectedCell]).to.eql([0, null]);
   });
 
   it('gives each sheet shown cells of its own', () => {
@@ -50,21 +50,18 @@ describe('Spreadsheet — what it knows of the sheet shown', () => {
 });
 
 describe('Spreadsheet — what the view remembers between drawings', () => {
-  it('starts with nothing to restore, keep in place or measure', () => {
+  it('starts with nothing to restore or keep in place', () => {
     const view = new ViewState();
 
     expect(view).to.deep.include({
       pendingSheetScroll: null,
       rowAnchor: null,
       anchoredScrollTop: null,
-      shownSheetName: null,
-      styleWidthRatiosStale: false,
-      pendingRatioReport: null
+      shownSheetName: null
     });
     expect(view.pagedViewParts).to.eql({
       corner: { width: 0, height: 0 },
       frozen: { width: 0, columns: 0, height: 0, rows: 0 }
     });
-    expect(view.measuredStyleIndexes).to.eql(new Set());
   });
 });
