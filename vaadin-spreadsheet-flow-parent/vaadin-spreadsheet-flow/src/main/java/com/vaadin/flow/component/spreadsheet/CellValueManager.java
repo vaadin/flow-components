@@ -70,8 +70,6 @@ public class CellValueManager implements Serializable {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(CellValueManager.class);
 
-    private short hyperlinkStyleIndex = -1;
-
     /**
      * The Spreadsheet this class is tied to.
      */
@@ -120,7 +118,6 @@ public class CellValueManager implements Serializable {
      */
     public void clearCachedContent() {
         clientCache.clear();
-        hyperlinkStyleIndex = -1;
         topLeftCellsLoaded = false;
     }
 
@@ -463,18 +460,21 @@ public class CellValueManager implements Serializable {
                                 && !newFormula.equals(cell.getCellFormula()));
                         cell.setCellFormula(newFormula);
                         getFormulaEvaluator().notifySetFormula(cell);
-                        if (value.startsWith("=HYPERLINK(")
-                                && cell.getCellStyle()
-                                        .getIndex() != hyperlinkStyleIndex) {
-                            // set the cell style to link cell
+                        WorkbookScope scope = spreadsheet.workbookScope();
+                        if (value.startsWith("=HYPERLINK(") && cell
+                                .getCellStyle()
+                                .getIndex() != scope.hyperlinkStyleIndex) {
+                            // set the cell style to link cell, made once for
+                            // the workbook, which has a limit on its styles
                             CellStyle hyperlinkCellStyle;
-                            if (hyperlinkStyleIndex == -1) {
+                            if (scope.hyperlinkStyleIndex == -1) {
                                 hyperlinkCellStyle = styler
                                         .createHyperlinkCellStyle();
-                                hyperlinkStyleIndex = -1;
+                                scope.hyperlinkStyleIndex = hyperlinkCellStyle
+                                        .getIndex();
                             } else {
-                                hyperlinkCellStyle = workbook
-                                        .getCellStyleAt(hyperlinkStyleIndex);
+                                hyperlinkCellStyle = workbook.getCellStyleAt(
+                                        scope.hyperlinkStyleIndex);
                             }
                             cell.setCellStyle(hyperlinkCellStyle);
                             styler.cellStyleUpdated(cell, true);

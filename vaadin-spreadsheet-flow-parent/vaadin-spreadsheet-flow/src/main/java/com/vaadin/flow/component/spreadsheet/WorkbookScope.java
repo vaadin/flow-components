@@ -42,6 +42,11 @@ final class WorkbookScope implements Serializable {
      * filter put over them to autofit them again.
      */
     final Map<CellReference, Integer> autofittedWidths = new HashMap<>();
+    /**
+     * The style of the cells a {@code =HYPERLINK} formula is typed into, made
+     * once for the workbook; -1 before it is.
+     */
+    short hyperlinkStyleIndex = -1;
     SpreadsheetStyleFactory styler;
     ConditionalFormatter conditionalFormatter;
 

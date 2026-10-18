@@ -134,4 +134,35 @@ class TypedValueStyleTest {
         assertFalse(styleOf("A1").getQuotePrefixed());
         assertTrue(styleOf("A2").getQuotePrefixed());
     }
+
+    private static final String LINK = "=HYPERLINK(\"https://vaadin.com\",\"Vaadin\")";
+
+    @Test
+    void hyperlinksTyped_shareOneStyle() {
+        // Each used to make a style of its own, and a workbook has a limit on
+        // its styles.
+        int styles = workbook.getNumCellStyles();
+
+        type("C3", LINK);
+        type("C4", LINK);
+        type("C5", LINK);
+
+        assertEquals(styles + 1, workbook.getNumCellStyles());
+        assertEquals(styleOf("C3").getIndex(), styleOf("C5").getIndex());
+    }
+
+    @Test
+    void hyperlinksTypedBeforeAndAfterVisitingAnotherSheet_shareOneStyle() {
+        spreadsheet.createNewSheet("Second", 10, 10);
+        spreadsheet.setActiveSheetIndex(0);
+        type("C3", LINK);
+        int styles = workbook.getNumCellStyles();
+
+        spreadsheet.setActiveSheetIndex(1);
+        spreadsheet.setActiveSheetIndex(0);
+        type("C4", LINK);
+
+        assertEquals(styles, workbook.getNumCellStyles());
+        assertEquals(styleOf("C3").getIndex(), styleOf("C4").getIndex());
+    }
 }
