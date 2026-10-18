@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * Writing a formula by pointing at cells, as the GWT client let the user:
@@ -391,6 +392,39 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     await sheet.getCellGrid().updateComplete;
 
     expect(grid().querySelectorAll('.formula-reference')).to.have.length(0);
+  });
+
+  it('points with the mouse from a formula typed into the formula field', async () => {
+    await rendered(sheet);
+    const field = sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+    field.focus();
+    field.value = '=1+';
+    field.setSelectionRange(3, 3);
+    field.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+
+    mouse('mousedown', cell(5, 6));
+    await rendered(sheet);
+
+    expect(field.value).to.equal('=1+E6');
+    expect(sheet.getSelection().activeCell).to.eql({ col: 3, row: 3 });
+  });
+
+  it('points with the mouse from the formula the selected cell holds, once the formula field has the keyboard', async () => {
+    sheet.updateBottomRightCellValues([
+      { col: 3, row: 3, value: '3', formulaValue: 'A1+B1', cellStyle: 'cs0', locked: false, needsMeasure: false }
+    ] as never);
+    sheet.updateFormulaBar(null as never, 3, 3);
+    await rendered(sheet);
+    const field = sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
+    field.focus();
+    // In the B1 of the formula: where the caret goes, the field reports.
+    field.setSelectionRange(5, 5);
+    field.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, composed: true }));
+
+    mouse('mousedown', cell(5, 6));
+    await rendered(sheet);
+
+    expect(field.value).to.equal('=A1+E6');
   });
 
   it('points from the formula field as well', async () => {

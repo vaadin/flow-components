@@ -43,7 +43,8 @@ describe('SheetStore', () => {
     expect(store.mergeEntry).to.equal(null);
     expect(store.interaction).to.equal(IDLE);
     expect(store.editor).to.equal(null);
-    expect(store.formula.draft).to.equal(null);
+    expect(store.writing).to.equal(null);
+    expect(store.draft).to.equal(null);
     expect(store.sheetData.cells.size).to.equal(0);
   });
 
@@ -152,12 +153,23 @@ describe('SheetStore', () => {
       expect(renders).to.equal(1);
     });
 
-    it('changes the formula being written, the editor kept', () => {
+    it('changes what is written, the editor kept, and the formula being written with it', () => {
       openEditorOn(2, 3);
 
-      store.changeFormula({ draft: { text: '=A', caret: 2 } });
+      store.changeWriting({ text: '=A', caret: 2, source: 'cell' });
 
-      expect(store.formula.draft).to.eql({ text: '=A', caret: 2 });
+      expect(store.writing).to.eql({ text: '=A', caret: 2, source: 'cell' });
+      expect(store.draft).to.equal(store.writing);
+      expect(store.editor?.col).to.equal(2);
+      expect(renders).to.equal(2);
+    });
+
+    it('changes what is pointed at, the editor kept', () => {
+      openEditorOn(2, 3);
+
+      store.changeFormula({ lastPointed: { col: 1, row: 1 } });
+
+      expect(store.formula.lastPointed).to.eql({ col: 1, row: 1 });
       expect(store.editor?.col).to.equal(2);
       expect(renders).to.equal(2);
     });

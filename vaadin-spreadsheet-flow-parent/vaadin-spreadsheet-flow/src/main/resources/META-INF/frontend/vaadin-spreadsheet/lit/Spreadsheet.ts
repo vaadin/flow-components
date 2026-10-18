@@ -41,7 +41,7 @@ import {
 } from './algorithms/ViewportMath.js';
 import { type CellSlots, Derived, drawnColumnWidth, drawnRowHeight, type SheetSizes } from './state/Derived.js';
 import { RenderScheduler } from './state/RenderScheduler.js';
-import { closeEditor, type FormulaWriting, IDLE, type InteractionState, openEditor } from './state/Interaction.js';
+import { closeEditor, IDLE, type InteractionState, openEditor } from './state/Interaction.js';
 import type { SheetData } from './state/SheetData.js';
 import { SheetStore } from './state/SheetStore.js';
 import { ViewState } from './state/ViewState.js';
@@ -182,11 +182,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   /** Pointing at cells while a formula is written; see {@link FormulaPointer}. */
   private readonly pointing = new FormulaPointer(this.store, {
-    editorText: () => this.cellGrid.editorDraft(),
-    setEditorText: (text, caret) => this.cellGrid.setEditorValue(text, caret),
-    fieldText: () => this.formulaBar.formulaFieldState(),
     fieldHasFocus: () => this.formulaBar.formulaFieldHasFocus(),
-    setFieldText: (text, caret) => this.formulaBar.setFormulaFieldValue(text, caret),
     sheetName: () => this.activeSheetName(),
     scrollIntoView: (cell) => this.scrollCellIntoView(cell)
   });
@@ -231,11 +227,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** The cell editor while it is open: the cell-grid draws an input on its cell. */
   private get editor(): CellEditorState | null {
     return this.store.editor;
-  }
-
-  /** The formula being written, in the cell editor or the formula field. */
-  private get formula(): FormulaWriting {
-    return this.store.formula;
   }
 
   /** A link cell's tooltip, shown while the pointer is over the cell; see {@link LinkTooltip}. */
@@ -563,7 +554,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.on(this.formulaBar, 'formula-input', this.handleFormulaInput);
     this.on(this.formulaBar, 'formula-arrow', (e: FormulaArrowEvent) => this.pointing.arrow(e, 'field'));
     this.on(this.formulaBar, 'formula-caret', (e: CaretEvent) =>
-      this.pointing.caretMoved(e.detail.value, e.detail.caret)
+      this.pointing.caretMoved(e.detail.value, e.detail.caret, 'field')
     );
     this.root.appendChild(this.scrollContainer);
     // Sheet tabs sit below the scroll container in the flex
@@ -664,7 +655,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.on(this.cellGrid, 'cell-editor-input', this.handleCellEditorInput);
     this.on(this.cellGrid, 'cell-editor-arrow', (e: FormulaArrowEvent) => this.pointing.arrow(e, 'cell'));
     this.on(this.cellGrid, 'cell-editor-caret', (e: CaretEvent) =>
-      this.pointing.caretMoved(e.detail.value, e.detail.caret)
+      this.pointing.caretMoved(e.detail.value, e.detail.caret, 'cell')
     );
     // Mouse drag selection. The cell-grid emits
     // cell-mousedown + cell-mouseover; the connector watches
@@ -1030,7 +1021,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const initialValue = this.store.formulaFieldValueFor(col, row);
     // Opening the existing value to change it: arrows move the caret.
     this.store.changeEdit(openEditor(this.interaction.edit, { col, row, initialValue, mode: 'edit' }, false));
-    this.showInFormulaField(initialValue);
   };
 
   /**
@@ -1069,7 +1059,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       setTimeout(() =>
         this.renders.handle(() => {
           if (this.editor?.col === col && this.editor.row === row && !this.formulaBar.formulaFieldHasFocus()) {
-            this.commitCellEdit(col, row, this.cellGrid.editorValue() ?? value, undefined, false, false);
+            this.commitCellEdit(col, row, this.store.writing?.text ?? value, undefined, false, false);
           }
         })
       );
@@ -1099,6 +1089,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // server's response.
     this.pointing.end();
     this.store.changeEdit(closeEditor(this.interaction.edit));
+    this.showInFormulaField(value);
     if (takeKeyboard) {
       this.returnFocusToSheet();
     }
@@ -1162,22 +1153,47 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.returnFocusToSheet();
   };
 
-  /** Typed into the cell editor: the formula field shows it as it is typed. */
+  /** Typed into the cell editor: the formula field shows it as it is typed; see {@link drawWriting}. */
   private readonly handleCellEditorInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
-    this.showInFormulaField(e.detail.value);
-    this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length);
+    this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length, 'cell');
   };
 
   /**
-   * Typed into the formula field while the edit started in the cell: the
-   * cell editor shows it as it is typed.
+   * Typed into the formula field. While the edit started in the cell, the
+   * cell editor shows it as it is typed; see {@link drawWriting}.
    */
   private readonly handleFormulaInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
-    if (this.editor !== null) {
-      this.cellGrid.setEditorValue(e.detail.value);
-    }
-    this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length);
+    this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length, 'field');
   };
+
+  /**
+   * Draws what is written into the input it is not written in, and into the
+   * one it is written in where pointing at a cell changed it. The cell editor
+   * and the formula field report what is typed into them and where the caret
+   * goes, which the store keeps; neither is written to anywhere else.
+   */
+  private drawWriting(): void {
+    const edit = this.interaction.edit;
+    if (edit.kind === 'editing') {
+      const shown = this.cellGrid.editorValue();
+      if (shown !== null && shown !== edit.writing.text) {
+        // The caret only where the editor has the keyboard: written in the
+        // formula field, the text is shown in the editor and nothing moves
+        // there.
+        this.cellGrid.setEditorValue(
+          edit.writing.text,
+          edit.writing.source === 'cell' ? edit.writing.caret : undefined
+        );
+      }
+    }
+    const writing = this.store.writing;
+    if (writing !== null && writing.source === 'field' && this.formulaBar.formulaFieldHasFocus()) {
+      const field = this.formulaBar.formulaFieldState();
+      if (field !== null && field.value !== writing.text) {
+        this.formulaBar.setFormulaFieldValue(writing.text, writing.caret);
+      }
+    }
+  }
 
   /** The name of the sheet shown. */
   private activeSheetName(): string {
@@ -1200,7 +1216,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if (this.editor !== null || (sameCell && this.formulaBar.formulaFieldEdited())) {
       return;
     }
-    if (this.formula.draft !== null && this.formula.draft.text !== value) {
+    if (this.store.draft !== null && this.store.draft.text !== value) {
       this.pointing.end();
     }
     this.showInFormulaField(value);
@@ -1494,7 +1510,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         mode: 'edit'
       };
       this.store.changeEdit(openEditor(this.interaction.edit, editor, false));
-      this.showInFormulaField(editor.initialValue);
       return;
     }
 
@@ -1523,7 +1538,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         mode: 'enter'
       };
       this.store.changeEdit(openEditor(this.interaction.edit, editor, key !== ' ' && editor.initialValue !== key));
-      this.showInFormulaField(editor.initialValue);
       return;
     }
 
@@ -2039,11 +2053,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const press = this.interaction.press;
     this.formulaBar.renderState = this.store.derived.formulaBar({
       bar: this.store.formulaBar,
+      writing: this.store.writing,
       selection: this.selection,
       growing: this.interaction.extending || (press?.kind === 'select' && press.crossed),
-      draft: this.formula.draft,
+      draft: this.store.draft,
       sheetName: this.activeSheetName()
     });
+    this.drawWriting();
     this.sheetTabs.renderState = this.tabs.renderState();
     this.contextMenu.renderState = this.menu.renderState();
     this.menu.drawn();
@@ -2299,7 +2315,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       scrollLeft: opts.scrollLeft,
       scrollTop: opts.scrollTop,
       editor: this.editor,
-      formulaReferences: this.store.derived.formulaReferences(this.formula.draft, this.activeSheetName()),
+      formulaReferences: this.store.derived.formulaReferences(this.store.draft, this.activeSheetName()),
       overlays: positionedOverlays,
       // Each at the bottom right corner of its cell.
       popupButtons: this.store.derived.popupButtons(this.popup.buttons(), model),
@@ -2404,6 +2420,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // the cell shows the value, as it does when the edit ends there.
     this.pointing.end();
     this.store.changeEdit(closeEditor(this.interaction.edit));
+    this.showInFormulaField(value);
     this.showCommittedValue(col, row, value);
     this.sendToServer({ type: 'cellValueEdited', data: { row, col, value } });
     // shift+Tab stays put.
@@ -2930,8 +2947,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private abandonInteraction(): void {
     const hadKeyboard = this.host.matches(':focus-within');
-    // The formula's colours in the formula field go with it.
-    this.pointing.updateDraft(null, 0);
+    // What was written goes with it, and the formula's colours with that.
     this.store.interact(IDLE);
     this.formulaBar.abandonFormulaEdit();
     this.headerResize.cancel();

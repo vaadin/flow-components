@@ -50,6 +50,8 @@ export function addressFieldText(selection: SelectionState, growing: boolean, se
 /** What the formula bar draws. */
 export function formulaBarRenderState(input: {
   readonly bar: FormulaBarInputs;
+  /** What is written in the cell editor or the formula field, which the field shows while it is; null while nothing is. */
+  readonly writing: { readonly text: string } | null;
   readonly selection: SelectionState;
   /** Whether a range is being grown; see {@link addressFieldText}. */
   readonly growing: boolean;
@@ -61,7 +63,7 @@ export function formulaBarRenderState(input: {
   const { bar, draft } = input;
   return {
     address: addressFieldText(input.selection, input.growing, bar.selectionName),
-    formula: bar.fieldText,
+    formula: input.writing?.text ?? bar.fieldText,
     namedRanges: bar.namedRanges,
     highlights:
       draft === null

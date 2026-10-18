@@ -18,12 +18,16 @@ import type { CellEditorState } from '../elements/types.js';
 import { Derived, drawnColumnWidth, drawnRowHeight } from './Derived.js';
 import {
   type CellPress,
+  draftOf,
   type Edit,
   formulaOf,
   type FormulaWriting,
   IDLE,
   type InteractionState,
-  withFormula
+  withFormula,
+  withWriting,
+  type Writing,
+  writingOf
 } from './Interaction.js';
 import {
   type CellRange,
@@ -121,9 +125,19 @@ export class SheetStore {
     return edit.kind === 'editing' ? edit.editor : null;
   }
 
-  /** The formula being written, in the cell editor or the formula field. */
+  /** Pointing at cells for the formula being written, in the cell editor or the formula field. */
   get formula(): FormulaWriting {
     return formulaOf(this.ongoing.edit);
+  }
+
+  /** What is written, in the cell editor or the formula field; see {@link Writing}. */
+  get writing(): Writing | null {
+    return writingOf(this.ongoing.edit);
+  }
+
+  /** The formula being written: what is written, while it is a formula. */
+  get draft(): Writing | null {
+    return draftOf(this.ongoing.edit);
   }
 
   /**
@@ -207,7 +221,12 @@ export class SheetStore {
     this.interact({ ...this.ongoing, edit });
   }
 
-  /** Changes the formula being written; see {@link withFormula}. */
+  /** Changes what is written; see {@link withWriting}. */
+  changeWriting(writing: Writing | null): void {
+    this.changeEdit(withWriting(this.ongoing.edit, writing));
+  }
+
+  /** Changes the pointing at cells for the formula being written; see {@link withFormula}. */
   changeFormula(change: Partial<FormulaWriting>): void {
     this.changeEdit(withFormula(this.ongoing.edit, { ...this.formula, ...change }));
   }

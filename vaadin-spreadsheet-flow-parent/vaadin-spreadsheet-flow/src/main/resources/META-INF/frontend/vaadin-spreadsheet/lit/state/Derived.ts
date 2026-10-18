@@ -238,12 +238,13 @@ export class Derived {
    */
   formulaBar(input: {
     bar: FormulaBarInputs;
+    writing: { text: string } | null;
     selection: SelectionState;
     growing: boolean;
     draft: { text: string } | null;
     sheetName: string;
   }): FormulaBarRenderState {
-    return this.bar.get([input.bar, input.selection, input.growing, input.draft, input.sheetName], () =>
+    return this.bar.get([input.bar, input.writing, input.selection, input.growing, input.draft, input.sheetName], () =>
       formulaBarRenderState(input)
     );
   }

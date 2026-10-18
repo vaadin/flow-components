@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * The formula field and the cell editor are one edit, as the GWT client had
@@ -309,6 +310,30 @@ describe('Spreadsheet — the cell once an edit is committed', () => {
     press(input, 'Enter');
 
     expect(await shown(2, 2)).to.equal('old');
+  });
+
+  it('keeps a value committed in the cell, without moving on, in the formula field', async () => {
+    await select(ctx, 2, 2, 'old');
+    const input = await typeOver(ctx, 'new');
+
+    input.dispatchEvent(new FocusEvent('blur'));
+    await rendered(ctx.sheet);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('new');
+  });
+
+  it('keeps a value committed in the formula field, without moving on, there', async () => {
+    await select(ctx, 2, 2, 'old');
+    const field = formulaField(ctx.sheet);
+    field.focus();
+    typeInto(field, 'new');
+
+    field.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, composed: true, cancelable: true })
+    );
+    await rendered(ctx.sheet);
+
+    expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('new');
   });
 
   it('shows text committed from the formula field at once', async () => {

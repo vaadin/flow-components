@@ -8,6 +8,7 @@
  * license.
  */
 
+import { isFormula } from '../algorithms/FormulaPointing.js';
 import type { CellRect, PaintOutcome } from '../algorithms/SelectionPaint.js';
 import type { CellEditorState } from '../elements/types.js';
 
@@ -35,10 +36,20 @@ export interface Pointer {
   readonly span: { readonly start: number; readonly end: number };
 }
 
-/** A formula being written, in the cell editor or the formula field. Pointing at cells is part of it. */
+/**
+ * The text written in the cell editor or the formula field, and where its
+ * caret is: the one copy of it. The cell editor and the formula field both
+ * show it, the one it is not written in as it is written.
+ */
+export interface Writing {
+  readonly text: string;
+  readonly caret: number;
+  /** Where it is written: the cell editor, or the formula field. */
+  readonly source: 'cell' | 'field';
+}
+
+/** Pointing at cells while a formula is written, in the cell editor or the formula field. */
 export interface FormulaWriting {
-  /** The formula and where its caret is; null while the text is no formula. */
-  readonly draft: { readonly text: string; readonly caret: number } | null;
   /** The reference pointed at last, which pointing again replaces; null once anything is typed. */
   readonly pointer: Pointer | null;
   /**
@@ -55,12 +66,13 @@ export interface FormulaWriting {
 }
 
 /** No formula being written. */
-export const NO_FORMULA: FormulaWriting = { draft: null, pointer: null, lastPointed: null, press: 'none' };
+export const NO_FORMULA: FormulaWriting = { pointer: null, lastPointed: null, press: 'none' };
 
 /**
- * Writing in the sheet: nothing, the cell editor open - with the formula
- * written in it, or in the formula field beside it - or a formula written in
- * the formula field alone.
+ * Writing in the sheet: nothing, the cell editor open - with what is written
+ * in it, or in the formula field beside it - or a formula written in the
+ * formula field alone. What else is typed into the formula field alone is the
+ * field's until it is committed.
  */
 export type Edit =
   | { readonly kind: 'idle' }
@@ -73,9 +85,16 @@ export type Edit =
        * formula.
        */
       readonly autoPercent: boolean;
+      /** What is written, in the cell editor or the formula field. */
+      readonly writing: Writing;
       readonly formula: FormulaWriting;
     }
-  | { readonly kind: 'formulaField'; readonly formula: FormulaWriting };
+  | {
+      readonly kind: 'formulaField';
+      /** The formula written in the field; null once only what was pointed at is left. */
+      readonly writing: Writing | null;
+      readonly formula: FormulaWriting;
+    };
 
 /**
  * A press on the cells, from the press to the release anywhere on the page:
@@ -104,31 +123,61 @@ const NO_EDIT: Edit = { kind: 'idle' };
 /** Nothing under way. */
 export const IDLE: InteractionState = { edit: NO_EDIT, press: null, comment: null, extending: false };
 
-/** The formula being written, in the editor or the field: none while nothing is. */
+/** Pointing at cells for the formula being written: none while nothing is. */
 export function formulaOf(edit: Edit): FormulaWriting {
   return edit.kind === 'idle' ? NO_FORMULA : edit.formula;
 }
 
+/** What is written, in the cell editor or the formula field; null while nothing is. */
+export function writingOf(edit: Edit): Writing | null {
+  return edit.kind === 'idle' ? null : edit.writing;
+}
+
 /**
- * The edit with the formula written changed. The editor stays as it is;
- * without one, a formula with nothing left in it leaves nothing being
- * written.
+ * The formula being written: what is written, while it is a formula. Its
+ * references are coloured on the cells and in the formula field.
+ */
+export function draftOf(edit: Edit): Writing | null {
+  const writing = writingOf(edit);
+  return writing !== null && isFormula(writing.text) ? writing : null;
+}
+
+/**
+ * The edit with the pointing changed. The editor stays as it is; without
+ * one, no formula left and nothing pointed at leaves nothing being written.
  */
 export function withFormula(edit: Edit, formula: FormulaWriting): Edit {
   if (edit.kind === 'editing') {
     return { ...edit, formula };
   }
-  const empty =
-    formula.draft === null && formula.pointer === null && formula.lastPointed === null && formula.press === 'none';
-  return empty ? NO_EDIT : { kind: 'formulaField', formula };
+  return fieldEdit(writingOf(edit), formula);
 }
 
-/** The cell editor opened, the formula written so far kept. */
+/**
+ * The edit with what is written changed. The editor stays open whatever is
+ * written in it; in the formula field alone only a formula is kept.
+ */
+export function withWriting(edit: Edit, writing: Writing | null): Edit {
+  if (edit.kind === 'editing') {
+    return writing === null ? edit : { ...edit, writing };
+  }
+  return fieldEdit(writing, formulaOf(edit));
+}
+
+/** The cell editor opened on its first text, with the caret at its end; what was pointed at is kept. */
 export function openEditor(edit: Edit, editor: CellEditorState, autoPercent: boolean): Edit {
-  return { kind: 'editing', editor, autoPercent, formula: formulaOf(edit) };
+  const writing: Writing = { text: editor.initialValue, caret: editor.initialValue.length, source: 'cell' };
+  return { kind: 'editing', editor, autoPercent, writing, formula: formulaOf(edit) };
 }
 
-/** The cell editor closed, with what is left of the formula written. */
+/** The cell editor closed, its text with it, and what is left of what was pointed at. */
 export function closeEditor(edit: Edit): Edit {
-  return withFormula(NO_EDIT, formulaOf(edit));
+  return fieldEdit(null, formulaOf(edit));
+}
+
+/** A formula written in the formula field alone, or nothing once nothing is left of it. */
+function fieldEdit(writing: Writing | null, formula: FormulaWriting): Edit {
+  const kept = writing !== null && isFormula(writing.text) ? writing : null;
+  const empty = kept === null && formula.pointer === null && formula.lastPointed === null && formula.press === 'none';
+  return empty ? NO_EDIT : { kind: 'formulaField', writing: kept, formula };
 }

@@ -45,6 +45,7 @@ describe('Formula bar state', () => {
     it('shows the address, the text the formula field was given and the named ranges, with nothing coloured', () => {
       const state = formulaBarRenderState({
         bar: { ...NO_FORMULA_BAR_INPUTS, fieldText: '=A1', namedRanges: ['Sales'] },
+        writing: null,
         selection: selectSingleCell(3, 4),
         growing: false,
         draft: null,
@@ -57,12 +58,14 @@ describe('Formula bar state', () => {
     it('colours the references of a formula being written', () => {
       const state = formulaBarRenderState({
         bar: NO_FORMULA_BAR_INPUTS,
+        writing: { text: '=B2+C3:D4' },
         selection: selectSingleCell(1, 1),
         growing: false,
         draft: { text: '=B2+C3:D4' },
         sheetName: 'Sheet1'
       });
 
+      expect(state.formula, 'what is written, over the field text').to.equal('=B2+C3:D4');
       expect(state.highlights?.text).to.equal('=B2+C3:D4');
       expect(state.highlights?.references.map((ref) => [ref.start, ref.end])).to.eql([
         [1, 3],

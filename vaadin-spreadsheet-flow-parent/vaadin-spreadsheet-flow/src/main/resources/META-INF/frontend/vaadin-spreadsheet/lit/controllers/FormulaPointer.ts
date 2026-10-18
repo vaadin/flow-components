@@ -25,27 +25,13 @@ interface Cell {
   row: number;
 }
 
-/** A text being written, and where its caret is. */
-export interface WrittenText {
-  value: string;
-  caret: number;
-}
-
 /** Where a formula is written: in the cell editor, or in the formula field. */
 export type FormulaSource = 'cell' | 'field';
 
 /** What pointing at cells for a formula needs of the sheet. */
 export interface FormulaPointerHost {
-  /** The cell editor's text and caret. */
-  editorText(): WrittenText | null;
-  /** Writes the cell editor's text, and puts its caret at the place given, if one is. */
-  setEditorText(text: string, caret?: number): void;
-  /** The formula field's text and caret; null while the field is not drawn. */
-  fieldText(): WrittenText | null;
   /** Whether the formula field has the keyboard. */
   fieldHasFocus(): boolean;
-  /** Writes the formula field's text, with its caret at the place given. */
-  setFieldText(text: string, caret: number): void;
   /** The name of the sheet shown, which a reference without a sheet of its own is on. */
   sheetName(): string;
   /** Brings a cell into view. */
@@ -57,20 +43,19 @@ export interface FormulaPointerHost {
  * formula field, as Excel has it: after an operator, a bracket or a
  * separator an arrow or a click puts a reference to a cell into the
  * formula, and further arrows, a drag or Shift stretch it. The selection
- * stays on the cell being edited. Also keeps the formula being written,
- * whose references are coloured on the cells and in the formula field.
+ * stays on the cell being edited. Also keeps what is written, from what the
+ * two inputs report; the sheet draws it into both.
  */
 export class FormulaPointer {
   constructor(private readonly store: SheetStore, private readonly host: FormulaPointerHost) {}
 
   /** Where a formula is being written now: the formula field, the cell editor, or nowhere. */
   source(): FormulaSource | null {
+    const draft = this.store.draft;
     if (this.host.fieldHasFocus()) {
-      const field = this.host.fieldText();
-      return field !== null && isFormula(field.value) ? 'field' : null;
+      return draft !== null && draft.source === 'field' ? 'field' : null;
     }
-    const draft = this.editorDraft();
-    return draft !== null && isFormula(draft.value) ? 'cell' : null;
+    return this.store.editor !== null && draft !== null ? 'cell' : null;
   }
 
   /**
@@ -78,13 +63,13 @@ export class FormulaPointer {
    * that reference: the next arrow after an operator points at a new one,
    * from the cell pointed at last.
    */
-  typed(value: string, caret: number): void {
+  typed(value: string, caret: number, source: FormulaSource): void {
     this.store.changeFormula({ pointer: null });
-    this.updateDraft(value, caret);
+    this.write(value, caret, source);
   }
 
-  /** The caret moved in the formula being written, or the edit just began. */
-  caretMoved(value: string, caret: number): void {
+  /** The caret moved in the cell editor or the formula field, or the edit just began. */
+  caretMoved(value: string, caret: number, source: FormulaSource): void {
     if (this.store.editor === null && !this.host.fieldHasFocus()) {
       // From an editor on its way out - the edit is over.
       return;
@@ -94,7 +79,7 @@ export class FormulaPointer {
       // Moved away from what was pointed at: the next point starts afresh.
       this.store.changeFormula({ pointer: null });
     }
-    this.updateDraft(value, caret);
+    this.write(value, caret, source);
   }
 
   /**
@@ -132,11 +117,11 @@ export class FormulaPointer {
    * the cell, and Ctrl or Cmd adds another after a comma.
    */
   press(col: number, row: number, shiftKey: boolean, add: boolean, source: FormulaSource): void {
-    const draft = source === 'field' ? this.host.fieldText() : this.editorDraft();
-    if (draft === null) {
+    const writing = this.store.writing;
+    if (writing === null) {
       return;
     }
-    let { value, caret } = draft;
+    let { text: value, caret } = writing;
     const { formula } = this.store;
     const cell = selectCellAt(col, row, this.store.model.mergedRegions).activeCell;
     const pointer = formula.pointer !== null && caret === formula.pointer.span.end ? formula.pointer : null;
@@ -171,11 +156,10 @@ export class FormulaPointer {
     if (this.store.formula.press !== 'pointing' || pointer === null) {
       return false;
     }
-    const source = this.source();
-    const draft = source === 'field' ? this.host.fieldText() : this.editorDraft();
-    if (draft !== null) {
+    const writing = this.store.writing;
+    if (writing !== null) {
       const end = selectCellAt(col, row, this.store.model.mergedRegions).activeCell;
-      this.pointAt(pointer.anchor, end, draft.value, pointer.span.end, pointer.span, source ?? 'cell');
+      this.pointAt(pointer.anchor, end, writing.text, pointer.span.end, pointer.span, this.source() ?? 'cell');
     }
     return true;
   }
@@ -198,22 +182,15 @@ export class FormulaPointer {
     return true;
   }
 
-  /** Colours the references of the formula being written, or none when it is not one. */
-  updateDraft(text: string | null, caret: number): void {
-    const draft = text !== null && isFormula(text) ? { text, caret } : null;
-    const before = this.store.formula.draft;
-    if (draft === null && before === null) {
-      return;
-    }
-    if (draft !== null && before !== null && draft.text === before.text && draft.caret === before.caret) {
-      return;
-    }
-    this.store.changeFormula({ draft });
-  }
-
-  /** The formula is written or thrown away: nothing is pointed at or coloured any more. */
+  /**
+   * The formula is written or thrown away: nothing is pointed at any more,
+   * and a formula written in the field alone is gone. An open editor keeps
+   * its text until it closes.
+   */
   end(): void {
-    this.updateDraft(null, 0);
+    if (this.store.editor === null) {
+      this.store.changeWriting(null);
+    }
     this.store.changeFormula({ pointer: null, lastPointed: null });
   }
 
@@ -243,19 +220,22 @@ export class FormulaPointer {
       pointer: { anchor, end, span: { start: placed.start, end: placed.end } },
       lastPointed: end
     });
-    if (this.store.editor !== null) {
-      this.host.setEditorText(placed.text, source === 'cell' ? placed.end : undefined);
-    }
-    if (source === 'field') {
-      this.host.setFieldText(placed.text, placed.end);
-    }
-    this.store.showInFormulaField(placed.text);
-    this.updateDraft(placed.text, placed.end);
+    this.write(placed.text, placed.end, source);
   }
 
-  /** What the cell editor holds and where its caret is, while it is open. */
-  private editorDraft(): WrittenText | null {
-    return this.store.editor === null ? null : this.host.editorText();
+  /**
+   * Keeps what is written, unless it is what is kept already, or text in the
+   * formula field alone that is no formula: that stays the field's.
+   */
+  private write(text: string, caret: number, source: FormulaSource): void {
+    const writing = this.store.writing;
+    if (writing !== null && writing.text === text && writing.caret === caret && writing.source === source) {
+      return;
+    }
+    if (writing === null && this.store.editor === null && !isFormula(text)) {
+      return;
+    }
+    this.store.changeWriting({ text, caret, source });
   }
 
   /** The cell the formula being written is for. */
