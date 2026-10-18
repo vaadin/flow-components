@@ -25,7 +25,6 @@ import {
   type CellRange,
   isCellInSelection,
   normalizedRange,
-  selectionSizeLabel,
   type SelectionState,
   selectSingleCell
 } from './state/SelectionState.js';
@@ -48,7 +47,6 @@ import { SheetStore } from './state/SheetStore.js';
 import { ViewState } from './state/ViewState.js';
 import { type SheetModel } from './state/SheetModel.js';
 import { initialEditValue } from './algorithms/PercentageEntry.js';
-import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
 import { type CellSlotAssignment, flowVirtualChildResolver } from './dom/VirtualChildren.js';
 import {
@@ -103,7 +101,7 @@ import {
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetHeaderCorner } from './elements/SpreadsheetHeaderCorner.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
-import { type FormulaBarRenderState, SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
+import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
 import { SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
 import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
@@ -272,16 +270,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
 
-  /**
-   * Whether the user is holding shift and growing the selection.
-   *
-   * While they are, the address field counts the block out - "3R x 3C" -
-   * rather than naming a cell, which is what Excel's name box does. It
-   * has to survive the server echoing the selection straight back, or
-   * the count would be replaced by the anchor's address before anyone
-   * could read it.
-   */
-  private extendingSelection = false;
   /**
    * The server-side components the sheet hosts: charts and other overlays,
    * components in cells, custom editors, and the icons of menu actions.
@@ -970,18 +958,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       activeRange: this.store.rangeTo(anchor, col, row),
       auxRanges: this.selection.auxRanges
     });
-    this.showRangeSizeInAddressField();
   };
-
-  /**
-   * While a range is being dragged out, the address field counts it
-   * rather than naming a cell — Excel's "3R x 2C". The count is what
-   * the user needs mid-drag; the address comes back when the server
-   * answers the finished selection.
-   */
-  private showRangeSizeInAddressField(): void {
-    this.changeFormulaBar({ address: selectionSizeLabel(this.selection.activeRange) });
-  }
 
   /**
    * Mouse drag — mouseup end. Closes the drag.
@@ -1367,13 +1344,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       return;
     }
     this.store.changeFormula({ draft });
-    const refs = draft === null ? [] : formulaReferences(draft.text, this.activeSheetName());
-    this.changeFormulaBar({
-      highlights:
-        draft === null
-          ? null
-          : { text: draft.text, references: refs.map((ref) => ({ start: ref.start, end: ref.end, color: ref.color })) }
-    });
   }
 
   /** The formula is written or thrown away: nothing is pointed at or coloured any more. */
@@ -1382,18 +1352,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.store.changeFormula({ pointer: null, lastPointed: null });
   }
 
-  /**
-   * Changes what the formula bar shows. Every change goes through here, so
-   * what one does not name stays as it is - the colours of a formula being
-   * written among it.
-   */
-  private changeFormulaBar(change: Partial<FormulaBarRenderState>): void {
-    this.formulaBar.renderState = { ...this.formulaBar.renderState, ...change };
-  }
-
   /** What the formula field shows - the cell editor's value, while it is open. */
   private showInFormulaField(value: string): void {
-    this.changeFormulaBar({ formula: value });
+    this.store.showInFormulaField(value);
   }
 
   /**
@@ -1791,8 +1752,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
           return;
         }
         this.store.select({ activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] });
-        this.extendingSelection = true;
-        this.showRangeSizeInAddressField();
+        this.store.extendSelection(true);
         this.scrollCellIntoView(grown.moved);
       } else {
         const next = moveActiveCell(this.selection.activeCell, this.mergeEntry, direction, this.store.sheetShape());
@@ -1831,7 +1791,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * named in the address field as the server hears of it.
    */
   private moveSelectionTo(next: SingleCellSelection): void {
-    this.extendingSelection = false;
+    this.store.extendSelection(false);
     this.store.pick(next);
     this.scrollCellIntoView(next.activeCell);
   }
@@ -1962,9 +1922,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * selection has only just been made.
    */
   private showSelectedCellInFormulaBar(cell: CellPosition): void {
-    this.changeFormulaBar({
-      address: this.extendingSelection ? selectionSizeLabel(this.selection.activeRange) : cellCoordToAddress(cell)
-    });
+    // The address field names the cell until the server names the selection.
+    this.store.nameSelection(null);
     this.showServerValueInFormulaField(this.store.formulaFieldValueFor(cell.col, cell.row), false);
   }
 
@@ -2245,6 +2204,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.cellGrid.renderState = state;
     const { col, row } = this.selection.activeCell;
     this.formulaBar.formulaLocked = this.store.isCellLockedForEdit(col, row);
+    const press = this.interaction.press;
+    this.formulaBar.renderState = this.store.derived.formulaBar({
+      bar: this.store.formulaBar,
+      selection: this.selection,
+      growing: this.interaction.extending || (press?.kind === 'select' && press.crossed),
+      draft: this.formula.draft,
+      sheetName: this.activeSheetName()
+    });
     this.hosted.place(state, slots.assignments);
     // Column-header strip. Sized + state-pushed only
     // when there is something to draw, so the default opt-out path
@@ -2566,11 +2533,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * to naming the cell the user started from.
    */
   private readonly handleDocumentKeyUp = (e: KeyboardEvent): void => {
-    if (e.key !== 'Shift' || !this.extendingSelection) {
+    if (e.key !== 'Shift' || !this.interaction.extending) {
       return;
     }
-    this.extendingSelection = false;
-    this.changeFormulaBar({ address: cellCoordToAddress(this.selection.activeCell) });
+    this.store.extendSelection(false);
   };
 
   /**
@@ -2755,16 +2721,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // The server only sends a name when the selection has one — a named
     // range, or a sheet-qualified reference. For an ordinary cell it
     // sends null and leaves the address to the client, which is the
-    // common case: without this the address field sits empty for every
-    // selection the user makes.
-    this.changeFormulaBar({
-      // While the user is still growing a selection the address field
-      // counts the block out, and this is the server naming the anchor
-      // of the range they are in the middle of making.
-      address: this.extendingSelection
-        ? selectionSizeLabel(this.selection.activeRange)
-        : possibleName ?? cellCoordToAddress({ col, row })
-    });
+    // common case. While the user is still growing a selection the
+    // address field counts the block out whatever the server names it;
+    // see addressFieldText.
+    this.store.nameSelection(possibleName);
     this.showServerValueInFormulaField(this.store.formulaFieldValueFor(col, row), true);
   }
 
@@ -2809,15 +2769,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     _initialSelection: boolean,
     keepView = false
   ): void {
-    // Read before the selection collapses to the one cell below: while
-    // the user is still growing a selection the address field is
-    // counting the block out, and this is the server answering the
-    // anchor of the range they are in the middle of making.
-    const sizeLabel = selectionSizeLabel(this.selection.activeRange);
     const before = this.selection.activeCell;
     this.store.select(selectSingleCell(col, row));
     this.sheetData.serverSelectedCell = { col, row };
-    this.changeFormulaBar({ address: this.extendingSelection ? sizeLabel : name ?? cellCoordToAddress({ col, row }) });
+    this.store.nameSelection(name);
     this.showServerValueInFormulaField(
       formula && cellValue !== '' ? `=${cellValue}` : cellValue,
       before.col === col && before.row === row
@@ -2877,16 +2832,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       auxRanges: this.selection.auxRanges
     });
     this.sheetData.serverSelectedCell = { col, row };
-    this.changeFormulaBar({
-      // As in updateFormulaBar: the server names a selection only when
-      // it has a name, and leaves an ordinary one to the client. While
-      // the user is still growing the selection, though, the count is
-      // what they are reading, and this is the server echoing back the
-      // range they are in the middle of making.
-      address: this.extendingSelection
-        ? selectionSizeLabel(this.selection.activeRange)
-        : name ?? cellCoordToAddress({ col, row })
-    });
+    // As in updateFormulaBar: the server names a selection only when it has
+    // a name, and leaves an ordinary one to the client.
+    this.store.nameSelection(name);
     // A new active cell shows in the field. The same cell keeps what the
     // field has: the server may have just sent its value along with
     // showSelectedCell, for a cell this client holds no data for.
@@ -3152,7 +3100,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.store.interact(IDLE);
     this.formulaBar.abandonFormulaEdit();
     this.headerResize.cancel();
-    this.extendingSelection = false;
     this.menu.close();
     this.linkTooltip.hide();
     if (hadKeyboard) {
@@ -3196,7 +3143,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.store.write('invalidFormulaErrorMessage', message);
   }
   setNamedRanges(names: string[] | null): void {
-    this.changeFormulaBar({ namedRanges: coerceArray(names) });
+    this.store.setNamedRanges(coerceArray(names));
   }
   setResources(host: HTMLElement, keys: string[] | null): void {
     // The server sends the resource KEYS here and puts each URL on the host

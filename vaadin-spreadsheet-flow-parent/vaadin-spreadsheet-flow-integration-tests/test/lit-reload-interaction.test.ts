@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import type { SpreadsheetActionDetails } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * A reload - another sheet shown, a new workbook, a sheet added, deleted or
@@ -66,7 +67,7 @@ describe('Spreadsheet — a reload ends what the user was doing', () => {
   async function reload(): Promise<void> {
     sheet.setReload(true);
     await sheet.getCellGrid().updateComplete;
-    await sheet.getFormulaBar().updateComplete;
+    await rendered(sheet);
   }
 
   function gridEvent(type: string, detail: Record<string, unknown>): void {
@@ -108,7 +109,7 @@ describe('Spreadsheet — a reload ends what the user was doing', () => {
   });
 
   it('ends an edit in the formula field without committing it', async () => {
-    await sheet.getFormulaBar().updateComplete;
+    await rendered(sheet);
     const field = sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
     field.focus();
     field.value = 'typed';
@@ -202,11 +203,13 @@ describe('Spreadsheet — a reload ends what the user was doing', () => {
     sheet
       .getScrollContainer()
       .dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', shiftKey: true, bubbles: true, composed: true, cancelable: true }));
+    await rendered(sheet);
     expect(sheet.getFormulaBar().renderState.address).to.equal('2R x 1C');
 
     await reload();
     sheet.showSelectedCell(null, 1, 1, '', false, false, true);
 
+    await rendered(sheet);
     expect(sheet.getFormulaBar().renderState.address).to.equal('A1');
   });
 

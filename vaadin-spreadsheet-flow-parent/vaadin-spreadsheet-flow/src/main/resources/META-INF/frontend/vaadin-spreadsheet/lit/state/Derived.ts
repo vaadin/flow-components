@@ -20,8 +20,10 @@ import {
 } from '../algorithms/ViewportMath.js';
 import { computeCellSlots, type CellSlotAssignment } from '../dom/VirtualChildren.js';
 import type { PositionedGrouping } from '../elements/SpreadsheetColumnHeader.js';
+import type { FormulaBarRenderState } from '../elements/SpreadsheetFormulaBar.js';
 import type { PositionedPopupButton } from '../elements/types.js';
 import type { PopupButtonState } from '../types/wire.js';
+import { type FormulaBarInputs, formulaBarRenderState } from './FormulaBarState.js';
 import { type CellRange, selectedColumnSet, selectedRowSet, type SelectionState } from './SelectionState.js';
 import type { SheetModel } from './SheetModel.js';
 
@@ -107,6 +109,7 @@ export class Derived {
   private readonly rowOutline = new Memo<PositionedGrouping[]>();
   private readonly references = new Memo<DrawnReference[]>();
   private readonly buttons = new Memo<PositionedPopupButton[]>();
+  private readonly bar = new Memo<FormulaBarRenderState>();
 
   /**
    * The sheet's row and column sizes as drawn. A sheet can have a million
@@ -227,6 +230,22 @@ export class Derived {
       const atCaret = referenceAt(refs, draft.caret);
       return refs.map((ref) => ({ range: ref.range, color: ref.color, atCaret: ref === atCaret }));
     });
+  }
+
+  /**
+   * What the formula bar draws; see {@link formulaBarRenderState}. Kept while
+   * nothing it is worked out from changes, so a scroll draws it no more.
+   */
+  formulaBar(input: {
+    bar: FormulaBarInputs;
+    selection: SelectionState;
+    growing: boolean;
+    draft: { text: string } | null;
+    sheetName: string;
+  }): FormulaBarRenderState {
+    return this.bar.get([input.bar, input.selection, input.growing, input.draft, input.sheetName], () =>
+      formulaBarRenderState(input)
+    );
   }
 
   /** The popup buttons, each at the bottom right corner of its cell. */

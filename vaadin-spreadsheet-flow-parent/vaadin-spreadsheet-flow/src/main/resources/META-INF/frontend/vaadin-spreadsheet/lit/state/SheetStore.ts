@@ -34,6 +34,7 @@ import {
   type SelectionState,
   type SheetSelection
 } from './SelectionState.js';
+import { type FormulaBarInputs, NO_FORMULA_BAR_INPUTS } from './FormulaBarState.js';
 import { SheetData } from './SheetData.js';
 import {
   initialSheetModel,
@@ -62,6 +63,9 @@ export class SheetStore {
 
   /** See {@link sheetData}. */
   private session = new SheetData();
+
+  /** See {@link formulaBar}. */
+  private bar: FormulaBarInputs = NO_FORMULA_BAR_INPUTS;
 
   /** What the sheet draws that is worked out from the model and the selection alone; see {@link Derived}. */
   readonly derived = new Derived();
@@ -128,6 +132,15 @@ export class SheetStore {
    */
   get sheetData(): SheetData {
     return this.session;
+  }
+
+  /**
+   * What the formula bar shows besides what the selection and the formula
+   * being written say; see {@link FormulaBarInputs}. Drawn in the render
+   * with the rest of the sheet.
+   */
+  get formulaBar(): FormulaBarInputs {
+    return this.bar;
   }
 
   /**
@@ -201,6 +214,32 @@ export class SheetStore {
 
   changePress(press: CellPress | null): void {
     this.interact({ ...this.ongoing, press });
+  }
+
+  /** Shift held growing the selection, or let go; see {@link InteractionState.extending}. */
+  extendSelection(extending: boolean): void {
+    this.interact({ ...this.ongoing, extending });
+  }
+
+  /** What the server named the selection; null leaves the address field naming the cell. */
+  nameSelection(name: string | null): void {
+    this.changeFormulaBar({ selectionName: name });
+  }
+
+  /**
+   * What the formula field shows while nobody types in it. Shown again even
+   * when it is what the field was last told: the field may hold text typed
+   * since, as after an edit thrown away. Each change replaces the inputs,
+   * the same text included, and the field is written again from a new render
+   * state.
+   */
+  showInFormulaField(text: string): void {
+    this.changeFormulaBar({ fieldText: text });
+  }
+
+  /** The named ranges the server sent, offered beside the address field. */
+  setNamedRanges(names: ReadonlyArray<string>): void {
+    this.changeFormulaBar({ namedRanges: names });
   }
 
   /** The sheet as the arrow keys see it. */
@@ -316,6 +355,11 @@ export class SheetStore {
 
   private changeSelection(selection: SheetSelection): void {
     this.selected = selection;
+    this.scheduleRender();
+  }
+
+  private changeFormulaBar(change: Partial<FormulaBarInputs>): void {
+    this.bar = { ...this.bar, ...change };
     this.scheduleRender();
   }
 }

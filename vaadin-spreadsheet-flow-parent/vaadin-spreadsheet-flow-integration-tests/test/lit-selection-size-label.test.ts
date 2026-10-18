@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import { selectionSizeLabel } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SelectionState.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * While a selection is being grown with shift, Excel's name box counts
@@ -82,7 +83,8 @@ describe('Spreadsheet — the address field while shift-selecting', () => {
         return sheet.getFormulaBar().renderState.address;
     }
 
-    it('names the cell before anything is selected', () => {
+    it('names the cell before anything is selected', async () => {
+        await rendered(sheet);
         expect(address()).to.equal('C3');
     });
 
@@ -123,11 +125,12 @@ describe('Spreadsheet — the address field while shift-selecting', () => {
         expect(address()).to.equal('C3');
     });
 
-    it('takes the server at its word once the selection is made', () => {
+    it('takes the server at its word once the selection is made', async () => {
         press('ArrowRight', true);
         document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Shift', bubbles: true }));
         sheet.setSelectedCellAndRange('MyRange', 3, 3, 3, 4, 3, 3, false);
 
+        await rendered(sheet);
         expect(address()).to.equal('MyRange');
     });
 

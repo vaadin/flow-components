@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * The named-range picker in the formula bar.
@@ -50,7 +51,7 @@ function namedRangeBox(sheet: Spreadsheet): HTMLSelectElement | null {
 }
 
 async function options(sheet: Spreadsheet): Promise<HTMLOptionElement[]> {
-  await sheet.getFormulaBar().updateComplete;
+  await rendered(sheet);
   const box = namedRangeBox(sheet);
   return box ? Array.from(box.options) : [];
 }
@@ -87,7 +88,7 @@ describe('Spreadsheet — named-range picker', () => {
 
   it('starts with nothing selected', async () => {
     ctx.sheet.setNamedRanges(['john', 'local']);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
     expect(namedRangeBox(ctx.sheet)!.value).to.equal('');
   });
 
@@ -101,7 +102,7 @@ describe('Spreadsheet — named-range picker', () => {
 
   it('reports the picked range as a sheet address change', async () => {
     ctx.sheet.setNamedRanges(['john', 'local']);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
 
     const seen: string[] = [];
     ctx.sheet.getFormulaBar().addEventListener('sheet-address-changed', (e: Event) => {
@@ -119,7 +120,7 @@ describe('Spreadsheet — named-range picker', () => {
     // How TestBench drives the picker: setProperty + a bare Event. A
     // listener delegated from the shadow root never sees this one.
     ctx.sheet.setNamedRanges(['john', 'local']);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
 
     const seen: string[] = [];
     ctx.sheet.getFormulaBar().addEventListener('sheet-address-changed', (e: Event) => {
@@ -135,7 +136,7 @@ describe('Spreadsheet — named-range picker', () => {
 
   it('ignores a change back to the blank entry', async () => {
     ctx.sheet.setNamedRanges(['john']);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
 
     const seen: string[] = [];
     ctx.sheet.getFormulaBar().addEventListener('sheet-address-changed', (e: Event) => {
@@ -153,12 +154,12 @@ describe('Spreadsheet — named-range picker', () => {
     // As the GWT client did: the picker follows the address field.
     ctx.sheet.setNamedRanges(['john', 'local']);
     ctx.sheet.updateFormulaBar('john', 1, 1);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
     expect(namedRangeBox(ctx.sheet)!.value).to.equal('john');
 
     ctx.sheet.setSelectedCellAndRange(null, 8, 12, 8, 8, 12, 12, false);
     ctx.sheet.updateFormulaBar(null, 8, 12);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
     expect(namedRangeBox(ctx.sheet)!.value).to.equal('');
   });
 
@@ -166,26 +167,23 @@ describe('Spreadsheet — named-range picker', () => {
     // A select only reports a change of option. Left on the range picked
     // before, picking it again after selecting elsewhere did nothing.
     ctx.sheet.setNamedRanges(['john', 'local']);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
     const box = namedRangeBox(ctx.sheet)!;
     box.value = 'john';
     box.dispatchEvent(new Event('change'));
 
     ctx.sheet.setSelectedCellAndRange(null, 8, 12, 8, 8, 12, 12, false);
     ctx.sheet.updateFormulaBar(null, 8, 12);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
 
     expect(box.value).to.equal('');
   });
 
   it('keeps the address and formula fields untouched by a range list update', async () => {
-    ctx.sheet.getFormulaBar().renderState = {
-      address: 'B2',
-      formula: '=SUM(A1:A3)',
-      namedRanges: []
-    };
+    ctx.sheet.showSelectedCell(null as any, 2, 2, 'SUM(A1:A3)', true, false, false);
+    await rendered(ctx.sheet);
     ctx.sheet.setNamedRanges(['john']);
-    await ctx.sheet.getFormulaBar().updateComplete;
+    await rendered(ctx.sheet);
 
     const root = ctx.sheet.getFormulaBar().shadowRoot!;
     expect(root.querySelector<HTMLInputElement>('.address')!.value).to.equal('B2');

@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * `setSelectedCellAndRange` applies server-driven selection.
@@ -122,20 +123,22 @@ describe('Spreadsheet server-driven selection', () => {
     expect(selection.auxRanges).to.have.length(0);
   });
 
-  it('shows the address the server sent in the formula bar', () => {
+  it('shows the address the server sent in the formula bar', async () => {
     ctx.sheet.setSelectedCellAndRange('Sheet1!B7', 2, 7, 2, 2, 7, 7, false);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal(
       'Sheet1!B7'
     );
   });
 
-  it('leaves the formula field alone when only the address changes', () => {
+  it('leaves the formula field alone when only the address changes', async () => {
     // The server sends a formula the way POI stores it, without the
     // leading '='; the client is what puts it back.
     ctx.sheet.showSelectedCell('A1', 1, 1, 'SUM(B1:B9)', true, false, false);
     ctx.sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal(
       '=SUM(B1:B9)'
     );
@@ -287,15 +290,17 @@ describe('showSelectedCell — the server moving the selection', () => {
     expect(ctx.sheet.getScrollContainer().scrollTop).to.equal(400);
   });
 
-  it('puts the leading = back on a formula', () => {
+  it('puts the leading = back on a formula', async () => {
     ctx.sheet.showSelectedCell('C3', 3, 3, 'A1+B2', true, false, false);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=A1+B2');
   });
 
-  it('leaves a plain value alone', () => {
+  it('leaves a plain value alone', async () => {
     ctx.sheet.showSelectedCell('C3', 3, 3, "'text", false, false, false);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal("'text");
   });
 
@@ -305,9 +310,17 @@ describe('showSelectedCell — the server moving the selection', () => {
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
   });
 
-  it('works out the address when the server sends no name', () => {
+  it('shows the name the server sends', async () => {
+    ctx.sheet.showSelectedCell('Totals', 2, 6, '', false, false, false);
+
+    await rendered(ctx.sheet);
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('Totals');
+  });
+
+  it('works out the address when the server sends no name', async () => {
     ctx.sheet.showSelectedCell(null as any, 2, 6, '', false, false, false);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B6');
   });
 
@@ -346,10 +359,11 @@ describe('Formula bar — the address field', () => {
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B2');
   });
 
-  it('prefers the name the server sent', () => {
+  it('prefers the name the server sent', async () => {
     clickCell(ctx.sheet, 2, 2);
     ctx.sheet.updateFormulaBar('Sales', 2, 2);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('Sales');
   });
 
@@ -407,7 +421,7 @@ describe('Formula bar — the address field', () => {
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
   });
 
-  it('shows the new active cell when the server moves the selection, as the GWT client did', () => {
+  it('shows the new active cell when the server moves the selection, as the GWT client did', async () => {
     // An address typed into the address field, or a named range picked
     // there, comes back this way; the field kept the old cell's value.
     ctx.sheet.updateBottomRightCellValues([
@@ -418,6 +432,7 @@ describe('Formula bar — the address field', () => {
     ctx.sheet.updateFormulaBar(null as any, 2, 2);
     ctx.sheet.setSelectedCellAndRange('C5', 3, 5, 3, 3, 5, 5, true);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('hello');
   });
 
@@ -430,12 +445,13 @@ describe('Formula bar — the address field', () => {
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('x');
   });
 
-  it('keeps what the server sent for the same cell when it names its range', () => {
+  it('keeps what the server sent for the same cell when it names its range', async () => {
     // A cell this client has no data for yet: the server sends its value
     // with showSelectedCell, then the range it is in.
     ctx.sheet.showSelectedCell('C5', 3, 5, 'far away', false, false, false);
     ctx.sheet.setSelectedCellAndRange('Sales', 3, 5, 3, 4, 5, 6, false);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('far away');
   });
 
@@ -480,7 +496,7 @@ describe('Formula bar — what the server says while the user moves on or writes
   }
 
   async function formulaField(): Promise<HTMLInputElement> {
-    await bar().updateComplete;
+    await rendered(ctx.sheet);
     return bar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
   }
 
@@ -531,10 +547,10 @@ describe('Formula bar — what the server says while the user moves on or writes
     ]);
 
     ctx.sheet.updateFormulaBar(null, 2, 2);
-    await bar().updateComplete;
+    await rendered(ctx.sheet);
     const afterAnswer = field.value;
     ctx.sheet.showSelectedCell(null, 2, 2, 'TWO!', false, false, false);
-    await bar().updateComplete;
+    await rendered(ctx.sheet);
 
     expect([afterAnswer, field.value]).to.eql(['typed', 'typed']);
   });
@@ -549,8 +565,7 @@ describe('Formula bar — what the server says while the user moves on or writes
     ]);
 
     ctx.sheet.updateFormulaBar(null, 2, 2);
-    await bar().updateComplete;
-
+    await rendered(ctx.sheet);
     expect(field.value).to.equal('TWO');
   });
 
@@ -578,12 +593,13 @@ describe('Formula bar — what the server says while the user moves on or writes
     expect(bar().renderState.highlights?.references).to.have.length(1);
   });
 
-  it('keeps the named ranges when the server names a cell', () => {
+  it('keeps the named ranges when the server names a cell', async () => {
     ctx.sheet.setNamedRanges(['john']);
 
     ctx.sheet.updateFormulaBar(null, 2, 2);
     ctx.sheet.showSelectedCell(null, 3, 5, 'hello', false, false, false);
 
+    await rendered(ctx.sheet);
     expect(bar().renderState.namedRanges).to.eql(['john']);
   });
 
@@ -594,7 +610,7 @@ describe('Formula bar — what the server says while the user moves on or writes
     expect(bar().renderState.highlights).to.not.equal(null);
 
     ctx.sheet.setSelectedCellAndRange('C5', 3, 5, 3, 3, 5, 5, false);
-    await bar().updateComplete;
+    await rendered(ctx.sheet);
 
     expect((await formulaField()).value).to.equal('hello');
     expect(bar().renderState.highlights ?? null).to.equal(null);
@@ -604,7 +620,7 @@ describe('Formula bar — what the server says while the user moves on or writes
     await typeInField('=A1');
 
     ctx.sheet.showSelectedCell('C5', 3, 5, 'hello', false, false, false);
-    await bar().updateComplete;
+    await rendered(ctx.sheet);
 
     expect((await formulaField()).value).to.equal('hello');
     expect(bar().renderState.highlights ?? null).to.equal(null);
@@ -624,7 +640,7 @@ describe('Formula bar — whether the formula field is being written in', () => 
 
   it('is written in only once typed into while it has the keyboard', async () => {
     const bar = ctx.sheet.getFormulaBar();
-    await bar.updateComplete;
+    await rendered(ctx.sheet);
     const field = bar.shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
 
     field.focus();
@@ -642,7 +658,7 @@ describe('Formula bar — whether the formula field is being written in', () => 
 
   it('is written in once a reference is pointed into it', async () => {
     const bar = ctx.sheet.getFormulaBar();
-    await bar.updateComplete;
+    await rendered(ctx.sheet);
     const field = bar.shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
     field.focus();
 
@@ -653,12 +669,12 @@ describe('Formula bar — whether the formula field is being written in', () => 
 
   it('is not written in when the sheet puts a value there', async () => {
     const bar = ctx.sheet.getFormulaBar();
-    await bar.updateComplete;
+    await rendered(ctx.sheet);
     const field = bar.shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
     field.focus();
 
     bar.renderState = { ...bar.renderState, formula: 'from the sheet' };
-    await bar.updateComplete;
+    await rendered(ctx.sheet);
 
     expect(bar.formulaFieldEdited()).to.equal(false);
   });
@@ -712,11 +728,12 @@ describe('Formula bar — jumping by address', () => {
     expect(jump.data).to.deep.equal({ value: 'B1:C2' });
   });
 
-  it('names an unnamed server selection by its active cell', () => {
+  it('names an unnamed server selection by its active cell', async () => {
     // Same as updateFormulaBar: the server names a selection only when
     // it has one, and leaves an ordinary one to the client.
     ctx.sheet.setSelectedCellAndRange(null as any, 2, 1, 2, 3, 1, 2, false);
 
+    await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B1');
   });
 });
@@ -804,11 +821,36 @@ describe('Formula bar — dragging out a range', () => {
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B2');
   });
 
-  it('gives the address back when the server answers the selection', () => {
+  it('gives the address back when the drag ends and the server answers the selection', async () => {
     drag([8, 10], [9, 10]);
+    document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
     ctx.sheet.updateFormulaBar(null as any, 8, 10);
+    await rendered(ctx.sheet);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('H10');
+  });
+
+  it('names the cell while it is only pressed, not yet dragged', async () => {
+    ctx.sheet.getCellGrid().dispatchEvent(
+      new CustomEvent('cell-mousedown', {
+        detail: { col: 8, row: 10, shiftKey: false, ctrlKey: false, metaKey: false, altKey: false },
+        bubbles: true,
+        composed: true
+      })
+    );
+
+    await rendered(ctx.sheet);
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('H10');
+  });
+
+  it('keeps counting while the drag goes on, whatever the server answers meanwhile', async () => {
+    // The answer to the press that started the drag can come while the
+    // range is still being dragged out: the count stays.
+    drag([8, 10], [9, 10]);
+    ctx.sheet.updateFormulaBar(null as any, 8, 10);
+    await rendered(ctx.sheet);
+
+    expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('1R x 2C');
   });
 
   it('leaves the formula field alone while dragging', () => {
@@ -836,7 +878,7 @@ describe('Formula bar — named ranges', () => {
 
   async function box(): Promise<HTMLSelectElement | null> {
     const bar = ctx.sheet.getFormulaBar();
-    await bar.updateComplete;
+    await rendered(ctx.sheet);
     return bar.shadowRoot!.querySelector<HTMLSelectElement>('.namedrangebox');
   }
 
@@ -878,7 +920,7 @@ describe('Formula bar — named ranges', () => {
     ctx.sheet.showSelectedCell('B2', 2, 2, '1+1', true, false, false);
 
     const bar = ctx.sheet.getFormulaBar();
-    await bar.updateComplete;
+    await rendered(ctx.sheet);
     expect(bar.shadowRoot!.querySelector('[part~="address-field"]')).to.not.be.null;
     expect(bar.shadowRoot!.querySelector('[part~="formula-field"]')).to.not.be.null;
     expect(bar.shadowRoot!.querySelector('.namedrangebox')).to.not.be.null;

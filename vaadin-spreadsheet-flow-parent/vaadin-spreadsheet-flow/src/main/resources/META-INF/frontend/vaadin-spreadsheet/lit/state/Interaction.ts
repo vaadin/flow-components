@@ -91,12 +91,18 @@ export interface InteractionState {
   readonly press: CellPress | null;
   /** The cell whose note is being written, by its key. */
   readonly comment: string | null;
+  /**
+   * Whether Shift is held growing the selection. While it is, the address
+   * field counts the block out - "3R x 3C" - rather than naming a cell, as
+   * Excel's name box does, whatever the server says of the selection.
+   */
+  readonly extending: boolean;
 }
 
 const NO_EDIT: Edit = { kind: 'idle' };
 
 /** Nothing under way. */
-export const IDLE: InteractionState = { edit: NO_EDIT, press: null, comment: null };
+export const IDLE: InteractionState = { edit: NO_EDIT, press: null, comment: null, extending: false };
 
 /** The formula being written, in the editor or the field: none while nothing is. */
 export function formulaOf(edit: Edit): FormulaWriting {

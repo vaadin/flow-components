@@ -190,13 +190,17 @@ export class SelectionReporter {
     this.send({ type: 'protectedCellWriteAttempted', data: {} });
   }
 
-  /** Sends an event, keeping the cell it tells the server is selected. */
+  /**
+   * Sends an event, keeping the cell it tells the server is selected. The
+   * cell is kept, and shown in the formula bar, before the server is told:
+   * the sheet is drawn before it tells the server anything, and drawn once.
+   */
   private send(event: SpreadsheetEvent): void {
-    this.host.send(event);
     const selected = selectedCellSetBy(event);
     if (selected !== null) {
       this.store.sheetData.serverSelectedCell = selected;
       this.host.selectedCellReported(selected);
     }
+    this.host.send(event);
   }
 }

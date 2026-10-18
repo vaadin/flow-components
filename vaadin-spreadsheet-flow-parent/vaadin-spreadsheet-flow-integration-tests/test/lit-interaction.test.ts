@@ -33,7 +33,7 @@ describe('Spreadsheet — what the user is in the middle of', () => {
   };
 
   it('starts with nothing under way', () => {
-    expect(IDLE).to.deep.equal({ edit: { kind: 'idle' }, press: null, comment: null });
+    expect(IDLE).to.deep.equal({ edit: { kind: 'idle' }, press: null, comment: null, extending: false });
     expect(NO_FORMULA).to.deep.equal({ draft: null, pointer: null, lastPointed: null, press: 'none' });
   });
 

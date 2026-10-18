@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * A value typed into the formula field belongs to the cell the sheet has
@@ -49,7 +50,7 @@ describe('Spreadsheet — editing through the formula field', () => {
 
     async function field(): Promise<HTMLInputElement> {
         const bar = sheet.getFormulaBar();
-        await bar.updateComplete;
+        await rendered(sheet);
         return bar.shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
     }
 
@@ -119,7 +120,7 @@ describe('Spreadsheet — editing through the formula field', () => {
         press(el, 'Enter');
         // The server names the new cell.
         sheet.updateFormulaBar(null, 3, 4);
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
 
         expect(sheet.getSelection().activeCell).to.eql({ col: 3, row: 4 });
         expect(el.value).to.equal('');
@@ -128,7 +129,7 @@ describe('Spreadsheet — editing through the formula field', () => {
     it('shows the cell again after Escape, even when it is empty', async () => {
         const el = await type('2');
         press(el, 'Escape');
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
 
         expect(el.value).to.equal('');
     });
@@ -241,7 +242,7 @@ describe('Spreadsheet — the formula bar and an input method', () => {
 
     async function input(cls: 'formula' | 'address', value: string): Promise<HTMLInputElement> {
         const bar = sheet.getFormulaBar();
-        await bar.updateComplete;
+        await rendered(sheet);
         const el = bar.shadowRoot!.querySelector<HTMLInputElement>(`.${cls}`)!;
         el.dispatchEvent(new FocusEvent('focusin', { bubbles: true, composed: true }));
         el.value = value;
@@ -312,7 +313,7 @@ describe('Spreadsheet — an address the server rejects', () => {
     }
 
     it('puts the real address back', async () => {
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
         expect(addressField().value).to.equal('C3');
 
         addressField().value = 'NOTACELL';
@@ -322,9 +323,9 @@ describe('Spreadsheet — an address the server rejects', () => {
     });
 
     it('leaves a valid address alone', async () => {
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
         sheet.setSelectedCellAndRange('D4', 4, 4, 4, 4, 4, 4, false);
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
 
         expect(addressField().value).to.equal('D4');
     });

@@ -9,6 +9,7 @@
 
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * Run with the browser reporting the given platform: the sheet's shortcuts
@@ -3274,7 +3275,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
     // ===================================================================
     it('formula bar renders two inputs with documented parts', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
         const fb = sheet.getFormulaBar().shadowRoot!;
         const addr = fb.querySelector('input.address') as HTMLInputElement;
         const formula = fb.querySelector('input.formula') as HTMLInputElement;
@@ -3289,7 +3290,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setSelectedCellAndRange(null, 2, 7, 2, 2, 7, 7, false);
         sheet.updateFormulaBar('B7', 2, 7);
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
         const addr = sheet.getFormulaBar().shadowRoot!.querySelector(
             'input.address'
         ) as HTMLInputElement;
@@ -3301,7 +3302,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         // Formula without its leading '=', as the server sends it.
         sheet.showSelectedCell('C3', 3, 3, 'A1+B2', true, false, false);
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
         const fb = sheet.getFormulaBar().shadowRoot!;
         const addr = fb.querySelector('input.address') as HTMLInputElement;
         const formula = fb.querySelector('input.formula') as HTMLInputElement;
@@ -3313,7 +3314,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
     it('pressing Enter in the address field dispatches sheetAddressChanged', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.updateFormulaBar('A1', 1, 1);
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
 
         const events: Array<{ type: string; data: Record<string, unknown> }> = [];
         host.addEventListener('spreadsheet-event', (e: Event) => {
@@ -3337,7 +3338,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
 
     it('formula bar hides when host gets the hidefunctionbar class', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
-        await sheet.getFormulaBar().updateComplete;
+        await rendered(sheet);
         expect(getComputedStyle(sheet.getFormulaBar()).display).to.not.equal('none');
         host.classList.add('hidefunctionbar');
         await Promise.resolve();

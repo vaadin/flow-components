@@ -10,6 +10,7 @@
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
+import { rendered } from './spreadsheet-harness.js';
 
 /**
  * The address and formula fields follow the selection at once, from the cells
@@ -121,11 +122,12 @@ describe('Spreadsheet — the formula bar follows the selection', () => {
     expect(bar().address).to.equal('2R x 1C');
   });
 
-  it('lets the server name a named range afterwards', () => {
+  it('lets the server name a named range afterwards', async () => {
     clickCell(2, 2);
 
     sheet.updateFormulaBar('Totals', 2, 2);
 
+    await rendered(sheet);
     expect(bar().address).to.equal('Totals');
   });
 });

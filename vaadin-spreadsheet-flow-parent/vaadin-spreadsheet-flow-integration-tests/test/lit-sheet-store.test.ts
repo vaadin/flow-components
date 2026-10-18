@@ -187,6 +187,47 @@ describe('SheetStore', () => {
     });
   });
 
+  describe('what the formula bar shows', () => {
+    it('starts with no name for the selection, nothing in the formula field and no named ranges', () => {
+      expect(store.formulaBar).to.eql({ selectionName: null, fieldText: '', namedRanges: [] });
+    });
+
+    it('takes the name the server gave the selection, and its taking back, and has them drawn', () => {
+      store.nameSelection('Sales');
+      expect(store.formulaBar.selectionName).to.equal('Sales');
+
+      store.nameSelection(null);
+      expect(store.formulaBar.selectionName).to.equal(null);
+      expect(renders).to.equal(2);
+    });
+
+    it('shows a text in the formula field again, the same text included', () => {
+      store.showInFormulaField('=A1');
+      const first = store.formulaBar;
+      store.showInFormulaField('=A1');
+
+      expect(store.formulaBar.fieldText).to.equal('=A1');
+      expect(store.formulaBar, 'replaced, to be written again').to.not.equal(first);
+      expect(renders).to.equal(2);
+    });
+
+    it('takes the named ranges, and has them drawn', () => {
+      store.setNamedRanges(['Sales', 'Costs']);
+
+      expect(store.formulaBar.namedRanges).to.eql(['Sales', 'Costs']);
+      expect(renders).to.equal(1);
+    });
+
+    it('marks the selection grown with Shift held, and let go, and has it drawn; ending everything lets go too', () => {
+      store.extendSelection(true);
+      expect(store.interaction.extending).to.be.true;
+
+      store.interact(IDLE);
+      expect(store.interaction.extending).to.be.false;
+      expect(renders).to.equal(2);
+    });
+  });
+
   describe('what the client knows of the sheet shown', () => {
     it('starts over on a reset', () => {
       const before = store.sheetData;
