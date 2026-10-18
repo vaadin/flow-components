@@ -3812,11 +3812,16 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.menu.setHasActions(hasActions);
   }
   /**
-   * The server flips this on loading another workbook. The change alone is
-   * the point: the property batch it comes in is drawn, as every batch is.
+   * The server flips this on loading a workbook, the same one again
+   * included. The change alone is the point: the property batch it comes in
+   * is drawn, as every batch is, and the style width ratios are measured and
+   * sent again. The server keeps them with the workbook, and the same styles
+   * bring no change of the style map that would say so.
    */
   setWorkbookChangeToggle(_toggle: boolean): void {
-    // See above.
+    this.view.measuredStyleIndexes = new Set();
+    this.view.styleWidthRatiosStale = true;
+    this.scheduleRender();
   }
 
   // Display content

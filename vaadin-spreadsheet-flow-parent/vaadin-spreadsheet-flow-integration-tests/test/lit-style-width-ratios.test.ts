@@ -184,6 +184,34 @@ describe('Spreadsheet — cell-style width ratios', () => {
     expect(ctx.sent.map((e) => e.type)).to.include('onSheetScroll');
   });
 
+  it('reports the ratios again for a workbook loaded anew, its styles unchanged', async () => {
+    // The server keeps the ratios with the workbook, and a reload or the same
+    // styles in the next workbook bring no style change: only the toggle
+    // says the workbook is a new one.
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;', 3: 'font-size:20px;' });
+    await settle(ctx.sheet);
+    const first = ratioReport(ctx.sent)!.data;
+    ctx.sent.length = 0;
+
+    ctx.sheet.setWorkbookChangeToggle(true);
+    await settle(ctx.sheet);
+
+    expect(ratioReport(ctx.sent)?.data).to.deep.equal(first);
+  });
+
+  it('reports the ratios again for every workbook loaded anew', async () => {
+    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+    await settle(ctx.sheet);
+    ctx.sheet.setWorkbookChangeToggle(true);
+    await settle(ctx.sheet);
+    ctx.sent.length = 0;
+
+    ctx.sheet.setWorkbookChangeToggle(false);
+    await settle(ctx.sheet);
+
+    expect(ctx.sent.filter((e) => e.type === 'setCellStyleWidthRatios')).to.have.length(1);
+  });
+
   it('does not re-measure on a render that changed no style', async () => {
     ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
     await settle(ctx.sheet);
