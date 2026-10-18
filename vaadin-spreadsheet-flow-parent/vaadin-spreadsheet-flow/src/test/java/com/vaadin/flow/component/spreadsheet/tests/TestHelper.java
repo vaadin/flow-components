@@ -18,6 +18,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetEvent;
 import com.vaadin.flow.internal.JacksonUtils;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
 
 public class TestHelper {
 
@@ -43,6 +44,22 @@ public class TestHelper {
         } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * What the spreadsheet sent the client as JSON, read back: an argument of a
+     * call, or the value of a property. It goes out as JSON, not as text
+     * holding JSON, so text fails here rather than reading as nothing.
+     *
+     * @param sent
+     *            the argument or the property value
+     * @return the JSON
+     */
+    public static JsonNode sentJson(Object sent) {
+        if (sent instanceof JsonNode json) {
+            return json;
+        }
+        throw new AssertionError("Not sent as JSON: " + sent);
     }
 
     /**

@@ -22,7 +22,7 @@ import java.io.Serializable;
  *
  * <p>
  * Every setter mirrors the value into the corresponding element property; the
- * scroll-position arrays go through {@link Serializer#serialize} since they're
+ * scroll-position arrays go through {@link Serializer#toJson} since they're
  * non-primitive payloads.
  */
 final class FreezePaneState implements Serializable {
@@ -64,8 +64,8 @@ final class FreezePaneState implements Serializable {
 
     void setVerticalScrollPositions(int[] verticalScrollPositions) {
         this.verticalScrollPositions = verticalScrollPositions;
-        spreadsheet.getElement().setProperty("verticalScrollPositions",
-                Serializer.serialize(verticalScrollPositions));
+        spreadsheet.getElement().setPropertyJson("verticalScrollPositions",
+                Serializer.toJson(verticalScrollPositions));
     }
 
     int[] getHorizontalScrollPositions() {
@@ -74,7 +74,7 @@ final class FreezePaneState implements Serializable {
 
     void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
         this.horizontalScrollPositions = horizontalScrollPositions;
-        spreadsheet.getElement().setProperty("horizontalScrollPositions",
-                Serializer.serialize(horizontalScrollPositions));
+        spreadsheet.getElement().setPropertyJson("horizontalScrollPositions",
+                Serializer.toJson(horizontalScrollPositions));
     }
 }

@@ -40,7 +40,6 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * What the client is sent when cells change: the cells changed, the formulas it
@@ -108,7 +107,6 @@ class SpreadsheetCellUpdatesTest {
     private List<String> calls(boolean withStyles) {
         ui.fakeClientCommunication();
         List<String> calls = new ArrayList<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             List<Object> parameters = invocation.getInvocation()
@@ -123,8 +121,8 @@ class SpreadsheetCellUpdatesTest {
                 calls.add("cellsReplaced");
             }
             for (Object parameter : parameters) {
-                if (parameter instanceof String text && text.startsWith("[")) {
-                    for (JsonNode cell : mapper.readTree(text)) {
+                if (parameter instanceof JsonNode json && json.isArray()) {
+                    for (JsonNode cell : json) {
                         String sent = new CellReference(
                                 cell.get("row").asInt() - 1,
                                 cell.get("col").asInt() - 1).formatAsString()

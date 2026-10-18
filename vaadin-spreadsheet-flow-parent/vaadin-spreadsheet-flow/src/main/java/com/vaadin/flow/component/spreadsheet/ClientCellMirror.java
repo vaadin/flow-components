@@ -9,13 +9,15 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.vaadin.flow.component.spreadsheet.client.CellData;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * What the client has of each cell, and the cells to send it at the end of the
@@ -95,30 +97,28 @@ final class ClientCellMirror implements Serializable {
      * trip: none after a reload, which forgot them.
      */
     void flush() {
-        List<CellData> changed = new ArrayList<>();
+        ArrayNode changed = Serializer.array();
         for (Map.Entry<String, CellData> entry : pending.entrySet()) {
             String key = entry.getKey();
-            CellData cell = entry.getValue();
-            String sent = Serializer.serialize(cell);
-            if (isRemoval(cell, sent)) {
+            JsonNode sent = Serializer.toJson(entry.getValue());
+            if (isRemoval(sent)) {
                 if (onTheClient.remove(key) != null) {
-                    changed.add(cell);
+                    changed.add(sent);
                 }
             } else {
-                Long had = onTheClient.put(key, hash(sent));
-                if (had == null || had != hash(sent)) {
-                    changed.add(cell);
+                long hash = hash(sent.toString());
+                Long had = onTheClient.put(key, hash);
+                if (had == null || had != hash) {
+                    changed.add(sent);
                 }
             }
         }
         pending.clear();
         if (replacing) {
             replacing = false;
-            spreadsheet.getElement().callJsFunction("cellsReplaced",
-                    Serializer.serialize(changed));
+            spreadsheet.getElement().callJsFunction("cellsReplaced", changed);
         } else if (!changed.isEmpty()) {
-            spreadsheet.getElement().callJsFunction("cellsUpdated",
-                    Serializer.serialize(changed));
+            spreadsheet.getElement().callJsFunction("cellsUpdated", changed);
         }
         if (refreshStyles) {
             refreshStyles = false;
@@ -126,12 +126,26 @@ final class ClientCellMirror implements Serializable {
         }
     }
 
-    /** Whether the cell data is what takes a cell off the client: no data. */
-    private static boolean isRemoval(CellData cell, String sent) {
-        CellData removal = new CellData();
-        removal.col = cell.col;
-        removal.row = cell.row;
-        return sent.equals(Serializer.serialize(removal));
+    /**
+     * What a cell taken off the client is sent as, besides its column and row:
+     * what a new {@link CellData} has.
+     */
+    private static final JsonNode REMOVAL = Serializer.toJson(new CellData());
+
+    /**
+     * Whether the cell data is what takes a cell off the client: its column and
+     * row, which are never 0, and nothing a new {@link CellData} does not have.
+     */
+    private static boolean isRemoval(JsonNode sent) {
+        if (sent.size() != REMOVAL.size() + 2) {
+            return false;
+        }
+        for (Map.Entry<String, JsonNode> field : REMOVAL.properties()) {
+            if (!field.getValue().equals(sent.get(field.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** FNV-1a, 64 bits: two different cells colliding is out of reach. */

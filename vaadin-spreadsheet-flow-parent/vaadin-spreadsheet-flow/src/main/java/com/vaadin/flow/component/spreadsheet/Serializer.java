@@ -16,6 +16,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.BaseJsonNode;
+import tools.jackson.databind.node.NullNode;
 
 class Serializer {
     private final static ObjectMapper objectMapper;
@@ -36,12 +39,26 @@ class Serializer {
                 .build();
     }
 
-    static String serialize(Object value) {
-        try {
-            return value == null ? "" : objectMapper.writeValueAsString(value);
-        } catch (JacksonException e) {
-            LOGGER.error("Error when serializing to JSON value: {}", value, e);
-            return null;
+    /**
+     * The value as JSON, which goes to the client as it is. Sent as text inside
+     * the message, every quote of it was escaped, a sixth of what a cell took
+     * on the wire, and the client parsed it a second time. {@code null} is
+     * JSON's null.
+     */
+    static BaseJsonNode toJson(Object value) {
+        if (value == null) {
+            return NullNode.getInstance();
         }
+        try {
+            return objectMapper.valueToTree(value);
+        } catch (JacksonException e) {
+            LOGGER.error("Error when converting to JSON: {}", value, e);
+            return NullNode.getInstance();
+        }
+    }
+
+    /** An empty JSON array, for a list built one item at a time. */
+    static ArrayNode array() {
+        return objectMapper.createArrayNode();
     }
 }

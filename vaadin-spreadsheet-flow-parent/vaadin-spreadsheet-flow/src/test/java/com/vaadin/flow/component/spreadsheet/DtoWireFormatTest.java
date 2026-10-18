@@ -20,10 +20,9 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 
 /**
- * Pins the JSON wire-format produced by {@link Serializer#serialize(Object)}
- * for each of the 6 DTOs the client reads. Each test populates fields with a
- * known set of values and asserts the exact JSON bytes the server would emit on
- * the wire.
+ * Pins the JSON wire-format produced by {@link Serializer#toJson(Object)} for
+ * each of the 6 DTOs the client reads. Each test populates fields with a known
+ * set of values and asserts the exact JSON the server would emit on the wire.
  *
  * <p>
  * These tests pin the server's serialization output so that any field rename,
@@ -63,7 +62,7 @@ class DtoWireFormatTest {
         cell.needsMeasure = true;
         cell.isPercentage = true;
 
-        String json = Serializer.serialize(cell);
+        String json = Serializer.toJson(cell).toString();
 
         assertEquals(
                 "{\"cellStyle\":\"cs7\",\"col\":5,"
@@ -85,7 +84,7 @@ class DtoWireFormatTest {
         // because CellData.value carries its own @JsonInclude.
         CellData cell = new CellData();
 
-        String json = Serializer.serialize(cell);
+        String json = Serializer.toJson(cell).toString();
 
         assertEquals("{\"cellStyle\":\"cs0\",\"value\":null}", json);
     }
@@ -98,7 +97,7 @@ class DtoWireFormatTest {
         // client and the outline spans nothing.
         GroupingData grouping = new GroupingData();
 
-        String json = Serializer.serialize(grouping);
+        String json = Serializer.toJson(grouping).toString();
 
         assertEquals("{\"collapsed\":false,\"endIndex\":0,\"level\":0,"
                 + "\"startIndex\":0,\"uniqueIndex\":0}", json);
@@ -112,7 +111,7 @@ class DtoWireFormatTest {
         action.caption = "Insert comment";
         action.key = "1";
 
-        String json = Serializer.serialize(action);
+        String json = Serializer.toJson(action).toString();
 
         assertEquals("{\"caption\":\"Insert comment\",\"iconNodeId\":0,"
                 + "\"key\":\"1\",\"type\":0}", json);
@@ -123,7 +122,7 @@ class DtoWireFormatTest {
         MergedRegion region = new MergedRegion(2, 3, 4, 5);
         region.id = 99;
 
-        String json = Serializer.serialize(region);
+        String json = Serializer.toJson(region).toString();
 
         assertEquals("{\"col1\":2,\"col2\":4,\"id\":99,\"row1\":3,\"row2\":5}",
                 json);
@@ -136,7 +135,7 @@ class DtoWireFormatTest {
         // so rather than leaving the client to guess.
         OverlayInfo overlay = new OverlayInfo();
 
-        String json = Serializer.serialize(overlay);
+        String json = Serializer.toJson(overlay).toString();
 
         assertEquals("{\"col\":0,\"dx\":0.0,\"dy\":0.0,\"height\":0.0,"
                 + "\"row\":0,\"type\":\"IMAGE\",\"width\":0.0}", json);
@@ -152,7 +151,7 @@ class DtoWireFormatTest {
         overlay.dx = 1f;
         overlay.dy = 2f;
 
-        String json = Serializer.serialize(overlay);
+        String json = Serializer.toJson(overlay).toString();
 
         assertEquals(
                 "{\"col\":2,\"dx\":1.0,\"dy\":2.0,\"height\":50.0,"
@@ -171,7 +170,7 @@ class DtoWireFormatTest {
         details.type = 1;
         details.iconNodeId = 42;
 
-        String json = Serializer.serialize(details);
+        String json = Serializer.toJson(details).toString();
 
         assertEquals("{\"caption\":\"Cut\",\"iconNodeId\":42,\"key\":\"cut\","
                 + "\"type\":1}", json);
@@ -190,7 +189,7 @@ class DtoWireFormatTest {
         state.popupWidth = "200px";
         state.sheet = "Sheet1";
 
-        String json = Serializer.serialize(state);
+        String json = Serializer.toJson(state).toString();
 
         assertEquals("{\"active\":true,\"col\":2,\"headerHidden\":true,"
                 + "\"popupHeight\":\"100px\",\"popupWidth\":\"200px\","
@@ -201,7 +200,7 @@ class DtoWireFormatTest {
     void groupingData_allFields_serializeAlphabetically() {
         GroupingData group = new GroupingData(5, 10, 1, 7, true);
 
-        String json = Serializer.serialize(group);
+        String json = Serializer.toJson(group).toString();
 
         assertEquals("{\"collapsed\":true,\"endIndex\":10,\"level\":1,"
                 + "\"startIndex\":5,\"uniqueIndex\":7}", json);

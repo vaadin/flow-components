@@ -26,7 +26,6 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Expanding a column group sends the cells of the columns it shows, of the rows
@@ -75,7 +74,6 @@ class ColumnGroupExpandTest {
     private Set<String> sent() {
         ui.fakeClientCommunication();
         Set<String> cells = new TreeSet<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             List<Object> parameters = invocation.getInvocation()
@@ -84,8 +82,8 @@ class ColumnGroupExpandTest {
                 continue;
             }
             for (Object parameter : parameters) {
-                if (parameter instanceof String text && text.startsWith("[")) {
-                    for (JsonNode cell : mapper.readTree(text)) {
+                if (parameter instanceof JsonNode json && json.isArray()) {
+                    for (JsonNode cell : json) {
                         cells.add(new CellReference(cell.get("row").asInt() - 1,
                                 cell.get("col").asInt() - 1).formatAsString());
                     }

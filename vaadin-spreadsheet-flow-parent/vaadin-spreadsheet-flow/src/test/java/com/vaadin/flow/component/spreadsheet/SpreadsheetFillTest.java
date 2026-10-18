@@ -30,7 +30,6 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Selections filled by dragging their corner, as Excel fills them: the cells of
@@ -135,14 +134,13 @@ class SpreadsheetFillTest {
     private List<String> sent() {
         ui.fakeClientCommunication();
         List<String> sent = new ArrayList<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             for (Object parameter : invocation.getInvocation()
                     .getParameters()) {
-                if (parameter instanceof String text && text.startsWith("[{")
-                        && text.contains("\"row\"")) {
-                    for (JsonNode cell : mapper.readTree(text)) {
+                if (parameter instanceof JsonNode json && json.isArray()
+                        && json.path(0).has("row")) {
+                    for (JsonNode cell : json) {
                         sent.add(new CellReference(cell.get("row").asInt() - 1,
                                 cell.get("col").asInt() - 1).formatAsString()
                                 + "=" + cell.path("value").asString(""));

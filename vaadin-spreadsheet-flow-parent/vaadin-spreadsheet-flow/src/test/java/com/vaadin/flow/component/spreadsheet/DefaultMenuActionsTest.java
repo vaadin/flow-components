@@ -39,7 +39,6 @@ import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The context-menu actions the component offers by itself, opened and picked as
@@ -341,9 +340,8 @@ class DefaultMenuActionsTest {
      */
     private Map<String, String> actionsShown() {
         Map<String, String> keys = new LinkedHashMap<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (List<Object> arguments : callsOf("showActions")) {
-            for (JsonNode action : mapper.readTree((String) arguments.get(0))) {
+            for (JsonNode action : TestHelper.sentJson(arguments.get(0))) {
                 keys.put(action.get("caption").asString(),
                         action.get("key").asString());
             }

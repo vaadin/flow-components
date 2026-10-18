@@ -168,7 +168,7 @@ class StyleMapPublishTest {
                 CALLS_REAL_METHODS)) {
             spreadsheet.getSpreadsheetStyleFactory().reloadWorkbookStyles();
 
-            serializer.verify(() -> Serializer.serialize(same(map)), times(1));
+            serializer.verify(() -> Serializer.toJson(same(map)), times(1));
         }
     }
 
@@ -190,7 +190,7 @@ class StyleMapPublishTest {
                         true);
             }
 
-            serializer.verify(() -> Serializer.serialize(same(map)), never());
+            serializer.verify(() -> Serializer.toJson(same(map)), never());
         }
     }
 
@@ -214,7 +214,7 @@ class StyleMapPublishTest {
             spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(second,
                     true);
 
-            serializer.verify(() -> Serializer.serialize(same(map)), times(1));
+            serializer.verify(() -> Serializer.toJson(same(map)), times(1));
         }
     }
 }

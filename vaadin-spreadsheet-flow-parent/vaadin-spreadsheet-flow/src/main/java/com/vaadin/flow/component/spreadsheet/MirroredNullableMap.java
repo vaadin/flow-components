@@ -27,7 +27,7 @@ import java.util.HashMap;
  * } else {
  *     this.field = input;
  * }
- * getElement().setProperty(name, Serializer.serialize(input));
+ * getElement().setPropertyJson(name, Serializer.toJson(input));
  * }</pre>
  *
  * <p>
@@ -72,7 +72,7 @@ final class MirroredNullableMap<K, V> implements Serializable {
         } else {
             value = input;
         }
-        spreadsheet.getElement().setProperty(propertyName,
-                Serializer.serialize(input));
+        spreadsheet.getElement().setPropertyJson(propertyName,
+                Serializer.toJson(input));
     }
 }

@@ -20,10 +20,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
+import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The cells the client is sent: each once a round trip, as it last was, only
@@ -63,7 +63,6 @@ class ClientCellMirrorTest {
      */
     private List<String> calls() {
         List<String> calls = new ArrayList<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             List<Object> parameters = invocation.getInvocation()
@@ -73,7 +72,7 @@ class ClientCellMirrorTest {
                 calls.add(function);
                 continue;
             }
-            for (JsonNode cell : mapper.readTree((String) parameters.get(1))) {
+            for (JsonNode cell : TestHelper.sentJson(parameters.get(1))) {
                 String name = FreshLoadHarness.name(cell.get("row").asInt(),
                         cell.get("col").asInt());
                 calls.add(cell.path("value").isNull() ? name

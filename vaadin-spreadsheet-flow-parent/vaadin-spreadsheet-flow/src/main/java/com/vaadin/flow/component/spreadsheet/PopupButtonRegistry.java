@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.apache.poi.ss.util.CellReference;
 
+import tools.jackson.databind.node.BaseJsonNode;
+
 /**
  * The pop-up buttons of a spreadsheet by their cells, and which of them are on
  * the client. A button is on the client while its cell is shown on the active
@@ -30,7 +32,7 @@ final class PopupButtonRegistry implements Serializable {
     private final Spreadsheet spreadsheet;
     private final Map<CellReference, PopupButton> buttonsByCell = new HashMap<>();
     /** The buttons on the client, with the state each was last sent in. */
-    private final Map<PopupButton, String> onTheClient = new HashMap<>();
+    private final Map<PopupButton, BaseJsonNode> onTheClient = new HashMap<>();
 
     PopupButtonRegistry(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -136,7 +138,7 @@ final class PopupButtonRegistry implements Serializable {
     }
 
     private void attach(PopupButton button) {
-        String state = Serializer.serialize(button.getState());
+        BaseJsonNode state = Serializer.toJson(button.getState());
         if (state.equals(onTheClient.put(button, state))) {
             // The client has it as it is.
             return;
@@ -153,7 +155,7 @@ final class PopupButtonRegistry implements Serializable {
             return;
         }
         spreadsheet.getElement().callJsFunction("removePopupButton",
-                Serializer.serialize(button.getState()));
+                Serializer.toJson(button.getState()));
         if (spreadsheet.getElement().equals(button.getElement().getParent())) {
             spreadsheet.getElement().removeVirtualChild(button.getElement());
         }

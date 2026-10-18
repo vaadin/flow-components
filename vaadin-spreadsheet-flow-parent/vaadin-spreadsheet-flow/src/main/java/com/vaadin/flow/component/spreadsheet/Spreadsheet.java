@@ -460,8 +460,8 @@ public class Spreadsheet extends Component
 
     void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
-        getElement().setProperty("cellStyleToCSSStyle",
-                Serializer.serialize(cellStyleToCSSStyle));
+        getElement().setPropertyJson("cellStyleToCSSStyle",
+                Serializer.toJson(cellStyleToCSSStyle));
     }
 
     void setRowIndexToStyleIndex(
@@ -534,8 +534,8 @@ public class Spreadsheet extends Component
                         getComponentNodeId(entry.getValue()));
             }
         }
-        getElement().setProperty("cellKeysToEditorIdMap",
-                Serializer.serialize(editorIds));
+        getElement().setPropertyJson("cellKeysToEditorIdMap",
+                Serializer.toJson(editorIds));
     }
 
     /**
@@ -625,8 +625,8 @@ public class Spreadsheet extends Component
     }
 
     void setNamedRanges(List<String> namedRanges) {
-        getElement().setProperty("namedRanges",
-                Serializer.serialize(namedRanges));
+        getElement().setPropertyJson("namedRanges",
+                Serializer.toJson(namedRanges));
     }
 
     void onPopupButtonClick(int row, int column) {
@@ -753,7 +753,7 @@ public class Spreadsheet extends Component
         public void showActions(
                 ArrayList<SpreadsheetActionDetails> actionDetails) {
             getElement().callJsFunction("showActions",
-                    Serializer.serialize(actionDetails));
+                    Serializer.toJson(actionDetails));
         }
 
         @Override

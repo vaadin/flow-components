@@ -37,7 +37,6 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Merging and unmerging cells: the regions POI and the client have, the cells a
@@ -97,7 +96,6 @@ class SpreadsheetMergedRegionsTest {
     private Sent sent() {
         ui.fakeClientCommunication();
         Sent sent = new Sent(new TreeSet<>(), new TreeSet<>());
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             List<Object> parameters = invocation.getInvocation()
@@ -106,8 +104,8 @@ class SpreadsheetMergedRegionsTest {
                 continue;
             }
             for (Object parameter : parameters) {
-                if (parameter instanceof String text && text.startsWith("[")) {
-                    for (JsonNode cell : mapper.readTree(text)) {
+                if (parameter instanceof JsonNode json && json.isArray()) {
+                    for (JsonNode cell : json) {
                         String name = new CellReference(
                                 cell.get("row").asInt() - 1,
                                 cell.get("col").asInt() - 1).formatAsString();

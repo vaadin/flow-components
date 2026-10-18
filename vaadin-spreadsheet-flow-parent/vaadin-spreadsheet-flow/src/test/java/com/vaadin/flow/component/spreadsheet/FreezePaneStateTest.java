@@ -11,8 +11,10 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,13 +27,15 @@ import org.mockito.MockitoAnnotations;
 
 import com.vaadin.flow.dom.Element;
 
+import tools.jackson.databind.node.BaseJsonNode;
+
 /**
  * The freeze-pane state {@link FreezePaneState} stores and mirrors to the
  * client.
  *
  * <p>
  * Four mirrored fields: two int split positions (primitives) and two int[]
- * scroll-position arrays (objects that go through {@link Serializer#serialize}
+ * scroll-position arrays (objects that go through {@link Serializer#toJson}
  * before being pushed to the element). The pattern split mirrors the
  * {@link MirroredProperty} {@code integer} vs {@code serialized} factory
  * dispatch.
@@ -84,35 +88,35 @@ class FreezePaneStateTest {
     }
 
     @Test
-    void setVerticalScrollPositions_storesReferenceAndPushesSerialized() {
+    void setVerticalScrollPositions_storesReferenceAndPushesJson() {
         // Pin: the getter returns the SAME reference that was set (no defensive
         // copy). Callers can observe later mutations of the int[] — that's
         // the original behavior.
         int[] positions = { 10, 20, 30 };
         state.setVerticalScrollPositions(positions);
         assertSame(positions, state.getVerticalScrollPositions());
-        // The push uses Serializer.serialize, producing a JsonValue.
-        verify(element).setProperty(eq("verticalScrollPositions"), anyString());
+        // Pushed as JSON.
+        verify(element).setPropertyJson(eq("verticalScrollPositions"),
+                argThat(json -> "[10,20,30]".equals(json.toString())));
     }
 
     @Test
-    void setHorizontalScrollPositions_storesReferenceAndPushesSerialized() {
+    void setHorizontalScrollPositions_storesReferenceAndPushesJson() {
         int[] positions = { 100, 200 };
         state.setHorizontalScrollPositions(positions);
         assertSame(positions, state.getHorizontalScrollPositions());
-        verify(element).setProperty(eq("horizontalScrollPositions"),
-                anyString());
+        verify(element).setPropertyJson(eq("horizontalScrollPositions"),
+                any(BaseJsonNode.class));
     }
 
     @Test
     void setVerticalScrollPositions_nullClearsViaSerializedNull() {
-        // Pin: null gets serialized and pushed (Serializer.serialize handles
-        // null per its contract, typically producing a JSON null). The cache
-        // becomes null.
+        // Pin: null is pushed as JSON's null. The cache becomes null.
         state.setVerticalScrollPositions(null);
         assertNull(state.getVerticalScrollPositions());
-        // Element still gets a setProperty call — null isn't a no-op.
-        verify(element).setProperty(eq("verticalScrollPositions"), anyString());
+        // Element still gets a call — null isn't a no-op.
+        verify(element).setPropertyJson(eq("verticalScrollPositions"),
+                argThat(BaseJsonNode::isNull));
     }
 
     @Test
@@ -129,9 +133,10 @@ class FreezePaneStateTest {
     void scrollPositionAxes_areIndependent() {
         int[] vPositions = { 5, 10 };
         state.setVerticalScrollPositions(vPositions);
-        verify(element).setProperty(eq("verticalScrollPositions"), anyString());
-        verify(element, never()).setProperty(eq("horizontalScrollPositions"),
-                anyString());
+        verify(element).setPropertyJson(eq("verticalScrollPositions"),
+                any(BaseJsonNode.class));
+        verify(element, never()).setPropertyJson(
+                eq("horizontalScrollPositions"), any(BaseJsonNode.class));
         assertNull(state.getHorizontalScrollPositions());
     }
 }

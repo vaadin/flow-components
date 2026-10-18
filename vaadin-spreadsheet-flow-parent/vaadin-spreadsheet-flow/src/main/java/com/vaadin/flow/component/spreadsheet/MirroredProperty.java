@@ -30,7 +30,7 @@ import com.vaadin.flow.function.SerializableBiConsumer;
  * {@link #get()} returns the last-set value. The mirror strategy is supplied at
  * construction as a {@link SerializableBiConsumer} that knows how to push the
  * value to the element (e.g. via {@code setProperty(name, value)} for
- * primitives, or {@code setProperty(name, Serializer.serialize(value))} for
+ * primitives, or {@code setPropertyJson(name, Serializer.toJson(value))} for
  * objects). Convenience factories below cover the common patterns.
  *
  * @param <T>
@@ -101,14 +101,14 @@ final class MirroredProperty<T> implements Serializable {
 
     /**
      * Object mirror — pushes via
-     * {@code setProperty(name, Serializer.serialize(value))} so the client gets
-     * a serialized representation. The convention across Spreadsheet for
+     * {@code setPropertyJson(name, Serializer.toJson(value))} so the client
+     * gets the value as JSON. The convention across Spreadsheet for
      * non-primitive properties.
      */
     static <T> MirroredProperty<T> serialized(Spreadsheet spreadsheet,
             String name, T initial) {
         return new MirroredProperty<>(spreadsheet,
-                (el, v) -> el.setProperty(name, Serializer.serialize(v)),
+                (el, v) -> el.setPropertyJson(name, Serializer.toJson(v)),
                 initial);
     }
 }

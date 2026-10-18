@@ -615,8 +615,8 @@ final class FreshLoadHarness {
                     cells.clear();
                 }
                 if (CELL_CALLS.contains(function)) {
-                    for (JsonNode sent : MAPPER
-                            .readTree((String) call.arguments().get(0))) {
+                    for (JsonNode sent : TestHelper
+                            .sentJson(call.arguments().get(0))) {
                         JsonNode cell = normalizeCell(sent);
                         String name = name(cell.get("row").asInt(),
                                 cell.get("col").asInt());
@@ -637,8 +637,8 @@ final class FreshLoadHarness {
                         cells.put(name, cell);
                     }
                 } else if ("addPopupButton".equals(function)) {
-                    JsonNode state = MAPPER
-                            .readTree((String) call.arguments().get(0));
+                    JsonNode state = TestHelper
+                            .sentJson(call.arguments().get(0));
                     String name = name(state.path("row").asInt(),
                             state.path("col").asInt());
                     if (waste != null && state.equals(popupButtons.get(name))) {
@@ -647,8 +647,8 @@ final class FreshLoadHarness {
                     }
                     popupButtons.put(name, state);
                 } else if ("removePopupButton".equals(function)) {
-                    JsonNode state = MAPPER
-                            .readTree((String) call.arguments().get(0));
+                    JsonNode state = TestHelper
+                            .sentJson(call.arguments().get(0));
                     String name = name(state.path("row").asInt(),
                             state.path("col").asInt());
                     if (popupButtons.remove(name) == null && waste != null) {
@@ -693,8 +693,7 @@ final class FreshLoadHarness {
         CellData removal = new CellData();
         removal.row = cell.path("row").asInt();
         removal.col = cell.path("col").asInt();
-        return cell.equals(
-                normalizeCell(MAPPER.readTree(Serializer.serialize(removal))));
+        return cell.equals(normalizeCell(Serializer.toJson(removal)));
     }
 
     /**

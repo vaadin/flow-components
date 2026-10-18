@@ -27,7 +27,6 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Copying a selection. The client copies the cells it has, and asks the server
@@ -61,13 +60,13 @@ class ClipboardCopyTest {
     private Set<Integer> rowsSent() {
         ui.fakeClientCommunication();
         Set<Integer> rows = new HashSet<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             for (Object parameter : invocation.getInvocation()
                     .getParameters()) {
-                if (parameter instanceof String text && text.startsWith("[{")) {
-                    for (JsonNode cell : mapper.readTree(text)) {
+                if (parameter instanceof JsonNode json
+                        && json.path(0).isObject()) {
+                    for (JsonNode cell : json) {
                         if (cell.has("row") && cell.has("col")) {
                             rows.add(cell.get("row").asInt());
                         }

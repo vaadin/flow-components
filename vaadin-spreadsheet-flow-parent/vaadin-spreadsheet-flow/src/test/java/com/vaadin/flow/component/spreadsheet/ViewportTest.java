@@ -25,7 +25,6 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The cells the client shows, as the public getters tell them: none until the
@@ -80,14 +79,13 @@ class ViewportTest {
     private Set<String> cellsSent() {
         ui.fakeClientCommunication();
         Set<String> sent = new TreeSet<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             for (Object parameter : invocation.getInvocation()
                     .getParameters()) {
-                if (parameter instanceof String text && text.startsWith("[")
-                        && text.contains("\"col\"")) {
-                    for (JsonNode cell : mapper.readTree(text)) {
+                if (parameter instanceof JsonNode json && json.isArray()
+                        && json.path(0).has("col")) {
+                    for (JsonNode cell : json) {
                         sent.add(new CellReference(cell.get("row").asInt() - 1,
                                 cell.get("col").asInt() - 1).formatAsString());
                     }

@@ -10,7 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -28,11 +28,13 @@ import org.mockito.MockitoAnnotations;
 
 import com.vaadin.flow.dom.Element;
 
+import tools.jackson.databind.node.BaseJsonNode;
+
 /**
  * The CSS maps {@link SheetCssStyleMaps} stores and mirrors to the client.
  *
  * <p>
- * Six getter/setter pairs, each paired with a serialized-property mirror. Pure
+ * Six getter/setter pairs, each paired with a JSON-property mirror. Pure
  * storage + mirror — same pattern as {@code SheetDimensionsTest} and
  * {@code SheetGroupingTest}. The intentionally-excluded
  * {@code cellStyleToCSSStyle} field stays on the parent Spreadsheet (protected
@@ -64,7 +66,7 @@ class SheetCssStyleMapsTest {
     }
 
     @Test
-    void setRowIndexToStyleIndex_storesAndMirrorsAsSerializedString() {
+    void setRowIndexToStyleIndex_storesAndMirrorsAsJson() {
         HashMap<Integer, Integer> data = new HashMap<>();
         data.put(0, 5);
         data.put(1, 7);
@@ -72,7 +74,8 @@ class SheetCssStyleMapsTest {
         maps.setRowIndexToStyleIndex(data);
 
         assertSame(data, maps.getRowIndexToStyleIndex());
-        verify(element).setProperty(eq("rowIndexToStyleIndex"), anyString());
+        verify(element).setPropertyJson(eq("rowIndexToStyleIndex"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -83,7 +86,8 @@ class SheetCssStyleMapsTest {
         maps.setColumnIndexToStyleIndex(data);
 
         assertSame(data, maps.getColumnIndexToStyleIndex());
-        verify(element).setProperty(eq("columnIndexToStyleIndex"), anyString());
+        verify(element).setPropertyJson(eq("columnIndexToStyleIndex"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -95,7 +99,8 @@ class SheetCssStyleMapsTest {
         maps.setLockedColumnIndexes(data);
 
         assertSame(data, maps.getLockedColumnIndexes());
-        verify(element).setProperty(eq("lockedColumnIndexes"), anyString());
+        verify(element).setPropertyJson(eq("lockedColumnIndexes"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -106,7 +111,8 @@ class SheetCssStyleMapsTest {
         maps.setLockedRowIndexes(data);
 
         assertSame(data, maps.getLockedRowIndexes());
-        verify(element).setProperty(eq("lockedRowIndexes"), anyString());
+        verify(element).setPropertyJson(eq("lockedRowIndexes"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -116,7 +122,8 @@ class SheetCssStyleMapsTest {
 
         maps.setShiftedCellBorderStyles(data);
 
-        verify(element).setProperty(eq("shiftedCellBorderStyles"), anyString());
+        verify(element).setPropertyJson(eq("shiftedCellBorderStyles"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -127,8 +134,8 @@ class SheetCssStyleMapsTest {
         maps.setConditionalFormattingStyles(data);
 
         assertSame(data, maps.getConditionalFormattingStyles());
-        verify(element).setProperty(eq("conditionalFormattingStyles"),
-                anyString());
+        verify(element).setPropertyJson(eq("conditionalFormattingStyles"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -153,8 +160,8 @@ class SheetCssStyleMapsTest {
         maps.setRowIndexToStyleIndex(data);
         maps.setRowIndexToStyleIndex(data);
 
-        verify(element, times(2)).setProperty(eq("rowIndexToStyleIndex"),
-                anyString());
+        verify(element, times(2)).setPropertyJson(eq("rowIndexToStyleIndex"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -162,6 +169,7 @@ class SheetCssStyleMapsTest {
         maps.setRowIndexToStyleIndex(null);
 
         assertNull(maps.getRowIndexToStyleIndex());
-        verify(element).setProperty(eq("rowIndexToStyleIndex"), anyString());
+        verify(element).setPropertyJson(eq("rowIndexToStyleIndex"),
+                any(BaseJsonNode.class));
     }
 }

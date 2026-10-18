@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -29,6 +29,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
+
+import tools.jackson.databind.node.BaseJsonNode;
 
 /**
  * The grouping state {@link SheetGrouping} stores and mirrors to the client.
@@ -66,13 +68,14 @@ class SheetGroupingTest {
     }
 
     @Test
-    void setColGroupingData_storesField_andMirrorsSerialized() {
+    void setColGroupingData_storesField_andMirrorsAsJson() {
         List<GroupingData> data = Arrays.asList(new GroupingData());
 
         grouping.setColGroupingData(data);
 
         assertSame(data, grouping.getColGroupingData());
-        verify(element).setProperty(eq("colGroupingData"), anyString());
+        verify(element).setPropertyJson(eq("colGroupingData"),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -87,7 +90,8 @@ class SheetGroupingTest {
 
         grouping.setRowGroupingData(data);
 
-        verify(element).setProperty(eq("rowGroupingData"), anyString());
+        verify(element).setPropertyJson(eq("rowGroupingData"),
+                any(BaseJsonNode.class));
         assertNull(grouping.getColGroupingData(),
                 "Setting row-grouping data must NOT populate the col cache");
     }
@@ -153,6 +157,7 @@ class SheetGroupingTest {
         grouping.setColGroupingData(null);
 
         assertNull(grouping.getColGroupingData());
-        verify(element).setProperty(eq("colGroupingData"), anyString());
+        verify(element).setPropertyJson(eq("colGroupingData"),
+                any(BaseJsonNode.class));
     }
 }

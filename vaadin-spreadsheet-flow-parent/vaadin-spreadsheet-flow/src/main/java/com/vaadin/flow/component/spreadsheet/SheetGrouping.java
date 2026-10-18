@@ -54,15 +54,15 @@ final class SheetGrouping implements Serializable {
 
     void setColGroupingData(List<GroupingData> colGroupingData) {
         this.colGroupingData = colGroupingData;
-        spreadsheet.getElement().setProperty("colGroupingData",
-                Serializer.serialize(colGroupingData));
+        spreadsheet.getElement().setPropertyJson("colGroupingData",
+                Serializer.toJson(colGroupingData));
     }
 
     void setRowGroupingData(List<GroupingData> rowGroupingData) {
         // Unlike the column data, row-grouping data goes straight to the
         // element without server-side caching.
-        spreadsheet.getElement().setProperty("rowGroupingData",
-                Serializer.serialize(rowGroupingData));
+        spreadsheet.getElement().setPropertyJson("rowGroupingData",
+                Serializer.toJson(rowGroupingData));
     }
 
     int getColGroupingMax() {

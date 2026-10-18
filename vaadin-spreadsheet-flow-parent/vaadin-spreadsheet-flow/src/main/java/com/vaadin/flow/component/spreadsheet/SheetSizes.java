@@ -108,8 +108,8 @@ final class SheetSizes implements Serializable {
      */
     void setRowHeights(float[] heights) {
         rowH = heights;
-        spreadsheet.getElement().setProperty("rowH",
-                Serializer.serialize(heights == null ? null : runs(heights)));
+        spreadsheet.getElement().setPropertyJson("rowH",
+                Serializer.toJson(heights == null ? null : runs(heights)));
     }
 
     /**
@@ -610,8 +610,8 @@ final class SheetSizes implements Serializable {
 
     private void setColumnWidths(int[] widths) {
         colW = widths;
-        spreadsheet.getElement().setProperty("colW",
-                Serializer.serialize(widths == null ? null : runs(widths)));
+        spreadsheet.getElement().setPropertyJson("colW",
+                Serializer.toJson(widths == null ? null : runs(widths)));
     }
 
     private void setDefaultRowHeightShown(float height) {
@@ -625,13 +625,13 @@ final class SheetSizes implements Serializable {
     }
 
     private void publishHiddenRows() {
-        spreadsheet.getElement().setProperty("hiddenRowIndexes",
-                Serializer.serialize(hiddenRowsFromOne()));
+        spreadsheet.getElement().setPropertyJson("hiddenRowIndexes",
+                Serializer.toJson(hiddenRowsFromOne()));
     }
 
     private void publishHiddenColumns() {
-        spreadsheet.getElement().setProperty("hiddenColumnIndexes",
-                Serializer.serialize(hiddenColumnsFromOne()));
+        spreadsheet.getElement().setPropertyJson("hiddenColumnIndexes",
+                Serializer.toJson(hiddenColumnsFromOne()));
     }
 
     private static ArrayList<Integer> fromOne(TreeSet<Integer> fromZero) {

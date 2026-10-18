@@ -26,7 +26,6 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * A sheet shown anew has the client reload it, every time: what the client is
@@ -55,7 +54,6 @@ class SheetReloadTest {
     private List<String> respond() {
         ui.fakeClientCommunication();
         List<String> calls = new ArrayList<>();
-        JsonMapper mapper = JsonMapper.builder().build();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             List<Object> parameters = invocation.getInvocation()
@@ -66,9 +64,9 @@ class SheetReloadTest {
                         + address(parameters.get(2), parameters.get(3)));
             }
             for (Object parameter : parameters) {
-                if (parameter instanceof String text && text.startsWith("[")
-                        && text.contains("\"col\"")) {
-                    for (JsonNode cell : mapper.readTree(text)) {
+                if (parameter instanceof JsonNode json && json.isArray()
+                        && json.path(0).has("col")) {
+                    for (JsonNode cell : json) {
                         calls.add(address(cell.get("col").asInt(),
                                 cell.get("row").asInt()) + "="
                                 + cell.path("value").asString(""));

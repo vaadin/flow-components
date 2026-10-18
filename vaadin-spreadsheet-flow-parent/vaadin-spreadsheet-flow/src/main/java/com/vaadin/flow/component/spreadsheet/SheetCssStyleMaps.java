@@ -41,7 +41,7 @@ import java.util.Set;
  *
  * <p>
  * Every setter mirrors the value to the corresponding element property. Setters
- * that take collections go through {@link Serializer#serialize}.
+ * that take collections go through {@link Serializer#toJson}.
  */
 final class SheetCssStyleMaps implements Serializable {
 
@@ -64,8 +64,8 @@ final class SheetCssStyleMaps implements Serializable {
     void setRowIndexToStyleIndex(
             HashMap<Integer, Integer> rowIndexToStyleIndex) {
         this.rowIndexToStyleIndex = rowIndexToStyleIndex;
-        spreadsheet.getElement().setProperty("rowIndexToStyleIndex",
-                Serializer.serialize(rowIndexToStyleIndex));
+        spreadsheet.getElement().setPropertyJson("rowIndexToStyleIndex",
+                Serializer.toJson(rowIndexToStyleIndex));
     }
 
     HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
@@ -75,8 +75,8 @@ final class SheetCssStyleMaps implements Serializable {
     void setColumnIndexToStyleIndex(
             HashMap<Integer, Integer> columnIndexToStyleIndex) {
         this.columnIndexToStyleIndex = columnIndexToStyleIndex;
-        spreadsheet.getElement().setProperty("columnIndexToStyleIndex",
-                Serializer.serialize(columnIndexToStyleIndex));
+        spreadsheet.getElement().setPropertyJson("columnIndexToStyleIndex",
+                Serializer.toJson(columnIndexToStyleIndex));
     }
 
     Set<Integer> getLockedColumnIndexes() {
@@ -85,8 +85,8 @@ final class SheetCssStyleMaps implements Serializable {
 
     void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
         this.lockedColumnIndexes = lockedColumnIndexes;
-        spreadsheet.getElement().setProperty("lockedColumnIndexes",
-                Serializer.serialize(lockedColumnIndexes));
+        spreadsheet.getElement().setPropertyJson("lockedColumnIndexes",
+                Serializer.toJson(lockedColumnIndexes));
     }
 
     Set<Integer> getLockedRowIndexes() {
@@ -95,13 +95,13 @@ final class SheetCssStyleMaps implements Serializable {
 
     void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
         this.lockedRowIndexes = lockedRowIndexes;
-        spreadsheet.getElement().setProperty("lockedRowIndexes",
-                Serializer.serialize(lockedRowIndexes));
+        spreadsheet.getElement().setPropertyJson("lockedRowIndexes",
+                Serializer.toJson(lockedRowIndexes));
     }
 
     void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
-        spreadsheet.getElement().setProperty("shiftedCellBorderStyles",
-                Serializer.serialize(shiftedCellBorderStyles));
+        spreadsheet.getElement().setPropertyJson("shiftedCellBorderStyles",
+                Serializer.toJson(shiftedCellBorderStyles));
     }
 
     HashMap<Integer, String> getConditionalFormattingStyles() {
@@ -111,7 +111,7 @@ final class SheetCssStyleMaps implements Serializable {
     void setConditionalFormattingStyles(
             HashMap<Integer, String> conditionalFormattingStyles) {
         this.conditionalFormattingStyles = conditionalFormattingStyles;
-        spreadsheet.getElement().setProperty("conditionalFormattingStyles",
-                Serializer.serialize(conditionalFormattingStyles));
+        spreadsheet.getElement().setPropertyJson("conditionalFormattingStyles",
+                Serializer.toJson(conditionalFormattingStyles));
     }
 }

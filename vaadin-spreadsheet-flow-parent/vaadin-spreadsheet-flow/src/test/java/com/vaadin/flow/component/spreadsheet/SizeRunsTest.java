@@ -21,11 +21,11 @@ import org.junit.jupiter.api.Test;
 class SizeRunsTest {
 
     private static String sent(float[] heights) {
-        return Serializer.serialize(SheetSizes.runs(heights));
+        return Serializer.toJson(SheetSizes.runs(heights)).toString();
     }
 
     private static String sent(int[] widths) {
-        return Serializer.serialize(SheetSizes.runs(widths));
+        return Serializer.toJson(SheetSizes.runs(widths)).toString();
     }
 
     @Test

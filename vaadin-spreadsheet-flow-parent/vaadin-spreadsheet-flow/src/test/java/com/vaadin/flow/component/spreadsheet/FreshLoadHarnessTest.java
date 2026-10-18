@@ -30,6 +30,8 @@ import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * That {@link FreshLoadHarness} sees each kind of mistake it is there to find,
@@ -63,7 +65,7 @@ class FreshLoadHarnessTest {
     private static void sendPastTheSpreadsheet(Spreadsheet spreadsheet,
             CellData... cells) {
         spreadsheet.getElement().callJsFunction("cellsUpdated",
-                Serializer.serialize(List.of(cells)));
+                Serializer.toJson(List.of(cells)));
     }
 
     private static void assertReported(List<String> problems, String expected) {
@@ -99,8 +101,8 @@ class FreshLoadHarnessTest {
 
     @Test
     void aCellSentAgainAsTheClientHasIt_isReported() {
-        String asTheClientHasIt = "[" + harness.clientModel().cells.get("F11")
-                + "]";
+        ArrayNode asTheClientHasIt = MAPPER.createArrayNode()
+                .add(harness.clientModel().cells.get("F11"));
 
         List<String> problems = harness.check(spreadsheet -> spreadsheet
                 .getElement().callJsFunction("cellsUpdated", asTheClientHasIt));
@@ -121,8 +123,9 @@ class FreshLoadHarnessTest {
     @Test
     void aPopupButtonTakenOffTheClientThatDoesNotHaveIt_isReported() {
         List<String> problems = harness
-                .check(spreadsheet -> spreadsheet.getElement().callJsFunction(
-                        "removePopupButton", "{\"row\": 30, \"col\": 30}"));
+                .check(spreadsheet -> spreadsheet.getElement()
+                        .callJsFunction("removePopupButton", (ObjectNode) MAPPER
+                                .readTree("{\"row\": 30, \"col\": 30}")));
 
         assertReported(problems, "pop-up button AD30 taken off the client");
     }
@@ -283,9 +286,10 @@ class FreshLoadHarnessTest {
     @Test
     void aValueTyped_showsAtOnceInItsCellsStyle_butAFormulaWaitsForTheServer() {
         FreshLoadHarness.ClientModel model = new FreshLoadHarness.ClientModel();
-        model.apply(List.of(new FreshLoadHarness.Call("cellsUpdated", List.of(
-                "[{\"col\":5,\"row\":10,\"value\":\"1\",\"cellStyle\":\"cs3\","
-                        + "\"overflowWidth\":40}]"))),
+        model.apply(List.of(new FreshLoadHarness.Call("cellsUpdated",
+                List.of(MAPPER.readTree(
+                        "[{\"col\":5,\"row\":10,\"value\":\"1\",\"cellStyle\":\"cs3\","
+                                + "\"overflowWidth\":40}]")))),
                 null);
 
         model.commitLocally(10, 5, "typed");
@@ -344,7 +348,7 @@ class FreshLoadHarnessTest {
         FreshLoadHarness.ClientModel model = new FreshLoadHarness.ClientModel();
         List<String> waste = new ArrayList<>();
         FreshLoadHarness.Call add = new FreshLoadHarness.Call("addPopupButton",
-                List.of("{\"row\": 19, \"col\": 5}"));
+                List.of(MAPPER.readTree("{\"row\": 19, \"col\": 5}")));
 
         model.apply(List.of(add), waste);
         model.apply(List.of(add), waste);
@@ -370,11 +374,12 @@ class FreshLoadHarnessTest {
     @Test
     void aReload_forgetsTheCells_butNotThePopupButtons() {
         FreshLoadHarness.ClientModel model = new FreshLoadHarness.ClientModel();
-        model.apply(List.of(
-                new FreshLoadHarness.Call("cellsUpdated",
-                        List.of("[{\"col\":5,\"row\":10,\"value\":\"1\"}]")),
-                new FreshLoadHarness.Call("addPopupButton",
-                        List.of("{\"row\": 19, \"col\": 5}"))),
+        model.apply(
+                List.of(new FreshLoadHarness.Call("cellsUpdated",
+                        List.of(MAPPER.readTree(
+                                "[{\"col\":5,\"row\":10,\"value\":\"1\"}]"))),
+                        new FreshLoadHarness.Call("addPopupButton", List.of(
+                                MAPPER.readTree("{\"row\": 19, \"col\": 5}")))),
                 null);
 
         model.reload();

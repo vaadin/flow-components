@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.vaadin.flow.dom.Element;
+
+import tools.jackson.databind.node.BaseJsonNode;
 
 /**
  * Storing a map and mirroring it to the client with
@@ -66,7 +69,8 @@ class MirroredNullableMapTest {
 
     @Test
     void construction_doesNotEagerlyMirror() {
-        verify(element, never()).setProperty(anyString(), any(String.class));
+        verify(element, never()).setPropertyJson(anyString(),
+                any(BaseJsonNode.class));
     }
 
     @Test
@@ -79,8 +83,9 @@ class MirroredNullableMapTest {
         // Reference replaced — get() returns the same object the caller
         // passed in.
         assertSame(input, map.get());
-        // Element gets a serialized push.
-        verify(element).setProperty(eq("myProp"), any(String.class));
+        // Element gets the map as JSON.
+        verify(element).setPropertyJson(eq("myProp"),
+                argThat(json -> "{\"k\":\"v\"}".equals(json.toString())));
     }
 
     @Test
@@ -106,23 +111,22 @@ class MirroredNullableMapTest {
     @Test
     void setNull_stillPushesSerializedNullToElement() {
         // Pin: even though the server-side state is "empty map", the client
-        // receives serialized null (Serializer.serialize(null) returns "").
-        // The client-side handler must treat null and {} equivalently.
+        // receives JSON's null. The client-side handler must treat null and {}
+        // equivalently.
         map.set(null);
-        // Two args (String, String) — Serializer.serialize(null) returns "".
-        verify(element).setProperty(eq("myProp"), eq(""));
+        verify(element).setPropertyJson(eq("myProp"),
+                argThat(BaseJsonNode::isNull));
     }
 
     @Test
-    void setNonNull_pushesSerializedJson() {
+    void setNonNull_pushesJson() {
         HashMap<String, String> input = new HashMap<>();
         input.put("k", "v");
         map.set(input);
-        // The push is a JSON-serialized string, not the empty string.
-        // Pinned with a contains() check rather than exact equality so the
-        // test stays robust to JSON-key ordering.
-        verify(element).setProperty(eq("myProp"),
-                org.mockito.ArgumentMatchers.contains("\"k\":\"v\""));
+        // The push is the map as JSON, not text holding it.
+        verify(element).setPropertyJson(eq("myProp"),
+                argThat(json -> json.isObject()
+                        && "v".equals(json.get("k").asString())));
     }
 
     @Test
@@ -131,9 +135,9 @@ class MirroredNullableMapTest {
         // an already-empty map is a no-op.
         map.set(null);
         map.set(null);
-        // Two element pushes, both serializing null.
-        verify(element, org.mockito.Mockito.times(2)).setProperty(eq("myProp"),
-                eq(""));
+        // Two element pushes, both JSON's null.
+        verify(element, org.mockito.Mockito.times(2))
+                .setPropertyJson(eq("myProp"), argThat(BaseJsonNode::isNull));
         assertNotNull(map.get());
         assertTrue(map.get().isEmpty());
     }

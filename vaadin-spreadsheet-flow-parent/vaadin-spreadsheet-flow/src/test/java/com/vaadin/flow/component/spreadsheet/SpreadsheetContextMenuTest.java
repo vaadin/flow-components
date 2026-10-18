@@ -34,7 +34,6 @@ import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The context menu opened on the cells and headers: what the action handlers do
@@ -109,15 +108,14 @@ class SpreadsheetContextMenuTest {
      */
     private Map<String, String> actionsShown() {
         ui.fakeClientCommunication();
-        JsonMapper mapper = JsonMapper.builder().build();
         Map<String, String> keys = new LinkedHashMap<>();
         for (PendingJavaScriptInvocation invocation : ui
                 .dumpPendingJavaScriptInvocations()) {
             if ("showActions".equals(JsFunctionCallUtil
                     .getFunctionName(invocation.getInvocation()))) {
-                String actions = (String) JsFunctionCallUtil
-                        .getArguments(invocation.getInvocation()).get(0);
-                for (JsonNode action : mapper.readTree(actions)) {
+                JsonNode actions = TestHelper.sentJson(JsFunctionCallUtil
+                        .getArguments(invocation.getInvocation()).get(0));
+                for (JsonNode action : actions) {
                     keys.put(action.get("caption").asString(),
                             action.get("key").asString());
                 }
