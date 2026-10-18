@@ -82,16 +82,7 @@ import {
 import { initialEditValue } from './algorithms/PercentageEntry.js';
 import { cellCoordToAddress } from './algorithms/CellRef.js';
 import { parseColRow, toKey } from './algorithms/CellKeys.js';
-import {
-  actionIconSlotName,
-  cellComponentSlotName,
-  cellEditorSlotName,
-  type CellSlotAssignment,
-  flowVirtualChildResolver,
-  overlayComponentSlotName,
-  SlottedVirtualChildren,
-  visibleCellSlots
-} from './dom/VirtualChildren.js';
+import { type CellSlotAssignment, flowVirtualChildResolver } from './dom/VirtualChildren.js';
 import {
   computePaintRectangle,
   grownSelection,
@@ -130,6 +121,7 @@ import { HeaderResize } from './controllers/HeaderResize.js';
 import { Popup } from './controllers/Popup.js';
 import { KeyboardExit } from './controllers/KeyboardExit.js';
 import { LinkTooltip } from './controllers/LinkTooltip.js';
+import { HostedComponents } from './controllers/HostedComponents.js';
 import { Outline } from './controllers/Outline.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { computeMergedRegionBoxes, computePositionedOverlays } from './algorithms/Positioning.js';
@@ -342,34 +334,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private extendingSelection = false;
   /**
-   * Server-side components the sheet renders as overlays — charts, and
-   * anything else added with {@code Spreadsheet.setComponent}. Flow creates
-   * the elements but leaves placing them to us; they become light-DOM
-   * children of the cell-grid so the slots in its shadow root can project
-   * them over the sheet.
+   * The server-side components the sheet hosts: charts and other overlays,
+   * components in cells, custom editors, and the icons of menu actions.
    */
-  private readonly overlayComponents: SlottedVirtualChildren;
-  /**
-   * Server-side components rendered inside a cell. Same mechanism as
-   * {@link overlayComponents} and the same host, kept apart because the two
-   * project through differently named slots. A component is either an
-   * overlay or in a cell, never both, so the two id sets never overlap.
-   */
-  private readonly cellComponents: SlottedVirtualChildren;
-  /**
-   * Custom cell editors. A third holder rather than a flag on
-   * {@link cellComponents}, because a cell can carry both and each needs
-   * its own slot: swapping one for the other must not disturb the other's
-   * element.
-   */
-  private readonly cellEditors: SlottedVirtualChildren;
-
-  /**
-   * Icons on context-menu actions. Server-side components attached to the
-   * action, so they need placing like any other; a fourth holder because
-   * they live in the context menu's shadow root rather than the grid's.
-   */
-  private readonly actionIcons: SlottedVirtualChildren;
+  private readonly hosted: HostedComponents;
 
   /**
    * The parts that follow the sheet into the page and out of it, in the
@@ -523,19 +491,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.contextMenu = new SpreadsheetContextMenu();
     const resolveVirtualChild = (nodeId: string): HTMLElement | null =>
       flowVirtualChildResolver(overlayComponentAppId(host))(nodeId);
-    // The components live in the host's light DOM, where an application's
-    // own components belong — findable by an ordinary document query, the
-    // way every other Vaadin component is. The slots that show them are in
-    // the cell-grid's shadow root, so each gets a forwarding slot.
-    this.overlayComponents = new SlottedVirtualChildren(
+    this.hosted = new HostedComponents(
       host,
-      this.cellGrid,
+      { cellGrid: this.cellGrid, contextMenu: this.contextMenu },
       resolveVirtualChild,
-      overlayComponentSlotName
+      { cellSlotAssignments: () => this.cellSlotAssignments() }
     );
-    this.cellComponents = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellComponentSlotName);
-    this.cellEditors = new SlottedVirtualChildren(host, this.cellGrid, resolveVirtualChild, cellEditorSlotName);
-    this.actionIcons = new SlottedVirtualChildren(host, this.contextMenu, resolveVirtualChild, actionIconSlotName);
     this.popup = new Popup(
       host,
       resolveVirtualChild,
@@ -758,7 +719,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // cell, then opens the menu).
     this.menu = new ContextMenu(
       this.contextMenu,
-      this.actionIcons,
+      this.hosted.actionIcons,
       this.root,
       { cells: this.cellGrid, columnHeader: this.columnHeader, rowHeader: this.rowHeader },
       {
@@ -1559,7 +1520,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private returnFocusToSheet(): void {
     const active = this.host.shadowRoot?.activeElement ?? document.activeElement;
-    if (active !== null && this.cellEditors.owns(active)) {
+    if (this.hosted.isEditor(active)) {
       return;
     }
     this.scrollContainer.focus();
@@ -1693,7 +1654,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if ((e.key === 'Enter' || e.key === ' ') && pressesButton(e)) {
       return;
     }
-    if (this.eventCameFromHostedComponent(e)) {
+    if (this.hosted.raisedInside(e)) {
       // The key belongs to the component the user is typing into. Acting
       // on it as a sheet shortcut moves the selection out from under a
       // custom editor mid-edit, which takes the editor off the sheet.
@@ -1702,7 +1663,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // sheet's after all: Escape returns the focus, Tab returns it and then
       // moves on to the next cell, and Enter returns it once the editor has
       // had it, leaving the cell selected, as in GWT.
-      const fromEditor = this.eventCameFromCellEditor(e);
+      const fromEditor = this.hosted.raisedInEditor(e);
       if (!fromEditor || !leavesEditor(e)) {
         return;
       }
@@ -1731,7 +1692,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     const startsEditing =
       !this.editor &&
       (((key === 'F2' || key === 'Enter') && !ctrlOrMeta && !e.altKey) || typesCharacter(e, isMacPlatform()));
-    if (startsEditing && this.focusCustomEditor()) {
+    const { activeCell } = this.selection;
+    if (startsEditing && this.hosted.focusEditorOf(activeCell.col, activeCell.row)) {
       return;
     }
 
@@ -2300,11 +2262,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.renders.cancel();
     this.ownListeners.abort();
     this.stopLongPress();
-    this.overlayComponents.clear();
-    this.cellComponents.clear();
-    this.cellEditors.clear();
+    this.hosted.clear();
     this.popup.dispose();
-    this.actionIcons.clear();
     this.disconnect();
     this.hostClassObserver.disconnect();
   }
@@ -2604,16 +2563,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.cellGrid.renderState = state;
     const { col, row } = this.selection.activeCell;
     this.formulaBar.formulaLocked = this.isCellLockedForEdit(col, row);
-    // The slots that project these live in the template we just handed the
-    // cell-grid, so the components have to be parented before the browser
-    // resolves them. sync() is idempotent, so the repaint on every scroll
-    // tick costs a set comparison and nothing else.
-    this.overlayComponents.sync(state.overlays.filter((o) => o.type === 'COMPONENT').map((o) => o.id));
-    // Only the cells on screen render a slot, so only those elements are
-    // placed — one off-screen would be parented with nowhere to project.
-    const visible = visibleCellSlots(slots.assignments, state);
-    this.cellComponents.sync(visible.filter((a) => a.kind === 'component').map((a) => a.nodeId));
-    this.cellEditors.sync(visible.filter((a) => a.kind === 'editor').map((a) => a.nodeId));
+    this.hosted.place(state, slots.assignments);
     // Column-header strip. Sized + state-pushed only
     // when there is something to draw, so the default opt-out path
     // stays a no-op — important to avoid feedback loops with the
@@ -3495,23 +3445,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.write('rowGroupingInversed', inversed);
   }
   /**
-   * Whether an event was raised inside a server-side component the sheet
-   * is hosting — a custom editor, an in-cell component, a chart overlay.
-   *
-   * Those components are light children of the host and reach the screen
-   * through slots, so their events travel the flattened tree and arrive at
-   * the sheet's own listeners. They are not the sheet's to act on.
-   */
-  private eventCameFromHostedComponent(e: Event): boolean {
-    for (const target of e.composedPath()) {
-      if (this.cellEditors.owns(target) || this.cellComponents.owns(target) || this.overlayComponents.owns(target)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * Clicking a custom editor selects the cell it belongs to.
    *
    * An editor is usually wider than its cell, so a click aimed at the cell
@@ -3526,7 +3459,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * talking about, in a loop.
    */
   private readonly handleHostedEditorPointerDown = (e: Event): void => {
-    const cell = this.cellShowingEditorFor(e);
+    const cell = this.hosted.cellOfEditor(e);
     if (cell === null) {
       return;
     }
@@ -3536,59 +3469,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.select(selectSingleCell(cell.col, cell.row));
     this.dispatchSelectionEvent();
   };
-
-  /** The cell whose custom editor an event came out of, if any. */
-  private cellShowingEditorFor(e: Event): { col: number; row: number } | null {
-    if (!this.eventCameFromCellEditor(e)) {
-      return null;
-    }
-    for (const [cellKey, assignment] of Object.entries(this.cellSlotAssignments())) {
-      if (assignment.kind !== 'editor') {
-        continue;
-      }
-      const element = this.cellEditors.get(assignment.nodeId);
-      if (element === null || !e.composedPath().includes(element)) {
-        continue;
-      }
-      const parsed = parseColRow(cellKey);
-      return { col: parsed.col, row: parsed.row };
-    }
-    return null;
-  }
-
-  /** Whether an event came out of a custom cell editor specifically. */
-  private eventCameFromCellEditor(e: Event): boolean {
-    for (const target of e.composedPath()) {
-      if (this.cellEditors.owns(target)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Hand the keyboard to the active cell's custom editor, if it has one.
-   *
-   * A cell showing a custom editor has no use for the inline editor: the
-   * editor IS the way to change the value, so a key that would normally
-   * start editing focuses it instead. Excel's F2 on such a cell does the
-   * same thing.
-   *
-   * @returns true when a custom editor took the focus.
-   */
-  private focusCustomEditor(): boolean {
-    const active = this.selection.activeCell;
-    const assignment = this.cellSlotAssignments()[toKey(active.col, active.row)];
-    if (assignment === undefined || assignment.kind !== 'editor') {
-      return false;
-    }
-    const element = this.cellEditors.get(assignment.nodeId);
-    if (element === null) {
-      return false;
-    }
-    element.focus();
-    return true;
-  }
 
   /**
    * Which server-side element each cell shows, from the three inputs the
