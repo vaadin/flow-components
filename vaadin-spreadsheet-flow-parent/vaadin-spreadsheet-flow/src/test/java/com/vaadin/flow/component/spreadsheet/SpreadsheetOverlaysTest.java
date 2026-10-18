@@ -134,6 +134,27 @@ class SpreadsheetOverlaysTest {
     }
 
     @Test
+    void aPictureLargerThanTheView_isGivenToTheClient_scrolledToItsMiddle() {
+        // Both its corners are outside the rows and columns shown, which used
+        // to count as not shown.
+        picture("D5:K30");
+
+        show();
+
+        assertEquals(List.of("D5"), startCells());
+    }
+
+    @Test
+    void aPictureLargerThanTheView_isTakenOff_scrolledPastIt() {
+        picture("D5:K30");
+        show();
+
+        showRows(31, 40);
+
+        assertEquals(List.of(), startCells());
+    }
+
+    @Test
     void aPictureShown_startsWhereItsAnchorDoes_withItsOffsetAndSize() {
         picture("F12:G13");
 

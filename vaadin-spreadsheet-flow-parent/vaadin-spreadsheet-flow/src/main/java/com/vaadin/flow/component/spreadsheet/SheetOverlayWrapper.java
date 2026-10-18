@@ -70,28 +70,20 @@ public abstract class SheetOverlayWrapper implements Serializable {
      */
     public boolean isVisible(int r1, int c1, int r2, int c2) {
         int col1 = anchor.getCol1() + 1;
-        int col2 = anchor.getCol2() + 1;
         int row1 = anchor.getRow1() + 1;
-        int row2 = anchor.getRow2() + 1;
+        // An anchor without an end cell, of a picture not sized with its
+        // cells, is taken to end where it starts.
+        int col2 = Math.max(anchor.getCol2() + 1, col1);
+        int row2 = Math.max(anchor.getRow2() + 1, row1);
 
         // sanity check
         if (r2 - r1 < 0 || c2 - c1 < 0) {
             return false;
         }
 
-        boolean col1isBetweenc1andc2 = c1 <= col1 && col1 <= c2;
-
-        boolean col2isBetweenc1andc2 = c1 <= col2 && col2 <= c2;
-
-        boolean inColumnRange = col1isBetweenc1andc2 || col2isBetweenc1andc2;
-
-        boolean row1isBetweenr1andr2 = r1 <= row1 && row1 <= r2;
-
-        boolean row2isBetweenr1andr2 = r1 <= row2 && row2 <= r2;
-
-        boolean inRowRange = row1isBetweenr1andr2 || row2isBetweenr1andr2;
-
-        return inColumnRange && inRowRange;
+        // Whether the two areas overlap: an overlay larger than the range,
+        // with both its corners outside it, is shown too.
+        return col1 <= c2 && col2 >= c1 && row1 <= r2 && row2 >= r1;
     }
 
     /**
