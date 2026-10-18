@@ -10,10 +10,23 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.apache.poi.hssf.usermodel.HSSFEvaluationWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.formula.FormulaParser;
+import org.apache.poi.ss.formula.FormulaParsingWorkbook;
+import org.apache.poi.ss.formula.FormulaRenderer;
+import org.apache.poi.ss.formula.FormulaRenderingWorkbook;
+import org.apache.poi.ss.formula.FormulaShifter;
+import org.apache.poi.ss.formula.FormulaType;
+import org.apache.poi.ss.formula.ptg.Ptg;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFEvaluationWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -24,9 +37,10 @@ import org.slf4j.LoggerFactory;
  * Type dispatch:
  *
  * <ul>
- * <li>{@code FORMULA} — rewrite cell references along the shift axis (row or
- * column delta). Absolute references (prefixed with {@code $}) are
- * preserved.</li>
+ * <li>{@code FORMULA} — copy the formula with its relative references moved
+ * along the shift axis, as POI moves those of a copied row or column. Absolute
+ * references (prefixed with {@code $}) are preserved, and a reference moved off
+ * the sheet becomes {@code #REF!}.</li>
  * <li>{@code BOOLEAN}, {@code ERROR} — copy the value unchanged.</li>
  * <li>{@code NUMERIC} — copy, plus {@code sequenceIncrement * distance} when
  * the increment is non-null.</li>
@@ -48,9 +62,6 @@ final class CellValueShifter implements Serializable {
 
     private static final org.slf4j.Logger LOGGER = LoggerFactory
             .getLogger(CellValueShifter.class);
-
-    static final Pattern ROW_SHIFT_PATTERN = Pattern
-            .compile("[$]?[a-zA-Z]+[$]?\\d+");
 
     private final Spreadsheet spreadsheet;
 
@@ -144,74 +155,59 @@ final class CellValueShifter implements Serializable {
         }
     }
 
+    /**
+     * Copies the formula to the new cell, its relative references moved as far
+     * as the cell moved, as Excel's fill handle moves them: the formula is
+     * parsed and its references shifted by POI, so sheet names, function names
+     * and text stay as they are, and a reference moved off the sheet becomes
+     * {@code #REF!}.
+     */
     private void shiftFormula(Cell shiftedCell, Cell newCell) {
         try {
-            if (shiftedCell.getColumnIndex() != newCell.getColumnIndex()) {
-                // shift column indexes
-                int collDiff = newCell.getColumnIndex()
-                        - shiftedCell.getColumnIndex();
-                Matcher matcher = ROW_SHIFT_PATTERN
-                        .matcher(shiftedCell.getCellFormula());
-                String originalFormula = shiftedCell.getCellFormula();
-                StringBuilder newFormula = new StringBuilder();
-                int lastEnd = 0;
-                while (matcher.find()) {
-                    String s = matcher.group();
-                    String replacement;
-                    if (!s.startsWith("$")) {
-                        String oldIndexString = s.replaceAll("[$]{0,1}\\d+",
-                                "");
-
-                        int columnIndex = SpreadsheetUtil
-                                .getColHeaderIndex(oldIndexString);
-                        columnIndex += collDiff;
-                        replacement = s.replace(oldIndexString,
-                                SpreadsheetUtil.getColHeader(columnIndex));
-                    } else {
-                        // if column has a '$' reference shouldn't change
-                        replacement = s;
-                    }
-                    newFormula.append(originalFormula.substring(lastEnd,
-                            matcher.start()));
-                    newFormula.append(replacement);
-                    lastEnd = matcher.end();
-                }
-                newFormula.append(originalFormula.substring(lastEnd));
-                newCell.setCellFormula(newFormula.toString());
-            } else { // shift row indexes
-                int rowDiff = newCell.getRowIndex() - shiftedCell.getRowIndex();
-                Matcher matcher = ROW_SHIFT_PATTERN
-                        .matcher(shiftedCell.getCellFormula());
-                String originalFormula = shiftedCell.getCellFormula();
-                StringBuilder newFormula = new StringBuilder();
-                int lastEnd = 0;
-                while (matcher.find()) {
-                    String s = matcher.group();
-                    String rowString = s.replaceAll("[$]{0,1}[a-zA-Z]+", "");
-                    String replacement;
-                    if (!rowString.startsWith("$")) {
-                        int row = Integer.parseInt(rowString);
-                        row += rowDiff;
-                        replacement = s.replace(rowString,
-                                Integer.toString(row));
-                    } else {
-                        // if row has a '$' reference shouldn't change
-                        replacement = s;
-                    }
-                    newFormula.append(originalFormula.substring(lastEnd,
-                            matcher.start()));
-                    newFormula.append(replacement);
-                    lastEnd = matcher.end();
-                }
-                newFormula.append(originalFormula.substring(lastEnd));
-                newCell.setCellFormula(newFormula.toString());
-            }
-        } catch (Exception e) {
+            newCell.setCellFormula(copiedFormula(shiftedCell, newCell));
+        } catch (RuntimeException e) {
             LOGGER.debug(e.getMessage(), e);
             // TODO visualize shifting error
             newCell.setCellFormula(shiftedCell.getCellFormula());
         }
         spreadsheet.getCellValueManager().getFormulaEvaluator()
                 .notifySetFormula(newCell);
+    }
+
+    private static String copiedFormula(Cell from, Cell to) {
+        Workbook workbook = from.getSheet().getWorkbook();
+        if (workbook instanceof HSSFWorkbook hssf) {
+            HSSFEvaluationWorkbook book = HSSFEvaluationWorkbook.create(hssf);
+            return copiedFormula(from, to, book, book);
+        }
+        XSSFEvaluationWorkbook book = XSSFEvaluationWorkbook
+                .create((XSSFWorkbook) workbook);
+        return copiedFormula(from, to, book, book);
+    }
+
+    private static String copiedFormula(Cell from, Cell to,
+            FormulaParsingWorkbook parsing,
+            FormulaRenderingWorkbook rendering) {
+        Sheet sheet = from.getSheet();
+        Workbook workbook = sheet.getWorkbook();
+        int sheetIndex = workbook.getSheetIndex(sheet);
+        String sheetName = sheet.getSheetName();
+        SpreadsheetVersion version = workbook.getSpreadsheetVersion();
+        Ptg[] ptgs = FormulaParser.parse(from.getCellFormula(), parsing,
+                FormulaType.CELL, sheetIndex);
+        int rows = to.getRowIndex() - from.getRowIndex();
+        if (rows != 0) {
+            FormulaShifter
+                    .createForRowCopy(sheetIndex, sheetName, from.getRowIndex(),
+                            from.getRowIndex(), rows, version)
+                    .adjustFormula(ptgs, sheetIndex);
+        }
+        int columns = to.getColumnIndex() - from.getColumnIndex();
+        if (columns != 0) {
+            FormulaShifter.createForColumnCopy(sheetIndex, sheetName,
+                    from.getColumnIndex(), from.getColumnIndex(), columns,
+                    version).adjustFormula(ptgs, sheetIndex);
+        }
+        return FormulaRenderer.toFormulaString(rendering, ptgs);
     }
 }

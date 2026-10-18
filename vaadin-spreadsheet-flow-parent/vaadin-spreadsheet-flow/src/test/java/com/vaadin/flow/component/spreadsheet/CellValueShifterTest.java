@@ -13,6 +13,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.eval.ErrorEval;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -262,8 +263,7 @@ class CellValueShifterTest {
     void shift_formulaCell_columnShift_rewritesRelativeColumnReferences() {
         // Pin column-shift rewrite: a same-row move 2 columns right
         // increments column letters. "A1+B2" shifted to column 2 becomes
-        // "C1+D2". The matcher routes through the column-delta branch
-        // (oldCol != newCol AND oldRow == newRow).
+        // "C1+D2".
         Cell src = sheet.createRow(0).createCell(0);
         src.setCellFormula("A1+B2");
         Cell dst = sheet.getRow(0).createCell(2); // same row, 2 cols right
@@ -290,11 +290,9 @@ class CellValueShifterTest {
 
     @Test
     void shift_formulaCell_noCellReferences_passesThroughUnchanged() {
-        // Pin: a formula whose body has no cell references (matches nothing
-        // under ROW_SHIFT_PATTERN) is written to the destination unchanged.
-        // The matcher loop never executes, so the StringBuilder ends up
-        // equal to the original formula. A regression that emitted "" or
-        // null when the matcher found nothing would fail this assertion.
+        // Pin: a formula whose body has no cell references is written to the
+        // destination unchanged. A regression that emitted "" or null for a
+        // formula with nothing to move would fail this assertion.
         Cell src = sheet.createRow(0).createCell(0);
         src.setCellFormula("2+3");
         Cell dst = sheet.createRow(1).createCell(0);
@@ -306,27 +304,96 @@ class CellValueShifterTest {
     }
 
     @Test
-    void shift_formulaCell_postShiftRefIsInvalid_catchBranchRestoresOriginal() {
-        // Pin the load-bearing catch (shiftFormula lines 217-221): if the
-        // rewritten formula is invalid (POI rejects it on setCellFormula),
-        // the catch resets the destination to the source's ORIGINAL
-        // formula. We trigger this by row-shifting "A1" up to a position
-        // where the rewrite produces "A0" — POI rejects row 0 in formulas
-        // (rows are 1-based in Excel formula syntax) and throws
-        // FormulaParseException.
-        //
-        // Verifies: removing the catch (or its fallback) would propagate
-        // the exception OR leave the dst cell without the original
-        // formula — either way the assertEquals on "A1" fails.
-        Cell src = sheet.createRow(1).createCell(0); // POI row 1 = Excel 2
+    void shift_formulaCell_referenceMovedOffTheSheet_becomesARefError() {
+        // As in Excel: "A1" filled from row 2 up to row 1 would point above
+        // the first row. It used to be copied unchanged, which in A1 made
+        // the cell refer to itself.
+        Cell src = sheet.createRow(1).createCell(0);
         src.setCellFormula("A1");
-        Cell dst = sheet.createRow(0).createCell(0); // POI row 0 = Excel 1
-        // rowDiff = 0 - 1 = -1; rewrite makes "A0", which POI rejects.
+        Cell dst = sheet.createRow(0).createCell(0);
 
         shifter.shift(src, dst, false, null);
 
-        assertEquals("A1", dst.getCellFormula(),
-                "Catch fallback MUST set dst to the original source formula");
+        assertEquals("#REF!", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_rowShift_keepsTheSheetOfASheetQualifiedReference() {
+        // The digits of a sheet's name are not a row: "Sheet1!A1" used to
+        // become "Sheet2!A2", another sheet.
+        workbook.createSheet("Sheet1");
+        workbook.createSheet("Sheet2");
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("Sheet1!A1*2");
+        Cell dst = sheet.createRow(1).createCell(0);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("Sheet1!A2*2", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_columnShift_keepsTheSheetOfASheetQualifiedReference() {
+        workbook.createSheet("Sheet1");
+        workbook.createSheet("Sheet2");
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("Sheet1!A1*2");
+        Cell dst = sheet.getRow(0).createCell(1);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("Sheet1!B1*2", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_rowShift_leavesAFunctionNameWithDigitsAlone() {
+        // "LOG10(A1)" used to become "LOG11(A2)", which did not parse, and
+        // was then copied with its reference not moved.
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("LOG10(A1)");
+        Cell dst = sheet.createRow(1).createCell(0);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("LOG10(A2)", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_rowShift_leavesTextAlone() {
+        Cell src = sheet.createRow(0).createCell(0);
+        src.setCellFormula("\"Q1\"&A1");
+        Cell dst = sheet.createRow(1).createCell(0);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("\"Q1\"&A2", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_rowShift_movesTheRelativeEndsOfARange() {
+        Cell src = sheet.createRow(0).createCell(3);
+        src.setCellFormula("SUM(A1:A3)+SUM($A$1:A3)");
+        Cell dst = sheet.createRow(1).createCell(3);
+
+        shifter.shift(src, dst, false, null);
+
+        assertEquals("SUM(A2:A4)+SUM($A$1:A4)", dst.getCellFormula());
+    }
+
+    @Test
+    void shift_formulaCell_ofAnOldWorkbook_rowShift_keepsTheSheetOfAReference()
+            throws Exception {
+        try (HSSFWorkbook old = new HSSFWorkbook()) {
+            Sheet first = old.createSheet("Data");
+            old.createSheet("Sheet1");
+            Cell src = first.createRow(0).createCell(0);
+            src.setCellFormula("Sheet1!A1*2");
+            Cell dst = first.createRow(1).createCell(0);
+
+            shifter.shift(src, dst, false, null);
+
+            assertEquals("Sheet1!A2*2", dst.getCellFormula());
+        }
     }
 
     // ----- ERROR branch -----------------------------------------------------
