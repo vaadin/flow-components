@@ -73,6 +73,8 @@ public class SpreadsheetHistoryManager implements Serializable {
      */
     public void addCommand(Command command) {
         SpreadsheetFactory.logMemoryUsage();
+        // Through the protected hook, for a subclass that overrides it.
+        discardAllAfter(historyIndex);
         stack.push(command);
         historyIndex = stack.getCursor();
         SpreadsheetFactory.logMemoryUsage();
@@ -150,6 +152,9 @@ public class SpreadsheetHistoryManager implements Serializable {
      *            New size for Command history
      */
     public void setHistorySize(int historySize) {
+        // The commands that could be redone and no longer fit go through the
+        // protected hook, for a subclass that overrides it; then the oldest.
+        discardAllAfter(Math.max(Math.max(0, historySize) - 1, historyIndex));
         stack.setMaxSize(historySize);
         historyIndex = stack.getCursor();
     }
@@ -197,7 +202,9 @@ public class SpreadsheetHistoryManager implements Serializable {
 
     /**
      * Clears all history after the given history index NOT including the
-     * command at the given index.
+     * command at the given index. Called when a command is added, for the
+     * commands that could be redone, and when the history size changes, for
+     * those of them that no longer fit.
      *
      * @param index
      *            History index to start the clearing from.

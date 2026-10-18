@@ -15,7 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -354,6 +356,62 @@ class SpreadsheetHistoryManagerTest {
         // index 1.
         assertEquals(1, history.getHistoryIndex());
         assertFalse(history.canRedo());
+    }
+
+    // 8b. the protected discardAllAfter hook ------------------------------
+
+    /** A history whose discardAllAfter records the index it is given. */
+    private static final class DiscardRecordingHistory
+            extends SpreadsheetHistoryManager {
+        final List<Integer> discardedAfter = new ArrayList<>();
+
+        DiscardRecordingHistory(Spreadsheet spreadsheet) {
+            super(spreadsheet);
+        }
+
+        @Override
+        protected void discardAllAfter(int index) {
+            discardedAfter.add(index);
+            super.discardAllAfter(index);
+        }
+    }
+
+    @Test
+    void addCommand_afterUndo_discardsTheRedoBranchThroughTheProtectedHook() {
+        DiscardRecordingHistory recording = new DiscardRecordingHistory(
+                spreadsheet);
+        recording.addCommand(new RecordingCommand());
+        recording.addCommand(new RecordingCommand());
+        recording.addCommand(new RecordingCommand());
+        recording.undo();
+        recording.undo();
+        recording.discardedAfter.clear();
+
+        recording.addCommand(new RecordingCommand());
+
+        assertEquals(List.of(0), recording.discardedAfter);
+        assertEquals(2, recording.commands.size());
+        assertEquals(1, recording.getHistoryIndex());
+    }
+
+    @Test
+    void setHistorySize_smaller_discardsTheRedoBranchThroughTheProtectedHook() {
+        DiscardRecordingHistory recording = new DiscardRecordingHistory(
+                spreadsheet);
+        for (int i = 0; i < 5; i++) {
+            recording.addCommand(new RecordingCommand());
+        }
+        recording.undo();
+        recording.discardedAfter.clear();
+
+        recording.setHistorySize(3);
+
+        // The command that could be redone goes through the hook, then the
+        // oldest goes to make room, as before.
+        assertEquals(List.of(3), recording.discardedAfter);
+        assertEquals(3, recording.commands.size());
+        assertEquals(2, recording.getHistoryIndex());
+        assertFalse(recording.canRedo());
     }
 
     // 9. getCommand bounds -------------------------------------------------
