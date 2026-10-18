@@ -57,8 +57,12 @@ final class CellDataBuilder implements Serializable {
         boolean valueOverflows = false;
         cellData.cellStyle = "cs" + cellStyle.getIndex();
         cellData.locked = spreadsheet.isCellLocked(cell.getAddress());
+        // A hidden cell of a protected sheet keeps what it holds from the
+        // client: neither its formula nor its value before formatting is
+        // sent, so the client shows only the value the cell displays.
+        boolean hidden = spreadsheet.isCellHidden(cell);
         try {
-            if (!spreadsheet.isCellHidden(cell)) {
+            if (!hidden) {
                 if (cell.getCellType() == CellType.FORMULA) {
                     cellData.formulaValue = manager.formulaFormatter
                             .reFormatFormulaValue(cell.getCellFormula(),
@@ -103,7 +107,7 @@ final class CellDataBuilder implements Serializable {
                     manager.getFormulaEvaluator(),
                     manager.getConditionalFormattingEvaluator());
 
-            if (!spreadsheet.isCellHidden(cell)) {
+            if (!hidden) {
                 if (cell.getCellType() == CellType.FORMULA
                         || cell.getCellType() == CellType.NUMERIC) {
                     formattedCellValue = formattedCellValue
@@ -114,8 +118,8 @@ final class CellDataBuilder implements Serializable {
                     cellData.row)) {
                 // The prefix '=' or '+' should not be included in formula
                 // value
-                if (cell.getStringCellValue().charAt(0) == '+'
-                        || cell.getStringCellValue().charAt(0) == '=') {
+                if (!hidden && (cell.getStringCellValue().charAt(0) == '+'
+                        || cell.getStringCellValue().charAt(0) == '=')) {
                     cellData.formulaValue = cell.getStringCellValue()
                             .substring(1);
                 }
@@ -213,7 +217,9 @@ final class CellDataBuilder implements Serializable {
                 }
             }
 
-            if (cell.getCellType() == CellType.NUMERIC
+            if (hidden) {
+                cellData.originalValue = null;
+            } else if (cell.getCellType() == CellType.NUMERIC
                     && DateUtil.isCellDateFormatted(cell)) {
                 cellData.originalValue = cellData.value;
             } else {
