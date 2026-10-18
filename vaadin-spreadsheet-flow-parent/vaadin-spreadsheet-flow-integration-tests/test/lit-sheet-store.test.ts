@@ -67,6 +67,16 @@ describe('SheetStore', () => {
       expect(renders).to.equal(1);
     });
 
+    it('has cells once the server has sent both the rows and the columns', () => {
+      expect(store.hasCells(), 'nothing sent').to.be.false;
+      store.write('rows', 5);
+      expect(store.hasCells(), 'rows only').to.be.false;
+      store.write('cols', 3);
+      expect(store.hasCells()).to.be.true;
+      store.write('rows', 0);
+      expect(store.hasCells(), 'columns only').to.be.false;
+    });
+
     it('gives the arrow keys the size, the merges and the hidden rows and columns', () => {
       store.write('rows', 20);
       store.write('cols', 8);

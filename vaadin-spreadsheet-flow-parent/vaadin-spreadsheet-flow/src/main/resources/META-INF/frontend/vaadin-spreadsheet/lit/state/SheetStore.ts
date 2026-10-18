@@ -268,6 +268,11 @@ export class SheetStore {
     this.changeFormulaBar({ namedRanges: names });
   }
 
+  /** Whether the sheet has any cells: none before the server sends its size. */
+  hasCells(): boolean {
+    return this.sheetModel.rows > 0 && this.sheetModel.cols > 0;
+  }
+
   /** The sheet as the arrow keys see it. */
   sheetShape(): SheetShape {
     const model = this.sheetModel;

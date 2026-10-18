@@ -47,16 +47,6 @@ import { ViewState } from './state/ViewState.js';
 import { type SheetModel } from './state/SheetModel.js';
 import { toKey } from './algorithms/CellKeys.js';
 import { type CellSlotAssignment, flowVirtualChildResolver } from './dom/VirtualChildren.js';
-import { inSelectionWalkDirection, walkInsideSelection } from './algorithms/SelectionWalk.js';
-import {
-  homeEndTarget,
-  keyDirection,
-  moveActiveCell,
-  moveRangeEdge,
-  selectCellAt,
-  type SingleCellSelection,
-  typesCharacter
-} from './algorithms/KeyboardMoves.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
@@ -71,6 +61,7 @@ import { HostedComponents } from './controllers/HostedComponents.js';
 import { SelectionReporter } from './controllers/SelectionReporter.js';
 import { ServerSync } from './controllers/ServerSync.js';
 import { EditSession } from './controllers/EditSession.js';
+import { KeyboardNavigation } from './controllers/KeyboardNavigation.js';
 import { PointerSelection } from './controllers/PointerSelection.js';
 import { FormulaPointer } from './controllers/FormulaPointer.js';
 import { Outline } from './controllers/Outline.js';
@@ -164,22 +155,6 @@ type ServerHost = HTMLElement & {
   $server?: { clipboardText(col1: number, row1: number, col2: number, row2: number): Promise<string | null> };
 };
 
-/**
- * Whether a key pressed in a custom editor takes the keyboard back to the
- * sheet. Enter does, unless the editor used it: for a new line in a text
- * area or in rich text, or to pick from a list it has open.
- */
-function leavesEditor(e: KeyboardEvent): boolean {
-  if (e.key === 'Escape' || e.key === 'Tab') {
-    return true;
-  }
-  if (e.key !== 'Enter' || e.defaultPrevented) {
-    return false;
-  }
-  const target = e.composedPath()[0];
-  return !(target instanceof HTMLTextAreaElement) && !(target instanceof HTMLElement && target.isContentEditable);
-}
-
 export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /**
    * What the sheet asks about the platform when it is made. Tests, which do
@@ -234,7 +209,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     isCellGrid: (target) => target === this.cellGrid,
     handle: (work) => this.renders.handle(work),
     returnFocusToSheet: () => this.returnFocusToSheet(),
-    moveInsideSelection: (cell) => this.moveActiveCellInsideSelection(cell),
+    moveInsideSelection: (cell) => this.keyboard.moveInsideSelection(cell),
     scrollIntoView: (cell) => this.scrollCellIntoView(cell),
     scheduleRender: () => this.scheduleRender(),
     send: (event) => this.sendToServer(event)
@@ -249,6 +224,18 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     send: (event) => this.sendToServer(event)
   });
 
+  /** The keyboard on the sheet; see {@link KeyboardNavigation}. */
+  private readonly keyboard = new KeyboardNavigation(this.store, this.report, this.edit, {
+    raisedInside: (e) => this.hosted.raisedInside(e),
+    raisedInEditor: (e) => this.hosted.raisedInEditor(e),
+    focusEditorOf: (col, row) => this.hosted.focusEditorOf(col, row),
+    exits: (e) => this.keyboardExit.takes(e),
+    focusSheet: () => this.scrollContainer.focus(),
+    isMac: () => isMacPlatform(),
+    scrollIntoView: (cell) => this.scrollCellIntoView(cell),
+    send: (event) => this.sendToServer(event)
+  });
+
   /** What the server mirrors onto the element; see {@link SheetStore.model}. */
   private get model(): SheetModel {
     return this.store.model;
@@ -257,15 +244,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** The cells selected. */
   private get selection(): SelectionState {
     return this.store.selection;
-  }
-
-  /**
-   * The cell a click or an arrow asked for when the selection is a merged
-   * region: the arrows leave the merge in its column and row. Null when
-   * the selection is not a merge.
-   */
-  private get mergeEntry(): { col: number; row: number } | null {
-    return this.store.mergeEntry;
   }
 
   /** What the user is in the middle of on the sheet; see {@link SheetStore.interaction}. */
@@ -782,7 +760,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // spreadsheet has focus. preventDefault() in the handler
     // stops the browser from scrolling the viewport via the
     // arrow keys.
-    this.on(this.scrollContainer, 'keydown', this.handleKeyDown);
+    this.on(this.scrollContainer, 'keydown', (e: KeyboardEvent) => this.keyboard.keyDown(e));
     this.on(this.scrollContainer, 'pointerdown', (e: Event) => this.pointerSelection.editorPressed(e));
     // Safari on iOS opens no menu on a long press, so it is made a
     // right-click there, on the cells and the headers alike.
@@ -795,7 +773,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
           [document, 'pointerdown', this.handleDocumentPointerDown],
           [document, 'keydown', this.handleContextMenuKeyDown],
           [document, 'mouseup', () => this.pointerSelection.release()],
-          [document, 'keyup', this.handleDocumentKeyUp],
+          [document, 'keyup', (e: Event) => this.keyboard.keyUp(e as KeyboardEvent)],
           [document, 'mousemove', this.handleDocumentMouseMove]
         ])
       ),
@@ -905,255 +883,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       return;
     }
     this.scrollContainer.focus();
-  }
-
-  /**
-   * Keyboard navigation. Arrow keys, Tab and Enter move the active cell
-   * over hidden rows and columns and out of merges; Shift with an arrow
-   * grows the range from the active cell, which stays where it is, as in
-   * Excel. Home and End go along the row, or with Ctrl to the sheet's first
-   * and last cell; typing starts an edit. Escape, then Tab, leaves the
-   * sheet; see {@link KeyboardExit}.
-   */
-  private readonly handleKeyDown = (e: KeyboardEvent): void => {
-    // Enter and Space on a button of the sheet's own - an outline button, a
-    // popup's close box - press that button, as on any button, rather than
-    // editing the active cell.
-    if ((e.key === 'Enter' || e.key === ' ') && pressesButton(e)) {
-      return;
-    }
-    if (this.hosted.raisedInside(e)) {
-      // The key belongs to the component the user is typing into. Acting
-      // on it as a sheet shortcut moves the selection out from under a
-      // custom editor mid-edit, which takes the editor off the sheet.
-      //
-      // Three keys are the way back out of a custom editor, so they are the
-      // sheet's after all: Escape returns the focus, Tab returns it and then
-      // moves on to the next cell, and Enter returns it once the editor has
-      // had it, leaving the cell selected, as in GWT.
-      const fromEditor = this.hosted.raisedInEditor(e);
-      if (!fromEditor || !leavesEditor(e)) {
-        return;
-      }
-      this.scrollContainer.focus();
-      if (e.key !== 'Tab') {
-        return;
-      }
-      e.preventDefault();
-    } else if (this.keyboardExit.takes(e)) {
-      return;
-    }
-    const key = e.key;
-    const ctrlOrMeta = e.ctrlKey || e.metaKey;
-    // The key that holds a shortcut - select all, undo, redo: Cmd on a Mac,
-    // where Ctrl+A and Ctrl+Z do nothing, and Ctrl or Cmd elsewhere.
-    const shortcut = isMacPlatform() ? e.metaKey : ctrlOrMeta;
-
-    // A cell showing a custom editor is edited through that editor, so
-    // every key that would otherwise start editing hands it the focus
-    // instead: F2, Enter, and any printable character.
-    //
-    // Deliberately without preventDefault. The character that opened the
-    // editor should land in it, and the browser delivers a keypress to
-    // whatever holds the focus once the handlers have run — which by then
-    // is the editor.
-    const startsEditing =
-      !this.editor &&
-      (((key === 'F2' || key === 'Enter') && !ctrlOrMeta && !e.altKey) || typesCharacter(e, isMacPlatform()));
-    const { activeCell } = this.selection;
-    if (startsEditing && this.hosted.focusEditorOf(activeCell.col, activeCell.row)) {
-      return;
-    }
-
-    // Ctrl+A / Cmd+A — select the entire sheet.
-    if (shortcut && (key === 'a' || key === 'A')) {
-      if (this.model.rows <= 0 || this.model.cols <= 0) {
-        return;
-      }
-      e.preventDefault();
-      this.store.select({
-        activeCell: { col: 1, row: 1 },
-        activeRange: normalizedRange(1, 1, this.model.cols, this.model.rows),
-        auxRanges: []
-      });
-      this.report.selection(true);
-      return;
-    }
-
-    // Ctrl+Z / Cmd+Z — undo. Pure pass-through to the server;
-    // the server owns the undo stack + replies with the
-    // resulting cell updates.
-    if (shortcut && (key === 'z' || key === 'Z') && !e.shiftKey) {
-      e.preventDefault();
-      this.sendToServer({ type: 'onUndo', data: {} });
-      return;
-    }
-
-    // Ctrl+Y / Cmd+Shift+Z — redo. Cmd+Y is reserved on Mac
-    // for "history menu" by some apps, so we also accept
-    // Cmd+Shift+Z (the Mac convention) + Ctrl+Y (Windows).
-    if (shortcut && (key === 'y' || key === 'Y' || ((key === 'z' || key === 'Z') && e.shiftKey))) {
-      e.preventDefault();
-      this.sendToServer({ type: 'onRedo', data: {} });
-      return;
-    }
-
-    // F2 opens the cell editor at the active cell, loaded with the
-    // cell's existing value (Excel convention).
-    //
-    // So does Enter on a single cell, as it always has. With a range
-    // selected Enter
-    // walks inside it instead, and on a cell the user cannot see there
-    // is nothing to edit, so it falls through to moving on.
-    const entersEditor =
-      key === 'F2' ||
-      (key === 'Enter' &&
-        !this.store.selectsRange() &&
-        !this.model.hiddenRowIndexes.has(this.selection.activeCell.row) &&
-        !this.model.hiddenColumnIndexes.has(this.selection.activeCell.col));
-    if (entersEditor && !this.editor) {
-      if (this.model.rows <= 0 || this.model.cols <= 0) {
-        return;
-      }
-      const { col, row } = this.selection.activeCell;
-      // F2 opens the existing value, so arrows move the caret.
-      if (this.edit.openExisting(col, row)) {
-        e.preventDefault();
-      }
-      return;
-    }
-
-    // Type-to-edit: a key that types a character opens the cell editor at
-    // the active cell with that character as the initial value - Excel's
-    // way: typing directly starts replacing the cell's content. A
-    // character typed with AltGr or Option counts; see typesCharacter.
-    if (!this.editor && typesCharacter(e, isMacPlatform())) {
-      if (this.model.rows <= 0 || this.model.cols <= 0) {
-        return;
-      }
-      const { col, row } = this.selection.activeCell;
-      if (this.edit.openTyping(col, row, key)) {
-        e.preventDefault();
-      }
-      return;
-    }
-
-    // Delete + Backspace clear the cell contents in the current
-    // selection. Pure pass-through to the server — the connector
-    // dispatches `deleteSelectedCells` and the server replies
-    // with `update*CellValues` carrying the cleared cells. The
-    // client doesn't optimistically clear locally so the
-    // server's response is the single source of truth. Slice
-    // 151.
-    if (key === 'Delete' || key === 'Backspace') {
-      if (this.model.rows <= 0 || this.model.cols <= 0) {
-        return;
-      }
-      e.preventDefault();
-      this.sendToServer({ type: 'deleteSelectedCells', data: {} });
-      return;
-    }
-    // With a range selected, Enter and Tab walk the active cell around
-    // inside it instead of moving on and dropping it: Enter down the
-    // column and on to the next, Tab along the row and on to the next,
-    // both wrapping at the end, shift reversing. The range stays, so the
-    // server hears a selection that did not discard its old range.
-    const walkDirection = inSelectionWalkDirection(key, e.shiftKey);
-    if (walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.store.selectsRange()) {
-      e.preventDefault();
-      const next = walkInsideSelection({
-        range: this.selection.activeRange,
-        col: this.selection.activeCell.col,
-        row: this.selection.activeCell.row,
-        direction: walkDirection,
-        hiddenColumns: this.model.hiddenColumnIndexes,
-        hiddenRows: this.model.hiddenRowIndexes
-      });
-      this.moveActiveCellInsideSelection(next);
-      return;
-    }
-
-    // The arrows - and Tab and Enter, outside a range - step over hidden
-    // rows and columns, onto a merge as a
-    // whole and out of it on the far side, and not at all at the edge of
-    // the sheet. Shift+arrow moves the side of the range away from the
-    // active cell instead.
-    const direction = keyDirection(key, e.shiftKey);
-    if (direction !== null) {
-      if (this.model.rows <= 0 || this.model.cols <= 0) {
-        return;
-      }
-      e.preventDefault();
-      if (e.shiftKey && key.startsWith('Arrow')) {
-        const grown = moveRangeEdge(
-          this.selection.activeRange,
-          this.selection.activeCell,
-          direction,
-          this.store.sheetShape()
-        );
-        if (grown === null) {
-          return;
-        }
-        this.store.select({ activeCell: this.selection.activeCell, activeRange: grown.range, auxRanges: [] });
-        this.store.extendSelection(true);
-        this.scrollCellIntoView(grown.moved);
-      } else {
-        const next = moveActiveCell(this.selection.activeCell, this.mergeEntry, direction, this.store.sheetShape());
-        if (next === null) {
-          return;
-        }
-        this.moveSelectionTo(next);
-      }
-      this.report.selection();
-      return;
-    }
-
-    // Home / End go to the first / last column of the row, Ctrl+Home to
-    // A1 and Ctrl+End to the last cell.
-    const target = homeEndTarget(
-      key,
-      e.ctrlKey || e.metaKey,
-      this.selection.activeCell,
-      this.model.cols,
-      this.model.rows
-    );
-    if (!target) {
-      return;
-    }
-    if (this.model.rows <= 0 || this.model.cols <= 0) {
-      return;
-    }
-    e.preventDefault();
-    this.moveSelectionTo(selectCellAt(target.col, target.row, this.model.mergedRegions));
-    this.report.selection();
-  };
-
-  /**
-   * Move the selection to one cell - or merge - from the keyboard. The cell
-   * is scrolled into view before the render - see {@link scrollToShow} - and
-   * named in the address field as the server hears of it.
-   */
-  private moveSelectionTo(next: SingleCellSelection): void {
-    this.store.extendSelection(false);
-    this.store.pick(next);
-    this.scrollCellIntoView(next.activeCell);
-  }
-
-  /**
-   * Put the active cell somewhere else inside the range that is already
-   * selected, keeping the range itself.
-   *
-   * The server hears that only the active cell moved; see
-   * {@link SelectionReporter.activeCellMoved}.
-   */
-  private moveActiveCellInsideSelection(next: { col: number; row: number }): void {
-    this.store.select({
-      activeCell: next,
-      activeRange: this.selection.activeRange,
-      auxRanges: this.selection.auxRanges
-    });
-    this.scrollCellIntoView(next);
-    this.report.activeCellMoved(next);
   }
 
   /**
@@ -1838,17 +1567,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
 
   /**
-   * Shift let go: the selection is made, so the address field goes back
-   * to naming the cell the user started from.
-   */
-  private readonly handleDocumentKeyUp = (e: KeyboardEvent): void => {
-    if (e.key !== 'Shift' || !this.interaction.extending) {
-      return;
-    }
-    this.store.extendSelection(false);
-  };
-
-  /**
    * Where the sheet is scrolled to, in whole pixels, as the server stores
    * it. A browser reports fractions on a scaled display, and the server
    * reads whole numbers.
@@ -2530,10 +2248,4 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 /** Whether the host is a Lit element, which tells its controllers as it joins and leaves the page. */
 function isControllerHost(host: HTMLElement): host is HTMLElement & ReactiveControllerHost {
   return typeof (host as Partial<ReactiveControllerHost>).addController === 'function';
-}
-
-/** Whether a key goes to a button, which the key itself is pressing. */
-function pressesButton(e: KeyboardEvent): boolean {
-  const target = e.composedPath()[0];
-  return target instanceof HTMLElement && (target.localName === 'button' || target.getAttribute('role') === 'button');
 }
