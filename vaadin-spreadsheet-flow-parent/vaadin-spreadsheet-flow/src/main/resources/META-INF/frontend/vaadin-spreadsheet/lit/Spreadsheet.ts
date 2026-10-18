@@ -28,7 +28,7 @@ import {
   type SelectionState,
   selectSingleCell
 } from './state/SelectionState.js';
-import type { SpreadsheetEvent, CellValueEditedData } from './types/rpc-client-to-server.js';
+import type { SpreadsheetEvent } from './types/rpc-client-to-server.js';
 import type { CellEditorState } from './elements/types.js';
 import {
   computeViewportBounds,
@@ -41,13 +41,12 @@ import {
 } from './algorithms/ViewportMath.js';
 import { type CellSlots, Derived, drawnColumnWidth, drawnRowHeight, type SheetSizes } from './state/Derived.js';
 import { RenderScheduler } from './state/RenderScheduler.js';
-import { closeEditor, IDLE, type InteractionState, openEditor } from './state/Interaction.js';
+import { IDLE, type InteractionState } from './state/Interaction.js';
 import type { SheetData } from './state/SheetData.js';
 import { SheetStore } from './state/SheetStore.js';
 import { ViewState } from './state/ViewState.js';
 import { type SheetModel } from './state/SheetModel.js';
-import { initialEditValue } from './algorithms/PercentageEntry.js';
-import { parseColRow, toKey } from './algorithms/CellKeys.js';
+import { toKey } from './algorithms/CellKeys.js';
 import { type CellSlotAssignment, flowVirtualChildResolver } from './dom/VirtualChildren.js';
 import {
   computePaintRectangle,
@@ -79,6 +78,7 @@ import { LinkTooltip } from './controllers/LinkTooltip.js';
 import { HostedComponents } from './controllers/HostedComponents.js';
 import { SelectionReporter } from './controllers/SelectionReporter.js';
 import { ServerSync } from './controllers/ServerSync.js';
+import { EditSession } from './controllers/EditSession.js';
 import { FormulaPointer } from './controllers/FormulaPointer.js';
 import { Outline } from './controllers/Outline.js';
 import { listenForLongPress } from './dom/LongPress.js';
@@ -104,6 +104,33 @@ type FormulaArrowEvent = CustomEvent<{ key: string; shiftKey: boolean; value: st
 
 /** The caret moved in the cell editor or the formula field. */
 type CaretEvent = CustomEvent<{ value: string; caret: number }>;
+
+/** Typed into the cell editor or the formula field. */
+type InputEvent = CustomEvent<{ value: string; caret?: number }>;
+
+/** A cell, double-clicked. */
+type CellEvent = CustomEvent<{ col: number; row: number }>;
+
+/** The cell editor's edit ended by a key or by leaving it. */
+type CellEditorCommitEvent = CustomEvent<{
+  col: number;
+  row: number;
+  value: string;
+  key?: string;
+  shiftKey?: boolean;
+  relatedTarget?: EventTarget | null;
+}>;
+
+/** The formula field's edit ended by a key or by leaving it. */
+type FormulaCommitEvent = CustomEvent<{
+  value: string;
+  key?: string;
+  shiftKey: boolean;
+  relatedTarget?: EventTarget | null;
+}>;
+
+/** A note finished, for the cell of the key. */
+type NoteCommitEvent = CustomEvent<{ key?: string; text: string }>;
 
 /**
  * Height of the column headers, in pixels: 27, so a sheet starts its first
@@ -191,6 +218,20 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private readonly report = new SelectionReporter(this.store, {
     send: (event) => this.sendToServer(event),
     selectedCellReported: (cell) => this.showSelectedCellInFormulaBar(cell)
+  });
+
+  /** Editing cells, in the cell editor and the formula field; see {@link EditSession}. */
+  private readonly edit = new EditSession(this.store, this.report, this.pointing, {
+    fieldHasFocus: () => this.formulaBar.formulaFieldHasFocus(),
+    fieldEdited: () => this.formulaBar.formulaFieldEdited(),
+    isFormulaBar: (target) => target === this.formulaBar,
+    isCellGrid: (target) => target === this.cellGrid,
+    handle: (work) => this.renders.handle(work),
+    returnFocusToSheet: () => this.returnFocusToSheet(),
+    moveInsideSelection: (cell) => this.moveActiveCellInsideSelection(cell),
+    scrollIntoView: (cell) => this.scrollCellIntoView(cell),
+    scheduleRender: () => this.scheduleRender(),
+    send: (event) => this.sendToServer(event)
   });
 
   /** What the server mirrors onto the element; see {@link SheetStore.model}. */
@@ -549,9 +590,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.root.appendChild(this.formulaBar);
     this.root.appendChild(this.contextMenu);
     this.on(this.formulaBar, 'sheet-address-changed', this.handleSheetAddressChanged);
-    this.on(this.formulaBar, 'formula-commit', this.handleFormulaCommit);
-    this.on(this.formulaBar, 'formula-cancel', this.handleFormulaCancel);
-    this.on(this.formulaBar, 'formula-input', this.handleFormulaInput);
+    this.on(this.formulaBar, 'formula-commit', (e: FormulaCommitEvent) => this.edit.fieldCommitted(e.detail));
+    this.on(this.formulaBar, 'formula-cancel', () => this.edit.fieldCancelled());
+    // What is typed is kept, and drawn into the other input; see drawWriting.
+    this.on(this.formulaBar, 'formula-input', (e: InputEvent) =>
+      this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length, 'field')
+    );
     this.on(this.formulaBar, 'formula-arrow', (e: FormulaArrowEvent) => this.pointing.arrow(e, 'field'));
     this.on(this.formulaBar, 'formula-caret', (e: CaretEvent) =>
       this.pointing.caretMoved(e.detail.value, e.detail.caret, 'field')
@@ -649,10 +693,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // Cell editor lifecycle events. The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
-    this.on(this.cellGrid, 'cell-doubleclick', this.handleCellDoubleClick);
-    this.on(this.cellGrid, 'cell-editor-commit', this.handleCellEditorCommit);
-    this.on(this.cellGrid, 'cell-editor-cancel', this.handleCellEditorCancel);
-    this.on(this.cellGrid, 'cell-editor-input', this.handleCellEditorInput);
+    this.on(this.cellGrid, 'cell-doubleclick', (e: CellEvent) => this.edit.openExisting(e.detail.col, e.detail.row));
+    this.on(this.cellGrid, 'cell-editor-commit', (e: CellEditorCommitEvent) => this.edit.editorCommitted(e));
+    this.on(this.cellGrid, 'cell-editor-cancel', () => this.edit.editorCancelled());
+    this.on(this.cellGrid, 'cell-editor-input', (e: InputEvent) =>
+      this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length, 'cell')
+    );
     this.on(this.cellGrid, 'cell-editor-arrow', (e: FormulaArrowEvent) => this.pointing.arrow(e, 'cell'));
     this.on(this.cellGrid, 'cell-editor-caret', (e: CaretEvent) =>
       this.pointing.caretMoved(e.detail.value, e.detail.caret, 'cell')
@@ -697,7 +743,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       },
       this.ownListeners.signal
     );
-    this.on(this.cellGrid, 'cell-comment-commit', this.handleCellCommentCommit);
+    this.on(this.cellGrid, 'cell-comment-commit', (e: NoteCommitEvent) => this.edit.noteCommitted(e.detail));
     // The outline's +/- and level buttons, which the server acts on.
     new Outline(
       { columnHeader: this.columnHeader, rowHeader: this.rowHeader, headerCorner: this.headerCorner },
@@ -1002,171 +1048,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   };
 
   /**
-   * Double-click on a cell opens the in-place editor at that
-   * cell. The connector loads the cell's existing
-   * value (or empty string when there's no data) into the
-   * editor state, then pushes a fresh render. The cell-grid's
-   * `updated()` lifecycle focuses the input + places the caret
-   * at the end.
-   */
-  private readonly handleCellDoubleClick = (e: CustomEvent<{ col: number; row: number }>): void => {
-    const { col, row } = e.detail;
-    if (this.store.isCellLockedForEdit(col, row)) {
-      this.report.protectedWrite();
-      return;
-    }
-    // Seeded with what the cell IS, not what it shows — the formula
-    // behind a computed cell, and the unformatted value otherwise, which
-    // is what carries a text cell's leading apostrophe.
-    const initialValue = this.store.formulaFieldValueFor(col, row);
-    // Opening the existing value to change it: arrows move the caret.
-    this.store.changeEdit(openEditor(this.interaction.edit, { col, row, initialValue, mode: 'edit' }, false));
-  };
-
-  /**
-   * Cell-editor commit. Called when the user presses Enter,
-   * Tab, or blurs the input. Reads the typed value, dispatches
-   * `cellValueEdited` to the server, closes the editor. When
-   * the commit key was Enter/Tab, moves the active
-   * cell in the canonical Excel direction:
-   * Enter           → row + 1
-   * Shift+Enter     → row - 1
-   * Tab             → col + 1
-   * Shift+Tab       → col - 1
-   * blur (no key)   → stay at the committed cell
-   */
-  private readonly handleCellEditorCommit = (
-    e: CustomEvent<{
-      col: number;
-      row: number;
-      value: string;
-      key?: string;
-      shiftKey?: boolean;
-      relatedTarget?: EventTarget | null;
-    }>
-  ): void => {
-    const { col, row, value, key, shiftKey, relatedTarget } = e.detail;
-    // An editor that has been closed commits nothing: its input losing the
-    // keyboard as it goes is not the user leaving it.
-    if (this.editor?.col !== col || this.editor.row !== row) {
-      return;
-    }
-    // Left for the formula bar, the edit carries on in the formula field:
-    // nothing is committed yet, and the editor stays open. Gone on to the
-    // address field instead, it ends once the keyboard has settled there.
-    if (key === undefined && relatedTarget === this.formulaBar) {
-      e.preventDefault();
-      setTimeout(() =>
-        this.renders.handle(() => {
-          if (this.editor?.col === col && this.editor.row === row && !this.formulaBar.formulaFieldHasFocus()) {
-            this.commitCellEdit(col, row, this.store.writing?.text ?? value, undefined, false, false);
-          }
-        })
-      );
-      return;
-    }
-    this.commitCellEdit(col, row, value, key, shiftKey === true, true);
-  };
-
-  /**
-   * Commit an edit made in the cell editor: report the value, close the
-   * editor and move on the way the key that ended the edit says - see
-   * handleCellEditorCommit. The keyboard goes back to the sheet unless the
-   * user has already put it somewhere.
-   */
-  private commitCellEdit(
-    col: number,
-    row: number,
-    value: string,
-    key: string | undefined,
-    shiftKey: boolean,
-    takeKeyboard: boolean
-  ): void {
-    this.showCommittedValue(col, row, value);
-    // Close the editor first so the re-render removes the
-    // input — important to do BEFORE dispatching the server
-    // event so the editor doesn't briefly flash on top of the
-    // server's response.
-    this.pointing.end();
-    this.store.changeEdit(closeEditor(this.interaction.edit));
-    this.showInFormulaField(value);
-    if (takeKeyboard) {
-      this.returnFocusToSheet();
-    }
-    // Move the active cell to the next slot per Excel
-    // convention. For 'Enter' / 'Tab' the move
-    // direction is fixed; blur leaves the selection at the
-    // committed cell. Clamped to grid bounds.
-    // Enter moves down, Tab right, shift reverses each; an arrow key
-    // moves the way it points, which is what committing from Excel's
-    // "enter" editing mode does.
-    //
-    // With a range selected the commit walks inside it, the same way
-    // Enter and Tab do when nothing is being edited: filling a block
-    // cell by cell is the reason the range is selected at all.
-    const walkDirection = inSelectionWalkDirection(key, shiftKey);
-    const walks = walkDirection !== null && this.model.rows > 0 && this.model.cols > 0 && this.store.selectsRange();
-    // Moving on goes by the arrows' rules: over hidden rows and columns,
-    // and out of a merge on its far side.
-    const direction = walks || key === undefined ? null : keyDirection(key, shiftKey);
-    const next =
-      direction !== null && this.model.rows > 0 && this.model.cols > 0
-        ? moveActiveCell({ col, row }, this.mergeEntry, direction, this.store.sheetShape())
-        : null;
-    if (next !== null) {
-      this.store.pick(next);
-    }
-    const data: CellValueEditedData = { row, col, value };
-    this.sendToServer({ type: 'cellValueEdited', data });
-    // If we moved the active cell, also dispatch the
-    // selection event so the server stays in sync: every
-    // selection write sends an event.
-    if (next !== null) {
-      this.report.selection();
-    }
-    if (walks) {
-      this.moveActiveCellInsideSelection(
-        walkInsideSelection({
-          range: this.selection.activeRange,
-          col,
-          row,
-          direction: walkDirection!,
-          hiddenColumns: this.model.hiddenColumnIndexes,
-          hiddenRows: this.model.hiddenRowIndexes
-        })
-      );
-    }
-  }
-
-  /**
-   * Cell-editor cancel. User pressed Escape. Close
-   * the editor without dispatching anything.
-   */
-  private readonly handleCellEditorCancel = (): void => {
-    const editor = this.editor;
-    this.pointing.end();
-    this.store.changeEdit(closeEditor(this.interaction.edit));
-    // The formula field showed what was typed; it shows the cell again.
-    if (editor !== null) {
-      this.showInFormulaField(this.store.formulaFieldValueFor(editor.col, editor.row));
-    }
-    this.returnFocusToSheet();
-  };
-
-  /** Typed into the cell editor: the formula field shows it as it is typed; see {@link drawWriting}. */
-  private readonly handleCellEditorInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
-    this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length, 'cell');
-  };
-
-  /**
-   * Typed into the formula field. While the edit started in the cell, the
-   * cell editor shows it as it is typed; see {@link drawWriting}.
-   */
-  private readonly handleFormulaInput = (e: CustomEvent<{ value: string; caret?: number }>): void => {
-    this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length, 'field');
-  };
-
-  /**
    * Draws what is written into the input it is not written in, and into the
    * one it is written in where pointing at a cell changed it. The cell editor
    * and the formula field report what is typed into them and where the caret
@@ -1198,63 +1079,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** The name of the sheet shown. */
   private activeSheetName(): string {
     return this.tabs.shownSheetName();
-  }
-
-  /** What the formula field shows - the cell editor's value, while it is open. */
-  private showInFormulaField(value: string): void {
-    this.store.showInFormulaField(value);
-  }
-
-  /**
-   * Shows the value of a cell the server named in the formula field, unless
-   * the user is writing one: in the cell editor, which the field mirrors,
-   * or in the field itself, for the cell they are still on. A formula being
-   * written in the field whose text this replaces is over, and so are its
-   * colours.
-   */
-  private showServerValueInFormulaField(value: string, sameCell: boolean): void {
-    if (this.editor !== null || (sameCell && this.formulaBar.formulaFieldEdited())) {
-      return;
-    }
-    if (this.store.draft !== null && this.store.draft.text !== value) {
-      this.pointing.end();
-    }
-    this.showInFormulaField(value);
-  }
-
-  /**
-   * Show a committed value in its cell at once. The server's
-   * `cellsUpdated` callback may arrive much later (or not at all in offline
-   * / TestBench scenarios); the cell is updated before the round-trip, as
-   * Excel users expect - except for a formula, which keeps showing the old
-   * value until the server has worked it out. Preserves
-   * the existing CellData metadata when present (style index, locked flag).
-   */
-  private showCommittedValue(col: number, row: number, value: string): void {
-    if (value.startsWith('=') || value.startsWith('+')) {
-      return;
-    }
-    const cellKey = toKey(col, row);
-    const previous = this.sheetData.cells.get(cellKey);
-    this.sheetData.cells.set(cellKey, {
-      col,
-      row,
-      value,
-      cellStyle: previous?.cellStyle ?? 'cs0',
-      locked: previous?.locked ?? false,
-      needsMeasure: previous?.needsMeasure ?? false,
-      isPercentage: previous?.isPercentage ?? false,
-      // Not carried over: how far the old text ran into its neighbours says
-      // nothing about how far the newly typed text should. The server sends
-      // the new width with its answer.
-      overflowWidth: 0,
-      ...(previous?.formulaValue !== undefined ? { formulaValue: previous.formulaValue } : {}),
-      ...(previous?.originalValue !== undefined ? { originalValue: previous.originalValue } : {}),
-      ...(previous?.textColor !== undefined ? { textColor: previous.textColor } : {})
-    });
-    // Drawn whichever way the edit was committed: leaving the formula field
-    // asks for no repaint of its own.
-    this.scheduleRender();
   }
 
   /**
@@ -1497,19 +1321,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       const { col, row } = this.selection.activeCell;
-      if (this.store.isCellLockedForEdit(col, row)) {
-        this.report.protectedWrite();
-        return;
+      // F2 opens the existing value, so arrows move the caret.
+      if (this.edit.openExisting(col, row)) {
+        e.preventDefault();
       }
-      e.preventDefault();
-      const editor: CellEditorState = {
-        col,
-        row,
-        initialValue: this.store.formulaFieldValueFor(col, row),
-        // F2 opens the existing value, so arrows move the caret.
-        mode: 'edit'
-      };
-      this.store.changeEdit(openEditor(this.interaction.edit, editor, false));
       return;
     }
 
@@ -1522,22 +1337,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       const { col, row } = this.selection.activeCell;
-      if (this.store.isCellLockedForEdit(col, row)) {
-        this.report.protectedWrite();
-        return;
+      if (this.edit.openTyping(col, row, key)) {
+        e.preventDefault();
       }
-      e.preventDefault();
-      // Typing over the cell: an arrow commits and moves on.
-      // A digit typed into a percentage cell means that many percent, so
-      // the editor opens on "5%" rather than "5" - see PercentageEntry.
-      // Space opens it empty: it starts an edit and types nothing.
-      const editor: CellEditorState = {
-        col,
-        row,
-        initialValue: key === ' ' ? '' : initialEditValue(key, this.sheetData.cells.get(toKey(col, row))),
-        mode: 'enter'
-      };
-      this.store.changeEdit(openEditor(this.interaction.edit, editor, key !== ' ' && editor.initialValue !== key));
       return;
     }
 
@@ -1770,7 +1572,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private showSelectedCellInFormulaBar(cell: CellPosition): void {
     // The address field names the cell until the server names the selection.
     this.store.nameSelection(null);
-    this.showServerValueInFormulaField(this.store.formulaFieldValueFor(cell.col, cell.row), false);
+    this.edit.showServerValue(this.store.formulaFieldValueFor(cell.col, cell.row), false);
   }
 
   /** The cells the grid draws, its drawing buffer included; null before anything is measured. */
@@ -2391,92 +2193,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   };
 
   /**
-   * A value typed into the formula field.
-   *
-   * It belongs to the cell the sheet has selected, so it is reported as
-   * an ordinary edit of that cell. Enter then moves on to the next cell
-   * down and Tab to the next one right, the way finishing an edit in
-   * the cell itself does; shift+Tab commits without moving. Clicking away commits too and leaves the
-   * selection alone - that is how a value typed here reaches the sheet
-   * when the user goes straight back to the cell.
-   */
-  private readonly handleFormulaCommit = (
-    e: CustomEvent<{ value: string; key?: string; shiftKey: boolean; relatedTarget?: EventTarget | null }>
-  ): void => {
-    const { value, key, shiftKey, relatedTarget } = e.detail;
-    // Back to the cell editor the edit came from: it carries on there.
-    if (key === undefined && this.editor !== null && relatedTarget === this.cellGrid) {
-      return;
-    }
-    const { col, row } = this.selection.activeCell;
-    if (this.model.rows <= 0 || this.model.cols <= 0) {
-      return;
-    }
-    if (this.store.isCellLockedForEdit(col, row)) {
-      this.report.protectedWrite();
-      return;
-    }
-    // An edit started in the cell ends here too: its editor closes, and
-    // the cell shows the value, as it does when the edit ends there.
-    this.pointing.end();
-    this.store.changeEdit(closeEditor(this.interaction.edit));
-    this.showInFormulaField(value);
-    this.showCommittedValue(col, row, value);
-    this.sendToServer({ type: 'cellValueEdited', data: { row, col, value } });
-    // shift+Tab stays put.
-    const direction = key === undefined || (key === 'Tab' && shiftKey) ? null : keyDirection(key, false);
-    if (direction === null) {
-      return;
-    }
-    this.returnFocusToSheet();
-    const next = moveActiveCell({ col, row }, this.mergeEntry, direction, this.store.sheetShape());
-    if (next === null) {
-      return;
-    }
-    this.store.pick(next);
-    this.scrollCellIntoView(next.activeCell);
-    this.report.selection();
-  };
-
-  /**
-   * Escape in the formula field: put the cell's own value back. An edit
-   * started in the cell is thrown away with it, and its editor closes.
-   */
-  private readonly handleFormulaCancel = (): void => {
-    this.pointing.end();
-    const { col, row } = this.selection.activeCell;
-    this.showInFormulaField(this.store.formulaFieldValueFor(col, row));
-    this.store.changeEdit(closeEditor(this.interaction.edit));
-    this.returnFocusToSheet();
-  };
-
-  /**
-   * A finished comment.
-   *
-   * The note shows what was typed straight away - the server sends the
-   * comments back, and waiting for that leaves the old note on screen
-   * in the meantime. A note emptied out is a note removed, which is
-   * what the server makes of empty text.
-   */
-  private readonly handleCellCommentCommit = (e: CustomEvent<{ key?: string; text: string }>): void => {
-    const { key, text } = e.detail;
-    // Reported once. Finishing the note puts the keyboard back on the
-    // sheet, which takes the focus off the textarea and asks again,
-    // and the textarea is still there until the next render.
-    if (this.interaction.comment === null) {
-      return;
-    }
-    this.store.interact({ ...this.interaction, comment: null });
-    const coord = key === undefined ? null : parseColRow(key);
-    if (coord === null || coord.col < 1 || coord.row < 1) {
-      return;
-    }
-    this.store.change({ cellComments: { ...this.model.cellComments, [key as string]: text } });
-    this.returnFocusToSheet();
-    this.sendToServer({ type: 'updateCellComment', data: { text, col: coord.col, row: coord.row } });
-  };
-
-  /**
    * Where the sheet is scrolled to, in whole pixels, as the server stores
    * it. A browser reports fractions on a scaled display, and the server
    * reads whole numbers.
@@ -2577,7 +2293,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // address field counts the block out whatever the server names it;
     // see addressFieldText.
     this.store.nameSelection(possibleName);
-    this.showServerValueInFormulaField(this.store.formulaFieldValueFor(col, row), true);
+    this.edit.showServerValue(this.store.formulaFieldValueFor(col, row), true);
   }
 
   /**
@@ -2625,7 +2341,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.store.select(selectSingleCell(col, row));
     this.sheetData.serverSelectedCell = { col, row };
     this.store.nameSelection(name);
-    this.showServerValueInFormulaField(
+    this.edit.showServerValue(
       formula && cellValue !== '' ? `=${cellValue}` : cellValue,
       before.col === col && before.row === row
     );
@@ -2691,7 +2407,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // field has: the server may have just sent its value along with
     // showSelectedCell, for a cell this client holds no data for.
     if (moved) {
-      this.showServerValueInFormulaField(this.store.formulaFieldValueFor(col, row), false);
+      this.edit.showServerValue(this.store.formulaFieldValueFor(col, row), false);
     }
     if (scroll) {
       this.scrollCellIntoView({ col, row });
