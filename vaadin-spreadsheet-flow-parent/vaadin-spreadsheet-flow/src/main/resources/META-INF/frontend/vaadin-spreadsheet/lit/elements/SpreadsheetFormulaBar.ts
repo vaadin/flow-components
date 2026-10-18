@@ -522,7 +522,12 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
     const namedRangeBox =
       namedRanges.length === 0
         ? ''
-        : html`<select class="namedrangebox" part="named-range-box" @change=${this.handleNamedRangeChange}>
+        : html`<select
+              class="namedrangebox"
+              part="named-range-box"
+              aria-label="Named ranges"
+              @change=${this.handleNamedRangeChange}
+            >
               <option value="" .selected=${live(selectedName === '')}></option>
               ${namedRanges.map(
                 (name) => html`<option value=${name} .selected=${live(name === selectedName)}>${name}</option>`
@@ -531,11 +536,17 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
             <span class="namedrange-arrow">▼</span>`;
     return html`
       <div class="address-panel">
-        <input class="address" part="address-field" .value=${address} />
+        <input class="address" part="address-field" aria-label="Name box" .value=${address} />
         ${namedRangeBox}
       </div>
       ${highlights === null ? '' : this.renderHighlights(highlights)}
-      <input class="formula" part="formula-field" .value=${formula} ?disabled=${this.formulaLocked} />
+      <input
+        class="formula"
+        part="formula-field"
+        aria-label="Formula bar"
+        .value=${formula}
+        ?disabled=${this.formulaLocked}
+      />
     `;
   }
 

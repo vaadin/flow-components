@@ -597,6 +597,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // tabindex=0 makes the scroll container focusable so it can
     // receive keydown events for keyboard navigation.
     this.scrollContainer.tabIndex = 0;
+    // To assistive technology the sheet is one control that takes its keys
+    // for itself, rather than a page to read, named after the sheet shown.
+    this.scrollContainer.setAttribute('role', 'application');
+    this.scrollContainer.setAttribute('aria-roledescription', 'spreadsheet');
+    this.scrollContainer.setAttribute('aria-label', 'Spreadsheet');
     // Header corner at (col 1, row 1) — sticky on both axes
     // so it overlays both header strips at their intersection.
     // Hidden when either header dimension is 0.
@@ -3143,6 +3148,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       };
     }
     this.view.shownSheetName = shownSheetName;
+    this.scrollContainer.setAttribute('aria-label', shownSheetName || 'Spreadsheet');
     if (changedPropertyNames.length > 0 || firstUpdate) {
       this.recomputeViewport();
     }

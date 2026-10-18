@@ -15,6 +15,7 @@ import { isFormula } from '../algorithms/FormulaPointing.js';
 import { composing } from '../algorithms/KeyboardMoves.js';
 
 import { parseColRow, toKey } from '../algorithms/CellKeys.js';
+import { cellCoordToAddress } from '../algorithms/CellRef.js';
 import { Memo, sameInputs } from '../algorithms/Memo.js';
 import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
@@ -3001,6 +3002,7 @@ function buildCellEditorOverlay(
     <input
       class="cell-editor"
       part="cell-input"
+      aria-label=${`Edit cell ${cellCoordToAddress({ col, row })}`}
       .value=${initialValue}
       style=${style}
       @keydown=${onKeyDown}
@@ -3125,6 +3127,7 @@ function buildPopupButtons(state: CellGridRenderState, quadrant: QuadrantRenderO
         part="popup-button"
         role="button"
         tabindex="0"
+        aria-label="Open pop-up"
         style=${style}
         data-col=${b.col}
         data-row=${b.row}
