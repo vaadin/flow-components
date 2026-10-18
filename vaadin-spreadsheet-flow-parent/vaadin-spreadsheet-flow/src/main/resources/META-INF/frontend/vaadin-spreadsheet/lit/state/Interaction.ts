@@ -116,12 +116,25 @@ export interface InteractionState {
    * Excel's name box does, whatever the server says of the selection.
    */
   readonly extending: boolean;
+  /**
+   * Whether the press just released reported the range it selected. A
+   * shift-click is a press, which selects the range, and a click: reported
+   * on both, the server heard the same range twice. The click takes it, and
+   * the next press starts without it.
+   */
+  readonly rangeReportedOnRelease: boolean;
 }
 
 const NO_EDIT: Edit = { kind: 'idle' };
 
 /** Nothing under way. */
-export const IDLE: InteractionState = { edit: NO_EDIT, press: null, comment: null, extending: false };
+export const IDLE: InteractionState = {
+  edit: NO_EDIT,
+  press: null,
+  comment: null,
+  extending: false,
+  rangeReportedOnRelease: false
+};
 
 /** Pointing at cells for the formula being written: none while nothing is. */
 export function formulaOf(edit: Edit): FormulaWriting {

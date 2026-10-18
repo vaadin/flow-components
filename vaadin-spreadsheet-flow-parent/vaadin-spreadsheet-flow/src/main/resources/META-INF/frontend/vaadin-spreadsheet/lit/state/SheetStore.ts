@@ -235,6 +235,13 @@ export class SheetStore {
     this.interact({ ...this.ongoing, press });
   }
 
+  /** The press just released reported its range, or that is over; see {@link InteractionState.rangeReportedOnRelease}. */
+  markRangeReportedOnRelease(reported: boolean): void {
+    if (this.ongoing.rangeReportedOnRelease !== reported) {
+      this.interact({ ...this.ongoing, rangeReportedOnRelease: reported });
+    }
+  }
+
   /** Shift held growing the selection, or let go; see {@link InteractionState.extending}. */
   extendSelection(extending: boolean): void {
     this.interact({ ...this.ongoing, extending });

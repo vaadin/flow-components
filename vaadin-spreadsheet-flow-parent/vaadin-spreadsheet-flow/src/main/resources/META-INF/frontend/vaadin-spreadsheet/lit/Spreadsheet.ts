@@ -20,7 +20,6 @@ import type {
 } from './types/wire.js';
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
-  addAuxRange,
   type CellPosition,
   type CellRange,
   isCellInSelection,
@@ -48,13 +47,6 @@ import { ViewState } from './state/ViewState.js';
 import { type SheetModel } from './state/SheetModel.js';
 import { toKey } from './algorithms/CellKeys.js';
 import { type CellSlotAssignment, flowVirtualChildResolver } from './dom/VirtualChildren.js';
-import {
-  computePaintRectangle,
-  grownSelection,
-  isNonEmpty,
-  type CellRect,
-  type PaintOutcome
-} from './algorithms/SelectionPaint.js';
 import { inSelectionWalkDirection, walkInsideSelection } from './algorithms/SelectionWalk.js';
 import {
   homeEndTarget,
@@ -79,6 +71,7 @@ import { HostedComponents } from './controllers/HostedComponents.js';
 import { SelectionReporter } from './controllers/SelectionReporter.js';
 import { ServerSync } from './controllers/ServerSync.js';
 import { EditSession } from './controllers/EditSession.js';
+import { PointerSelection } from './controllers/PointerSelection.js';
 import { FormulaPointer } from './controllers/FormulaPointer.js';
 import { Outline } from './controllers/Outline.js';
 import { listenForLongPress } from './dom/LongPress.js';
@@ -131,6 +124,19 @@ type FormulaCommitEvent = CustomEvent<{
 
 /** A note finished, for the cell of the key. */
 type NoteCommitEvent = CustomEvent<{ key?: string; text: string }>;
+
+/** A press or a click on a cell, with the keys held. */
+type CellPressEvent = CustomEvent<{
+  col: number;
+  row: number;
+  shiftKey: boolean;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  altKey: boolean;
+}>;
+
+/** A click on a column letter or a row number, with the keys held. */
+type HeaderClickEvent<T> = CustomEvent<T & { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean; altKey: boolean }>;
 
 /**
  * Height of the column headers, in pixels: 27, so a sheet starts its first
@@ -234,6 +240,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     send: (event) => this.sendToServer(event)
   });
 
+  /** Selecting with the pointer; see {@link PointerSelection}. */
+  private readonly pointerSelection = new PointerSelection(this.store, this.report, this.pointing, {
+    scrollTop: () => this.scrollContainer.scrollTop,
+    scrollLeft: () => this.scrollContainer.scrollLeft,
+    finishHeaderResize: () => this.headerResize.finish(),
+    cellOfEditor: (e) => this.hosted.cellOfEditor(e),
+    send: (event) => this.sendToServer(event)
+  });
+
   /** What the server mirrors onto the element; see {@link SheetStore.model}. */
   private get model(): SheetModel {
     return this.store.model;
@@ -243,13 +258,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private get selection(): SelectionState {
     return this.store.selection;
   }
-
-  /**
-   * Whether the release of the press under way reported the range it
-   * selected. A shift-click is a press, which selects the range, and a
-   * click: reported on both, the server heard the same range twice.
-   */
-  private rangeReportedOnRelease = false;
 
   /**
    * The cell a click or an arrow asked for when the selection is a merged
@@ -689,7 +697,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // shiftKey, ctrlKey, metaKey, altKey }. The connector updates
     // its selection + re-renders. Bubble + composed = true so the
     // event crosses the cell-grid's shadow DOM boundary.
-    this.on(this.cellGrid, 'cell-click', this.handleCellClick);
+    this.on(this.cellGrid, 'cell-click', (e: CellPressEvent) => this.pointerSelection.click(e.detail));
     // Cell editor lifecycle events. The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
@@ -707,10 +715,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // cell-mousedown + cell-mouseover; the connector watches
     // mouseup at the document level so a drag that ends
     // outside the spreadsheet still terminates cleanly.
-    this.on(this.cellGrid, 'cell-mousedown', this.handleCellMouseDown);
-    this.on(this.cellGrid, 'cell-mouseover', this.handleCellMouseOver);
+    this.on(this.cellGrid, 'cell-mousedown', (e: CellPressEvent) => this.pointerSelection.press(e));
+    this.on(this.cellGrid, 'cell-mouseover', (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>) => {
+      this.linkTooltip.show(e.detail);
+      this.pointerSelection.over(e.detail.col, e.detail.row);
+    });
     this.on(this.cellGrid, 'grid-mouseleave', this.linkTooltip.hide);
-    this.on(this.cellGrid, 'selection-paint-start', this.handleSelectionPaintStart);
+    this.on(this.cellGrid, 'selection-paint-start', () => this.pointerSelection.fillStarted());
     // Popup-button click → dispatch popupButtonClick. The
     // server's `onPopupButtonClick` opens the associated popup
     // component.
@@ -760,15 +771,19 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // emits its own custom event with the col / row coordinate;
     // the connector translates them into whole-column / whole-
     // row range selections.
-    this.on(this.columnHeader, 'column-header-click', this.handleColumnHeaderClick);
-    this.on(this.rowHeader, 'row-header-click', this.handleRowHeaderClick);
+    this.on(this.columnHeader, 'column-header-click', (e: HeaderClickEvent<{ col: number }>) =>
+      this.pointerSelection.columnHeaderClicked(e.detail)
+    );
+    this.on(this.rowHeader, 'row-header-click', (e: HeaderClickEvent<{ row: number }>) =>
+      this.pointerSelection.rowHeaderClicked(e.detail)
+    );
     // Keyboard navigation. Listen on the scroll
     // container so arrow keys + shift+arrow work whenever the
     // spreadsheet has focus. preventDefault() in the handler
     // stops the browser from scrolling the viewport via the
     // arrow keys.
     this.on(this.scrollContainer, 'keydown', this.handleKeyDown);
-    this.on(this.scrollContainer, 'pointerdown', this.handleHostedEditorPointerDown);
+    this.on(this.scrollContainer, 'pointerdown', (e: Event) => this.pointerSelection.editorPressed(e));
     // Safari on iOS opens no menu on a long press, so it is made a
     // right-click there, on the cells and the headers alike.
     this.stopLongPress = Spreadsheet.platform.isIOS() ? listenForLongPress(this.scrollContainer) : () => {};
@@ -779,7 +794,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         this.handlingAll([
           [document, 'pointerdown', this.handleDocumentPointerDown],
           [document, 'keydown', this.handleContextMenuKeyDown],
-          [document, 'mouseup', this.handleDocumentMouseUp],
+          [document, 'mouseup', () => this.pointerSelection.release()],
           [document, 'keyup', this.handleDocumentKeyUp],
           [document, 'mousemove', this.handleDocumentMouseMove]
         ])
@@ -833,218 +848,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     listen(target, type, this.handling(listener), this.ownListeners.signal);
   }
 
-  /**
-   * Cell-click handler. Single click = move active cell + collapse
-   * selection to that cell. Shift-click = extend the active range
-   * to include the new anchor while keeping the existing active
-   * cell as the range origin (Excel convention). Ctrl/Meta click
-   * adds the cell to the selection as a range of its own, and
-   * Ctrl/Meta+Shift extends the active range keeping the others.
-   */
-  private readonly handleCellClick = (
-    e: CustomEvent<{
-      col: number;
-      row: number;
-      shiftKey: boolean;
-      ctrlKey: boolean;
-      metaKey: boolean;
-      altKey: boolean;
-    }>
-  ): void => {
-    if (this.pointing.clicked()) {
-      // The press pointed at the cell for a formula; it selects nothing.
-      return;
-    }
-    const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
-    const ctrlOrMeta = ctrlKey || metaKey;
-    if (ctrlOrMeta && shiftKey) {
-      // Extend the active range, keeping the ranges already picked
-      // out with earlier Ctrl-clicks.
-      const anchor = this.selection.activeCell;
-      const extended = {
-        activeCell: anchor,
-        activeRange: this.store.rangeTo(anchor, col, row),
-        auxRanges: []
-      };
-      this.store.select({ ...extended, auxRanges: this.selection.auxRanges });
-      this.report.rangeAdded(extended.activeRange);
-      return;
-    }
-    if (ctrlOrMeta) {
-      // Non-coherent selection: the clicked cell joins the selection
-      // as its own range and becomes active; the previous active
-      // range is kept as an aux range.
-      this.store.select(addAuxRange(this.selection, col, row, col, row));
-      this.report.cellAdded(col, row);
-      return;
-    }
-    if (shiftKey) {
-      // Extend the active range from the existing active cell
-      // (= the anchor) to the clicked coordinate. Ranges picked out
-      // with earlier Ctrl-clicks stay: shift extends the last range,
-      // it does not start the selection over.
-      const anchor = this.selection.activeCell;
-      this.store.select({
-        activeCell: anchor,
-        activeRange: this.store.rangeTo(anchor, col, row),
-        auxRanges: this.selection.auxRanges
-      });
-      if (!this.rangeReportedOnRelease) {
-        this.report.range();
-      }
-      return;
-    } else {
-      this.store.selectCellOrMerge(col, row);
-    }
-    this.report.selection();
-    // Hyperlink cells additionally dispatch `linkCellClicked`
-    // after the normal selection event. The
-    // server's onLinkCellClicked handler opens the URL.
-    const cellKey = toKey(col, row);
-    if (this.model.hyperlinksTooltips[cellKey] !== undefined) {
-      this.sendToServer({
-        type: 'linkCellClicked',
-        data: { row, column: col }
-      });
-    }
-  };
-
   /** The pointer moved on the page: a header drag follows it. */
   private readonly handleDocumentMouseMove = (e: MouseEvent): void => {
     this.headerResize.moved(e);
-  };
-
-  /**
-   * Mouse drag — mousedown begin. Starts a drag.
-   * Sets the selection to the single cell at the mousedown
-   * coord (anchor) + opens the dragging flag so subsequent
-   * `cell-mouseover` events extend the range. Doesn't dispatch
-   * `cellSelected` here — the existing `cell-click` handler
-   * (which fires on mouseup) takes care of that for a no-drag
-   * click. A real drag ends with a `cellRangeSelected` event
-   * in {@link handleDocumentMouseUp}.
-   */
-  private readonly handleCellMouseDown = (
-    e: CustomEvent<{
-      col: number;
-      row: number;
-      shiftKey: boolean;
-      ctrlKey: boolean;
-      metaKey: boolean;
-      altKey: boolean;
-    }>
-  ): void => {
-    const { col, row, shiftKey, ctrlKey, metaKey } = e.detail;
-    // A formula is being written: the press points at the cell instead of
-    // selecting it, and the keyboard stays where the formula is.
-    const source = this.pointing.source();
-    if (source !== null) {
-      e.preventDefault();
-      this.pointing.press(col, row, shiftKey, ctrlKey || metaKey, source);
-      return;
-    }
-    if (ctrlKey || metaKey) {
-      // Ctrl/Cmd-mousedown must leave the selection untouched. The
-      // click that follows adds this cell as a further range, and it
-      // needs the current active range to push aside — replacing the
-      // selection here would wipe exactly what the Ctrl-click is meant
-      // to keep. mousedown always precedes click for a real pointer.
-      // Nor does it start a drag: a pointer that drifted into the next
-      // cell before the button came up would replace every range picked
-      // out with Ctrl with one rectangle.
-      return;
-    }
-    this.store.changePress({ kind: 'select', crossed: false });
-    if (shiftKey) {
-      // Shift+mousedown: extend existing range to the
-      // mousedown coord (treat the existing anchor as the
-      // drag start). Standard Excel "shift-drag" behavior.
-      // Aux ranges survive, as on a shift-click.
-      const anchor = this.selection.activeCell;
-      this.store.select({
-        activeCell: anchor,
-        activeRange: this.store.rangeTo(anchor, col, row),
-        auxRanges: this.selection.auxRanges
-      });
-    } else {
-      this.store.selectCellOrMerge(col, row);
-    }
-  };
-
-  /**
-   * Mouse drag — mouseover during drag. Extends
-   * the range from the active cell (anchor) to the hovered
-   * cell. Mouseover events that fire while NOT dragging are
-   * silently ignored — the cell-grid emits on every hover.
-   */
-  private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>): void => {
-    this.linkTooltip.show(e.detail);
-    if (this.pointing.dragOver(e.detail.col, e.detail.row)) {
-      return;
-    }
-    const press = this.interaction.press;
-    if (press?.kind === 'fill') {
-      const { col, row } = e.detail;
-      this.store.changePress({ ...press, outcome: computePaintRectangle(press.from, col, row) });
-      return;
-    }
-    if (press?.kind !== 'select') {
-      return;
-    }
-    if (!press.crossed) {
-      this.store.changePress({ kind: 'select', crossed: true });
-    }
-    const { col, row } = e.detail;
-    // Same as shift-arrow: keep activeCell as anchor, move
-    // the extend corner.
-    // The ranges picked out before stay: a plain press has already let
-    // them go, and a Shift-press drags out the range it extends.
-    const anchor = this.selection.activeCell;
-    this.store.select({
-      activeCell: anchor,
-      activeRange: this.store.rangeTo(anchor, col, row),
-      auxRanges: this.selection.auxRanges
-    });
-  };
-
-  /**
-   * Mouse drag — mouseup end. Closes the drag.
-   * Dispatches a {@code cellRangeSelected} event when the
-   * final range covers more than one cell (single-cell drag
-   * is treated as a click, whose `cell-click` handler already
-   * dispatched `cellSelected`).
-   */
-  private readonly handleDocumentMouseUp = (): void => {
-    const press = this.interaction.press;
-    if (press?.kind === 'fill') {
-      this.finishPainting(press);
-      return;
-    }
-    if (this.headerResize.finish()) {
-      return;
-    }
-    if (this.pointing.released()) {
-      // The press that pointed is over; the click it ends in is to come.
-      return;
-    }
-    if (press === null) {
-      return;
-    }
-    this.store.changePress(null);
-    if (press.kind === 'select' && this.store.selectsRange()) {
-      // Multi-cell range — dispatch the server-bound
-      // selection event so the server learns the final
-      // dragged range: with the cell the drag started on, when it went
-      // into other cells. One that stayed in its cell was a shift-click,
-      // which grows the range from the selected cell.
-      this.report.range(press.crossed);
-      // The click that may follow the release reports nothing more.
-      this.rangeReportedOnRelease = true;
-      setTimeout(() => (this.rangeReportedOnRelease = false));
-    }
-    // Single-cell drag (mousedown + mouseup on the same cell
-    // with no mouseover-extension) is handled by the existing
-    // `cell-click` handler — no double dispatch.
   };
 
   /**
@@ -1100,117 +906,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     this.scrollContainer.focus();
   }
-
-  /**
-   * Column-header click handler. Selects the entire
-   * column (rows 1..this.model.rows). The active cell becomes the
-   * column's row 1. Shift-click extends from the existing anchor
-   * column to the clicked column, selecting a whole-column
-   * range.
-   */
-  private readonly handleColumnHeaderClick = (
-    e: CustomEvent<{
-      col: number;
-      shiftKey: boolean;
-      ctrlKey: boolean;
-      metaKey: boolean;
-      altKey: boolean;
-    }>
-  ): void => {
-    const { col, shiftKey, ctrlKey, metaKey } = e.detail;
-    const rows = this.model.rows > 0 ? this.model.rows : 1;
-    const row = this.firstRowOnScreen();
-    if ((ctrlKey || metaKey) && !shiftKey) {
-      // The whole column joins the selection as a further range.
-      this.store.select(addAuxRange(this.selection, col, 1, col, rows, { col, row }));
-      this.report.columnAdded(col, row);
-      return;
-    }
-    if (shiftKey) {
-      // Extend across columns, keeping ranges added with Ctrl.
-      const anchor = this.selection.activeCell;
-      this.store.select({
-        activeCell: anchor,
-        activeRange: normalizedRange(anchor.col, 1, col, rows),
-        auxRanges: this.selection.auxRanges
-      });
-    } else {
-      this.store.select({
-        activeCell: { col, row },
-        activeRange: normalizedRange(col, 1, col, rows),
-        auxRanges: []
-      });
-    }
-    this.report.selection();
-  };
-
-  /**
-   * The row a click on a column letter makes active: the first one whose top
-   * is on screen, as in GWT, or row 1 when rows are frozen. Row 1 of a sheet
-   * scrolled far down is off screen, and the keys went there.
-   */
-  private firstRowOnScreen(): number {
-    if (this.model.verticalSplitPosition > 0 || this.model.rows <= 0) {
-      return 1;
-    }
-    let row = this.sheetSizes().rows.reach(1, this.scrollContainer.scrollTop);
-    while (row < this.model.rows && this.model.hiddenRowIndexes.has(row)) {
-      row++;
-    }
-    return row;
-  }
-
-  /** The column a click on a row number makes active; see {@link firstRowOnScreen}. */
-  private firstColumnOnScreen(): number {
-    if (this.model.horizontalSplitPosition > 0 || this.model.cols <= 0) {
-      return 1;
-    }
-    let col = this.sheetSizes().columns.reach(1, this.scrollContainer.scrollLeft);
-    while (col < this.model.cols && this.model.hiddenColumnIndexes.has(col)) {
-      col++;
-    }
-    return col;
-  }
-
-  /**
-   * Row-header click handler. Mirror of the column
-   * variant — selects an entire row (cols 1..this.model.cols).
-   */
-  private readonly handleRowHeaderClick = (
-    e: CustomEvent<{
-      row: number;
-      shiftKey: boolean;
-      ctrlKey: boolean;
-      metaKey: boolean;
-      altKey: boolean;
-    }>
-  ): void => {
-    const { row, shiftKey, ctrlKey, metaKey } = e.detail;
-    const cols = this.model.cols > 0 ? this.model.cols : 1;
-    const col = this.firstColumnOnScreen();
-    if ((ctrlKey || metaKey) && !shiftKey) {
-      // The whole row joins the selection as a further range.
-      this.store.select(addAuxRange(this.selection, 1, row, cols, row, { col, row }));
-      this.report.rowAdded(row, col);
-      return;
-    }
-    if (shiftKey) {
-      // Extend across rows, keeping ranges added with Ctrl.
-      const anchor = this.selection.activeCell;
-      this.store.select({
-        activeCell: anchor,
-        activeRange: normalizedRange(1, anchor.row, cols, row),
-        auxRanges: this.selection.auxRanges
-      });
-    } else {
-      this.store.select({
-        activeCell: { col, row },
-        activeRange: normalizedRange(1, row, cols, row),
-        auxRanges: []
-      });
-    }
-    this.report.selection();
-  };
 
   /**
    * Keyboard navigation. Arrow keys, Tab and Enter move the active cell
@@ -1771,45 +1466,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** Test-only accessor: the overlay an open popup button's content is in. */
   getPopupOverlay(): HTMLElement {
     return this.popup.overlay;
-  }
-
-  /**
-   * Mousedown on the fill handle. The drag that follows paints rather than
-   * selects, so the current range is remembered as the one being grown or
-   * shrunk.
-   */
-  private readonly handleSelectionPaintStart = (): void => {
-    const { c1, c2, r1, r2 } = this.selection.activeRange;
-    this.store.changePress({ kind: 'fill', from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } });
-  };
-
-  /**
-   * Release of a fill-handle drag: tell the server what to copy or clear.
-   *
-   * The two directions are different operations, and the server takes them
-   * through different events — growing reports the whole new rectangle,
-   * shrinking reports only the corner the selection retreats to.
-   */
-  private finishPainting(painting: { from: CellRect; outcome: PaintOutcome }): void {
-    this.store.changePress(null);
-    if (painting.outcome.kind === 'none') {
-      return;
-    }
-
-    if (painting.outcome.kind === 'decrease') {
-      const { r1, c1 } = painting.outcome.painted;
-      this.sendToServer({ type: 'selectionDecreasePainted', data: { row: r1, col: c1 } });
-      return;
-    }
-
-    const grown = grownSelection(painting.from, painting.outcome.painted);
-    if (!isNonEmpty(grown)) {
-      return;
-    }
-    this.sendToServer({
-      type: 'selectionIncreasePainted',
-      data: { r1: grown.r1, c1: grown.c1, r2: grown.r2, c2: grown.c2 }
-    });
   }
 
   // ====================================================================
@@ -2573,31 +2229,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   setRowGroupingInversed(inversed: boolean): void {
     this.store.write('rowGroupingInversed', inversed);
   }
-  /**
-   * Clicking a custom editor selects the cell it belongs to.
-   *
-   * An editor is usually wider than its cell, so a click aimed at the cell
-   * often lands on the editor instead — and the cell-grid's own click
-   * delegation cannot see it, because the editor is projected in rather
-   * than a descendant of the cell. Without this, selecting such a cell by
-   * mouse is impossible, and the server never learns the editor is showing.
-   *
-   * Bound to pointerdown rather than focus on purpose: the server focuses
-   * an editor itself when it displays one, and reporting that back as a
-   * selection would move the selection to whatever the server was last
-   * talking about, in a loop.
-   */
-  private readonly handleHostedEditorPointerDown = (e: Event): void => {
-    const cell = this.hosted.cellOfEditor(e);
-    if (cell === null) {
-      return;
-    }
-    if (this.selection.activeCell.col === cell.col && this.selection.activeCell.row === cell.row) {
-      return;
-    }
-    this.store.select(selectSingleCell(cell.col, cell.row));
-    this.report.selection();
-  };
 
   /**
    * Which server-side element each cell shows, from the three inputs the

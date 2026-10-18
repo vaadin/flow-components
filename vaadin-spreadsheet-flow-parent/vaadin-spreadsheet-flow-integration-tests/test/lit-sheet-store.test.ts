@@ -230,6 +230,16 @@ describe('SheetStore', () => {
       expect(renders).to.equal(1);
     });
 
+    it('marks a range reported on a release until the click takes it, asking for no drawing when nothing changes', () => {
+      store.markRangeReportedOnRelease(true);
+      expect(store.interaction.rangeReportedOnRelease).to.be.true;
+
+      store.markRangeReportedOnRelease(true);
+      store.markRangeReportedOnRelease(false);
+      expect(store.interaction.rangeReportedOnRelease).to.be.false;
+      expect(renders).to.equal(2);
+    });
+
     it('marks the selection grown with Shift held, and let go, and has it drawn; ending everything lets go too', () => {
       store.extendSelection(true);
       expect(store.interaction.extending).to.be.true;
