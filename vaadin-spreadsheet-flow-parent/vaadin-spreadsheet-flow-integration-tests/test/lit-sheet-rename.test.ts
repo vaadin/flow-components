@@ -290,19 +290,21 @@ describe('Spreadsheet — renaming a sheet tab', () => {
         expect(el.isConnected, 'the input was replaced').to.be.true;
     });
 
-    it('keeps the keys out of the sheet underneath', async () => {
-        // Without stopping the event, typing a name would also be typing
-        // into the cell the sheet has selected.
+    it('keeps the keys typed into the name from the page', async () => {
+        // The page is where the sheet's own page listeners and the
+        // application's shortcuts listen. The sheet's cells are not on the
+        // way, so listening on them proved nothing.
         await doubleClick(2);
-        let reachedSheet = false;
-        sheet
-            .getScrollContainer()
-            .addEventListener('keydown', () => {
-                reachedSheet = true;
-            });
-        press((await input())!, 'a');
+        const reachedPage: string[] = [];
+        const listener = (e: KeyboardEvent) => reachedPage.push(e.key);
+        document.addEventListener('keydown', listener);
+        try {
+            press((await input())!, 'a');
+        } finally {
+            document.removeEventListener('keydown', listener);
+        }
 
-        expect(reachedSheet).to.be.false;
+        expect(reachedPage).to.deep.equal([]);
     });
 
     function compose(el: HTMLElement, key: string): void {

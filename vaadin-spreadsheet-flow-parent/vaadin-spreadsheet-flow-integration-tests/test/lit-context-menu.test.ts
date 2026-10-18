@@ -523,6 +523,22 @@ describe("Spreadsheet context menu — the keyboard, as the GWT client's menu ha
     expect(ctx.sheet.getSelection().activeCell).to.deep.equal(before);
   });
 
+  it('keeps its keys from the page while it is open', () => {
+    // The page is where the application's shortcuts listen: Enter there can
+    // press a button of the view while it picks an item here.
+    const reachedPage: string[] = [];
+    const listener = (e: KeyboardEvent) => reachedPage.push(e.key);
+    document.addEventListener('keydown', listener);
+    try {
+      press(ctx.sheet, 'ArrowDown');
+      press(ctx.sheet, 'Enter');
+    } finally {
+      document.removeEventListener('keydown', listener);
+    }
+
+    expect(reachedPage).to.deep.equal([]);
+  });
+
   it('hands the keyboard back to the sheet when it closes', async () => {
     press(ctx.sheet, 'Escape');
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));

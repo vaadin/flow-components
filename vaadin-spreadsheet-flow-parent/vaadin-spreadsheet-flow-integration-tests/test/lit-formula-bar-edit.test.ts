@@ -179,16 +179,24 @@ describe('Spreadsheet — editing through the formula field', () => {
         expect(edits()).to.be.empty;
     });
 
-    it('keeps the keys out of the sheet underneath', async () => {
-        // Without stopping them, typing a formula would also be typing
-        // into the cell the sheet has selected.
-        let reachedSheet = false;
-        sheet.getScrollContainer().addEventListener('keydown', () => {
-            reachedSheet = true;
-        });
-        press(await type('='), 'a');
+    it('keeps the keys typed into it from the page', async () => {
+        // The page is where the sheet's own page listeners and the
+        // application's shortcuts listen: Escape there closes the sheet's
+        // menu and pop-up, and Enter can press a button of the view. The
+        // sheet's cells are not on the way, so listening on them proved
+        // nothing.
+        const reachedPage: string[] = [];
+        const listener = (e: KeyboardEvent) => reachedPage.push(e.key);
+        document.addEventListener('keydown', listener);
+        try {
+            const el = await type('=');
+            press(el, 'a');
+            press(el, 'Escape');
+        } finally {
+            document.removeEventListener('keydown', listener);
+        }
 
-        expect(reachedSheet).to.be.false;
+        expect(reachedPage).to.deep.equal([]);
     });
 });
 
