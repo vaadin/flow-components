@@ -211,7 +211,6 @@ describe('Spreadsheet model of the server properties', () => {
       'theme',
       // Nothing to hold.
       'reload',
-      'id',
       'workbookChangeToggle',
       'popupbuttons',
       // Held by the parts that draw them.

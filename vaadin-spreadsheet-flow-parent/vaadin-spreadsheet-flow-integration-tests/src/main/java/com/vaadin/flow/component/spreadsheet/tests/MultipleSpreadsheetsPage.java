@@ -33,9 +33,7 @@ public class MultipleSpreadsheetsPage extends VerticalLayout {
 
     private VerticalLayout buildSpreadsheet(String id, String actionLabel) {
         Spreadsheet spreadsheet = new Spreadsheet();
-        // setId sets the property, which the LitElement does not reflect to
-        // the attribute; we need the attribute for TestBench element lookup.
-        spreadsheet.getElement().setAttribute("id", id);
+        spreadsheet.setId(id);
         spreadsheet.setHeight("250px");
 
         Div lastAction = new Div();

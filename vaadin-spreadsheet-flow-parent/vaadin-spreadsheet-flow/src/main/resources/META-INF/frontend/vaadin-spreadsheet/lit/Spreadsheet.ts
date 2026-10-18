@@ -3852,14 +3852,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   setHyperlinksTooltips(tooltips: Json<Record<string, string>>): void {
     this.write('hyperlinksTooltips', tooltips);
   }
-  /**
-   * The id the server gives the element. The element's own id property
-   * applies it: Lit wraps the native one.
-   */
-  setId(_id: string): void {
-    // See above.
-  }
-
   // ====================================================================
   // Popup-button lifecycle
   // ====================================================================

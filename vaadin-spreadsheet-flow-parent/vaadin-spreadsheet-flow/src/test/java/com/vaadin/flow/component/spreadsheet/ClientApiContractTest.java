@@ -56,9 +56,12 @@ public class ClientApiContractTest {
     /**
      * Element properties the wrapper deliberately does not declare.
      * {@code appId} is read straight off the element by the connector's
-     * virtual-child resolver rather than pushed through a setter.
+     * virtual-child resolver rather than pushed through a setter. {@code id} is
+     * the browser's own: declared, Lit would keep it as a plain value and the
+     * attribute would never be set.
      */
-    private static final Set<String> UNDECLARED_BY_DESIGN = Set.of("appId");
+    private static final Set<String> UNDECLARED_BY_DESIGN = Set.of("appId",
+            "id");
 
     /** {@code callJsFunction("name"} in any of the module's Java sources. */
     private static final Pattern CALL_JS = Pattern

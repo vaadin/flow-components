@@ -48,8 +48,6 @@ export class VaadinSpreadsheet extends LitElement {
     return {
       dirty: { type: Number },
 
-      id: { type: String },
-
       resources: { type: String },
 
       popupbuttons: { type: String },

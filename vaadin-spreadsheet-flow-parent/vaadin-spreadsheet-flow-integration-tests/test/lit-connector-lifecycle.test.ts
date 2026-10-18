@@ -169,6 +169,27 @@ describe('<vaadin-spreadsheet> — joining and leaving the page', () => {
   });
 });
 
+describe('<vaadin-spreadsheet> — its id', () => {
+  type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
+
+  it('takes the id the server sets as a property as its attribute too', async () => {
+    // The server's setId sets the property. Declared as a property of the
+    // element, it stopped there, so #id in CSS, getElementById and TestBench
+    // missed the element.
+    const el = document.createElement('vaadin-spreadsheet') as Element;
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    el.id = 'budget';
+    await el.updateComplete;
+
+    expect(el.getAttribute('id')).to.equal('budget');
+    expect(document.getElementById('budget')).to.equal(el);
+    el.remove();
+    el.$connector.dispose();
+  });
+});
+
 describe('<vaadin-spreadsheet> — listening to the page as it comes and goes', () => {
   type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
 
