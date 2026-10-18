@@ -1013,6 +1013,214 @@ describe('Spreadsheet — the strip shows the active sheet', () => {
     });
 });
 
+/**
+ * The tab strip from the keyboard, as the tabs pattern of WAI-ARIA has it.
+ * The GWT client's strip was plain boxes, so sheets could not be switched,
+ * added or renamed without a mouse. 400px leaves 270px beside the buttons:
+ * three whole 69px tabs and a part of the fourth.
+ */
+describe('Spreadsheet — the sheet tabs from the keyboard', () => {
+    const EIGHT = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
+    let host: HTMLElement;
+    let sheet: Spreadsheet;
+    let sent: Array<{ type: string; data: Record<string, unknown> }>;
+
+    beforeEach(async () => {
+        host = document.createElement('div');
+        host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
+        document.body.appendChild(host);
+        sheet = new Spreadsheet(host);
+        sheet.setSheetNames(EIGHT);
+        sheet.setSheetIndex(1);
+        sent = [];
+        host.addEventListener('spreadsheet-event', (e) => sent.push((e as CustomEvent).detail));
+        await settled();
+    });
+
+    afterEach(() => {
+        sheet.dispose();
+        host.remove();
+    });
+
+    async function settled(): Promise<SpreadsheetSheetTabs> {
+        const tabs = sheet.getSheetTabs();
+        for (let i = 0; i < 4; i++) {
+            await tabs.updateComplete;
+        }
+        return tabs;
+    }
+
+    function tabEl(index: number): HTMLElement | null {
+        return sheet.getSheetTabs().shadowRoot!.querySelector<HTMLElement>(`.sheet-tab[data-index="${index}"]`);
+    }
+
+    function focusedIndex(): number | null {
+        const active = sheet.getSheetTabs().shadowRoot!.activeElement as HTMLElement | null;
+        return active?.classList.contains('sheet-tab') ? Number(active.dataset.index) : null;
+    }
+
+    function press(el: Element, key: string): KeyboardEvent {
+        const event = new KeyboardEvent('keydown', { key, bubbles: true, composed: true, cancelable: true });
+        el.dispatchEvent(event);
+        return event;
+    }
+
+    async function pressOnFocused(key: string): Promise<void> {
+        press(tabEl(focusedIndex()!)!, key);
+        await settled();
+    }
+
+    function tabbable(): number[] {
+        return [...sheet.getSheetTabs().shadowRoot!.querySelectorAll<HTMLElement>('.sheet-tab')]
+            .filter((t) => t.getAttribute('tabindex') === '0')
+            .map((t) => Number(t.dataset.index));
+    }
+
+    it('is a list of tabs, the active sheet selected', () => {
+        const list = sheet.getSheetTabs().shadowRoot!.querySelector('.sheet-tabsheet-container')!;
+        expect(list.getAttribute('role')).to.equal('tablist');
+        expect(list.getAttribute('aria-label')).to.equal('Sheets');
+        expect(tabEl(1)!.getAttribute('role')).to.equal('tab');
+        expect(tabEl(1)!.getAttribute('aria-selected')).to.equal('true');
+        expect(tabEl(2)!.getAttribute('aria-selected')).to.equal('false');
+    });
+
+    it('puts only the tab of the active sheet in the Tab order', () => {
+        expect(tabbable()).to.deep.equal([1]);
+    });
+
+    it('moves the keyboard along the tabs with the arrows', async () => {
+        tabEl(1)!.focus();
+
+        await pressOnFocused('ArrowRight');
+        await pressOnFocused('ArrowRight');
+        expect(focusedIndex()).to.equal(3);
+        expect(tabbable()).to.deep.equal([3]);
+
+        await pressOnFocused('ArrowLeft');
+        expect(focusedIndex()).to.equal(2);
+    });
+
+    it('stops at either end rather than going round', async () => {
+        tabEl(1)!.focus();
+
+        await pressOnFocused('ArrowLeft');
+
+        expect(focusedIndex()).to.equal(1);
+    });
+
+    it('goes to the last tab with End, scrolling the strip to it, and back with Home', async () => {
+        tabEl(1)!.focus();
+
+        await pressOnFocused('End');
+        expect(focusedIndex()).to.equal(8);
+        expect(sheet.getSheetTabs().renderState.firstVisibleTab).to.equal(5);
+
+        await pressOnFocused('Home');
+        expect(focusedIndex()).to.equal(1);
+        expect(sheet.getSheetTabs().renderState.firstVisibleTab).to.equal(0);
+    });
+
+    it('scrolls the strip to show a tab the keyboard moves onto that it cuts off', async () => {
+        tabEl(1)!.focus();
+        await pressOnFocused('ArrowRight');
+        await pressOnFocused('ArrowRight');
+
+        await pressOnFocused('ArrowRight');
+
+        expect(focusedIndex()).to.equal(4);
+        expect(sheet.getSheetTabs().renderState.firstVisibleTab).to.equal(1);
+    });
+
+    it('keeps a tab in the Tab order when the active one is scrolled away', async () => {
+        const forward = sheet.getSheetTabs().shadowRoot!.querySelector<HTMLElement>('.scroll-tabs-right')!;
+        forward.click();
+        forward.click();
+        await settled();
+
+        expect(tabbable()).to.deep.equal([3]);
+    });
+
+    it('shows the sheet of the tab the keyboard is on with Enter, and gives the keyboard to the sheet', async () => {
+        tabEl(1)!.focus();
+        await pressOnFocused('ArrowRight');
+
+        await pressOnFocused('Enter');
+
+        expect(sent.filter((e) => e.type === 'sheetSelected').map((e) => e.data.sheetIndex)).to.deep.equal([1]);
+        expect(host.shadowRoot?.activeElement ?? document.activeElement).to.equal(sheet.getScrollContainer());
+    });
+
+    it('shows the sheet with Space too', async () => {
+        tabEl(1)!.focus();
+        await pressOnFocused('ArrowRight');
+
+        await pressOnFocused(' ');
+
+        expect(sent.filter((e) => e.type === 'sheetSelected').map((e) => e.data.sheetIndex)).to.deep.equal([1]);
+    });
+
+    it('renames the active sheet with F2, as a double-click does', async () => {
+        tabEl(1)!.focus();
+
+        await pressOnFocused('F2');
+
+        expect(sheet.getSheetTabs().shadowRoot!.querySelector('.sheet-tab-rename')).to.not.be.null;
+    });
+
+    it('renames no other sheet with F2, and none of a protected workbook', async () => {
+        tabEl(1)!.focus();
+        await pressOnFocused('ArrowRight');
+        await pressOnFocused('F2');
+        expect(sheet.getSheetTabs().shadowRoot!.querySelector('.sheet-tab-rename')).to.be.null;
+
+        sheet.setWorkbookProtected(true);
+        await settled();
+        tabEl(1)!.focus();
+        await pressOnFocused('F2');
+        expect(sheet.getSheetTabs().shadowRoot!.querySelector('.sheet-tab-rename')).to.be.null;
+    });
+
+    it('has a named + button in the Tab order that adds a sheet with Enter or Space', async () => {
+        const add = sheet.getSheetTabs().shadowRoot!.querySelector<HTMLElement>('[data-new-tab]')!;
+        expect(add.getAttribute('role')).to.equal('button');
+        expect(add.getAttribute('tabindex')).to.equal('0');
+        expect(add.getAttribute('aria-label')).to.equal('Add a sheet');
+
+        press(add, 'Enter');
+        press(add, ' ');
+
+        expect(sent.filter((e) => e.type === 'sheetCreated')).to.have.length(2);
+    });
+
+    it('names its scroll buttons, and says which do nothing', () => {
+        const buttons = [...sheet.getSheetTabs().shadowRoot!.querySelectorAll<HTMLElement>('[data-scroll]')];
+
+        expect(buttons.map((b) => b.getAttribute('aria-label'))).to.deep.equal([
+            'Scroll to the first sheets',
+            'Scroll the sheets left',
+            'Scroll the sheets right',
+            'Scroll to the last sheets',
+        ]);
+        expect(buttons.map((b) => b.getAttribute('aria-disabled'))).to.deep.equal(['true', 'true', 'false', 'false']);
+    });
+
+    it('keeps the keys it takes from the page', async () => {
+        const reachedPage: string[] = [];
+        const listener = (e: KeyboardEvent) => reachedPage.push(e.key);
+        document.addEventListener('keydown', listener);
+        try {
+            tabEl(1)!.focus();
+            await pressOnFocused('ArrowRight');
+            await pressOnFocused('Enter');
+        } finally {
+            document.removeEventListener('keydown', listener);
+        }
+
+        expect(reachedPage).to.deep.equal([]);
+    });
+});
+
 describe('Spreadsheet — the status label', () => {
     function attach(): { sheet: Spreadsheet; cleanup: () => void } {
         const host = document.createElement('div');

@@ -338,6 +338,18 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
    */
   private revealedFor: { sheetNames: ReadonlyArray<string>; activeIndex: number } | null = null;
 
+  /**
+   * The tab the keyboard is on, 1-based, the only one in the Tab order; 0 for
+   * the active sheet's, which it goes back to whenever that changes.
+   */
+  private focusedTab = 0;
+
+  /** The active sheet the strip last drew, which resets {@link focusedTab}. */
+  private drawnActiveIndex = 0;
+
+  /** Whether the next drawing hands the focus to {@link focusedTab}. */
+  private focusPending = false;
+
   private readonly resizeObserver = new ResizeObserver(() => {
     this.measureLastFirstTab();
     this.revealActiveTab();
@@ -396,7 +408,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
    * is.
    */
   private revealActiveTab(): void {
-    const { sheetNames, activeIndex, firstVisibleTab = 0 } = this.renderState;
+    const { sheetNames, activeIndex } = this.renderState;
     const done = this.revealedFor;
     if (done !== null && done.sheetNames === sheetNames && done.activeIndex === activeIndex) {
       return;
@@ -404,33 +416,22 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     if (activeIndex < 1 || activeIndex > sheetNames.length) {
       return;
     }
-    const active = activeIndex - 1;
-    let first = firstVisibleTab;
-    if (active < firstVisibleTab) {
-      first = active;
-    } else {
-      const root = this.shadowRoot;
-      const options = root?.querySelector<HTMLElement>('.sheet-tabsheet-options');
-      if (!options || this.offsetWidth === 0) {
-        return;
-      }
-      const label = root!.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
-      let room = this.offsetWidth - options.offsetWidth - (label?.offsetWidth ?? 0);
-      // The tabs are rendered from the first one shown on.
-      const widths = Array.from(root!.querySelectorAll<HTMLElement>('.sheet-tab'))
-        .slice(0, active - firstVisibleTab + 1)
-        .map(tabWidth);
-      if (widths.reduce((sum, width) => sum + width, 0) > room) {
-        let index = widths.length - 1;
-        room -= widths[index];
-        while (index > 0 && room - widths[index - 1] > 0) {
-          index--;
-          room -= widths[index];
-        }
-        first = firstVisibleTab + index;
-      }
+    if (!this.reveal(activeIndex)) {
+      return;
     }
     this.revealedFor = { sheetNames, activeIndex };
+  }
+
+  /**
+   * Ask the controller to scroll the strip so the tab, 1-based, shows whole,
+   * if it does not. False when the strip cannot measure yet.
+   */
+  private reveal(index: number): boolean {
+    const firstVisibleTab = this.renderState.firstVisibleTab ?? 0;
+    const first = this.firstShowing(index);
+    if (first === null) {
+      return false;
+    }
     if (first !== firstVisibleTab) {
       this.dispatchEvent(
         new CustomEvent('sheet-tabs-scroll', {
@@ -440,6 +441,42 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
         })
       );
     }
+    return true;
+  }
+
+  /**
+   * The leftmost tab, 0-based, that shows the tab, 1-based, whole: the first
+   * one shown when it already does, the tab itself when it is before it, and
+   * otherwise the one that puts it at the right end of the strip. Null when
+   * the strip is not laid out yet.
+   */
+  private firstShowing(index: number): number | null {
+    const firstVisibleTab = this.renderState.firstVisibleTab ?? 0;
+    const at = index - 1;
+    if (at < firstVisibleTab) {
+      return at;
+    }
+    const root = this.shadowRoot;
+    const options = root?.querySelector<HTMLElement>('.sheet-tabsheet-options');
+    if (!options || this.offsetWidth === 0) {
+      return null;
+    }
+    const label = root!.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
+    let room = this.offsetWidth - options.offsetWidth - (label?.offsetWidth ?? 0);
+    // The tabs are rendered from the first one shown on.
+    const widths = Array.from(root!.querySelectorAll<HTMLElement>('.sheet-tab'))
+      .slice(0, at - firstVisibleTab + 1)
+      .map(tabWidth);
+    if (widths.reduce((sum, width) => sum + width, 0) <= room) {
+      return firstVisibleTab;
+    }
+    let i = widths.length - 1;
+    room -= widths[i];
+    while (i > 0 && room - widths[i - 1] > 0) {
+      i--;
+      room -= widths[i];
+    }
+    return firstVisibleTab + i;
   }
 
   /**
@@ -451,7 +488,76 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
   firstUpdated(): void {
     this.shadowRoot!.addEventListener('click', this.handleShadowClick);
     this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick);
+    this.shadowRoot!.addEventListener('keydown', this.handleShadowKeyDown);
   }
+
+  /**
+   * The keyboard, as the tabs pattern of WAI-ARIA has it: Left and Right
+   * move the focus to the tab beside, Home and End to the first and the
+   * last, scrolling the strip to show it; Enter or Space shows its sheet,
+   * and F2 on the active sheet's tab renames it, as a double-click does.
+   * Enter or Space on the + button adds a sheet. The keys taken are the
+   * strip's, not the page's.
+   */
+  private readonly handleShadowKeyDown = (event: Event): void => {
+    const e = event as KeyboardEvent;
+    const target = e.target;
+    if (!(target instanceof HTMLElement) || composing(e)) {
+      return;
+    }
+    if (target.matches('[data-new-tab]')) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        this.dispatchEvent(new CustomEvent('sheet-tab-add', { bubbles: true, composed: true }));
+      }
+      return;
+    }
+    // The rename input keeps its keys to itself.
+    if (!target.classList.contains('sheet-tab')) {
+      return;
+    }
+    const index = Number(target.dataset.index);
+    const { sheetNames, activeIndex, readOnly } = this.renderState;
+    let next: number;
+    switch (e.key) {
+      case 'ArrowLeft':
+        next = Math.max(1, index - 1);
+        break;
+      case 'ArrowRight':
+        next = Math.min(sheetNames.length, index + 1);
+        break;
+      case 'Home':
+        next = 1;
+        break;
+      case 'End':
+        next = sheetNames.length;
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        e.stopPropagation();
+        this.dispatchEvent(new CustomEvent('sheet-tab-click', { detail: { index }, bubbles: true, composed: true }));
+        return;
+      case 'F2':
+        e.preventDefault();
+        e.stopPropagation();
+        if (!readOnly && index === activeIndex) {
+          this.dispatchEvent(
+            new CustomEvent('sheet-tab-rename-start', { detail: { index }, bubbles: true, composed: true })
+          );
+        }
+        return;
+      default:
+        return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    this.focusedTab = next;
+    this.focusPending = true;
+    this.reveal(next);
+    this.requestUpdate();
+  };
 
   /**
    * Double-clicking a sheet tab renames it.
@@ -548,6 +654,10 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     }
     this.measureLastFirstTab();
     this.revealActiveTab();
+    if (this.focusPending) {
+      this.focusPending = false;
+      this.shadowRoot?.querySelector<HTMLElement>(`.sheet-tab[data-index="${this.focusedTab}"]`)?.focus();
+    }
   }
 
   private readonly handleShadowClick = (e: Event): void => {
@@ -613,32 +723,55 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     const scrollPart = (enabled: boolean, specific: string): string =>
       `${enabled ? 'scroll-tabs-button' : 'scroll-tabs-button-disabled'} ${specific}`;
     const scrollClass = (cls: string, enabled: boolean): string => (enabled ? cls : `${cls} hidden`);
+    // Buttons to assistive technology, named. The keyboard scrolls the strip
+    // by moving along the tabs, so these stay out of the Tab order.
     return html`
       <div class="sheet-tabsheet-options">
         <div
           class=${scrollClass('scroll-tabs-beginning', canScrollBack)}
           part=${scrollPart(canScrollBack, 'scroll-tabs-to-start-button')}
+          role="button"
+          aria-label="Scroll to the first sheets"
+          aria-disabled=${String(!canScrollBack)}
           data-scroll="start"
         ></div>
         <div
           class=${scrollClass('scroll-tabs-left', canScrollBack)}
           part=${scrollPart(canScrollBack, 'scroll-tabs-backward-button')}
+          role="button"
+          aria-label="Scroll the sheets left"
+          aria-disabled=${String(!canScrollBack)}
           data-scroll="backward"
         ></div>
         <div
           class=${scrollClass('scroll-tabs-right', canScrollForward)}
           part=${scrollPart(canScrollForward, 'scroll-tabs-forward-button')}
+          role="button"
+          aria-label="Scroll the sheets right"
+          aria-disabled=${String(!canScrollForward)}
           data-scroll="forward"
         ></div>
         <div
           class=${scrollClass('scroll-tabs-end', canScrollForward)}
           part=${scrollPart(canScrollForward, 'scroll-tabs-to-end-button')}
+          role="button"
+          aria-label="Scroll to the last sheets"
+          aria-disabled=${String(!canScrollForward)}
           data-scroll="end"
         ></div>
         ${
           // A protected workbook takes no new sheet, and shows no button
           // for one.
-          this.renderState.readOnly ? nothing : html`<div class="add-new-tab" part="new-tab-button" data-new-tab></div>`
+          this.renderState.readOnly
+            ? nothing
+            : html`<div
+                class="add-new-tab"
+                part="new-tab-button"
+                role="button"
+                tabindex="0"
+                aria-label="Add a sheet"
+                data-new-tab
+              ></div>`
         }
       </div>
     `;
@@ -651,6 +784,16 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     }
     const canScrollBack = firstVisibleTab > 0;
     const canScrollForward = firstVisibleTab < this.lastFirstTab;
+    if (activeIndex !== this.drawnActiveIndex) {
+      this.drawnActiveIndex = activeIndex;
+      this.focusedTab = 0;
+    }
+    // One tab in the Tab order: the one the keyboard is on, the active
+    // sheet's to begin with, or the first one shown when that is scrolled
+    // away, so the strip can always be reached.
+    const keyboardTab = this.focusedTab || activeIndex;
+    const tabbable =
+      keyboardTab > firstVisibleTab && keyboardTab <= sheetNames.length ? keyboardTab : firstVisibleTab + 1;
     const tabs = sheetNames.map((name, i) => {
       const oneBasedIndex = i + 1;
       const isActive = oneBasedIndex === activeIndex;
@@ -676,14 +819,30 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
               @blur=${this.handleRenameBlur}
             />`
           : name;
-      return html` <div class=${className} part=${part} title=${name} data-index=${oneBasedIndex}> ${content} </div> `;
+      return html`
+        <div
+          class=${className}
+          part=${part}
+          role="tab"
+          aria-selected=${String(isActive)}
+          tabindex=${oneBasedIndex === tabbable ? '0' : '-1'}
+          title=${name}
+          data-index=${oneBasedIndex}
+        >
+          ${content}
+        </div>
+      `;
     });
     // The tabs scroll by whole tabs; hiding the ones before
     // firstVisibleTab is enough and needs no width arithmetic.
     const hasLabel = infoLabel !== null && infoLabel !== undefined;
     return html`
       ${this.renderStripButtons(canScrollBack, canScrollForward)}
-      <div class=${hasLabel ? 'sheet-tabsheet-container beside-infolabel' : 'sheet-tabsheet-container'}>
+      <div
+        class=${hasLabel ? 'sheet-tabsheet-container beside-infolabel' : 'sheet-tabsheet-container'}
+        role="tablist"
+        aria-label="Sheets"
+      >
         ${tabs.slice(firstVisibleTab)}
       </div>
       ${hasLabel ? html`<div class="sheet-tabsheet-infolabel">${infoLabel}</div>` : nothing}
