@@ -150,12 +150,13 @@ describe('Spreadsheet — render pipeline', () => {
         const root = sheet.getRoot();
         expect(host.firstElementChild).to.equal(root);
 
-        // Root has 9 children: formula bar + context menu + scroll
+        // Root has 11 children: formula bar + context menu + scroll
         // container + sheet tabs + the popup overlay, which is outside the
         // scroll container so the keys typed into a popup are not the
-        // sheet's, the cover, line and tooltip a header drag shows, and a
-        // link cell's tooltip.
-        expect(root.children).to.have.length(9);
+        // sheet's, the cover, line and tooltip a header drag shows, a
+        // link cell's tooltip, and the point Escape then Tab leaves the
+        // sheet from, with its hint.
+        expect(root.children).to.have.length(11);
         const rootKids = Array.from(root.children);
         expect(rootKids.includes(sheet.getFormulaBar())).to.be.true;
         expect(rootKids.includes(sheet.getContextMenu())).to.be.true;
@@ -2175,8 +2176,9 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         expect(shadow.children.length).to.equal(1);
         expect(shadow.firstElementChild).to.equal(sheet.getRoot());
         // Formula bar, context menu, popup overlay, scroll container, tabs,
-        // what a header drag shows, and a link cell's tooltip.
-        expect(sheet.getRoot().children.length).to.equal(9);
+        // what a header drag shows, a link cell's tooltip, and the way out
+        // of the sheet with its hint.
+        expect(sheet.getRoot().children.length).to.equal(11);
         expect(host.children.length).to.equal(0);
         // The host belongs to the application: the component must not
         // write a layout onto it. An inline style would beat any

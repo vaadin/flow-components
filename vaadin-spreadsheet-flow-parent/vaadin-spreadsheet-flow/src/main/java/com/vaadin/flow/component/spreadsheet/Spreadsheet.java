@@ -101,6 +101,11 @@ import tools.jackson.databind.JsonNode;
  * with the contents of an Excel file. The Spreadsheet can be used in any Vaadin
  * application for enabling users to view and manipulate Excel files in their
  * web browsers.
+ * <p>
+ * On the cells, Tab and Shift+Tab move the active cell, as in Excel. To move
+ * the keyboard focus out of the sheet, press Escape, then Tab to go to the next
+ * control or Shift+Tab to go to the previous one. The sheet describes this to
+ * assistive technology.
  *
  * @author Vaadin Ltd.
  * @since 23.1

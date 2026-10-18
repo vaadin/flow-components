@@ -128,6 +128,7 @@ import { SheetTabs } from './controllers/SheetTabs.js';
 import { ContextMenu } from './controllers/ContextMenu.js';
 import { HeaderResize } from './controllers/HeaderResize.js';
 import { Popup } from './controllers/Popup.js';
+import { KeyboardExit } from './controllers/KeyboardExit.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
 import { linkTooltipPosition } from './algorithms/Placement.js';
@@ -321,6 +322,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private readonly menu: ContextMenu;
   /** The popup buttons and the popup one opens; see {@link Popup}. */
   private readonly popup: Popup;
+  /** Escape, then Tab, leaving the sheet; see {@link KeyboardExit}. */
+  private readonly keyboardExit: KeyboardExit;
 
   /** The cell-grid sub-element. Created in the constructor + appended to the host. */
   private readonly cellGrid: SpreadsheetCellGrid;
@@ -641,6 +644,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // never grow / shrink based on content.
     this.sheetTabs.style.flex = '0 0 auto';
     this.root.appendChild(this.sheetTabs);
+    this.keyboardExit = new KeyboardExit(
+      this.scrollContainer,
+      { showsMenuOrPopup: () => this.menu.isOpen() || this.popup.isOpen() },
+      this.ownListeners.signal
+    );
+    this.scrollContainer.after(...this.keyboardExit.elements());
     // Outside the scroll container: the keys typed into a filter's fields and the clicks on
     // its check boxes are the popup's, not the sheet's shortcuts. Beside
     // the context menu, the other overlay.
@@ -1734,7 +1743,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * over hidden rows and columns and out of merges; Shift with an arrow
    * grows the range from the active cell, which stays where it is, as in
    * Excel. Home and End go along the row, or with Ctrl to the sheet's first
-   * and last cell; typing starts an edit.
+   * and last cell; typing starts an edit. Escape, then Tab, leaves the
+   * sheet; see {@link KeyboardExit}.
    */
   private readonly handleKeyDown = (e: KeyboardEvent): void => {
     // Enter and Space on a button of the sheet's own - an outline button, a
@@ -1761,6 +1771,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         return;
       }
       e.preventDefault();
+    } else if (this.keyboardExit.takes(e)) {
+      return;
     }
     const key = e.key;
     const ctrlOrMeta = e.ctrlKey || e.metaKey;

@@ -197,6 +197,11 @@ export class Popup implements ReactiveController {
     }
   }
 
+  /** Whether a popup is open. */
+  isOpen(): boolean {
+    return this.openPopup !== null;
+  }
+
   /**
    * Hide the open popup at the given cell.
    *

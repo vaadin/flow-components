@@ -70,6 +70,11 @@ export class ContextMenu {
     this.hasActions = hasActions;
   }
 
+  /** Whether the menu is open. */
+  isOpen(): boolean {
+    return this.element.renderState.open;
+  }
+
   /** A press somewhere on the page: anywhere but in the menu, it closes it. */
   closeUnlessPressedIn(path: EventTarget[]): void {
     if (!this.element.renderState.open || path.includes(this.element)) {
