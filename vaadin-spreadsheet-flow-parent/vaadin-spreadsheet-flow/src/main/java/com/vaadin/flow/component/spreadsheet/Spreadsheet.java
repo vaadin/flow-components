@@ -4668,7 +4668,11 @@ public class Spreadsheet extends Component
 
         }
 
-        SpreadsheetFactory.reloadSpreadsheetComponent(this, workbook);
+        // As for one group: the grouping and the sizes are read again. Loading
+        // the whole workbook again, as this once did, emptied the undo history
+        // and dropped what the application had set on the sheet.
+        SpreadsheetFactory.loadGrouping(this);
+        sheetSizes.groupToggled();
     }
 
     /**

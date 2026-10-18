@@ -217,7 +217,16 @@ final class SheetSizes implements Serializable {
      * to date.
      */
     void groupToggled() {
+        TreeSet<Integer> hiddenBefore = new TreeSet<>(hiddenColumns);
         readAll(spreadsheet.getActiveSheet(), rowH.length, colW.length);
+        // The cells of a column the change showed or hid are built again at
+        // the width it has now, as when one column is shown or hidden.
+        for (int column = 0; column < colW.length; column++) {
+            if (hiddenBefore.contains(column) != hiddenColumns
+                    .contains(column)) {
+                cellsResized(column);
+            }
+        }
         refresh(true, true);
     }
 

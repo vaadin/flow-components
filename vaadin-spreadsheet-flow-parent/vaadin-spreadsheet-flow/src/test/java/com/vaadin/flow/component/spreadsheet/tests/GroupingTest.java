@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
@@ -19,6 +20,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetPr;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.component.spreadsheet.SpreadsheetFilterTable;
 
 class GroupingTest {
 
@@ -351,6 +353,73 @@ class GroupingTest {
         clickColumnLevelHeader(4);
         clickColumnLevelHeader(8);
         Assertions.assertFalse(spreadsheet.isColumnHidden(4));
+    }
+
+    /** Types into A1, as the user does: the history then holds an edit. */
+    private void typeIntoA1() {
+        spreadsheet.setSelection("A1");
+        spreadsheet.getCellValueManager().onCellValueChange(1, 1, "typed");
+    }
+
+    @Test
+    void clickRowLevelHeader_keepsTheUndoHistory() {
+        // The click used to load the whole workbook again, which emptied the
+        // history.
+        setActiveSheet(SHEET6);
+        typeIntoA1();
+
+        clickRowLevelHeader(4);
+
+        Assertions.assertTrue(
+                spreadsheet.getSpreadsheetHistoryManager().canUndo());
+    }
+
+    @Test
+    void clickColumnLevelHeader_keepsTheUndoHistory() {
+        setActiveSheet(SHEET6);
+        typeIntoA1();
+
+        clickColumnLevelHeader(4);
+
+        Assertions.assertTrue(
+                spreadsheet.getSpreadsheetHistoryManager().canUndo());
+    }
+
+    @Test
+    void clickRowLevelHeader_keepsATableTheApplicationRegistered() {
+        setActiveSheet(SHEET6);
+        SpreadsheetFilterTable table = new SpreadsheetFilterTable(spreadsheet,
+                CellRangeAddress.valueOf("J1:K5"));
+        spreadsheet.registerTable(table);
+
+        clickRowLevelHeader(4);
+
+        Assertions.assertTrue(spreadsheet.getTables().contains(table));
+    }
+
+    @Test
+    void clickRowLevelHeader_tellsTheClientWhichRowsAreHidden() {
+        setActiveSheet(SHEET6);
+
+        clickRowLevelHeader(4);
+
+        // The client numbers rows from 1: row 4 hidden, row 6 shown.
+        String hidden = spreadsheet.getElement()
+                .getProperty("hiddenRowIndexes");
+        Assertions.assertTrue(hidden.matches(".*[\\[,]5[,\\]].*"), hidden);
+        Assertions.assertFalse(hidden.matches(".*[\\[,]7[,\\]].*"), hidden);
+    }
+
+    @Test
+    void clickColumnLevelHeader_tellsTheClientWhichColumnsAreHidden() {
+        setActiveSheet(SHEET6);
+
+        clickColumnLevelHeader(4);
+
+        String hidden = spreadsheet.getElement()
+                .getProperty("hiddenColumnIndexes");
+        Assertions.assertTrue(hidden.matches(".*[\\[,]5[,\\]].*"), hidden);
+        Assertions.assertFalse(hidden.matches(".*[\\[,]7[,\\]].*"), hidden);
     }
 
     @Test
