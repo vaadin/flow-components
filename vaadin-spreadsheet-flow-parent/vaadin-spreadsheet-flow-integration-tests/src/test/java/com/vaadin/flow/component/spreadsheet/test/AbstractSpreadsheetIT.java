@@ -523,6 +523,9 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
         WebElement updateBtn = $("vaadin-button").id("update");
         updateBtn.click();
+        // A file the server could not read shows an error rather than a
+        // sheet.
+        assertNoErrorIndicatorDetected();
 
         setSpreadsheet($(SpreadsheetElement.class).first());
     }
@@ -678,9 +681,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 Boolean.TRUE.equals(state.get("focused")));
     }
 
+    /**
+     * Fails if the server reported an error, which the test page shows: Flow
+     * otherwise only logs it.
+     */
     public void assertNoErrorIndicatorDetected() {
-        Assert.assertTrue("Error indicator detected when there should be none.",
-                findElements(By.className("v-errorindicator")).isEmpty());
+        List<String> errors = findElements(By.className("server-error"))
+                .stream().map(WebElement::getText).toList();
+        Assert.assertTrue("The server reported an error: " + errors,
+                errors.isEmpty());
     }
 
     protected void assertAddressFieldValue(String expected) {

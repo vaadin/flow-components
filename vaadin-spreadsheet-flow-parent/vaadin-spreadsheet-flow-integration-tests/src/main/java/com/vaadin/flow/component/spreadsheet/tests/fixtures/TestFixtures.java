@@ -50,7 +50,8 @@ public enum TestFixtures {
     IconAction(IconActionFixture.class),
     InsertRow(InsertRowFixture.class),
     DeleteRow(DeleteRowFixture.class),
-    RowHeaderDoubleClick(RowHeaderDoubleClickFixture.class);
+    RowHeaderDoubleClick(RowHeaderDoubleClickFixture.class),
+    ServerError(ServerErrorFixture.class);
 
     public final SpreadsheetFixtureFactory factory;
 

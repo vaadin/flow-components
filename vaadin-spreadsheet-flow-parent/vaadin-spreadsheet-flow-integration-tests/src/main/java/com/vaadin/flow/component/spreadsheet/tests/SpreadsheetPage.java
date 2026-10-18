@@ -26,6 +26,7 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -382,6 +383,25 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
         return cb;
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        // Flow only logs an error on the server. Shown on the page as well, a
+        // test can tell that one happened.
+        attachEvent.getSession().setErrorHandler(event -> {
+            LOGGER.error("Unexpected error", event.getThrowable());
+            showServerError(event.getThrowable());
+        });
+    }
+
+    /** Puts the error on the page, where an integration test looks for it. */
+    private void showServerError(Throwable error) {
+        Div shown = new Div(
+                error.getClass().getName() + ": " + error.getMessage());
+        shown.addClassName("server-error");
+        addComponentAsFirst(shown);
+    }
+
     private void loadFile(File file) {
         try {
             if (spreadsheet == null) {
@@ -404,6 +424,7 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
             rowColHeadings.setValue(spreadsheet.isRowColHeadingsVisible());
         } catch (Exception e) {
             LOGGER.warn("ERROR reading file " + file, e);
+            showServerError(e);
         }
     }
 
