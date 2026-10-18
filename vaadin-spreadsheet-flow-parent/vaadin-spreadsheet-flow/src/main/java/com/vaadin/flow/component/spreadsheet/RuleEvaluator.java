@@ -219,20 +219,38 @@ final class RuleEvaluator implements Serializable {
                 return cell.getNumericCellValue() >= formula1Val;
 
             case ComparisonOperator.BETWEEN:
-                boolean lt = cell.getNumericCellValue() >= formula1Val;
-                boolean gt = cell.getNumericCellValue() <= Double
-                        .valueOf(rule.getFormula2());
-                return lt && gt;
-
             case ComparisonOperator.NOT_BETWEEN:
-                lt = cell.getNumericCellValue() <= formula1Val;
-                gt = cell.getNumericCellValue() >= Double
-                        .valueOf(rule.getFormula2());
-                return lt && gt;
+                Double formula2Val = secondBound(rule, cell, deltaColumn,
+                        deltaRow);
+                if (formula2Val == null) {
+                    return false;
+                }
+                double value = cell.getNumericCellValue();
+                boolean between = value >= formula1Val && value <= formula2Val;
+                return comparisonOperation == ComparisonOperator.BETWEEN
+                        ? between
+                        : !between;
             }
         }
 
         return false;
+    }
+
+    /**
+     * The second bound of a "between" rule, evaluated as the first one is, so
+     * it can be a cell reference or a formula; null when it is not a number,
+     * and the rule then matches nothing.
+     */
+    private Double secondBound(ConditionalFormattingRule rule, Cell cell,
+            int deltaColumn, int deltaRow) {
+        String formula2 = rule.getFormula2();
+        if (formula2 == null || formula2.isEmpty()) {
+            return null;
+        }
+        ValueEval eval = getValueEvalFromFormula(formula2, cell, deltaColumn,
+                deltaRow);
+        return eval instanceof NumericValueEval number ? number.getNumberValue()
+                : null;
     }
 
     private ValueEval getValueEvalFromFormula(String formula, Cell cell,

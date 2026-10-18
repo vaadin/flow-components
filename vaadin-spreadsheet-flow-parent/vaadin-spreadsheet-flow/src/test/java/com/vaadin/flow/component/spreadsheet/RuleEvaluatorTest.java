@@ -219,6 +219,56 @@ class RuleEvaluatorTest {
         assertFalse(evaluator.matches(numericCell(1, 0, 11d), rule, 0, 0));
     }
 
+    @Test
+    void matchesValue_numericNOT_BETWEEN_matchesOutsideRange() {
+        ConditionalFormattingRule rule = betweenRule(
+                ComparisonOperator.NOT_BETWEEN, "10", "20");
+
+        assertTrue(evaluator.matches(numericCell(0, 0, 5d), rule, 0, 0));
+        assertTrue(evaluator.matches(numericCell(1, 0, 50d), rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_numericNOT_BETWEEN_insideRangeOrOnABoundary_doesNotMatch() {
+        ConditionalFormattingRule rule = betweenRule(
+                ComparisonOperator.NOT_BETWEEN, "10", "20");
+
+        assertFalse(evaluator.matches(numericCell(0, 0, 15d), rule, 0, 0));
+        assertFalse(evaluator.matches(numericCell(1, 0, 10d), rule, 0, 0));
+        assertFalse(evaluator.matches(numericCell(2, 0, 20d), rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_numericBETWEEN_withACellReferenceAsTheSecondBound() {
+        // The second bound used to be read as a number, so a reference threw
+        // while the sheet loaded.
+        numericCell(0, 2, 20d); // C1
+        ConditionalFormattingRule rule = betweenRule(ComparisonOperator.BETWEEN,
+                "10", "$C$1");
+
+        assertTrue(evaluator.matches(numericCell(1, 0, 15d), rule, 0, 0));
+        assertFalse(evaluator.matches(numericCell(2, 0, 25d), rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_numericNOT_BETWEEN_withACellReferenceAsTheSecondBound() {
+        numericCell(0, 2, 20d); // C1
+        ConditionalFormattingRule rule = betweenRule(
+                ComparisonOperator.NOT_BETWEEN, "10", "$C$1");
+
+        assertTrue(evaluator.matches(numericCell(1, 0, 25d), rule, 0, 0));
+        assertFalse(evaluator.matches(numericCell(2, 0, 15d), rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_numericBETWEEN_withASecondBoundThatIsNoNumber_doesNotMatch() {
+        stringCell(0, 2, "twenty"); // C1
+        ConditionalFormattingRule rule = betweenRule(ComparisonOperator.BETWEEN,
+                "10", "$C$1");
+
+        assertFalse(evaluator.matches(numericCell(1, 0, 15d), rule, 0, 0));
+    }
+
     // ----- CELL_VALUE_IS — string -------------------------------------------
 
     @Test
