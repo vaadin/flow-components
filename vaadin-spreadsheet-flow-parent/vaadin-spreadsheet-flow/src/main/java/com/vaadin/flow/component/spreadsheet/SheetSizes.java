@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -271,9 +272,20 @@ final class SheetSizes implements Serializable {
         refresh(true, true);
     }
 
-    /** Hides or shows the rows, as a filter does, before any refresh. */
+    /**
+     * Hides or shows the rows, as a filter does, before any refresh. The client
+     * is sent the heights and the hidden rows once for all of them: a filter
+     * passes every row of its table.
+     */
     void setRowsHidden(Map<Integer, Boolean> rowsHidden) {
-        rowsHidden.forEach(this::applyRowHidden);
+        if (!rowsHidden.isEmpty()) {
+            float[] heights = heightsCovering(
+                    Collections.max(rowsHidden.keySet()));
+            rowsHidden.forEach(
+                    (row, hidden) -> markRowHidden(heights, row, hidden));
+            publishHiddenRows();
+            setRowHeights(heights);
+        }
         refresh(true, true);
     }
 
@@ -319,6 +331,17 @@ final class SheetSizes implements Serializable {
     }
 
     private void applyRowHidden(int row, boolean hidden) {
+        float[] heights = heightsCovering(row);
+        markRowHidden(heights, row, hidden);
+        publishHiddenRows();
+        setRowHeights(heights);
+    }
+
+    /**
+     * Hides or shows the row in the sheet and in the heights given, which cover
+     * it, sending the client nothing yet.
+     */
+    private void markRowHidden(float[] heights, int row, boolean hidden) {
         Row poiRow = poiRow(row);
         poiRow.setZeroHeight(hidden);
         if (hidden) {
@@ -326,10 +349,7 @@ final class SheetSizes implements Serializable {
         } else {
             hiddenRows.remove(row);
         }
-        float[] heights = heightsCovering(row);
         heights[row] = hidden ? 0f : poiRow.getHeightInPoints();
-        publishHiddenRows();
-        setRowHeights(heights);
     }
 
     private Row poiRow(int row) {

@@ -8,10 +8,14 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -142,5 +146,65 @@ class SheetSizesTest {
         Spreadsheet spreadsheet = new Spreadsheet(workbook);
 
         assertEquals(18f, spreadsheet.getRowH()[0]);
+    }
+
+    /**
+     * A sheet of 2,000 rows, every seventh 30 points high and the rest 15, with
+     * row 5 hidden.
+     */
+    private static Spreadsheet sheetOfRows() {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet();
+        for (int row = 0; row < 2_000; row += 7) {
+            sheet.createRow(row).setHeightInPoints(30);
+        }
+        sheet.createRow(4).setZeroHeight(true);
+        return new Spreadsheet(workbook);
+    }
+
+    /**
+     * What a filter does to the rows: hides the odd ones up to 199, shows row 5
+     * again, and hides row 2,501, past the rows the sheet was loaded with.
+     */
+    private static Map<Integer, Boolean> filtered() {
+        Map<Integer, Boolean> rowsHidden = new LinkedHashMap<>();
+        for (int row = 1; row < 200; row += 2) {
+            rowsHidden.put(row, true);
+        }
+        rowsHidden.put(4, false);
+        rowsHidden.put(2_500, true);
+        return rowsHidden;
+    }
+
+    @Test
+    void rowsHiddenAtOnce_goToTheClientOnce() {
+        Spreadsheet spreadsheet = sheetOfRows();
+        List<String> sent = new ArrayList<>();
+        Element element = spreadsheet.getElement();
+        element.addPropertyChangeListener("rowH", event -> sent.add("rowH"));
+        element.addPropertyChangeListener("hiddenRowIndexes",
+                event -> sent.add("hiddenRowIndexes"));
+
+        spreadsheet.setRowsHidden(filtered());
+
+        assertEquals(List.of("hiddenRowIndexes", "rowH"), sent);
+    }
+
+    @Test
+    void rowsHiddenAndShownAtOnce_endAsWhenHiddenAndShownOneByOne() {
+        Spreadsheet atOnce = sheetOfRows();
+        Spreadsheet oneByOne = sheetOfRows();
+
+        atOnce.setRowsHidden(filtered());
+        filtered().forEach(oneByOne::setRowHidden);
+
+        assertArrayEquals(oneByOne.getRowH(), atOnce.getRowH());
+        assertEquals(oneByOne.getHiddenRowIndexes(),
+                atOnce.getHiddenRowIndexes());
+        assertEquals(oneByOne.getElement().getProperty("rowH"),
+                atOnce.getElement().getProperty("rowH"));
+        assertEquals(2_501, atOnce.getRowH().length);
+        assertEquals(0f, atOnce.getRowH()[2_500]);
+        assertEquals(15f, atOnce.getRowH()[4]);
     }
 }
