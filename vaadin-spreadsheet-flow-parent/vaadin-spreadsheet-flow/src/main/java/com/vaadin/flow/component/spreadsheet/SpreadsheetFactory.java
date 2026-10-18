@@ -407,26 +407,49 @@ public class SpreadsheetFactory implements Serializable {
         if (autoFilter != null
                 && !tableForCTAutoFilterAlreadyLoaded(spreadsheet,
                         autoFilter)) {
-            SpreadsheetTable sheetFilterTable = new SpreadsheetFilterTable(
-                    spreadsheet, spreadsheet.getActiveSheet(),
-                    CellRangeAddress.valueOf(autoFilter.getRef()), autoFilter,
-                    null);
+            CellRangeAddress range = CellRangeAddress
+                    .valueOf(autoFilter.getRef());
+            if (hasRowsToFilter(sheet, range)) {
+                SpreadsheetTable sheetFilterTable = new SpreadsheetFilterTable(
+                        spreadsheet, spreadsheet.getActiveSheet(), range,
+                        autoFilter, null);
 
-            spreadsheet.registerTable(sheetFilterTable);
+                spreadsheet.registerTable(sheetFilterTable);
 
-            markActiveButtons(sheetFilterTable, autoFilter);
+                markActiveButtons(sheetFilterTable, autoFilter);
+            }
         }
 
         for (XSSFTable table : sheet.getTables()) {
             if (!tableForXSSFTableAlreadyLoaded(spreadsheet, table)) {
-                SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
-                        spreadsheet, spreadsheet.getActiveSheet(),
-                        CellRangeAddress.valueOf(table.getCTTable().getRef()),
-                        null, table);
+                CellRangeAddress range = CellRangeAddress
+                        .valueOf(table.getCTTable().getRef());
+                if (hasRowsToFilter(sheet, range)) {
+                    SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
+                            spreadsheet, spreadsheet.getActiveSheet(), range,
+                            null, table);
 
-                spreadsheet.registerTable(spreadsheetTable);
+                    spreadsheet.registerTable(spreadsheetTable);
+                }
             }
         }
+    }
+
+    /**
+     * Whether a filter or a table has rows under its header row, which a filter
+     * table filters. One of its header row alone, as a workbook with headers
+     * and no data yet has, is not shown; the workbook keeps it.
+     */
+    private static boolean hasRowsToFilter(Sheet sheet,
+            CellRangeAddress range) {
+        if (range.getFirstRow() < range.getLastRow()) {
+            return true;
+        }
+        LOGGER.warn(
+                "The filter of {} on sheet {} has no rows under its header"
+                        + " row, and is not shown",
+                range.formatAsString(), sheet.getSheetName());
+        return false;
     }
 
     private static boolean tableForXSSFTableAlreadyLoaded(
