@@ -123,6 +123,16 @@ class RuleEvaluatorTest {
         return cell;
     }
 
+    private Cell booleanCell(int rowIdx, int colIdx, boolean value) {
+        Row row = sheet.getRow(rowIdx);
+        if (row == null) {
+            row = sheet.createRow(rowIdx);
+        }
+        Cell cell = row.createCell(colIdx, CellType.BOOLEAN);
+        cell.setCellValue(value);
+        return cell;
+    }
+
     private Cell stringCell(int rowIdx, int colIdx, String value) {
         Row row = sheet.getRow(rowIdx);
         if (row == null) {
@@ -288,6 +298,26 @@ class RuleEvaluatorTest {
 
         assertFalse(evaluator.matches(stringCell(0, 0, "HELLO"), rule, 0, 0));
         assertTrue(evaluator.matches(stringCell(1, 0, "world"), rule, 0, 0));
+    }
+
+    // ----- CELL_VALUE_IS — boolean ------------------------------------------
+
+    @Test
+    void matchesValue_booleanEqual_matchesTheSameValueOnly() {
+        ConditionalFormattingRule rule = cellValueRule(ComparisonOperator.EQUAL,
+                "TRUE");
+
+        assertTrue(evaluator.matches(booleanCell(0, 0, true), rule, 0, 0));
+        assertFalse(evaluator.matches(booleanCell(1, 0, false), rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_booleanNotEqual_matchesTheOtherValueOnly() {
+        ConditionalFormattingRule rule = cellValueRule(
+                ComparisonOperator.NOT_EQUAL, "TRUE");
+
+        assertFalse(evaluator.matches(booleanCell(0, 0, true), rule, 0, 0));
+        assertTrue(evaluator.matches(booleanCell(1, 0, false), rule, 0, 0));
     }
 
     // ----- CELL_VALUE_IS — type mismatch ------------------------------------

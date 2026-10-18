@@ -74,6 +74,18 @@ class ParseNumberTest {
     }
 
     @Test
+    void aNumberWithGroupingDecimalsAndAnExponent_isParsed() {
+        Assertions.assertEquals(1234500.0,
+                SpreadsheetUtil.parseNumber("1,234.5E3", Locale.US));
+    }
+
+    @Test
+    void anExponentBeforeTheDecimalPoint_isNoNumber() {
+        Assertions.assertNull(
+                SpreadsheetUtil.parseNumber("1,234E3.5", Locale.US));
+    }
+
+    @Test
     void testNumberParsingWithFiLocale() {
         Locale locale = new Locale("fi");
 

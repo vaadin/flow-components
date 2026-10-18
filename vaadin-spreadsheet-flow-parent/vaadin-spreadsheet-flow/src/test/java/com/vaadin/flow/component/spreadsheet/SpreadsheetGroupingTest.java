@@ -112,6 +112,14 @@ class SpreadsheetGroupingTest {
     }
 
     @Test
+    void aColumnGroupCollapsedAndExpanded_isAsAFreshLoadGivesIt() {
+        harness.check(toggle(true, 3, true));
+
+        assertEquals(List.of(), harness.check(toggle(true, 3, false)));
+        assertFalse(spreadsheet.isColumnHidden(4));
+    }
+
+    @Test
     void aGroupCollapsed_leavesTheSizeTheApplicationSet() {
         Consumer<Spreadsheet> size = s -> {
             s.setMaxRows(300);
