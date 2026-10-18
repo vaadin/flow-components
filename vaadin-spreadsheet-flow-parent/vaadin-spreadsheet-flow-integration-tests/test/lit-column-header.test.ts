@@ -39,6 +39,13 @@ function cleanup(el: HTMLElement) {
     el.remove();
 }
 
+/** The elements the header draws, by class: none for a header that shows nothing. */
+function renderedElements(el: HTMLElement): string[] {
+    return Array.from(el.shadowRoot!.querySelectorAll('*'))
+        .filter((e) => e.localName !== 'style')
+        .map((e) => e.className);
+}
+
 function buildState(opts: {
     firstColumnIndex: number;
     lastColumnIndex: number;
@@ -120,6 +127,40 @@ describe('SpreadsheetColumnHeader — render with header active', () => {
         );
 
         expect(el.shadowRoot!.querySelectorAll('.col-header-cell')).to.have.length(0);
+
+        cleanup(el);
+    });
+
+    it('renders nothing at all with headings hidden and no groups, frozen columns included', async () => {
+        const el = await attachWithState({
+            ...buildState({
+                firstColumnIndex: 3,
+                lastColumnIndex: 5,
+                firstColumnPosition: 0,
+                colX: [0, 50, 100],
+                colWidths: [50, 50, 50],
+                headerHeight: 0,
+            }),
+            horizontalSplitPosition: 2,
+            frozenColX: [0, 50],
+            frozenColWidths: [50, 50],
+        });
+
+        expect(renderedElements(el)).to.eql([]);
+
+        cleanup(el);
+    });
+
+    it('renders nothing at all before the columns shown are known, frozen ones included', async () => {
+        const el = await attachWithState({
+            ...emptyColumnHeaderRenderState(),
+            headerHeight: 24,
+            horizontalSplitPosition: 2,
+            frozenColX: [0, 50],
+            frozenColWidths: [50, 50],
+        });
+
+        expect(renderedElements(el)).to.eql([]);
 
         cleanup(el);
     });

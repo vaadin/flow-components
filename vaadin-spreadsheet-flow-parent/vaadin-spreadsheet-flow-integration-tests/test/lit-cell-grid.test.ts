@@ -4121,6 +4121,16 @@ describe('SpreadsheetCellGrid — hyperlink cells', () => {
         cleanup(el);
     });
 
+    it('takes the default style\'s colour, whatever comes after it in the style', async () => {
+        const el = await attachWithState(
+            withLink('cs0', { 0: 'color: rgb(51, 51, 51); background-color: rgb(255, 0, 0);' })
+        );
+
+        expect(link(el).color).to.equal('rgb(51, 51, 51)');
+
+        cleanup(el);
+    });
+
     it('colours unstyled links when the application sets the property', async () => {
         const el = await attachWithState(withLink('cs0', { 0: 'color: rgb(51, 51, 51);' }));
         el.style.setProperty('--vaadin-spreadsheet-link-fg', 'rgb(1, 2, 3)');

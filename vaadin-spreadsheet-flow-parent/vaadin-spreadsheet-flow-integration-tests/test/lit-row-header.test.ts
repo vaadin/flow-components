@@ -542,6 +542,27 @@ describe('Row header — grouping outline', () => {
         cleanup(el);
     });
 
+    it('draws no gutter beside numbers without groups', async () => {
+        const el = await attachWithState(stateWithGroupings({ max: 0, groupings: [] }));
+
+        expect(el.shadowRoot!.querySelector('.row-grouping-gutter')).to.be.null;
+        cleanup(el);
+    });
+
+    it('leaves the gutter to the strip\'s own border without numbers', async () => {
+        // Headings hidden: the header is the gutter alone, one level of 15px
+        // and its border.
+        const el = await attachWithState({
+            ...stateWithGroupings({ max: 1, groupings: oneGroup }),
+            headerWidth: 16,
+            rowGroupingHeadings: false,
+        });
+
+        expect(el.shadowRoot!.querySelector('.row-grouping-gutter')).to.be.null;
+        expect(el.shadowRoot!.querySelectorAll('.row-grouping-toggle')).to.have.length(1);
+        cleanup(el);
+    });
+
     it('borders the gutter off from the numbers beside it, as the GWT client did', async () => {
         const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
 

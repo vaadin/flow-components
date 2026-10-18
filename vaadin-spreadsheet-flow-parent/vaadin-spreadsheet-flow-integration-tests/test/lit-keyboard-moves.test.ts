@@ -206,6 +206,16 @@ describe('KeyboardMoves — Shift+arrow', () => {
     });
   });
 
+  it('takes the far side in by one where a merge lies wholly inside the range', () => {
+    // A1:D10 holding B4:D6, the active cell at the bottom: Shift+Down takes
+    // the top side to row 2. The merge further down is not in its way.
+    const range = { c1: 1, c2: 4, r1: 1, r2: 10 };
+    expect(moveRangeEdge(range, { col: 1, row: 10 }, 'down', shape())!.range).to.eql({ c1: 1, c2: 4, r1: 2, r2: 10 });
+    // And across: A4:F6, the active cell on the right, Shift+Right.
+    const across = { c1: 1, c2: 6, r1: 4, r2: 6 };
+    expect(moveRangeEdge(across, { col: 6, row: 4 }, 'right', shape())!.range).to.eql({ c1: 2, c2: 6, r1: 4, r2: 6 });
+  });
+
   it('grows a merge that is the whole selection either way', () => {
     const merge = { c1: 2, c2: 4, r1: 4, r2: 6 };
     expect(moveRangeEdge(merge, { col: 2, row: 4 }, 'left', shape())!.range).to.eql({ c1: 1, c2: 4, r1: 4, r2: 6 });

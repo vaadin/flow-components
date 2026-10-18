@@ -500,14 +500,18 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
   });
 
-  it('stays open when the click lands inside it', () => {
+  it('stays open when the click lands inside it', async () => {
     const popup = content('filter');
     withFlowClient({ 42: popup });
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    ctx.sent.length = 0;
 
     popup.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true }));
+    // A popup closing fades out first, and is only hidden after.
+    await settle(ctx.sheet.getPopupOverlay());
 
     expect(ctx.sheet.getPopupOverlay().hidden).to.be.false;
+    expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.be.empty;
   });
 
   it('closes and reports on Escape', async () => {
