@@ -129,9 +129,9 @@ import { ContextMenu } from './controllers/ContextMenu.js';
 import { HeaderResize } from './controllers/HeaderResize.js';
 import { Popup } from './controllers/Popup.js';
 import { KeyboardExit } from './controllers/KeyboardExit.js';
+import { LinkTooltip } from './controllers/LinkTooltip.js';
+import { Outline } from './controllers/Outline.js';
 import { listenForLongPress } from './dom/LongPress.js';
-import { hideFromTopLayer, showInTopLayer } from './dom/TopLayer.js';
-import { linkTooltipPosition } from './algorithms/Placement.js';
 import { computeMergedRegionBoxes, computePositionedOverlays } from './algorithms/Positioning.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
@@ -288,8 +288,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     return formulaOf(this.interaction.edit);
   }
 
-  /** A link cell's tooltip, shown while the pointer is over the cell. */
-  private readonly linkTooltip: HTMLElement;
+  /** A link cell's tooltip, shown while the pointer is over the cell; see {@link LinkTooltip}. */
+  private readonly linkTooltip = new LinkTooltip({
+    tooltipAt: (col, row) => this.model.hyperlinksTooltips[toKey(col, row)],
+    dragging: () => this.interaction.press !== null
+  });
 
   /** Resizing columns and rows by their header edges; see {@link HeaderResize}. */
   private readonly headerResize: HeaderResize;
@@ -611,7 +614,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.headerCorner.className = 'sheet-header-corner';
     this.headerCorner.style.cssText =
       'grid-column:1;grid-row:1;' + 'position:sticky;top:0;left:0;z-index:6;' + 'width:0;height:0;';
-    this.on(this.headerCorner, 'level-header-click', this.handleLevelHeaderClick);
     // Column-header at (col 2, row 1) — top strip above cells.
     this.columnHeader.style.gridColumn = '2';
     this.columnHeader.style.gridRow = '1';
@@ -680,11 +682,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       },
       this.ownListeners.signal
     );
-    this.linkTooltip = document.createElement('div');
-    this.linkTooltip.className = 'link-tooltip';
-    this.linkTooltip.popover = 'manual';
-    this.linkTooltip.hidden = true;
-    this.popup.overlay.after(...this.headerResize.elements(), this.linkTooltip);
+    this.popup.overlay.after(...this.headerResize.elements(), this.linkTooltip.element);
     this.renderTarget.appendChild(this.root);
     // Honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
     // on the wrapper host. When the host has that class, the sheet
@@ -745,7 +743,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // outside the spreadsheet still terminates cleanly.
     this.on(this.cellGrid, 'cell-mousedown', this.handleCellMouseDown);
     this.on(this.cellGrid, 'cell-mouseover', this.handleCellMouseOver);
-    this.on(this.cellGrid, 'grid-mouseleave', this.hideLinkTooltip);
+    this.on(this.cellGrid, 'grid-mouseleave', this.linkTooltip.hide);
     this.on(this.cellGrid, 'selection-paint-start', this.handleSelectionPaintStart);
     // Popup-button click → dispatch popupButtonClick. The
     // server's `onPopupButtonClick` opens the associated popup
@@ -779,12 +777,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.ownListeners.signal
     );
     this.on(this.cellGrid, 'cell-comment-commit', this.handleCellCommentCommit);
-    // Grouping outline. The column header emits
-    // `column-grouping-toggle` when the user clicks a +/-
-    // button in the grouping gutter; the connector forwards
-    // it as `groupingCollapsed` to the server.
-    this.on(this.columnHeader, 'column-grouping-toggle', this.handleColumnGroupingToggle);
-    this.on(this.rowHeader, 'row-grouping-toggle', this.handleRowGroupingToggle);
+    // The outline's +/- and level buttons, which the server acts on.
+    new Outline(
+      { columnHeader: this.columnHeader, rowHeader: this.rowHeader, headerCorner: this.headerCorner },
+      (event) => this.sendToServer(event),
+      this.ownListeners.signal
+    );
     // Header-drag resize. The header elements
     // emit `column-resize-start` / `row-resize-start` from
     // their right-edge / bottom-edge mousedown handles; the
@@ -951,64 +949,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   };
 
   /**
-   * A link cell's tooltip - the target the server named for it - while
-   * the pointer is over the cell: below the
-   * cell, or above it when there is no room below. Any other cell, or a
-   * drag in progress, takes it away.
-   */
-  private showLinkTooltip(at: { col: number; row: number; box?: DOMRect }): void {
-    const text = this.model.hyperlinksTooltips[toKey(at.col, at.row)];
-    const dragging = this.interaction.press !== null;
-    if (text === undefined || at.box === undefined || dragging) {
-      this.hideLinkTooltip();
-      return;
-    }
-    const tooltip = this.linkTooltip;
-    tooltip.textContent = text;
-    tooltip.hidden = false;
-    showInTopLayer(tooltip);
-    const { left, top } = linkTooltipPosition(at.box, tooltip.getBoundingClientRect(), {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-  }
-
-  private readonly hideLinkTooltip = (): void => {
-    if (this.linkTooltip.hidden) {
-      return;
-    }
-    this.linkTooltip.hidden = true;
-    hideFromTopLayer(this.linkTooltip);
-  };
-
-  /**
-   * Column-grouping toggle. Forwards the user's
-   * +/- click in the grouping outline gutter as
-   * {@code groupingCollapsed} for the server. Wire payload:
-   * {@code cols: true}, {@code colIndex} carries the
-   * grouping's {@code uniqueIndex} (its identity in the
-   * grouping list), {@code collapsed} is the NEW state the
-   * user is requesting.
-   */
-  private readonly handleColumnGroupingToggle = (e: CustomEvent<{ uniqueIndex: number; collapsed: boolean }>): void => {
-    const { uniqueIndex, collapsed } = e.detail;
-    this.sendToServer({
-      type: 'groupingCollapsed',
-      data: { cols: true, colIndex: uniqueIndex, collapsed }
-    });
-  };
-
-  private readonly handleRowGroupingToggle = (e: CustomEvent<{ uniqueIndex: number; collapsed: boolean }>): void => {
-    const { uniqueIndex, collapsed } = e.detail;
-    this.sendToServer({
-      type: 'groupingCollapsed',
-      data: { cols: false, colIndex: uniqueIndex, collapsed }
-    });
-  };
-
-  /**
    * Mouse drag — mousedown begin. Starts a drag.
    * Sets the selection to the single cell at the mousedown
    * coord (anchor) + opens the dragging flag so subsequent
@@ -1072,7 +1012,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * silently ignored — the cell-grid emits on every hover.
    */
   private readonly handleCellMouseOver = (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>): void => {
-    this.showLinkTooltip(e.detail);
+    this.linkTooltip.show(e.detail);
     const pointer = this.formula.pointer;
     if (this.formula.press === 'pointing' && pointer !== null) {
       const draft = this.formulaSource() === 'field' ? this.formulaBar.formulaFieldState() : this.editorDraft();
@@ -3087,16 +3027,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   };
 
   /**
-   * An outline level button: show the sheet down to that level.
-   *
-   * The server expands everything shallower and collapses that level,
-   * which hides whatever is nested under it.
-   */
-  private readonly handleLevelHeaderClick = (e: CustomEvent<{ cols: boolean; level: number }>): void => {
-    this.sendToServer({ type: 'levelHeaderClicked', data: { cols: e.detail.cols, level: e.detail.level } });
-  };
-
-  /**
    * Where the sheet is scrolled to, in whole pixels, as the server stores
    * it. A browser reports fractions on a scaled display, and the server
    * reads whole numbers.
@@ -3730,7 +3660,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.headerResize.cancel();
     this.extendingSelection = false;
     this.menu.close();
-    this.hideLinkTooltip();
+    this.linkTooltip.hide();
     if (hadKeyboard) {
       this.returnFocusToSheet();
     }

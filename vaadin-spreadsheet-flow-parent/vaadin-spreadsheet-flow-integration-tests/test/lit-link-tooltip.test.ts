@@ -11,6 +11,7 @@ import { expect } from 'chai';
 
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import { linkTooltipPosition } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/Placement.js';
+import { LinkTooltip } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/controllers/LinkTooltip.js';
 import { spreadsheetStyles } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/vaadin-spreadsheet-styles.js';
 
 /**
@@ -152,3 +153,60 @@ describe('Spreadsheet — the tooltip of a link cell', () => {
     expect(tooltip().hidden).to.be.true;
   });
 });
+
+describe('LinkTooltip — on its own', () => {
+  let dragging: boolean;
+  let tooltip: LinkTooltip;
+  const box = new DOMRect(100, 100, 80, 20);
+
+  beforeEach(() => {
+    dragging = false;
+    tooltip = new LinkTooltip({
+      tooltipAt: (col, row) => (col === 2 && row === 3 ? 'https://vaadin.com' : undefined),
+      dragging: () => dragging
+    });
+    document.body.appendChild(tooltip.element);
+  });
+
+  afterEach(() => {
+    tooltip.element.remove();
+  });
+
+  it('starts hidden, as a popover of its own', () => {
+    expect(tooltip.element.hidden).to.be.true;
+    expect(tooltip.element.popover).to.equal('manual');
+    expect(tooltip.element.className).to.equal('link-tooltip');
+  });
+
+  it("shows the link's target below the cell", () => {
+    tooltip.show({ col: 2, row: 3, box });
+
+    expect(tooltip.element.hidden).to.be.false;
+    expect(tooltip.element.textContent).to.equal('https://vaadin.com');
+    expect(tooltip.element.style.top).to.equal('120px');
+  });
+
+  it('hides over a cell without a link, without a box, and while dragging', () => {
+    tooltip.show({ col: 2, row: 3, box });
+    tooltip.show({ col: 1, row: 1, box });
+    expect(tooltip.element.hidden).to.be.true;
+
+    tooltip.show({ col: 2, row: 3, box });
+    tooltip.show({ col: 2, row: 3 });
+    expect(tooltip.element.hidden).to.be.true;
+
+    dragging = true;
+    tooltip.show({ col: 2, row: 3, box });
+    expect(tooltip.element.hidden).to.be.true;
+  });
+
+  it('hides on demand, and hiding again changes nothing', () => {
+    tooltip.show({ col: 2, row: 3, box });
+
+    tooltip.hide();
+    tooltip.hide();
+
+    expect(tooltip.element.hidden).to.be.true;
+  });
+});
+
