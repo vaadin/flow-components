@@ -62,6 +62,30 @@ describe('Spreadsheet — turning the headings off and on', () => {
     expect(sheet.getCellGrid().offsetLeft).to.equal(0);
   });
 
+  it('starts the cells at the top when the headings are off and only rows are grouped', () => {
+    // The row outline gutter stays; nothing is over the cells, and the
+    // corner, with no height of its own, took a 1px row with its border.
+    sheet.setRowGroupingMax(1);
+    sheet.setRowGroupingData([{ uniqueIndex: 1, level: 1, startIndex: 1, endIndex: 3, collapsed: false }]);
+    sheet.setDisplayRowColHeadings(false);
+    endBatch(['displayRowColHeadings', 'rowGroupingMax', 'rowGroupingData']);
+
+    expect(sheet.getCellGrid().offsetTop).to.equal(0);
+    expect(sheet.getRowHeader().getBoundingClientRect().width).to.be.greaterThan(0);
+    expect(sheet.getCellGrid().offsetLeft).to.equal(sheet.getRowHeader().getBoundingClientRect().width);
+  });
+
+  it('starts the cells at the left when the headings are off and only columns are grouped', () => {
+    sheet.setColGroupingMax(1);
+    sheet.setColGroupingData([{ uniqueIndex: 1, level: 1, startIndex: 1, endIndex: 3, collapsed: false }]);
+    sheet.setDisplayRowColHeadings(false);
+    endBatch(['displayRowColHeadings', 'colGroupingMax', 'colGroupingData']);
+
+    expect(sheet.getCellGrid().offsetLeft).to.equal(0);
+    expect(sheet.getColumnHeader().getBoundingClientRect().height).to.be.greaterThan(0);
+    expect(sheet.getCellGrid().offsetTop).to.equal(sheet.getColumnHeader().getBoundingClientRect().height);
+  });
+
   it('brings them back at their default sizes when turned on again', () => {
     sheet.setDisplayRowColHeadings(false);
     endBatch(['displayRowColHeadings']);

@@ -2749,11 +2749,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     } else {
       this.rowHeader.hidden = true;
     }
-    // Header corner. Sized only when BOTH header
-    // dimensions are > 0 so it occupies its grid cell with
-    // matching width + height. When either is 0, the corner
-    // collapses to a 0×0 box and isn't visible.
-    this.headerCorner.hidden = cornerWidth === 0 && cornerHeight === 0;
+    // Header corner. Shown only when BOTH its dimensions are > 0, so it
+    // fills its grid cell with matching width + height. With either at 0 -
+    // the headings off and only one axis grouped - it is hidden: its border
+    // would otherwise keep a 1px row or column of the grid, and every cell
+    // would sit a pixel off.
+    this.headerCorner.hidden = cornerWidth === 0 || cornerHeight === 0;
     this.headerCorner.style.width = `${cornerWidth}px`;
     this.headerCorner.style.height = `${cornerHeight}px`;
     this.view.pagedViewParts = {
