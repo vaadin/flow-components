@@ -37,7 +37,4 @@ export class ViewState {
     corner: { width: 0, height: 0 },
     frozen: { width: 0, columns: 0, height: 0, rows: 0 }
   };
-
-  /** When the server was last told of a write to a locked cell, if ever. */
-  protectedWriteReportedAt: number | null = null;
 }

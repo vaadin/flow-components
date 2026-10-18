@@ -21,26 +21,15 @@ import type {
 import type { SpreadsheetClientApi } from './types/rpc-server-to-client.js';
 import {
   addAuxRange,
-  buildSelectionEvent,
   type CellPosition,
   type CellRange,
   isCellInSelection,
   normalizedRange,
-  selectedCellSetBy,
   selectionSizeLabel,
   type SelectionState,
   selectSingleCell
 } from './state/SelectionState.js';
-import type {
-  SpreadsheetEvent,
-  CellRangePaintedData,
-  CellRangeSelectedData,
-  CellAddedToSelectionData,
-  CellSelectedData,
-  CellValueEditedData,
-  ColumnSelectedData,
-  RowSelectedData
-} from './types/rpc-client-to-server.js';
+import type { SpreadsheetEvent, CellValueEditedData } from './types/rpc-client-to-server.js';
 import type { CellEditorState } from './elements/types.js';
 import {
   computeViewportBounds,
@@ -69,7 +58,7 @@ import {
   type CellRect,
   type PaintOutcome
 } from './algorithms/SelectionPaint.js';
-import { inSelectionWalkDirection, isMultiCellRange, walkInsideSelection } from './algorithms/SelectionWalk.js';
+import { inSelectionWalkDirection, walkInsideSelection } from './algorithms/SelectionWalk.js';
 import {
   canPoint,
   formulaReferences,
@@ -98,6 +87,7 @@ import { Popup } from './controllers/Popup.js';
 import { KeyboardExit } from './controllers/KeyboardExit.js';
 import { LinkTooltip } from './controllers/LinkTooltip.js';
 import { HostedComponents } from './controllers/HostedComponents.js';
+import { SelectionReporter } from './controllers/SelectionReporter.js';
 import { ServerSync } from './controllers/ServerSync.js';
 import { Outline } from './controllers/Outline.js';
 import { listenForLongPress } from './dom/LongPress.js';
@@ -117,13 +107,6 @@ import { type FormulaBarRenderState, SpreadsheetFormulaBar } from './elements/Sp
 import { SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
 import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
-
-/**
- * The shortest time between two reports of a write to a locked cell, as the
- * GWT client kept it: the server's ProtectedEditListener promises one event a
- * second at most.
- */
-const PROTECTED_WRITE_REPORT_INTERVAL_MS = 1000;
 
 /**
  * Height of the column headers, in pixels: 27, so a sheet starts its first
@@ -199,6 +182,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * see {@link SheetStore}.
    */
   private readonly store = new SheetStore(() => this.scheduleRender());
+
+  /** Tells the server what the user selected; see {@link SelectionReporter}. */
+  private readonly report = new SelectionReporter(this.store, {
+    send: (event) => this.sendToServer(event),
+    selectedCellReported: (cell) => this.showSelectedCellInFormulaBar(cell)
+  });
 
   /** What the server mirrors onto the element; see {@link SheetStore.model}. */
   private get model(): SheetModel {
@@ -704,7 +693,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
           this.renders.handle(() => {
             if (!isCellInSelection(col, row, this.selection)) {
               this.store.selectCellOrMerge(col, row);
-              this.dispatchSelectionEvent();
+              this.report.selection();
             }
           }),
         returnFocusToSheet: () => this.returnFocusToSheet(),
@@ -837,7 +826,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         auxRanges: []
       };
       this.store.select({ ...extended, auxRanges: this.selection.auxRanges });
-      this.dispatchCellsAddedToRangeSelection(extended.activeRange);
+      this.report.rangeAdded(extended.activeRange);
       return;
     }
     if (ctrlOrMeta) {
@@ -845,7 +834,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // as its own range and becomes active; the previous active
       // range is kept as an aux range.
       this.store.select(addAuxRange(this.selection, col, row, col, row));
-      this.dispatchCellAddedToSelection(col, row);
+      this.report.cellAdded(col, row);
       return;
     }
     if (shiftKey) {
@@ -860,13 +849,13 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         auxRanges: this.selection.auxRanges
       });
       if (!this.rangeReportedOnRelease) {
-        this.reportRangeSelection();
+        this.report.range();
       }
       return;
     } else {
       this.store.selectCellOrMerge(col, row);
     }
-    this.dispatchSelectionEvent();
+    this.report.selection();
     // Hyperlink cells additionally dispatch `linkCellClicked`
     // after the normal selection event. The
     // server's onLinkCellClicked handler opens the URL.
@@ -1025,7 +1014,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // dragged range: with the cell the drag started on, when it went
       // into other cells. One that stayed in its cell was a shift-click,
       // which grows the range from the selected cell.
-      this.reportRangeSelection(press.crossed);
+      this.report.range(press.crossed);
       // The click that may follow the release reports nothing more.
       this.rangeReportedOnRelease = true;
       setTimeout(() => (this.rangeReportedOnRelease = false));
@@ -1046,7 +1035,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private readonly handleCellDoubleClick = (e: CustomEvent<{ col: number; row: number }>): void => {
     const { col, row } = e.detail;
     if (this.store.isCellLockedForEdit(col, row)) {
-      this.reportProtectedCellWriteAttempt();
+      this.report.protectedWrite();
       return;
     }
     // Seeded with what the cell IS, not what it shows — the formula
@@ -1156,7 +1145,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // selection event so the server stays in sync: every
     // selection write sends an event.
     if (next !== null) {
-      this.dispatchSelectionEvent();
+      this.report.selection();
     }
     if (walks) {
       this.moveActiveCellInsideSelection(
@@ -1501,8 +1490,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole column joins the selection as a further range.
       this.store.select(addAuxRange(this.selection, col, 1, col, rows, { col, row }));
-      const data: ColumnSelectedData = { column: col, firstRowIndex: row };
-      this.sendToServer({ type: 'columnAddedToSelection', data });
+      this.report.columnAdded(col, row);
       return;
     }
     if (shiftKey) {
@@ -1520,7 +1508,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         auxRanges: []
       });
     }
-    this.dispatchSelectionEvent();
+    this.report.selection();
   };
 
   /**
@@ -1570,8 +1558,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     if ((ctrlKey || metaKey) && !shiftKey) {
       // The whole row joins the selection as a further range.
       this.store.select(addAuxRange(this.selection, 1, row, cols, row, { col, row }));
-      const data: RowSelectedData = { row, firstColumnIndex: col };
-      this.sendToServer({ type: 'rowAddedToRangeSelection', data });
+      this.report.rowAdded(row, col);
       return;
     }
     if (shiftKey) {
@@ -1589,7 +1576,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         auxRanges: []
       });
     }
-    this.dispatchSelectionEvent();
+    this.report.selection();
   };
 
   /**
@@ -1661,7 +1648,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         activeRange: normalizedRange(1, 1, this.model.cols, this.model.rows),
         auxRanges: []
       });
-      this.dispatchSelectionEvent(true);
+      this.report.selection(true);
       return;
     }
 
@@ -1702,7 +1689,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       }
       const { col, row } = this.selection.activeCell;
       if (this.store.isCellLockedForEdit(col, row)) {
-        this.reportProtectedCellWriteAttempt();
+        this.report.protectedWrite();
         return;
       }
       e.preventDefault();
@@ -1728,7 +1715,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       }
       const { col, row } = this.selection.activeCell;
       if (this.store.isCellLockedForEdit(col, row)) {
-        this.reportProtectedCellWriteAttempt();
+        this.report.protectedWrite();
         return;
       }
       e.preventDefault();
@@ -1814,7 +1801,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         }
         this.moveSelectionTo(next);
       }
-      this.dispatchSelectionEvent();
+      this.report.selection();
       return;
     }
 
@@ -1835,7 +1822,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     e.preventDefault();
     this.moveSelectionTo(selectCellAt(target.col, target.row, this.model.mergedRegions));
-    this.dispatchSelectionEvent();
+    this.report.selection();
   };
 
   /**
@@ -1853,10 +1840,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * Put the active cell somewhere else inside the range that is already
    * selected, keeping the range itself.
    *
-   * The server is told with the plain `cellSelected` event, but with
-   * `oldSelectionRangeDiscarded` false - that flag is the whole
-   * difference between "the user picked this cell" and "the user is
-   * walking through the block they picked earlier".
+   * The server hears that only the active cell moved; see
+   * {@link SelectionReporter.activeCellMoved}.
    */
   private moveActiveCellInsideSelection(next: { col: number; row: number }): void {
     this.store.select({
@@ -1865,12 +1850,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       auxRanges: this.selection.auxRanges
     });
     this.scrollCellIntoView(next);
-    const data: CellSelectedData = {
-      row: next.row,
-      column: next.col,
-      oldSelectionRangeDiscarded: false
-    };
-    this.sendToServer({ type: 'cellSelected', data });
+    this.report.activeCellMoved(next);
   }
 
   /**
@@ -1936,29 +1916,15 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * Send an event to the server. Dispatched on the host alone, where Flow
    * listens: a bubbling event also reached the server component of a
    * spreadsheet this one sits in - as popup content, a custom editor or a
-   * cell's component - which applied it to its own cells.
+   * cell's component - which applied it to its own cells. What is drawn is
+   * drawn first; see {@link RenderScheduler}. The selection goes through
+   * {@link report}, which keeps the cell the server holds as selected.
    */
   private sendToServer(detail: SpreadsheetEvent): void {
     this.renders.beforeSend();
     this.host.dispatchEvent(new CustomEvent('spreadsheet-event', { detail }));
-    const selected = selectedCellSetBy(detail);
-    if (selected !== null) {
-      this.sheetData.serverSelectedCell = selected;
-      this.showSelectedCellInFormulaBar(selected);
-    }
   }
 
-  /**
-   * Names the selected cell in the address field and shows what it holds in
-   * the formula field, from the cells the client has, as GWT did on every
-   * click and key. Waiting for the server's answer, which only confirms them,
-   * had both fields trail every click by a round trip: a third of a second
-   * on a slow network. The answer still names a named range, and fills in a
-   * cell not loaded yet.
-   *
-   * Nothing can have been written in the formula field for the cell yet: the
-   * selection has only just been made.
-   */
   /**
    * Puts the server's text for a range on the clipboard once it comes; see
    * {@link listenToClipboard}. Asked for and written now, while the copy is
@@ -1984,6 +1950,17 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     return true;
   }
 
+  /**
+   * Names the selected cell in the address field and shows what it holds in
+   * the formula field, from the cells the client has, as GWT did on every
+   * click and key. Waiting for the server's answer, which only confirms them,
+   * had both fields trail every click by a round trip: a third of a second
+   * on a slow network. The answer still names a named range, and fills in a
+   * cell not loaded yet.
+   *
+   * Nothing can have been written in the formula field for the cell yet: the
+   * selection has only just been made.
+   */
   private showSelectedCellInFormulaBar(cell: CellPosition): void {
     this.changeFormulaBar({
       address: this.extendingSelection ? selectionSizeLabel(this.selection.activeRange) : cellCoordToAddress(cell)
@@ -2190,67 +2167,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
 
   /**
-   * Tell the server a cell joined a non-coherent selection. Distinct
-   * from {@link dispatchSelectionEvent}, which reports a selection that
-   * replaces whatever came before.
-   */
-  private dispatchCellAddedToSelection(col: number, row: number): void {
-    const data: CellAddedToSelectionData = {
-      row,
-      column: col
-    };
-    this.sendToServer({ type: 'cellAddedToSelectionAndSelected', data });
-  }
-
-  /**
-   * Tell the server about the active range, as a whole selection or as
-   * one more piece of a selection that is already in pieces.
-   *
-   * An ordinary selection event says the old range is gone, and the
-   * server drops the cells earlier Ctrl-clicks put there along with it.
-   * Anything then acting on the selection - a context-menu action, a
-   * delete - misses them.
-   */
-  private reportRangeSelection(startsAnew = false): void {
-    if (this.selection.auxRanges.length > 0) {
-      this.dispatchCellsAddedToRangeSelection(this.selection.activeRange);
-      return;
-    }
-    this.dispatchSelectionEvent(startsAnew);
-  }
-
-  /** Tell the server a whole range joined a non-coherent selection. */
-  private dispatchCellsAddedToRangeSelection(range: CellRange): void {
-    const data: CellRangeSelectedData = {
-      row1: range.r1,
-      col1: range.c1,
-      row2: range.r2,
-      col2: range.c2
-    };
-    this.sendToServer({ type: 'cellsAddedToRangeSelection', data });
-  }
-
-  /**
-   * Tell the server the user tried to change a cell they may not change.
-   *
-   * The client refuses the edit on its own; the server is told so it can
-   * say why — the default handler shows the workbook's "this cell is
-   * protected" notification. Silently swallowing the keystroke leaves the
-   * user with no idea why nothing happened.
-   */
-  private reportProtectedCellWriteAttempt(): void {
-    // A burst of keys into a locked cell is one attempt, not a notification
-    // per key: the attempts within a second of the last report go unsaid.
-    const now = performance.now();
-    const last = this.view.protectedWriteReportedAt;
-    if (last !== null && now - last < PROTECTED_WRITE_REPORT_INTERVAL_MS) {
-      return;
-    }
-    this.view.protectedWriteReportedAt = now;
-    this.sendToServer({ type: 'protectedCellWriteAttempted', data: {} });
-  }
-
-  /**
    * Mousedown on the fill handle. The drag that follows paints rather than
    * selects, so the current range is remembered as the one being grown or
    * shrunk.
@@ -2287,58 +2203,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       type: 'selectionIncreasePainted',
       data: { r1: grown.r1, c1: grown.c1, r2: grown.r2, c2: grown.c2 }
     });
-  }
-
-  /**
-   * Dispatch a {@code spreadsheet-event} on the host carrying
-   * the appropriate server-bound event for the current selection.
-   * Picks one of {@code cellSelected /
-   * cellRangeSelected / columnSelected / rowSelected} based on
-   * the shape of {@code this.selection.activeRange}:
-   *
-   *  - whole column (r1=1, r2=rows, single col) → columnSelected
-   *  - whole row    (c1=1, c2=cols, single row) → rowSelected
-   *  - single cell  (c1=c2, r1=r2)              → cellSelected
-   *  - otherwise                                → cellRangeSelected
-   *
-   * The server receives {@code spreadsheet-event} through a
-   * {@code @DomEvent}; the detail's {@code type} + {@code data} follow the
-   * server's SpreadsheetHandler signatures as a wire contract.
-   *
-   * A range goes in one event, as in earlier versions. Grown from the cell
-   * the server holds as selected - a shift-click, Shift+arrow - it is
-   * `cellRangeSelected`, which keeps that cell. With a starting point of its
-   * own - a drag, select all - or grown from a cell the server does not
-   * hold, it is `cellRangePainted`, which carries the starting point:
-   * `cellRangeSelected` would leave the server's selected cell elsewhere, or
-   * null. Telling the server the starting point first, in a `cellSelected`,
-   * made it report a selection of that one cell in between, which every
-   * selection listener of the application saw.
-   *
-   * @param startsAnew whether the range has a starting point of its own,
-   *   even one that is the selected cell already
-   */
-  private dispatchSelectionEvent(startsAnew = false): void {
-    const { activeCell } = this.selection;
-    // A merge is one cell: the server hears that cell, rather than a range
-    // it would offer to merge again.
-    const range =
-      this.store.selectsRange() || !isMultiCellRange(this.selection.activeRange)
-        ? this.selection.activeRange
-        : { c1: activeCell.col, c2: activeCell.col, r1: activeCell.row, r2: activeCell.row };
-    const event = buildSelectionEvent(activeCell, range, this.model.rows, this.model.cols);
-    const held = this.sheetData.serverSelectedCell;
-    const grownFromHeld = held !== null && held.col === activeCell.col && held.row === activeCell.row;
-    if (event.type === 'cellRangeSelected' && (startsAnew || !grownFromHeld)) {
-      const data: CellRangePaintedData = {
-        selectedCellRow: activeCell.row,
-        selectedCellColumn: activeCell.col,
-        ...event.data
-      };
-      this.sendToServer({ type: 'cellRangePainted', data });
-      return;
-    }
-    this.sendToServer(event);
   }
 
   // ====================================================================
@@ -2732,7 +2596,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       return;
     }
     if (this.store.isCellLockedForEdit(col, row)) {
-      this.reportProtectedCellWriteAttempt();
+      this.report.protectedWrite();
       return;
     }
     // An edit started in the cell ends here too: its editor closes, and
@@ -2753,7 +2617,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
     this.store.pick(next);
     this.scrollCellIntoView(next.activeCell);
-    this.dispatchSelectionEvent();
+    this.report.selection();
   };
 
   /**
@@ -3216,7 +3080,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       return;
     }
     this.store.select(selectSingleCell(cell.col, cell.row));
-    this.dispatchSelectionEvent();
+    this.report.selection();
   };
 
   /**
