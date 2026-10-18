@@ -124,6 +124,7 @@ public class ContextMenuManager implements Serializable {
      *            Column index at context menu target, 1-based
      */
     public void onContextMenuOpenOnSelection(int row, int column) {
+        removeActionIcons();
         // update the selection if the context menu wasn't triggered on
         // top of any of the cells inside the current selection.
         boolean keepSelection = spreadsheet.getCellSelectionManager()
@@ -152,6 +153,7 @@ public class ContextMenuManager implements Serializable {
      *            Index of the target row, 1-based
      */
     public void onRowHeaderContextMenuOpen(int rowIndex) {
+        removeActionIcons();
         ArrayList<SpreadsheetActionDetails> actions = createActionsListForRow(
                 rowIndex);
         if (!actions.isEmpty()) {
@@ -168,6 +170,7 @@ public class ContextMenuManager implements Serializable {
      *            Index of the target column, 1-based
      */
     public void onColumnHeaderContextMenuOpen(int columnIndex) {
+        removeActionIcons();
         ArrayList<SpreadsheetActionDetails> actions = createActionsListForColumn(
                 columnIndex);
         if (!actions.isEmpty()) {
@@ -184,6 +187,7 @@ public class ContextMenuManager implements Serializable {
      *            Key of the selected action
      */
     public void onActionOnCurrentSelection(String actionKey) {
+        removeActionIcons();
         Action action = actionMapper.get(actionKey);
         for (Handler ah : actionHandlers) {
             ah.handleAction(action, spreadsheet, spreadsheet
@@ -199,6 +203,7 @@ public class ContextMenuManager implements Serializable {
      *            Key of the selected action
      */
     public void onActionOnRowHeader(String actionKey) {
+        removeActionIcons();
         Action action = actionMapper.get(actionKey);
         final CellRangeAddress row = new CellRangeAddress(
                 contextMenuHeaderIndex - 1, contextMenuHeaderIndex - 1, -1, -1);
@@ -215,6 +220,7 @@ public class ContextMenuManager implements Serializable {
      *            Key of the selected action
      */
     public void onActionOnColumnHeader(String actionKey) {
+        removeActionIcons();
         Action action = actionMapper.get(actionKey);
         final CellRangeAddress column = new CellRangeAddress(-1, -1,
                 contextMenuHeaderIndex - 1, contextMenuHeaderIndex - 1);
@@ -323,6 +329,11 @@ public class ContextMenuManager implements Serializable {
         return actionDetailsList;
     }
 
+    /**
+     * Takes the icons of the menu shown last off the component: when the menu
+     * closes, when an item is picked, and before a menu opens, so an icon an
+     * application offers again is never attached twice.
+     */
     private void removeActionIcons() {
         for (var icon : iconsInContextMenu) {
             spreadsheet.getElement().removeVirtualChild(icon);

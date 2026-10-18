@@ -214,6 +214,9 @@ export class ContextMenu {
     // goes back to the sheet.
     this.host.returnFocusToSheet();
     this.host.send({ type: eventType, data: { actionKey: key } });
+    // The pick closed the menu too, which the server hears after the action,
+    // as the GWT client told it: that is when it takes the icons off.
+    this.host.send({ type: 'contextMenuClosed', data: {} });
   };
 
   /** Left or Tab in the menu closes it. */

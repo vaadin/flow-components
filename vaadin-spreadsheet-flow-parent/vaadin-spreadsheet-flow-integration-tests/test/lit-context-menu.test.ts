@@ -388,7 +388,6 @@ describe('Spreadsheet context menu — picking an item', () => {
     ctx.events.length = 0;
     (await items(ctx.sheet))[0].click();
 
-    expect(ctx.events).to.have.length(1);
     expect(ctx.events[0].type).to.equal('actionOnCurrentSelection');
     expect(ctx.events[0].data).to.deep.equal({ actionKey: 'insert-row' });
   });
@@ -416,6 +415,15 @@ describe('Spreadsheet context menu — picking an item', () => {
     (await items(ctx.sheet))[0].click();
 
     expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
+  });
+
+  it('tells the server it closed, after the action, as the GWT client did', async () => {
+    // The server takes the action icons off when it hears of the close.
+    ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
+    ctx.events.length = 0;
+    (await items(ctx.sheet))[0].click();
+
+    expect(ctx.events.map((e) => e.type)).to.deep.equal(['actionOnCurrentSelection', 'contextMenuClosed']);
   });
 });
 
@@ -480,6 +488,15 @@ describe("Spreadsheet context menu — the keyboard, as the GWT client's menu ha
     expect(ctx.events.filter((e) => e.type === 'actionOnCurrentSelection').map((e) => e.data)).to.deep.equal([
       { actionKey: '2' }
     ]);
+  });
+
+  it('tells the server it closed, after the action, when an item is picked with Enter', () => {
+    press(ctx.sheet, 'ArrowDown');
+    ctx.events.length = 0;
+
+    press(ctx.sheet, 'Enter');
+
+    expect(ctx.events.map((e) => e.type)).to.deep.equal(['actionOnCurrentSelection', 'contextMenuClosed']);
   });
 
   it('closes on Left once an item is in hand', async () => {
