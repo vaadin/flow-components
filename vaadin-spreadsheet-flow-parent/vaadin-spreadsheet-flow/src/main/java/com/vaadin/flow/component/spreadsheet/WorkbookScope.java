@@ -62,5 +62,6 @@ final class WorkbookScope implements Serializable {
      */
     void close() {
         popupButtons.detachAll();
+        sheetState.close();
     }
 }

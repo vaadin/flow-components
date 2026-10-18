@@ -13,6 +13,8 @@ import java.util.WeakHashMap;
 
 import org.apache.poi.ss.usermodel.Sheet;
 
+import com.vaadin.flow.shared.Registration;
+
 /**
  * This Class keeps the last state of selected cell or selected range.
  * <p>
@@ -21,9 +23,10 @@ import org.apache.poi.ss.usermodel.Sheet;
  */
 class SheetState implements Serializable {
     private final WeakHashMap<Sheet, String> selectedCells = new WeakHashMap<Sheet, String>();
+    private final Registration registration;
 
     SheetState(final Spreadsheet spreadSheet) {
-        spreadSheet.addSelectionChangeListener(
+        registration = spreadSheet.addSelectionChangeListener(
                 new Spreadsheet.SelectionChangeListener() {
                     @Override
                     public void onSelectionChange(
@@ -69,5 +72,13 @@ class SheetState implements Serializable {
 
     public void clear() {
         selectedCells.clear();
+    }
+
+    /**
+     * Stops remembering selections: the workbook they were made in is no longer
+     * shown, and the next one has a state of its own.
+     */
+    void close() {
+        registration.remove();
     }
 }
