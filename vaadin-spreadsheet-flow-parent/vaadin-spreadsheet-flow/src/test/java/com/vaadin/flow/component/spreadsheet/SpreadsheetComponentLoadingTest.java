@@ -242,6 +242,20 @@ class SpreadsheetComponentLoadingTest {
     }
 
     @Test
+    void aRow_getsTheMinimumHeightTheApplicationSets() {
+        components.add("First!F12");
+        spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setSpreadsheetComponentFactory(factory);
+        spreadsheet.setMinimumRowHeightForComponents(45);
+        ui.add(spreadsheet);
+
+        showRows(10, 20);
+
+        assertEquals(45f, heightOfRow(12));
+        assertEquals(sheet.getDefaultRowHeightInPoints(), heightOfRow(13));
+    }
+
+    @Test
     void aHiddenRow_staysHiddenWithAComponent() {
         sheet.createRow(11).setZeroHeight(true);
         components.add("First!F12");

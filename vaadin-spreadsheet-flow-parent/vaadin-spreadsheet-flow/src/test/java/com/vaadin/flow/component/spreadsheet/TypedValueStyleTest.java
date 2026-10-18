@@ -86,6 +86,24 @@ class TypedValueStyleTest {
     }
 
     @Test
+    void aPercentageTyped_getsTheDefaultPercentageFormat() {
+        type("A1", "5%");
+
+        assertEquals("0.00%", styleOf("A1").getDataFormatString());
+        assertEquals(0.05, spreadsheet.getCell("A1").getNumericCellValue(),
+                1e-9);
+    }
+
+    @Test
+    void aPercentageTyped_getsThePercentageFormatTheApplicationSets() {
+        spreadsheet.setDefaultPercentageFormat("0.0%");
+
+        type("A1", "5%");
+
+        assertEquals("0.0%", styleOf("A1").getDataFormatString());
+    }
+
+    @Test
     void aPercentageTyped_keepsTheRestOfTheStyleOfItsCell() {
         type("A1", "5%");
 

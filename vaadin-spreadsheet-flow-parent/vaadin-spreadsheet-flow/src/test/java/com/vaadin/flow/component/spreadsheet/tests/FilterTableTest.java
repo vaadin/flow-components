@@ -155,6 +155,24 @@ class FilterTableTest {
     }
 
     @Test
+    void clearAllFilters_clearsTheFiltersOfEveryColumn() {
+        getFilterCheckboxGroup(1).deselect("4");
+        getFilterCheckboxGroup(2).deselect("6");
+        Assertions.assertTrue(spreadsheet.isRowHidden(3));
+        Assertions.assertTrue(spreadsheet.isRowHidden(4));
+
+        table.clearAllFilters();
+
+        for (int column = 1; column <= 2; column++) {
+            Assertions.assertTrue(
+                    getItemFilter(column).getFilteredRows().isEmpty());
+            Assertions.assertFalse(getPopupButton(column).isActive());
+        }
+        Assertions.assertFalse(spreadsheet.isRowHidden(3));
+        Assertions.assertFalse(spreadsheet.isRowHidden(4));
+    }
+
+    @Test
     void filter_clearAndReload_filtersCleared() {
         getFilterCheckboxGroup(1).deselect("4");
         table.clear();

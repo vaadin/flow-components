@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet.tests;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -15,6 +17,7 @@ import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,6 +103,43 @@ class InsertDeleteCellCommentActionTest {
         Assertions.assertNull(commentAt("B3"));
         Assertions.assertNull(sheet.getRow(2),
                 "the row made to reach the comment is gone again");
+    }
+
+    @Test
+    void insert_givesTheCommentTheAuthorTheProviderNamesForItsCell() {
+        List<CellReference> askedFor = new ArrayList<>();
+        spreadsheet.setCommentAuthorProvider(cell -> {
+            askedFor.add(cell);
+            return "Ada";
+        });
+
+        runOn("B3");
+
+        Assertions.assertEquals("Ada", commentAt("B3").getAuthor());
+        Assertions.assertEquals(1, askedFor.size());
+        Assertions.assertEquals(2, askedFor.get(0).getRow());
+        Assertions.assertEquals(1, askedFor.get(0).getCol());
+    }
+
+    @Test
+    void insert_withoutAProvider_givesTheDefaultAuthor() {
+        runOn("B3");
+
+        Assertions.assertEquals("Spreadsheet User",
+                commentAt("B3").getAuthor());
+    }
+
+    @Test
+    void insert_withAProviderThatNamesNoOne_givesTheDefaultAuthor() {
+        spreadsheet.setCommentAuthorProvider(cell -> " ");
+        runOn("B3");
+        spreadsheet.setCommentAuthorProvider(cell -> null);
+        runOn("C3");
+
+        Assertions.assertEquals("Spreadsheet User",
+                commentAt("B3").getAuthor());
+        Assertions.assertEquals("Spreadsheet User",
+                commentAt("C3").getAuthor());
     }
 
     private void runOn(String address) {
