@@ -31,6 +31,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.formula.FormulaParseException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellPropertyType;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -41,6 +42,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -157,9 +159,18 @@ public class CellValueManager implements Serializable {
         return cellDataBuilder.createCellDataForCell(cell);
     }
 
+    /**
+     * Marks the cell as text typed with a leading apostrophe, or takes the mark
+     * off. A style is shared by every cell that wears it, so the cell is given
+     * a style that differs in the mark only, found or made.
+     */
     private void setLeadingQuoteStyle(Cell cell, boolean leadingQuote) {
-        if (cell instanceof XSSFCell xssfCell) {
-            xssfCell.getCellStyle().getCoreXf().setQuotePrefix(leadingQuote);
+        if (cell instanceof XSSFCell
+                && cell.getCellStyle().getQuotePrefixed() != leadingQuote) {
+            CellUtil.setCellStyleProperty(cell, CellPropertyType.QUOTE_PREFIXED,
+                    leadingQuote);
+            spreadsheet.getSpreadsheetStyleFactory().cellStyleUpdated(cell,
+                    true);
         }
     }
 
@@ -489,19 +500,17 @@ public class CellValueManager implements Serializable {
                     if (value.isEmpty()) {
                         cell.setBlank();
                     } else if (percentage != null) {
-                        CellStyle cs = cell.getCellStyle();
-                        // Do not use default cell style (index == 0) for
-                        // percentage as it will affect all cells
-                        if (cs == null || cs.getIndex() == 0) {
-                            cs = workbook.createCellStyle();
-                            cell.setCellStyle(cs);
-                        }
-
-                        if (cs.getDataFormatString() != null
-                                && !cs.getDataFormatString().contains("%")) {
-                            cs.setDataFormat(workbook.createDataFormat()
-                                    .getFormat(spreadsheet
-                                            .getDefaultPercentageFormat()));
+                        String format = cell.getCellStyle()
+                                .getDataFormatString();
+                        if (format != null && !format.contains("%")) {
+                            // A style is shared by every cell that wears it:
+                            // the cell is given one that differs in the format
+                            // only, found or made.
+                            CellUtil.setCellStyleProperty(cell,
+                                    CellPropertyType.DATA_FORMAT,
+                                    workbook.createDataFormat()
+                                            .getFormat(spreadsheet
+                                                    .getDefaultPercentageFormat()));
                             styler.cellStyleUpdated(cell, true);
                         }
                         cell.setCellValue(percentage);
