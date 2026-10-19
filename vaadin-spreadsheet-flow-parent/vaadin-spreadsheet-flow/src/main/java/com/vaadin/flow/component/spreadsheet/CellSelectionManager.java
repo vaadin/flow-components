@@ -255,21 +255,56 @@ public class CellSelectionManager implements Serializable {
      */
     protected void onSheetAddressChanged(String value,
             boolean initialSelection) {
+        // What the address is, read before anything is selected: POI's word
+        // for a reference or a name it cannot read is an
+        // IllegalArgumentException, and only then is the address at fault.
+        // What selecting it throws, a selection listener's included, goes
+        // through.
+        Runnable namedRangeSelection = null;
+        CellRangeAddress range = null;
+        CellReference cellReference = null;
         try {
             if (namedRangeUtils.isNamedRange(value)) {
-                namedRangeUtils.onNamedRange(value);
+                namedRangeSelection = namedRangeUtils.selectionFor(value);
             } else if (value.contains(":")) {
+                range = spreadsheet.createCorrectCellRangeAddress(value);
+            } else if (namedRangeUtils.isCellReference(value)) {
+                cellReference = new CellReference(value);
+            }
+        } catch (IllegalArgumentException invalid) {
+            spreadsheet.getRpcProxy().invalidCellAddress();
+            return;
+        }
+        if (namedRangeSelection != null) {
+            namedRangeSelection.run();
+        } else if (range != null) {
+            CellRangeAddress cra = range;
+            // need to check the range for merged regions
+            MergedRegion region = MergedRegionUtil.findIncreasingSelection(
+                    spreadsheet.getMergedRegionContainer(),
+                    cra.getFirstRow() + 1, cra.getLastRow() + 1,
+                    cra.getFirstColumn() + 1, cra.getLastColumn() + 1);
+            if (region != null) {
+                cra = new CellRangeAddress(region.row1 - 1, region.row2 - 1,
+                        region.col1 - 1, region.col2 - 1);
+            }
+            handleCellRangeSelection(cra);
+            selectedCellReference = new CellReference(
+                    spreadsheet.getActiveSheet().getSheetName(),
+                    cra.getFirstRow(), cra.getFirstColumn(), false, false);
+            paintedCellRange = cra;
+            cellRangeAddresses.clear();
+            cellRangeAddresses.add(cra);
+        } else if (cellReference != null) {
+            MergedRegion region = MergedRegionUtil.findIncreasingSelection(
+                    spreadsheet.getMergedRegionContainer(),
+                    cellReference.getRow() + 1, cellReference.getRow() + 1,
+                    cellReference.getCol() + 1, cellReference.getCol() + 1);
+            if (region != null && (region.col1 != region.col2
+                    || region.row1 != region.row2)) {
                 CellRangeAddress cra = spreadsheet
-                        .createCorrectCellRangeAddress(value);
-                // need to check the range for merged regions
-                MergedRegion region = MergedRegionUtil.findIncreasingSelection(
-                        spreadsheet.getMergedRegionContainer(),
-                        cra.getFirstRow() + 1, cra.getLastRow() + 1,
-                        cra.getFirstColumn() + 1, cra.getLastColumn() + 1);
-                if (region != null) {
-                    cra = new CellRangeAddress(region.row1 - 1, region.row2 - 1,
-                            region.col1 - 1, region.col2 - 1);
-                }
+                        .createCorrectCellRangeAddress(region.row1, region.col1,
+                                region.row2, region.col2);
                 handleCellRangeSelection(cra);
                 selectedCellReference = new CellReference(
                         spreadsheet.getActiveSheet().getSheetName(),
@@ -277,52 +312,24 @@ public class CellSelectionManager implements Serializable {
                 paintedCellRange = cra;
                 cellRangeAddresses.clear();
                 cellRangeAddresses.add(cra);
-            } else if (namedRangeUtils.isCellReference(value)) {
-                final CellReference cellReference = new CellReference(value);
-                MergedRegion region = MergedRegionUtil.findIncreasingSelection(
-                        spreadsheet.getMergedRegionContainer(),
-                        cellReference.getRow() + 1, cellReference.getRow() + 1,
-                        cellReference.getCol() + 1, cellReference.getCol() + 1);
-                if (region != null && (region.col1 != region.col2
-                        || region.row1 != region.row2)) {
-                    CellRangeAddress cra = spreadsheet
-                            .createCorrectCellRangeAddress(region.row1,
-                                    region.col1, region.row2, region.col2);
-                    handleCellRangeSelection(cra);
-                    selectedCellReference = new CellReference(
-                            spreadsheet.getActiveSheet().getSheetName(),
-                            cra.getFirstRow(), cra.getFirstColumn(), false,
-                            false);
-                    paintedCellRange = cra;
-                    cellRangeAddresses.clear();
-                    cellRangeAddresses.add(cra);
-                } else {
-                    handleCellAddressChange(cellReference.getRow() + 1,
-                            cellReference.getCol() + 1, initialSelection);
-                    paintedCellRange = spreadsheet
-                            .createCorrectCellRangeAddress(
-                                    cellReference.getRow() + 1,
-                                    cellReference.getCol() + 1,
-                                    cellReference.getRow() + 1,
-                                    cellReference.getCol() + 1);
-                    final CellReference cellReferenceWithSheetName = new CellReference(
-                            spreadsheet.getActiveSheet().getSheetName(),
-                            cellReference.getRow(), cellReference.getCol(),
-                            false, false);
-                    selectedCellReference = cellReferenceWithSheetName;
-                    cellRangeAddresses.clear();
-                }
             } else {
-                // Not a named range, not a range, not a cell reference -
-                // there is nothing to select. Saying so lets the client put
-                // the real address back; falling through in silence left the
-                // typed text in the field naming a cell nobody is on, and
-                // the next Enter sent it again.
-                spreadsheet.getRpcProxy().invalidCellAddress();
-                return;
+                handleCellAddressChange(cellReference.getRow() + 1,
+                        cellReference.getCol() + 1, initialSelection);
+                paintedCellRange = spreadsheet.createCorrectCellRangeAddress(
+                        cellReference.getRow() + 1, cellReference.getCol() + 1,
+                        cellReference.getRow() + 1, cellReference.getCol() + 1);
+                selectedCellReference = new CellReference(
+                        spreadsheet.getActiveSheet().getSheetName(),
+                        cellReference.getRow(), cellReference.getCol(), false,
+                        false);
+                cellRangeAddresses.clear();
             }
-        } catch (IllegalArgumentException invalid) {
-            // POI's word for a reference or a name it cannot read
+        } else {
+            // Not a named range, not a range, not a cell reference - there is
+            // nothing to select. Saying so lets the client put the real
+            // address back; falling through in silence left the typed text in
+            // the field naming a cell nobody is on, and the next Enter sent it
+            // again.
             spreadsheet.getRpcProxy().invalidCellAddress();
             return;
         }

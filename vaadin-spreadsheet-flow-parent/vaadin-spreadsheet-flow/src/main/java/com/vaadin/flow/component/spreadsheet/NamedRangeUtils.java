@@ -68,20 +68,40 @@ class NamedRangeUtils implements Serializable {
     }
 
     /**
-     * Run when address field contains named range This creates new range or
-     * selects already existing one.
+     * What typing a name into the address field does, read before anything is
+     * done: a name not there yet is made for the selection, and selects nothing
+     * more; one there selects what it refers to, on its sheet. What POI cannot
+     * read of the name throws here, as an {@link IllegalArgumentException}; the
+     * selection returned only selects, and what it throws, a listener's
+     * included, is not about the name.
      *
      * @param value
      *            Address field value
+     * @return what selects the range the name refers to
      */
-    public void onNamedRange(String value) {
+    Runnable selectionFor(String value) {
         Workbook workbook = spreadsheet.getWorkbook();
         Name name = workbook.getName(value);
         if (name == null) {
             createNewNamedRange(value);
-        } else {
-            selectExistingNameRange(name);
+            return () -> {
+            };
         }
+        String rangeFormula = name.getRefersToFormula();
+        String formulaSheet = name.getSheetName();
+        if (!formulaSheet.equals(spreadsheet.getActiveSheet().getSheetName())) {
+            return () -> switchSheet(formulaSheet, rangeFormula);
+        }
+        String nameName = name.getNameName();
+        if (rangeFormula.indexOf(":") == -1) {
+            final CellReference cell = new CellReference(rangeFormula);
+            return () -> getSelectionManager().handleCellAddressChange(
+                    cell.getRow() + 1, cell.getCol() + 1, false, nameName);
+        }
+        CellRangeAddress cra = spreadsheet
+                .createCorrectCellRangeAddress(rangeFormula);
+        return () -> getSelectionManager().handleCellRangeSelection(nameName,
+                cra);
     }
 
     /**
@@ -125,40 +145,12 @@ class NamedRangeUtils implements Serializable {
                 .formatAsString(sheetName, true);
     }
 
-    private void selectExistingNameRange(Name name) {
-        String rangeFormula = name.getRefersToFormula();
-        String formulaSheet = name.getSheetName();
-
-        final boolean rangeIsOnDifferentSheet = !name.getSheetName()
-                .equals(spreadsheet.getActiveSheet().getSheetName());
-
-        if (rangeIsOnDifferentSheet) {
-            switchSheet(formulaSheet, rangeFormula);
-        } else {
-            selectFormula(rangeFormula, name.getNameName());
-        }
-    }
-
     private void switchSheet(String formulaSheet, String range) {
         if (!spreadsheet.getActiveSheet().getSheetName().equals(formulaSheet)) {
             int sheetIndex = spreadsheet.getWorkbook()
                     .getSheetIndex(formulaSheet);
             spreadsheet.setActiveSheetIndex(sheetIndex);
             spreadsheet.initialSheetSelection = range;
-        }
-    }
-
-    private void selectFormula(String formula, String name) {
-        if (formula.indexOf(":") == -1) {
-            final CellReference cell = new CellReference(formula);
-
-            getSelectionManager().handleCellAddressChange(cell.getRow() + 1,
-                    cell.getCol() + 1, false, name);
-        } else {
-            CellRangeAddress cra = spreadsheet
-                    .createCorrectCellRangeAddress(formula);
-
-            getSelectionManager().handleCellRangeSelection(name, cra);
         }
     }
 }
