@@ -11,32 +11,28 @@
 import { html, type TemplateResult } from 'lit';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
 import { cellTarget } from '../dom/IndexedTarget.js';
-import { isFormula } from '../algorithms/FormulaPointing.js';
-import { composing } from '../algorithms/KeyboardMoves.js';
 
 import { toKey } from '../algorithms/CellKeys.js';
-import { cellCoordToAddress } from '../algorithms/CellRef.js';
 import { Memo, sameInputs } from '../algorithms/Memo.js';
-import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
 import { overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 import {
   cellBoxOnGrid,
   columnWidthOf,
-  drawnCellBox,
   drawnRanges,
   frozenExtentOf,
   type QuadrantName,
   type QuadrantRenderOpts,
   quadrants
 } from './cell-grid/GridGeometry.js';
-import { buildCellStyleBlock, editorCellStyle, styleRuleInputs } from './cell-grid/CellStyleRules.js';
+import { buildCellStyleBlock, styleRuleInputs } from './cell-grid/CellStyleRules.js';
 import { cellGridLumoStyles, cellGridStyles } from './cell-grid/CellGridStyles.js';
 import { buildFormulaReferences, buildPaintOutline, buildSelectionOverlay } from './cell-grid/RangeOverlays.js';
 import { buildPopupButtons, buildSheetOverlays } from './cell-grid/SheetOverlays.js';
 import { buildMergedCellOverlays, renderQuadrant } from './cell-grid/QuadrantCells.js';
 import { CommentNotes } from './cell-grid/CommentNotes.js';
+import { CellEditor } from './cell-grid/CellEditor.js';
 
 /**
  * Internal cell-grid Lit element. Renders absolutely-positioned cell
@@ -127,14 +123,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   private judgedBeforeDrawing = false;
   /** The style rules written from the workbook's styles, and what they were written from. */
   private readonly styleRules = new Memo<TemplateResult | string>();
-  /**
-   * How wide the editor is for the text in it, and on which cell: measured
-   * when it opens and as the user types, and kept so that drawing the sheet
-   * again - on a scroll, say - does not shrink it back to its cell.
-   */
-  private editorFit: { key: string; width: number } | null = null;
-  /** The editor input the keyboard was last given to - see updated(). */
-  private focusedEditor: HTMLInputElement | null = null;
+  /** The cell editor: its input, its width, and the keyboard. */
+  private readonly editor = new CellEditor(this, (cellStyle, value) => this.measureValue(cellStyle, value));
   /** The notes: which show, and where. */
   private readonly notes = new CommentNotes(this);
 
@@ -351,38 +341,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     return [this.renderState.cellStyleToCSSStyle, this.renderState.conditionalFormattingStyles, this.theme];
   }
 
-  /** The editor's measured width, while it is the editor open now. */
-  private editorFitWidth(): number | undefined {
-    const editor = this.renderState.editor;
-    const fit = this.editorFit;
-    return editor && fit?.key === toKey(editor.col, editor.row) ? fit.width : undefined;
-  }
-
-  /**
-   * Widens or narrows the editor to the text typed into it, and says what
-   * it now holds: the formula field shows it as it is typed.
-   */
-  private readonly handleEditorInput = (e: Event): void => {
-    const input = e.currentTarget as HTMLInputElement;
-    const width = this.fitEditor(input.value);
-    if (width !== null) {
-      input.style.width = `${width}px`;
-    }
-    const editor = this.renderState.editor;
-    if (editor) {
-      this.dispatchEvent(
-        new CustomEvent('cell-editor-input', {
-          detail: { col: editor.col, row: editor.row, value: input.value, caret: input.selectionStart ?? 0 },
-          bubbles: true,
-          composed: true
-        })
-      );
-    }
-  };
-
   /** What the open editor holds, or null when none is open. */
   editorValue(): string | null {
-    return this.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor')?.value ?? null;
+    return this.editor.value();
   }
 
   /**
@@ -390,34 +351,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * on there - into the open editor, which widens or narrows to it.
    */
   setEditorValue(value: string, caret?: number): void {
-    const input = this.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;
-    if (input === null) {
-      return;
-    }
-    input.value = value;
-    if (caret !== undefined) {
-      input.setSelectionRange(caret, caret);
-    }
-    const width = this.fitEditor(value);
-    if (width !== null) {
-      input.style.width = `${width}px`;
-    }
-  }
-
-  /**
-   * Measures text in the edited cell's style, and keeps the width the
-   * editor needs for it.
-   */
-  private fitEditor(value: string): number | null {
-    const editor = this.renderState.editor;
-    if (!editor) {
-      return null;
-    }
-    const { col, row } = editor;
-    const cellStyle = this.renderState.cellData.get(toKey(col, row))?.cellStyle ?? 'cs0';
-    const width = editorWidth(this.renderState, col, row, this.measureValue(cellStyle, value));
-    this.editorFit = { key: toKey(col, row), width };
-    return width;
+    this.editor.setValue(value, caret);
   }
 
   /** What a value would be drawn at, in its own style. */
@@ -452,11 +386,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
 
   /** What the cell editor holds and where its caret is; null while none is open. */
   editorDraft(): { value: string; caret: number } | null {
-    const input = this.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;
-    if (input === null) {
-      return null;
-    }
-    return { value: input.value, caret: input.selectionStart ?? input.value.length };
+    return this.editor.draft();
   }
 
   /** The popup button drawn on a cell, or null when there is none in view. */
@@ -495,11 +425,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   /**
-   * After every render: measure what the new state needs measured, place
-   * the notes, and give the keyboard to the note or editor being written.
-   * The browser's autofocus works only once, on insertion, so this focuses
-   * on every move into editing, which also puts the caret in an editor
-   * opened at another cell.
+   * After every render: measure what the new state needs measured, then
+   * place the notes, and fit the editor and give it the keyboard.
    */
   updated(changedProps: Map<string, unknown>): void {
     this.stylesDrawn = this.measuringInputs();
@@ -507,40 +434,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       this.judgeDrawnCells();
     }
     this.notes.updated();
-    if (!this.renderState.editor) {
-      // The next edit starts from its cell again.
-      this.editorFit = null;
-    } else if (this.editorFitWidth() === undefined) {
-      // Just opened: as wide as the value it opens with.
-      const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
-      const width = input === null ? null : this.fitEditor(input.value);
-      if (input !== null && width !== null) {
-        input.style.width = `${width}px`;
-      }
-    }
-    // The keyboard goes to an editor as it appears, and not again on every
-    // repaint: the user may have taken it to the formula field to carry the
-    // edit on there.
-    const input = this.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement | null;
-    if (input !== null && input !== this.focusedEditor) {
-      input.focus();
-      // Caret at the end so typing extends the existing value (Excel
-      // convention), except before a trailing percent sign: a cell opened
-      // on "5%" has to take the next digit into the number, not after the
-      // sign.
-      const caret = caretPosition(input.value);
-      input.setSelectionRange(caret, caret);
-      // What it opened on, so that a formula's references are coloured
-      // from the start.
-      input.dispatchEvent(
-        new CustomEvent('cell-editor-caret', {
-          detail: { value: input.value, caret },
-          bubbles: true,
-          composed: true
-        })
-      );
-    }
-    this.focusedEditor = input;
+    this.editor.updated();
   }
 
   /**
@@ -746,18 +640,13 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     const styleBlock = this.styleRules.get(styleRuleInputs(state), () => buildCellStyleBlock(state));
     // The notes and the editor float above every pane, so they stay at
     // grid level, placed where their cell is on screen.
-    const editor = buildCellEditorOverlay(
-      this.renderState,
-      isLumo(this.theme),
-      this.editorFitWidth(),
-      this.handleEditorInput
-    );
+    const editorInput = this.editor.render();
     const commentOverlays = this.notes.render();
     // A hidden stand-in for the editor, an input that is always there:
     // TestBench hands it out while no cell is being edited, so tests
     // that ask whether the editor is shown keep working.
     const standIn = html`<input class="cell-input-stand-in" hidden inert tabindex="-1" aria-hidden="true" />`;
-    return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${top}${left}${corner}${commentOverlays}${editor}${standIn}`;
+    return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${top}${left}${corner}${commentOverlays}${editorInput}${standIn}`;
   }
 
   /**
@@ -848,210 +737,6 @@ interface JudgedCell {
 /** The key a measured width is kept under. */
 function widthKey(cellStyle: string, value: string): string {
   return `${cellStyle}\u0000${value}`;
-}
-
-/**
- * How wide the editor is for text drawn at a width: its cell - the whole merged cell when the cell starts one - and then
- * the columns after it, whole ones, until the text fits, and a pixel more,
- * over the gridline at its right. Only the columns drawn count; past them
- * the editor is out of sight anyway, and the text scrolls inside it.
- */
-function editorWidth(state: CellGridRenderState, col: number, row: number, textWidth: number): number {
-  const index = state.mergedRegions.findIndex((region) => region.col1 === col && region.row1 === row);
-  const merged = index < 0 ? undefined : state.mergedRegionBoxes?.[index];
-  let last = merged === undefined ? col : state.mergedRegions[index].col2;
-  let width = merged === undefined ? columnWidthOf(state, col) : merged.width;
-  while (width < textWidth && last < state.viewport.lastColumnIndex) {
-    last += 1;
-    width += columnWidthOf(state, last);
-  }
-  return width + 1;
-}
-
-/** Whether a theme attribute's value names the Lumo variant. */
-function isLumo(theme: string | null | undefined): boolean {
-  return (theme ?? '').split(/\s+/).includes('lumo');
-}
-
-/**
- * Build the cell-editor overlay {@code <input>} when {@code state
- * .editor} is non-null. The input is sized to match
- * the cell's pixel box using the appropriate quadrant arrays:
- *
- *  - col within frozen cols: use {@code frozenColX} / {@code
- * frozenColWidths}
- *  - col within viewport: use {@code colX} / {@code colWidths}
- *  - row within frozen rows: use {@code frozenRowY} / {@code
- * frozenRowHeights}
- *  - row within viewport: use {@code rowY} / {@code rowHeights}
- *
- * When the editor's coordinate falls outside both the viewport
- * and the frozen ranges, returns empty (defensive — the
- * connector should never push an editor at an off-screen cell;
- * this keeps the render safe regardless).
- *
- * On keydown:
- * Enter / Tab → dispatch {@code cell-editor-commit} with the
- * current input value; the connector dispatches
- *     `cellValueEdited` + clears editor state.
- * Escape       → dispatch {@code cell-editor-cancel};
- * connector clears editor state without
- * dispatching cellValueEdited.
- * Blur          → same as commit (Excel convention).
- *
- * The detail event payload is {@code { col, row, value }} so the
- * connector can route the value to the correct cell without
- * re-querying its state.
- */
-function buildCellEditorOverlay(
-  state: CellGridRenderState,
-  lumo = false,
-  fitWidth?: number,
-  onInput?: (e: Event) => void
-): TemplateResult | string {
-  const editor = state.editor;
-  if (!editor) {
-    return '';
-  }
-  const { col, row, initialValue } = editor;
-
-  // Over the cell where it is on screen: a frozen cell moves with the view,
-  // and an editor placed by the frozen arrays alone was left behind as soon
-  // as the sheet scrolled. Over the whole of a merged cell.
-  const box = drawnCellBox(state, col, row);
-  if (box === null || box.width === 0 || box.height === 0) {
-    return '';
-  }
-  const { left, top, height } = box;
-  // As wide as the text in it needs, once that has been measured.
-  const width = fitWidth ?? editorWidth(state, col, row, 0);
-
-  // The Lumo theme puts every cell in its own font, which the cell's
-  // styles would undo here: they reach the editor inline, past anything a
-  // stylesheet says. So the theme's font goes last - and the sheet's text
-  // colour, which Lumo's editor writes in whatever colour the cell is.
-  const style =
-    `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
-    editorCellStyle(state, col, row) +
-    (lumo
-      ? '--default-font-family:var(--lumo-font-family);--default-font-size:var(--lumo-font-size-s);' +
-        'color:var(--default-color);'
-      : '');
-
-  const dispatchEditorEvent = (
-    target: EventTarget,
-    type: 'cell-editor-commit' | 'cell-editor-cancel',
-    value: string,
-    key?: string,
-    shiftKey?: boolean,
-    relatedTarget?: EventTarget | null
-  ): void => {
-    // Closing the editor takes the input out of the document, and losing
-    // the focus that way fires blur — which would commit a second time.
-    // One edit, one `cellValueEdited`.
-    if (target instanceof HTMLElement) {
-      target.dataset.editorClosed = 'true';
-    }
-    const proceeds = target.dispatchEvent(
-      new CustomEvent(type, {
-        // Include the key + shift modifier so the connector can
-        // pick the next active-cell direction after commit
-        // (Excel convention: Enter moves down, Tab moves right;
-        // shift reverses each). Left for somewhere, where
-        // to: the edit carries on in the formula field, so the
-        // connector stops the commit then and the editor stays open.
-        detail: { col, row, value, key, shiftKey, relatedTarget },
-        bubbles: true,
-        composed: true,
-        cancelable: true
-      })
-    );
-    if (!proceeds && target instanceof HTMLElement) {
-      delete target.dataset.editorClosed;
-    }
-  };
-
-  const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-
-  const onKeyDown = (e: KeyboardEvent): void => {
-    const input = e.currentTarget as HTMLInputElement;
-    if (composing(e)) {
-      // The key is the input method's: confirming a conversion with Enter
-      // neither commits nor moves on.
-      e.stopPropagation();
-      return;
-    }
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      e.preventDefault();
-      dispatchEditorEvent(input, 'cell-editor-commit', input.value, e.key, e.shiftKey);
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      dispatchEditorEvent(input, 'cell-editor-cancel', input.value);
-    } else if (ARROW_KEYS.includes(e.key)) {
-      // In a formula the sheet may take the arrow, to point at a cell with
-      // it. One it leaves moves the caret and never commits: a formula stays
-      // open whatever the arrows do.
-      const pointed = !input.dispatchEvent(
-        new CustomEvent('cell-editor-arrow', {
-          detail: { key: e.key, shiftKey: e.shiftKey, value: input.value, caret: input.selectionStart ?? 0 },
-          bubbles: true,
-          composed: true,
-          cancelable: true
-        })
-      );
-      if (pointed) {
-        e.preventDefault();
-      } else if (editor.mode === 'enter' && !isFormula(input.value)) {
-        // Excel has two editing modes and they differ here: when the user
-        // is typing over the cell, an arrow commits and moves on. Only
-        // when they opened the existing value to change it does an arrow
-        // move the caret instead.
-        e.preventDefault();
-        dispatchEditorEvent(input, 'cell-editor-commit', input.value, e.key, e.shiftKey);
-      }
-    }
-    // Other keys (typing) are NOT stopped so the input receives them.
-    e.stopPropagation();
-  };
-
-  // Where the caret is, for the reference it is in to be outlined.
-  const onCaret = (e: Event): void => {
-    const input = e.currentTarget as HTMLInputElement;
-    input.dispatchEvent(
-      new CustomEvent('cell-editor-caret', {
-        detail: { value: input.value, caret: input.selectionStart ?? 0 },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
-
-  const onBlur = (e: FocusEvent): void => {
-    const input = e.currentTarget as HTMLInputElement;
-    if (input.dataset.editorClosed === 'true') {
-      // Already committed or cancelled by a key; this blur is the
-      // editor being taken off the sheet, not the user leaving it.
-      return;
-    }
-    // Blur commit doesn't pass key/shift — the connector
-    // leaves the selection at the committed cell.
-    dispatchEditorEvent(input, 'cell-editor-commit', input.value, undefined, undefined, e.relatedTarget);
-  };
-
-  return html`
-    <input
-      class="cell-editor"
-      part="cell-input"
-      aria-label=${`Edit cell ${cellCoordToAddress({ col, row })}`}
-      .value=${initialValue}
-      style=${style}
-      @keydown=${onKeyDown}
-      @keyup=${onCaret}
-      @mouseup=${onCaret}
-      @input=${onInput}
-      @blur=${onBlur}
-    />
-  `;
 }
 
 customElements.define('vaadin-spreadsheet-internal-cell-grid', SpreadsheetCellGrid);
