@@ -223,6 +223,43 @@ describe('CommentNotes', () => {
       expect(host.updatesAsked, "a formula's error").to.equal(3);
     });
 
+    it('looks nothing up after a drawing with no note, now or before', () => {
+      // The sheet draws on every scroll step; with no note there is nothing
+      // to place.
+      const root = host.shadowRoot!;
+      const looked: string[] = [];
+      const all = root.querySelectorAll.bind(root);
+      const one = root.querySelector.bind(root);
+      root.querySelectorAll = ((selector: string) => {
+        looked.push(selector);
+        return all(selector);
+      }) as ShadowRoot['querySelectorAll'];
+      root.querySelector = ((selector: string) => {
+        looked.push(selector);
+        return one(selector);
+      }) as ShadowRoot['querySelector'];
+
+      host.draw();
+      host.draw();
+
+      expect(looked).to.deep.equal([]);
+    });
+
+    it('drops a note into place again when it shows again after going', () => {
+      host.notes.hover('col1 row1');
+      host.draw();
+      cards()[0].classList.remove('animate-in');
+      host.notes.hover(null);
+      host.draw();
+
+      host.notes.hover('col1 row1');
+      host.draw();
+
+      const shown = cards().filter((card) => !card.classList.contains('animate-out'));
+      expect(shown).to.have.length(1);
+      expect(shown[0].classList.contains('animate-in')).to.be.true;
+    });
+
     it('drops a note into place as it appears, and not again as the sheet draws', () => {
       host.notes.hover('col1 row1');
       host.draw();

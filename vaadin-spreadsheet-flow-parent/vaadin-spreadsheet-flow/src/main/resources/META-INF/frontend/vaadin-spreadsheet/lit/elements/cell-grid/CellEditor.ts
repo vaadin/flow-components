@@ -255,9 +255,13 @@ export class CellEditor {
    */
   updated(): void {
     if (!this.host.renderState.editor) {
-      // The next edit starts from its cell again.
+      // The next edit starts from its cell again, and no input has the
+      // keyboard: none is drawn, so there is nothing to look up either.
       this.fit = null;
-    } else if (this.fitWidth() === undefined) {
+      this.focused = null;
+      return;
+    }
+    if (this.fitWidth() === undefined) {
       // Just opened: as wide as the value it opens with.
       const input = this.input();
       const width = input === null ? null : this.fitTo(input.value);

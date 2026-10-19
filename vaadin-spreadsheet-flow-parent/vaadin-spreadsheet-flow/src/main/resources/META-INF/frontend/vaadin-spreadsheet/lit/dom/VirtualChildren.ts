@@ -7,7 +7,7 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import { toKey } from '../algorithms/CellKeys.js';
+import { parseColRow } from '../algorithms/CellKeys.js';
 
 /**
  * Placing server-side Vaadin components inside the sheet.
@@ -357,6 +357,10 @@ export function computeCellSlots(input: {
  * stays rendered whatever the scroll position, in its own quadrant. An
  * editor pinned in a frozen row was never placed while only the viewport
  * counted.
+ *
+ * It goes through the assignments rather than the cells drawn: a sheet
+ * without components has none to go through, and one with them has no more
+ * than it draws. Each scroll step places the components again.
  */
 export function visibleCellSlots(
   assignments: Readonly<Record<string, CellSlotAssignment>>,
@@ -372,28 +376,17 @@ export function visibleCellSlots(
   }
 ): CellSlotAssignment[] {
   const { viewport } = state;
-  const rows = new Set<number>();
-  for (let row = 1; row <= state.verticalSplitPosition; row++) {
-    rows.add(row);
-  }
-  for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-    rows.add(row);
-  }
-  const cols = new Set<number>();
-  for (let col = 1; col <= state.horizontalSplitPosition; col++) {
-    cols.add(col);
-  }
-  for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-    cols.add(col);
-  }
-
+  // A frozen row or column, counted from 1, is drawn wherever the sheet is scrolled.
+  const drawn = (index: number, frozen: number, first: number, last: number): boolean =>
+    index <= frozen || (index >= first && index <= last);
   const visible: CellSlotAssignment[] = [];
-  for (const row of rows) {
-    for (const col of cols) {
-      const assignment = assignments[toKey(col, row)];
-      if (assignment !== undefined) {
-        visible.push(assignment);
-      }
+  for (const [cellKey, assignment] of Object.entries(assignments)) {
+    const { col, row } = parseColRow(cellKey);
+    if (
+      drawn(row, state.verticalSplitPosition, viewport.firstRowIndex, viewport.lastRowIndex) &&
+      drawn(col, state.horizontalSplitPosition, viewport.firstColumnIndex, viewport.lastColumnIndex)
+    ) {
+      visible.push(assignment);
     }
   }
   return visible;

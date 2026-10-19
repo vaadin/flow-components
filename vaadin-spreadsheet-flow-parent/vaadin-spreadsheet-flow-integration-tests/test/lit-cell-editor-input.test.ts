@@ -157,6 +157,23 @@ describe('CellEditor', () => {
       host.remove();
     });
 
+    it('looks nothing up after a drawing with no editor open', () => {
+      // The sheet draws on every scroll step; with no editor there is no
+      // input to fit or to give the keyboard to.
+      host.renderState = sheet(null);
+      const root = host.shadowRoot!;
+      const looked: string[] = [];
+      const one = root.querySelector.bind(root);
+      root.querySelector = ((selector: string) => {
+        looked.push(selector);
+        return one(selector);
+      }) as ShadowRoot['querySelector'];
+
+      host.draw();
+
+      expect(looked).to.deep.equal([]);
+    });
+
     it('fits an editor as it opens, and gives it the keyboard, the caret before a percent sign, saying where it is', () => {
       host.renderState = sheet({ initialValue: '5%' }, { cellData: new Map([['col3 row2', { col: 3, row: 2, value: '5%', cellStyle: 'cs7', locked: false, needsMeasure: false, isPercentage: true }]]) });
 

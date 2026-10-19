@@ -259,6 +259,12 @@ export class CommentNotes {
    * so this focuses on every move into writing one.
    */
   updated(): void {
+    // No note drawn now, nor before: nothing to place, and no note to give
+    // the keyboard to. The sheet updates on every scroll step, and looking
+    // through its every element for notes cost a scroll a few percent.
+    if (this.notes.length === 0 && this.noteKeysShown.size === 0) {
+      return;
+    }
     const root = this.host.shadowRoot!;
     this.place(root);
     // The note being written, not the copy of one fading out.

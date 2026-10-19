@@ -243,6 +243,35 @@ describe('visibleCellSlots — only what the viewport renders', () => {
     expect(visibleCellSlots(slots, VIEWPORT_3x3)).to.deep.equal([]);
   });
 
+  it("includes the cells on the viewport's last row and column, and none past them", () => {
+    const slots = slotsFor({
+      componentIdToCellKey: { a: 'col3 row1', b: 'col1 row3', c: 'col4 row1', d: 'col1 row4' }
+    });
+
+    expect(
+      visibleCellSlots(slots, VIEWPORT_3x3)
+        .map((s) => s.nodeId)
+        .sort()
+    ).to.deep.equal(['a', 'b']);
+  });
+
+  it('includes the last frozen row and column, and not the ones after them', () => {
+    const slots = slotsFor({
+      componentIdToCellKey: { a: 'col2 row45', b: 'col25 row2', c: 'col3 row45', d: 'col25 row3' }
+    });
+    const scrolled = {
+      viewport: { firstColumnIndex: 20, lastColumnIndex: 30, firstRowIndex: 40, lastRowIndex: 60 },
+      verticalSplitPosition: 2,
+      horizontalSplitPosition: 2
+    };
+
+    expect(
+      visibleCellSlots(slots, scrolled)
+        .map((s) => s.nodeId)
+        .sort()
+    ).to.deep.equal(['a', 'b']);
+  });
+
   it('returns nothing when no cell has an assignment', () => {
     expect(visibleCellSlots({}, VIEWPORT_3x3)).to.deep.equal([]);
   });
