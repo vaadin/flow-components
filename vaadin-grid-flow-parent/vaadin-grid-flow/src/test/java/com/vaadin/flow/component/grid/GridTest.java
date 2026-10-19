@@ -62,6 +62,19 @@ class GridTest {
     }
 
     @Test
+    void setItems_sizePropertyMatchesItemCount() {
+        Grid<String> grid = new Grid<>();
+        grid.setItems("Item 0", "Item 1", "Item 2");
+        ui.add(grid);
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(3, grid.getElement().getProperty("size", -1));
+
+        grid.setItems("Item 0", "Item 1", "Item 2", "Item 3", "Item 4");
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(5, grid.getElement().getProperty("size", -1));
+    }
+
+    @Test
     void setAllRowsVisible_allRowsAreVisible() {
         final Grid<String> grid = new Grid<>();
 
