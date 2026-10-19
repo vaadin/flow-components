@@ -55,28 +55,7 @@ final class SheetOperations implements Serializable {
                     "Cannot set a hidden or very hidden sheet as the active sheet. Given index: "
                             + sheetIndex);
         }
-        showSheet(sheetIndex);
-    }
-
-    /**
-     * Shows the sheet at the POI index, or the nearest one shown if it is
-     * hidden: the client has nothing of the last sheet any more, and everything
-     * of this one is loaded, by the component's
-     * {@code reloadActiveSheetData()}. Every way of showing a sheet comes here:
-     * switching to it, adding it, and loading a workbook. Freezing panes
-     * reloads the sheet shown through {@code reloadActiveSheetData()} alone.
-     */
-    void showSheet(int poiIndex) {
-        Workbook workbook = spreadsheet.workbook;
-        int shown = nearestShown(workbook, poiIndex);
-        workbook.setActiveSheet(shown);
-        // The UI selects one sheet at a time: the active one.
-        workbook.setSelectedTab(shown);
-
-        // formulas defined relative to the sheet may need recalculation
-        spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
-
-        spreadsheet.reloadActiveSheetData();
+        spreadsheet.loader().showSheet(sheetIndex);
     }
 
     /**
@@ -123,8 +102,7 @@ final class SheetOperations implements Serializable {
                     "Sheet name must be unique within the workbook.");
         }
         Sheet previousSheet = spreadsheet.getActiveSheet();
-        SpreadsheetFactory.addNewSheet(spreadsheet, spreadsheet.workbook,
-                sheetName, rows, columns);
+        spreadsheet.loader().addSheet(sheetName, rows, columns);
         spreadsheet.fireSheetChangeEvent(previousSheet,
                 spreadsheet.getActiveSheet());
     }
@@ -190,7 +168,7 @@ final class SheetOperations implements Serializable {
                     "Sheet name must be unique within the workbook.");
         }
         workbook.setSheetName(sheetIndex, sheetName);
-        spreadsheet.reloadSheetNames();
+        spreadsheet.loader().reloadSheetNames();
         // The formulas that name the sheet now name it anew, and the client
         // shows the formulas of its cells.
         spreadsheet.updateMarkedCells();
@@ -217,7 +195,7 @@ final class SheetOperations implements Serializable {
             return;
         }
         if (sheetPOIIndex != activeSheetIndex) {
-            spreadsheet.reloadSheetNames();
+            spreadsheet.loader().reloadSheetNames();
             spreadsheet.workbookModel().sheetIndex.set(
                     spreadsheet.getSpreadsheetSheetIndex(activeSheetIndex) + 1);
         } else {
@@ -266,7 +244,7 @@ final class SheetOperations implements Serializable {
      * The sheet at the index if it is shown, or else the nearest one shown
      * after it, or else before it.
      */
-    private static int nearestShown(Workbook workbook, int index) {
+    static int nearestShown(Workbook workbook, int index) {
         for (int i = index; i < workbook.getNumberOfSheets(); i++) {
             if (isShown(workbook, i)) {
                 return i;

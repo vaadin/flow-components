@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import org.apache.poi.hssf.usermodel.HSSFPictureData;
 import org.apache.poi.hssf.usermodel.HSSFShape;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -47,7 +45,6 @@ import org.apache.poi.xssf.usermodel.XSSFPictureData;
 import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTOneCellAnchor;
@@ -97,137 +94,6 @@ public class SpreadsheetFactory implements Serializable {
     private static boolean LOG_MEMORY = false;
 
     /**
-     * Clears the given Spreadsheet and loads the given Workbook into it.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param workbook
-     *            Workbook to load or null to generate a new workbook with one
-     *            sheet.
-     * @param rowCount
-     *            Number of rows to generate in the first sheet. Only applies
-     *            when the workbook parameter is null.
-     * @param columnCount
-     *            Number of columns to generate in the first sheet. Only applies
-     *            when the workbook parameter is null.
-     */
-    static void loadSpreadsheetWith(Spreadsheet spreadsheet, Workbook workbook,
-            int rowCount, int columnCount) {
-        spreadsheet.clearSheetServerSide();
-        if (workbook == null) {
-            workbook = new XSSFWorkbook();
-            prepareNewSheet(createNewSheet(workbook), rowCount, columnCount);
-        }
-        spreadsheet.setInternalWorkbook(workbook);
-        spreadsheet.showSheet(workbook.getActiveSheetIndex());
-    }
-
-    /**
-     * Clears the target Spreadsheet, creates a new XLSX Workbook and loads it
-     * in the Spreadsheet.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     */
-    static void loadNewXLSXSpreadsheet(Spreadsheet spreadsheet) {
-        Workbook workbook = spreadsheet.getWorkbook();
-        if (workbook instanceof SXSSFWorkbook sxssf) {
-            sxssf.dispose();
-        }
-        final XSSFWorkbook newWorkbook = new XSSFWorkbook();
-        prepareNewSheet(createNewSheet(newWorkbook), DEFAULT_ROWS,
-                DEFAULT_COLUMNS);
-        spreadsheet.clearSheetServerSide();
-        spreadsheet.setInternalWorkbook(newWorkbook);
-        spreadsheet.showSheet(0);
-    }
-
-    /**
-     * Adds a new sheet to the given Spreadsheet and Workbook.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param workbook
-     *            Target Workbook
-     * @param sheetName
-     *            Name of the new sheet
-     * @param rows
-     *            Row count for the new sheet
-     * @param columns
-     *            Column count for the new sheet
-     */
-    static void addNewSheet(final Spreadsheet spreadsheet,
-            final Workbook workbook, final String sheetName, int rows,
-            int columns) {
-        final Sheet sheet;
-        if (sheetName == null) {
-            sheet = createNewSheet(workbook);
-        } else {
-            sheet = workbook.createSheet(sheetName);
-        }
-        prepareNewSheet(sheet, rows, columns);
-        spreadsheet.showSheet(workbook.getSheetIndex(sheet));
-    }
-
-    /**
-     * Reloads the Spreadsheet component from the given file.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param spreadsheetFile
-     *            Source file. Should be of XLS or XLSX format.
-     * @throws IOException
-     *             If file has invalid format
-     */
-    static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
-            final File spreadsheetFile) throws IOException {
-        try {
-            Workbook workbook = WorkbookFactory.create(spreadsheetFile);
-            reloadSpreadsheetComponent(spreadsheet, workbook);
-        } catch (POIXMLException e) {
-            throw new IOException(e);
-        }
-    }
-
-    /**
-     * Reloads the Spreadsheet component from the given InputStream.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param inputStream
-     *            Source stream. Stream content be of XLS or XLSX format.
-     * @throws IOException
-     *             If data in the stream has invalid format
-     */
-    static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
-            final InputStream inputStream) throws IOException {
-        reloadSpreadsheetComponent(spreadsheet,
-                WorkbookFactory.create(inputStream));
-    }
-
-    /**
-     * Reloads the Spreadsheet component using the given Workbook as data
-     * source.
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param workbook
-     *            Source Workbook
-     */
-    static void reloadSpreadsheetComponent(Spreadsheet spreadsheet,
-            final Workbook workbook) {
-        Workbook oldWorkbook = spreadsheet.getWorkbook();
-        if (oldWorkbook != null) {
-            spreadsheet.clearSheetServerSide();
-            if (oldWorkbook instanceof SXSSFWorkbook sxssf) {
-                sxssf.dispose();
-            }
-        }
-        spreadsheet.setInternalWorkbook(workbook);
-        spreadsheet.showSheet(workbook.getActiveSheetIndex());
-    }
-
-    /**
      * Writes the current Workbook state from the given Spreadsheet to the given
      * file.
      *
@@ -264,9 +130,7 @@ public class SpreadsheetFactory implements Serializable {
             // back from the file. Any other stays as it is, and so does what
             // the application set on it, such as pop-up buttons.
             sxssf.dispose();
-            Workbook wb = WorkbookFactory.create(file);
-            spreadsheet.setInternalWorkbook(wb);
-            spreadsheet.showSheet(wb.getActiveSheetIndex());
+            spreadsheet.loader().show(WorkbookFactory.create(file));
         }
         return file;
     }
@@ -296,51 +160,6 @@ public class SpreadsheetFactory implements Serializable {
             if (stream != null) {
                 stream.close();
             }
-        }
-    }
-
-    /**
-     * Gives a new sheet its size and Excel's default column width, rather than
-     * POI's, for it to be shown.
-     */
-    private static void prepareNewSheet(final Sheet sheet, int rows,
-            int columns) {
-        sheet.createRow(rows - 1).createCell(columns - 1);
-        sheet.setDefaultColumnWidth(DEFAULT_COL_WIDTH_UNITS);
-    }
-
-    /**
-     * Reloads all data for the given Sheet within the target Spreadsheet
-     *
-     * @param spreadsheet
-     *            Target Spreadsheet
-     * @param sheet
-     *            Target sheet within the Spreadsheet
-     */
-    static void reloadSpreadsheetData(final Spreadsheet spreadsheet,
-            final Sheet sheet) {
-        logMemoryUsage();
-        // What POI cannot read of a sheet is left out, and the rest loaded.
-        loadPart("row height",
-                () -> spreadsheet.sizes().loadDefaultRowHeight(sheet));
-        loadPart("column width",
-                () -> spreadsheet.sizes().loadDefaultColumnWidth());
-        loadPart("sizes", () -> spreadsheet.sizes().load(sheet));
-        loadPart("overlays", () -> loadSheetOverlays(spreadsheet));
-        loadPart("tables", () -> loadSheetTables(spreadsheet));
-        loadPart("merged cells", spreadsheet.mergedRegionOperations::load);
-        loadPart("frozen panes", () -> loadFreezePane(spreadsheet));
-        loadPart("protection", () -> loadSheetProtection(spreadsheet));
-        loadPart("grouping", () -> spreadsheet.outline().load());
-        loadPart("named ranges", () -> loadNamedRanges(spreadsheet));
-        logMemoryUsage();
-    }
-
-    private static void loadPart(String part, Runnable load) {
-        try {
-            load.run();
-        } catch (RuntimeException failure) {
-            LOGGER.warn("Could not load the {} of the sheet", part, failure);
         }
     }
 
@@ -391,7 +210,7 @@ public class SpreadsheetFactory implements Serializable {
      * @param spreadsheet
      *            Target Spreadsheet
      */
-    private static void loadSheetTables(Spreadsheet spreadsheet) {
+    static void loadSheetTables(Spreadsheet spreadsheet) {
         if (!(spreadsheet.getActiveSheet() instanceof XSSFSheet sheet)) {
             return;
         }
@@ -718,16 +537,6 @@ public class SpreadsheetFactory implements Serializable {
             spreadsheet.sheetModel().horizontalSplitPosition.set(0);
         }
 
-    }
-
-    private static Sheet createNewSheet(Workbook workbook) {
-        int idx = workbook.getNumberOfSheets() + 1;
-        String sheetname = "Sheet" + idx;
-        while (workbook.getSheet(sheetname) != null) {
-            idx++;
-            sheetname = "Sheet" + idx;
-        }
-        return workbook.createSheet(sheetname);
     }
 
     /**

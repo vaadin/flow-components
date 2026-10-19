@@ -572,6 +572,9 @@ public class Spreadsheet extends Component
     /** The groups of rows and columns of the sheet shown. */
     private final Outline outline = new Outline(this);
 
+    /** How the workbook and its sheets are shown. */
+    private final SheetLoader loader = new SheetLoader(this);
+
     final CellCommentLoader cellCommentLoader = new CellCommentLoader(this);
 
     private final HyperlinkLoader hyperlinkLoader = new HyperlinkLoader(this);
@@ -624,8 +627,7 @@ public class Spreadsheet extends Component
         init();
         setDefaultRowCount(defaultRowCount);
         setDefaultColumnCount(defaultColumnCount);
-        SpreadsheetFactory.loadSpreadsheetWith(this, null, getDefaultRowCount(),
-                getDefaultColumnCount());
+        loader.load(null, getDefaultRowCount(), getDefaultColumnCount());
     }
 
     /**
@@ -636,8 +638,7 @@ public class Spreadsheet extends Component
      */
     public Spreadsheet(Workbook workbook) {
         init();
-        SpreadsheetFactory.loadSpreadsheetWith(this, workbook,
-                getDefaultRowCount(), getDefaultColumnCount());
+        loader.load(workbook, getDefaultRowCount(), getDefaultColumnCount());
     }
 
     /**
@@ -650,7 +651,7 @@ public class Spreadsheet extends Component
      */
     public Spreadsheet(File file) throws IOException {
         init();
-        SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
+        loader.read(file);
     }
 
     /**
@@ -665,7 +666,7 @@ public class Spreadsheet extends Component
      */
     public Spreadsheet(InputStream inputStream) throws IOException {
         init();
-        SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
+        loader.read(inputStream);
     }
 
     private void init() {
@@ -2326,7 +2327,7 @@ public class Spreadsheet extends Component
      *             format.
      */
     public void read(File file) throws IOException {
-        SpreadsheetFactory.reloadSpreadsheetComponent(this, file);
+        loader.read(file);
     }
 
     /**
@@ -2340,7 +2341,7 @@ public class Spreadsheet extends Component
      *             format.
      */
     public void read(InputStream inputStream) throws IOException {
-        SpreadsheetFactory.reloadSpreadsheetComponent(this, inputStream);
+        loader.read(inputStream);
     }
 
     /**
@@ -2534,36 +2535,32 @@ public class Spreadsheet extends Component
         historyManager.clear();
     }
 
-    void setInternalWorkbook(Workbook workbook) {
+    /**
+     * The workbook shown from now on, in a scope of its own: the last one's
+     * closes, taking off the client what it had of it.
+     */
+    void openWorkbookScope(Workbook workbook) {
         this.workbook = workbook;
         if (workbookScope != null) {
             workbookScope.close();
         }
         workbookScope = new WorkbookScope(this, workbook);
-        // Through the methods an application may override, once the scope is
-        // in place for them to read, and before the sheet, which reads them,
-        // is loaded.
-        workbookScope.styler = createSpreadsheetStyleFactory();
-        workbookScope.conditionalFormatter = createConditionalFormatter();
-        // The styles are the workbook's: loaded with it, for the sheet shown
-        // to be styled with them.
-        workbookScope.styler.reloadWorkbookStyles();
+    }
 
-        if (workbook instanceof HSSFWorkbook hssf) {
-            workbookModel().workbookProtected.set(hssf.isWriteProtected());
-        } else if (workbook instanceof XSSFWorkbook xssf) {
-            workbookModel().workbookProtected.set(xssf.isStructureLocked());
-        }
-
+    /**
+     * Tells the client another workbook is shown: the toggle flips from its
+     * last value.
+     */
+    void toggleWorkbookChange() {
         setWorkbookChangeToggle(!isWorkbookChangeToggle());
     }
 
     /**
      * Shows the sheet at the POI index, or the nearest one shown if it is
-     * hidden. See {@link SheetOperations#showSheet(int)}.
+     * hidden. See {@link SheetLoader#showSheet(int)}.
      */
     void showSheet(int poiIndex) {
-        sheetOperations.showSheet(poiIndex);
+        loader.showSheet(poiIndex);
     }
 
     /** The client has no cells: it is reloaded, or new. */
@@ -2630,6 +2627,11 @@ public class Spreadsheet extends Component
         return outline;
     }
 
+    /** How the workbook and its sheets are shown. */
+    SheetLoader loader() {
+        return loader;
+    }
+
     SheetState sheetState() {
         return workbookScope.sheetState;
     }
@@ -2668,39 +2670,19 @@ public class Spreadsheet extends Component
      * pop-up buttons.
      */
     protected void reloadActiveSheetData() {
+        loader.reloadActiveSheet();
+    }
+
+    /**
+     * Another sheet is shown, or the same one anew: the selection and what the
+     * client was sent of the cells are forgotten, and the sheet gets a scope of
+     * its own, the last one's closing with what the client had of it.
+     */
+    void openSheetScope() {
         selectionManager.clear();
         valueManager.clearCachedContent();
-
-        // What the client has of the last sheet goes with its scope.
         sheetScope.close();
         sheetScope = new SheetScope(this);
-
-        clientChanges.sheetShown();
-
-        workbookModel().sheetIndex.set(
-                getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
-        sheetModel().sheetProtected.set(getActiveSheet().getProtect());
-
-        popupButtons().detachAll();
-
-        // clear all tables, possible tables for new/changed sheet are added
-        // after first round trip.
-        workbookScope.tables.markNeedsReload();
-
-        reloadSheetNames();
-        updateMergedRegions();
-        sheetModel().displayGridlines
-                .set(getActiveSheet().isDisplayGridlines());
-        sheetModel().displayRowColHeadings
-                .set(getActiveSheet().isDisplayRowColHeadings());
-
-        // Everything of the sheet is loaded again: what the client had of it
-        // went with the scope.
-        SpreadsheetFactory.reloadSpreadsheetData(this, getActiveSheet());
-        reloadActiveSheetStyles();
-        loadPopupButtons();
-
-        markAsDirty();
     }
 
     void markAsDirty() {
@@ -2714,19 +2696,6 @@ public class Spreadsheet extends Component
      */
     protected void loadCustomEditorOnSelectedCell() {
         sheetScope.components.showEditorOfSelectedCell();
-    }
-
-    void reloadSheetNames() {
-        final ArrayList<String> sheetNamesList = new ArrayList<String>();
-
-        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            if (!workbook.isSheetVeryHidden(i) && !workbook.isSheetHidden(i)) {
-                sheetNamesList.add(workbook.getSheetName(i));
-            }
-        }
-        workbookModel().sheetNames
-                .set(sheetNamesList.toArray(new String[sheetNamesList.size()]));
-        workbookScope.scrollMemory.publish();
     }
 
     /**
@@ -2905,7 +2874,7 @@ public class Spreadsheet extends Component
             throw new NullPointerException(
                     "Cannot open a null workbook with Spreadsheet component.");
         }
-        SpreadsheetFactory.reloadSpreadsheetComponent(this, workbook);
+        loader.replace(workbook);
     }
 
     /**
@@ -3931,7 +3900,7 @@ public class Spreadsheet extends Component
      * Note: Discards all data. Be sure to write out the old Workbook if needed.
      */
     public void reset() {
-        SpreadsheetFactory.loadNewXLSXSpreadsheet(this);
+        loader.loadNew();
     }
 
     private CommentAuthorProvider commentAuthorProvider;
