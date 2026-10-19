@@ -136,26 +136,16 @@ final class POIReflectionTools {
             return false;
         }
 
-        switch (b) {
-        case LEFT:
-            return ctBorder.isSetLeft();
-        case TOP:
-            return ctBorder.isSetTop();
-        case RIGHT:
-            return ctBorder.isSetRight();
-        case BOTTOM:
-            return ctBorder.isSetBottom();
-        case DIAGONAL:
-            return ctBorder.isSetDiagonal();
-        case HORIZONTAL:
-            return ctBorder.isSetHorizontal();
-        case VERTICAL:
-            return ctBorder.isSetVertical();
-        default:
-            break;
-        }
-
-        return false;
+        return switch (b) {
+        case LEFT -> ctBorder.isSetLeft();
+        case TOP -> ctBorder.isSetTop();
+        case RIGHT -> ctBorder.isSetRight();
+        case BOTTOM -> ctBorder.isSetBottom();
+        case DIAGONAL -> ctBorder.isSetDiagonal();
+        case HORIZONTAL -> ctBorder.isSetHorizontal();
+        case VERTICAL -> ctBorder.isSetVertical();
+        default -> false;
+        };
     }
 
     /**

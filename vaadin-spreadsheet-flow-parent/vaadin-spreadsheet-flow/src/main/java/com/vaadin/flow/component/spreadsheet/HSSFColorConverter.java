@@ -48,20 +48,13 @@ public class HSSFColorConverter implements ColorConverter {
 
         final HSSFCellStyle cs = (HSSFCellStyle) cellStyle;
         switch (borderSide) {
-        case BOTTOM:
-            styleBorderColor(sb, attr, cs.getBottomBorderColor());
-            break;
-        case LEFT:
-            styleBorderColor(sb, attr, cs.getLeftBorderColor());
-            break;
-        case RIGHT:
-            styleBorderColor(sb, attr, cs.getRightBorderColor());
-            break;
-        case TOP:
-            styleBorderColor(sb, attr, cs.getTopBorderColor());
-            break;
-        default:
-            break;
+        case BOTTOM -> styleBorderColor(sb, attr, cs.getBottomBorderColor());
+        case LEFT -> styleBorderColor(sb, attr, cs.getLeftBorderColor());
+        case RIGHT -> styleBorderColor(sb, attr, cs.getRightBorderColor());
+        case TOP -> styleBorderColor(sb, attr, cs.getTopBorderColor());
+        default -> {
+            // A diagonal or inner border has no color here
+        }
         }
 
         return sb.toString();

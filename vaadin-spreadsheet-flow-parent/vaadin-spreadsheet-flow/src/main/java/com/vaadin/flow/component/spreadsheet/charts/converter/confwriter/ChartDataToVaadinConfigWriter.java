@@ -307,25 +307,23 @@ public class ChartDataToVaadinConfigWriter {
         logger.info("updateLegend()");
 
         switch (definition.legendProperties.position) {
-        case NONE:
-            legend.setEnabled(false);
-            break;
-        case RIGHT:
+        case NONE -> legend.setEnabled(false);
+        case RIGHT -> {
             legend.setVerticalAlign(VerticalAlign.MIDDLE);
             legend.setAlign(HorizontalAlign.RIGHT);
             legend.setLayout(LayoutDirection.VERTICAL);
-            break;
-        case BOTTOM:
+        }
+        case BOTTOM -> {
             legend.setVerticalAlign(VerticalAlign.BOTTOM);
             legend.setAlign(HorizontalAlign.CENTER);
             legend.setLayout(LayoutDirection.HORIZONTAL);
-            break;
-        case LEFT:
+        }
+        case LEFT -> {
             legend.setVerticalAlign(VerticalAlign.MIDDLE);
             legend.setAlign(HorizontalAlign.LEFT);
             legend.setLayout(LayoutDirection.VERTICAL);
-            break;
-        case TOP:
+        }
+        case TOP -> {
             legend.setVerticalAlign(VerticalAlign.TOP);
             legend.setAlign(HorizontalAlign.CENTER);
             legend.setLayout(LayoutDirection.HORIZONTAL);
@@ -335,12 +333,12 @@ public class ChartDataToVaadinConfigWriter {
             // further investigation. At this point we try to estimate the
             // titles' vertical size and move the legend down
             legend.setY(estimateTitleVerticalSize(definition));
-            break;
-        case TOP_RIGHT:
+        }
+        case TOP_RIGHT -> {
             legend.setVerticalAlign(VerticalAlign.TOP);
             legend.setAlign(HorizontalAlign.RIGHT);
             legend.setLayout(LayoutDirection.VERTICAL);
-            break;
+        }
         }
     }
 

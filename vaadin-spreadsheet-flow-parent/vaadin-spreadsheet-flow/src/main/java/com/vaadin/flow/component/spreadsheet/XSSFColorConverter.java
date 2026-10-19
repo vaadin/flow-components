@@ -203,19 +203,13 @@ public class XSSFColorConverter implements ColorConverter {
             declaredField = casted.getClass().getDeclaredField("_border");
             declaredField.setAccessible(true);
             CTBorder object = (CTBorder) declaredField.get(casted);
-            switch (borderSide) {
-            case BOTTOM:
-                return object.getBottom().getColor();
-            case LEFT:
-                return object.getLeft().getColor();
-            case RIGHT:
-                return object.getRight().getColor();
-            case TOP:
-                return object.getTop().getColor();
-
-            default:
-                break;
-            }
+            return switch (borderSide) {
+            case BOTTOM -> object.getBottom().getColor();
+            case LEFT -> object.getLeft().getColor();
+            case RIGHT -> object.getRight().getColor();
+            case TOP -> object.getTop().getColor();
+            default -> null;
+            };
         } catch (IllegalArgumentException e) {
             LOGGER.error(
                     "Incompatible POI implementation; unable to parse border color",

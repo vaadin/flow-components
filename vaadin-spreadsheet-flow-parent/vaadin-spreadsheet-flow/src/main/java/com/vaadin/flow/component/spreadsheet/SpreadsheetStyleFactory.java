@@ -518,28 +518,14 @@ public class SpreadsheetStyleFactory implements Serializable {
         sb.append(cssFontName(name));
         sb.append(",");
         if (font instanceof XSSFFont xssfFont) {
-            FontFamily family = FontFamily.valueOf(xssfFont.getFamily());
-            switch (family) {
-            case ROMAN:
-                sb.append("roman,");
-                break;
-            case SWISS:
-                sb.append("swiss,");
-                break;
-            case MODERN:
-                sb.append("modern,");
-                break;
-            case SCRIPT:
-                sb.append("script,");
-                break;
-            case DECORATIVE:
-                sb.append("decorative,");
-                break;
-            case NOT_APPLICABLE:
-                break;
-            default:
-                break;
-            }
+            sb.append(switch (FontFamily.valueOf(xssfFont.getFamily())) {
+            case ROMAN -> "roman,";
+            case SWISS -> "swiss,";
+            case MODERN -> "modern,";
+            case SCRIPT -> "script,";
+            case DECORATIVE -> "decorative,";
+            default -> "";
+            });
         }
         sb.append("Helvetica,arial;");
         return sb.toString();

@@ -167,44 +167,28 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
 
             Color color = result.textColor; // AWT color value returned by POI
 
-            // Convert calculated color value to simplest parseable hex string
-            // @formatter:off
-            final int cval = (color.getRed() << 16) | 
-                (color.getGreen() << 8) | color.getBlue();
-            final String hex = Integer.toHexString(cval);
-            switch (hex.length()) {
-                case 1: return "00000" + hex;
-                case 2: return "0000" + hex;
-                case 3: return "000" + hex;
-                case 4: return "00" + hex;
-                case 5: return "0" + hex;
-                default: return hex;
-            }
-            // @formatter:on
+            // The color as six hex digits, without the alpha
+            return String.format("%06x", color.getRGB() & 0xFFFFFF);
         } catch (Exception e) {
             return null;
         }
     }
 
     private String getNumericFormat(double value, String[] formatParts) {
-        // fall through intended
-        switch (formatParts.length) {
-        case 3:
-        case 4:
+        return switch (formatParts.length) {
+        case 1 -> value < 0.0 ? "-" + formatParts[POSITIVE_FORMAT_INDEX]
+                : formatParts[POSITIVE_FORMAT_INDEX];
+        case 2 -> value < 0.0 ? formatParts[NEGATIVE_FORMAT_INDEX]
+                : formatParts[POSITIVE_FORMAT_INDEX];
+        case 3, 4 -> {
             if (value == 0.0) {
-                return formatParts[ZERO_FORMAT_INDEX];
+                yield formatParts[ZERO_FORMAT_INDEX];
             }
-        case 2:
-            if (value < 0.0) {
-                return formatParts[NEGATIVE_FORMAT_INDEX];
-            }
-        case 1:
-            if (value < 0.0) {
-                return "-" + formatParts[POSITIVE_FORMAT_INDEX];
-            }
-        default:
-            return formatParts[POSITIVE_FORMAT_INDEX];
+            yield value < 0.0 ? formatParts[NEGATIVE_FORMAT_INDEX]
+                    : formatParts[POSITIVE_FORMAT_INDEX];
         }
+        default -> formatParts[POSITIVE_FORMAT_INDEX];
+        };
     }
 
     /**

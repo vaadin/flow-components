@@ -174,12 +174,13 @@ final class RuleEvaluator implements Serializable {
             String stringValue = cell.getStringCellValue();
 
             // Excel string comparison ignores case
-            switch (comparisonOperation) {
-            case ComparisonOperator.EQUAL:
-                return stringValue.equalsIgnoreCase(formulaValue);
-            case ComparisonOperator.NOT_EQUAL:
-                return !stringValue.equalsIgnoreCase(formulaValue);
-            }
+            return switch (comparisonOperation) {
+            case ComparisonOperator.EQUAL ->
+                stringValue.equalsIgnoreCase(formulaValue);
+            case ComparisonOperator.NOT_EQUAL ->
+                !stringValue.equalsIgnoreCase(formulaValue);
+            default -> false;
+            };
         }
         if (eval instanceof BoolEval bool
                 && (cell.getCellType() == CellType.BOOLEAN
@@ -189,48 +190,41 @@ final class RuleEvaluator implements Serializable {
 
             boolean formulaVal = bool.getBooleanValue();
 
-            switch (comparisonOperation) {
-            case ComparisonOperator.EQUAL:
-                return cell.getBooleanCellValue() == formulaVal;
-            case ComparisonOperator.NOT_EQUAL:
-                return cell.getBooleanCellValue() != formulaVal;
-            }
+            return switch (comparisonOperation) {
+            case ComparisonOperator.EQUAL ->
+                cell.getBooleanCellValue() == formulaVal;
+            case ComparisonOperator.NOT_EQUAL ->
+                cell.getBooleanCellValue() != formulaVal;
+            default -> false;
+            };
         }
 
         // numerical types
         if (cell.getCellType() == CellType.NUMERIC || isFormulaNumericType) {
 
             double formula1Val = ((NumericValueEval) eval).getNumberValue();
+            double value = cell.getNumericCellValue();
 
-            switch (comparisonOperation) {
-
-            case ComparisonOperator.EQUAL:
-                return cell.getNumericCellValue() == formula1Val;
-            case ComparisonOperator.NOT_EQUAL:
-                return cell.getNumericCellValue() != formula1Val;
-
-            case ComparisonOperator.LT:
-                return cell.getNumericCellValue() < formula1Val;
-            case ComparisonOperator.LE:
-                return cell.getNumericCellValue() <= formula1Val;
-            case ComparisonOperator.GT:
-                return cell.getNumericCellValue() > formula1Val;
-            case ComparisonOperator.GE:
-                return cell.getNumericCellValue() >= formula1Val;
-
-            case ComparisonOperator.BETWEEN:
-            case ComparisonOperator.NOT_BETWEEN:
+            return switch (comparisonOperation) {
+            case ComparisonOperator.EQUAL -> value == formula1Val;
+            case ComparisonOperator.NOT_EQUAL -> value != formula1Val;
+            case ComparisonOperator.LT -> value < formula1Val;
+            case ComparisonOperator.LE -> value <= formula1Val;
+            case ComparisonOperator.GT -> value > formula1Val;
+            case ComparisonOperator.GE -> value >= formula1Val;
+            case ComparisonOperator.BETWEEN, ComparisonOperator.NOT_BETWEEN -> {
                 Double formula2Val = secondBound(rule, cell, deltaColumn,
                         deltaRow);
                 if (formula2Val == null) {
-                    return false;
+                    yield false;
                 }
-                double value = cell.getNumericCellValue();
                 boolean between = value >= formula1Val && value <= formula2Val;
-                return comparisonOperation == ComparisonOperator.BETWEEN
+                yield comparisonOperation == ComparisonOperator.BETWEEN
                         ? between
                         : !between;
             }
+            default -> false;
+            };
         }
 
         return false;
