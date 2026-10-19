@@ -169,13 +169,10 @@ export function cellStyleRules(state: StyleTables): string[] {
 
 /**
  * The {@code <style>} element the cells' rules go in - see
- * {@link cellStyleRules} - or nothing when there are none.
+ * {@link cellStyleRules}, which always has the rule for links at least.
  */
-export function buildCellStyleBlock(state: StyleTables): TemplateResult | string {
+export function buildCellStyleBlock(state: StyleTables): TemplateResult {
   const rules = cellStyleRules(state);
-  if (rules.length === 0) {
-    return '';
-  }
   // The rules go in as text, never as markup. A workbook names its own
   // fonts, and a name is written into these rules as it is.
   return html`<style>

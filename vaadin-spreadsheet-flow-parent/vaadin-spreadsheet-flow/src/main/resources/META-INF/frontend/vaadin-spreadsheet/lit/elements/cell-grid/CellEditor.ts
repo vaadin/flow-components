@@ -318,15 +318,6 @@ export class CellEditor {
     }
   }
 
-  /** What the cell editor holds and where its caret is; null while none is open. */
-  draft(): { value: string; caret: number } | null {
-    const input = this.input();
-    if (input === null) {
-      return null;
-    }
-    return { value: input.value, caret: input.selectionStart ?? input.value.length };
-  }
-
   /** The editor's input, while one is drawn. */
   private input(): HTMLInputElement | null {
     return this.host.shadowRoot?.querySelector<HTMLInputElement>('.cell-editor') ?? null;

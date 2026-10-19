@@ -33,11 +33,12 @@ window.Vaadin.Flow.spreadsheetConnector = window.Vaadin.Flow.spreadsheetConnecto
   }
 };
 
-const overlayStyles = (() => {
-  const $tpl = document.createElement('template');
-  $tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
-  return $tpl.content;
-})();
+/**
+ * The styles of the filter pop-up's content: the application's components,
+ * in the page's light DOM, so they go into the document head.
+ */
+const overlayStyleElement = document.createElement('style');
+overlayStyleElement.textContent = spreadsheetOverlayStyles.toString();
 
 export class VaadinSpreadsheet extends LitElement {
   static get styles() {
@@ -148,7 +149,7 @@ export class VaadinSpreadsheet extends LitElement {
 
       namedRanges: { type: String },
 
-      theme: { type: String, reflectToAttribute: true },
+      theme: { type: String },
 
       showCustomEditorOnFocus: { type: Boolean },
       hasComponentFactory: { type: Boolean }
@@ -158,9 +159,9 @@ export class VaadinSpreadsheet extends LitElement {
   constructor() {
     super();
 
-    if (!overlayStyles.parentElement) {
-      // Append spreadsheet overlay styles to the document head
-      document.head.appendChild(overlayStyles);
+    // Once for every sheet, unless they have been taken out since.
+    if (!overlayStyleElement.isConnected) {
+      document.head.appendChild(overlayStyleElement);
     }
   }
 

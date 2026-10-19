@@ -63,7 +63,9 @@ export function emptyHeaderCornerRenderState(): HeaderCornerRenderState {
  * meet, a box over the dotted lines that divide their levels.
  */
 export class SpreadsheetHeaderCorner extends SpreadsheetPart {
-  static readonly EXPORTED_PARTS = 'header-corner,outline-level-button';
+  // Its own `header-corner` part is on the element itself, in the sheet's
+  // shadow root: only the parts inside it are exported.
+  static readonly EXPORTED_PARTS = 'outline-level-button';
 
   static properties = {
     renderState: { attribute: false }

@@ -229,11 +229,10 @@ describe('CellEditor', () => {
 
       expect([input().value, input().selectionStart, input().style.width]).to.eql(['abcdefgh', 2, '101px']);
       expect(host.editor.value()).to.equal('abcdefgh');
-      expect(host.editor.draft()).to.eql({ value: 'abcdefgh', caret: 2 });
       host.renderState = sheet(null);
       host.draw();
       host.editor.setValue('x');
-      expect([host.editor.value(), host.editor.draft()]).to.eql([null, null]);
+      expect(host.editor.value()).to.equal(null);
     });
 
     describe('its keys', () => {

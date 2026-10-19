@@ -94,9 +94,8 @@ public class ServerEventPayloadContractTest {
     @Test
     public void contract_coversEveryDeclaredEventType() throws IOException {
         String source = readResource(CONTRACT_RESOURCE);
-        String union = source.substring(
-                source.indexOf("export type SpreadsheetEventType ="),
-                source.indexOf("export interface SpreadsheetEventDetail"));
+        int start = source.indexOf("export type SpreadsheetEventType =");
+        String union = source.substring(start, source.indexOf(';', start));
 
         Set<String> declared = new LinkedHashSet<>();
         Matcher m = Pattern.compile("\\|\\s*'([a-zA-Z]+)'").matcher(union);

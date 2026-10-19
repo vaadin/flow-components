@@ -82,18 +82,6 @@ export type SpreadsheetEventType =
   | 'popupButtonClick'
   | 'popupClose';
 
-/**
- * Generic envelope for every event the connector sends. The data
- * shape varies per event; specific event interfaces below narrow it.
- */
-export interface SpreadsheetEventDetail<
-  T extends SpreadsheetEventType = SpreadsheetEventType,
-  D = Record<string, unknown>
-> {
-  type: T;
-  data: D;
-}
-
 // ====================================================================
 // Per-event data shapes — typed for the events whose argument list is
 // stable per the existing SpreadsheetHandler.java. The data field is

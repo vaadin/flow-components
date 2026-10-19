@@ -169,6 +169,46 @@ describe('<vaadin-spreadsheet> — joining and leaving the page', () => {
   });
 });
 
+describe('<vaadin-spreadsheet> — the styles of its pop-up content', () => {
+  type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
+
+  /** The style elements in the document head holding the filter pop-up's content styles. */
+  const inTheHead = (): HTMLStyleElement[] =>
+    Array.from(document.head.querySelectorAll('style')).filter((style) =>
+      (style.textContent ?? '').includes('.spreadsheet-filter-table-content')
+    );
+
+  async function sheet(): Promise<Element> {
+    const el = document.createElement('vaadin-spreadsheet') as Element;
+    document.body.appendChild(el);
+    await el.updateComplete;
+    return el;
+  }
+
+  function remove(el: Element): void {
+    el.remove();
+    el.$connector.dispose();
+  }
+
+  it('puts them in the document head once, however many sheets there are', async () => {
+    const first = await sheet();
+    const second = await sheet();
+
+    expect(inTheHead()).to.have.length(1);
+    remove(first);
+    remove(second);
+  });
+
+  it('puts them back for the next sheet once they were taken out', async () => {
+    inTheHead().forEach((style) => style.remove());
+
+    const el = await sheet();
+
+    expect(inTheHead()).to.have.length(1);
+    remove(el);
+  });
+});
+
 describe('<vaadin-spreadsheet> — its id', () => {
   type Element = HTMLElement & { $connector: Spreadsheet; updateComplete: Promise<boolean> };
 

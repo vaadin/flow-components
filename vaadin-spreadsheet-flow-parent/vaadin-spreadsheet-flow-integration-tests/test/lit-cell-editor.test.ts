@@ -961,27 +961,10 @@ describe('SpreadsheetCellGrid — the editor and an input method', () => {
 });
 
 /**
- * The grid answers for its own parts: what its editor holds, and how wide a
- * text is drawn in a style. The connector asked its shadow root for both.
+ * The grid answers for its own parts: how wide a text is drawn in a style.
+ * The connector asked its shadow root.
  */
 describe('SpreadsheetCellGrid — what it tells the sheet', () => {
-    it('tells what the editor holds and where its caret is', async () => {
-        const el = await attachCellGridWithState(buildEditorState({ col: 2, row: 2, initialValue: 'abc' }));
-        const input = el.shadowRoot!.querySelector('.cell-editor') as HTMLInputElement;
-        input.value = 'abcd';
-        input.setSelectionRange(2, 2);
-
-        expect(el.editorDraft()).to.eql({ value: 'abcd', caret: 2 });
-        el.remove();
-    });
-
-    it('tells nothing while no editor is open', async () => {
-        const el = await attachCellGridWithState({ ...buildEditorState({ col: 2, row: 2, initialValue: '' }), editor: null });
-
-        expect(el.editorDraft()).to.equal(null);
-        el.remove();
-    });
-
     it('measures a text in each style, in the order asked, wider for a longer text', async () => {
         const el = await attachCellGridWithState({
             ...buildEditorState({ col: 2, row: 2, initialValue: '' }),

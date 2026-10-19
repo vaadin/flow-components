@@ -100,7 +100,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    */
   declare theme: string | null;
   /** The style rules written from the workbook's styles, and what they were written from. */
-  private readonly styleRules = new Memo<TemplateResult | string>();
+  private readonly styleRules = new Memo<TemplateResult>();
   /** Measures values: the cells too narrow for theirs, and the run-on ones that fit after all. */
   private readonly measurer = new ValueMeasurer(this);
   /** The cell editor: its input, its width, and the keyboard. */
@@ -179,11 +179,6 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    */
   textWidths(cellStyles: readonly string[], text: string): number[] {
     return this.measurer.textWidths(cellStyles, text);
-  }
-
-  /** What the cell editor holds and where its caret is; null while none is open. */
-  editorDraft(): { value: string; caret: number } | null {
-    return this.editor.draft();
   }
 
   /** The popup button drawn on a cell, or null when there is none in view. */
