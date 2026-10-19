@@ -510,7 +510,7 @@ public class SpreadsheetJsApi {
                 }
             };
             popupButtonConnectors.put(key, connector);
-            
+
             widget = connector.getWidget();
             popupButtonWidgets.put(key, widget);
 

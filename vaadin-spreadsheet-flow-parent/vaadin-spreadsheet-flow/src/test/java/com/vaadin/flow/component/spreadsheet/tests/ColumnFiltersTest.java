@@ -143,13 +143,12 @@ class ColumnFiltersTest {
 
         for (boolean active : new boolean[] { true, false }) {
             popupButton.markActive(active);
-            
+
             Assertions.assertEquals(active, popupButton.isActive());
             Assertions.assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .noneMatch(invocation -> "setPopupButtonState".equals(
-                    JsFunctionCallUtil.getFunctionName(invocation)
-                )));
+                    .map(PendingJavaScriptInvocation::getInvocation)
+                    .noneMatch(invocation -> "setPopupButtonState".equals(
+                            JsFunctionCallUtil.getFunctionName(invocation))));
         }
     }
 
