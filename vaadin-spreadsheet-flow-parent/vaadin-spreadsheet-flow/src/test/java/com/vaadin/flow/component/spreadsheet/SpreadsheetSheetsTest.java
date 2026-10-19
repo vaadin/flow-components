@@ -86,7 +86,7 @@ class SpreadsheetSheetsTest {
     }
 
     private List<String> tabs() {
-        return List.of(spreadsheet.getSheetNames());
+        return List.of(spreadsheet.workbookModel().sheetNames.get());
     }
 
     private List<String> sheetNames() {
@@ -290,9 +290,9 @@ class SpreadsheetSheetsTest {
                 "{\"sheetIndex\": 1, \"scrollLeft\": 30, \"scrollTop\": 40}");
 
         assertArrayEquals(new int[] { 40, 0 },
-                spreadsheet.getVerticalScrollPositions());
+                spreadsheet.workbookModel().verticalScrollPositions.get());
         assertArrayEquals(new int[] { 30, 0 },
-                spreadsheet.getHorizontalScrollPositions());
+                spreadsheet.workbookModel().horizontalScrollPositions.get());
     }
 
     @Test
@@ -309,9 +309,9 @@ class SpreadsheetSheetsTest {
         assertEquals(30, spreadsheet.getRows());
         assertEquals(15, spreadsheet.getColumns());
         assertArrayEquals(new int[] { 40, 0 },
-                spreadsheet.getVerticalScrollPositions());
+                spreadsheet.workbookModel().verticalScrollPositions.get());
         assertArrayEquals(new int[] { 30, 0 },
-                spreadsheet.getHorizontalScrollPositions());
+                spreadsheet.workbookModel().horizontalScrollPositions.get());
     }
 
     @Test

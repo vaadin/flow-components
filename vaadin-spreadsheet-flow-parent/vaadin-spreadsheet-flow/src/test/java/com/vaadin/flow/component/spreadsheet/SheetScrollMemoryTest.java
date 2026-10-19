@@ -54,8 +54,10 @@ class SheetScrollMemoryTest {
 
     private static void assertOffsets(Spreadsheet spreadsheet, int[] tops,
             int[] lefts) {
-        assertArrayEquals(tops, spreadsheet.getVerticalScrollPositions());
-        assertArrayEquals(lefts, spreadsheet.getHorizontalScrollPositions());
+        assertArrayEquals(tops,
+                spreadsheet.workbookModel().verticalScrollPositions.get());
+        assertArrayEquals(lefts,
+                spreadsheet.workbookModel().horizontalScrollPositions.get());
     }
 
     @Test

@@ -28,6 +28,10 @@ import org.apache.poi.ss.util.CellReference;
  */
 final class WorkbookScope implements Serializable {
 
+    /**
+     * What the client is given of the workbook, as properties of the element.
+     */
+    final WorkbookClientModel client;
     final FormulaEvaluator formulaEvaluator;
     final ConditionalFormattingEvaluator formattingEvaluator;
     final TableRegistry tables = new TableRegistry();
@@ -51,6 +55,7 @@ final class WorkbookScope implements Serializable {
     ConditionalFormatter conditionalFormatter;
 
     WorkbookScope(Spreadsheet spreadsheet, Workbook workbook) {
+        client = new WorkbookClientModel(spreadsheet.getElement());
         formulaEvaluator = workbook.getCreationHelper()
                 .createFormulaEvaluator();
         // Every formula evaluator of POI extends BaseFormulaEvaluator.

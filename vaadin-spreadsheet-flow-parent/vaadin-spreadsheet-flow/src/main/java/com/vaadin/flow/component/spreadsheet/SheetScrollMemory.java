@@ -81,8 +81,8 @@ final class SheetScrollMemory implements Serializable {
                 visibleLefts[i] = lefts[poiIndex];
             }
         }
-        spreadsheet.setVerticalScrollPositions(visibleTops);
-        spreadsheet.setHorizontalScrollPositions(visibleLefts);
+        spreadsheet.workbookModel().verticalScrollPositions.set(visibleTops);
+        spreadsheet.workbookModel().horizontalScrollPositions.set(visibleLefts);
     }
 
     private static int[] withoutIndex(int[] values, int index) {

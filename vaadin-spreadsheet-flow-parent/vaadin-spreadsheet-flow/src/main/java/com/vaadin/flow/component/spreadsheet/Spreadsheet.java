@@ -175,28 +175,11 @@ public class Spreadsheet extends Component
     /** What the client has of each cell; every cell sent goes through it. */
     final ClientCellMirror clientCells = new ClientCellMirror(this);
 
-    /** 1-based */
-    private final ClientProperty<Integer> sheetIndex = ClientProperty
-            .integer(getElement(), "sheetIndex", 1);
-
-    private final ClientProperty<String[]> sheetNames = ClientProperty
-            .json(getElement(), "sheetNames");
-
     /**
      * The CSS of each cell style of the workbook, by POI cell style index, as
      * sent to the client. Set when the styles of the active sheet are loaded.
      */
     protected HashMap<Integer, String> cellStyleToCSSStyle = null;
-
-    /** The CSS of the cell styles, as the client has it. */
-    private final ClientProperty<HashMap<Integer, String>> cellStyles = ClientProperty
-            .json(getElement(), "cellStyleToCSSStyle");
-
-    private final FreezePaneState freezePaneState = new FreezePaneState(
-            getElement());
-
-    private final ClientProperty<Boolean> workbookProtected = ClientProperty
-            .bool(getElement(), "workbookProtected", false);
 
     private final ClientProperty<Boolean> showCustomEditorOnFocus = ClientProperty
             .bool(getElement(), "showCustomEditorOnFocus", false);
@@ -252,14 +235,6 @@ public class Spreadsheet extends Component
         return sheetSizes.columnWidths();
     }
 
-    int getSheetIndex() {
-        return sheetIndex.get();
-    }
-
-    String[] getSheetNames() {
-        return sheetNames.get();
-    }
-
     HashMap<Integer, String> getCellStyleToCSSStyle() {
         return cellStyleToCSSStyle;
     }
@@ -282,14 +257,6 @@ public class Spreadsheet extends Component
         return sheetSizes.hiddenRowsFromOne();
     }
 
-    int[] getVerticalScrollPositions() {
-        return freezePaneState.getVerticalScrollPositions();
-    }
-
-    int[] getHorizontalScrollPositions() {
-        return freezePaneState.getHorizontalScrollPositions();
-    }
-
     Map<String, Component> getCellKeyToEditorMap() {
         return cellKeyToEditor;
     }
@@ -310,29 +277,9 @@ public class Spreadsheet extends Component
         sheetSizes.setRowHeights(rowH);
     }
 
-    void setSheetIndex(int sheetIndex) {
-        this.sheetIndex.set(sheetIndex);
-    }
-
-    void setSheetNames(String[] sheetNames) {
-        this.sheetNames.set(sheetNames);
-    }
-
     void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
-        cellStyles.set(cellStyleToCSSStyle);
-    }
-
-    void setVerticalScrollPositions(int[] verticalScrollPositions) {
-        freezePaneState.setVerticalScrollPositions(verticalScrollPositions);
-    }
-
-    void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
-        freezePaneState.setHorizontalScrollPositions(horizontalScrollPositions);
-    }
-
-    private void setWorkbookProtected(boolean workbookProtected) {
-        this.workbookProtected.set(workbookProtected);
+        workbookModel().cellStyleToCSSStyle.set(cellStyleToCSSStyle);
     }
 
     /**
@@ -1433,7 +1380,7 @@ public class Spreadsheet extends Component
      * @return Names of the currently visible sheets.
      */
     public String[] getVisibleSheetNames() {
-        final String[] names = getSheetNames();
+        final String[] names = workbookModel().sheetNames.get();
         return Arrays.copyOf(names, names.length);
     }
 
@@ -1560,8 +1507,9 @@ public class Spreadsheet extends Component
      * @return Number of visible sheets.
      */
     public int getNumberOfVisibleSheets() {
-        if (getSheetNames() != null) {
-            return getSheetNames().length;
+        String[] names = workbookModel().sheetNames.get();
+        if (names != null) {
+            return names.length;
         } else {
             return 0;
         }
@@ -1593,7 +1541,7 @@ public class Spreadsheet extends Component
      * @return Index of the active sheet, 0-based
      */
     public int getActiveSheetIndex() {
-        return getSheetIndex() - 1;
+        return workbookModel().sheetIndex.get() - 1;
     }
 
     /**
@@ -1603,7 +1551,7 @@ public class Spreadsheet extends Component
      * @return POI model index of the active sheet, 0-based
      */
     public int getActiveSheetPOIIndex() {
-        return getVisibleSheetPOIIndex(getSheetIndex() - 1);
+        return getVisibleSheetPOIIndex(workbookModel().sheetIndex.get() - 1);
     }
 
     /**
@@ -2736,9 +2684,9 @@ public class Spreadsheet extends Component
         workbookScope.styler.reloadWorkbookStyles();
 
         if (workbook instanceof HSSFWorkbook hssf) {
-            setWorkbookProtected(hssf.isWriteProtected());
+            workbookModel().workbookProtected.set(hssf.isWriteProtected());
         } else if (workbook instanceof XSSFWorkbook xssf) {
-            setWorkbookProtected(xssf.isStructureLocked());
+            workbookModel().workbookProtected.set(xssf.isStructureLocked());
         }
 
         setWorkbookChangeToggle(!isWorkbookChangeToggle());
@@ -2763,6 +2711,11 @@ public class Spreadsheet extends Component
      */
     SheetClientModel sheetModel() {
         return sheetScope.client;
+    }
+
+    /** What the client is given of the workbook shown. */
+    WorkbookClientModel workbookModel() {
+        return workbookScope.client;
     }
 
     /** The overlays of the sheet shown. */
@@ -2848,7 +2801,7 @@ public class Spreadsheet extends Component
 
         clientChanges.sheetShown();
 
-        setSheetIndex(
+        workbookModel().sheetIndex.set(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
         sheetModel().sheetProtected.set(getActiveSheet().getProtect());
         setCellKeyToEditorMap(null);
@@ -2936,8 +2889,8 @@ public class Spreadsheet extends Component
                 sheetNamesList.add(workbook.getSheetName(i));
             }
         }
-        setSheetNames(
-                sheetNamesList.toArray(new String[sheetNamesList.size()]));
+        workbookModel().sheetNames
+                .set(sheetNamesList.toArray(new String[sheetNamesList.size()]));
         workbookScope.scrollMemory.publish();
     }
 

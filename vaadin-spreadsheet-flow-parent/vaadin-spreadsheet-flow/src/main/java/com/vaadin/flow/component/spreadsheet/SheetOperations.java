@@ -34,7 +34,8 @@ final class SheetOperations implements Serializable {
     /** Shows the sheet of the tab at the index. */
     void setActiveSheetIndex(int sheetIndex) {
         if (sheetIndex < 0
-                || sheetIndex >= spreadsheet.getSheetNames().length) {
+                || sheetIndex >= spreadsheet.workbookModel().sheetNames
+                        .get().length) {
             throw new IllegalArgumentException("Invalid Sheet index given.");
         }
         // Through the component, so an override of it applies.
@@ -84,7 +85,8 @@ final class SheetOperations implements Serializable {
      */
     void onSheetSelected(int tabIndex, int scrollLeft, int scrollTop) {
         spreadsheet.workbookScope().scrollMemory.rememberForSheetAtIndex(
-                spreadsheet.getSheetIndex() - 1, scrollLeft, scrollTop);
+                spreadsheet.workbookModel().sheetIndex.get() - 1, scrollLeft,
+                scrollTop);
         Sheet oldSheet = spreadsheet.getActiveSheet();
         spreadsheet.setActiveSheetIndex(tabIndex);
         spreadsheet.fireSheetChangeEvent(oldSheet,
@@ -94,7 +96,8 @@ final class SheetOperations implements Serializable {
     /** The client added a sheet, of the size new sheets have. */
     void onNewSheetCreated(int scrollLeft, int scrollTop) {
         spreadsheet.workbookScope().scrollMemory.rememberForSheetAtIndex(
-                spreadsheet.getSheetIndex() - 1, scrollLeft, scrollTop);
+                spreadsheet.workbookModel().sheetIndex.get() - 1, scrollLeft,
+                scrollTop);
         spreadsheet.createNewSheet(null, spreadsheet.defaultNewSheetRows,
                 spreadsheet.defaultNewSheetColumns);
     }
@@ -162,7 +165,8 @@ final class SheetOperations implements Serializable {
     /** Renames the sheet of the tab at the index. */
     void setSheetName(int sheetIndex, String sheetName) {
         if (sheetIndex < 0
-                || sheetIndex >= spreadsheet.getSheetNames().length) {
+                || sheetIndex >= spreadsheet.workbookModel().sheetNames
+                        .get().length) {
             throw new IllegalArgumentException("Invalid Sheet index given.");
         }
         // Through the component, so an override of it applies.
@@ -214,7 +218,7 @@ final class SheetOperations implements Serializable {
         }
         if (sheetPOIIndex != activeSheetIndex) {
             spreadsheet.reloadSheetNames();
-            spreadsheet.setSheetIndex(
+            spreadsheet.workbookModel().sheetIndex.set(
                     spreadsheet.getSpreadsheetSheetIndex(activeSheetIndex) + 1);
         } else {
             // The sheet shown was hidden: the next sheet shown takes its
