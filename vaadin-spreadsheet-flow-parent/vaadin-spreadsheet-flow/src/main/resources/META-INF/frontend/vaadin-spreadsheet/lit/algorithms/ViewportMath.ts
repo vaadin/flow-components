@@ -237,6 +237,22 @@ export function freezeGap(frozen: number): number {
 }
 
 /**
+ * The column or row at a point along one axis, 1-based: `offset` pixels
+ * past where the cells start on screen. The frozen ones come first and stay
+ * where they are, the freeze line's pixel with them; the rest come after
+ * that, `scroll` pixels of them scrolled out of view. Hidden ones hold no
+ * point, and a point past the sheet is on its last one.
+ */
+export function indexAtPoint(sizes: AxisSizes, frozen: number, count: number, offset: number, scroll: number): number {
+  const frozenExtent = sizes.start(frozen + 1) - sizes.start(1);
+  const scrollingStart = frozenExtent + freezeGap(frozen);
+  if (frozen > 0 && offset < scrollingStart) {
+    return Math.min(frozen, sizes.holding(1, offset));
+  }
+  return Math.min(Math.max(1, count), sizes.holding(frozen + 1, offset - scrollingStart + scroll));
+}
+
+/**
  * How much further on a column or row is drawn for the freeze line before
  * it: the line's pixel when it lies past the frozen ones, nothing otherwise.
  */

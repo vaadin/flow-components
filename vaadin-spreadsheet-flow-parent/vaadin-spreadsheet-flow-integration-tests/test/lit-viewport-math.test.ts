@@ -14,6 +14,7 @@ import {
     convertPointsToPixel,
     FALLBACK_PPI,
     getDefaultRowHeightPx,
+    indexAtPoint,
     type ViewportInput,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 import { AxisSizes } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/AxisSizes.js';
@@ -460,5 +461,45 @@ describe('ViewportMath — computeViewportBounds — against a walk from the fir
             const sheet = randomSheet(next);
             expect(bounds(inputOf(sheet)), JSON.stringify(sheet)).to.eql(walk(sheet));
         }
+    });
+});
+
+describe('ViewportMath — indexAtPoint, the row or column at a point', () => {
+    // Twenty 20px rows.
+    const twenty = new AxisSizes(20, () => 20, 20);
+
+    it('finds the row at a point, from where the cells start', () => {
+        expect(indexAtPoint(twenty, 0, 20, 45, 0)).to.equal(3);
+    });
+
+    it('counts the rows scrolled out of view', () => {
+        // Scrolled 100px, five rows are above the view: 45px down is row 8.
+        expect(indexAtPoint(twenty, 0, 20, 45, 100)).to.equal(8);
+    });
+
+    it('finds a frozen row where it stays, however far the rest are scrolled', () => {
+        // Rows 1-3 frozen (60px), then the freeze line's pixel.
+        expect(indexAtPoint(twenty, 3, 20, 30, 200)).to.equal(2);
+    });
+
+    it('counts the freeze line\'s own pixel with the frozen rows', () => {
+        expect(indexAtPoint(twenty, 3, 20, 60, 200)).to.equal(3);
+    });
+
+    it('starts the scrolling rows past the freeze line', () => {
+        // Not scrolled, the first scrolling row is row 4, at 61px.
+        expect(indexAtPoint(twenty, 3, 20, 61, 0)).to.equal(4);
+        // Scrolled 100px, the row 100px further on: row 9.
+        expect(indexAtPoint(twenty, 3, 20, 61, 100)).to.equal(9);
+    });
+
+    it('keeps to the last row of the sheet past it', () => {
+        expect(indexAtPoint(twenty, 0, 20, 10_000, 0)).to.equal(20);
+    });
+
+    it('passes over hidden rows', () => {
+        // Row 3 has no height: 40px down is row 4.
+        const hidden = new AxisSizes(20, (i) => (i === 3 ? 0 : 20), 20);
+        expect(indexAtPoint(hidden, 0, 20, 40, 0)).to.equal(4);
     });
 });

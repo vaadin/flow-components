@@ -14,9 +14,11 @@ import {
   computeViewportBounds,
   FALLBACK_PPI,
   freezeGap,
+  indexAtPoint,
   pagedViewInset,
   scrollToShow
 } from '../algorithms/ViewportMath.js';
+import type { CellPanes } from '../controllers/DragScroll.js';
 import type { CellSlotAssignment } from '../dom/VirtualChildren.js';
 import type { SpreadsheetCellGrid } from '../elements/SpreadsheetCellGrid.js';
 import type { SpreadsheetColumnHeader } from '../elements/SpreadsheetColumnHeader.js';
@@ -553,25 +555,54 @@ export class SheetRenderer {
    * to this pane, whose bottom is the sheet's own.
    */
   scrollingPaneClientRect(): { left: number; top: number; bottom: number } {
+    const { scrolling } = this.cellPanes();
+    return {
+      left: scrolling.left,
+      top: scrolling.top,
+      bottom: this.parts.scrollContainer.getBoundingClientRect().bottom
+    };
+  }
+
+  /**
+   * Where the cells are on screen: all of them in view, the frozen ones
+   * included, and the pane of those that scroll, past the frozen rows and
+   * columns and the freeze line's own pixel. The scroll bars are not cells.
+   */
+  cellPanes(): CellPanes {
     const { scrollContainer, cellGrid } = this.parts;
     const { model } = this.store;
     const box = scrollContainer.getBoundingClientRect();
     const frozen = cellGrid.frozenExtent();
-    // Past the freeze line's own pixel, where the scrolling cells start.
+    const viewLeft = box.left + scrollContainer.clientLeft;
+    const viewTop = box.top + scrollContainer.clientTop;
+    const cells = {
+      left: viewLeft + cellGrid.offsetLeft,
+      top: viewTop + cellGrid.offsetTop,
+      right: viewLeft + scrollContainer.clientWidth,
+      bottom: viewTop + scrollContainer.clientHeight
+    };
     return {
-      left:
-        box.left +
-        scrollContainer.clientLeft +
-        cellGrid.offsetLeft +
-        frozen.width +
-        freezeGap(model.horizontalSplitPosition),
-      top:
-        box.top +
-        scrollContainer.clientTop +
-        cellGrid.offsetTop +
-        frozen.height +
-        freezeGap(model.verticalSplitPosition),
-      bottom: box.bottom
+      cells,
+      scrolling: {
+        ...cells,
+        left: cells.left + frozen.width + freezeGap(model.horizontalSplitPosition),
+        top: cells.top + frozen.height + freezeGap(model.verticalSplitPosition)
+      }
+    };
+  }
+
+  /**
+   * The cell at a point on the cells, as they are drawn and scrolled now. A
+   * point off them is on the nearest column or row of the sheet.
+   */
+  cellAt(x: number, y: number): { col: number; row: number } {
+    const { model } = this.store;
+    const { scrollContainer } = this.parts;
+    const { columns, rows } = this.sheetSizes();
+    const { cells } = this.cellPanes();
+    return {
+      col: indexAtPoint(columns, model.horizontalSplitPosition, model.cols, x - cells.left, scrollContainer.scrollLeft),
+      row: indexAtPoint(rows, model.verticalSplitPosition, model.rows, y - cells.top, scrollContainer.scrollTop)
     };
   }
 

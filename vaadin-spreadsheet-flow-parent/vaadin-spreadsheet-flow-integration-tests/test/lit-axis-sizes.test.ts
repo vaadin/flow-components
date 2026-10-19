@@ -103,3 +103,54 @@ describe('AxisSizes — which one a distance reaches', () => {
     }
   });
 });
+
+describe('AxisSizes — which one a point lies in', () => {
+  it('stays put for a point at the start or before it', () => {
+    expect(sizes([10, 20], 5).holding(2, 0)).to.equal(2);
+    expect(sizes([10, 20], 5).holding(2, -15)).to.equal(2);
+  });
+
+  it('takes the one the point is inside', () => {
+    expect(sizes([10, 20, 30], 5).holding(1, 25)).to.equal(2);
+  });
+
+  it('takes one that starts exactly at the point', () => {
+    expect(sizes([10, 20, 30], 5).holding(1, 30)).to.equal(3);
+  });
+
+  it('passes over hidden ones, which hold no point', () => {
+    // The second and third have no size: the point at 10 is in the fourth.
+    expect(sizes([10, 0, 0, 10], 5).holding(1, 10)).to.equal(4);
+    // A hidden one to start from holds nothing either.
+    expect(sizes([0, 10], 5).holding(1, 0)).to.equal(2);
+  });
+
+  it('goes on past the sized ones at the size beyond them', () => {
+    // 10 + 20 = 30, then 5 each: 42 is in the third of those, the fifth.
+    expect(sizes([10, 20], 5).holding(1, 42)).to.equal(5);
+  });
+
+  it('agrees with a walk from where it starts, on many axes', () => {
+    let x = 7;
+    const next = () => {
+      x = (x * 1103515245 + 12345) % 2147483648;
+      return x / 2147483648;
+    };
+    const pick = (n: number) => Math.floor(next() * n);
+    for (let i = 0; i < 3000; i++) {
+      const list = Array.from({ length: pick(40) }, () => (next() < 0.2 ? 0 : 1 + pick(30)));
+      const beyond = 1 + pick(20);
+      const axis = sizes(list, beyond);
+      const from = 1 + pick(list.length + 5);
+      const distance = pick(800);
+      // The one whose own pixels, from where it starts, take in the point.
+      let index = from;
+      let end = axis.size(index);
+      while (end <= distance) {
+        index++;
+        end += axis.size(index);
+      }
+      expect(axis.holding(from, distance), JSON.stringify({ list, beyond, from, distance })).to.equal(index);
+    }
+  });
+});

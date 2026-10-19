@@ -197,6 +197,21 @@ describe('SheetStore', () => {
       expect(renders).to.equal(3);
     });
 
+    it('drags over the cells while a press selects, fills or points at cells for a formula', () => {
+      expect(store.dragging(), 'nothing pressed').to.be.false;
+      store.changePress({ kind: 'select', crossed: false });
+      expect(store.dragging(), 'a selection').to.be.true;
+      store.changePress({ kind: 'fill', from: { c1: 1, c2: 1, r1: 1, r2: 1 }, outcome: { kind: 'none' } });
+      expect(store.dragging(), 'a fill').to.be.true;
+      store.changePress(null);
+      openEditorOn(2, 3);
+      expect(store.dragging(), 'an edit').to.be.false;
+      store.changeFormula({ press: 'pointing' });
+      expect(store.dragging(), 'pointing for a formula').to.be.true;
+      store.changeFormula({ press: 'pointed' });
+      expect(store.dragging(), 'pointed, the button up').to.be.false;
+    });
+
     it('ends everything, and has that drawn', () => {
       openEditorOn(2, 3);
       store.changePress({ kind: 'select', crossed: true });

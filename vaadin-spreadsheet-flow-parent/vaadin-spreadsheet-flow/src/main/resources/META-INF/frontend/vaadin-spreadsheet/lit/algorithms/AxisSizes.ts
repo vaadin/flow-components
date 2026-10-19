@@ -73,4 +73,24 @@ export class AxisSizes {
     }
     return first + Math.ceil((target - this.start(first)) / this.beyond);
   }
+
+  /**
+   * The one a point lies in, `distance` past where `from` starts: `from`
+   * itself for a point at its start or before it. Ones of no size, a hidden
+   * row, hold no point; the point is in the next one with a size.
+   */
+  holding(from: number, distance: number): number {
+    let index = from;
+    if (distance > 0) {
+      index = this.reach(from, distance);
+      if (this.start(index) > this.start(from) + distance) {
+        // It starts past the point, which is in the one before it.
+        index--;
+      }
+    }
+    while (index <= this.count && this.size(index) <= 0) {
+      index++;
+    }
+    return index;
+  }
 }

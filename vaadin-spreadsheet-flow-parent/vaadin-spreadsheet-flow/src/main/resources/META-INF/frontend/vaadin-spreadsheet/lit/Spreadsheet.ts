@@ -41,6 +41,7 @@ import { flowVirtualChildResolver } from './dom/VirtualChildren.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
+import { DragScroll } from './controllers/DragScroll.js';
 import { onDocument, type PageListener, PageListeners } from './controllers/PageListeners.js';
 import { SheetTabs } from './controllers/SheetTabs.js';
 import { ContextMenu } from './controllers/ContextMenu.js';
@@ -198,6 +199,27 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     finishHeaderResize: () => this.headerResize.finish(),
     cellOfEditor: (e) => this.hosted.cellOfEditor(e),
     send: (event) => this.sendToServer(event)
+  });
+
+  /** Scrolling the cells while a drag holds the pointer past their edge; see {@link DragScroll}. */
+  private readonly dragScroll = new DragScroll({
+    dragging: () => this.store.dragging(),
+    panes: () => this.renderer.cellPanes(),
+    scrolled: () => {
+      const container = this.scrollContainer;
+      return {
+        left: container.scrollLeft,
+        top: container.scrollTop,
+        maxLeft: container.scrollWidth - container.clientWidth,
+        maxTop: container.scrollHeight - container.clientHeight
+      };
+    },
+    scrollTo: (left, top) => {
+      this.scrollContainer.scrollLeft = left;
+      this.scrollContainer.scrollTop = top;
+    },
+    cellAt: (x, y) => this.renderer.cellAt(x, y),
+    over: (col, row) => this.pointerSelection.over(col, row)
   });
 
   /** The keyboard on the sheet; see {@link KeyboardNavigation}. */
@@ -564,7 +586,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.on(this.cellGrid, 'cell-mousedown', (e: CellPressEvent) => this.pointerSelection.press(e));
     this.on(this.cellGrid, 'cell-mouseover', (e: CustomEvent<{ col: number; row: number; box?: DOMRect }>) => {
       this.linkTooltip.show(e.detail);
-      this.pointerSelection.over(e.detail.col, e.detail.row);
+      // While the cells scroll for a drag, the drag is at their edge.
+      if (!this.dragScroll.scrolling()) {
+        this.pointerSelection.over(e.detail.col, e.detail.row);
+      }
     });
     this.on(this.cellGrid, 'grid-mouseleave', this.linkTooltip.hide);
     this.on(this.cellGrid, 'selection-paint-start', () => this.pointerSelection.fillStarted());
@@ -647,7 +672,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       ),
       {
         hostConnected: () => this.resizeObserver.observe(this.scrollContainer),
-        hostDisconnected: () => this.resizeObserver.disconnect()
+        hostDisconnected: () => {
+          this.resizeObserver.disconnect();
+          this.dragScroll.stop();
+        }
       },
       this.popup
     ];
@@ -694,9 +722,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     listen(target, type, this.handling(listener), this.ownListeners.signal);
   }
 
-  /** The pointer moved on the page: a header drag follows it. */
+  /** The pointer moved on the page: a header drag follows it, and a drag past the cells scrolls them. */
   private readonly handleDocumentMouseMove = (e: MouseEvent): void => {
     this.headerResize.moved(e);
+    this.dragScroll.moved(e.clientX, e.clientY);
   };
 
   /** The name of the sheet shown. */
@@ -1114,10 +1143,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     }
   }
   /** Any click outside the menu dismisses it, as a native menu would. */
-  private readonly handleDocumentPointerDown = (e: Event): void => {
+  private readonly handleDocumentPointerDown = (e: PointerEvent): void => {
     const path = e.composedPath();
     this.popup.pressed(path);
     this.menu.closeUnlessPressedIn(path);
+    this.dragScroll.pressed(e.clientX, e.clientY);
   };
 
   private readonly handleContextMenuKeyDown = (e: KeyboardEvent): void => {

@@ -243,6 +243,48 @@ describe('SheetRenderer', () => {
       expect(pane.left).to.equal(box.left + parts.scrollContainer.clientLeft + 64 + 1);
       expect(pane.bottom).to.equal(box.bottom);
     });
+
+    it('gives where the cells are on screen, and the pane of those that scroll', () => {
+      store.write('horizontalSplitPosition', 1);
+      store.write('verticalSplitPosition', 2);
+      renderer.apply(VIEW);
+      const container = parts.scrollContainer;
+      const box = container.getBoundingClientRect();
+      const left = box.left + container.clientLeft;
+      const top = box.top + container.clientTop;
+
+      const { cells, scrolling } = renderer.cellPanes();
+
+      expect(cells).to.eql({ left, top, right: left + container.clientWidth, bottom: top + container.clientHeight });
+      // One frozen 64px column and two frozen 20px rows, and the freeze line's pixel past each.
+      expect(scrolling).to.eql({ ...cells, left: left + 65, top: top + 41 });
+    });
+
+    it('leaves the border and the scroll bars out of the cells', () => {
+      parts.scrollContainer.style.border = '3px solid black';
+      renderer.apply(VIEW);
+      const container = parts.scrollContainer;
+      const box = container.getBoundingClientRect();
+
+      const { cells } = renderer.cellPanes();
+
+      expect(cells.right).to.equal(box.left + 3 + container.clientWidth);
+      expect(cells.bottom).to.equal(box.top + 3 + container.clientHeight);
+      expect(cells.right).to.be.below(box.right);
+    });
+
+    it('finds the cell at a point, on the frozen cells or the ones scrolled', () => {
+      store.write('horizontalSplitPosition', 1);
+      store.write('verticalSplitPosition', 2);
+      renderer.apply(VIEW);
+      parts.scrollContainer.scrollTop = 100;
+      const { cells, scrolling } = renderer.cellPanes();
+
+      expect(renderer.cellAt(cells.left + 10, cells.top + 10), 'frozen').to.eql({ col: 1, row: 1 });
+      // 5px into the scrolling cells, scrolled 100px down: 105px past row 3's top, in row 8.
+      expect(renderer.cellAt(scrolling.left + 5, scrolling.top + 5), 'scrolled').to.eql({ col: 2, row: 8 });
+      expect(renderer.cellAt(cells.right + 500, cells.bottom + 500), 'past the sheet').to.eql({ col: 10, row: 20 });
+    });
   });
 
   it('reads the resources from the element they are published on, and none before', () => {

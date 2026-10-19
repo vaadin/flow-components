@@ -285,6 +285,14 @@ export class SheetStore {
     };
   }
 
+  /**
+   * Whether a press is being dragged over the cells: out into a range, from
+   * the fill handle, or pointing at cells for the formula being written.
+   */
+  dragging(): boolean {
+    return this.ongoing.press !== null || this.formula.press === 'pointing';
+  }
+
   /** The strip a fill drag paints, while one does. */
   paintRect(): CellRect | null {
     const press = this.ongoing.press;
