@@ -39,9 +39,9 @@ public class HiddenGridComponentColumnIT extends AbstractComponentIT {
         // The second round matters: the first one can pass on a grid that had
         // no rows before
         for (int round = 1; round <= 2; round++) {
-            clickElementWithJs("hide-grid");
-            clickElementWithJs("set-items");
-            clickElementWithJs("show-grid");
+            clickButton("hide-grid");
+            clickButton("set-items");
+            clickButton("show-grid");
 
             int generation = round + 1;
             Assert.assertEquals("round " + round,
@@ -52,8 +52,8 @@ public class HiddenGridComponentColumnIT extends AbstractComponentIT {
 
     @Test
     public void hideGridClearItemsAndHideColumn_showGridWithNewItems_componentsAreRendered() {
-        clickElementWithJs("hide-grid-and-column");
-        clickElementWithJs("show-grid-with-new-items");
+        clickButton("hide-grid-and-column");
+        clickButton("show-grid-with-new-items");
 
         waitUntil(driver -> grid.getRowCount() > 0);
 
@@ -61,5 +61,9 @@ public class HiddenGridComponentColumnIT extends AbstractComponentIT {
         // left
         Assert.assertEquals("component of item 2.1",
                 grid.getCell(0, 0).getText());
+    }
+
+    private void clickButton(String id) {
+        $("button").id(id).click();
     }
 }
