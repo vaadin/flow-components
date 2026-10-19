@@ -38,7 +38,7 @@ describe('Spreadsheet — the sizes the sheet is drawn with', () => {
 
   /** What the sizes are worked out as, kept from the last draw while nothing they come from changed. */
   function kept(): unknown {
-    return (sheet as unknown as { sheetSizes(): unknown }).sheetSizes();
+    return (sheet as unknown as { renderer: { sheetSizes(): unknown } }).renderer.sheetSizes();
   }
 
   function height(): number {

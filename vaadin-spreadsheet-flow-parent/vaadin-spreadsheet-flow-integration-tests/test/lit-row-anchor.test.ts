@@ -221,8 +221,9 @@ describe('Spreadsheet — rows above the screen changing height', () => {
   it('draws once when only rows below the top of the screen change height', () => {
     scrollTo(2000);
     let draws = 0;
-    const draw = sheet.applyRenderState.bind(sheet);
-    sheet.applyRenderState = (opts) => {
+    const renderer = (sheet as unknown as { renderer: { apply(opts: unknown): void } }).renderer;
+    const draw = renderer.apply.bind(renderer);
+    renderer.apply = (opts) => {
       draws++;
       draw(opts);
     };

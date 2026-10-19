@@ -29,24 +29,15 @@ import {
 } from './state/SelectionState.js';
 import type { SpreadsheetEvent } from './types/rpc-client-to-server.js';
 import type { CellEditorState } from './elements/types.js';
-import {
-  computeViewportBounds,
-  FALLBACK_PPI,
-  freezeGap,
-  getDefaultRowHeightPx,
-  pagedViewInset,
-  scrollToShow,
-  withSize
-} from './algorithms/ViewportMath.js';
-import { type CellSlots, Derived, drawnColumnWidth, drawnRowHeight, type SheetSizes } from './state/Derived.js';
+import { FALLBACK_PPI, getDefaultRowHeightPx, withSize } from './algorithms/ViewportMath.js';
+import type { CellSlots } from './state/Derived.js';
 import { RenderScheduler } from './state/RenderScheduler.js';
 import { IDLE, type InteractionState } from './state/Interaction.js';
 import type { SheetData } from './state/SheetData.js';
 import { SheetStore } from './state/SheetStore.js';
-import { ViewState } from './state/ViewState.js';
 import { type SheetModel } from './state/SheetModel.js';
 import { toKey } from './algorithms/CellKeys.js';
-import { type CellSlotAssignment, flowVirtualChildResolver } from './dom/VirtualChildren.js';
+import { flowVirtualChildResolver } from './dom/VirtualChildren.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
@@ -65,22 +56,18 @@ import { KeyboardNavigation } from './controllers/KeyboardNavigation.js';
 import { PointerSelection } from './controllers/PointerSelection.js';
 import { FormulaPointer } from './controllers/FormulaPointer.js';
 import { Outline } from './controllers/Outline.js';
+import { type ScrollView, SheetRenderer } from './render/SheetRenderer.js';
 import { listenForLongPress } from './dom/LongPress.js';
-import { computeMergedRegionBoxes, computePositionedOverlays } from './algorithms/Positioning.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
 import { coerceArray, coerceJson } from './wire/Coerce.js';
-import {
-  columnGroupingGutterPx,
-  rowGroupingGutterPx,
-  SpreadsheetColumnHeader
-} from './elements/SpreadsheetColumnHeader.js';
+import { SpreadsheetColumnHeader } from './elements/SpreadsheetColumnHeader.js';
 import { SpreadsheetRowHeader } from './elements/SpreadsheetRowHeader.js';
 import { SpreadsheetHeaderCorner } from './elements/SpreadsheetHeaderCorner.js';
 import { SpreadsheetSheetTabs } from './elements/SpreadsheetSheetTabs.js';
 import { SpreadsheetFormulaBar } from './elements/SpreadsheetFormulaBar.js';
 import { SpreadsheetContextMenu } from './elements/SpreadsheetContextMenu.js';
-import { type LoadRange, ViewportLoader } from './state/ViewportLoader.js';
+import { ViewportLoader } from './state/ViewportLoader.js';
 import type { CellGridRenderState } from './elements/types.js';
 
 /** An arrow in the cell editor or the formula field, with the text written and its caret. */
@@ -128,18 +115,6 @@ type CellPressEvent = CustomEvent<{
 
 /** A click on a column letter or a row number, with the keys held. */
 type HeaderClickEvent<T> = CustomEvent<T & { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean; altKey: boolean }>;
-
-/**
- * Height of the column headers, in pixels: 27, so a sheet starts its first
- * row where it always did.
- */
-const DEFAULT_HEADER_ROW_HEIGHT = 27;
-
-/**
- * Width of the row headers, in pixels: 50, as in earlier versions, which
- * also fits a six-digit row number.
- */
-const DEFAULT_HEADER_COLUMN_WIDTH = 50;
 
 /**
  * The client of the Spreadsheet component: the connector between the
@@ -192,7 +167,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private readonly pointing = new FormulaPointer(this.store, {
     fieldHasFocus: () => this.formulaBar.formulaFieldHasFocus(),
     sheetName: () => this.activeSheetName(),
-    scrollIntoView: (cell) => this.scrollCellIntoView(cell)
+    scrollIntoView: (cell) => this.renderer.scrollCellIntoView(cell)
   });
 
   /** Tells the server what the user selected; see {@link SelectionReporter}. */
@@ -210,7 +185,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     handle: (work) => this.renders.handle(work),
     returnFocusToSheet: () => this.returnFocusToSheet(),
     moveInsideSelection: (cell) => this.keyboard.moveInsideSelection(cell),
-    scrollIntoView: (cell) => this.scrollCellIntoView(cell),
+    scrollIntoView: (cell) => this.renderer.scrollCellIntoView(cell),
     scheduleRender: () => this.scheduleRender(),
     send: (event) => this.sendToServer(event)
   });
@@ -232,7 +207,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     exits: (e) => this.keyboardExit.takes(e),
     focusSheet: () => this.scrollContainer.focus(),
     isMac: () => isMacPlatform(),
-    scrollIntoView: (cell) => this.scrollCellIntoView(cell),
+    scrollIntoView: (cell) => this.renderer.scrollCellIntoView(cell),
     send: (event) => this.sendToServer(event)
   });
 
@@ -265,9 +240,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /** Resizing columns and rows by their header edges; see {@link HeaderResize}. */
   private readonly headerResize: HeaderResize;
 
-  /** The element the `resource-<id>` attributes live on; see {@link setResources}. */
-  private resourceHost: HTMLElement | null = null;
-
   /**
    * What the client knows of the sheet the server shows: its cells, and the
    * cell the server holds as selected. Replaced whole on a reload; see
@@ -277,11 +249,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     return this.store.sheetData;
   }
 
-  /**
-   * What the view remembers from one drawing to the next: the row to keep in
-   * place, the scroll to restore, the cell style widths measured.
-   */
-  private readonly view = new ViewState();
+  /** Draws the sheet; see {@link SheetRenderer}. */
+  private readonly renderer: SheetRenderer;
 
   /** When the sheet is drawn; see {@link RenderScheduler}. */
   private readonly renders = new RenderScheduler(() => this.recomputeViewport());
@@ -314,7 +283,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   /** Decides when the server is asked for the cells the sheet scrolls to. */
   private readonly viewportLoader = new ViewportLoader({
-    drawnRange: () => this.drawnRange(),
+    drawnRange: () => this.renderer.drawnRange(),
     sheet: () => ({
       rows: this.model.rows,
       cols: this.model.cols,
@@ -334,7 +303,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       size: () => this.model,
       cellStyles: () => this.model.cellStyleToCSSStyle,
       cells: () => this.sheetData.cells,
-      drawnRange: () => this.drawnRange(),
+      drawnRange: () => this.renderer.drawnRange(),
       textWidths: (cellStyles, text) => this.cellGrid.textWidths(cellStyles, text),
       painted: () => this.cellGrid.updateComplete,
       scheduleRender: () => this.scheduleRender(),
@@ -346,17 +315,16 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   /**
    * The column-header sub-element. Sibling of the cell-grid
    * inside the scroll container; renders the column letters
-   * (A, B, ..., AA) above the cells. Hidden when
-   * {@link headerRowHeight} is 0, as it is while the server hides
-   * the headings.
+   * (A, B, ..., AA) above the cells. Hidden while the server hides
+   * the headings and groups no columns; see {@link SheetRenderer}.
    */
   private readonly columnHeader: SpreadsheetColumnHeader;
 
   /**
    * The row-header sub-element. Sibling of the cell-grid
    * inside the scroll container; renders the row numbers
-   * (1, 2, 3, ...) at the left of the cells. Hidden when
-   * {@link headerColumnWidth} is 0.
+   * (1, 2, 3, ...) at the left of the cells. Hidden while the server
+   * hides the headings and groups no rows; see {@link SheetRenderer}.
    */
   private readonly rowHeader: SpreadsheetRowHeader;
 
@@ -399,23 +367,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * made while the host is out of the page is there when it comes back.
    */
   private readonly hostClassObserver: MutationObserver;
-
-  /**
-   * Height of the column-header strip in pixels, its bottom border
-   * included. {@code 0} when the sheet hides its headings, which
-   * collapses the strip.
-   */
-  private get headerRowHeight(): number {
-    return this.model.displayRowColHeadings ? DEFAULT_HEADER_ROW_HEIGHT : 0;
-  }
-
-  /**
-   * Width of the row-header strip in pixels, its right border included.
-   * {@code 0} when the sheet hides its headings.
-   */
-  private get headerColumnWidth(): number {
-    return this.model.displayRowColHeadings ? DEFAULT_HEADER_COLUMN_WIDTH : 0;
-  }
 
   /**
    * The component's own root inside {@link renderTarget}.
@@ -475,7 +426,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       host,
       { cellGrid: this.cellGrid, contextMenu: this.contextMenu },
       resolveVirtualChild,
-      { cellSlotAssignments: () => this.cellSlotAssignments() }
+      { cellSlotAssignments: () => this.renderer.cellSlotAssignments() }
     );
     this.popup = new Popup(
       host,
@@ -483,7 +434,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.cellGrid,
       {
         cellValue: (col, row) => this.sheetData.cells.get(toKey(col, row))?.value ?? '',
-        paneClientRect: () => this.scrollingPaneClientRect(),
+        paneClientRect: () => this.renderer.scrollingPaneClientRect(),
         focusSheet: () => this.scrollContainer.focus({ preventScroll: true }),
         scheduleRender: () => this.scheduleRender(),
         send: (event) => this.sendToServer(event)
@@ -509,6 +460,29 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // viewport's.
       'min-height:100px;box-sizing:border-box;position:relative;';
     this.scrollContainer = document.createElement('div');
+    this.renderer = new SheetRenderer(
+      this.store,
+      {
+        scrollContainer: this.scrollContainer,
+        cellGrid: this.cellGrid,
+        columnHeader: this.columnHeader,
+        rowHeader: this.rowHeader,
+        headerCorner: this.headerCorner,
+        formulaBar: this.formulaBar,
+        sheetTabs: this.sheetTabs,
+        contextMenu: this.contextMenu
+      },
+      {
+        drawingStarts: () => this.renders.drawn(),
+        drawn: () => this.sync.drawn(),
+        sheetName: () => this.activeSheetName(),
+        tabs: () => this.tabs.renderState(),
+        menu: () => this.menu.renderState(),
+        menuDrawn: () => this.menu.drawn(),
+        placeHosted: (drawn, assignments) => this.hosted.place(drawn, assignments),
+        popupButtons: () => this.popup.buttons()
+      }
+    );
     this.scrollContainer.className = 'sheet-scroll';
     // CSS Grid layout inside the scroll container: 2 columns ×
     // 2 rows so each header sits in its own cell. Column 1 =
@@ -578,7 +552,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.on(this.formulaBar, 'sheet-address-changed', this.handleSheetAddressChanged);
     this.on(this.formulaBar, 'formula-commit', (e: FormulaCommitEvent) => this.edit.fieldCommitted(e.detail));
     this.on(this.formulaBar, 'formula-cancel', () => this.edit.fieldCancelled());
-    // What is typed is kept, and drawn into the other input; see drawWriting.
+    // What is typed is kept, and drawn into the other input; see SheetRenderer.
     this.on(this.formulaBar, 'formula-input', (e: InputEvent) =>
       this.pointing.typed(e.detail.value, e.detail.caret ?? e.detail.value.length, 'field')
     );
@@ -831,35 +805,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.headerResize.moved(e);
   };
 
-  /**
-   * Draws what is written into the input it is not written in, and into the
-   * one it is written in where pointing at a cell changed it. The cell editor
-   * and the formula field report what is typed into them and where the caret
-   * goes, which the store keeps; neither is written to anywhere else.
-   */
-  private drawWriting(): void {
-    const edit = this.interaction.edit;
-    if (edit.kind === 'editing') {
-      const shown = this.cellGrid.editorValue();
-      if (shown !== null && shown !== edit.writing.text) {
-        // The caret only where the editor has the keyboard: written in the
-        // formula field, the text is shown in the editor and nothing moves
-        // there.
-        this.cellGrid.setEditorValue(
-          edit.writing.text,
-          edit.writing.source === 'cell' ? edit.writing.caret : undefined
-        );
-      }
-    }
-    const writing = this.store.writing;
-    if (writing !== null && writing.source === 'field' && this.formulaBar.formulaFieldHasFocus()) {
-      const field = this.formulaBar.formulaFieldState();
-      if (field !== null && field.value !== writing.text) {
-        this.formulaBar.setFormulaFieldValue(writing.text, writing.caret);
-      }
-    }
-  }
-
   /** The name of the sheet shown. */
   private activeSheetName(): string {
     return this.tabs.shownSheetName();
@@ -886,57 +831,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
 
   /**
-   * Adjust {@code scrollContainer.scrollLeft / scrollTop} so the
-   * given cell (either the new active cell or the extend cell
-   * after shift+arrow) is in full view - see {@link scrollToShow}. Sets scrollLeft/Top in-place; the
-   * existing `scroll` listener triggers a fresh recomputeViewport.
-   */
-  private scrollCellIntoView(target: { col: number; row: number }): void {
-    if (this.model.rows <= 0 || this.model.cols <= 0) {
-      return;
-    }
-    const sc = this.scrollContainer;
-    // The cells' part of the view: the header strips stick to its top and
-    // left edges, and the cell grid starts where they end.
-    const viewWidth = sc.clientWidth - this.cellGrid.offsetLeft;
-    const viewHeight = sc.clientHeight - this.cellGrid.offsetTop;
-    const left = scrollToShow(
-      target.col,
-      this.model.horizontalSplitPosition,
-      this.model.cols,
-      sc.scrollLeft,
-      viewWidth,
-      (c) => this.store.colWidthPx(c)
-    );
-    const top = scrollToShow(
-      target.row,
-      this.model.verticalSplitPosition,
-      this.model.rows,
-      sc.scrollTop,
-      viewHeight,
-      (r) => this.store.rowHeightPx(r)
-    );
-    if (left !== sc.scrollLeft) {
-      sc.scrollLeft = left;
-    }
-    if (top !== sc.scrollTop) {
-      sc.scrollTop = top;
-    }
-  }
-
-  /**
    * Scroll-event handler: tell the loader where the sheet is, recompute
    * the visible viewport and push a fresh render state to the cell-grid.
    * The loader decides whether the server needs asking for cells now - see
    * {@link ViewportLoader}.
    */
   private readonly handleScroll = (): void => {
-    const anchored = this.view.anchoredScrollTop;
-    this.view.anchoredScrollTop = null;
     // The sheet keeping a row in place is not the user scrolling.
-    if (this.scrollContainer.scrollTop !== anchored) {
-      // The user has moved on: no row to keep where it was.
-      this.view.rowAnchor = null;
+    if (this.renderer.scrolled()) {
       this.viewportLoader.scrolled(this.scrollContainer.scrollTop, this.scrollContainer.scrollLeft);
     }
     this.recomputeViewport();
@@ -999,20 +901,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.edit.showServerValue(this.store.formulaFieldValueFor(cell.col, cell.row), false);
   }
 
-  /** The cells the grid draws, its drawing buffer included; null before anything is measured. */
-  private drawnRange(): LoadRange | null {
-    const viewport = this.cellGrid.renderState.viewport;
-    if (viewport.lastRowIndex < viewport.firstRowIndex || viewport.lastColumnIndex < viewport.firstColumnIndex) {
-      return null;
-    }
-    return {
-      r1: viewport.firstRowIndex,
-      c1: viewport.firstColumnIndex,
-      r2: viewport.lastRowIndex,
-      c2: viewport.lastColumnIndex
-    };
-  }
-
   /**
    * Request a repaint once the current task is done, coalescing repeated
    * calls into a single {@link recomputeViewport}.
@@ -1050,32 +938,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * force a re-render without going through the scroll surface.
    */
   recomputeViewport(): void {
-    this.renders.drawn();
-    if (this.view.pendingSheetScroll !== null) {
-      // A sheet shown again goes back to where it was scrolled. The grid is
-      // sized for it first: against the last sheet's size the browser would
-      // cut the offsets short.
-      const { top, left } = this.view.pendingSheetScroll;
-      this.view.pendingSheetScroll = null;
-      // The rows are another sheet's: there is no row to keep in place.
-      this.view.rowAnchor = null;
-      this.applyRenderState({
-        scrollLeft: 0,
-        scrollTop: 0,
-        viewportWidth: this.scrollContainer.clientWidth,
-        viewportHeight: this.scrollContainer.clientHeight
-      });
-      this.scrollContainer.scrollTop = top;
-      this.scrollContainer.scrollLeft = left;
-    }
-    this.keepRowAnchored();
-    this.applyRenderState({
-      scrollLeft: this.scrollContainer.scrollLeft,
-      scrollTop: this.scrollContainer.scrollTop,
-      viewportWidth: this.scrollContainer.clientWidth,
-      viewportHeight: this.scrollContainer.clientHeight
-    });
-    this.sync.drawn();
+    this.renderer.recompute();
   }
 
   /**
@@ -1108,19 +971,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   private applyHostHideClasses(): void {
     this.sheetTabs.hidden = this.host.classList.contains('hidetabsheet');
     this.formulaBar.hidden = this.host.classList.contains('hidefunctionbar');
-    this.applyPagedViewInset();
-  }
-
-  /**
-   * Leaves the headers and frozen panes out of the view the browser pages,
-   * so Page Up and Page Down move the cells by a page of cells. Paging the
-   * whole scroll container, they would move them a header further.
-   */
-  private applyPagedViewInset(): void {
-    const { corner, frozen } = this.view.pagedViewParts;
-    const inset = pagedViewInset(corner, frozen, !this.sheetTabs.hidden);
-    this.scrollContainer.style.scrollPaddingTop = `${inset.top}px`;
-    this.scrollContainer.style.scrollPaddingLeft = `${inset.left}px`;
+    this.renderer.insetPagedView();
   }
 
   /**
@@ -1202,171 +1053,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   // current state + push to the cell-grid sub-element.
   // ====================================================================
 
-  /**
-   * Recompute the visible viewport + push a fresh
-   * {@code CellGridRenderState} to the cell-grid sub-element.
-   *
-   * The connector calls this in response to scroll events, viewport
-   * resize, or any state change that affects rendering (data updates,
-   * style changes, selection moves).
-   *
-   * @param opts.scrollLeft Horizontal scroll offset in pixels.
-   * @param opts.scrollTop Vertical scroll offset in pixels.
-   * @param opts.viewportWidth Viewport pixel width.
-   * @param opts.viewportHeight Viewport pixel height.
-   */
-  /** The sheet's row and column sizes as drawn; see {@link Derived.sheetSizes}. */
-  private sheetSizes(): SheetSizes {
-    return this.store.derived.sheetSizes(this.model);
-  }
-
-  applyRenderState(opts: {
-    scrollLeft: number;
-    scrollTop: number;
-    viewportWidth: number;
-    viewportHeight: number;
-  }): void {
-    const slots = this.cellSlots();
-    const state = this.buildRenderState(opts, slots);
-    // Size the cell-grid to the full virtual grid so the scroll
-    // surface's scrollWidth / scrollHeight reflect actual extent.
-    // Cells render at absolute virtual coordinates inside; the
-    // scroll container clips + scrolls them visually.
-    this.cellGrid.style.width = `${state.totalGridWidthPx}px`;
-    this.cellGrid.style.height = `${state.totalGridHeightPx}px`;
-    this.cellGrid.renderState = state;
-    const { col, row } = this.selection.activeCell;
-    this.formulaBar.formulaLocked = this.store.isCellLockedForEdit(col, row);
-    const press = this.interaction.press;
-    this.formulaBar.renderState = this.store.derived.formulaBar({
-      bar: this.store.formulaBar,
-      writing: this.store.writing,
-      selection: this.selection,
-      growing: this.interaction.extending || (press?.kind === 'select' && press.crossed),
-      draft: this.store.draft,
-      sheetName: this.activeSheetName()
-    });
-    this.drawWriting();
-    this.sheetTabs.renderState = this.tabs.renderState();
-    this.contextMenu.renderState = this.menu.renderState();
-    this.menu.drawn();
-    this.hosted.place(state, slots.assignments);
-    // Column-header strip. Sized + state-pushed only
-    // when there is something to draw, so the default opt-out path
-    // stays a no-op — important to avoid feedback loops with the
-    // ResizeObserver under wtr parallel.
-    //
-    // A workbook can hide its headers and still group its columns; the
-    // outline gutter lives in this strip, so it has to be drawn even
-    // when the letters above it are not.
-    //
-    // The corner covers the outline gutters too - otherwise a grouped sheet
-    // has an empty notch where the two gutters meet, and the level buttons
-    // have nowhere to sit. Its size is how far the strips start from the
-    // sheet's edges.
-    const rowGutterPx = rowGroupingGutterPx(this.model.rowGroupingMax, this.headerColumnWidth > 0);
-    const colGutterPx = columnGroupingGutterPx(this.model.colGroupingMax, this.headerRowHeight > 0);
-    const cornerWidth = this.headerColumnWidth > 0 ? this.headerColumnWidth + rowGutterPx : rowGutterPx;
-    const cornerHeight = this.headerRowHeight > 0 ? this.headerRowHeight + colGutterPx : colGutterPx;
-    if (this.headerRowHeight > 0 || this.model.colGroupingMax > 0) {
-      // The outline's pixels are worked out here, which keeps the header
-      // element independent of the full colWidths array.
-      const colGroupings = this.store.derived.columnGroupings(this.model);
-      this.columnHeader.hidden = false;
-      this.columnHeader.style.width = `${state.totalGridWidthPx}px`;
-      this.columnHeader.style.height = `${this.headerRowHeight + colGutterPx}px`;
-      this.columnHeader.renderState = {
-        viewport: state.viewport,
-        colX: state.colX,
-        colWidths: state.colWidths,
-        headerHeight: this.headerRowHeight,
-        totalGridWidthPx: state.totalGridWidthPx,
-        // Frozen columns stay on screen whatever the scroll position,
-        // so their headers travel with them.
-        horizontalSplitPosition: state.horizontalSplitPosition,
-        frozenRows: state.verticalSplitPosition > 0,
-        scrollTop: state.scrollTop,
-        frozenColX: state.frozenColX,
-        frozenColWidths: state.frozenColWidths,
-        scrollLeft: state.scrollLeft,
-        colGroupings,
-        colGroupingMax: this.model.colGroupingMax,
-        colGroupingInversed: this.model.colGroupingInversed,
-        leadingPx: cornerWidth,
-        // Feed the selected-columns set so the
-        // header can emit `part="column-header
-        // header-selected"` on cells inside the active
-        // range. Pure derivation from
-        // {@code selection.activeRange}.
-        selectedColumns: this.store.derived.selectedColumns(this.selection)
-      };
-    } else {
-      // No headings and no outline: the strip goes altogether, border and
-      // all - also when they are turned off while
-      // the sheet is up, rather than keep the size it was last given.
-      this.columnHeader.hidden = true;
-    }
-    // Row-header strip. Same opt-in gate as the column
-    // header, and the same reason for the grouping half of it.
-    if (this.headerColumnWidth > 0 || this.model.rowGroupingMax > 0) {
-      // Row groupings mirror the column ones; heights come from the same
-      // point-to-pixel conversion the grid uses.
-      const rowGroupings = this.store.derived.rowGroupings(this.model);
-      this.rowHeader.hidden = false;
-      this.rowHeader.style.width = `${this.headerColumnWidth + rowGutterPx}px`;
-      this.rowHeader.style.height = `${state.totalGridHeightPx}px`;
-      this.rowHeader.renderState = {
-        viewport: state.viewport,
-        rowY: state.rowY,
-        rowHeights: state.rowHeights,
-        headerWidth: this.headerColumnWidth + rowGutterPx,
-        totalGridHeightPx: state.totalGridHeightPx,
-        // Feed the selected-rows set so the
-        // header can emit `part="row-header
-        // header-selected"` on rows inside the active
-        // range.
-        selectedRows: this.store.derived.selectedRows(this.selection),
-        rowGroupings,
-        rowGroupingMax: this.model.rowGroupingMax,
-        rowGroupingInversed: this.model.rowGroupingInversed,
-        rowGroupingHeadings: this.headerColumnWidth > 0,
-        leadingPx: cornerHeight,
-        // Frozen rows stay on screen whatever the scroll position, so
-        // their headers travel with them.
-        verticalSplitPosition: state.verticalSplitPosition,
-        frozenColumns: state.horizontalSplitPosition > 0,
-        scrollLeft: state.scrollLeft,
-        frozenRowY: state.frozenRowY,
-        frozenRowHeights: state.frozenRowHeights,
-        scrollTop: state.scrollTop
-      };
-    } else {
-      this.rowHeader.hidden = true;
-    }
-    // Header corner. Shown only when BOTH its dimensions are > 0, so it
-    // fills its grid cell with matching width + height. With either at 0 -
-    // the headings off and only one axis grouped - it is hidden: its border
-    // would otherwise keep a 1px row or column of the grid, and every cell
-    // would sit a pixel off.
-    this.headerCorner.hidden = cornerWidth === 0 || cornerHeight === 0;
-    this.headerCorner.style.width = `${cornerWidth}px`;
-    this.headerCorner.style.height = `${cornerHeight}px`;
-    this.view.pagedViewParts = {
-      corner: { width: cornerWidth, height: cornerHeight },
-      frozen: {
-        width: state.frozenColWidths.reduce((sum, w) => sum + w, 0),
-        columns: state.horizontalSplitPosition,
-        height: state.frozenRowHeights.reduce((sum, h) => sum + h, 0),
-        rows: state.verticalSplitPosition
-      }
-    };
-    this.applyPagedViewInset();
-    this.headerCorner.renderState = {
-      headerWidth: this.headerColumnWidth,
-      headerHeight: this.headerRowHeight,
-      colGroupingMax: this.model.colGroupingMax,
-      rowGroupingMax: this.model.rowGroupingMax
-    };
+  applyRenderState(opts: ScrollView): void {
+    this.renderer.apply(opts);
   }
 
   /**
@@ -1376,146 +1064,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * {@link applyRenderState} writes the result to the cell-grid;
    * this lets tests inspect it directly).
    */
-  buildRenderState(
-    opts: {
-      scrollLeft: number;
-      scrollTop: number;
-      viewportWidth: number;
-      viewportHeight: number;
-    },
-    slots: CellSlots = this.cellSlots()
-  ): CellGridRenderState {
-    const ppi = FALLBACK_PPI;
-    const model = this.model;
-    const rowHeightForIndex = (row: number): number => drawnRowHeight(model, row, ppi);
-    const colWidthForIndex = (col: number): number => drawnColumnWidth(model, col);
-
-    const sizes = this.sheetSizes();
-    const viewport = computeViewportBounds({
-      scrollLeft: opts.scrollLeft,
-      scrollTop: opts.scrollTop,
-      scrollViewWidth: opts.viewportWidth,
-      scrollViewHeight: opts.viewportHeight,
-      horizontalSplitPosition: this.model.horizontalSplitPosition,
-      verticalSplitPosition: this.model.verticalSplitPosition,
-      columnBufferSize: this.model.columnBufferSize,
-      rowBufferSize: this.model.rowBufferSize,
-      maxColumns: this.model.cols,
-      maxRows: this.model.rows,
-      columns: sizes.columns,
-      rows: sizes.rows
-    });
-
-    // Frozen columns 1..horizontalSplitPosition and rows
-    // 1..verticalSplitPosition, 1-based and inclusive. Empty when nothing
-    // is frozen.
-    const frozen = this.store.derived.frozenPanes(model);
-
-    // Build per-visible-index arrays for colX, rowY, widths, heights.
-    //
-    // These are the sheet's own coordinates: the distance from its left
-    // edge, frozen columns included. The viewport reports how far into
-    // the scrolling region the first visible column is, which is
-    // measured from the split, so the frozen block's width goes back on
-    // top. Without it the scrolling columns were drawn from x 0,
-    // underneath the frozen block that is pinned there - the first
-    // columns after a freeze could not be seen at all, and a click on
-    // one landed on a frozen cell.
-    //
-    // The freeze line has a pixel of its own between the frozen columns or
-    // rows and the rest, the frozen pane's border, so the scrolling ones start one pixel past it. Drawn over their first pixel
-    // instead, the first row after a freeze came out a pixel short.
-    const split = { cols: this.model.horizontalSplitPosition, rows: this.model.verticalSplitPosition };
-    const gapX = freezeGap(split.cols);
-    const gapY = freezeGap(split.rows);
-    const colX: number[] = [];
-    const colWidths: number[] = [];
-    let cumulativeX = frozen.width + gapX + viewport.firstColumnPosition;
-    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-      const w = colWidthForIndex(col);
-      colX.push(cumulativeX);
-      colWidths.push(w);
-      cumulativeX += w;
-    }
-
-    const rowY: number[] = [];
-    const rowHeights: number[] = [];
-    let cumulativeY = frozen.height + gapY + viewport.firstRowPosition;
-    for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-      const h = rowHeightForIndex(row);
-      rowY.push(cumulativeY);
-      rowHeights.push(h);
-      cumulativeY += h;
-    }
-
-    // Total grid dimensions in pixels — used by the scroll surface
-    // to establish scroll extent.
-    const totalWidthPx = sizes.totalWidthPx + gapX;
-    const totalHeightPx = sizes.totalHeightPx + gapY;
-
-    // Compute positioned overlays from the current
-    // overlay map + resource map. Each overlay's pixel
-    // position is anchor cell's left/top (cumulative col/row
-    // widths/heights) + the overlay's dx/dy offset.
-    const positionedOverlays = computePositionedOverlays(
-      this.model.overlays,
-      this.resolveResources(),
-      colWidthForIndex,
-      rowHeightForIndex,
-      ppi,
-      split
-    );
-
-    const mergedRegionBoxes = computeMergedRegionBoxes(
-      this.model.mergedRegions,
-      split,
-      { left: opts.scrollLeft, top: opts.scrollTop },
-      colWidthForIndex,
-      rowHeightForIndex
-    );
-
-    return {
-      viewport,
-      cellData: this.sheetData.cells,
-      colX,
-      rowY,
-      colWidths,
-      rowHeights,
-      cellStyleToCSSStyle: this.model.cellStyleToCSSStyle,
-      displayGridlines: this.model.displayGridlines,
-      rowIndexToStyleIndex: this.model.rowIndexToStyleIndex,
-      columnIndexToStyleIndex: this.model.columnIndexToStyleIndex,
-      cellSlots: slots.slots,
-      conditionalFormattingStyles: this.model.conditionalFormattingStyles,
-      shiftedCellBorderStyles: this.model.shiftedCellBorderStyles,
-      mergedRegions: this.model.mergedRegions,
-      mergedRegionBoxes,
-      selection: this.selection,
-      verticalSplitPosition: this.model.verticalSplitPosition,
-      horizontalSplitPosition: this.model.horizontalSplitPosition,
-      frozenColX: frozen.colX,
-      frozenColWidths: frozen.colWidths,
-      frozenRowY: frozen.rowY,
-      frozenRowHeights: frozen.rowHeights,
-      totalGridWidthPx: totalWidthPx,
-      totalGridHeightPx: totalHeightPx,
-      scrollLeft: opts.scrollLeft,
-      scrollTop: opts.scrollTop,
-      editor: this.editor,
-      formulaReferences: this.store.derived.formulaReferences(this.store.draft, this.activeSheetName()),
-      overlays: positionedOverlays,
-      // Each at the bottom right corner of its cell.
-      popupButtons: this.store.derived.popupButtons(this.popup.buttons(), model),
-      paintRect: this.store.paintRect(),
-      commentText: this.model.cellComments,
-      commentAuthors: this.model.cellCommentAuthors,
-      visibleCommentKeys: this.model.visibleCellComments,
-      editingCommentKey: this.interaction.comment,
-      invalidFormulaMessage: this.model.invalidFormulaErrorMessage,
-      commentCells: this.store.derived.commentCells(model),
-      invalidFormulaCells: this.model.invalidFormulaCells,
-      hyperlinkCells: this.store.derived.hyperlinkCells(model)
-    };
+  buildRenderState(opts: ScrollView, slots?: CellSlots): CellGridRenderState {
+    return this.renderer.build(opts, slots);
   }
 
   /**
@@ -1528,7 +1078,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   /** Test-only accessor: resource id to currently resolved URL. */
   getResources(): Readonly<Record<string, string>> {
-    return this.resolveResources();
+    return this.renderer.resources();
   }
 
   /** Test-only accessor: the context menu shown on right-click. */
@@ -1622,15 +1172,14 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // shown can also get another index without changing, when a sheet
     // before it is deleted, hidden or shown again: it stays where it is.
     const index = this.tabs.sheetIndex - 1;
-    const shownSheetName = this.tabs.sheetNames[index] ?? null;
-    if (!firstUpdate && changedPropertyNames.includes('sheetIndex') && shownSheetName !== this.view.shownSheetName) {
-      this.view.pendingSheetScroll = {
+    this.renderer.sheetShown(
+      this.tabs.sheetNames[index] ?? null,
+      {
         top: this.model.verticalScrollPositions[index] ?? 0,
         left: this.model.horizontalScrollPositions[index] ?? 0
-      };
-    }
-    this.view.shownSheetName = shownSheetName;
-    this.scrollContainer.setAttribute('aria-label', shownSheetName || 'Spreadsheet');
+      },
+      !firstUpdate && changedPropertyNames.includes('sheetIndex')
+    );
     if (changedPropertyNames.length > 0 || firstUpdate) {
       this.recomputeViewport();
     }
@@ -1725,7 +1274,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // see is not somewhere they have been taken, so bring it into view.
     // A cell that is already visible stays where it is.
     if (!keepView) {
-      this.scrollCellIntoView({ col, row });
+      this.renderer.scrollCellIntoView({ col, row });
     }
   }
   /** Any click outside the menu dismisses it, as a native menu would. */
@@ -1784,7 +1333,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.edit.showServerValue(this.store.formulaFieldValueFor(col, row), false);
     }
     if (scroll) {
-      this.scrollCellIntoView({ col, row });
+      this.renderer.scrollCellIntoView({ col, row });
     }
   }
   cellsUpdated(updatedCellData: CellData[]): void {
@@ -1842,45 +1391,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * them on again: 8 requests after one jump, to GWT's 3.
    */
   setRowH(rowHeightsInPoints: number[] | Float32Array | SizeRuns | null): void {
-    this.view.rowAnchor ??= this.firstRowWithTopOnScreen();
+    this.renderer.holdRowInPlace();
     this.store.write('rowH', rowHeightsInPoints);
   }
 
-  /** The first scrolling row whose top is on screen, and how far below the top of the screen. */
-  private firstRowWithTopOnScreen(): { row: number; below: number } {
-    const top = this.scrollContainer.scrollTop;
-    const rows = this.sheetSizes().rows;
-    const origin = this.model.verticalSplitPosition + 1;
-    const row = rows.reach(origin, top);
-    return { row, below: rows.start(row) - rows.start(origin) - top };
-  }
-
-  /**
-   * Puts the row {@link setRowH} keeps back where it was on screen, now that
-   * the rows above it have their new heights.
-   */
-  private keepRowAnchored(): void {
-    const anchor = this.view.rowAnchor;
-    if (anchor === null) {
-      return;
-    }
-    this.view.rowAnchor = null;
-    const rows = this.sheetSizes().rows;
-    const top = rows.start(anchor.row) - rows.start(this.model.verticalSplitPosition + 1) - anchor.below;
-    if (top === this.scrollContainer.scrollTop) {
-      return;
-    }
-    // Sized for the new heights first: against the old ones the browser
-    // would cut the offset short.
-    this.applyRenderState({
-      scrollLeft: this.scrollContainer.scrollLeft,
-      scrollTop: this.scrollContainer.scrollTop,
-      viewportWidth: this.scrollContainer.clientWidth,
-      viewportHeight: this.scrollContainer.clientHeight
-    });
-    this.scrollContainer.scrollTop = top;
-    this.view.anchoredScrollTop = this.scrollContainer.scrollTop;
-  }
   setColW(colWidthsInPixels: number[] | Int32Array | SizeRuns | null): void {
     this.store.write('colW', colWidthsInPixels);
   }
@@ -1949,24 +1463,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   }
 
   /**
-   * Which server-side element each cell shows, from the three inputs the
-   * server pushes separately.
-   *
-   * Recomputed rather than cached: it depends on the selection, which
-   * changes on every click, and the maps it reads are small. A draw works
-   * it out once and uses it twice.
-   */
-  private cellSlotAssignments(): Record<string, CellSlotAssignment> {
-    return this.cellSlots().assignments;
-  }
-
-  /** Which component or editor each cell shows, and the slot the grid draws for it. */
-  private cellSlots(): CellSlots {
-    const active = this.selection.activeCell;
-    return this.store.derived.cellSlots(this.model, active === null ? null : toKey(active.col, active.row));
-  }
-
-  /**
    * The server signals that it has thrown away its per-sheet state.
    *
    * `Spreadsheet.reloadActiveSheetData` clears the overlay, comment,
@@ -1991,7 +1487,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       // now.
       this.store.resetSheetData();
       // Its row heights are those of whatever it shows now.
-      this.view.rowAnchor = null;
+      this.renderer.forgetRowAnchor();
       // What it was told of where the sheet is, and asked to load, is gone
       // too: the sheet introduces itself again, and loads again even the
       // same range.
@@ -2067,35 +1563,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // resources minted per element rather than plain strings
     // (Spreadsheet.setResource). Resolving them means reading the
     // attributes, not parsing a map out of this argument.
-    this.resourceHost = host;
+    this.renderer.useResourcesOf(host);
     this.store.write('resources', keys);
     this.scheduleRender();
   }
 
-  /**
-   * Read the current URL for every published resource id.
-   *
-   * Deliberately re-read on every render rather than cached when the key
-   * list arrives. Scrolling an overlay out of view unregisters its stream
-   * resource, and scrolling back mints a fresh one under the same id: the
-   * attribute changes while the key list does not, so there is no property
-   * push to cache on. A cached URL would point at a registration the
-   * server has already dropped, and the image would 404.
-   */
-  private resolveResources(): Record<string, string> {
-    const host = this.resourceHost;
-    if (host === null) {
-      return {};
-    }
-    const resolved: Record<string, string> = {};
-    for (const key of this.model.resources) {
-      const url = host.getAttribute(`resource-${key}`);
-      if (url) {
-        resolved[key] = url;
-      }
-    }
-    return resolved;
-  }
   setWorkbookProtected(isProtected: boolean): void {
     this.tabs.setWorkbookProtected(isProtected);
   }
@@ -2158,31 +1630,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   // Popup-button lifecycle
   // ====================================================================
 
-  /**
-   * The scrolling pane on screen: the cells under the column letters and
-   * right of the row numbers, past the frozen rows and columns. Popups keep
-   * to this pane, whose bottom is the sheet's own.
-   */
-  private scrollingPaneClientRect(): { left: number; top: number; bottom: number } {
-    const box = this.scrollContainer.getBoundingClientRect();
-    const frozen = this.cellGrid.frozenExtent();
-    // Past the freeze line's own pixel, where the scrolling cells start.
-    return {
-      left:
-        box.left +
-        this.scrollContainer.clientLeft +
-        this.cellGrid.offsetLeft +
-        frozen.width +
-        freezeGap(this.model.horizontalSplitPosition),
-      top:
-        box.top +
-        this.scrollContainer.clientTop +
-        this.cellGrid.offsetTop +
-        frozen.height +
-        freezeGap(this.model.verticalSplitPosition),
-      bottom: box.bottom
-    };
-  }
   /** Show a popup button's content; see {@link Popup.open}. */
   onPopupButtonOpen(row: number, column: number, contentId: number | string, appId: string): void {
     this.popup.open(row, column, contentId, appId);
