@@ -63,8 +63,10 @@ public class ClusterIT extends AbstractComponentIT {
         MapElement.ClusterSourceReference source = layer.getSource()
                 .asClusterSource();
 
-        // Should expand to clusters for individual features
-        Assert.assertEquals(4, source.getClusterCount());
+        // Should expand to clusters for individual features. Clusters are
+        // recalculated when the map renders the new zoom level, which happens
+        // asynchronously.
+        waitUntil(driver -> source.getClusterCount() == 4);
     }
 
     @Test

@@ -155,7 +155,7 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
     public void addItemCountChangeListener_newItemAdded_itemCountChanged() {
         // Add custom value
         firstComboBox.sendKeys(NEW_PERSON_NAME);
-        waitUntil(driver -> !firstComboBox.getPropertyBoolean("loading"));
+        firstComboBox.waitForLoadingFinished();
         firstComboBox.sendKeys(Keys.ENTER);
         verifyNotifiedItemCount(
                 "Expected item count = 251 after adding a new item", 251);

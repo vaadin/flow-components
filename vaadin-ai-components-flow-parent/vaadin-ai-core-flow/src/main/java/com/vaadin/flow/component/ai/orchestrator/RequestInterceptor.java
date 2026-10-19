@@ -52,24 +52,24 @@ import com.vaadin.flow.function.SerializableConsumer;
  * </pre>
  * <p>
  * The interceptor runs before the prompt has any effect: before the message
- * appears in the message list, before {@link AIController#onRequest()
- * controller} and {@link RequestListener} hooks, before the conversation
- * history entry, and before the LLM request is built. Everything downstream
- * sees only the processed content. A silently rejected prompt leaves no trace
- * in the UI or the history; rejecting with a user-facing message shows the
- * original prompt and the reason in the message list only — never in the
- * history or a request. Note that attachments pending in a configured file
- * receiver have already been taken from it when the interceptor runs, so they
- * are not resubmitted with the next prompt if this one is rejected, dropped, or
- * fails after being postponed. Prompts whose original text is blank are dropped
- * before the interceptor runs.
+ * appears in the message list, before
+ * {@link AIController#onRequest(RequestListener.RequestEvent) controller} and
+ * {@link RequestListener} hooks, before the conversation history entry, and
+ * before the LLM request is built. Everything downstream sees only the
+ * processed content. A silently rejected prompt leaves no trace in the UI or
+ * the history; rejecting with a user-facing message shows the original prompt
+ * and the reason in the message list only — never in the history or a request.
+ * Note that attachments pending in a configured file receiver have already been
+ * taken from it when the interceptor runs, so they are not resubmitted with the
+ * next prompt if this one is rejected, dropped, or fails after being postponed.
+ * Prompts whose original text is blank are dropped before the interceptor runs.
  * <p>
  * Throwing from the interceptor aborts the prompt the same way as a rejection,
  * except that the exception is reported to the {@link ResponseListener} and
- * {@link AIController#onResponse(Throwable)}, and propagates to the caller of
- * the prompt entry point. Throw only for failures; use
- * {@link RequestInterceptEvent#reject(String) reject} for expected validation
- * outcomes.
+ * {@link AIController#onResponse(ResponseListener.ResponseEvent)}, and
+ * propagates to the caller of the prompt entry point. Throw only for failures;
+ * use {@link RequestInterceptEvent#reject(String) reject} for expected
+ * validation outcomes.
  * <p>
  * <b>Threading:</b> the interceptor is called on the UI thread under the
  * session lock, and unless the prompt is postponed its result is used as soon
@@ -80,23 +80,22 @@ import com.vaadin.flow.function.SerializableConsumer;
  * {@link RequestContinuation}.
  * <p>
  * <b>Postponing:</b> while a prompt is postponed nothing is shown in the UI and
- * further prompts are ignored, so show a pending indicator and disable the
- * input before scheduling the work, and clean up when completing the
- * continuation. Server push must be enabled — e.g. with
- * {@link com.vaadin.flow.component.page.Push @Push} on the application shell
- * class — for the resumed turn to reach the browser without user interaction.
- * Capture the {@link com.vaadin.flow.component.UI UI} before scheduling the
- * work and wrap component changes made from the completing thread in
- * {@code ui.access(...)}:
+ * further prompts are ignored, so show a pending indicator before scheduling
+ * the work and hide it when completing the continuation. Server push must be
+ * enabled — e.g. with {@link com.vaadin.flow.component.page.Push @Push} on the
+ * application shell class — for the resumed turn to reach the browser without
+ * user interaction. Capture the {@link com.vaadin.flow.component.UI UI} before
+ * scheduling the work and wrap component changes made from the completing
+ * thread in {@code ui.access(...)}:
  *
  * <pre>
  * .withRequestInterceptor(event -&gt; {
  *     var continuation = event.postpone(Duration.ofSeconds(10));
  *     var ui = UI.getCurrent();
- *     input.setEnabled(false);
+ *     progressBar.setVisible(true);
  *     moderationService.checkAsync(event.getUserMessage())
  *             .whenComplete((verdict, error) -&gt; {
- *                 ui.access(() -&gt; input.setEnabled(true));
+ *                 ui.access(() -&gt; progressBar.setVisible(false));
  *                 if (error != null) {
  *                     continuation.fail(error);
  *                     return;
@@ -111,8 +110,9 @@ import com.vaadin.flow.function.SerializableConsumer;
  *
  * A failure after postponing — {@link RequestContinuation#fail} or the timeout
  * — is reported to the {@link ResponseListener} and
- * {@link AIController#onResponse(Throwable)} only; it cannot propagate to the
- * caller of the prompt entry point, which has long returned.
+ * {@link AIController#onResponse(ResponseListener.ResponseEvent)} only; it
+ * cannot propagate to the caller of the prompt entry point, which has long
+ * returned.
  * <p>
  * <b>Serialization:</b> the interceptor is stored on the serializable
  * orchestrator and survives session serialization with it — unlike the LLM
@@ -261,9 +261,10 @@ public interface RequestInterceptor extends Serializable {
         /**
          * Rejects the prompt without user-facing feedback: nothing is sent to
          * the LLM, nothing is added to the message list or the conversation
-         * history, and neither {@link AIController#onRequest() controller} nor
-         * {@link RequestListener} hooks fire. Rejection is final — later
-         * content changes do not undo it.
+         * history, and neither
+         * {@link AIController#onRequest(RequestListener.RequestEvent)
+         * controller} nor {@link RequestListener} hooks fire. Rejection is
+         * final — later content changes do not undo it.
          *
          * @throws IllegalStateException
          *             if a postponed prompt has already been completed
@@ -418,10 +419,10 @@ public interface RequestInterceptor extends Serializable {
         /**
          * Aborts the postponed prompt: nothing is sent or shown, and the cause
          * is reported to the {@link ResponseListener} and
-         * {@link AIController#onResponse(Throwable)}. Safe to call when the UI
-         * is already detached: the {@link ResponseListener} is still notified,
-         * only the UI-bound controller hook is skipped. A no-op when the prompt
-         * has already been completed or timed out.
+         * {@link AIController#onResponse(ResponseListener.ResponseEvent)}. Safe
+         * to call when the UI is already detached: the {@link ResponseListener}
+         * is still notified, only the UI-bound controller hook is skipped. A
+         * no-op when the prompt has already been completed or timed out.
          *
          * @param cause
          *            the failure to report, not {@code null}

@@ -63,5 +63,16 @@ describe('grid connector - column events', () => {
       expect(spy.calledOnce).to.be.true;
       expect(spy.firstCall.args[0].detail.columns).to.deep.equal(['col0', 'col1']);
     });
+
+    it('should include hidden columns in column-reorder-all-columns', async () => {
+      columns[0].hidden = true;
+      await nextFrame();
+      const spy = sinon.spy();
+      grid.addEventListener('column-reorder-all-columns' as any, spy);
+
+      grid.dispatchEvent(new CustomEvent('column-reorder'));
+
+      expect(spy.firstCall.args[0].detail.columns).to.deep.equal(['col0', 'col1']);
+    });
   });
 });

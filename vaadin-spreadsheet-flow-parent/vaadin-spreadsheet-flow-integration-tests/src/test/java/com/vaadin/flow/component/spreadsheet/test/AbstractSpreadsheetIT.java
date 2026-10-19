@@ -339,6 +339,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public void addFreezePane() {
         $("vaadin-button").id("freezePane").click();
         $("vaadin-button").id("submitValues").click();
+        waitForDialogToClose();
     }
 
     public void addFreezePane(int horizontalSplitPosition,
@@ -349,6 +350,17 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         $(TextFieldElement.class).id("horizontalSplitPosition")
                 .setValue(String.valueOf(horizontalSplitPosition));
         $("vaadin-button").id("submitValues").click();
+        waitForDialogToClose();
+    }
+
+    /**
+     * Waits until no dialog is open or still running its closing animation. The
+     * freeze pane dialog is modal, so while it is closing its overlay still
+     * covers the page and swallows clicks meant for the sheet.
+     */
+    private void waitForDialogToClose() {
+        waitUntil(driver -> !$("vaadin-dialog").withAttribute("opened").exists()
+                && !$("vaadin-dialog").withAttribute("closing").exists());
     }
 
     public void setLocale(Locale locale) {

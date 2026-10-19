@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.shared.Registration;
 
@@ -34,11 +35,13 @@ class ComboBoxRenderManager<TItem> implements Serializable {
     private final ComboBoxBase<?, TItem, ?> comboBox;
     private Renderer<TItem> renderer;
 
-    private boolean renderScheduled;
+    private final BeforeClientResponseAction renderAction;
     private final List<Registration> renderingRegistrations = new ArrayList<>();
 
     ComboBoxRenderManager(ComboBoxBase<?, TItem, ?> comboBox) {
         this.comboBox = comboBox;
+        this.renderAction = new BeforeClientResponseAction(comboBox,
+                this::render);
     }
 
     void setRenderer(Renderer<TItem> renderer) {
@@ -49,15 +52,10 @@ class ComboBoxRenderManager<TItem> implements Serializable {
     }
 
     void scheduleRender() {
-        if (renderScheduled || comboBox.getDataCommunicator() == null
-                || renderer == null) {
+        if (comboBox.getDataCommunicator() == null || renderer == null) {
             return;
         }
-        renderScheduled = true;
-        comboBox.runBeforeClientResponse(ui -> {
-            render();
-            renderScheduled = false;
-        });
+        renderAction.schedule();
     }
 
     private void render() {

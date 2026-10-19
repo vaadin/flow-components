@@ -30,6 +30,7 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -92,6 +93,41 @@ class GridHiddenColumnRenderingTest {
         assertColumnDataNotGenerated();
     }
 
+    @Test
+    void removeColumnBeforeRender_columnDataNotGenerated() {
+        grid.removeColumn(column);
+        ui.fakeClientCommunication();
+        assertColumnDataNotGenerated();
+    }
+
+    @Test
+    void bindVisible_initiallyVisibleColumn_columnDataNotGeneratedOnceHidden() {
+        ValueSignal<Boolean> visibleSignal = new ValueSignal<>(true);
+        column.bindVisible(visibleSignal);
+        ui.fakeClientCommunication();
+        assertColumnDataGenerated();
+
+        resetColumnDataSpies();
+
+        visibleSignal.set(false);
+        ui.fakeClientCommunication();
+        assertColumnDataNotGenerated();
+    }
+
+    @Test
+    void bindVisible_initiallyHiddenColumn_columnDataGeneratedOnceShown() {
+        ValueSignal<Boolean> visibleSignal = new ValueSignal<>(false);
+        column.bindVisible(visibleSignal);
+        ui.fakeClientCommunication();
+        assertColumnDataNotGenerated();
+
+        resetColumnDataSpies();
+
+        visibleSignal.set(true);
+        ui.fakeClientCommunication();
+        assertColumnDataGenerated();
+    }
+
     @Nested
     class InitiallyVisibleColumnClass {
         @BeforeEach
@@ -119,6 +155,14 @@ class GridHiddenColumnRenderingTest {
         @Test
         void hideColumn_columnDataNotGenerated() {
             column.setVisible(false);
+            ui.fakeClientCommunication();
+            assertColumnDataNotGenerated();
+        }
+
+        @Test
+        void removeColumn_resetDataCommunicator_columnDataNotGenerated() {
+            grid.removeColumn(column);
+            grid.getDataCommunicator().reset();
             ui.fakeClientCommunication();
             assertColumnDataNotGenerated();
         }

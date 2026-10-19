@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.UploadCapture;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 
@@ -59,6 +60,27 @@ class UploadTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(Upload.class));
+    }
+
+    @Test
+    void capture() {
+        var upload = new Upload();
+        Assertions.assertNull(upload.getCapture());
+        Assertions.assertFalse(upload.getElement().hasProperty("capture"));
+
+        upload.setCapture(UploadCapture.ENVIRONMENT);
+        Assertions.assertEquals(UploadCapture.ENVIRONMENT, upload.getCapture());
+        Assertions.assertEquals("environment",
+                upload.getElement().getProperty("capture"));
+
+        upload.setCapture(UploadCapture.USER);
+        Assertions.assertEquals(UploadCapture.USER, upload.getCapture());
+        Assertions.assertEquals("user",
+                upload.getElement().getProperty("capture"));
+
+        upload.setCapture(null);
+        Assertions.assertNull(upload.getCapture());
+        Assertions.assertFalse(upload.getElement().hasProperty("capture"));
     }
 
     // --- Accepted MIME Types ---

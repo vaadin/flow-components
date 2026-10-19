@@ -115,7 +115,7 @@ public class DetachReattachIT extends AbstractComponentIT {
         open();
         GridElement grid = $(GridElement.class).first();
 
-        grid.getHeaderCell(0).$("vaadin-grid-sorter").first().click();
+        grid.getHeaderCell(0).getSorter().click();
 
         // Detach, reset sorting and re-attach
         $("button").id("detach-button").click();
@@ -208,17 +208,29 @@ public class DetachReattachIT extends AbstractComponentIT {
         open();
 
         GridElement grid = $(GridElement.class).first();
-        var sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        var sorter = grid.getHeaderCell(0).getSorter();
         sorter.click();
-        var direction = sorter.getProperty("direction");
-        Assert.assertNotNull(direction);
+        Assert.assertTrue(sorter.isAscending());
 
         $("button").id("detach-and-reattach-button").click();
         $("button").id("detach-and-reattach-button").click();
 
         grid = $(GridElement.class).first();
-        sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
-        Assert.assertEquals(direction, sorter.getProperty("direction"));
+        sorter = grid.getHeaderCell(0).getSorter();
+        Assert.assertTrue(sorter.isAscending());
+    }
+
+    @Test
+    public void selectItem_detach_setItemsAndAttach_rowsAreRendered() {
+        open();
+        $(GridElement.class).first().select(0);
+
+        $("button").id("detach-button").click();
+        $("button").id("set-items-and-attach-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertEquals("Component A", grid.getCell(0, 1).getText());
+        checkLogsForErrors();
     }
 
     @Test

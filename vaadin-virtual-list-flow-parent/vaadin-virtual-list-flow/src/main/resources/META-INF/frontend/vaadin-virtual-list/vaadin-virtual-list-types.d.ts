@@ -32,11 +32,6 @@ export interface VirtualListServer {
   setViewportRange(startIndex: number, size: number): void;
 }
 
-/** The Flow client of an app instance on the page */
-export interface FlowClient {
-  getByNodeId(nodeId: number): HTMLElement;
-}
-
 /** A root element the renderer renders an item into, extended with the connector's bookkeeping properties */
 export interface VirtualListRenderRoot extends HTMLElement {
   __virtualListIndex: number;
@@ -80,11 +75,21 @@ export type FlowVirtualList = Omit<
 
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connector
+  // with the Flow namespace used by the connector. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
-    Flow: {
-      virtualListConnector: { initLazy(list: FlowVirtualList): void };
-      clients: Record<string, FlowClient>;
-    };
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    virtualListConnector: { initLazy(list: FlowVirtualList): void };
+    /** The store of Flow DOM nodes, keyed by app id */
+    clients: Record<string, VaadinFlowClient>;
+  }
+
+  /** The Flow client of an app instance on the page */
+  interface VaadinFlowClient {
+    getByNodeId(nodeId: number): HTMLElement | null;
   }
 }

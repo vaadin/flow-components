@@ -58,7 +58,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 1.0
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.3.0-alpha14")
+@NpmPackage(value = "@vaadin/upload", version = "25.4.0-alpha3")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<UploadVariant> {
@@ -335,6 +335,46 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public boolean isDropAllowed() {
         return !getElement().getProperty("nodrop", false);
+    }
+
+    /**
+     * Gets the device input that is used for capturing a new file.
+     *
+     * @return the device input used for capturing a new file, or {@code null}
+     *         if not set
+     * @see #setCapture(UploadCapture)
+     * @since 25.4
+     */
+    public UploadCapture getCapture() {
+        return UploadCapture.fromValue(getElement().getProperty("capture"));
+    }
+
+    /**
+     * Sets the device input to use for capturing a new file, for example
+     * {@link UploadCapture#ENVIRONMENT} to take a photo with the back camera of
+     * a phone. On devices that support it, selecting files then opens the
+     * camera or microphone directly instead of the file browser. The type of
+     * input is determined by the accepted MIME types, for example
+     * {@code "image/*"} for the camera, see
+     * {@link #setAcceptedMimeTypes(String...)}.
+     * <p>
+     * This is only a hint to the browser. Devices without such an input, for
+     * example desktop browsers, ignore it and open the file browser. It does
+     * not restrict which files can be uploaded.
+     * <p>
+     * The default is {@code null}, which opens the file browser.
+     *
+     * @param capture
+     *            the device input to use for capturing a new file, or
+     *            {@code null} to choose existing files
+     * @since 25.4
+     */
+    public void setCapture(UploadCapture capture) {
+        if (capture == null) {
+            getElement().removeProperty("capture");
+        } else {
+            getElement().setProperty("capture", capture.getValue());
+        }
     }
 
     /**
@@ -1025,7 +1065,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
 
     /**
      * Clear the list of files being processed, or already uploaded.
-     * 
+     *
      * @since 23.0
      */
     public void clearFileList() {

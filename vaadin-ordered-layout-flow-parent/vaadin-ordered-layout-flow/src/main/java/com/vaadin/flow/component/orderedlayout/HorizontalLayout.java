@@ -39,11 +39,11 @@ import com.vaadin.flow.shared.Registration;
  * Horizontal Layout places components side-by-side in a row. By default, it has
  * undefined width and height, meaning its size is determined by the components
  * it contains.
- * 
+ *
  * @since 1.0
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.3.0-alpha14")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "25.4.0-alpha3")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout>,
@@ -292,17 +292,8 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent.super.replace(oldComponent, newComponent);
 
         if (newComponent != null && oldComponent != null) {
-            if (oldSlotName == null) {
-                newComponent.getElement().removeAttribute("slot");
-            } else {
-                newComponent.getElement().setAttribute("slot", oldSlotName);
-            }
-
-            if (newSlotName == null) {
-                oldComponent.getElement().removeAttribute("slot");
-            } else {
-                oldComponent.getElement().setAttribute("slot", newSlotName);
-            }
+            newComponent.getElement().setAttribute("slot", oldSlotName);
+            oldComponent.getElement().setAttribute("slot", newSlotName);
         }
 
         updateChildDetachListeners();
@@ -312,7 +303,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * {@inheritDoc}
      * <p>
      * This method only adds components to the start slot.
-     * 
+     *
      * @since 24.7
      */
     @Override
@@ -324,7 +315,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * {@inheritDoc}
      * <p>
      * This method only adds components to the start slot.
-     * 
+     *
      * @since 24.7
      */
     @Override
@@ -349,11 +340,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
 
         FlexComponent.super.addComponentAtIndex(index, component);
 
-        if (slotName == null) {
-            component.getElement().removeAttribute("slot");
-        } else {
-            component.getElement().setAttribute("slot", slotName);
-        }
+        component.getElement().setAttribute("slot", slotName);
 
         updateChildDetachListeners();
     }

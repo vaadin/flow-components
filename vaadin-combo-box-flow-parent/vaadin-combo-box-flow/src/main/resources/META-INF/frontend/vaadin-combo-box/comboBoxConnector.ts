@@ -5,7 +5,7 @@ import type {
   ComboBoxDataProviderCallback,
   ComboBoxDataProviderParams
 } from '@vaadin/combo-box/src/vaadin-combo-box-data-provider-mixin.js';
-import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js';
+import type { FlowComboBox, FlowMultiSelectComboBox, Item, ItemRange } from './vaadin-combo-box-types.js';
 
 /**
  * comboBoxConnector is a communication layer between ComboBox's flow component
@@ -13,13 +13,12 @@ import type { FlowComboBox, Item, ItemRange } from './vaadin-combo-box-types.js'
  */
 export class ComboBoxConnector {
   readonly #comboBox: FlowComboBox;
-  readonly #placeholder = new window.Vaadin.ComboBoxPlaceholder();
+  readonly #placeholder = new ComboBoxPlaceholder();
 
   #cache: Record<number, Item[]> = {};
 
   #lastTypedFilter = '';
   #lastRequestedRange: ItemRange = [-1, -1];
-  #lastRequestedFilter = '';
   #needsDataCommunicatorReset = false;
 
   constructor(comboBox: FlowComboBox) {
@@ -30,9 +29,21 @@ export class ComboBoxConnector {
 
     comboBox.itemClassNameGenerator = (item) => item.className || '';
 
+    if (isMultiSelectComboBox(comboBox)) {
+      comboBox._toggleSelectAllHandler = () => comboBox.$server.toggleSelectAll();
+    }
+
     // Assign last: setting the data provider can synchronously trigger a first
     // page load that calls back into the connector.
     comboBox.dataProvider = (params, callback) => this.#loadPage(params, callback);
+
+    // Whenever the web component cache is cleared after that, the server
+    // considers the requested range as already sent. Make the next request ask
+    // the server to send it again.
+    comboBox.clearCache = () => {
+      this.#needsDataCommunicatorReset = true;
+      Object.getPrototypeOf(comboBox).clearCache.call(comboBox);
+    };
   }
 
   clear(start: number, length: number): void {
@@ -48,8 +59,9 @@ export class ComboBoxConnector {
     const filteredItems = comboBox.filteredItems ?? [];
     for (let index = firstPage * pageSize; index < lastPage * pageSize; index++) {
       if (filteredItems[index]) {
-        // The placeholder stands in for an item that is being loaded
-        filteredItems[index] = this.#placeholder as Item;
+        // The placeholder stands in for an item that is being loaded. It is not
+        // an Item, but the combo box expects placeholders in the items array.
+        filteredItems[index] = this.#placeholder as unknown as Item;
       }
     }
   }
@@ -118,6 +130,9 @@ export class ComboBoxConnector {
     this.#lastRequestedRange = [-1, -1];
     this.#lastTypedFilter = '';
     comboBox.clearCache();
+    // The server resets the data communicator itself before calling this, so
+    // the next request must not ask for another reset
+    this.#needsDataCommunicatorReset = false;
   }
 
   confirm(id: number, filter: string): void {
@@ -173,11 +188,6 @@ export class ComboBoxConnector {
         comboBox._filterDebouncer,
         timeOut.after(comboBox._filterTimeout ?? 500),
         () => {
-          // Filter cycled back to what server last received — force re-emit.
-          if (params.filter === this.#lastRequestedFilter) {
-            this.#needsDataCommunicatorReset = true;
-          }
-
           comboBox.clearCache();
         }
       );
@@ -235,7 +245,6 @@ export class ComboBoxConnector {
     }
 
     this.#lastRequestedRange = viewportPageRange;
-    this.#lastRequestedFilter = filter;
   }
 
   /** The range of item indexes currently rendered in the dropdown */
@@ -272,6 +281,10 @@ export class ComboBoxConnector {
 
     callback(filteredItems, filteredItems.length);
   }
+}
+
+function isMultiSelectComboBox(comboBox: FlowComboBox): comboBox is FlowMultiSelectComboBox {
+  return comboBox.localName === 'vaadin-multi-select-combo-box';
 }
 
 function initLazy(comboBox: FlowComboBox): void {

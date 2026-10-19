@@ -35,9 +35,21 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public final class GridAITools {
+
+    /**
+     * Tail of the error a tool returns when it failed for a reason the LLM was
+     * given no detail about, because the cause was not a {@link ToolException}
+     * and so is not safe to pass on. Repeating the call unchanged can only fail
+     * the same way, which is what the LLM did without this; a rewritten attempt
+     * is still worth one try, since the cause is often something the LLM can
+     * avoid by itself, such as an identifier the database reserves.
+     */
+    private static final String RETRY_ONCE = " No details about the cause are "
+            + "available. Do not repeat the same query: change it and try "
+            + "once more, or report the failure if you cannot.";
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(GridAITools.class);
@@ -183,16 +195,18 @@ public final class GridAITools {
                         - ALWAYS give every column a human-readable AS alias
                         - Do NOT use LIMIT or OFFSET — the grid handles pagination
                         - Use double quotes for aliases with spaces or dots
-                        Example: SELECT name AS "Employee Name", salary AS "Salary" FROM employees
+                        - Use ONLY tables and columns from get_database_schema()
+                        Shape (placeholders, not real names):
+                        SELECT ColumnA AS "Readable A", ColumnB AS "Readable B" FROM TableName
 
                         COLUMN GROUPING (only when the user asks for grouping):
                         When the user mentions "grouped under X" in their request:
                         1. Select ONLY the columns mentioned for grouping
                         2. Alias each column as "X.ReadableName" (with the group prefix and a dot)
                         3. Do NOT include columns that are not part of a group
-                        Example request: "product and category grouped under Product"
-                        Correct SQL: SELECT product AS "Product.Name", category AS "Product.Category" FROM sales
-                        Result: A "Product" header spanning both columns.
+                        Example request: "ColumnA and ColumnB grouped under GroupName"
+                        Correct SQL: SELECT ColumnA AS "GroupName.Readable A", ColumnB AS "GroupName.Readable B" FROM TableName
+                        Result: A "GroupName" header spanning both columns.
                         Do NOT use "X.Name" format unless the user asks for grouping.
                         """;
             }
@@ -232,7 +246,7 @@ public final class GridAITools {
                     return "Error updating grid data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_grid_data failed", e);
-                    return "Error updating grid data.";
+                    return "Error updating grid data." + RETRY_ONCE;
                 }
             }
         };

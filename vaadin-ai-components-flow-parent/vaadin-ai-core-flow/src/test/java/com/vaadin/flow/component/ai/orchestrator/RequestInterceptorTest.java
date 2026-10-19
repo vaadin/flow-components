@@ -390,8 +390,8 @@ class RequestInterceptorTest {
         Assertions.assertThrows(RuntimeException.class,
                 () -> orchestrator.prompt("Hello"));
 
-        Mockito.verify(controller, Mockito.never()).onRequest();
-        Mockito.verify(controller).onResponse(thrown);
+        Mockito.verify(controller, Mockito.never()).onRequest(Mockito.any());
+        Mockito.verify(controller).onResponse(errorIs(thrown));
     }
 
     @Test
@@ -441,7 +441,7 @@ class RequestInterceptorTest {
 
         orchestrator.prompt("Hello");
 
-        Mockito.verify(controller, Mockito.never()).onRequest();
+        Mockito.verify(controller, Mockito.never()).onRequest(Mockito.any());
     }
 
     @Test
@@ -459,7 +459,7 @@ class RequestInterceptorTest {
         var inOrder = Mockito.inOrder(interceptor, controller);
         inOrder.verify(interceptor).intercept(
                 Mockito.any(RequestInterceptor.RequestInterceptEvent.class));
-        inOrder.verify(controller).onRequest();
+        inOrder.verify(controller).onRequest(Mockito.any());
     }
 
     @Test
@@ -551,7 +551,7 @@ class RequestInterceptorTest {
 
         orchestrator.prompt("first");
 
-        Assertions.assertTrue(errorReported.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, errorReported),
                 "Timeout must fail the turn");
         Assertions.assertInstanceOf(TimeoutException.class,
                 reportedError.get());
@@ -574,7 +574,7 @@ class RequestInterceptorTest {
                 .withResponseListener(event -> timedOut.countDown()).build();
 
         orchestrator.prompt("Hello");
-        Assertions.assertTrue(timedOut.await(5, TimeUnit.SECONDS));
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, timedOut));
 
         continuation.get().proceed();
 
@@ -605,12 +605,12 @@ class RequestInterceptorTest {
             throws Exception {
         // The scenario behind provider background execution: a postponed
         // prompt resumes and the provider schedules the turn itself. The
-        // resumed turn must run and end normally. Two mock-session limits
-        // shape the test: the session lock is permanently held by the test
-        // thread, so both the resume and the turn's ui.access updates must
-        // avoid foreign-thread lock acquisition — proceed() runs on the test
-        // thread and no message list is attached. The cross-thread resume
-        // with a live message list is covered by the manual catalog's C4.
+        // resumed turn must run and end normally. The mock session's lock
+        // shapes the test: the test thread holds it, so the resume runs there
+        // (proceed() is called on it), no message list is attached, and the
+        // wait for the end-of-turn hooks releases the lock for them. The
+        // cross-thread resume with a live message list is covered by the
+        // manual catalog's C4.
         var turnEnded = new CountDownLatch(1);
         var responseEvents = new ArrayList<ResponseListener.ResponseEvent>();
         Mockito.when(
@@ -632,7 +632,7 @@ class RequestInterceptorTest {
 
         continuation.get().proceed();
 
-        Assertions.assertTrue(turnEnded.await(5, TimeUnit.SECONDS),
+        Assertions.assertTrue(MockSession.awaitUnlocked(ui, turnEnded),
                 "The resumed turn never completed");
         Assertions.assertEquals(1, responseEvents.size());
         Assertions.assertTrue(responseEvents.getFirst().getError().isEmpty(),
@@ -1065,7 +1065,7 @@ class RequestInterceptorTest {
         }
 
         Mockito.verify(controller)
-                .onResponse(Mockito.isA(TimeoutException.class));
+                .onResponse(errorOfType(TimeoutException.class));
     }
 
     @Test
@@ -1273,4 +1273,18 @@ class RequestInterceptorTest {
     private static AIAttachment createAttachment(String fileName) {
         return new AIAttachment(fileName, "text/plain", "test".getBytes());
     }
+
+    /** Matches a turn outcome carrying exactly the given error instance. */
+    private static ResponseListener.ResponseEvent errorIs(Throwable expected) {
+        return Mockito.argThat(
+                e -> e != null && e.getError().orElse(null) == expected);
+    }
+
+    /** Matches a turn outcome whose error is of the given type. */
+    private static ResponseListener.ResponseEvent errorOfType(
+            Class<? extends Throwable> type) {
+        return Mockito.argThat(e -> e != null
+                && e.getError().filter(type::isInstance).isPresent());
+    }
+
 }

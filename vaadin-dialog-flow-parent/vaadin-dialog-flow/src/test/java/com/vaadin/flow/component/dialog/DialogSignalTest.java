@@ -15,11 +15,14 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.ModalityMode;
-import com.vaadin.flow.signals.BindingActiveException;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.AbstractSignalsTest;
 
@@ -40,26 +43,11 @@ class DialogSignalTest extends AbstractSignalsTest {
                 () -> dialog.bindHeight(signal));
     }
 
-    @Test
-    void bindVisible_visibilitySynchronized() {
-        var visibleSignal = new ValueSignal<>(false);
-        dialog.bindVisible(visibleSignal);
-        ui.add(dialog);
-
-        Assertions.assertFalse(dialog.isVisible());
-
-        visibleSignal.set(true);
-        Assertions.assertTrue(dialog.isVisible());
-    }
-
-    @Test
-    void bindVisible_setVisibleWhileBound_throws() {
-        var visibleSignal = new ValueSignal<>(false);
-        dialog.bindVisible(visibleSignal);
-        ui.add(dialog);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> dialog.setVisible(true));
+    @TestFactory
+    Stream<DynamicTest> bindVisible() {
+        // Dialog is visible by default, so start with false
+        return generateBindingTests(Dialog::new, Dialog::bindVisible,
+                Dialog::isVisible, Dialog::setVisible, false, true);
     }
 
     @Test

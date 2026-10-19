@@ -26,10 +26,11 @@ import com.vaadin.flow.router.Route;
 public class DynamicContextMenuGridPage extends Div {
 
     public DynamicContextMenuGridPage() {
-        gridWithDynamicContextMenu();
+        gridWithDynamicContentHandler();
+        gridWithDynamicContentProvider();
     }
 
-    private void gridWithDynamicContextMenu() {
+    private void gridWithDynamicContentHandler() {
         final Grid<Person> grid = new Grid<>();
         grid.addColumn(Person::getFirstName).setHeader("Name").setId("Name-Id");
         grid.addColumn(Person::getAge).setHeader("Born").setId("Born-Id");
@@ -50,7 +51,33 @@ public class DynamicContextMenuGridPage extends Div {
             return true;
         });
 
-        grid.setId("grid-with-dynamic-context-menu");
+        grid.setId("grid-with-dynamic-content-handler");
+        add(grid);
+    }
+
+    private void gridWithDynamicContentProvider() {
+        final Grid<Person> grid = new Grid<>();
+        Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader("Name");
+        grid.addColumn(Person::getAge).setHeader("Age");
+
+        grid.setItems(IntStream.range(0, 50)
+                .mapToObj(i -> new Person("Person " + i, i)).toList());
+
+        GridContextMenu<Person> contextMenu = grid.addContextMenu();
+
+        contextMenu.setDynamicContentProvider(context -> {
+            Person person = context.item();
+            contextMenu.removeAll();
+            if (person != null) {
+                contextMenu.addItem(context.column() == nameColumn
+                        ? "Call " + person.getFirstName()
+                        : "Age " + person.getAge());
+            }
+            return person != null;
+        });
+
+        grid.setId("grid-with-dynamic-content-provider");
         add(grid);
     }
 }

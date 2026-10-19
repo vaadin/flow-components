@@ -37,7 +37,7 @@ declare global {
   // Adds to the Flow namespace declared by the context menu module
   interface VaadinFlow {
     menubarConnector: {
-      initLazy(menuBar: FlowMenuBar, appId: string): void;
+      initLazy(menuBar: FlowMenuBar): void;
     };
   }
 }

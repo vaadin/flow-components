@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -34,7 +35,8 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
     public void init() {
         open();
         list = $(VirtualListElement.class).waitForFirst();
-        waitForElementPresent(By.id("item-0"));
+        // Wait for the item data, the list renders placeholders until then
+        waitUntil(ExpectedConditions.textToBe(By.id("item-0"), "Lit: Item 0"));
     }
 
     @Test
@@ -68,7 +70,6 @@ public class VirtualListLitRendererIT extends AbstractComponentIT {
 
     @Test
     public void shouldClickAnItem() {
-        waitForElementPresent(By.id("item-0"));
         clickElementWithJs("item-0");
         waitForElementPresent(
                 By.cssSelector("vaadin-virtual-list[data-clicked-item=\"0\"]"));

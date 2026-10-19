@@ -51,9 +51,8 @@ public class ItemEnabledGeneratorIT extends AbstractSelectIT {
         int valueChangeEvents = 0;
         String previousValue = null;
         for (int i = 0; i < items.size(); i++) {
-            SelectElement.ItemElement itemElement = items.get(i);
             if (i % 2 == 0) {
-                itemElement.click();
+                selectElement.selectItemByIndex(i);
                 verify.valueChangeEvent("Item-" + i, previousValue, true,
                         valueChangeEvents);
                 verify.selectedItem("Item-" + i);

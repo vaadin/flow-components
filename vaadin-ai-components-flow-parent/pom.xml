@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>25.3-SNAPSHOT</version>
+        <version>25.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-ai-components-flow-parent</artifactId>
     <packaging>pom</packaging>
@@ -13,6 +13,7 @@
     <modules>
         <module>vaadin-ai-core-flow</module>
         <module>vaadin-ai-extensions-flow</module>
+        <module>vaadin-ai-components-flow-benchmark</module>
     </modules>
     <dependencies/>
     <profiles>

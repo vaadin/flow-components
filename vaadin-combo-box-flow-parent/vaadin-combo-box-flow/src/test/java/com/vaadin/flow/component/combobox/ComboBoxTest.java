@@ -38,6 +38,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.JsFunctionCallUtil;
 
 import tools.jackson.databind.node.ObjectNode;
 
@@ -272,10 +273,10 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue("C");
         comboBox.setOpened(true);
 
-        var parameters = focusSelectedItemParameters();
-        Assertions.assertEquals(1, parameters.size());
-        // Parameter 0 is the target element, parameter 1 is the item index
-        Assertions.assertEquals(2, parameters.get(0).get(1));
+        var arguments = focusSelectedItemArguments();
+        Assertions.assertEquals(1, arguments.size());
+        // The only argument is the index of the selected item
+        Assertions.assertEquals(2, arguments.get(0).get(0));
     }
 
     @Test
@@ -289,7 +290,7 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.getElement().setProperty("filter", "C");
         comboBox.setOpened(true);
 
-        Assertions.assertEquals(List.of(), focusSelectedItemParameters());
+        Assertions.assertEquals(List.of(), focusSelectedItemArguments());
     }
 
     @Test
@@ -302,9 +303,9 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.getElement().setProperty("filter", "");
         comboBox.setOpened(true);
 
-        var parameters = focusSelectedItemParameters();
-        Assertions.assertEquals(1, parameters.size());
-        Assertions.assertEquals(2, parameters.get(0).get(1));
+        var arguments = focusSelectedItemArguments();
+        Assertions.assertEquals(1, arguments.size());
+        Assertions.assertEquals(2, arguments.get(0).get(0));
     }
 
     @Test
@@ -315,7 +316,7 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue("Cherry");
         comboBox.setOpened(true);
 
-        Assertions.assertEquals(List.of(), focusSelectedItemParameters());
+        Assertions.assertEquals(List.of(), focusSelectedItemArguments());
     }
 
     @Test
@@ -326,7 +327,7 @@ class ComboBoxTest extends ComboBoxBaseTest {
         comboBox.setFocusSelectedItem(true);
         comboBox.setOpened(true);
 
-        Assertions.assertEquals(List.of(), focusSelectedItemParameters());
+        Assertions.assertEquals(List.of(), focusSelectedItemArguments());
     }
 
     @Test
@@ -342,13 +343,12 @@ class ComboBoxTest extends ComboBoxBaseTest {
                 comboBox.getElement().getProperty("_filterTimeout", 0));
     }
 
-    private List<List<Object>> focusSelectedItemParameters() {
+    private List<List<Object>> focusSelectedItemArguments() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("__focusIndex"))
-                .map(invocation -> List.copyOf(invocation.getParameters()))
-                .toList();
+                .filter(invocation -> "__focusIndex"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
+                .map(JsFunctionCallUtil::getArguments).toList();
     }
 
     @Tag("div")

@@ -17,6 +17,7 @@ package com.vaadin.tests;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
@@ -30,10 +31,14 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServiceEventBus;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.startup.ApplicationConfiguration;
 
@@ -100,6 +105,8 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
         Mockito.when(vaadinContext.getAttribute(ApplicationConfiguration.class))
                 .thenReturn(applicationConfiguration);
         Mockito.when(service.getContext()).thenReturn(vaadinContext);
+        var eventBus = new VaadinServiceEventBus(service);
+        Mockito.when(service.getEventBus()).thenReturn(eventBus);
 
         session = Mockito.spy(new AlwaysLockedVaadinSession(service));
 
@@ -243,6 +250,31 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
     public List<PendingJavaScriptInvocation> dumpPendingJavaScriptInvocations() {
         this.fakeClientCommunication();
         return ui.getInternals().dumpPendingJavaScriptInvocations();
+    }
+
+    /**
+     * Dump the pending JavaScript invocations from the UI internals, and get
+     * the calls among them that were made on the given element through the
+     * given JavaScript definition with {@link Element#executeJs(Class)
+     * executeJs(Class)}.
+     * <p>
+     * Like {@link #dumpPendingJavaScriptInvocations()}, this clears all pending
+     * invocations, including those that are not returned.
+     *
+     * @param owner
+     *            the element that the calls were made on, use the UI element
+     *            for calls made on the UI
+     * @param definitionType
+     *            the JavaScript definition interface of the calls
+     * @return a list of the matching calls, in the order they were made
+     */
+    public List<JsCall> dumpJsCalls(Element owner, Class<?> definitionType) {
+        return dumpPendingJavaScriptInvocations().stream()
+                .filter(pending -> pending.getOwner() == owner.getNode())
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .map(JavaScriptInvocation::getJsCall).filter(Objects::nonNull)
+                .filter(call -> call.definitionType() == definitionType)
+                .toList();
     }
 
     private static class AlwaysLockedVaadinSession extends VaadinSession {

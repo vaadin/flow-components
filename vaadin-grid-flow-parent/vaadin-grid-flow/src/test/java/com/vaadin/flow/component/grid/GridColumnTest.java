@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -78,6 +80,69 @@ class GridColumnTest {
         firstColumn.setKey("foo");
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> secondColumn.setKey("foo"));
+    }
+
+    @Test
+    void setSortProperty_getBySortProperty() {
+        firstColumn.setSortProperty("foo");
+        secondColumn.setSortProperty("bar");
+        Assertions.assertSame(firstColumn, grid.getColumnBySortProperty("foo"));
+        Assertions.assertSame(secondColumn,
+                grid.getColumnBySortProperty("bar"));
+    }
+
+    @Test
+    void setMultipleSortProperties_getBySortProperty_returnsColumnForEach() {
+        firstColumn.setSortProperty("foo", "bar");
+        Assertions.assertSame(firstColumn, grid.getColumnBySortProperty("foo"));
+        Assertions.assertSame(firstColumn, grid.getColumnBySortProperty("bar"));
+    }
+
+    @Test
+    void setKey_noSortProperty_getBySortProperty_returnsColumnByKey() {
+        firstColumn.setKey("foo");
+        Assertions.assertSame(firstColumn, grid.getColumnBySortProperty("foo"));
+    }
+
+    @Test
+    void setKeyAndSortProperty_getBySortProperty_doesNotMatchKey() {
+        firstColumn.setKey("foo").setSortProperty("bar");
+        Assertions.assertNull(grid.getColumnBySortProperty("foo"));
+        Assertions.assertSame(firstColumn, grid.getColumnBySortProperty("bar"));
+    }
+
+    @Test
+    void setSortOrderProvider_getBySortProperty_returnsColumn() {
+        firstColumn.setSortOrderProvider(
+                direction -> Stream.of(new QuerySortOrder("foo", direction)));
+        Assertions.assertSame(firstColumn, grid.getColumnBySortProperty("foo"));
+    }
+
+    @Test
+    void sharedSortProperty_getBySortProperty_returnsFirstColumn() {
+        firstColumn.setSortProperty("foo");
+        secondColumn.setSortProperty("foo");
+        Assertions.assertSame(firstColumn, grid.getColumnBySortProperty("foo"));
+    }
+
+    @Test
+    void notSortableColumn_getBySortProperty_returnsColumn() {
+        fourthColumn.setKey("foo");
+        Assertions.assertFalse(fourthColumn.isSortable());
+        Assertions.assertSame(fourthColumn,
+                grid.getColumnBySortProperty("foo"));
+    }
+
+    @Test
+    void getByUnknownSortProperty_returnsNull() {
+        firstColumn.setSortProperty("foo");
+        Assertions.assertNull(grid.getColumnBySortProperty("bar"));
+    }
+
+    @Test
+    void getByNullSortProperty_returnsNull() {
+        firstColumn.setSortProperty("foo");
+        Assertions.assertNull(grid.getColumnBySortProperty(null));
     }
 
     @Test
@@ -222,6 +287,86 @@ class GridColumnTest {
         column.setTextAlign(null);
         Assertions.assertEquals(ColumnTextAlign.START, column.getTextAlign());
         Assertions.assertNull(column.getElement().getProperty("textAlign"));
+    }
+
+    @Test
+    void setResizable_resizablePropertyUpdated() {
+        Assertions.assertFalse(firstColumn.isResizable());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("resizable", false));
+
+        firstColumn.setResizable(true);
+        Assertions.assertTrue(firstColumn.isResizable());
+        Assertions.assertTrue(
+                firstColumn.getElement().getProperty("resizable", false));
+
+        firstColumn.setResizable(false);
+        Assertions.assertFalse(firstColumn.isResizable());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("resizable", true));
+    }
+
+    @Test
+    void setFrozen_frozenPropertyUpdated() {
+        Assertions.assertFalse(firstColumn.isFrozen());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozen", false));
+
+        firstColumn.setFrozen(true);
+        Assertions.assertTrue(firstColumn.isFrozen());
+        Assertions.assertTrue(
+                firstColumn.getElement().getProperty("frozen", false));
+
+        firstColumn.setFrozen(false);
+        Assertions.assertFalse(firstColumn.isFrozen());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozen", true));
+    }
+
+    @Test
+    void setFrozenToEnd_frozenToEndPropertyUpdated() {
+        Assertions.assertFalse(firstColumn.isFrozenToEnd());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozenToEnd", false));
+
+        firstColumn.setFrozenToEnd(true);
+        Assertions.assertTrue(firstColumn.isFrozenToEnd());
+        Assertions.assertTrue(
+                firstColumn.getElement().getProperty("frozenToEnd", false));
+
+        firstColumn.setFrozenToEnd(false);
+        Assertions.assertFalse(firstColumn.isFrozenToEnd());
+        Assertions.assertFalse(
+                firstColumn.getElement().getProperty("frozenToEnd", true));
+    }
+
+    @Test
+    void setWidthAndFlexGrow_propertiesUpdated() {
+        firstColumn.setWidth("75px").setFlexGrow(0);
+
+        Assertions.assertEquals("75px", firstColumn.getWidth());
+        Assertions.assertEquals("75px",
+                firstColumn.getElement().getProperty("width"));
+        Assertions.assertEquals(0, firstColumn.getFlexGrow());
+        Assertions.assertEquals(0,
+                firstColumn.getElement().getProperty("flexGrow", 1));
+    }
+
+    @Test
+    void setColumnReorderingAllowed_columnReorderingAllowedPropertyUpdated() {
+        Assertions.assertFalse(grid.isColumnReorderingAllowed());
+        Assertions.assertFalse(grid.getElement()
+                .getProperty("columnReorderingAllowed", false));
+
+        grid.setColumnReorderingAllowed(true);
+        Assertions.assertTrue(grid.isColumnReorderingAllowed());
+        Assertions.assertTrue(grid.getElement()
+                .getProperty("columnReorderingAllowed", false));
+
+        grid.setColumnReorderingAllowed(false);
+        Assertions.assertFalse(grid.isColumnReorderingAllowed());
+        Assertions.assertFalse(
+                grid.getElement().getProperty("columnReorderingAllowed", true));
     }
 
     @Test

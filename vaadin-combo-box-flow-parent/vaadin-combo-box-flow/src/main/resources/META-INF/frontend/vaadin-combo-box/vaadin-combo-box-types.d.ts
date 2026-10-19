@@ -51,13 +51,34 @@ export interface FlowComboBoxInternals {
 /** The Flow combo box element, also used by the multi-select combo box */
 export type FlowComboBox = ComboBox<Item> & FlowComboBoxInternals;
 
+/** The server-side RPC proxy of the multi-select combo box */
+export interface MultiSelectComboBoxServer extends ComboBoxServer {
+  toggleSelectAll(): Promise<void>;
+}
+
+/**
+ * The private @vaadin/multi-select-combo-box API and the Flow-specific API that
+ * the combo box connector relies on.
+ */
+export interface FlowMultiSelectComboBoxInternals {
+  $server: MultiSelectComboBoxServer;
+  _toggleSelectAllHandler?: () => Promise<void>;
+}
+
+/** The Flow multi-select combo box element */
+export type FlowMultiSelectComboBox = FlowComboBox & FlowMultiSelectComboBoxInternals;
+
 declare global {
   // Augments the global Vaadin interface declared by @vaadin/component-base
-  // with the Flow namespace used by the connector
+  // with the Flow namespace used by the connector. The namespace is a shared
+  // interface that each module merges its own members into, so that connectors
+  // from different modules can be type-checked in the same program.
   interface Vaadin {
     ComboBoxPlaceholder: typeof ComboBoxPlaceholder;
-    Flow: {
-      comboBoxConnector: { initLazy(comboBox: FlowComboBox): void };
-    };
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    comboBoxConnector: { initLazy(comboBox: FlowComboBox): void };
   }
 }

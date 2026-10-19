@@ -19,13 +19,13 @@ import type {
   FlowContextMenuItemComponent
 } from './vaadin-context-menu-types.js';
 
-function getContainer(appId: string, nodeId: number): Element | undefined {
+function getContainer(appId: string, nodeId: number): Element | null {
   try {
     return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
   } catch (error) {
     console.error('Could not get node %s from app %s', nodeId, appId);
     console.error(error);
-    return undefined;
+    return null;
   }
 }
 
@@ -35,24 +35,22 @@ function getContainer(appId: string, nodeId: number): Element | undefined {
  */
 export class ContextMenuConnector {
   readonly #contextMenu: FlowContextMenu;
-  readonly #appId: string;
 
-  constructor(contextMenu: FlowContextMenu, appId: string) {
+  constructor(contextMenu: FlowContextMenu) {
     this.#contextMenu = contextMenu;
-    this.#appId = appId;
   }
 
   /**
    * Generates and assigns the items to the context menu.
    */
-  generateItems(nodeId: number): void {
-    this.#contextMenu.items = generateItemsTree(this.#appId, nodeId);
+  generateItems(appId: string, nodeId: number): void {
+    this.#contextMenu.items = generateItemsTree(appId, nodeId);
   }
 }
 
-function initLazy(contextMenu: FlowContextMenu, appId: string): void {
+function initLazy(contextMenu: FlowContextMenu): void {
   // Init the connector only once for the context menu
-  contextMenu.$connector ??= new ContextMenuConnector(contextMenu, appId);
+  contextMenu.$connector ??= new ContextMenuConnector(contextMenu);
 }
 
 /**

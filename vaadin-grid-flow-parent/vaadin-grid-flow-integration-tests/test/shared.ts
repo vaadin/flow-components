@@ -11,6 +11,7 @@ import type {} from '@web/test-runner-mocha';
 import type {} from 'sinon-chai';
 import type {
   FlowGrid as ConnectorFlowGrid,
+  FlowTreeGrid as ConnectorFlowTreeGrid,
   GridConnector as ConnectorGridConnector,
   GridServer as ConnectorGridServer,
   Item as ConnectorItem
@@ -20,6 +21,8 @@ export type GridServer = {
   [K in keyof ConnectorGridServer]: ConnectorGridServer[K] & sinon.SinonSpy;
 } & {
   setViewportRange: ConnectorGridServer['setViewportRange'] & sinon.SinonSpy & { promise?: sinon.SinonPromise<void> };
+  setViewportRangeByIndexPath: ConnectorGridServer['setViewportRangeByIndexPath'] &
+    sinon.SinonSpy & { promise?: sinon.SinonPromise<number> };
 };
 
 export type Item = ConnectorItem & {
@@ -38,13 +41,13 @@ export type GridConnector = Omit<ConnectorGridConnector, 'doSelection' | 'doDese
   updateFlatData(updatedItems: Item[]): void;
 };
 
-export type FlowGrid = {
+type TestGridInternals = {
   $connector: GridConnector;
   $server: GridServer;
-} & ConnectorFlowGrid & {
-    _flatSize: number;
-    _updateItem: (index: number, item: Item) => void;
-  };
+  _flatSize: number;
+};
+
+export type FlowGrid = TestGridInternals & ConnectorFlowGrid;
 
 export type FlowGridSorter = GridSorter & {
   _order?: number | null;
@@ -54,6 +57,8 @@ export type FlowGridSelectionColumn = GridColumn & {
   selectAll: boolean;
   $server: GridServer;
 };
+
+export type FlowTreeGrid = TestGridInternals & ConnectorFlowTreeGrid;
 
 export const gridConnector = window.Vaadin.Flow.gridConnector;
 export const treeGridConnector = window.Vaadin.Flow.treeGridConnector;
@@ -77,7 +82,11 @@ export function init(grid: FlowGrid, connector: { initLazy(grid: ConnectorFlowGr
       grid.$server.setViewportRange.promise = promise;
       return promise;
     }),
-    setViewportRangeByIndexPath: sinon.spy(),
+    setViewportRangeByIndexPath: sinon.spy(() => {
+      const promise = sinon.promise<number>();
+      grid.$server.setViewportRangeByIndexPath.promise = promise;
+      return promise;
+    }),
     sortersChanged: sinon.spy(),
     setShiftKeyDown: sinon.spy(),
     updateContextMenuTargetItem: sinon.spy()

@@ -1,0 +1,242 @@
+/*
+ * Copyright 2000-2026 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.grid.it;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridSorterElement;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
+
+@TestPath("vaadin-grid/multi-sort")
+public class GridMultiSortIT extends AbstractComponentIT {
+
+    private GridElement grid;
+    private CheckboxElement multiSortToggle;
+    private CheckboxElement multiSortPriorityToggle;
+    private TestBenchElement invertSortDirections;
+    private TestBenchElement resetSortDirections;
+    private TestBenchElement sortByAgeThenName;
+    private TestBenchElement message;
+
+    @Before
+    public void init() {
+        open();
+        grid = $(GridElement.class).id("grid-sortable-columns");
+        multiSortToggle = $(CheckboxElement.class).id("grid-multi-sort-toggle");
+        multiSortPriorityToggle = $(CheckboxElement.class)
+                .id("grid-multi-sort-priority-toggle");
+        invertSortDirections = $("button")
+                .id("grid-sortable-columns-invert-sortings");
+        resetSortDirections = $("button")
+                .id("grid-sortable-columns-reset-sortings");
+        sortByAgeThenName = $("button").id("grid-sortable-columns-sort-by-two");
+        message = $("*").id("grid-sortable-columns-message");
+    }
+
+    @Test
+    public void gridWithSorting() {
+        grid.getHeaderCell(0).getSorter().click();
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
+        grid.getHeaderCell(2).getSorter().click();
+        assertSortMessageEquals(
+                QuerySortOrder.asc("street").thenAsc("number").build(), true);
+        grid.getHeaderCell(2).getSorter().click();
+        assertSortMessageEquals(
+                QuerySortOrder.desc("street").thenDesc("number").build(), true);
+        grid.getHeaderCell(2).getSorter().click();
+        assertSortMessageEquals(Collections.emptyList(), true);
+
+        // enable multi sort
+        multiSortToggle.click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(1).getSorter().click();
+        assertSortMessageEquals(
+                QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
+    }
+
+    @Test
+    public void gridWithSorting_switchColumnSorting() {
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(0).getSorter().click();
+
+        Assert.assertEquals(
+                "Current sort order: . Sort originates from the client: true.",
+                message.getText());
+    }
+
+    @Test
+    public void gridWithSorting_invertAndResetSortings() {
+        grid.getHeaderCell(0).getSorter().click();
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
+
+        invertSortDirections.click();
+        assertSortMessageEquals(QuerySortOrder.desc("firstName").build(),
+                false);
+
+        invertSortDirections.click();
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), false);
+
+        resetSortDirections.click();
+        assertSortMessageEquals(Collections.emptyList(), false);
+
+        // enable multi sort
+        multiSortToggle.click();
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(1).getSorter().click();
+        assertSortMessageEquals(
+                QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
+
+        invertSortDirections.click();
+        assertSortMessageEquals(
+                QuerySortOrder.desc("age").thenDesc("firstName").build(),
+                false);
+
+        resetSortDirections.click();
+        assertSortMessageEquals(Collections.emptyList(), false);
+    }
+
+    @Test
+    public void gridWithSorting_toggleColumnVisibilityAndReset() {
+        TestBenchElement toggleFirstColumnButton = $("button")
+                .id("grid-sortable-columns-toggle-first");
+
+        grid.getHeaderCell(0).getSorter().click();
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
+
+        toggleFirstColumnButton.click();
+        assertSortMessageEquals(Collections.emptyList(), false);
+
+        toggleFirstColumnButton.click();
+        assertSortMessageEquals(Collections.emptyList(), false);
+
+        GridSorterElement sorter = grid.getHeaderCell(0).getSorter();
+        Assert.assertFalse(sorter.isAscending());
+        Assert.assertFalse(sorter.isDescending());
+    }
+
+    @Test
+    public void gridWithSorting_noMultiSort_secondSortColumnIgnored() {
+        sortByAgeThenName.click();
+        assertSortMessageEquals(QuerySortOrder.asc("age").build(), false);
+
+        resetSortDirections.click();
+        // enable multi sort
+        multiSortToggle.click();
+        sortByAgeThenName.click();
+        assertSortMessageEquals(
+                QuerySortOrder.asc("age").thenDesc("firstName").build(), false);
+    }
+
+    @Test
+    public void gridWithSorting_multiSortPriorityAppend() {
+        // enable multi sort
+        multiSortToggle.click();
+        // set multi-sort priority to append
+        multiSortPriorityToggle.click();
+
+        grid.getHeaderCell(0).getSorter().click();
+        grid.getHeaderCell(1).getSorter().click();
+
+        assertSortMessageEquals(
+                QuerySortOrder.asc("firstName").thenAsc("age").build(), true);
+
+        grid.getHeaderCell(1).getSorter().click();
+
+        assertSortMessageEquals(
+                QuerySortOrder.asc("firstName").thenDesc("age").build(), true);
+    }
+
+    @Test
+    public void multiSortPrepend_sortByAgeThenFirstName_sortIndicatorsOrderedByAgeThenFirstName() {
+        // enable multi sort
+        multiSortToggle.click();
+        sortByAgeThenName.click();
+
+        List<QuerySortOrder> expectedSortOrder = QuerySortOrder.asc("Age")
+                .thenDesc("Name").build();
+        assertSortIndicatorOrder(expectedSortOrder);
+    }
+
+    @Test
+    public void multiSortAppend_sortByAgeThenFirstName_sortIndicatorsOrderedByAgeThenFirstName() {
+        // enable multi sort
+        multiSortToggle.click();
+        // set multi-sort priority to append
+        multiSortPriorityToggle.click();
+        sortByAgeThenName.click();
+
+        List<QuerySortOrder> expectedSortOrder = QuerySortOrder.asc("Age")
+                .thenDesc("Name").build();
+        assertSortIndicatorOrder(expectedSortOrder);
+    }
+
+    private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,
+            boolean fromClient) {
+        String sortOrdersString = querySortOrders.stream()
+                .map(querySortOrder -> String.format(
+                        "{sort property: %s, direction: %s}",
+                        querySortOrder.getSorted(),
+                        querySortOrder.getDirection()))
+                .collect(Collectors.joining(", "));
+        Assert.assertEquals(String.format(
+                "Current sort order: %s. Sort originates from the client: %s.",
+                sortOrdersString, fromClient), message.getText());
+    }
+
+    private void assertSortIndicatorOrder(
+            List<QuerySortOrder> querySortOrders) {
+        List<GridSorterElement> sorters = grid.$(GridSorterElement.class)
+                .hasAttribute("direction").all();
+
+        querySortOrders.forEach((querySortOrder) -> {
+            // Lookup sorter for column
+            String columnName = querySortOrder.getSorted();
+            GridSorterElement columnSorter = sorters.stream()
+                    .filter(sorter -> sorter.getText().startsWith(columnName))
+                    .findFirst().orElse(null);
+            Assert.assertNotNull(
+                    "Could not find sorter for column: " + columnName,
+                    columnSorter);
+
+            // Check sort direction
+            SortDirection direction = querySortOrder.getDirection();
+            Assert.assertEquals(direction == SortDirection.ASCENDING,
+                    columnSorter.isAscending());
+            Assert.assertEquals(direction == SortDirection.DESCENDING,
+                    columnSorter.isDescending());
+
+            // Check order part displays correct order value
+            String orderValue = String
+                    .valueOf(querySortOrders.indexOf(querySortOrder) + 1);
+            TestBenchElement orderElement = columnSorter.$("*")
+                    .withAttribute("part", "order").first();
+            Assert.assertEquals(orderValue, orderElement.getText());
+        });
+    }
+}

@@ -166,7 +166,9 @@ public class TimePickerElement extends TestBenchElement
         scrollToItem(index);
 
         TestBenchElement item = getItem(index);
-        item.click();
+        // Do not use TestBench click, because it focuses the element first.
+        // Real mouse click prevents mousedown, so focus stays in the input.
+        executeScript("arguments[0].click()", item);
     }
 
     /**

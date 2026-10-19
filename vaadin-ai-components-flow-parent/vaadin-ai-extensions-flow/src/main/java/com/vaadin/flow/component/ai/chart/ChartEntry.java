@@ -16,6 +16,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -23,9 +24,10 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
- * Holds the data source queries and pending LLM state for a chart. Chart
- * entries are stored directly on the {@link Chart} instance via
- * {@link ComponentUtil}, so their lifecycle is tied to the chart component.
+ * Holds the data source queries, the configuration the LLM has set and the
+ * pending LLM state for a chart. Chart entries are stored directly on the
+ * {@link Chart} instance via {@link ComponentUtil}, so their lifecycle is tied
+ * to the chart component.
  *
  * @author Vaadin Ltd
  */
@@ -34,7 +36,13 @@ class ChartEntry implements Serializable {
     private final String id;
     private List<String> queries = new ArrayList<>();
     private List<String> pendingQueries;
-    private String pendingConfigurationJson;
+    private final List<String> pendingConfigurationJsons = new ArrayList<>();
+    /**
+     * Built only from the configuration JSON the LLM sent, so unlike the
+     * chart's own configuration it holds no series, categories or other values
+     * the renderer derives from the query results.
+     */
+    private Configuration llmConfiguration = new Configuration();
 
     /**
      * Gets the {@link ChartEntry} for the given chart, or {@code null} if none
@@ -110,23 +118,25 @@ class ChartEntry implements Serializable {
     }
 
     /**
-     * Gets the pending configuration JSON that will be applied when
-     * {@link #hasPendingState()} is true.
+     * Gets the configuration JSON updates staged for the next successful
+     * {@code onResponseComplete}, in the order they were staged.
      *
-     * @return the pending configuration JSON, or {@code null} if none
+     * @return an unmodifiable list of configuration JSON strings, empty if none
      */
-    public String getPendingConfigurationJson() {
-        return pendingConfigurationJson;
+    public List<String> getPendingConfigurationJsons() {
+        return Collections.unmodifiableList(pendingConfigurationJsons);
     }
 
     /**
-     * Sets the pending configuration JSON to be applied later.
+     * Stages a configuration JSON update to be applied on the next successful
+     * {@code onResponseComplete}, after the updates staged before it.
      *
      * @param configurationJson
-     *            the configuration JSON string
+     *            the configuration JSON string, not {@code null}
      */
-    public void setPendingConfigurationJson(String configurationJson) {
-        this.pendingConfigurationJson = configurationJson;
+    public void addPendingConfigurationJson(String configurationJson) {
+        pendingConfigurationJsons
+                .add(Objects.requireNonNull(configurationJson));
     }
 
     /**
@@ -152,26 +162,61 @@ class ChartEntry implements Serializable {
     }
 
     /**
+     * Gets the configuration the LLM has set.
+     *
+     * @return the configuration, never {@code null}
+     */
+    public Configuration getLlmConfiguration() {
+        return llmConfiguration;
+    }
+
+    /**
+     * Replaces the configuration the LLM has set.
+     *
+     * @param configuration
+     *            the configuration, not {@code null}
+     */
+    public void setLlmConfiguration(Configuration configuration) {
+        llmConfiguration = Objects.requireNonNull(configuration);
+    }
+
+    /**
+     * Applies configuration JSON the LLM sent to the configuration it has set
+     * so far, by the same rules the renderer applies it to the chart.
+     *
+     * @param configurationJson
+     *            the configuration JSON, not {@code null}
+     */
+    public void applyLlmConfiguration(String configurationJson) {
+        llmConfiguration = ChartRenderer.applyConfiguration(llmConfiguration,
+                configurationJson);
+        // Each update adds its series entries. Keep the latest per name, the
+        // one the renderer uses as that series' settings.
+        llmConfiguration.setSeries(new ArrayList<>(
+                ChartRenderer.extractSeriesConfig(llmConfiguration).values()));
+    }
+
+    /**
      * Returns whether this entry has pending state waiting to be applied.
      *
      * @return {@code true} if there is pending configuration or pending queries
      */
     public boolean hasPendingState() {
-        return pendingConfigurationJson != null || pendingQueries != null;
+        return !pendingConfigurationJsons.isEmpty() || pendingQueries != null;
     }
 
     /**
      * Clears all pending state.
      */
     public void clearPendingState() {
-        pendingConfigurationJson = null;
+        pendingConfigurationJsons.clear();
         pendingQueries = null;
     }
 
     /**
      * Returns the current state of the chart as a JSON string suitable for LLM
-     * tool responses. Includes the chart ID, the Highcharts configuration
-     * (without series data), and any SQL queries.
+     * tool responses. Includes the chart ID, the configuration the LLM has set,
+     * and any SQL queries. Nothing in it comes from the query results.
      *
      * @param chart
      *            the chart component, not {@code null}
@@ -185,21 +230,8 @@ class ChartEntry implements Serializable {
 
         ChartEntry entry = get(chart);
         if (entry != null && !entry.queries.isEmpty()) {
-            String configJson = ChartSerialization
-                    .toJSON(chart.getConfiguration());
-            ObjectNode configNode = JacksonUtils.readTree(configJson);
-
-            // Strip data from series but keep configuration (name,
-            // plotOptions, yAxis, type) so the LLM can see per-series
-            // settings.
-            if (configNode.has("series")
-                    && configNode.get("series").isArray()) {
-                for (var seriesNode : configNode.get("series")) {
-                    if (seriesNode instanceof ObjectNode seriesObj) {
-                        seriesObj.remove("data");
-                    }
-                }
-            }
+            ObjectNode configNode = JacksonUtils.readTree(
+                    ChartSerialization.toJSON(entry.llmConfiguration));
             result.set("configuration", configNode);
 
             ArrayNode arr = result.putArray("queries");

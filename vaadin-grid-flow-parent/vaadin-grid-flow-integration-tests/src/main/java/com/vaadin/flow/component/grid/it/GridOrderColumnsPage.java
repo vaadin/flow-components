@@ -15,8 +15,11 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -70,5 +73,12 @@ public class GridOrderColumnsPage extends VerticalLayout {
 
         add(new HorizontalLayout(orderCol123Button, orderCol321Button,
                 orderCol31Button, visualOrderButton));
+
+        Span columnOrder = new Span();
+        columnOrder.setId("column-order");
+        grid.addColumnReorderListener(e -> columnOrder
+                .setText(e.getColumns().stream().map(Grid.Column::getKey)
+                        .collect(Collectors.joining(", "))));
+        add(columnOrder);
     }
 }

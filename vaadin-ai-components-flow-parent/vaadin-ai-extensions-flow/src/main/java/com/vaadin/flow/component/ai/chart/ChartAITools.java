@@ -40,9 +40,21 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * @author Vaadin Ltd
- * @since 25.2
+ * @since 25.3
  */
 public final class ChartAITools {
+
+    /**
+     * Tail of the error a tool returns when it failed for a reason the LLM was
+     * given no detail about, because the cause was not a {@link ToolException}
+     * and so is not safe to pass on. Repeating the call unchanged can only fail
+     * the same way, which is what the LLM did without this; a rewritten attempt
+     * is still worth one try, since the cause is often something the LLM can
+     * avoid by itself, such as an identifier the database reserves.
+     */
+    private static final String RETRY_ONCE = " No details about the cause are "
+            + "available. Do not repeat the same %s: change it and try once "
+            + "more, or report the failure if you cannot.";
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(ChartAITools.class);
@@ -58,15 +70,17 @@ public final class ChartAITools {
     public interface Callbacks extends Serializable {
 
         /**
-         * Returns the current state of a chart including its Highcharts
-         * configuration and SQL queries. The returned JSON string should
-         * contain the chart configuration and the SQL queries used to populate
-         * the chart series. Should throw if the chart is not found.
+         * Returns the current state of a chart as a JSON string holding the
+         * Highcharts configuration the LLM has set and the SQL queries used to
+         * populate the chart series. The LLM gets the state as is, so the
+         * configuration must not include values from the query results, such as
+         * series names, axis categories or points. Should throw if the chart is
+         * not found.
          *
          * @param chartId
          *            the chart ID
-         * @return the chart state as a JSON string containing the Highcharts
-         *         configuration and SQL queries
+         * @return the chart state as a JSON string containing the configuration
+         *         the LLM has set and the SQL queries
          */
         String getState(String chartId);
 
@@ -234,10 +248,14 @@ public final class ChartAITools {
 
             @Override
             public String getDescription() {
-                return "Gets the current state of a chart including its "
-                        + "Highcharts configuration and SQL queries. Returns "
-                        + "the chart configuration as JSON and the SQL "
-                        + "queries used to populate the chart series.";
+                return "Gets the current state of a chart: the configuration "
+                        + "set through update_chart_configuration and the SQL "
+                        + "queries that populate its series. Values from the "
+                        + "query results, such as series names, axis "
+                        + "categories and points, are never included, even "
+                        + "though the chart shows them. To change what the "
+                        + "chart shows, such as its sorting or filtering, "
+                        + "change the queries.";
             }
 
             @Override
@@ -528,7 +546,8 @@ public final class ChartAITools {
                             + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_configuration failed", e);
-                    return "Error updating chart configuration.";
+                    return "Error updating chart configuration."
+                            + RETRY_ONCE.formatted("configuration");
                 }
             }
         };
@@ -545,7 +564,10 @@ public final class ChartAITools {
             public String getDescription() {
                 return resolveColumnNames(
                         """
-                                Updates the chart data using SQL SELECT queries (one per series).
+                                Updates the chart data using SQL SELECT queries (one per series). \
+                                The queries replace all current series of the chart: to add a series, pass \
+                                the current queries from get_chart_state together with the new one; to remove \
+                                a series, leave its query out.
 
                                 IMPORTANT: Column names control how data is mapped to series. \
                                 Use the exact aliases below (prefixed with '{PREFIX}') in your SELECT statements.
@@ -580,10 +602,10 @@ public final class ChartAITools {
                                 OHLC/Candlestick:
                                 - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
                                 - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
-                                - When adding a volume series alongside OHLC/candlestick data, use a separate query \
-                                with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, 'Volume' AS {SERIES} \
-                                FROM stock_prices). The {SERIES} alias names the series so it can be configured via \
-                                update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
+                                - When adding a volume series alongside OHLC/candlestick data, pass the OHLC query and a \
+                                second query with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, \
+                                'Volume' AS {SERIES} FROM stock_prices). The {SERIES} alias names the series so it can be \
+                                configured via update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
 
                                 Sankey diagram:
                                 - 3 columns: {FROM}, {TO}, {WEIGHT}
@@ -626,7 +648,7 @@ public final class ChartAITools {
 
                                 Parameters:
                                 - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
-                                - queries (array of strings, required): SQL SELECT queries, one per series
+                                - queries (array of strings, required): SQL SELECT queries, one per series, replacing the current ones
 
                                 Changes are applied when the request completes.""");
             }
@@ -678,7 +700,8 @@ public final class ChartAITools {
                     return "Error updating chart data: " + e.getMessage();
                 } catch (Exception e) {
                     LOGGER.error("update_chart_data_source failed", e);
-                    return "Error updating chart data.";
+                    return "Error updating chart data."
+                            + RETRY_ONCE.formatted("queries");
                 }
             }
         };

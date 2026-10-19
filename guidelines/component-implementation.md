@@ -80,6 +80,23 @@ module and add a matching `!...tsconfig.json` negation to the root
 `.d.ts` files that ship next to the connector. `node scripts/wtr.js {component}`
 type-checks the connector against the tsconfig, in CI as well.
 
+Declare the connector's `window.Vaadin.Flow` members by merging into the
+shared global `VaadinFlow` interface — never as an object literal type on the
+`Flow` property, which conflicts with other modules' declarations when an
+application type-checks connectors from several modules in one program:
+
+```typescript
+declare global {
+  interface Vaadin {
+    Flow: VaadinFlow;
+  }
+
+  interface VaadinFlow {
+    exampleConnector: { initLazy(element: FlowExample): void };
+  }
+}
+```
+
 Use the `initLazy` + `$connector`-guard pattern, and initialise it in the
 attach handler:
 

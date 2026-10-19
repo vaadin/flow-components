@@ -161,12 +161,24 @@ class NotificationTest {
     }
 
     @Test
+    void setText_getText() {
+        Notification notification = new Notification();
+        Assertions.assertEquals("", notification.getText());
+
+        notification.setText("foo");
+        Assertions.assertEquals("foo", notification.getText());
+        Assertions.assertEquals("foo",
+                notification.getElement().getProperty("text"));
+    }
+
+    @Test
     void addComponent_setText_notificationHasText() {
         Notification notification = new Notification();
 
         notification.add(new Div());
         notification.setText("foo");
 
+        Assertions.assertEquals("foo", notification.getText());
         Assertions.assertEquals("foo",
                 notification.getElement().getProperty("text"));
     }
@@ -178,6 +190,7 @@ class NotificationTest {
         notification.setText("foo");
         notification.add(new Div());
 
+        Assertions.assertEquals("", notification.getText());
         Assertions.assertEquals(null,
                 notification.getElement().getProperty("text"));
     }
@@ -189,6 +202,7 @@ class NotificationTest {
         notification.setText("foo");
         notification.setText(null);
 
+        Assertions.assertEquals("", notification.getText());
         Assertions.assertEquals(null,
                 notification.getElement().getProperty("text"));
     }

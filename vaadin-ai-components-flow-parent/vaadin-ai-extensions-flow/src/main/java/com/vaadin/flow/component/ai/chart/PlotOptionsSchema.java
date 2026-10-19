@@ -16,6 +16,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -29,6 +32,9 @@ import tools.jackson.databind.JsonNode;
  * @author Vaadin Ltd
  */
 final class PlotOptionsSchema implements Serializable {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(PlotOptionsSchema.class);
 
     private static final String SCHEMAS_RESOURCE = "plot-options-schemas.json";
 
@@ -75,6 +81,11 @@ final class PlotOptionsSchema implements Serializable {
         try (var input = PlotOptionsSchema.class
                 .getResourceAsStream(SCHEMAS_RESOURCE)) {
             if (input == null) {
+                LOGGER.error(
+                        "Plot options schema resource '{}' is missing from the "
+                                + "classpath. The get_plot_options_schema tool "
+                                + "will report every chart type as unknown.",
+                        SCHEMAS_RESOURCE);
                 return Map.of();
             }
             JsonNode root = JacksonUtils.getMapper().readTree(input);

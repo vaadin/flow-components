@@ -12,6 +12,7 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.findTool;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.formStateFields;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.json;
+import static com.vaadin.flow.component.ai.form.FormTestSupport.requestEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigIntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
@@ -232,7 +234,8 @@ class FormStateToolTest {
         readOnly.setReadOnly(true);
         var controller = new FormAIController(new Div(editable, readOnly));
 
-        controller.onRequest(); // locks the editable field read-only
+        controller.onRequest(requestEvent()); // locks the editable field
+                                              // read-only
         try {
             var fields = formStateFields(controller);
 
@@ -248,7 +251,7 @@ class FormStateToolTest {
                     "Application-read-only field must stay flagged, got: "
                             + fields.get(1));
         } finally {
-            controller.onResponse(null);
+            controller.onResponse(AITurnEvents.success());
         }
     }
 
@@ -1248,41 +1251,28 @@ class FormStateToolTest {
     }
 
     @Test
-    void getFormStateSchemaIsStaticAndDeclaresOnlyOptionalParameters() {
-        // A schema with no properties makes models disagree on what to send
-        // as arguments, and some LLM APIs reject the request that replays
-        // such a tool call — so the tool declares an optional property it
-        // ignores. The schema stays static so providers that cache prompt
-        // prefixes hit the cache on every subsequent prompt.
+    void getFormStateDeclaresNoParameters() {
+        // A null schema tells the provider the tool takes no parameters; the
+        // provider substitutes a static placeholder schema in the LLM
+        // request, so providers that cache prompt prefixes hit the cache on
+        // every subsequent prompt.
         var controller = new FormAIController(new Div(new TestField()));
 
-        var schema = findTool(controller.getTools(), "get_form_state")
-                .getParametersSchema();
-        var node = json(schema);
-
-        Assertions.assertEquals("object", node.path("type").asString());
-        Assertions.assertTrue(node.path("properties").size() > 0,
-                "Schema must declare at least one property, got: " + node);
-        Assertions.assertEquals(0, node.path("required").size(),
-                "All declared properties must be optional, got: " + node);
-        Assertions.assertEquals(schema,
-                findTool(controller.getTools(), "get_form_state")
-                        .getParametersSchema(),
-                "Schema must be byte-identical across calls");
+        Assertions.assertNull(findTool(controller.getTools(), "get_form_state")
+                .getParametersSchema());
     }
 
     @Test
-    void getFormStateIgnoresDeclaredOptionalArguments() {
+    void getFormStateIgnoresUnexpectedArguments() {
         var controller = new FormAIController(new Div(new TestField()));
         var tool = findTool(controller.getTools(), "get_form_state");
 
         var args = JacksonUtils.createObjectNode();
-        json(tool.getParametersSchema()).path("properties").propertyNames()
-                .forEach(name -> args.put(name, "ignored"));
+        args.put("unexpected", "ignored");
 
         Assertions.assertEquals(tool.execute(JacksonUtils.createObjectNode()),
                 tool.execute(args),
-                "Declared optional properties must not affect the result");
+                "Unexpected arguments must not affect the result");
     }
 
     @Test

@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.provider;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.common.ChatMessage;
@@ -43,7 +44,7 @@ import tools.jackson.databind.JsonNode;
  * </pre>
  *
  * @author Vaadin Ltd.
- * @since 25.1
+ * @since 25.3
  */
 public interface LLMProvider {
 
@@ -162,6 +163,48 @@ public interface LLMProvider {
         default List<ToolSpec> explicitTools() {
             return List.of();
         }
+
+        /**
+         * Gets the session context for this turn: free-form text the
+         * application supplies through
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIOrchestrator.Builder#withMetadata(com.vaadin.flow.function.SerializableSupplier)
+         * AIOrchestrator.Builder.withMetadata}, such as the current date and
+         * time, captured when the user sent the message.
+         * <p>
+         * Send it to the model together with the user message, after the user's
+         * text, so that the system prompt and the tool definitions stay
+         * identical from turn to turn and an LLM provider that caches the
+         * prompt prefix keeps hitting its cache. The built-in providers append
+         * it to the user message text in a delimited block. The default returns
+         * {@code null}.
+         *
+         * @return the session context for this turn, or {@code null} when there
+         *         is none
+         * @since 25.3
+         */
+        default String sessionContext() {
+            return null;
+        }
+
+        /**
+         * Gets the consumer that receives metadata about the model's response,
+         * such as the finish reason and token usage. A provider that observes
+         * such metadata passes it to this consumer as the turn progresses —
+         * each call carries everything observed so far and replaces the value
+         * of any earlier call, so a turn that fails midway has still reported
+         * what was observed before the failure. A provider that observes no
+         * metadata never calls the consumer. The default implementation
+         * discards the metadata.
+         *
+         * @return the metadata consumer, never {@code null}
+         * @since 25.3
+         */
+        default Consumer<ResponseMetadata> metadataSink() {
+            return metadata -> {
+                // Discarded by default; the request creator overrides this to
+                // receive the metadata.
+            };
+        }
     }
 
     /**
@@ -181,31 +224,6 @@ public interface LLMProvider {
      * </p>
      */
     interface ToolSpec {
-
-        /**
-         * JSON Schema for a tool that takes no parameters. Declares a single
-         * optional {@code reason} property that the tool ignores, so the LLM
-         * always has a well-formed, non-empty object to send as arguments.
-         * <p>
-         * Use this instead of {@code null} or a schema with an empty
-         * {@code properties} object: without a declared property, models
-         * disagree on what to send as arguments — some send an empty string —
-         * and some LLM APIs (for example Anthropic models on Amazon Bedrock)
-         * reject the request that replays such a tool call.
-         * </p>
-         *
-         * @since 25.3
-         */
-        String NO_PARAMETERS_SCHEMA = """
-                {
-                  "type": "object",
-                  "properties": {
-                    "reason": {
-                      "type": "string",
-                      "description": "Optional note on why this tool is being called. Ignored by the tool."
-                    }
-                  }
-                }""";
 
         /**
          * Gets the unique name of this tool. The name must contain only
@@ -279,17 +297,15 @@ public interface LLMProvider {
          * that not every LLM provider accepts.
          * </p>
          * <p>
-         * For a tool that takes no parameters, return
-         * {@link #NO_PARAMETERS_SCHEMA} rather than {@code null} or a schema
-         * with an empty {@code properties} object — see the constant's
-         * documentation for why. The built-in providers substitute
-         * {@link #NO_PARAMETERS_SCHEMA} for a {@code null} or blank return
-         * value, but an empty {@code properties} object is passed through
-         * as-is.
+         * For a tool that takes no parameters, return {@code null}. The
+         * built-in providers then declare a placeholder schema to the LLM —
+         * some LLM APIs misbehave when a tool declares no properties at all —
+         * and always invoke {@link #execute(JsonNode)} with an empty arguments
+         * object, whatever the model sends.
          * </p>
          *
-         * @return the JSON Schema string, or {@link #NO_PARAMETERS_SCHEMA} if
-         *         the tool takes no parameters
+         * @return the JSON Schema string, or {@code null} if the tool takes no
+         *         parameters
          */
         String getParametersSchema();
 
@@ -307,7 +323,16 @@ public interface LLMProvider {
          * or with background execution enabled — where Vaadin thread locals
          * such as {@code UI.getCurrent()} are not bound. Wrap UI component
          * access in {@code ui.access()}, or work on state captured in
-         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest()}.
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest}.
+         * </p>
+         * <p>
+         * An unbound thread local returns {@code null} rather than throwing, so
+         * a tool that reads one without checking does not fail — it proceeds
+         * with a missing value and can return a confidently wrong answer the
+         * LLM has no way to recognize as wrong. Capture what the tool needs in
+         * {@link com.vaadin.flow.component.ai.orchestrator.AIController#onRequest},
+         * which always runs on the UI thread, rather than reading thread locals
+         * here.
          * </p>
          *
          * @param arguments

@@ -157,4 +157,17 @@ public class GenericIT extends AbstractSpreadsheetIT {
         b2.setValue("example 2");
         Assert.assertEquals("example 2", getCellValue("B2"));
     }
+
+    @Test
+    public void cellEditorOpen_getCellAt_returnsCellInsteadOfEditor() {
+        final var b2 = getSpreadsheet().getCellAt("B2");
+        b2.setValue("123");
+
+        selectCell("B2");
+        // The inline editor gets the same col/row/cell class names as the
+        // cell it edits, so it must not be mistaken for the cell itself
+        getSpreadsheet().sendKeys(Keys.F2);
+
+        Assert.assertEquals("123", getSpreadsheet().getCellAt("B2").getValue());
+    }
 }

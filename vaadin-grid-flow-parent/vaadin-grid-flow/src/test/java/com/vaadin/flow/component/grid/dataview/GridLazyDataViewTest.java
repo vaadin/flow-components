@@ -25,7 +25,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.tests.MockUIExtension;
 
 class GridLazyDataViewTest {
@@ -74,5 +76,44 @@ class GridLazyDataViewTest {
 
         Assertions.assertEquals(2, itemCount.get(),
                 "Invalid item count reported");
+    }
+
+    @Test
+    void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
+        Item first = new Item(1L, "first");
+        Item second = new Item(2L, "second");
+        Grid<Item> itemGrid = new Grid<>();
+        GridLazyDataView<Item> itemDataView = itemGrid
+                .setItems(query -> Stream.of(first, second));
+        DataKeyMapper<Item> keyMapper = itemGrid.getDataCommunicator()
+                .getKeyMapper();
+        keyMapper.key(first);
+        keyMapper.key(second);
+
+        Assertions.assertFalse(keyMapper.has(new Item(1L, "copy")));
+        itemDataView.setIdentifierProvider(Item::id);
+        Assertions.assertTrue(keyMapper.has(new Item(1L, "copy")));
+        itemDataView.setIdentifierProvider(IdentifierProvider.identity());
+        Assertions.assertFalse(keyMapper.has(new Item(1L, "copy")));
+    }
+
+    @Test
+    void setIdentifierProvider_refreshItemWithSameId_keyMapperUpdated() {
+        Item first = new Item(1L, "first");
+        Grid<Item> itemGrid = new Grid<>();
+        GridLazyDataView<Item> itemDataView = itemGrid
+                .setItems(query -> Stream.of(first));
+        itemDataView.setIdentifierProvider(Item::id);
+        DataKeyMapper<Item> keyMapper = itemGrid.getDataCommunicator()
+                .getKeyMapper();
+        String key = keyMapper.key(first);
+
+        Item copy = new Item(1L, "updated");
+        itemDataView.refreshItem(copy);
+
+        Assertions.assertSame(copy, keyMapper.get(key));
+    }
+
+    private record Item(long id, String value) {
     }
 }

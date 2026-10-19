@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.internal.HtmlUtils;
 
 /**
@@ -36,8 +37,10 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         implements ColumnBase<T> {
 
     protected final Grid<?> grid;
-    private boolean headerRenderingScheduled;
-    private boolean footerRenderingScheduled;
+    private final BeforeClientResponseAction headerRendering = new BeforeClientResponseAction(
+            this, this::renderHeader);
+    private final BeforeClientResponseAction footerRendering = new BeforeClientResponseAction(
+            this, this::renderFooter);
 
     private boolean sortingIndicators;
 
@@ -57,8 +60,8 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
 
         // Needed to update node ids when refreshing with @PreserveOnRefresh.
         addAttachListener(e -> {
-            scheduleHeaderRendering();
-            scheduleFooterRendering();
+            headerRendering.schedule();
+            footerRendering.schedule();
         });
     }
 
@@ -69,21 +72,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      */
     public Grid<?> getGrid() {
         return grid;
-    }
-
-    private void scheduleHeaderRendering() {
-        if (headerRenderingScheduled) {
-            return;
-        }
-        headerRenderingScheduled = true;
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    if (!headerRenderingScheduled) {
-                        return;
-                    }
-                    renderHeader();
-                    headerRenderingScheduled = false;
-                }));
     }
 
     private void renderHeader() {
@@ -106,21 +94,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         }
         grid.getElement().executeJs(jsExpression, getElement(), headerContent,
                 showSorter, sorterPath);
-    }
-
-    private void scheduleFooterRendering() {
-        if (footerRenderingScheduled) {
-            return;
-        }
-        footerRenderingScheduled = true;
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    if (!footerRenderingScheduled) {
-                        return;
-                    }
-                    renderFooter();
-                    footerRenderingScheduled = false;
-                }));
     }
 
     private void renderFooter() {
@@ -198,7 +171,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     void setHeaderContent(String text, Component component) {
         headerText = text;
         headerComponent = replaceChildComponent(headerComponent, component);
-        scheduleHeaderRendering();
+        headerRendering.schedule();
     }
 
     /**
@@ -214,7 +187,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     void setFooterContent(String text, Component component) {
         footerText = text;
         footerComponent = replaceChildComponent(footerComponent, component);
-        scheduleFooterRendering();
+        footerRendering.schedule();
     }
 
     /**
@@ -300,7 +273,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
             return;
         }
         this.sortingIndicators = sortingIndicators;
-        scheduleHeaderRendering();
+        headerRendering.schedule();
     }
 
     protected boolean hasSortingIndicators() {

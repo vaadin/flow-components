@@ -65,17 +65,11 @@ class DatabaseProviderAIToolsTest {
     }
 
     @Test
-    void getDatabaseSchema_declaresOptionalOnlyParametersSchema() {
-        // A tool without a declared property makes models disagree on what
-        // to send as arguments, and some LLM APIs reject the request that
-        // replays such a tool call.
+    void getDatabaseSchema_declaresNoParameters() {
+        // A null schema tells the provider the tool takes no parameters; the
+        // provider substitutes its placeholder schema in the LLM request.
         var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
-        var schema = JacksonUtils.readTree(tool.getParametersSchema());
-        Assertions.assertEquals("object", schema.path("type").asString());
-        Assertions.assertTrue(schema.path("properties").size() > 0,
-                "Schema must declare at least one property, got: " + schema);
-        Assertions.assertEquals(0, schema.path("required").size(),
-                "All declared properties must be optional, got: " + schema);
+        Assertions.assertNull(tool.getParametersSchema());
     }
 
     @Test
@@ -86,11 +80,10 @@ class DatabaseProviderAIToolsTest {
     }
 
     @Test
-    void getDatabaseSchema_executeIgnoresDeclaredArguments() {
+    void getDatabaseSchema_executeIgnoresUnexpectedArguments() {
         var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         var args = JacksonUtils.createObjectNode();
-        JacksonUtils.readTree(tool.getParametersSchema()).path("properties")
-                .propertyNames().forEach(name -> args.put(name, "ignored"));
+        args.put("unexpected", "ignored");
         Assertions.assertEquals(SCHEMA, tool.execute(args));
     }
 

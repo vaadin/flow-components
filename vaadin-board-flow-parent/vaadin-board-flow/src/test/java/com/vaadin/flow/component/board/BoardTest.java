@@ -104,7 +104,7 @@ class BoardTest {
         ui.add(board);
 
         board.redraw();
-        FunctionCallerTest.assertPendingInvocations(ui, "return $0.redraw()");
+        FunctionCallerTest.assertPendingFunctionCall(ui, "redraw");
     }
 
     static void assertChildren(Component parent,

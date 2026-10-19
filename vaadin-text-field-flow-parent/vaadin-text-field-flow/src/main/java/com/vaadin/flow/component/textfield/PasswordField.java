@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTextSelection;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
@@ -85,10 +86,11 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @since 1.0
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/password-field", version = "25.3.0-alpha14")
+@NpmPackage(value = "@vaadin/password-field", version = "25.4.0-alpha3")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
-        implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
+        implements HasAllowedCharPattern, HasTextSelection,
+        HasThemeVariant<TextFieldVariant> {
 
     private PasswordFieldI18n i18n;
 
@@ -263,7 +265,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      * However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
-     * 
+     *
      * @since 24.5
      */
     @Override
@@ -443,7 +445,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
-     * 
+     *
      * @since 2.0.8
      */
     protected void validate() {
@@ -483,7 +485,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
     /**
      * The internationalization properties for {@link PasswordField}.
-     * 
+     *
      * @since 24.5
      */
     public static class PasswordFieldI18n implements Serializable {

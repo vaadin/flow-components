@@ -15,10 +15,14 @@
  */
 package com.vaadin.flow.component.markdown.tests;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.markdown.Markdown;
@@ -46,6 +50,19 @@ class MarkdownSignalTest extends AbstractSignalsTest {
         if (markdown != null && markdown.isAttached()) {
             markdown.removeFromParent();
         }
+    }
+
+    @TestFactory
+    Stream<DynamicTest> bindContent() {
+        return generateBindingTests(Markdown::new, Markdown::bindContent,
+                Markdown::getContent, Markdown::setContent, "**foo**",
+                "**bar**");
+    }
+
+    @TestFactory
+    Stream<DynamicTest> bindLineBreaks() {
+        return generateBindingTests(Markdown::new, Markdown::bindLineBreaks,
+                Markdown::isLineBreaks, Markdown::setLineBreaks, true, false);
     }
 
     @Test
@@ -82,16 +99,6 @@ class MarkdownSignalTest extends AbstractSignalsTest {
         Assertions.assertEquals("**foo**", markdown.getContent());
         contentSignal.set("**bar**");
         Assertions.assertEquals("**bar**", markdown.getContent());
-    }
-
-    @Test
-    void bindContent_setContent_throwsBindingActiveException() {
-        markdown = new Markdown();
-        markdown.bindContent(contentSignal);
-        ui.add(markdown);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> markdown.setContent("imperative"));
     }
 
     @Test
@@ -157,18 +164,6 @@ class MarkdownSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindLineBreaks_signalDrivesLineBreaks() {
-        markdown = new Markdown();
-        markdown.bindLineBreaks(lineBreaksSignal);
-        ui.add(markdown);
-
-        Assertions.assertTrue(markdown.isLineBreaks());
-
-        lineBreaksSignal.set(false);
-        Assertions.assertFalse(markdown.isLineBreaks());
-    }
-
-    @Test
     void bindLineBreaks_nullSignalValue_lineBreaksDisabled() {
         markdown = new Markdown();
         markdown.bindLineBreaks(lineBreaksSignal);
@@ -176,16 +171,6 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
         lineBreaksSignal.set(null);
         Assertions.assertFalse(markdown.isLineBreaks());
-    }
-
-    @Test
-    void bindLineBreaks_setLineBreaks_throwsBindingActiveException() {
-        markdown = new Markdown();
-        markdown.bindLineBreaks(lineBreaksSignal);
-        ui.add(markdown);
-
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> markdown.setLineBreaks(false));
     }
 
     private void assertUpdateMarkdownCall(Component component, String content,

@@ -1,5 +1,6 @@
 import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { timeOut } from '@vaadin/component-base/src/async.js';
+import { setOrRemoveAttribute } from '@vaadin/component-base/src/dom-utils.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.ts';
 import type { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
@@ -42,6 +43,8 @@ export class GridConnector {
 
   #preventRowUpdatesActive = 0;
 
+  #pendingScrollToItem: { itemKey: string; indexes: number[] } | null = null;
+
   constructor(grid: FlowGrid) {
     this.#grid = grid;
     this.#dataProviderController = grid._dataProviderController;
@@ -53,9 +56,8 @@ export class GridConnector {
     this.#addGridEventListeners();
   }
 
-  hasRootRequestQueue(): boolean {
-    const { pendingRequests } = this.#dataProviderController.rootCache;
-    return Object.keys(pendingRequests).length > 0 || !!this.#requestDebouncer?.isActive();
+  hasPendingRequests(): boolean {
+    return this.#dataProviderController.isLoading() || !!this.#requestDebouncer?.isActive();
   }
 
   doSelection(items: (Item | null)[], userOriginated?: boolean): void {
@@ -319,7 +321,7 @@ export class GridConnector {
     this.#selectionMode = mode;
     this.#selectedKeys = {};
     this.#grid.selectedItems = [];
-    this.#grid.__a11yUpdateMutiSelectable();
+    this.#updateAriaMultiSelectable();
   }
 
   setHeaderRenderer(
@@ -366,18 +368,25 @@ export class GridConnector {
     column.footerRenderer = (root) => renderContent(root, content);
   }
 
-  scrollToItem(itemKey: string, ...args: number[]): void {
+  /**
+   * Scrolls to the item unless its row is already fully visible. The check uses
+   * the item key, because the web component can only map `indexes` to a row
+   * after loading the data around it.
+   */
+  scrollToItem(itemKey: string, ...indexes: number[]): void {
     const grid = this.#grid;
-
-    const targetRow = grid._getRenderedRows().find((row) => {
-      const { item } = grid.__getRowModel(row);
-      return grid.getItemId(item) === itemKey;
-    });
-    if (targetRow && this.#isRowFullyInViewport(targetRow)) {
+    this.#pendingScrollToItem = null;
+    if (this.#isItemFullyInViewport(itemKey)) {
       return;
     }
 
-    grid.scrollToIndex(...args);
+    grid.scrollToIndex(...indexes);
+
+    // Before the first render, the grid defers the scroll and has no rows to
+    // check yet. Remember the item to check it when the grid replays the scroll.
+    this.#pendingScrollToItem = grid.__pendingScrollToIndexes
+      ? { itemKey, indexes: grid.__pendingScrollToIndexes }
+      : null;
   }
 
   /**
@@ -386,6 +395,11 @@ export class GridConnector {
    */
   #patchGrid(): void {
     const grid = this.#grid;
+
+    grid.ready = () => {
+      Object.getPrototypeOf(grid).ready.call(grid);
+      this.#updateAriaMultiSelectable();
+    };
 
     // The grid requests a page only when a row from that page gets rendered,
     // which is too late to keep up while scrolling and leads to blank rows.
@@ -398,6 +412,19 @@ export class GridConnector {
         const fetchRange = this.getFetchRange();
         this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[0]);
         this.#dataProviderController.ensureFlatIndexLoaded(fetchRange[1]);
+      }
+    };
+
+    // Check visibility before the grid replays a deferred scrollToItem. A newer
+    // scroll call replaces the pending indexes, which the grid replays as usual.
+    // The grid stores a copy of the indexes, so compare by reference.
+    grid.__scrollToPendingIndexes = () => {
+      const pending = this.#pendingScrollToItem;
+      if (pending && pending.indexes === grid.__pendingScrollToIndexes) {
+        delete grid.__pendingScrollToIndexes;
+        this.scrollToItem(pending.itemKey, ...pending.indexes);
+      } else {
+        Object.getPrototypeOf(grid).__scrollToPendingIndexes.call(grid);
       }
     };
 
@@ -444,29 +471,6 @@ export class GridConnector {
       Object.getPrototypeOf(grid).__a11yUpdateRowSelected.call(grid, row, selected);
     };
 
-    /*
-     * Manage aria-multiselectable attribute depending on the selection mode.
-     * see more: https://github.com/vaadin/web-components/issues/1536
-     * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
-     */
-    grid.__a11yUpdateMutiSelectable = () => {
-      if (!grid.$) {
-        return;
-      }
-
-      switch (this.#selectionMode) {
-        case 'SINGLE':
-          grid.$.table.setAttribute('aria-multiselectable', 'false');
-          break;
-        case 'MULTI':
-          grid.$.table.setAttribute('aria-multiselectable', 'true');
-          break;
-        default:
-          grid.$.table.removeAttribute('aria-multiselectable');
-      }
-    };
-    grid._createPropertyObserver('isAttached', '__a11yUpdateMutiSelectable');
-
     // This method is overridden to prevent the grid web component from
     // automatically excluding columns from sorting when they get hidden.
     // In Flow, it's the developer's responsibility to remove the column
@@ -508,7 +512,8 @@ export class GridConnector {
       const eventContext = grid.getEventContext(sourceEvent);
       const key = eventContext.item?.key || '';
       const columnId = eventContext.column?.id || '';
-      return { key, columnId };
+      const internalColumnId = eventContext.column?._flowId ?? '';
+      return { key, columnId, internalColumnId };
     };
 
     grid.preventContextMenu = (event) => {
@@ -555,7 +560,7 @@ export class GridConnector {
     grid.addEventListener('dblclick', (e) => this.#fireClickEvent(e, 'item-double-click'));
 
     grid.addEventListener('column-resize', (e) => {
-      const cols = grid._getColumnsInOrder().filter((col) => !col.hidden);
+      const cols = grid._columnTree.at(-1)!.filter((col) => !col.hidden);
 
       cols.forEach((col) => {
         col.dispatchEvent(new CustomEvent('column-drag-resize'));
@@ -606,7 +611,7 @@ export class GridConnector {
     grid.addEventListener('grid-dragstart', (e) => {
       const { draggedItems, setDragData, setDraggedItemsCount } = e.detail;
 
-      if (grid._isSelected(draggedItems[0])) {
+      if (this.#selectedKeys[draggedItems[0].key]) {
         // Dragging selected (possibly multiple) items
         if (grid.__selectionDragData) {
           Object.entries(grid.__selectionDragData).forEach(([type, data]) => setDragData(type, data));
@@ -703,6 +708,20 @@ export class GridConnector {
     }
   }
 
+  /*
+   * Manage aria-multiselectable attribute depending on the selection mode.
+   * see more: https://github.com/vaadin/web-components/issues/1536
+   * or: https://www.w3.org/TR/wai-aria-1.1/#aria-multiselectable
+   */
+  #updateAriaMultiSelectable(): void {
+    if (!this.#grid.$) {
+      return;
+    }
+
+    const multiSelectable = { SINGLE: 'false', MULTI: 'true', NONE: null }[this.#selectionMode];
+    setOrRemoveAttribute(this.#grid.$.table, 'aria-multiselectable', multiSelectable);
+  }
+
   #preventRowUpdates(callback: () => void): void {
     try {
       this.#preventRowUpdatesActive++;
@@ -712,8 +731,12 @@ export class GridConnector {
     }
   }
 
-  #isRowFullyInViewport(row: HTMLElement): boolean {
+  #isItemFullyInViewport(itemKey: string): boolean {
     const grid = this.#grid;
+    const row = grid._getRenderedRows().find((row) => row._item && grid.getItemId(row._item) === itemKey);
+    if (!row) {
+      return false;
+    }
     const rowRect = row.getBoundingClientRect();
     const tableRect = grid.$.table.getBoundingClientRect();
     const headerRect = grid.$.header.getBoundingClientRect();

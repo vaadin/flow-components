@@ -10,10 +10,12 @@ package com.vaadin.flow.component.ai.form;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.ai.orchestrator.RequestListener;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -51,6 +53,17 @@ final class FormTestSupport {
 
     static JsonNode json(String text) {
         return JacksonUtils.readTree(text);
+    }
+
+    /**
+     * Builds the request event a test passes to
+     * {@link FormAIController#onRequest(RequestListener.RequestEvent)} to start
+     * a turn. The form controller does not read the event, so the content is a
+     * placeholder.
+     */
+    static RequestListener.RequestEvent requestEvent() {
+        return new RequestListener.RequestEvent("prompt",
+                UUID.randomUUID().toString(), List.of());
     }
 
     /**
