@@ -8,7 +8,7 @@
  * license.
  */
 
-import type { CellData } from '../types/wire.js';
+import { SheetCells } from './SheetCells.js';
 
 /**
  * What the client knows of the sheet the server shows, from what the two
@@ -22,8 +22,10 @@ export class SheetData {
    * committed edit changed until the server answers. The server only sends
    * cells with something in them: a cell empty on a sheet shown anew is never
    * mentioned, and a value kept from the sheet before would show through.
+   * Each row's changes are counted, so a row nothing changed in is not drawn
+   * again.
    */
-  readonly cells = new Map<string, CellData>();
+  readonly cells = new SheetCells();
 
   /**
    * The cell the server holds as selected, as far as this client knows: the

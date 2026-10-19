@@ -24,6 +24,7 @@ import {
   type CellGridRenderState,
   emptyCellGridRenderState
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/types.js';
+import { SheetCells } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SheetCells.js';
 import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
@@ -255,6 +256,155 @@ describe('QuadrantCells', () => {
       const nodes = Array.from(inDrawn(container, 1, 1).childNodes, (node) => node.nodeType);
       expect(nodes).to.eql([Node.COMMENT_NODE, Node.TEXT_NODE]);
     });
+  });
+
+  describe('drawing a row again', () => {
+    let container: HTMLElement;
+    /** The rows whose cells were looked up in the last drawing: the rows drawn. */
+    let looked: Set<number>;
+
+    /** Notes the row of each cell looked up in the map. */
+    function counted<M extends Map<string, CellData>>(map: M): M {
+      const get = map.get.bind(map);
+      map.get = (key: string) => {
+        looked.add(Number(key.split('row')[1]));
+        return get(key);
+      };
+      return map;
+    }
+
+    /** Cells in rows 1 to 3, the second column holding values, in a map that counts its changes. */
+    function sheetCells(): SheetCells {
+      const cells = counted(new SheetCells());
+      for (const [key, data] of [cell(2, 1), cell(2, 2), cell(2, 3)]) {
+        cells.set(key, data);
+      }
+      return cells;
+    }
+
+    /** Draws a state into the one container, and gives the rows drawn, in order. */
+    function draw(state: CellGridRenderState): number[] {
+      looked = new Set();
+      render(renderQuadrant(main(state)), container);
+      return [...looked].sort((a, b) => a - b);
+    }
+
+    const rowElement = (row: number): Element => inDrawn(container, 2, row).parentElement!;
+
+    let cells: SheetCells;
+    let base: CellGridRenderState;
+
+    beforeEach(() => {
+      container = document.createElement('div');
+      cells = sheetCells();
+      base = sheet({
+        cellData: cells,
+        selection: { activeCell: { col: 1, row: 1 }, activeRange: { c1: 1, c2: 1, r1: 1, r2: 1 }, auxRanges: [] }
+      });
+      expect(draw(base), 'the first drawing').to.eql([1, 2, 3]);
+    });
+
+    it('draws no row again when nothing it shows changed, in a new state as in the same one', () => {
+      const rows = [1, 2, 3].map(rowElement);
+
+      expect(draw({ ...base })).to.eql([]);
+      expect(draw(base)).to.eql([]);
+      expect([1, 2, 3].map(rowElement)).to.eql(rows);
+    });
+
+    it('draws again only the row a cell was set in, and every row for another map', () => {
+      cells.set('col4 row2', { ...cell(4, 2)[1], value: 'new' });
+
+      expect(draw({ ...base })).to.eql([2]);
+      expect(inDrawn(container, 4, 2).textContent).to.equal('new');
+      expect(draw({ ...base, cellData: sheetCells() })).to.eql([1, 2, 3]);
+    });
+
+    it('draws every row again, every time, from a map that does not count its changes', () => {
+      const plain = counted(new Map([cell(2, 1)]));
+
+      expect(draw({ ...base, cellData: plain })).to.eql([1, 2, 3]);
+      expect(draw({ ...base, cellData: plain })).to.eql([1, 2, 3]);
+    });
+
+    it('draws only the row that came into view as the sheet scrolls, keeping the others', () => {
+      const kept = [2, 3].map(rowElement);
+      cells.set('col2 row4', cell(2, 4)[1]);
+
+      const scrolled = sheet({
+        ...base,
+        viewport: { ...base.viewport, firstRowIndex: 2, lastRowIndex: 4 },
+        rowY: [20, 40, 60],
+        rowHeights: [20, 20, 20]
+      });
+
+      expect(draw(scrolled)).to.eql([4]);
+      expect([2, 3].map(rowElement)).to.eql(kept);
+      expect(container.querySelectorAll('.cell-row')).to.have.length(3);
+      expect(inDrawn(container, 2, 1)).to.equal(null);
+    });
+
+    it('draws again a row made taller, and the row it pushed down', () => {
+      expect(draw({ ...base, rowY: [0, 20, 50], rowHeights: [20, 30, 20] })).to.eql([2, 3]);
+      expect(inDrawn(container, 2, 3).style.top).to.equal('50px');
+    });
+
+    it('draws every row again when a column is made wider, or the columns move over', () => {
+      expect(draw({ ...base, colX: [0, 50, 110, 110], colWidths: [50, 60, 0, 50] })).to.eql([1, 2, 3]);
+      expect(inDrawn(container, 2, 1).style.width).to.equal('60px');
+      // As when a frozen column before them is made wider.
+      expect(draw({ ...base, colX: [10, 60, 120, 120], colWidths: [50, 60, 0, 50] })).to.eql([1, 2, 3]);
+      expect(inDrawn(container, 2, 1).style.left).to.equal('60px');
+      // The last column, which moves none after it.
+      expect(draw({ ...base, colX: [10, 60, 120, 120], colWidths: [50, 60, 0, 70] })).to.eql([1, 2, 3]);
+      expect(inDrawn(container, 4, 1).style.width).to.equal('70px');
+    });
+
+    it('draws again only the rows the selection left, came to, or changed in', () => {
+      type Range = CellGridRenderState['selection']['activeRange'];
+      const span = (c1: number, r1: number, c2: number, r2: number): Range => ({ c1, r1, c2, r2 });
+      /** Selects the given ranges, the first with the active cell, and gives the rows drawn. */
+      const select = (col: number, row: number, activeRange: Range, ...auxRanges: Range[]): number[] => {
+        base = { ...base, selection: { activeCell: { col, row }, activeRange, auxRanges } };
+        return draw(base);
+      };
+
+      expect(select(2, 2, span(2, 2, 2, 2))).to.eql([1, 2]);
+      expect(select(2, 2, span(2, 2, 2, 3))).to.eql([3]);
+      expect(inDrawn(container, 2, 3).getAttribute('part')).to.equal('cell cell-range');
+      expect(select(2, 2, span(2, 2, 4, 3))).to.eql([2, 3]);
+      expect(select(2, 2, span(2, 2, 4, 3), span(1, 1, 1, 1)), 'another range, and the active cell ringed').to.eql([1, 2]);
+      expect(inDrawn(container, 2, 2).className).to.contain(' selected-cell-highlight');
+      expect(select(3, 2, span(2, 2, 4, 3), span(1, 1, 1, 1)), 'the active cell moved along its row').to.eql([2]);
+      expect(inDrawn(container, 2, 2).getAttribute('part')).to.equal('cell cell-range');
+    });
+
+    it('draws every row again when the merges change', () => {
+      expect(draw({ ...base, mergedRegions: [region(2, 3, 3, 3)] })).to.eql([1, 2, 3]);
+      expect(draw({ ...base, mergedRegions: [region(2, 3, 3, 3)] }), 'other merges, alike').to.eql([1, 2, 3]);
+    });
+
+    it('draws again only the row a slot came to or changed in', () => {
+      expect(draw({ ...base, cellSlots: { 'col2 row2': 'custom-component-1' } })).to.eql([2]);
+      expect(draw({ ...base, cellSlots: { 'col2 row2': 'custom-component-1' } }), 'the same, in a new record').to.eql([]);
+      expect(draw({ ...base, cellSlots: { 'col2 row2': 'custom-component-2' } })).to.eql([2]);
+      expect(inDrawn(container, 2, 2).querySelector('slot')!.name).to.equal('custom-component-2');
+    });
+
+    for (const listed of [
+      'tooNarrowCells',
+      'fittingSpills',
+      'hyperlinkCells',
+      'commentCells',
+      'invalidFormulaCells'
+    ] as const) {
+      it(`draws again only the row a cell was added to or taken out of the ${listed} in`, () => {
+        expect(draw({ ...base, [listed]: new Set(['col2 row3']) })).to.eql([3]);
+        expect(draw({ ...base, [listed]: new Set(['col2 row3']) }), 'the same, in a new set').to.eql([]);
+        expect(draw({ ...base, [listed]: new Set(['col2 row3', 'col4 row1']) })).to.eql([1]);
+        expect(draw({ ...base, [listed]: new Set() })).to.eql([1, 3]);
+      });
+    }
   });
 
   describe('the merged cells', () => {

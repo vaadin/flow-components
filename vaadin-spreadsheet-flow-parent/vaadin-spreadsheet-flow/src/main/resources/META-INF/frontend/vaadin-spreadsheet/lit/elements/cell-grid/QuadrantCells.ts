@@ -9,9 +9,11 @@
  */
 
 import { html, type TemplateResult } from 'lit';
-import { toKey } from '../../algorithms/CellKeys.js';
+import { guard } from 'lit/directives/guard.js';
+import { parseColRow, toKey } from '../../algorithms/CellKeys.js';
 import { keyedList } from '../../dom/KeyedList.js';
 import { isCellEditorSlot } from '../../dom/VirtualChildren.js';
+import { SheetCells } from '../../state/SheetCells.js';
 import { isActiveCell, isCellSelected, isCoherentSelection, type SelectionState } from '../../state/SelectionState.js';
 import type { CellData } from '../../types/wire.js';
 import type { CellGridRenderState } from '../types.js';
@@ -132,6 +134,17 @@ function textColorDeclaration(data: CellData | undefined): string {
   return color ? `color:#${color};` : '';
 }
 
+/** A cell of a row, by its key. */
+interface DrawnCell {
+  key: string;
+  template: TemplateResult;
+}
+
+/** What a sheet without slots gives each cell. */
+const NO_SLOTS: Readonly<Record<string, string>> = {};
+/** What a sheet without links, comments or bad formulas lists. */
+const NO_KEYS: ReadonlySet<string> = new Set();
+
 /**
  * Render the cells of a single quadrant. Each cell carries a
  * {@code quadrant-<name>} class so CSS can apply z-index stacking
@@ -139,108 +152,20 @@ function textColorDeclaration(data: CellData | undefined): string {
  * caller's {@code getColLeft/getRowTop/getColWidth/getRowHeight}
  * closures — different quadrants use different position arrays
  * (frozen arrays vs main arrays).
+ *
+ * A row is drawn again only when something it shows changed - see
+ * {@link rowInputs} - and kept as it is otherwise: as the sheet scrolls,
+ * only the rows that come into view are drawn. Drawing every row again
+ * each step, to find nothing changed in most, took most of a frame.
  */
 export function renderQuadrant(opts: QuadrantRenderOpts): unknown {
-  const { state, quadrantName, colStart, colEnd, rowStart, rowEnd, getColLeft, getColWidth, getRowTop, getRowHeight } =
-    opts;
-  const { cellData, selection } = state;
-  // Defensive defaults, once for every cell: some test fixtures do not
-  // declare the slots or the link cells.
-  const cellSlots = state.cellSlots ?? {};
-  const hyperlinkCells = state.hyperlinkCells ?? new Set<string>();
-
-  const covered = coveredByMergeCoords(state.mergedRegions, colStart, colEnd, rowStart, rowEnd);
-  const rows: Array<{ row: number; cells: Array<{ key: string; template: TemplateResult }> }> = [];
+  const { state, colStart, colEnd, rowStart, rowEnd } = opts;
+  const columns = columnsOf(opts);
+  // Worked out for the first row drawn, and only then.
+  let covered: Set<string> | null = null;
+  const rows: number[] = [];
   for (let row = rowStart; row <= rowEnd; row++) {
-    const cells: Array<{ key: string; template: TemplateResult }> = [];
-    const top = getRowTop(row);
-    const height = getRowHeight(row);
-    for (let col = colStart; col <= colEnd; col++) {
-      const left = getColLeft(col);
-      const width = getColWidth(col);
-      // A cell in a hidden row or column is still rendered, collapsed by
-      // `display:none` — see collapsedDeclaration. Leaving it out instead
-      // makes it unfindable, and "is this cell hidden?" is a question
-      // both the tests and an application's own scripting ask.
-      const key = toKey(col, row);
-      const data = cellData.get(key);
-      // A cell holding a server-side component or a custom editor shows
-      // that instead of its own text — it is what the cell is for.
-      const underMerge = covered.has(key);
-      const slotName = underMerge ? undefined : cellSlots[key];
-      // A number too wide for its column shows as hashes rather than a
-      // clipped prefix: "$246 913" where the value is 246 trillion reads as
-      // a number, and a wrong one. The server sets needsMeasure when its
-      // fit check says the value does not fit.
-      const tooNarrow = data?.needsMeasure === true && (state.tooNarrowCells?.has(key) ?? false);
-      const cellText = tooNarrow ? '###' : data?.value ?? '';
-      const rawText = slotName === undefined ? cellText : html`<slot name=${slotName}></slot>`;
-      // Text too wide for its column runs into the empty cells beside it,
-      // and what still does not fit ends in an ellipsis. The server settles
-      // how far, because it is the side that knows what the neighbours hold;
-      // a cell showing a component or sitting under a merge keeps to itself.
-      const fitsAfterAll = state.fittingSpills?.has(key) ?? false;
-      const spill = slotName === undefined && !underMerge && !fitsAfterAll ? data?.overflowWidth ?? 0 : 0;
-      // A cell the server sent nothing for still wears the workbook's
-      // default style. Without it the cell falls through to the host's own
-      // font and colour - Helvetica 14px in grey - instead of the sheet's
-      // default, Calibri 11pt in black, which every cell has before anything
-      // else applies.
-      const cellStyleClass = data?.cellStyle ?? 'cs0';
-      // A right-aligned value too wide for its cell - a date, a number in
-      // scientific notation - overflows it as any value does: it starts at the cell's left edge and runs on to the right, over
-      // its own padding and border too, until a neighbour holding a value
-      // cuts it off, without an ellipsis.
-      const runsRight = spill > 0 && cellStyleClass.split(/\s+/).includes('r');
-      const overflowing = runsRight || spill > width;
-      // With nowhere to go the text is still held at the column's width from
-      // the padding on: it reaches past the cell's
-      // right edge, under the neighbour, which is drawn later on a ground of
-      // its own - see .cut-short.
-      const cutShort = spill > 0 && !overflowing;
-      const text =
-        spill === 0
-          ? rawText
-          : runsRight
-          ? html`<div class="cell-spill runs-right" style="width:${spill - 2}px">${rawText}</div>`
-          : html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>`;
-      const selected = selectionClassFor(selection, col, row);
-      // Hyperlink cells get a `link-cell` class: a pointer cursor,
-      // the workbook styling the link itself. The click handler in
-      // the connector dispatches `linkCellClicked` based
-      // on the same hyperlinks map.
-      const linkClass = hyperlinkCells.has(key) ? ' link-cell' : '';
-      const classList =
-        `cell col${col} row${row} quadrant-${quadrantName}` +
-        (cellStyleClass ? ` ${cellStyleClass}` : '') +
-        selected.classes +
-        linkClass +
-        (overflowing ? ' overflowing' : '') +
-        (cutShort ? ' cut-short' : '') +
-        (slotName !== undefined && isCellEditorSlot(slotName) ? ' custom-editor-cell' : '');
-      const style =
-        `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
-        collapsedDeclaration(width, height) +
-        textColorDeclaration(data);
-      // A cell under a merge leaves its markers to the merged cell.
-      const markers = underMerge ? NO_MARKERS : cellMarkers(state, key, col, row);
-      // data-col + data-row drive the click-delegation handler
-      // in firstUpdated() — single source of truth
-      // for the cell's coordinate when the event bubbles.
-      // On one line, and the marker only where there is one: whitespace
-      // between the tags is a text node of its own and every binding a
-      // marker, and with a thousand cells drawn they doubled the nodes the
-      // sheet makes and restyles as it scrolls.
-      const content =
-        markers.invalid === '' && markers.comment === '' ? text : html`${markers.invalid}${markers.comment}${text}`;
-      cells.push({
-        key,
-        template: html`<div class=${classList} part=${selected.part} style=${style} data-col=${col} data-row=${row}
-          >${content}</div
-        >`
-      });
-    }
-    rows.push({ row, cells });
+    rows.push(row);
   }
   // Keyed by row, and each row's cells by cell, so a cell keeps its element
   // as the sheet scrolls: cells are placed in sheet coordinates, and one
@@ -251,16 +176,197 @@ export function renderQuadrant(opts: QuadrantRenderOpts): unknown {
   // its class, place and text - and restyled on every step.
   return keyedList(
     rows,
-    (group) => group.row,
-    (group) =>
-      html`<div class="cell-row"
-        >${keyedList(
-          group.cells,
-          (cell) => cell.key,
-          (cell) => cell.template
-        )}</div
-      >`
+    (row) => row,
+    (row) =>
+      guard(rowInputs(opts, row, columns), () => {
+        covered ??= coveredByMergeCoords(state.mergedRegions, colStart, colEnd, rowStart, rowEnd);
+        return html`<div class="cell-row"
+          >${keyedList(
+            rowCells(opts, row, covered),
+            (cell) => cell.key,
+            (cell) => cell.template
+          )}</div
+        >`;
+      })
   );
+}
+
+/**
+ * Everything a row of a quadrant is drawn from, compared one by one with
+ * what it was drawn from last: its cells, its place and size, the columns,
+ * its part of the selection, the merges, and the slots, judged cells,
+ * links, comments and bad formulas in it. The quadrant it is in never
+ * changes: each pane draws a list of its own.
+ */
+function rowInputs(opts: QuadrantRenderOpts, row: number, columns: string): unknown[] {
+  const { state } = opts;
+  const { cellData } = state;
+  return [
+    cellData,
+    // A map that does not count its changes could have changed anywhere.
+    cellData instanceof SheetCells ? cellData.rowVersion(row) : {},
+    opts.getRowTop(row),
+    opts.getRowHeight(row),
+    columns,
+    selectionInRow(state.selection, row),
+    state.mergedRegions,
+    keysInRow(state.cellSlots ?? NO_SLOTS, row),
+    keysInRow(state.tooNarrowCells ?? NO_KEYS, row),
+    keysInRow(state.fittingSpills ?? NO_KEYS, row),
+    keysInRow(state.hyperlinkCells ?? NO_KEYS, row),
+    keysInRow(state.commentCells ?? NO_KEYS, row),
+    keysInRow(state.invalidFormulaCells ?? NO_KEYS, row)
+  ];
+}
+
+/** The columns a quadrant draws, each where it is and as wide as it is, as one text. */
+function columnsOf(opts: QuadrantRenderOpts): string {
+  let columns = `${opts.colStart}`;
+  for (let col = opts.colStart; col <= opts.colEnd; col++) {
+    columns += `,${opts.getColLeft(col)}+${opts.getColWidth(col)}`;
+  }
+  return columns;
+}
+
+/**
+ * What the selection marks in a row, as one text: the active cell when it
+ * is in the row, with whether the selection is of several ranges, and the
+ * columns each range across the row takes in.
+ */
+function selectionInRow(selection: SelectionState, row: number): string {
+  const { activeCell, activeRange, auxRanges } = selection;
+  let marks = activeCell.row === row ? `${activeCell.col}${isCoherentSelection(selection) ? '' : '+'}` : '';
+  if (row >= activeRange.r1 && row <= activeRange.r2) {
+    marks += `:${activeRange.c1}-${activeRange.c2}`;
+  }
+  for (const range of auxRanges) {
+    if (row >= range.r1 && row <= range.r2) {
+      marks += `:${range.c1}-${range.c2}`;
+    }
+  }
+  return marks;
+}
+
+/** The keys of each set or record, by row, worked out once for each. */
+const keysByRow = new WeakMap<object, ReadonlyMap<number, string>>();
+
+/**
+ * The keys of a set in a row, or those of a record with what each holds, as
+ * one text: the keys are sorted into rows once for each set or record.
+ */
+function keysInRow(keys: ReadonlySet<string> | Readonly<Record<string, string>>, row: number): string {
+  let rows = keysByRow.get(keys);
+  if (rows === undefined) {
+    const sorted = new Map<number, string>();
+    const entries: Iterable<readonly [string, string]> =
+      keys instanceof Set ? Array.from(keys as ReadonlySet<string>, (key) => [key, ''] as const) : Object.entries(keys);
+    for (const [key, held] of entries) {
+      const at = parseColRow(key).row;
+      sorted.set(at, `${sorted.get(at) ?? ''}${key}=${held};`);
+    }
+    keysByRow.set(keys, sorted);
+    rows = sorted;
+  }
+  return rows.get(row) ?? '';
+}
+
+/** The cells of one row of a quadrant. */
+function rowCells(opts: QuadrantRenderOpts, row: number, covered: ReadonlySet<string>): DrawnCell[] {
+  const { state, quadrantName, colStart, colEnd, getColLeft, getColWidth, getRowTop, getRowHeight } = opts;
+  const { cellData, selection } = state;
+  // Defensive defaults, once for every cell: some test fixtures do not
+  // declare the slots or the link cells.
+  const cellSlots = state.cellSlots ?? NO_SLOTS;
+  const hyperlinkCells = state.hyperlinkCells ?? NO_KEYS;
+  const cells: DrawnCell[] = [];
+  const top = getRowTop(row);
+  const height = getRowHeight(row);
+  for (let col = colStart; col <= colEnd; col++) {
+    const left = getColLeft(col);
+    const width = getColWidth(col);
+    // A cell in a hidden row or column is still rendered, collapsed by
+    // `display:none` — see collapsedDeclaration. Leaving it out instead
+    // makes it unfindable, and "is this cell hidden?" is a question
+    // both the tests and an application's own scripting ask.
+    const key = toKey(col, row);
+    const data = cellData.get(key);
+    // A cell holding a server-side component or a custom editor shows
+    // that instead of its own text — it is what the cell is for.
+    const underMerge = covered.has(key);
+    const slotName = underMerge ? undefined : cellSlots[key];
+    // A number too wide for its column shows as hashes rather than a
+    // clipped prefix: "$246 913" where the value is 246 trillion reads as
+    // a number, and a wrong one. The server sets needsMeasure when its
+    // fit check says the value does not fit.
+    const tooNarrow = data?.needsMeasure === true && (state.tooNarrowCells?.has(key) ?? false);
+    const cellText = tooNarrow ? '###' : data?.value ?? '';
+    const rawText = slotName === undefined ? cellText : html`<slot name=${slotName}></slot>`;
+    // Text too wide for its column runs into the empty cells beside it,
+    // and what still does not fit ends in an ellipsis. The server settles
+    // how far, because it is the side that knows what the neighbours hold;
+    // a cell showing a component or sitting under a merge keeps to itself.
+    const fitsAfterAll = state.fittingSpills?.has(key) ?? false;
+    const spill = slotName === undefined && !underMerge && !fitsAfterAll ? data?.overflowWidth ?? 0 : 0;
+    // A cell the server sent nothing for still wears the workbook's
+    // default style. Without it the cell falls through to the host's own
+    // font and colour - Helvetica 14px in grey - instead of the sheet's
+    // default, Calibri 11pt in black, which every cell has before anything
+    // else applies.
+    const cellStyleClass = data?.cellStyle ?? 'cs0';
+    // A right-aligned value too wide for its cell - a date, a number in
+    // scientific notation - overflows it as any value does: it starts at the cell's left edge and runs on to the right, over
+    // its own padding and border too, until a neighbour holding a value
+    // cuts it off, without an ellipsis.
+    const runsRight = spill > 0 && cellStyleClass.split(/\s+/).includes('r');
+    const overflowing = runsRight || spill > width;
+    // With nowhere to go the text is still held at the column's width from
+    // the padding on: it reaches past the cell's
+    // right edge, under the neighbour, which is drawn later on a ground of
+    // its own - see .cut-short.
+    const cutShort = spill > 0 && !overflowing;
+    const text =
+      spill === 0
+        ? rawText
+        : runsRight
+        ? html`<div class="cell-spill runs-right" style="width:${spill - 2}px">${rawText}</div>`
+        : html`<div class="cell-spill" style="width:${spill}px">${rawText}</div>`;
+    const selected = selectionClassFor(selection, col, row);
+    // Hyperlink cells get a `link-cell` class: a pointer cursor,
+    // the workbook styling the link itself. The click handler in
+    // the connector dispatches `linkCellClicked` based
+    // on the same hyperlinks map.
+    const linkClass = hyperlinkCells.has(key) ? ' link-cell' : '';
+    const classList =
+      `cell col${col} row${row} quadrant-${quadrantName}` +
+      (cellStyleClass ? ` ${cellStyleClass}` : '') +
+      selected.classes +
+      linkClass +
+      (overflowing ? ' overflowing' : '') +
+      (cutShort ? ' cut-short' : '') +
+      (slotName !== undefined && isCellEditorSlot(slotName) ? ' custom-editor-cell' : '');
+    const style =
+      `left:${left}px;top:${top}px;width:${width}px;height:${height}px;` +
+      collapsedDeclaration(width, height) +
+      textColorDeclaration(data);
+    // A cell under a merge leaves its markers to the merged cell.
+    const markers = underMerge ? NO_MARKERS : cellMarkers(state, key, col, row);
+    // data-col + data-row drive the click-delegation handler
+    // in firstUpdated() — single source of truth
+    // for the cell's coordinate when the event bubbles.
+    // On one line, and the marker only where there is one: whitespace
+    // between the tags is a text node of its own and every binding a
+    // marker, and with a thousand cells drawn they doubled the nodes the
+    // sheet makes and restyles as it scrolls.
+    const content =
+      markers.invalid === '' && markers.comment === '' ? text : html`${markers.invalid}${markers.comment}${text}`;
+    cells.push({
+      key,
+      template: html`<div class=${classList} part=${selected.part} style=${style} data-col=${col} data-row=${row}
+        >${content}</div
+      >`
+    });
+  }
+  return cells;
 }
 
 /**
