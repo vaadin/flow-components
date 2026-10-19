@@ -17,6 +17,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonServerRpc;
 import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
@@ -63,6 +64,8 @@ public class PopupButton extends Component {
     private Component child;
 
     private PopupButtonState state = new PopupButtonState();
+
+    private PendingJavaScriptResult pendingStateUpdate;
 
     /**
      * Constructs a new PopupButton.
@@ -242,10 +245,14 @@ public class PopupButton extends Component {
      * Update client side state, if applicable.
      */
     private void updateState() {
-        getParent().filter(Spreadsheet.class::isInstance)
-                .ifPresent(parent -> parent.getElement().callJsFunction(
-                        "setPopupButtonState",
-                        Serializer.serialize(getState())));
+        getParent().filter(Spreadsheet.class::isInstance).ifPresent(parent -> {
+            if (pendingStateUpdate != null
+                    && !pendingStateUpdate.isSentToBrowser()) {
+                pendingStateUpdate.cancelExecution();
+            }
+            pendingStateUpdate = parent.getElement().callJsFunction(
+                    "setPopupButtonState", Serializer.serialize(getState()));
+        });
     }
 
     public boolean isActive() {
