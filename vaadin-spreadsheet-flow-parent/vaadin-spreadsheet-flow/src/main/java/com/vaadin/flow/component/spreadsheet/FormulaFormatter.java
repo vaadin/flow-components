@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -153,7 +153,7 @@ public class FormulaFormatter implements Serializable {
      */
     private List<FormulaToken> localizeTokens(List<FormulaToken> tokens,
             Locale locale) {
-        List<FormulaToken> localizedTokens = new LinkedList<>();
+        List<FormulaToken> localizedTokens = new ArrayList<>();
 
         for (FormulaToken token : tokens) {
             if (token instanceof NumberToken) {
@@ -191,7 +191,7 @@ public class FormulaFormatter implements Serializable {
      */
     protected List<FormulaToken> unLocalizeTokens(List<FormulaToken> tokens,
             Locale locale) {
-        List<FormulaToken> unlocalizedTokens = new LinkedList<>();
+        List<FormulaToken> unlocalizedTokens = new ArrayList<>();
 
         var decimalFormat = getDecimalFormat(locale);
         for (FormulaToken token : tokens) {
@@ -225,7 +225,7 @@ public class FormulaFormatter implements Serializable {
             Locale from) {
         boolean inString = false;
         StringBuilder numberBuilder = new StringBuilder();
-        List<FormulaToken> tokens = new LinkedList<>();
+        List<FormulaToken> tokens = new ArrayList<>();
         for (int i = 0; i < formulaValue.length() + 1; i++) {
             Character current = i == formulaValue.length() ? null
                     : formulaValue.charAt(i);

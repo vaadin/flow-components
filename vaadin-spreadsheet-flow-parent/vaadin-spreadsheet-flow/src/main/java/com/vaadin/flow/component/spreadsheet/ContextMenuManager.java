@@ -10,7 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.jsoup.Jsoup;
@@ -34,7 +34,7 @@ public class ContextMenuManager implements Serializable {
 
     // Never null: a menu event can still arrive after the last handler went,
     // sent by a client that had not heard there is no menu.
-    private final LinkedList<Handler> actionHandlers = new LinkedList<>();
+    private final List<Handler> actionHandlers = new ArrayList<>();
 
     private final KeyMapper<Action> actionMapper = new KeyMapper<>();
 

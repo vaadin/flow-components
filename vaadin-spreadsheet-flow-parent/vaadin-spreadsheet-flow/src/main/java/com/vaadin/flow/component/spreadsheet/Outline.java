@@ -9,11 +9,12 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -195,7 +196,7 @@ final class Outline implements Serializable {
         List<GroupingData> data = new ArrayList<>();
         Set<GroupingData> toRemove;
 
-        Stack<GroupingData> rows = new Stack<>();
+        Deque<GroupingData> rows = new ArrayDeque<>();
         short lastlevel = 0;
         for (int i = 0; i <= spreadsheet.getRows(); i++) {
 
