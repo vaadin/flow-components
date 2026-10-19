@@ -213,7 +213,6 @@ final class SheetLoader implements Serializable {
         spreadsheet.workbookScope().tables.markNeedsReload();
 
         reloadSheetNames();
-        spreadsheet.updateMergedRegions();
         spreadsheet.sheetModel().displayGridlines
                 .set(sheet.isDisplayGridlines());
         spreadsheet.sheetModel().displayRowColHeadings

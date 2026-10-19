@@ -58,4 +58,32 @@ class SheetLoadingTest {
         assertTrue(spreadsheet.getElement().getProperty("namedRanges", "")
                 .contains("Later"));
     }
+
+    @Test
+    @ExpectWarnings
+    void mergedCellsPoiCannotRead_areReported_andTheRestLoaded() {
+        // The regions were read once more before the parts, where a failure
+        // was not caught: the sheet was not shown at all.
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet();
+        sheet.createFreezePane(1, 2);
+        workbook.createName().setNameName("Later");
+        workbook.getName("Later").setRefersToFormula("Sheet0!$A$1");
+        sheet.getCTWorksheet().addNewMergeCells().addNewMergeCell()
+                .setRef("not a range");
+
+        Spreadsheet spreadsheet;
+        List<CapturedLogs.Entry> logged;
+        try (CapturedLogs.Capture logs = CapturedLogs.capture()) {
+            spreadsheet = new Spreadsheet(workbook);
+            logged = logs.entries();
+        }
+
+        assertEquals(1, logged.size());
+        assertEquals("Could not load the merged cells of the sheet",
+                logged.get(0).message());
+        assertEquals(2, spreadsheet.getLastFrozenRow());
+        assertTrue(spreadsheet.getElement().getProperty("namedRanges", "")
+                .contains("Later"));
+    }
 }
