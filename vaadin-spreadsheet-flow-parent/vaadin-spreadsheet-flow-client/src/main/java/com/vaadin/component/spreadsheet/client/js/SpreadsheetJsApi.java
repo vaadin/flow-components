@@ -501,17 +501,18 @@ public class SpreadsheetJsApi {
 
         if (!popupButtonWidgets.containsKey(key)) {
             popupButtonStates.put(key, state);
-            PopupButtonConnector connector;
-            popupButtonConnectors.put(key,
-                    connector = new PopupButtonConnector() {
-                        @Override
-                        public PopupButtonState getState() {
-                            // Flow supplies state through this bridge rather
-                            // than the legacy connector state transport.
-                            return popupButtonStates.get(key);
-                        }
-                    });
-            popupButtonWidgets.put(key, widget = connector.getWidget());
+            PopupButtonConnector connector = new PopupButtonConnector() {
+                @Override
+                public PopupButtonState getState() {
+                    // Flow supplies state through this bridge rather
+                    // than the legacy connector state transport.
+                    return popupButtonStates.get(key);
+                }
+            };
+            popupButtonConnectors.put(key, connector);
+            
+            widget = connector.getWidget();
+            popupButtonWidgets.put(key, widget);
 
             connector.setPopupButtonServerRpc(getServerRpcInstance());
             connector.init();
@@ -534,7 +535,7 @@ public class SpreadsheetJsApi {
         if (state == null) {
             return;
         }
-        
+
         String key = getPopupKey(state.sheet, state.row, state.col);
         PopupButtonConnector connector = popupButtonConnectors.get(key);
 
