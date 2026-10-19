@@ -531,8 +531,13 @@ public class SpreadsheetJsApi {
 
     public void setPopupButtonState(String rawState) {
         PopupButtonState state = Parser.parsePopupButtonState(rawState);
+        if (state == null) {
+            return;
+        }
+        
         String key = getPopupKey(state.sheet, state.row, state.col);
         PopupButtonConnector connector = popupButtonConnectors.get(key);
+
         // Visibility and registration own widget existence. A state update
         // must not recreate a button that has already been removed.
         if (connector == null) {
