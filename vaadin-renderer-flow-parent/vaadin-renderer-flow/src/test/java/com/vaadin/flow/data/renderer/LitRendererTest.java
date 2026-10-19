@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.trigger.ClientAction;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.function.ValueProvider;
@@ -143,15 +144,19 @@ class LitRendererTest {
 
     @Test
     void doNotAllowClientActionNamesWithSpaces() {
+        LitRenderer<Object> renderer = LitRenderer.of("");
+        ClientAction action = Clipboard.writeText();
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> LitRenderer.of("").withClientAction("illegal name",
-                        Clipboard.writeText()));
+                () -> renderer.withClientAction("illegal name", action));
     }
 
     @Test
     void doNotAllowClientActionNameAlreadyUsedByAFunction() {
+        LitRenderer<Object> renderer = LitRenderer.of("").withFunction("copy",
+                item -> {
+                });
+        ClientAction action = Clipboard.writeText();
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> LitRenderer.of("").withFunction("copy", item -> {
-                }).withClientAction("copy", Clipboard.writeText()));
+                () -> renderer.withClientAction("copy", action));
     }
 }
