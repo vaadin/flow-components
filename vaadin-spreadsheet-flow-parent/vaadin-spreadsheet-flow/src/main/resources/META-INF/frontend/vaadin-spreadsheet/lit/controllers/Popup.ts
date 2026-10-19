@@ -12,7 +12,7 @@ import type { ReactiveController } from 'lit';
 import { popupPlacement } from '../algorithms/Placement.js';
 import { listen } from '../dom/Listen.js';
 import { animateIn, animateOut } from '../dom/OverlayAnimation.js';
-import { popupOverlayRules } from '../dom/PopupOverlayStyles.js';
+import { adoptPopupOverlayStyles } from '../dom/PopupOverlayStyles.js';
 import { hideFromTopLayer, showInTopLayer } from '../dom/TopLayer.js';
 import {
   flowVirtualChildResolver,
@@ -101,7 +101,7 @@ export class Popup implements ReactiveController {
     // inset, margin and overflow undo the browser's popover defaults:
     // content taller than a set height shows
     // past it rather than scrolling. Drawn by the rules the overlay carries
-    // - see popupOverlayRules.
+    // - see popupOverlayStyles.
     this.overlay.popover = 'manual';
     // Takes the keyboard when it opens from it without a close box.
     this.overlay.tabIndex = -1;
@@ -172,7 +172,8 @@ export class Popup implements ReactiveController {
     this.contents.setResolver(flowVirtualChildResolver(appId));
     this.contents.sync([nodeId]);
     const state = this.buttonStates.find((b) => b.row === row && b.col === column);
-    const parts: Node[] = [popupOverlayRules()];
+    adoptPopupOverlayStyles(this.overlay);
+    const parts: Node[] = [];
     if (!state?.headerHidden) {
       parts.push(this.buildHeader(this.host.cellValue(column, row)));
     }

@@ -195,6 +195,23 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(slot.assignedElements({ flatten: true })).to.eql([popup]);
   });
 
+  it('draws the card by one sheet of rules its root takes once, before the sheets it had', () => {
+    withFlowClient({ 42: content('filter') });
+    const root = ctx.host.shadowRoot!;
+    const own = new CSSStyleSheet();
+    root.adoptedStyleSheets = [own];
+
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+    ctx.sheet.closePopup(1, 4);
+    ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
+
+    expect(root.adoptedStyleSheets).to.have.length(2);
+    expect(root.adoptedStyleSheets[1]).to.equal(own);
+    const overlay = ctx.sheet.getPopupOverlay();
+    expect(overlay.querySelector('style'), 'no rules parsed for each popup').to.be.null;
+    expect(getComputedStyle(overlay).paddingTop).to.equal('4px');
+  });
+
   it('leaves the content in the host light DOM, where the server can reach it', () => {
     const popup = content('filter');
     withFlowClient({ 42: popup });
