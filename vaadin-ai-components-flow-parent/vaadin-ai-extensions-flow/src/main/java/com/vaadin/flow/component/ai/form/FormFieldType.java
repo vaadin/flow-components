@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.HasItems;
@@ -85,8 +86,35 @@ enum FormFieldType {
         }
     };
 
+    /**
+     * Memoizes the resolved {@code HasValue<?, V>} value type per concrete
+     * field class. {@link Optional#empty()} marks classes whose {@code V}
+     * cannot be narrowed to a concrete {@link Class}.
+     */
+    private static final ClassValue<Optional<Class<?>>> VALUE_TYPE_CACHE = new ClassValue<>() {
+        @Override
+        protected Optional<Class<?>> computeValue(Class<?> type) {
+            return Optional.ofNullable(resolveValueType(type));
+        }
+    };
+
     static FormFieldType classify(HasValue<?, ?> field) {
         return CLASSIFY_CACHE.get(field.getClass());
+    }
+
+    /**
+     * Returns the {@code V} type argument of the field's
+     * {@code HasValue<?, V>}, used by the write path to produce a value of the
+     * exact type the field holds (for example {@link Long} rather than
+     * {@link Integer} for an {@link #INTEGER} field).
+     *
+     * @param field
+     *            the field, not {@code null}
+     * @return the resolved value type, or {@code null} when it cannot be
+     *         narrowed to a concrete class
+     */
+    static Class<?> valueType(HasValue<?, ?> field) {
+        return VALUE_TYPE_CACHE.get(field.getClass()).orElse(null);
     }
 
     /**
@@ -145,7 +173,7 @@ enum FormFieldType {
                 || HasItems.class.isAssignableFrom(fieldClass)) {
             return SINGLE_SELECT;
         }
-        var valueType = resolveValueType(fieldClass);
+        var valueType = VALUE_TYPE_CACHE.get(fieldClass).orElse(null);
         if (valueType == null) {
             return STRING;
         }
