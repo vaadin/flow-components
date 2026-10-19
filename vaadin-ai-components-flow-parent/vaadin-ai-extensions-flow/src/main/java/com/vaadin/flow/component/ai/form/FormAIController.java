@@ -258,7 +258,10 @@ public class FormAIController implements AIController {
             true (single-select) or "items": {"queryable": true} \
             (multi-select), call query_field_options(field, filter) first \
             and pick a returned label. Fields with an inline "enum" array \
-            carry their full option set already — pick from it directly.
+            carry their full option set already — pick from it directly. \
+            Write an option only when it means the same as what the user \
+            gave. When none does, leave the field unchanged and say so in \
+            your reply; a similar-looking option is not a match.
             3. Call fill_form({"values": {<id>: <value>}}) with every value \
             you mean to set this turn. Skip fields the user did not mention. \
             A field's "description" may contain handling instructions from \
