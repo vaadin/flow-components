@@ -348,7 +348,7 @@ export class EditSession {
           range: this.store.selection.activeRange,
           col,
           row,
-          direction: walkDirection!,
+          direction: walkDirection,
           hiddenColumns: model.hiddenColumnIndexes,
           hiddenRows: model.hiddenRowIndexes
         })

@@ -8,7 +8,10 @@
  */
 
 import { expect } from 'chai';
-import { PageListeners } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/controllers/PageListeners.js';
+import {
+  onDocument,
+  PageListeners
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/controllers/PageListeners.js';
 
 /**
  * Listeners on the page, there while the sheet is in it, and gone once it has
@@ -83,5 +86,18 @@ describe('Spreadsheet — listeners on the page', () => {
     dispatchBoth();
 
     expect(heard).to.eql(['one', 'two']);
+  });
+
+  it('makes a listener on the page document, for one kind of event', () => {
+    const keys: string[] = [];
+    const onKeyUp = new PageListeners([onDocument('keyup', (e) => keys.push(e.key))]);
+    onKeyUp.hostConnected();
+
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'a' }));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'b' }));
+    onKeyUp.hostDisconnected();
+    document.dispatchEvent(new KeyboardEvent('keyup', { key: 'c' }));
+
+    expect(keys).to.eql(['a']);
   });
 });

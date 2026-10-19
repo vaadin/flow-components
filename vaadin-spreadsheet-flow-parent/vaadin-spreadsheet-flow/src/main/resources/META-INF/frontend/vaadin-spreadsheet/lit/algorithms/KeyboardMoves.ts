@@ -120,7 +120,7 @@ export function moveActiveCell(
 ): SingleCellSelection | null {
   const region = mergeAt(shape.mergedRegions, from.col, from.row);
   const inside = region !== null && entry !== null && mergeAt([region], entry.col, entry.row) !== null;
-  const lane = inside ? entry! : from;
+  const lane = inside ? entry : from;
   let col: number | null = lane.col;
   let row: number | null = lane.row;
   switch (direction) {

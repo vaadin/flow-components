@@ -11,8 +11,20 @@
 import type { ReactiveController } from 'lit';
 import { listen } from '../dom/Listen.js';
 
-/** A listener on something the sheet does not own: the page's document. */
-export type PageListener = readonly [target: EventTarget, type: string, listener: (event: any) => void];
+/**
+ * A listener on something the sheet does not own: the page's document. Made
+ * with {@link onDocument}, which checks the handler against the kind of event;
+ * after that it is only handed to `addEventListener`.
+ */
+export type PageListener = readonly [target: EventTarget, type: string, listener: (event: never) => void];
+
+/** A listener on the page's document, whose handler takes the kind of event it listens for. */
+export function onDocument<K extends keyof DocumentEventMap>(
+  type: K,
+  listener: (event: DocumentEventMap[K]) => void
+): PageListener {
+  return [document, type, listener];
+}
 
 /**
  * Listeners on the page, there while the sheet is in it. They hold the sheet:

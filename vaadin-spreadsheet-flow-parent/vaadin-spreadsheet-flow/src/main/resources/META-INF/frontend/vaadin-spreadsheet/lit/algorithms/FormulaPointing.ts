@@ -155,10 +155,9 @@ export function formulaReferences(text: string, activeSheet: string): FormulaRef
       r2: Math.max(first.row, last.row)
     };
     const key = colorKey(range);
-    if (!colors.has(key)) {
-      colors.set(key, REFERENCE_COLORS[colors.size % REFERENCE_COLORS.length]);
-    }
-    refs.push({ start: i - m[0].length + 1, end, text: m[0], range, color: colors.get(key)! });
+    const color = colors.get(key) ?? REFERENCE_COLORS[colors.size % REFERENCE_COLORS.length];
+    colors.set(key, color);
+    refs.push({ start: i - m[0].length + 1, end, text: m[0], range, color });
   }
   return refs;
 }

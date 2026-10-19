@@ -41,7 +41,7 @@ import { flowVirtualChildResolver } from './dom/VirtualChildren.js';
 import { SpreadsheetCellGrid } from './elements/SpreadsheetCellGrid.js';
 import { listen } from './dom/Listen.js';
 import { listenToClipboard } from './controllers/Clipboard.js';
-import { type PageListener, PageListeners } from './controllers/PageListeners.js';
+import { onDocument, type PageListener, PageListeners } from './controllers/PageListeners.js';
 import { SheetTabs } from './controllers/SheetTabs.js';
 import { ContextMenu } from './controllers/ContextMenu.js';
 import { HeaderResize } from './controllers/HeaderResize.js';
@@ -638,11 +638,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.viewportLoader,
       new PageListeners(
         this.handlingAll([
-          [document, 'pointerdown', this.handleDocumentPointerDown],
-          [document, 'keydown', this.handleContextMenuKeyDown],
-          [document, 'mouseup', () => this.pointerSelection.release()],
-          [document, 'keyup', (e: Event) => this.keyboard.keyUp(e as KeyboardEvent)],
-          [document, 'mousemove', this.handleDocumentMouseMove]
+          onDocument('pointerdown', this.handleDocumentPointerDown),
+          onDocument('keydown', this.handleContextMenuKeyDown),
+          onDocument('mouseup', () => this.pointerSelection.release()),
+          onDocument('keyup', (e) => this.keyboard.keyUp(e)),
+          onDocument('mousemove', this.handleDocumentMouseMove)
         ])
       ),
       {
@@ -1120,8 +1120,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.menu.closeUnlessPressedIn(path);
   };
 
-  private readonly handleContextMenuKeyDown = (e: Event): void => {
-    if ((e as KeyboardEvent).key !== 'Escape') {
+  private readonly handleContextMenuKeyDown = (e: KeyboardEvent): void => {
+    if (e.key !== 'Escape') {
       return;
     }
     this.popup.dismiss();

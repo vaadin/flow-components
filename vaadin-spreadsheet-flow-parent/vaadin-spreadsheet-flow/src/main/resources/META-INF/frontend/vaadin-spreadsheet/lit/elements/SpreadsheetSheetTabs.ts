@@ -382,8 +382,8 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     const tabs = Array.from(root?.querySelectorAll<HTMLElement>('.sheet-tab') ?? []);
     const first = this.renderState.firstVisibleTab ?? 0;
     let lastFirstTab = first;
-    if (options && tabs.length > 0) {
-      const label = root!.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
+    if (root && options && tabs.length > 0) {
+      const label = root.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
       let room = this.offsetWidth - options.offsetWidth - (label?.offsetWidth ?? 0);
       let index = tabs.length - 1;
       room -= tabWidth(tabs[index]);
@@ -458,13 +458,13 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
     }
     const root = this.shadowRoot;
     const options = root?.querySelector<HTMLElement>('.sheet-tabsheet-options');
-    if (!options || this.offsetWidth === 0) {
+    if (!root || !options || this.offsetWidth === 0) {
       return null;
     }
-    const label = root!.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
+    const label = root.querySelector<HTMLElement>('.sheet-tabsheet-infolabel');
     let room = this.offsetWidth - options.offsetWidth - (label?.offsetWidth ?? 0);
     // The tabs are rendered from the first one shown on.
-    const widths = Array.from(root!.querySelectorAll<HTMLElement>('.sheet-tab'))
+    const widths = Array.from(root.querySelectorAll<HTMLElement>('.sheet-tab'))
       .slice(0, at - firstVisibleTab + 1)
       .map(tabWidth);
     if (widths.reduce((sum, width) => sum + width, 0) <= room) {

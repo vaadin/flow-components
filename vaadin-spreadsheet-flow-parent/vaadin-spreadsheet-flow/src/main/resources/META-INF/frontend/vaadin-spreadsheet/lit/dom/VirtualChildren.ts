@@ -92,6 +92,11 @@ export function actionIconSlotName(nodeId: string): string {
 /** Resolves a Flow node id to the element Flow created for it. */
 export type VirtualChildResolver = (nodeId: string) => HTMLElement | null;
 
+/** The part of Flow's client on the page that finds the element of a node id. */
+type FlowWindow = Window & {
+  Vaadin?: { Flow?: { clients?: Record<string, { getByNodeId?: (nodeId: number) => unknown } | undefined> } };
+};
+
 /**
  * Build a resolver backed by the Flow client for the given application.
  *
@@ -108,8 +113,7 @@ export function flowVirtualChildResolver(appId: string): VirtualChildResolver {
     if (!Number.isFinite(parsed)) {
       return null;
     }
-    const flow = (window as any).Vaadin?.Flow;
-    const client = flow?.clients?.[appId];
+    const client = (window as FlowWindow).Vaadin?.Flow?.clients?.[appId];
     if (!client || typeof client.getByNodeId !== 'function') {
       return null;
     }

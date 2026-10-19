@@ -94,7 +94,8 @@ export class FormulaPointer {
   arrow(e: CustomEvent<{ key: string; shiftKey: boolean; value: string; caret: number }>, source: FormulaSource): void {
     const { key, shiftKey, value, caret } = e.detail;
     const { model, formula } = this.store;
-    if (!isFormula(value) || model.rows <= 0 || model.cols <= 0) {
+    const direction = keyDirection(key, false);
+    if (direction === null || !isFormula(value) || model.rows <= 0 || model.cols <= 0) {
       return;
     }
     const pointer = formula.pointer !== null && caret === formula.pointer.span.end ? formula.pointer : null;
@@ -103,7 +104,7 @@ export class FormulaPointer {
     }
     e.preventDefault();
     const from = pointer?.end ?? formula.lastPointed ?? this.formulaCell();
-    const next = moveActiveCell(from, null, keyDirection(key, false)!, this.store.sheetShape());
+    const next = moveActiveCell(from, null, direction, this.store.sheetShape());
     const end = next?.activeCell ?? from;
     const anchor = shiftKey && pointer !== null ? pointer.anchor : end;
     this.pointAt(anchor, end, value, caret, pointer?.span ?? null, source);
