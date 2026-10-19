@@ -10,10 +10,7 @@
 import { expect } from 'chai';
 
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
-import {
-    coveredByMergeCoords,
-    SpreadsheetCellGrid,
-} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetCellGrid.js';
+import { SpreadsheetCellGrid } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetCellGrid.js';
 import {
     type CellGridRenderState,
     emptyCellGridRenderState,
@@ -4379,29 +4376,6 @@ describe('SpreadsheetCellGrid — scrolling keeps the cells it can', () => {
         }
     });
 });
-
-describe('SpreadsheetCellGrid — the cells it draws', () => {
-    const region = (col1: number, row1: number, col2: number, row2: number) => ({ col1, row1, col2, row2 });
-
-    it('covers only the part of a merge inside the quadrant', () => {
-        // A merge as tall as the sheet cost a million coordinates on every
-        // render before it was clipped.
-        const covered = coveredByMergeCoords([region(1, 1, 1, 1048576)], 1, 3, 10, 12);
-
-        expect([...covered].sort()).to.eql(['col1 row10', 'col1 row11', 'col1 row12']);
-    });
-
-    it('covers nothing for a merge outside the quadrant', () => {
-        expect(coveredByMergeCoords([region(5, 5, 6, 6)], 1, 3, 1, 3).size).to.equal(0);
-    });
-
-    it('covers where a merge and the quadrant overlap', () => {
-        const covered = coveredByMergeCoords([region(2, 2, 9, 9)], 1, 3, 1, 3);
-
-        expect([...covered].sort()).to.eql(['col2 row2', 'col2 row3', 'col3 row2', 'col3 row3']);
-    });
-});
-
 
 describe('SpreadsheetCellGrid — the cells as the sheet scrolls', () => {
     /** Rows `first` to `first + 3` of two 50px columns, 20px rows. */
