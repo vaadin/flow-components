@@ -73,11 +73,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.Uses;
-import com.vaadin.flow.component.spreadsheet.ClientChanges.Call;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
-import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
-import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
@@ -424,78 +421,8 @@ public class Spreadsheet extends Component
      * needed for proper value string conversions
      */
 
-    private SpreadsheetClientRpc clientRpc = new SpreadsheetClientRpc() {
-        @Override
-        public void updateBottomRightCellValues(ArrayList<CellData> cellData) {
-            clientCells.send(cellData);
-        }
-
-        @Override
-        public void updateTopLeftCellValues(ArrayList<CellData> cellData) {
-            clientCells.send(cellData);
-        }
-
-        @Override
-        public void updateTopRightCellValues(ArrayList<CellData> cellData) {
-            clientCells.send(cellData);
-        }
-
-        @Override
-        public void updateBottomLeftCellValues(ArrayList<CellData> cellData) {
-            clientCells.send(cellData);
-        }
-
-        @Override
-        public void updateFormulaBar(String possibleName, int col, int row) {
-            clientChanges.call(Call.FORMULA_BAR, "updateFormulaBar",
-                    possibleName, col, row);
-        }
-
-        @Override
-        public void invalidCellAddress() {
-            clientChanges.call(Call.SELECTION, "invalidCellAddress");
-        }
-
-        @Override
-        public void showSelectedCell(String name, int col, int row,
-                String cellValue, boolean function, boolean locked,
-                boolean initialSelection) {
-            selectionManager.onCellSelected(row, col, initialSelection);
-            clientChanges.call(Call.SELECTION, "showSelectedCell", name, col,
-                    row, cellValue, function, locked, initialSelection,
-                    selectionManager.isKeepingView());
-        }
-
-        @Override
-        public void showActions(
-                ArrayList<SpreadsheetActionDetails> actionDetails) {
-            clientChanges.call(Call.ACTIONS, "showActions",
-                    Serializer.toJson(actionDetails));
-        }
-
-        @Override
-        public void setSelectedCellAndRange(String name, int col, int row,
-                int c1, int c2, int r1, int r2, boolean scroll) {
-            clientChanges.call(Call.SELECTION, "setSelectedCellAndRange", name,
-                    col, row, c1, c2, r1, r2,
-                    scroll && !selectionManager.isKeepingView());
-        }
-
-        @Override
-        public void cellsUpdated(ArrayList<CellData> cellData) {
-            clientCells.send(cellData);
-        }
-
-        @Override
-        public void refreshCellStyles() {
-            clientCells.refreshStyles();
-        }
-
-        @Override
-        public void editCellComment(int col, int row) {
-            clientChanges.call(Call.COMMENT, "editCellComment", col, row);
-        }
-    };
+    /** What the server sends the client; see {@link #getRpcProxy()}. */
+    private final SpreadsheetClientRpc clientRpc = new ClientRpcSender(this);
 
     /**
      * An interface for handling the edited cell value from user input.

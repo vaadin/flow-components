@@ -380,36 +380,33 @@ public class CellSelectionManager implements Serializable {
             Workbook workbook = spreadsheet.getWorkbook();
             final Row row = workbook.getSheetAt(workbook.getActiveSheetIndex())
                     .getRow(rowIndex - 1);
-            if (row != null) {
-                final Cell cell = row.getCell(colIndex - 1);
-                if (cell != null) {
-                    String value = "";
-                    boolean formula = cell.getCellType() == CellType.FORMULA;
-                    if (!spreadsheet.isCellHidden(cell)) {
-                        if (formula) {
-                            value = cell.getCellFormula();
-                        } else if (SpreadsheetUtil.needsLeadingQuote(cell)) {
-                            value = "'" + spreadsheet.getCellValue(cell);
-                        } else {
-                            value = spreadsheet.getCellValue(cell);
-                        }
+            final Cell cell = row == null ? null : row.getCell(colIndex - 1);
+            String value = "";
+            boolean formula = false;
+            boolean locked;
+            if (cell != null) {
+                formula = cell.getCellType() == CellType.FORMULA;
+                if (!spreadsheet.isCellHidden(cell)) {
+                    if (formula) {
+                        value = cell.getCellFormula();
+                    } else if (SpreadsheetUtil.needsLeadingQuote(cell)) {
+                        value = "'" + spreadsheet.getCellValue(cell);
+                    } else {
+                        value = spreadsheet.getCellValue(cell);
                     }
-                    spreadsheet.getRpcProxy().showSelectedCell(name, colIndex,
-                            rowIndex, value, formula,
-                            spreadsheet.isCellLocked(cell.getAddress()),
-                            initialSelection);
-                } else {
-                    spreadsheet.getRpcProxy().showSelectedCell(name, colIndex,
-                            rowIndex, "", false,
-                            spreadsheet.isCellLocked(
-                                    new CellAddress(rowIndex, colIndex)),
-                            initialSelection);
                 }
+                locked = spreadsheet.isCellLocked(cell.getAddress());
+            } else if (row != null) {
+                locked = spreadsheet
+                        .isCellLocked(new CellAddress(rowIndex, colIndex));
             } else {
-                spreadsheet.getRpcProxy().showSelectedCell(name, colIndex,
-                        rowIndex, "", false,
-                        spreadsheet.isActiveSheetProtected(), initialSelection);
+                locked = spreadsheet.isActiveSheetProtected();
             }
+            // The selection changes, and its listeners hear of it, before the
+            // client is told: the sender only sends.
+            onCellSelected(rowIndex, colIndex, initialSelection);
+            spreadsheet.getRpcProxy().showSelectedCell(name, colIndex, rowIndex,
+                    value, formula, locked, initialSelection);
         }
     }
 

@@ -16,16 +16,14 @@ import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 
 /**
  * The messages the server sends to the client. Despite the "Rpc" suffix, kept
- * for compatibility, every method here is implemented in {@code Spreadsheet} as
- * a call to the method of the same name on the web component, mostly in this
- * form:
- *
- * <pre>
- * getElement().callJsFunction("methodName", serializedArgs)
- * </pre>
- *
+ * for compatibility, each is a call to the web component, sent at the end of
+ * the round trip in a fixed order: the cells, then the selection, the formula
+ * bar, the actions and the comment to write. The cells of the four pane methods
+ * and of {@link #cellsUpdated(ArrayList)} all go the same way, and only those
+ * the client does not have are sent.
  * <p>
- * The interface documents the typed shape of those calls in one place.
+ * Sending is all an implementation does: the selection has changed, and its
+ * listeners have heard of it, before {@link #showSelectedCell} is called.
  *
  * @since 23.1
  */
