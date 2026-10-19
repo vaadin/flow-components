@@ -171,8 +171,7 @@ public class CellValueCommand extends SpreadsheetCommand
         List<Cell> cellsToUpdate = new ArrayList<Cell>();
 
         for (Object o : values) {
-            if (o instanceof CellValue) {
-                CellValue cellValue = (CellValue) o;
+            if (o instanceof CellValue cellValue) {
                 cellValue.value = updateCellValue(cellValue.row, cellValue.col,
                         cellValue.value, cellsToUpdate);
             } else {
@@ -247,22 +246,22 @@ public class CellValueCommand extends SpreadsheetCommand
                 }
             }
         } else {
-            if (value instanceof String) {
-                if (((String) value).startsWith("=")) {
+            if (value instanceof String text) {
+                if (text.startsWith("=")) {
                     try {
-                        cell.setCellFormula(((String) value).substring(1));
+                        cell.setCellFormula(text.substring(1));
                     } catch (FormulaParseException fpe) {
-                        cell.setCellValue((String) value);
+                        cell.setCellValue(text);
                     }
                 } else {
-                    cell.setCellValue((String) value);
+                    cell.setCellValue(text);
                 }
-            } else if (value instanceof Byte) {
-                cell.setCellErrorValue((Byte) value);
-            } else if (value instanceof Double) {
-                cell.setCellValue((Double) value);
-            } else if (value instanceof Boolean) {
-                cell.setCellValue((Boolean) value);
+            } else if (value instanceof Byte error) {
+                cell.setCellErrorValue(error);
+            } else if (value instanceof Double number) {
+                cell.setCellValue(number);
+            } else if (value instanceof Boolean bool) {
+                cell.setCellValue(bool);
             }
             if (!spreadsheet.isRerenderPending()) {
                 cellsToUpdate.add(cell);
@@ -344,8 +343,7 @@ public class CellValueCommand extends SpreadsheetCommand
     public Set<CellReference> getChangedCells() {
         Set<CellReference> changedCells = new HashSet<CellReference>();
         for (Object o : values) {
-            if (o instanceof CellValue) {
-                CellValue cellValue = (CellValue) o;
+            if (o instanceof CellValue cellValue) {
                 changedCells.add(new CellReference(getSheet().getSheetName(),
                         cellValue.row, cellValue.col, false, false));
             } else {

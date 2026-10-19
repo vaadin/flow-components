@@ -63,8 +63,8 @@ final class HyperlinkLoader implements Serializable {
                     Hyperlink link = cell.getHyperlink();
                     if (link != null) {
                         String tooltip;
-                        if (link instanceof XSSFHyperlink) {
-                            tooltip = ((XSSFHyperlink) link).getTooltip();
+                        if (link instanceof XSSFHyperlink xssfLink) {
+                            tooltip = xssfLink.getTooltip();
                             // Show address if no defined tooltip (like in
                             // Excel)
                             if (tooltip == null) {

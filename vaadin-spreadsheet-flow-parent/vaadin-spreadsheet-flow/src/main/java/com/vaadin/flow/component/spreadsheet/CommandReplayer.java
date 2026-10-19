@@ -109,8 +109,7 @@ final class CommandReplayer implements Serializable {
      * {@link ValueChangeCommand}.
      */
     void fireCellValueChangeEvent(Command command) {
-        if (command instanceof ValueChangeCommand) {
-            ValueChangeCommand valueUpdaterCommand = (ValueChangeCommand) command;
+        if (command instanceof ValueChangeCommand valueUpdaterCommand) {
             spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet,
                     valueUpdaterCommand.getChangedCells()));
         }

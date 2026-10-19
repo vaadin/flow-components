@@ -46,9 +46,8 @@ public class DefaultChartCreator implements ChartCreator {
 
         chart.addPointSelectListener(event -> {
             Series series = event.getSeries();
-            if (series instanceof SelectListeningDataSeries) {
-                ((SelectListeningDataSeries) series).getSelectListener()
-                        .selected();
+            if (series instanceof SelectListeningDataSeries listening) {
+                listening.getSelectListener().selected();
             }
         });
         return chart;

@@ -148,7 +148,7 @@ public class SpreadsheetEventListener
         // the ones declared in rpc-client-to-server.ts. Reading by name
         // rather than by index means a field added or reordered on either
         // side can no longer silently shift every argument along.
-        ObjectNode pars = data instanceof ObjectNode ? (ObjectNode) data : null;
+        ObjectNode pars = data instanceof ObjectNode node ? node : null;
 
         LOGGER.debug(type + " " + (pars == null ? "null" : pars.toString()));
 

@@ -69,17 +69,15 @@ public class SpreadsheetDefaultActionHandler implements Action.Handler {
     public Action[] getActions(Object target, Object sender) {
         ArrayList<Action> temp = new ArrayList<Action>();
         Spreadsheet spreadsheet = (Spreadsheet) sender;
-        if (target instanceof SelectionChangeEvent) {
+        if (target instanceof SelectionChangeEvent selection) {
             for (SpreadsheetAction action : defaultActions) {
-                if (action.isApplicableForSelection(spreadsheet,
-                        (SelectionChangeEvent) target)) {
+                if (action.isApplicableForSelection(spreadsheet, selection)) {
                     temp.add(action);
                 }
             }
-        } else if (target instanceof CellRangeAddress) {
+        } else if (target instanceof CellRangeAddress header) {
             for (SpreadsheetAction action : defaultActions) {
-                if (action.isApplicableForHeader(spreadsheet,
-                        (CellRangeAddress) target)) {
+                if (action.isApplicableForHeader(spreadsheet, header)) {
                     temp.add(action);
                 }
             }
@@ -89,13 +87,13 @@ public class SpreadsheetDefaultActionHandler implements Action.Handler {
 
     @Override
     public void handleAction(Action action, Object sender, Object target) {
-        if (action instanceof SpreadsheetAction) {
-            if (target instanceof SelectionChangeEvent) {
-                ((SpreadsheetAction) action).executeActionOnSelection(
-                        ((Spreadsheet) sender), (SelectionChangeEvent) target);
-            } else if (target instanceof CellRangeAddress) {
-                ((SpreadsheetAction) action).executeActionOnHeader(
-                        ((Spreadsheet) sender), (CellRangeAddress) target);
+        if (action instanceof SpreadsheetAction spreadsheetAction) {
+            if (target instanceof SelectionChangeEvent selection) {
+                spreadsheetAction.executeActionOnSelection((Spreadsheet) sender,
+                        selection);
+            } else if (target instanceof CellRangeAddress header) {
+                spreadsheetAction.executeActionOnHeader((Spreadsheet) sender,
+                        header);
             }
         }
     }

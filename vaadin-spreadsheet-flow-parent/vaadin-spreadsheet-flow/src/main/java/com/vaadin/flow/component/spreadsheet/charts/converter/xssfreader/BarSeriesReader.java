@@ -60,14 +60,12 @@ public class BarSeriesReader
     @Override
     protected void fillSeriesData(ColumnSeriesData seriesData, CTBarSer serie) {
         super.fillSeriesData(seriesData, serie);
-        if (getChart() instanceof CTBarChart) {
-            CTBarChart chart = (CTBarChart) getChart();
+        if (getChart() instanceof CTBarChart chart) {
             if (chart.getVaryColors() != null
                     && chart.getVaryColors().getVal()) {
                 seriesData.isColorByPoint = true;
             }
-        } else if (getChart() instanceof CTBar3DChart) {
-            CTBar3DChart chart = (CTBar3DChart) getChart();
+        } else if (getChart() instanceof CTBar3DChart chart) {
             if (chart.getVaryColors() != null
                     && chart.getVaryColors().getVal()) {
                 seriesData.isColorByPoint = true;
