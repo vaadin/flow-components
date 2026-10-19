@@ -8,7 +8,7 @@
  * license.
  */
 
-import { html, type TemplateResult } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { guard } from 'lit/directives/guard.js';
 import { parseColRow, toKey } from '../../algorithms/CellKeys.js';
 import { keyedList } from '../../dom/KeyedList.js';
@@ -82,13 +82,13 @@ export function selectionClassFor(selection: SelectionState, col: number, row: n
 /** The markers in a cell's top-right corner, each nothing when the cell has none. */
 export interface CellMarkers {
   /** A formula that could not be evaluated. */
-  invalid: TemplateResult | '';
+  invalid: TemplateResult | typeof nothing;
   /** A comment. */
-  comment: TemplateResult | '';
+  comment: TemplateResult | typeof nothing;
 }
 
 /** A cell with no markers. */
-export const NO_MARKERS: CellMarkers = { invalid: '', comment: '' };
+export const NO_MARKERS: CellMarkers = { invalid: nothing, comment: nothing };
 
 /**
  * The markers in a cell's corner, inside its border: one for a formula that
@@ -101,11 +101,11 @@ export function cellMarkers(state: CellGridRenderState, key: string, col: number
     invalid:
       state.invalidFormulaCells?.has(key) === true
         ? html`<div class="invalidformula-indicator" part="invalid-triangle"></div>`
-        : '',
+        : nothing,
     comment:
       state.commentCells?.has(key) === true
         ? html`<div class="comment-indicator" part="comment-triangle" data-col=${col} data-row=${row}></div>`
-        : ''
+        : nothing
   };
 }
 
@@ -358,7 +358,9 @@ function rowCells(opts: QuadrantRenderOpts, row: number, covered: ReadonlySet<st
     // marker, and with a thousand cells drawn they doubled the nodes the
     // sheet makes and restyles as it scrolls.
     const content =
-      markers.invalid === '' && markers.comment === '' ? text : html`${markers.invalid}${markers.comment}${text}`;
+      markers.invalid === nothing && markers.comment === nothing
+        ? text
+        : html`${markers.invalid}${markers.comment}${text}`;
     cells.push({
       key,
       template: html`<div class=${classList} part=${selected.part} style=${style} data-col=${col} data-row=${row}

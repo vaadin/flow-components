@@ -8,7 +8,7 @@
  * license.
  */
 
-import { css, html, type TemplateResult } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
 import { live } from 'lit/directives/live.js';
 import { composing } from '../algorithms/KeyboardMoves.js';
@@ -521,7 +521,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
     // matching Excel — an empty picker beside every sheet would be noise.
     const namedRangeBox =
       namedRanges.length === 0
-        ? ''
+        ? nothing
         : html`<select
               class="namedrangebox"
               part="named-range-box"
@@ -539,7 +539,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
         <input class="address" part="address-field" aria-label="Name box" .value=${address} />
         ${namedRangeBox}
       </div>
-      ${highlights === null ? '' : this.renderHighlights(highlights)}
+      ${highlights === null ? nothing : this.renderHighlights(highlights)}
       <input
         class="formula"
         part="formula-field"

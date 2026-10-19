@@ -8,7 +8,7 @@
  */
 
 import { expect } from 'chai';
-import { render } from 'lit';
+import { nothing, render } from 'lit';
 import {
   type QuadrantRenderOpts,
   quadrants
@@ -111,7 +111,7 @@ describe('QuadrantCells', () => {
 
   describe("a cell's corner markers", () => {
     it('are none for a cell with neither a comment nor a bad formula', () => {
-      expect(cellMarkers(sheet(), 'col1 row1', 1, 1)).to.eql({ invalid: '', comment: '' });
+      expect(cellMarkers(sheet(), 'col1 row1', 1, 1)).to.eql({ invalid: nothing, comment: nothing });
     });
 
     it('mark a bad formula, and a comment with the cell it marks, each only where there is one', () => {
@@ -128,13 +128,13 @@ describe('QuadrantCells', () => {
         '4',
         '1'
       ]);
-      expect([bad.comment, commented.invalid]).to.eql(['', '']);
+      expect([bad.comment, commented.invalid]).to.eql([nothing, nothing]);
     });
 
     it('are none of either for a sheet that lists no such cells', () => {
       const state = { ...sheet(), invalidFormulaCells: undefined, commentCells: undefined };
 
-      expect(cellMarkers(state, 'col1 row1', 1, 1)).to.eql({ invalid: '', comment: '' });
+      expect(cellMarkers(state, 'col1 row1', 1, 1)).to.eql({ invalid: nothing, comment: nothing });
     });
   });
 

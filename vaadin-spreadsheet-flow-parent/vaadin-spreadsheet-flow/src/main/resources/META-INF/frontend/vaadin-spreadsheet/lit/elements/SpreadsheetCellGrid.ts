@@ -8,7 +8,7 @@
  * license.
  */
 
-import { html, type TemplateResult } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
 import { cellTarget } from '../dom/IndexedTarget.js';
 
@@ -63,8 +63,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
 
   static properties = {
     renderState: { attribute: false },
-    tooNarrowCells: { attribute: false },
-    fittingSpills: { attribute: false },
+    // Worked out by the grid itself, from the drawing; see ValueMeasurer.
+    tooNarrowCells: { state: true },
+    fittingSpills: { state: true },
     theme: { type: String }
   };
 
@@ -408,9 +409,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     // painting over it.
     const mainMerged = buildMergedCellOverlays(main);
     const mainOverlays = this.quadrantOverlays(main);
-    const pane = (name: QuadrantName): TemplateResult | string => {
+    const pane = (name: QuadrantName): TemplateResult | typeof nothing => {
       const quadrant = frozen.find((q) => q.quadrantName === name);
-      return quadrant === undefined ? '' : this.frozenPane(quadrant);
+      return quadrant === undefined ? nothing : this.frozenPane(quadrant);
     };
     const top = pane('top');
     const left = pane('left');
