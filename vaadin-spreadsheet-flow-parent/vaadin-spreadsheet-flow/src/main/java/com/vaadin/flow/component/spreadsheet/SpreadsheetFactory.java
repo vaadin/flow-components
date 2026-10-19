@@ -87,8 +87,6 @@ public class SpreadsheetFactory implements Serializable {
     /**
      * Set to true if Spreadsheet should log its memory usage.
      */
-    private static boolean LOG_MEMORY = false;
-
     /**
      * Writes the current Workbook state from the given Spreadsheet to the given
      * file.
@@ -506,18 +504,12 @@ public class SpreadsheetFactory implements Serializable {
     }
 
     /**
-     * Runs garbage collection and outputs current memory usage to console.
+     * Does nothing.
+     *
+     * @deprecated Does nothing, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static void logMemoryUsage() {
-        // TODO make this a more comprehensive solution (output logging
-        // automatically if set?)
-        if (LOG_MEMORY) {
-            Runtime runtime = Runtime.getRuntime();
-            runtime.gc();
-            long tot = runtime.totalMemory();
-            long free = runtime.freeMemory();
-            LOGGER.info("Total: " + tot / 1000000 + " Free: " + free / 1000000
-                    + " Usage: " + (tot - free) / 1000000);
-        }
+        // The flag that turned the logging on was never set.
     }
 }

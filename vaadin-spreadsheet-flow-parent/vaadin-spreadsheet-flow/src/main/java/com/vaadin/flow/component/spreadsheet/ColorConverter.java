@@ -81,7 +81,9 @@ public interface ColorConverter extends Serializable {
      *            the cell style
      * @return Whether the given cell style has a defined background color or
      *         not.
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     boolean hasBackgroundColor(CellStyle cs);
 
     /**

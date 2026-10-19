@@ -760,7 +760,9 @@ public class CellValueManager implements Serializable {
      *            Target Cell
      * @param value
      *            Source for parsing the value
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     protected void parseValueIntoNumericCell(final Cell cell,
             final String value) {
         // try to parse the string with the existing cell format

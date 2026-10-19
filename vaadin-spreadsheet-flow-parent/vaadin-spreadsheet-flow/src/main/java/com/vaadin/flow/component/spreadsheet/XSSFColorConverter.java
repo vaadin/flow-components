@@ -266,6 +266,10 @@ public class XSSFColorConverter implements ColorConverter {
 
     }
 
+    /**
+     * @deprecated Not used by the component, and no replacement is planned.
+     */
+    @Deprecated(since = "25.4")
     @Override
     public boolean hasBackgroundColor(CellStyle cellStyle) {
         XSSFCellStyle cs = (XSSFCellStyle) cellStyle;

@@ -81,7 +81,9 @@ public class Action implements Serializable {
      * -method, which in many cases is easier than implementing the
      * Action.Handler interface.
      *
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     @FunctionalInterface
     public interface Listener extends Serializable {
         public void handleAction(Object sender, Object target);
@@ -92,13 +94,19 @@ public class Action implements Serializable {
      * single Actions than the more involved Action.Handler. The added actions
      * must be Action.Listeners, thus handling the action themselves.
      *
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public interface Notifier extends Container {
         public <T extends Action & Listener> void addAction(T action);
 
         public <T extends Action & Listener> void removeAction(T action);
     }
 
+    /**
+     * @deprecated Not used by the component, and no replacement is planned.
+     */
+    @Deprecated(since = "25.4")
     public interface ShortcutNotifier extends Serializable {
         /**
          * Add a shortcut listener and return a registration object for

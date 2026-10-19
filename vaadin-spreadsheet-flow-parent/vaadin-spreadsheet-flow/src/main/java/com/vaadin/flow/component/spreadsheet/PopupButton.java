@@ -290,6 +290,11 @@ public class PopupButton extends Component {
      * {@link PopupButton}.
      */
     public interface PopupOpenListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         public static final Method POPUP_OPEN_METHOD = ReflectTools.findMethod(
                 PopupOpenListener.class, "onPopupOpen", PopupOpenEvent.class);
 
@@ -334,6 +339,11 @@ public class PopupButton extends Component {
      * {@link PopupButton}.
      */
     public interface PopupCloseListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         public static final Method POPUP_CLOSE_METHOD = ReflectTools.findMethod(
                 PopupCloseListener.class, "onPopupClose",
                 PopupCloseEvent.class);

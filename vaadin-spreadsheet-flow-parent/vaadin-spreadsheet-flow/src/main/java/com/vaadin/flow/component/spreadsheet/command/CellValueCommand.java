@@ -101,7 +101,10 @@ public class CellValueCommand extends SpreadsheetCommand
 
     /**
      * Clears all values captured by this command.
+     *
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public void clearValues() {
         values.clear();
     }

@@ -3501,6 +3501,11 @@ public class Spreadsheet extends Component
      * Used for knowing when a user has changed the cell selection in any way.
      */
     public interface SelectionChangeListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         public static final Method SELECTION_CHANGE_METHOD = ReflectTools
                 .findMethod(SelectionChangeListener.class, "onSelectionChange",
                         SelectionChangeEvent.class);
@@ -3519,6 +3524,11 @@ public class Spreadsheet extends Component
      * UI.
      */
     public interface CellValueChangeListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         public static final Method CELL_VALUE_CHANGE_METHOD = ReflectTools
                 .findMethod(CellValueChangeListener.class, "onCellValueChange",
                         CellValueChangeEvent.class);
@@ -3537,6 +3547,11 @@ public class Spreadsheet extends Component
      * the Spreadsheet UI making the formula value change
      */
     public interface FormulaValueChangeListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         public static final Method FORMULA_VALUE_CHANGE_METHOD = ReflectTools
                 .findMethod(FormulaValueChangeListener.class,
                         "onFormulaValueChange", FormulaValueChangeEvent.class);
@@ -3604,6 +3619,11 @@ public class Spreadsheet extends Component
      * A listener for when an attempt to modify a locked cell has been made.
      */
     public interface ProtectedEditListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         public static final Method SELECTION_CHANGE_METHOD = ReflectTools
                 .findMethod(ProtectedEditListener.class, "writeAttempted",
                         ProtectedEditEvent.class);
@@ -3764,6 +3784,11 @@ public class Spreadsheet extends Component
      * A listener for when a sheet is selected.
      */
     public interface SheetChangeListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         public static final Method SHEET_CHANGE_METHOD = ReflectTools
                 .findMethod(SheetChangeListener.class, "onSheetChange",
                         SheetChangeEvent.class);
@@ -4161,6 +4186,11 @@ public class Spreadsheet extends Component
      * Interface for listening a {@link RowHeaderDoubleClickEvent} event
      **/
     public interface RowHeaderDoubleClickListener extends Serializable {
+        /**
+         * @deprecated Not used: the component calls its listeners through its
+         *             event bus. No replacement is planned.
+         */
+        @Deprecated(since = "25.4")
         Method ON_ROW_ON_ROW_HEADER_DOUBLE_CLICK = ReflectTools.findMethod(
                 RowHeaderDoubleClickListener.class, "onRowHeaderDoubleClick",
                 RowHeaderDoubleClickEvent.class);

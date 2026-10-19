@@ -41,7 +41,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetTheme;
-import com.vaadin.flow.component.spreadsheet.SpreadsheetFactory;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Receiver;
@@ -173,10 +172,8 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
 
         Button closeButton = new Button("Close", event -> {
             if (spreadsheet != null) {
-                SpreadsheetFactory.logMemoryUsage();
                 spreadsheetContainer.remove(spreadsheet);
                 spreadsheet = null;
-                SpreadsheetFactory.logMemoryUsage();
                 disableCheckboxes();
             }
         });

@@ -301,7 +301,11 @@ public class SpreadsheetTable implements Serializable {
      * @param ctWorksheetAutoFilter
      *            Referenced autofilter.
      * @since 24.2.4
+     * @deprecated Pass the auto-filter to
+     *             {@link #SpreadsheetTable(Spreadsheet, Sheet, CellRangeAddress, CTAutoFilter, XSSFTable)}
+     *             instead.
      */
+    @Deprecated(since = "25.4")
     protected void setCtWorksheetAutoFilter(
             CTAutoFilter ctWorksheetAutoFilter) {
         this.ctWorksheetAutoFilter = ctWorksheetAutoFilter;
@@ -324,7 +328,11 @@ public class SpreadsheetTable implements Serializable {
      * @param xssfTable
      *            Referenced table.
      * @since 24.2.4
+     * @deprecated Pass the table to
+     *             {@link #SpreadsheetTable(Spreadsheet, Sheet, CellRangeAddress, CTAutoFilter, XSSFTable)}
+     *             instead.
      */
+    @Deprecated(since = "25.4")
     protected void setXssfTable(XSSFTable xssfTable) {
         this.xssfTable = xssfTable;
     }

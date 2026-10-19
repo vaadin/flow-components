@@ -74,7 +74,9 @@ public class ReflectTools implements Serializable {
      *             If the value could not be retrieved
      * @throws IllegalArgumentException
      *             If the value could not be retrieved
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static Object getJavaFieldValue(Object object, Field field)
             throws IllegalArgumentException, IllegalAccessException,
             InvocationTargetException {
@@ -118,7 +120,9 @@ public class ReflectTools implements Serializable {
      *             If the value could not be retrieved
      * @throws IllegalArgumentException
      *             If the value could not be retrieved
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static Object getJavaFieldValue(Object object, Field field,
             Class<?> propertyType) throws IllegalArgumentException,
             IllegalAccessException, InvocationTargetException {
@@ -164,7 +168,9 @@ public class ReflectTools implements Serializable {
      *             If the value could not be assigned to the field
      * @throws InvocationTargetException
      *             If the value could not be assigned to the field
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static void setJavaFieldValue(Object object, Field field,
             Object value) throws IllegalAccessException,
             IllegalArgumentException, InvocationTargetException {
@@ -189,7 +195,10 @@ public class ReflectTools implements Serializable {
     }
 
     /**
+     *
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static Class<?> convertPrimitiveType(Class<?> type) {
         // Gets the return type from get method
         if (type.isPrimitive()) {
@@ -225,7 +234,9 @@ public class ReflectTools implements Serializable {
      * @param b
      *            another class to get the base type for, not <code>null</code>
      * @return the most specific base class, not <code>null</code>
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static Class<?> findCommonBaseType(Class<?> a, Class<?> b) {
         if (a.isInterface()) {
             throw new IllegalArgumentException("a cannot be an interface");
@@ -258,7 +269,9 @@ public class ReflectTools implements Serializable {
      * @param cls
      *            the class to instantiate
      * @return an instance of the class
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static <T> T createInstance(Class<T> cls) {
         checkClassAccessibility(cls);
         try {
@@ -322,7 +335,9 @@ public class ReflectTools implements Serializable {
      * @return the first non-synthetic method
      * @throws IllegalStateException
      *             if the specified class does not have found method
+     * @deprecated Not used by the component, and no replacement is planned.
      */
+    @Deprecated(since = "25.4")
     public static Method getMethod(Class<?> listenerClass) {
         for (Method m : listenerClass.getDeclaredMethods()) {
             if (!m.isSynthetic()) {

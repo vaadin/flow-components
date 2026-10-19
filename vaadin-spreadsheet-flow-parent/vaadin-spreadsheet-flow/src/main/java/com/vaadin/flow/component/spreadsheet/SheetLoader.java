@@ -248,7 +248,6 @@ final class SheetLoader implements Serializable {
      * merged cells, frozen panes, protection, outline and named ranges.
      */
     private void loadParts(final Sheet sheet) {
-        SpreadsheetFactory.logMemoryUsage();
         // What POI cannot read of a sheet is left out, and the rest loaded.
         loadPart("row height",
                 () -> spreadsheet.sizes().loadDefaultRowHeight(sheet));
@@ -267,7 +266,6 @@ final class SheetLoader implements Serializable {
         loadPart("grouping", () -> spreadsheet.outline().load());
         loadPart("named ranges",
                 () -> SpreadsheetFactory.loadNamedRanges(spreadsheet));
-        SpreadsheetFactory.logMemoryUsage();
     }
 
     private static void loadPart(String part, Runnable load) {

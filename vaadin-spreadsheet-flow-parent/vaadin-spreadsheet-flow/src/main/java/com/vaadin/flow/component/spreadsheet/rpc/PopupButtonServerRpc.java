@@ -12,7 +12,10 @@ import java.io.Serializable;
 
 /**
  * @since 23.1
+ * @deprecated Not used: the pop-up button hears of its opening and closing from
+ *             the element. No replacement is planned.
  */
+@Deprecated(since = "25.4")
 public interface PopupButtonServerRpc extends Serializable {
 
     /**

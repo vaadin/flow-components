@@ -341,7 +341,11 @@ public class SpreadsheetStyleFactory implements Serializable {
     /**
      * Does nothing: the borders the cells draw on other cells than their own
      * reach the client before the next response after each change to them.
+     *
+     * @deprecated Does nothing, and no replacement is planned: the borders
+     *             reach the client after each change by themselves.
      */
+    @Deprecated(since = "25.4")
     public void loadCustomBorderStylesToState() {
         // nothing to do
     }

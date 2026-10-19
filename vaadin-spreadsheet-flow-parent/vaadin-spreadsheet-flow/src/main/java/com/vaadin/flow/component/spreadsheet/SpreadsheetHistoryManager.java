@@ -72,12 +72,10 @@ public class SpreadsheetHistoryManager implements Serializable {
      *            Command to add as the latest command in history
      */
     public void addCommand(Command command) {
-        SpreadsheetFactory.logMemoryUsage();
         // Through the protected hook, for a subclass that overrides it.
         discardAllAfter(historyIndex);
         stack.push(command);
         historyIndex = stack.getCursor();
-        SpreadsheetFactory.logMemoryUsage();
     }
 
     /**
