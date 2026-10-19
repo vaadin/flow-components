@@ -68,7 +68,7 @@ describe('Spreadsheet store characterization — drawn before the server is told
     expect(ctx.types()).to.eql(['onSheetScroll', 'cellSelected']);
   });
 
-  it('reports a move at once and the rows it scrolls to later, when they are loaded', async () => {
+  it('reports each move at once, and the rows it scrolls to once', async () => {
     ctx = attachSheet({ rows: 200 });
     await afterFrames();
     ctx.sheet.setSelectedCellAndRange('', 1, 12, 1, 1, 12, 12, false);
@@ -78,11 +78,15 @@ describe('Spreadsheet store characterization — drawn before the server is told
     for (let row = 13; row <= 18; row++) {
       pressOnSheet(ctx.sheet, 'ArrowDown');
     }
-    expect(ctx.types(), 'at once').to.eql(new Array(6).fill('cellSelected'));
+    const cellsSelected = () => ctx.types().filter((type) => type === 'cellSelected');
+    expect(cellsSelected(), 'at once').to.have.length(6);
     expect(ctx.sheet.getScrollContainer().scrollTop, 'scrolled').to.be.greaterThan(0);
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    expect(ctx.types().slice(6)).to.eql(['onSheetScroll']);
+    // The rows scrolled to go past the first screen's: asked for as they
+    // come into view, or once the scroll stops - once either way.
+    expect(ctx.types().filter((type) => type === 'onSheetScroll')).to.have.length(1);
+    expect(cellsSelected()).to.have.length(6);
   });
 
   it('has the cell grid showing the new cell when a move is reported', () => {

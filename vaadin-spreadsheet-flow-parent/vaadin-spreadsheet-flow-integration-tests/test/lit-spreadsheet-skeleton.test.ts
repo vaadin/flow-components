@@ -1909,15 +1909,15 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         const scroller = sheet.getScrollContainer();
         scroller.scrollTop = 200; // 10 rows down (20px each)
         scroller.dispatchEvent(new Event('scroll'));
-        // None of them was loaded: they are asked for first, and once the
-        // scroll has stopped, the cells past them.
+        // Nothing was loaded yet: this is the sheet's first screen, which
+        // comes in one request with a quarter screen past it.
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         // Rows from 11 are in view. The request covers them and loads
         // ahead, so the next steps of a scroll need no request of their own.
         expect(received).to.exist;
         expect(received!.data.firstRow).to.be.at.most(11);
-        expect(received!.data.lastRow).to.be.greaterThan(15);
+        expect(received!.data.lastRow).to.be.greaterThan(received!.data.drawnLastRow);
         cleanup();
     });
 

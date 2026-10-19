@@ -123,13 +123,27 @@ function setUp(sheet: Partial<{ rows: number; frozenRows: number; frozenCols: nu
       busy = value;
     },
     /**
-     * Open the sheet: its first screen is asked for, then, once it is in -
-     * at once here, as no server keeps it waiting - the margin around it,
-     * and that is in too. The requests are counted from there.
+     * Open the sheet: its first screen and a quarter screen below it, rows 1
+     * to 38, are asked for and in - at once here, as no server keeps them
+     * waiting. The requests are counted from there.
      */
     open() {
       loader.check();
       time.advance(60);
+      loads.length = 0;
+    },
+    /**
+     * Open the sheet and scroll it a row down, which loads the margin below
+     * it: rows 1 to 76 loaded, rows 2 to 31 drawn, the sheet stopped.
+     */
+    openWithMargin() {
+      this.open();
+      loader.scrolled(0, 0);
+      time.advance(16);
+      loader.scrolled(20, 0);
+      drawn = { r1: 2, c1: 1, r2: 31, c2: 10 };
+      loader.check();
+      time.advance(400);
       loads.length = 0;
     },
     /** Scroll to a row at a reading pace, then stop. */
@@ -141,19 +155,27 @@ function setUp(sheet: Partial<{ rows: number; frozenRows: number; frozenCols: nu
 }
 
 describe('ViewportLoader', () => {
-  it('asks for the drawn cells first, and for a screen and a half below them once those are in', () => {
-    // On a slow network, the first screen came 0.3-1 s after GWT's while
-    // the margin came along.
+  it('asks for the drawn cells and a quarter screen below them in one request, and nothing more until the sheet scrolls', () => {
+    // A sheet is complete after one round trip, as with GWT. Asked for alone,
+    // with the margin once they were in, the cells took a round trip more;
+    // with the whole margin, the first screen came later on a slow network.
     const t = setUp();
 
     t.loader.check();
-    expect(t.loads, 'at first').to.eql([{ r1: 1, c1: 1, r2: 30, c2: 10 }]);
-    t.time.advance(30);
+    t.time.advance(400);
 
-    expect(t.loads).to.eql([
-      { r1: 1, c1: 1, r2: 30, c2: 10 },
-      { r1: 1, c1: 1, r2: 75, c2: 10 }
-    ]);
+    expect(t.loads).to.eql([{ r1: 1, c1: 1, r2: 38, c2: 10 }]);
+  });
+
+  it('loads the margin with the first scroll that leaves the first screen', () => {
+    const t = setUp();
+    t.open();
+
+    t.loader.scrolled(200, 0);
+    t.show({ r1: 11, c1: 1, r2: 40, c2: 10 });
+    t.loader.check();
+
+    expect(t.loads).to.eql([{ r1: 1, c1: 1, r2: 85, c2: 10 }]);
   });
 
   it('after a jump to cells none of which are loaded, asks for them first, and for their margin once they are in', () => {
@@ -169,18 +191,23 @@ describe('ViewportLoader', () => {
     expect(t.loads[1]).to.eql({ r1: 486, c1: 1, r2: 575, c2: 10 });
   });
 
-  it('asks for the margin once the sheet has stopped, if it moves on before the drawn cells are in', () => {
+  it('asks for the margin of a jump once the sheet has stopped, if it moves on before the drawn cells are in', () => {
     const t = setUp();
     t.serverAnswersAfterEachLoad();
     t.loader.check();
+    t.answer();
+    t.time.advance(30);
+    t.scrollTo(10000);
+    t.show({ r1: 501, c1: 1, r2: 530, c2: 10 });
+    t.loader.check();
 
-    t.loader.scrolled(20, 0);
+    t.loader.scrolled(10020, 0);
     t.answer();
     t.time.advance(60);
-    expect(t.loads, 'while it moves').to.have.length(1);
+    expect(t.loads, 'while it moves').to.have.length(2);
     t.time.advance(200);
 
-    expect(t.loads[1]).to.eql({ r1: 1, c1: 1, r2: 75, c2: 10 });
+    expect(t.loads[2]).to.eql({ r1: 486, c1: 1, r2: 575, c2: 10 });
   });
 
   it('asks for the margin with the next cells, when the sheet has moved on to cells not loaded', () => {
@@ -194,7 +221,7 @@ describe('ViewportLoader', () => {
     t.time.advance(400);
 
     expect(t.loads).to.eql([
-      { r1: 1, c1: 1, r2: 30, c2: 10 },
+      { r1: 1, c1: 1, r2: 38, c2: 10 },
       { r1: 1, c1: 1, r2: 85, c2: 10 }
     ]);
   });
@@ -229,27 +256,33 @@ describe('ViewportLoader', () => {
     expect(t.loads).to.have.length(1);
   });
 
-  it('still asks for the margin of the first screen, drawn anew before it went', () => {
+  it('asks nothing more for a first screen drawn smaller before its cells came', () => {
     const t = setUp();
     t.loader.check();
 
     t.show({ r1: 1, c1: 1, r2: 25, c2: 10 });
-    t.time.advance(30);
+    t.time.advance(400);
 
-    expect(t.loads[1]).to.eql({ r1: 1, c1: 1, r2: 63, c2: 10 });
+    expect(t.loads).to.eql([{ r1: 1, c1: 1, r2: 38, c2: 10 }]);
   });
 
-  it('waits for the drawn cells to be in before asking for their margin', () => {
+  it('after a jump, waits for the drawn cells to be in before asking for their margin', () => {
     const t = setUp();
     t.serverAnswersAfterEachLoad();
     t.loader.check();
+    t.answer();
+    t.time.advance(30);
+    t.loads.length = 0;
 
+    t.scrollTo(10000);
+    t.show({ r1: 501, c1: 1, r2: 530, c2: 10 });
+    t.loader.check();
     t.time.advance(100);
-    expect(t.loads, 'while they are on their way').to.have.length(1);
+    expect(t.loads, 'while they are on their way').to.eql([{ r1: 501, c1: 1, r2: 530, c2: 10 }]);
     t.answer();
     t.time.advance(30);
 
-    expect(t.loads[1]).to.eql({ r1: 1, c1: 1, r2: 75, c2: 10 });
+    expect(t.loads[1]).to.eql({ r1: 486, c1: 1, r2: 575, c2: 10 });
   });
 
   // Drawn cells that share a row or a column with what was loaded are not
@@ -259,11 +292,11 @@ describe('ViewportLoader', () => {
     const t = setUp();
     t.open();
 
-    t.scrollTo(1480);
-    t.show({ r1: 75, c1: 1, r2: 104, c2: 10 });
+    t.scrollTo(740);
+    t.show({ r1: 38, c1: 1, r2: 67, c2: 10 });
     t.loader.check();
 
-    expect(t.loads).to.eql([{ r1: 60, c1: 1, r2: 149, c2: 10 }]);
+    expect(t.loads).to.eql([{ r1: 23, c1: 1, r2: 112, c2: 10 }]);
   });
 
   it('loads the margin at once with cells that share their last row with the first row loaded', () => {
@@ -319,14 +352,14 @@ describe('ViewportLoader', () => {
     t.open();
     t.scrollTo(0);
 
-    t.loader.scrolled(400, 0);
-    t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
+    t.loader.scrolled(100, 0);
+    t.show({ r1: 6, c1: 1, r2: 35, c2: 10 });
     t.loader.check();
     expect(t.loads, 'asked while scrolling').to.be.empty;
 
     t.time.advance(200);
 
-    expect(t.loads).to.eql([{ r1: 6, c1: 1, r2: 95, c2: 10 }]);
+    expect(t.loads).to.eql([{ r1: 1, c1: 1, r2: 80, c2: 10 }]);
   });
 
   it('asks nothing more once the server knows where the sheet stopped', () => {
@@ -365,8 +398,6 @@ describe('ViewportLoader', () => {
     t.loader.check();
     expect(t.loader.pending, 'with its request out').to.be.true;
     t.time.advance(30);
-    expect(t.loader.pending, 'with the margin asked for').to.be.true;
-    t.time.advance(30);
     expect(t.loader.pending, 'answered').to.be.false;
 
     t.loader.scrolled(400, 0);
@@ -380,8 +411,13 @@ describe('ViewportLoader', () => {
   it('asks again once the drawn cells leave what was loaded, half a screen behind and a screen and a half ahead', () => {
     const t = setUp();
     t.open();
-
     t.scrollTo(0);
+    t.scrollTo(200);
+    t.show({ r1: 11, c1: 1, r2: 40, c2: 10 });
+    t.loader.check();
+    expect(t.loads, 'the margin of the first scroll').to.eql([{ r1: 1, c1: 1, r2: 85, c2: 10 }]);
+    t.loads.length = 0;
+
     t.scrollTo(1200);
     t.show({ r1: 61, c1: 1, r2: 90, c2: 10 });
     t.loader.check();
@@ -421,26 +457,30 @@ describe('ViewportLoader', () => {
 
   it('loads ahead upwards when scrolling up', () => {
     const t = setUp();
+    t.open();
     t.scrollTo(10000);
-    t.scrollTo(9980);
-    t.show({ r1: 500, c1: 1, r2: 529, c2: 10 });
-
+    t.show({ r1: 501, c1: 1, r2: 530, c2: 10 });
     t.loader.check();
     t.time.advance(30);
+    expect(t.loads[1], 'the margin below the jump').to.eql({ r1: 486, c1: 1, r2: 575, c2: 10 });
 
-    expect(t.loads[1]).to.eql({ r1: 455, c1: 1, r2: 544, c2: 10 });
+    t.scrollTo(9600);
+    t.show({ r1: 481, c1: 1, r2: 510, c2: 10 });
+    t.loader.check();
+
+    expect(t.loads[2]).to.eql({ r1: 436, c1: 1, r2: 525, c2: 10 });
   });
 
   it('loads columns ahead too when scrolling sideways', () => {
     const t = setUp();
+    t.open();
     t.scrollTo(0, 0);
-    t.scrollTo(0, 1200);
-    t.show({ r1: 1, c1: 20, r2: 30, c2: 29 });
+    t.scrollTo(0, 320);
+    t.show({ r1: 1, c1: 6, r2: 30, c2: 15 });
 
     t.loader.check();
-    t.time.advance(30);
 
-    expect(t.loads[1]).to.eql({ r1: 1, c1: 15, r2: 75, c2: 44 });
+    expect(t.loads).to.eql([{ r1: 1, c1: 1, r2: 75, c2: 30 }]);
   });
 
   it('asks one thing at a time, and then for where the sheet is, not where it was', () => {
@@ -494,7 +534,7 @@ describe('ViewportLoader', () => {
 
   it('on a machine drawing slow frames, holds back while the sheet scrolls, and asks once it stops', () => {
     const t = setUp();
-    t.open();
+    t.openWithMargin();
     t.time.setFrameInterval(120);
 
     // 10 rows a frame: slow enough to load on the way on a fast machine.
@@ -531,7 +571,7 @@ describe('ViewportLoader', () => {
     // Two frames are 32 ms at 60 Hz: the pause between two turns of a wheel
     // would count as a stop, and each would ask the server again.
     const t = setUp();
-    t.open();
+    t.openWithMargin();
     t.scrollTo(0);
     t.loader.scrolled(400, 0);
     t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
@@ -562,7 +602,7 @@ describe('ViewportLoader', () => {
 
   it('counts the time between slow frames as scrolling, not as a stop', () => {
     const t = setUp();
-    t.open();
+    t.openWithMargin();
     t.scrollTo(0);
     t.time.setFrameInterval(150);
 
@@ -595,7 +635,7 @@ describe('ViewportLoader', () => {
 
   it('on a machine drawing fewer than 30 frames a second, holds back while the sheet scrolls', () => {
     const t = setUp();
-    t.open();
+    t.openWithMargin();
 
     for (let step = 1; step <= 8; step++) {
       scrollOn(t, step, 45);
@@ -637,7 +677,7 @@ describe('ViewportLoader', () => {
 
   it('takes a fast machine slowing down for a slow one from its second slow frame', () => {
     const t = setUp();
-    t.open();
+    t.openWithMargin();
     for (let step = 1; step <= 3; step++) {
       scrollOn(t, step, 16);
     }
@@ -664,7 +704,7 @@ describe('ViewportLoader', () => {
 
   it('takes a slow machine with one short frame for a slow machine still', () => {
     const t = setUp();
-    t.open();
+    t.openWithMargin();
 
     for (let step = 1; step <= 8; step++) {
       scrollOn(t, step, step === 5 ? 28 : 45);
@@ -679,8 +719,8 @@ describe('ViewportLoader', () => {
     t.open();
     t.scrollTo(0);
     t.time.setFrameInterval(Number.POSITIVE_INFINITY);
-    t.loader.scrolled(400, 0);
-    t.show({ r1: 21, c1: 1, r2: 50, c2: 10 });
+    t.loader.scrolled(100, 0);
+    t.show({ r1: 6, c1: 1, r2: 35, c2: 10 });
     t.loader.check();
 
     t.time.advance(500);
@@ -698,9 +738,7 @@ describe('ViewportLoader', () => {
     t.answer();
     t.time.advance(30);
     expect(t.loader.loadRoundTrip).to.be.greaterThan(400);
-    expect(t.loads[1], 'the margin of the first screen').to.eql({ r1: 1, c1: 1, r2: 38, c2: 10 });
-    t.time.advance(1000);
-    t.answer();
+    expect(t.loads, 'the first screen and a quarter screen below it').to.eql([{ r1: 1, c1: 1, r2: 38, c2: 10 }]);
 
     t.scrollTo(0);
     t.scrollTo(6000);
@@ -710,7 +748,7 @@ describe('ViewportLoader', () => {
     t.answer();
     t.time.advance(30);
 
-    expect(t.loads.slice(2)).to.eql([
+    expect(t.loads.slice(1)).to.eql([
       { r1: 301, c1: 1, r2: 330, c2: 10 },
       { r1: 301, c1: 1, r2: 338, c2: 10 }
     ]);
@@ -732,11 +770,15 @@ describe('ViewportLoader', () => {
   it('stays inside the sheet and below its frozen rows', () => {
     const t = setUp({ rows: 40, frozenRows: 3 });
     t.show({ r1: 4, c1: 1, r2: 33, c2: 10 });
-
     t.loader.check();
     t.time.advance(30);
+    expect(t.loads, 'the first screen').to.eql([{ r1: 4, c1: 1, r2: 40, c2: 10 }]);
 
-    expect(t.loads[1]).to.eql({ r1: 4, c1: 1, r2: 40, c2: 10 });
+    t.scrollTo(20);
+    t.show({ r1: 5, c1: 1, r2: 34, c2: 10 });
+    t.loader.check();
+
+    expect(t.loads[1], 'where it stopped').to.eql({ r1: 4, c1: 1, r2: 40, c2: 10 });
   });
 
   it('forgets what was loaded on reset, and loads it again', () => {
@@ -763,8 +805,8 @@ describe('ViewportLoader', () => {
     const t = setUp();
     t.open();
 
-    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 75, c2: 10 }), 'all of it').to.be.true;
-    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 76, c2: 10 }), 'a row past it').to.be.false;
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 38, c2: 10 }), 'all of it').to.be.true;
+    expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 39, c2: 10 }), 'a row past it').to.be.false;
     expect(t.loader.hasLoaded({ r1: 1, c1: 1, r2: 10, c2: 11 }), 'a column past it').to.be.false;
   });
 

@@ -74,15 +74,16 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     expect(Math.max(...loads.map((l) => l.lastRow))).to.be.greaterThan(drawn().lastRow);
   });
 
-  it('asks for the cells it draws first, and for those past them after', async () => {
-    // On a slow network, the first screen came 0.3-1 s after GWT's while
-    // the margin came along.
+  it('asks for the cells it draws and a quarter screen below them, in one request', async () => {
+    // A sheet is complete after one round trip, as with GWT; the margin
+    // comes with the first scroll.
     await open();
 
-    expect(loadedBy(loads[0])).to.eql(drawn());
-    expect(loads[1].lastRow).to.be.greaterThan(drawn().lastRow);
-    // Each tells the server what is drawn, the margin's too.
-    expect(loads.map(drawnBy)).to.eql([drawn(), drawn()]);
+    const shown = drawn();
+    const quarter = Math.ceil((shown.lastRow - shown.firstRow + 1) / 4);
+    expect(loads.map(loadedBy)).to.eql([{ ...shown, lastRow: shown.lastRow + quarter }]);
+    // It tells the server what is drawn.
+    expect(loads.map(drawnBy)).to.eql([shown]);
   });
 
   /** Scroll the sheet down to the pixel, as the user does. */
@@ -106,7 +107,9 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     await open();
     loads = [];
 
-    scrollTo(300);
+    // A row: inside what was loaded, the server hears of it once the
+    // scroll stops.
+    scrollTo(15);
     sheet.disconnect();
     await new Promise((resolve) => setTimeout(resolve, 400));
 

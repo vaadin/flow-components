@@ -103,10 +103,15 @@ const FRAMES_TIMED = 3;
  * <li>Ask only when the drawn cells are not all loaded, and then load a
  * margin ahead in the direction of scrolling, so a steady scroll needs a
  * request only every screen or so.
- * <li>When none of the drawn cells are loaded - the first screen, or after
- * a jump - ask for them alone first, and for the margin once they are in.
- * On a slow network the first screen came 0.3-1 s after GWT's, and the
- * first jump took twice as long, while the margin came along.
+ * <li>The first screen comes in one request, with a quarter screen below
+ * it, as on a slow connection: a sheet is complete after one round trip, as
+ * with GWT, and its margin comes with the first scroll. Loaded with its
+ * margin, the first screen came 0.3-1 s after GWT's on a slow network;
+ * loaded alone, with the margin asked for once it was in, the sheet took a
+ * round trip more than GWT's to load.
+ * <li>When none of the drawn cells are loaded after a jump, ask for them
+ * alone first, and for the margin once they are in. On a slow network the
+ * first jump took twice as long while the margin came along.
  * <li>Once the sheet stops, tell the server where, even when its cells are
  * all loaded. The server uses the
  * range it was last given for more than cells: it closes the popup of a
@@ -245,6 +250,11 @@ export class ViewportLoader implements ReactiveController {
       this.checkLater();
       return;
     }
+    if (this.loaded === null) {
+      // The first screen, and a quarter screen below it, in one request.
+      this.load(this.target(drawn, true), drawn);
+      return;
+    }
     if (!this.overlapsLoaded(drawn) && !sameRange(target, drawn)) {
       this.load(drawn, drawn);
       this.marginToFollow = true;
@@ -346,12 +356,14 @@ export class ViewportLoader implements ReactiveController {
     );
   }
 
-  /** The drawn range plus the margin to load with it, within the sheet. */
-  private target(drawn: LoadRange): LoadRange {
+  /**
+   * The drawn range plus the margin to load with it, within the sheet: the
+   * margin of a slow connection when `slow` says so.
+   */
+  private target(drawn: LoadRange, slow = this.roundTrip > SLOW_ROUND_TRIP_MS): LoadRange {
     const sheet = this.host.sheet();
     const rows = drawn.r2 - drawn.r1 + 1;
     const cols = drawn.c2 - drawn.c1 + 1;
-    const slow = this.roundTrip > SLOW_ROUND_TRIP_MS;
     // A screen and a half ahead and half a screen behind on the axis that
     // scrolls; a quarter screen ahead on a slow connection.
     const ahead = (n: number) => (sheet.noMargin ? 0 : slow ? Math.ceil(n / 4) : n + Math.ceil(n / 2));
