@@ -49,14 +49,10 @@ import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.PaneInformation;
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jspecify.annotations.Nullable;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -572,6 +568,9 @@ public class Spreadsheet extends Component
     /** The selection the sheet shown next is shown with. */
     private final PendingSelection pendingSelection = new PendingSelection(
             this);
+
+    /** The groups of rows and columns of the sheet shown. */
+    private final Outline outline = new Outline(this);
 
     final CellCommentLoader cellCommentLoader = new CellCommentLoader(this);
 
@@ -2626,6 +2625,11 @@ public class Spreadsheet extends Component
         return pendingSelection;
     }
 
+    /** The groups of rows and columns of the sheet shown. */
+    Outline outline() {
+        return outline;
+    }
+
     SheetState sheetState() {
         return workbookScope.sheetState;
     }
@@ -4093,26 +4097,7 @@ public class Spreadsheet extends Component
      */
     protected void setGroupingCollapsed(boolean isCols, int index,
             boolean collapsed) {
-
-        XSSFSheet activeSheet = (XSSFSheet) getActiveSheet();
-        if (isCols) {
-            if (collapsed) {
-                GroupingUtil.collapseColumn(activeSheet, index);
-            } else {
-                // The cells of the columns shown are sent below, for the
-                // rows on the screen.
-                GroupingUtil.expandColumn(activeSheet, index);
-            }
-        } else {
-            if (collapsed) {
-                GroupingUtil.collapseRow(activeSheet, index);
-            } else {
-                GroupingUtil.expandRow(activeSheet, index);
-            }
-        }
-        SpreadsheetFactory.loadGrouping(this);
-        // The rows and columns the group hid or showed are read again.
-        sheetSizes.groupToggled();
+        outline.setCollapsed(isCols, index, collapsed);
     }
 
     /**
@@ -4124,84 +4109,7 @@ public class Spreadsheet extends Component
      *            which level the user clicked
      */
     protected void levelHeaderClicked(boolean isCols, int level) {
-
-        /*
-         * A click on a header should change groupings so that all levels above
-         * the selected are expanded, and the selected level is all collapsed
-         * (which hides any levels underneath this).
-         */
-
-        if (!(getActiveSheet() instanceof XSSFSheet xsheet)) {
-            return;
-        }
-        CTWorksheet ctWorksheet = xsheet.getCTWorksheet();
-
-        if (isCols) {
-
-            CTCols ctCols = ctWorksheet.getColsList().get(0);
-            List<CTCol> colList = ctCols.getColList();
-            for (CTCol col : colList) {
-                short l = col.getOutlineLevel();
-
-                // It's a lot easier to not call expand/collapse
-
-                if (l >= 0 && l < level) {
-                    // expand
-                    if (col.isSetHidden()) {
-                        col.unsetHidden();
-                    }
-                } else {
-                    // collapse
-                    col.setHidden(true);
-                }
-            }
-
-        } else {
-
-            /*
-             * Groups are more complicated than cols, use existing
-             * collapse/expand functionality.
-             */
-
-            int lastlevel = 0;
-            for (int i = 0; i < getRows(); i++) {
-
-                XSSFRow row = xsheet.getRow(i);
-                if (row == null) {
-                    lastlevel = 0;
-                    continue;
-                }
-
-                short l = row.getCTRow().getOutlineLevel();
-                if (l != lastlevel) {
-
-                    // group starts here
-
-                    int end = (int) GroupingUtil.findEndOfRowGroup(this, i, l);
-                    long uniqueIndex = GroupingUtil.findUniqueRowIndex(this, i,
-                            end, l);
-
-                    if (l > 0 && l < level) {
-                        // expand
-                        GroupingUtil.expandRow(xsheet, (int) uniqueIndex);
-
-                    } else if (l >= level) {
-                        // collapse
-                        GroupingUtil.collapseRow(xsheet, (int) uniqueIndex);
-                    }
-
-                    lastlevel = l;
-                }
-
-            }
-
-        }
-
-        // As for one group: the grouping and the sizes are read again. Loading
-        // the whole workbook again, as this once did, emptied the undo history
-        // and dropped what the application had set on the sheet.
-        SpreadsheetFactory.loadGrouping(this);
-        sheetSizes.groupToggled();
+        outline.showLevel(isCols, level);
     }
 
     /**

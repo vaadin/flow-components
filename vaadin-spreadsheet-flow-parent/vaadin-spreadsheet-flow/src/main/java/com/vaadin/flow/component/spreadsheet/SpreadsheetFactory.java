@@ -16,10 +16,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -47,7 +44,6 @@ import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFGraphicFrame;
 import org.apache.poi.xssf.usermodel.XSSFPicture;
 import org.apache.poi.xssf.usermodel.XSSFPictureData;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
@@ -57,16 +53,10 @@ import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTOneCellAnchor;
 import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTTwoCellAnchor;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFilterColumn;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTOutlinePr;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 
 /**
  * SpreadsheetFactory is an utility class of the Spreadsheet component. It is
@@ -341,7 +331,7 @@ public class SpreadsheetFactory implements Serializable {
         loadPart("merged cells", spreadsheet.mergedRegionOperations::load);
         loadPart("frozen panes", () -> loadFreezePane(spreadsheet));
         loadPart("protection", () -> loadSheetProtection(spreadsheet));
-        loadPart("grouping", () -> loadGrouping(spreadsheet));
+        loadPart("grouping", () -> spreadsheet.outline().load());
         loadPart("named ranges", () -> loadNamedRanges(spreadsheet));
         logMemoryUsage();
     }
@@ -494,271 +484,6 @@ public class SpreadsheetFactory implements Serializable {
                 .set(isProtected && protection.getFormatColumns());
         spreadsheet.sheetModel().lockFormatRows
                 .set(isProtected && protection.getFormatRows());
-    }
-
-    /**
-     * Loads all data relating to grouping if the current sheet is a
-     * {@link XSSFSheet}.
-     *
-     * <p>
-     * Top-level orchestrator: bail out for HSSF, capture outline-pr settings,
-     * then process the column and row outlines separately. The two
-     * outline-processing branches are independent (they touch different POI
-     * types and different Spreadsheet setters), so they live in dedicated
-     * helpers below.
-     */
-    static void loadGrouping(Spreadsheet spreadsheet) {
-
-        if (!(spreadsheet.getActiveSheet() instanceof XSSFSheet xssfSheet)) {
-            // API not available on HSSF
-            return;
-        }
-
-        CTWorksheet ctWorksheet = xssfSheet.getCTWorksheet();
-        spreadsheet.sheetModel().colGroupingMax.set(0);
-        spreadsheet.sheetModel().rowGroupingMax.set(0);
-
-        if (ctWorksheet.getSheetPr() != null
-                && ctWorksheet.getSheetPr().getOutlinePr() != null) {
-            CTOutlinePr outlinePr = ctWorksheet.getSheetPr().getOutlinePr();
-            spreadsheet.sheetModel().colGroupingInversed
-                    .set(!outlinePr.getSummaryRight());
-            spreadsheet.sheetModel().rowGroupingInversed
-                    .set(!outlinePr.getSummaryBelow());
-        } else {
-            spreadsheet.sheetModel().colGroupingInversed.set(false);
-            spreadsheet.sheetModel().rowGroupingInversed.set(false);
-        }
-
-        loadColumnGrouping(spreadsheet, ctWorksheet);
-        loadRowGrouping(spreadsheet);
-    }
-
-    /**
-     * Column-outline branch of {@link #loadGrouping}.
-     *
-     * <p>
-     * Columns are grouped so that columns that are beside each other and share
-     * properties have a single {@code CTCol} with a min and max index. A column
-     * that is part of a group has an outline level. Each col also has a
-     * property called 'collapsed', which doesn't appear to be used for
-     * anything. If a group is collapsed, each col in the group has its
-     * 'visibility' property set to false.
-     */
-    private static void loadColumnGrouping(Spreadsheet spreadsheet,
-            CTWorksheet ctWorksheet) {
-        CTCols colsArray = ctWorksheet.getColsArray(0);
-
-        List<GroupingData> data = new ArrayList<GroupingData>();
-
-        short lastlevel = 0;
-        CTCol prev = null;
-        for (CTCol col : colsArray.getColList()) {
-
-            if (prev != null && prev.getMax() + 1 < col.getMin()) {
-                // break in cols, reset level
-                lastlevel = 0;
-            }
-
-            if (col.getOutlineLevel() > lastlevel) {
-
-                // new group starts
-
-                // multiple groups might start on the same column, go through
-                // each in order
-                while (lastlevel != col.getOutlineLevel()) {
-
-                    lastlevel++;
-                    if (spreadsheet.sheetModel().colGroupingMax
-                            .get() < lastlevel) {
-                        spreadsheet.sheetModel().colGroupingMax
-                                .set((int) lastlevel);
-                    }
-
-                    // do not add children of collapsed groups
-                    if (!data.isEmpty()) {
-                        GroupingData previous = data.get(data.size() - 1);
-                        if (previous.collapsed
-                                && previous.endIndex >= col.getMin()
-                                && previous.level < col.getOutlineLevel()) {
-
-                            continue;
-                        }
-                    }
-
-                    boolean columnHidden = GroupingUtil.checkHidden(colsArray,
-                            col, lastlevel);
-
-                    long end = GroupingUtil.findEndOfColGroup(colsArray, col,
-                            lastlevel) - 1;
-                    long unique = GroupingUtil.findUniqueColIndex(colsArray,
-                            col, lastlevel) - 1;
-                    GroupingData d = new GroupingData(col.getMin() - 1, end,
-                            lastlevel, unique, columnHidden);
-                    data.add(d);
-
-                }
-
-            } else if (col.getOutlineLevel() < lastlevel) {
-                // groups end
-                lastlevel = col.getOutlineLevel();
-            }
-
-            prev = col;
-        }
-
-        /*
-         * There is a Excel data model inconsistency here. Technically, multiple
-         * groups can start or end on the same column. However, the
-         * collapse/expanded property is stored only as a boolean on the column;
-         * if there are multiple groups in one column, there is no way to know
-         * which of the groups is collapsed and which isn't, since there is only
-         * one boolean value. The way Excel 'solves' this is to not render the
-         * lower level groups fully in this particular case (the line and expand
-         * button are not visible). So, let's not display them here either.
-         */
-        Set<GroupingData> toRemove = new HashSet<GroupingData>();
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = i + 1; j < data.size(); j++) {
-                GroupingData d1 = data.get(i);
-                GroupingData d2 = data.get(j);
-
-                boolean together = spreadsheet.sheetModel().colGroupingInversed
-                        .get() ? d1.startIndex == d2.startIndex
-                                : d1.endIndex == d2.endIndex;
-                if (together) {
-                    // The outer one is drawn, whichever was read first.
-                    toRemove.add(d1.level > d2.level ? d1 : d2);
-                }
-            }
-        }
-
-        data.removeAll(toRemove);
-
-        spreadsheet.sheetModel().colGroupingData.set(data);
-    }
-
-    /**
-     * Row-outline branch of {@link #loadGrouping}.
-     *
-     * <p>
-     * Each row that has data (or grouping props) exists separately, they are
-     * not grouped like columns. Each row that is part of a group has a set
-     * outline level. Unlike cols, the 'collapse' property is actually used for
-     * rows, in conjuction with the 'hidden' prop. If a group is collapsed, each
-     * row in the group has its 'hidden' prop set to true. Also, the column
-     * after the group (or before, if inverted) has its 'collapsed' property set
-     * to true.
-     */
-    private static void loadRowGrouping(Spreadsheet spreadsheet) {
-        List<GroupingData> data = new ArrayList<GroupingData>();
-        Set<GroupingData> toRemove;
-
-        Stack<GroupingData> rows = new Stack<GroupingData>();
-        short lastlevel = 0;
-        for (int i = 0; i <= spreadsheet.getRows(); i++) {
-
-            XSSFRow row = (XSSFRow) spreadsheet.getActiveSheet().getRow(i);
-            if (row == null || row.getCTRow().getOutlineLevel() < lastlevel) {
-                // end any groups
-
-                short level;
-                if (row == null) {
-                    level = 0;
-                } else {
-                    level = row.getCTRow().getOutlineLevel();
-                }
-
-                GroupingData g = null;
-                while (level != lastlevel) {
-                    g = rows.pop();
-                    lastlevel--;
-
-                    boolean collapsed = false;
-                    if (spreadsheet.sheetModel().rowGroupingInversed.get()) {
-                        // marker is before group
-                        XSSFRow r = (XSSFRow) spreadsheet.getActiveSheet()
-                                .getRow(g.startIndex - 1);
-                        if (r != null) {
-                            collapsed = r.getCTRow().getCollapsed();
-                        }
-                    } else if (row != null) {
-                        // collapse marker is after group, so it is on this
-                        // row
-                        collapsed = row.getCTRow().getCollapsed();
-                    }
-
-                    g.collapsed = collapsed;
-
-                    // remove children of collapsed parent
-                    if (collapsed) {
-                        toRemove = new HashSet<GroupingData>();
-                        for (GroupingData d : data) {
-                            if (d.startIndex >= g.startIndex
-                                    && d.endIndex <= g.endIndex
-                                    && d.level > g.level) {
-                                toRemove.add(d);
-                            }
-                        }
-                        data.removeAll(toRemove);
-                    }
-                    data.add(g);
-                }
-                continue;
-            }
-
-            short level = row.getCTRow().getOutlineLevel();
-
-            if (level > lastlevel) {
-                // group start
-
-                // possibly many groups start here
-                while (level != lastlevel) {
-                    lastlevel++;
-
-                    int end = (int) GroupingUtil.findEndOfRowGroup(spreadsheet,
-                            i, lastlevel);
-                    long uniqueIndex = GroupingUtil
-                            .findUniqueRowIndex(spreadsheet, i, end, lastlevel);
-
-                    GroupingData d = new GroupingData(i, end, lastlevel,
-                            uniqueIndex, false);
-
-                    rows.push(d);
-
-                    if (spreadsheet.sheetModel().rowGroupingMax
-                            .get() < d.level) {
-                        spreadsheet.sheetModel().rowGroupingMax.set(d.level);
-                    }
-
-                }
-            }
-
-        }
-
-        /*
-         * Same issue as with groups starting or ending on same row, only
-         * process top level one.
-         */
-        toRemove = new HashSet<GroupingData>();
-        for (int i = 0; i < data.size(); i++) {
-            for (int j = i + 1; j < data.size(); j++) {
-                GroupingData d1 = data.get(i);
-                GroupingData d2 = data.get(j);
-
-                boolean together = spreadsheet.sheetModel().rowGroupingInversed
-                        .get() ? d1.startIndex == d2.startIndex
-                                : d1.endIndex == d2.endIndex;
-                if (together) {
-                    // The outer one is drawn, whichever was read first.
-                    toRemove.add(d1.level > d2.level ? d1 : d2);
-                }
-            }
-        }
-
-        data.removeAll(toRemove);
-
-        spreadsheet.sheetModel().rowGroupingData.set(data);
     }
 
     /**
