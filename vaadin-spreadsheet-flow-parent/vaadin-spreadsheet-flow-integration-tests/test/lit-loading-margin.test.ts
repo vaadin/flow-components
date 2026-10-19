@@ -93,6 +93,47 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     container.dispatchEvent(new Event('scroll'));
   }
 
+  /** Scroll the sheet across to the pixel, as the user does. */
+  function scrollAcross(left: number): void {
+    const container = sheet.getScrollContainer();
+    container.scrollLeft = left;
+    container.dispatchEvent(new Event('scroll'));
+  }
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  it('asks on the way for the rows a slow scroll comes to', async () => {
+    await open();
+
+    // Two rows every 40 ms: three of its screens a second, no fling. The
+    // first steps ask before the scroll's speed is known.
+    for (let step = 1; step <= 20; step++) {
+      scrollTo(step * 30);
+      await wait(40);
+      if (step === 2) {
+        loads = [];
+      }
+    }
+
+    expect(loads, 'before the scroll stops').to.not.be.empty;
+  });
+
+  it('asks on the way for the columns a slow scroll comes to', async () => {
+    await open();
+
+    // A column every 40 ms: four of its screens a second, no fling, and on
+    // past the margin the second step loads.
+    for (let step = 1; step <= 30; step++) {
+      scrollAcross(step * 60);
+      await wait(40);
+      if (step === 2) {
+        loads = [];
+      }
+    }
+
+    expect(loads, 'before the scroll stops').to.not.be.empty;
+  });
+
   it('tells the server where a scroll stopped soon after', async () => {
     await open();
     loads = [];

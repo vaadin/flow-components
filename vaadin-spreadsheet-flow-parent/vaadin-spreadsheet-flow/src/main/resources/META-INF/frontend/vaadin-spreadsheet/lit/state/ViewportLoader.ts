@@ -24,8 +24,8 @@ export interface ViewportLoaderHost {
   drawnRange(): LoadRange | null;
   /**
    * The sheet's size, its frozen panes, the height and width of a default
-   * row and column in pixels, and whether to load the drawn cells alone,
-   * with no margin.
+   * row and column in pixels, how tall and wide its view is in pixels, and
+   * whether to load the drawn cells alone, with no margin.
    */
   sheet(): {
     rows: number;
@@ -34,6 +34,8 @@ export interface ViewportLoaderHost {
     frozenCols: number;
     rowPx: number;
     colPx: number;
+    viewHeight: number;
+    viewWidth: number;
     noMargin: boolean;
   };
   /** Whether the server is answering a request right now. */
@@ -91,6 +93,12 @@ const SLOW_FRAME_MS = 1000 / 30;
 const FRAMES_TIMED = 3;
 
 /**
+ * Faster than this many screens a second, a scroll is a fling: each screen
+ * is gone in less than a tenth of a second, before it can be read.
+ */
+const FLING_SCREENS_PER_SECOND = 10;
+
+/**
  * Decides when the server is asked for cells as the sheet scrolls, and for
  * which range.
  *
@@ -133,8 +141,11 @@ const FRAMES_TIMED = 3;
  * Such a request is not timed.
  * <li>No request while the sheet moves faster than a load comes back, timed
  * from the round trips so far: the cells would arrive after the user has
- * scrolled past them. The request goes out once the scrolling slows down
- * or stops.
+ * scrolled past them. Nor while it flings, faster than ten screens a second,
+ * however fast the connection: the cells would be gone before they could
+ * be read, and a fast scroll brought in five times GWT's bytes, which
+ * loaded only where the scroll stopped. The request goes out once the
+ * scrolling slows down or stops.
  * <li>On a slow connection the margin shrinks to a quarter screen, so what
  * is on screen arrives sooner.
  * <li>A sheet whose cells may hold components or editors loads no margin,
@@ -422,7 +433,10 @@ export class ViewportLoader implements ReactiveController {
     }
   };
 
-  /** Whether the sheet moves past the target's margin before a load could come back. */
+  /**
+   * Whether the sheet flings, or moves past the target's margin before a
+   * load could come back.
+   */
   private tooFast(drawn: LoadRange, target: LoadRange): boolean {
     const first = this.samples[0];
     const last = this.samples[this.samples.length - 1];
@@ -434,8 +448,14 @@ export class ViewportLoader implements ReactiveController {
     }
     const sheet = this.host.sheet();
     const elapsed = Math.max(1, last.t - first.t);
-    const rowsMoved = ((Math.abs(last.top - first.top) / elapsed) * this.roundTrip) / sheet.rowPx;
-    const colsMoved = ((Math.abs(last.left - first.left) / elapsed) * this.roundTrip) / sheet.colPx;
+    // Pixels a millisecond, down and across.
+    const down = Math.abs(last.top - first.top) / elapsed;
+    const across = Math.abs(last.left - first.left) / elapsed;
+    if (flings(down, sheet.viewHeight) || flings(across, sheet.viewWidth)) {
+      return true;
+    }
+    const rowsMoved = (down * this.roundTrip) / sheet.rowPx;
+    const colsMoved = (across * this.roundTrip) / sheet.colPx;
     const rowMargin = this.rowDirection < 0 ? drawn.r1 - target.r1 : target.r2 - drawn.r2;
     const colMargin = this.columnDirection < 0 ? drawn.c1 - target.c1 : target.c2 - drawn.c2;
     return rowsMoved > Math.max(rowMargin, 1) || (colsMoved > 0 && colsMoved > Math.max(colMargin, 1));
@@ -488,6 +508,14 @@ export class ViewportLoader implements ReactiveController {
       this.timer = null;
     }
   }
+}
+
+/**
+ * Whether a scroll this many pixels a millisecond is a fling across a view
+ * this many pixels long; see {@link FLING_SCREENS_PER_SECOND}.
+ */
+function flings(pxPerMs: number, viewPx: number): boolean {
+  return (pxPerMs * 1000) / viewPx > FLING_SCREENS_PER_SECOND;
 }
 
 /** Whether rows or columns from first to last are each frozen or among those loaded. */

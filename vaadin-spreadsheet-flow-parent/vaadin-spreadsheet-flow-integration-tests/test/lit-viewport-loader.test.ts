@@ -79,7 +79,9 @@ function fakeClock() {
   };
 }
 
-function setUp(sheet: Partial<{ rows: number; frozenRows: number; frozenCols: number; noMargin: boolean }> = {}) {
+function setUp(
+  sheet: Partial<{ rows: number; frozenRows: number; frozenCols: number; noMargin: boolean; viewWidth: number }> = {}
+) {
   const time = fakeClock();
   const loads: LoadRange[] = [];
   let drawn: LoadRange | null = { r1: 1, c1: 1, r2: 30, c2: 10 };
@@ -95,6 +97,9 @@ function setUp(sheet: Partial<{ rows: number; frozenRows: number; frozenCols: nu
         frozenCols: sheet.frozenCols ?? 0,
         rowPx: 20,
         colPx: 64,
+        // 30 rows and 10 columns of the defaults.
+        viewHeight: 600,
+        viewWidth: sheet.viewWidth ?? 640,
         noMargin: sheet.noMargin ?? false
       }),
       serverBusy: () => busy,
@@ -144,6 +149,21 @@ function setUp(sheet: Partial<{ rows: number; frozenRows: number; frozenCols: nu
       drawn = { r1: 2, c1: 1, r2: 31, c2: 10 };
       loader.check();
       time.advance(400);
+      loads.length = 0;
+    },
+    /**
+     * Open the sheet on a connection whose loads come back within a
+     * recheck, about 30 ms once timed over a few of them.
+     */
+    fastConnection() {
+      busyWhileLoading = true;
+      for (let load = 0; load < 6; load++) {
+        loader.reset();
+        loader.check();
+        time.advance(10);
+        busy = false;
+        time.advance(30);
+      }
       loads.length = 0;
     },
     /** Scroll to a row at a reading pace, then stop. */
@@ -526,6 +546,84 @@ describe('ViewportLoader', () => {
 
     expect(t.loads[0]).to.eql({ r1: 201, c1: 1, r2: 230, c2: 10 });
     expect(t.loads[1].r1).to.equal(186);
+  });
+
+  it('holds back while the sheet flings, faster than ten screens a second, however fast the connection, and asks once it stops', () => {
+    // A fast scroll brought in five times GWT's bytes, every screen it
+    // passed, each gone before it could be read.
+    const t = setUp();
+    t.fastConnection();
+    expect(t.loader.loadRoundTrip, 'loads come back fast').to.be.lessThan(40);
+    t.loader.scrolled(0, 0);
+
+    // 240 pixels every 20 ms: 20 screens of 600 pixels a second, which a
+    // 30 ms load and its margin would keep up with.
+    for (let step = 1; step <= 10; step++) {
+      t.time.advance(20);
+      t.loader.scrolled(step * 240, 0);
+      const first = 1 + step * 12;
+      t.show({ r1: first, c1: 1, r2: first + 29, c2: 10 });
+      t.loader.check();
+    }
+    expect(t.loads, 'asked while flinging').to.be.empty;
+
+    t.time.advance(400);
+
+    expect(t.loads[0]).to.eql({ r1: 121, c1: 1, r2: 150, c2: 10 });
+  });
+
+  it('holds back while the sheet flings sideways too', () => {
+    const t = setUp();
+    t.fastConnection();
+    t.loader.scrolled(0, 0);
+
+    // 256 pixels every 20 ms: 20 screens of 640 pixels a second.
+    for (let step = 1; step <= 10; step++) {
+      t.time.advance(20);
+      t.loader.scrolled(0, step * 256);
+      const first = 1 + step * 4;
+      t.show({ r1: 1, c1: first, r2: 30, c2: first + 9 });
+      t.loader.check();
+    }
+
+    expect(t.loads, 'asked while flinging').to.be.empty;
+  });
+
+  it("counts a sideways fling in screens of the view's width", () => {
+    // A view 2,000 pixels wide: 7,000 pixels a second across is 3.5 of its
+    // screens, and would be more than ten screens 600 pixels tall.
+    const t = setUp({ viewWidth: 2000 });
+    t.fastConnection();
+    t.loader.scrolled(0, 0);
+
+    for (let step = 1; step <= 10; step++) {
+      t.time.advance(40);
+      t.answer();
+      t.loader.scrolled(0, step * 280);
+      const first = 1 + Math.floor((step * 280) / 64);
+      t.show({ r1: 1, c1: first, r2: 30, c2: first + 9 });
+      t.loader.check();
+    }
+
+    expect(t.loads, 'asked while scrolling').to.not.be.empty;
+  });
+
+  it('asks on the way while the sheet scrolls slower than ten screens a second', () => {
+    const t = setUp();
+    t.fastConnection();
+    t.loader.scrolled(0, 0);
+
+    // 120 pixels every 40 ms: 5 screens of 600 pixels a second.
+    for (let step = 1; step <= 10; step++) {
+      t.time.advance(40);
+      t.answer();
+      t.loader.scrolled(step * 120, 0);
+      const first = 1 + step * 6;
+      t.show({ r1: first, c1: 1, r2: first + 29, c2: 10 });
+      t.loader.check();
+    }
+
+    expect(t.loads, 'asked while scrolling').to.not.be.empty;
   });
 
   // On a slow machine frames are 100-190 ms apart, and so are a scroll's

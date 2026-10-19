@@ -325,6 +325,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       frozenCols: this.model.horizontalSplitPosition,
       rowPx: getDefaultRowHeightPx(this.model.defRowH, FALLBACK_PPI),
       colPx: this.model.defColW,
+      viewHeight: this.scrollContainer.clientHeight,
+      viewWidth: this.scrollContainer.clientWidth,
       noMargin: this.model.hasComponentFactory
     }),
     serverBusy: () => flowRequestInFlight(this.host),
