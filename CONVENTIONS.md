@@ -112,6 +112,8 @@ Do not add tests that cover behavior of mixin interfaces in each component that 
 
 `@Route` and `@TestPath` annotations on integration tests views should use routes prefixed with the component element name, e.g. "vaadin-markdown/sub-route".
 
+An integration test view contains one instance of the tested component. Add more instances only when the test checks how they interact. Create a new view for an unrelated scenario instead of adding an instance to an existing view.
+
 In TestBench element classes, methods that query for an element should return null for absent elements instead of throwing an exception.
 
 When a TestBench element or integration test needs to query elements by a specific characteristic (text content, class name, attribute value), use the respective TestBench query API if it exists. Do not simply query all elements and do the filtering from Java as that results in N+1 WebDriver round-trips when accessing each element's data. When such a lookup can not be implemented with standard TestBench query APIs, or logic is otherwise complex and would require excessive web-driver round-trips, prefer a single `executeScript` that implements the logic via JavaScript.
