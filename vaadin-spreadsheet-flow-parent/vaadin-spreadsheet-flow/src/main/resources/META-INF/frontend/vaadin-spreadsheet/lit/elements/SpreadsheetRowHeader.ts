@@ -9,9 +9,7 @@
  */
 
 import { css, html, nothing, type TemplateResult } from 'lit';
-import { indexedTarget } from '../dom/IndexedTarget.js';
-import { SpreadsheetPart } from './SpreadsheetPart.js';
-import { keyedList } from '../dom/KeyedList.js';
+import { type HeaderAxis, HeaderStrip } from './headers/HeaderStrip.js';
 
 import {
   GROUPING_BUTTON_SIZE_PX,
@@ -155,6 +153,22 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
   };
 }
 
+/** The numbers along the rows, for what both header strips do alike. */
+const ROW_AXIS: HeaderAxis = {
+  key: 'row',
+  cellClass: 'row-header-cell',
+  handleClass: 'row-resize-handle',
+  toggleClass: 'row-grouping-toggle',
+  edge: 'top',
+  events: {
+    click: 'row-header-click',
+    contextMenu: 'row-header-contextmenu',
+    resizeStart: 'row-resize-start',
+    autofit: 'row-autofit',
+    groupingToggle: 'row-grouping-toggle'
+  }
+};
+
 /**
  * Internal row-header Lit element. Renders one
  * {@code .row-header-cell} per visible row with the row's 1-based
@@ -169,7 +183,7 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
  * Same render-state-driven contract + same no-decorator pattern as
  * the cell-grid + column-header.
  */
-export class SpreadsheetRowHeader extends SpreadsheetPart {
+export class SpreadsheetRowHeader extends HeaderStrip {
   static readonly EXPORTED_PARTS = 'row-header,header-selected';
 
   static properties = {
@@ -388,132 +402,12 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
 
   declare renderState: RowHeaderRenderState;
 
+  protected readonly axis = ROW_AXIS;
+
   constructor() {
     super();
     this.renderState = emptyRowHeaderRenderState();
   }
-
-  /**
-   * Shadow-root click delegation — same pattern as the column
-   * header. Dispatches {@code row-header-click}
-   * with the row coordinate + modifier-key state.
-   */
-  firstUpdated(): void {
-    this.shadowRoot!.addEventListener('click', this.handleShadowClick);
-    // Row-resize drag mousedown.
-    this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown as EventListener);
-    // Right-click on a row header dispatches
-    // `row-header-contextmenu`. When the connector takes it,
-    // the browser's native menu is suppressed so only the
-    // server-supplied ContextMenu is shown.
-    this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
-    // Double-clicking a resize handle autofits the row to its content, the
-    // way Excel does; the drag on the same handle resizes it by hand.
-    this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick as EventListener);
-  }
-
-  private readonly handleShadowDoubleClick = (e: Event): void => {
-    const at = indexedTarget(e, '.row-resize-handle', 'row');
-    if (at === null) {
-      return;
-    }
-    const row = at.index;
-    e.preventDefault();
-    this.dispatchEvent(
-      new CustomEvent('row-autofit', {
-        detail: { row },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
-
-  private readonly handleShadowContextMenu = (event: Event): void => {
-    const e = event as MouseEvent;
-    const at = indexedTarget(e, '.row-header-cell', 'row');
-    if (at === null) {
-      return;
-    }
-    const row = at.index;
-    // The browser's own menu stays unless the sheet takes the right-click
-    // for a menu of its own.
-    const taken = !this.dispatchEvent(
-      new CustomEvent('row-header-contextmenu', {
-        detail: { row, clientX: e.clientX, clientY: e.clientY },
-        bubbles: true,
-        composed: true,
-        cancelable: true
-      })
-    );
-    if (taken) {
-      e.preventDefault();
-    }
-  };
-
-  private readonly handleShadowMouseDown = (e: Event): void => {
-    const at = indexedTarget(e, '.row-resize-handle', 'row');
-    if (at === null) {
-      return;
-    }
-    const row = at.index;
-    e.preventDefault();
-    const ev = e as MouseEvent;
-    // Where the row starts on screen: the row is sized from there to the
-    // pointer.
-    const number = this.shadowRoot!.querySelector<HTMLElement>(`.row-header-cell.row${row}`);
-    this.dispatchEvent(
-      new CustomEvent('row-resize-start', {
-        detail: { row, clientX: ev.clientX, clientY: ev.clientY, top: number?.getBoundingClientRect().top },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
-
-  private readonly handleShadowClick = (e: Event): void => {
-    const ev = e as MouseEvent;
-    const target = ev.target;
-    if (!(target instanceof Element)) {
-      return;
-    }
-    // Grouping toggle click — dispatch `row-grouping-toggle` so the
-    // connector can forward `groupingCollapsed`. Stop here so the click is
-    // not also read as a row-header click.
-    const toggle = target.closest<HTMLElement>('.row-grouping-toggle');
-    if (toggle) {
-      const uniqueIndex = Number(toggle.dataset.uniqueIndex);
-      const collapsed = toggle.dataset.collapsed === 'true';
-      if (Number.isFinite(uniqueIndex)) {
-        this.dispatchEvent(
-          new CustomEvent('row-grouping-toggle', {
-            detail: { uniqueIndex, collapsed: !collapsed },
-            bubbles: true,
-            composed: true
-          })
-        );
-      }
-      ev.stopPropagation();
-      return;
-    }
-    const at = indexedTarget(ev, '.row-header-cell', 'row');
-    if (at === null) {
-      return;
-    }
-    const row = at.index;
-    this.dispatchEvent(
-      new CustomEvent('row-header-click', {
-        detail: {
-          row,
-          shiftKey: ev.shiftKey,
-          ctrlKey: ev.ctrlKey,
-          metaKey: ev.metaKey,
-          altKey: ev.altKey
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
 
   render(): TemplateResult {
     const {
@@ -549,44 +443,37 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     const numbersLeft = gutterWidth;
     const numbersWidth = Math.max(0, headerWidth - gutterWidth);
 
-    // Keyed by row, so a number keeps its element as the sheet scrolls:
-    // matched by position, every one was rewritten on every scroll step.
-    const cells: Array<{ key: number; template: TemplateResult }> = [];
-    const handles: Array<{ key: number; template: TemplateResult }> = [];
-    const buildRow = (row: number, top: number, height: number): void => {
-      // Headings hidden, the outline still drawn: no numbers at all. A number of no width still draws its border.
-      if (numbersWidth <= 0) {
-        return;
+    const labels = this.labels(
+      {
+        first: viewport.firstRowIndex,
+        last: viewport.lastRowIndex,
+        starts: rowY,
+        sizes: rowHeights,
+        frozen: verticalSplitPosition,
+        frozenStarts: frozenRowY,
+        frozenSizes: frozenRowHeights
+      },
+      (row, top, height) => {
+        // Headings hidden, the outline still drawn: no numbers at all. A number of no width still draws its border.
+        if (numbersWidth <= 0) {
+          return null;
+        }
+        const style = `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;`;
+        // `part="row-header"` (+ `header-selected` when the row intersects
+        // the active selection) mirrors the documented public styling API.
+        // data-row is what the click delegation reads.
+        const isSelected = selectedRows.has(row);
+        const cellPart = isSelected ? 'row-header header-selected' : 'row-header';
+        // Resize handle on the row's bottom edge.
+        const handleStyle = `top:${top + height - 3}px;left:${numbersLeft}px;width:${numbersWidth}px;`;
+        return {
+          cell: html`
+            <div class="row-header-cell row${row}" part=${cellPart} style=${style} data-row=${row}> ${row} </div>
+          `,
+          handle: html` <div class="row-resize-handle" style=${handleStyle} data-row=${row}></div> `
+        };
       }
-      const style = `left:${numbersLeft}px;top:${top}px;width:${numbersWidth}px;height:${height}px;`;
-      // `part="row-header"` (+ `header-selected`
-      // when the row intersects the active selection) mirrors
-      // the documented public styling API.
-      const isSelected = selectedRows.has(row);
-      const cellPart = isSelected ? 'row-header header-selected' : 'row-header';
-      // data-row drives the click-delegation handler in
-      // firstUpdated().
-      cells.push({
-        key: row,
-        template: html`
-          <div class="row-header-cell row${row}" part=${cellPart} style=${style} data-row=${row}> ${row} </div>
-        `
-      });
-      // Resize handle on the row's bottom edge.
-      const handleStyle = `top:${top + height - 3}px;left:${numbersLeft}px;width:${numbersWidth}px;`;
-      handles.push({
-        key: row,
-        template: html` <div class="row-resize-handle" style=${handleStyle} data-row=${row}></div> `
-      });
-    };
-
-    for (let row = viewport.firstRowIndex; row <= viewport.lastRowIndex; row++) {
-      const height = rowHeights[row - viewport.firstRowIndex] ?? 0;
-      if (height === 0) {
-        continue;
-      }
-      buildRow(row, rowY[row - viewport.firstRowIndex] ?? 0, height);
-    }
+    );
 
     // Frozen rows get their own strip, translated by the scroll offset
     // so it stays put while the rest slides underneath — the same trick
@@ -594,17 +481,6 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
     let frozenStrip: TemplateResult | string = '';
     let freezeGap: TemplateResult | typeof nothing = nothing;
     if (verticalSplitPosition > 0) {
-      const scrolling = cells.length;
-      const scrollingHandles = handles.length;
-      for (let row = 1; row <= verticalSplitPosition; row++) {
-        const height = frozenRowHeights[row - 1] ?? 0;
-        if (height === 0) {
-          continue;
-        }
-        buildRow(row, frozenRowY[row - 1] ?? 0, height);
-      }
-      const frozenCells = cells.splice(scrolling);
-      const frozenHandles = handles.splice(scrollingHandles);
       // The freeze line runs on across the outline gutter, on the pixel it
       // has to
       // itself among the cells; across the numbers too when columns are
@@ -646,9 +522,7 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
           : nothing;
       frozenStrip = html`
         <div class="frozen-header-strip" style="transform:translateY(${scrollTop}px);">
-          ${frozenCells.map((cell) => cell.template)}${frozenHandles.map(
-            (handle) => handle.template
-          )}${gutterLine}${numberLine}
+          ${labels.frozenCells}${labels.frozenHandles}${gutterLine}${numberLine}
         </div>
       `;
     }
@@ -684,28 +558,9 @@ export class SpreadsheetRowHeader extends SpreadsheetPart {
       // tick end.
       const half = GROUPING_BUTTON_SIZE_PX / 2;
       const btnStyle = `left:${lineLeft + 2 - half}px;top:${g.buttonPx - half}px;`;
-      groupingEls.push(html`
-        <button
-          class="row-grouping-toggle"
-          type="button"
-          aria-expanded=${g.collapsed ? 'false' : 'true'}
-          style=${btnStyle}
-          data-unique-index=${g.uniqueIndex}
-          data-collapsed=${g.collapsed ? 'true' : 'false'}
-        >
-          ${g.collapsed ? '+' : '−'}
-        </button>
-      `);
+      groupingEls.push(this.groupingToggle(g, btnStyle));
     }
-    return html`${groupingEls}${keyedList(
-      cells,
-      (cell) => cell.key,
-      (cell) => cell.template
-    )}${keyedList(
-      handles,
-      (handle) => handle.key,
-      (handle) => handle.template
-    )}${freezeGap}${frozenStrip}`;
+    return this.strip(groupingEls, labels, freezeGap, frozenStrip);
   }
 }
 

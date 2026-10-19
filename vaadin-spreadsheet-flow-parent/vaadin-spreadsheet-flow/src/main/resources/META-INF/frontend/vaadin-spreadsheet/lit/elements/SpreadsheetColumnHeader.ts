@@ -9,9 +9,7 @@
  */
 
 import { css, html, nothing, type TemplateResult } from 'lit';
-import { indexedTarget } from '../dom/IndexedTarget.js';
-import { SpreadsheetPart } from './SpreadsheetPart.js';
-import { keyedList } from '../dom/KeyedList.js';
+import { type HeaderAxis, HeaderStrip } from './headers/HeaderStrip.js';
 
 import { columnIndexToLetters } from '../algorithms/CellRef.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
@@ -160,6 +158,22 @@ export function emptyColumnHeaderRenderState(): ColumnHeaderRenderState {
   };
 }
 
+/** The letters along the columns, for what both header strips do alike. */
+const COLUMN_AXIS: HeaderAxis = {
+  key: 'col',
+  cellClass: 'col-header-cell',
+  handleClass: 'col-resize-handle',
+  toggleClass: 'col-grouping-toggle',
+  edge: 'left',
+  events: {
+    click: 'column-header-click',
+    contextMenu: 'column-header-contextmenu',
+    resizeStart: 'column-resize-start',
+    autofit: 'column-autofit',
+    groupingToggle: 'column-grouping-toggle'
+  }
+};
+
 /**
  * Internal column-header Lit element. Renders one
  * {@code .col-header-cell} per visible column with the column's
@@ -178,7 +192,7 @@ export function emptyColumnHeaderRenderState(): ColumnHeaderRenderState {
  * (no decorators) for the same esbuild-compatibility reason as
  * {@link SpreadsheetCellGrid}.
  */
-export class SpreadsheetColumnHeader extends SpreadsheetPart {
+export class SpreadsheetColumnHeader extends HeaderStrip {
   static readonly EXPORTED_PARTS = 'column-header,header-selected';
 
   static properties = {
@@ -390,139 +404,12 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
 
   declare renderState: ColumnHeaderRenderState;
 
+  protected readonly axis = COLUMN_AXIS;
+
   constructor() {
     super();
     this.renderState = emptyColumnHeaderRenderState();
   }
-
-  /**
-   * Wire shadow-root click delegation on first render — same
-   * pattern as {@link SpreadsheetCellGrid}. Each click that
-   * lands on a {@code .col-header-cell} dispatches a
-   * {@code column-header-click} custom event with the column
-   * coordinate + modifier-key state.
-   */
-  firstUpdated(): void {
-    this.shadowRoot!.addEventListener('click', this.handleShadowClick);
-    // Column-resize drag. mousedown on a
-    // `.col-resize-handle` dispatches `column-resize-start`
-    // with the col + the original clientX so the connector
-    // can track the drag.
-    this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown as EventListener);
-    // Right-click on a column header dispatches
-    // `column-header-contextmenu` so the connector can
-    // forward it as `columnHeaderContextMenuOpen` to the
-    // server. The browser's native menu is suppressed when the
-    // connector takes the event.
-    this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
-    // Double-clicking a resize handle autofits the column to its content,
-    // the way Excel does; the drag on the same handle resizes it by hand.
-    this.shadowRoot!.addEventListener('dblclick', this.handleShadowDoubleClick as EventListener);
-  }
-
-  private readonly handleShadowContextMenu = (event: Event): void => {
-    const e = event as MouseEvent;
-    const at = indexedTarget(e, '.col-header-cell', 'col');
-    if (at === null) {
-      return;
-    }
-    const col = at.index;
-    // The browser's own menu stays unless the sheet takes the right-click
-    // for a menu of its own.
-    const taken = !this.dispatchEvent(
-      new CustomEvent('column-header-contextmenu', {
-        detail: { col, clientX: e.clientX, clientY: e.clientY },
-        bubbles: true,
-        composed: true,
-        cancelable: true
-      })
-    );
-    if (taken) {
-      e.preventDefault();
-    }
-  };
-
-  private readonly handleShadowDoubleClick = (e: Event): void => {
-    const at = indexedTarget(e, '.col-resize-handle', 'col');
-    if (at === null) {
-      return;
-    }
-    const col = at.index;
-    e.preventDefault();
-    this.dispatchEvent(
-      new CustomEvent('column-autofit', {
-        detail: { col },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
-
-  private readonly handleShadowMouseDown = (e: Event): void => {
-    const at = indexedTarget(e, '.col-resize-handle', 'col');
-    if (at === null) {
-      return;
-    }
-    const col = at.index;
-    e.preventDefault();
-    const ev = e as MouseEvent;
-    // Where the column starts on screen: the column is sized from there to
-    // the pointer.
-    const letter = this.shadowRoot!.querySelector<HTMLElement>(`.col-header-cell.col${col}`);
-    this.dispatchEvent(
-      new CustomEvent('column-resize-start', {
-        detail: { col, clientX: ev.clientX, clientY: ev.clientY, left: letter?.getBoundingClientRect().left },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
-
-  private readonly handleShadowClick = (e: Event): void => {
-    const ev = e as MouseEvent;
-    const target = ev.target;
-    if (!(target instanceof Element)) {
-      return;
-    }
-    // Grouping toggle click — dispatch
-    // `column-grouping-toggle` so the connector can forward
-    // `groupingCollapsed` to the server. Stop here so the
-    // click doesn't also bubble as a column-header click.
-    const toggle = target.closest<HTMLElement>('.col-grouping-toggle');
-    if (toggle) {
-      const uniqueIndex = Number(toggle.dataset.uniqueIndex);
-      const collapsed = toggle.dataset.collapsed === 'true';
-      if (Number.isFinite(uniqueIndex)) {
-        this.dispatchEvent(
-          new CustomEvent('column-grouping-toggle', {
-            detail: { uniqueIndex, collapsed: !collapsed },
-            bubbles: true,
-            composed: true
-          })
-        );
-      }
-      ev.stopPropagation();
-      return;
-    }
-    const at = indexedTarget(ev, '.col-header-cell', 'col');
-    if (at === null) {
-      return;
-    }
-    const col = at.index;
-    this.dispatchEvent(
-      new CustomEvent('column-header-click', {
-        detail: {
-          col,
-          shiftKey: ev.shiftKey,
-          ctrlKey: ev.ctrlKey,
-          metaKey: ev.metaKey,
-          altKey: ev.altKey
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
 
   render(): TemplateResult {
     const {
@@ -555,71 +442,49 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
     const gutterHeight = columnGroupingGutterPx(colGroupingMax, headerHeight > 0);
     const letterTop = gutterHeight;
 
-    // Keyed by column, so a letter keeps its element as the sheet scrolls:
-    // matched by position, every one was rewritten on every scroll step.
-    const cells: Array<{ key: number; template: TemplateResult }> = [];
-    const handles: Array<{ key: number; template: TemplateResult }> = [];
-    const buildColumn = (col: number, left: number, width: number): void => {
-      // Headings hidden, the outline still drawn: no letters at all. A letter of no height still draws its border.
-      if (headerHeight <= 0) {
-        return;
+    const labels = this.labels(
+      {
+        first: viewport.firstColumnIndex,
+        last: viewport.lastColumnIndex,
+        starts: colX,
+        sizes: colWidths,
+        frozen: horizontalSplitPosition,
+        frozenStarts: frozenColX,
+        frozenSizes: frozenColWidths
+      },
+      (col, left, width) => {
+        // Headings hidden, the outline still drawn: no letters at all. A letter of no height still draws its border.
+        if (headerHeight <= 0) {
+          return null;
+        }
+        const letter = columnIndexToLetters(col);
+        const style =
+          `left:${left}px;top:${letterTop}px;width:${width}px;` +
+          `height:${headerHeight}px;line-height:${headerHeight}px;`;
+        // `part="column-header"` (+ `header-selected` when the column
+        // intersects the active selection) mirrors the documented public
+        // styling API. data-col is what the click delegation reads.
+        const isSelected = selectedColumns.has(col);
+        const cellPart = isSelected ? 'column-header header-selected' : 'column-header';
+        // Resize handle on the right edge of this column, so a press on it
+        // begins a resize of THIS column.
+        const handleStyle = `left:${left + width - 3}px;top:${letterTop}px;` + `height:${headerHeight}px;`;
+        return {
+          cell: html`
+            <div class="col-header-cell col${col}" part=${cellPart} style=${style} data-col=${col}> ${letter} </div>
+          `,
+          handle: html` <div class="col-resize-handle" style=${handleStyle} data-col=${col}></div> `
+        };
       }
-      const letter = columnIndexToLetters(col);
-      const style =
-        `left:${left}px;top:${letterTop}px;width:${width}px;` +
-        `height:${headerHeight}px;line-height:${headerHeight}px;`;
-      // data-col drives the click delegation handler in
-      // firstUpdated() — same pattern as the
-      // cell-grid.
-      // `part="column-header"` (+ `header-selected`
-      // when the column intersects the active selection)
-      // mirrors the documented public styling API.
-      const isSelected = selectedColumns.has(col);
-      const cellPart = isSelected ? 'column-header header-selected' : 'column-header';
-      cells.push({
-        key: col,
-        template: html`
-          <div class="col-header-cell col${col}" part=${cellPart} style=${style} data-col=${col}> ${letter} </div>
-        `
-      });
-      // Resize handle on the right edge of this column.
-      // Anchored at the column's right edge so
-      // mousedown begins a resize-drag for THIS column.
-      const handleStyle = `left:${left + width - 3}px;top:${letterTop}px;` + `height:${headerHeight}px;`;
-      handles.push({
-        key: col,
-        template: html` <div class="col-resize-handle" style=${handleStyle} data-col=${col}></div> `
-      });
-    };
-
-    for (let col = viewport.firstColumnIndex; col <= viewport.lastColumnIndex; col++) {
-      const width = colWidths[col - viewport.firstColumnIndex] ?? 0;
-      if (width === 0) {
-        continue;
-      }
-      buildColumn(col, colX[col - viewport.firstColumnIndex] ?? 0, width);
-    }
+    );
 
     // Frozen columns get their own strip, translated by the scroll
     // offset so it stays put while the rest slides underneath — the
-    // same trick the cell-grid uses for its frozen quadrants. Built
+    // same trick the cell-grid uses for its frozen quadrants. Drawn
     // after the scrolling columns so it draws over them.
-    const frozenCells: TemplateResult[] = [];
-    const frozenHandles: TemplateResult[] = [];
     let frozenStrip: TemplateResult | string = '';
     let freezeGap: TemplateResult | typeof nothing = nothing;
     if (horizontalSplitPosition > 0) {
-      const scrolling = cells.length;
-      const scrollingHandles = handles.length;
-      for (let col = 1; col <= horizontalSplitPosition; col++) {
-        const width = frozenColWidths[col - 1] ?? 0;
-        if (width === 0) {
-          continue;
-        }
-        buildColumn(col, frozenColX[col - 1] ?? 0, width);
-      }
-      frozenCells.push(...cells.splice(scrolling).map((cell) => cell.template));
-      frozenHandles.push(...handles.splice(scrollingHandles).map((handle) => handle.template));
       // The freeze line runs on up through the outline gutter, on the pixel
       // it has to
       // itself among the cells; through the letters too when rows are
@@ -661,7 +526,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
           : nothing;
       frozenStrip = html`
         <div class="frozen-header-strip" style="transform:translateX(${scrollLeft}px);">
-          ${frozenCells}${frozenHandles}${gutterLine}${letterLine}${risenLine}
+          ${labels.frozenCells}${labels.frozenHandles}${gutterLine}${letterLine}${risenLine}
         </div>
       `;
     }
@@ -695,28 +560,9 @@ export class SpreadsheetColumnHeader extends SpreadsheetPart {
       // Centred on the bracket's line, at the summary column.
       const half = GROUPING_BUTTON_SIZE_PX / 2;
       const btnStyle = `left:${g.buttonPx - half}px;top:${lineTop + 1 - half}px;`;
-      groupingEls.push(html`
-        <button
-          class="col-grouping-toggle"
-          type="button"
-          aria-expanded=${g.collapsed ? 'false' : 'true'}
-          style=${btnStyle}
-          data-unique-index=${g.uniqueIndex}
-          data-collapsed=${g.collapsed ? 'true' : 'false'}
-        >
-          ${g.collapsed ? '+' : '−'}
-        </button>
-      `);
+      groupingEls.push(this.groupingToggle(g, btnStyle));
     }
-    return html`${groupingEls}${keyedList(
-      cells,
-      (cell) => cell.key,
-      (cell) => cell.template
-    )}${keyedList(
-      handles,
-      (handle) => handle.key,
-      (handle) => handle.template
-    )}${freezeGap}${frozenStrip}`;
+    return this.strip(groupingEls, labels, freezeGap, frozenStrip);
   }
 }
 
