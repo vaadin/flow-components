@@ -93,7 +93,8 @@ class SpreadsheetOverlaysTest {
     /** The cells the overlays the client has start at. */
     private List<String> startCells() {
         List<String> cells = new ArrayList<>();
-        Map<String, OverlayInfo> overlays = spreadsheet.getOverlays();
+        Map<String, OverlayInfo> overlays = spreadsheet.sheetModel().overlays
+                .get();
         if (overlays != null) {
             for (OverlayInfo info : overlays.values()) {
                 cells.add(new CellReference(info.row - 1, info.col - 1)
@@ -104,8 +105,9 @@ class SpreadsheetOverlaysTest {
     }
 
     private OverlayInfo onlyOverlay() {
-        assertEquals(1, spreadsheet.getOverlays().size());
-        return spreadsheet.getOverlays().values().iterator().next();
+        assertEquals(1, spreadsheet.sheetModel().overlays.get().size());
+        return spreadsheet.sheetModel().overlays.get().values().iterator()
+                .next();
     }
 
     @Test
@@ -174,7 +176,8 @@ class SpreadsheetOverlaysTest {
     void aPictureShown_hasItsImageServed_untilItIsScrolledAway() {
         picture("F12:F12");
         show();
-        String id = spreadsheet.getOverlays().keySet().iterator().next();
+        String id = spreadsheet.sheetModel().overlays.get().keySet().iterator()
+                .next();
         assertTrue(spreadsheet.getResources().containsKey(id));
 
         showRows(30, 40);
@@ -233,7 +236,7 @@ class SpreadsheetOverlaysTest {
 
         show();
 
-        assertEquals(1, spreadsheet.getOverlays().size());
+        assertEquals(1, spreadsheet.sheetModel().overlays.get().size());
     }
 
     /** An overlay of its own, with a component. */
@@ -414,7 +417,8 @@ class SpreadsheetOverlaysTest {
         workbook.createSheet("Second");
         picture("F12:F12");
         show();
-        String id = spreadsheet.getOverlays().keySet().iterator().next();
+        String id = spreadsheet.sheetModel().overlays.get().keySet().iterator()
+                .next();
 
         spreadsheet.setActiveSheetIndex(1);
 

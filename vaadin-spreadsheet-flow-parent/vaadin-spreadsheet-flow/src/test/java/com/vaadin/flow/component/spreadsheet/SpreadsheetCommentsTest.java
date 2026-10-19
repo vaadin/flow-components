@@ -124,10 +124,12 @@ class SpreadsheetCommentsTest {
 
         show();
 
-        assertEquals(Map.of("A1", "on A1", "A12", "on A12", "F1", "on F1",
-                "F12", "on F12"), byName(spreadsheet.getCellComments()));
+        assertEquals(
+                Map.of("A1", "on A1", "A12", "on A12", "F1", "on F1", "F12",
+                        "on F12"),
+                byName(spreadsheet.sheetModel().cellComments.get()));
         assertEquals(Map.of("A1", "a1", "A12", "a12", "F1", "f1", "F12", "f12"),
-                byName(spreadsheet.getCellCommentAuthors()));
+                byName(spreadsheet.sheetModel().cellCommentAuthors.get()));
     }
 
     @Test
@@ -140,7 +142,7 @@ class SpreadsheetCommentsTest {
         show();
 
         assertEquals(List.of("B2", "B20", "E10", "H2", "H20"),
-                names(spreadsheet.getCellComments().keySet()));
+                names(spreadsheet.sheetModel().cellComments.get().keySet()));
     }
 
     @Test
@@ -152,7 +154,7 @@ class SpreadsheetCommentsTest {
         show();
 
         assertEquals(List.of("A1", "F12"),
-                names(spreadsheet.getVisibleCellComments()));
+                names(spreadsheet.sheetModel().visibleCellComments.get()));
     }
 
     @Test
@@ -166,7 +168,7 @@ class SpreadsheetCommentsTest {
         show();
 
         assertEquals(List.of("F12"),
-                names(spreadsheet.getCellComments().keySet()));
+                names(spreadsheet.sheetModel().cellComments.get().keySet()));
     }
 
     @Test
@@ -179,7 +181,7 @@ class SpreadsheetCommentsTest {
         show();
 
         assertEquals(List.of("E15", "H15"),
-                names(spreadsheet.getCellComments().keySet()));
+                names(spreadsheet.sheetModel().cellComments.get().keySet()));
     }
 
     @Test
@@ -192,7 +194,7 @@ class SpreadsheetCommentsTest {
         showRows(11, 21);
 
         assertEquals(List.of("A1", "F12"),
-                names(spreadsheet.getInvalidFormulaCells()));
+                names(spreadsheet.sheetModel().invalidFormulaCells.get()));
     }
 
     @Test
@@ -204,7 +206,7 @@ class SpreadsheetCommentsTest {
         showRows(30, 40);
 
         assertEquals(List.of("F32"),
-                names(spreadsheet.getCellComments().keySet()));
+                names(spreadsheet.sheetModel().cellComments.get().keySet()));
     }
 
     @Test
@@ -215,6 +217,6 @@ class SpreadsheetCommentsTest {
 
         spreadsheet.refreshCells(sheet.getRow(11).getCell(5));
 
-        assertNull(spreadsheet.getCellComments());
+        assertNull(spreadsheet.sheetModel().cellComments.get());
     }
 }

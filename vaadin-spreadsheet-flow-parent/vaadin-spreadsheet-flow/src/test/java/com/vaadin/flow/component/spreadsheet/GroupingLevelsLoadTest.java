@@ -58,8 +58,8 @@ class GroupingLevelsLoadTest {
 
         Spreadsheet spreadsheet = show();
 
-        assertEquals(2, spreadsheet.getRowGroupingMax());
-        assertEquals(2, spreadsheet.getColGroupingMax());
+        assertEquals(2, spreadsheet.sheetModel().rowGroupingMax.get());
+        assertEquals(2, spreadsheet.sheetModel().colGroupingMax.get());
     }
 
     @Test
@@ -71,15 +71,15 @@ class GroupingLevelsLoadTest {
 
         Spreadsheet spreadsheet = show();
 
-        assertEquals(1, spreadsheet.getRowGroupingMax());
-        assertEquals(1, spreadsheet.getColGroupingMax());
+        assertEquals(1, spreadsheet.sheetModel().rowGroupingMax.get());
+        assertEquals(1, spreadsheet.sheetModel().colGroupingMax.get());
     }
 
     @Test
     void noGroups_giveNoLevels() {
         Spreadsheet spreadsheet = show();
 
-        assertEquals(0, spreadsheet.getRowGroupingMax());
-        assertEquals(0, spreadsheet.getColGroupingMax());
+        assertEquals(0, spreadsheet.sheetModel().rowGroupingMax.get());
+        assertEquals(0, spreadsheet.sheetModel().colGroupingMax.get());
     }
 }

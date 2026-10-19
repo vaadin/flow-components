@@ -46,10 +46,10 @@ final class CellCommentLoader implements Serializable {
         Set<String> invalidFormulas = new HashSet<>();
         spreadsheet.viewport().forEachPane((r1, c1, r2, c2) -> scan(comments,
                 authors, visible, invalidFormulas, r1, c1, r2, c2));
-        spreadsheet.setCellComments(comments);
-        spreadsheet.setCellCommentAuthors(authors);
-        spreadsheet.setVisibleCellComments(visible);
-        spreadsheet.setInvalidFormulaCells(invalidFormulas);
+        spreadsheet.sheetModel().cellComments.set(comments);
+        spreadsheet.sheetModel().cellCommentAuthors.set(authors);
+        spreadsheet.sheetModel().visibleCellComments.set(visible);
+        spreadsheet.sheetModel().invalidFormulaCells.set(invalidFormulas);
     }
 
     private void scan(HashMap<String, String> comments,

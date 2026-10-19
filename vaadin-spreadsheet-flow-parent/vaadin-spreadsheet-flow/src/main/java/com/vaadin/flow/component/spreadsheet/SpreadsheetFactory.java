@@ -374,7 +374,7 @@ public class SpreadsheetFactory implements Serializable {
             }
         }
 
-        spreadsheet.setNamedRanges(names);
+        spreadsheet.sheetModel().namedRanges.set(names);
     }
 
     private static boolean isNameSelectable(Name name) {
@@ -490,10 +490,10 @@ public class SpreadsheetFactory implements Serializable {
                         ? xssfSheet.getCTWorksheet().getSheetProtection()
                         : null;
         boolean isProtected = protection != null && protection.getSheet();
-        spreadsheet.setLockFormatColumns(
-                isProtected && protection.getFormatColumns());
-        spreadsheet
-                .setLockFormatRows(isProtected && protection.getFormatRows());
+        spreadsheet.sheetModel().lockFormatColumns
+                .set(isProtected && protection.getFormatColumns());
+        spreadsheet.sheetModel().lockFormatRows
+                .set(isProtected && protection.getFormatRows());
     }
 
     /**
@@ -515,17 +515,19 @@ public class SpreadsheetFactory implements Serializable {
         }
 
         CTWorksheet ctWorksheet = xssfSheet.getCTWorksheet();
-        spreadsheet.setColGroupingMax(0);
-        spreadsheet.setRowGroupingMax(0);
+        spreadsheet.sheetModel().colGroupingMax.set(0);
+        spreadsheet.sheetModel().rowGroupingMax.set(0);
 
         if (ctWorksheet.getSheetPr() != null
                 && ctWorksheet.getSheetPr().getOutlinePr() != null) {
             CTOutlinePr outlinePr = ctWorksheet.getSheetPr().getOutlinePr();
-            spreadsheet.setColGroupingInversed(!outlinePr.getSummaryRight());
-            spreadsheet.setRowGroupingInversed(!outlinePr.getSummaryBelow());
+            spreadsheet.sheetModel().colGroupingInversed
+                    .set(!outlinePr.getSummaryRight());
+            spreadsheet.sheetModel().rowGroupingInversed
+                    .set(!outlinePr.getSummaryBelow());
         } else {
-            spreadsheet.setColGroupingInversed(false);
-            spreadsheet.setRowGroupingInversed(false);
+            spreadsheet.sheetModel().colGroupingInversed.set(false);
+            spreadsheet.sheetModel().rowGroupingInversed.set(false);
         }
 
         loadColumnGrouping(spreadsheet, ctWorksheet);
@@ -567,8 +569,10 @@ public class SpreadsheetFactory implements Serializable {
                 while (lastlevel != col.getOutlineLevel()) {
 
                     lastlevel++;
-                    if (spreadsheet.getColGroupingMax() < lastlevel) {
-                        spreadsheet.setColGroupingMax(lastlevel);
+                    if (spreadsheet.sheetModel().colGroupingMax
+                            .get() < lastlevel) {
+                        spreadsheet.sheetModel().colGroupingMax
+                                .set((int) lastlevel);
                     }
 
                     // do not add children of collapsed groups
@@ -619,7 +623,7 @@ public class SpreadsheetFactory implements Serializable {
                 GroupingData d1 = data.get(i);
                 GroupingData d2 = data.get(j);
 
-                if (spreadsheet.isColGroupingInversed()) {
+                if (spreadsheet.sheetModel().colGroupingInversed.get()) {
                     if (d1.startIndex == d2.startIndex) {
                         toRemove.add(d2);
                     }
@@ -633,7 +637,7 @@ public class SpreadsheetFactory implements Serializable {
 
         data.removeAll(toRemove);
 
-        spreadsheet.setColGroupingData(data);
+        spreadsheet.sheetModel().colGroupingData.set(data);
     }
 
     /**
@@ -673,7 +677,7 @@ public class SpreadsheetFactory implements Serializable {
                     lastlevel--;
 
                     boolean collapsed = false;
-                    if (spreadsheet.isRowGroupingInversed()) {
+                    if (spreadsheet.sheetModel().rowGroupingInversed.get()) {
                         // marker is before group
                         XSSFRow r = (XSSFRow) spreadsheet.getActiveSheet()
                                 .getRow(g.startIndex - 1);
@@ -724,8 +728,9 @@ public class SpreadsheetFactory implements Serializable {
 
                     rows.push(d);
 
-                    if (spreadsheet.getRowGroupingMax() < d.level) {
-                        spreadsheet.setRowGroupingMax(d.level);
+                    if (spreadsheet.sheetModel().rowGroupingMax
+                            .get() < d.level) {
+                        spreadsheet.sheetModel().rowGroupingMax.set(d.level);
                     }
 
                 }
@@ -743,7 +748,7 @@ public class SpreadsheetFactory implements Serializable {
                 GroupingData d1 = data.get(i);
                 GroupingData d2 = data.get(j);
 
-                if (spreadsheet.isRowGroupingInversed()) {
+                if (spreadsheet.sheetModel().rowGroupingInversed.get()) {
                     if (d1.startIndex == d2.startIndex) {
                         toRemove.add(d2);
                     }
@@ -757,7 +762,7 @@ public class SpreadsheetFactory implements Serializable {
 
         data.removeAll(toRemove);
 
-        spreadsheet.setRowGroupingData(data);
+        spreadsheet.sheetModel().rowGroupingData.set(data);
     }
 
     /**
@@ -957,14 +962,15 @@ public class SpreadsheetFactory implements Serializable {
              * rows/columns, but only if there actually was a split.
              */
             if (vSplit > 0) {
-                spreadsheet.setHorizontalSplitPosition(vSplit + leftCol);
+                spreadsheet.sheetModel().horizontalSplitPosition
+                        .set(vSplit + leftCol);
                 if (leftCol > 0) {
                     spreadsheet.setColumnsHidden(IntStream.range(0, leftCol)
                             .boxed().collect(Collectors.toMap(
                                     Function.identity(), index -> true)));
                 }
             } else {
-                spreadsheet.setHorizontalSplitPosition(0);
+                spreadsheet.sheetModel().horizontalSplitPosition.set(0);
                 if (leftCol > 0) {
                     // TODO: should scroll horizontally to restore viewport
                     // state. This needs API on the Spreadsheet side
@@ -972,22 +978,23 @@ public class SpreadsheetFactory implements Serializable {
             }
 
             if (hSplit > 0) {
-                spreadsheet.setVerticalSplitPosition(hSplit + topRow);
+                spreadsheet.sheetModel().verticalSplitPosition
+                        .set(hSplit + topRow);
                 if (topRow > 0) {
                     spreadsheet.setRowsHidden(IntStream.range(0, topRow).boxed()
                             .collect(Collectors.toMap(Function.identity(),
                                     index -> true)));
                 }
             } else {
-                spreadsheet.setVerticalSplitPosition(0);
+                spreadsheet.sheetModel().verticalSplitPosition.set(0);
                 if (topRow > 0) {
                     // TODO: should scroll vertically to restore viewport
                     // state. This needs API on the Spreadsheet side
                 }
             }
         } else {
-            spreadsheet.setVerticalSplitPosition(0);
-            spreadsheet.setHorizontalSplitPosition(0);
+            spreadsheet.sheetModel().verticalSplitPosition.set(0);
+            spreadsheet.sheetModel().horizontalSplitPosition.set(0);
         }
 
     }

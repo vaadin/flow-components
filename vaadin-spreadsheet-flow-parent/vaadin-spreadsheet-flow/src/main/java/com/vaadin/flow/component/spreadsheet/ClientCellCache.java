@@ -197,7 +197,8 @@ final class ClientCellCache implements Serializable {
         addSpillSources(sheet, manager, updatedCellData);
         // A cell with a component is not sent, as it is not when loaded.
         Set<String> componentCells = new HashSet<>(
-                spreadsheet.getComponentIDtoCellKeysMap().values());
+                spreadsheet.sheetModel().componentIDtoCellKeysMap.get()
+                        .values());
 
         // The formula cells the client has are sent again, as what they work
         // out to may have changed, and so are the cells marked: only those

@@ -60,7 +60,7 @@ class FrozenCornerCommentTest {
         spreadsheet.onSheetScroll(3, 2, 30, 15);
 
         assertEquals("First cell comment",
-                spreadsheet.getCellComments().get("col1 row1"));
+                spreadsheet.sheetModel().cellComments.get().get("col1 row1"));
     }
 
     @Test
@@ -70,6 +70,6 @@ class FrozenCornerCommentTest {
         spreadsheet.onSheetScroll(20, 2, 50, 15);
 
         assertEquals("First cell comment",
-                spreadsheet.getCellComments().get("col1 row1"));
+                spreadsheet.sheetModel().cellComments.get().get("col1 row1"));
     }
 }

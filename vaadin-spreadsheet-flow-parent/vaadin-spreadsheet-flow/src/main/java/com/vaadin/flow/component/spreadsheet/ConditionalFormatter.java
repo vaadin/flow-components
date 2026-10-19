@@ -221,7 +221,8 @@ public class ConditionalFormatter implements Serializable {
         }
 
         sendCellsChanged(before);
-        spreadsheet.setConditionalFormattingStyles(conditionalFormattingStyles);
+        spreadsheet.sheetModel().conditionalFormattingStyles
+                .set(conditionalFormattingStyles);
     }
 
     /**

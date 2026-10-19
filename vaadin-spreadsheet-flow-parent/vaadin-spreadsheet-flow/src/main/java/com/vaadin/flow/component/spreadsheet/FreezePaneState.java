@@ -13,51 +13,28 @@ import java.io.Serializable;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Freeze-pane split coordinates plus per-pane scroll positions.
+ * The scroll position of each pane of a frozen sheet, which a sheet switch
+ * restores.
  *
  * <p>
  * A frozen pane divides the sheet into up to four scroll regions (top-left,
- * top-right, bottom-left, bottom-right). The two split positions name where the
- * divider sits (row index for the horizontal split, column index for the
- * vertical split); the two scroll-position arrays remember the last-seen scroll
- * offset of each region so a sheet switch can restore them.
+ * top-right, bottom-left, bottom-right); the two arrays remember the last-seen
+ * scroll offset of each region. Where the panes split is the sheet's own:
+ * {@link SheetClientModel} holds it.
  *
  * <p>
- * Every setter gives the element the value at once, the scroll-position arrays
- * as JSON.
+ * Every setter gives the element the value at once, as JSON.
  */
 final class FreezePaneState implements Serializable {
 
-    private final ClientProperty<Integer> verticalSplitPosition;
-    private final ClientProperty<Integer> horizontalSplitPosition;
     private final ClientProperty<int[]> verticalScrollPositions;
     private final ClientProperty<int[]> horizontalScrollPositions;
 
     FreezePaneState(Element element) {
-        verticalSplitPosition = ClientProperty.integer(element,
-                "verticalSplitPosition", 0);
-        horizontalSplitPosition = ClientProperty.integer(element,
-                "horizontalSplitPosition", 0);
         verticalScrollPositions = ClientProperty.json(element,
                 "verticalScrollPositions");
         horizontalScrollPositions = ClientProperty.json(element,
                 "horizontalScrollPositions");
-    }
-
-    int getVerticalSplitPosition() {
-        return verticalSplitPosition.get();
-    }
-
-    void setVerticalSplitPosition(int verticalSplitPosition) {
-        this.verticalSplitPosition.set(verticalSplitPosition);
-    }
-
-    int getHorizontalSplitPosition() {
-        return horizontalSplitPosition.get();
-    }
-
-    void setHorizontalSplitPosition(int horizontalSplitPosition) {
-        this.horizontalSplitPosition.set(horizontalSplitPosition);
     }
 
     int[] getVerticalScrollPositions() {

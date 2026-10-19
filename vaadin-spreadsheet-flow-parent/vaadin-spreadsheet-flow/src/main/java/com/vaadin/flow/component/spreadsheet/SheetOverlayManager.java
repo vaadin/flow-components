@@ -48,9 +48,9 @@ final class SheetOverlayManager implements Serializable {
     }
 
     void loadOrUpdate() {
-        // Fixes the issue of overlays being lost when creating or removing
-        // frozen rows/columns. More like a kludge, a real solution is yet
-        // to be found.
+        // A sheet shown has its overlays loaded. One without any reads them
+        // again here, so a picture added through POI later is shown; main did
+        // the same.
         if (!hasOverlays()) {
             SpreadsheetFactory.loadSheetOverlays(spreadsheet);
         }
@@ -65,7 +65,7 @@ final class SheetOverlayManager implements Serializable {
             }
             overlay.setVisible(visible);
         }
-        spreadsheet.setOverlays(shown);
+        spreadsheet.sheetModel().overlays.set(shown);
     }
 
     /**

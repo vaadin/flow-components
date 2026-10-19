@@ -899,7 +899,7 @@ public class CellValueManager implements Serializable {
         final Sheet activeSheet = workbook
                 .getSheetAt(workbook.getActiveSheetIndex());
         final Collection<String> customComponentCells = spreadsheet
-                .getComponentIDtoCellKeysMap().values();
+                .sheetModel().componentIDtoCellKeysMap.get().values();
         for (int r = firstRow - 1; r < lastRow; r++) {
             Row row = activeSheet.getRow(r);
             if (row != null && row.getLastCellNum() != -1

@@ -125,8 +125,9 @@ class SpreadsheetMergedRegionsTest {
 
     private List<String> clientRegions() {
         List<String> regions = new ArrayList<>();
-        if (spreadsheet.getMergedRegions() != null) {
-            for (MergedRegion region : spreadsheet.getMergedRegions()) {
+        if (spreadsheet.sheetModel().mergedRegions.get() != null) {
+            for (MergedRegion region : spreadsheet.sheetModel().mergedRegions
+                    .get()) {
                 regions.add(format(region));
             }
         }
@@ -140,8 +141,8 @@ class SpreadsheetMergedRegionsTest {
     }
 
     private List<Integer> ids() {
-        return spreadsheet.getMergedRegions().stream().map(region -> region.id)
-                .toList();
+        return spreadsheet.sheetModel().mergedRegions.get().stream()
+                .map(region -> region.id).toList();
     }
 
     /**
@@ -264,10 +265,12 @@ class SpreadsheetMergedRegionsTest {
         // long as it is the same list of the same size.
         fillBut();
         show("A1:B2");
-        List<MergedRegion> before = spreadsheet.getMergedRegions();
+        List<MergedRegion> before = spreadsheet.sheetModel().mergedRegions
+                .get();
 
         spreadsheet.addMergedRegion("D1:D2");
-        List<MergedRegion> merged = spreadsheet.getMergedRegions();
+        List<MergedRegion> merged = spreadsheet.sheetModel().mergedRegions
+                .get();
         spreadsheet.removeMergedRegion(0);
 
         assertEquals(List.of("A1:B2"),
@@ -460,7 +463,7 @@ class SpreadsheetMergedRegionsTest {
         spreadsheet.shiftRows(2, 3, -2);
 
         assertEquals(List.of(), poiRegions());
-        assertNull(spreadsheet.getMergedRegions());
+        assertNull(spreadsheet.sheetModel().mergedRegions.get());
     }
 
     @Test
@@ -471,7 +474,7 @@ class SpreadsheetMergedRegionsTest {
 
         spreadsheet.reloadAllMergedRegions();
 
-        assertNull(spreadsheet.getMergedRegions());
+        assertNull(spreadsheet.sheetModel().mergedRegions.get());
     }
 
     @Test

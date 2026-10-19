@@ -60,8 +60,10 @@ final class SheetOperations implements Serializable {
     /**
      * Shows the sheet at the POI index, or the nearest one shown if it is
      * hidden: the client has nothing of the last sheet any more, and everything
-     * of this one is loaded. Every way of showing a sheet comes here: switching
-     * to it, adding it, and loading a workbook.
+     * of this one is loaded, by the component's
+     * {@code reloadActiveSheetData()}. Every way of showing a sheet comes here:
+     * switching to it, adding it, and loading a workbook. Freezing panes
+     * reloads the sheet shown through {@code reloadActiveSheetData()} alone.
      */
     void showSheet(int poiIndex) {
         Workbook workbook = spreadsheet.workbook;
@@ -74,10 +76,6 @@ final class SheetOperations implements Serializable {
         spreadsheet.getFormulaEvaluator().clearAllCachedResultValues();
 
         spreadsheet.reloadActiveSheetData();
-        SpreadsheetFactory.reloadSpreadsheetData(spreadsheet,
-                workbook.getSheetAt(shown));
-        spreadsheet.reloadActiveSheetStyles();
-        spreadsheet.loadPopupButtons();
     }
 
     /**
@@ -239,8 +237,8 @@ final class SheetOperations implements Serializable {
                     "Invalid POI Sheet index given.");
         }
         workbook.getSheetAt(sheetPOIIndex).protectSheet(password);
-        spreadsheet
-                .setSheetProtected(spreadsheet.getActiveSheet().getProtect());
+        spreadsheet.sheetModel().sheetProtected
+                .set(spreadsheet.getActiveSheet().getProtect());
         // What the protection of the sheet shown locks reaches the client
         // with the sheet: resizing, the rows and columns styled as locked,
         // and every cell, the one selected among them.

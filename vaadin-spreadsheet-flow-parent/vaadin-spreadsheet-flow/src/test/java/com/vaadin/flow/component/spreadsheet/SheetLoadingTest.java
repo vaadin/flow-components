@@ -54,7 +54,7 @@ class SheetLoadingTest {
         assertEquals(1, logged.size());
         assertEquals("Could not load the frozen panes of the sheet",
                 logged.get(0).message());
-        assertEquals(1, spreadsheet.getMergedRegions().size());
+        assertEquals(1, spreadsheet.sheetModel().mergedRegions.get().size());
         assertTrue(spreadsheet.getElement().getProperty("namedRanges", "")
                 .contains("Later"));
     }

@@ -103,8 +103,8 @@ class SpreadsheetComponentLoadingTest {
 
     /** The cells whose components the client has, by their keys. */
     private List<String> cellsWithComponents() {
-        return spreadsheet.getComponentIDtoCellKeysMap().values().stream()
-                .sorted().toList();
+        return spreadsheet.sheetModel().componentIDtoCellKeysMap.get().values()
+                .stream().sorted().toList();
     }
 
     private static String key(String cell) {
@@ -210,7 +210,8 @@ class SpreadsheetComponentLoadingTest {
 
         spreadsheet.setSpreadsheetComponentFactory(null);
 
-        assertTrue(spreadsheet.getComponentIDtoCellKeysMap().isEmpty());
+        assertTrue(spreadsheet.sheetModel().componentIDtoCellKeysMap.get()
+                .isEmpty());
         assertTrue(spreadsheet.getCellKeyToEditorMap().isEmpty());
         assertEquals(sheet.getDefaultRowHeightInPoints(), heightOfRow(12));
     }

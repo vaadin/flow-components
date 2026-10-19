@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand;
 import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
-import com.vaadin.flow.dom.Element;
 
 /**
  * The heights of the rows and the widths of the columns of the sheet shown, and
@@ -69,31 +68,18 @@ final class SheetSizes implements Serializable {
     private float[] rowH;
     private int[] colW;
 
-    /** The heights of the rows, as the client has them: runs of equal ones. */
-    private final ClientProperty<float[]> rowHeightsShown;
     /**
-     * The widths of the columns, as the client has them: runs of equal ones.
+     * The width of a column the sheet gives none, as the client has it: the
+     * component's, whatever sheet is shown.
      */
-    private final ClientProperty<int[]> columnWidthsShown;
-    private final ClientProperty<Float> defaultRowHeightShown;
     private final ClientProperty<Integer> defaultColumnWidthShown;
-    private final ClientProperty<ArrayList<Integer>> hiddenRowsShown;
-    private final ClientProperty<ArrayList<Integer>> hiddenColumnsShown;
     private final TreeSet<Integer> hiddenRows = new TreeSet<>();
     private final TreeSet<Integer> hiddenColumns = new TreeSet<>();
 
     SheetSizes(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
-        Element element = spreadsheet.getElement();
-        rowHeightsShown = ClientProperty.json(element, "rowH",
-                SheetSizes::runs);
-        columnWidthsShown = ClientProperty.json(element, "colW",
-                SheetSizes::runs);
-        defaultRowHeightShown = ClientProperty.decimal(element, "defRowH", 0);
-        defaultColumnWidthShown = ClientProperty.integer(element, "defColW", 0);
-        hiddenRowsShown = ClientProperty.json(element, "hiddenRowIndexes");
-        hiddenColumnsShown = ClientProperty.json(element,
-                "hiddenColumnIndexes");
+        defaultColumnWidthShown = ClientProperty
+                .integer(spreadsheet.getElement(), "defColW", 0);
     }
 
     // ----- what the sizes are -------------------------------------------
@@ -130,7 +116,7 @@ final class SheetSizes implements Serializable {
      */
     void setRowHeights(float[] heights) {
         rowH = heights;
-        rowHeightsShown.set(heights);
+        spreadsheet.sheetModel().rowH.set(heights);
     }
 
     /**
@@ -185,8 +171,8 @@ final class SheetSizes implements Serializable {
         for (Row row : sheet) {
             cols = Math.max(cols, row.getLastCellNum());
         }
-        spreadsheet.setRows(rows);
-        spreadsheet.setCols(cols);
+        spreadsheet.sheetModel().rows.set(rows);
+        spreadsheet.sheetModel().cols.set(cols);
         readAll(sheet, rows, cols);
     }
 
@@ -631,12 +617,12 @@ final class SheetSizes implements Serializable {
 
     private void setColumnWidths(int[] widths) {
         colW = widths;
-        columnWidthsShown.set(widths);
+        spreadsheet.sheetModel().colW.set(widths);
     }
 
     private void setDefaultRowHeightShown(float height) {
         defRowH = height;
-        defaultRowHeightShown.set(height);
+        spreadsheet.sheetModel().defRowH.set(height);
     }
 
     private void setDefaultColumnWidthShown(int width) {
@@ -645,11 +631,12 @@ final class SheetSizes implements Serializable {
     }
 
     private void publishHiddenRows() {
-        hiddenRowsShown.set(hiddenRowsFromOne());
+        spreadsheet.sheetModel().hiddenRowIndexes.set(hiddenRowsFromOne());
     }
 
     private void publishHiddenColumns() {
-        hiddenColumnsShown.set(hiddenColumnsFromOne());
+        spreadsheet.sheetModel().hiddenColumnIndexes
+                .set(hiddenColumnsFromOne());
     }
 
     private static ArrayList<Integer> fromOne(TreeSet<Integer> fromZero) {

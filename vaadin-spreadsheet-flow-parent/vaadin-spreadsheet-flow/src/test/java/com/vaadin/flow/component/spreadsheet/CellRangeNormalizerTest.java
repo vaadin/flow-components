@@ -28,10 +28,10 @@ import org.mockito.MockitoAnnotations;
  * <ul>
  * <li>{@code fromAddressString(String)} — POI-format parsing (0-based coords
  * from {@link org.apache.poi.ss.util.CellReference}), reorder corners, clamp to
- * {@code getRows() - 1} / {@code getCols() - 1}.</li>
+ * {@code getRows() - 1} / {@code getColumns() - 1}.</li>
  * <li>{@code fromCoordinates(int row1, int col1, int row2, int col2)} — 1-based
- * input, reorder corners, clamp to {@code getRows()} / {@code getCols()}, then
- * subtract one to land in POI's 0-based space.</li>
+ * input, reorder corners, clamp to {@code getRows()} / {@code getColumns()},
+ * then subtract one to land in POI's 0-based space.</li>
  * </ul>
  *
  * <p>
@@ -53,7 +53,7 @@ class CellRangeNormalizerTest {
         // Default sheet bounds: 10 rows x 10 columns. Override per test
         // when a smaller / larger sheet is needed.
         when(spreadsheet.getRows()).thenReturn(10);
-        when(spreadsheet.getCols()).thenReturn(10);
+        when(spreadsheet.getColumns()).thenReturn(10);
         normalizer = new CellRangeNormalizer(spreadsheet);
     }
 
@@ -114,9 +114,9 @@ class CellRangeNormalizerTest {
     @Test
     void fromAddressString_columnBeyondSheet_clampsToLastColumn() {
         // Pin: "A1:Z1" against a 10-column sheet clamps lastColumn to 9.
-        // CellReference parses "Z" → col index 25; the >= getCols() guard
-        // triggers and the value is set to getCols() - 1 = 9.
-        when(spreadsheet.getCols()).thenReturn(10);
+        // CellReference parses "Z" → col index 25; the >= getColumns() guard
+        // triggers and the value is set to getColumns() - 1 = 9.
+        when(spreadsheet.getColumns()).thenReturn(10);
         CellRangeAddress range = normalizer.fromAddressString("A1:Z1");
 
         assertEquals(0, range.getFirstColumn());
@@ -129,7 +129,7 @@ class CellRangeNormalizerTest {
         // the same upper bound. The result collapses to a 1x1 range at
         // the sheet's bottom-right corner.
         when(spreadsheet.getRows()).thenReturn(5);
-        when(spreadsheet.getCols()).thenReturn(5);
+        when(spreadsheet.getColumns()).thenReturn(5);
         CellRangeAddress range = normalizer.fromAddressString("J10:K15");
 
         assertEquals(4, range.getFirstRow());
@@ -220,7 +220,7 @@ class CellRangeNormalizerTest {
 
     @Test
     void fromCoordinates_columnBeyondSheet_clampsToGetCols_thenSubtractsOne() {
-        when(spreadsheet.getCols()).thenReturn(10);
+        when(spreadsheet.getColumns()).thenReturn(10);
         CellRangeAddress range = normalizer.fromCoordinates(1, 1, 1, 26);
 
         assertEquals(0, range.getFirstColumn());
@@ -247,7 +247,7 @@ class CellRangeNormalizerTest {
     @Test
     void fromCoordinates_bothCornersBeyondSheet_collapsesToCorner() {
         when(spreadsheet.getRows()).thenReturn(5);
-        when(spreadsheet.getCols()).thenReturn(5);
+        when(spreadsheet.getColumns()).thenReturn(5);
         CellRangeAddress range = normalizer.fromCoordinates(10, 10, 15, 15);
 
         assertEquals(4, range.getFirstRow());
@@ -279,7 +279,7 @@ class CellRangeNormalizerTest {
         // equivalent out-of-bounds input. Catches a regression where
         // one overload accidentally drops the -1 on the int side.
         when(spreadsheet.getRows()).thenReturn(10);
-        when(spreadsheet.getCols()).thenReturn(10);
+        when(spreadsheet.getColumns()).thenReturn(10);
 
         CellRangeAddress fromString = normalizer.fromAddressString("A1:Z100");
         CellRangeAddress fromInts = normalizer.fromCoordinates(1, 1, 100, 26);

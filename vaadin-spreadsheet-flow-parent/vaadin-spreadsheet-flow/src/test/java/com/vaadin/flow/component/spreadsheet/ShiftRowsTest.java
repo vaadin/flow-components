@@ -245,7 +245,8 @@ class ShiftRowsTest {
     /** The merged regions the client is told about. */
     private Map<Integer, Integer> clientMergedRegionRows() {
         Map<Integer, Integer> rows = allRemoved();
-        for (MergedRegion region : spreadsheet.getMergedRegions()) {
+        for (MergedRegion region : spreadsheet.sheetModel().mergedRegions
+                .get()) {
             // 1-based
             rows.put(rowOfRegionColumn(region.col1 - 1), region.row1 - 1);
         }

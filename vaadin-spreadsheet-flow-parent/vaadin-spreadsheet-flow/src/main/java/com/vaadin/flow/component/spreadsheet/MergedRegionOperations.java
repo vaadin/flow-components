@@ -71,11 +71,13 @@ final class MergedRegionOperations implements Serializable {
         }
         sheet.addMergedRegion(range);
         MergedRegion added = toClient(range);
-        ArrayList<MergedRegion> updated = spreadsheet.getMergedRegions() != null
-                ? new ArrayList<>(spreadsheet.getMergedRegions())
-                : new ArrayList<>();
+        ArrayList<MergedRegion> updated = spreadsheet.sheetModel().mergedRegions
+                .get() != null
+                        ? new ArrayList<>(
+                                spreadsheet.sheetModel().mergedRegions.get())
+                        : new ArrayList<>();
         updated.add(added);
-        spreadsheet.setMergedRegions(updated);
+        spreadsheet.sheetModel().mergedRegions.set(updated);
         afterMerge(added);
         spreadsheet.updateMarkedCells();
         spreadsheet.getCellSelectionManager().mergedRegionAdded(range);
@@ -106,14 +108,14 @@ final class MergedRegionOperations implements Serializable {
         List<CellRangeAddress> poiRegions = spreadsheet.getActiveSheet()
                 .getMergedRegions();
         if (poiRegions.isEmpty()) {
-            spreadsheet.setMergedRegions(null);
+            spreadsheet.sheetModel().mergedRegions.set(null);
             return;
         }
         ArrayList<MergedRegion> regions = new ArrayList<>(poiRegions.size());
         for (CellRangeAddress poiRegion : poiRegions) {
             regions.add(toClient(poiRegion));
         }
-        spreadsheet.setMergedRegions(regions);
+        spreadsheet.sheetModel().mergedRegions.set(regions);
     }
 
     /** The region as the client has it: 1-based, with an id of its own. */
@@ -130,9 +132,9 @@ final class MergedRegionOperations implements Serializable {
     private void removeFromPoiAndClient(int index) {
         spreadsheet.getActiveSheet().removeMergedRegion(index);
         ArrayList<MergedRegion> updated = new ArrayList<>(
-                spreadsheet.getMergedRegions());
+                spreadsheet.sheetModel().mergedRegions.get());
         MergedRegion removed = updated.remove(index);
-        spreadsheet.setMergedRegions(updated);
+        spreadsheet.sheetModel().mergedRegions.set(updated);
         afterUnmerge(removed);
     }
 

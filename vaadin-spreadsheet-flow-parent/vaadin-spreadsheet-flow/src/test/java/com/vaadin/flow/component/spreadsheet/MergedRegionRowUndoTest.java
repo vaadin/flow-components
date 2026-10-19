@@ -50,7 +50,8 @@ class MergedRegionRowUndoTest {
 
     private List<String> clientRegions() {
         List<String> regions = new ArrayList<>();
-        for (MergedRegion region : spreadsheet.getMergedRegions()) {
+        for (MergedRegion region : spreadsheet.sheetModel().mergedRegions
+                .get()) {
             // 1-based
             regions.add(new CellRangeAddress(region.row1 - 1, region.row2 - 1,
                     region.col1 - 1, region.col2 - 1).formatAsString());

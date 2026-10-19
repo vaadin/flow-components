@@ -53,7 +53,8 @@ class MergedRegionLoadingTest {
     /** The regions the client has, written as POI writes them. */
     private List<String> clientRegions() {
         List<String> regions = new ArrayList<>();
-        for (MergedRegion region : spreadsheet.getMergedRegions()) {
+        for (MergedRegion region : spreadsheet.sheetModel().mergedRegions
+                .get()) {
             // 1-based
             regions.add(new CellRangeAddress(region.row1 - 1, region.row2 - 1,
                     region.col1 - 1, region.col2 - 1).formatAsString());
@@ -62,8 +63,8 @@ class MergedRegionLoadingTest {
     }
 
     private List<Integer> ids() {
-        return spreadsheet.getMergedRegions().stream().map(region -> region.id)
-                .toList();
+        return spreadsheet.sheetModel().mergedRegions.get().stream()
+                .map(region -> region.id).toList();
     }
 
     @ParameterizedTest
@@ -80,7 +81,7 @@ class MergedRegionLoadingTest {
     void aSheetWithoutRegions_givesTheClientNone(String format) {
         open(format);
 
-        assertNull(spreadsheet.getMergedRegions());
+        assertNull(spreadsheet.sheetModel().mergedRegions.get());
     }
 
     @ParameterizedTest
@@ -122,7 +123,7 @@ class MergedRegionLoadingTest {
 
         spreadsheet.reloadAllMergedRegions();
 
-        assertNull(spreadsheet.getMergedRegions());
+        assertNull(spreadsheet.sheetModel().mergedRegions.get());
     }
 
     @ParameterizedTest
@@ -148,6 +149,6 @@ class MergedRegionLoadingTest {
 
         spreadsheet.updateMergedRegions();
 
-        assertNull(spreadsheet.getMergedRegions());
+        assertNull(spreadsheet.sheetModel().mergedRegions.get());
     }
 }

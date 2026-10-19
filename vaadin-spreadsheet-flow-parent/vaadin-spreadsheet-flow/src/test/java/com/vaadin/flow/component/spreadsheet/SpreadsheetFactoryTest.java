@@ -8,7 +8,7 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import org.apache.poi.ss.usermodel.Sheet;
@@ -19,10 +19,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import com.vaadin.flow.dom.Element;
+
 class SpreadsheetFactoryTest {
 
     @Mock
     private Spreadsheet spreadsheet;
+
+    private final SheetClientModel model = new SheetClientModel(
+            new Element("vaadin-spreadsheet"));
 
     private XSSFWorkbook workbook;
 
@@ -30,6 +35,7 @@ class SpreadsheetFactoryTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         workbook = new XSSFWorkbook();
+        when(spreadsheet.sheetModel()).thenReturn(model);
     }
 
     @Test
@@ -47,8 +53,8 @@ class SpreadsheetFactoryTest {
         // Spreadsheet swaps the naming:
         // POI verticalSplit (cols=5) → Spreadsheet horizontalSplitPosition
         // POI horizontalSplit (rows=4) → Spreadsheet verticalSplitPosition
-        verify(spreadsheet).setHorizontalSplitPosition(5);
-        verify(spreadsheet).setVerticalSplitPosition(4);
+        assertEquals(5, model.horizontalSplitPosition.get());
+        assertEquals(4, model.verticalSplitPosition.get());
     }
 
     @Test
@@ -61,8 +67,8 @@ class SpreadsheetFactoryTest {
 
         SpreadsheetFactory.loadFreezePane(spreadsheet);
 
-        verify(spreadsheet).setHorizontalSplitPosition(0);
-        verify(spreadsheet).setVerticalSplitPosition(3);
+        assertEquals(0, model.horizontalSplitPosition.get());
+        assertEquals(3, model.verticalSplitPosition.get());
     }
 
     @Test
@@ -75,8 +81,8 @@ class SpreadsheetFactoryTest {
 
         SpreadsheetFactory.loadFreezePane(spreadsheet);
 
-        verify(spreadsheet).setHorizontalSplitPosition(2);
-        verify(spreadsheet).setVerticalSplitPosition(0);
+        assertEquals(2, model.horizontalSplitPosition.get());
+        assertEquals(0, model.verticalSplitPosition.get());
     }
 
     @Test
@@ -87,8 +93,8 @@ class SpreadsheetFactoryTest {
 
         SpreadsheetFactory.loadFreezePane(spreadsheet);
 
-        verify(spreadsheet).setHorizontalSplitPosition(0);
-        verify(spreadsheet).setVerticalSplitPosition(0);
+        assertEquals(0, model.horizontalSplitPosition.get());
+        assertEquals(0, model.verticalSplitPosition.get());
     }
 
     @Test
@@ -106,16 +112,17 @@ class SpreadsheetFactoryTest {
         when(spreadsheet.getActiveSheet()).thenReturn(bothSplits);
         SpreadsheetFactory.loadFreezePane(spreadsheet);
 
-        verify(spreadsheet).setHorizontalSplitPosition(5);
-        verify(spreadsheet).setVerticalSplitPosition(4);
+        assertEquals(5, model.horizontalSplitPosition.get());
+        assertEquals(4, model.verticalSplitPosition.get());
 
         Mockito.reset(spreadsheet);
+        when(spreadsheet.sheetModel()).thenReturn(model);
 
         // Switch to second sheet (only columns) — vertical must reset
         when(spreadsheet.getActiveSheet()).thenReturn(onlyColumns);
         SpreadsheetFactory.loadFreezePane(spreadsheet);
 
-        verify(spreadsheet).setHorizontalSplitPosition(2);
-        verify(spreadsheet).setVerticalSplitPosition(0);
+        assertEquals(2, model.horizontalSplitPosition.get());
+        assertEquals(0, model.verticalSplitPosition.get());
     }
 }

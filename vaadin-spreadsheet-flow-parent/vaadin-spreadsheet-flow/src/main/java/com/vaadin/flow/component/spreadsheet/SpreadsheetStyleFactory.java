@@ -211,7 +211,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         final Workbook workbook = spreadsheet.getWorkbook();
 
         HashMap<Integer, Integer> _rowIndexToStyleIndex = spreadsheet
-                .getRowIndexToStyleIndex();
+                .sheetModel().rowIndexToStyleIndex.get();
         if (_rowIndexToStyleIndex == null) {
             _rowIndexToStyleIndex = new HashMap<Integer, Integer>(
                     workbook.getNumCellStyles());
@@ -219,7 +219,7 @@ public class SpreadsheetStyleFactory implements Serializable {
             _rowIndexToStyleIndex.clear();
         }
         HashMap<Integer, Integer> _columnIndexToStyleIndex = spreadsheet
-                .getColumnIndexToStyleIndex();
+                .sheetModel().columnIndexToStyleIndex.get();
         if (_columnIndexToStyleIndex == null) {
             _columnIndexToStyleIndex = new HashMap<Integer, Integer>(
                     workbook.getNumCellStyles());
@@ -227,13 +227,14 @@ public class SpreadsheetStyleFactory implements Serializable {
             _columnIndexToStyleIndex.clear();
         }
         Set<Integer> _lockedColumnIndexes = spreadsheet
-                .getLockedColumnIndexes();
+                .sheetModel().lockedColumnIndexes.get();
         if (_lockedColumnIndexes == null) {
             _lockedColumnIndexes = new HashSet<Integer>();
         } else {
             _lockedColumnIndexes.clear();
         }
-        Set<Integer> _lockedRowIndexes = spreadsheet.getLockedRowIndexes();
+        Set<Integer> _lockedRowIndexes = spreadsheet
+                .sheetModel().lockedRowIndexes.get();
         if (_lockedRowIndexes == null) {
             _lockedRowIndexes = new HashSet<Integer>();
         } else {
@@ -266,10 +267,12 @@ public class SpreadsheetStyleFactory implements Serializable {
             }
         }
 
-        spreadsheet.setLockedRowIndexes(_lockedRowIndexes);
-        spreadsheet.setLockedColumnIndexes(_lockedColumnIndexes);
-        spreadsheet.setColumnIndexToStyleIndex(_columnIndexToStyleIndex);
-        spreadsheet.setRowIndexToStyleIndex(_rowIndexToStyleIndex);
+        spreadsheet.sheetModel().lockedRowIndexes.set(_lockedRowIndexes);
+        spreadsheet.sheetModel().lockedColumnIndexes.set(_lockedColumnIndexes);
+        spreadsheet.sheetModel().columnIndexToStyleIndex
+                .set(_columnIndexToStyleIndex);
+        spreadsheet.sheetModel().rowIndexToStyleIndex
+                .set(_rowIndexToStyleIndex);
     }
 
     /**
@@ -371,7 +374,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     /** Gives the client the borders drawn on other cells. */
     void sendBorders() {
-        spreadsheet.setShiftedCellBorderStyles(borderRules());
+        spreadsheet.sheetModel().shiftedCellBorderStyles.set(borderRules());
     }
 
     @SuppressWarnings({ "unchecked" })

@@ -254,7 +254,8 @@ class OverridableHooksTest {
         spreadsheet.getConditionalFormatter().createConditionalFormatterRules();
 
         String styles = String.join("",
-                spreadsheet.getConditionalFormattingStyles().values());
+                spreadsheet.sheetModel().conditionalFormattingStyles.get()
+                        .values());
         assertTrue(styles.contains("border-right-color:#c0ffee;"), styles);
     }
 

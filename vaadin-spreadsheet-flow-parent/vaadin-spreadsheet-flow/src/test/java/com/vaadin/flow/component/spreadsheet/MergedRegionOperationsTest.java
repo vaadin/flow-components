@@ -8,17 +8,13 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -27,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
+import com.vaadin.flow.dom.Element;
 
 /**
  * Reading POI's merged regions all at once. XSSF finds a region by its index by
@@ -39,7 +35,8 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 class MergedRegionOperationsTest {
 
     private final Sheet sheet = Mockito.spy(new XSSFWorkbook().createSheet());
-    private final AtomicReference<ArrayList<MergedRegion>> clientRegions = new AtomicReference<>();
+    private final SheetClientModel model = new SheetClientModel(
+            new Element("vaadin-spreadsheet"));
     private MergedRegionOperations operations;
 
     @BeforeEach
@@ -47,12 +44,7 @@ class MergedRegionOperationsTest {
         Spreadsheet spreadsheet = Mockito.mock(Spreadsheet.class,
                 Mockito.RETURNS_DEEP_STUBS);
         when(spreadsheet.getActiveSheet()).thenReturn(sheet);
-        when(spreadsheet.getMergedRegions())
-                .thenAnswer(invocation -> clientRegions.get());
-        doAnswer(invocation -> {
-            clientRegions.set(invocation.getArgument(0));
-            return null;
-        }).when(spreadsheet).setMergedRegions(any());
+        when(spreadsheet.sheetModel()).thenReturn(model);
         for (String region : List.of("C3:D4", "A1:B2", "F10:F12")) {
             sheet.addMergedRegion(CellRangeAddress.valueOf(region));
         }

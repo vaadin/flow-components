@@ -22,14 +22,14 @@ import org.apache.poi.ss.util.CellReference;
  * Two normalization concerns are bundled here because both methods reduce down
  * to the same shape: order the two corners, then clamp each to the sheet's
  * max-row / max-column. The 0-based string overload clamps with
- * {@code getRows() - 1} / {@code getCols() - 1} directly. The 1-based int
- * overload clamps with {@code getRows()} / {@code getCols()} then subtracts one
- * when constructing the {@code CellRangeAddress}. The two paths arrive at the
- * same observable result, but the inner arithmetic differs.
+ * {@code getRows() - 1} / {@code getColumns() - 1} directly. The 1-based int
+ * overload clamps with {@code getRows()} / {@code getColumns()} then subtracts
+ * one when constructing the {@code CellRangeAddress}. The two paths arrive at
+ * the same observable result, but the inner arithmetic differs.
  *
  * <p>
  * Holds a {@link Spreadsheet} reference for the {@code getRows()} /
- * {@code getCols()} reads only; no mutation.
+ * {@code getColumns()} reads only; no mutation.
  */
 final class CellRangeNormalizer implements Serializable {
 
@@ -58,11 +58,11 @@ final class CellRangeNormalizer implements Serializable {
         if (r2 >= spreadsheet.getRows()) {
             r2 = spreadsheet.getRows() - 1;
         }
-        if (c1 >= spreadsheet.getCols()) {
-            c1 = spreadsheet.getCols() - 1;
+        if (c1 >= spreadsheet.getColumns()) {
+            c1 = spreadsheet.getColumns() - 1;
         }
-        if (c2 >= spreadsheet.getCols()) {
-            c2 = spreadsheet.getCols() - 1;
+        if (c2 >= spreadsheet.getColumns()) {
+            c2 = spreadsheet.getColumns() - 1;
         }
         return new CellRangeAddress(r1, r2, c1, c2);
     }
@@ -70,8 +70,8 @@ final class CellRangeNormalizer implements Serializable {
     /**
      * Build a {@link CellRangeAddress} from 1-based start / end coordinates.
      * Reorders the corners so the result is min-to-max, clamps each coordinate
-     * to {@code getRows()} / {@code getCols()}, then subtracts one on emit to
-     * land in POI's 0-based space.
+     * to {@code getRows()} / {@code getColumns()}, then subtracts one on emit
+     * to land in POI's 0-based space.
      */
     CellRangeAddress fromCoordinates(int row1, int col1, int row2, int col2) {
         int r1 = row1 > row2 ? row2 : row1;
@@ -84,11 +84,11 @@ final class CellRangeNormalizer implements Serializable {
         if (r2 >= spreadsheet.getRows()) {
             r2 = spreadsheet.getRows();
         }
-        if (c1 >= spreadsheet.getCols()) {
-            c1 = spreadsheet.getCols();
+        if (c1 >= spreadsheet.getColumns()) {
+            c1 = spreadsheet.getColumns();
         }
-        if (c2 >= spreadsheet.getCols()) {
-            c2 = spreadsheet.getCols();
+        if (c2 >= spreadsheet.getColumns()) {
+            c2 = spreadsheet.getColumns();
         }
         return new CellRangeAddress(r1 - 1, r2 - 1, c1 - 1, c2 - 1);
     }

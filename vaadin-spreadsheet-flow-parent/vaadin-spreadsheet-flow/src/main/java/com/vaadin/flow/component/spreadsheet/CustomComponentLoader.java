@@ -74,7 +74,7 @@ final class CustomComponentLoader implements Serializable {
         if (spreadsheet.getSpreadsheetComponentFactory() == null) {
             // No factory -> clear all
             spreadsheet.setCellKeyToEditorMap(null);
-            spreadsheet.setComponentIDtoCellKeysMap(null);
+            spreadsheet.sheetModel().componentIDtoCellKeysMap.set(null);
             if (!customComponents.isEmpty()) {
                 for (Component c : customComponents) {
                     spreadsheet.unRegisterCustomComponent(c);
@@ -116,7 +116,8 @@ final class CustomComponentLoader implements Serializable {
         }
         customComponents = nextComponents;
         spreadsheet.setCellKeyToEditorMap(nextCellKeyToEditor);
-        spreadsheet.setComponentIDtoCellKeysMap(nextComponentIDtoCellKeysMap);
+        spreadsheet.sheetModel().componentIDtoCellKeysMap
+                .set(nextComponentIDtoCellKeysMap);
 
         if (!rowsWithComponents.isEmpty()) {
             applyHeightsFor(rowsWithComponents);

@@ -75,14 +75,11 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
-import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
-import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
-import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinService;
@@ -167,14 +164,6 @@ public class Spreadsheet extends Component
      */
     private static final int DEFAULT_BUFFER_SIZE = 200;
 
-    private final ClientProperty<Integer> rows = ClientProperty
-            .integer(getElement(), "rows", 0);
-
-    private final ClientProperty<Integer> cols = ClientProperty
-            .integer(getElement(), "cols", 0);
-
-    private final SheetGrouping sheetGrouping = new SheetGrouping(getElement());
-
     private final SheetSizes sheetSizes = new SheetSizes(this);
 
     /** What follows from cells created past the end, once a round trip. */
@@ -203,14 +192,8 @@ public class Spreadsheet extends Component
     private final ClientProperty<HashMap<Integer, String>> cellStyles = ClientProperty
             .json(getElement(), "cellStyleToCSSStyle");
 
-    private final SheetCssStyleMaps cssStyleMaps = new SheetCssStyleMaps(
-            getElement());
-
     private final FreezePaneState freezePaneState = new FreezePaneState(
             getElement());
-
-    private final ClientProperty<Boolean> sheetProtected = ClientProperty
-            .bool(getElement(), "sheetProtected", false);
 
     private final ClientProperty<Boolean> workbookProtected = ClientProperty
             .bool(getElement(), "workbookProtected", false);
@@ -229,34 +212,6 @@ public class Spreadsheet extends Component
      */
     private Map<String, Component> cellKeyToEditor = new HashMap<>();
 
-    /** The node id of the editor of each cell, by cell key. */
-    private final ClientProperty<HashMap<String, String>> cellKeysToEditorIdMap = ClientProperty
-            .json(getElement(), "cellKeysToEditorIdMap");
-
-    private final ClientMapProperty<String, String> componentIDtoCellKeysMap = new ClientMapProperty<>(
-            getElement(), "componentIDtoCellKeysMap");
-
-    // Cell CSS key to link tooltip (usually same as address)
-    private final ClientProperty<HashMap<String, String>> hyperlinksTooltips = ClientProperty
-            .json(getElement(), "hyperlinksTooltips");
-
-    private final ClientProperty<HashMap<String, String>> cellComments = ClientProperty
-            .json(getElement(), "cellComments");
-    private final ClientProperty<HashMap<String, String>> cellCommentAuthors = ClientProperty
-            .json(getElement(), "cellCommentAuthors");
-
-    private final ClientProperty<ArrayList<String>> visibleCellComments = ClientProperty
-            .json(getElement(), "visibleCellComments");
-
-    private final ClientProperty<Set<String>> invalidFormulaCells = ClientProperty
-            .json(getElement(), "invalidFormulaCells");
-
-    private final ClientProperty<HashMap<String, OverlayInfo>> overlays = ClientProperty
-            .json(getElement(), "overlays");
-
-    private final ClientProperty<ArrayList<MergedRegion>> mergedRegions = ClientProperty
-            .json(getElement(), "mergedRegions");
-
     private final ClientProperty<String> infoLabelValue = ClientProperty
             .string(getElement(), "infoLabelValue", null);
 
@@ -265,21 +220,6 @@ public class Spreadsheet extends Component
 
     private final ClientProperty<Boolean> hasActions = ClientProperty
             .bool(getElement(), "hasActions", false);
-
-    private final ClientProperty<Boolean> displayGridlines = ClientProperty
-            .bool(getElement(), "displayGridlines", true);
-
-    private final ClientProperty<Boolean> displayRowColHeadings = ClientProperty
-            .bool(getElement(), "displayRowColHeadings", true);
-
-    private final ClientProperty<Boolean> lockFormatColumns = ClientProperty
-            .bool(getElement(), "lockFormatColumns", false);
-
-    private final ClientProperty<Boolean> lockFormatRows = ClientProperty
-            .bool(getElement(), "lockFormatRows", false);
-
-    private final ClientProperty<List<String>> namedRanges = ClientProperty
-            .json(getElement(), "namedRanges");
 
     private final ClientProperty<Integer> rowBufferSize = ClientProperty
             .integer(getElement(), "rowBufferSize", DEFAULT_BUFFER_SIZE);
@@ -295,30 +235,6 @@ public class Spreadsheet extends Component
     private Registration spreadsheetHandlerRegistration;
 
     private boolean insideCustomEditorCallback;
-
-    int getCols() {
-        return cols.get();
-    }
-
-    private List<GroupingData> getColGroupingData() {
-        return sheetGrouping.getColGroupingData();
-    }
-
-    int getColGroupingMax() {
-        return sheetGrouping.getColGroupingMax();
-    }
-
-    int getRowGroupingMax() {
-        return sheetGrouping.getRowGroupingMax();
-    }
-
-    boolean isColGroupingInversed() {
-        return sheetGrouping.isColGroupingInversed();
-    }
-
-    boolean isRowGroupingInversed() {
-        return sheetGrouping.isRowGroupingInversed();
-    }
 
     float getDefRowH() {
         return sheetSizes.defaultRowHeight();
@@ -348,32 +264,12 @@ public class Spreadsheet extends Component
         return cellStyleToCSSStyle;
     }
 
-    HashMap<Integer, Integer> getRowIndexToStyleIndex() {
-        return cssStyleMaps.getRowIndexToStyleIndex();
-    }
-
-    HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
-        return cssStyleMaps.getColumnIndexToStyleIndex();
-    }
-
-    Set<Integer> getLockedColumnIndexes() {
-        return cssStyleMaps.getLockedColumnIndexes();
-    }
-
-    Set<Integer> getLockedRowIndexes() {
-        return cssStyleMaps.getLockedRowIndexes();
-    }
-
     /**
      * The rules of the borders the cells draw on other cells than their own, as
      * the client is given them before the next response.
      */
     ArrayList<String> getShiftedCellBorderStyles() {
         return workbookScope.styler.borderRules();
-    }
-
-    HashMap<Integer, String> getConditionalFormattingStyles() {
-        return cssStyleMaps.getConditionalFormattingStyles();
     }
 
     /** The columns hidden, counted from 1, as the client counts them. */
@@ -394,56 +290,12 @@ public class Spreadsheet extends Component
         return freezePaneState.getHorizontalScrollPositions();
     }
 
-    private boolean isSheetProtected() {
-        return sheetProtected.get();
-    }
-
     Map<String, Component> getCellKeyToEditorMap() {
         return cellKeyToEditor;
     }
 
-    HashMap<String, String> getComponentIDtoCellKeysMap() {
-        return componentIDtoCellKeysMap.get();
-    }
-
-    HashMap<String, String> getHyperlinksTooltips() {
-        return hyperlinksTooltips.get();
-    }
-
-    HashMap<String, String> getCellComments() {
-        return cellComments.get();
-    }
-
-    HashMap<String, String> getCellCommentAuthors() {
-        return cellCommentAuthors.get();
-    }
-
-    ArrayList<String> getVisibleCellComments() {
-        return visibleCellComments.get();
-    }
-
-    Set<String> getInvalidFormulaCells() {
-        return invalidFormulaCells.get();
-    }
-
-    HashMap<String, OverlayInfo> getOverlays() {
-        return overlays.get();
-    }
-
     Map<String, String> getResources() {
         return resources;
-    }
-
-    ArrayList<MergedRegion> getMergedRegions() {
-        return mergedRegions.get();
-    }
-
-    private int getVerticalSplitPosition() {
-        return freezePaneState.getVerticalSplitPosition();
-    }
-
-    private int getHorizontalSplitPosition() {
-        return freezePaneState.getHorizontalSplitPosition();
     }
 
     private String getInfoLabelValue() {
@@ -452,38 +304,6 @@ public class Spreadsheet extends Component
 
     private boolean isWorkbookChangeToggle() {
         return workbookChangeToggle.get();
-    }
-
-    void setRows(int rows) {
-        this.rows.set(rows);
-    }
-
-    void setCols(int cols) {
-        this.cols.set(cols);
-    }
-
-    void setColGroupingData(List<GroupingData> colGroupingData) {
-        sheetGrouping.setColGroupingData(colGroupingData);
-    }
-
-    void setRowGroupingData(List<GroupingData> rowGroupingData) {
-        sheetGrouping.setRowGroupingData(rowGroupingData);
-    }
-
-    void setColGroupingMax(int colGroupingMax) {
-        sheetGrouping.setColGroupingMax(colGroupingMax);
-    }
-
-    void setRowGroupingMax(int rowGroupingMax) {
-        sheetGrouping.setRowGroupingMax(rowGroupingMax);
-    }
-
-    void setColGroupingInversed(boolean colGroupingInversed) {
-        sheetGrouping.setColGroupingInversed(colGroupingInversed);
-    }
-
-    void setRowGroupingInversed(boolean rowGroupingInversed) {
-        sheetGrouping.setRowGroupingInversed(rowGroupingInversed);
     }
 
     void setRowH(float[] rowH) {
@@ -503,44 +323,12 @@ public class Spreadsheet extends Component
         cellStyles.set(cellStyleToCSSStyle);
     }
 
-    void setRowIndexToStyleIndex(
-            HashMap<Integer, Integer> rowIndexToStyleIndex) {
-        cssStyleMaps.setRowIndexToStyleIndex(rowIndexToStyleIndex);
-    }
-
-    void setColumnIndexToStyleIndex(
-            HashMap<Integer, Integer> columnIndexToStyleIndex) {
-        cssStyleMaps.setColumnIndexToStyleIndex(columnIndexToStyleIndex);
-    }
-
-    void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
-        cssStyleMaps.setLockedColumnIndexes(lockedColumnIndexes);
-    }
-
-    void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
-        cssStyleMaps.setLockedRowIndexes(lockedRowIndexes);
-    }
-
-    void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
-        cssStyleMaps.setShiftedCellBorderStyles(shiftedCellBorderStyles);
-    }
-
-    void setConditionalFormattingStyles(
-            HashMap<Integer, String> conditionalFormattingStyles) {
-        cssStyleMaps
-                .setConditionalFormattingStyles(conditionalFormattingStyles);
-    }
-
     void setVerticalScrollPositions(int[] verticalScrollPositions) {
         freezePaneState.setVerticalScrollPositions(verticalScrollPositions);
     }
 
     void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
         freezePaneState.setHorizontalScrollPositions(horizontalScrollPositions);
-    }
-
-    void setSheetProtected(boolean sheetProtected) {
-        this.sheetProtected.set(sheetProtected);
     }
 
     private void setWorkbookProtected(boolean workbookProtected) {
@@ -573,7 +361,7 @@ public class Spreadsheet extends Component
                         getComponentNodeId(entry.getValue()));
             }
         }
-        cellKeysToEditorIdMap.set(editorIds);
+        sheetModel().cellKeysToEditorIdMap.set(editorIds);
     }
 
     /**
@@ -592,57 +380,8 @@ public class Spreadsheet extends Component
         lastEditorCallbackComponent = null;
     }
 
-    void setComponentIDtoCellKeysMap(
-            HashMap<String, String> componentIDtoCellKeysMap) {
-        this.componentIDtoCellKeysMap.set(componentIDtoCellKeysMap);
-    }
-
-    void setHyperlinksTooltips(HashMap<String, String> hyperlinksTooltips) {
-        this.hyperlinksTooltips.set(hyperlinksTooltips);
-    }
-
-    void setCellComments(HashMap<String, String> cellComments) {
-        this.cellComments.set(cellComments);
-    }
-
-    void setCellCommentAuthors(HashMap<String, String> cellCommentAuthors) {
-        this.cellCommentAuthors.set(cellCommentAuthors);
-    }
-
-    void setVisibleCellComments(ArrayList<String> visibleCellComments) {
-        this.visibleCellComments.set(visibleCellComments);
-    }
-
-    void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
-        this.invalidFormulaCells.set(invalidFormulaCells);
-    }
-
     private void setHasActions(boolean hasActions) {
         this.hasActions.set(hasActions);
-    }
-
-    void setOverlays(HashMap<String, OverlayInfo> overlays) {
-        this.overlays.set(overlays);
-    }
-
-    void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
-        this.mergedRegions.set(mergedRegions);
-    }
-
-    private void setDisplayGridlines(boolean displayGridlines) {
-        this.displayGridlines.set(displayGridlines);
-    }
-
-    private void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        this.displayRowColHeadings.set(displayRowColHeadings);
-    }
-
-    void setVerticalSplitPosition(int verticalSplitPosition) {
-        freezePaneState.setVerticalSplitPosition(verticalSplitPosition);
-    }
-
-    void setHorizontalSplitPosition(int horizontalSplitPosition) {
-        freezePaneState.setHorizontalSplitPosition(horizontalSplitPosition);
     }
 
     private void setInfoLabelValue(String infoLabelValue) {
@@ -651,18 +390,6 @@ public class Spreadsheet extends Component
 
     private void setWorkbookChangeToggle(boolean workbookChangeToggle) {
         this.workbookChangeToggle.set(workbookChangeToggle);
-    }
-
-    void setLockFormatColumns(boolean lockFormatColumns) {
-        this.lockFormatColumns.set(lockFormatColumns);
-    }
-
-    void setLockFormatRows(boolean lockFormatRows) {
-        this.lockFormatRows.set(lockFormatRows);
-    }
-
-    void setNamedRanges(List<String> namedRanges) {
-        this.namedRanges.set(namedRanges);
     }
 
     void onPopupButtonClick(int row, int column) {
@@ -1038,7 +765,7 @@ public class Spreadsheet extends Component
      * reflects the current merged regions of the sheet.
      */
     protected final MergedRegionContainer mergedRegionContainer = new MergedRegionLookup(
-            this::getMergedRegions);
+            () -> sheetModel().mergedRegions.get());
 
     final MergedRegionOperations mergedRegionOperations = new MergedRegionOperations(
             this);
@@ -1413,7 +1140,7 @@ public class Spreadsheet extends Component
      * @return Last frozen row or 0 if none
      */
     public int getLastFrozenRow() {
-        return getVerticalSplitPosition();
+        return sheetModel().verticalSplitPosition.get();
     }
 
     /**
@@ -1423,7 +1150,7 @@ public class Spreadsheet extends Component
      * @return Last frozen column or 0 if none
      */
     public int getLastFrozenColumn() {
-        return getHorizontalSplitPosition();
+        return sheetModel().horizontalSplitPosition.get();
     }
 
     /**
@@ -1657,15 +1384,15 @@ public class Spreadsheet extends Component
             getElement().executeJs("this.resources=$0", resources.keySet());
         }
 
-        if (overlays.get() != null) {
+        if (sheetModel().overlays.get() != null) {
             // The node id's of component overlays attached as virtual children
             // may no longer be valid after a detach/attach. Remove all
             // overlays and reload them (with updated node id's).
-            overlays.get().clear();
+            sheetModel().overlays.get().clear();
             sheetScope.overlays.loadOrUpdate();
         }
 
-        if (!componentIDtoCellKeysMap.get().isEmpty()
+        if (!sheetModel().componentIDtoCellKeysMap.get().isEmpty()
                 || !cellKeyToEditor.isEmpty()) {
             // The node id's of custom components may no longer be valid after a
             // detach/attach. Remove all custom components and reload them (with
@@ -1956,7 +1683,7 @@ public class Spreadsheet extends Component
      * @return Number of visible columns.
      */
     public int getColumns() {
-        return getCols();
+        return sheetModel().cols.get();
     }
 
     /**
@@ -1968,7 +1695,7 @@ public class Spreadsheet extends Component
      * @return Number of visible rows.
      */
     public int getRows() {
-        return rows.get();
+        return sheetModel().rows.get();
     }
 
     /**
@@ -2289,8 +2016,8 @@ public class Spreadsheet extends Component
         // once before the response: cells are often created one after another,
         // and each would read every row and column again.
         if (row >= getRows() || col >= getColumns()) {
-            setRows(Math.max(getRows(), row + 1));
-            setCols(Math.max(getColumns(), col + 1));
+            sheetModel().rows.set(Math.max(getRows(), row + 1));
+            sheetModel().cols.set(Math.max(getColumns(), col + 1));
             clientChanges.sizes();
         }
         return cell;
@@ -2319,8 +2046,8 @@ public class Spreadsheet extends Component
      *            New maximum column count.
      */
     public void setMaxColumns(int cols) {
-        if (getCols() != cols) {
-            setCols(cols);
+        if (getColumns() != cols) {
+            sheetModel().cols.set(cols);
             sizeChanged();
         }
     }
@@ -2338,7 +2065,7 @@ public class Spreadsheet extends Component
      */
     public void setMaxRows(int rows) {
         if (getRows() != rows) {
-            setRows(rows);
+            sheetModel().rows.set(rows);
             sizeChanged();
         }
     }
@@ -2353,8 +2080,8 @@ public class Spreadsheet extends Component
      *            Maximum column count
      */
     public void setSheetMaxSize(int rows, int cols) {
-        setCols(cols);
-        setRows(rows);
+        sheetModel().cols.set(cols);
+        sheetModel().rows.set(rows);
         sizeChanged();
     }
 
@@ -3030,6 +2757,14 @@ public class Spreadsheet extends Component
         clientCells.reload();
     }
 
+    /**
+     * What the client is given of the sheet shown: the properties of the
+     * element that its scope sets back when another sheet is shown.
+     */
+    SheetClientModel sheetModel() {
+        return sheetScope.client;
+    }
+
     /** The overlays of the sheet shown. */
     SheetOverlayManager overlays() {
         return sheetScope.overlays;
@@ -3097,6 +2832,11 @@ public class Spreadsheet extends Component
 
     /**
      * Clears and reloads all data related to the currently active sheet.
+     * <p>
+     * The client is left nothing of the sheet shown before, and is given
+     * everything of the active one: its sizes, pictures and charts, tables,
+     * merged cells, frozen panes, protection, outline, named ranges, styles and
+     * pop-up buttons.
      */
     protected void reloadActiveSheetData() {
         selectionManager.clear();
@@ -3110,16 +2850,8 @@ public class Spreadsheet extends Component
 
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
-        setSheetProtected(getActiveSheet().getProtect());
+        sheetModel().sheetProtected.set(getActiveSheet().getProtect());
         setCellKeyToEditorMap(null);
-        setHyperlinksTooltips(null);
-        setComponentIDtoCellKeysMap(null);
-        setOverlays(null);
-        setMergedRegions(null);
-        setCellComments(null);
-        setCellCommentAuthors(null);
-        setVisibleCellComments(null);
-        setInvalidFormulaCells(null);
 
         popupButtons().detachAll();
 
@@ -3129,8 +2861,16 @@ public class Spreadsheet extends Component
 
         reloadSheetNames();
         updateMergedRegions();
-        setDisplayGridlines(getActiveSheet().isDisplayGridlines());
-        setDisplayRowColHeadings(getActiveSheet().isDisplayRowColHeadings());
+        sheetModel().displayGridlines
+                .set(getActiveSheet().isDisplayGridlines());
+        sheetModel().displayRowColHeadings
+                .set(getActiveSheet().isDisplayRowColHeadings());
+
+        // Everything of the sheet is loaded again: what the client had of it
+        // went with the scope.
+        SpreadsheetFactory.reloadSpreadsheetData(this, getActiveSheet());
+        reloadActiveSheetStyles();
+        loadPopupButtons();
 
         markAsDirty();
     }
@@ -3258,7 +2998,7 @@ public class Spreadsheet extends Component
      * @return true if the current {@link Sheet} is protected, false otherwise.
      */
     public boolean isActiveSheetProtected() {
-        return isSheetProtected();
+        return sheetModel().sheetProtected.get();
     }
 
     /**
@@ -3794,7 +3534,7 @@ public class Spreadsheet extends Component
             throw new NullPointerException("no active sheet");
         }
         getActiveSheet().setDisplayGridlines(visible);
-        setDisplayGridlines(visible);
+        sheetModel().displayGridlines.set(visible);
     }
 
     /**
@@ -3820,7 +3560,7 @@ public class Spreadsheet extends Component
             throw new NullPointerException("no active sheet");
         }
         getActiveSheet().setDisplayRowColHeadings(visible);
-        setDisplayRowColHeadings(visible);
+        sheetModel().displayRowColHeadings.set(visible);
     }
 
     /**
@@ -4153,7 +3893,6 @@ public class Spreadsheet extends Component
      */
     public void createFreezePane(int rowSplit, int colSplit) {
         getActiveSheet().createFreezePane(colSplit, rowSplit);
-        SpreadsheetFactory.loadFreezePane(this);
         reloadActiveSheetData();
     }
 
@@ -4165,7 +3904,6 @@ public class Spreadsheet extends Component
         PaneInformation paneInformation = getActiveSheet().getPaneInformation();
         if (paneInformation != null && paneInformation.isFreezePane()) {
             getActiveSheet().createFreezePane(0, 0);
-            SpreadsheetFactory.loadFreezePane(this);
             reloadActiveSheetData();
         }
     }

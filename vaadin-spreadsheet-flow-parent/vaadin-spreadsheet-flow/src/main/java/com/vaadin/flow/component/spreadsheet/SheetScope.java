@@ -18,20 +18,27 @@ import java.io.Serializable;
  */
 final class SheetScope implements Serializable {
 
+    /** What the client is given of the sheet, as properties of the element. */
+    final SheetClientModel client;
     /** The rows and columns the client shows: none until it reports them. */
     final Viewport viewport;
     final SheetOverlayManager overlays;
     final CustomComponentLoader components;
 
     SheetScope(Spreadsheet spreadsheet) {
+        client = new SheetClientModel(spreadsheet.getElement());
         viewport = new Viewport(new SheetView(spreadsheet));
         overlays = new SheetOverlayManager(spreadsheet);
         components = new CustomComponentLoader(spreadsheet);
     }
 
-    /** The sheet is no longer shown: what the client has of it goes. */
+    /**
+     * The sheet is no longer shown: what the client has of it goes, every
+     * property of it set back to the value the client starts from.
+     */
     void close() {
         overlays.clear();
         components.unloadAll();
+        client.reset();
     }
 }
