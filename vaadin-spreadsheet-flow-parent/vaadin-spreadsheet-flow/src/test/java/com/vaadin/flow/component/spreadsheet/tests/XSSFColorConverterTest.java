@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,6 +79,29 @@ class XSSFColorConverterTest {
         var cssColor = converter.getBackgroundColorCSS(rule);
 
         Assertions.assertEquals("rgba(255, 128, 64, 1.0);", cssColor);
+    }
+
+    @Test
+    void getBorderColorCSS_ofARule_givesEachSideItsOwnColor() {
+        var border = createRule().createBorderFormatting();
+        border.setLeftBorderColor(rgb(255, 0, 0));
+        border.setTopBorderColor(rgb(0, 255, 0));
+        border.setRightBorderColor(rgb(0, 0, 255));
+        border.setBottomBorderColor(rgb(255, 255, 0));
+
+        Assertions.assertEquals("left:rgba(255, 0, 0, 1.0);",
+                converter.getBorderColorCSS(BorderSide.LEFT, "left", border));
+        Assertions.assertEquals("top:rgba(0, 255, 0, 1.0);",
+                converter.getBorderColorCSS(BorderSide.TOP, "top", border));
+        Assertions.assertEquals("right:rgba(0, 0, 255, 1.0);",
+                converter.getBorderColorCSS(BorderSide.RIGHT, "right", border));
+        Assertions.assertEquals("bottom:rgba(255, 255, 0, 1.0);", converter
+                .getBorderColorCSS(BorderSide.BOTTOM, "bottom", border));
+    }
+
+    private static XSSFColor rgb(int red, int green, int blue) {
+        return new XSSFColor(
+                new byte[] { (byte) red, (byte) green, (byte) blue });
     }
 
     private ConditionalFormattingRule createRule() {

@@ -128,4 +128,54 @@ class CustomDataFormatterTest {
         Assertions.assertEquals("text",
                 spreadsheet.getCellValue(generalFormatCell).trim());
     }
+
+    // The section a value picks decides how it is formatted: an empty section
+    // shows nothing, and a section of only text shows that text.
+
+    @Test
+    void zeroInAFormatWithAnEmptyZeroSection_showsNothing() {
+        Assertions.assertEquals("", formatted(0, "0;-0;;@"));
+        Assertions.assertEquals("", formatted(0, "0;-0;"));
+    }
+
+    @Test
+    void zeroInAFormatWithATextZeroSection_showsTheText() {
+        Assertions.assertEquals("zero", formatted(0, "0;-0;\"zero\";@"));
+        Assertions.assertEquals("zero", formatted(0, "0;-0;\"zero\""));
+    }
+
+    @Test
+    void negativeInAFormatWithAnEmptyNegativeSection_showsNothing() {
+        Assertions.assertEquals("", formatted(-5, "0;;0;@"));
+        Assertions.assertEquals("", formatted(-5, "0;;0"));
+        Assertions.assertEquals("", formatted(-5, "0;"));
+    }
+
+    @Test
+    void negativeInAFormatWithATextNegativeSection_showsTheText() {
+        Assertions.assertEquals("neg", formatted(-5, "0;\"neg\";0;@"));
+        Assertions.assertEquals("neg", formatted(-5, "0;\"neg\";0"));
+        Assertions.assertEquals("neg", formatted(-5, "0;\"neg\""));
+    }
+
+    @Test
+    void positiveInAFormatWithATextPositiveSection_showsTheText() {
+        Assertions.assertEquals("pos", formatted(5, "\"pos\";-0;0;@"));
+        Assertions.assertEquals("pos", formatted(5, "\"pos\";-0"));
+    }
+
+    @Test
+    void aFormatOfOnlyText_showsTheText_withAMinusForANegative() {
+        Assertions.assertEquals("text", formatted(5, "\"text\""));
+        Assertions.assertEquals("-text", formatted(-5, "\"text\""));
+    }
+
+    private String formatted(double value, String format) {
+        var cell = spreadsheet.createCell(5, 1, value);
+        var cellStyle = spreadsheet.getWorkbook().createCellStyle();
+        cellStyle.setDataFormat(
+                spreadsheet.getWorkbook().createDataFormat().getFormat(format));
+        cell.setCellStyle(cellStyle);
+        return spreadsheet.getCellValue(cell);
+    }
 }

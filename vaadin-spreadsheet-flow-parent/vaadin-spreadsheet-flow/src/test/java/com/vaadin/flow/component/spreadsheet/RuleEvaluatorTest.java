@@ -11,10 +11,13 @@ package com.vaadin.flow.component.spreadsheet;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ComparisonOperator;
+import org.apache.poi.ss.usermodel.ConditionType;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.SheetConditionalFormatting;
@@ -173,6 +176,33 @@ class RuleEvaluatorTest {
     }
 
     @Test
+    void matchesValue_numericLT_doesNotMatchTheBound() {
+        ConditionalFormattingRule rule = cellValueRule(ComparisonOperator.LT,
+                "10");
+        Cell cell = numericCell(0, 0, 10d);
+
+        assertFalse(evaluator.matches(cell, rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_numericGT_doesNotMatchTheBound() {
+        ConditionalFormattingRule rule = cellValueRule(ComparisonOperator.GT,
+                "10");
+        Cell cell = numericCell(0, 0, 10d);
+
+        assertFalse(evaluator.matches(cell, rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_numericGE_matchesTheBound() {
+        ConditionalFormattingRule rule = cellValueRule(ComparisonOperator.GE,
+                "10");
+        Cell cell = numericCell(0, 0, 10d);
+
+        assertTrue(evaluator.matches(cell, rule, 0, 0));
+    }
+
+    @Test
     void matchesValue_numericLE_matchesEqualBoundary() {
         // Pin inclusive bound: LE includes the equal case.
         ConditionalFormattingRule rule = cellValueRule(ComparisonOperator.LE,
@@ -300,6 +330,15 @@ class RuleEvaluatorTest {
         assertTrue(evaluator.matches(stringCell(1, 0, "world"), rule, 0, 0));
     }
 
+    @Test
+    void matchesValue_stringOrdered_doesNotMatch() {
+        // Text is compared only for being equal or not.
+        ConditionalFormattingRule rule = cellValueRule(ComparisonOperator.LT,
+                "\"m\"");
+
+        assertFalse(evaluator.matches(stringCell(0, 0, "a"), rule, 0, 0));
+    }
+
     // ----- CELL_VALUE_IS — boolean ------------------------------------------
 
     @Test
@@ -318,6 +357,29 @@ class RuleEvaluatorTest {
 
         assertFalse(evaluator.matches(booleanCell(0, 0, true), rule, 0, 0));
         assertTrue(evaluator.matches(booleanCell(1, 0, false), rule, 0, 0));
+    }
+
+    @Test
+    void matchesValue_booleanOrdered_doesNotMatch() {
+        // A truth value is compared only for being equal or not.
+        ConditionalFormattingRule rule = cellValueRule(ComparisonOperator.GT,
+                "FALSE");
+
+        assertFalse(evaluator.matches(booleanCell(0, 0, true), rule, 0, 0));
+    }
+
+    // ----- CELL_VALUE_IS — no operator --------------------------------------
+
+    @Test
+    void matchesValue_withoutAnOperator_doesNotMatch() {
+        // As POI reads a cell-value rule whose file gives no operator
+        ConditionalFormattingRule rule = mock(ConditionalFormattingRule.class);
+        when(rule.getConditionType()).thenReturn(ConditionType.CELL_VALUE_IS);
+        when(rule.getComparisonOperation())
+                .thenReturn(ComparisonOperator.NO_COMPARISON);
+        when(rule.getFormula1()).thenReturn("5");
+
+        assertFalse(evaluator.matches(numericCell(0, 0, 5d), rule, 0, 0));
     }
 
     // ----- CELL_VALUE_IS — type mismatch ------------------------------------

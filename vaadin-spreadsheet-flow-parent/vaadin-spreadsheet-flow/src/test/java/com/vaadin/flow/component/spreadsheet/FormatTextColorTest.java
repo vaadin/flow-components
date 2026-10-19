@@ -64,4 +64,18 @@ class FormatTextColorTest {
         assertNull(textColorOf(positive));
         assertNull(textColorOf(plain));
     }
+
+    @Test
+    void aColourStartingWithZeros_isSentWithAllSixDigits() {
+        Cell black = cell(0, 42, "[Black]0");
+        Cell blue = cell(1, 42, "[Blue]0");
+        Cell green = cell(2, 42, "[Green]0");
+        spreadsheet = new Spreadsheet(workbook);
+        spreadsheet.setLocale(Locale.US);
+        ui.add(spreadsheet);
+
+        assertEquals("000000", textColorOf(black));
+        assertEquals("0000ff", textColorOf(blue));
+        assertEquals("00ff00", textColorOf(green));
+    }
 }
