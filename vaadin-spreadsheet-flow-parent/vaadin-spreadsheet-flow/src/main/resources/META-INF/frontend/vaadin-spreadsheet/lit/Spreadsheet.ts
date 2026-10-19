@@ -57,6 +57,7 @@ import { PointerSelection } from './controllers/PointerSelection.js';
 import { FormulaPointer } from './controllers/FormulaPointer.js';
 import { Outline } from './controllers/Outline.js';
 import { type ScrollView, SheetRenderer } from './render/SheetRenderer.js';
+import { SheetLayout } from './dom/SheetLayout.js';
 import { listenForLongPress } from './dom/LongPress.js';
 import { flowRequestInFlight, overlayComponentAppId } from './dom/FlowClient.js';
 import { isIOS, isMacPlatform } from './dom/Platform.js';
@@ -358,33 +359,12 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    */
   private readonly formulaBar: SpreadsheetFormulaBar;
 
-  /**
-   * MutationObserver watching the spreadsheet host for class
-   * changes: {@code Spreadsheet.HIDE_TABSHEET_STYLE}
-   * ("hidetabsheet") and {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE}
-   * ("hidefunctionbar") hide the matching internal elements. It watches
-   * the host in the page and out of it, until {@link dispose}: a change
-   * made while the host is out of the page is there when it comes back.
-   */
-  private readonly hostClassObserver: MutationObserver;
+  /** The sheet's own elements, laid out; see {@link SheetLayout}. */
+  private readonly layout: SheetLayout;
 
-  /**
-   * The component's own root inside {@link renderTarget}.
-   *
-   * Everything the spreadsheet draws lives in here, and this element —
-   * not the host — owns the vertical layout. The host belongs to the
-   * application: writing a layout onto it means an application that
-   * positions the component its own way is silently overridden.
-   */
+  /** The component's own root inside {@link renderTarget}; see {@link SheetLayout.root}. */
   private readonly root: HTMLElement;
-  /**
-   * The scroll surface — wraps the cell-grid and provides the
-   * scrollbars + viewport bounds. The user scrolls THIS element;
-   * the connector listens for {@code scroll} events and recomputes
-   * the visible viewport. The cell-grid's intrinsic size is set to
-   * the total grid dimensions so the scrollbar track reflects the
-   * full scroll extent.
-   */
+  /** The scroll container: the headers and the cells; see {@link SheetLayout.scrollContainer}. */
   private readonly scrollContainer: HTMLElement;
 
   /**
@@ -441,25 +421,22 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       },
       this.ownListeners.signal
     );
-    // A flex column holding the formula bar, the sheet, and the tabs.
-    // `flex:1 1 auto` fills a host that has a definite height and
-    // content-sizes against one that does not; a percentage height
-    // would resolve to `auto` against a host whose own height is a
-    // percentage, and the sheet would grow to the height of the whole
-    // grid. Set on the element rather than in the stylesheet because
-    // this is the component's own element and its sizing has to hold
-    // wherever the connector is used, stylesheet or not.
-    this.root = document.createElement('div');
-    this.root.className = 'spreadsheet-root';
-    // min-height is a floor: a spreadsheet nobody has given a height to is still a spreadsheet,
-    // not a one-line strip.
-    this.root.style.cssText =
-      'display:flex;flex-direction:column;width:100%;flex:1 1 auto;' +
-      // position:relative so the context menu, which is a child, is
-      // placed in the sheet's own coordinate space rather than the
-      // viewport's.
-      'min-height:100px;box-sizing:border-box;position:relative;';
-    this.scrollContainer = document.createElement('div');
+    this.layout = new SheetLayout(
+      host,
+      {
+        cellGrid: this.cellGrid,
+        columnHeader: this.columnHeader,
+        rowHeader: this.rowHeader,
+        headerCorner: this.headerCorner,
+        formulaBar: this.formulaBar,
+        sheetTabs: this.sheetTabs,
+        contextMenu: this.contextMenu
+      },
+      this.ownListeners.signal,
+      () => this.renderer.insetPagedView()
+    );
+    this.root = this.layout.root;
+    this.scrollContainer = this.layout.scrollContainer;
     this.renderer = new SheetRenderer(
       this.store,
       {
@@ -483,72 +460,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         popupButtons: () => this.popup.buttons()
       }
     );
-    this.scrollContainer.className = 'sheet-scroll';
-    // CSS Grid layout inside the scroll container: 2 columns ×
-    // 2 rows so each header sits in its own cell. Column 1 =
-    // row-header (auto-sized to its intrinsic width); column
-    // 2 = cell-grid (auto-sized to its intrinsic width). Same
-    // for rows. Sticky positioning on each header pins it to
-    // its viewport edge during scroll.
-    // `flex:1` so the container takes the remaining vertical
-    // space inside the flex-column host, leaving room for the
-    // sheet tabs below.
-    // height:0 with flex:1 1 0 is what keeps the sheet from sizing the
-    // component. A column flex item still offers its content height
-    // when the container's own height is indefinite, and the grid
-    // inside is as tall as the whole sheet, so a spreadsheet with no
-    // height became thousands of pixels tall. A stated height of 0 is
-    // definite, so it offers nothing, and flex-grow still gives it
-    // every pixel left over once the host does have a height.
-    // A sheet smaller than its view keeps to the top left corner: left to
-    // stretch, the grid shares the room left over between the header track
-    // and the cells', and the cells drop away from their headers.
-    this.scrollContainer.style.cssText =
-      'position:relative;overflow:auto;width:100%;flex:1 1 0;height:0;min-height:0;' +
-      'display:grid;grid-template-columns:auto auto;' +
-      'grid-template-rows:auto auto;align-content:start;justify-content:start;' +
-      // outline:none so the browser-default focus ring doesn't
-      // render around the spreadsheet; we get focus via
-      // tabindex=0 but draw selection feedback via
-      // the .sheet-selection overlay instead.
-      'outline:none;' +
-      // Cells and headers are not text to select: a drag selects cells, and a long press on a phone opens the sheet's
-      // menu rather than the browser's. Fields typed into still select.
-      'user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;';
-    // tabindex=0 makes the scroll container focusable so it can
-    // receive keydown events for keyboard navigation.
-    this.scrollContainer.tabIndex = 0;
-    // To assistive technology the sheet is one control that takes its keys
-    // for itself, rather than a page to read, named after the sheet shown.
-    this.scrollContainer.setAttribute('role', 'application');
-    this.scrollContainer.setAttribute('aria-roledescription', 'spreadsheet');
-    this.scrollContainer.setAttribute('aria-label', 'Spreadsheet');
-    // Header corner at (col 1, row 1) — sticky on both axes
-    // so it overlays both header strips at their intersection.
-    // Hidden when either header dimension is 0.
-    this.headerCorner.className = 'sheet-header-corner';
-    this.headerCorner.style.cssText =
-      'grid-column:1;grid-row:1;' + 'position:sticky;top:0;left:0;z-index:6;' + 'width:0;height:0;';
-    // Column-header at (col 2, row 1) — top strip above cells.
-    this.columnHeader.style.gridColumn = '2';
-    this.columnHeader.style.gridRow = '1';
-    // Row-header at (col 1, row 2) — left strip alongside cells.
-    this.rowHeader.style.gridColumn = '1';
-    this.rowHeader.style.gridRow = '2';
-    // Cell-grid at (col 2, row 2).
-    this.cellGrid.style.gridColumn = '2';
-    this.cellGrid.style.gridRow = '2';
-    this.scrollContainer.appendChild(this.headerCorner);
-    this.scrollContainer.appendChild(this.columnHeader);
-    this.scrollContainer.appendChild(this.rowHeader);
-    this.scrollContainer.appendChild(this.cellGrid);
-    // Formula bar sits ABOVE the scroll container
-    // in the flex column. flex:0 so it takes its intrinsic
-    // height. Appended to renderTarget first so it ends up
-    // ahead of the scroll container in DOM order.
-    this.formulaBar.style.flex = '0 0 auto';
-    this.root.appendChild(this.formulaBar);
-    this.root.appendChild(this.contextMenu);
     this.on(this.formulaBar, 'sheet-address-changed', this.handleSheetAddressChanged);
     this.on(this.formulaBar, 'formula-commit', (e: FormulaCommitEvent) => this.edit.fieldCommitted(e.detail));
     this.on(this.formulaBar, 'formula-cancel', () => this.edit.fieldCancelled());
@@ -560,12 +471,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.on(this.formulaBar, 'formula-caret', (e: CaretEvent) =>
       this.pointing.caretMoved(e.detail.value, e.detail.caret, 'field')
     );
-    this.root.appendChild(this.scrollContainer);
-    // Sheet tabs sit below the scroll container in the flex
-    // column. flex:0 so they take their intrinsic height,
-    // never grow / shrink based on content.
-    this.sheetTabs.style.flex = '0 0 auto';
-    this.root.appendChild(this.sheetTabs);
     this.keyboardExit = new KeyboardExit(
       this.scrollContainer,
       { showsMenuOrPopup: () => this.menu.isOpen() || this.popup.isOpen() },
@@ -604,18 +509,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     );
     this.popup.overlay.after(...this.headerResize.elements(), this.linkTooltip.element);
     this.renderTarget.appendChild(this.root);
-    // Honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet")
-    // on the wrapper host. When the host has that class, the sheet
-    // tabs strip hides. Observe the host's class attribute via
-    // MutationObserver — the wrapper element is light DOM, so
-    // CSS in our shadow root can't `:host-context()` it.
-    this.applyHostHideClasses();
-    this.applyHostTheme();
-    this.hostClassObserver = new MutationObserver(() => {
-      this.applyHostHideClasses();
-      this.applyHostTheme();
-    });
-    this.hostClassObserver.observe(this.host, { attributes: true, attributeFilter: ['class', 'theme'] });
+    // Honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet") and the theme
+    // on the wrapper host; see SheetLayout.
+    this.layout.followHost();
     // Sheet tab click → switch active sheet via spreadsheet-event.
     this.tabs = new SheetTabs(
       this.sheetTabs,
@@ -630,8 +526,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       this.ownListeners.signal
     );
     this.on(this.scrollContainer, 'scroll', this.handleScroll);
-    this.on(this.scrollContainer, 'focusin', this.handleSheetFocusChange);
-    this.on(this.scrollContainer, 'focusout', this.handleSheetFocusChange);
     listenToClipboard(
       this.scrollContainer,
       {
@@ -954,52 +848,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.hosted.clear();
     this.popup.dispose();
     this.disconnect();
-    this.hostClassObserver.disconnect();
-  }
-
-  /**
-   * Read the spreadsheet host's class list + apply
-   * the two public "hide bar" classes by hiding the matching
-   * internal elements. The constants
-   * {@link Spreadsheet#HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
-   * and {@link Spreadsheet#HIDE_TABSHEET_STYLE} ("hidetabsheet")
-   * are public JavaDoc-documented API; consumers call
-   * {@code addClassName(HIDE_TABSHEET_STYLE)} on the host
-   * (or use {@code setSheetSelectionBarVisible(false)} which
-   * does the same) to suppress the corresponding strip.
-   */
-  private applyHostHideClasses(): void {
-    this.sheetTabs.hidden = this.host.classList.contains('hidetabsheet');
-    this.formulaBar.hidden = this.host.classList.contains('hidefunctionbar');
-    this.renderer.insetPagedView();
-  }
-
-  /**
-   * The host's theme variant, on every internal element as well.
-   *
-   * `Spreadsheet.setTheme(SpreadsheetTheme.LUMO)` sets `theme="lumo"` on
-   * the host. Each internal element draws in its own shadow root, where no
-   * selector can see the host's attributes, so each carries the attribute
-   * itself and draws its theme under `:host([theme~='lumo'])`.
-   */
-  private applyHostTheme(): void {
-    const theme = this.host.getAttribute('theme');
-    const themed = [
-      this.formulaBar,
-      this.contextMenu,
-      this.headerCorner,
-      this.columnHeader,
-      this.rowHeader,
-      this.cellGrid,
-      this.sheetTabs
-    ];
-    for (const element of themed) {
-      if (theme === null) {
-        element.removeAttribute('theme');
-      } else if (element.getAttribute('theme') !== theme) {
-        element.setAttribute('theme', theme);
-      }
-    }
+    this.layout.dispose();
   }
 
   /**
@@ -1024,19 +873,6 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
   getRoot(): HTMLElement {
     return this.root;
   }
-
-  /**
-   * Tells the cell grid whether the sheet has the keyboard, which it shows
-   * by dimming the selection when it does not, so a sheet left for another field does not look like it still takes the
-   * typing. Read once the focus has settled: moving between the sheet and
-   * its own cell editor fires a focusout and a focusin, and only the
-   * outcome matters.
-   */
-  private readonly handleSheetFocusChange = (): void => {
-    queueMicrotask(() => {
-      this.cellGrid.toggleAttribute('sheet-focused', this.scrollContainer.matches(':focus-within'));
-    });
-  };
 
   /** Test-only accessor: the scroll container element. */
   getScrollContainer(): HTMLElement {
@@ -1134,7 +970,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   /** The sheet's width, not the component's. See {@link setHeight}. */
   setWidth(width: string): void {
-    this.root.style.width = width;
+    this.layout.setWidth(width);
   }
 
   /**
@@ -1148,7 +984,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * is the application's to size.
    */
   setHeight(height: string): void {
-    this.root.style.height = height;
+    this.layout.setHeight(height);
   }
 
   notifyStateChanges(changedPropertyNames: string[], firstUpdate: boolean): void {
