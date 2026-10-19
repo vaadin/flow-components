@@ -25,6 +25,17 @@ import { isCellEditorSlot, overlayComponentSlotName } from '../dom/VirtualChildr
 import { isActiveCell, isCellSelected, isCoherentSelection } from '../state/SelectionState.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 import {
+  cellBoxOnGrid,
+  columnWidthOf,
+  drawnCellBox,
+  drawnRanges,
+  frozenExtentOf,
+  type QuadrantName,
+  quadrantOf,
+  type QuadrantRenderOpts,
+  quadrants
+} from './cell-grid/GridGeometry.js';
+import {
   cellBackground,
   cellBorderColor,
   cellRangeBg,
@@ -1125,11 +1136,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
 
   /** How far the frozen columns reach across and the frozen rows down. */
   frozenExtent(): { width: number; height: number } {
-    const state = this.renderState;
-    return {
-      width: frozenExtent(state.frozenColX, state.frozenColWidths, state.horizontalSplitPosition),
-      height: frozenExtent(state.frozenRowY, state.frozenRowHeights, state.verticalSplitPosition)
-    };
+    return frozenExtentOf(this.renderState);
   }
 
   willUpdate(changedProps: Map<string, unknown>): void {
@@ -1259,7 +1266,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     const panes = this.notePanes(container);
     const grid = this.getBoundingClientRect();
     for (const note of Array.from(notes)) {
-      const pane = panes[(note.dataset.quadrant as QuadrantRenderOpts['quadrantName']) ?? 'main'] ?? panes.main;
+      const pane = panes[(note.dataset.quadrant as QuadrantName) ?? 'main'] ?? panes.main;
       const cellLeft = Number(note.dataset.cellLeft);
       const cellRight = Number(note.dataset.cellRight);
       const cellTop = Number(note.dataset.cellTop);
@@ -1309,7 +1316,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    */
   private notePanes(
     container: HTMLElement
-  ): Record<QuadrantRenderOpts['quadrantName'], { left: number; right: number; top: number; bottom: number }> {
+  ): Record<QuadrantName, { left: number; right: number; top: number; bottom: number }> {
     const box = container.getBoundingClientRect();
     const sheetLeft = box.left + container.clientLeft;
     const sheetTop = box.top + container.clientTop;
@@ -1530,140 +1537,32 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   };
 
   render(): TemplateResult {
-    const { viewport, verticalSplitPosition, horizontalSplitPosition, scrollLeft, scrollTop } = this.renderState;
-
-    if (viewport.lastColumnIndex < viewport.firstColumnIndex || viewport.lastRowIndex < viewport.firstRowIndex) {
-      // Empty viewport — render an empty host. (The connector
-      // may push an empty state during initial measurement.)
+    // The scrolling pane, then the frozen ones there are. None while nothing
+    // is measured: the connector may push an empty state while it measures.
+    const [main, ...frozen] = quadrants(this.measuredState());
+    if (main === undefined) {
       return html``;
     }
 
-    // Main (bottom-right) quadrant: scrolling rows + cols.
-    // Emitted as direct children of the cell-grid so cells sit at
-    // their virtual coordinates and scroll naturally with the
-    // scroll container.
-    const mainOpts: QuadrantRenderOpts = {
-      state: this.measuredState(),
-      quadrantName: 'main',
-      colStart: viewport.firstColumnIndex,
-      colEnd: viewport.lastColumnIndex,
-      rowStart: viewport.firstRowIndex,
-      rowEnd: viewport.lastRowIndex,
-      getColLeft: (col) => this.renderState.colX[col - viewport.firstColumnIndex] ?? 0,
-      getColWidth: (col) => this.renderState.colWidths[col - viewport.firstColumnIndex] ?? 0,
-      getRowTop: (row) => this.renderState.rowY[row - viewport.firstRowIndex] ?? 0,
-      getRowHeight: (row) => this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0
-    };
-    const mainCells = renderQuadrant(mainOpts);
+    // The scrolling pane's cells are direct children of the cell-grid, so
+    // they sit at their sheet coordinates and scroll with the scroll
+    // container.
+    const mainCells = renderQuadrant(main);
     // Straight after the cells they cover, so the frozen quadrants, which
     // come later at the same z-index, stay on top of a merge scrolling
     // under them. The selection, the fill outline, the pictures and the
     // filter buttons of the scrolling quadrant go there too, for the same
     // reason: under a frozen pane they scroll out of sight, instead of
     // painting over it.
-    const mainMerged = buildMergedCellOverlays(mainOpts);
-    const mainOverlays = this.quadrantOverlays(mainOpts);
-
-    // Frozen quadrants live inside transform-translated wrappers
-    // so their cells visually stay pinned as the user scrolls.
-    // The wrapper transform counters the scroll
-    // container's shift; cells inside use coordinates relative
-    // to the wrapper, which is itself anchored at the cell-grid
-    // origin. CSS z-index on the wrappers stacks corner > top +
-    // left > main.
-
-    const frozenHeight = frozenExtent(
-      this.renderState.frozenRowY,
-      this.renderState.frozenRowHeights,
-      verticalSplitPosition
-    );
-    const frozenWidth = frozenExtent(
-      this.renderState.frozenColX,
-      this.renderState.frozenColWidths,
-      horizontalSplitPosition
-    );
-
-    let topQuadrant: TemplateResult | string = '';
-    if (verticalSplitPosition > 0) {
-      const topOpts: QuadrantRenderOpts = {
-        state: this.measuredState(),
-        quadrantName: 'top',
-        colStart: viewport.firstColumnIndex,
-        colEnd: viewport.lastColumnIndex,
-        rowStart: 1,
-        rowEnd: verticalSplitPosition,
-        getColLeft: (col) => this.renderState.colX[col - viewport.firstColumnIndex] ?? 0,
-        getColWidth: (col) => this.renderState.colWidths[col - viewport.firstColumnIndex] ?? 0,
-        getRowTop: (row) => this.renderState.frozenRowY[row - 1] ?? 0,
-        getRowHeight: (row) => this.renderState.frozenRowHeights[row - 1] ?? 0
-      };
-      const topCells = renderQuadrant(topOpts);
-      const topMerged = buildMergedCellOverlays(topOpts);
-      const transform = `transform:translateY(${scrollTop}px);`;
-      const line = freezeLine('rows', frozenHeight, this.renderState.totalGridWidthPx);
-      topQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-top" style=${transform}>
-          ${topCells}${topMerged}${line}${this.quadrantOverlays(topOpts)}
-        </div>
-      `;
-    }
-
-    let leftQuadrant: TemplateResult | string = '';
-    if (horizontalSplitPosition > 0) {
-      const leftOpts: QuadrantRenderOpts = {
-        state: this.measuredState(),
-        quadrantName: 'left',
-        colStart: 1,
-        colEnd: horizontalSplitPosition,
-        rowStart: viewport.firstRowIndex,
-        rowEnd: viewport.lastRowIndex,
-        getColLeft: (col) => this.renderState.frozenColX[col - 1] ?? 0,
-        getColWidth: (col) => this.renderState.frozenColWidths[col - 1] ?? 0,
-        getRowTop: (row) => this.renderState.rowY[row - viewport.firstRowIndex] ?? 0,
-        getRowHeight: (row) => this.renderState.rowHeights[row - viewport.firstRowIndex] ?? 0
-      };
-      const leftCells = renderQuadrant(leftOpts);
-      const leftMerged = buildMergedCellOverlays(leftOpts);
-      const transform = `transform:translateX(${scrollLeft}px);`;
-      const line = freezeLine('columns', frozenWidth, this.renderState.totalGridHeightPx);
-      leftQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-left" style=${transform}>
-          ${leftCells}${leftMerged}${line}${this.quadrantOverlays(leftOpts)}
-        </div>
-      `;
-    }
-
-    let cornerQuadrant: TemplateResult | string = '';
-    if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
-      const cornerOpts: QuadrantRenderOpts = {
-        state: this.measuredState(),
-        quadrantName: 'corner',
-        colStart: 1,
-        colEnd: horizontalSplitPosition,
-        rowStart: 1,
-        rowEnd: verticalSplitPosition,
-        getColLeft: (col) => this.renderState.frozenColX[col - 1] ?? 0,
-        getColWidth: (col) => this.renderState.frozenColWidths[col - 1] ?? 0,
-        getRowTop: (row) => this.renderState.frozenRowY[row - 1] ?? 0,
-        getRowHeight: (row) => this.renderState.frozenRowHeights[row - 1] ?? 0
-      };
-      const cornerCells = renderQuadrant(cornerOpts);
-      const cornerMerged = buildMergedCellOverlays(cornerOpts);
-      const transform = `transform:translate(${scrollLeft}px, ${scrollTop}px);`;
-      // The left pane's cells cover the top pane's line where the frozen
-      // columns are, and the top pane's cover the left pane's; the corner
-      // sits above both and draws the two pieces they hide.
-      const lines = html`${freezeLine('rows', frozenHeight, frozenWidth + 1)}${freezeLine(
-        'columns',
-        frozenWidth,
-        frozenHeight + 1
-      )}`;
-      cornerQuadrant = html`
-        <div class="quadrant-wrapper quadrant-wrapper-corner" style=${transform}>
-          ${cornerCells}${cornerMerged}${lines}${this.quadrantOverlays(cornerOpts)}
-        </div>
-      `;
-    }
+    const mainMerged = buildMergedCellOverlays(main);
+    const mainOverlays = this.quadrantOverlays(main);
+    const pane = (name: QuadrantName): TemplateResult | string => {
+      const quadrant = frozen.find((q) => q.quadrantName === name);
+      return quadrant === undefined ? '' : this.frozenPane(quadrant);
+    };
+    const top = pane('top');
+    const left = pane('left');
+    const corner = pane('corner');
 
     // Written again only when what they are written from changes, not on
     // every drawing: a workbook's rules run to hundreds of kilobytes of
@@ -1693,7 +1592,42 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     // TestBench hands it out while no cell is being edited, so tests
     // that ask whether the editor is shown keep working.
     const standIn = html`<input class="cell-input-stand-in" hidden inert tabindex="-1" aria-hidden="true" />`;
-    return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${topQuadrant}${leftQuadrant}${cornerQuadrant}${commentOverlays}${editor}${standIn}`;
+    return html`${styleBlock}${mainCells}${mainMerged}${mainOverlays}${top}${left}${corner}${commentOverlays}${editor}${standIn}`;
+  }
+
+  /**
+   * A frozen pane, in a wrapper moved along with the scroll so that its
+   * cells stay pinned to their edge of the view: the wrapper's transform
+   * counters the scroll container's shift, and the cells are placed in the
+   * wrapper, which is anchored at the grid's origin. The wrappers stack the
+   * corner over the top and left panes, and those over the scrolling one.
+   *
+   * Each draws the line along its freeze. The left pane's cells cover the
+   * top pane's line where the frozen columns are, and the top pane's cover
+   * the left pane's; the corner sits above both and draws the two pieces
+   * they hide.
+   */
+  private frozenPane(quadrant: QuadrantRenderOpts): TemplateResult {
+    const { state, quadrantName } = quadrant;
+    const { scrollLeft, scrollTop } = state;
+    const { width, height } = frozenExtentOf(state);
+    let transform: string;
+    let lines: TemplateResult;
+    if (quadrantName === 'top') {
+      transform = `transform:translateY(${scrollTop}px);`;
+      lines = freezeLine('rows', height, state.totalGridWidthPx);
+    } else if (quadrantName === 'left') {
+      transform = `transform:translateX(${scrollLeft}px);`;
+      lines = freezeLine('columns', width, state.totalGridHeightPx);
+    } else {
+      transform = `transform:translate(${scrollLeft}px, ${scrollTop}px);`;
+      lines = html`${freezeLine('rows', height, width + 1)}${freezeLine('columns', width, height + 1)}`;
+    }
+    return html`
+      <div class="quadrant-wrapper quadrant-wrapper-${quadrantName}" style=${transform}>
+        ${renderQuadrant(quadrant)}${buildMergedCellOverlays(quadrant)}${lines}${this.quadrantOverlays(quadrant)}
+      </div>
+    `;
   }
 
   /**
@@ -1710,39 +1644,6 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       opts
     )}${buildFormulaReferences(opts)}${buildPopupButtons(state, opts.quadrantName)}`;
   }
-}
-
-interface QuadrantRenderOpts {
-  state: CellGridRenderState;
-  quadrantName: 'main' | 'top' | 'left' | 'corner';
-  colStart: number;
-  colEnd: number;
-  rowStart: number;
-  rowEnd: number;
-  getColLeft: (col: number) => number;
-  getColWidth: (col: number) => number;
-  getRowTop: (row: number) => number;
-  getRowHeight: (row: number) => number;
-}
-
-/** The quadrant a cell is drawn in, by which side of each split it lies. */
-function quadrantOf(
-  col: number,
-  row: number,
-  frozenCols: number,
-  frozenRows: number
-): QuadrantRenderOpts['quadrantName'] {
-  const top = row <= frozenRows;
-  const left = col <= frozenCols;
-  if (top) {
-    return left ? 'corner' : 'top';
-  }
-  return left ? 'left' : 'main';
-}
-
-/** Where the frozen rows or columns end: the far edge of the last one. */
-function frozenExtent(starts: ReadonlyArray<number>, sizes: ReadonlyArray<number>, count: number): number {
-  return count > 0 ? (starts[count - 1] ?? 0) + (sizes[count - 1] ?? 0) : 0;
 }
 
 /**
@@ -1811,31 +1712,6 @@ export function coveredByMergeCoords(
     }
   }
   return covered;
-}
-
-/**
- * The cell ranges the grid draws: the scrolling quadrant's, and those of
- * the frozen panes there are. 1-based and inclusive; empty while nothing
- * is measured.
- */
-export function drawnRanges(state: CellGridRenderState): Array<{ c1: number; c2: number; r1: number; r2: number }> {
-  const { viewport, verticalSplitPosition, horizontalSplitPosition } = state;
-  if (viewport.lastColumnIndex < viewport.firstColumnIndex || viewport.lastRowIndex < viewport.firstRowIndex) {
-    return [];
-  }
-  const cols = { c1: viewport.firstColumnIndex, c2: viewport.lastColumnIndex };
-  const rows = { r1: viewport.firstRowIndex, r2: viewport.lastRowIndex };
-  const ranges = [{ ...cols, ...rows }];
-  if (verticalSplitPosition > 0) {
-    ranges.push({ ...cols, r1: 1, r2: verticalSplitPosition });
-  }
-  if (horizontalSplitPosition > 0) {
-    ranges.push({ c1: 1, c2: horizontalSplitPosition, ...rows });
-  }
-  if (verticalSplitPosition > 0 && horizontalSplitPosition > 0) {
-    ranges.push({ c1: 1, c2: horizontalSplitPosition, r1: 1, r2: verticalSplitPosition });
-  }
-  return ranges;
 }
 
 /**
@@ -2226,43 +2102,6 @@ function pieceBox(piece: RangePiece): string {
   return `left:${left}px;top:${top}px;width:${width}px;height:${height}px;position:absolute;pointer-events:none;`;
 }
 
-/**
- * Where a cell is on screen, in the grid's own coordinates, or null when it
- * is not drawn. A frozen cell sits in its pane's wrapper, which the scroll
- * offset moves along with the view, so its box moves with it: something at
- * grid level placed by the frozen arrays alone is left behind on a scroll.
- */
-function cellBoxOnGrid(
-  state: CellGridRenderState,
-  col: number,
-  row: number
-): { left: number; top: number; width: number; height: number } | null {
-  const { viewport, horizontalSplitPosition, verticalSplitPosition } = state;
-  let left: number;
-  let width: number;
-  if (col >= 1 && col <= horizontalSplitPosition) {
-    left = (state.frozenColX[col - 1] ?? 0) + state.scrollLeft;
-    width = state.frozenColWidths[col - 1] ?? 0;
-  } else if (col >= viewport.firstColumnIndex && col <= viewport.lastColumnIndex) {
-    left = state.colX[col - viewport.firstColumnIndex] ?? 0;
-    width = state.colWidths[col - viewport.firstColumnIndex] ?? 0;
-  } else {
-    return null;
-  }
-  let top: number;
-  let height: number;
-  if (row >= 1 && row <= verticalSplitPosition) {
-    top = (state.frozenRowY[row - 1] ?? 0) + state.scrollTop;
-    height = state.frozenRowHeights[row - 1] ?? 0;
-  } else if (row >= viewport.firstRowIndex && row <= viewport.lastRowIndex) {
-    top = state.rowY[row - viewport.firstRowIndex] ?? 0;
-    height = state.rowHeights[row - viewport.firstRowIndex] ?? 0;
-  } else {
-    return null;
-  }
-  return { left, top, width, height };
-}
-
 /** A value probe: out of flow and off-screen, so measuring never disturbs the sheet. */
 const VALUE_PROBE_STYLE = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
 
@@ -2288,33 +2127,6 @@ interface JudgedCell {
 /** The key a measured width is kept under. */
 function widthKey(cellStyle: string, value: string): string {
   return `${cellStyle}\u0000${value}`;
-}
-
-/** A drawn column's width, frozen ones included; 0 when it is not drawn. */
-function columnWidthOf(state: CellGridRenderState, col: number): number {
-  if (col >= 1 && col <= state.horizontalSplitPosition) {
-    return state.frozenColWidths[col - 1] ?? 0;
-  }
-  return state.colWidths[col - state.viewport.firstColumnIndex] ?? 0;
-}
-
-/**
- * The box a cell is drawn in: its own, or the merged cell's when the cell
- * starts a merge - the box a note hangs off and the editor lies over. In grid coordinates, frozen panes included; null while the
- * cell is not drawn.
- */
-function drawnCellBox(
-  state: CellGridRenderState,
-  col: number,
-  row: number
-): { left: number; top: number; width: number; height: number } | null {
-  const cell = cellBoxOnGrid(state, col, row);
-  if (cell === null) {
-    return null;
-  }
-  const index = state.mergedRegions.findIndex((region) => region.col1 === col && region.row1 === row);
-  const merged = index < 0 ? undefined : state.mergedRegionBoxes?.[index];
-  return merged === undefined ? cell : { left: cell.left, top: cell.top, width: merged.width, height: merged.height };
 }
 
 /**
@@ -2988,7 +2800,7 @@ function buildCellEditorOverlay(
  * so every image re-downloads and flickers even though nothing about it
  * changed. Keyed, Lit moves the existing elements instead.
  */
-function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRenderOpts['quadrantName']): unknown {
+function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantName): unknown {
   // Defensive default — some test fixtures do not declare the
   // overlays array. Real connector pushes always populate the field.
   //
@@ -3045,7 +2857,7 @@ function buildSheetOverlays(state: CellGridRenderState, quadrant: QuadrantRender
  * which the connector translates to a `popupButtonClick`
  * spreadsheet-event for the server.
  */
-function buildPopupButtons(state: CellGridRenderState, quadrant: QuadrantRenderOpts['quadrantName']): TemplateResult[] {
+function buildPopupButtons(state: CellGridRenderState, quadrant: QuadrantName): TemplateResult[] {
   // In the pane of the cell each belongs to, like the sheet overlays: a
   // filter button in a frozen header row stays in that row on a scroll.
   const buttons = (state.popupButtons ?? []).filter(

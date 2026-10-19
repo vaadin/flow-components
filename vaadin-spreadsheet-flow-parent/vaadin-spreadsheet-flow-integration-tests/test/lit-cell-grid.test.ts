@@ -12,7 +12,6 @@ import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import {
     coveredByMergeCoords,
-    drawnRanges,
     SpreadsheetCellGrid,
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetCellGrid.js';
 import {
@@ -4400,35 +4399,6 @@ describe('SpreadsheetCellGrid — the cells it draws', () => {
         const covered = coveredByMergeCoords([region(2, 2, 9, 9)], 1, 3, 1, 3);
 
         expect([...covered].sort()).to.eql(['col2 row2', 'col2 row3', 'col3 row2', 'col3 row3']);
-    });
-
-    it('draws the scrolling range alone without frozen panes', () => {
-        const state = {
-            ...emptyCellGridRenderState(),
-            viewport: { ...emptyCellGridRenderState().viewport, firstColumnIndex: 3, lastColumnIndex: 9, firstRowIndex: 20, lastRowIndex: 40 },
-        };
-
-        expect(drawnRanges(state)).to.eql([{ c1: 3, c2: 9, r1: 20, r2: 40 }]);
-    });
-
-    it('adds the frozen panes, the corner where both are frozen', () => {
-        const state = {
-            ...emptyCellGridRenderState(),
-            viewport: { ...emptyCellGridRenderState().viewport, firstColumnIndex: 3, lastColumnIndex: 9, firstRowIndex: 20, lastRowIndex: 40 },
-            verticalSplitPosition: 2,
-            horizontalSplitPosition: 1,
-        };
-
-        expect(drawnRanges(state)).to.eql([
-            { c1: 3, c2: 9, r1: 20, r2: 40 },
-            { c1: 3, c2: 9, r1: 1, r2: 2 },
-            { c1: 1, c2: 1, r1: 20, r2: 40 },
-            { c1: 1, c2: 1, r1: 1, r2: 2 },
-        ]);
-    });
-
-    it('draws nothing before anything is measured', () => {
-        expect(drawnRanges(emptyCellGridRenderState())).to.eql([]);
     });
 });
 
