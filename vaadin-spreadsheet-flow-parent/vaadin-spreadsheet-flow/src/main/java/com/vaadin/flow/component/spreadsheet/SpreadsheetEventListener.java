@@ -152,82 +152,70 @@ public class SpreadsheetEventListener
 
         LOGGER.debug(type + " " + (pars == null ? "null" : pars.toString()));
 
-        if ("onConnectorInit".equals(type)) {
-            handler.onConnectorInit();
-        } else if ("contextMenuOpenOnSelection".equals(type)) {
-            handler.contextMenuOpenOnSelection(toInt(pars, "row"),
-                    toInt(pars, "column"));
-        } else if ("actionOnCurrentSelection".equals(type)) {
+        switch (type) {
+        case "onConnectorInit" -> handler.onConnectorInit();
+        case "contextMenuOpenOnSelection" -> handler.contextMenuOpenOnSelection(
+                toInt(pars, "row"), toInt(pars, "column"));
+        case "actionOnCurrentSelection" ->
             handler.actionOnCurrentSelection(toStr(pars, "actionKey"));
-        } else if ("rowHeaderContextMenuOpen".equals(type)) {
+        case "rowHeaderContextMenuOpen" ->
             handler.rowHeaderContextMenuOpen(toInt(pars, "rowIndex"));
-        } else if ("actionOnRowHeader".equals(type)) {
+        case "actionOnRowHeader" ->
             handler.actionOnRowHeader(toStr(pars, "actionKey"));
-        } else if ("columnHeaderContextMenuOpen".equals(type)) {
+        case "columnHeaderContextMenuOpen" ->
             handler.columnHeaderContextMenuOpen(toInt(pars, "columnIndex"));
-        } else if ("actionOnColumnHeader".equals(type)) {
+        case "actionOnColumnHeader" ->
             handler.actionOnColumnHeader(toStr(pars, "actionKey"));
-        } else if ("onSheetScroll".equals(type)) {
-            handler.onSheetScroll(toInt(pars, "firstRow"),
-                    toInt(pars, "firstColumn"), toInt(pars, "lastRow"),
-                    toInt(pars, "lastColumn"));
-        } else if ("sheetAddressChanged".equals(type)) {
+        case "onSheetScroll" -> handler.onSheetScroll(toInt(pars, "firstRow"),
+                toInt(pars, "firstColumn"), toInt(pars, "lastRow"),
+                toInt(pars, "lastColumn"));
+        case "sheetAddressChanged" ->
             handler.sheetAddressChanged(toStr(pars, "value"));
-        } else if ("cellSelected".equals(type)) {
+        case "cellSelected" ->
             handler.cellSelected(toInt(pars, "row"), toInt(pars, "column"),
                     toBool(pars, "oldSelectionRangeDiscarded"));
-        } else if ("cellRangeSelected".equals(type)) {
+        case "cellRangeSelected" ->
             handler.cellRangeSelected(toInt(pars, "row1"), toInt(pars, "col1"),
                     toInt(pars, "row2"), toInt(pars, "col2"));
-        } else if ("cellAddedToSelectionAndSelected".equals(type)) {
+        case "cellAddedToSelectionAndSelected" ->
             handler.cellAddedToSelectionAndSelected(toInt(pars, "row"),
                     toInt(pars, "column"));
-        } else if ("cellsAddedToRangeSelection".equals(type)) {
-            handler.cellsAddedToRangeSelection(toInt(pars, "row1"),
-                    toInt(pars, "col1"), toInt(pars, "row2"),
-                    toInt(pars, "col2"));
-        } else if ("rowSelected".equals(type)) {
-            handler.rowSelected(toInt(pars, "row"),
-                    toInt(pars, "firstColumnIndex"));
-        } else if ("rowAddedToRangeSelection".equals(type)) {
-            handler.rowAddedToRangeSelection(toInt(pars, "row"),
-                    toInt(pars, "firstColumnIndex"));
-        } else if ("columnSelected".equals(type)) {
-            handler.columnSelected(toInt(pars, "column"),
-                    toInt(pars, "firstRowIndex"));
-        } else if ("columnAddedToSelection".equals(type)) {
+        case "cellsAddedToRangeSelection" -> handler.cellsAddedToRangeSelection(
+                toInt(pars, "row1"), toInt(pars, "col1"), toInt(pars, "row2"),
+                toInt(pars, "col2"));
+        case "rowSelected" -> handler.rowSelected(toInt(pars, "row"),
+                toInt(pars, "firstColumnIndex"));
+        case "rowAddedToRangeSelection" -> handler.rowAddedToRangeSelection(
+                toInt(pars, "row"), toInt(pars, "firstColumnIndex"));
+        case "columnSelected" -> handler.columnSelected(toInt(pars, "column"),
+                toInt(pars, "firstRowIndex"));
+        case "columnAddedToSelection" -> {
             // Note the argument order: this one takes the row index first,
             // unlike columnSelected above.
             handler.columnAddedToSelection(toInt(pars, "firstRowIndex"),
                     toInt(pars, "column"));
-        } else if ("selectionIncreasePainted".equals(type)) {
+        }
+        case "selectionIncreasePainted" ->
             handler.selectionIncreasePainted(toInt(pars, "r1"),
                     toInt(pars, "c1"), toInt(pars, "r2"), toInt(pars, "c2"));
-        } else if ("selectionDecreasePainted".equals(type)) {
-            handler.selectionDecreasePainted(toInt(pars, "row"),
-                    toInt(pars, "col"));
-        } else if ("cellValueEdited".equals(type)) {
-            handler.cellValueEdited(toInt(pars, "row"), toInt(pars, "col"),
-                    toStr(pars, "value"));
-        } else if ("sheetSelected".equals(type)) {
-            handler.sheetSelected(toInt(pars, "sheetIndex"),
-                    toInt(pars, "scrollLeft"), toInt(pars, "scrollTop"));
-        } else if ("sheetRenamed".equals(type)) {
-            handler.sheetRenamed(toInt(pars, "sheetIndex"),
-                    toStr(pars, "newName"));
-        } else if ("sheetCreated".equals(type)) {
-            handler.sheetCreated(toInt(pars, "scrollLeft"),
-                    toInt(pars, "scrollTop"));
-        } else if ("cellRangePainted".equals(type)) {
-            handler.cellRangePainted(toInt(pars, "selectedCellRow"),
-                    toInt(pars, "selectedCellColumn"), toInt(pars, "row1"),
-                    toInt(pars, "col1"), toInt(pars, "row2"),
-                    toInt(pars, "col2"));
-        } else if ("deleteSelectedCells".equals(type)) {
-            handler.deleteSelectedCells();
-        } else if ("linkCellClicked".equals(type)) {
+        case "selectionDecreasePainted" -> handler.selectionDecreasePainted(
+                toInt(pars, "row"), toInt(pars, "col"));
+        case "cellValueEdited" -> handler.cellValueEdited(toInt(pars, "row"),
+                toInt(pars, "col"), toStr(pars, "value"));
+        case "sheetSelected" -> handler.sheetSelected(toInt(pars, "sheetIndex"),
+                toInt(pars, "scrollLeft"), toInt(pars, "scrollTop"));
+        case "sheetRenamed" -> handler.sheetRenamed(toInt(pars, "sheetIndex"),
+                toStr(pars, "newName"));
+        case "sheetCreated" -> handler.sheetCreated(toInt(pars, "scrollLeft"),
+                toInt(pars, "scrollTop"));
+        case "cellRangePainted" -> handler.cellRangePainted(
+                toInt(pars, "selectedCellRow"),
+                toInt(pars, "selectedCellColumn"), toInt(pars, "row1"),
+                toInt(pars, "col1"), toInt(pars, "row2"), toInt(pars, "col2"));
+        case "deleteSelectedCells" -> handler.deleteSelectedCells();
+        case "linkCellClicked" ->
             handler.linkCellClicked(toInt(pars, "row"), toInt(pars, "column"));
-        } else if ("rowsResized".equals(type)) {
+        case "rowsResized" -> {
             // The client reports which rows changed and their new heights;
             // the affected span doubles as the range to refresh. Rows are
             // 1-based, and only the rows of the sheet can be resized.
@@ -238,7 +226,8 @@ public class SpreadsheetEventListener
                 handler.rowsResized(heights, minKey(heights), 1,
                         maxKey(heights), 1);
             }
-        } else if ("columnResized".equals(type)) {
+        }
+        case "columnResized" -> {
             HashMap<Integer, Integer> widths = keysWithin(
                     toIntMap(pars, "colIndexes", "newWidths"), 1,
                     event.getSource().getColumns());
@@ -246,43 +235,40 @@ public class SpreadsheetEventListener
                 handler.columnResized(widths, 1, minKey(widths), 1,
                         maxKey(widths));
             }
-        } else if ("onRowAutofit".equals(type)) {
-            handler.onRowAutofit(toInt(pars, "rowIndex"));
-        } else if ("onColumnAutofit".equals(type)) {
+        }
+        case "onRowAutofit" -> handler.onRowAutofit(toInt(pars, "rowIndex"));
+        case "onColumnAutofit" ->
             handler.onColumnAutofit(toInt(pars, "columnIndex"));
-        } else if ("onUndo".equals(type)) {
-            handler.onUndo();
-        } else if ("onRedo".equals(type)) {
-            handler.onRedo();
-        } else if ("setCellStyleWidthRatios".equals(type)) {
+        case "onUndo" -> handler.onUndo();
+        case "onRedo" -> handler.onRedo();
+        case "setCellStyleWidthRatios" -> {
             // Only styles the workbook has.
             HashMap<Integer, Float> ratios = toFloatMap(pars, "styleIndexes",
                     "ratios");
             int styleCount = event.getSource().getWorkbook().getNumCellStyles();
             ratios.keySet().removeIf(key -> !isStyleKey(key, styleCount));
             handler.setCellStyleWidthRatios(ratios);
-        } else if ("protectedCellWriteAttempted".equals(type)) {
+        }
+        case "protectedCellWriteAttempted" ->
             handler.protectedCellWriteAttempted();
-        } else if ("onPaste".equals(type)) {
-            handler.onPaste(toStr(pars, "text"));
-        } else if ("clearSelectedCellsOnCut".equals(type)) {
-            handler.clearSelectedCellsOnCut();
-        } else if ("updateCellComment".equals(type)) {
-            handler.updateCellComment(toStr(pars, "text"), toInt(pars, "col"),
-                    toInt(pars, "row"));
-        } else if ("groupingCollapsed".equals(type)) {
+        case "onPaste" -> handler.onPaste(toStr(pars, "text"));
+        case "clearSelectedCellsOnCut" -> handler.clearSelectedCellsOnCut();
+        case "updateCellComment" -> handler.updateCellComment(
+                toStr(pars, "text"), toInt(pars, "col"), toInt(pars, "row"));
+        case "groupingCollapsed" ->
             handler.setGroupingCollapsed(toBool(pars, "cols"),
                     toInt(pars, "colIndex"), toBool(pars, "collapsed"));
-        } else if ("levelHeaderClicked".equals(type)) {
-            handler.levelHeaderClicked(toBool(pars, "cols"),
-                    toInt(pars, "level"));
-        } else if ("popupButtonClick".equals(type)) {
-            handler.onPopupButtonClick(toInt(pars, "row"),
-                    toInt(pars, "column"));
-        } else if ("popupClose".equals(type)) {
+        case "levelHeaderClicked" -> handler
+                .levelHeaderClicked(toBool(pars, "cols"), toInt(pars, "level"));
+        case "popupButtonClick" -> handler
+                .onPopupButtonClick(toInt(pars, "row"), toInt(pars, "column"));
+        case "popupClose" ->
             handler.onPopupClose(toInt(pars, "row"), toInt(pars, "column"));
-        } else if ("contextMenuClosed".equals(type)) {
-            handler.contextMenuClosed();
+        case "contextMenuClosed" -> handler.contextMenuClosed();
+        case null, default -> {
+            // Not an event of this component: nothing to do. The debug log
+            // above has it.
+        }
         }
     }
 

@@ -52,11 +52,10 @@ public class ServerEventPayloadContractTest {
             "SpreadsheetEventListener.java");
 
     /**
-     * {@code "<type>".equals(type)} opens a branch; it also ends the one
-     * before.
+     * {@code case "<type>" ->} opens a branch; it also ends the one before.
      */
     private static final Pattern BRANCH = Pattern
-            .compile("\"([a-zA-Z]+)\"\\.equals\\(type\\)");
+            .compile("case\\s+\"([a-zA-Z]+)\"\\s*->");
 
     /**
      * Every payload key the listener reads is a string literal argument that
