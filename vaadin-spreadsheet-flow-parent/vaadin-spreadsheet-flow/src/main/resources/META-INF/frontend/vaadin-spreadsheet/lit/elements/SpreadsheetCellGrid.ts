@@ -10,6 +10,7 @@
 
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
+import { cellTarget } from '../dom/IndexedTarget.js';
 import { keyedList } from '../dom/KeyedList.js';
 import { isFormula } from '../algorithms/FormulaPointing.js';
 import { composing } from '../algorithms/KeyboardMoves.js';
@@ -1340,10 +1341,6 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * range).
    */
   private readonly handleShadowMouseDown = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof Element)) {
-      return;
-    }
     // The right button leaves the selection to the context menu. A press of
     // its own would select the cell under it, and a
     // right-click on a range would lose the range the menu is for.
@@ -1353,20 +1350,16 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     // The fill handle sits on top of the cell under it, and a drag from it
     // paints rather than selects — so it is checked first and the event
     // goes no further.
-    if (target.closest('.selection-corner')) {
+    if (e.target instanceof Element && e.target.closest('.selection-corner')) {
       e.preventDefault();
       this.dispatchEvent(new CustomEvent('selection-paint-start', { bubbles: true, composed: true }));
       return;
     }
-    const cell = target.closest<HTMLElement>('.cell');
-    if (!cell) {
+    const at = cellTarget(e);
+    if (at === null) {
       return;
     }
-    const col = Number(cell.dataset.col);
-    const row = Number(cell.dataset.row);
-    if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
-      return;
-    }
+    const { col, row } = at;
     const ev = e as MouseEvent;
     // Taken to point at the cell while a formula is written, the press
     // must not move the keyboard out of the editor - that would end the
@@ -1427,19 +1420,11 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * dragging flag.
    */
   private readonly handleShadowMouseOver = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = cellTarget(e);
+    if (at === null) {
       return;
     }
-    const cell = target.closest<HTMLElement>('.cell');
-    if (!cell) {
-      return;
-    }
-    const col = Number(cell.dataset.col);
-    const row = Number(cell.dataset.row);
-    if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
-      return;
-    }
+    const { cell, col, row } = at;
     // Which cell the pointer is over decides whether a comment shows, and
     // that is presentation only — the connector never needs to know, and
     // routing it through a full render-state push would repaint the sheet
@@ -1465,19 +1450,11 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    * 152.
    */
   private readonly handleShadowDoubleClick = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = cellTarget(e);
+    if (at === null) {
       return;
     }
-    const cell = target.closest<HTMLElement>('.cell');
-    if (!cell) {
-      return;
-    }
-    const col = Number(cell.dataset.col);
-    const row = Number(cell.dataset.row);
-    if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
-      return;
-    }
+    const { col, row } = at;
     this.dispatchEvent(
       new CustomEvent('cell-doubleclick', {
         detail: { col, row },
@@ -1495,19 +1472,11 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    */
   private readonly handleShadowContextMenu = (event: Event): void => {
     const e = event as MouseEvent;
-    const target = e.target;
-    if (!(target instanceof Element)) {
+    const at = cellTarget(e);
+    if (at === null) {
       return;
     }
-    const cell = target.closest<HTMLElement>('.cell');
-    if (!cell) {
-      return;
-    }
-    const col = Number(cell.dataset.col);
-    const row = Number(cell.dataset.row);
-    if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
-      return;
-    }
+    const { col, row } = at;
     // A Ctrl-click on a Mac: the browser reports it as a right-click and
     // fires no click at all. It is the Ctrl-click it is, adding the cell to
     // the selection, so it is reported as one first.
@@ -1537,23 +1506,13 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
 
   private readonly handleShadowClick = (e: Event): void => {
     const ev = e as MouseEvent;
-    const target = ev.target;
-    // The event target may be the ShadowRoot when the listener
-    // catches synthetic events that don't originate from a node
-    // inside the tree. ShadowRoot doesn't implement `closest`,
-    // so we narrow to Element first.
-    if (!(target instanceof Element)) {
+    // Nothing for an event from the shadow root itself - a synthetic one
+    // dispatched there - which is no cell.
+    const at = cellTarget(e);
+    if (at === null) {
       return;
     }
-    const cell = target.closest<HTMLElement>('.cell');
-    if (!cell) {
-      return;
-    }
-    const col = Number(cell.dataset.col);
-    const row = Number(cell.dataset.row);
-    if (!Number.isFinite(col) || !Number.isFinite(row) || col < 1 || row < 1) {
-      return;
-    }
+    const { col, row } = at;
     this.dispatchEvent(
       new CustomEvent('cell-click', {
         detail: {

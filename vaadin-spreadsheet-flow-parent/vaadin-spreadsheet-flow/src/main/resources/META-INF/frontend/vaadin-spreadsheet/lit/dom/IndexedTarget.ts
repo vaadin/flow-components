@@ -26,3 +26,18 @@ export function indexedTarget(e: Event, selector: string, key: string): { elemen
   const index = Number(element.dataset[key]);
   return Number.isFinite(index) && index >= 1 ? { element, index } : null;
 }
+
+/**
+ * The cell an event came from: the nearest `.cell` to the event's target,
+ * with the column and row it holds in `data-col` and `data-row`. Null when
+ * the event came from no cell, or from one whose column or row is not a
+ * number from 1 on.
+ */
+export function cellTarget(e: Event): { cell: HTMLElement; col: number; row: number } | null {
+  const column = indexedTarget(e, '.cell', 'col');
+  if (column === null) {
+    return null;
+  }
+  const row = Number(column.element.dataset.row);
+  return Number.isFinite(row) && row >= 1 ? { cell: column.element, col: column.index, row } : null;
+}
