@@ -450,7 +450,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * LitRenderer.<Person> of(
      *         "<span>${item.email}</span><button @click=${() => copy(item.email)}>Copy</button>")
      *         .withProperty("email", Person::getEmail)
-     *         .withClientAction("copy", Clipboard.write());
+     *         .withClientAction("copy", Clipboard.writeText());
      * }
      * </pre>
      *

@@ -87,7 +87,7 @@ class LitRendererTest {
         LitRenderer<String> renderer = LitRenderer.<String> of(
                 "<span>${item.email}</span><button @click=${() => copy(item.email)}>Copy</button>")
                 .withProperty("email", ValueProvider.identity())
-                .withClientAction("copy", Clipboard.write());
+                .withClientAction("copy", Clipboard.writeText());
 
         renderer.render(container.getElement(), new KeyMapper<>(), "renderer");
         ui.getUI().getInternals().getStateTree()
@@ -115,7 +115,8 @@ class LitRendererTest {
         // The copied value is the argument the template passes, so the same
         // function serves every rendered row.
         JsFunction text = (JsFunction) copy.getCaptures().get(0);
-        Assertions.assertEquals("return context?.[$0]?.[$1]", text.getBody());
+        Assertions.assertEquals("return context?.[$0]?.[$1] ?? null",
+                text.getBody());
         Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
     }
 
@@ -144,14 +145,13 @@ class LitRendererTest {
     void doNotAllowClientActionNamesWithSpaces() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> LitRenderer.of("").withClientAction("illegal name",
-                        Clipboard.write()));
+                        Clipboard.writeText()));
     }
 
     @Test
     void doNotAllowClientActionNameAlreadyUsedByAFunction() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> LitRenderer.of("").withFunction("copy", item -> {
-                }).withClientAction("copy",
-                        Clipboard.write()));
+                }).withClientAction("copy", Clipboard.writeText()));
     }
 }
