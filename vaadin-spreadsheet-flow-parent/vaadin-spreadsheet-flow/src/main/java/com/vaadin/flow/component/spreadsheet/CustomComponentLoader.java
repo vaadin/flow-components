@@ -32,7 +32,8 @@ import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
  * them. A component kept from one load to the next keeps its {@code StateNode};
  * those no longer shown are taken off. A cell keeps the editor it has while it
  * is loaded, so that what the user typed into it survives the cell being drawn
- * again.
+ * again, and the factory is told when the editor of the selected cell is newly
+ * displayed. It lives with the sheet shown, and so do the editors.
  */
 final class CustomComponentLoader implements Serializable {
 
@@ -44,12 +45,122 @@ final class CustomComponentLoader implements Serializable {
     /** The rows grown for components on the last load, 0-based. */
     private Set<Integer> grownRows;
 
+    /**
+     * The editor shown in each cell, by cell key. A cell keeps its editor
+     * across the re-renders that keep the cell in view (scroll, selection,
+     * resize), so what the user typed into it survives them. Dropped whenever
+     * the editors are recreated from the factory.
+     */
+    private Map<String, Component> editors = new HashMap<>();
+
+    /**
+     * Cell key and editor that {@code onCustomEditorDisplayed} was last invoked
+     * for, so the callback fires on a real selection change and not on the
+     * re-renders that keep the same selection — scrolling, resizing, extending
+     * a range. Re-firing would re-run the application's setValue and wipe
+     * whatever the user had typed into the editor.
+     */
+    private String lastEditorCallbackKey;
+    private Component lastEditorCallbackComponent;
+
+    /** Whether the application's {@code onCustomEditorDisplayed} is running. */
+    private boolean insideEditorCallback;
+
     CustomComponentLoader(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
     }
 
     Set<Component> getCustomComponents() {
         return customComponents;
+    }
+
+    /** The editor of each cell shown, by cell key. */
+    Map<String, Component> editors() {
+        return editors;
+    }
+
+    /**
+     * Sets the editor of each cell, by cell key, and tells the client the node
+     * id of each one. The ids are derived from the editors on every call rather
+     * than kept: a node id is -1 until the node is attached, and changes when
+     * it is attached again.
+     * <p>
+     * {@code null} drops every editor and the callback tracker, and clears the
+     * map on the client.
+     */
+    private void setEditors(Map<String, Component> editors) {
+        HashMap<String, String> editorIds = null;
+        if (editors == null) {
+            // Every editor is gone — the factory being removed, a forced
+            // refresh. The next one to be selected is newly displayed however
+            // it compares to the last.
+            this.editors = new HashMap<>();
+            resetEditorCallbackTracker();
+        } else {
+            this.editors = editors;
+            editorIds = new HashMap<>();
+            for (Map.Entry<String, Component> entry : editors.entrySet()) {
+                editorIds.put(entry.getKey(),
+                        Spreadsheet.getComponentNodeId(entry.getValue()));
+            }
+        }
+        spreadsheet.sheetModel().cellKeysToEditorIdMap.set(editorIds);
+    }
+
+    private void resetEditorCallbackTracker() {
+        lastEditorCallbackKey = null;
+        lastEditorCallbackComponent = null;
+    }
+
+    /**
+     * Tells the factory that the editor of the selected cell is displayed, if
+     * the cell has one and it is newly displayed: the selection moved to it, or
+     * it is another editor than the one the factory was last told of.
+     */
+    void showEditorOfSelectedCell() {
+        // Guard against reentrancy: if user code in onCustomEditorDisplayed
+        // calls refreshCells() -> updateMarkedCells() ->
+        // reloadVisibleCellContents() -> loadCells() ->
+        // loadCustomEditorOnSelectedCell(), skip the recursive call.
+        if (insideEditorCallback) {
+            return;
+        }
+        CellReference selectedCellReference = spreadsheet
+                .getCellSelectionManager().getSelectedCellReference();
+        SpreadsheetComponentFactory factory = spreadsheet
+                .getSpreadsheetComponentFactory();
+        if (selectedCellReference != null && factory != null) {
+            final short col = selectedCellReference.getCol();
+            final int row = selectedCellReference.getRow();
+            final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
+            Component editor = editors.get(key);
+            if (editor != null) {
+                if (key.equals(lastEditorCallbackKey)
+                        && editor == lastEditorCallbackComponent) {
+                    // Same cell, same editor: nothing was newly displayed, so
+                    // the callback has already run for it.
+                    return;
+                }
+                lastEditorCallbackKey = key;
+                lastEditorCallbackComponent = editor;
+                insideEditorCallback = true;
+                try {
+                    factory.onCustomEditorDisplayed(
+                            spreadsheet.getCell(row, col), row, col,
+                            spreadsheet, spreadsheet.getActiveSheet(), editor);
+                } catch (Exception e) {
+                    LOGGER.warn(
+                            "Error in onCustomEditorDisplayed for cell ({}, {})",
+                            col + 1, row + 1, e);
+                } finally {
+                    insideEditorCallback = false;
+                }
+                return;
+            }
+            // Selected cell has no custom editor: forget the last-fired
+            // editor so returning to an editor cell fires the callback again.
+            resetEditorCallbackTracker();
+        }
     }
 
     void load() {
@@ -69,11 +180,11 @@ final class CustomComponentLoader implements Serializable {
             // Drop the cached editors (and the callback tracker) so the scan
             // below asks the factory for new ones and the callback fires again
             // for the selected cell.
-            spreadsheet.setCellKeyToEditorMap(null);
+            setEditors(null);
         }
         if (spreadsheet.getSpreadsheetComponentFactory() == null) {
             // No factory -> clear all
-            spreadsheet.setCellKeyToEditorMap(null);
+            setEditors(null);
             spreadsheet.sheetModel().componentIDtoCellKeysMap.set(null);
             if (!customComponents.isEmpty()) {
                 for (Component c : customComponents) {
@@ -85,8 +196,7 @@ final class CustomComponentLoader implements Serializable {
             return;
         }
 
-        Map<String, Component> nextCellKeyToEditor = new HashMap<>(
-                spreadsheet.getCellKeyToEditorMap());
+        Map<String, Component> nextCellKeyToEditor = new HashMap<>(editors);
         HashMap<String, String> nextComponentIDtoCellKeysMap = new HashMap<>();
         HashSet<Component> nextComponents = new HashSet<>();
         Set<Integer> rowsWithComponents = new HashSet<>();
@@ -115,7 +225,7 @@ final class CustomComponentLoader implements Serializable {
             }
         }
         customComponents = nextComponents;
-        spreadsheet.setCellKeyToEditorMap(nextCellKeyToEditor);
+        setEditors(nextCellKeyToEditor);
         spreadsheet.sheetModel().componentIDtoCellKeysMap
                 .set(nextComponentIDtoCellKeysMap);
 
@@ -286,8 +396,8 @@ final class CustomComponentLoader implements Serializable {
     /**
      * Used by {@code Spreadsheet.setSpreadsheetComponentFactory} when the
      * spreadsheet has not been initialized yet (first row not set), and when
-     * another sheet is shown: detaches the components registered so far. The
-     * editor map has been dropped already then.
+     * another sheet is shown: detaches the components registered so far, the
+     * editors among them.
      */
     void unloadAll() {
         if (!customComponents.isEmpty()) {

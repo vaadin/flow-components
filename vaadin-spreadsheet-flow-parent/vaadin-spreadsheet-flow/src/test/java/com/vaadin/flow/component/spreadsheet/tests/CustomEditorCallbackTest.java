@@ -38,6 +38,12 @@ class CustomEditorCallbackTest {
     private Spreadsheet spreadsheet;
     private List<Component> handedOut;
     private List<String> displayed;
+    private SpreadsheetComponentFactory factory;
+    /** The one editor handed out, by a factory that keeps its editors. */
+    private Component kept;
+    /** What the application does as an editor is displayed. */
+    private Runnable onDisplayed = () -> {
+    };
 
     @BeforeEach
     void init() {
@@ -45,38 +51,40 @@ class CustomEditorCallbackTest {
         displayed = new ArrayList<>();
 
         spreadsheet = new Spreadsheet();
-        spreadsheet.setSpreadsheetComponentFactory(
-                new SpreadsheetComponentFactory() {
+        factory = new SpreadsheetComponentFactory() {
 
-                    @Override
-                    public void onCustomEditorDisplayed(Cell cell, int rowIndex,
-                            int columnIndex, Spreadsheet spreadsheet,
-                            Sheet sheet, Component customEditor) {
-                        displayed.add(rowIndex + "," + columnIndex);
-                    }
+            @Override
+            public void onCustomEditorDisplayed(Cell cell, int rowIndex,
+                    int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
+                    Component customEditor) {
+                displayed.add(rowIndex + "," + columnIndex);
+                onDisplayed.run();
+            }
 
-                    @Override
-                    public Component getCustomEditorForCell(Cell cell,
-                            int rowIndex, int columnIndex,
-                            Spreadsheet spreadsheet, Sheet sheet) {
-                        // B2 only, in 0-based POI coordinates.
-                        if (rowIndex != 1 || columnIndex != 1) {
-                            return null;
-                        }
-                        // A fresh instance per call, which a factory is
-                        // free to do and several real ones do. The
-                        // spreadsheet is expected to keep the one it has.
-                        handedOut.add(new Span("editor"));
-                        return handedOut.get(handedOut.size() - 1);
-                    }
+            @Override
+            public Component getCustomEditorForCell(Cell cell, int rowIndex,
+                    int columnIndex, Spreadsheet spreadsheet, Sheet sheet) {
+                // B2 only, in 0-based POI coordinates.
+                if (rowIndex != 1 || columnIndex != 1) {
+                    return null;
+                }
+                if (kept != null) {
+                    return kept;
+                }
+                // A fresh instance per call, which a factory is
+                // free to do and several real ones do. The
+                // spreadsheet is expected to keep the one it has.
+                handedOut.add(new Span("editor"));
+                return handedOut.get(handedOut.size() - 1);
+            }
 
-                    @Override
-                    public Component getCustomComponentForCell(Cell cell,
-                            int rowIndex, int columnIndex,
-                            Spreadsheet spreadsheet, Sheet sheet) {
-                        return null;
-                    }
-                });
+            @Override
+            public Component getCustomComponentForCell(Cell cell, int rowIndex,
+                    int columnIndex, Spreadsheet spreadsheet, Sheet sheet) {
+                return null;
+            }
+        };
+        spreadsheet.setSpreadsheetComponentFactory(factory);
 
         scrollTo(1, 10);
     }
@@ -86,6 +94,16 @@ class CustomEditorCallbackTest {
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
                 "{\"firstRow\": " + firstRow + ", \"firstColumn\": 1,"
                         + " \"lastRow\": " + lastRow + ", \"lastColumn\": 10}");
+    }
+
+    /**
+     * From now on the factory hands out one editor, kept, for every cell it
+     * gives one, as a factory that keeps its editors does; the cells shown are
+     * given it at once.
+     */
+    private void keepEditors() {
+        kept = new Span("kept");
+        spreadsheet.setSpreadsheetComponentFactory(factory);
     }
 
     private void select(String address) {
@@ -214,5 +232,56 @@ class CustomEditorCallbackTest {
         selectAndReload("B2");
 
         assertEquals(List.of("1,1"), displayed);
+    }
+
+    @Test
+    void aCallbackThatSetsTheFactoryAgain_isNotRunInsideItself() {
+        // Setting the factory hands out new editors and displays the
+        // selected one anew, which would run the callback again, inside
+        // itself, without end.
+        onDisplayed = () -> spreadsheet.setSpreadsheetComponentFactory(factory);
+
+        select("B2");
+
+        assertEquals(List.of("1,1"), displayed);
+    }
+
+    @Test
+    void theFactorySetAgain_firesTheCallbackAgain_evenForAnEditorItKeeps() {
+        // The editors are dropped: the one the factory hands back, kept or
+        // not, is displayed anew.
+        keepEditors();
+        select("B2");
+
+        spreadsheet.setSpreadsheetComponentFactory(factory);
+
+        assertEquals(List.of("1,1", "1,1"), displayed);
+    }
+
+    @Test
+    void anEditorGivenAgainAfterTheSheetWasProtected_firesTheCallbackAgain() {
+        // Protected, the cell loses its editor; unprotected, it is given a
+        // new one, which is displayed anew.
+        select("B2");
+        spreadsheet.setActiveSheetProtected("");
+        spreadsheet.setActiveSheetProtected(null);
+
+        repaint();
+
+        assertEquals(List.of("1,1", "1,1"), displayed);
+    }
+
+    @Test
+    void anotherSheetShown_firesTheCallbackForTheEditorOfItsCell() {
+        // The factory hands out the same editor for B2 of every sheet: on
+        // another sheet it is displayed anew all the same.
+        keepEditors();
+        select("B2");
+        spreadsheet.createNewSheet("Other", 10, 10);
+        scrollTo(1, 10);
+
+        select("B2");
+
+        assertEquals(List.of("1,1", "1,1"), displayed);
     }
 }
