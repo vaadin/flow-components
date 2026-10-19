@@ -146,7 +146,7 @@ public class SpreadsheetUtil implements Serializable {
      */
     public static int getFirstVisibleSheetPOIIndex(Workbook workbook) {
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-            if (!(workbook.isSheetHidden(i) && workbook.isSheetVeryHidden(i))) {
+            if (!workbook.isSheetHidden(i) && !workbook.isSheetVeryHidden(i)) {
                 return i;
             }
         }
