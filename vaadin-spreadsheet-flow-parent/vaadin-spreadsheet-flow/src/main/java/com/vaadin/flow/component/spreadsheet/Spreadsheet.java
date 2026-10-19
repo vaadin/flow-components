@@ -167,9 +167,6 @@ public class Spreadsheet extends Component
 
     private final SheetSizes sheetSizes = new SheetSizes(this);
 
-    /** What follows from cells created past the end, once a round trip. */
-
-    /** should the sheet be reloaded on client side */
     /** What changed for the client, sent once before the response. */
     private final ClientChanges clientChanges = new ClientChanges(this);
 
@@ -352,15 +349,6 @@ public class Spreadsheet extends Component
      * This is a style which hides the bottom (sheet selection) bar.
      */
     public static final String HIDE_TABSHEET_STYLE = "hidetabsheet";
-
-    /**
-     * A common formula evaluator for this Spreadsheet
-     */
-
-    /**
-     * A common conditional formatting formula evaluator for this Spreadsheet
-     * needed for proper value string conversions
-     */
 
     /** What the server sends the client; see {@link #getRpcProxy()}. */
     private final SpreadsheetClientRpc clientRpc = new ClientRpcSender(this);
@@ -2613,7 +2601,6 @@ public class Spreadsheet extends Component
         return workbookScope.invalidFormulas;
     }
 
-    /** What each sheet of the workbook shown was left with. */
     /** The selection the sheet shown next is shown with. */
     PendingSelection pendingSelection() {
         return pendingSelection;

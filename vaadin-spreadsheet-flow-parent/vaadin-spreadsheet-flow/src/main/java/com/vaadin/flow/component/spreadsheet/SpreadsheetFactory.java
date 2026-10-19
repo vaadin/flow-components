@@ -85,9 +85,6 @@ public class SpreadsheetFactory implements Serializable {
     public static final int DEFAULT_ROWS = 200;
 
     /**
-     * Set to true if Spreadsheet should log its memory usage.
-     */
-    /**
      * Writes the current Workbook state from the given Spreadsheet to the given
      * file.
      *
