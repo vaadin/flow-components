@@ -49,9 +49,12 @@ public class ChartTestBase {
 
     protected Chart getChartFromSampleFile(String filename, String cell)
             throws Exception {
+        return getChart(TestHelper.createSpreadsheet(filename), cell);
+    }
 
-        Spreadsheet spreadsheet = TestHelper.createSpreadsheet(filename);
-
+    /** The chart of the sheet shown whose top left corner is in the cell. */
+    protected Chart getChart(Spreadsheet spreadsheet, String cell)
+            throws Exception {
         CellReference cellRef = new CellReference(cell);
 
         Set<SheetOverlayWrapper> sheetOverlays = getSheetOverlays(spreadsheet);

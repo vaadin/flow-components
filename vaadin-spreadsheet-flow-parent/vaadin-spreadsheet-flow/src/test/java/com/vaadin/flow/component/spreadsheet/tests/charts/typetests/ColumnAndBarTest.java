@@ -12,6 +12,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.BarDirection;
+import org.apache.poi.xddf.usermodel.chart.BarGrouping;
+import org.apache.poi.xddf.usermodel.chart.ChartTypes;
+import org.apache.poi.xddf.usermodel.chart.XDDFBar3DChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +34,7 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.Stacking;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
 class ColumnAndBarTest extends ChartTestBase {
@@ -206,6 +219,39 @@ class ColumnAndBarTest extends ChartTestBase {
     void barColorByPoint() throws Exception {
         Configuration conf = getChartFromSampleFile("ColorByPoint.xlsx", "D18")
                 .getConfiguration();
+        assertSeriesType(conf.getSeries(), ChartType.BAR);
+        Assertions.assertTrue(
+                ((PlotOptionsBar) conf.getSeries().get(0).getPlotOptions())
+                        .getColorByPoint());
+    }
+
+    @Test
+    void bar3DColorByPoint() throws Exception {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet();
+        for (int i = 0; i < 3; i++) {
+            XSSFRow row = sheet.createRow(i);
+            row.createCell(0).setCellValue("Category " + i);
+            row.createCell(1).setCellValue(10 * (i + 1));
+        }
+        XSSFChart chart = sheet.createDrawingPatriarch()
+                .createChart(new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 10, 15));
+        XDDFBar3DChartData bars = (XDDFBar3DChartData) chart.createData(
+                ChartTypes.BAR3D, chart.createCategoryAxis(AxisPosition.BOTTOM),
+                chart.createValueAxis(AxisPosition.LEFT));
+        bars.setBarDirection(BarDirection.BAR);
+        bars.setBarGrouping(BarGrouping.CLUSTERED);
+        bars.setVaryColors(true);
+        bars.addSeries(
+                XDDFDataSourcesFactory.fromStringCellRange(sheet,
+                        CellRangeAddress.valueOf("A1:A3")),
+                XDDFDataSourcesFactory.fromNumericCellRange(sheet,
+                        CellRangeAddress.valueOf("B1:B3")));
+        chart.plot(bars);
+
+        Configuration conf = getChart(new Spreadsheet(workbook), "D2")
+                .getConfiguration();
+
         assertSeriesType(conf.getSeries(), ChartType.BAR);
         Assertions.assertTrue(
                 ((PlotOptionsBar) conf.getSeries().get(0).getPlotOptions())

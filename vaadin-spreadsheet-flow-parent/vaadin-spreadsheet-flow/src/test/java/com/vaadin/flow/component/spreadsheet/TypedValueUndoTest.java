@@ -10,9 +10,11 @@ package com.vaadin.flow.component.spreadsheet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Locale;
 
+import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.util.CellReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,5 +63,38 @@ class TypedValueUndoTest {
         spreadsheet.getSpreadsheetHistoryManager().redo();
 
         assertEquals(42.0, spreadsheet.getCell("D2").getNumericCellValue());
+    }
+
+    @Test
+    void aFormulaTypedOver_comesBackOnUndo() {
+        spreadsheet.createCell(0, 0, 2.0);
+        spreadsheet.createFormulaCell(1, 0, "A1*3");
+        type("A2", "typed");
+
+        spreadsheet.getSpreadsheetHistoryManager().undo();
+
+        assertEquals("A1*3", spreadsheet.getCell("A2").getCellFormula());
+    }
+
+    @Test
+    void aTruthValueTypedOver_comesBackOnUndo() {
+        spreadsheet.createCell(0, 0, Boolean.TRUE);
+        type("A1", "typed");
+
+        spreadsheet.getSpreadsheetHistoryManager().undo();
+
+        assertTrue(spreadsheet.getCell("A1").getBooleanCellValue());
+    }
+
+    @Test
+    void anErrorTypedOver_comesBackOnUndo() {
+        spreadsheet.createCell(0, 0, "")
+                .setCellErrorValue(FormulaError.DIV0.getCode());
+        type("A1", "typed");
+
+        spreadsheet.getSpreadsheetHistoryManager().undo();
+
+        assertEquals(FormulaError.DIV0.getCode(),
+                spreadsheet.getCell("A1").getErrorCellValue());
     }
 }
