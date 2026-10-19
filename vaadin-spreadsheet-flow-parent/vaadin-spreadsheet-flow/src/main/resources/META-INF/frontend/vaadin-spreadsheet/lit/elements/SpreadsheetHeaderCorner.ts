@@ -19,7 +19,7 @@ import {
   columnGroupingGutterPx,
   ROW_GROUPING_LEVEL_PX,
   rowGroupingGutterPx
-} from './SpreadsheetColumnHeader.js';
+} from './headers/Grouping.js';
 import { headerBg, headerBorderColor, headerFont, textColor } from './ThemeProperties.js';
 
 export interface HeaderCornerRenderState {

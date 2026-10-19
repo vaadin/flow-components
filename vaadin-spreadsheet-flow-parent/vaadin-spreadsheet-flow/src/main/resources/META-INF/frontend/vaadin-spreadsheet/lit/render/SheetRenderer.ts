@@ -19,11 +19,8 @@ import {
 } from '../algorithms/ViewportMath.js';
 import type { CellSlotAssignment } from '../dom/VirtualChildren.js';
 import type { SpreadsheetCellGrid } from '../elements/SpreadsheetCellGrid.js';
-import {
-  columnGroupingGutterPx,
-  rowGroupingGutterPx,
-  type SpreadsheetColumnHeader
-} from '../elements/SpreadsheetColumnHeader.js';
+import type { SpreadsheetColumnHeader } from '../elements/SpreadsheetColumnHeader.js';
+import { columnGroupingGutterPx, rowGroupingGutterPx } from '../elements/headers/Grouping.js';
 import type { ContextMenuRenderState, SpreadsheetContextMenu } from '../elements/SpreadsheetContextMenu.js';
 import type { SpreadsheetFormulaBar } from '../elements/SpreadsheetFormulaBar.js';
 import type { SpreadsheetHeaderCorner } from '../elements/SpreadsheetHeaderCorner.js';

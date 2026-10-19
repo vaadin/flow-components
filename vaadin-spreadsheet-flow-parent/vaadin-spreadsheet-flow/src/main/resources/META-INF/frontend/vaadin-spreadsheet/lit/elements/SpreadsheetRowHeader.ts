@@ -18,7 +18,7 @@ import {
   type PositionedGrouping,
   ROW_GROUPING_LEVEL_PX,
   rowGroupingGutterPx
-} from './SpreadsheetColumnHeader.js';
+} from './headers/Grouping.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
 import {
   groupingToggleBg,

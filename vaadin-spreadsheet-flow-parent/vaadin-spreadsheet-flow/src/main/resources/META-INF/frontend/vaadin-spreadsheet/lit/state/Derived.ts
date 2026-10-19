@@ -19,7 +19,7 @@ import {
   getDefaultRowHeightPx
 } from '../algorithms/ViewportMath.js';
 import { computeCellSlots, type CellSlotAssignment } from '../dom/VirtualChildren.js';
-import type { PositionedGrouping } from '../elements/SpreadsheetColumnHeader.js';
+import type { PositionedGrouping } from '../elements/headers/Grouping.js';
 import type { FormulaBarRenderState } from '../elements/SpreadsheetFormulaBar.js';
 import type { PositionedPopupButton } from '../elements/types.js';
 import type { PopupButtonState } from '../types/wire.js';

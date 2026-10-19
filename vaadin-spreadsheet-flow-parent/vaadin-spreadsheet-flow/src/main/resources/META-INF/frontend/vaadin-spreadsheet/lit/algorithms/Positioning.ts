@@ -10,7 +10,7 @@
 
 import type { GroupingData, MergedRegion, OverlayInfo, PopupButtonState } from '../types/wire.js';
 import type { MergedRegionBox, PositionedOverlay, PositionedPopupButton } from '../elements/types.js';
-import type { PositionedGrouping } from '../elements/SpreadsheetColumnHeader.js';
+import type { PositionedGrouping } from '../elements/headers/Grouping.js';
 import { FALLBACK_PPI, freezeGap, pastFreeze } from './ViewportMath.js';
 
 /**
