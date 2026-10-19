@@ -15,6 +15,8 @@ import java.util.Map;
 
 import org.apache.poi.ss.util.CellReference;
 
+import com.vaadin.flow.component.spreadsheet.ClientChanges.Call;
+
 import tools.jackson.databind.node.BaseJsonNode;
 
 /**
@@ -143,7 +145,8 @@ final class PopupButtonRegistry implements Serializable {
             // The client has it as it is.
             return;
         }
-        spreadsheet.getElement().callJsFunction("addPopupButton", state);
+        spreadsheet.clientChanges().call(Call.POPUP_BUTTONS, "addPopupButton",
+                state);
         if (!spreadsheet.getElement().equals(button.getElement().getParent())) {
             spreadsheet.getElement().appendVirtualChild(button.getElement());
         }
@@ -154,8 +157,8 @@ final class PopupButtonRegistry implements Serializable {
             // Not on the client, so there is nothing to take off.
             return;
         }
-        spreadsheet.getElement().callJsFunction("removePopupButton",
-                Serializer.toJson(button.getState()));
+        spreadsheet.clientChanges().call(Call.POPUP_BUTTONS,
+                "removePopupButton", Serializer.toJson(button.getState()));
         if (spreadsheet.getElement().equals(button.getElement().getParent())) {
             spreadsheet.getElement().removeVirtualChild(button.getElement());
         }

@@ -103,7 +103,10 @@ final class FreshLoadHarness {
             // the UI's, and a random one
             "appId", "id",
             // the time of the last reload, repaint and workbook change
-            "reload", "dirty", "workbookChangeToggle");
+            "reload", "dirty", "workbookChangeToggle",
+            // the keys of the resources, which differ between spreadsheets as
+            // the overlay ids do: compared by how many the client finds
+            "resources");
 
     /** Properties the client takes as false until it is sent one. */
     private static final Set<String> FALSE_BY_DEFAULT = Set.of(
@@ -509,9 +512,6 @@ final class FreshLoadHarness {
         /** The pop-up buttons, by the name of their cell. */
         final Map<String, JsonNode> popupButtons = new TreeMap<>();
 
-        /** The keys of the resources, as overlay images. */
-        final List<String> resources = new ArrayList<>();
-
         /**
          * The comments written on the client, by the key of their cell, until
          * the server sends the comments again.
@@ -666,10 +666,6 @@ final class FreshLoadHarness {
                         waste.add("pop-up button " + name + " taken off the"
                                 + " client, which does not have it");
                     }
-                } else if ("resources=".equals(function)) {
-                    resources.clear();
-                    ((Iterable<?>) call.arguments().get(0))
-                            .forEach(key -> resources.add(String.valueOf(key)));
                 } else if (!OTHER_CALLS.contains(function)) {
                     throw new AssertionError("A client call the model does "
                             + "not know: " + function + call.arguments());
@@ -760,8 +756,12 @@ final class FreshLoadHarness {
         properties.put("(resource attributes)",
                 MAPPER.valueToTree(element.getAttributeNames()
                         .filter(name -> name.startsWith("resource-")).count()));
+        List<String> resourceKeys = new ArrayList<>();
+        if (element.getPropertyRaw("resources") instanceof JsonNode keys) {
+            keys.forEach(key -> resourceKeys.add(key.asString()));
+        }
         properties.put("(resources the client finds)",
-                MAPPER.valueToTree(model.resources.stream()
+                MAPPER.valueToTree(resourceKeys.stream()
                         .filter(key -> element.hasAttribute("resource-" + key))
                         .count()));
 

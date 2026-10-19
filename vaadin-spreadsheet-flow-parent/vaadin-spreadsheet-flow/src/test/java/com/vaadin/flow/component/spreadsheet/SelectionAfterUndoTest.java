@@ -85,10 +85,10 @@ class SelectionAfterUndoTest {
     private static String selection(JavaScriptInvocation invocation) {
         List<String> args = invocation.getParameters().stream()
                 .map(String::valueOf).toList();
-        if (invocation.getExpression().contains("updateFormulaBar")) {
-            return "updateFormulaBar " + address(args.get(1), args.get(2));
-        }
         return switch (args.get(0)) {
+        // updateFormulaBar(possibleName, col, row)
+        case "updateFormulaBar" ->
+            "updateFormulaBar " + address(args.get(2), args.get(3));
         case "invalidCellAddress" -> "invalidCellAddress";
         // showSelectedCell(name, col, row, value, formula, locked,
         // initialSelection, keepingView)
@@ -182,8 +182,9 @@ class SelectionAfterUndoTest {
 
         undo();
 
+        // The formula bar reads the selection, so it is refreshed after it.
         assertEquals(
-                List.of("updateFormulaBar B2", "showSelectedCell B2 into view"),
+                List.of("showSelectedCell B2 into view", "updateFormulaBar B2"),
                 respond());
     }
 

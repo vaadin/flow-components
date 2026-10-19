@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import org.apache.poi.ss.util.CellReference;
 
@@ -17,6 +18,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.spreadsheet.ClientChanges.Call;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonServerRpc;
 import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
@@ -125,12 +127,10 @@ public class PopupButton extends Component {
      */
     public void openPopup() {
         getElement().appendChild(getContent().getElement());
-        getParent().ifPresent(parent -> {
-            parent.getElement().callJsFunction("onPopupButtonOpen",
-                    getRow() + 1, getColumn() + 1,
-                    getElement().getNode().getId(),
-                    UI.getCurrentOrThrow().getInternals().getAppId());
-        });
+        spreadsheet().ifPresent(spreadsheet -> spreadsheet.clientChanges().call(
+                Call.POPUP_BUTTONS, "onPopupButtonOpen", getRow() + 1,
+                getColumn() + 1, getElement().getNode().getId(),
+                UI.getCurrentOrThrow().getInternals().getAppId()));
         fireOpen();
     }
 
@@ -138,9 +138,19 @@ public class PopupButton extends Component {
      * Closes the pop-up if it is open.
      */
     public void closePopup() {
-        getParent().ifPresent(parent -> parent.getElement()
-                .callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
+        spreadsheet().ifPresent(spreadsheet -> spreadsheet.clientChanges().call(
+                Call.POPUP_BUTTONS, "closePopup", getRow() + 1,
+                getColumn() + 1));
         fireClose();
+    }
+
+    /**
+     * The spreadsheet the button is on, which sends the calls after the button
+     * itself, should it be added in the same round trip.
+     */
+    private Optional<Spreadsheet> spreadsheet() {
+        return getParent().filter(Spreadsheet.class::isInstance)
+                .map(Spreadsheet.class::cast);
     }
 
     /**

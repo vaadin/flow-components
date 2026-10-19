@@ -299,8 +299,8 @@ class SpreadsheetCellUpdatesTest {
 
         ui.fakeClientCommunication();
         assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
-                .anyMatch(call -> call.getInvocation().getExpression()
-                        .contains("updateFormulaBar")));
+                .anyMatch(call -> "updateFormulaBar"
+                        .equals(call.getInvocation().getParameters().get(0))));
     }
 
     @Test
@@ -315,8 +315,8 @@ class SpreadsheetCellUpdatesTest {
 
         ui.fakeClientCommunication();
         assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
-                .anyMatch(call -> call.getInvocation().getExpression()
-                        .contains("updateFormulaBar")));
+                .anyMatch(call -> "updateFormulaBar"
+                        .equals(call.getInvocation().getParameters().get(0))));
     }
 
     @Test

@@ -73,6 +73,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.Uses;
+import com.vaadin.flow.component.spreadsheet.ClientChanges.Call;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegionUtil.MergedRegionContainer;
@@ -155,6 +156,13 @@ public class Spreadsheet extends Component
     // from SaredState
 
     private Map<String, String> resources = new HashMap<>();
+
+    /**
+     * The keys of the resources, which the client finds among the attributes of
+     * the element.
+     */
+    private final ClientProperty<List<String>> resourceKeys = ClientProperty
+            .json(getElement(), "resources");
 
     // spreadsheetState
 
@@ -439,14 +447,13 @@ public class Spreadsheet extends Component
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            getElement().executeJs(
-                    "queueMicrotask(() => this.updateFormulaBar($0, $1, $2));",
+            clientChanges.call(Call.FORMULA_BAR, "updateFormulaBar",
                     possibleName, col, row);
         }
 
         @Override
         public void invalidCellAddress() {
-            getElement().callJsFunction("invalidCellAddress");
+            clientChanges.call(Call.SELECTION, "invalidCellAddress");
         }
 
         @Override
@@ -454,23 +461,23 @@ public class Spreadsheet extends Component
                 String cellValue, boolean function, boolean locked,
                 boolean initialSelection) {
             selectionManager.onCellSelected(row, col, initialSelection);
-            getElement().callJsFunction("showSelectedCell", name, col, row,
-                    cellValue, function, locked, initialSelection,
+            clientChanges.call(Call.SELECTION, "showSelectedCell", name, col,
+                    row, cellValue, function, locked, initialSelection,
                     selectionManager.isKeepingView());
         }
 
         @Override
         public void showActions(
                 ArrayList<SpreadsheetActionDetails> actionDetails) {
-            getElement().callJsFunction("showActions",
+            clientChanges.call(Call.ACTIONS, "showActions",
                     Serializer.toJson(actionDetails));
         }
 
         @Override
         public void setSelectedCellAndRange(String name, int col, int row,
                 int c1, int c2, int r1, int r2, boolean scroll) {
-            getElement().callJsFunction("setSelectedCellAndRange", name, col,
-                    row, c1, c2, r1, r2,
+            clientChanges.call(Call.SELECTION, "setSelectedCellAndRange", name,
+                    col, row, c1, c2, r1, r2,
                     scroll && !selectionManager.isKeepingView());
         }
 
@@ -486,7 +493,7 @@ public class Spreadsheet extends Component
 
         @Override
         public void editCellComment(int col, int row) {
-            getElement().callJsFunction("editCellComment", col, row);
+            clientChanges.call(Call.COMMENT, "editCellComment", col, row);
         }
     };
 
@@ -1325,11 +1332,6 @@ public class Spreadsheet extends Component
         valueManager.updateLocale(getLocale());
 
         updateAppId();
-
-        if (!resources.isEmpty()) {
-            // A new element has none of the resource keys sent to the last.
-            getElement().executeJs("this.resources=$0", resources.keySet());
-        }
 
         if (sheetModel().overlays.get() != null) {
             // The node id's of component overlays attached as virtual children
@@ -2645,6 +2647,7 @@ public class Spreadsheet extends Component
     protected void setResource(String key, DownloadHandler resource) {
         if (resource == null) {
             resources.remove(key);
+            resourceKeys.set(new ArrayList<>(resources.keySet()));
             getElement().removeAttribute("resource-" + key);
         } else {
             if (resource instanceof AbstractDownloadHandler<?> handler) {
@@ -2653,7 +2656,7 @@ public class Spreadsheet extends Component
                 handler.inline();
             }
             resources.put(key, resource.toString());
-            getElement().executeJs("this.resources=$0", resources.keySet());
+            resourceKeys.set(new ArrayList<>(resources.keySet()));
             getElement().setAttribute("resource-" + key,
                     new StreamResourceRegistry.ElementStreamResource(resource,
                             this.getElement()));

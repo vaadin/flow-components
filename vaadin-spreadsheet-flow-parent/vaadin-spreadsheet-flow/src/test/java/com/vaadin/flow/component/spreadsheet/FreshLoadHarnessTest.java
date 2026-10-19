@@ -382,19 +382,6 @@ class FreshLoadHarnessTest {
     }
 
     @Test
-    void theResourceKeys_areReplacedByEachList() {
-        FreshLoadHarness.ClientModel model = new FreshLoadHarness.ClientModel();
-
-        model.apply(List.of(new FreshLoadHarness.Call("resources=",
-                List.of(List.of("a", "b")))), null);
-        model.apply(List.of(
-                new FreshLoadHarness.Call("resources=", List.of(List.of("c")))),
-                null);
-
-        assertEquals(List.of("c"), model.resources);
-    }
-
-    @Test
     void aReload_forgetsTheCells_butNotThePopupButtons() {
         FreshLoadHarness.ClientModel model = new FreshLoadHarness.ClientModel();
         model.apply(

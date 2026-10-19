@@ -9,13 +9,18 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 
 /**
  * What changed for the client in a round trip, sent once before the response,
  * in this order: the rows and columns added past the last ones, then the
- * borders drawn on other cells, then a sheet shown anew, then the cells.
+ * borders drawn on other cells, then a sheet shown anew, then the cells, then
+ * the calls, by {@link Call kind}. The client takes the properties of the
+ * element before any call, whatever order they were set in.
  * <p>
  * The rows and columns added go first, as what follows from them restyles
  * cells, and so changes borders and cells: the order saves the flush a second
@@ -27,6 +32,22 @@ import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
  * runs when changes come without a current UI, from a background thread, say.
  */
 final class ClientChanges implements Serializable {
+
+    /**
+     * The kinds of call the client is sent, in the order the flush sends them,
+     * after the cells: the selection shown reads the cells, the formula bar
+     * reads the selection and the cells, and the actions, the comment to write
+     * and the pop-up buttons go to cells the client has by then. A pop-up
+     * button is opened after it is added.
+     */
+    enum Call {
+        SELECTION, FORMULA_BAR, ACTIONS, COMMENT, POPUP_BUTTONS
+    }
+
+    /** A call to the client, with its arguments as they were when made. */
+    private record PendingCall(String function,
+            Serializable[] arguments) implements Serializable {
+    }
 
     private final Spreadsheet spreadsheet;
 
@@ -47,6 +68,10 @@ final class ClientChanges implements Serializable {
 
     /** The reloads asked of the client, as it has them. */
     private final ClientProperty<Integer> reload;
+
+    /** The calls not sent yet, by kind, each kind in the order made. */
+    private final EnumMap<Call, List<PendingCall>> calls = new EnumMap<>(
+            Call.class);
 
     ClientChanges(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
@@ -85,6 +110,16 @@ final class ClientChanges implements Serializable {
         flush.schedule();
     }
 
+    /**
+     * Calls the function on the client in the flush, after the cells and the
+     * calls of the kinds before this one.
+     */
+    void call(Call kind, String function, Serializable... arguments) {
+        calls.computeIfAbsent(kind, ignored -> new ArrayList<>())
+                .add(new PendingCall(function, arguments));
+        flush.schedule();
+    }
+
     /** Whether the client reloads the sheet at the end of this round trip. */
     boolean isSheetShown() {
         return sheetShown;
@@ -104,6 +139,11 @@ final class ClientChanges implements Serializable {
             reload();
         }
         spreadsheet.clientCells.flush();
+        // By kind, in the order the kinds are declared.
+        calls.forEach((kind, pending) -> pending
+                .forEach(call -> spreadsheet.getElement()
+                        .callJsFunction(call.function(), call.arguments())));
+        calls.clear();
     }
 
     /**

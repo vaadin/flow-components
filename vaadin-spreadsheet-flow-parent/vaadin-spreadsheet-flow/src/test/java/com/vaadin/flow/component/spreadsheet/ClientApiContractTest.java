@@ -63,9 +63,12 @@ public class ClientApiContractTest {
     private static final Set<String> UNDECLARED_BY_DESIGN = Set.of("appId",
             "id");
 
-    /** {@code callJsFunction("name"} in any of the module's Java sources. */
-    private static final Pattern CALL_JS = Pattern
-            .compile("callJsFunction\\(\\s*\"([^\"]+)\"");
+    /**
+     * {@code callJsFunction("name"} in any of the module's Java sources, or
+     * {@code call(Call.KIND, "name"}: a call queued for the flush.
+     */
+    private static final Pattern CALL_JS = Pattern.compile(
+            "(?:callJsFunction\\(|\\.call\\(\\s*(?:ClientChanges\\.)?Call\\.\\w+\\s*,)\\s*\"([^\"]+)\"");
 
     private static final Pattern SET_PROPERTY = Pattern
             .compile("\\.setProperty\\(\\s*\"([^\"]+)\"");
