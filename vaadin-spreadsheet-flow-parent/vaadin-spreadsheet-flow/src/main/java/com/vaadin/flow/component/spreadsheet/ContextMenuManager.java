@@ -228,7 +228,7 @@ public class ContextMenuManager implements Serializable {
      * @return List of actions
      */
     protected ArrayList<SpreadsheetActionDetails> createActionsListForSelection() {
-        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
+        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<>();
         for (Handler handler : actionHandlers) {
             Action[] handlerActions = handler.getActions(spreadsheet
                     .getCellSelectionManager().getLatestSelectionEvent(),
@@ -248,7 +248,7 @@ public class ContextMenuManager implements Serializable {
      */
     protected ArrayList<SpreadsheetActionDetails> createActionsListForColumn(
             int columnIndex) {
-        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
+        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<>();
         final CellRangeAddress column = new CellRangeAddress(-1, -1,
                 columnIndex - 1, columnIndex - 1);
         for (Handler handler : actionHandlers) {
@@ -268,7 +268,7 @@ public class ContextMenuManager implements Serializable {
      */
     protected ArrayList<SpreadsheetActionDetails> createActionsListForRow(
             int rowIndex) {
-        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<SpreadsheetActionDetails>();
+        ArrayList<SpreadsheetActionDetails> actions = new ArrayList<>();
         final CellRangeAddress row = new CellRangeAddress(rowIndex - 1,
                 rowIndex - 1, -1, -1);
         for (Handler handler : actionHandlers) {
@@ -294,7 +294,7 @@ public class ContextMenuManager implements Serializable {
      */
     private ArrayList<SpreadsheetActionDetails> createActionDetailsList(
             Action[] actions, ActionType actionType) {
-        ArrayList<SpreadsheetActionDetails> actionDetailsList = new ArrayList<SpreadsheetActionDetails>();
+        ArrayList<SpreadsheetActionDetails> actionDetailsList = new ArrayList<>();
         if (actions != null) {
             for (Action action : actions) {
                 String key = actionMapper.key(action);

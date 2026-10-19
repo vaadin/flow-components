@@ -90,7 +90,7 @@ final class Outline implements Serializable {
     private void loadColumns(CTWorksheet ctWorksheet) {
         CTCols colsArray = ctWorksheet.getColsArray(0);
 
-        List<GroupingData> data = new ArrayList<GroupingData>();
+        List<GroupingData> data = new ArrayList<>();
 
         short lastlevel = 0;
         CTCol prev = null;
@@ -158,7 +158,7 @@ final class Outline implements Serializable {
          * lower level groups fully in this particular case (the line and expand
          * button are not visible). So, let's not display them here either.
          */
-        Set<GroupingData> toRemove = new HashSet<GroupingData>();
+        Set<GroupingData> toRemove = new HashSet<>();
         for (int i = 0; i < data.size(); i++) {
             for (int j = i + 1; j < data.size(); j++) {
                 GroupingData d1 = data.get(i);
@@ -192,10 +192,10 @@ final class Outline implements Serializable {
      * to true.
      */
     private void loadRows() {
-        List<GroupingData> data = new ArrayList<GroupingData>();
+        List<GroupingData> data = new ArrayList<>();
         Set<GroupingData> toRemove;
 
-        Stack<GroupingData> rows = new Stack<GroupingData>();
+        Stack<GroupingData> rows = new Stack<>();
         short lastlevel = 0;
         for (int i = 0; i <= spreadsheet.getRows(); i++) {
 
@@ -233,7 +233,7 @@ final class Outline implements Serializable {
 
                     // remove children of collapsed parent
                     if (collapsed) {
-                        toRemove = new HashSet<GroupingData>();
+                        toRemove = new HashSet<>();
                         for (GroupingData d : data) {
                             if (d.startIndex >= g.startIndex
                                     && d.endIndex <= g.endIndex
@@ -281,7 +281,7 @@ final class Outline implements Serializable {
          * Same issue as with groups starting or ending on same row, only
          * process top level one.
          */
-        toRemove = new HashSet<GroupingData>();
+        toRemove = new HashSet<>();
         for (int i = 0; i < data.size(); i++) {
             for (int j = i + 1; j < data.size(); j++) {
                 GroupingData d1 = data.get(i);

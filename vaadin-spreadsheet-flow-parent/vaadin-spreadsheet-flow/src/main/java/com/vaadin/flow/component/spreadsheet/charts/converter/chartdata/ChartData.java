@@ -49,7 +49,7 @@ public class ChartData {
         /**
          * Start point in 0..1 range and color
          */
-        public SortedMap<Double, ColorProperties> colorStops = new TreeMap<Double, ColorProperties>();
+        public SortedMap<Double, ColorProperties> colorStops = new TreeMap<>();
 
         /**
          * Angle in 0..1 range: 0 meaning 0 degrees (starting vertically), 1

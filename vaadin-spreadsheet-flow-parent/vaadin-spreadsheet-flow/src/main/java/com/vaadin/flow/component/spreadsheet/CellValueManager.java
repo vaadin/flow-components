@@ -690,7 +690,7 @@ public class CellValueManager implements Serializable {
             individualCellsDeletionCheckPassed = deletionGuard
                     .passesIndividualDeletionCheck(individualSelectedCells);
         } else if (!selectedIsInRange && !individualSelectedCells.isEmpty()) {
-            List<CellReference> individualSelectedCellsIncludingCurrentSelection = new ArrayList<CellReference>(
+            List<CellReference> individualSelectedCellsIncludingCurrentSelection = new ArrayList<>(
                     individualSelectedCells);
             individualSelectedCellsIncludingCurrentSelection
                     .add(selectedCellReference);
@@ -896,7 +896,7 @@ public class CellValueManager implements Serializable {
      */
     protected ArrayList<CellData> loadCellDataForRowAndColumnRange(int firstRow,
             int firstColumn, int lastRow, int lastColumn) {
-        ArrayList<CellData> cellData = new ArrayList<CellData>();
+        ArrayList<CellData> cellData = new ArrayList<>();
         Workbook workbook = spreadsheet.getWorkbook();
         final Sheet activeSheet = workbook
                 .getSheetAt(workbook.getActiveSheetIndex());

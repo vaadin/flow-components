@@ -22,7 +22,7 @@ import com.vaadin.flow.shared.Registration;
  * last selected cell is considered depends on which one happens later.
  */
 class SheetState implements Serializable {
-    private final WeakHashMap<Sheet, String> selectedCells = new WeakHashMap<Sheet, String>();
+    private final WeakHashMap<Sheet, String> selectedCells = new WeakHashMap<>();
     private final Registration registration;
 
     SheetState(final Spreadsheet spreadSheet) {

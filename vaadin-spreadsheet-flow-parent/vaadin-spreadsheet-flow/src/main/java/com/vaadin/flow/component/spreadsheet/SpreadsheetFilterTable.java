@@ -275,7 +275,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
                 .entrySet()) {
             PopupButton popupButton = entry.getKey();
             HashSet<SpreadsheetFilter> filters = entry.getValue();
-            HashSet<Integer> temp = new HashSet<Integer>();
+            HashSet<Integer> temp = new HashSet<>();
             for (SpreadsheetFilter filter : filters) {
                 temp.addAll(filter.getFilteredRows());
             }
@@ -330,7 +330,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             if (popupButtonToFiltersMap.containsKey(popupButton)) {
                 popupButtonToFiltersMap.get(popupButton).add(filter);
             } else {
-                HashSet<SpreadsheetFilter> filters = new HashSet<SpreadsheetFilter>();
+                HashSet<SpreadsheetFilter> filters = new HashSet<>();
                 filters.add(filter);
                 popupButtonToFiltersMap.put(popupButton, filters);
             }

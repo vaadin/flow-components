@@ -43,8 +43,8 @@ public class CellSelectionManager implements Serializable {
 
     private final NamedRangeUtils namedRangeUtils;
 
-    private final ArrayList<CellRangeAddress> cellRangeAddresses = new ArrayList<CellRangeAddress>();
-    private final ArrayList<CellReference> individualSelectedCells = new ArrayList<CellReference>();
+    private final ArrayList<CellRangeAddress> cellRangeAddresses = new ArrayList<>();
+    private final ArrayList<CellReference> individualSelectedCells = new ArrayList<>();
 
     /** Set while a selection that leaves the view where it is is sent. */
     private boolean keepingView;
@@ -878,9 +878,9 @@ public class CellSelectionManager implements Serializable {
                 return;
             }
         }
-        ArrayList<CellReference> cellRefCopy = new ArrayList<CellReference>(
+        ArrayList<CellReference> cellRefCopy = new ArrayList<>(
                 individualSelectedCells);
-        ArrayList<CellRangeAddress> rangeCopy = new ArrayList<CellRangeAddress>(
+        ArrayList<CellRangeAddress> rangeCopy = new ArrayList<>(
                 cellRangeAddresses);
         latestSelectionEvent = new SelectionChangeEvent(spreadsheet,
                 selectedCellReference, cellRefCopy, selectedCellMergedRegion,

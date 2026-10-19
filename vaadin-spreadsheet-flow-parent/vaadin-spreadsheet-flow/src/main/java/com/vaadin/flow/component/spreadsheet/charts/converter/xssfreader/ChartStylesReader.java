@@ -133,7 +133,7 @@ class ChartStylesReader {
     }
 
     public LinkedHashMap<Long, AxisProperties> getYAxisProperties() {
-        LinkedHashMap<Long, AxisProperties> result = new LinkedHashMap<Long, AxisProperties>();
+        LinkedHashMap<Long, AxisProperties> result = new LinkedHashMap<>();
 
         List<CTValAx> valAxList = xssfChart.getCTChart().getPlotArea()
                 .getValAxList();

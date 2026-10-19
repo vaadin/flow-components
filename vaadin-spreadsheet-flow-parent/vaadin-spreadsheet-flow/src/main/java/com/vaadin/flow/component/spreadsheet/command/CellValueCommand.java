@@ -66,7 +66,7 @@ public class CellValueCommand extends SpreadsheetCommand
         }
     }
 
-    protected final List<Object> values = new ArrayList<Object>();
+    protected final List<Object> values = new ArrayList<>();
     protected final int selectedCellRow;
     protected final int selectedcellCol;
     protected final int[] selectedCellRange;
@@ -168,7 +168,7 @@ public class CellValueCommand extends SpreadsheetCommand
     }
 
     private void updateValues() {
-        List<Cell> cellsToUpdate = new ArrayList<Cell>();
+        List<Cell> cellsToUpdate = new ArrayList<>();
 
         for (Object o : values) {
             if (o instanceof CellValue cellValue) {
@@ -341,7 +341,7 @@ public class CellValueCommand extends SpreadsheetCommand
 
     @Override
     public Set<CellReference> getChangedCells() {
-        Set<CellReference> changedCells = new HashSet<CellReference>();
+        Set<CellReference> changedCells = new HashSet<>();
         for (Object o : values) {
             if (o instanceof CellValue cellValue) {
                 changedCells.add(new CellReference(getSheet().getSheetName(),

@@ -77,7 +77,7 @@ public class ScatterSeriesReader
         final List<CellReference> ptListY = Utils.getAllReferencedCells(
                 formulaY, getSpreadsheet(), showDataInHiddenCells);
 
-        final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
+        final List<SeriesPoint> list = new ArrayList<>();
 
         for (int i = 0; i < ptListY.size(); i++) {
             list.add(new SeriesPoint(getNumericValueFromCellRef(ptListX.get(i)),

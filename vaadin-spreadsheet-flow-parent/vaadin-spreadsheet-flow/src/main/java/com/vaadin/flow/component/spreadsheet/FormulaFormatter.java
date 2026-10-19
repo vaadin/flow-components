@@ -153,7 +153,7 @@ public class FormulaFormatter implements Serializable {
      */
     private List<FormulaToken> localizeTokens(List<FormulaToken> tokens,
             Locale locale) {
-        List<FormulaToken> localizedTokens = new LinkedList<FormulaToken>();
+        List<FormulaToken> localizedTokens = new LinkedList<>();
 
         for (FormulaToken token : tokens) {
             if (token instanceof NumberToken) {
@@ -191,7 +191,7 @@ public class FormulaFormatter implements Serializable {
      */
     protected List<FormulaToken> unLocalizeTokens(List<FormulaToken> tokens,
             Locale locale) {
-        List<FormulaToken> unlocalizedTokens = new LinkedList<FormulaToken>();
+        List<FormulaToken> unlocalizedTokens = new LinkedList<>();
 
         var decimalFormat = getDecimalFormat(locale);
         for (FormulaToken token : tokens) {
@@ -225,7 +225,7 @@ public class FormulaFormatter implements Serializable {
             Locale from) {
         boolean inString = false;
         StringBuilder numberBuilder = new StringBuilder();
-        List<FormulaToken> tokens = new LinkedList<FormulaToken>();
+        List<FormulaToken> tokens = new LinkedList<>();
         for (int i = 0; i < formulaValue.length() + 1; i++) {
             Character current = i == formulaValue.length() ? null
                     : formulaValue.charAt(i);

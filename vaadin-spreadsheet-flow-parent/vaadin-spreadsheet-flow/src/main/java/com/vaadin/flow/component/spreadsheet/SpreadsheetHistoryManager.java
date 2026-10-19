@@ -35,7 +35,7 @@ public class SpreadsheetHistoryManager implements Serializable {
      * All executed commands in chronological order. You can read this list in a
      * subclass; changing it directly has undefined results.
      */
-    protected final LinkedList<Command> commands = new LinkedList<Command>();
+    protected final LinkedList<Command> commands = new LinkedList<>();
 
     /**
      * Target Spreadsheet component.

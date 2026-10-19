@@ -231,7 +231,7 @@ final class SheetLoader implements Serializable {
      */
     void reloadSheetNames() {
         Workbook workbook = spreadsheet.getWorkbook();
-        final ArrayList<String> sheetNamesList = new ArrayList<String>();
+        final ArrayList<String> sheetNamesList = new ArrayList<>();
 
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             if (!workbook.isSheetVeryHidden(i) && !workbook.isSheetHidden(i)) {

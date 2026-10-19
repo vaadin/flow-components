@@ -94,7 +94,7 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
             rowData.writeTo(row);
 
             if (!spreadsheet.isRerenderPending()) {
-                ArrayList<Cell> modifiedCells = new ArrayList<Cell>();
+                ArrayList<Cell> modifiedCells = new ArrayList<>();
                 for (Cell cell : row) {
                     if (cell != null) {
                         modifiedCells.add(cell);

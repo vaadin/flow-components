@@ -62,8 +62,8 @@ public class BubbleSeriesReader
         final List<CellReference> ptListY = Utils.getAllReferencedCells(
                 formulaY, getSpreadsheet(), showDataInHiddenCells);
 
-        final List<Double> sizes = new ArrayList<Double>();
-        List<CellReference> ptListSize = new ArrayList<CellReference>();
+        final List<Double> sizes = new ArrayList<>();
+        List<CellReference> ptListSize = new ArrayList<>();
         if (bubbleSize.getNumRef() == null) {
             for (int i = 0; i < ptListY.size(); i++) {
                 sizes.add(Double.valueOf(1));
@@ -77,7 +77,7 @@ public class BubbleSeriesReader
             }
         }
 
-        final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
+        final List<SeriesPoint> list = new ArrayList<>();
 
         for (int i = 0; i < ptListY.size(); i++) {
             list.add(new SeriesPoint(getNumericValueFromCellRef(ptListX.get(i)),

@@ -109,7 +109,7 @@ public class SpreadsheetTable implements Serializable {
         this.fullTableRegion = fullTableRegion;
         this.xssfTable = xssfTable;
         this.ctWorksheetAutoFilter = ctWorksheetAutoFilter;
-        popupButtons = new HashMap<CellReference, PopupButton>();
+        popupButtons = new HashMap<>();
 
         if (isTableSheetCurrentlyActive()) {
             initPopupButtons();

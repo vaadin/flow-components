@@ -50,7 +50,7 @@ public class ConditionalFormatter implements Serializable {
     /**
      * Cache of styles for each cell. One cell may have several styles.
      */
-    private Map<String, Set<Integer>> cellToIndex = new HashMap<String, Set<Integer>>();
+    private Map<String, Set<Integer>> cellToIndex = new HashMap<>();
 
     protected ColorConverter colorConverter;
 
@@ -290,7 +290,7 @@ public class ConditionalFormatter implements Serializable {
                         Set<Integer> list = cellToIndex
                                 .get(SpreadsheetUtil.toKey(cell));
                         if (list == null) {
-                            list = new HashSet<Integer>();
+                            list = new HashSet<>();
                             cellToIndex.put(SpreadsheetUtil.toKey(cell), list);
                         }
                         list.add(classNameIndex);
@@ -311,7 +311,7 @@ public class ConditionalFormatter implements Serializable {
                                 list = cellToIndex
                                         .get(SpreadsheetUtil.toKey(cellToLeft));
                                 if (list == null) {
-                                    list = new HashSet<Integer>();
+                                    list = new HashSet<>();
                                     cellToIndex.put(
                                             SpreadsheetUtil.toKey(cellToLeft),
                                             list);
@@ -333,7 +333,7 @@ public class ConditionalFormatter implements Serializable {
                                 list = cellToIndex
                                         .get(SpreadsheetUtil.toKey(cellOnTop));
                                 if (list == null) {
-                                    list = new HashSet<Integer>();
+                                    list = new HashSet<>();
                                     cellToIndex.put(
                                             SpreadsheetUtil.toKey(cellOnTop),
                                             list);

@@ -30,7 +30,7 @@ public class SpreadsheetDefaultActionHandler implements Action.Handler {
     private final List<SpreadsheetAction> defaultActions;
 
     public SpreadsheetDefaultActionHandler() {
-        defaultActions = new ArrayList<SpreadsheetAction>();
+        defaultActions = new ArrayList<>();
         defaultActions.add(new HideHeaderAction());
         defaultActions.add(new UnHideHeadersAction());
         defaultActions.add(new MergeCellsAction());
@@ -67,7 +67,7 @@ public class SpreadsheetDefaultActionHandler implements Action.Handler {
 
     @Override
     public Action[] getActions(Object target, Object sender) {
-        ArrayList<Action> temp = new ArrayList<Action>();
+        ArrayList<Action> temp = new ArrayList<>();
         Spreadsheet spreadsheet = (Spreadsheet) sender;
         if (target instanceof SelectionChangeEvent selection) {
             for (SpreadsheetAction action : defaultActions) {

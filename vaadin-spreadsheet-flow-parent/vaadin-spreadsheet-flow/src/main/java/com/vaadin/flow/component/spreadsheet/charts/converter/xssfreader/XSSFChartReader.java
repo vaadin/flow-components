@@ -94,8 +94,7 @@ public class XSSFChartReader {
         chartData.xAxisProperties = stylesReader.getXAxisProperties();
 
         // values() of LinkedHashMap guarantees the order of items
-        chartData.yAxesProperties = new ArrayList<AxisProperties>(
-                yAxes.values());
+        chartData.yAxesProperties = new ArrayList<>(yAxes.values());
 
         chartData.blanksAsZeros = getDisplayBlanksAs();
 
@@ -124,7 +123,7 @@ public class XSSFChartReader {
     }
 
     private LegendPosition getLegendPosition() {
-        Map<STLegendPos.Enum, LegendPosition> translationMap = new HashMap<STLegendPos.Enum, LegendPosition>();
+        Map<STLegendPos.Enum, LegendPosition> translationMap = new HashMap<>();
         translationMap.put(STLegendPos.B, LegendPosition.BOTTOM);
         translationMap.put(STLegendPos.L, LegendPosition.LEFT);
         translationMap.put(STLegendPos.T, LegendPosition.TOP);
@@ -144,7 +143,7 @@ public class XSSFChartReader {
     private List<AbstractSeriesData> readPlotData(CTPlotArea plotArea) {
         boolean showDataInHiddenCells = getShowDataInHiddenCells();
 
-        ArrayList<AbstractSeriesData> list = new ArrayList<AbstractSeriesData>();
+        ArrayList<AbstractSeriesData> list = new ArrayList<>();
 
         for (CTBarChart ctChart : plotArea.getBarChartList()) {
             list.addAll(addYAxis(
@@ -225,7 +224,7 @@ public class XSSFChartReader {
             Collection<? extends AbstractSeriesData> seriesList,
             List<CTUnsignedInt> axIdList) {
         // keySet() of LinkedHashMap guarantees the order of items
-        final List<Long> axisIds = new ArrayList<Long>(yAxes.keySet());
+        final List<Long> axisIds = new ArrayList<>(yAxes.keySet());
 
         for (Long axisId : axisIds) {
             for (CTUnsignedInt id : axIdList) {

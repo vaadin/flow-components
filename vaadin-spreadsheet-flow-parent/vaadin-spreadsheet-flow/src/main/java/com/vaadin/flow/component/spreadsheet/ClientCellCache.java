@@ -37,18 +37,18 @@ import com.vaadin.flow.component.spreadsheet.client.CellData;
  */
 final class ClientCellCache implements Serializable {
 
-    private final HashSet<String> sentCells = new HashSet<String>();
-    private final HashSet<String> sentFormulaCells = new HashSet<String>();
+    private final HashSet<String> sentCells = new HashSet<>();
+    private final HashSet<String> sentFormulaCells = new HashSet<>();
 
     /** Cells whose values have changed and are to be sent again. */
-    private final HashSet<String> markedCells = new HashSet<String>();
+    private final HashSet<String> markedCells = new HashSet<>();
     /** Cells to take off the client: a row and column, and no value. */
-    private final HashSet<CellData> removedCells = new HashSet<CellData>();
+    private final HashSet<CellData> removedCells = new HashSet<>();
     /**
      * Formula cells that work out to something else than when they were last
      * sent, for the formula change event of the next update.
      */
-    private HashSet<CellReference> changedFormulaCells = new HashSet<CellReference>();
+    private HashSet<CellReference> changedFormulaCells = new HashSet<>();
 
     /**
      * Forgets the cells the client has and those to send it. A cell taken off
@@ -100,7 +100,7 @@ final class ClientCellCache implements Serializable {
      * before formula cells.
      */
     List<CellData> pruneRowsRange(int startRow, int endRow) {
-        List<CellData> removals = new ArrayList<CellData>();
+        List<CellData> removals = new ArrayList<>();
         for (int i = startRow; i <= endRow; i++) {
             String rowKey = "row" + i;
             for (Iterator<String> iterator = sentCells.iterator(); iterator
@@ -192,7 +192,7 @@ final class ClientCellCache implements Serializable {
      * formula works out to something else.
      */
     void flush(Spreadsheet spreadsheet, CellValueManager manager) {
-        ArrayList<CellData> updatedCellData = new ArrayList<CellData>();
+        ArrayList<CellData> updatedCellData = new ArrayList<>();
         Sheet sheet = spreadsheet.getActiveSheet();
         addSpillSources(sheet, manager, updatedCellData);
         // A cell with a component is not sent, as it is not when loaded.
@@ -234,7 +234,7 @@ final class ClientCellCache implements Serializable {
             // A new set rather than a cleared one, so a listener can go
             // through the cells while new changes are recorded.
             Set<CellReference> changed = changedFormulaCells;
-            changedFormulaCells = new HashSet<CellReference>();
+            changedFormulaCells = new HashSet<>();
             manager.fireFormulaValueChangeEvent(changed);
         }
         // empty cells have cell data with just col and row

@@ -172,7 +172,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         final Workbook workbook = spreadsheet.getWorkbook();
         spreadsheet.cellStyleToCSSStyle = spreadsheet.getCellStyleToCSSStyle();
         if (spreadsheet.cellStyleToCSSStyle == null) {
-            spreadsheet.cellStyleToCSSStyle = new HashMap<Integer, String>(
+            spreadsheet.cellStyleToCSSStyle = new HashMap<>(
                     workbook.getNumCellStyles());
         } else {
             spreadsheet.cellStyleToCSSStyle.clear();
@@ -213,15 +213,14 @@ public class SpreadsheetStyleFactory implements Serializable {
         HashMap<Integer, Integer> _rowIndexToStyleIndex = spreadsheet
                 .sheetModel().rowIndexToStyleIndex.get();
         if (_rowIndexToStyleIndex == null) {
-            _rowIndexToStyleIndex = new HashMap<Integer, Integer>(
-                    workbook.getNumCellStyles());
+            _rowIndexToStyleIndex = new HashMap<>(workbook.getNumCellStyles());
         } else {
             _rowIndexToStyleIndex.clear();
         }
         HashMap<Integer, Integer> _columnIndexToStyleIndex = spreadsheet
                 .sheetModel().columnIndexToStyleIndex.get();
         if (_columnIndexToStyleIndex == null) {
-            _columnIndexToStyleIndex = new HashMap<Integer, Integer>(
+            _columnIndexToStyleIndex = new HashMap<>(
                     workbook.getNumCellStyles());
         } else {
             _columnIndexToStyleIndex.clear();
@@ -229,14 +228,14 @@ public class SpreadsheetStyleFactory implements Serializable {
         Set<Integer> _lockedColumnIndexes = spreadsheet
                 .sheetModel().lockedColumnIndexes.get();
         if (_lockedColumnIndexes == null) {
-            _lockedColumnIndexes = new HashSet<Integer>();
+            _lockedColumnIndexes = new HashSet<>();
         } else {
             _lockedColumnIndexes.clear();
         }
         Set<Integer> _lockedRowIndexes = spreadsheet
                 .sheetModel().lockedRowIndexes.get();
         if (_lockedRowIndexes == null) {
-            _lockedRowIndexes = new HashSet<Integer>();
+            _lockedRowIndexes = new HashSet<>();
         } else {
             _lockedRowIndexes.clear();
         }
@@ -383,7 +382,7 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     @SuppressWarnings({ "unchecked" })
     private static <K, V> Map<K, V> mapFor(Object... mapping) {
-        Map<K, V> map = new HashMap<K, V>();
+        Map<K, V> map = new HashMap<>();
         for (int i = 0; i < mapping.length; i += 2) {
             map.put((K) mapping[i], (V) mapping[i + 1]);
         }

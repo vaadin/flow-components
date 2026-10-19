@@ -408,7 +408,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     }
 
     private void fireCellValueChangeEvent(CellRangeAddress region) {
-        Set<CellReference> cells = new HashSet<CellReference>();
+        Set<CellReference> cells = new HashSet<>();
         for (int x = region.getFirstColumn(); x <= region
                 .getLastColumn(); x++) {
             for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {
@@ -427,7 +427,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void clearSelectedCellsOnCut() {
         // clear ranges
-        List<Cell> targetCells = new ArrayList<Cell>();
+        List<Cell> targetCells = new ArrayList<>();
         List<CellRangeAddress> cellRangeAddresses = spreadsheet
                 .getCellSelectionManager().getCellRangeAddresses();
         for (CellRangeAddress a : cellRangeAddresses) {

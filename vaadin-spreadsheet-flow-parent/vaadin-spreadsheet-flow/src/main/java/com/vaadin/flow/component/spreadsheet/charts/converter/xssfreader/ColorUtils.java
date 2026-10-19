@@ -42,7 +42,7 @@ class ColorUtils {
     }
 
     public static Map<String, byte[]> createColorMap(CTColorScheme clrScheme) {
-        Map<String, byte[]> colorMap = new HashMap<String, byte[]>();
+        Map<String, byte[]> colorMap = new HashMap<>();
 
         if (clrScheme.getDk1().getSysClr() != null) {
             colorMap.put("tx1", clrScheme.getDk1().getSysClr().getLastClr());

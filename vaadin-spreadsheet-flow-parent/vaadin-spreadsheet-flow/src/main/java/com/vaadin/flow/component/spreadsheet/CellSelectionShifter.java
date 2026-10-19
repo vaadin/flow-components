@@ -126,7 +126,7 @@ public class CellSelectionShifter implements Serializable {
     }
 
     private void fireCellValueChangeEvent(CellRangeAddress region) {
-        Set<CellReference> cells = new HashSet<CellReference>();
+        Set<CellReference> cells = new HashSet<>();
         for (int x = region.getFirstColumn(); x <= region
                 .getLastColumn(); x++) {
             for (int y = region.getFirstRow(); y <= region.getLastRow(); y++) {

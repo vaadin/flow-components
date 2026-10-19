@@ -158,7 +158,7 @@ public class SpreadsheetFactory implements Serializable {
         final List<? extends Name> namedRanges = spreadsheet.getWorkbook()
                 .getAllNames();
 
-        final List<String> names = new ArrayList<String>();
+        final List<String> names = new ArrayList<>();
 
         for (Name name : namedRanges) {
             if (!isNameSelectable(name)) {

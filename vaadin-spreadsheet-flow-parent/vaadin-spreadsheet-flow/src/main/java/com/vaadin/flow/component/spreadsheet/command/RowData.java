@@ -38,9 +38,9 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
  */
 class RowData implements Serializable {
 
-    private final List<CellData> cellsData = new ArrayList<CellData>();
-    private final List<CommentData> commentsWithoutCell = new ArrayList<CommentData>();
-    private final List<CellRangeAddress> mergedCells = new ArrayList<CellRangeAddress>();
+    private final List<CellData> cellsData = new ArrayList<>();
+    private final List<CommentData> commentsWithoutCell = new ArrayList<>();
+    private final List<CellRangeAddress> mergedCells = new ArrayList<>();
     private ConditionalFormattingSnapshot conditionalFormatting = null;
     private boolean isCopied;
     private int maxCol;

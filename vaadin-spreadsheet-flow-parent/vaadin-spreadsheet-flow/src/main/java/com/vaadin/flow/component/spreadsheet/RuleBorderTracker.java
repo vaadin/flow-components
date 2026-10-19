@@ -48,8 +48,8 @@ final class RuleBorderTracker implements Serializable {
 
     private static final String BORDER_STYLE_DEFAULT = "1pt solid #d6d6d6;";
 
-    private final Map<ConditionalFormatting, Integer> topBorders = new HashMap<ConditionalFormatting, Integer>();
-    private final Map<ConditionalFormatting, Integer> leftBorders = new HashMap<ConditionalFormatting, Integer>();
+    private final Map<ConditionalFormatting, Integer> topBorders = new HashMap<>();
+    private final Map<ConditionalFormatting, Integer> leftBorders = new HashMap<>();
 
     void clear() {
         topBorders.clear();

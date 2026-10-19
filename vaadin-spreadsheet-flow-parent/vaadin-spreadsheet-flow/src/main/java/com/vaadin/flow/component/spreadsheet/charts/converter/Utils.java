@@ -56,7 +56,7 @@ public class Utils {
 
     public static String getStringValueFromFormula(String formula,
             Spreadsheet spreadsheet) {
-        List<String> strings = new ArrayList<String>();
+        List<String> strings = new ArrayList<>();
 
         for (CellReference ref : getAllReferencedCells(
                 spreadsheet.getWorkbook().getSpreadsheetVersion(), formula)) {
@@ -88,7 +88,7 @@ public class Utils {
      */
     public static List<CellReference> getAllReferencedCells(
             SpreadsheetVersion version, String formula) {
-        ArrayList<CellReference> cellRefs = new ArrayList<CellReference>();
+        ArrayList<CellReference> cellRefs = new ArrayList<>();
         for (AreaReference area : getAreaReferences(version, formula)) {
             cellRefs.addAll(Arrays.asList(area.getAllReferencedCells()));
         }
@@ -149,7 +149,7 @@ public class Utils {
             return cellRefs;
         } else {
             // Filter out hidden cells of rows that are hidden (Excel spec)
-            ArrayList<CellReference> visibleCells = new ArrayList<CellReference>();
+            ArrayList<CellReference> visibleCells = new ArrayList<>();
             for (CellReference cr : cellRefs) {
                 if (!spreadsheet.isRowHidden(cr.getRow())
                         && !spreadsheet.isColumnHidden(cr.getCol())) {

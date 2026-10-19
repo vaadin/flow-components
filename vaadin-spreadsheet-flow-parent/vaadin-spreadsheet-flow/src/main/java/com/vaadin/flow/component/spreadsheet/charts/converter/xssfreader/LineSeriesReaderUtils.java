@@ -62,7 +62,7 @@ public class LineSeriesReaderUtils {
     }
 
     private static String getDashStyleString(STPresetLineDashVal.Enum val) {
-        final Map<STPresetLineDashVal.Enum, String> map = new HashMap<STPresetLineDashVal.Enum, String>();
+        final Map<STPresetLineDashVal.Enum, String> map = new HashMap<>();
         // see comment in
         // com.vaadin.flow.component.spreadsheet.chartconverter.chartdata.LineSeriesData.dashStyle
         map.put(STPresetLineDashVal.SOLID, "SOLID");

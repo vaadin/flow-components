@@ -432,7 +432,7 @@ public class SpreadsheetUtil implements Serializable {
             return cellRefs;
         } else {
             // Filter out hidden cells of rows that are hidden (Excel spec)
-            ArrayList<CellReference> visibleCells = new ArrayList<CellReference>();
+            ArrayList<CellReference> visibleCells = new ArrayList<>();
             for (CellReference cr : cellRefs) {
                 if (!spreadsheet.isRowHidden(cr.getRow())
                         && !spreadsheet.isColumnHidden(cr.getCol())) {
