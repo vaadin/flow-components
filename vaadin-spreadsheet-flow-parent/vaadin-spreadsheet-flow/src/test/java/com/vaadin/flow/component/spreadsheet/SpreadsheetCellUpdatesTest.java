@@ -199,6 +199,19 @@ class SpreadsheetCellUpdatesTest {
     }
 
     @Test
+    void aFormulaCellMarkedAgainAfterItWasToBeTakenOff_staysOnTheClient() {
+        formulaInB1();
+        show();
+        CellValueManager values = spreadsheet.getCellValueManager();
+        values.markCellForRemove(cell("B1"));
+        values.markCellForUpdate(cell("B1"));
+
+        spreadsheet.updateMarkedCells();
+
+        assertFalse(calls().contains("B1="));
+    }
+
+    @Test
     void aCellRemovedInPoi_andMarkedAsDeleted_isTakenOffTheClient() {
         show();
         Cell text = cell("C1");

@@ -187,6 +187,20 @@ class SpillRefreshTest {
     }
 
     @Test
+    void resizeAColumnTheTextOfAFormulaRunsInto_theFormulaIsSentAgain() {
+        spreadsheet.createFormulaCell(2, 0, "\"fifteen chars!!\"");
+        showTheSheet();
+        clearInvocations(rpc);
+
+        TestHelper.fireClientEvent(spreadsheet, "columnResized",
+                "{\"colIndexes\": [2], \"newWidths\": [80]}");
+
+        CellData a3 = sentCell("A3");
+        assertNotNull(a3, "A3 has to be sent again");
+        assertEquals(180, a3.overflowWidth);
+    }
+
+    @Test
     void hideAColumnTheTextRunsInto_theTextIsSentAgain() {
         showTheSheet();
         clearInvocations(rpc);
