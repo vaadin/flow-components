@@ -623,14 +623,12 @@ public class SpreadsheetFactory implements Serializable {
                 GroupingData d1 = data.get(i);
                 GroupingData d2 = data.get(j);
 
-                if (spreadsheet.sheetModel().colGroupingInversed.get()) {
-                    if (d1.startIndex == d2.startIndex) {
-                        toRemove.add(d2);
-                    }
-                } else {
-                    if (d1.endIndex == d2.endIndex) {
-                        toRemove.add(d2);
-                    }
+                boolean together = spreadsheet.sheetModel().colGroupingInversed
+                        .get() ? d1.startIndex == d2.startIndex
+                                : d1.endIndex == d2.endIndex;
+                if (together) {
+                    // The outer one is drawn, whichever was read first.
+                    toRemove.add(d1.level > d2.level ? d1 : d2);
                 }
             }
         }
@@ -748,14 +746,12 @@ public class SpreadsheetFactory implements Serializable {
                 GroupingData d1 = data.get(i);
                 GroupingData d2 = data.get(j);
 
-                if (spreadsheet.sheetModel().rowGroupingInversed.get()) {
-                    if (d1.startIndex == d2.startIndex) {
-                        toRemove.add(d2);
-                    }
-                } else {
-                    if (d1.endIndex == d2.endIndex) {
-                        toRemove.add(d2);
-                    }
+                boolean together = spreadsheet.sheetModel().rowGroupingInversed
+                        .get() ? d1.startIndex == d2.startIndex
+                                : d1.endIndex == d2.endIndex;
+                if (together) {
+                    // The outer one is drawn, whichever was read first.
+                    toRemove.add(d1.level > d2.level ? d1 : d2);
                 }
             }
         }
