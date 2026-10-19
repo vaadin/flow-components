@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Name;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -165,5 +166,32 @@ class SelectionWhenASheetIsShownTest {
 
         assertEquals(List.of(new Sent("showSelectedCell", 6, 50, true)),
                 selectionsSent());
+    }
+
+    @Test
+    void aNamedRangeOfAnotherSheet_selectsItsCell_broughtIntoView() {
+        Name elsewhere = spreadsheet.getWorkbook().createName();
+        elsewhere.setNameName("Elsewhere");
+        elsewhere.setRefersToFormula("Second!$D$90");
+
+        TestHelper.fireClientEvent(spreadsheet, "sheetAddressChanged",
+                "{\"value\": \"Elsewhere\"}");
+
+        assertEquals("Second", spreadsheet.getActiveSheet().getSheetName());
+        assertEquals(List.of(new Sent("showSelectedCell", 4, 90, true)),
+                roundTrip());
+    }
+
+    @Test
+    void aNamedRangeOfAnotherSheet_selectsItsRange_broughtIntoView() {
+        Name elsewhere = spreadsheet.getWorkbook().createName();
+        elsewhere.setNameName("Elsewhere");
+        elsewhere.setRefersToFormula("Second!$D$90:$E$95");
+
+        TestHelper.fireClientEvent(spreadsheet, "sheetAddressChanged",
+                "{\"value\": \"Elsewhere\"}");
+
+        assertEquals(List.of(new Sent("setSelectedCellAndRange", 4, 90, true)),
+                roundTrip());
     }
 }

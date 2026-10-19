@@ -150,7 +150,10 @@ class NamedRangeUtils implements Serializable {
             int sheetIndex = spreadsheet.getWorkbook()
                     .getSheetIndex(formulaSheet);
             spreadsheet.setActiveSheetIndex(sheetIndex);
-            spreadsheet.initialSheetSelection = range;
+            // The address field reads an address of the sheet shown, without
+            // the sheet's name: a single cell with it is no address at all.
+            spreadsheet.initialSheetSelection = range
+                    .substring(range.lastIndexOf('!') + 1);
         }
     }
 }
