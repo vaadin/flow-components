@@ -1131,7 +1131,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.menu.showActions(coerceArray<SpreadsheetActionDetails>(actionDetails));
   }
   setSelectedCellAndRange(
-    name: string,
+    name: string | null,
     col: number,
     row: number,
     c1: number,

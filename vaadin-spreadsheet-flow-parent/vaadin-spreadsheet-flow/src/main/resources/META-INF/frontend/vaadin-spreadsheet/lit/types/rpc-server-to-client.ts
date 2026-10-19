@@ -58,7 +58,7 @@ export interface SpreadsheetClientApi {
   updateFormulaBar(possibleName: string | null, col: number, row: number): void;
   invalidCellAddress(): void;
   showSelectedCell(
-    name: string,
+    name: string | null,
     col: number,
     row: number,
     cellValue: string,
@@ -69,7 +69,7 @@ export interface SpreadsheetClientApi {
   ): void;
   showActions(actionDetails: SpreadsheetActionDetails[] | null): void;
   setSelectedCellAndRange(
-    name: string,
+    name: string | null,
     col: number,
     row: number,
     c1: number,

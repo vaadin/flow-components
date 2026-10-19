@@ -318,7 +318,7 @@ describe('showSelectedCell — the server moving the selection', () => {
   });
 
   it('works out the address when the server sends no name', async () => {
-    ctx.sheet.showSelectedCell(null as any, 2, 6, '', false, false, false);
+    ctx.sheet.showSelectedCell(null, 2, 6, '', false, false, false);
 
     await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B6');
@@ -354,7 +354,7 @@ describe('Formula bar — the address field', () => {
     // and leaves the address to the client, which is every selection a
     // user makes by clicking.
     clickCell(ctx.sheet, 2, 2);
-    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B2');
   });
@@ -369,7 +369,7 @@ describe('Formula bar — the address field', () => {
 
   it('works out a two-letter column', () => {
     clickCell(ctx.sheet, 28, 5);
-    ctx.sheet.updateFormulaBar(null as any, 28, 5);
+    ctx.sheet.updateFormulaBar(null, 28, 5);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('AB5');
   });
@@ -381,7 +381,7 @@ describe('Formula bar — the address field', () => {
       { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any
     ]);
     clickCell(ctx.sheet, 2, 2);
-    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=SUM(B1:B9)');
   });
@@ -394,7 +394,7 @@ describe('Formula bar — the address field', () => {
       { row: 4, col: 2, value: 'abc', originalValue: "'abc", cellStyle: 'cs0' } as any
     ]);
     clickCell(ctx.sheet, 2, 4);
-    ctx.sheet.updateFormulaBar(null as any, 2, 4);
+    ctx.sheet.updateFormulaBar(null, 2, 4);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal("'abc");
   });
@@ -404,7 +404,7 @@ describe('Formula bar — the address field', () => {
       { row: 5, col: 2, value: 'plain', cellStyle: 'cs0' } as any
     ]);
     clickCell(ctx.sheet, 2, 5);
-    ctx.sheet.updateFormulaBar(null as any, 2, 5);
+    ctx.sheet.updateFormulaBar(null, 2, 5);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('plain');
   });
@@ -414,9 +414,9 @@ describe('Formula bar — the address field', () => {
       { row: 2, col: 2, value: '42', formulaValue: 'SUM(B1:B9)', cellStyle: 'cs0' } as any
     ]);
     clickCell(ctx.sheet, 2, 2);
-    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
     clickCell(ctx.sheet, 9, 9);
-    ctx.sheet.updateFormulaBar(null as any, 9, 9);
+    ctx.sheet.updateFormulaBar(null, 9, 9);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
   });
@@ -429,7 +429,7 @@ describe('Formula bar — the address field', () => {
       { row: 5, col: 3, value: 'hello', cellStyle: 'cs0' } as any
     ]);
     clickCell(ctx.sheet, 2, 2);
-    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
     ctx.sheet.setSelectedCellAndRange('C5', 3, 5, 3, 3, 5, 5, true);
 
     await rendered(ctx.sheet);
@@ -463,7 +463,7 @@ describe('Formula bar — the address field', () => {
       } as any
     ]);
     clickCell(ctx.sheet, 2, 2);
-    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('=SUM(B1:B9)');
   });
@@ -575,7 +575,7 @@ describe('Formula bar — what the server says while the user moves on or writes
 
     ctx.sheet.updateFormulaBar(null, 2, 2);
     ctx.sheet.showSelectedCell(null, 2, 2, 'two', false, false, false);
-    ctx.sheet.setSelectedCellAndRange(null as any, 2, 2, 2, 2, 2, 2, false);
+    ctx.sheet.setSelectedCellAndRange(null, 2, 2, 2, 2, 2, 2, false);
 
     expect(bar().renderState.highlights?.references).to.have.length(2);
   });
@@ -731,7 +731,7 @@ describe('Formula bar — jumping by address', () => {
   it('names an unnamed server selection by its active cell', async () => {
     // Same as updateFormulaBar: the server names a selection only when
     // it has one, and leaves an ordinary one to the client.
-    ctx.sheet.setSelectedCellAndRange(null as any, 2, 1, 2, 3, 1, 2, false);
+    ctx.sheet.setSelectedCellAndRange(null, 2, 1, 2, 3, 1, 2, false);
 
     await rendered(ctx.sheet);
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('B1');
@@ -809,7 +809,7 @@ describe('Formula bar — dragging out a range', () => {
   it('says nothing on a hover with no button down', () => {
     // The grid emits cell-mouseover on every hover.
     clickCell(ctx.sheet, 2, 2);
-    ctx.sheet.updateFormulaBar(null as any, 2, 2);
+    ctx.sheet.updateFormulaBar(null, 2, 2);
     ctx.sheet.getCellGrid().dispatchEvent(
       new CustomEvent('cell-mouseover', {
         detail: { col: 9, row: 9 },
@@ -824,7 +824,7 @@ describe('Formula bar — dragging out a range', () => {
   it('gives the address back when the drag ends and the server answers the selection', async () => {
     drag([8, 10], [9, 10]);
     document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-    ctx.sheet.updateFormulaBar(null as any, 8, 10);
+    ctx.sheet.updateFormulaBar(null, 8, 10);
     await rendered(ctx.sheet);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('H10');
@@ -847,7 +847,7 @@ describe('Formula bar — dragging out a range', () => {
     // The answer to the press that started the drag can come while the
     // range is still being dragged out: the count stays.
     drag([8, 10], [9, 10]);
-    ctx.sheet.updateFormulaBar(null as any, 8, 10);
+    ctx.sheet.updateFormulaBar(null, 8, 10);
     await rendered(ctx.sheet);
 
     expect(ctx.sheet.getFormulaBar().renderState.address).to.equal('1R x 2C');
@@ -858,7 +858,7 @@ describe('Formula bar — dragging out a range', () => {
       { row: 10, col: 8, value: 'x', originalValue: 'x', cellStyle: 'cs0' } as any
     ]);
     clickCell(ctx.sheet, 8, 10);
-    ctx.sheet.updateFormulaBar(null as any, 8, 10);
+    ctx.sheet.updateFormulaBar(null, 8, 10);
     drag([8, 10], [9, 10]);
 
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('x');

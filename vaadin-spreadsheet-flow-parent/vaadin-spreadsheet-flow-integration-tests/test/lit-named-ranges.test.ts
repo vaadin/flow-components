@@ -180,7 +180,7 @@ describe('Spreadsheet — named-range picker', () => {
   });
 
   it('keeps the address and formula fields untouched by a range list update', async () => {
-    ctx.sheet.showSelectedCell(null as any, 2, 2, 'SUM(A1:A3)', true, false, false);
+    ctx.sheet.showSelectedCell(null, 2, 2, 'SUM(A1:A3)', true, false, false);
     await rendered(ctx.sheet);
     ctx.sheet.setNamedRanges(['john']);
     await rendered(ctx.sheet);
