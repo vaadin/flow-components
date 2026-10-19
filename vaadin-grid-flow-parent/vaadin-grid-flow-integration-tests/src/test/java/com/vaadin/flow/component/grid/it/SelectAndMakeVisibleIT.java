@@ -17,8 +17,8 @@ package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -26,16 +26,14 @@ import com.vaadin.tests.AbstractComponentIT;
 public class SelectAndMakeVisibleIT extends AbstractComponentIT {
 
     @Test
-    public void selectRowAndMakeGridVisible() throws InterruptedException {
+    public void selectRowAndMakeGridVisible_rowIsSelected() {
         open();
 
         $("button").id("select").click();
-        checkLogsForErrors();
 
-        Long selectedLength = (Long) getCommandExecutor().executeScript(
-                "return arguments[0].selectedItems.length;",
-                findElement(By.tagName("vaadin-grid")));
-        Assert.assertEquals("Unexpected number of selected items", 1l,
-                selectedLength.longValue());
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertTrue(grid.getRow(0).isSelected());
+        Assert.assertFalse(grid.getRow(1).isSelected());
+        checkLogsForErrors();
     }
 }

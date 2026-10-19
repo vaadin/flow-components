@@ -221,6 +221,19 @@ public class DetachReattachIT extends AbstractComponentIT {
     }
 
     @Test
+    public void selectItem_detach_setItemsAndAttach_rowsAreRendered() {
+        open();
+        $(GridElement.class).first().select(0);
+
+        $("button").id("detach-button").click();
+        $("button").id("set-items-and-attach-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertEquals("Component A", grid.getCell(0, 1).getText());
+        checkLogsForErrors();
+    }
+
+    @Test
     public void detach_attachAndDetach_noClientErrors() {
         open();
 

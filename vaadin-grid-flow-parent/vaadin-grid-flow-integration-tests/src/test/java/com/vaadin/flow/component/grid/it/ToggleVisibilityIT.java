@@ -17,8 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -28,27 +26,25 @@ import com.vaadin.tests.AbstractComponentIT;
 public class ToggleVisibilityIT extends AbstractComponentIT {
 
     @Test
-    public void toggleVisibility_secondGridIsVisible() {
+    public void toggleVisibility_visibleGridIsRendered() {
         open();
 
-        waitForElementPresent(By.id("toggle-visibility-grid1"));
-        checkLogsForErrors();
+        Assert.assertEquals("Grid1 Item 0", getGrid1().getCell(0, 0).getText());
 
-        GridElement grid1 = $(GridElement.class).id("toggle-visibility-grid1");
-        Assert.assertEquals("Grid1 Item 0", grid1.getCell(0, 0).getText());
+        $("button").id("toggle-visibility-button").click();
+        Assert.assertEquals("Grid2 Item 0", getGrid2().getCell(0, 0).getText());
+        Assert.assertFalse(getGrid1().isDisplayed());
 
-        WebElement toggle = findElement(By.id("toggle-visibility-button"));
-        toggle.click();
-
-        waitForElementPresent(By.id("toggle-visibility-grid2"));
-        checkLogsForErrors();
-
-        GridElement grid2 = $(GridElement.class).id("toggle-visibility-grid2");
-        Assert.assertEquals("Grid2 Item 0", grid2.getCell(0, 0).getText());
-
-        toggle.click();
-        waitForElementPresent(By.id("toggle-visibility-grid1"));
+        $("button").id("toggle-visibility-button").click();
+        Assert.assertEquals("Grid1 Item 0", getGrid1().getCell(0, 0).getText());
         checkLogsForErrors();
     }
 
+    private GridElement getGrid1() {
+        return $(GridElement.class).id("toggle-visibility-grid1");
+    }
+
+    private GridElement getGrid2() {
+        return $(GridElement.class).id("toggle-visibility-grid2");
+    }
 }
