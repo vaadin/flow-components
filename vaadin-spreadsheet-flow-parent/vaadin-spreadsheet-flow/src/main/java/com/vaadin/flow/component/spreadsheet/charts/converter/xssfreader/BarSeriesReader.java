@@ -74,7 +74,11 @@ public class BarSeriesReader
             }
         }
 
-        seriesData.stacking = getStacking(getGrouping().getVal());
+        // A file may leave the grouping out, and the bars are then side by
+        // side.
+        CTBarGrouping grouping = getGrouping();
+        seriesData.stacking = getStacking(
+                grouping == null ? STBarGrouping.CLUSTERED : grouping.getVal());
 
         // I need this trick because for some reason "reversed x-axis" doesn't
         // work in Highcharts

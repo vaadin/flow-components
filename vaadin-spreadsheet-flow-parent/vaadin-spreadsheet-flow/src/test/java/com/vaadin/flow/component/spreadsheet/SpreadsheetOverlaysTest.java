@@ -27,6 +27,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.util.Units;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.BarDirection;
+import org.apache.poi.xddf.usermodel.chart.ChartTypes;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -121,6 +127,34 @@ class SpreadsheetOverlaysTest {
         show();
 
         assertEquals(List.of("A1", "A12", "F1", "F12"), startCells());
+    }
+
+    @Test
+    void aBarChartWithoutAGrouping_isShown_andTheOtherOverlaysWithIt() {
+        // The grouping is optional in a file, and bars are then side by
+        // side. Read as required, the chart threw and the sheet showed no
+        // overlay at all.
+        for (int i = 0; i < 3; i++) {
+            sheet.createRow(i).createCell(0).setCellValue("Category " + i);
+            sheet.getRow(i).createCell(1).setCellValue(10 * (i + 1));
+        }
+        picture("F12:F12");
+        XSSFChart chart = sheet.createDrawingPatriarch()
+                .createChart(new XSSFClientAnchor(0, 0, 0, 0, 5, 14, 7, 18));
+        XDDFBarChartData bars = (XDDFBarChartData) chart.createData(
+                ChartTypes.BAR, chart.createCategoryAxis(AxisPosition.BOTTOM),
+                chart.createValueAxis(AxisPosition.LEFT));
+        bars.setBarDirection(BarDirection.COL);
+        bars.addSeries(
+                XDDFDataSourcesFactory.fromStringCellRange(sheet,
+                        CellRangeAddress.valueOf("A1:A3")),
+                XDDFDataSourcesFactory.fromNumericCellRange(sheet,
+                        CellRangeAddress.valueOf("B1:B3")));
+        chart.plot(bars);
+
+        show();
+
+        assertEquals(List.of("F12", "F15"), startCells());
     }
 
     @Test

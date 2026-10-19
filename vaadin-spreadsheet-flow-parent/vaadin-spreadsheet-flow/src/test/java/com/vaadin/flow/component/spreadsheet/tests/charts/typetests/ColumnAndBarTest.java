@@ -18,7 +18,10 @@ import org.apache.poi.xddf.usermodel.chart.BarDirection;
 import org.apache.poi.xddf.usermodel.chart.BarGrouping;
 import org.apache.poi.xddf.usermodel.chart.ChartTypes;
 import org.apache.poi.xddf.usermodel.chart.XDDFBar3DChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
 import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -227,35 +230,68 @@ class ColumnAndBarTest extends ChartTestBase {
 
     @Test
     void bar3DColorByPoint() throws Exception {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet();
-        for (int i = 0; i < 3; i++) {
-            XSSFRow row = sheet.createRow(i);
-            row.createCell(0).setCellValue("Category " + i);
-            row.createCell(1).setCellValue(10 * (i + 1));
-        }
-        XSSFChart chart = sheet.createDrawingPatriarch()
-                .createChart(new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 10, 15));
+        XSSFSheet sheet = sheetWithThreeValues();
+        XSSFChart chart = chartAtD2(sheet);
         XDDFBar3DChartData bars = (XDDFBar3DChartData) chart.createData(
                 ChartTypes.BAR3D, chart.createCategoryAxis(AxisPosition.BOTTOM),
                 chart.createValueAxis(AxisPosition.LEFT));
         bars.setBarDirection(BarDirection.BAR);
         bars.setBarGrouping(BarGrouping.CLUSTERED);
         bars.setVaryColors(true);
-        bars.addSeries(
-                XDDFDataSourcesFactory.fromStringCellRange(sheet,
-                        CellRangeAddress.valueOf("A1:A3")),
-                XDDFDataSourcesFactory.fromNumericCellRange(sheet,
-                        CellRangeAddress.valueOf("B1:B3")));
+        bars.addSeries(categories(sheet), values(sheet));
         chart.plot(bars);
 
-        Configuration conf = getChart(new Spreadsheet(workbook), "D2")
-                .getConfiguration();
+        Configuration conf = getChart(new Spreadsheet(sheet.getWorkbook()),
+                "D2").getConfiguration();
 
         assertSeriesType(conf.getSeries(), ChartType.BAR);
         Assertions.assertTrue(
                 ((PlotOptionsBar) conf.getSeries().get(0).getPlotOptions())
                         .getColorByPoint());
+    }
+
+    @Test
+    void columnWithoutAGrouping_isNotStacked() throws Exception {
+        XSSFSheet sheet = sheetWithThreeValues();
+        XSSFChart chart = chartAtD2(sheet);
+        XDDFBarChartData bars = (XDDFBarChartData) chart.createData(
+                ChartTypes.BAR, chart.createCategoryAxis(AxisPosition.BOTTOM),
+                chart.createValueAxis(AxisPosition.LEFT));
+        bars.setBarDirection(BarDirection.COL);
+        bars.addSeries(categories(sheet), values(sheet));
+        chart.plot(bars);
+
+        Configuration conf = getChart(new Spreadsheet(sheet.getWorkbook()),
+                "D2").getConfiguration();
+
+        assertSeriesType(conf.getSeries(), ChartType.COLUMN);
+        assertStacking(conf.getSeries(), Stacking.NONE);
+    }
+
+    /** Three categories in A1:A3, with their values in B1:B3. */
+    private static XSSFSheet sheetWithThreeValues() {
+        XSSFSheet sheet = new XSSFWorkbook().createSheet();
+        for (int i = 0; i < 3; i++) {
+            XSSFRow row = sheet.createRow(i);
+            row.createCell(0).setCellValue("Category " + i);
+            row.createCell(1).setCellValue(10 * (i + 1));
+        }
+        return sheet;
+    }
+
+    private static XSSFChart chartAtD2(XSSFSheet sheet) {
+        return sheet.createDrawingPatriarch()
+                .createChart(new XSSFClientAnchor(0, 0, 0, 0, 3, 1, 10, 15));
+    }
+
+    private static XDDFDataSource<String> categories(XSSFSheet sheet) {
+        return XDDFDataSourcesFactory.fromStringCellRange(sheet,
+                CellRangeAddress.valueOf("A1:A3"));
+    }
+
+    private static XDDFNumericalDataSource<Double> values(XSSFSheet sheet) {
+        return XDDFDataSourcesFactory.fromNumericCellRange(sheet,
+                CellRangeAddress.valueOf("B1:B3"));
     }
 
     @Test
