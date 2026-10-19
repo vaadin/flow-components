@@ -291,6 +291,57 @@ export const cellGridStyles = css`
      them. The border divs above are raised for the same reason. */
     z-index: 2;
   }
+  /* Used by touch, the corner handle stretches the selection: a round dot
+   in the outline's colour, with 30 pixels round it a finger can find. A
+   drag from it scrolls nothing. */
+  .sheet-selection.touch .selection-corner {
+    right: -5px;
+    bottom: -5px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: ${selectionColor};
+    outline: none;
+    cursor: default;
+    touch-action: none;
+  }
+  /* Once "Fill" is chosen: a fill handle at the middle of each side, a
+   square in the fill colour ringed in white, with 30 pixels round it a
+   finger can find. A drag from one scrolls nothing. */
+  .sheet-selection .fill-touch-square {
+    position: absolute;
+    box-sizing: content-box;
+    width: 6px;
+    height: 6px;
+    margin: -5px 0 0 -5px;
+    background: ${selectionBorderColor};
+    border: 2px solid #fff;
+    pointer-events: auto;
+    touch-action: none;
+    z-index: 2;
+  }
+  .sheet-selection.touch .selection-corner::before,
+  .sheet-selection .fill-touch-square::before {
+    content: '';
+    position: absolute;
+    inset: -11px;
+  }
+  .sheet-selection .fill-touch-square.top {
+    left: 50%;
+    top: 0;
+  }
+  .sheet-selection .fill-touch-square.bottom {
+    left: 50%;
+    top: 100%;
+  }
+  .sheet-selection .fill-touch-square.left {
+    left: 0;
+    top: 50%;
+  }
+  .sheet-selection .fill-touch-square.right {
+    left: 100%;
+    top: 50%;
+  }
 
   /* A side the range runs on past, into the next pane or out of view. */
   .sheet-selection .cut {
@@ -547,6 +598,10 @@ export const cellGridLumoStyles = css`
 
   :host([theme~='lumo']) .selection-corner {
     outline-color: var(--lumo-base-color);
+  }
+
+  :host([theme~='lumo']) .fill-touch-square {
+    border-color: var(--lumo-base-color);
   }
 
   :host([theme~='lumo']) .paintmode {

@@ -212,6 +212,18 @@ describe('SheetStore', () => {
       expect(store.dragging(), 'pointed, the button up').to.be.false;
     });
 
+    it('is used by touch or not, and fills by touch once Fill is chosen, drawing each change', () => {
+      expect(store.interaction.touch).to.equal('off');
+
+      store.useTouch('select');
+      expect(store.interaction.touch).to.equal('select');
+      store.useTouch('select');
+      expect(renders, 'the same again draws nothing').to.equal(1);
+      store.useTouch('fill');
+      expect(store.interaction.touch).to.equal('fill');
+      expect(renders).to.equal(2);
+    });
+
     it('ends everything, and has that drawn', () => {
       openEditorOn(2, 3);
       store.changePress({ kind: 'select', crossed: true });

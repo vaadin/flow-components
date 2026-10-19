@@ -139,6 +139,9 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     // document level by the connector so a drag that ends
     // outside the spreadsheet still terminates cleanly.
     this.shadowRoot!.addEventListener('mousedown', this.handleShadowMouseDown);
+    // A finger on a handle of the selection, before the browser makes a
+    // mouse press of it.
+    this.shadowRoot!.addEventListener('pointerdown', this.handleShadowPointerDown);
     this.shadowRoot!.addEventListener('mouseover', this.handleShadowMouseOver);
     // mouseleave on the grid itself: mouseout fires between cells too, and
     // would flicker the comment off and on as the pointer crosses a border.
@@ -203,6 +206,27 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   /** How far the frozen columns reach across and the frozen rows down. */
   frozenExtent(): { width: number; height: number } {
     return frozenExtentOf(this.renderState);
+  }
+
+  /**
+   * Where the selection is drawn on screen, its pieces in the panes taken
+   * together. Null while none of it is drawn.
+   */
+  selectionClientRect(): DOMRect | null {
+    let left = Infinity;
+    let top = Infinity;
+    let right = -Infinity;
+    let bottom = -Infinity;
+    for (const piece of this.shadowRoot?.querySelectorAll<HTMLElement>('.sheet-selection') ?? []) {
+      const box = piece.getBoundingClientRect();
+      if (box.width > 0 && box.height > 0) {
+        left = Math.min(left, box.left);
+        top = Math.min(top, box.top);
+        right = Math.max(right, box.right);
+        bottom = Math.max(bottom, box.bottom);
+      }
+    }
+    return left < right ? new DOMRect(left, top, right - left, bottom - top) : null;
   }
 
   willUpdate(changedProps: Map<string, unknown>): void {
@@ -270,6 +294,30 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     if (taken) {
       ev.preventDefault();
     }
+  };
+
+  /**
+   * A finger on a handle of the selection: the corner, which stretches the
+   * selection, or a fill handle. Emits {@code touch-handle-press}, and takes
+   * the press from the browser, which would otherwise make a mouse press of
+   * it - one that on the corner starts a fill.
+   */
+  private readonly handleShadowPointerDown = (e: Event): void => {
+    if ((e as PointerEvent).pointerType !== 'touch' || !(e.target instanceof Element)) {
+      return;
+    }
+    const handle = e.target.closest('.selection-corner, .fill-touch-square');
+    if (handle === null) {
+      return;
+    }
+    e.preventDefault();
+    this.dispatchEvent(
+      new CustomEvent('touch-handle-press', {
+        detail: { fill: handle.classList.contains('fill-touch-square') },
+        bubbles: true,
+        composed: true
+      })
+    );
   };
 
   private readonly handleGridMouseLeave = (): void => {

@@ -57,6 +57,7 @@ import { KeyboardNavigation } from './controllers/KeyboardNavigation.js';
 import { PointerSelection } from './controllers/PointerSelection.js';
 import { FormulaPointer } from './controllers/FormulaPointer.js';
 import { Outline } from './controllers/Outline.js';
+import { TouchSelection } from './controllers/TouchSelection.js';
 import { type ScrollView, SheetRenderer } from './render/SheetRenderer.js';
 import { SheetLayout } from './dom/SheetLayout.js';
 import { listenForLongPress } from './dom/LongPress.js';
@@ -220,6 +221,16 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     },
     cellAt: (x, y) => this.renderer.cellAt(x, y),
     over: (col, row) => this.pointerSelection.over(col, row)
+  });
+
+  /** Selecting by touch: handles for a finger, and the "Fill" command; see {@link TouchSelection}. */
+  private readonly touchSelection = new TouchSelection(this.store, this.pointerSelection, {
+    cellAt: (x, y) => this.renderer.cellAt(x, y),
+    scrolling: () => this.dragScroll.scrolling(),
+    movedTo: (x, y) => this.dragScroll.moved(x, y),
+    selectionBox: () => this.selectionBoxInView(),
+    cellsTop: () => this.renderer.cellPanes().cells.top,
+    afterDrawn: (work) => requestAnimationFrame(() => work())
   });
 
   /** The keyboard on the sheet; see {@link KeyboardNavigation}. */
@@ -529,7 +540,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       },
       this.ownListeners.signal
     );
-    this.popup.overlay.after(...this.headerResize.elements(), this.linkTooltip.element);
+    this.popup.overlay.after(...this.headerResize.elements(), this.linkTooltip.element, this.touchSelection.element);
     this.renderTarget.appendChild(this.root);
     // Honor `Spreadsheet.HIDE_TABSHEET_STYLE` ("hidetabsheet") and the theme
     // on the wrapper host; see SheetLayout.
@@ -565,7 +576,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // shiftKey, ctrlKey, metaKey, altKey }. The connector updates
     // its selection + re-renders. Bubble + composed = true so the
     // event crosses the cell-grid's shadow DOM boundary.
-    this.on(this.cellGrid, 'cell-click', (e: CellPressEvent) => this.pointerSelection.click(e.detail));
+    this.on(this.cellGrid, 'cell-click', (e: CellPressEvent) => {
+      this.pointerSelection.click(e.detail);
+      this.touchSelection.tapped();
+    });
     // Cell editor lifecycle events. The cell-grid
     // emits these from its shadow DOM; the connector tracks
     // editor state + dispatches cellValueEdited on commit.
@@ -593,6 +607,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     });
     this.on(this.cellGrid, 'grid-mouseleave', this.linkTooltip.hide);
     this.on(this.cellGrid, 'selection-paint-start', () => this.pointerSelection.fillStarted());
+    this.on(this.cellGrid, 'touch-handle-press', (e: CustomEvent<{ fill: boolean }>) =>
+      this.touchSelection.handlePressed(e.detail.fill)
+    );
     // Popup-button click → dispatch popupButtonClick. The
     // server's `onPopupButtonClick` opens the associated popup
     // component.
@@ -654,7 +671,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     // stops the browser from scrolling the viewport via the
     // arrow keys.
     this.on(this.scrollContainer, 'keydown', (e: KeyboardEvent) => this.keyboard.keyDown(e));
-    this.on(this.scrollContainer, 'pointerdown', (e: Event) => this.pointerSelection.editorPressed(e));
+    this.on(this.scrollContainer, 'pointerdown', (e: PointerEvent) => {
+      this.touchSelection.pressed(e.pointerType);
+      this.pointerSelection.editorPressed(e);
+    });
     // Safari on iOS opens no menu on a long press, so it is made a
     // right-click there, on the cells and the headers alike.
     this.stopLongPress = Spreadsheet.platform.isIOS() ? listenForLongPress(this.scrollContainer) : () => {};
@@ -667,7 +687,10 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
           onDocument('keydown', this.handleContextMenuKeyDown),
           onDocument('mouseup', () => this.pointerSelection.release()),
           onDocument('keyup', (e) => this.keyboard.keyUp(e)),
-          onDocument('mousemove', this.handleDocumentMouseMove)
+          onDocument('mousemove', this.handleDocumentMouseMove),
+          onDocument('pointermove', (e) => this.touchSelection.moved(e)),
+          onDocument('pointerup', () => this.touchSelection.lifted()),
+          onDocument('pointercancel', () => this.touchSelection.lifted())
         ])
       ),
       {
@@ -675,6 +698,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
         hostDisconnected: () => {
           this.resizeObserver.disconnect();
           this.dragScroll.stop();
+          this.touchSelection.dismiss();
         }
       },
       this.popup
@@ -722,6 +746,20 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     listen(target, type, this.handling(listener), this.ownListeners.signal);
   }
 
+  /** Where the selection shows on screen: its box cut to the cells in view, or null when none of it shows. */
+  private selectionBoxInView(): { left: number; top: number; right: number; bottom: number } | null {
+    const box = this.cellGrid.selectionClientRect();
+    if (box === null) {
+      return null;
+    }
+    const { cells } = this.renderer.cellPanes();
+    const left = Math.max(box.left, cells.left);
+    const top = Math.max(box.top, cells.top);
+    const right = Math.min(box.right, cells.right);
+    const bottom = Math.min(box.bottom, cells.bottom);
+    return left < right && top < bottom ? { left, top, right, bottom } : null;
+  }
+
   /** The pointer moved on the page: a header drag follows it, and a drag past the cells scrolls them. */
   private readonly handleDocumentMouseMove = (e: MouseEvent): void => {
     this.headerResize.moved(e);
@@ -767,6 +805,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.recomputeViewport();
     // An open popup moves along with its cell.
     this.popup.reposition();
+    this.touchSelection.dismiss();
   };
 
   /**
@@ -1148,9 +1187,11 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
     this.popup.pressed(path);
     this.menu.closeUnlessPressedIn(path);
     this.dragScroll.pressed(e.clientX, e.clientY);
+    this.touchSelection.dismiss(path);
   };
 
   private readonly handleContextMenuKeyDown = (e: KeyboardEvent): void => {
+    this.touchSelection.dismiss();
     if (e.key !== 'Escape') {
       return;
     }

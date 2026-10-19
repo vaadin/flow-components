@@ -99,11 +99,21 @@ export type Edit =
 /**
  * A press on the cells, from the press to the release anywhere on the page:
  * dragging out a range - `crossed` once the pointer has gone into another
- * cell - or dragging the fill handle from the selection it started with.
+ * cell - or dragging the fill handle from the selection it started with. A
+ * fill by touch only grows the selection: dragged back inside it, it fills
+ * nothing rather than clearing.
  */
 export type CellPress =
   | { readonly kind: 'select'; readonly crossed: boolean }
-  | { readonly kind: 'fill'; readonly from: CellRect; readonly outcome: PaintOutcome };
+  | { readonly kind: 'fill'; readonly from: CellRect; readonly outcome: PaintOutcome; readonly byTouch?: boolean };
+
+/**
+ * Whether the sheet is used by touch: `off` while the last press on it was
+ * a mouse's or a pen's, `select` while it was a finger's - the selection
+ * then has handles a finger can drag - and `fill` once the "Fill" command
+ * is chosen, its handles filling rather than selecting.
+ */
+export type TouchUse = 'off' | 'select' | 'fill';
 
 export interface InteractionState {
   readonly edit: Edit;
@@ -123,6 +133,8 @@ export interface InteractionState {
    * the next press starts without it.
    */
   readonly rangeReportedOnRelease: boolean;
+  /** Whether the sheet is used by touch; see {@link TouchUse}. */
+  readonly touch: TouchUse;
 }
 
 const NO_EDIT: Edit = { kind: 'idle' };
@@ -133,7 +145,8 @@ export const IDLE: InteractionState = {
   press: null,
   comment: null,
   extending: false,
-  rangeReportedOnRelease: false
+  rangeReportedOnRelease: false,
+  touch: 'off'
 };
 
 /** Pointing at cells for the formula being written: none while nothing is. */

@@ -419,6 +419,7 @@ export class SheetRenderer {
       // Each at the bottom right corner of its cell.
       popupButtons: store.derived.popupButtons(this.host.popupButtons(), model),
       paintRect: store.paintRect(),
+      touch: store.interaction.touch,
       commentText: model.cellComments,
       commentAuthors: model.cellCommentAuthors,
       visibleCommentKeys: model.visibleCellComments,

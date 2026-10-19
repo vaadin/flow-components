@@ -182,6 +182,61 @@ describe('RangeOverlays', () => {
     });
   });
 
+  describe('the selection used by touch', () => {
+    const selection = { activeCell: { col: 2, row: 2 }, activeRange: { c1: 2, c2: 3, r1: 2, r2: 3 }, auxRanges: [] };
+
+    function outlineOf(state: CellGridRenderState, name: QuadrantRenderOpts['quadrantName'] = 'main'): HTMLElement {
+      return drawn(buildSelectionOverlay(pane(state, name))).querySelector<HTMLElement>('.sheet-selection')!;
+    }
+
+    const squares = (outline: HTMLElement) =>
+      Array.from(outline.querySelectorAll('.fill-touch-square'), (square) => square.className);
+
+    it('has the corner handle made for a finger', () => {
+      const outline = outlineOf(sheet({ selection, touch: 'select' }));
+
+      expect(outline.className).to.equal('sheet-selection touch');
+      expect(outline.querySelector('.selection-corner')).to.exist;
+      expect(squares(outline)).to.eql([]);
+    });
+
+    it('has a fill handle at the middle of each side once Fill is chosen, and no corner handle', () => {
+      const outline = outlineOf(sheet({ selection, touch: 'fill' }));
+
+      expect(outline.className).to.equal('sheet-selection touch fill');
+      expect(outline.querySelector('.selection-corner')).to.equal(null);
+      expect(squares(outline)).to.eql([
+        'fill-touch-square top',
+        'fill-touch-square left',
+        'fill-touch-square right',
+        'fill-touch-square bottom'
+      ]);
+    });
+
+    it('has fill handles only on the sides of the range a pane shows', () => {
+      const state = sheet({
+        selection: { activeCell: { col: 1, row: 3 }, activeRange: { c1: 1, c2: 3, r1: 3, r2: 9 }, auxRanges: [] },
+        touch: 'fill'
+      });
+
+      expect(squares(outlineOf(state, 'left'))).to.eql(['fill-touch-square top', 'fill-touch-square left']);
+      expect(squares(outlineOf(state, 'main'))).to.eql(['fill-touch-square top', 'fill-touch-square right']);
+    });
+
+    it('has no handles for several ranges', () => {
+      const outline = outlineOf(
+        sheet({
+          selection: { ...selection, auxRanges: [{ c1: 5, c2: 5, r1: 5, r2: 5 }] },
+          touch: 'fill'
+        })
+      );
+
+      expect(outline.className).to.equal('sheet-selection multi-range touch fill');
+      expect(outline.querySelector('.selection-corner')).to.equal(null);
+      expect(squares(outline)).to.eql([]);
+    });
+  });
+
   describe("the fill handle's drag", () => {
     it('is kept, hidden, in the scrolling pane alone while nothing is painted', () => {
       const hidden = drawn(buildPaintOutline(pane(sheet(), 'main'))).querySelector<HTMLElement>('.paintmode')!;

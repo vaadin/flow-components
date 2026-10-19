@@ -216,6 +216,53 @@ describe('PointerSelection', () => {
     });
   });
 
+  describe('the handles of a selection by touch', () => {
+    it('stretch the range from its active cell to the cell the finger goes to, reported on the release', () => {
+      click(2, 2);
+      sent.length = 0;
+      selecting.stretchStarted();
+
+      selecting.over(4, 5);
+      expect(range()).to.eql({ c1: 2, c2: 4, r1: 2, r2: 5 });
+      expect(store.selection.activeCell).to.eql({ col: 2, row: 2 });
+
+      selecting.release();
+      expect(sent).to.eql([
+        {
+          type: 'cellRangePainted',
+          data: { selectedCellRow: 2, selectedCellColumn: 2, row1: 2, col1: 2, row2: 5, col2: 4 }
+        }
+      ]);
+      expect(store.interaction.press).to.equal(null);
+    });
+
+    it('fill outward only: a drag back inside the range paints nothing, and clears nothing on the release', () => {
+      store.select({ activeCell: { col: 2, row: 2 }, activeRange: { c1: 2, c2: 2, r1: 2, r2: 5 }, auxRanges: [] });
+      selecting.fillStarted(true);
+
+      selecting.over(2, 3);
+      expect(store.paintRect(), 'inside').to.equal(null);
+      selecting.over(2, 7);
+      expect(store.paintRect(), 'below').to.eql({ c1: 2, c2: 2, r1: 6, r2: 7 });
+      selecting.over(2, 4);
+      expect(store.paintRect(), 'inside again').to.equal(null);
+
+      selecting.release();
+      expect(sent).to.eql([]);
+    });
+
+    it('fill outward as the fill handle does', () => {
+      click(2, 2);
+      sent.length = 0;
+      selecting.fillStarted(true);
+
+      selecting.over(4, 2);
+      selecting.release();
+
+      expect(sent).to.eql([{ type: 'selectionIncreasePainted', data: { r1: 2, c1: 2, r2: 2, c2: 4 } }]);
+    });
+  });
+
   describe('the column letters and row numbers', () => {
     it('select the whole column, its first row on screen active', () => {
       scroll.top = 100;

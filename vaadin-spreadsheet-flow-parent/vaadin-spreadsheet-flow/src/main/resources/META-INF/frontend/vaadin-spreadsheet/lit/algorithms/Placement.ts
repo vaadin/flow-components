@@ -64,3 +64,21 @@ export function linkTooltipPosition(
   }
   return { left, top };
 }
+
+/**
+ * Where the command a selection made by touch offers goes, in viewport
+ * pixels: centred over the selection and 5px above it - or 5px below it
+ * when above would take it past `cellsTop`, the top of the cells on screen -
+ * and kept inside the window across.
+ */
+export function touchCommandPosition(
+  selection: { left: number; top: number; right: number; bottom: number },
+  size: { width: number; height: number },
+  cellsTop: number,
+  viewWidth: number
+): { left: number; top: number } {
+  const centred = (selection.left + selection.right) / 2 - size.width / 2;
+  const left = Math.max(0, Math.min(centred, viewWidth - size.width));
+  const above = selection.top - 5 - size.height;
+  return { left, top: above < cellsTop ? selection.bottom + 5 : above };
+}

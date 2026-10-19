@@ -43,7 +43,8 @@ describe('Spreadsheet — what the user is in the middle of', () => {
       press: null,
       comment: null,
       extending: false,
-      rangeReportedOnRelease: false
+      rangeReportedOnRelease: false,
+      touch: 'off'
     });
     expect(NO_FORMULA).to.deep.equal({ pointer: null, lastPointed: null, press: 'none' });
   });

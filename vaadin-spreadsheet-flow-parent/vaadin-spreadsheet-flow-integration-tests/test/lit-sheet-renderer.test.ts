@@ -90,6 +90,14 @@ describe('SheetRenderer', () => {
       expect(state.cellData).to.equal(store.sheetData.cells);
     });
 
+    it('draws the selection for a finger while the sheet is used by touch', () => {
+      expect(renderer.build(VIEW).touch).to.equal('off');
+
+      store.useTouch('fill');
+
+      expect(renderer.build(VIEW).touch).to.equal('fill');
+    });
+
     it('starts the scrolling columns past the frozen ones and the freeze line', () => {
       store.write('horizontalSplitPosition', 2);
 

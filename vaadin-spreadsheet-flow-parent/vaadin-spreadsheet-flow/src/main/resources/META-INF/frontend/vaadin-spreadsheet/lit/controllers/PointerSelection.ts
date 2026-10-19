@@ -22,6 +22,9 @@ import type { SpreadsheetEvent } from '../types/rpc-client-to-server.js';
 import type { FormulaPointer } from './FormulaPointer.js';
 import type { SelectionReporter } from './SelectionReporter.js';
 
+/** A fill drag that paints nothing. */
+const NO_PAINT: PaintOutcome = { kind: 'none' };
+
 /** A cell, by its column and row, 1-based. */
 interface Cell {
   col: number;
@@ -188,7 +191,9 @@ export class PointerSelection {
     }
     const press = this.store.interaction.press;
     if (press?.kind === 'fill') {
-      this.store.changePress({ ...press, outcome: computePaintRectangle(press.from, col, row) });
+      const outcome = computePaintRectangle(press.from, col, row);
+      // By touch a fill only grows the selection.
+      this.store.changePress({ ...press, outcome: press.byTouch && outcome.kind === 'decrease' ? NO_PAINT : outcome });
       return;
     }
     if (press?.kind !== 'select') {
@@ -319,13 +324,22 @@ export class PointerSelection {
   }
 
   /**
-   * Mousedown on the fill handle. The drag that follows paints rather than
-   * selects, so the current range is remembered as the one being grown or
-   * shrunk.
+   * Mousedown on the fill handle, or a finger on a fill handle. The drag that
+   * follows paints rather than selects, so the current range is remembered
+   * as the one being grown or shrunk - by touch, only grown.
    */
-  fillStarted(): void {
+  fillStarted(byTouch = false): void {
     const { c1, c2, r1, r2 } = this.store.selection.activeRange;
-    this.store.changePress({ kind: 'fill', from: { c1, c2, r1, r2 }, outcome: { kind: 'none' } });
+    this.store.changePress({ kind: 'fill', from: { c1, c2, r1, r2 }, outcome: NO_PAINT, byTouch });
+  }
+
+  /**
+   * A finger on the corner handle of the selection. The drag that follows
+   * stretches the selection from its active cell, as a drag with Shift held
+   * does, and the release reports it.
+   */
+  stretchStarted(): void {
+    this.store.changePress({ kind: 'select', crossed: false });
   }
 
   /**

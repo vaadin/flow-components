@@ -24,6 +24,7 @@ import {
   type FormulaWriting,
   IDLE,
   type InteractionState,
+  type TouchUse,
   withFormula,
   withWriting,
   type Writing,
@@ -245,6 +246,13 @@ export class SheetStore {
   /** Shift held growing the selection, or let go; see {@link InteractionState.extending}. */
   extendSelection(extending: boolean): void {
     this.interact({ ...this.ongoing, extending });
+  }
+
+  /** The sheet used by touch, or not; see {@link TouchUse}. */
+  useTouch(touch: TouchUse): void {
+    if (this.ongoing.touch !== touch) {
+      this.interact({ ...this.ongoing, touch });
+    }
   }
 
   /** What the server named the selection; null leaves the address field naming the cell. */

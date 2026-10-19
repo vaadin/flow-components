@@ -182,9 +182,23 @@ export function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult 
   // With several ranges selected there is no outline and no fill handle -
   // the active cell carries the selected-cell-highlight
   // instead. The overlay stays, for the coordinates it carries.
+  //
+  // Used by touch, the corner handle is drawn for a finger; once "Fill" is
+  // chosen, a fill handle at the middle of each side the piece holds takes
+  // its place. Neither carries a part of its own: naming one would add to
+  // the documented styling API, which is a product decision.
+  const coherent = isCoherentSelection(selection);
+  const touch = opts.state.touch ?? 'off';
+  const classes =
+    'sheet-selection' +
+    (coherent ? '' : ' multi-range') +
+    (touch === 'off' ? '' : ' touch') +
+    (touch === 'fill' ? ' fill' : '');
+  const square = (name: string, real: boolean) =>
+    touch === 'fill' && coherent && real ? html`<div class="fill-touch-square ${name}"></div>` : nothing;
   return html`
     <div
-      class=${!isCoherentSelection(selection) ? 'sheet-selection multi-range' : 'sheet-selection'}
+      class=${classes}
       data-col=${selection.activeCell.col}
       data-row=${selection.activeCell.row}
       style=${pieceBox(piece)}
@@ -193,9 +207,13 @@ export function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult 
         's-bottom',
         piece.hasBottom
       )}
-      ${piece.hasRight && piece.hasBottom
+      ${piece.hasRight && piece.hasBottom && touch !== 'fill'
         ? html`<div class="selection-corner" part="selection-corner"></div>`
         : nothing}
+      ${square('top', piece.hasTop)}${square('left', piece.hasLeft)}${square('right', piece.hasRight)}${square(
+        'bottom',
+        piece.hasBottom
+      )}
     </div>
   `;
 }

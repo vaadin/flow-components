@@ -8,7 +8,13 @@
  * license.
  */
 import { css } from 'lit';
-import { borderColor, cellBackground, textColor } from './lit/elements/ThemeProperties.js';
+import {
+  borderColor,
+  cellBackground,
+  contextmenuBg,
+  contextmenuBorder,
+  textColor
+} from './lit/elements/ThemeProperties.js';
 
 /**
  * The stylesheet of the {@code <vaadin-spreadsheet>} element.
@@ -135,6 +141,30 @@ export const spreadsheetStyles = css`
     pointer-events: none;
   }
 
+  /* The command a selection made by touch offers, "Fill", on a card like the
+     context menu's. In the top layer, placed in viewport coordinates; the
+     inset, margin and border undo the browser's popover defaults. */
+  .touch-actions {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    border-radius: 4px;
+    background: ${contextmenuBg};
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px ${contextmenuBorder};
+  }
+
+  .touch-actions button {
+    min-height: 36px;
+    padding: 0 16px;
+    border: 0;
+    background: transparent;
+    color: #474747;
+    font: inherit;
+    font-size: 14px;
+  }
+
   /* SpreadsheetTheme.LUMO: the Lumo value of
      every documented property the application leaves unset. Lumo's
      tokens come from the application's Lumo theme. */
@@ -183,6 +213,12 @@ export const spreadsheetStyles = css`
 
   :host([theme~='lumo']) .resize-line {
     background: var(--lumo-primary-color);
+  }
+
+  :host([theme~='lumo']) .touch-actions button {
+    color: var(--lumo-body-text-color);
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-m);
   }
 
   :host([theme~='lumo']) .resize-tooltip,

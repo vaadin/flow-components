@@ -252,6 +252,13 @@ export interface CellGridRenderState {
    */
   paintRect?: CellRect | null;
 
+  /**
+   * Whether the sheet is used by touch: `select` draws the selection's
+   * corner handle for a finger, and `fill` a fill handle on each side in its
+   * place; `off`, or left out, draws it for a mouse.
+   */
+  touch?: 'off' | 'select' | 'fill';
+
   /** Comment text by cell key, for every cell that carries one. */
   commentText?: Readonly<Record<string, string>>;
 
@@ -432,6 +439,7 @@ export function emptyCellGridRenderState(): CellGridRenderState {
     overlays: [],
     popupButtons: [],
     paintRect: null,
+    touch: 'off',
     commentText: {},
     commentAuthors: {},
     visibleCommentKeys: [],
