@@ -152,8 +152,8 @@ class NamedRangeUtils implements Serializable {
             spreadsheet.setActiveSheetIndex(sheetIndex);
             // The address field reads an address of the sheet shown, without
             // the sheet's name: a single cell with it is no address at all.
-            spreadsheet.initialSheetSelection = range
-                    .substring(range.lastIndexOf('!') + 1);
+            spreadsheet.pendingSelection()
+                    .select(range.substring(range.lastIndexOf('!') + 1));
         }
     }
 }

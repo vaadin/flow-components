@@ -569,13 +569,9 @@ public class Spreadsheet extends Component
 
     protected String initialSheetSelection = null;
 
-    /**
-     * Whether {@link #initialSheetSelection} is the selection the sheet was
-     * left with, which it is shown with again without moving the view: the
-     * client puts the sheet back where it was scrolled. A selection that a
-     * hyperlink, a named range or an undo leads to is brought into view.
-     */
-    boolean initialSheetSelectionKeepsView;
+    /** The selection the sheet shown next is shown with. */
+    private final PendingSelection pendingSelection = new PendingSelection(
+            this);
 
     final CellCommentLoader cellCommentLoader = new CellCommentLoader(this);
 
@@ -1079,16 +1075,7 @@ public class Spreadsheet extends Component
             loadCells(getFirstRow(), getFirstColumn(), getLastRow(),
                     getLastColumn());
         }
-        if (initialSheetSelection != null) {
-            if (initialSheetSelectionKeepsView) {
-                selectionManager.selectKeepingView(initialSheetSelection);
-            } else {
-                selectionManager.onSheetAddressChanged(initialSheetSelection,
-                        true);
-            }
-            initialSheetSelection = null;
-            initialSheetSelectionKeepsView = false;
-        } else if (reloadCellDataOnNextScroll) {
+        if (!pendingSelection.make() && reloadCellDataOnNextScroll) {
             selectionManager.reloadCurrentSelection();
         }
         reloadCellDataOnNextScroll = false;
@@ -2629,6 +2616,11 @@ public class Spreadsheet extends Component
     }
 
     /** What each sheet of the workbook shown was left with. */
+    /** The selection the sheet shown next is shown with. */
+    PendingSelection pendingSelection() {
+        return pendingSelection;
+    }
+
     SheetState sheetState() {
         return workbookScope.sheetState;
     }

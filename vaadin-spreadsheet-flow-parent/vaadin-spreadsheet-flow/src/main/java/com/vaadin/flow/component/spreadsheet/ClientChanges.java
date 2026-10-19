@@ -147,29 +147,13 @@ final class ClientChanges implements Serializable {
     }
 
     /**
-     * Has the client reload the sheet, which forgets its cells, and seeds the
-     * selection it shows when not already set: the active sheet's remembered
-     * selection, or A1. A seeded selection leaves the view where it is, unless
-     * cells were selected after the reload; one that was already set, by a
-     * hyperlink, a named range or an undo, is brought into view.
+     * Has the client reload the sheet, which forgets its cells and its
+     * selection: the sheet is shown with the selection pending, or else the one
+     * it was left with.
      */
     private void reload() {
         reload.set(++reloads);
         spreadsheet.forgetClientCells();
-        if (spreadsheet.initialSheetSelection == null) {
-            String selectedCellsOnSheet = spreadsheet.sheetState()
-                    .getSelectedCellsOnSheet(spreadsheet.getActiveSheet());
-            spreadsheet.initialSheetSelection = selectedCellsOnSheet == null
-                    ? "A1"
-                    : selectedCellsOnSheet;
-            // The reload cleared the selection. Unless something has selected
-            // cells since, this is the selection the sheet was left with, and
-            // it leaves the view where the client puts the sheet back.
-            spreadsheet.initialSheetSelectionKeepsView = spreadsheet
-                    .getCellSelectionManager()
-                    .getSelectedCellReference() == null;
-        } else {
-            spreadsheet.initialSheetSelectionKeepsView = false;
-        }
+        spreadsheet.pendingSelection().sheetShown();
     }
 }

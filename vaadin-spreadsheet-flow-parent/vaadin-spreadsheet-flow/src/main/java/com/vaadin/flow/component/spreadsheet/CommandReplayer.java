@@ -33,11 +33,10 @@ import com.vaadin.flow.component.spreadsheet.command.ValueChangeCommand;
  *
  * <p>
  * Same-package access is used for the two operations that the
- * {@code Spreadsheet} class does not expose publicly: the
- * {@code initialSheetSelection} protected field and the {@code fireEvent}
- * protected method. The replayer lives in the same package as
- * {@code Spreadsheet} and is otherwise package-private; no public surface is
- * added to {@code Spreadsheet} for this collaboration.
+ * {@code Spreadsheet} class does not expose publicly: the selection a sheet is
+ * shown with, and the {@code fireEvent} protected method. The replayer lives in
+ * the same package as {@code Spreadsheet} and is otherwise package-private; no
+ * public surface is added to {@code Spreadsheet} for this collaboration.
  */
 final class CommandReplayer implements Serializable {
 
@@ -49,16 +48,15 @@ final class CommandReplayer implements Serializable {
 
     /**
      * Switches the active sheet to the one recorded in the command if it
-     * differs from the currently active sheet, and seeds
-     * {@code Spreadsheet.initialSheetSelection} so the selection restores on
-     * the next render.
+     * differs from the currently active sheet, and has the sheet shown with the
+     * command's selection once the client has it.
      */
     void makeSureCorrectSheetActive(Command command) {
         if (spreadsheet.getActiveSheetIndex() != command
                 .getActiveSheetIndex()) {
             spreadsheet.setActiveSheetIndex(command.getActiveSheetIndex());
-            spreadsheet.initialSheetSelection = computeInitialSelection(
-                    command);
+            spreadsheet.pendingSelection()
+                    .select(computeInitialSelection(command));
         }
     }
 

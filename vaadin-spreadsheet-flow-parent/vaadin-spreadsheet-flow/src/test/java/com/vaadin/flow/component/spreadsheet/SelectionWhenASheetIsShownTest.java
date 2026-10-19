@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Name;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -192,6 +194,48 @@ class SelectionWhenASheetIsShownTest {
                 "{\"value\": \"Elsewhere\"}");
 
         assertEquals(List.of(new Sent("setSelectedCellAndRange", 4, 90, true)),
+                roundTrip());
+    }
+
+    @Test
+    void aLinkToACellOfAnotherSheet_selectsTheCell_broughtIntoView() {
+        Hyperlink link = spreadsheet.getWorkbook().getCreationHelper()
+                .createHyperlink(HyperlinkType.DOCUMENT);
+        link.setAddress("Second!C70");
+        spreadsheet.createCell(0, 0, "to C70").setHyperlink(link);
+
+        spreadsheet.onLinkCellClick(1, 1);
+
+        assertEquals("Second", spreadsheet.getActiveSheet().getSheetName());
+        assertEquals(List.of(new Sent("showSelectedCell", 3, 70, true)),
+                roundTrip());
+    }
+
+    @Test
+    void aClientStartedAgainWithASelectionPending_isSentTheSelectionOnce() {
+        clickTab(1);
+        ui.fakeClientCommunication();
+        // The client starts anew, as after a reload of the page, before it
+        // reports where the sheet is.
+        spreadsheet.onConnectorInit();
+
+        assertEquals(1, roundTrip().size());
+    }
+
+    @Test
+    void aLinkToACellOfTheSheetShown_afterItWasShownAgain_isBroughtIntoView() {
+        clickTab(1);
+        roundTrip();
+        clickTab(0);
+        roundTrip();
+        Hyperlink link = spreadsheet.getWorkbook().getCreationHelper()
+                .createHyperlink(HyperlinkType.DOCUMENT);
+        link.setAddress(spreadsheet.getActiveSheet().getSheetName() + "!E40");
+        spreadsheet.createCell(0, 0, "to E40").setHyperlink(link);
+
+        spreadsheet.onLinkCellClick(1, 1);
+
+        assertEquals(List.of(new Sent("showSelectedCell", 5, 40, true)),
                 roundTrip());
     }
 }

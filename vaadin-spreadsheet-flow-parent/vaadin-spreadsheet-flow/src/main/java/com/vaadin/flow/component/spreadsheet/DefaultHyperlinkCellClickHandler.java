@@ -140,7 +140,7 @@ public class DefaultHyperlinkCellClickHandler
                 int sheetPOIIndex = getSheetIndex(cell, sheetName);
                 spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
             }
-            spreadsheet.initialSheetSelection = addressInSheet;
+            spreadsheet.pendingSelection().select(addressInSheet);
             spreadsheet.getCellSelectionManager()
                     .onSheetAddressChanged(addressInSheet, true);
         } else {
