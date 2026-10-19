@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -19,9 +18,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.charts.events.DrilldownEvent;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.Lang;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
@@ -39,7 +35,8 @@ class ChartJsTest {
 
         ChartOptions.get(ui.getUI()).setLang(lang);
 
-        List<JsCall> calls = getChartJsCalls(ui.getUI().getElement());
+        List<JsCall> calls = ui.dumpJsCalls(ui.getUI().getElement(),
+                ChartJs.class);
         Assertions.assertEquals(1, calls.size());
         JsCall call = calls.get(0);
         Assertions.assertEquals("setHighchartsOptions", call.methodName());
@@ -62,7 +59,7 @@ class ChartJsTest {
         ComponentUtil.fireEvent(chart, new DrilldownEvent(chart, true, null,
                 null, null, null, 2, null, 1));
 
-        List<JsCall> calls = getChartJsCalls(chart.getElement());
+        List<JsCall> calls = ui.dumpJsCalls(chart.getElement(), ChartJs.class);
         Assertions.assertEquals(1, calls.size());
         JsCall call = calls.get(0);
         Assertions.assertEquals("addSeriesAsDrilldown", call.methodName());
@@ -71,14 +68,5 @@ class ChartJsTest {
         ObjectNode drilldownSeries = (ObjectNode) call.arguments().get(2);
         Assertions.assertEquals("Drilldown",
                 drilldownSeries.get("name").asString());
-    }
-
-    private List<JsCall> getChartJsCalls(Element owner) {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(pending -> pending.getOwner() == owner.getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(JavaScriptInvocation::getJsCall).filter(Objects::nonNull)
-                .filter(call -> call.definitionType() == ChartJs.class)
-                .toList();
     }
 }

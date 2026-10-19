@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.shared.internal;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,8 +30,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.component.shared.DisableOnClickMode;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController.DisableOnClickJs;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -469,11 +469,8 @@ class DisableOnClickControllerTest {
     }
 
     private List<Object> dumpClientSideDisabledValues() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("this.disabled = $0"))
-                .map(invocation -> invocation.getParameters().get(0)).toList();
+        return ui.dumpJsCalls(component.getElement(), DisableOnClickJs.class)
+                .stream().map(call -> call.arguments().get(0)).toList();
     }
 
     @Tag("test-parent")
