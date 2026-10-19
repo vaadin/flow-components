@@ -176,6 +176,23 @@ describe('HostedComponents', () => {
     expect(hosted.isEditor(null)).to.be.false;
   });
 
+  it('counts what is inside a custom editor as the editor, in its shadow root too', () => {
+    const field = document.createElement('div');
+    const input = document.createElement('input');
+    field.append(input);
+    const shadowInput = document.createElement('input');
+    field.attachShadow({ mode: 'open' }).append(shadowInput);
+    elements['3'] = field;
+    component('2', 1, 1);
+    editor('3', 2, 1);
+    hosted.place(drawn(), assignments);
+
+    expect(hosted.isEditor(input)).to.be.true;
+    expect(hosted.isEditor(shadowInput)).to.be.true;
+    expect(hosted.isEditor(elements['2'])).to.be.false;
+    expect(hosted.isEditor(host)).to.be.false;
+  });
+
   it('finds the cell whose custom editor an event came out of', () => {
     editor('3', 2, 7);
     hosted.place(drawn(), assignments);
