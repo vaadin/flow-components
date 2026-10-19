@@ -122,9 +122,9 @@ final class CellMarkUpdater implements Serializable {
         // further away would be out of date, and sending them all sent 8 MB
         // for a sheet of 100,000 cells. They are sent once they are shown.
         spreadsheet.clientCells.replace();
-        spreadsheet.updateRowAndColumnRangeCellData(spreadsheet.getFirstRow(),
-                spreadsheet.getFirstColumn(), spreadsheet.getLastRow(),
-                spreadsheet.getLastColumn());
+        spreadsheet.updateRowAndColumnRangeCellData(
+                spreadsheet.loadedFirstRow(), spreadsheet.loadedFirstColumn(),
+                spreadsheet.loadedLastRow(), spreadsheet.loadedLastColumn());
         // The selected cell too, wherever it is: the formula bar shows it.
         CellReference selected = spreadsheet.getSelectedCellReference();
         Cell selectedCell = selected == null ? null

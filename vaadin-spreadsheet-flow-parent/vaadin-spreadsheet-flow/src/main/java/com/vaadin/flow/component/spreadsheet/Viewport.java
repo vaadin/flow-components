@@ -38,6 +38,10 @@ final class Viewport implements Serializable {
     private int lastRow = -1;
     private int firstColumn = -1;
     private int lastColumn = -1;
+    private int firstDrawnRow = -1;
+    private int lastDrawnRow = -1;
+    private int firstDrawnColumn = -1;
+    private int lastDrawnColumn = -1;
 
     Viewport(SheetView sheet) {
         this.sheet = sheet;
@@ -66,6 +70,42 @@ final class Viewport implements Serializable {
     /** The last column shown, or -1 before the client reports where it is. */
     int getLastColumn() {
         return lastColumn;
+    }
+
+    /**
+     * Takes the cells the client draws, its drawing buffer included, 1-based as
+     * it numbers them and limited to the sheet: the range the getters of the
+     * rows and columns shown give, as GWT gave the range it drew. The range
+     * reported to load is wider, by the margin the client loads ahead.
+     */
+    void drawn(int firstRow, int firstColumn, int lastRow, int lastColumn) {
+        int lastRowOfSheet = Math.max(1, sheet.rows()) - 1;
+        int lastColumnOfSheet = Math.max(1, sheet.columns()) - 1;
+        firstDrawnRow = Math.clamp(firstRow - 1, 0, lastRowOfSheet);
+        lastDrawnRow = Math.clamp(lastRow - 1, firstDrawnRow, lastRowOfSheet);
+        firstDrawnColumn = Math.clamp(firstColumn - 1, 0, lastColumnOfSheet);
+        lastDrawnColumn = Math.clamp(lastColumn - 1, firstDrawnColumn,
+                lastColumnOfSheet);
+    }
+
+    /** The first row drawn, or reported to load until the client says. */
+    int getFirstDrawnRow() {
+        return firstDrawnRow != -1 ? firstDrawnRow : firstRow;
+    }
+
+    /** The last row drawn, or reported to load until the client says. */
+    int getLastDrawnRow() {
+        return firstDrawnRow != -1 ? lastDrawnRow : lastRow;
+    }
+
+    /** The first column drawn, or reported to load until the client says. */
+    int getFirstDrawnColumn() {
+        return firstDrawnRow != -1 ? firstDrawnColumn : firstColumn;
+    }
+
+    /** The last column drawn, or reported to load until the client says. */
+    int getLastDrawnColumn() {
+        return firstDrawnRow != -1 ? lastDrawnColumn : lastColumn;
     }
 
     /**

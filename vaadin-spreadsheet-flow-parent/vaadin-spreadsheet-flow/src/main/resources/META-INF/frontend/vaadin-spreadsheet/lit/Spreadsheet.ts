@@ -295,7 +295,7 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
       noMargin: this.model.hasComponentFactory
     }),
     serverBusy: () => flowRequestInFlight(this.host),
-    load: (range) => this.sync.load(range)
+    load: (range, drawn) => this.sync.load(range, drawn)
   });
 
   /** Keeps the server in step with what the sheet shows; see {@link ServerSync}. */

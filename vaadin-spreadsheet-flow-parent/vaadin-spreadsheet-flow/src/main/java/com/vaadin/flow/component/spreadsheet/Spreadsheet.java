@@ -909,7 +909,7 @@ public class Spreadsheet extends Component
      * @return Index of first visible column, 1-based
      */
     public int getFirstColumn() {
-        return oneBased(sheetScope.viewport.getFirstColumn());
+        return oneBased(sheetScope.viewport.getFirstDrawnColumn());
     }
 
     /**
@@ -918,7 +918,7 @@ public class Spreadsheet extends Component
      * @return Index of last visible column, 1-based
      */
     public int getLastColumn() {
-        return oneBased(sheetScope.viewport.getLastColumn());
+        return oneBased(sheetScope.viewport.getLastDrawnColumn());
     }
 
     /**
@@ -927,7 +927,7 @@ public class Spreadsheet extends Component
      * @return Index of first visible row, 1-based
      */
     public int getFirstRow() {
-        return oneBased(sheetScope.viewport.getFirstRow());
+        return oneBased(sheetScope.viewport.getFirstDrawnRow());
     }
 
     /**
@@ -936,7 +936,35 @@ public class Spreadsheet extends Component
      * @return Index of last visible row, 1-based
      */
     public int getLastRow() {
+        return oneBased(sheetScope.viewport.getLastDrawnRow());
+    }
+
+    /*
+     * The rows and columns the client has asked to load, 1-based: the cells it
+     * draws and a margin ahead. What the server loads and sends again; the
+     * getters above give the cells drawn.
+     */
+
+    int loadedFirstRow() {
+        return oneBased(sheetScope.viewport.getFirstRow());
+    }
+
+    int loadedLastRow() {
         return oneBased(sheetScope.viewport.getLastRow());
+    }
+
+    int loadedFirstColumn() {
+        return oneBased(sheetScope.viewport.getFirstColumn());
+    }
+
+    int loadedLastColumn() {
+        return oneBased(sheetScope.viewport.getLastColumn());
+    }
+
+    /** The cells the client draws, 1-based; see {@link Viewport#drawn}. */
+    void sheetDrawn(int firstRow, int firstColumn, int lastRow,
+            int lastColumn) {
+        sheetScope.viewport.drawn(firstRow, firstColumn, lastRow, lastColumn);
     }
 
     /** A row or column 1-based, as the getters give them; -1 stays -1. */
@@ -1057,8 +1085,8 @@ public class Spreadsheet extends Component
         // send nothing, the client having them: skipping saves the work.
         if (viewport.report(firstRow, firstColumn, lastRow, lastColumn)
                 || reloadCellDataOnNextScroll) {
-            loadCells(getFirstRow(), getFirstColumn(), getLastRow(),
-                    getLastColumn());
+            loadCells(loadedFirstRow(), loadedFirstColumn(), loadedLastRow(),
+                    loadedLastColumn());
         }
         if (!pendingSelection.make() && reloadCellDataOnNextScroll) {
             selectionManager.reloadCurrentSelection();
@@ -2480,8 +2508,8 @@ public class Spreadsheet extends Component
      */
     void reloadVisibleCellContents(boolean recreateEditors) {
         sheetScope.components.load(recreateEditors);
-        updateRowAndColumnRangeCellData(getFirstRow(), getFirstColumn(),
-                getLastRow(), getLastColumn());
+        updateRowAndColumnRangeCellData(loadedFirstRow(), loadedFirstColumn(),
+                loadedLastRow(), loadedLastColumn());
     }
 
     /*

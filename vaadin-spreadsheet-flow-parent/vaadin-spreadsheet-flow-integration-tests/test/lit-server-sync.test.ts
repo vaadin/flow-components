@@ -126,10 +126,22 @@ describe('ServerSync', () => {
   });
 
   it('asks the server for a range', () => {
-    sync.load({ r1: 3, c1: 2, r2: 40, c2: 12 });
+    sync.load({ r1: 3, c1: 2, r2: 40, c2: 12 }, { r1: 5, c1: 2, r2: 20, c2: 8 });
 
     expect(sent).to.eql([
-      { type: 'onSheetScroll', data: { firstRow: 3, firstColumn: 2, lastRow: 40, lastColumn: 12 } }
+      {
+        type: 'onSheetScroll',
+        data: {
+          firstRow: 3,
+          firstColumn: 2,
+          lastRow: 40,
+          lastColumn: 12,
+          drawnFirstRow: 5,
+          drawnFirstColumn: 2,
+          drawnLastRow: 20,
+          drawnLastColumn: 8
+        }
+      }
     ]);
   });
 

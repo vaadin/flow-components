@@ -936,8 +936,9 @@ public class CellValueManager implements Serializable {
      * data correctly.
      */
     protected void updateVisibleCellValues() {
-        loadCellData(spreadsheet.getFirstRow(), spreadsheet.getFirstColumn(),
-                spreadsheet.getLastRow(), spreadsheet.getLastColumn());
+        loadCellData(spreadsheet.loadedFirstRow(),
+                spreadsheet.loadedFirstColumn(), spreadsheet.loadedLastRow(),
+                spreadsheet.loadedLastColumn());
     }
 
     /**

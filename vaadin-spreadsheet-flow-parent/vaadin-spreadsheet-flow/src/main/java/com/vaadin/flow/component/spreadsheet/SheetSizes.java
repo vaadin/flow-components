@@ -486,8 +486,8 @@ final class SheetSizes implements Serializable {
     private void cellsResized(int column) {
         spreadsheet.getCellValueManager().clearCacheForColumn(column + 1);
         spreadsheet.getCellValueManager().loadCellData(
-                spreadsheet.getFirstRow(), column + 1, spreadsheet.getLastRow(),
-                column + 1);
+                spreadsheet.loadedFirstRow(), column + 1,
+                spreadsheet.loadedLastRow(), column + 1);
         spreadsheet.getCellValueManager().resendTextRunningInto(column);
     }
 

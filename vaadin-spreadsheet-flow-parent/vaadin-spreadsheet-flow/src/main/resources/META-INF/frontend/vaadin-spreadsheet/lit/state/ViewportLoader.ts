@@ -38,8 +38,8 @@ export interface ViewportLoaderHost {
   };
   /** Whether the server is answering a request right now. */
   serverBusy(): boolean;
-  /** Ask the server for the cells of a range. */
-  load(range: LoadRange): void;
+  /** Ask the server for the cells of a range, telling it the cells drawn. */
+  load(range: LoadRange, drawn: LoadRange): void;
 }
 
 /** Clock, timers and frames, replaceable in tests. */
@@ -261,7 +261,7 @@ export class ViewportLoader implements ReactiveController {
     this.marginToFollow = false;
     this.unreportedScroll = false;
     this.inFlightSince = this.clock.now();
-    this.host.load(range);
+    this.host.load(range, drawn);
     // Flow sends the request as the event is dispatched, or as soon as the
     // answer it waits for is in.
     this.sawBusy = this.host.serverBusy();

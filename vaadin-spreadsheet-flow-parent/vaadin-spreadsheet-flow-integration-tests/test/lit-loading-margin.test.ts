@@ -11,7 +11,18 @@ import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 import '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/vaadin-spreadsheet.js';
 
-type LoadEvent = { firstRow: number; firstColumn: number; lastRow: number; lastColumn: number };
+type Range = { firstRow: number; firstColumn: number; lastRow: number; lastColumn: number };
+type LoadEvent = Range & { drawnFirstRow: number; drawnFirstColumn: number; drawnLastRow: number; drawnLastColumn: number };
+
+/** The range a request asks to load. */
+function loadedBy(l: LoadEvent): Range {
+  return { firstRow: l.firstRow, firstColumn: l.firstColumn, lastRow: l.lastRow, lastColumn: l.lastColumn };
+}
+
+/** The cells drawn a request tells the server of. */
+function drawnBy(l: LoadEvent): Range {
+  return { firstRow: l.drawnFirstRow, firstColumn: l.drawnFirstColumn, lastRow: l.drawnLastRow, lastColumn: l.drawnLastColumn };
+}
 
 /**
  * The cells the sheet asks the server for, against the ones it draws: more
@@ -52,7 +63,7 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
 
-  function drawn(): LoadEvent {
+  function drawn(): Range {
     const v = sheet.getCellGrid().renderState.viewport;
     return { firstRow: v.firstRowIndex, firstColumn: v.firstColumnIndex, lastRow: v.lastRowIndex, lastColumn: v.lastColumnIndex };
   }
@@ -68,8 +79,10 @@ describe('Spreadsheet — the cells it asks the server for', () => {
     // the margin came along.
     await open();
 
-    expect(loads[0]).to.eql(drawn());
+    expect(loadedBy(loads[0])).to.eql(drawn());
     expect(loads[1].lastRow).to.be.greaterThan(drawn().lastRow);
+    // Each tells the server what is drawn, the margin's too.
+    expect(loads.map(drawnBy)).to.eql([drawn(), drawn()]);
   });
 
   /** Scroll the sheet down to the pixel, as the user does. */
@@ -121,7 +134,7 @@ describe('Spreadsheet — the cells it asks the server for', () => {
 
     await open();
 
-    expect(loads).to.deep.equal([drawn()]);
+    expect(loads.map(loadedBy)).to.deep.equal([drawn()]);
   });
 
   it('asks for rows past them again once the factory is gone', async () => {

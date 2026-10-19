@@ -106,16 +106,22 @@ export class ServerSync {
 
   /**
    * Asks the server to load the cells, comments, overlays and components of
-   * a range. Its `onSheetScroll` loads what it has not sent before.
+   * a range. Its `onSheetScroll` loads what it has not sent before. The cells
+   * drawn go along: the server's getters of the rows and columns shown give
+   * them, as GWT gave the range it drew, not the range loaded ahead.
    */
-  load(range: LoadRange): void {
+  load(range: LoadRange, drawn: LoadRange): void {
     this.sheet.send({
       type: 'onSheetScroll',
       data: {
         firstRow: range.r1,
         firstColumn: range.c1,
         lastRow: range.r2,
-        lastColumn: range.c2
+        lastColumn: range.c2,
+        drawnFirstRow: drawn.r1,
+        drawnFirstColumn: drawn.c1,
+        drawnLastRow: drawn.r2,
+        drawnLastColumn: drawn.c2
       }
     });
   }

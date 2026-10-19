@@ -166,9 +166,21 @@ public class SpreadsheetEventListener
             handler.columnHeaderContextMenuOpen(toInt(pars, "columnIndex"));
         case "actionOnColumnHeader" ->
             handler.actionOnColumnHeader(toStr(pars, "actionKey"));
-        case "onSheetScroll" -> handler.onSheetScroll(toInt(pars, "firstRow"),
-                toInt(pars, "firstColumn"), toInt(pars, "lastRow"),
-                toInt(pars, "lastColumn"));
+        case "onSheetScroll" -> {
+            // The cells drawn come with the range to load, which is wider by
+            // the margin loaded ahead. They are taken first, so that what the
+            // load runs into sees them.
+            int drawnFirstRow = toInt(pars, "drawnFirstRow");
+            if (drawnFirstRow > 0) {
+                handler.sheetDrawn(drawnFirstRow,
+                        toInt(pars, "drawnFirstColumn"),
+                        toInt(pars, "drawnLastRow"),
+                        toInt(pars, "drawnLastColumn"));
+            }
+            handler.onSheetScroll(toInt(pars, "firstRow"),
+                    toInt(pars, "firstColumn"), toInt(pars, "lastRow"),
+                    toInt(pars, "lastColumn"));
+        }
         case "sheetAddressChanged" ->
             handler.sheetAddressChanged(toStr(pars, "value"));
         case "cellSelected" ->

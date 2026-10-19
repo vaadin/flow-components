@@ -60,6 +60,23 @@ class ViewportTest {
                         + ", \"lastColumn\": " + lastColumn + "}");
     }
 
+    /**
+     * The client asks to load one range, 1-based, and draws a narrower one,
+     * which comes along.
+     */
+    private void clientLoadsAndDraws(int firstRow, int firstColumn, int lastRow,
+            int lastColumn, int drawnFirstRow, int drawnFirstColumn,
+            int drawnLastRow, int drawnLastColumn) {
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "{\"firstRow\": " + firstRow + ", \"firstColumn\": "
+                        + firstColumn + ", \"lastRow\": " + lastRow
+                        + ", \"lastColumn\": " + lastColumn
+                        + ", \"drawnFirstRow\": " + drawnFirstRow
+                        + ", \"drawnFirstColumn\": " + drawnFirstColumn
+                        + ", \"drawnLastRow\": " + drawnLastRow
+                        + ", \"drawnLastColumn\": " + drawnLastColumn + "}");
+    }
+
     /** First row, first column, last row and last column shown, 1-based. */
     private List<Integer> shown() {
         return List.of(spreadsheet.getFirstRow(), spreadsheet.getFirstColumn(),
@@ -129,6 +146,97 @@ class ViewportTest {
 
         clientShows(1, 1, 20, 10);
         assertEquals(List.of(1, 1, 20, 10), shown());
+    }
+
+    @Test
+    void theRangeShown_isTheCellsDrawn_notTheMarginLoadedAhead() {
+        // As GWT gave the range it drew: rows 1-32 for 21 rows in view.
+        clientLoadsAndDraws(1, 1, 80, 12, 1, 1, 32, 10);
+
+        assertEquals(List.of(1, 1, 32, 10), shown());
+
+        clientLoadsAndDraws(60, 1, 185, 12, 80, 2, 122, 9);
+
+        assertEquals(List.of(80, 2, 122, 9), shown());
+    }
+
+    @Test
+    void theCellsLoadedAhead_areSentWithThoseDrawn() {
+        fillA1ToO40();
+
+        clientLoadsAndDraws(1, 1, 40, 15, 1, 1, 12, 5);
+
+        assertEquals(cells(1, 1, 40, 15), cellsSent());
+    }
+
+    @Test
+    void aSheetShownAnew_forgetsTheCellsDrawn() {
+        clientLoadsAndDraws(1, 1, 80, 12, 1, 1, 32, 10);
+
+        spreadsheet.setActiveSheetIndex(1);
+
+        assertEquals(List.of(-1, -1, -1, -1), shown());
+    }
+
+    @Test
+    void visibleCellContentsReloaded_areThoseLoaded_notOnlyThoseDrawn() {
+        clientLoadsAndDraws(1, 1, 40, 15, 1, 1, 12, 5);
+        cellsSent();
+        // Made through POI alone, past the cells drawn: never sent yet
+        spreadsheet.getActiveSheet().createRow(29).createCell(13)
+                .setCellValue("made");
+
+        spreadsheet.reloadVisibleCellContents();
+
+        assertEquals(Set.of("N30"), cellsSent());
+    }
+
+    /**
+     * A long number in every cell of A1:O40, which a column of the default
+     * width shortens once the client has said how wide a digit is: loaded from
+     * 1 to 40 and 1 to 15, A1:E12 drawn.
+     */
+    private void longNumbersShortened() {
+        for (int row = 0; row < 40; row++) {
+            for (int column = 0; column < 15; column++) {
+                spreadsheet.createCell(row, column,
+                        row * 100 + column + 0.123456789012);
+            }
+        }
+        clientLoadsAndDraws(1, 1, 40, 15, 1, 1, 12, 5);
+        TestHelper.fireClientEvent(spreadsheet, "setCellStyleWidthRatios",
+                "{\"styleIndexes\": [0], \"ratios\": [7.0]}");
+        cellsSent();
+    }
+
+    @Test
+    void aColumnResized_sendsItsCellsLoaded_notOnlyThoseDrawn() {
+        longNumbersShortened();
+
+        spreadsheet.setColumnWidth(13, 400);
+
+        assertEquals(cells(1, 14, 40, 14), cellsSent());
+    }
+
+    @Test
+    void newWidthRatios_rebuildTheCellsLoaded_notOnlyThoseDrawn() {
+        longNumbersShortened();
+
+        TestHelper.fireClientEvent(spreadsheet, "setCellStyleWidthRatios",
+                "{\"styleIndexes\": [0], \"ratios\": [2.5]}");
+
+        assertEquals(cells(1, 1, 40, 15), cellsSent());
+    }
+
+    @Test
+    void allCellValuesRefreshed_areTheCellsLoaded_notOnlyThoseDrawn() {
+        fillA1ToO40();
+        clientLoadsAndDraws(1, 1, 40, 15, 1, 1, 12, 5);
+        cellsSent();
+
+        spreadsheet.refreshAllCellValues();
+
+        assertEquals(cells(1, 1, 40, 15), cellsSent());
     }
 
     @Test

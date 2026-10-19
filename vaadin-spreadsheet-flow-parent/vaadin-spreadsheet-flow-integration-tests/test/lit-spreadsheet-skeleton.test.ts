@@ -1874,10 +1874,13 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         // After scrolling 100px right (col width 50), firstColumnIndex
         // should be at least 3.
         expect(received!.data.firstColumn).to.be.greaterThanOrEqual(3);
-        // The dispatched data has firstRow/firstColumn/lastRow/lastColumn.
+        // The range to load, and the cells drawn, which the server's getters
+        // of the range shown give.
         expect(received!.data).to.have.all.keys(
-            'firstRow', 'firstColumn', 'lastRow', 'lastColumn'
+            'firstRow', 'firstColumn', 'lastRow', 'lastColumn',
+            'drawnFirstRow', 'drawnFirstColumn', 'drawnLastRow', 'drawnLastColumn'
         );
+        expect(received!.data.drawnFirstColumn).to.be.greaterThanOrEqual(3);
         cleanup();
     });
 

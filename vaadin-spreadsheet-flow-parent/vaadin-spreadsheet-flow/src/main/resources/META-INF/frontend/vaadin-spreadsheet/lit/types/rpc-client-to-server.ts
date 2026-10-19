@@ -89,10 +89,16 @@ export type SpreadsheetEventType =
 // ====================================================================
 
 export interface OnSheetScrollData {
+  /** The range to load, 1-based: the cells drawn and a margin ahead. */
   firstRow: number;
   firstColumn: number;
   lastRow: number;
   lastColumn: number;
+  /** The cells drawn, the drawing buffer included: what the server's getters of the range shown give. */
+  drawnFirstRow: number;
+  drawnFirstColumn: number;
+  drawnLastRow: number;
+  drawnLastColumn: number;
 }
 
 export interface CellSelectedData {
@@ -328,7 +334,16 @@ export const SERVER_EVENT_PAYLOAD_KEYS: {
   >;
 } = {
   onConnectorInit: [],
-  onSheetScroll: ['firstRow', 'firstColumn', 'lastRow', 'lastColumn'],
+  onSheetScroll: [
+    'firstRow',
+    'firstColumn',
+    'lastRow',
+    'lastColumn',
+    'drawnFirstRow',
+    'drawnFirstColumn',
+    'drawnLastRow',
+    'drawnLastColumn'
+  ],
   sheetAddressChanged: ['value'],
   cellSelected: ['row', 'column', 'oldSelectionRangeDiscarded'],
   cellRangeSelected: ['row1', 'col1', 'row2', 'col2'],

@@ -65,6 +65,12 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
         spreadsheet.onSheetScroll(firstRow, firstColumn, lastRow, lastColumn);
     }
 
+    /** The cells the client draws, which come with each range to load. */
+    void sheetDrawn(int firstRow, int firstColumn, int lastRow,
+            int lastColumn) {
+        spreadsheet.sheetDrawn(firstRow, firstColumn, lastRow, lastColumn);
+    }
+
     @Override
     public void cellSelected(int row, int column,
             boolean discardOldRangeSelection) {
