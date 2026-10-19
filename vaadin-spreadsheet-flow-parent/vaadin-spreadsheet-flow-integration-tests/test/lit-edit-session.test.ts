@@ -103,6 +103,25 @@ describe('EditSession', () => {
       expect(opened.kind === 'editing' && opened.autoPercent).to.be.true;
     });
 
+    it('brings the cell into view first, as the editor is drawn over it, and a locked cell not', () => {
+      // Scrolled out of view, a cell is not drawn, and neither was the
+      // editor: the keys typed after the first went nowhere.
+      edit.openTyping(2, 2, 'a');
+      edit.editorCancelled();
+      edit.openExisting(3, 4);
+      expect(scrolled).to.eql([
+        { col: 2, row: 2 },
+        { col: 3, row: 4 }
+      ]);
+
+      edit.editorCancelled();
+      store.write('sheetProtected', true);
+      cell(5, 5, { locked: true });
+      edit.openTyping(5, 5, 'a');
+      edit.openExisting(5, 5);
+      expect(scrolled).to.have.length(2);
+    });
+
     it('opens nothing on a locked cell, and tells the server it was tried', () => {
       store.write('sheetProtected', true);
       cell(2, 2, { locked: true });

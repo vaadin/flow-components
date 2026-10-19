@@ -67,12 +67,17 @@ export class EditSession {
    * Opens the cell editor on what a cell holds, as a double-click, F2 or
    * Enter does; whether it opened. A locked cell does not open, and the
    * server is told it was tried.
+   * <p>
+   * The cell is brought into view first, as GWT did: the editor is drawn
+   * over it, and a cell scrolled out of view is not drawn, so the keys
+   * typed into an editor opened there were lost.
    */
   openExisting(col: number, row: number): boolean {
     if (this.store.isCellLockedForEdit(col, row)) {
       this.report.protectedWrite();
       return false;
     }
+    this.host.scrollIntoView({ col, row });
     // Seeded with what the cell IS, not what it shows — the formula
     // behind a computed cell, and the unformatted value otherwise, which
     // is what carries a text cell's leading apostrophe.
@@ -91,13 +96,15 @@ export class EditSession {
    * Opens the cell editor on a key typed over a cell, with that character
    * as its first text - Excel's way: typing directly starts replacing the
    * cell's content; whether it opened. A locked cell does not open, and the
-   * server is told it was tried.
+   * server is told it was tried. The cell is brought into view first - see
+   * {@link openExisting}.
    */
   openTyping(col: number, row: number, key: string): boolean {
     if (this.store.isCellLockedForEdit(col, row)) {
       this.report.protectedWrite();
       return false;
     }
+    this.host.scrollIntoView({ col, row });
     // Typing over the cell: an arrow commits and moves on.
     // A digit typed into a percentage cell means that many percent, so
     // the editor opens on "5%" rather than "5" - see PercentageEntry.
