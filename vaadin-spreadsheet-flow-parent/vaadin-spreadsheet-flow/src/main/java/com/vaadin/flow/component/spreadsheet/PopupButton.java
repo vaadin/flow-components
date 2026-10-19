@@ -100,6 +100,7 @@ public class PopupButton extends Component {
         getState().col = cellReference.getCol() + 1;
         getState().row = cellReference.getRow() + 1;
         getState().sheet = cellReference.getSheetName();
+        updateState();
     }
 
     /**
@@ -161,6 +162,7 @@ public class PopupButton extends Component {
      */
     public void setHeaderHidden(boolean headerHidden) {
         getState().headerHidden = headerHidden;
+        updateState();
     }
 
     /**
@@ -172,6 +174,7 @@ public class PopupButton extends Component {
      */
     public void setPopupWidth(String width) {
         getState().popupWidth = width;
+        updateState();
     }
 
     /**
@@ -192,6 +195,7 @@ public class PopupButton extends Component {
      */
     public void setPopupHeight(String height) {
         getState().popupHeight = height;
+        updateState();
     }
 
     /**
