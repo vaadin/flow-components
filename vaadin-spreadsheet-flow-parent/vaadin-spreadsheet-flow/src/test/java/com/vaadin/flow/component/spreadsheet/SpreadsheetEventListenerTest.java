@@ -15,12 +15,27 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 
 import tools.jackson.databind.json.JsonMapper;
@@ -49,6 +64,156 @@ public class SpreadsheetEventListenerTest {
         handler = mock(SpreadsheetHandlerImpl.class);
         listener = new SpreadsheetEventListener(handler);
         source = new Spreadsheet();
+    }
+
+    /** An event, with distinct values, and the one handler call it makes. */
+    private static Arguments event(String type, String json,
+            Consumer<SpreadsheetHandlerImpl> call) {
+        return Arguments.of(type, json, call);
+    }
+
+    private static Stream<Arguments> everyEvent() {
+        return Stream.of(
+                event("onConnectorInit", "{}", h -> h.onConnectorInit()),
+                event("contextMenuOpenOnSelection", "{\"row\":3,\"column\":4}",
+                        h -> h.contextMenuOpenOnSelection(3, 4)),
+                event("actionOnCurrentSelection", "{\"actionKey\":\"a1\"}",
+                        h -> h.actionOnCurrentSelection("a1")),
+                event("rowHeaderContextMenuOpen", "{\"rowIndex\":5}",
+                        h -> h.rowHeaderContextMenuOpen(5)),
+                event("actionOnRowHeader", "{\"actionKey\":\"r1\"}",
+                        h -> h.actionOnRowHeader("r1")),
+                event("columnHeaderContextMenuOpen", "{\"columnIndex\":6}",
+                        h -> h.columnHeaderContextMenuOpen(6)),
+                event("actionOnColumnHeader", "{\"actionKey\":\"c1\"}",
+                        h -> h.actionOnColumnHeader("c1")),
+                event("onSheetScroll",
+                        "{\"firstRow\":1,\"firstColumn\":2,\"lastRow\":30,\"lastColumn\":12}",
+                        h -> h.onSheetScroll(1, 2, 30, 12)),
+                event("sheetAddressChanged", "{\"value\":\"B12\"}",
+                        h -> h.sheetAddressChanged("B12")),
+                event("cellSelected",
+                        "{\"row\":7,\"column\":3,\"oldSelectionRangeDiscarded\":true}",
+                        h -> h.cellSelected(7, 3, true)),
+                event("cellRangeSelected",
+                        "{\"row1\":2,\"col1\":3,\"row2\":8,\"col2\":9}",
+                        h -> h.cellRangeSelected(2, 3, 8, 9)),
+                event("cellAddedToSelectionAndSelected",
+                        "{\"row\":4,\"column\":5}",
+                        h -> h.cellAddedToSelectionAndSelected(4, 5)),
+                event("cellsAddedToRangeSelection",
+                        "{\"row1\":1,\"col1\":2,\"row2\":3,\"col2\":4}",
+                        h -> h.cellsAddedToRangeSelection(1, 2, 3, 4)),
+                event("rowSelected", "{\"row\":6,\"firstColumnIndex\":2}",
+                        h -> h.rowSelected(6, 2)),
+                event("rowAddedToRangeSelection",
+                        "{\"row\":7,\"firstColumnIndex\":3}",
+                        h -> h.rowAddedToRangeSelection(7, 3)),
+                event("columnSelected", "{\"column\":4,\"firstRowIndex\":1}",
+                        h -> h.columnSelected(4, 1)),
+                event("columnAddedToSelection",
+                        "{\"column\":5,\"firstRowIndex\":2}",
+                        h -> h.columnAddedToSelection(2, 5)),
+                event("selectionIncreasePainted",
+                        "{\"r1\":1,\"c1\":2,\"r2\":3,\"c2\":4}",
+                        h -> h.selectionIncreasePainted(1, 2, 3, 4)),
+                event("selectionDecreasePainted", "{\"row\":5,\"col\":6}",
+                        h -> h.selectionDecreasePainted(5, 6)),
+                event("cellValueEdited",
+                        "{\"row\":2,\"col\":3,\"value\":\"=A1+1\"}",
+                        h -> h.cellValueEdited(2, 3, "=A1+1")),
+                event("sheetSelected",
+                        "{\"sheetIndex\":2,\"scrollLeft\":40,\"scrollTop\":80}",
+                        h -> h.sheetSelected(2, 40, 80)),
+                event("sheetRenamed",
+                        "{\"sheetIndex\":1,\"newName\":\"Budget\"}",
+                        h -> h.sheetRenamed(1, "Budget")),
+                event("sheetCreated", "{\"scrollLeft\":10,\"scrollTop\":20}",
+                        h -> h.sheetCreated(10, 20)),
+                event("cellRangePainted",
+                        "{\"selectedCellRow\":1,\"selectedCellColumn\":2,\"row1\":3,\"col1\":4,\"row2\":5,\"col2\":6}",
+                        h -> h.cellRangePainted(1, 2, 3, 4, 5, 6)),
+                event("deleteSelectedCells", "{}",
+                        h -> h.deleteSelectedCells()),
+                event("linkCellClicked", "{\"row\":5,\"column\":1}",
+                        h -> h.linkCellClicked(5, 1)),
+                event("rowsResized",
+                        "{\"rowIndexes\":[3,5],\"newHeights\":[20.5,30]}",
+                        h -> h.rowsResized(
+                                new HashMap<>(Map.of(3, 20.5f, 5, 30f)), 3, 1,
+                                5, 1)),
+                event("columnResized",
+                        "{\"colIndexes\":[2],\"newWidths\":[80]}",
+                        h -> h.columnResized(new HashMap<>(Map.of(2, 80)), 1, 2,
+                                1, 2)),
+                event("onRowAutofit", "{\"rowIndex\":8}",
+                        h -> h.onRowAutofit(8)),
+                event("onColumnAutofit", "{\"columnIndex\":9}",
+                        h -> h.onColumnAutofit(9)),
+                event("onUndo", "{}", h -> h.onUndo()),
+                event("onRedo", "{}", h -> h.onRedo()),
+                event("setCellStyleWidthRatios",
+                        "{\"styleIndexes\":[0],\"ratios\":[7.5]}",
+                        h -> h.setCellStyleWidthRatios(
+                                new HashMap<>(Map.of(0, 7.5f)))),
+                event("protectedCellWriteAttempted", "{}",
+                        h -> h.protectedCellWriteAttempted()),
+                event("onPaste", "{\"text\":\"a\\tb\"}",
+                        h -> h.onPaste("a\tb")),
+                event("clearSelectedCellsOnCut", "{}",
+                        h -> h.clearSelectedCellsOnCut()),
+                event("updateCellComment",
+                        "{\"text\":\"note\",\"col\":3,\"row\":4}",
+                        h -> h.updateCellComment("note", 3, 4)),
+                event("groupingCollapsed",
+                        "{\"cols\":true,\"colIndex\":3,\"collapsed\":false}",
+                        h -> h.setGroupingCollapsed(true, 3, false)),
+                event("levelHeaderClicked", "{\"cols\":false,\"level\":2}",
+                        h -> h.levelHeaderClicked(false, 2)),
+                event("popupButtonClick", "{\"row\":4,\"column\":2}",
+                        h -> h.onPopupButtonClick(4, 2)),
+                event("popupClose", "{\"row\":5,\"column\":3}",
+                        h -> h.onPopupClose(5, 3)),
+                event("contextMenuClosed", "{}", h -> h.contextMenuClosed()));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("everyEvent")
+    public void eachEvent_reachesItsOwnHandlerMethod_withItsValues(String type,
+            String json, Consumer<SpreadsheetHandlerImpl> call) {
+        fire(type, json);
+
+        call.accept(verify(handler));
+        verifyNoMoreInteractions(handler);
+    }
+
+    @Test
+    public void everyEventTheClientSends_isInTheTableAbove()
+            throws IOException {
+        String contract;
+        try (InputStream in = getClass().getClassLoader().getResourceAsStream(
+                "META-INF/frontend/vaadin-spreadsheet/lit/types/rpc-client-to-server.ts")) {
+            contract = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        int start = contract.indexOf("export type SpreadsheetEventType =");
+        Set<String> sent = new TreeSet<>();
+        Matcher m = Pattern.compile("\\|\\s*'([a-zA-Z]+)'").matcher(
+                contract.substring(start, contract.indexOf(';', start)));
+        while (m.find()) {
+            sent.add(m.group(1));
+        }
+
+        Set<String> tabled = everyEvent().map(event -> (String) event.get()[0])
+                .collect(Collectors.toCollection(TreeSet::new));
+        assertEquals(sent, tabled);
+    }
+
+    @Test
+    public void anEventOfNoKnownType_reachesNoHandlerMethod() {
+        fire("cellSelectd", "{\"row\":7,\"column\":3}");
+        fire(null, "{}");
+
+        verifyNoInteractions(handler);
     }
 
     private void fire(String type, String json) {
