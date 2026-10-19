@@ -52,14 +52,12 @@ final class PopupButtonRegistry implements Serializable {
         PopupButton existing = buttonsByCell.remove(cell);
         if (existing != null) {
             detach(existing);
-            spreadsheet.markAsDirty();
         }
         if (button != null) {
             button.setCellReference(cell);
             buttonsByCell.put(cell, button);
             if (isShown(button)) {
                 attach(button);
-                spreadsheet.markAsDirty();
             }
         }
     }

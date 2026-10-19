@@ -2685,10 +2685,6 @@ public class Spreadsheet extends Component
         sheetScope = new SheetScope(this);
     }
 
-    void markAsDirty() {
-        getElement().setProperty("dirty", System.currentTimeMillis());
-    }
-
     /**
      * This method should be always called when the selected cell has changed so
      * proper actions can be triggered for possible custom component inside the

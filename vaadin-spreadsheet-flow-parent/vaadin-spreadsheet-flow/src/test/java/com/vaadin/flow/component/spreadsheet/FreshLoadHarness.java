@@ -102,8 +102,9 @@ final class FreshLoadHarness {
     private static final Set<String> IGNORED_PROPERTIES = Set.of(
             // the UI's, and a random one
             "appId", "id",
-            // the time of the last reload, repaint and workbook change
-            "reload", "dirty", "workbookChangeToggle",
+            // the reloads counted and the workbook change, which differ by
+            // what happened before
+            "reload", "workbookChangeToggle",
             // the keys of the resources, which differ between spreadsheets as
             // the overlay ids do: compared by how many the client finds
             "resources");

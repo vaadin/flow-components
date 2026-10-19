@@ -175,6 +175,27 @@ public class ClientApiContractTest {
                 "element properties the server writes that never reach the connector");
     }
 
+    @Test
+    public void everyWrapperProperty_isOneTheServerWrites() throws IOException {
+        Set<String> declared = matches(PROPERTY_DECLARED,
+                readResource(WRAPPER_RESOURCE));
+        assertTrue(declared.contains("rows") && declared.size() > 10,
+                "failed to parse the wrapper's properties: " + declared);
+        Set<String> written = serverProperties();
+
+        // A property nobody writes misleads a reader of the wire contract,
+        // and one the client skips is sent for nothing. The theme comes as
+        // the attribute Flow sets, which Lit reads into the property.
+        List<String> unwritten = new ArrayList<>();
+        for (String property : new TreeSet<>(declared)) {
+            if (!property.equals("theme") && !written.contains(property)) {
+                unwritten.add(property);
+            }
+        }
+        assertEquals(List.of(), unwritten,
+                "element properties the wrapper declares that the server never writes");
+    }
+
     private Set<String> serverCalls() throws IOException {
         Set<String> calls = scanJava(CALL_JS);
         // The RPC interface's javadoc shows the call shape with a

@@ -212,12 +212,10 @@ describe('Spreadsheet model of the server properties', () => {
   it('has every property the element declares, but those the sheet takes apart', () => {
     const apart = [
       // Not passed on to the sheet.
-      'dirty',
       'theme',
       // Nothing to hold.
       'reload',
       'workbookChangeToggle',
-      'popupbuttons',
       // Held by the parts that draw them.
       'sheetIndex',
       'sheetNames',

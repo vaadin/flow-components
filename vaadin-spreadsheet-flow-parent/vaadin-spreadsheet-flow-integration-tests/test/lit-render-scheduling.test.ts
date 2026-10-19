@@ -9,7 +9,10 @@
 
 import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
-import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
+import type {
+    CellData,
+    PopupButtonState,
+} from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
  * Server-pushed updates must repaint.
@@ -33,6 +36,19 @@ function cell(col: number, row: number, value: string): CellData {
         locked: false,
         needsMeasure: false,
         isPercentage: false,
+    };
+}
+
+/** A filter button as the server sends it, on the given cell. */
+function popupButton(col: number, row: number): PopupButtonState {
+    return {
+        col,
+        row,
+        active: false,
+        headerHidden: false,
+        popupWidth: null,
+        popupHeight: null,
+        sheet: 'Sheet1',
     };
 }
 
@@ -167,6 +183,18 @@ describe('Spreadsheet render scheduling — server pushes repaint', () => {
         expect(ctx.paints()).to.equal(1);
     });
 
+    it('addPopupButton and removePopupButton repaint', async () => {
+        // The server sends nothing else with them: the call itself is what
+        // has the button drawn, or taken away.
+        ctx.sheet.addPopupButton(popupButton(2, 2));
+        await afterFrame();
+        expect(ctx.paints()).to.equal(1);
+
+        ctx.sheet.removePopupButton(popupButton(2, 2));
+        await afterFrame();
+        expect(ctx.paints()).to.equal(2);
+    });
+
     it('setReload(false) does not repaint', async () => {
         ctx.sheet.setReload(false);
         await afterFrame();
@@ -200,6 +228,15 @@ describe('Spreadsheet render scheduling — when the repaint lands', () => {
             ctx.sheet.getCellGrid().shadowRoot!.querySelector('.cell.col1.row1')!
                 .textContent!.trim()
         ).to.equal('fresh');
+    });
+
+    it('draws a button the server adds within the same turn', async () => {
+        ctx.sheet.addPopupButton(popupButton(2, 2));
+
+        await Promise.resolve();
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getCellGrid().popupButton(2, 2)).to.not.equal(null);
     });
 
     it('folds every push in one response into a single repaint', async () => {

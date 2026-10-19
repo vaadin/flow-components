@@ -224,8 +224,6 @@ final class SheetLoader implements Serializable {
         loadParts(sheet);
         spreadsheet.reloadActiveSheetStyles();
         spreadsheet.loadPopupButtons();
-
-        spreadsheet.markAsDirty();
     }
 
     /**

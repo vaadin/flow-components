@@ -46,11 +46,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   static get properties() {
     return {
-      dirty: { type: Number },
-
       resources: { type: String },
-
-      popupbuttons: { type: String },
 
       rowBufferSize: { type: Number },
 
@@ -195,9 +191,9 @@ export class VaadinSpreadsheet extends LitElement {
     changedProperties.forEach((oldValue, name) => {
       const newVal = this[name];
       // Most server properties map to a `set<Name>` method on the connector.
-      // A few need special handling, and dirty and theme are not forwarded
-      // at all (still reported via notifyStateChanges below).
-      if (name === 'dirty' || name === 'theme') {
+      // A few need special handling, and the theme is not forwarded at all
+      // (still reported via notifyStateChanges below).
+      if (name === 'theme') {
         // No-op.
       } else if (name === 'reload') {
         this.$connector.setReload(true);

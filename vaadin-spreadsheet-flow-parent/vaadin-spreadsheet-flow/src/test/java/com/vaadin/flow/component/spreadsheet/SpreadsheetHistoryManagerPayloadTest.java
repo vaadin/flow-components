@@ -40,10 +40,9 @@ import com.vaadin.tests.MockUIExtension;
  * <strong>byte-identical</strong> after normalization.
  *
  * <p>
- * Normalization: timestamp-valued properties ({@code reload}, {@code dirty},
- * and any other {@code System.currentTimeMillis()}-derived field) are replaced
- * with {@code <T>}. The map of properties is sorted by name. JS-invocation
- * parameters are rendered in their declaration order.
+ * Normalization: the {@code reload} count, which depends on what came before,
+ * is replaced with {@code <T>}. The map of properties is sorted by name.
+ * JS-invocation parameters are rendered in their declaration order.
  */
 class SpreadsheetHistoryManagerPayloadTest {
 
@@ -158,8 +157,8 @@ class SpreadsheetHistoryManagerPayloadTest {
     }
 
     private String normalize(String name, String value) {
-        // Timestamps written by Spreadsheet via System.currentTimeMillis().
-        if ("reload".equals(name) || "dirty".equals(name)) {
+        // The reloads counted so far, which depend on what came before.
+        if ("reload".equals(name)) {
             return "<T>";
         }
         return value;
