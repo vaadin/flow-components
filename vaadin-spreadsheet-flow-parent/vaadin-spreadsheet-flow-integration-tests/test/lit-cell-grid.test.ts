@@ -4438,12 +4438,13 @@ describe('SpreadsheetCellGrid — the cells as the sheet scrolls', () => {
         cleanup(el);
     });
 
-    it('lays the cells out as though the row group were not there', async () => {
+    it('lays the cells out as though the row group were not there, a box of no size where the grid starts', async () => {
         const el = await attachWithState(rowsFrom(1));
 
         const group = cell(el, 1, 3)!.parentElement!;
-        expect(getComputedStyle(group).display).to.equal('contents');
         const grid = el.getBoundingClientRect();
+        const at = group.getBoundingClientRect();
+        expect([at.left - grid.left, at.top - grid.top, at.width, at.height]).to.eql([0, 0, 0, 0]);
         const box = cell(el, 2, 3)!.getBoundingClientRect();
         expect(Math.round(box.left - grid.left)).to.equal(50);
         expect(Math.round(box.top - grid.top)).to.equal(40);

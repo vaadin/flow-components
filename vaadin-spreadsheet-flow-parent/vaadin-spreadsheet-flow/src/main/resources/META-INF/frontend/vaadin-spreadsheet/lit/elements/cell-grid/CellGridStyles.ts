@@ -45,9 +45,14 @@ export const cellGridStyles = css`
   }
 
   /* A row of cells, keyed as one: scrolling a row out of view takes
-   its cells with it in one removal. No box of its own. */
+   its cells with it in one removal. A box of no size where its pane
+   starts, which its cells are placed in as they would be in the pane:
+   a row that comes into view is laid out on its own. With no box of its
+   own, every cell of the pane was laid out again with it. */
   .cell-row {
-    display: contents;
+    position: absolute;
+    left: 0;
+    top: 0;
   }
 
   .cell {

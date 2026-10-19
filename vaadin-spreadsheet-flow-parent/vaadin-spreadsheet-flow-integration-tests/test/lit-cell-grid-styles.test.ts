@@ -86,6 +86,21 @@ describe('CellGridStyles', () => {
     }
   });
 
+  it('place a row of cells as a box of no size where the grid starts, its cells where their column and row are', () => {
+    const cell = inGrid('.cell.col2.row3');
+    const row = cell.parentElement!;
+    const origin = grid.getBoundingClientRect();
+    const at = (el: Element) => {
+      const box = el.getBoundingClientRect();
+      return [box.left - origin.left, box.top - origin.top, box.width, box.height];
+    };
+
+    expect(row.classList.contains('cell-row')).to.be.true;
+    expect(cell.offsetParent, 'the row, laid out on its own').to.equal(row);
+    expect(at(row)).to.eql([0, 0, 0, 0]);
+    expect(at(cell)).to.eql([60, 40, 60, 20]);
+  });
+
   it('put the selection in one layer over the cells that the pointer goes through', () => {
     const style = getComputedStyle(inGrid('.sheet-selection'));
 
