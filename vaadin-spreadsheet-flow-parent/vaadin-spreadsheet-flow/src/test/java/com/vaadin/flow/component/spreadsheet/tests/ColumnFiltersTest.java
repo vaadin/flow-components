@@ -131,6 +131,28 @@ class ColumnFiltersTest {
         assertPopupActiveStateSent(false);
     }
 
+    @Test
+    void markActive_unregisteredPopup_doesNotSendSharedState() {
+        ui.add(spreadsheet);
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        Assertions.assertTrue(popupButton.getParent().isEmpty());
+
+        for (boolean active : new boolean[] { true, false }) {
+            popupButton.markActive(active);
+            
+            Assertions.assertEquals(active, popupButton.isActive());
+            Assertions.assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .noneMatch(invocation -> "setPopupButtonState".equals(
+                    JsFunctionCallUtil.getFunctionName(invocation)
+                )));
+        }
+    }
+
     private void assertPopupActiveStateSent(boolean active) {
         var pendingInvocations = ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation).toList();
