@@ -236,11 +236,13 @@ public class DetachReattachIT extends AbstractComponentIT {
     @Test
     public void selectItem_moveToContainer_rowsAndSelectionKept() {
         open();
-        $(GridElement.class).first().select(0);
+        // Moving keeps the client element, so the reference does not go stale
+        GridElement grid = $(GridElement.class).first();
+        grid.select(0);
 
         $("button").id("move-to-container-button").click();
-        GridElement grid = $("div").id("container").$(GridElement.class)
-                .first();
+        Assert.assertTrue(
+                $("div").id("container").$(GridElement.class).exists());
         Assert.assertEquals("A", grid.getCell(0, 0).getText());
         Assert.assertTrue(grid.getRow(0).isSelected());
 
@@ -248,7 +250,6 @@ public class DetachReattachIT extends AbstractComponentIT {
         $("button").id("attach-button").click();
         Assert.assertFalse(
                 $("div").id("container").$(GridElement.class).exists());
-        grid = $(GridElement.class).first();
         Assert.assertEquals("A", grid.getCell(0, 0).getText());
         Assert.assertFalse(grid.getRow(0).isSelected());
         Assert.assertTrue(grid.getRow(1).isSelected());
