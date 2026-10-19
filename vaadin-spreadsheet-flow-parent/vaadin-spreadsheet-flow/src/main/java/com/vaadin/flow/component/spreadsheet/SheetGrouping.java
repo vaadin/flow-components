@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
+import com.vaadin.flow.dom.Element;
 
 /**
  * Row and column grouping (outline) metadata mirrored to the client.
@@ -36,70 +37,65 @@ import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
  */
 final class SheetGrouping implements Serializable {
 
-    private final Spreadsheet spreadsheet;
+    private final ClientProperty<List<GroupingData>> colGroupingData;
+    private final ClientProperty<List<GroupingData>> rowGroupingData;
+    private final ClientProperty<Integer> colGroupingMax;
+    private final ClientProperty<Integer> rowGroupingMax;
+    private final ClientProperty<Boolean> colGroupingInversed;
+    private final ClientProperty<Boolean> rowGroupingInversed;
 
-    private List<GroupingData> colGroupingData;
-    private int colGroupingMax;
-    private int rowGroupingMax;
-    private boolean colGroupingInversed;
-    private boolean rowGroupingInversed;
-
-    SheetGrouping(Spreadsheet spreadsheet) {
-        this.spreadsheet = spreadsheet;
+    SheetGrouping(Element element) {
+        colGroupingData = ClientProperty.json(element, "colGroupingData");
+        rowGroupingData = ClientProperty.json(element, "rowGroupingData");
+        colGroupingMax = ClientProperty.integer(element, "colGroupingMax", 0);
+        rowGroupingMax = ClientProperty.integer(element, "rowGroupingMax", 0);
+        colGroupingInversed = ClientProperty.bool(element,
+                "colGroupingInversed", false);
+        rowGroupingInversed = ClientProperty.bool(element,
+                "rowGroupingInversed", false);
     }
 
     List<GroupingData> getColGroupingData() {
-        return colGroupingData;
+        return colGroupingData.get();
     }
 
     void setColGroupingData(List<GroupingData> colGroupingData) {
-        this.colGroupingData = colGroupingData;
-        spreadsheet.getElement().setPropertyJson("colGroupingData",
-                Serializer.toJson(colGroupingData));
+        this.colGroupingData.set(colGroupingData);
     }
 
     void setRowGroupingData(List<GroupingData> rowGroupingData) {
-        // Unlike the column data, row-grouping data goes straight to the
-        // element without server-side caching.
-        spreadsheet.getElement().setPropertyJson("rowGroupingData",
-                Serializer.toJson(rowGroupingData));
+        this.rowGroupingData.set(rowGroupingData);
     }
 
     int getColGroupingMax() {
-        return colGroupingMax;
+        return colGroupingMax.get();
     }
 
     void setColGroupingMax(int colGroupingMax) {
-        this.colGroupingMax = colGroupingMax;
-        spreadsheet.getElement().setProperty("colGroupingMax", colGroupingMax);
+        this.colGroupingMax.set(colGroupingMax);
     }
 
     int getRowGroupingMax() {
-        return rowGroupingMax;
+        return rowGroupingMax.get();
     }
 
     void setRowGroupingMax(int rowGroupingMax) {
-        this.rowGroupingMax = rowGroupingMax;
-        spreadsheet.getElement().setProperty("rowGroupingMax", rowGroupingMax);
+        this.rowGroupingMax.set(rowGroupingMax);
     }
 
     boolean isColGroupingInversed() {
-        return colGroupingInversed;
+        return colGroupingInversed.get();
     }
 
     void setColGroupingInversed(boolean colGroupingInversed) {
-        this.colGroupingInversed = colGroupingInversed;
-        spreadsheet.getElement().setProperty("colGroupingInversed",
-                colGroupingInversed);
+        this.colGroupingInversed.set(colGroupingInversed);
     }
 
     boolean isRowGroupingInversed() {
-        return rowGroupingInversed;
+        return rowGroupingInversed.get();
     }
 
     void setRowGroupingInversed(boolean rowGroupingInversed) {
-        this.rowGroupingInversed = rowGroupingInversed;
-        spreadsheet.getElement().setProperty("rowGroupingInversed",
-                rowGroupingInversed);
+        this.rowGroupingInversed.set(rowGroupingInversed);
     }
 }

@@ -14,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -45,8 +44,6 @@ import tools.jackson.databind.node.BaseJsonNode;
 class SheetGroupingTest {
 
     @Mock
-    private Spreadsheet spreadsheet;
-    @Mock
     private Element element;
 
     private SheetGrouping grouping;
@@ -54,8 +51,7 @@ class SheetGroupingTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        grouping = new SheetGrouping(spreadsheet);
-        lenient().when(spreadsheet.getElement()).thenReturn(element);
+        grouping = new SheetGrouping(element);
     }
 
     @Test

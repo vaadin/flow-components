@@ -45,9 +45,13 @@ final class ClientChanges implements Serializable {
      */
     private int reloads;
 
+    /** The reloads asked of the client, as it has them. */
+    private final ClientProperty<Integer> reload;
+
     ClientChanges(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
         flush = new BeforeClientResponseAction(spreadsheet, this::flush);
+        reload = ClientProperty.integer(spreadsheet.getElement(), "reload", 0);
     }
 
     /** Rows or columns were added past the last ones of the sheet. */
@@ -110,7 +114,7 @@ final class ClientChanges implements Serializable {
      * hyperlink, a named range or an undo, is brought into view.
      */
     private void reload() {
-        spreadsheet.getElement().setProperty("reload", ++reloads);
+        reload.set(++reloads);
         spreadsheet.forgetClientCells();
         if (spreadsheet.initialSheetSelection == null) {
             String selectedCellsOnSheet = spreadsheet.sheetState()

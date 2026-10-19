@@ -71,12 +71,12 @@ public class ClientApiContractTest {
             .compile("\\.setProperty\\(\\s*\"([^\"]+)\"");
 
     /**
-     * An element property the component mirrors: {@code MirroredProperty
-     * .integer(this, "rows", 0)} and the like, and {@code new
-     * MirroredNullableMap<>(this, "name")}.
+     * An element property the server declares for the client: {@code
+     * ClientProperty.integer(element, "rows", 0)} and the like, and {@code new
+     * ClientMapProperty<>(element, "name")}, whatever the element is called.
      */
     private static final Pattern MIRRORED_PROPERTY = Pattern.compile(
-            "(?:MirroredProperty\\s*\\.\\s*\\w+|new\\s+MirroredNullableMap<[^>]*>)\\s*\\(\\s*this\\s*,\\s*\"([^\"]+)\"");
+            "(?:ClientProperty\\s*\\.\\s*\\w+|new\\s+ClientMapProperty<[^>]*>)\\s*\\(\\s*[\\w.]+(?:\\(\\))?\\s*,\\s*\"([^\"]+)\"");
 
     /** A method on the wrapper element — two-space indent, class body level. */
     private static final Pattern WRAPPER_METHOD = Pattern
@@ -182,12 +182,11 @@ public class ClientApiContractTest {
     }
 
     private Set<String> serverProperties() throws IOException {
-        Set<String> properties = scanJava(SET_PROPERTY);
-        assertTrue(properties.size() > 10, "failed to find setProperty uses");
-        Set<String> mirrored = scanJava(MIRRORED_PROPERTY);
-        assertTrue(mirrored.contains("rows"),
-                "failed to find the mirrored properties: " + mirrored);
-        properties.addAll(mirrored);
+        // Declared as a ClientProperty each, but for the few set directly.
+        Set<String> properties = scanJava(MIRRORED_PROPERTY);
+        assertTrue(properties.contains("rows") && properties.size() > 10,
+                "failed to find the declared properties: " + properties);
+        properties.addAll(scanJava(SET_PROPERTY));
         return properties;
     }
 

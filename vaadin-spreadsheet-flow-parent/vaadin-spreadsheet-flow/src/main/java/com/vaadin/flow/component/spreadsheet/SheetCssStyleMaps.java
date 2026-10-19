@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import com.vaadin.flow.dom.Element;
+
 /**
  * Per-sheet CSS-style index maps mirrored to the client.
  *
@@ -40,78 +42,75 @@ import java.util.Set;
  * subclasses if moved — so it stays on the parent.
  *
  * <p>
- * Every setter mirrors the value to the corresponding element property. Setters
- * that take collections go through {@link Serializer#toJson}.
+ * Every setter gives the element the value at once, collections as JSON.
  */
 final class SheetCssStyleMaps implements Serializable {
 
-    private final Spreadsheet spreadsheet;
+    private final ClientProperty<HashMap<Integer, Integer>> rowIndexToStyleIndex;
+    private final ClientProperty<HashMap<Integer, Integer>> columnIndexToStyleIndex;
+    private final ClientProperty<Set<Integer>> lockedColumnIndexes;
+    private final ClientProperty<Set<Integer>> lockedRowIndexes;
+    private final ClientProperty<ArrayList<String>> shiftedCellBorderStyles;
+    private final ClientProperty<HashMap<Integer, String>> conditionalFormattingStyles;
 
-    private HashMap<Integer, Integer> rowIndexToStyleIndex;
-    private HashMap<Integer, Integer> columnIndexToStyleIndex;
-    private Set<Integer> lockedColumnIndexes;
-    private Set<Integer> lockedRowIndexes;
-    private HashMap<Integer, String> conditionalFormattingStyles;
-
-    SheetCssStyleMaps(Spreadsheet spreadsheet) {
-        this.spreadsheet = spreadsheet;
+    SheetCssStyleMaps(Element element) {
+        rowIndexToStyleIndex = ClientProperty.json(element,
+                "rowIndexToStyleIndex");
+        columnIndexToStyleIndex = ClientProperty.json(element,
+                "columnIndexToStyleIndex");
+        lockedColumnIndexes = ClientProperty.json(element,
+                "lockedColumnIndexes");
+        lockedRowIndexes = ClientProperty.json(element, "lockedRowIndexes");
+        shiftedCellBorderStyles = ClientProperty.json(element,
+                "shiftedCellBorderStyles");
+        conditionalFormattingStyles = ClientProperty.json(element,
+                "conditionalFormattingStyles");
     }
 
     HashMap<Integer, Integer> getRowIndexToStyleIndex() {
-        return rowIndexToStyleIndex;
+        return rowIndexToStyleIndex.get();
     }
 
     void setRowIndexToStyleIndex(
             HashMap<Integer, Integer> rowIndexToStyleIndex) {
-        this.rowIndexToStyleIndex = rowIndexToStyleIndex;
-        spreadsheet.getElement().setPropertyJson("rowIndexToStyleIndex",
-                Serializer.toJson(rowIndexToStyleIndex));
+        this.rowIndexToStyleIndex.set(rowIndexToStyleIndex);
     }
 
     HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
-        return columnIndexToStyleIndex;
+        return columnIndexToStyleIndex.get();
     }
 
     void setColumnIndexToStyleIndex(
             HashMap<Integer, Integer> columnIndexToStyleIndex) {
-        this.columnIndexToStyleIndex = columnIndexToStyleIndex;
-        spreadsheet.getElement().setPropertyJson("columnIndexToStyleIndex",
-                Serializer.toJson(columnIndexToStyleIndex));
+        this.columnIndexToStyleIndex.set(columnIndexToStyleIndex);
     }
 
     Set<Integer> getLockedColumnIndexes() {
-        return lockedColumnIndexes;
+        return lockedColumnIndexes.get();
     }
 
     void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
-        this.lockedColumnIndexes = lockedColumnIndexes;
-        spreadsheet.getElement().setPropertyJson("lockedColumnIndexes",
-                Serializer.toJson(lockedColumnIndexes));
+        this.lockedColumnIndexes.set(lockedColumnIndexes);
     }
 
     Set<Integer> getLockedRowIndexes() {
-        return lockedRowIndexes;
+        return lockedRowIndexes.get();
     }
 
     void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
-        this.lockedRowIndexes = lockedRowIndexes;
-        spreadsheet.getElement().setPropertyJson("lockedRowIndexes",
-                Serializer.toJson(lockedRowIndexes));
+        this.lockedRowIndexes.set(lockedRowIndexes);
     }
 
     void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
-        spreadsheet.getElement().setPropertyJson("shiftedCellBorderStyles",
-                Serializer.toJson(shiftedCellBorderStyles));
+        this.shiftedCellBorderStyles.set(shiftedCellBorderStyles);
     }
 
     HashMap<Integer, String> getConditionalFormattingStyles() {
-        return conditionalFormattingStyles;
+        return conditionalFormattingStyles.get();
     }
 
     void setConditionalFormattingStyles(
             HashMap<Integer, String> conditionalFormattingStyles) {
-        this.conditionalFormattingStyles = conditionalFormattingStyles;
-        spreadsheet.getElement().setPropertyJson("conditionalFormattingStyles",
-                Serializer.toJson(conditionalFormattingStyles));
+        this.conditionalFormattingStyles.set(conditionalFormattingStyles);
     }
 }

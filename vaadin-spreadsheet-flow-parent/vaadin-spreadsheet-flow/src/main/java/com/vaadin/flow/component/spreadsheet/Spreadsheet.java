@@ -167,13 +167,13 @@ public class Spreadsheet extends Component
      */
     private static final int DEFAULT_BUFFER_SIZE = 200;
 
-    private final MirroredProperty<Integer> rows = MirroredProperty
-            .integer(this, "rows", 0);
+    private final ClientProperty<Integer> rows = ClientProperty
+            .integer(getElement(), "rows", 0);
 
-    private final MirroredProperty<Integer> cols = MirroredProperty
-            .integer(this, "cols", 0);
+    private final ClientProperty<Integer> cols = ClientProperty
+            .integer(getElement(), "cols", 0);
 
-    private final SheetGrouping sheetGrouping = new SheetGrouping(this);
+    private final SheetGrouping sheetGrouping = new SheetGrouping(getElement());
 
     private final SheetSizes sheetSizes = new SheetSizes(this);
 
@@ -187,11 +187,11 @@ public class Spreadsheet extends Component
     final ClientCellMirror clientCells = new ClientCellMirror(this);
 
     /** 1-based */
-    private final MirroredProperty<Integer> sheetIndex = MirroredProperty
-            .integer(this, "sheetIndex", 1);
+    private final ClientProperty<Integer> sheetIndex = ClientProperty
+            .integer(getElement(), "sheetIndex", 1);
 
-    private final MirroredProperty<String[]> sheetNames = MirroredProperty
-            .serialized(this, "sheetNames", null);
+    private final ClientProperty<String[]> sheetNames = ClientProperty
+            .json(getElement(), "sheetNames");
 
     /**
      * The CSS of each cell style of the workbook, by POI cell style index, as
@@ -199,17 +199,26 @@ public class Spreadsheet extends Component
      */
     protected HashMap<Integer, String> cellStyleToCSSStyle = null;
 
-    private final SheetCssStyleMaps cssStyleMaps = new SheetCssStyleMaps(this);
+    /** The CSS of the cell styles, as the client has it. */
+    private final ClientProperty<HashMap<Integer, String>> cellStyles = ClientProperty
+            .json(getElement(), "cellStyleToCSSStyle");
 
-    private final FreezePaneState freezePaneState = new FreezePaneState(this);
+    private final SheetCssStyleMaps cssStyleMaps = new SheetCssStyleMaps(
+            getElement());
 
-    private final MirroredProperty<Boolean> sheetProtected = MirroredProperty
-            .bool(this, "sheetProtected", false);
+    private final FreezePaneState freezePaneState = new FreezePaneState(
+            getElement());
 
-    private final MirroredProperty<Boolean> showCustomEditorOnFocus = MirroredProperty
-            .bool(this, "showCustomEditorOnFocus", false);
-    private final MirroredProperty<Boolean> hasComponentFactory = MirroredProperty
-            .bool(this, "hasComponentFactory", false);
+    private final ClientProperty<Boolean> sheetProtected = ClientProperty
+            .bool(getElement(), "sheetProtected", false);
+
+    private final ClientProperty<Boolean> workbookProtected = ClientProperty
+            .bool(getElement(), "workbookProtected", false);
+
+    private final ClientProperty<Boolean> showCustomEditorOnFocus = ClientProperty
+            .bool(getElement(), "showCustomEditorOnFocus", false);
+    private final ClientProperty<Boolean> hasComponentFactory = ClientProperty
+            .bool(getElement(), "hasComponentFactory", false);
 
     /**
      * The editor shown in each cell, by cell key. A cell keeps its editor
@@ -220,35 +229,66 @@ public class Spreadsheet extends Component
      */
     private Map<String, Component> cellKeyToEditor = new HashMap<>();
 
-    private final MirroredNullableMap<String, String> componentIDtoCellKeysMap = new MirroredNullableMap<>(
-            this, "componentIDtoCellKeysMap");
+    /** The node id of the editor of each cell, by cell key. */
+    private final ClientProperty<HashMap<String, String>> cellKeysToEditorIdMap = ClientProperty
+            .json(getElement(), "cellKeysToEditorIdMap");
+
+    private final ClientMapProperty<String, String> componentIDtoCellKeysMap = new ClientMapProperty<>(
+            getElement(), "componentIDtoCellKeysMap");
 
     // Cell CSS key to link tooltip (usually same as address)
-    private final MirroredProperty<HashMap<String, String>> hyperlinksTooltips = MirroredProperty
-            .serialized(this, "hyperlinksTooltips", null);
+    private final ClientProperty<HashMap<String, String>> hyperlinksTooltips = ClientProperty
+            .json(getElement(), "hyperlinksTooltips");
 
-    private final MirroredProperty<HashMap<String, String>> cellComments = MirroredProperty
-            .serialized(this, "cellComments", null);
-    private final MirroredProperty<HashMap<String, String>> cellCommentAuthors = MirroredProperty
-            .serialized(this, "cellCommentAuthors", null);
+    private final ClientProperty<HashMap<String, String>> cellComments = ClientProperty
+            .json(getElement(), "cellComments");
+    private final ClientProperty<HashMap<String, String>> cellCommentAuthors = ClientProperty
+            .json(getElement(), "cellCommentAuthors");
 
-    private final MirroredProperty<ArrayList<String>> visibleCellComments = MirroredProperty
-            .serialized(this, "visibleCellComments", null);
+    private final ClientProperty<ArrayList<String>> visibleCellComments = ClientProperty
+            .json(getElement(), "visibleCellComments");
 
-    private final MirroredProperty<Set<String>> invalidFormulaCells = MirroredProperty
-            .serialized(this, "invalidFormulaCells", null);
+    private final ClientProperty<Set<String>> invalidFormulaCells = ClientProperty
+            .json(getElement(), "invalidFormulaCells");
 
-    private final MirroredProperty<HashMap<String, OverlayInfo>> overlays = MirroredProperty
-            .serialized(this, "overlays", null);
+    private final ClientProperty<HashMap<String, OverlayInfo>> overlays = ClientProperty
+            .json(getElement(), "overlays");
 
-    private final MirroredProperty<ArrayList<MergedRegion>> mergedRegions = MirroredProperty
-            .serialized(this, "mergedRegions", null);
+    private final ClientProperty<ArrayList<MergedRegion>> mergedRegions = ClientProperty
+            .json(getElement(), "mergedRegions");
 
-    private final MirroredProperty<String> infoLabelValue = MirroredProperty
-            .string(this, "infoLabelValue", null);
+    private final ClientProperty<String> infoLabelValue = ClientProperty
+            .string(getElement(), "infoLabelValue", null);
 
-    private final MirroredProperty<Boolean> workbookChangeToggle = MirroredProperty
-            .bool(this, "workbookChangeToggle", false);
+    private final ClientProperty<Boolean> workbookChangeToggle = ClientProperty
+            .bool(getElement(), "workbookChangeToggle", false);
+
+    private final ClientProperty<Boolean> hasActions = ClientProperty
+            .bool(getElement(), "hasActions", false);
+
+    private final ClientProperty<Boolean> displayGridlines = ClientProperty
+            .bool(getElement(), "displayGridlines", true);
+
+    private final ClientProperty<Boolean> displayRowColHeadings = ClientProperty
+            .bool(getElement(), "displayRowColHeadings", true);
+
+    private final ClientProperty<Boolean> lockFormatColumns = ClientProperty
+            .bool(getElement(), "lockFormatColumns", false);
+
+    private final ClientProperty<Boolean> lockFormatRows = ClientProperty
+            .bool(getElement(), "lockFormatRows", false);
+
+    private final ClientProperty<List<String>> namedRanges = ClientProperty
+            .json(getElement(), "namedRanges");
+
+    private final ClientProperty<Integer> rowBufferSize = ClientProperty
+            .integer(getElement(), "rowBufferSize", DEFAULT_BUFFER_SIZE);
+
+    private final ClientProperty<Integer> columnBufferSize = ClientProperty
+            .integer(getElement(), "columnBufferSize", DEFAULT_BUFFER_SIZE);
+
+    private final ClientProperty<String> invalidFormulaErrorMessage = ClientProperty
+            .string(getElement(), "invalidFormulaErrorMessage", null);
 
     private Locale locale;
 
@@ -460,8 +500,7 @@ public class Spreadsheet extends Component
 
     void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
-        getElement().setPropertyJson("cellStyleToCSSStyle",
-                Serializer.toJson(cellStyleToCSSStyle));
+        cellStyles.set(cellStyleToCSSStyle);
     }
 
     void setRowIndexToStyleIndex(
@@ -505,7 +544,7 @@ public class Spreadsheet extends Component
     }
 
     private void setWorkbookProtected(boolean workbookProtected) {
-        getElement().setProperty("workbookProtected", workbookProtected);
+        this.workbookProtected.set(workbookProtected);
     }
 
     /**
@@ -534,8 +573,7 @@ public class Spreadsheet extends Component
                         getComponentNodeId(entry.getValue()));
             }
         }
-        getElement().setPropertyJson("cellKeysToEditorIdMap",
-                Serializer.toJson(editorIds));
+        cellKeysToEditorIdMap.set(editorIds);
     }
 
     /**
@@ -580,7 +618,7 @@ public class Spreadsheet extends Component
     }
 
     private void setHasActions(boolean hasActions) {
-        getElement().setProperty("hasActions", hasActions);
+        this.hasActions.set(hasActions);
     }
 
     void setOverlays(HashMap<String, OverlayInfo> overlays) {
@@ -592,12 +630,11 @@ public class Spreadsheet extends Component
     }
 
     private void setDisplayGridlines(boolean displayGridlines) {
-        getElement().setProperty("displayGridlines", displayGridlines);
+        this.displayGridlines.set(displayGridlines);
     }
 
     private void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        getElement().setProperty("displayRowColHeadings",
-                displayRowColHeadings);
+        this.displayRowColHeadings.set(displayRowColHeadings);
     }
 
     void setVerticalSplitPosition(int verticalSplitPosition) {
@@ -617,16 +654,15 @@ public class Spreadsheet extends Component
     }
 
     void setLockFormatColumns(boolean lockFormatColumns) {
-        getElement().setProperty("lockFormatColumns", lockFormatColumns);
+        this.lockFormatColumns.set(lockFormatColumns);
     }
 
     void setLockFormatRows(boolean lockFormatRows) {
-        getElement().setProperty("lockFormatRows", lockFormatRows);
+        this.lockFormatRows.set(lockFormatRows);
     }
 
     void setNamedRanges(List<String> namedRanges) {
-        getElement().setPropertyJson("namedRanges",
-                Serializer.toJson(namedRanges));
+        this.namedRanges.set(namedRanges);
     }
 
     void onPopupButtonClick(int row, int column) {
@@ -2806,7 +2842,7 @@ public class Spreadsheet extends Component
      * @return The current row buffer size
      */
     public int getRowBufferSize() {
-        return getElement().getProperty("rowBufferSize", DEFAULT_BUFFER_SIZE);
+        return rowBufferSize.get();
     }
 
     /**
@@ -2821,7 +2857,7 @@ public class Spreadsheet extends Component
      *            bottom edges of the visible area.
      */
     public void setRowBufferSize(int rowBufferInPixels) {
-        getElement().setProperty("rowBufferSize", rowBufferInPixels);
+        rowBufferSize.set(rowBufferInPixels);
     }
 
     /**
@@ -2834,8 +2870,7 @@ public class Spreadsheet extends Component
      * @return The current column buffer size
      */
     public int getColBufferSize() {
-        return getElement().getProperty("columnBufferSize",
-                DEFAULT_BUFFER_SIZE);
+        return columnBufferSize.get();
     }
 
     /**
@@ -2851,7 +2886,7 @@ public class Spreadsheet extends Component
      *            right edges of the visible area.
      */
     public void setColBufferSize(int colBufferInPixels) {
-        getElement().setProperty("columnBufferSize", colBufferInPixels);
+        columnBufferSize.set(colBufferInPixels);
     }
 
     /**
@@ -4520,8 +4555,7 @@ public class Spreadsheet extends Component
 
     public void setInvalidFormulaErrorMessage(
             String invalidFormulaErrorMessage) {
-        getElement().setProperty("invalidFormulaErrorMessage",
-                invalidFormulaErrorMessage);
+        this.invalidFormulaErrorMessage.set(invalidFormulaErrorMessage);
     }
 
     /**

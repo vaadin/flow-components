@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -43,8 +42,6 @@ import tools.jackson.databind.node.BaseJsonNode;
 class SheetCssStyleMapsTest {
 
     @Mock
-    private Spreadsheet spreadsheet;
-    @Mock
     private Element element;
 
     private SheetCssStyleMaps maps;
@@ -52,8 +49,7 @@ class SheetCssStyleMapsTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        maps = new SheetCssStyleMaps(spreadsheet);
-        lenient().when(spreadsheet.getElement()).thenReturn(element);
+        maps = new SheetCssStyleMaps(element);
     }
 
     @Test

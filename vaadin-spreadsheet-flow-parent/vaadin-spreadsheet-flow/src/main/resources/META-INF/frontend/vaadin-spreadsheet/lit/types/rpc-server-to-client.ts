@@ -27,8 +27,8 @@ import type {
  *
  * The RPC methods at the top mirror
  * {@link com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc}.
- * The setters below receive the properties, which the server sets
- * directly or through a {@link MirroredProperty};
+ * The setters below receive the properties, which the server declares
+ * as a {@code ClientProperty} each;
  * {@code ClientApiContractTest} checks that each one has a setter.
  */
 export interface SpreadsheetClientApi {
@@ -85,7 +85,7 @@ export interface SpreadsheetClientApi {
 
   // ====================================================================
   // Property mirrors (state lane) — each setter corresponds to one
-  // MirroredProperty<T> on the server side.
+  // ClientProperty<T> on the server side.
   // ====================================================================
 
   setRowBufferSize(pixels: number): void;

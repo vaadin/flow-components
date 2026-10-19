@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,13 +36,10 @@ import tools.jackson.databind.node.BaseJsonNode;
  * Four mirrored fields: two int split positions (primitives) and two int[]
  * scroll-position arrays (objects that go through {@link Serializer#toJson}
  * before being pushed to the element). The pattern split mirrors the
- * {@link MirroredProperty} {@code integer} vs {@code serialized} factory
- * dispatch.
+ * {@link ClientProperty} {@code integer} vs {@code json} factory dispatch.
  */
 class FreezePaneStateTest {
 
-    @Mock
-    private Spreadsheet spreadsheet;
     @Mock
     private Element element;
 
@@ -52,8 +48,7 @@ class FreezePaneStateTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(spreadsheet.getElement()).thenReturn(element);
-        state = new FreezePaneState(spreadsheet);
+        state = new FreezePaneState(element);
     }
 
     @Test

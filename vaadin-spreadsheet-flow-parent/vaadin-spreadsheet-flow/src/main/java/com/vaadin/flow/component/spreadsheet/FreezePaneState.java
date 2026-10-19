@@ -10,6 +10,8 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.dom.Element;
+
 /**
  * Freeze-pane split coordinates plus per-pane scroll positions.
  *
@@ -21,60 +23,56 @@ import java.io.Serializable;
  * offset of each region so a sheet switch can restore them.
  *
  * <p>
- * Every setter mirrors the value into the corresponding element property; the
- * scroll-position arrays go through {@link Serializer#toJson} since they're
- * non-primitive payloads.
+ * Every setter gives the element the value at once, the scroll-position arrays
+ * as JSON.
  */
 final class FreezePaneState implements Serializable {
 
-    private final Spreadsheet spreadsheet;
+    private final ClientProperty<Integer> verticalSplitPosition;
+    private final ClientProperty<Integer> horizontalSplitPosition;
+    private final ClientProperty<int[]> verticalScrollPositions;
+    private final ClientProperty<int[]> horizontalScrollPositions;
 
-    private int verticalSplitPosition = 0;
-    private int horizontalSplitPosition = 0;
-    private int[] verticalScrollPositions;
-    private int[] horizontalScrollPositions;
-
-    FreezePaneState(Spreadsheet spreadsheet) {
-        this.spreadsheet = spreadsheet;
+    FreezePaneState(Element element) {
+        verticalSplitPosition = ClientProperty.integer(element,
+                "verticalSplitPosition", 0);
+        horizontalSplitPosition = ClientProperty.integer(element,
+                "horizontalSplitPosition", 0);
+        verticalScrollPositions = ClientProperty.json(element,
+                "verticalScrollPositions");
+        horizontalScrollPositions = ClientProperty.json(element,
+                "horizontalScrollPositions");
     }
 
     int getVerticalSplitPosition() {
-        return verticalSplitPosition;
+        return verticalSplitPosition.get();
     }
 
     void setVerticalSplitPosition(int verticalSplitPosition) {
-        this.verticalSplitPosition = verticalSplitPosition;
-        spreadsheet.getElement().setProperty("verticalSplitPosition",
-                verticalSplitPosition);
+        this.verticalSplitPosition.set(verticalSplitPosition);
     }
 
     int getHorizontalSplitPosition() {
-        return horizontalSplitPosition;
+        return horizontalSplitPosition.get();
     }
 
     void setHorizontalSplitPosition(int horizontalSplitPosition) {
-        this.horizontalSplitPosition = horizontalSplitPosition;
-        spreadsheet.getElement().setProperty("horizontalSplitPosition",
-                horizontalSplitPosition);
+        this.horizontalSplitPosition.set(horizontalSplitPosition);
     }
 
     int[] getVerticalScrollPositions() {
-        return verticalScrollPositions;
+        return verticalScrollPositions.get();
     }
 
     void setVerticalScrollPositions(int[] verticalScrollPositions) {
-        this.verticalScrollPositions = verticalScrollPositions;
-        spreadsheet.getElement().setPropertyJson("verticalScrollPositions",
-                Serializer.toJson(verticalScrollPositions));
+        this.verticalScrollPositions.set(verticalScrollPositions);
     }
 
     int[] getHorizontalScrollPositions() {
-        return horizontalScrollPositions;
+        return horizontalScrollPositions.get();
     }
 
     void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
-        this.horizontalScrollPositions = horizontalScrollPositions;
-        spreadsheet.getElement().setPropertyJson("horizontalScrollPositions",
-                Serializer.toJson(horizontalScrollPositions));
+        this.horizontalScrollPositions.set(horizontalScrollPositions);
     }
 }
