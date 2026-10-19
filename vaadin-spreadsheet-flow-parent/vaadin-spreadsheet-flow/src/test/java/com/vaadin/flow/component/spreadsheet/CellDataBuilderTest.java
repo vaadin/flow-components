@@ -83,7 +83,7 @@ class CellDataBuilderTest {
         numericFormatter.updateLocale(Locale.US);
         formulaFormatter = new FormulaFormatter();
         fitCalculator = new CellFitCalculator();
-        clientCache = new ClientCellCache();
+        clientCache = new ClientCellCache(new ClientCellRecord());
 
         // Wire the package-private fields the builder reads on the
         // manager via reflection (Mockito mocks have the fields but

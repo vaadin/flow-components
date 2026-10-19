@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +32,15 @@ final class ClientCellMirror implements Serializable {
 
     private final Spreadsheet spreadsheet;
 
-    /** What the client has of each cell, by key, as a hash of what it got. */
-    private final Map<String, Long> onTheClient = new HashMap<>();
+    /**
+     * What the client has of each cell, as a hash of what it got, and the cells
+     * built for it, which {@link ClientCellCache} keeps: one record of the
+     * cells.
+     */
+    final ClientCellRecord record = new ClientCellRecord();
 
-    /** The cells to send, by key, in the order first sent. */
-    private final Map<String, CellData> pending = new LinkedHashMap<>();
+    /** The cells to send, by the record's key, in the order first sent. */
+    private final Map<Long, CellData> pending = new LinkedHashMap<>();
 
     /** Whether the client is to draw its cells' styles again. */
     private boolean refreshStyles;
@@ -52,7 +55,7 @@ final class ClientCellMirror implements Serializable {
     /** Sends the cells at the end of the round trip, each as it is then. */
     void send(List<CellData> cells) {
         for (CellData cell : cells) {
-            pending.put(SpreadsheetUtil.toKey(cell.col, cell.row), cell);
+            pending.put(ClientCellRecord.keyOf(cell.col, cell.row), cell);
         }
         schedule();
     }
@@ -72,7 +75,7 @@ final class ClientCellMirror implements Serializable {
      * are not sent, so the record of what was sent forgets them too.
      */
     void reload() {
-        onTheClient.clear();
+        record.clear();
         pending.clear();
         refreshStyles = false;
         // A replacement asked for in a round trip that reloads the client is
@@ -86,7 +89,7 @@ final class ClientCellMirror implements Serializable {
      * from now to the end of the round trip, which go in one call.
      */
     void replace() {
-        onTheClient.clear();
+        record.forgetClient();
         pending.clear();
         replacing = true;
         schedule();
@@ -98,19 +101,12 @@ final class ClientCellMirror implements Serializable {
      */
     void flush() {
         ArrayNode changed = Serializer.array();
-        for (Map.Entry<String, CellData> entry : pending.entrySet()) {
-            String key = entry.getKey();
+        for (Map.Entry<Long, CellData> entry : pending.entrySet()) {
+            long key = entry.getKey();
             JsonNode sent = Serializer.toJson(entry.getValue());
-            if (isRemoval(sent)) {
-                if (onTheClient.remove(key) != null) {
-                    changed.add(sent);
-                }
-            } else {
-                long hash = hash(sent.toString());
-                Long had = onTheClient.put(key, hash);
-                if (had == null || had != hash) {
-                    changed.add(sent);
-                }
+            if (isRemoval(sent) ? record.takenOff(key)
+                    : record.sent(key, hash(sent.toString()))) {
+                changed.add(sent);
             }
         }
         pending.clear();

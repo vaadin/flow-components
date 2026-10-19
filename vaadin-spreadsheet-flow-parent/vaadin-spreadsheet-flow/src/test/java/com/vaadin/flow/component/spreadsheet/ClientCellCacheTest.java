@@ -20,17 +20,13 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
 
 /**
- * The record {@link ClientCellCache} keeps of the cells sent to the client.
+ * The cells {@link ClientCellCache} has built for the client, which it keeps in
+ * the record of what the client has: plain cells and formulas, dropping one,
+ * and pruning by rows and by column.
  *
  * <p>
- * Pins the cache's pure-data behavior: separate plain / formula sets,
- * try-plain-first drop semantics, prune-by-row-range and prune-by-column
- * operations.
- *
- * <p>
- * Pure-logic tests — no POI fixture needed. The cache stores cell-key strings
- * (the {@link SpreadsheetUtil#toKey} format `"col<N> row<M>"`) and operates
- * purely on those strings.
+ * Pure-logic tests, with no POI fixture: the cache is given cell keys (the
+ * {@link SpreadsheetUtil#toKey} format `"col<N> row<M>"`).
  */
 class ClientCellCacheTest {
 
@@ -38,7 +34,7 @@ class ClientCellCacheTest {
 
     @BeforeEach
     void setUp() {
-        cache = new ClientCellCache();
+        cache = new ClientCellCache(new ClientCellRecord());
     }
 
     @Test
@@ -92,17 +88,19 @@ class ClientCellCacheTest {
     }
 
     @Test
-    void dropSent_triesPlainSetFirst_thenFormulaSet() {
-        // Edge case pinning: if (by inconsistency) a key appears in BOTH sets,
-        // dropSent removes from plain first and short-circuits — formula entry
-        // remains. Documents the actual behavior of the
-        // `if (sentCells.remove(key)) return true;` idiom.
+    void aCellBuiltPlainThenAsAFormula_isAFormula_andDroppedIsNeither() {
+        // One record of the cell: plain or a formula, not both. The sets it
+        // replaced could hold a cell in each, and dropping took the plain
+        // one and left the formula.
         cache.markNormalSent("col1 row1");
         cache.markFormulaSent("col1 row1");
-        assertTrue(cache.dropSent("col1 row1"));
         assertFalse(cache.containsNormal("col1 row1"));
-        // Formula entry still present because dropSent short-circuited.
         assertTrue(cache.containsFormula("col1 row1"));
+
+        assertTrue(cache.dropSent("col1 row1"));
+
+        assertFalse(cache.containsNormal("col1 row1"));
+        assertFalse(cache.containsFormula("col1 row1"));
     }
 
     @Test

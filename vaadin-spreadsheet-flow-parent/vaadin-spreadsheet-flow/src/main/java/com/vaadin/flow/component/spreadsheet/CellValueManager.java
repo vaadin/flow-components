@@ -86,7 +86,7 @@ public class CellValueManager implements Serializable {
     }
 
     private final CellDeletionGuard deletionGuard = new CellDeletionGuard(this);
-    final ClientCellCache clientCache = new ClientCellCache();
+    final ClientCellCache clientCache;
 
     private boolean topLeftCellsLoaded;
 
@@ -102,6 +102,8 @@ public class CellValueManager implements Serializable {
      */
     public CellValueManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
+        // The record of the cells built is the one of what the client has.
+        clientCache = new ClientCellCache(spreadsheet.clientCells.record);
 
         UI current = UI.getCurrent();
         if (current != null) {
@@ -907,20 +909,15 @@ public class CellValueManager implements Serializable {
             if (row != null && row.getLastCellNum() != -1
                     && row.getLastCellNum() >= firstColumn) {
                 for (int c = firstColumn - 1; c < lastColumn; c++) {
-                    final String key = SpreadsheetUtil.toKey(c + 1, r + 1);
-                    if (!customComponentCells.contains(key)
-                            && !clientCache.containsNormal(key)
-                            && !clientCache.containsFormula(key)) {
+                    if (!clientCache.contains(c + 1, r + 1)
+                            && !customComponentCells.contains(
+                                    SpreadsheetUtil.toKey(c + 1, r + 1))) {
                         Cell cell = row.getCell(c);
                         if (cell != null) {
                             final CellData cd = createCellDataForCell(cell);
                             if (cd != null) {
-                                CellType cellType = cell.getCellType();
-                                if (cellType == CellType.FORMULA) {
-                                    clientCache.markFormulaSent(key);
-                                } else {
-                                    clientCache.markNormalSent(key);
-                                }
+                                clientCache.markSent(c + 1, r + 1,
+                                        cell.getCellType() == CellType.FORMULA);
                                 cellData.add(cd);
                             }
                         }
@@ -1172,9 +1169,8 @@ public class CellValueManager implements Serializable {
             if (source == null) {
                 continue;
             }
-            String key = SpreadsheetUtil.toKey(source);
-            if (clientCache.containsNormal(key)
-                    || clientCache.containsFormula(key)) {
+            if (clientCache.contains(source.getColumnIndex() + 1,
+                    source.getRowIndex() + 1)) {
                 CellData cellData = createCellDataForCell(source);
                 if (cellData != null && cellData.overflowWidth > 0) {
                     resent.add(cellData);

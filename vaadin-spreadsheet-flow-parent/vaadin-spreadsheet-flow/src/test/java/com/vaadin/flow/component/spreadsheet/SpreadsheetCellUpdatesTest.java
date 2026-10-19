@@ -199,6 +199,19 @@ class SpreadsheetCellUpdatesTest {
     }
 
     @Test
+    void theCellsBuilt_andWhatTheClientHasOfThem_areOneRecord() {
+        // One entry a cell: the server kept two records of the cells the
+        // client has, keyed by strings, about 400 bytes a cell scrolled past.
+        show();
+        ClientCellRecord record = spreadsheet.clientCells.record;
+        long a1 = ClientCellRecord.keyOf(1, 1);
+
+        assertTrue(record.isBuilt(a1));
+        assertTrue(record.isOnClient(a1));
+        assertEquals(2, record.size(), "A1 and C1");
+    }
+
+    @Test
     void aFormulaCellMarkedAgainAfterItWasToBeTakenOff_staysOnTheClient() {
         formulaInB1();
         show();
