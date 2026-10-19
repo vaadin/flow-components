@@ -112,18 +112,9 @@ export class HostedComponents {
     return e.composedPath().some((target) => this.cellEditors.owns(target));
   }
 
-  /**
-   * Whether a node is the element of one of the custom cell editors, or is
-   * inside one: a field's input has the keyboard rather than the field.
-   */
+  /** Whether a node is the element of one of the custom cell editors. */
   isEditor(node: EventTarget | null): boolean {
-    for (let n = node instanceof Node ? node : null; n !== null; ) {
-      if (this.cellEditors.owns(n)) {
-        return true;
-      }
-      n = n.parentNode instanceof ShadowRoot ? n.parentNode.host : n.parentNode;
-    }
-    return false;
+    return this.cellEditors.owns(node);
   }
 
   /** The cell whose custom editor an event came out of, if any. */

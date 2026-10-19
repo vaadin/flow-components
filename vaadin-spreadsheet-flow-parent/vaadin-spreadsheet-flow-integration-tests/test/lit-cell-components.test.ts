@@ -497,28 +497,6 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
-  it('leaves the keyboard in a custom editor that the server reloads the sheet under', async () => {
-    // A field's input sits inside the field, and has the keyboard rather
-    // than the field itself.
-    const field = document.createElement('div');
-    const fieldInput = document.createElement('input');
-    field.append(fieldInput);
-    const plain = document.createElement('input');
-    const { sheet, cleanup } = attachSheet({ '77': field, '78': plain });
-    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77', 'col3 row2': '78' });
-    sheet.recomputeViewport();
-    await sheet.getCellGrid().updateComplete;
-
-    for (const input of [fieldInput, plain]) {
-      input.focus();
-      sheet.setReload(true);
-      await sheet.getCellGrid().updateComplete;
-
-      expect(document.activeElement, input === plain ? 'the editor' : 'inside the editor').to.equal(input);
-    }
-    cleanup();
-  });
-
   it('pads a cell showing a custom editor all round, as the GWT client did', async () => {
     // The GWT client gave the cell a class of its own, with two pixels of
     // padding on every side; the editor sat two pixels higher than in a
