@@ -1778,6 +1778,15 @@ describe('Spreadsheet — committing an edit with a key', () => {
         expect(ctx.sheet.getScrollContainer().matches(':focus')).to.be.true;
     });
 
+    it('puts the keyboard back on the sheet after a commit by leaving the editor for nowhere', async () => {
+        const input = await typeOver(ctx.sheet, 2, 2, '123');
+
+        input.blur();
+        await ctx.sheet.getCellGrid().updateComplete;
+
+        expect(ctx.sheet.getScrollContainer().matches(':focus')).to.be.true;
+    });
+
     it('puts the keyboard back on the sheet after Escape', async () => {
         const input = await typeOver(ctx.sheet, 2, 2, '123');
 

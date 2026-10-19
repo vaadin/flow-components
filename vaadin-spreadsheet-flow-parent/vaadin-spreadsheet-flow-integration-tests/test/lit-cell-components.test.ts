@@ -497,6 +497,32 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('commits an edit left for a custom editor and leaves the keyboard in the editor', async () => {
+    // A field's input sits inside the field.
+    const field = document.createElement('div');
+    const fieldInput = document.createElement('input');
+    field.append(fieldInput);
+    const { host, sheet, cleanup } = attachSheet({ '77': field });
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+    const sent: string[] = [];
+    host.addEventListener('spreadsheet-event', (e) => sent.push((e as CustomEvent).detail.type));
+    sheet
+      .getScrollContainer()
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true, composed: true, cancelable: true }));
+    await sheet.getCellGrid().updateComplete;
+    const cellEditor = cell(sheet, '.cell-editor') as HTMLInputElement;
+    expect(sheet.getCellGrid().shadowRoot!.activeElement, 'editing').to.equal(cellEditor);
+
+    fieldInput.focus();
+    await sheet.getCellGrid().updateComplete;
+
+    expect(sent).to.include('cellValueEdited');
+    expect(document.activeElement).to.equal(fieldInput);
+    cleanup();
+  });
+
   it('pads a cell showing a custom editor all round, as the GWT client did', async () => {
     // The GWT client gave the cell a class of its own, with two pixels of
     // padding on every side; the editor sat two pixels higher than in a

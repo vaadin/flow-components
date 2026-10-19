@@ -163,7 +163,10 @@ export class EditSession {
       );
       return;
     }
-    this.commit(col, row, value, key, shiftKey === true, true);
+    // Left for somewhere - a custom editor, a field of the page - the
+    // keyboard stays where the user put it. A key that ended the edit, which
+    // has nowhere it went, or a blur to nowhere gives it back to the sheet.
+    this.commit(col, row, value, key, shiftKey === true, relatedTarget == null);
   }
 
   /**
