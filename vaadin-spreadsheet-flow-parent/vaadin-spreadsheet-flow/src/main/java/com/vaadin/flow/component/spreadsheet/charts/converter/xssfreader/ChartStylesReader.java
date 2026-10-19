@@ -268,9 +268,7 @@ class ChartStylesReader {
             try {
                 themeDocument = ThemeDocument.Factory
                         .parse(theme.getPackagePart().getInputStream());
-            } catch (XmlException e) {
-                return null;
-            } catch (IOException e) {
+            } catch (XmlException | IOException e) {
                 return null;
             }
 

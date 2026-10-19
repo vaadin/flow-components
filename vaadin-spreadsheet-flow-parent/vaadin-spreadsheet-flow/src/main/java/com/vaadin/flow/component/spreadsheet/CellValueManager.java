@@ -1111,13 +1111,8 @@ public class CellValueManager implements Serializable {
                 sheetField.setAccessible(false);
                 recordField.setAccessible(false);
             }
-        } catch (SecurityException e) {
-            LOGGER.trace(e.getMessage(), e);
-        } catch (NoSuchFieldException e) {
-            LOGGER.trace(e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
-            LOGGER.trace(e.getMessage(), e);
-        } catch (IllegalAccessException e) {
+        } catch (SecurityException | NoSuchFieldException
+                | IllegalArgumentException | IllegalAccessException e) {
             LOGGER.trace(e.getMessage(), e);
         }
     }

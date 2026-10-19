@@ -71,19 +71,8 @@ final class POIReflectionTools {
             val = f.get(owner);
             return val;
 
-        } catch (NoSuchFieldException e) {
-            LOGGER.error(
-                    "Incompatible POI implementation, unable to parse conditional formatting rule",
-                    e);
-        } catch (SecurityException e) {
-            LOGGER.error(
-                    "Incompatible POI implementation, unable to parse conditional formatting rule",
-                    e);
-        } catch (IllegalArgumentException e) {
-            LOGGER.error(
-                    "Incompatible POI implementation, unable to parse conditional formatting rule",
-                    e);
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | SecurityException
+                | IllegalArgumentException | IllegalAccessException e) {
             LOGGER.error(
                     "Incompatible POI implementation, unable to parse conditional formatting rule",
                     e);

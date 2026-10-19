@@ -210,19 +210,8 @@ public class XSSFColorConverter implements ColorConverter {
             case TOP -> object.getTop().getColor();
             default -> null;
             };
-        } catch (IllegalArgumentException e) {
-            LOGGER.error(
-                    "Incompatible POI implementation; unable to parse border color",
-                    e);
-        } catch (IllegalAccessException e) {
-            LOGGER.error(
-                    "Incompatible POI implementation; unable to parse border color",
-                    e);
-        } catch (NoSuchFieldException e) {
-            LOGGER.error(
-                    "Incompatible POI implementation; unable to parse border color",
-                    e);
-        } catch (SecurityException e) {
+        } catch (IllegalArgumentException | IllegalAccessException
+                | NoSuchFieldException | SecurityException e) {
             LOGGER.error(
                     "Incompatible POI implementation; unable to parse border color",
                     e);

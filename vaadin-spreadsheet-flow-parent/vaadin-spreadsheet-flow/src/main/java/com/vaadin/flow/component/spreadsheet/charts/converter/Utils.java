@@ -178,13 +178,8 @@ public class Utils {
                     || cell.getCellType() == CellType.FORMULA)) {
                 return cell.getNumericCellValue();
             }
-        } catch (NullPointerException e) {
-            LOGGER.warning("Could not parse number from cell on column "
-                    + ref.getCol() + " and row " + ref.getRow());
-        } catch (IllegalStateException e) {
-            LOGGER.warning("Could not parse number from cell on column "
-                    + ref.getCol() + " and row " + ref.getRow());
-        } catch (NumberFormatException e) {
+        } catch (NullPointerException | IllegalStateException
+                | NumberFormatException e) {
             LOGGER.warning("Could not parse number from cell on column "
                     + ref.getCol() + " and row " + ref.getRow());
         } catch (FormulaParseException e) {
