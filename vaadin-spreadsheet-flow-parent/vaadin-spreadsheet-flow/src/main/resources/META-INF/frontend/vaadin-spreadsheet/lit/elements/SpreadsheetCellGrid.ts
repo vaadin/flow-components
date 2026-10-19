@@ -8,18 +8,18 @@
  * license.
  */
 
-import { html, nothing, type TemplateResult } from 'lit';
+import { html, type TemplateResult } from 'lit';
 import { SpreadsheetPart } from './SpreadsheetPart.js';
 import { cellTarget } from '../dom/IndexedTarget.js';
 import { isFormula } from '../algorithms/FormulaPointing.js';
 import { composing } from '../algorithms/KeyboardMoves.js';
 
-import { parseColRow, toKey } from '../algorithms/CellKeys.js';
+import { toKey } from '../algorithms/CellKeys.js';
 import { cellCoordToAddress } from '../algorithms/CellRef.js';
 import { Memo, sameInputs } from '../algorithms/Memo.js';
 import { caretPosition } from '../algorithms/PercentageEntry.js';
 import type { CellData } from '../types/wire.js';
-import { ANIMATE_IN_CLASS, animateIn, animateOut, overlayAnimationStyles } from '../dom/OverlayAnimation.js';
+import { overlayAnimationStyles } from '../dom/OverlayAnimation.js';
 import { type CellGridRenderState, emptyCellGridRenderState } from './types.js';
 import {
   cellBoxOnGrid,
@@ -28,7 +28,6 @@ import {
   drawnRanges,
   frozenExtentOf,
   type QuadrantName,
-  quadrantOf,
   type QuadrantRenderOpts,
   quadrants
 } from './cell-grid/GridGeometry.js';
@@ -37,6 +36,7 @@ import { cellGridLumoStyles, cellGridStyles } from './cell-grid/CellGridStyles.j
 import { buildFormulaReferences, buildPaintOutline, buildSelectionOverlay } from './cell-grid/RangeOverlays.js';
 import { buildPopupButtons, buildSheetOverlays } from './cell-grid/SheetOverlays.js';
 import { buildMergedCellOverlays, renderQuadrant } from './cell-grid/QuadrantCells.js';
+import { CommentNotes } from './cell-grid/CommentNotes.js';
 
 /**
  * Internal cell-grid Lit element. Renders absolutely-positioned cell
@@ -135,8 +135,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   private editorFit: { key: string; width: number } | null = null;
   /** The editor input the keyboard was last given to - see updated(). */
   private focusedEditor: HTMLInputElement | null = null;
-  /** The cells whose notes were drawn last time, so only new ones drop in. */
-  private noteKeysShown: ReadonlySet<string> = new Set();
+  /** The notes: which show, and where. */
+  private readonly notes = new CommentNotes(this);
 
   constructor() {
     super();
@@ -179,45 +179,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     // selects the cell (if outside selection) and forwards as
     // contextMenuOpenOnSelection.
     this.shadowRoot!.addEventListener('contextmenu', this.handleShadowContextMenu);
-    // A note being written ends when the user leaves it, or presses
-    // Escape. Delegated at the shadow root because the textarea comes
-    // and goes with the overlay it lives in.
-    this.shadowRoot!.addEventListener('focusout', this.handleCommentEditEnd);
-    this.shadowRoot!.addEventListener('keydown', this.handleCommentEditKeyDown);
+    this.notes.listen(this.shadowRoot!);
   }
-
-  /** Report the note as written, once, when it is left. */
-  private readonly handleCommentEditEnd = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof HTMLTextAreaElement) || !target.classList.contains('comment-overlay-edit')) {
-      return;
-    }
-    this.dispatchEvent(
-      new CustomEvent('cell-comment-commit', {
-        detail: { key: target.dataset.key, text: target.value },
-        bubbles: true,
-        composed: true
-      })
-    );
-  };
-
-  /**
-   * Escape ends the note. Every other key belongs to the textarea, and
-   * so does the event: without stopping it, typing a note would also be
-   * typing into the cell underneath.
-   */
-  private readonly handleCommentEditKeyDown = (e: Event): void => {
-    const target = e.target;
-    if (!(target instanceof HTMLTextAreaElement) || !target.classList.contains('comment-overlay-edit')) {
-      return;
-    }
-    e.stopPropagation();
-    // Escape dropping a conversion leaves the note open.
-    if ((e as KeyboardEvent).key === 'Escape' && !composing(e as KeyboardEvent)) {
-      e.preventDefault();
-      target.blur();
-    }
-  };
 
   /**
    * The render state with this element's own measurements folded in.
@@ -520,7 +483,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   willUpdate(changedProps: Map<string, unknown>): void {
-    this.fadeOutLeavingNotes();
+    this.notes.willUpdate();
     // Judged before drawing while the rules a value is measured in are
     // already in the page: a probe then lays out on its own, where after a
     // drawing it laid out every new cell with it, and the cells are drawn
@@ -528,37 +491,6 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     this.judgedBeforeDrawing = changedProps.has('renderState') && sameInputs(this.measuringInputs(), this.stylesDrawn);
     if (this.judgedBeforeDrawing) {
       this.judgeDrawnCells();
-    }
-  }
-
-  /**
-   * A note that goes fades out: the sheet drops it at once, and a copy of
-   * it, as it was, fades where it was and then goes too. Its line goes at
-   * once. A note still
-   * dropping into place just goes.
-   */
-  private fadeOutLeavingNotes(): void {
-    const root = this.shadowRoot;
-    if (root === null || this.noteKeysShown.size === 0) {
-      return;
-    }
-    const staying = new Set(drawnNotes(this.renderState, this.hoveredKey).map((note) => note.key));
-    for (const note of root.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)')) {
-      if (
-        staying.has(note.dataset.key ?? '') ||
-        note.style.display === 'none' ||
-        note.classList.contains(ANIMATE_IN_CLASS)
-      ) {
-        continue;
-      }
-      // What was typed into a note being written comes along: a copy of a
-      // text box keeps its value. A copy for the eye only: given the
-      // keyboard, its text box took the keys meant for the sheet - an undo
-      // right after a note became an undo of the note's text.
-      const copy = note.cloneNode(true) as HTMLElement;
-      copy.inert = true;
-      root.appendChild(copy);
-      animateOut(copy, () => copy.remove());
     }
   }
 
@@ -574,15 +506,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     if (changedProps.has('renderState') && !this.judgedBeforeDrawing) {
       this.judgeDrawnCells();
     }
-    this.placeCommentOverlays();
-    // The note being written, not the copy of one fading out.
-    const note = this.shadowRoot!.querySelector(
-      '.v-spreadsheet-comment-overlay:not([inert]) .comment-overlay-edit'
-    ) as HTMLTextAreaElement | null;
-    if (note !== null && this.shadowRoot!.activeElement !== note) {
-      note.focus();
-      note.setSelectionRange(note.value.length, note.value.length);
-    }
+    this.notes.updated();
     if (!this.renderState.editor) {
       // The next edit starts from its cell again.
       this.editorFit = null;
@@ -617,106 +541,6 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       );
     }
     this.focusedEditor = input;
-  }
-
-  /**
-   * Move a note that does not fit its pane, once its size is known: to the
-   * left of its cell when it runs past the
-   * pane's right edge and fits there, up when it runs past the bottom, and
-   * never above the top. The line to it follows. A workbook's
-   * always-visible note shows only while its cell's top-right corner is in
-   * the pane.
-   */
-  private placeCommentOverlays(): void {
-    // Not the copies of notes that have gone, fading out where they were.
-    const notes = this.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)');
-    // A note drops into place as it appears, and not again each time the
-    // sheet repaints.
-    const keys = new Set(Array.from(notes, (note) => note.dataset.key ?? ''));
-    for (const note of Array.from(notes)) {
-      if (!this.noteKeysShown.has(note.dataset.key ?? '')) {
-        animateIn(note);
-      }
-    }
-    this.noteKeysShown = keys;
-    const container = this.parentElement;
-    if (notes.length === 0 || container === null) {
-      return;
-    }
-    const panes = this.notePanes(container);
-    const grid = this.getBoundingClientRect();
-    for (const note of Array.from(notes)) {
-      const pane = panes[(note.dataset.quadrant as QuadrantName) ?? 'main'] ?? panes.main;
-      const cellLeft = Number(note.dataset.cellLeft);
-      const cellRight = Number(note.dataset.cellRight);
-      const cellTop = Number(note.dataset.cellTop);
-      const line = note.previousElementSibling as HTMLElement | null;
-      const cornerX = grid.left + cellRight;
-      const cornerY = grid.top + cellTop;
-      const cornerInPane =
-        cornerX >= pane.left && cornerX < pane.right && cornerY >= pane.top && cornerY <= pane.bottom;
-      const shown = note.dataset.pinned !== 'true' || cornerInPane;
-      note.style.display = shown ? '' : 'none';
-      if (!shown) {
-        if (line !== null && line.classList.contains('comment-overlay-line')) {
-          line.style.display = 'none';
-        }
-        continue;
-      }
-      const width = note.offsetWidth;
-      const height = note.offsetHeight;
-      let left = grid.left + cellRight + COMMENT_GAP;
-      if (left + width > pane.right) {
-        const leftOfCell = grid.left + cellLeft - COMMENT_GAP - width;
-        if (pane.left < leftOfCell) {
-          left = leftOfCell;
-        }
-      }
-      let top = grid.top + cellTop - COMMENT_GAP;
-      if (top + height > pane.bottom) {
-        top = Math.max(pane.top, top - (top + height - pane.bottom + 5));
-      } else if (top < pane.top) {
-        top = pane.top;
-      }
-      const noteLeft = left - grid.left;
-      const noteTop = top - grid.top;
-      note.style.left = `${noteLeft}px`;
-      note.style.top = `${noteTop}px`;
-      if (line !== null && line.classList.contains('comment-overlay-line')) {
-        line.style.cssText = commentLineStyle(cellRight, cellTop, noteLeft, noteTop, width);
-      }
-    }
-  }
-
-  /**
-   * The panes a note keeps to, on screen:
-   * the scrolling pane under the column letters and right of the row
-   * numbers, past the frozen rows and columns; a frozen pane takes in the
-   * headers along its frozen side.
-   */
-  private notePanes(
-    container: HTMLElement
-  ): Record<QuadrantName, { left: number; right: number; top: number; bottom: number }> {
-    const box = container.getBoundingClientRect();
-    const sheetLeft = box.left + container.clientLeft;
-    const sheetTop = box.top + container.clientTop;
-    // The grid sits right of the row numbers and under the column letters.
-    const splitX = sheetLeft + this.offsetLeft + this.frozenExtent().width;
-    const splitY = sheetTop + this.offsetTop + this.frozenExtent().height;
-    // The frozen pane takes the pixel of the freeze line too, and the
-    // scrolling pane starts past it.
-    const gapX = this.renderState.horizontalSplitPosition > 0 ? 1 : 0;
-    const gapY = this.renderState.verticalSplitPosition > 0 ? 1 : 0;
-    const scrollingX = { left: splitX + gapX, right: box.right };
-    const frozenX = { left: sheetLeft, right: splitX + gapX };
-    const scrollingY = { top: splitY + gapY, bottom: box.bottom };
-    const frozenY = { top: sheetTop, bottom: splitY + gapY };
-    return {
-      main: { ...scrollingX, ...scrollingY },
-      top: { ...scrollingX, ...frozenY },
-      left: { ...frozenX, ...scrollingY },
-      corner: { ...frozenX, ...frozenY }
-    };
   }
 
   /**
@@ -771,32 +595,8 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
     }
   };
 
-  /** The cell the pointer is over, or null. Presentation-only state. */
-  private hoveredKey: string | null = null;
-
-  private setHoveredKey(key: string | null): void {
-    if (this.hoveredKey === key) {
-      return;
-    }
-    const before = this.hoveredKey;
-    this.hoveredKey = key;
-    // Only a cell with a note or an invalid formula shows anything while
-    // hovered: moving between other cells changes nothing that is drawn.
-    if (this.showsOnHover(before) || this.showsOnHover(key)) {
-      this.requestUpdate();
-    }
-  }
-
-  /** Whether hovering a cell shows something: its note, or its formula's error. */
-  private showsOnHover(key: string | null): boolean {
-    const { commentText, invalidFormulaCells } = this.renderState;
-    return (
-      key !== null && ((commentText !== undefined && key in commentText) || invalidFormulaCells?.has(key) === true)
-    );
-  }
-
   private readonly handleGridMouseLeave = (): void => {
-    this.setHoveredKey(null);
+    this.notes.hover(null);
     this.dispatchEvent(new CustomEvent('grid-mouseleave', { bubbles: true, composed: true }));
   };
 
@@ -812,11 +612,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       return;
     }
     const { cell, col, row } = at;
-    // Which cell the pointer is over decides whether a comment shows, and
-    // that is presentation only — the connector never needs to know, and
-    // routing it through a full render-state push would repaint the sheet
-    // on every pointer move.
-    this.setHoveredKey(toKey(col, row));
+    this.notes.hover(toKey(col, row));
     // Where the cell is on screen, for what is shown beside it: a link's
     // tooltip.
     const box = cell.getBoundingClientRect();
@@ -956,7 +752,7 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
       this.editorFitWidth(),
       this.handleEditorInput
     );
-    const commentOverlays = buildCommentOverlays(this.renderState, this.hoveredKey);
+    const commentOverlays = this.notes.render();
     // A hidden stand-in for the editor, an input that is always there:
     // TestBench hands it out while no cell is being edited, so tests
     // that ask whether the editor is shown keep working.
@@ -1070,170 +866,6 @@ function editorWidth(state: CellGridRenderState, col: number, row: number, textW
     width += columnWidthOf(state, last);
   }
   return width + 1;
-}
-
-/** How far from its cell a note hangs, across and up. */
-const COMMENT_GAP = 15;
-
-/**
- * The line from a cell's top-right corner to its note: to the note's top-left corner when the note is to the right, to
- * its top-right corner when it had to go to the left, two pixels in for the
- * rounded corner. A one-pixel bar, turned about its start.
- */
-function commentLineStyle(
-  cellRight: number,
-  cellTop: number,
-  noteLeft: number,
-  noteTop: number,
-  noteWidth: number
-): string {
-  const targetTop = noteTop + 2;
-  let across: number;
-  let down = cellTop - targetTop;
-  let degrees: number;
-  if (noteLeft > cellRight) {
-    across = noteLeft + 2 - cellRight;
-    if (down > 0) {
-      degrees = -(Math.atan(down / across) * 180) / Math.PI;
-    } else {
-      down = Math.abs(down);
-      degrees = 0;
-    }
-  } else {
-    across = cellRight - (noteLeft + noteWidth);
-    if (down > 0) {
-      degrees = -180 + (Math.atan(down / across) * 180) / Math.PI;
-    } else {
-      down = Math.abs(down);
-      degrees = -180;
-    }
-  }
-  const length = Math.sqrt(across * across + down * down) + 1;
-  return `left:${cellRight}px;top:${cellTop}px;width:${length}px;transform:rotate(${degrees}deg);`;
-}
-
-/** A note on screen: whose it is, and what it shows. */
-interface DrawnNote {
-  key: string;
-  coord: { col: number; row: number };
-  showsError: boolean;
-  editing: boolean;
-  comment: string | undefined;
-  geometry: { left: number; top: number; width: number; height: number };
-}
-
-/** The notes on screen, in the order they are drawn. */
-function drawnNotes(state: CellGridRenderState, hoveredKey: string | null): DrawnNote[] {
-  const text = state.commentText ?? {};
-  const invalidCells = state.invalidFormulaCells ?? new Set<string>();
-  const invalidMessage = state.invalidFormulaMessage ?? null;
-
-  const editingKey = state.editingCommentKey ?? null;
-  const keys = new Set<string>(state.visibleCommentKeys ?? []);
-  if (hoveredKey !== null && (hoveredKey in text || invalidCells.has(hoveredKey))) {
-    keys.add(hoveredKey);
-  }
-  // The note being written stays up whether or not it is hovered, and
-  // whether or not it has any text yet.
-  if (editingKey !== null) {
-    keys.add(editingKey);
-  }
-
-  const notes: DrawnNote[] = [];
-  for (const key of keys) {
-    const coord = parseColRow(key);
-    if (coord.col < 1 || coord.row < 1) {
-      continue;
-    }
-    // An invalid formula only shows while hovered — an always-visible
-    // comment is the workbook's choice, an error message is feedback.
-    const showsError = key === hoveredKey && invalidCells.has(key) && invalidMessage !== null;
-    const editing = key === editingKey;
-    const comment = text[key];
-    if (!showsError && !editing && comment === undefined) {
-      continue;
-    }
-    // On screen, frozen panes included: the note floats above every pane,
-    // so it is drawn at grid level wherever its cell is.
-    const geometry = drawnCellBox(state, coord.col, coord.row);
-    if (geometry === null) {
-      continue;
-    }
-    notes.push({ key, coord, showsError, editing, comment, geometry });
-  }
-  return notes;
-}
-
-/**
- * Comment overlays — the little yellow notes.
- *
- * Two things put one on screen: the workbook marking a comment "always
- * visible", and the pointer resting on a cell that has one. A cell whose
- * formula the server rejected shows the same overlay carrying the error
- * instead, which is why one function renders both.
- *
- * Class names are those of earlier versions (`comment-overlay-label`,
- * `comment-overlay-author`, `comment-overlay-invalidformula`). A page's
- * styles reached them while notes were drawn outside the component's
- * shadow root; here they are two shadow roots in, so the card,
- * its author and its text are the parts `comment-overlay`, `comment-author`
- * and `comment-text`, which is what an application styles now.
- */
-function buildCommentOverlays(state: CellGridRenderState, hoveredKey: string | null): TemplateResult[] {
-  const authors = state.commentAuthors ?? {};
-  const invalidMessage = state.invalidFormulaMessage ?? null;
-
-  const overlays: TemplateResult[] = [];
-  for (const { key, coord, showsError, editing, comment, geometry } of drawnNotes(state, hoveredKey)) {
-    // The pane it keeps to, and whether it is one of the workbook's
-    // always-visible notes, which show only while their cell's corner is
-    // in that pane - see placeCommentOverlays.
-    const quadrant = quadrantOf(coord.col, coord.row, state.horizontalSplitPosition, state.verticalSplitPosition);
-    const pinned = key !== hoveredKey && !editing;
-    // Where a note hangs: 15px right of the cell and 15px
-    // above it, with a line from the cell's corner to the note's. Moved to
-    // the cell's left, or down, once the note's size is known, should it
-    // not fit the sheet - see placeCommentOverlays.
-    const cellRight = geometry.left + geometry.width;
-    const style = `left:${cellRight + COMMENT_GAP}px;top:${geometry.top - COMMENT_GAP}px;position:absolute;`;
-    overlays.push(
-      html`<div
-        class="comment-overlay-line"
-        style=${commentLineStyle(cellRight, geometry.top, cellRight + COMMENT_GAP, geometry.top - COMMENT_GAP, 0)}
-      ></div>`
-    );
-    const author = authors[key];
-    overlays.push(html`
-      <div
-        class="v-spreadsheet-comment-overlay"
-        part="comment-overlay"
-        style=${style}
-        data-cell-left=${geometry.left}
-        data-cell-right=${cellRight}
-        data-cell-top=${geometry.top}
-        data-quadrant=${quadrant}
-        data-pinned=${pinned ? 'true' : 'false'}
-        data-key=${key}
-      >
-        ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
-        ${showsError && (editing || comment !== undefined)
-          ? html`<div class="comment-overlay-separator"></div>`
-          : nothing}
-        ${author ? html`<div class="comment-overlay-author" part="comment-author">${author}</div>` : nothing}
-        ${editing
-          ? html`<textarea
-              class="comment-overlay-edit"
-              part="comment-edit"
-              data-key=${key}
-              .value=${comment ?? ''}
-            ></textarea>`
-          : comment === undefined
-          ? nothing
-          : html`<div class="comment-overlay-label" part="comment-text">${comment}</div>`}
-      </div>
-    `);
-  }
-  return overlays;
 }
 
 /** Whether a theme attribute's value names the Lumo variant. */
