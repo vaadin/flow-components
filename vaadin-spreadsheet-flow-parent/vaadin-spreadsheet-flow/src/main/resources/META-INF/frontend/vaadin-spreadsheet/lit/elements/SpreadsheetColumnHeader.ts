@@ -10,6 +10,7 @@
 
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { type HeaderAxis, HeaderStrip } from './headers/HeaderStrip.js';
+import { headerStripStyles } from './headers/HeaderStripStyles.js';
 
 import { columnIndexToLetters } from '../algorithms/CellRef.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
@@ -19,15 +20,7 @@ import {
   GROUPING_BUTTON_SIZE_PX,
   type PositionedGrouping
 } from './headers/Grouping.js';
-import {
-  groupingToggleBg,
-  groupingToggleBorderColor,
-  headerBg,
-  headerBorderColor,
-  headerFont,
-  headerFontSize,
-  headerSelectedBg
-} from './ThemeProperties.js';
+import { headerBg, headerBorderColor, headerSelectedBg } from './ThemeProperties.js';
 
 /**
  * Input state for the {@link SpreadsheetColumnHeader} element.
@@ -199,208 +192,110 @@ export class SpreadsheetColumnHeader extends HeaderStrip {
     renderState: { attribute: false }
   };
 
-  static styles = css`
-    :host {
-      display: block;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      box-sizing: border-box;
-      /* What moves with the scroll - the frozen strip, the freeze line's
-         gap - and the last column's resize handle reach past the header's
-         end, and would make the sheet's scroll area grow with every scroll.
-         Clipped across only: along the cells, the active letter's marker
-         and the freeze line run over the header's border. */
-      overflow-x: clip;
-      background: ${headerBg};
-      border-bottom: 1px solid ${headerBorderColor};
-      font-family: ${headerFont};
-      font-size: ${headerFontSize};
-    }
+  static styles = [
+    headerStripStyles,
+    css`
+      :host {
+        top: 0;
+        z-index: 5;
+        /* What moves with the scroll - the frozen strip, the freeze line's
+           gap - and the last column's resize handle reach past the header's
+           end, and would make the sheet's scroll area grow with every scroll.
+           Clipped across only: along the cells, the active letter's marker
+           and the freeze line run over the header's border. */
+        overflow-x: clip;
+        border-bottom: 1px solid ${headerBorderColor};
+      }
 
-    :host([hidden]) {
-      display: none !important;
-    }
+      .frozen-header-strip > .freeze-line {
+        width: 1px;
+      }
 
-    /* Frozen columns are drawn in their own strip, translated to
-       cancel the scroll out. It sits above the scrolling headers so a
-       column sliding underneath does not show through. */
-    .frozen-header-strip {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-    }
+      .freeze-gutter-pane {
+        border-right: 1px solid #6a6a6a;
+        border-bottom: 1px solid ${headerBorderColor};
+      }
 
-    .frozen-header-strip > * {
-      pointer-events: auto;
-    }
+      :host([theme~='lumo']) .freeze-gutter-pane {
+        border-right-color: var(--lumo-contrast-50pct);
+      }
 
-    /* Over the strip's bottom border too. */
-    .frozen-header-strip > .freeze-line {
-      position: absolute;
-      width: 1px;
-      z-index: 3;
-      background: #6a6a6a;
-      pointer-events: none;
-    }
+      .freeze-gap {
+        bottom: -1px;
+        width: 1px;
+      }
 
-    .freeze-gutter-pane {
-      position: absolute;
-      left: 0;
-      top: 0;
-      box-sizing: border-box;
-      border-right: 1px solid #6a6a6a;
-      border-bottom: 1px solid ${headerBorderColor};
-      pointer-events: none;
-    }
+      /* A letter: on a gradient from the header
+         colour down to a shade darker, over a border of its own along the
+         cells - which the active column's marker replaces, and so does an
+         application's ::part(column-header) border. The pointer is an arrow
+         down the column a click selects. The divider between letters is
+         drawn inside the letter's box: it takes no room from the letter, which is centred on the whole column, and the
+         border along the cells runs under it to the end, the active column's
+         marker too. The shades blend in sRGB, as two hex colours do: with a
+         mixed colour in it, a gradient blends in Oklab, a level off in
+         places. */
+      .col-header-cell {
+        box-shadow: inset -1px 0 0 ${headerBorderColor};
+        border-bottom: 1px solid ${headerBorderColor};
+        background: linear-gradient(to bottom in srgb, ${headerBg} 2%, color-mix(in srgb, ${headerBg} 96%, #000) 98%);
+        cursor: s-resize;
+      }
 
-    :host([theme~='lumo']) .freeze-gutter-pane {
-      border-right-color: var(--lumo-contrast-50pct);
-    }
-
-    /* The gap at the freeze line in the letters when only columns are
-       frozen: under the letters, the sheet's background. */
-    .freeze-gap {
-      position: absolute;
-      bottom: -1px;
-      width: 1px;
-      z-index: -1;
-      background: var(--default-background-color, #fff);
-      pointer-events: none;
-    }
-
-    /* A letter: on a gradient from the header
-       colour down to a shade darker, over a border of its own along the
-       cells - which the active column's marker replaces, and so does an
-       application's ::part(column-header) border. The pointer is an arrow
-       down the column a click selects. The divider between letters is
-       drawn inside the letter's box: it takes no room from the letter, which is centred on the whole column, and the
-       border along the cells runs under it to the end, the active column's
-       marker too. The shades blend in sRGB, as two hex colours do: with a
-       mixed colour in it, a gradient blends in Oklab, a level off in
-       places. */
-    .col-header-cell {
-      position: absolute;
-      box-sizing: border-box;
-      overflow: hidden;
-      text-align: center;
-      box-shadow: inset -1px 0 0 ${headerBorderColor};
-      border-bottom: 1px solid ${headerBorderColor};
-      background: linear-gradient(to bottom in srgb, ${headerBg} 2%, color-mix(in srgb, ${headerBg} 96%, #000) 98%);
-      cursor: s-resize;
-    }
-
-    /* The active cell's headers are tinted so the cursor's row and
-       column stay findable on a wide sheet. The cell also carries the documented
-       ::part(header-selected) for consumers who want another one. */
-    .col-header-cell[part~='header-selected'] {
-      background: ${headerSelectedBg};
       /* A marker along the edge that faces the cells. */
-      border-bottom: 2px solid #63b1ff;
-    }
+      .col-header-cell[part~='header-selected'] {
+        border-bottom: 2px solid #63b1ff;
+      }
 
-    /* Resize handle on the right edge of each column header.
-           4px wide, full-height, cursor:col-resize.
-           Mousedown begins a column-resize drag. */
-    .col-resize-handle {
-      position: absolute;
-      top: 0;
-      width: 5px;
-      cursor: col-resize;
-      z-index: 1;
-    }
+      /* Resize handle on the right edge of each column header, full-height.
+         A press begins a resize drag. */
+      .col-resize-handle {
+        top: 0;
+        width: 5px;
+        cursor: col-resize;
+      }
 
-    /* The outline gutter above the letters: a bracket over each group - a line with a tick where the group
-       starts - and a round button over its summary column, which sits
-       after the group or, inversed, before it. */
-    .col-grouping-line {
-      position: absolute;
-      height: 7px;
-      border-top: 2px solid ${headerBorderColor};
-      border-left: 2px solid ${headerBorderColor};
-      pointer-events: none;
-    }
+      /* The outline gutter above the letters: the brackets run across, their
+         ticks down, and the summary column sits after the group or, inversed,
+         before it. */
+      .col-grouping-line {
+        height: 7px;
+      }
 
-    .col-grouping-line.inversed {
-      border-left: none;
-      border-right: 2px solid ${headerBorderColor};
-    }
+      .col-grouping-line.inversed {
+        border-left: none;
+        border-right: 2px solid ${headerBorderColor};
+      }
 
-    /* The sign sits on an 11px line at the top of a borderless button: the ring is drawn inside, taking no room,
-       and the pixel of padding fits the box to the line - a box taller than
-       its line, and the browser centres the line instead. */
-    .col-grouping-toggle {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      box-sizing: border-box;
-      padding: 0 0 1px;
-      margin: 0;
-      border: 0;
-      box-shadow: inset 0 0 0 1px ${groupingToggleBorderColor};
-      border-radius: 50%;
-      background: ${groupingToggleBg};
-      color: #fff;
-      font: inherit;
-      font-size: 12px;
-      line-height: 11px;
-      text-align: center;
-      cursor: pointer;
-      z-index: 2;
-    }
+      .col-grouping-gutter {
+        border-bottom: 1px solid ${headerBorderColor};
+      }
 
-    .col-grouping-gutter {
-      position: absolute;
-      left: 0;
-      top: 0;
-      box-sizing: border-box;
-      border-bottom: 1px solid ${headerBorderColor};
-      pointer-events: none;
-    }
+      .col-grouping-separator {
+        height: 0;
+        border-bottom: 1px dotted ${headerBorderColor};
+      }
 
-    /* Divides one outline level from the next. Over the freeze line in
-       the gutter. */
-    .col-grouping-separator {
-      position: absolute;
-      z-index: 3;
-      height: 0;
-      border-bottom: 1px dotted ${headerBorderColor};
-      pointer-events: none;
-    }
+      /* No gradient on the letters in Lumo: each carries the strip's tint
+         over the Lumo ground, so a frozen column's letter covers the scrolled
+         one under it. The active cell's column is in the primary tint, with
+         its marker below. */
+      :host([theme~='lumo']) .col-header-cell {
+        background-color: ${headerBg};
+        background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+      }
 
-    /* SpreadsheetTheme.LUMO: the strip and its
-       outline gutter tinted over the Lumo ground, the active cell's column
-       in the primary tint with its marker below. */
-    :host([theme~='lumo']) {
-      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    }
+      :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {
+        background-color: ${headerSelectedBg};
+        background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
+        border-bottom-color: var(--lumo-primary-color-50pct);
+      }
 
-    /* No gradient on the letters: each carries the strip's tint over the
-       Lumo ground, so a frozen column's letter
-       covers the scrolled one under it. */
-    :host([theme~='lumo']) .col-header-cell {
-      background-color: ${headerBg};
-      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    }
-
-    /* Over the sheet's ground, not over the letters' tint. */
-    :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
-      background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
-    }
-
-    :host([theme~='lumo']) .col-header-cell[part~='header-selected'] {
-      background-color: ${headerSelectedBg};
-      background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
-      border-bottom-color: var(--lumo-primary-color-50pct);
-    }
-
-    :host([theme~='lumo']) .col-grouping-toggle {
-      background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
-      font-size: var(--lumo-font-size-s);
-      cursor: var(--lumo-clickable-cursor);
-    }
-  `;
+      :host([theme~='lumo']) .col-grouping-toggle {
+        font-size: var(--lumo-font-size-s);
+      }
+    `
+  ];
 
   declare renderState: ColumnHeaderRenderState;
 

@@ -10,6 +10,7 @@
 
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { type HeaderAxis, HeaderStrip } from './headers/HeaderStrip.js';
+import { headerStripStyles } from './headers/HeaderStripStyles.js';
 
 import {
   GROUPING_BUTTON_SIZE_PX,
@@ -18,15 +19,7 @@ import {
   rowGroupingGutterPx
 } from './headers/Grouping.js';
 import type { ViewportBounds } from '../algorithms/ViewportMath.js';
-import {
-  groupingToggleBg,
-  groupingToggleBorderColor,
-  headerBg,
-  headerBorderColor,
-  headerFont,
-  headerFontSize,
-  headerSelectedBg
-} from './ThemeProperties.js';
+import { headerBg, headerBorderColor } from './ThemeProperties.js';
 
 /**
  * Input state for the {@link SpreadsheetRowHeader} element. The
@@ -190,215 +183,119 @@ export class SpreadsheetRowHeader extends HeaderStrip {
     renderState: { attribute: false }
   };
 
-  static styles = css`
-    /* The outline gutter beside the numbers: a bracket down each group - a line with a tick where the group
-       starts - and a round button beside its summary row, which sits
-       below the group or, inversed, above it. */
-    .row-grouping-line {
-      position: absolute;
-      width: 8px;
-      border-top: 2px solid ${headerBorderColor};
-      border-left: 2px solid ${headerBorderColor};
-      pointer-events: none;
-    }
+  static styles = [
+    headerStripStyles,
+    css`
+      :host {
+        left: 0;
+        z-index: 4;
+        /* What moves with the scroll - the frozen strip, the freeze line's
+           gaps - and the last row's resize handle reach past the header's
+           end, and would make the sheet's scroll area grow with every scroll.
+           Clipped down only: along the cells, the active number's marker and
+           the freeze line run over the header's border. */
+        overflow-y: clip;
+        border-right: 1px solid ${headerBorderColor};
+      }
 
-    .row-grouping-line.inversed {
-      border-top: none;
-      border-bottom: 2px solid ${headerBorderColor};
-    }
+      .frozen-header-strip > .freeze-line {
+        height: 1px;
+      }
 
-    /* The sign sits on an 11px line at the top of a borderless button: the ring is drawn inside, taking no room,
-       and the pixel of padding fits the box to the line - a box taller than
-       its line, and the browser centres the line instead. */
-    .row-grouping-toggle {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      box-sizing: border-box;
-      padding: 0 0 1px;
-      margin: 0;
-      border: 0;
-      box-shadow: inset 0 0 0 1px ${groupingToggleBorderColor};
-      border-radius: 50%;
-      background: ${groupingToggleBg};
-      color: #fff;
-      font: inherit;
-      font-size: 12px;
-      line-height: 11px;
-      text-align: center;
-      cursor: pointer;
-      z-index: 2;
-    }
+      .freeze-gutter-pane {
+        border-right: 1px solid ${headerBorderColor};
+        border-bottom: 1px solid #6a6a6a;
+      }
 
-    .row-grouping-gutter {
-      position: absolute;
-      left: 0;
-      top: 0;
-      box-sizing: border-box;
-      border-right: 1px solid ${headerBorderColor};
-      pointer-events: none;
-    }
+      :host([theme~='lumo']) .freeze-gutter-pane {
+        border-bottom-color: var(--lumo-contrast-50pct);
+      }
 
-    /* Divides one outline level from the next. Over the freeze line in
-       the gutter. */
-    .row-grouping-separator {
-      position: absolute;
-      z-index: 3;
-      width: 0;
-      border-right: 1px dotted ${headerBorderColor};
-      pointer-events: none;
-    }
+      .freeze-gap {
+        right: -1px;
+        height: 1px;
+      }
 
-    :host {
-      display: block;
-      position: sticky;
-      left: 0;
-      z-index: 4;
-      box-sizing: border-box;
-      /* What moves with the scroll - the frozen strip, the freeze line's
-         gaps - and the last row's resize handle reach past the header's
-         end, and would make the sheet's scroll area grow with every scroll.
-         Clipped down only: along the cells, the active number's marker and
-         the freeze line run over the header's border. */
-      overflow-y: clip;
-      background: ${headerBg};
-      border-right: 1px solid ${headerBorderColor};
-      font-family: ${headerFont};
-      font-size: ${headerFontSize};
-    }
+      /* What of the frozen rows' line has slid left under the numbers. */
+      .freeze-gap.slid {
+        background: #6a6a6a;
+      }
 
-    :host([hidden]) {
-      display: none !important;
-    }
+      :host([theme~='lumo']) .freeze-gap.slid {
+        background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
+      }
 
-    /* Frozen rows are drawn in their own strip, translated to cancel
-       the scroll out, above the scrolling headers. */
-    .frozen-header-strip {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-    }
+      /* A number, over a border of its own along
+         the cells - which the active row's marker replaces, and so does an
+         application's ::part(row-header) border. The pointer is an arrow
+         along the row a click selects. Each number has the strip's own
+         background, so a frozen row's number covers the scrolled one under
+         it. The number is centred as a line of the font's own height in the
+         middle of the whole row. The divider between numbers is drawn inside
+         the number's box: it takes no room from the number, and the border
+         along the cells runs past it to the end, the active row's marker
+         too. */
+      .row-header-cell {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 100%;
+        background: ${headerBg};
+        box-shadow: inset 0 -1px 0 ${headerBorderColor};
+        border-right: 1px solid ${headerBorderColor};
+        cursor: e-resize;
+      }
 
-    .frozen-header-strip > * {
-      pointer-events: auto;
-    }
-
-    /* Over the strip's right border too. */
-    .frozen-header-strip > .freeze-line {
-      position: absolute;
-      height: 1px;
-      z-index: 3;
-      background: #6a6a6a;
-      pointer-events: none;
-    }
-
-    /* Over the sheet's ground, not over the numbers' tint. */
-    :host([theme~='lumo']) .frozen-header-strip > .freeze-line {
-      background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
-    }
-
-    .freeze-gutter-pane {
-      position: absolute;
-      left: 0;
-      top: 0;
-      box-sizing: border-box;
-      border-right: 1px solid ${headerBorderColor};
-      border-bottom: 1px solid #6a6a6a;
-      pointer-events: none;
-    }
-
-    :host([theme~='lumo']) .freeze-gutter-pane {
-      border-bottom-color: var(--lumo-contrast-50pct);
-    }
-
-    /* The gap at the freeze line in the numbers when only rows are
-       frozen: under the numbers, the sheet's background. */
-    .freeze-gap {
-      position: absolute;
-      right: -1px;
-      height: 1px;
-      z-index: -1;
-      background: var(--default-background-color, #fff);
-      pointer-events: none;
-    }
-
-    .freeze-gap.slid {
-      background: #6a6a6a;
-    }
-
-    :host([theme~='lumo']) .freeze-gap.slid {
-      background: linear-gradient(var(--lumo-contrast-50pct), var(--lumo-contrast-50pct)) var(--lumo-base-color);
-    }
-
-    /* A number, over a border of its own along
-       the cells - which the active row's marker replaces, and so does an
-       application's ::part(row-header) border. The pointer is an arrow
-       along the row a click selects. Each number has the strip's own
-       background, so a frozen row's number covers the scrolled one under
-       it. The number is centred as a line of the font's own height in the
-       middle of the whole row. The divider between numbers is drawn inside
-       the number's box: it takes no room from the number, and the border
-       along the cells runs past it to the end, the active row's marker
-       too. */
-    .row-header-cell {
-      position: absolute;
-      box-sizing: border-box;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      line-height: 100%;
-      text-align: center;
-      background: ${headerBg};
-      box-shadow: inset 0 -1px 0 ${headerBorderColor};
-      border-right: 1px solid ${headerBorderColor};
-      cursor: e-resize;
-    }
-
-    /* The active cell's headers are tinted so the cursor's row and
-       column stay findable on a wide sheet. The cell also carries the documented
-       ::part(header-selected) for consumers who want another one. */
-    .row-header-cell[part~='header-selected'] {
-      background: ${headerSelectedBg};
       /* A marker along the edge that faces the cells. */
-      border-right: 2px solid #63b1ff;
-    }
+      .row-header-cell[part~='header-selected'] {
+        border-right: 2px solid #63b1ff;
+      }
 
-    /* Resize handle on the bottom edge of each row header.
-           5px tall, full-width, cursor:row-resize. */
-    .row-resize-handle {
-      position: absolute;
-      left: 0;
-      height: 5px;
-      cursor: row-resize;
-      z-index: 1;
-    }
+      /* Resize handle on the bottom edge of each row header, full-width. */
+      .row-resize-handle {
+        left: 0;
+        height: 5px;
+        cursor: row-resize;
+      }
 
-    /* SpreadsheetTheme.LUMO: the strip and its
-       outline gutter tinted over the Lumo ground, the active cell's row in
-       the primary tint with its marker beside it. */
-    :host([theme~='lumo']) {
-      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    }
+      /* The outline gutter beside the numbers: the brackets run down, their
+         ticks across, and the summary row sits below the group or, inversed,
+         above it. */
+      .row-grouping-line {
+        width: 8px;
+      }
 
-    /* Each number carries the strip's tint too, so a frozen row's number
-       covers the scrolled one under it. */
-    :host([theme~='lumo']) .row-header-cell {
-      background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    }
+      .row-grouping-line.inversed {
+        border-top: none;
+        border-bottom: 2px solid ${headerBorderColor};
+      }
 
-    :host([theme~='lumo']) .row-header-cell[part~='header-selected'] {
-      background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
-      border-right-color: var(--lumo-primary-color-50pct);
-    }
+      .row-grouping-gutter {
+        border-right: 1px solid ${headerBorderColor};
+      }
 
-    :host([theme~='lumo']) .row-grouping-toggle {
-      background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
-      font-size: var(--lumo-font-size-xs);
-      cursor: var(--lumo-clickable-cursor);
-    }
-  `;
+      .row-grouping-separator {
+        width: 0;
+        border-right: 1px dotted ${headerBorderColor};
+      }
+
+      /* Each number carries the strip's tint too in Lumo, so a frozen row's
+         number covers the scrolled one under it. The active cell's row is in
+         the primary tint, with its marker beside it. */
+      :host([theme~='lumo']) .row-header-cell {
+        background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
+      }
+
+      :host([theme~='lumo']) .row-header-cell[part~='header-selected'] {
+        background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct));
+        border-right-color: var(--lumo-primary-color-50pct);
+      }
+
+      :host([theme~='lumo']) .row-grouping-toggle {
+        font-size: var(--lumo-font-size-xs);
+      }
+    `
+  ];
 
   declare renderState: RowHeaderRenderState;
 
