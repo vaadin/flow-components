@@ -30,7 +30,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.LoggerFactory;
 
 /**
  * ConditionalFormatter is an utility class of Spreadsheet, which handles all
@@ -45,19 +44,6 @@ import org.slf4j.LoggerFactory;
  * @since 23.1
  */
 public class ConditionalFormatter implements Serializable {
-
-    private static final org.slf4j.Logger LOGGER = LoggerFactory
-            .getLogger(ConditionalFormatter.class);
-
-    /*
-     * Slight hack. This style is used when a CF rule defines 'no border', in
-     * which case the border should be empty. However, since we use cell DIV
-     * borders for the grid structure, empty borders are in fact grey. So, if
-     * one rule says red, and the next says no border, then we need to know what
-     * 'no border' means in CSS. Of course, if the default CSS changes, this
-     * needs to change too.
-     */
-    private static String BORDER_STYLE_DEFAULT = "1pt solid #d6d6d6;";
 
     private Spreadsheet spreadsheet;
 

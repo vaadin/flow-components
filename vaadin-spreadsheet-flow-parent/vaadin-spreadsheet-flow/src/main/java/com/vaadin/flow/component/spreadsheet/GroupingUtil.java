@@ -313,22 +313,6 @@ class GroupingUtil implements Serializable {
             row.getCTRow().setHidden(hidden);
             rowIndex++;
         }
-
-        /** old code, for reference */
-        // for (Iterator<Row> it = sheet.rowIterator(); it.hasNext();) {
-        // xRow = (XSSFRow) it.next();
-        //
-        // // skip rows before the start of this group
-        // if (xRow.getRowNum() < rowIndex) {
-        // continue;
-        // }
-        //
-        // if (xRow.getCTRow().getOutlineLevel() >= level) {
-        // xRow.getCTRow().setHidden(hidden);
-        // rowIndex++;
-        // }
-        //
-        // }
         return rowIndex;
     }
 
@@ -389,8 +373,6 @@ class GroupingUtil implements Serializable {
         // hidden bit only is altered for this outline level. ie. don't
         // uncollapse contained groups
         CTCol[] colArray = cols.getColArray();
-        @SuppressWarnings("unused")
-        CTCol columnInfo = colArray[endIdx];
         short expandedLevel = -1;
         if (!isColumnGroupHiddenByParent(sheet, idx)) {
             /** Start */
@@ -411,14 +393,6 @@ class GroupingUtil implements Serializable {
                 }
             }
         }
-
-        /** start */
-        // // Write collapse flag (stored in a single col info record after this
-        // // outline group)
-        // callSheetMethod("setColumn", sheet,
-        // new Object[] { (int) columnInfo.getMax() + 1, null, null,
-        // Boolean.FALSE, Boolean.FALSE });
-        /** end */
         return expandedLevel;
     }
 
@@ -434,26 +408,6 @@ class GroupingUtil implements Serializable {
 
         CTCol col = cols.getColArray(idx);
         return col.isSetHidden();
-
-        /**
-         * original code for reference
-         */
-
-        // CTCols cols = sheet.getCTWorksheet().getColsArray(0);
-        // CTCol[] colArray = cols.getColArray();
-        // int endOfOutlineGroupIdx = findEndOfColumnOutlineGroup(sheet, idx);
-        // int nextColInfoIx = endOfOutlineGroupIdx + 1;
-        // if (nextColInfoIx >= colArray.length) {
-        // return false;
-        // }
-        // CTCol nextColInfo = colArray[nextColInfoIx];
-        //
-        // CTCol col = colArray[endOfOutlineGroupIdx];
-        // if (!isAdjacentBefore(col, nextColInfo)) {
-        // return false;
-        // }
-        //
-        // return nextColInfo.getCollapsed();
     }
 
     /**
@@ -462,12 +416,6 @@ class GroupingUtil implements Serializable {
      */
     private static Object callSheetMethod(String methodname, XSSFSheet sheet,
             Object... params) {
-
-        Class<?>[] paramtypes = new Class[params.length];
-        for (int i = 0; i < params.length; i++) {
-            paramtypes[i] = params[i] == null ? Object.class
-                    : params[i].getClass();
-        }
 
         Method method = null;
         try {
@@ -478,8 +426,6 @@ class GroupingUtil implements Serializable {
                 }
             }
 
-            // method = XSSFSheet.class.getDeclaredMethod(methodname,
-            // paramtypes);
             if (method != null) {
                 method.setAccessible(true);
                 return method.invoke(sheet, params);

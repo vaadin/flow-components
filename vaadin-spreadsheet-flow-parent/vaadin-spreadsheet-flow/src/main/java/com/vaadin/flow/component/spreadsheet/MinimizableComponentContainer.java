@@ -22,14 +22,6 @@ class MinimizableComponentContainer extends Div {
     private final Button minimizeButton;
     private OverlayChangeListener listener;
 
-    public MinimizableComponentContainer(Component comp) {
-        this.content = comp;
-        this.minimizeButton = createMinimizeButton();
-
-        this.add(minimizeButton, content);
-        this.getStyle().set("position", "relative");
-    }
-
     public MinimizableComponentContainer() {
         this.minimizeButton = createMinimizeButton();
         this.add(minimizeButton);

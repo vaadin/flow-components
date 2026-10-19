@@ -70,10 +70,6 @@ class SheetState implements Serializable {
         return selectedCells.get(sheetIdx);
     }
 
-    public void clear() {
-        selectedCells.clear();
-    }
-
     /**
      * Stops remembering selections: the workbook they were made in is no longer
      * shown, and the next one has a state of its own.

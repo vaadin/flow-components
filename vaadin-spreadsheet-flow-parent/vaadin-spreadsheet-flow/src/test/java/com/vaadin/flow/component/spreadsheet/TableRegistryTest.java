@@ -128,16 +128,6 @@ class TableRegistryTest {
     }
 
     @Test
-    void clear_forgetsEveryTable() {
-        registry.add(table1);
-        registry.add(table3);
-
-        registry.clear();
-
-        assertTrue(registry.getAll().isEmpty());
-    }
-
-    @Test
     void reloadForSheet_reloadsTheTablesOfThatSheetAlone() {
         registry.add(table1);
         registry.add(table2);

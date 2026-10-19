@@ -31,12 +31,6 @@ final class SheetScrollMemory implements Serializable {
         this.spreadsheet = spreadsheet;
     }
 
-    /** Forgets every offset, for a workbook being loaded. */
-    void clear() {
-        tops = new int[0];
-        lefts = new int[0];
-    }
-
     /**
      * Remembers the given offsets for the sheet at the given visible index, and
      * sends them to the client. An index that is not a visible sheet's is

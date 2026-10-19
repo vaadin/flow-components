@@ -62,11 +62,6 @@ final class TableRegistry implements Serializable {
         }
     }
 
-    /** Forgets every table, as for another workbook. */
-    void clear() {
-        tables.clear();
-    }
-
     /** Another sheet is shown: its tables are to be reloaded. */
     void markNeedsReload() {
         reloaded = false;

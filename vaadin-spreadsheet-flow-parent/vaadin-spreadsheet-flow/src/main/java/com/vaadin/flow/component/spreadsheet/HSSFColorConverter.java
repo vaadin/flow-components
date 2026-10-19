@@ -198,15 +198,4 @@ public class HSSFColorConverter implements ColorConverter {
             sb.append("var(--default-color);");
         }
     }
-
-    @SuppressWarnings("unused")
-    private void styleColor(final StringBuilder sb, String attr, short index) {
-        HSSFColor color = colors.getColor(index);
-        if (index != HSSF_AUTO.getIndex() && color != null) {
-            short[] rgb = color.getTriplet();
-            sb.append(attr);
-            sb.append(":");
-            sb.append(String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
-        }
-    }
 }

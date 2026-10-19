@@ -9,11 +9,8 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.Format;
 import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +25,6 @@ import org.apache.poi.ss.formula.eval.RefListEval;
 import org.apache.poi.ss.formula.eval.ValueEval;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -239,31 +235,6 @@ public class SpreadsheetUtil implements Serializable {
     public static Double parseNumber(Cell cell, String value, Locale locale) {
         if (value == null || value.trim().isEmpty()) {
             return null;
-        }
-        if (cell.getCellStyle().getDataFormatString() != null) {
-            DataFormatter df = new CustomDataFormatter(locale);
-            try {
-                Method formatter = df.getClass().getDeclaredMethod("getFormat",
-                        Cell.class);
-                formatter.setAccessible(true);
-                Format format = (Format) formatter.invoke(df, cell);
-                if (format != null) {
-                    ParsePosition parsePosition = new ParsePosition(0);
-                    Object parsed = format.parseObject(value, parsePosition);
-                    if (parsePosition.getIndex() == value.length()) {
-                        if (parsed instanceof Double d) {
-                            return d;
-                        } else if (parsed instanceof Number n) {
-                            return n.doubleValue();
-                        }
-                    }
-                }
-            } catch (NoSuchMethodException e) {
-            } catch (InvocationTargetException e) {
-            } catch (IllegalAccessException e) {
-            } catch (UnsupportedOperationException e) {
-            }
-
         }
         return parseNumber(value, locale);
     }

@@ -70,10 +70,6 @@ final class CustomComponentLoader implements Serializable {
         this.spreadsheet = spreadsheet;
     }
 
-    Set<Component> getCustomComponents() {
-        return customComponents;
-    }
-
     /** The editor of each cell shown, by cell key. */
     Map<String, Component> editors() {
         return editors;
@@ -161,10 +157,6 @@ final class CustomComponentLoader implements Serializable {
             // editor so returning to an editor cell fires the callback again.
             resetEditorCallbackTracker();
         }
-    }
-
-    void load() {
-        load(false);
     }
 
     /**

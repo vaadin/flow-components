@@ -20,7 +20,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.ClientChanges.Call;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
-import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonServerRpc;
 import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 import com.vaadin.flow.shared.Registration;
 
@@ -48,19 +47,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("div")
 public class PopupButton extends Component {
 
-    private PopupButtonServerRpc rpc = new PopupButtonServerRpc() {
-
-        @Override
-        public void onPopupClose() {
-            fireClose();
-        }
-
-        @Override
-        public void onPopupButtonClick() {
-            fireOpen();
-        }
-    };
-
     private Component child;
 
     private PopupButtonState state = new PopupButtonState();
@@ -69,11 +55,6 @@ public class PopupButton extends Component {
      * Constructs a new PopupButton.
      */
     public PopupButton() {
-        registerRpc(rpc);
-    }
-
-    private void registerRpc(PopupButtonServerRpc rpc) {
-        this.rpc = rpc;
     }
 
     /**

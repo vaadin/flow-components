@@ -45,10 +45,6 @@ import org.apache.poi.xssf.usermodel.XSSFPictureData;
 import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFTable;
-import org.apache.xmlbeans.XmlCursor;
-import org.apache.xmlbeans.XmlObject;
-import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTOneCellAnchor;
-import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTTwoCellAnchor;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFilterColumn;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
@@ -405,36 +401,6 @@ public class SpreadsheetFactory implements Serializable {
         }
 
         return null;
-    }
-
-    /**
-     * Copy-pasted from XSSFDrawing (private there) with slight modifications.
-     * Used to get anchors from an XSSFShape's parent.
-     */
-    private static XSSFClientAnchor getAnchorFromParent(XmlObject obj) {
-        XSSFClientAnchor anchor = null;
-
-        XmlObject parentXbean = null;
-        XmlCursor cursor = obj.newCursor();
-        if (cursor.toParent()) {
-            parentXbean = cursor.getObject();
-        }
-        cursor.dispose();
-        if (parentXbean != null) {
-            if (parentXbean instanceof CTTwoCellAnchor ct) {
-                anchor = new XSSFClientAnchor((int) ct.getFrom().getColOff(),
-                        (int) ct.getFrom().getRowOff(),
-                        (int) ct.getTo().getColOff(),
-                        (int) ct.getTo().getRowOff(), ct.getFrom().getCol(),
-                        ct.getFrom().getRow(), ct.getTo().getCol(),
-                        ct.getTo().getRow());
-            } else if (parentXbean instanceof CTOneCellAnchor ct) {
-                anchor = new XSSFClientAnchor((int) ct.getFrom().getColOff(),
-                        (int) ct.getFrom().getRowOff(), 0, 0,
-                        ct.getFrom().getCol(), ct.getFrom().getRow(), 0, 0);
-            }
-        }
-        return anchor;
     }
 
     /**

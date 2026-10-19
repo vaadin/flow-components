@@ -127,11 +127,6 @@ final class PopupButtonRegistry implements Serializable {
         onTheClient.clear();
     }
 
-    /** Forgets every button, as when another workbook is set. */
-    void clear() {
-        buttonsByCell.clear();
-    }
-
     private boolean isShown(PopupButton button) {
         return spreadsheet.viewport().shows(button.getRow(),
                 button.getColumn());

@@ -152,7 +152,6 @@ class RowData implements Serializable {
         private double numericCellValue;
         private Date dateCellValue;
         private RichTextString richTextCellValue;
-        private String stringCellValue;
         private boolean booleanCellValue;
         private byte errorCellValue;
         private CommentData cellComment;
@@ -163,10 +162,6 @@ class RowData implements Serializable {
 
         public CellData(Spreadsheet spreadsheet) {
             this.spreadsheet = spreadsheet;
-        }
-
-        public int getRowIndex() {
-            return rowIndex;
         }
 
         public int getColumnIndex() {
@@ -191,7 +186,9 @@ class RowData implements Serializable {
                     columnIndex + 1, rowIndex + 1);
 
             switch (cellType) {
-            case _NONE, BLANK -> stringCellValue = cell.getStringCellValue();
+            case _NONE, BLANK -> {
+                // Nothing to keep: it is written back blank.
+            }
             case BOOLEAN -> booleanCellValue = cell.getBooleanCellValue();
             case ERROR -> errorCellValue = cell.getErrorCellValue();
             case FORMULA -> cellFormula = cell.getCellFormula();
@@ -244,7 +241,6 @@ class RowData implements Serializable {
         private String author;
         private String text;
         private boolean visible;
-        private int row;
         private int column;
 
         public void read(Comment cellComment) {
@@ -252,7 +248,6 @@ class RowData implements Serializable {
             author = cellComment.getAuthor();
             text = cellComment.getString().getString();
             visible = cellComment.isVisible();
-            row = cellComment.getRow();
             column = cellComment.getColumn();
         }
 
@@ -270,10 +265,6 @@ class RowData implements Serializable {
             newCellComment.setVisible(visible);
 
             cell.setCellComment(newCellComment);
-        }
-
-        public int getRow() {
-            return row;
         }
 
         public int getColumn() {
