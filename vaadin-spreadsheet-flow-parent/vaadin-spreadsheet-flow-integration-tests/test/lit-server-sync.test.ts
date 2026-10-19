@@ -266,5 +266,49 @@ describe('ServerSync', () => {
       expect(renders).to.equal(1);
       expect(ratioReports()).to.have.length(1);
     });
+
+    it('measures again, after another drawing, for a workbook loaded while a measurement waited for the paint', async () => {
+      styles = { '0': '' };
+      widths = { cs0: 70 };
+      sync.restyled();
+      sync.drawn();
+      sync.workbookLoaded();
+      // The drawing the load asked for, before the grid has painted
+      sync.drawn();
+      await painted();
+      expect(ratioReports(), 'measured once while waiting').to.have.length(1);
+      expect(renders, 'the load, and another drawing to measure again').to.equal(2);
+
+      sync.drawn();
+      await painted();
+
+      expect(ratioReports()).to.have.length(2);
+    });
+
+    it('measures again for styles the server sent while a measurement waited for the paint', async () => {
+      styles = { '0': '' };
+      widths = { cs0: 70, cs1: 80 };
+      sync.restyled();
+      sync.drawn();
+      styles = { '0': '', '1': '' };
+      sync.restyled();
+      await painted();
+
+      sync.drawn();
+      await painted();
+
+      expect(ratioReports()).to.have.length(2);
+      expect(ratioReports()[1].data).to.eql({ styleIndexes: [0, 1], ratios: [7, 8] });
+    });
+
+    it('asks for no drawing after a measurement that found nothing laid out', async () => {
+      styles = { '0': '' };
+      sync.restyled();
+      sync.drawn();
+      await painted();
+
+      expect(ratioReports()).to.eql([]);
+      expect(renders, 'measured again at the next drawing, not in a loop').to.equal(0);
+    });
   });
 });

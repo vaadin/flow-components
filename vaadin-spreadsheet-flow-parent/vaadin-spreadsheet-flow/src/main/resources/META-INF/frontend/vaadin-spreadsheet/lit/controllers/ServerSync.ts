@@ -78,12 +78,17 @@ export class ServerSync {
   drawn(): void {
     if (this.restyledSinceMeasured && this.pendingMeasurement === null) {
       // Measured once the grid has painted the rules that were just handed to
-      // it, not against the ones it is replacing - and so against whatever
-      // else changed while it waited.
+      // it, not against the ones it is replacing. Styles that change while it
+      // waits are measured again, after another drawing: their rules may not
+      // be painted yet.
+      this.restyledSinceMeasured = false;
       this.pendingMeasurement = this.sheet.painted().then(() => {
         this.pendingMeasurement = null;
-        this.restyledSinceMeasured = false;
+        const restyledWhileWaiting = this.restyledSinceMeasured;
         this.reportWidthRatios();
+        if (restyledWhileWaiting) {
+          this.sheet.scheduleRender();
+        }
       });
     }
     if (this.pendingMeasurement !== null) {
