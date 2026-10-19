@@ -500,12 +500,19 @@ public class SpreadsheetJsApi {
         PopupButtonWidget widget;
 
         if (!popupButtonWidgets.containsKey(key)) {
+            popupButtonStates.put(key, state);
             PopupButtonConnector connector;
             popupButtonConnectors.put(key,
-                    connector = new PopupButtonConnector());
+                    connector = new PopupButtonConnector() {
+                        @Override
+                        public PopupButtonState getState() {
+                            // Flow supplies state through this bridge rather
+                            // than the legacy connector state transport.
+                            return popupButtonStates.get(key);
+                        }
+                    });
             popupButtonWidgets.put(key, widget = connector.getWidget());
 
-            popupButtonStates.put(key, state);
             connector.setPopupButtonServerRpc(getServerRpcInstance());
             connector.init();
             widget.setCol(state.col);
@@ -520,6 +527,28 @@ public class SpreadsheetJsApi {
         }
         widget.markActive(state.active);
         spreadsheetWidget.addPopupButton(widget);
+    }
+
+    public void setPopupButtonState(String rawState) {
+        PopupButtonState state = Parser.parsePopupButtonState(rawState);
+        String key = getPopupKey(state.sheet, state.row, state.col);
+        PopupButtonConnector connector = popupButtonConnectors.get(key);
+        // Visibility and registration own widget existence. A state update
+        // must not recreate a button that has already been removed.
+        if (connector == null) {
+            return;
+        }
+        // Replace the snapshot so omitted default values also clear old state.
+        popupButtonStates.put(key, state);
+        JsonObject changedProperties = Json.createObject();
+        for (String property : new String[] { "active", "headerHidden",
+                "popupHeight", "popupWidth" }) {
+            changedProperties.put(property, "");
+        }
+        // Let the connector apply presentation changes without re-adding the
+        // widget. Sheet, row and column identify it and are not moved here.
+        connector.onStateChanged(
+                new StateChangeEvent(connector, changedProperties, false));
     }
 
     public void removePopupButton(String rawState) {

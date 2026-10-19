@@ -10,6 +10,7 @@ package com.vaadin.component.spreadsheet.client.js;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,18 +20,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.google.gwt.thirdparty.guava.common.collect.Lists;
 import com.vaadin.addon.spreadsheet.client.CellData;
+import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
+import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
+import com.vaadin.client.communication.StateChangeEvent;
+
+import elemental.json.JsonObject;
 
 class SpreadsheetJsApiTest {
 
@@ -373,6 +381,74 @@ class SpreadsheetJsApiTest {
     void should_updateState_when_setShowCustomEditorOnFocus_isCalled() {
         api.setShowCustomEditorOnFocus(true);
         assertEquals(true, sharedState.showCustomEditorOnFocus);
+    }
+
+    @Test
+    void setPopupButtonState_registeredPopup_updatesStateAndNotifiesConnector()
+            throws ReflectiveOperationException {
+        PopupButtonConnector popupConnector = Mockito
+                .mock(PopupButtonConnector.class);
+        Map<String, PopupButtonConnector> connectors = getPopupMap(
+                "popupButtonConnectors");
+        Map<String, PopupButtonState> states = getPopupMap("popupButtonStates");
+        connectors.put("Sheet1_2_3", popupConnector);
+
+        try (var parser = Mockito.mockStatic(Parser.class)) {
+            for (boolean active : new boolean[] { true, false }) {
+                PopupButtonState state = new PopupButtonState();
+                state.sheet = "Sheet1";
+                state.row = 2;
+                state.col = 3;
+                state.active = active;
+                parser.when(() -> Parser.parsePopupButtonState("state"))
+                        .thenReturn(state);
+
+                api.setPopupButtonState("state");
+
+                assertSame(state, states.get("Sheet1_2_3"));
+            }
+        }
+
+        var events = ArgumentCaptor.forClass(StateChangeEvent.class);
+        verify(popupConnector, times(2)).onStateChanged(events.capture());
+        // Inspect the JSON payload directly: hasPropertyChanged uses native
+        // GWT code which cannot run in this JVM test.
+        var stateJson = StateChangeEvent.class.getDeclaredField("stateJson");
+        stateJson.setAccessible(true);
+        for (StateChangeEvent event : events.getAllValues()) {
+            JsonObject changedProperties = (JsonObject) stateJson.get(event);
+            assertTrue(changedProperties.hasKey("active"));
+            assertSame(popupConnector, event.getConnector());
+        }
+        Mockito.verifyNoMoreInteractions(popupConnector);
+    }
+
+    @Test
+    void setPopupButtonState_unregisteredPopup_doesNotCreateStateOrWidget()
+            throws ReflectiveOperationException {
+        PopupButtonState state = new PopupButtonState();
+        state.sheet = "Sheet1";
+        state.row = 2;
+        state.col = 3;
+        state.active = true;
+        try (var parser = Mockito.mockStatic(Parser.class)) {
+            parser.when(() -> Parser.parsePopupButtonState("state"))
+                    .thenReturn(state);
+
+            api.setPopupButtonState("state");
+        }
+
+        assertTrue(getPopupMap("popupButtonStates").isEmpty());
+        assertTrue(getPopupMap("popupButtonConnectors").isEmpty());
+        assertTrue(getPopupMap("popupButtonWidgets").isEmpty());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Map<String, T> getPopupMap(String fieldName)
+            throws ReflectiveOperationException {
+        var field = SpreadsheetJsApi.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return (Map<String, T>) field.get(api);
     }
 
     // CLIENT RPC METHODS

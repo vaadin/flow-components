@@ -231,6 +231,17 @@ public class PopupButton extends Component {
      */
     public void markActive(boolean active) {
         getState().active = active;
+        updateState();
+    }
+
+    /**
+     * Update client side state, if applicable.
+     */
+    private void updateState() {
+        getParent().filter(Spreadsheet.class::isInstance)
+                .ifPresent(parent -> parent.getElement().callJsFunction(
+                        "setPopupButtonState",
+                        Serializer.serialize(getState())));
     }
 
     public boolean isActive() {

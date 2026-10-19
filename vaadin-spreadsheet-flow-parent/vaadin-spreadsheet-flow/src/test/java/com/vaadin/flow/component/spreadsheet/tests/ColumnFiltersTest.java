@@ -18,11 +18,20 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.tests.JsFunctionCallUtil;
+import com.vaadin.tests.MockUIExtension;
 
 class ColumnFiltersTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     final String TABLE1_RANGE = "B2:B4";
     final String TABLE2_RANGE = "B6:B8";
@@ -103,6 +112,44 @@ class ColumnFiltersTest {
 
         Assertions.assertTrue(table.getPopupButton(1).isActive());
         Assertions.assertFalse(table.getPopupButton(2).isActive());
+    }
+
+    @Test
+    void markActive_registeredPopup_sendsUpdatedSharedState() {
+        ui.add(spreadsheet);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 10, 10]");
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        popupButton.markActive(true);
+        assertPopupActiveStateSent(true);
+
+        popupButton.markActive(false);
+        assertPopupActiveStateSent(false);
+    }
+
+    private void assertPopupActiveStateSent(boolean active) {
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation).toList();
+        Assertions.assertTrue(pendingInvocations.stream()
+                .noneMatch(invocation -> "addPopupButton".equals(
+                        JsFunctionCallUtil.getFunctionName(invocation))));
+        var invocations = pendingInvocations.stream()
+                .filter(invocation -> "setPopupButtonState"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
+                .toList();
+        Assertions.assertEquals(1, invocations.size());
+        var state = JacksonUtils.getMapper()
+                .readTree((String) JsFunctionCallUtil
+                        .getArguments(invocations.get(0)).get(0));
+        Assertions.assertEquals(active, state.path("active").asBoolean(false));
+        Assertions.assertEquals(2, state.get("row").asInt());
+        Assertions.assertEquals(2, state.get("col").asInt());
+        Assertions.assertEquals(workbook.getSheetName(0),
+                state.get("sheet").asString());
     }
 
     @Test
