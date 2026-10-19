@@ -10,9 +10,10 @@
 
 import { toKey } from '../../algorithms/CellKeys.js';
 import { sameInputs } from '../../algorithms/Memo.js';
+import { SheetCells } from '../../state/SheetCells.js';
 import type { CellData } from '../../types/wire.js';
 import type { CellGridRenderState } from '../types.js';
-import { columnWidthOf, drawnRanges } from './GridGeometry.js';
+import { columnWidthOf, quadrants } from './GridGeometry.js';
 
 /** A value probe: out of flow and off-screen, so measuring never disturbs the sheet. */
 const VALUE_PROBE_STYLE = 'position:absolute;left:-10000px;top:0;visibility:hidden;width:auto;white-space:nowrap;';
@@ -28,6 +29,8 @@ function createValueProbe(cellStyle: string, value: string): HTMLSpanElement {
 
 /** How many measured widths are kept before starting over. */
 const MEASURED_WIDTHS_LIMIT = 50000;
+/** How many judged rows are remembered before starting over. */
+const JUDGED_ROWS_LIMIT = 10000;
 
 /** A drawn cell the server flagged, with its key and the width of its column. */
 interface JudgedCell {
@@ -81,6 +84,13 @@ export class ValueMeasurer {
   private stylesDrawn: readonly unknown[] | null = null;
   /** Whether this update judged the drawn cells before drawing them. */
   private judgedBeforeDrawing = false;
+  /**
+   * What each row of each pane was last judged from, by pane and row: a row
+   * judged from the same is judged as it was, and not looked at again.
+   */
+  private readonly judgedRows = new Map<string, readonly unknown[]>();
+  /** The sets the last judging left: others put in their place leave no row judged. */
+  private judgedSets: readonly [ReadonlySet<string>, ReadonlySet<string>] | null = null;
 
   constructor(private readonly host: ValueMeasurerHost) {}
 
@@ -153,23 +163,49 @@ export class ValueMeasurer {
    * <p>
    * Only the drawn cells are looked at, in one walk for both: the cache
    * holds every cell loaded since the sheet opened, and a smooth scroll
-   * draws every frame. A width is found by the cell's data object, which a
+   * draws every frame. Of those, only the rows not judged from the same
+   * cells, columns and styles before: as the sheet scrolls, the rows that
+   * come into view. A width is found by the cell's data object, which a
    * cell keeps until the server sends it again. A set that comes out as it
    * was is kept, so it asks for no second render.
    */
   private judgeDrawnCells(): void {
     this.forgetWidthsOfOldStyles();
     const state = this.host.renderState;
+    const { cellData } = state;
+    if (
+      this.judgedSets?.[0] !== this.host.tooNarrowCells ||
+      this.judgedSets[1] !== this.host.fittingSpills ||
+      this.judgedRows.size > JUDGED_ROWS_LIMIT
+    ) {
+      this.judgedRows.clear();
+    }
     const narrow: JudgedCell[] = [];
     const spills: JudgedCell[] = [];
     const notNarrow: string[] = [];
     const notSpill: string[] = [];
     const unmeasured: CellData[] = [];
-    for (const range of drawnRanges(state)) {
-      for (let row = range.r1; row <= range.r2; row++) {
-        for (let col = range.c1; col <= range.c2; col++) {
+    for (const pane of quadrants(state)) {
+      let columns = `${pane.colStart}`;
+      for (let col = pane.colStart; col <= pane.colEnd; col++) {
+        columns += `,${columnWidthOf(state, col)}`;
+      }
+      for (let row = pane.rowStart; row <= pane.rowEnd; row++) {
+        // A map that does not count its changes could have changed anywhere.
+        const inputs = [
+          cellData,
+          cellData instanceof SheetCells ? cellData.rowVersion(row) : {},
+          columns,
+          this.measuredWith
+        ];
+        const rowKey = `${pane.quadrantName} ${row}`;
+        if (sameInputs(inputs, this.judgedRows.get(rowKey) ?? null)) {
+          continue;
+        }
+        this.judgedRows.set(rowKey, inputs);
+        for (let col = pane.colStart; col <= pane.colEnd; col++) {
           const key = toKey(col, row);
-          const data = state.cellData.get(key);
+          const data = cellData.get(key);
           const columnWidth = data === undefined ? 0 : columnWidthOf(state, col);
           const flaggedNarrow = data !== undefined && columnWidth > 0 && data.needsMeasure === true;
           const flaggedSpill = data !== undefined && columnWidth > 0 && (data.overflowWidth ?? 0) > 0;
@@ -208,6 +244,7 @@ export class ValueMeasurer {
     if (fitting !== this.host.fittingSpills) {
       this.host.fittingSpills = fitting;
     }
+    this.judgedSets = [tooNarrow, fitting];
   }
 
   /**

@@ -13,6 +13,7 @@ import {
   type CellGridRenderState,
   emptyCellGridRenderState
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/types.js';
+import { SheetCells } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/state/SheetCells.js';
 import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /** Stands in for the cell grid: measures in its shadow root, in a cell font of its own. */
@@ -160,6 +161,123 @@ describe('ValueMeasurer', () => {
 
       expect(host.tooNarrowCells).to.equal(tooNarrowCells);
       expect(host.fittingSpills).to.equal(fittingSpills);
+    });
+  });
+
+  describe('judging only the rows that changed', () => {
+    /** The rows whose cells were looked up in the last judging: the rows judged. */
+    let looked: Set<number>;
+    let cells: SheetCells;
+
+    /** A value too wide for the first column in rows 1 and 2, in a map that counts its changes. */
+    function sheetCells(): SheetCells {
+      const counted = new SheetCells();
+      const get = counted.get.bind(counted);
+      counted.get = (key: string) => {
+        looked.add(Number(key.split('row')[1]));
+        return get(key);
+      };
+      for (const c of [cell(1, 1, '12345678', { needsMeasure: true }), cell(1, 2, '12345678', { needsMeasure: true })]) {
+        counted.set(`col${c.col} row${c.row}`, c);
+      }
+      return counted;
+    }
+
+    /** Judges the drawn cells, and gives the rows looked at, in order. */
+    function judgedRows(): number[] {
+      looked = new Set();
+      update();
+      return [...looked].sort((a, b) => a - b);
+    }
+
+    beforeEach(() => {
+      looked = new Set();
+      cells = sheetCells();
+      host.renderState = sheet([], [10, 50, 50], { cellData: cells });
+      expect(judgedRows(), 'the first judging').to.eql([1, 2]);
+      expect([...host.tooNarrowCells]).to.eql(['col1 row1', 'col1 row2']);
+    });
+
+    it('judges no row again that nothing changed in', () => {
+      const { tooNarrowCells } = host;
+      host.renderState = { ...host.renderState };
+
+      expect(judgedRows()).to.eql([]);
+      expect(host.tooNarrowCells).to.equal(tooNarrowCells);
+    });
+
+    it('judges no row of a frozen pane again either, the same rows as the scrolling pane draws', () => {
+      host.renderState = sheet([], [10, 50, 50], {
+        cellData: cells,
+        viewport: { ...host.renderState.viewport, firstColumnIndex: 2 },
+        horizontalSplitPosition: 1,
+        frozenColX: [0],
+        frozenColWidths: [10]
+      });
+      expect(judgedRows(), 'the frozen column, and the columns after it').to.eql([1, 2]);
+
+      host.renderState = { ...host.renderState };
+      expect(judgedRows()).to.eql([]);
+    });
+
+    it('judges again only the row a cell was set in, and finds what it holds now', () => {
+      cells.set('col1 row2', cell(1, 2, '1', { needsMeasure: true }));
+      host.renderState = { ...host.renderState };
+
+      expect(judgedRows()).to.eql([2]);
+      expect([...host.tooNarrowCells]).to.eql(['col1 row1']);
+    });
+
+    it('judges every row again when a column is made wider, or the styles change', () => {
+      host.renderState = sheet([], [200, 50, 50], { cellData: cells });
+      expect(judgedRows()).to.eql([1, 2]);
+      expect(host.tooNarrowCells.size, 'both fit now').to.equal(0);
+
+      host.renderState = sheet([], [10, 50, 50], { cellData: cells });
+      judgedRows();
+      host.renderState = sheet([], [10, 50, 50], { cellData: cells, cellStyleToCSSStyle: { 0: 'color: red' } });
+      expect(judgedRows(), 'new styles').to.eql([1, 2]);
+    });
+
+    it('judges every row again once either set was put in place of the one it left', () => {
+      host.tooNarrowCells = new Set();
+      expect(judgedRows()).to.eql([1, 2]);
+      expect([...host.tooNarrowCells]).to.eql(['col1 row1', 'col1 row2']);
+
+      host.fittingSpills = new Set(['col1 row1']);
+      expect(judgedRows()).to.eql([1, 2]);
+      expect(host.fittingSpills.size, 'not a run-on cell').to.equal(0);
+    });
+
+    it('judges every row again for another map, and every time for a map that does not count its changes', () => {
+      host.renderState = { ...host.renderState, cellData: sheetCells() };
+      expect(judgedRows()).to.eql([1, 2]);
+
+      const plain = new Map([...cells]);
+      const get = plain.get.bind(plain);
+      plain.get = (key: string) => {
+        looked.add(Number(key.split('row')[1]));
+        return get(key);
+      };
+      host.renderState = { ...host.renderState, cellData: plain };
+      expect(judgedRows()).to.eql([1, 2]);
+      host.renderState = { ...host.renderState };
+      expect(judgedRows()).to.eql([1, 2]);
+    });
+
+    it('takes a row scrolled out of view and back as it was judged, without looking at it again', () => {
+      cells.set('col1 row3', cell(1, 3, '12345678', { needsMeasure: true }));
+      const rows = (first: number): Partial<CellGridRenderState> => ({
+        cellData: cells,
+        viewport: { ...host.renderState.viewport, firstRowIndex: first, lastRowIndex: first + 1 },
+        rowY: [20 * (first - 1), 20 * first]
+      });
+
+      host.renderState = sheet([], [10, 50, 50], rows(2));
+      expect(judgedRows()).to.eql([3]);
+      host.renderState = sheet([], [10, 50, 50], rows(1));
+      expect(judgedRows()).to.eql([]);
+      expect([...host.tooNarrowCells]).to.eql(['col1 row1', 'col1 row2', 'col1 row3']);
     });
   });
 

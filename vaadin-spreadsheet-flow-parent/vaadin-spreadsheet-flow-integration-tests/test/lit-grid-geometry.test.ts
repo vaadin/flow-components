@@ -12,7 +12,6 @@ import {
   cellBoxOnGrid,
   columnWidthOf,
   drawnCellBox,
-  drawnRanges,
   frozenExtentOf,
   quadrantOf,
   quadrants
@@ -108,49 +107,6 @@ describe('GridGeometry', () => {
 
     it('are none before anything is measured', () => {
       expect(quadrants(emptyCellGridRenderState())).to.eql([]);
-    });
-  });
-
-  describe('the cells drawn', () => {
-    it('are the scrolling range alone without frozen panes', () => {
-      const state = {
-        ...emptyCellGridRenderState(),
-        viewport: {
-          ...emptyCellGridRenderState().viewport,
-          firstColumnIndex: 3,
-          lastColumnIndex: 9,
-          firstRowIndex: 20,
-          lastRowIndex: 40
-        }
-      };
-
-      expect(drawnRanges(state)).to.eql([{ c1: 3, c2: 9, r1: 20, r2: 40 }]);
-    });
-
-    it('add the frozen panes, the corner where both are frozen', () => {
-      const state = {
-        ...emptyCellGridRenderState(),
-        viewport: {
-          ...emptyCellGridRenderState().viewport,
-          firstColumnIndex: 3,
-          lastColumnIndex: 9,
-          firstRowIndex: 20,
-          lastRowIndex: 40
-        },
-        verticalSplitPosition: 2,
-        horizontalSplitPosition: 1
-      };
-
-      expect(drawnRanges(state)).to.eql([
-        { c1: 3, c2: 9, r1: 20, r2: 40 },
-        { c1: 3, c2: 9, r1: 1, r2: 2 },
-        { c1: 1, c2: 1, r1: 20, r2: 40 },
-        { c1: 1, c2: 1, r1: 1, r2: 2 }
-      ]);
-    });
-
-    it('are none before anything is measured', () => {
-      expect(drawnRanges(emptyCellGridRenderState())).to.eql([]);
     });
   });
 

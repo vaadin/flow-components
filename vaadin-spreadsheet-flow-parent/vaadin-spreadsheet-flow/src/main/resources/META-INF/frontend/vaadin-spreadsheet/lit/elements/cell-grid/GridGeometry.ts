@@ -94,15 +94,6 @@ export function quadrants(state: CellGridRenderState): QuadrantRenderOpts[] {
   return panes;
 }
 
-/**
- * The cell ranges the grid draws: the scrolling pane's, and those of the
- * frozen panes there are. 1-based and inclusive; empty while nothing is
- * measured.
- */
-export function drawnRanges(state: CellGridRenderState): Array<{ c1: number; c2: number; r1: number; r2: number }> {
-  return quadrants(state).map((pane) => ({ c1: pane.colStart, c2: pane.colEnd, r1: pane.rowStart, r2: pane.rowEnd }));
-}
-
 /** The pane a cell is drawn in, by which side of each freeze it lies. */
 export function quadrantOf(col: number, row: number, frozenCols: number, frozenRows: number): QuadrantName {
   const top = row <= frozenRows;
