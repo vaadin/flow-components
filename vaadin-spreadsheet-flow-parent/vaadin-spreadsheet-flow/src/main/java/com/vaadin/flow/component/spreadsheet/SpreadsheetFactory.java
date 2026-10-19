@@ -123,7 +123,7 @@ public class SpreadsheetFactory implements Serializable {
             // Writing uses a streaming workbook up: the one shown is read
             // back from the file. Any other stays as it is, and so does what
             // the application set on it, such as pop-up buttons.
-            sxssf.dispose();
+            dispose(sxssf);
             spreadsheet.loader().show(WorkbookFactory.create(file));
         }
         return file;
@@ -148,7 +148,7 @@ public class SpreadsheetFactory implements Serializable {
             stream.close();
             stream = null;
             if (workbook instanceof SXSSFWorkbook sxssf) {
-                sxssf.dispose();
+                dispose(sxssf);
             }
         } finally {
             if (stream != null) {
@@ -501,6 +501,18 @@ public class SpreadsheetFactory implements Serializable {
             spreadsheet.sheetModel().horizontalSplitPosition.set(0);
         }
 
+    }
+
+    /**
+     * Deletes the temporary files a streaming workbook keeps on disk, which
+     * leaves it unusable. Not with {@code close()}, which POI suggests in its
+     * place: that also closes the workbook the streaming one wraps, which can
+     * be the application's own, and a workbook opened from a file is written
+     * back to the file as it closes.
+     */
+    @SuppressWarnings("deprecation")
+    static void dispose(SXSSFWorkbook workbook) {
+        workbook.dispose();
     }
 
     /**

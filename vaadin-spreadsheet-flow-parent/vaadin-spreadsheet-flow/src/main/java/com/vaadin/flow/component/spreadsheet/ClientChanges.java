@@ -140,9 +140,9 @@ final class ClientChanges implements Serializable {
         }
         spreadsheet.clientCells.flush();
         // By kind, in the order the kinds are declared.
-        calls.forEach((kind, pending) -> pending
-                .forEach(call -> spreadsheet.getElement()
-                        .callJsFunction(call.function(), call.arguments())));
+        calls.forEach((kind, pending) -> pending.forEach(
+                call -> spreadsheet.getElement().callJsFunction(call.function(),
+                        (Object[]) call.arguments())));
         calls.clear();
     }
 

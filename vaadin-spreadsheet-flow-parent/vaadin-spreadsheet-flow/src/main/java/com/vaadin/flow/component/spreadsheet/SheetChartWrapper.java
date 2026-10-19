@@ -63,7 +63,8 @@ public class SheetChartWrapper extends SheetOverlayWrapper
             try {
                 Class<?> clazz = Class.forName(implementation);
                 if (ChartCreator.class.isAssignableFrom(clazz)) {
-                    setChartCreator((ChartCreator) clazz.newInstance());
+                    setChartCreator((ChartCreator) clazz
+                            .getDeclaredConstructor().newInstance());
                 }
             } catch (Exception e) {
                 LOGGER.warn(

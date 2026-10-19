@@ -63,7 +63,7 @@ final class SheetLoader implements Serializable {
     void loadNew() {
         Workbook workbook = spreadsheet.getWorkbook();
         if (workbook instanceof SXSSFWorkbook sxssf) {
-            sxssf.dispose();
+            SpreadsheetFactory.dispose(sxssf);
         }
         final XSSFWorkbook newWorkbook = new XSSFWorkbook();
         prepareNewSheet(createNewSheet(newWorkbook),
@@ -108,7 +108,7 @@ final class SheetLoader implements Serializable {
         if (oldWorkbook != null) {
             spreadsheet.clearSheetServerSide();
             if (oldWorkbook instanceof SXSSFWorkbook sxssf) {
-                sxssf.dispose();
+                SpreadsheetFactory.dispose(sxssf);
             }
         }
         show(workbook);

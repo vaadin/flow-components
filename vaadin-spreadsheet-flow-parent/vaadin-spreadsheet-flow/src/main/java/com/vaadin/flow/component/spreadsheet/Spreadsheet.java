@@ -1036,15 +1036,12 @@ public class Spreadsheet extends Component
         return showCustomEditorOnFocus.get();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.vaadin.server.AbstractClientConnector#fireEvent(java.util.EventObject
-     * )
+    /**
+     * Fires the event to its listeners. Overridden to open it to the helpers of
+     * this package, which fire the component's events.
      */
     @Override
-    protected void fireEvent(ComponentEvent event) {
+    protected void fireEvent(ComponentEvent<?> event) {
         super.fireEvent(event);
     }
 

@@ -444,7 +444,7 @@ public class SpreadsheetStyleFactory implements Serializable {
      */
     private void defaultFontStyle(CellStyle cellStyle, StringBuilder sb) {
         defaultFont = spreadsheet.getWorkbook()
-                .getFontAt(cellStyle.getFontIndexAsInt());
+                .getFontAt(cellStyle.getFontIndex());
         defaultFontFamily = fontFamily(defaultFont);
         defaultFontHeightInPoints = defaultFont.getFontHeightInPoints();
         sb.append(defaultFontFamily);
@@ -470,8 +470,8 @@ public class SpreadsheetStyleFactory implements Serializable {
     private void fontStyle(StringBuilder sb, CellStyle cellStyle) {
         try {
             Font font = spreadsheet.getWorkbook()
-                    .getFontAt(cellStyle.getFontIndexAsInt());
-            if (font.getIndexAsInt() == defaultFont.getIndexAsInt()) {
+                    .getFontAt(cellStyle.getFontIndex());
+            if (font.getIndex() == defaultFont.getIndex()) {
                 // uses default font, no need to add styles
                 return;
             }
@@ -496,7 +496,7 @@ public class SpreadsheetStyleFactory implements Serializable {
         } catch (IndexOutOfBoundsException missingFont) {
             LOGGER.warn(
                     "Cell style {} has font {}, which the workbook has not: its cells are shown in the font of the default style",
-                    cellStyle.getIndex(), cellStyle.getFontIndexAsInt());
+                    cellStyle.getIndex(), cellStyle.getFontIndex());
         }
     }
 
