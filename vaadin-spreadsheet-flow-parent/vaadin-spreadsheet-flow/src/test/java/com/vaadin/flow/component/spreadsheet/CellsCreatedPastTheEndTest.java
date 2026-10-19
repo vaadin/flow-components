@@ -21,9 +21,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.tests.MockUIExtension;
 
 /**
- * Cells created, or rows shifted, past the last row or column shown: the sheet
- * grows to show them, with the styles and locks of the rows and columns it
- * grows by, as loading the workbook shows it.
+ * Cells created, with a value or a formula, or rows shifted, past the last row
+ * or column shown: the sheet grows to show them, with the styles and locks of
+ * the rows and columns it grows by, as loading the workbook shows it.
  */
 class CellsCreatedPastTheEndTest {
 
@@ -70,6 +70,22 @@ class CellsCreatedPastTheEndTest {
 
         assertEquals(List.of(), harness.check(spreadsheet -> spreadsheet
                 .refreshCells(spreadsheet.createCell(196, 52, "column 53"))));
+    }
+
+    @Test
+    void aFormulaCellJustPastTheLastRow() {
+        harness.show(workbook());
+
+        assertEquals(List.of(), harness.check(spreadsheet -> spreadsheet
+                .refreshCells(spreadsheet.createFormulaCell(200, 0, "1+1"))));
+    }
+
+    @Test
+    void aFormulaCellJustPastTheLastColumn() {
+        harness.show(workbook());
+
+        assertEquals(List.of(), harness.check(spreadsheet -> spreadsheet
+                .refreshCells(spreadsheet.createFormulaCell(196, 52, "1+1"))));
     }
 
     @Test

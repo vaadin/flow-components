@@ -502,4 +502,21 @@ class SpreadsheetCellUpdatesTest {
         assertEquals(1, calls().stream().filter(sent -> sent.startsWith("C1="))
                 .count());
     }
+
+    @Test
+    void aCellOverwrittenWithoutARefresh_isSentAsTheClientLoadsItAgain() {
+        // Not refreshed, the value is sent once the client loads the cell
+        // again: the server forgets it sent the old one.
+        show();
+        showRows(30, 50);
+        calls();
+
+        spreadsheet.createCell(0, 2, "new");
+        spreadsheet.createFormulaCell(0, 0, "2+2");
+        showRows(1, 20);
+
+        List<String> sent = calls();
+        assertTrue(sent.contains("C1=new"), sent.toString());
+        assertTrue(sent.contains("A1=4"), sent.toString());
+    }
 }

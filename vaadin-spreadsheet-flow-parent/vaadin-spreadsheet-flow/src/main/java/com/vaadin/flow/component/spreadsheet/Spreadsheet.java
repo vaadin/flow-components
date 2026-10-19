@@ -1752,21 +1752,10 @@ public class Spreadsheet extends Component
      */
     public Cell createFormulaCell(int row, int col, String formula)
             throws IllegalArgumentException {
-        final Sheet activeSheet = workbook
-                .getSheetAt(workbook.getActiveSheetIndex());
-        Row r = activeSheet.getRow(row);
-        if (r == null) {
-            r = activeSheet.createRow(row);
-        }
-        Cell cell = r.getCell(col);
-        if (cell == null) {
-            cell = r.createCell(col, CellType.FORMULA);
-        } else {
-            final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
-            valueManager.clearCellCache(key);
-        }
+        Cell cell = cellToWrite(row, col, CellType.FORMULA);
         cell.setCellFormula(formula);
         valueManager.cellUpdated(cell);
+        showCellsUpTo(row, col);
         return cell;
     }
 
@@ -1795,19 +1784,7 @@ public class Spreadsheet extends Component
      */
     public Cell createCell(int row, int col, Object value)
             throws IllegalArgumentException {
-        final Sheet activeSheet = workbook
-                .getSheetAt(workbook.getActiveSheetIndex());
-        Row r = activeSheet.getRow(row);
-        if (r == null) {
-            r = activeSheet.createRow(row);
-        }
-        Cell cell = r.getCell(col);
-        if (cell == null) {
-            cell = r.createCell(col);
-        } else {
-            final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
-            valueManager.clearCellCache(key);
-        }
+        Cell cell = cellToWrite(row, col, CellType.BLANK);
         if (value instanceof Double d) {
             cell.setCellValue(d);
         } else if (value instanceof Boolean b) {
@@ -1820,16 +1797,44 @@ public class Spreadsheet extends Component
             cell.setCellValue(value.toString());
         }
         valueManager.cellUpdated(cell);
-        // A cell past the last row or column shown is shown, as loading the
-        // workbook shows it. The counts change at once, what follows from them
-        // once before the response: cells are often created one after another,
-        // and each would read every row and column again.
+        showCellsUpTo(row, col);
+        return cell;
+    }
+
+    /**
+     * The cell of the active sheet at the 0-based row and column, made of the
+     * type given if there is none. One already there has the value the client
+     * was sent forgotten, for its new one to be sent.
+     */
+    private Cell cellToWrite(int row, int col, CellType type) {
+        final Sheet activeSheet = workbook
+                .getSheetAt(workbook.getActiveSheetIndex());
+        Row r = activeSheet.getRow(row);
+        if (r == null) {
+            r = activeSheet.createRow(row);
+        }
+        Cell cell = r.getCell(col);
+        if (cell == null) {
+            cell = r.createCell(col, type);
+        } else {
+            valueManager
+                    .clearCellCache(SpreadsheetUtil.toKey(col + 1, row + 1));
+        }
+        return cell;
+    }
+
+    /**
+     * A cell past the last row or column shown is shown, as loading the
+     * workbook shows it. The counts change at once, what follows from them once
+     * before the response: cells are often created one after another, and each
+     * would read every row and column again.
+     */
+    private void showCellsUpTo(int row, int col) {
         if (row >= getRows() || col >= getColumns()) {
             sheetModel().rows.set(Math.max(getRows(), row + 1));
             sheetModel().cols.set(Math.max(getColumns(), col + 1));
             clientChanges.sizes();
         }
-        return cell;
     }
 
     /**
