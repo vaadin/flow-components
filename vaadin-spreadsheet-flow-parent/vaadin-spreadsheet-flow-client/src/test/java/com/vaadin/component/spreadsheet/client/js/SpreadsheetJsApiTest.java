@@ -417,7 +417,10 @@ class SpreadsheetJsApiTest {
         stateJson.setAccessible(true);
         for (StateChangeEvent event : events.getAllValues()) {
             JsonObject changedProperties = (JsonObject) stateJson.get(event);
-            assertTrue(changedProperties.hasKey("active"));
+            for (String property : new String[] { "active", "headerHidden",
+                    "popupHeight", "popupWidth" }) {
+                assertTrue(changedProperties.hasKey(property), property);
+            }
             assertSame(popupConnector, event.getConnector());
         }
         Mockito.verifyNoMoreInteractions(popupConnector);
