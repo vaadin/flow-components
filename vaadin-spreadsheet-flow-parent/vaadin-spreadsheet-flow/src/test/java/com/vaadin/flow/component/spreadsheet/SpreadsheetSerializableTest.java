@@ -30,6 +30,10 @@ class SpreadsheetSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.charts\\..*Serializer(Modifier)?",
                 "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\.BeanSerializationDelegate",
                 "com\\.vaadin\\.flow\\.component\\.charts\\.model\\.serializers\\.BeanSerializerDelegator",
+                // The GWT client's state and pop-up button calls, kept
+                // deprecated as main has them and never made by the component.
+                "com\\.vaadin\\.flow\\.component\\.spreadsheet\\.(shared\\.SpreadsheetState"
+                        + "|rpc\\.PopupButtonClientRpc)",
                 // Static helpers, never made.
                 "com\\.vaadin\\.flow\\.component\\.spreadsheet\\.(ClipboardText(\\$.*)?"
                         + "|ColumnWidths|InvalidFormulaMarks|POIReflectionTools"
