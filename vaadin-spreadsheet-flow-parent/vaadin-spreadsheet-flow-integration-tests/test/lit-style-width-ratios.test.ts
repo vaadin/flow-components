@@ -161,13 +161,26 @@ describe('Spreadsheet — cell-style width ratios', () => {
     expect(types).to.include('onSheetScroll');
   });
 
-  it('measures once for repaints that come before the grid has painted', async () => {
-    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
+  it('measures once for repaints that come before the grid has painted, and the styles they bring', async () => {
+    // Style 2 has all along the size style 1 is given while the first
+    // measurement waits for the paint.
+    ctx.sheet.setCellStyleToCSSStyle({ 1: 'font-size:10px;', 2: 'font-size:30px;' });
     ctx.sheet.recomputeViewport();
-    ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:12px;' });
-    await settle(ctx.sheet);
+    ctx.sheet.setCellStyleToCSSStyle({ 1: 'font-size:30px;', 2: 'font-size:30px;' });
+    // Drawn as the sheet schedules it, and not recomputed before the paint.
+    for (let i = 0; i < 3; i++) {
+      await ctx.sheet.getCellGrid().updateComplete;
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
 
-    expect(ctx.sent.filter((e) => e.type === 'setCellStyleWidthRatios')).to.have.length(1);
+    const reports = ctx.sent.filter((e) => e.type === 'setCellStyleWidthRatios');
+    expect(reports).to.have.length(1);
+    const [changed, constant] = reports[0].data.ratios as number[];
+    expect(changed).to.equal(constant);
+    const types = ctx.sent.map((e) => e.type);
+    expect(types.indexOf('onConnectorInit'), 'the sheet introduced after the ratios').to.be.greaterThan(
+      types.indexOf('setCellStyleWidthRatios')
+    );
   });
 
   it('tells the server where the sheet is at once while no measurement waits', async () => {

@@ -26,6 +26,7 @@ describe('ServerSync', () => {
   let cells: Map<string, CellData>;
   let drawnRange: LoadRange | null;
   let widths: Record<string, number>;
+  let paintedWidths: Record<string, number>;
   let probeTexts: string[];
   let paints: number;
   let renders: number;
@@ -57,6 +58,7 @@ describe('ServerSync', () => {
     cells = new Map();
     drawnRange = { r1: 1, c1: 1, r2: 30, c2: 10 };
     widths = {};
+    paintedWidths = {};
     probeTexts = [];
     paints = 0;
     renders = 0;
@@ -68,11 +70,15 @@ describe('ServerSync', () => {
         drawnRange: () => drawnRange,
         textWidths: (cellStyles, text) => {
           probeTexts.push(text);
-          return cellStyles.map((cellStyle) => widths[cellStyle] ?? 0);
+          return cellStyles.map((cellStyle) => paintedWidths[cellStyle] ?? 0);
         },
         painted: () => {
           paints++;
-          return Promise.resolve();
+          // The paint shows the rules handed to the grid before it was asked for.
+          const painting = { ...widths };
+          return Promise.resolve().then(() => {
+            paintedWidths = painting;
+          });
         },
         scheduleRender: () => renders++,
         send: (event) => sent.push(event)
@@ -267,38 +273,57 @@ describe('ServerSync', () => {
       expect(ratioReports()).to.have.length(1);
     });
 
-    it('measures again, after another drawing, for a workbook loaded while a measurement waited for the paint', async () => {
+    it('measures styles that came while a measurement waited for the paint once, after the drawing that brings them', async () => {
       styles = { '0': '' };
       widths = { cs0: 70 };
       sync.restyled();
       sync.drawn();
-      sync.workbookLoaded();
-      // The drawing the load asked for, before the grid has painted
-      sync.drawn();
+      widths = { cs0: 80 };
+      sync.restyled();
       await painted();
-      expect(ratioReports(), 'measured once while waiting').to.have.length(1);
-      expect(renders, 'the load, and another drawing to measure again').to.equal(2);
+      expect(ratioReports(), 'nothing measured from rules perhaps not painted').to.eql([]);
+      expect(renders, 'another drawing asked for').to.equal(1);
 
       sync.drawn();
       await painted();
 
-      expect(ratioReports()).to.have.length(2);
+      expect(ratioReports()).to.eql([
+        { type: 'setCellStyleWidthRatios', data: { styleIndexes: [0], ratios: [8] } }
+      ]);
     });
 
-    it('measures again for styles the server sent while a measurement waited for the paint', async () => {
+    it('introduces the sheet after the ratios, also when a measurement gave way to another', async () => {
       styles = { '0': '' };
-      widths = { cs0: 70, cs1: 80 };
+      widths = { cs0: 70 };
       sync.restyled();
       sync.drawn();
-      styles = { '0': '', '1': '' };
       sync.restyled();
+      // The drawing of what came, before the grid has painted
+      sync.drawn();
+      await painted();
+      expect(types(), 'nothing said before the styles are measured').to.eql([]);
+
+      sync.drawn();
+      await painted();
+
+      expect(types()).to.eql(['setCellStyleWidthRatios', 'onConnectorInit']);
+    });
+
+    it('measures a workbook loaded while a measurement waited for the paint after its drawing', async () => {
+      styles = { '0': '' };
+      widths = { cs0: 70 };
+      sync.restyled();
+      sync.drawn();
+      widths = { cs0: 80 };
+      sync.workbookLoaded();
       await painted();
 
       sync.drawn();
       await painted();
 
-      expect(ratioReports()).to.have.length(2);
-      expect(ratioReports()[1].data).to.eql({ styleIndexes: [0, 1], ratios: [7, 8] });
+      expect(ratioReports()).to.eql([
+        { type: 'setCellStyleWidthRatios', data: { styleIndexes: [0], ratios: [8] } }
+      ]);
     });
 
     it('asks for no drawing after a measurement that found nothing laid out', async () => {

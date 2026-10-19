@@ -57,7 +57,7 @@ export class ServerSync {
   /** Whether the cell styles have changed since their widths were last measured. */
   private restyledSinceMeasured = false;
   /** The width measurement waiting for the grid to paint, which the viewport goes after. */
-  private pendingMeasurement: Promise<void> | null = null;
+  private pendingMeasurement: Promise<boolean> | null = null;
   /** The style indexes last reported to the server with a width ratio. */
   private measured: ReadonlySet<number> = new Set();
 
@@ -78,21 +78,27 @@ export class ServerSync {
   drawn(): void {
     if (this.restyledSinceMeasured && this.pendingMeasurement === null) {
       // Measured once the grid has painted the rules that were just handed to
-      // it, not against the ones it is replacing. Styles that change while it
-      // waits are measured again, after another drawing: their rules may not
-      // be painted yet.
+      // it, not against the ones it is replacing.
       this.restyledSinceMeasured = false;
       this.pendingMeasurement = this.sheet.painted().then(() => {
         this.pendingMeasurement = null;
-        const restyledWhileWaiting = this.restyledSinceMeasured;
-        this.reportWidthRatios();
-        if (restyledWhileWaiting) {
+        if (this.restyledSinceMeasured) {
+          // Styles came while it waited, and their rules may not be painted
+          // yet: they are measured, and the sheet introduced, after another
+          // drawing.
           this.sheet.scheduleRender();
+          return false;
         }
+        this.reportWidthRatios();
+        return true;
       });
     }
     if (this.pendingMeasurement !== null) {
-      void this.pendingMeasurement.then(() => this.announceViewport());
+      void this.pendingMeasurement.then((reported) => {
+        if (reported) {
+          this.announceViewport();
+        }
+      });
       return;
     }
     this.announceViewport();
