@@ -251,7 +251,7 @@ describe('computeMergedRegionBoxes', () => {
 
   it('places a region by the sheet\'s own coordinates', () => {
     const [box] = computeMergedRegionBoxes(
-      [{ id: 0, col1: 3, col2: 4, row1: 2, row2: 4 }],
+      [{ col1: 3, col2: 4, row1: 2, row2: 4 }],
       none,
       unscrolled,
       col,
@@ -265,7 +265,7 @@ describe('computeMergedRegionBoxes', () => {
     // Without a freeze the region scrolls with the sheet: nothing pinned,
     // nothing to shorten.
     const [box] = computeMergedRegionBoxes(
-      [{ id: 0, col1: 1, col2: 2, row1: 1, row2: 5 }],
+      [{ col1: 1, col2: 2, row1: 1, row2: 5 }],
       none,
       { left: 30, top: 50 },
       col,
@@ -279,7 +279,7 @@ describe('computeMergedRegionBoxes', () => {
     // Rows 1-2 frozen; the region runs from row 2 to row 4, 40px past the
     // split, which start past the freeze line's own pixel. Scrolled 15px,
     // 25px of that part is still out from under the frozen rows.
-    const regions = [{ id: 0, col1: 3, col2: 4, row1: 2, row2: 4 }];
+    const regions = [{ col1: 3, col2: 4, row1: 2, row2: 4 }];
     const frozen = { rows: 2, cols: 0 };
 
     const [still] = computeMergedRegionBoxes(regions, frozen, unscrolled, col, row);
@@ -293,7 +293,7 @@ describe('computeMergedRegionBoxes', () => {
 
   it('pins a region that runs past both splits on both axes', () => {
     const [box] = computeMergedRegionBoxes(
-      [{ id: 0, col1: 1, col2: 3, row1: 1, row2: 3 }],
+      [{ col1: 1, col2: 3, row1: 1, row2: 3 }],
       { rows: 1, cols: 1 },
       { left: 60, top: 10 },
       col,
@@ -306,7 +306,7 @@ describe('computeMergedRegionBoxes', () => {
 
   it('does not shorten a region that starts past the split', () => {
     const [box] = computeMergedRegionBoxes(
-      [{ id: 0, col1: 3, col2: 4, row1: 5, row2: 8 }],
+      [{ col1: 3, col2: 4, row1: 5, row2: 8 }],
       { rows: 2, cols: 2 },
       { left: 70, top: 30 },
       col,
@@ -320,7 +320,7 @@ describe('computeMergedRegionBoxes', () => {
 
   it('gives hidden rows and columns no size', () => {
     const [box] = computeMergedRegionBoxes(
-      [{ id: 0, col1: 1, col2: 3, row1: 1, row2: 3 }],
+      [{ col1: 1, col2: 3, row1: 1, row2: 3 }],
       none,
       unscrolled,
       (c) => (c === 2 ? 0 : 50),

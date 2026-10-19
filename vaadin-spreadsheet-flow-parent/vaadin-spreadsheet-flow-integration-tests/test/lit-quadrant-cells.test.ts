@@ -33,7 +33,7 @@ import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/
  * covers.
  */
 describe('QuadrantCells', () => {
-  const region = (col1: number, row1: number, col2: number, row2: number) => ({ id: 0, col1, row1, col2, row2 });
+  const region = (col1: number, row1: number, col2: number, row2: number) => ({ col1, row1, col2, row2 });
 
   function cell(col: number, row: number, extra: Partial<CellData> = {}): [string, CellData] {
     return [

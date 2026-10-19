@@ -143,8 +143,8 @@ export function cellCoordToAddress(coord: CellCoord): string {
  *                          `"A1:B3"`, `"Sheet2!C5"`).
  * @param activeSheetName   Active sheet's name; refs not on this sheet
  *                          return `null`.
- * @returns A `MergedRegion` with `id=0` describing the addressed range,
- *          or `null` when the ref is on another sheet.
+ * @returns A `MergedRegion` describing the addressed range, or `null`
+ *          when the ref is on another sheet.
  */
 export function parseCellRefRange(ref: string, activeSheetName: string): MergedRegion | null {
   if (ref.includes('!')) {
@@ -161,7 +161,6 @@ export function parseCellRefRange(ref: string, activeSheetName: string): MergedR
     const c1 = parseSingleCell(refs[0]);
     const c2 = parseSingleCell(refs[1]);
     return {
-      id: 0,
       col1: c1.col,
       col2: c2.col,
       row1: c1.row,
@@ -171,7 +170,6 @@ export function parseCellRefRange(ref: string, activeSheetName: string): MergedR
     // Single-cell ref.
     const cc = parseSingleCell(ref);
     return {
-      id: 0,
       col1: cc.col,
       col2: cc.col,
       row1: cc.row,

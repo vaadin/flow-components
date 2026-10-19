@@ -77,7 +77,7 @@ describe('CellEditor', () => {
     it('starts from a whole merged cell, and takes in the columns past its last one', () => {
       const state = sheet(null, {
         colWidths: [50, 0, 50, 70],
-        mergedRegions: [{ id: 1, col1: 1, row1: 1, col2: 3, row2: 1 }],
+        mergedRegions: [{ col1: 1, row1: 1, col2: 3, row2: 1 }],
         mergedRegionBoxes: [{ left: 0, top: 0, width: 100, height: 20 }]
       });
 

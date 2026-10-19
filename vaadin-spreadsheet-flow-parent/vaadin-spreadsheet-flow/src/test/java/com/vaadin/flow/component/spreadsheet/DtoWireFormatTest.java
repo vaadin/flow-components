@@ -118,14 +118,15 @@ class DtoWireFormatTest {
     }
 
     @Test
-    void mergedRegion_allFields_serializeAlphabetically() {
+    void mergedRegion_cellsSerializeAlphabetically_withoutTheId() {
+        // The client reads no id, and one numbered anew on each reload made
+        // an unchanged list of regions differ from the one sent before.
         MergedRegion region = new MergedRegion(2, 3, 4, 5);
         region.id = 99;
 
         String json = Serializer.toJson(region).toString();
 
-        assertEquals("{\"col1\":2,\"col2\":4,\"id\":99,\"row1\":3,\"row2\":5}",
-                json);
+        assertEquals("{\"col1\":2,\"col2\":4,\"row1\":3,\"row2\":5}", json);
     }
 
     @Test

@@ -618,7 +618,7 @@ describe('Spreadsheet — custom cell editors', () => {
     // region — the slot has to be there or the editor has nowhere to go.
     const editor = field();
     const { host, sheet, cleanup } = attachSheet({ '77': editor });
-    sheet.setMergedRegions([{ id: 1, col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
+    sheet.setMergedRegions([{ col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;
@@ -638,7 +638,7 @@ describe('Spreadsheet — custom cell editors', () => {
   it('shows a component in a merged cell', async () => {
     const widget = document.createElement('span');
     const { host, sheet, cleanup } = attachSheet({ '31': widget });
-    sheet.setMergedRegions([{ id: 1, col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
+    sheet.setMergedRegions([{ col1: 2, row1: 2, col2: 4, row2: 3 }] as any);
     sheet.setComponentIDtoCellKeysMap({ '31': 'col2 row2' });
     sheet.recomputeViewport();
     await sheet.getCellGrid().updateComplete;

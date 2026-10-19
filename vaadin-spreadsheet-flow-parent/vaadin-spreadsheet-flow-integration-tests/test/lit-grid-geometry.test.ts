@@ -142,7 +142,7 @@ describe('GridGeometry', () => {
       // A merge in the frozen corner, its box in its pane's coordinates: on
       // screen it moves with the scroll, as the cell it starts at does.
       const state = frozenSheet({
-        mergedRegions: [{ id: 1, col1: 2, row1: 1, col2: 3, row2: 1 }],
+        mergedRegions: [{ col1: 2, row1: 1, col2: 3, row2: 1 }],
         mergedRegionBoxes: [{ left: 50, top: 0, width: 130, height: 30 }]
       });
 

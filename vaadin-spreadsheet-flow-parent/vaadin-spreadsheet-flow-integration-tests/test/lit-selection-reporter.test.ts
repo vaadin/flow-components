@@ -133,7 +133,7 @@ describe('SelectionReporter', () => {
     });
 
     it('reports a merge as its one cell', () => {
-      store.write('mergedRegions', [{ id: 1, col1: 2, col2: 3, row1: 2, row2: 4 }]);
+      store.write('mergedRegions', [{ col1: 2, col2: 3, row1: 2, row2: 4 }]);
       store.selectCellOrMerge(3, 3);
 
       report.selection();

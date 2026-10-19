@@ -72,13 +72,10 @@ export interface CellData {
 /**
  * A merged-region range on the sheet.
  *
- * Server-side shape: `com.vaadin.flow.component.spreadsheet.client.MergedRegion`.
- * `id` is positive for POI-tracked regions; the algorithm in
- * `MergedRegionUtil.findIncreasingSelection` constructs transient
- * regions with id 0.
+ * Server-side shape: `com.vaadin.flow.component.spreadsheet.client.MergedRegion`,
+ * whose id the server keeps to itself.
  */
 export interface MergedRegion {
-  id: number;
   /** Left column, 1-based, inclusive. */
   col1: number;
   /** Right column, 1-based, inclusive. */

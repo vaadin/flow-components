@@ -30,10 +30,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SelectionChangeEvent;
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
+import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.internal.change.MapPutChange;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.JsonNode;
@@ -115,6 +119,37 @@ class SpreadsheetMergedRegionsTest {
                 }
             }
         }
+        return sent;
+    }
+
+    /**
+     * The region lists the response gives the client, each as POI names its
+     * regions.
+     */
+    private List<List<String>> regionsSent() {
+        UI current = ui.getUI();
+        StateNode node = spreadsheet.getElement().getNode();
+        current.getInternals().getStateTree()
+                .runExecutionsBeforeClientResponse();
+        List<List<String>> sent = new ArrayList<>();
+        current.getInternals().getStateTree().collectChanges(change -> {
+            if (change.getNode() == node && change instanceof MapPutChange put
+                    && put.getFeature() == ElementPropertyMap.class
+                    && "mergedRegions".equals(put.getKey())) {
+                List<String> regions = new ArrayList<>();
+                for (JsonNode region : (JsonNode) put.getValue()) {
+                    // 1-based
+                    regions.add(
+                            new CellRangeAddress(region.get("row1").asInt() - 1,
+                                    region.get("row2").asInt() - 1,
+                                    region.get("col1").asInt() - 1,
+                                    region.get("col2").asInt() - 1)
+                                    .formatAsString());
+                }
+                sent.add(regions);
+            }
+        });
+        ui.dumpPendingJavaScriptInvocations();
         return sent;
     }
 
@@ -452,6 +487,20 @@ class SpreadsheetMergedRegionsTest {
 
         assertEquals(List.of("A3:B4"), clientRegions());
         assertEquals(List.of(1), ids());
+    }
+
+    @Test
+    void rowsShiftedPastTheRegions_sendThemNotAgain_andOverOne_sendTheMovedOnes() {
+        fillBut();
+        show("A1:B2", "C3:D3");
+        regionsSent();
+
+        // Rows below every region: the regions stay where they are.
+        spreadsheet.shiftRows(5, 8, 2);
+        assertEquals(List.of(), regionsSent());
+
+        spreadsheet.shiftRows(0, 3, 2);
+        assertEquals(List.of(List.of("A3:B4", "C5:D5")), regionsSent());
     }
 
     @Test

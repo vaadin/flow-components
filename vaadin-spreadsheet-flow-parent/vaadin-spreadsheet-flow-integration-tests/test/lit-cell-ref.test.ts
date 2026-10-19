@@ -100,7 +100,6 @@ describe('CellRef — parseCellRefRange', () => {
         const result = parseCellRefRange('A1', SHEET);
 
         expect(result).to.deep.equal({
-            id: 0,
             col1: 1,
             col2: 1,
             row1: 1,
@@ -112,7 +111,6 @@ describe('CellRef — parseCellRefRange', () => {
         const result = parseCellRefRange('A1:B3', SHEET);
 
         expect(result).to.deep.equal({
-            id: 0,
             col1: 1,
             col2: 2,
             row1: 1,
@@ -124,7 +122,6 @@ describe('CellRef — parseCellRefRange', () => {
         const result = parseCellRefRange('Sheet1!A1', SHEET);
 
         expect(result).to.deep.equal({
-            id: 0,
             col1: 1,
             col2: 1,
             row1: 1,
@@ -142,7 +139,6 @@ describe('CellRef — parseCellRefRange', () => {
         const result = parseCellRefRange('Sheet1!A1:C3', SHEET);
 
         expect(result).to.deep.equal({
-            id: 0,
             col1: 1,
             col2: 3,
             row1: 1,

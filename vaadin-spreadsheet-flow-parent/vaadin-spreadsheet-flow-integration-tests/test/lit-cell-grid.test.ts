@@ -1083,7 +1083,7 @@ describe('SpreadsheetCellGrid — clicking a merged cell', () => {
         sheet.setCols(6);
         sheet.setColW(new Array(6).fill(50));
         sheet.setRowH(new Array(10).fill(15));
-        sheet.setMergedRegions([{ id: 1, col1: 2, row1: 3, col2: 4, row2: 4 }] as any);
+        sheet.setMergedRegions([{ col1: 2, row1: 3, col2: 4, row2: 4 }] as any);
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
         const merged = sheet
@@ -1125,7 +1125,7 @@ describe('SpreadsheetCellGrid — clicking a merged cell', () => {
         sheet.setCols(6);
         sheet.setColW(new Array(6).fill(50));
         sheet.setRowH(new Array(10).fill(15));
-        sheet.setMergedRegions([{ id: 1, col1: 2, row1: 3, col2: 4, row2: 4 }] as any);
+        sheet.setMergedRegions([{ col1: 2, row1: 3, col2: 4, row2: 4 }] as any);
         sheet.recomputeViewport();
         await sheet.getCellGrid().updateComplete;
         const events: any[] = [];
@@ -1185,7 +1185,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
 
     it('renders one .merged-cell div per merged region at the top-left', async () => {
         const el = await attachWithState(buildMergedState([
-            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+            { col1: 2, col2: 3, row1: 2, row2: 3 },
         ]));
 
         // Single merged region → 1 merged-cell div.
@@ -1203,7 +1203,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
     it('sizes the merged-cell div to span the full region', async () => {
         const el = await attachWithState(buildMergedState([
             // cols 2..3, rows 2..3 → 100×40 area
-            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+            { col1: 2, col2: 3, row1: 2, row2: 3 },
         ]));
 
         const cell = el.shadowRoot!.querySelector('.merged-cell') as HTMLElement;
@@ -1220,7 +1220,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
             ['col2 row2', { ...makeCellData(2, 2, 'Merged!'), cellStyle: 'cs0' }],
         ]);
         const el = await attachWithState(buildMergedState(
-            [{ id: 1, col1: 2, col2: 3, row1: 2, row2: 3 }],
+            [{ col1: 2, col2: 3, row1: 2, row2: 3 }],
             cellData,
         ));
 
@@ -1232,7 +1232,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
 
     it('keeps the cells a merge covers, drawing the merge over them', async () => {
         const el = await attachWithState(buildMergedState([
-            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+            { col1: 2, col2: 3, row1: 2, row2: 3 },
         ]));
 
         // Two elements answer to the anchor coordinate: the cell itself
@@ -1264,7 +1264,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
     it('does NOT render an overlay when the merge top-left is outside the viewport', async () => {
         // viewport: cols 1..4, rows 1..4. Merge at (10..11, 10..11).
         const el = await attachWithState(buildMergedState([
-            { id: 1, col1: 10, col2: 11, row1: 10, row2: 11 },
+            { col1: 10, col2: 11, row1: 10, row2: 11 },
         ]));
 
         expect(el.shadowRoot!.querySelector('.merged-cell')).to.be.null;
@@ -1275,7 +1275,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
     it('clamps the overlay size when the merge extends past the viewport', async () => {
         // viewport: cols 1..4. Merge at cols 3..6 (extends past) rows 3..6.
         const el = await attachWithState(buildMergedState([
-            { id: 1, col1: 3, col2: 6, row1: 3, row2: 6 },
+            { col1: 3, col2: 6, row1: 3, row2: 6 },
         ]));
 
         const cell = el.shadowRoot!.querySelector('.merged-cell') as HTMLElement;
@@ -1292,8 +1292,8 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
 
     it('renders multiple merged-cell overlays for multiple regions', async () => {
         const el = await attachWithState(buildMergedState([
-            { id: 1, col1: 1, col2: 2, row1: 1, row2: 1 },
-            { id: 2, col1: 3, col2: 4, row1: 3, row2: 4 },
+            { col1: 1, col2: 2, row1: 1, row2: 1 },
+            { col1: 3, col2: 4, row1: 3, row2: 4 },
         ]));
 
         const merged = el.shadowRoot!.querySelectorAll('.merged-cell');
@@ -1309,7 +1309,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
 
     it('applies cell-range to the merged overlay when its top-left is in the selection range', async () => {
         const state = buildMergedState([
-            { id: 1, col1: 2, col2: 3, row1: 2, row2: 3 },
+            { col1: 2, col2: 3, row1: 2, row2: 3 },
         ]);
         // Active cell elsewhere; selection range covers the merge's top-left.
         state.selection = {
@@ -3774,7 +3774,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         // B1:C2 ends at x 150, where column B alone ends at 100.
         const { note, cleanup } = await inSheet(
             withNote('col2 row2', {
-                mergedRegions: [{ id: 1, col1: 2, row1: 2, col2: 3, row2: 3 }],
+                mergedRegions: [{ col1: 2, row1: 2, col2: 3, row2: 3 }],
                 mergedRegionBoxes: [{ left: 50, top: 20, width: 100, height: 40 }],
             }),
             800,
@@ -4158,7 +4158,7 @@ describe('SpreadsheetCellGrid — the markers of a merged cell', () => {
             colWidths: [50, 50, 50, 50],
             rowHeights: [20, 20, 20, 20],
             // B2:C3, 100px wide from x 50.
-            mergedRegions: [{ id: 1, col1: 2, row1: 2, col2: 3, row2: 3 }],
+            mergedRegions: [{ col1: 2, row1: 2, col2: 3, row2: 3 }],
             mergedRegionBoxes: [{ left: 50, top: 20, width: 100, height: 40 }],
             ...extra,
         };

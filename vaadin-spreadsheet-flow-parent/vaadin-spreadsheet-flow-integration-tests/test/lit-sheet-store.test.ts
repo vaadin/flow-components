@@ -21,7 +21,7 @@ import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/
  */
 describe('SheetStore', () => {
   /** B2:C4. */
-  const merge = { id: 1, col1: 2, col2: 3, row1: 2, row2: 4 };
+  const merge = { col1: 2, col2: 3, row1: 2, row2: 4 };
   let renders: number;
   let store: SheetStore;
 

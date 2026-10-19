@@ -227,7 +227,7 @@ describe('Spreadsheet store characterization — what a reload resets', () => {
 
   it('keeps the cell a merge was entered by when the server says the merge is selected', () => {
     ctx = attachSheet();
-    ctx.sheet.setMergedRegions([{ id: 1, col1: 1, col2: 2, row1: 1, row2: 2 }] as never);
+    ctx.sheet.setMergedRegions([{ col1: 1, col2: 2, row1: 1, row2: 2 }] as never);
     ctx.sheet.recomputeViewport();
     ctx.sheet.setSelectedCellAndRange('', 3, 1, 3, 3, 1, 1, false);
     // Into the merge A1:B2 from C1: entered by B1.

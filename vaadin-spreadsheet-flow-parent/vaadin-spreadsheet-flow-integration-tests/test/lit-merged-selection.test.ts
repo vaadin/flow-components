@@ -180,7 +180,7 @@ function attachSheet(): {
   sheet.setRows(10);
   sheet.setColW(new Array(10).fill(50));
   sheet.setRowH(new Array(10).fill(15));
-  sheet.setMergedRegions([{ id: 1, col1: 2, col2: 3, row1: 2, row2: 3 }] as any);
+  sheet.setMergedRegions([{ col1: 2, col2: 3, row1: 2, row2: 3 }] as any);
   sheet.recomputeViewport();
   const sent: { type: string; data: Record<string, unknown> }[] = [];
   host.addEventListener('spreadsheet-event', (e) => sent.push((e as CustomEvent).detail));

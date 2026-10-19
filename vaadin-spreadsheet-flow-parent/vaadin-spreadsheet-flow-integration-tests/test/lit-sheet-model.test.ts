@@ -48,8 +48,8 @@ describe('Spreadsheet model of the server properties', () => {
       read: [{ startIndex: 2, endIndex: 4, level: 1, collapsed: true }]
     },
     mergedRegions: {
-      sent: [{ id: 1, col1: 1, col2: 2, row1: 1, row2: 2 }],
-      read: [{ id: 1, col1: 1, col2: 2, row1: 1, row2: 2 }]
+      sent: [{ col1: 1, col2: 2, row1: 1, row2: 2 }],
+      read: [{ col1: 1, col2: 2, row1: 1, row2: 2 }]
     },
     cellKeysToEditorIdMap: { sent: { col2row3: '7' }, read: { col2row3: '7' } },
     componentIDtoCellKeysMap: { sent: { '8': 'col1row1' }, read: { '8': 'col1row1' } },
@@ -190,7 +190,7 @@ describe('Spreadsheet model of the server properties', () => {
   });
 
   it('keeps the values a change leaves alone as they are', () => {
-    const before = withProperty(initialSheetModel(), 'mergedRegions', [{ id: 1, col1: 1, col2: 2, row1: 1, row2: 2 }]);
+    const before = withProperty(initialSheetModel(), 'mergedRegions', [{ col1: 1, col2: 2, row1: 1, row2: 2 }]);
 
     const after = withProperty(before, 'rows', 10);
 
@@ -198,7 +198,7 @@ describe('Spreadsheet model of the server properties', () => {
   });
 
   it('holds each value the server sends as it is, not a copy', () => {
-    const regions = [{ id: 1, col1: 1, col2: 2, row1: 1, row2: 2 }];
+    const regions = [{ col1: 1, col2: 2, row1: 1, row2: 2 }];
 
     expect(withProperty(initialSheetModel(), 'mergedRegions', regions).mergedRegions).to.equal(regions);
   });

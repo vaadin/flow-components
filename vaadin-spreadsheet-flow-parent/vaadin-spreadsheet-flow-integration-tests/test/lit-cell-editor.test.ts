@@ -365,7 +365,7 @@ describe('SpreadsheetCellGrid — the editor grows with its text', () => {
             state(
                 { col: 2, row: 1, initialValue: '' },
                 {
-                    mergedRegions: [{ id: 1, col1: 2, row1: 1, col2: 3, row2: 2 }],
+                    mergedRegions: [{ col1: 2, row1: 1, col2: 3, row2: 2 }],
                     mergedRegionBoxes: [{ left: 50, top: 0, width: 100, height: 40 }],
                 }
             )
@@ -419,7 +419,7 @@ describe('SpreadsheetCellGrid — the editor grows with its text', () => {
             state(
                 { col: 1, row: 1, initialValue: '' },
                 {
-                    mergedRegions: [{ id: 1, col1: 1, row1: 1, col2: 2, row2: 1 }],
+                    mergedRegions: [{ col1: 1, row1: 1, col2: 2, row2: 1 }],
                     mergedRegionBoxes: [{ left: 0, top: 0, width: 100, height: 20 }],
                 }
             )

@@ -91,8 +91,8 @@ describe('Spreadsheet skeleton — property mirrors', () => {
 
     it('stores + returns merged regions', () => {
         const regions = [
-            { id: 1, col1: 1, col2: 3, row1: 1, row2: 1 },
-            { id: 2, col1: 5, col2: 7, row1: 2, row2: 4 },
+            { col1: 1, col2: 3, row1: 1, row2: 1 },
+            { col1: 5, col2: 7, row1: 2, row2: 4 },
         ];
 
         sheet.setMergedRegions(regions);
@@ -212,7 +212,7 @@ describe('Spreadsheet — render pipeline', () => {
         sheet.setColW(new Array(10).fill(50));
         sheet.setRowH(new Array(10).fill(15)); // 20px
         sheet.setVerticalSplitPosition(2);
-        sheet.setMergedRegions([{ id: 0, col1: 3, col2: 4, row1: 2, row2: 4 }]);
+        sheet.setMergedRegions([{ col1: 3, col2: 4, row1: 2, row2: 4 }]);
 
         const state = sheet.buildRenderState({
             scrollLeft: 0,

@@ -10,10 +10,19 @@ package com.vaadin.flow.component.spreadsheet.client;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * @since 23.1
  */
 public class MergedRegion implements Serializable {
+    /**
+     * A number the server gives each region it lists. Not sent to the client,
+     * which identifies a region by its cells: numbered anew on every reload, it
+     * made a list of unchanged regions differ from the one sent before, so the
+     * list was sent again.
+     */
+    @JsonIgnore
     public int id;
     public int col1;
     public int col2;
