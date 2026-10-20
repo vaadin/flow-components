@@ -74,19 +74,20 @@ describe('Column header — frozen columns', () => {
     expect(colHeaders(ctx.sheet)).to.include.members(['1', '2']);
   });
 
-  it('draws them in a strip that cancels the scroll out', async () => {
+  it('holds the frozen letters in place as the sheet scrolls, before the scroll is drawn', async () => {
     ctx.sheet.setHorizontalSplitPosition(2);
-    ctx.sheet.getScrollContainer().scrollLeft = 1000;
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getColumnHeader().updateComplete;
+    const letter = (): number =>
+      ctx.sheet
+        .getColumnHeader()
+        .shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip .col-header-cell.col1')!
+        .getBoundingClientRect().left;
+    const before = letter();
 
-    const strip = ctx.sheet
-      .getColumnHeader()
-      .shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip')!;
-    expect(strip).to.not.be.null;
-    expect(strip.style.transform).to.equal(
-      `translateX(${ctx.sheet.getScrollContainer().scrollLeft}px)`
-    );
+    ctx.sheet.getScrollContainer().scrollLeft = 1000;
+
+    expect(letter()).to.equal(before);
   });
 
   it('puts the frozen headers in the strip, not the scrolling row', async () => {
@@ -144,19 +145,20 @@ describe('Row header — frozen rows', () => {
     expect(rowHeaders(ctx.sheet)).to.include.members(['1', '2']);
   });
 
-  it('draws them in a strip that cancels the scroll out', async () => {
+  it('holds the frozen numbers in place as the sheet scrolls, before the scroll is drawn', async () => {
     ctx.sheet.setVerticalSplitPosition(2);
-    ctx.sheet.getScrollContainer().scrollTop = 2000;
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getRowHeader().updateComplete;
+    const number = (): number =>
+      ctx.sheet
+        .getRowHeader()
+        .shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip .row-header-cell.row1')!
+        .getBoundingClientRect().top;
+    const before = number();
 
-    const strip = ctx.sheet
-      .getRowHeader()
-      .shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip')!;
-    expect(strip).to.not.be.null;
-    expect(strip.style.transform).to.equal(
-      `translateY(${ctx.sheet.getScrollContainer().scrollTop}px)`
-    );
+    ctx.sheet.getScrollContainer().scrollTop = 2000;
+
+    expect(number()).to.equal(before);
   });
 
   it('draws no strip when nothing is frozen', async () => {
@@ -166,6 +168,162 @@ describe('Row header — frozen rows', () => {
     expect(
       ctx.sheet.getRowHeader().shadowRoot!.querySelector('.frozen-header-strip')
     ).to.be.null;
+  });
+});
+
+/**
+ * The browser scrolls the sheet before the page hears of the scroll, and
+ * shows the scroll straight away. So it is the browser that holds the frozen
+ * panes, their headers and the freeze line in place, in the same frame. Moved
+ * back by the sheet once the scroll has been handled, they would show off
+ * their edge in between, the further the faster the scroll.
+ */
+describe('Frozen panes — held in place while the sheet scrolls', () => {
+  let ctx: ReturnType<typeof attachSheet>;
+
+  beforeEach(() => {
+    ctx = attachSheet();
+  });
+
+  afterEach(() => {
+    ctx.cleanup();
+  });
+
+  async function draw(): Promise<void> {
+    ctx.sheet.recomputeViewport();
+    await ctx.sheet.getColumnHeader().updateComplete;
+    await ctx.sheet.getRowHeader().updateComplete;
+    await ctx.sheet.getCellGrid().updateComplete;
+  }
+
+  const cells = (): ShadowRoot => ctx.sheet.getCellGrid().shadowRoot!;
+  const letters = (): ShadowRoot => ctx.sheet.getColumnHeader().shadowRoot!;
+  const numbers = (): ShadowRoot => ctx.sheet.getRowHeader().shadowRoot!;
+
+  /** Where each of them is on screen, its top left corner. */
+  function where(parts: Record<string, () => Element | null>): Record<string, string> {
+    const at: Record<string, string> = {};
+    for (const [name, find] of Object.entries(parts)) {
+      const box = find()?.getBoundingClientRect();
+      at[name] = box === undefined ? 'not drawn' : `${box.left} ${box.top}`;
+    }
+    return at;
+  }
+
+  /**
+   * Scrolls the sheet, and asserts that the parts are where they were: at
+   * once, before the scroll is handled, and once it has been drawn.
+   */
+  async function expectHeldOnScroll(
+    parts: Record<string, () => Element | null>,
+    top: number,
+    left: number
+  ): Promise<void> {
+    const before = where(parts);
+    expect(Object.values(before), 'all drawn').to.not.include('not drawn');
+    const scroller = ctx.sheet.getScrollContainer();
+
+    scroller.scrollTop = top;
+    scroller.scrollLeft = left;
+
+    expect([scroller.scrollTop, scroller.scrollLeft], 'scrolled').to.eql([top, left]);
+    expect(where(parts), 'before the scroll is handled').to.deep.equal(before);
+    await draw();
+    expect(where(parts), 'once the scroll is drawn').to.deep.equal(before);
+  }
+
+  it('holds the frozen rows, their line and the gap among the numbers as the sheet scrolls down', async () => {
+    ctx.sheet.setVerticalSplitPosition(2);
+    await draw();
+
+    await expectHeldOnScroll(
+      {
+        'a frozen row': () => cells().querySelector('.cell.col3.row1'),
+        'the freeze line': () => cells().querySelector('.quadrant-wrapper-top .freeze-line'),
+        'the gap among the numbers': () => numbers().querySelector('.freeze-gap:not(.slid)')
+      },
+      600,
+      0
+    );
+  });
+
+  it('holds the frozen columns, their line and the gap among the letters as the sheet scrolls right', async () => {
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await draw();
+
+    await expectHeldOnScroll(
+      {
+        'a frozen column': () => cells().querySelector('.cell.col1.row3'),
+        'the freeze line': () => cells().querySelector('.quadrant-wrapper-left .freeze-line'),
+        'the gap among the letters': () => letters().querySelector('.freeze-gap')
+      },
+      0,
+      1000
+    );
+  });
+
+  it('holds the corner, its headers and the lines through them as the sheet scrolls both ways', async () => {
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await draw();
+
+    await expectHeldOnScroll(
+      {
+        'the frozen corner': () => cells().querySelector('.cell.col1.row1'),
+        'the line under it': () => cells().querySelector('.quadrant-wrapper-corner .freeze-line'),
+        'its letter': () => letters().querySelector('.frozen-header-strip .col-header-cell.col1'),
+        'its number': () => numbers().querySelector('.frozen-header-strip .row-header-cell.row1'),
+        'the line through the letters': () => letters().querySelector('.frozen-header-strip > .freeze-line'),
+        'the line through the numbers': () => numbers().querySelector('.frozen-header-strip > .freeze-line')
+      },
+      600,
+      1000
+    );
+  });
+
+  it('holds the frozen panes just inside the headers, their outline gutters included', async () => {
+    ctx.sheet.setColGroupingMax(2);
+    ctx.sheet.setRowGroupingMax(1);
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await draw();
+    const scroller = ctx.sheet.getScrollContainer();
+    // How far the corner is from the letters' bottom and the numbers' right edge.
+    const offHeaders = (): number[] => {
+      const corner = cells().querySelector('.cell.col1.row1')!.getBoundingClientRect();
+      return [
+        corner.top - ctx.sheet.getColumnHeader().getBoundingClientRect().bottom,
+        corner.left - ctx.sheet.getRowHeader().getBoundingClientRect().right
+      ];
+    };
+
+    scroller.scrollTop = 600;
+    scroller.scrollLeft = 1000;
+
+    expect(offHeaders(), 'before the scroll is handled').to.eql([0, 0]);
+    await draw();
+    expect(offHeaders(), 'once the scroll is drawn').to.eql([0, 0]);
+  });
+
+  it('holds the frozen panes at the edges of the view when the sheet shows no headers', async () => {
+    ctx.sheet.setDisplayRowColHeadings(false);
+    ctx.sheet.setVerticalSplitPosition(2);
+    ctx.sheet.setHorizontalSplitPosition(2);
+    await draw();
+    const scroller = ctx.sheet.getScrollContainer();
+    // How far the corner is from the view's top left corner.
+    const offView = (): number[] => {
+      const view = scroller.getBoundingClientRect();
+      const corner = cells().querySelector('.cell.col1.row1')!.getBoundingClientRect();
+      return [corner.left - view.left - scroller.clientLeft, corner.top - view.top - scroller.clientTop];
+    };
+
+    scroller.scrollTop = 600;
+    scroller.scrollLeft = 1000;
+
+    expect(offView(), 'before the scroll is handled').to.eql([0, 0]);
+    await draw();
+    expect(offView(), 'once the scroll is drawn').to.eql([0, 0]);
   });
 });
 
@@ -428,7 +586,7 @@ describe('Frozen panes — the freeze line through the headers', () => {
       return b.left <= box.left && box.right <= b.right;
     });
     expect(under, 'a letter across the gap').to.not.be.empty;
-    expect(getComputedStyle(gap).zIndex, 'under the letters').to.equal('-1');
+    expect(getComputedStyle(gap.closest('.frozen-header-under')!).zIndex, 'under the letters').to.equal('-1');
   });
 
   it('carries the line across the numbers and the gutter when columns are frozen too', async () => {
@@ -476,7 +634,7 @@ describe('Frozen panes — the freeze line through the headers', () => {
       return b.top <= box.top && box.bottom <= b.bottom;
     });
     expect(under, 'a number across the gap').to.not.be.empty;
-    expect(getComputedStyle(gap).zIndex, 'under the numbers').to.equal('-1');
+    expect(getComputedStyle(gap.closest('.frozen-header-under')!).zIndex, 'under the numbers').to.equal('-1');
   });
 
   it('shows the frozen columns\' line sliding up into the letters\' gap as the sheet scrolls down', async () => {
@@ -512,7 +670,7 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(`${box.top} ${box.height}`).to.equal(`${cellLine.top} 1`);
     expect(`${box.left} ${box.right}`).to.equal(`${strip.right - 20} ${strip.right}`);
     expect(getComputedStyle(slid).backgroundColor).to.equal('rgb(106, 106, 106)');
-    expect(getComputedStyle(slid).zIndex, 'under the numbers').to.equal('-1');
+    expect(getComputedStyle(slid.closest('.frozen-header-under')!).zIndex, 'under the numbers').to.equal('-1');
   });
 
   it('draws the dotted level lines over the freeze line in the gutters', async () => {
@@ -563,9 +721,9 @@ describe('Frozen panes — the freeze line through the headers', () => {
 });
 
 describe('Frozen panes — the scroll area stays the size of the sheet', () => {
-  // The strip that keeps the frozen headers in place is moved by the
-  // scroll, and it reached past the end of the sheet: every scroll to the
-  // bottom made the scroll area longer, into empty space.
+  // What keeps the frozen headers in place must not reach past the end of
+  // the sheet: every scroll to the bottom would make the scroll area longer,
+  // into empty space.
   let ctx: ReturnType<typeof attachSheet>;
 
   beforeEach(() => {

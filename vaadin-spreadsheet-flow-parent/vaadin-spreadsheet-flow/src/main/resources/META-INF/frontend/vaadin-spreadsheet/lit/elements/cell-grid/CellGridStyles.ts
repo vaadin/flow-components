@@ -374,18 +374,16 @@ export const cellGridStyles = css`
     display: none;
   }
 
-  /* Frozen-pane wrappers. Each frozen quadrant lives
-       in its own wrapper div that's transform-translated by the
-       current scroll offset, so the cells inside stay visually
-       pinned to their viewport edge as the scroll container
-       scrolls. The transform property creates a containing block,
-       so the cells' absolute positions remain relative to the
-       wrapper's top-left — which is itself anchored at the
-       cell-grid's origin. */
+  /* Frozen-pane wrappers. Each frozen quadrant lives in its own wrapper, a
+       box of no size where the grid starts, which its cells are placed in
+       as they are in the grid. The wrapper is sticky, at the insets the grid
+       gives it: the browser holds it there as it scrolls the sheet, in the
+       same frame, so the pane stays on its edge of the view however fast
+       the sheet scrolls. Of no size, it takes no room among the cells. */
   .quadrant-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: sticky;
+    width: 0;
+    height: 0;
   }
   .quadrant-wrapper-top {
     z-index: 2;
@@ -408,10 +406,9 @@ export const cellGridStyles = css`
   }
 
   /* Per-cell z-index for the unwrapped main quadrant. Frozen
-       quadrants inherit z-index from their wrapper (each wrapper
-       is its own stacking context via the transform property),
-       so the cell-level rule below only takes effect for main
-       cells. */
+       quadrants inherit z-index from their wrapper (each wrapper,
+       being sticky, is its own stacking context), so the
+       cell-level rule below only takes effect for main cells. */
   .cell.quadrant-main {
     z-index: 1;
   }

@@ -26,8 +26,10 @@ import {
  * and outline gutter.
  */
 export const headerStripStyles = css`
+  /* A flex box, which lays the frozen strip and the layer under the labels
+     along the header at no size, each as deep as the header is. */
   :host {
-    display: block;
+    display: flex;
     position: sticky;
     box-sizing: border-box;
     background: ${headerBg};
@@ -39,13 +41,23 @@ export const headerStripStyles = css`
     display: none !important;
   }
 
-  /* The frozen columns or rows are drawn in their own strip, translated to
-     cancel the scroll out. It sits above the scrolling headers, so one
-     sliding underneath does not show through. */
+  /* The frozen columns or rows are drawn in their own strip, above the
+     scrolling headers, so one sliding underneath does not show through. The
+     strip is sticky: the browser holds it at the header's frozen end as it
+     scrolls the sheet, in the same frame as the frozen cells. */
   .frozen-header-strip {
-    position: absolute;
-    inset: 0;
+    position: sticky;
+    flex: none;
     z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Held in place with the frozen labels, but under the scrolling ones: the
+     gap at the freeze line. */
+  .frozen-header-under {
+    position: sticky;
+    flex: none;
+    z-index: -1;
     pointer-events: none;
   }
 
@@ -73,7 +85,6 @@ export const headerStripStyles = css`
      frozen: under the labels, the sheet's background. */
   .freeze-gap {
     position: absolute;
-    z-index: -1;
     background: var(--default-background-color, #fff);
     pointer-events: none;
   }

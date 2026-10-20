@@ -188,8 +188,7 @@ export class SheetRenderer {
     const headerColumnWidth = this.headerColumnWidth();
     const rowGutterPx = rowGroupingGutterPx(model.rowGroupingMax, headerColumnWidth > 0);
     const colGutterPx = columnGroupingGutterPx(model.colGroupingMax, headerRowHeight > 0);
-    const cornerWidth = headerColumnWidth > 0 ? headerColumnWidth + rowGutterPx : rowGutterPx;
-    const cornerHeight = headerRowHeight > 0 ? headerRowHeight + colGutterPx : colGutterPx;
+    const { width: cornerWidth, height: cornerHeight } = this.headerExtent();
     if (headerRowHeight > 0 || model.colGroupingMax > 0) {
       // The outline's pixels are worked out here, which keeps the header
       // element independent of the full colWidths array.
@@ -210,7 +209,6 @@ export class SheetRenderer {
         scrollTop: state.scrollTop,
         frozenColX: state.frozenColX,
         frozenColWidths: state.frozenColWidths,
-        scrollLeft: state.scrollLeft,
         colGroupings,
         colGroupingMax: model.colGroupingMax,
         colGroupingInversed: model.colGroupingInversed,
@@ -259,8 +257,7 @@ export class SheetRenderer {
         frozenColumns: state.horizontalSplitPosition > 0,
         scrollLeft: state.scrollLeft,
         frozenRowY: state.frozenRowY,
-        frozenRowHeights: state.frozenRowHeights,
-        scrollTop: state.scrollTop
+        frozenRowHeights: state.frozenRowHeights
       };
     } else {
       parts.rowHeader.hidden = true;
@@ -411,6 +408,7 @@ export class SheetRenderer {
       frozenRowHeights: frozen.rowHeights,
       totalGridWidthPx: totalWidthPx,
       totalGridHeightPx: totalHeightPx,
+      headerExtent: this.headerExtent(),
       scrollLeft: opts.scrollLeft,
       scrollTop: opts.scrollTop,
       editor: store.editor,
@@ -663,6 +661,23 @@ export class SheetRenderer {
    */
   private headerColumnWidth(): number {
     return this.store.model.displayRowColHeadings ? DEFAULT_HEADER_COLUMN_WIDTH : 0;
+  }
+
+  /**
+   * How far the row numbers and their outline gutter reach across the sheet,
+   * and the column letters and theirs down it: the corner where the two
+   * meet, and where the cells start.
+   */
+  private headerExtent(): { width: number; height: number } {
+    const { model } = this.store;
+    const headerRowHeight = this.headerRowHeight();
+    const headerColumnWidth = this.headerColumnWidth();
+    const rowGutterPx = rowGroupingGutterPx(model.rowGroupingMax, headerColumnWidth > 0);
+    const colGutterPx = columnGroupingGutterPx(model.colGroupingMax, headerRowHeight > 0);
+    return {
+      width: headerColumnWidth > 0 ? headerColumnWidth + rowGutterPx : rowGutterPx,
+      height: headerRowHeight > 0 ? headerRowHeight + colGutterPx : colGutterPx
+    };
   }
 
   /** The sheet's row and column sizes as drawn; see {@link Derived.sheetSizes}. */

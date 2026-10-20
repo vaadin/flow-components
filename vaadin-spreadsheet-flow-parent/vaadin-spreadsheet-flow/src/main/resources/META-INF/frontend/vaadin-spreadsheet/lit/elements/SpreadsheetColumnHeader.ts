@@ -79,12 +79,6 @@ export interface ColumnHeaderRenderState {
   scrollTop?: number;
   /** Pixel widths of the frozen columns, same indexing as frozenColX. */
   frozenColWidths?: ReadonlyArray<number>;
-  /**
-   * Current horizontal scroll offset. The frozen strip is translated by
-   * it to cancel the scroll out, the way the cell-grid pins its own
-   * frozen quadrants.
-   */
-  scrollLeft?: number;
 
   /**
    * Column groupings (outline) with pre-computed pixel positions.
@@ -111,7 +105,8 @@ export interface ColumnHeaderRenderState {
   /**
    * How far left of the first column the sheet's edge is - the row numbers
    * and their outline gutter. The dotted lines between the outline levels
-   * start there, so their dots fall on the same pixels.
+   * start there, so their dots fall on the same pixels, and the frozen
+   * letters are held that far in from the view's left edge.
    */
   leadingPx?: number;
   /**
@@ -143,7 +138,6 @@ export function emptyColumnHeaderRenderState(): ColumnHeaderRenderState {
     horizontalSplitPosition: 0,
     frozenColX: [],
     frozenColWidths: [],
-    scrollLeft: 0,
     colGroupings: [],
     colGroupingMax: 0,
     colGroupingInversed: false,
@@ -198,13 +192,18 @@ export class SpreadsheetColumnHeader extends HeaderStrip {
       :host {
         top: 0;
         z-index: 5;
-        /* What moves with the scroll - the frozen strip, the freeze line's
-           gap - and the last column's resize handle reach past the header's
-           end, and would make the sheet's scroll area grow with every scroll.
-           Clipped across only: along the cells, the active letter's marker
-           and the freeze line run over the header's border. */
+        /* Nothing in the header may widen the sheet's scroll area: the last
+           column's resize handle reaches past its end, and so can the frozen
+           strip, held in place as the sheet scrolls. Clipped across only:
+           along the cells, the active letter's marker and the freeze line
+           run over the header's border. */
         overflow-x: clip;
         border-bottom: 1px solid ${headerBorderColor};
+      }
+
+      .frozen-header-strip,
+      .frozen-header-under {
+        width: 0;
       }
 
       .frozen-header-strip > .freeze-line {
@@ -322,8 +321,7 @@ export class SpreadsheetColumnHeader extends HeaderStrip {
       frozenRows = false,
       scrollTop = 0,
       frozenColX = [],
-      frozenColWidths = [],
-      scrollLeft = 0
+      frozenColWidths = []
     } = this.renderState;
 
     // A header of no height still draws its grouping gutter: a
@@ -373,10 +371,11 @@ export class SpreadsheetColumnHeader extends HeaderStrip {
       }
     );
 
-    // Frozen columns get their own strip, translated by the scroll
-    // offset so it stays put while the rest slides underneath — the
-    // same trick the cell-grid uses for its frozen quadrants. Drawn
-    // after the scrolling columns so it draws over them.
+    // Frozen columns get their own strip, held in place by the browser as
+    // the sheet scrolls, as the cell-grid's frozen panes are, while the rest
+    // slide underneath: as far in from the view's left edge as the row
+    // numbers reach. Drawn after the scrolling columns so it draws over
+    // them.
     let frozenStrip: TemplateResult | string = '';
     let freezeGap: TemplateResult | typeof nothing = nothing;
     if (horizontalSplitPosition > 0) {
@@ -400,13 +399,12 @@ export class SpreadsheetColumnHeader extends HeaderStrip {
       // With columns frozen alone the corner has no border, and its pixel
       // is see-through: the sheet's background at rest, the letters that
       // scroll under it as the sheet scrolls. So the gap lies under the
-      // letters, pinned with the frozen ones.
+      // letters, held in place with the frozen ones.
       freezeGap =
         headerHeight > 0 && !frozenRows
-          ? html`<div
-              class="freeze-gap"
-              style="transform:translateX(${scrollLeft}px);left:${frozenWidth}px;top:${gutterHeight}px;"
-            ></div>`
+          ? html`<div class="frozen-header-under" style="left:${leadingPx}px;">
+              <div class="freeze-gap" style="left:${frozenWidth}px;top:${gutterHeight}px;"></div>
+            </div>`
           : nothing;
       // What of the frozen columns' line has slid up under the letters.
       const risenLine =
@@ -420,7 +418,7 @@ export class SpreadsheetColumnHeader extends HeaderStrip {
             ></div>`
           : nothing;
       frozenStrip = html`
-        <div class="frozen-header-strip" style="transform:translateX(${scrollLeft}px);">
+        <div class="frozen-header-strip" style="left:${leadingPx}px;">
           ${labels.frozenCells}${labels.frozenHandles}${gutterLine}${letterLine}${risenLine}
         </div>
       `;

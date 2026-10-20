@@ -198,14 +198,18 @@ export interface CellGridRenderState {
   totalGridHeightPx: number;
 
   /**
-   * Current horizontal scroll offset in pixels — copied through
-   * from the {@code applyRenderState} call so the cell-grid can
-   * keep frozen quadrants visually pinned. The frozen-row and
-   * frozen-corner quadrant wrappers apply
-   * {@code transform:translateY(scrollTop)} to counter the scroll
-   * container's vertical shift; the frozen-column and corner
-   * wrappers apply {@code transform:translateX(scrollLeft)} to
-   * counter the horizontal shift.
+   * How far the row numbers reach across the view and the column letters
+   * down it, their outline gutters included: where the cells start. The
+   * frozen panes are held that far in from the view's edges as the sheet
+   * scrolls. Absent, there are no headers.
+   */
+  headerExtent?: { width: number; height: number };
+
+  /**
+   * Current horizontal scroll offset in pixels, as drawn. What is drawn at
+   * grid level over a frozen cell - the editor, a note - is placed by it, and
+   * so is how much of a merged region across the freeze still shows. The
+   * frozen panes themselves are held in place by the browser.
    */
   scrollLeft: number;
 

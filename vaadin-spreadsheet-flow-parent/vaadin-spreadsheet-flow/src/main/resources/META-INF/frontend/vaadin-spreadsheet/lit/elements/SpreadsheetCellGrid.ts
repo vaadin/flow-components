@@ -481,11 +481,13 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
   }
 
   /**
-   * A frozen pane, in a wrapper moved along with the scroll so that its
-   * cells stay pinned to their edge of the view: the wrapper's transform
-   * counters the scroll container's shift, and the cells are placed in the
-   * wrapper, which is anchored at the grid's origin. The wrappers stack the
-   * corner over the top and left panes, and those over the scrolling one.
+   * A frozen pane, in a wrapper of no size where the grid starts, which its
+   * cells are placed in as they are in the grid. The wrapper is sticky: as
+   * the sheet scrolls, the browser holds it just inside the headers on the
+   * side the pane is frozen on, in the same frame as the scroll, so the pane
+   * never shows off its edge, however fast the sheet scrolls. The wrappers
+   * stack the corner over the top and left panes, and those over the
+   * scrolling one.
    *
    * Each draws the line along its freeze. The left pane's cells cover the
    * top pane's line where the frozen columns are, and the top pane's cover
@@ -494,22 +496,22 @@ export class SpreadsheetCellGrid extends SpreadsheetPart {
    */
   private frozenPane(quadrant: QuadrantRenderOpts): TemplateResult {
     const { state, quadrantName } = quadrant;
-    const { scrollLeft, scrollTop } = state;
     const { width, height } = frozenExtentOf(state);
-    let transform: string;
+    const headers = state.headerExtent ?? { width: 0, height: 0 };
+    let stick: string;
     let lines: TemplateResult;
     if (quadrantName === 'top') {
-      transform = `transform:translateY(${scrollTop}px);`;
+      stick = `top:${headers.height}px;`;
       lines = freezeLine('rows', height, state.totalGridWidthPx);
     } else if (quadrantName === 'left') {
-      transform = `transform:translateX(${scrollLeft}px);`;
+      stick = `left:${headers.width}px;`;
       lines = freezeLine('columns', width, state.totalGridHeightPx);
     } else {
-      transform = `transform:translate(${scrollLeft}px, ${scrollTop}px);`;
+      stick = `top:${headers.height}px;left:${headers.width}px;`;
       lines = html`${freezeLine('rows', height, width + 1)}${freezeLine('columns', width, height + 1)}`;
     }
     return html`
-      <div class="quadrant-wrapper quadrant-wrapper-${quadrantName}" style=${transform}>
+      <div class="quadrant-wrapper quadrant-wrapper-${quadrantName}" style=${stick}>
         ${renderQuadrant(quadrant)}${buildMergedCellOverlays(quadrant)}${lines}${this.quadrantOverlays(quadrant)}
       </div>
     `;

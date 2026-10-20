@@ -98,7 +98,8 @@ describe('HeaderStripStyles', () => {
   it('lays the frozen strip over the scrolling labels in both, letting the pointer through but to its labels', () => {
     for (const header of [letters, numbers]) {
       const strip = inside(header, '.frozen-header-strip');
-      expect([strip.position, strip.zIndex, strip.pointerEvents]).to.eql(['absolute', '2', 'none']);
+      // Sticky: the browser holds it in place as the sheet scrolls.
+      expect([strip.position, strip.zIndex, strip.pointerEvents]).to.eql(['sticky', '2', 'none']);
       expect(inside(header, '.frozen-header-strip > [part]').pointerEvents).to.equal('auto');
     }
   });
@@ -112,10 +113,11 @@ describe('HeaderStripStyles', () => {
     expect([letter.borderBottomWidth, number.borderRightWidth]).to.eql(['2px', '2px']);
   });
 
-  it('sticks each header to its own edge, as a block in the header font', () => {
+  it('sticks each header to its own edge, in the header font, laying out what it holds in place along it', () => {
     const [col, row] = [getComputedStyle(letters), getComputedStyle(numbers)];
 
-    expect([col.position, col.display, row.position, row.display]).to.eql(['sticky', 'block', 'sticky', 'block']);
+    expect([col.position, col.display, col.flexDirection]).to.eql(['sticky', 'flex', 'row']);
+    expect([row.position, row.display, row.flexDirection]).to.eql(['sticky', 'flex', 'column']);
     expect(col.fontFamily).to.equal(row.fontFamily);
     expect([col.top, row.left]).to.eql(['0px', '0px']);
   });

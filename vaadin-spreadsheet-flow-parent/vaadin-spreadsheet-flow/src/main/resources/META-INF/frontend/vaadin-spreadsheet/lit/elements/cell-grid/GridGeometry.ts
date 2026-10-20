@@ -119,9 +119,10 @@ function farEdge(starts: ReadonlyArray<number>, sizes: ReadonlyArray<number>, co
 
 /**
  * Where a cell is on screen, in the grid's own coordinates, or null when it
- * is not drawn. A frozen cell sits in its pane's wrapper, which the scroll
- * offset moves along with the view, so its box moves with it: something at
- * grid level placed by the frozen arrays alone is left behind on a scroll.
+ * is not drawn. A frozen cell sits in its pane's wrapper, which is held in
+ * place as the sheet scrolls, so on the grid its box moves along with the
+ * scroll: something at grid level placed by the frozen arrays alone is left
+ * behind on a scroll.
  */
 export function cellBoxOnGrid(state: CellGridRenderState, col: number, row: number): GridBox | null {
   const { viewport, horizontalSplitPosition, verticalSplitPosition } = state;

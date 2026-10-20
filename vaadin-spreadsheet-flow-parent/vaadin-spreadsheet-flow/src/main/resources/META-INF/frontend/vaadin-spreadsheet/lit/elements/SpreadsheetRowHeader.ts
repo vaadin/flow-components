@@ -86,11 +86,6 @@ export interface RowHeaderRenderState {
   /** Pixel heights of the frozen rows, same indexing as frozenRowY. */
   frozenRowHeights?: ReadonlyArray<number>;
   /**
-   * Current vertical scroll offset, used to translate the frozen strip
-   * so it cancels the scroll out.
-   */
-  scrollTop?: number;
-  /**
    * Row groupings (outline) with pre-computed pixel positions. Mirrors the
    * column header's gutter, rotated: the gutter is a column of levels to the
    * LEFT of the row numbers (or to the right when inversed).
@@ -113,7 +108,8 @@ export interface RowHeaderRenderState {
   /**
    * How far above the first row the top of the outline gutters is - the
    * letters and their outline gutter. The dotted lines between the outline
-   * levels start there, so their dots fall on the same pixels.
+   * levels start there, so their dots fall on the same pixels, and the frozen
+   * numbers are held that far down from the view's top edge.
    */
   leadingPx?: number;
 }
@@ -139,7 +135,6 @@ export function emptyRowHeaderRenderState(): RowHeaderRenderState {
     verticalSplitPosition: 0,
     frozenRowY: [],
     frozenRowHeights: [],
-    scrollTop: 0,
     rowGroupings: [],
     rowGroupingMax: 0,
     rowGroupingInversed: false
@@ -189,13 +184,19 @@ export class SpreadsheetRowHeader extends HeaderStrip {
       :host {
         left: 0;
         z-index: 4;
-        /* What moves with the scroll - the frozen strip, the freeze line's
-           gaps - and the last row's resize handle reach past the header's
-           end, and would make the sheet's scroll area grow with every scroll.
-           Clipped down only: along the cells, the active number's marker and
-           the freeze line run over the header's border. */
+        flex-direction: column;
+        /* Nothing in the header may lengthen the sheet's scroll area: the
+           last row's resize handle reaches past its end, and so can the
+           frozen strip, held in place as the sheet scrolls. Clipped down
+           only: along the cells, the active number's marker and the freeze
+           line run over the header's border. */
         overflow-y: clip;
         border-right: 1px solid ${headerBorderColor};
+      }
+
+      .frozen-header-strip,
+      .frozen-header-under {
+        height: 0;
       }
 
       .frozen-header-strip > .freeze-line {
@@ -323,7 +324,6 @@ export class SpreadsheetRowHeader extends HeaderStrip {
       scrollLeft = 0,
       frozenRowY = [],
       frozenRowHeights = [],
-      scrollTop = 0,
       leadingPx = 0
     } = this.renderState;
 
@@ -372,9 +372,10 @@ export class SpreadsheetRowHeader extends HeaderStrip {
       }
     );
 
-    // Frozen rows get their own strip, translated by the scroll offset
-    // so it stays put while the rest slides underneath — the same trick
-    // the cell-grid uses for its frozen quadrants.
+    // Frozen rows get their own strip, held in place by the browser as the
+    // sheet scrolls, as the cell-grid's frozen panes are, while the rest
+    // slide underneath: as far down from the view's top edge as the column
+    // letters reach.
     let frozenStrip: TemplateResult | string = '';
     let freezeGap: TemplateResult | typeof nothing = nothing;
     if (verticalSplitPosition > 0) {
@@ -398,27 +399,23 @@ export class SpreadsheetRowHeader extends HeaderStrip {
       // With rows frozen alone the corner has no border, and its pixel is
       // see-through: the sheet's background at rest, the numbers that
       // scroll under it as the sheet scrolls. So the gap lies
-      // under the numbers, pinned with the frozen ones.
+      // under the numbers, held in place with the frozen ones.
       // What of the frozen rows' line has slid left under the numbers lies
       // in the gap too, under the numbers.
       freezeGap =
         numbersWidth > 0 && !frozenColumns
-          ? html`<div
-                class="freeze-gap"
-                style="transform:translateY(${scrollTop}px);top:${frozenHeight}px;left:${gutterWidth}px;"
-              ></div
-              >${scrollLeft > 0
+          ? html`<div class="frozen-header-under" style="top:${leadingPx}px;">
+              <div class="freeze-gap" style="top:${frozenHeight}px;left:${gutterWidth}px;"></div>
+              ${scrollLeft > 0
                 ? html`<div
                     class="freeze-gap slid"
-                    style="transform:translateY(${scrollTop}px);top:${frozenHeight}px;left:${Math.max(
-                      gutterWidth,
-                      headerWidth - scrollLeft
-                    )}px;"
+                    style="top:${frozenHeight}px;left:${Math.max(gutterWidth, headerWidth - scrollLeft)}px;"
                   ></div>`
-                : nothing}`
+                : nothing}
+            </div>`
           : nothing;
       frozenStrip = html`
-        <div class="frozen-header-strip" style="transform:translateY(${scrollTop}px);">
+        <div class="frozen-header-strip" style="top:${leadingPx}px;">
           ${labels.frozenCells}${labels.frozenHandles}${gutterLine}${numberLine}
         </div>
       `;

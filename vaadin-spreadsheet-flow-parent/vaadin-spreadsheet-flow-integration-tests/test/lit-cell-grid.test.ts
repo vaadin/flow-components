@@ -49,6 +49,27 @@ function cleanup(el: HTMLElement) {
     el.remove();
 }
 
+/**
+ * The grid in a view of its own, scrolled. The frozen panes are held in place
+ * by the browser, as they are in the sheet, so only a real scroll moves them
+ * along the grid; the state is told of the same scroll, as the sheet tells it.
+ * Cleaned up with its view, the grid's parent.
+ */
+async function attachScrolled(state: CellGridRenderState, left: number, top: number): Promise<SpreadsheetCellGrid> {
+    const view = document.createElement('div');
+    view.style.cssText = 'overflow:hidden;width:600px;height:400px;';
+    document.body.appendChild(view);
+    const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
+    el.style.width = `${state.totalGridWidthPx}px`;
+    el.style.height = `${state.totalGridHeightPx}px`;
+    el.renderState = { ...state, scrollLeft: left, scrollTop: top };
+    view.appendChild(el);
+    view.scrollLeft = left;
+    view.scrollTop = top;
+    await el.updateComplete;
+    return el;
+}
+
 describe('emptyCellGridRenderState — helper for tests + connector initial state', () => {
     it('returns a state with an empty viewport (no cells render from it)', () => {
         const state = emptyCellGridRenderState();
@@ -1649,16 +1670,16 @@ describe('SpreadsheetCellGrid — cell-click event delegation', () => {
     });
 });
 
-describe('SpreadsheetCellGrid — frozen-pane transform wrappers', () => {
+describe('SpreadsheetCellGrid — frozen-pane wrappers', () => {
     function buildScrolledFreezeState(opts: {
         verticalSplitPosition: number;
         horizontalSplitPosition: number;
         scrollLeft: number;
         scrollTop: number;
+        headerExtent?: { width: number; height: number };
     }): CellGridRenderState {
-        // Same shape as buildFreezeState — adding
-        // scrollLeft + scrollTop so the wrappers' transforms are
-        // observable.
+        // Same shape as buildFreezeState, with the scroll and how far the
+        // headers reach, which the wrappers are held inside of.
         return {
             viewport: {
                 firstColumnIndex: 3,
@@ -1685,10 +1706,17 @@ describe('SpreadsheetCellGrid — frozen-pane transform wrappers', () => {
             frozenRowHeights: opts.verticalSplitPosition > 0 ? [20, 20] : [],
             totalGridWidthPx: 1000,
             totalGridHeightPx: 500,
+            headerExtent: opts.headerExtent,
             scrollLeft: opts.scrollLeft,
             scrollTop: opts.scrollTop,
             selection: emptyCellGridRenderState().selection,
         };
+    }
+
+    /** How the browser holds a wrapper: its position and its top and left insets. */
+    function held(wrapper: Element): string[] {
+        const style = getComputedStyle(wrapper);
+        return [style.position, style.top, style.left];
     }
 
     it('renders NO wrappers when freeze is inactive', async () => {
@@ -1704,58 +1732,60 @@ describe('SpreadsheetCellGrid — frozen-pane transform wrappers', () => {
         cleanup(el);
     });
 
-    it('renders a top wrapper with translateY(scrollTop) when row-freeze is active', async () => {
+    it('holds a top wrapper just under the column letters when rows are frozen', async () => {
         const el = await attachWithState(buildScrolledFreezeState({
             verticalSplitPosition: 2,
             horizontalSplitPosition: 0,
             scrollLeft: 0,
             scrollTop: 100,
+            headerExtent: { width: 50, height: 27 },
         }));
 
         const wrapper = el.shadowRoot!.querySelector(
             '.quadrant-wrapper-top'
         ) as HTMLElement;
         expect(wrapper).to.not.be.null;
-        expect(wrapper.style.transform).to.equal('translateY(100px)');
+        // Held as the sheet scrolls down; across, it scrolls with the columns.
+        expect(held(wrapper)).to.deep.equal(['sticky', '27px', 'auto']);
         // Cells inside the wrapper still carry their quadrant-top class.
         expect(wrapper.querySelectorAll('.quadrant-top')).to.have.length(4);
 
         cleanup(el);
     });
 
-    it('renders a left wrapper with translateX(scrollLeft) when col-freeze is active', async () => {
+    it('holds a left wrapper just right of the row numbers when columns are frozen', async () => {
         const el = await attachWithState(buildScrolledFreezeState({
             verticalSplitPosition: 0,
             horizontalSplitPosition: 2,
             scrollLeft: 200,
             scrollTop: 0,
-            editor: null,
-            overlays: [],
+            headerExtent: { width: 50, height: 27 },
         }));
 
         const wrapper = el.shadowRoot!.querySelector(
             '.quadrant-wrapper-left'
         ) as HTMLElement;
         expect(wrapper).to.not.be.null;
-        expect(wrapper.style.transform).to.equal('translateX(200px)');
+        expect(held(wrapper)).to.deep.equal(['sticky', 'auto', '50px']);
         expect(wrapper.querySelectorAll('.quadrant-left')).to.have.length(4);
 
         cleanup(el);
     });
 
-    it('renders a corner wrapper with translate(scrollLeft, scrollTop) when both freezes are active', async () => {
+    it('holds a corner wrapper inside both headers when rows and columns are frozen', async () => {
         const el = await attachWithState(buildScrolledFreezeState({
             verticalSplitPosition: 2,
             horizontalSplitPosition: 2,
             scrollLeft: 200,
             scrollTop: 100,
+            headerExtent: { width: 50, height: 27 },
         }));
 
         const wrapper = el.shadowRoot!.querySelector(
             '.quadrant-wrapper-corner'
         ) as HTMLElement;
         expect(wrapper).to.not.be.null;
-        expect(wrapper.style.transform).to.equal('translate(200px, 100px)');
+        expect(held(wrapper)).to.deep.equal(['sticky', '27px', '50px']);
         expect(wrapper.querySelectorAll('.quadrant-corner')).to.have.length(4);
 
         cleanup(el);
@@ -1781,61 +1811,57 @@ describe('SpreadsheetCellGrid — frozen-pane transform wrappers', () => {
         cleanup(el);
     });
 
-    it('wrapper transforms update when scroll position changes', async () => {
+    it('moves the wrappers in with the headers, and leaves the scroll to the browser', async () => {
         const el = await attachWithState(buildScrolledFreezeState({
             verticalSplitPosition: 2,
             horizontalSplitPosition: 2,
             scrollLeft: 0,
             scrollTop: 0,
-            editor: null,
-            overlays: [],
+            headerExtent: { width: 50, height: 27 },
         }));
+        const corner = (): HTMLElement => el.shadowRoot!.querySelector<HTMLElement>('.quadrant-wrapper-corner')!;
+        expect(held(corner())).to.deep.equal(['sticky', '27px', '50px']);
 
-        let corner = el.shadowRoot!.querySelector(
-            '.quadrant-wrapper-corner'
-        ) as HTMLElement;
-        expect(corner.style.transform).to.equal('translate(0px, 0px)');
-
+        // Scrolled, with an outline gutter over the letters now.
         el.renderState = buildScrolledFreezeState({
             verticalSplitPosition: 2,
             horizontalSplitPosition: 2,
             scrollLeft: 300,
             scrollTop: 150,
+            headerExtent: { width: 50, height: 45 },
         });
         await el.updateComplete;
 
-        corner = el.shadowRoot!.querySelector(
-            '.quadrant-wrapper-corner'
-        ) as HTMLElement;
-        expect(corner.style.transform).to.equal('translate(300px, 150px)');
+        expect(held(corner())).to.deep.equal(['sticky', '45px', '50px']);
+        expect(corner().style.transform).to.equal('');
 
         cleanup(el);
     });
 
-    it('frozen wrappers are positioned absolutely at top:0 left:0 so cells anchor to grid origin', async () => {
+    it('places the frozen wrappers as boxes of no size where the grid starts, so cells anchor to its origin', async () => {
         const el = await attachWithState(buildScrolledFreezeState({
             verticalSplitPosition: 2,
             horizontalSplitPosition: 2,
-            scrollLeft: 100,
-            scrollTop: 50,
+            scrollLeft: 0,
+            scrollTop: 0,
         }));
 
+        const origin = el.getBoundingClientRect();
         const wrappers = el.shadowRoot!.querySelectorAll('.quadrant-wrapper');
         // 3 wrappers: top, left, corner. (Main is not wrapped.)
         expect(wrappers).to.have.length(3);
         for (const w of Array.from(wrappers)) {
-            const computed = getComputedStyle(w);
-            // Wrappers must be position:absolute (set via static CSS rule).
-            expect(computed.position).to.equal('absolute');
+            const box = w.getBoundingClientRect();
+            expect([box.left - origin.left, box.top - origin.top, box.width, box.height]).to.deep.equal([0, 0, 0, 0]);
         }
 
         cleanup(el);
     });
 
     it('frozen cell positions inside wrappers stay anchored at grid coords (not subtracted)', async () => {
-        // Verify the wrapper-transform approach: cells inside the
-        // wrapper still report virtual positions, the wrapper's
-        // transform does the visual offset.
+        // Cells inside a wrapper keep their grid coordinates; the wrapper,
+        // held in place by the browser as the sheet scrolls, does the
+        // moving.
         const el = await attachWithState(buildScrolledFreezeState({
             verticalSplitPosition: 2,
             horizontalSplitPosition: 0,
@@ -1845,7 +1871,7 @@ describe('SpreadsheetCellGrid — frozen-pane transform wrappers', () => {
 
         // A top-quadrant cell at row 1: top should still be 0
         // (frozenRowY[0]), NOT 0 - 100 or anything subtracted. The
-        // wrapper's translateY does the visual shift; the cell's
+        // wrapper is held in place as the sheet scrolls; the cell's
         // inline style stays at its grid coord.
         const cell = el.shadowRoot!.querySelector(
             '.quadrant-top.row1'
@@ -3312,9 +3338,7 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
     it('lets a frozen pane cover the selection that scrolls under it', async () => {
         // Scrolled 30px down: the frozen rows now cover sheet y 30-70, and
         // row 3 (y 40-60) is under them.
-        const el = await attachWithState(frozen({ ...selecting(3, 3), scrollTop: 30 }));
-        el.style.cssText = 'display:block;position:relative;width:1000px;height:500px;';
-        await el.updateComplete;
+        const el = await attachScrolled(frozen(selecting(3, 3)), 0, 30);
 
         // The outline takes no pointer events, so the hit test would pass
         // it by whatever its stacking; given them, the hit test follows the
@@ -3326,7 +3350,7 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
         expect(hit.classList.contains('s-top'), hit.className).to.be.false;
         expect(hit.closest('.quadrant-wrapper-top'), hit.className).to.not.be.null;
 
-        cleanup(el);
+        cleanup(el.parentElement!);
     });
 
     it('keeps a filter button in a frozen row with its row', async () => {
@@ -3546,14 +3570,13 @@ describe('SpreadsheetCellGrid — merged cells in a freeze', () => {
     it('keeps a merge that scrolls under the frozen rows beneath them', async () => {
         // Scrolled down 40px, the frozen rows sit where rows 3-4 are, so a
         // merge in row 3 passes underneath them - it must not cover them.
-        const el = await attachWithState(freezeWithMerges([{ col1: 3, col2: 4, row1: 3, row2: 3 }], 40));
-        el.style.height = '300px';
+        const el = await attachScrolled(freezeWithMerges([{ col1: 3, col2: 4, row1: 3, row2: 3 }]), 0, 40);
 
         const origin = el.getBoundingClientRect();
         const top = el.shadowRoot!.elementFromPoint(origin.left + 120, origin.top + 50) as HTMLElement;
         expect(top.closest('.quadrant-wrapper-top'), 'a frozen cell is on top').to.not.be.null;
 
-        cleanup(el);
+        cleanup(el.parentElement!);
     });
 });
 
