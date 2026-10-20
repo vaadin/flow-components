@@ -861,6 +861,26 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
+  it('selects the whole merge when the editor of a merged cell is clicked', async () => {
+    // The editor sits on the merge's top-left cell; a click on it selects
+    // the merge, as a click on the merged cell around it does.
+    const editor = field();
+    const { sheet, cleanup } = attachSheet({ '77': editor });
+    sheet.setMergedRegions([{ col1: 2, row1: 2, col2: 3, row2: 3 }] as any);
+    sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
+    sheet.recomputeViewport();
+    await sheet.getCellGrid().updateComplete;
+
+    editor.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, composed: true })
+    );
+    await sheet.getCellGrid().updateComplete;
+
+    expect(sheet.getSelection().activeCell).to.deep.equal({ col: 2, row: 2 });
+    expect(sheet.getSelection().activeRange).to.deep.equal({ c1: 2, c2: 3, r1: 2, r2: 3 });
+    cleanup();
+  });
+
   it('tells the server about a selection made through an editor', async () => {
     const editor = field();
     const { host, sheet, cleanup } = attachSheet({ '77': editor });

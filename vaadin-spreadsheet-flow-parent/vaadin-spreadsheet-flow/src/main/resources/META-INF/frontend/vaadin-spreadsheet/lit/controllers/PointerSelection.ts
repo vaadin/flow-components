@@ -16,7 +16,7 @@ import {
   isNonEmpty,
   type PaintOutcome
 } from '../algorithms/SelectionPaint.js';
-import { addAuxRange, normalizedRange, selectSingleCell } from '../state/SelectionState.js';
+import { addAuxRange, normalizedRange } from '../state/SelectionState.js';
 import type { SheetStore } from '../state/SheetStore.js';
 import type { SpreadsheetEvent } from '../types/rpc-client-to-server.js';
 import type { FormulaPointer } from './FormulaPointer.js';
@@ -343,7 +343,8 @@ export class PointerSelection {
   }
 
   /**
-   * Clicking a custom editor selects the cell it belongs to.
+   * Clicking a custom editor selects the cell it belongs to, or the whole
+   * merge when that cell starts one, as a click on the cell would.
    *
    * An editor is usually wider than its cell, so a click aimed at the cell
    * often lands on the editor instead — and the cell-grid's own click
@@ -365,7 +366,7 @@ export class PointerSelection {
     if (active.col === cell.col && active.row === cell.row) {
       return;
     }
-    this.store.select(selectSingleCell(cell.col, cell.row));
+    this.store.selectCellOrMerge(cell.col, cell.row);
     this.report.selection();
   }
 
