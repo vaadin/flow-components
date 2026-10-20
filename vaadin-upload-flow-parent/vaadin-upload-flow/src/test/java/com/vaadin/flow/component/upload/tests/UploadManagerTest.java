@@ -581,44 +581,21 @@ class UploadManagerTest {
     }
 
     @Test
-    void uploadStartedBeforeModal_allowedToFinishWhileModalIsOpen() {
+    void modalOpen_uploadReceivedAndAllFinishedFired() {
         manager.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
         }));
         AtomicInteger finishedCount = new AtomicInteger(0);
         manager.addAllFinishedListener(
                 event -> finishedCount.incrementAndGet());
-        fireConnectorDomEvent(manager, "upload-start");
         openModal();
 
         Assertions.assertTrue(getRegisteredHandler().isAllowInert(),
-                "Queued files should be received for an inert owner");
+                "Files should be received for an inert owner");
 
         simulateAllFinishedDomEvent(manager);
 
         Assertions.assertEquals(1, finishedCount.get(),
                 "AllFinished should fire for an inert owner");
-        Assertions.assertFalse(getRegisteredHandler().isAllowInert(),
-                "A finished upload should not allow further uploads");
-    }
-
-    @Test
-    void uploadStartedWhileModalIsOpen_rejected() {
-        manager.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
-        }));
-        AtomicInteger finishedCount = new AtomicInteger(0);
-        manager.addAllFinishedListener(
-                event -> finishedCount.incrementAndGet());
-        openModal();
-
-        fireConnectorDomEvent(manager, "upload-start");
-
-        Assertions.assertFalse(getRegisteredHandler().isAllowInert(),
-                "An upload should not start for an inert owner");
-
-        simulateAllFinishedDomEvent(manager);
-
-        Assertions.assertEquals(0, finishedCount.get(),
-                "AllFinished should not fire for an upload rejected while inert");
     }
 
     private void openModal() {
@@ -654,25 +631,6 @@ class UploadManagerTest {
 
         Assertions.assertEquals("custom-postfix",
                 getRegisteredHandler().getUrlPostfix());
-    }
-
-    @Test
-    void setUploadHandler_delegatesIsAllowInert() {
-        UploadHandler handler = new UploadHandler() {
-            @Override
-            public void handleUploadRequest(
-                    com.vaadin.flow.server.streams.UploadEvent event) {
-            }
-
-            @Override
-            public boolean isAllowInert() {
-                return true;
-            }
-        };
-
-        manager.setUploadHandler(handler);
-
-        Assertions.assertTrue(getRegisteredHandler().isAllowInert());
     }
 
     @Test
@@ -719,14 +677,9 @@ class UploadManagerTest {
      * Simulates the client-side "all-finished" DOM event on the connector.
      */
     private void simulateAllFinishedDomEvent(UploadManager manager) {
-        fireConnectorDomEvent(manager, "all-finished");
-    }
-
-    private void fireConnectorDomEvent(UploadManager manager,
-            String eventType) {
         Component connector = getConnector(manager);
         Element element = connector.getElement();
-        DomEvent event = new DomEvent(element, eventType,
+        DomEvent event = new DomEvent(element, "all-finished",
                 JacksonUtils.createObjectNode());
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }

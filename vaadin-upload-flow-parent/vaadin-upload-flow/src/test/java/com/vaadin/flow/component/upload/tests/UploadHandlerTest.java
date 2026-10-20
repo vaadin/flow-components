@@ -27,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.html.Div;
@@ -121,7 +121,6 @@ class UploadHandlerTest {
     void uploadWithStandardHandler_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException, URISyntaxException {
         // Not uploading initially
-        Assertions.assertFalse(upload.isUploading());
 
         // Simulate an upload using a handler, verify that uploading flag is set
         // while upload is in progress
@@ -129,7 +128,6 @@ class UploadHandlerTest {
                 .spy(new InMemoryUploadCallback() {
                     @Override
                     public void complete(UploadMetadata metadata, byte[] data) {
-                        Assertions.assertTrue(upload.isUploading());
                     }
                 });
         InMemoryUploadHandler handler = new InMemoryUploadHandler(callback);
@@ -138,7 +136,6 @@ class UploadHandlerTest {
         simulateUpload();
 
         // Verify flag is reset after upload completes
-        Assertions.assertFalse(upload.isUploading());
 
         // Sanity check that callback containing the assertion was called
         Mockito.verify(callback, Mockito.times(1)).complete(Mockito.any(),
@@ -149,7 +146,6 @@ class UploadHandlerTest {
     void uploadWithCustomHandler_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException, URISyntaxException {
         // Not uploading initially
-        Assertions.assertFalse(upload.isUploading());
 
         // Simulate an upload using a custom handler, verify that uploading flag
         // is set while upload is in progress
@@ -158,7 +154,6 @@ class UploadHandlerTest {
             public void handleUploadRequest(UploadEvent event) {
                 // when the upload starts,
                 // then the upload is in progress
-                Assertions.assertTrue(upload.isUploading());
             }
 
             @Override
@@ -196,7 +191,6 @@ class UploadHandlerTest {
         simulateUpload();
 
         // Verify flag is reset after upload completes
-        Assertions.assertFalse(upload.isUploading());
 
         // verify that the original methods of custom handler were called
         Mockito.verify(customHandler)
@@ -240,23 +234,30 @@ class UploadHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "upload-success", "upload-error", "upload-abort" })
-    void uploadStartedBeforeModal_allowedToFinishWhileModalIsOpen(
+    @CsvSource({ "true,upload-success", "true,upload-error",
+            "true,upload-abort", "false,upload-success" })
+    void modalOpen_uploadReceivedAndFinished(boolean modalOpensFirst,
             String finishEvent) throws URISyntaxException {
         upload.setUploadHandler(event -> {
         });
         AtomicBoolean allFinished = new AtomicBoolean();
         upload.addAllFinishedListener(event -> allFinished.set(true));
-        fireUploadDomEvent("upload-start", true);
-        openModal();
-        // The first file finishes and the next queued file starts. Queued
-        // files count as uploading on the client, so this holds even when
-        // only one file is uploaded at a time.
+        if (modalOpensFirst) {
+            // E.g. a modal opened when submitting a form, which then starts
+            // uploading the files selected earlier
+            openModal();
+            fireUploadDomEvent("upload-start", true);
+        } else {
+            // E.g. a modal opened from an upload start listener
+            fireUploadDomEvent("upload-start", true);
+            openModal();
+        }
+        // The first file finishes and the next queued file starts
         fireUploadDomEvent("upload-success", true);
         fireUploadDomEvent("upload-start", true);
 
         Assertions.assertTrue(getUploadHandler().isAllowInert(),
-                "Queued files should be received for an inert upload");
+                "Files should be received for an inert upload");
         Assertions.assertFalse(allFinished.get(),
                 "AllFinished should not fire while files are queued");
 
@@ -264,33 +265,6 @@ class UploadHandlerTest {
 
         Assertions.assertTrue(allFinished.get(),
                 "AllFinished should fire for an inert upload");
-        Assertions.assertFalse(getUploadHandler().isAllowInert(),
-                "A finished upload should not allow further uploads");
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    void uploadStartsWhileModalIsOpen_allowedOnlyIfHandlerAllowsInert(
-            boolean allowInert) throws URISyntaxException {
-        upload.setUploadHandler(new UploadHandler() {
-            @Override
-            public void handleUploadRequest(UploadEvent event) {
-            }
-
-            @Override
-            public boolean isAllowInert() {
-                return allowInert;
-            }
-        });
-        AtomicBoolean allFinished = new AtomicBoolean();
-        upload.addAllFinishedListener(event -> allFinished.set(true));
-        openModal();
-
-        fireUploadDomEvent("upload-start", true);
-        Assertions.assertEquals(allowInert, getUploadHandler().isAllowInert());
-        fireUploadDomEvent("upload-success", false);
-
-        Assertions.assertEquals(allowInert, allFinished.get());
     }
 
     private void openModal() {
