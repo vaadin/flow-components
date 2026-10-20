@@ -371,8 +371,8 @@ export class PointerSelection {
 
   /**
    * The row a click on a column letter makes active: the first one whose top
-   * is on screen, as in GWT, or row 1 when rows are frozen. Row 1 of a sheet
-   * scrolled far down is off screen, and the keys went there.
+   * is on screen, or row 1 when rows are frozen. Row 1 of a sheet scrolled
+   * far down is off screen, and the keys would go there.
    */
   private firstRowOnScreen(): number {
     const { model } = this.store;

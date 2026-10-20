@@ -138,7 +138,7 @@ export class KeyboardNavigation {
       // Three keys are the way back out of a custom editor, so they are the
       // sheet's after all: Escape returns the focus, Tab returns it and then
       // moves on to the next cell, and Enter returns it once the editor has
-      // had it, leaving the cell selected, as in GWT.
+      // had it, leaving the cell selected.
       if (!this.host.raisedInEditor(e) || !leavesEditor(e)) {
         return;
       }

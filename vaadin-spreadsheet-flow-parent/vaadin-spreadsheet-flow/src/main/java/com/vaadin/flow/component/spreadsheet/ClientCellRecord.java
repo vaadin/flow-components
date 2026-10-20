@@ -17,9 +17,8 @@ import java.util.Arrays;
  * and row packed in a {@code long}, in arrays of primitives.
  * <p>
  * There is an entry for every cell the client has, which for a sheet scrolled
- * through is every cell of it. Kept as two sets of string keys and a map of the
- * same keys to boxed hashes, a cell scrolled past took about 400 bytes of the
- * server's memory; GWT's one set of keys took 280.
+ * through is every cell of it, so the entries are kept in arrays of primitives
+ * rather than as objects: 24 to 48 bytes a cell, by how full the table is.
  * <p>
  * An entry holds two facts, each with its own reset:
  * <ul>

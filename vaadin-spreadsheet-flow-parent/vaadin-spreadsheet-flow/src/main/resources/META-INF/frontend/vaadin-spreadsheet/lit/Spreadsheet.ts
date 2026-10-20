@@ -850,9 +850,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
 
   /**
    * Names the selected cell in the address field and shows what it holds in
-   * the formula field, from the cells the client has, as GWT did on every
-   * click and key. Waiting for the server's answer, which only confirms them,
-   * had both fields trail every click by a round trip: a third of a second
+   * the formula field, from the cells the client has, on every click and
+   * key. Waiting for the server's answer, which only confirms them, would
+   * have both fields trail every click by a round trip: a third of a second
    * on a slow network. The answer still names a named range, and fills in a
    * cell not loaded yet.
    *
@@ -1296,8 +1296,8 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * Row heights from the server. Rows above the screen grow and shrink as
    * their components are loaded and let go of; the first row with its top
    * on screen stays where it is, and so does what is on screen. Moved, the
-   * rows on screen were others than those loaded, and loading those moved
-   * them on again: 8 requests after one jump, to GWT's 3.
+   * rows on screen would be others than those loaded, and loading those would
+   * move them on again, one request after another.
    */
   setRowH(rowHeightsInPoints: number[] | Float32Array | SizeRuns | null): void {
     this.renderer.holdRowInPlace();

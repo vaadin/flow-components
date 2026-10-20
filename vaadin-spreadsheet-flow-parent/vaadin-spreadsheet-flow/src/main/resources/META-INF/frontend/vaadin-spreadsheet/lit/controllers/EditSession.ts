@@ -68,9 +68,9 @@ export class EditSession {
    * Enter does; whether it opened. A locked cell does not open, and the
    * server is told it was tried.
    * <p>
-   * The cell is brought into view first, as GWT did: the editor is drawn
-   * over it, and a cell scrolled out of view is not drawn, so the keys
-   * typed into an editor opened there were lost.
+   * The cell is brought into view first: the editor is drawn over it, and a
+   * cell scrolled out of view is not drawn, so the keys typed into an editor
+   * opened there would be lost.
    */
   openExisting(col: number, row: number): boolean {
     if (this.store.isCellLockedForEdit(col, row)) {

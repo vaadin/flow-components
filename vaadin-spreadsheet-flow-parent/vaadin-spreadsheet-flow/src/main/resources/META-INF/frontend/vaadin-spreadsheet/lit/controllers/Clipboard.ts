@@ -42,8 +42,8 @@ export interface ClipboardHost {
  *
  * A range the client has goes on the clipboard at once; the text of one it
  * does not have comes from the server, and goes on the clipboard when it
- * comes. The server used to send every selection to the client in case it
- * was copied: 10 MB for one column of 100,000 rows.
+ * comes. The server does not send every selection to the client in case it
+ * is copied: that would be 10 MB for one column of 100,000 rows.
  */
 export function listenToClipboard(target: EventTarget, host: ClipboardHost, signal: AbortSignal): void {
   // Whether the range went on the clipboard.

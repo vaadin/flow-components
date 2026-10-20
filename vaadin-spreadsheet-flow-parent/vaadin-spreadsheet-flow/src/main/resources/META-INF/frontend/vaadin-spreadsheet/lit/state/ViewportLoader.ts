@@ -112,11 +112,10 @@ const FLING_SCREENS_PER_SECOND = 10;
  * margin ahead in the direction of scrolling, so a steady scroll needs a
  * request only every screen or so.
  * <li>The first screen comes in one request, with a quarter screen below
- * it, as on a slow connection: a sheet is complete after one round trip, as
- * with GWT, and its margin comes with the first scroll. Loaded with its
- * margin, the first screen came 0.3-1 s after GWT's on a slow network;
- * loaded alone, with the margin asked for once it was in, the sheet took a
- * round trip more than GWT's to load.
+ * it, as on a slow connection: a sheet is complete after one round trip, and
+ * its margin comes with the first scroll. Loaded with its margin, the first
+ * screen would come 0.3-1 s later on a slow network; loaded alone, with the
+ * margin asked for once it was in, the sheet would take a round trip more.
  * <li>When none of the drawn cells are loaded after a jump, ask for them
  * alone first, and for the margin once they are in. On a slow network the
  * first jump took twice as long while the margin came along.
@@ -143,18 +142,15 @@ const FLING_SCREENS_PER_SECOND = 10;
  * from the round trips so far: the cells would arrive after the user has
  * scrolled past them. Nor while it flings, faster than ten screens a second,
  * however fast the connection: the cells would be gone before they could
- * be read, and a fast scroll brought in five times GWT's bytes, which
- * loaded only where the scroll stopped. The request goes out once the
- * scrolling slows down or stops.
+ * be read. The request goes out once the scrolling slows down or stops.
  * <li>On a slow connection the margin shrinks to a quarter screen, so what
  * is on screen arrives sooner.
- * <li>A sheet whose cells may hold components or editors loads no margin,
- * as GWT did: the server asks its factory about each cell loaded, and makes
- * and sends what it returns. With a margin, a sheet opened with 2.5 times
- * GWT's components.
- * <li>On a slow machine nothing is loaded until the scrolling stops, as in
- * GWT: a fling loaded 10-49 times, each load slowing the next frames
- * further. A machine is slow while it draws a scroll's frames fewer than 30
+ * <li>A sheet whose cells may hold components or editors loads no margin:
+ * the server asks its factory about each cell loaded, and makes and sends
+ * what it returns. With a margin, opening a sheet would make 2.5 times as
+ * many components.
+ * <li>On a slow machine nothing is loaded until the scrolling stops: a fling
+ * would load 10-49 times, each load slowing the next frames further. A machine is slow while it draws a scroll's frames fewer than 30
  * a second; six times slower than a fast one, they were 40-60 ms apart. Its
  * scroll events come as far apart as its frames, so a scroll stops once two
  * frames are drawn without a scroll event, as well as 100 ms: counted in

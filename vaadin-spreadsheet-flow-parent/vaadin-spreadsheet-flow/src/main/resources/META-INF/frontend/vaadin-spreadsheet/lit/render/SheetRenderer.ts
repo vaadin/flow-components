@@ -508,8 +508,8 @@ export class SheetRenderer {
    * Row heights are about to change. Rows above the screen grow and shrink
    * as their components are loaded and let go of; the first row with its
    * top on screen stays where it is, and so does what is on screen. Moved,
-   * the rows on screen were others than those loaded, and loading those
-   * moved them on again: 8 requests after one jump, to GWT's 3.
+   * the rows on screen would be others than those loaded, and loading those
+   * would move them on again, one request after another.
    */
   holdRowInPlace(): void {
     this.view.rowAnchor ??= this.firstRowWithTopOnScreen();

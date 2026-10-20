@@ -22,9 +22,8 @@ import type {
 } from '../types/rpc-client-to-server.js';
 
 /**
- * The shortest time between two reports of a write to a locked cell, as the
- * GWT client kept it: the server's ProtectedEditListener promises one event a
- * second at most.
+ * The shortest time between two reports of a write to a locked cell: the
+ * server's ProtectedEditListener promises one event a second at most.
  */
 const PROTECTED_WRITE_REPORT_INTERVAL_MS = 1000;
 

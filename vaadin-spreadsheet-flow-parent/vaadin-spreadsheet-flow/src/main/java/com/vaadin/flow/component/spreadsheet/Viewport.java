@@ -75,8 +75,8 @@ final class Viewport implements Serializable {
     /**
      * Takes the cells the client draws, its drawing buffer included, 1-based as
      * it numbers them and limited to the sheet: the range the getters of the
-     * rows and columns shown give, as GWT gave the range it drew. The range
-     * reported to load is wider, by the margin the client loads ahead.
+     * rows and columns shown give. The range reported to load is wider, by the
+     * margin the client loads ahead.
      */
     void drawn(int firstRow, int firstColumn, int lastRow, int lastColumn) {
         int lastRowOfSheet = Math.max(1, sheet.rows()) - 1;

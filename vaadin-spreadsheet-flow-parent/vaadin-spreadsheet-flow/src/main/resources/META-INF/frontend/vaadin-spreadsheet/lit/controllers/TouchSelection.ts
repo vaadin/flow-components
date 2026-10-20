@@ -44,7 +44,7 @@ export interface TouchSelectionHost {
 }
 
 /**
- * Selecting by touch, as with the GWT client. A finger's press on the sheet
+ * Selecting by touch. A finger's press on the sheet
  * makes it used by touch, until a mouse's or a pen's: the selection's corner
  * handle is then drawn for a finger, and dragging it stretches the
  * selection from its active cell. After a tap or a stretch, a "Fill"

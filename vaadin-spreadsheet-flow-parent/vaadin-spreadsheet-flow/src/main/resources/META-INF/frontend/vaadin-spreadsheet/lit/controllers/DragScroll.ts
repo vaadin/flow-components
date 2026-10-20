@@ -95,7 +95,7 @@ function stepPast(at: number, start: number, end: number, back: boolean, on: boo
  * range dragged out, the fill handle dragged, or a reference pointed at for
  * a formula, reaching cells out of view. Every 50 ms the cells scroll by
  * half of how far the pointer is past the edge - the further, the faster -
- * and the drag reaches the cell at the edge, as with the GWT client.
+ * and the drag reaches the cell at the edge.
  *
  * Toward the frozen rows or columns, the cells scroll back only for a drag
  * that has been on the scrolling ones: one that starts on the frozen ones

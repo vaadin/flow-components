@@ -401,7 +401,7 @@ export class SpreadsheetSheetTabs extends SpreadsheetPart {
 
   /**
    * Bring the active sheet's tab into view once the active sheet or the
-   * sheets changed, as the GWT client did: back to it when it is before the
+   * sheets changed: back to it when it is before the
    * first tab shown, and forward until it shows whole when the strip cuts it
    * off. Asked of the controller, which keeps where the strip starts. A
    * strip not laid out yet has nothing to measure, and tries again once it

@@ -30,8 +30,7 @@ public class SpreadsheetElement extends TestBenchElement {
 
     /**
      * Find a single element in the cell-grid's shadow root via a CSS selector.
-     * Returns {@code null} when not found (matches the legacy
-     * {@code findElementInShadowRoot} return semantics).
+     * Returns {@code null} when not found.
      */
     private WebElement findInCellGrid(String selector) {
         return (WebElement) ((JavascriptExecutor) getCommandExecutor()
@@ -338,10 +337,9 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * The Lit Spreadsheet's scroll container — a {@code <div>} inside the
-     * host's shadow root that wraps the cell grid and its sticky-positioned
-     * header strips. Lit equivalent of the legacy {@code .bottom-right-pane}.
-     * Found by its own class: it is not the only element with an inline
+     * The spreadsheet's scroll container — a {@code <div>} inside the host's
+     * shadow root that wraps the cell grid and its sticky-positioned header
+     * strips. Found by its own class: it is not the only element with an inline
      * overflow.
      */
     private TestBenchElement scrollContainer() {
