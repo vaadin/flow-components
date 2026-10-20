@@ -164,7 +164,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        Assert.assertTrue(findElementsInShadowRoot(By.className("popupbutton"))
+        Assert.assertTrue(findElementsInShadowRoot(By.className("popup-button"))
                 .isEmpty());
     }
 

@@ -173,7 +173,7 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         // Check that the last column header is visible
         // By default, there are 52 columns (A, B, ..., AZ)
         var rightmostHeader = findElementInShadowRoot(
-                By.cssSelector(".ch.col52"));
+                By.cssSelector(".col-header-cell.col52"));
         Assert.assertNotNull("Should have the last column header visible",
                 rightmostHeader);
 
@@ -214,7 +214,7 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         // Check that the last row header is visible
         // By default, there are 200 rows
         var bottommostHeader = findElementInShadowRoot(
-                By.cssSelector(".rh.row200"));
+                By.cssSelector(".row-header-cell.row200"));
         Assert.assertNotNull("Should have the last column header visible",
                 bottommostHeader);
 

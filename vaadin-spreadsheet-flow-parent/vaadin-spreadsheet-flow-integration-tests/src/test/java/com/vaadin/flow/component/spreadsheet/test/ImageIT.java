@@ -58,7 +58,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     public void pictureType2_width() {
         spreadsheet.scroll(680);
         waitUntil(e -> findElementInShadowRoot(
-                By.cssSelector(cellToCSS("G42") + " img")) != null);
+                By.cssSelector(overlayImageAt("G42"))) != null);
 
         assertInRange(250, imageWidth("C38"), 280);
         assertInRange(240, imageWidth("G42"), 260);
@@ -72,7 +72,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
 
         // Get all type3 pictures (absolute position)
         var type3 = findElementsInShadowRoot(
-                By.cssSelector(cellToCSS("A1") + " img")).stream()
+                By.cssSelector(overlayImageAt("A1"))).stream()
                 .map(image -> image.getRect())
                 .collect(Collectors.toCollection(ArrayList::new));
         Assert.assertEquals(3, type3.size());
@@ -106,7 +106,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
         loadFile("group_image.xlsx");
         waitForImages();
         var image = findElementInShadowRoot(
-                By.cssSelector(cellToCSS("D3") + " img"));
+                By.cssSelector(overlayImageAt("D3")));
         var originalSrc = image.getAttribute("src");
         // Scroll to the bottom so the image is detached. The sheet keeps half
         // a screen loaded behind what it shows, and the image reaches far
@@ -121,12 +121,11 @@ public class ImageIT extends AbstractSpreadsheetIT {
         // the re-registered URL to land instead.
         waitUntil(e -> {
             var found = findElementsInShadowRoot(
-                    By.cssSelector(cellToCSS("D3") + " img"));
+                    By.cssSelector(overlayImageAt("D3")));
             return !found.isEmpty()
                     && !originalSrc.equals(found.get(0).getAttribute("src"));
         });
-        image = findElementInShadowRoot(
-                By.cssSelector(cellToCSS("D3") + " img"));
+        image = findElementInShadowRoot(By.cssSelector(overlayImageAt("D3")));
 
         var newSrc = image.getAttribute("src");
         Assert.assertNotEquals(
@@ -147,7 +146,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     }
 
     private double imageWidth(String cell) {
-        return findElementInShadowRoot(By.cssSelector(cellToCSS(cell) + " img"))
+        return findElementInShadowRoot(By.cssSelector(overlayImageAt(cell)))
                 .getSize().width;
     }
 }

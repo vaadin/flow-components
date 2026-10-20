@@ -9,9 +9,7 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.io.IOException;
-import java.util.List;
 
-import org.apache.poi.ss.util.CellReference;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -276,25 +274,11 @@ public class ChartsIT extends AbstractSpreadsheetIT {
     }
 
     private WebElement getOverlayElement(String cell) {
-        int[] coordinates = numericCoordinates(cell);
-
-        WebElement element = findElementInShadowRoot(By.cssSelector(
-                ".sheet-image.col" + coordinates[0] + ".row" + coordinates[1]));
-
-        return element;
+        return findElementInShadowRoot(By.cssSelector(overlayAt(cell)));
     }
 
     private boolean isOverlayPresent(String cell) {
-        int[] coordinates = numericCoordinates(cell);
-
-        List<WebElement> elements = findElementsInShadowRoot(By.cssSelector(
-                ".sheet-image.col" + coordinates[0] + ".row" + coordinates[1]));
-        return elements.size() > 0;
-    }
-
-    private int[] numericCoordinates(String cell) {
-        CellReference cellReference = new CellReference(cell);
-        return new int[] { cellReference.getCol() + 1,
-                cellReference.getRow() + 1 };
+        return !findElementsInShadowRoot(By.cssSelector(overlayAt(cell)))
+                .isEmpty();
     }
 }

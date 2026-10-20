@@ -70,7 +70,7 @@ public class CellShiftingIT extends AbstractSpreadsheetIT {
         firstCell.setValue(value);
         selectCell(firstAddress);
         WebElement shiftHandle = findElementInShadowRoot(
-                By.className("s-corner"));
+                By.className("selection-corner"));
         new Actions(driver).dragAndDrop(shiftHandle, lastCell).perform();
         waitUntilCellHasValue(lastCell, value);
     }

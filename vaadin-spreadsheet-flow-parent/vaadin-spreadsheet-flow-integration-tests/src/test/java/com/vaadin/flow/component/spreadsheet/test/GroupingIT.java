@@ -23,7 +23,7 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-spreadsheet")
 public class GroupingIT extends AbstractSpreadsheetIT {
 
-    private static final String IMAGE_CSS_SELECTOR = "div.sheet-image";
+    private static final String IMAGE_CSS_SELECTOR = ".sheet-overlay-image";
 
     /**
      * The last row of row_group_at_last_row.xlsx, which is also the last row of
@@ -116,7 +116,7 @@ public class GroupingIT extends AbstractSpreadsheetIT {
         // the group is at the end of the sheet, scroll it into view
         spreadsheetElement.scroll(100000);
         waitUntil(driver -> !findElementsInShadowRoot(
-                By.cssSelector(".rh.row" + LAST_ROW)).isEmpty());
+                By.cssSelector(".row-header-cell.row" + LAST_ROW)).isEmpty());
 
         // The Lit gutter draws the group's bracket and its button as
         // separate elements; the bracket is what spans the rows.
@@ -128,8 +128,8 @@ public class GroupingIT extends AbstractSpreadsheetIT {
                 bracket.getSize().getHeight() >= GROUPED_ROWS * rowHeight);
 
         // the collapse icon is at the end of the group, not at its start
-        WebElement collapseIcon = findElementInShadowRoot(
-                By.cssSelector(".row-group-pane .grouping.minus"));
+        WebElement collapseIcon = findElementInShadowRoot(By
+                .cssSelector(".row-grouping-toggle[data-collapsed=\"false\"]"));
         Assert.assertTrue("Collapse icon position",
                 collapseIcon.getLocation().getY() >= spreadsheetElement
                         .getRowHeader(LAST_ROW).getLocation().getY());
@@ -138,7 +138,8 @@ public class GroupingIT extends AbstractSpreadsheetIT {
         waitUntil(driver -> !isRowHeaderShown(LAST_ROW));
 
         findElementInShadowRoot(
-                By.cssSelector(".row-group-pane .grouping.plus")).click();
+                By.cssSelector(".row-grouping-toggle[data-collapsed=\"true\"]"))
+                .click();
         waitUntil(driver -> isRowHeaderShown(LAST_ROW));
     }
 
@@ -147,8 +148,9 @@ public class GroupingIT extends AbstractSpreadsheetIT {
      * hidden row, where the GWT client kept a hidden element.
      */
     private boolean isRowHeaderShown(int row) {
-        return findElementsInShadowRoot(By.cssSelector(".rh.row" + row))
-                .stream().anyMatch(WebElement::isDisplayed);
+        return findElementsInShadowRoot(
+                By.cssSelector(".row-header-cell.row" + row)).stream()
+                .anyMatch(WebElement::isDisplayed);
     }
 
     // HELPERS
@@ -158,26 +160,26 @@ public class GroupingIT extends AbstractSpreadsheetIT {
     }
 
     private void collapseColumn(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findElementInShadowRoot(
-                By.cssSelector(".col-group-pane .grouping.minus"));
+        WebElement colGrouping = findElementInShadowRoot(By
+                .cssSelector(".col-grouping-toggle[data-collapsed=\"false\"]"));
         colGrouping.click();
     }
 
     private void expandColumn(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findElementInShadowRoot(
-                By.cssSelector(".col-group-pane .grouping.plus"));
+        WebElement colGrouping = findElementInShadowRoot(By
+                .cssSelector(".col-grouping-toggle[data-collapsed=\"true\"]"));
         colGrouping.click();
     }
 
     private void collapseRow(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findElementInShadowRoot(
-                By.cssSelector(".row-group-pane .grouping.minus"));
+        WebElement colGrouping = findElementInShadowRoot(By
+                .cssSelector(".row-grouping-toggle[data-collapsed=\"false\"]"));
         colGrouping.click();
     }
 
     private void expandRow(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findElementInShadowRoot(
-                By.cssSelector(".row-group-pane .grouping.plus"));
+        WebElement colGrouping = findElementInShadowRoot(By
+                .cssSelector(".row-grouping-toggle[data-collapsed=\"true\"]"));
         colGrouping.click();
     }
 

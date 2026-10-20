@@ -37,12 +37,12 @@ public class ClosedGroupNumbersIT extends AbstractSpreadsheetIT {
         loadFile("closed-group-with-numbers.xlsx");
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 
-        WebElement rowGrouping = findElementInShadowRoot(
-                By.cssSelector(".col-group-pane .grouping.plus"));
+        WebElement rowGrouping = findElementInShadowRoot(By
+                .cssSelector(".col-grouping-toggle[data-collapsed=\"true\"]"));
         rowGrouping.click();
 
-        waitUntil(e -> findElementInShadowRoot(
-                By.cssSelector(".col-group-pane .grouping.minus")) != null);
+        waitUntil(e -> findElementInShadowRoot(By.cssSelector(
+                ".col-grouping-toggle[data-collapsed=\"false\"]")) != null);
 
         SheetCellElement c2 = spreadsheet.getCellAt("C2");
         Assert.assertEquals("100", c2.getValue());

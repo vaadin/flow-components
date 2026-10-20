@@ -61,8 +61,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     /**
      * Finds an element anywhere in the spreadsheet's nested shadow roots: the
      * cell grid, the column and row headers, the formula bar and the sheet tabs
-     * each have their own. Selectors written for the GWT client's DOM are
-     * translated to the current DOM first. Throws
+     * each have their own. Throws
      * {@link org.openqa.selenium.NoSuchElementException} if nothing matches.
      */
     protected WebElement findElementInShadowRoot(By by) {
@@ -98,85 +97,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         return raw;
     }
 
-    /**
-     * Translate a CSS selector written for the GWT client's DOM to its
-     * equivalent in the current DOM. Returns the input unchanged when no
-     * translation applies.
-     */
-    private String translateSelector(String selector) {
-        // Headers — GWT used .ch / .rh class on header cells; Lit
-        // uses .col-header-cell / .row-header-cell.
-        selector = selector.replace(".ch.col", ".col-header-cell.col");
-        selector = selector.replace(".rh.row", ".row-header-cell.row");
-        // Sheet tab — GWT used .sheet-tabsheet for the strip +
-        // .sheet-tabsheet-tab.selected-tab for the active tab.
-        selector = selector.replace(".sheet-tabsheet-tab.selected-tab",
-                ".sheet-tab.active");
-        // Formula bar — GWT used input.addressfield + .functionfield.
-        selector = selector.replace("input.addressfield",
-                "[part~=\"address-field\"]");
-        selector = selector.replace(".addressfield",
-                "[part~=\"address-field\"]");
-        selector = selector.replace(".functionfield",
-                "[part~=\"formula-field\"]");
-        // GWT sized the scroll area with a tall empty ".floater" div. The
-        // Lit grid is its own scroll extent, so the cell-grid element is
-        // what has the full sheet height.
-        selector = selector.replace(".floater",
-                "vaadin-spreadsheet-internal-cell-grid");
-        // Cell editor input.
-        selector = selector.replace("input[id='cellinput']",
-                "[part~=\"cell-input\"]");
-        // Selection corner drag handle — GWT called it .s-corner.
-        selector = selector.replace(".s-corner", ".selection-corner");
-        // Popup (filter) button on a table header cell.
-        selector = selector.replace(".popupbutton", ".popup-button");
-        // Header corner — the empty box where the two header strips meet.
-        selector = selector.replace(".corner", ".sheet-header-corner");
-        // Cell comment indicator. The Lit element exposes it as a
-        // documented part rather than a class.
-        selector = selector.replace(".cell-comment-triangle",
-                "[part~=\"comment-triangle\"]");
-        // Column grouping outline. GWT rendered .grouping.plus /
-        // .grouping.minus buttons inside a .col-group-pane strip; the
-        // Lit column header renders one toggle per group carrying its
-        // collapsed state as a data attribute.
-        selector = selector.replace(".col-group-pane .grouping.plus",
-                ".col-grouping-toggle[data-collapsed=\"true\"]");
-        selector = selector.replace(".col-group-pane .grouping.minus",
-                ".col-grouping-toggle[data-collapsed=\"false\"]");
-        selector = selector.replace(".row-group-pane .grouping.plus",
-                ".row-grouping-toggle[data-collapsed=\"true\"]");
-        selector = selector.replace(".row-group-pane .grouping.minus",
-                ".row-grouping-toggle[data-collapsed=\"false\"]");
-        // Frozen-pane quadrants. GWT named them by position; the Lit grid
-        // wraps each frozen quadrant in its own transform container. The
-        // unfrozen quadrant has no wrapper — it is the grid's own cells — so
-        // ".bottom-right-pane" has no equivalent and is left alone.
-        selector = selector.replace(".top-left-pane",
-                ".quadrant-wrapper-corner");
-        selector = selector.replace(".top-right-pane", ".quadrant-wrapper-top");
-        selector = selector.replace(".bottom-left-pane",
-                ".quadrant-wrapper-left");
-        // Sheet overlays. GWT rendered a div carrying the anchor cell as
-        // .col<N>.row<N> classes; the Lit grid renders an <img> (or a
-        // placeholder div for component overlays) carrying the anchor as
-        // data attributes, matching the convention cells already use.
-        selector = selector.replaceAll(
-                "(?:div)?\\.sheet-image\\.col(\\d+)\\.row(\\d+)",
-                ".sheet-overlay[data-col=\"$1\"][data-row=\"$2\"]");
-        selector = selector.replaceAll("(?:div)?\\.sheet-image",
-                ".sheet-overlay-image");
-        // GWT nested the image inside its anchor cell, so tests look for
-        // ".col<N>.row<N> img". The Lit grid renders overlays as siblings of
-        // the cells, addressed by the same anchor.
-        selector = selector.replaceAll("\\.col(\\d+)\\.row(\\d+)\\s+img",
-                ".sheet-overlay-image[data-col=\"$1\"][data-row=\"$2\"]");
-        return selector;
-    }
-
     private WebElement findInLitShadowRoots(String cssSelector) {
-        String translated = translateSelector(cssSelector);
         return (WebElement) ((org.openqa.selenium.JavascriptExecutor) getDriver())
                 .executeScript("""
                         const host = arguments[0];
@@ -197,12 +118,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                             return null;
                         }
                         return searchShadow(host.shadowRoot);
-                        """, $(SpreadsheetElement.class).first(), translated);
+                        """, $(SpreadsheetElement.class).first(), cssSelector);
     }
 
     @SuppressWarnings("unchecked")
     private List<WebElement> findAllInLitShadowRoots(String cssSelector) {
-        String translated = translateSelector(cssSelector);
         return (List<WebElement>) ((org.openqa.selenium.JavascriptExecutor) getDriver())
                 .executeScript("""
                         const host = arguments[0];
@@ -218,7 +138,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                         }
                         searchShadow(host.shadowRoot);
                         return out;
-                        """, $(SpreadsheetElement.class).first(), translated);
+                        """, $(SpreadsheetElement.class).first(), cssSelector);
     }
 
     public void selectCell(String address) {
@@ -330,7 +250,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     public String getSelectedSheetName() {
         WebElement selectedSheetTab = findElementInShadowRoot(
-                By.cssSelector(".sheet-tabsheet-tab.selected-tab"));
+                By.cssSelector(".sheet-tab.active"));
 
         return selectedSheetTab.getText();
     }
@@ -398,13 +318,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public void clickOnColumnHeader(int column, Keys... modifiers) {
         Actions actions = new Actions(driver);
         WebElement header = findElementInShadowRoot(
-                By.cssSelector(".ch.col" + column));
+                By.cssSelector(".col-header-cell.col" + column));
         actions.moveToElement(header, 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
-        actions.click(
-                findElementInShadowRoot(By.cssSelector(".ch.col" + column)));
+        actions.click(findElementInShadowRoot(
+                By.cssSelector(".col-header-cell.col" + column)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -413,12 +333,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     public void clickOnRowHeader(int row, Keys... modifiers) {
         Actions actions = new Actions(driver);
-        actions.moveToElement(
-                findElementInShadowRoot(By.cssSelector(".rh.row" + row)), 1, 1);
+        actions.moveToElement(findElementInShadowRoot(
+                By.cssSelector(".row-header-cell.row" + row)), 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
-        actions.click(findElementInShadowRoot(By.cssSelector(".rh.row" + row)));
+        actions.click(findElementInShadowRoot(
+                By.cssSelector(".row-header-cell.row" + row)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -752,11 +673,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     private WebElement getAddressField() {
-        return findElementInShadowRoot(By.cssSelector("input.addressfield"));
+        return findElementInShadowRoot(
+                By.cssSelector("[part~=\"address-field\"]"));
     }
 
     private WebElement getFormulaField() {
-        return findElementInShadowRoot(By.className("functionfield"));
+        return findElementInShadowRoot(
+                By.cssSelector("[part~=\"formula-field\"]"));
     }
 
     public String getFormulaFieldValue() {
@@ -863,6 +786,23 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         return coordinates;
     }
 
+    /**
+     * The selector of the overlay anchored at the cell, such as a chart or the
+     * box an image is drawn in.
+     */
+    public String overlayAt(String cell) {
+        int[] coordinates = numericCoordinates(cell);
+        return ".sheet-overlay[data-col=\"" + coordinates[0] + "\"][data-row=\""
+                + coordinates[1] + "\"]";
+    }
+
+    /** The selector of the image anchored at the cell. */
+    public String overlayImageAt(String cell) {
+        int[] coordinates = numericCoordinates(cell);
+        return ".sheet-overlay-image[data-col=\"" + coordinates[0]
+                + "\"][data-row=\"" + coordinates[1] + "\"]";
+    }
+
     public String cellToCSS(String cell) {
         int[] coordinates = numericCoordinates(cell);
         return ".col" + coordinates[0] + ".row" + coordinates[1];
@@ -886,8 +826,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     public void navigateToCell(String cell) {
-        findElementInShadowRoot(By.cssSelector(".addressfield")).clear();
-        findElementInShadowRoot(By.cssSelector(".addressfield")).sendKeys(cell);
+        findElementInShadowRoot(By.cssSelector("[part~=\"address-field\"]"))
+                .clear();
+        findElementInShadowRoot(By.cssSelector("[part~=\"address-field\"]"))
+                .sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
     }
 
@@ -968,8 +910,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     public List<WebElement> getGroupings() {
-        return findElementsInShadowRoot(
-                By.cssSelector(".col-group-pane .grouping.plus"));
+        return findElementsInShadowRoot(By
+                .cssSelector(".col-grouping-toggle[data-collapsed=\"true\"]"));
     }
 
     protected double getSize(String size) {

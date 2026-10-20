@@ -536,7 +536,8 @@ public class NavigationIT extends AbstractSpreadsheetIT {
     }
 
     private String addressFieldValue() {
-        return findElementInShadowRoot(By.cssSelector(".addressfield"))
+        return findElementInShadowRoot(
+                By.cssSelector("[part~=\"address-field\"]"))
                 .getDomProperty("value");
     }
 }

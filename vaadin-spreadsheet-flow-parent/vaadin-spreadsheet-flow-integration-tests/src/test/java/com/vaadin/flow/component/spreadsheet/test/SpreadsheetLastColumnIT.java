@@ -24,7 +24,7 @@ public class SpreadsheetLastColumnIT extends AbstractSpreadsheetIT {
 
     // Last column (index 3 -> 1-based class col4) in the frozen top row.
     private static final By LAST_FROZEN_CELL = By
-            .cssSelector(".top-right-pane .col4.row1");
+            .cssSelector(".quadrant-wrapper-top .col4.row1");
 
     @Before
     public void init() {

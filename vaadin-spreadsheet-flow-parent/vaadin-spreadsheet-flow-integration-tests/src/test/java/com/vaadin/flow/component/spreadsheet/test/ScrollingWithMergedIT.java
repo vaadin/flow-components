@@ -39,9 +39,9 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
         final SpreadsheetElement spreadsheetElement = getSpreadsheet();
         Assert.assertNotNull(spreadsheetElement.getCellAt("A1"));
 
-        spreadsheetElement
-                .scroll(findElementInShadowRoot(By.className("floater"))
-                        .getSize().height + 100);
+        spreadsheetElement.scroll(findElementInShadowRoot(
+                By.tagName("vaadin-spreadsheet-internal-cell-grid"))
+                .getSize().height + 100);
         Thread.sleep(1000);
 
         try {
@@ -72,7 +72,8 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
         ensureMergedRegionNotVisibleWhenScrolledLeft(spreadsheetElement);
 
         // scroll all the way to right
-        int scrollLeft = findElementInShadowRoot(By.className("floater"))
+        int scrollLeft = findElementInShadowRoot(
+                By.tagName("vaadin-spreadsheet-internal-cell-grid"))
                 .getSize().width + 100;
         spreadsheetElement.scrollLeft(scrollLeft);
         Thread.sleep(1000);
