@@ -31,7 +31,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -165,7 +165,7 @@ jobs:
     name: Fast tests (${{ matrix.name }})
     needs: build
     if: needs.build.outputs.skip != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -355,7 +355,7 @@ jobs:
     name: ITs (${{ matrix.shard }})
     needs: [build, fast-tests]
     if: needs.fast-tests.outputs.has-tests == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     permissions:
       contents: read
@@ -445,7 +445,7 @@ jobs:
     name: Validation result
     needs: [build, fast-tests, its]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       checks: write
