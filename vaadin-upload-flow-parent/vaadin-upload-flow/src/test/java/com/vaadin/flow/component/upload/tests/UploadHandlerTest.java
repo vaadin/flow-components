@@ -121,6 +121,7 @@ class UploadHandlerTest {
     void uploadWithStandardHandler_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException, URISyntaxException {
         // Not uploading initially
+        Assertions.assertFalse(upload.isUploading());
 
         // Simulate an upload using a handler, verify that uploading flag is set
         // while upload is in progress
@@ -128,6 +129,7 @@ class UploadHandlerTest {
                 .spy(new InMemoryUploadCallback() {
                     @Override
                     public void complete(UploadMetadata metadata, byte[] data) {
+                        Assertions.assertTrue(upload.isUploading());
                     }
                 });
         InMemoryUploadHandler handler = new InMemoryUploadHandler(callback);
@@ -136,6 +138,7 @@ class UploadHandlerTest {
         simulateUpload();
 
         // Verify flag is reset after upload completes
+        Assertions.assertFalse(upload.isUploading());
 
         // Sanity check that callback containing the assertion was called
         Mockito.verify(callback, Mockito.times(1)).complete(Mockito.any(),
@@ -146,6 +149,7 @@ class UploadHandlerTest {
     void uploadWithCustomHandler_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException, URISyntaxException {
         // Not uploading initially
+        Assertions.assertFalse(upload.isUploading());
 
         // Simulate an upload using a custom handler, verify that uploading flag
         // is set while upload is in progress
@@ -154,6 +158,7 @@ class UploadHandlerTest {
             public void handleUploadRequest(UploadEvent event) {
                 // when the upload starts,
                 // then the upload is in progress
+                Assertions.assertTrue(upload.isUploading());
             }
 
             @Override
@@ -191,6 +196,7 @@ class UploadHandlerTest {
         simulateUpload();
 
         // Verify flag is reset after upload completes
+        Assertions.assertFalse(upload.isUploading());
 
         // verify that the original methods of custom handler were called
         Mockito.verify(customHandler)
@@ -234,10 +240,11 @@ class UploadHandlerTest {
     }
 
     @ParameterizedTest
-    @CsvSource({ "true,upload-success", "true,upload-error",
-            "true,upload-abort", "false,upload-success" })
+    @CsvSource({ "true,true,upload-success", "true,true,upload-error",
+            "true,true,upload-abort", "false,true,upload-success",
+            "true,false,upload-success" })
     void modalOpen_uploadReceivedAndFinished(boolean modalOpensFirst,
-            String finishEvent) throws URISyntaxException {
+            boolean queuedFile, String finishEvent) throws URISyntaxException {
         upload.setUploadHandler(event -> {
         });
         AtomicBoolean allFinished = new AtomicBoolean();
@@ -252,9 +259,11 @@ class UploadHandlerTest {
             fireUploadDomEvent("upload-start", true);
             openModal();
         }
-        // The first file finishes and the next queued file starts
-        fireUploadDomEvent("upload-success", true);
-        fireUploadDomEvent("upload-start", true);
+        if (queuedFile) {
+            // The first file finishes and the next queued file starts
+            fireUploadDomEvent("upload-success", true);
+            fireUploadDomEvent("upload-start", true);
+        }
 
         Assertions.assertTrue(getUploadHandler().isAllowInert(),
                 "Files should be received for an inert upload");

@@ -929,6 +929,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
      * <p>
+     * Uploads are received also while a modal component makes this component
+     * inert, so that opening a modal before or during an upload does not reject
+     * the files the user selected. The handler's
+     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
+     * disable this component.
+     * <p>
      * This overload uses the default upload target name {@code "upload"}, which
      * becomes the last segment of the dynamically generated upload URL.
      *
@@ -946,6 +952,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle,
      * The given handler defines how uploaded file content is handled on the
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     * <p>
+     * Uploads are received also while a modal component makes this component
+     * inert, so that opening a modal before or during an upload does not reject
+     * the files the user selected. The handler's
+     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
+     * disable this component.
      *
      * @param handler
      *            upload handler to use for file receptions, not {@code null}

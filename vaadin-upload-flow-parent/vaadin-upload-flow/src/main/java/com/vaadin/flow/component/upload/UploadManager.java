@@ -173,6 +173,12 @@ public class UploadManager implements Serializable {
     /**
      * Sets the upload handler that processes uploaded files.
      * <p>
+     * Uploads are received also while a modal component makes the owner inert,
+     * so that opening a modal before or during an upload does not reject the
+     * files the user selected. The handler's
+     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
+     * disable the owner component.
+     * <p>
      * This overload uses the default upload target name {@code "upload"}, which
      * becomes the last segment of the dynamically generated upload URL.
      *
@@ -185,6 +191,12 @@ public class UploadManager implements Serializable {
 
     /**
      * Sets the upload handler that processes uploaded files.
+     * <p>
+     * Uploads are received also while a modal component makes the owner inert,
+     * so that opening a modal before or during an upload does not reject the
+     * files the user selected. The handler's
+     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
+     * disable the owner component.
      *
      * @param handler
      *            the upload handler, not {@code null}
