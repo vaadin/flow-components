@@ -1144,9 +1144,9 @@ export class Spreadsheet implements SpreadsheetClientApi, ReactiveController {
    * to that one cell. Range selections never
    * come through here, so nothing a drag produced is disturbed.
    *
-   * Updating only the formula bar, as this did before, left the
-   * highlight behind on the cell the user had clicked while the
-   * address field named the one the server had moved to.
+   * Updating only the formula bar would leave the highlight behind on
+   * the cell the user had clicked while the address field named the one
+   * the server had moved to.
    *
    * `cellValue` is the formula without its leading `=` when
    * `formula` is set — that is how POI stores it and how the server

@@ -237,8 +237,8 @@ describe('Spreadsheet non-coherent selection — server events', () => {
 
   it('keeps Ctrl-added ranges when a plain shift-click extends the last one', () => {
     // Excel: shift extends the range you are on and leaves the ranges you
-    // picked out earlier alone. Rebuilding the selection from scratch here
-    // silently dropped them, so B1:B3 vanished the moment D3:E3 was drawn.
+    // picked out earlier alone. Rebuilt from scratch here, the selection
+    // would silently drop them: B1:B3 would vanish the moment D3:E3 is drawn.
     clickCell(ctx.sheet, 2, 1);
     clickCell(ctx.sheet, 2, 3, { shiftKey: true });
     clickCell(ctx.sheet, 4, 3, { ctrlKey: true });

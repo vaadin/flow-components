@@ -45,7 +45,7 @@ export interface ColumnHeaderRenderState {
   /**
    * Height of the header strip in pixels. {@code 0} disables the
    * header (the connector still pushes a state, but render() emits
-   * an empty fragment). 27 by default, as in earlier versions.
+   * an empty fragment). 27 by default.
    */
   headerHeight: number;
   /**

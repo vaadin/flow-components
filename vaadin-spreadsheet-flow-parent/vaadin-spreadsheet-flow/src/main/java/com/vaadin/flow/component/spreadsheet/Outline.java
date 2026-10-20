@@ -415,8 +415,8 @@ final class Outline implements Serializable {
         }
 
         // As for one group: the grouping and the sizes are read again. Loading
-        // the whole workbook again, as this once did, emptied the undo history
-        // and dropped what the application had set on the sheet.
+        // the whole workbook again would empty the undo history and drop what
+        // the application has set on the sheet.
         load();
         spreadsheet.sizes().groupToggled();
     }

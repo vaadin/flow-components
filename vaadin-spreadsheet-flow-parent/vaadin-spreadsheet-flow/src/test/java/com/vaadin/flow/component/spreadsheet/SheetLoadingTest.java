@@ -62,8 +62,8 @@ class SheetLoadingTest {
     @Test
     @ExpectWarnings
     void mergedCellsPoiCannotRead_areReported_andTheRestLoaded() {
-        // The regions were read once more before the parts, where a failure
-        // was not caught: the sheet was not shown at all.
+        // Read once more before the parts, where nothing catches a failure,
+        // regions POI cannot read would keep the sheet from being shown.
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet();
         sheet.createFreezePane(1, 2);

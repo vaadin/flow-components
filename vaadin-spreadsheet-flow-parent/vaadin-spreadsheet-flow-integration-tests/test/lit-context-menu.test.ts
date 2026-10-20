@@ -324,9 +324,9 @@ describe('Spreadsheet context menu — where it lands', () => {
   });
 
   it('is not cut off by the edge of the sheet', async () => {
-    // The component clips what overflows it, and the menu was drawn inside
-    // it: opened near the bottom of a sheet shorter than the window, its
-    // last items were cut off and could not be clicked.
+    // The component clips what overflows it: drawn inside it, a menu opened
+    // near the bottom of a sheet shorter than the window would have its last
+    // items cut off, out of reach of a click.
     ctx = attachSheet();
     ctx.host.style.height = '150px';
     ctx.host.style.overflow = 'hidden';

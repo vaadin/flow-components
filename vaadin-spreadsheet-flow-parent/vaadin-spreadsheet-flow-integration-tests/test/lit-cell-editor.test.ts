@@ -1623,8 +1623,8 @@ describe('Spreadsheet — cell editor lifecycle through the connector', () => {
  * Typing over a cell is "enter" mode: an arrow commits what was typed and
  * moves the selection the way it points. Opening the existing value with F2
  * or a double-click is "edit" mode: an arrow moves the caret through the
- * text instead. The connector only ever did the second, so typing a value
- * and pressing an arrow left the editor open and the value uncommitted.
+ * text instead. Doing the second in both modes, typing a value and pressing
+ * an arrow would leave the editor open and the value uncommitted.
  */
 describe('Spreadsheet — committing an edit with a key', () => {
     function editorInput(sheet: Spreadsheet): HTMLInputElement | null {

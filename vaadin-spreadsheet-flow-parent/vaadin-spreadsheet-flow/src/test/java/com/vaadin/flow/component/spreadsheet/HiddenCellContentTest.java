@@ -30,7 +30,7 @@ import com.vaadin.tests.MockUIExtension;
  * A cell whose style hides it, on a protected sheet, keeps what it holds from
  * the client: neither its formula nor its value before formatting is sent, and
  * the client shows only the value the cell displays. Without the protection, or
- * without the hidden style, the formula goes to the client as before.
+ * without the hidden style, the formula goes to the client.
  */
 class HiddenCellContentTest {
 

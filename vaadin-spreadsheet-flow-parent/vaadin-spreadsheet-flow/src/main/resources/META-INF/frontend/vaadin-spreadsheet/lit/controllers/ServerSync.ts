@@ -15,8 +15,8 @@ import type { CellData } from '../types/wire.js';
 import { coerceArray } from '../wire/Coerce.js';
 
 /**
- * Sample the cell-style width measurement uses: ten digits, as earlier
- * versions measured, so the ratios keep the same meaning server-side.
+ * Sample the cell-style width measurement uses: ten digits, the sample the
+ * server's width arithmetic expects the ratios to come from.
  */
 const WIDTH_PROBE_TEXT = '5555555555';
 
@@ -70,10 +70,10 @@ export class ServerSync {
    * Brings the server up to date with a drawing: measures the cell styles
    * again if they changed, then tells the server where the sheet is.
    *
-   * The viewport goes after the ratios, as in earlier versions: the server
-   * builds the cells it sends against the ratios, and builds the ones in view
-   * again when new ratios arrive - before, the first screen of every workbook
-   * went out twice. Both still go in one request.
+   * The viewport goes after the ratios: the server builds the cells it sends
+   * against the ratios, and builds the ones in view again when new ratios
+   * arrive - sent the other way round, the first screen of every workbook
+   * would go out twice. Both go in one request.
    */
   drawn(): void {
     if (this.restyledSinceMeasured && this.pendingMeasurement === null) {
@@ -239,8 +239,7 @@ export class ServerSync {
    * everything fits and no number is ever shortened.
    *
    * Measured as ten digits in a probe carrying the style's class, divided
-   * by ten, as earlier versions measured it, so the server's existing
-   * arithmetic keeps its meaning.
+   * by ten: the ratio the server's arithmetic expects.
    */
   private reportWidthRatios(): void {
     // Every style a cell wears, not only those the style map holds: a style

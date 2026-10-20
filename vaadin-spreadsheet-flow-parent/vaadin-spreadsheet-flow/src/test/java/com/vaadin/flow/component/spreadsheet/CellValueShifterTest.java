@@ -306,8 +306,8 @@ class CellValueShifterTest {
     @Test
     void shift_formulaCell_referenceMovedOffTheSheet_becomesARefError() {
         // As in Excel: "A1" filled from row 2 up to row 1 would point above
-        // the first row. It used to be copied unchanged, which in A1 made
-        // the cell refer to itself.
+        // the first row. Copied unchanged, it would make the cell in A1 refer
+        // to itself.
         Cell src = sheet.createRow(1).createCell(0);
         src.setCellFormula("A1");
         Cell dst = sheet.createRow(0).createCell(0);
@@ -347,8 +347,9 @@ class CellValueShifterTest {
 
     @Test
     void shift_formulaCell_rowShift_leavesAFunctionNameWithDigitsAlone() {
-        // "LOG10(A1)" used to become "LOG11(A2)", which did not parse, and
-        // was then copied with its reference not moved.
+        // With "LOG10" read as a reference, "LOG10(A1)" would become
+        // "LOG11(A2)", which does not parse, and the formula would be copied
+        // with its reference not moved.
         Cell src = sheet.createRow(0).createCell(0);
         src.setCellFormula("LOG10(A1)");
         Cell dst = sheet.createRow(1).createCell(0);

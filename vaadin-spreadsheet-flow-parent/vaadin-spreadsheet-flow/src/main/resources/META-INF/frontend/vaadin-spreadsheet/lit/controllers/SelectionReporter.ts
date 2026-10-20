@@ -64,7 +64,7 @@ export class SelectionReporter {
    * {@code @DomEvent}; the detail's {@code type} + {@code data} follow the
    * server's SpreadsheetHandler signatures as a wire contract.
    *
-   * A range goes in one event, as in earlier versions. Grown from the cell
+   * A range goes in one event. Grown from the cell
    * the server holds as selected - a shift-click, Shift+arrow - it is
    * `cellRangeSelected`, which keeps that cell. With a starting point of its
    * own - a drag, select all - or grown from a cell the server does not

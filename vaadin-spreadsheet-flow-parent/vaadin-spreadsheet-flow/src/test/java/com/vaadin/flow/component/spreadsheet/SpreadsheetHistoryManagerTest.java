@@ -407,7 +407,7 @@ class SpreadsheetHistoryManagerTest {
         recording.setHistorySize(3);
 
         // The command that could be redone goes through the hook, then the
-        // oldest goes to make room, as before.
+        // oldest goes to make room.
         assertEquals(List.of(3), recording.discardedAfter);
         assertEquals(3, recording.commands.size());
         assertEquals(2, recording.getHistoryIndex());

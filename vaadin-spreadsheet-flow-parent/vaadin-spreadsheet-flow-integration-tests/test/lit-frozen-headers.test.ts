@@ -13,11 +13,10 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 /**
  * Headers of frozen rows and columns.
  *
- * The cell-grid pins frozen cells in their own quadrants, but the header
- * strips only ever drew the scrolling viewport. Scroll a sheet with two
- * frozen columns and the columns stayed put while the letters naming
- * them slid away — and once column 1's header is gone, nothing can
- * select that column.
+ * The header strips draw the frozen rows and columns too, as the cell-grid
+ * holds them. Drawing only the scrolling viewport, they would let the
+ * letters of two frozen columns slide away while the columns stay put -
+ * and once column 1's header is gone, nothing can select that column.
  */
 
 function attachSheet(): { sheet: Spreadsheet; cleanup: () => void } {
@@ -515,9 +514,9 @@ describe('Frozen panes — where the scrolling cells start', () => {
 });
 
 /**
- * The frozen headers stay put while the rest scroll under them. The row
- * numbers had no background of their own, so a frozen row's number was
- * drawn over the scrolled one beneath it - 2 over 42.
+ * The frozen headers stay put while the rest scroll under them. Without a
+ * background of their own, a frozen row's number would be drawn over the
+ * scrolled one beneath it - 2 over 42.
  */
 describe('Frozen panes — headers that cover what scrolls under them', () => {
   let sheet: Spreadsheet;

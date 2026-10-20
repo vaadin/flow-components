@@ -139,7 +139,7 @@ class CustomEditorScrollingTest {
         assertTrue(registered(b2));
     }
 
-    // The page grew without bound when every editor ever made was kept: 161
+    // Keeping every editor ever made, the page would grow without bound: 161
     // MB after 600 rows of a sheet with an editor in every cell.
 
     @Test

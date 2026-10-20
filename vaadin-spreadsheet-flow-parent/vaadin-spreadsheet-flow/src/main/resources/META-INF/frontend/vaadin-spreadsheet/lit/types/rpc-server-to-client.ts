@@ -163,10 +163,9 @@ export interface SpreadsheetClientApi {
   // ====================================================================
 
   /**
-   * Named for the server's call, not the past tense the earlier draft used:
-   * {@code PopupButton.openPopup()} runs
+   * Named for the server's call: {@code PopupButton.openPopup()} runs
    * {@code callJsFunction("onPopupButtonOpen", ...)}, and a client method
-   * under any other name is simply never called.
+   * under any other name is never called.
    */
   onPopupButtonOpen(row: number, column: number, contentId: number, appId: string): void;
   closePopup(row: number, column: number): void;

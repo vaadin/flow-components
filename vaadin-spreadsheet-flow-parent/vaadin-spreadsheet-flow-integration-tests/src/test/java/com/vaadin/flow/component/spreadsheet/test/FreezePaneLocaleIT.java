@@ -38,9 +38,9 @@ public class FreezePaneLocaleIT extends AbstractSpreadsheetIT {
      * colour when the first sheet goes away, or it keeps a border belonging to
      * a sheet nobody can see.
      * <p>
-     * This test used to read border-bottom-width and expect it not to be 1px
-     * before hiding. Every cell carries a 1px grid line, so that could never
-     * hold - it is the failure reported in <a href=
+     * Expecting border-bottom-width not to be 1px before hiding could never
+     * hold: every cell carries a 1px grid line. That is the failure reported in
+     * <a href=
      * "https://github.com/vaadin/flow-components/issues/4737">flow-components
      * #4737</a>. The colour is what tells the two sheets apart.
      */

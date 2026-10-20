@@ -157,8 +157,8 @@ class TypedValueStyleTest {
 
     @Test
     void hyperlinksTyped_shareOneStyle() {
-        // Each used to make a style of its own, and a workbook has a limit on
-        // its styles.
+        // A style of its own for each would soon reach the limit a workbook
+        // has on its styles.
         int styles = workbook.getNumCellStyles();
 
         type("C3", LINK);

@@ -314,8 +314,8 @@ class ClipboardTest {
 
     @Test
     void cut_undo_redo_cellsAreEmptyAgain() {
-        // The active cell, inside the range cut, was kept twice, so the redo
-        // put its value back.
+        // Kept twice, the active cell inside the range cut would get its value
+        // back from the redo.
         selectThreeValues();
         cut();
         undo();

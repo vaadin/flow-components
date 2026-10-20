@@ -86,7 +86,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       height: var(--vaadin-spreadsheet-formulabar-height, 30px);
       background: ${formulabarBg};
       /* The bar's own border colour, or each line in its documented colour:
-         this one in the header border colour, as in earlier versions. */
+         this one in the header border colour. */
       --_line-color: ${headerBorderColor};
       border-bottom: 1px solid var(--vaadin-spreadsheet-formulabar-border, var(--_line-color));
       font-family: ${formulabarFont};
@@ -116,7 +116,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       box-sizing: border-box;
       width: 176px;
       height: 100%;
-      /* The divider in the sheet's border colour, as in earlier versions. */
+      /* The divider in the sheet's border colour. */
       --_line-color: ${borderColor};
       border-right: 1px solid var(--vaadin-spreadsheet-formulabar-border, var(--_line-color));
       background: #fafafa;
@@ -201,8 +201,7 @@ export class SpreadsheetFormulaBar extends SpreadsheetPart {
       padding-right: var(--lumo-space-xs);
     }
 
-    /* In Lumo the divider is in the header border colour, as in earlier
-       versions. */
+    /* In Lumo the divider is in the header border colour. */
     :host([theme~='lumo']) .address-panel {
       --_line-color: ${headerBorderColor};
       background: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct)) var(--lumo-base-color);

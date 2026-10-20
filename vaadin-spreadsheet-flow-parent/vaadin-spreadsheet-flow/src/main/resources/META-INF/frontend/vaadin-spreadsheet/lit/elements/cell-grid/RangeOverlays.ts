@@ -137,9 +137,8 @@ export function pieceBox(piece: RangePiece): string {
  * visible viewport (selection scrolled off-screen) — TestBench's
  * waitUntil lookup will then poll until the user scrolls back.
  *
- * Wire contract: the class names are those of earlier versions, which
- * tests look for. The overlay is positioned absolutely within the
- * cell-grid's shadow DOM.
+ * Wire contract: tests look for these class names. The overlay is
+ * positioned absolutely within the cell-grid's shadow DOM.
  */
 export function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult | string {
   const { selection } = opts.state;
@@ -160,9 +159,8 @@ export function buildSelectionOverlay(opts: QuadrantRenderOpts): TemplateResult 
   // the cells of the range other than the active one; on the overlay too, a rule meant for those cells drew around
   // the whole range, the active cell included. The selection corner
   // handle (drag affordance in the bottom-right) carries
-  // `part="selection-corner"`. Border divs are internal (their s-* names
-  // come from earlier versions; no part attribute since they aren't
-  // documented).
+  // `part="selection-corner"`. Border divs are internal: no part attribute,
+  // since they aren't documented.
   //
   // A side the range runs on past is kept, hidden, so every piece has all
   // four; the handle is only where the range's last cell is.

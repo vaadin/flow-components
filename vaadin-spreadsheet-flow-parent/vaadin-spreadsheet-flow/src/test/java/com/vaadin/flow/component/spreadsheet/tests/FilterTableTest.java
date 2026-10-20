@@ -53,8 +53,8 @@ class FilterTableTest {
 
     @Test
     void aTableForASheetNotShown_belongsToThatSheet_andHasNoButtonsYet() {
-        // The sheet given used to be ignored, and the table landed on the
-        // sheet shown.
+        // With the sheet given ignored, the table would land on the sheet
+        // shown.
         spreadsheet.createNewSheet("Other", 10, 10);
         spreadsheet.setActiveSheetIndex(0);
         Sheet other = spreadsheet.getWorkbook().getSheet("Other");

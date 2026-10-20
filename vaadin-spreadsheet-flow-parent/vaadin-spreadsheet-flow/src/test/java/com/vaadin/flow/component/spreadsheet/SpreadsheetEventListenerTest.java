@@ -44,12 +44,11 @@ import tools.jackson.databind.node.ObjectNode;
 /**
  * Pins how client events map onto handler calls.
  *
- * The client sends one named object per event. This used to be read
- * positionally — {@code (ArrayNode) event.getData()} — which threw a
- * ClassCastException on every single event, so nothing a user did ever reached
- * the server. These tests pin the field names, and in particular the two
- * handlers whose argument order does not match the order the fields are
- * declared in.
+ * The client sends one named object per event. Read positionally -
+ * {@code (ArrayNode) event.getData()} - every event would throw a
+ * ClassCastException, and nothing a user did would reach the server. These
+ * tests pin the field names, and in particular the two handlers whose argument
+ * order does not match the order the fields are declared in.
  */
 public class SpreadsheetEventListenerTest {
 

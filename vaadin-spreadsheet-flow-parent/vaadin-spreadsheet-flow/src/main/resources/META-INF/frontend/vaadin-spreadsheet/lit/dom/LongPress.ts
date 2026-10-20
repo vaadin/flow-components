@@ -8,7 +8,7 @@
  * license.
  */
 
-/** How long a press stays put to be a long press, as it has been in earlier versions. */
+/** How long a press stays put to be a long press. */
 export const LONG_PRESS_MS = 750;
 
 /** How far a finger may drift during a long press, in CSS pixels. */

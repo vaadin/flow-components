@@ -48,8 +48,8 @@ class ConditionalFormattingRefreshTest {
     @Test
     void cellsTheFormatNeedsAreCreatedBlank() {
         // B3 sits in a formatted range and holds nothing. The format needs
-        // a cell there to hang on, and it used to make one holding an empty
-        // string - which A2's rule, comparing against B3, then read as text.
+        // a cell there to hang on. Made holding an empty string, that cell
+        // would be read as text by A2's rule, which compares against B3.
         Spreadsheet spreadsheet = TestHelper.createSpreadsheet(
                 "conditional_formatting_shared_formula.xlsx");
 

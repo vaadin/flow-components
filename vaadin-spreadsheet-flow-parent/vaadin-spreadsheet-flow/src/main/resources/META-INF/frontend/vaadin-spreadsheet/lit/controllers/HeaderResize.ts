@@ -145,9 +145,9 @@ export class HeaderResize {
    * The pointer was let go: a dragged column takes the width from its left
    * edge to where the pointer is, and a row the height, when it is a
    * different one. A press let go without moving - a click, or the first
-   * click of a double-click - resizes nothing, as in earlier versions: the
-   * handle is a few pixels wide, so the pointer is rarely on the edge
-   * itself. Returns whether a drag ended.
+   * click of a double-click - resizes nothing: the handle is a few pixels
+   * wide, so the pointer is rarely on the edge itself. Returns whether a
+   * drag ended.
    */
   finish(): boolean {
     const drag = this.drag;

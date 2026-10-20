@@ -452,8 +452,8 @@ export function buildMergedCellOverlays(opts: QuadrantRenderOpts): TemplateResul
     const style =
       `left:${left}px;top:${top}px;width:${width}px;height:${height}px;z-index:2;` + textColorDeclaration(data);
     // data-col / data-row are what the click delegation reads. Without
-    // them a merged region matched `.cell` and then parsed NaN, so
-    // every click on one was dropped — a merged cell could not be
+    // them a merged region would match `.cell` and then parse NaN, so
+    // every click on one would be dropped — a merged cell could not be
     // selected at all. `part` for the same reason a plain cell has it:
     // a merged cell is still a cell to a stylesheet.
     //

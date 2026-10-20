@@ -689,8 +689,8 @@ public class SpreadsheetElement extends TestBenchElement {
      * Gets the input of the inline cell editor, which holds the value of the
      * cell being edited.
      * <p>
-     * While no cell is being edited, this is a hidden stand-in, as in earlier
-     * versions: {@code isDisplayed()} is {@code false}.
+     * While no cell is being edited, this is a hidden stand-in:
+     * {@code isDisplayed()} is {@code false}.
      *
      * @return the input
      */

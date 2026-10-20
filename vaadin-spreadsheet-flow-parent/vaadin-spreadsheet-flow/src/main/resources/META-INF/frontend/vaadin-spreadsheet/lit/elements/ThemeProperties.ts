@@ -13,7 +13,7 @@ import { css } from 'lit';
 /*
  * The documented styling properties, each as the sheet reads it: the
  * application's value; else the theme's, a --_vaadin-spreadsheet-* property
- * a theme sets on the host; else the default it has always had. Every default
+ * a theme sets on the host; else its own default. Every default
  * is written here once. The properties are read, never declared, so a value
  * set on any ancestor reaches the sheet.
  */

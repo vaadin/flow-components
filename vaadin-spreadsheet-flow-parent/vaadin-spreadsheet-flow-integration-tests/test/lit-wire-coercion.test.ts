@@ -25,9 +25,9 @@ import {
  *
  * They are worth pinning on their own: text that slipped through would not
  * fail loudly. It would be iterated character by character and quietly
- * produce nonsense — that is how the whole sheet once rendered blank with a
- * single entry keyed "colundefined rowundefined". The server sent JSON as
- * text then; it no longer does, and the client no longer parses text.
+ * produce nonsense - a whole sheet rendered blank, with a single entry keyed
+ * "colundefined rowundefined". The server sends no JSON as text, and the
+ * client parses no text.
  */
 
 describe('coerceArray', () => {

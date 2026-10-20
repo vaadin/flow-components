@@ -35,15 +35,12 @@ import type { LoadRange } from '../state/ViewportLoader.js';
 import { ViewState } from '../state/ViewState.js';
 import type { PopupButtonState } from '../types/wire.js';
 
-/**
- * Height of the column headers, in pixels: 27, so a sheet starts its first
- * row where it always did.
- */
+/** Height of the column headers, in pixels. */
 const DEFAULT_HEADER_ROW_HEIGHT = 27;
 
 /**
- * Width of the row headers, in pixels: 50, as in earlier versions, which
- * also fits a six-digit row number.
+ * Width of the row headers, in pixels: 50, which fits a six-digit row
+ * number.
  */
 const DEFAULT_HEADER_COLUMN_WIDTH = 50;
 
@@ -326,14 +323,14 @@ export class SheetRenderer {
     // edge, frozen columns included. The viewport reports how far into
     // the scrolling region the first visible column is, which is
     // measured from the split, so the frozen block's width goes back on
-    // top. Without it the scrolling columns were drawn from x 0,
-    // underneath the frozen block that is pinned there - the first
+    // top. Without it the scrolling columns would be drawn from x 0,
+    // underneath the frozen block that is held there - the first
     // columns after a freeze could not be seen at all, and a click on
-    // one landed on a frozen cell.
+    // one would land on a frozen cell.
     //
     // The freeze line has a pixel of its own between the frozen columns or
     // rows and the rest, the frozen pane's border, so the scrolling ones start one pixel past it. Drawn over their first pixel
-    // instead, the first row after a freeze came out a pixel short.
+    // instead, the first row after a freeze would come out a pixel short.
     const split = { cols: model.horizontalSplitPosition, rows: model.verticalSplitPosition };
     const gapX = freezeGap(split.cols);
     const gapY = freezeGap(split.rows);

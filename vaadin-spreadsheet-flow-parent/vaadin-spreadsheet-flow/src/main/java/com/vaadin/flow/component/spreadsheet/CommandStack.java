@@ -21,14 +21,13 @@ import com.vaadin.flow.component.spreadsheet.command.Command;
  * subclasses that read that field continue to see the live list.
  *
  * <p>
- * Two behaviours that {@code SpreadsheetHistoryManager} has always had:
+ * Two behaviours of the history:
  * <ul>
  * <li>{@link #push} when the list overflows {@code maxSize} drops the oldest
  * command via {@code removeFirst()} and does <em>not</em> advance the cursor in
  * that branch.</li>
- * <li>{@link #setMaxSize} calls {@link #clipAfter} with the new max size as the
- * cursor argument, which is how
- * {@code SpreadsheetHistoryManager.setHistorySize} has always behaved.</li>
+ * <li>{@link #setMaxSize} drops the commands that no longer fit: those that
+ * could be redone first, then the oldest, with the cursor following them.</li>
  * </ul>
  */
 final class CommandStack implements Serializable {
@@ -120,8 +119,8 @@ final class CommandStack implements Serializable {
     /**
      * Changes the bound, dropping the commands that no longer fit: those that
      * could be redone first, latest first, then the oldest, with the cursor
-     * following them. Keeping the oldest instead, as this once did, left the
-     * cursor past the end of the list, and an undo then failed.
+     * following them. Keeping the oldest instead would leave the cursor past
+     * the end of the list, and an undo would then fail.
      */
     void setMaxSize(int newMaxSize) {
         this.maxSize = newMaxSize;

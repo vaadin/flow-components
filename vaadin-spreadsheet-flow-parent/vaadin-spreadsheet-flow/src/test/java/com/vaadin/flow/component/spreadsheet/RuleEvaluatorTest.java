@@ -280,8 +280,8 @@ class RuleEvaluatorTest {
 
     @Test
     void matchesValue_numericBETWEEN_withACellReferenceAsTheSecondBound() {
-        // The second bound used to be read as a number, so a reference threw
-        // while the sheet loaded.
+        // Read as a number, a reference as the second bound would throw while
+        // the sheet loads.
         numericCell(0, 2, 20d); // C1
         ConditionalFormattingRule rule = betweenRule(ComparisonOperator.BETWEEN,
                 "10", "$C$1");

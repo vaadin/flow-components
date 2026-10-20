@@ -30,8 +30,8 @@ import {
  *   2. {@code --vaadin-spreadsheet-*} CSS custom properties — read,
  *      never declared, so a value an application sets on any
  *      ancestor reaches the sheet. Each read falls back to a
- *      {@code --_vaadin-spreadsheet-*} theme default and then to the
- *      value it has always had.
+ *      {@code --_vaadin-spreadsheet-*} theme default and then to a
+ *      default of its own.
  *   3. {@code Spreadsheet.HIDE_FUNCTION_BAR_STYLE} ("hidefunctionbar")
  *      + {@code Spreadsheet.HIDE_TABSHEET_STYLE} ("hidetabsheet")
  *      Java constants — applied to the host's class list. The
@@ -42,12 +42,6 @@ import {
  *      each internal element. The theme defaults below give every
  *      documented property its Lumo value; each element draws the
  *      rest of the Lumo look under {@code :host([theme~='lumo'])}.
- *
- * Selectors of earlier versions (.s-top, .sheet-tabsheet, .ch.col1, .rh.row1,
- * .addressfield, .functionfield, .bottom-right-pane, .v-spreadsheet,
- * .merged-cell, .v-contextmenu, etc.) were NOT documented and are
- * removed. End users who customized appearance via those selectors
- * should migrate to {@code ::part(...)} per the docs.
  */
 export const spreadsheetStyles = css`
   :host {

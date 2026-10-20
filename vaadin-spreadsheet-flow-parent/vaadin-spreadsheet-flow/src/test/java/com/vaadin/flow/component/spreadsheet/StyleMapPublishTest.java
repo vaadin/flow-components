@@ -157,7 +157,7 @@ class StyleMapPublishTest {
     }
 
     // Each send serializes the whole map: a workbook's styles, added one by
-    // one, cost the server half a minute for 20,000 when each was sent alone.
+    // one and each sent alone, would cost the server half a minute for 20,000.
 
     @Test
     void reloadingTheStyles_serializesTheMapOnce() {

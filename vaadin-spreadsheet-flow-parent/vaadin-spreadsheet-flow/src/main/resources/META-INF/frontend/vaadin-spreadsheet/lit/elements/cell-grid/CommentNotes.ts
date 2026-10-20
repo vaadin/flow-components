@@ -115,12 +115,11 @@ export function drawnNotes(state: CellGridRenderState, hoveredKey: string | null
  * formula the server rejected shows the same overlay carrying the error
  * instead, which is why one function renders both.
  *
- * Class names are those of earlier versions (`comment-overlay-label`,
- * `comment-overlay-author`, `comment-overlay-invalidformula`). A page's
- * styles reached them while notes were drawn outside the component's
- * shadow root; here they are two shadow roots in, so the card,
- * its author and its text are the parts `comment-overlay`, `comment-author`
- * and `comment-text`, which is what an application styles now.
+ * The class names (`comment-overlay-label`, `comment-overlay-author`,
+ * `comment-overlay-invalidformula`) are internal: the notes are two shadow
+ * roots in, where no page's styles reach. An application styles the card,
+ * its author and its text through the parts `comment-overlay`,
+ * `comment-author` and `comment-text`.
  */
 export function buildCommentOverlays(
   state: CellGridRenderState,

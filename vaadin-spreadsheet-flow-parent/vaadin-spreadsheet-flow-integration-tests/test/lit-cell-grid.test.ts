@@ -1269,7 +1269,7 @@ describe('SpreadsheetCellGrid — merged-cell overlays', () => {
         expect(el.shadowRoot!.querySelector('.col3.row2')).to.not.be.null;
         expect(el.shadowRoot!.querySelector('.col3.row3')).to.not.be.null;
 
-        // Cells OUTSIDE the merge render as they always did.
+        // Cells OUTSIDE the merge render as plain cells.
         expect(el.shadowRoot!.querySelector('.col1.row1')).to.not.be.null;
         expect(el.shadowRoot!.querySelector('.col4.row4')).to.not.be.null;
 

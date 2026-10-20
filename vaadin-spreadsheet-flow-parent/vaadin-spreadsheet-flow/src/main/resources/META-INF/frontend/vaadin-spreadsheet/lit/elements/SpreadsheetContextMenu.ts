@@ -78,8 +78,8 @@ export class SpreadsheetContextMenu extends SpreadsheetPart {
      * sheet's own coordinates and measures this element to turn it back
      * into the page's. The menu itself goes in the top layer, where no
      * ancestor's transform applies: a fixed box inside a dialog overlay,
-     * which is transformed while it animates, was drawn 16px off and
-     * jumped a moment later.
+     * which is transformed while it animates, would be drawn 16px off and
+     * jump a moment later.
      */
       :host {
         position: absolute;

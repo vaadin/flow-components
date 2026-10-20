@@ -455,10 +455,10 @@ class CellNumericFormatterTest {
 
     @Test
     void valueContainsOnlyNumbers_separatorIsALiteral_notARegex() {
-        // The separator used to be concatenated into the regex unquoted,
-        // so under US - where it is '.' - it meant "any character" and
-        // "1,5" and "1X5" counted as numbers. It is quoted now, so only
-        // the separator the locale actually uses is accepted.
+        // Concatenated into the regex unquoted, the separator would mean
+        // "any character" under US - where it is '.' - and "1,5" and "1X5"
+        // would count as numbers. Quoted, only the separator the locale
+        // actually uses is accepted.
         formatter.updateLocale(Locale.US);
 
         assertFalse(formatter.valueContainsOnlyNumbers("1,5"),
