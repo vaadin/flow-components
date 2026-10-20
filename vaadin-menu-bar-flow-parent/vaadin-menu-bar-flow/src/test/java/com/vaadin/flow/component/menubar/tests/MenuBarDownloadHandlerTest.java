@@ -162,11 +162,26 @@ class MenuBarDownloadHandlerTest {
         menuBar.remove(item);
         ui.fakeClientCommunication();
 
-        VaadinResponse response = sendRequest(url);
+        assertNotFound(url);
+    }
 
-        Assertions.assertEquals(0, downloads.get());
-        Mockito.verify(response).sendError(Mockito.eq(404),
-                Mockito.anyString());
+    @Test
+    void menuBarDetached_notFound() throws IOException {
+        String url = getDownloadUrl(item);
+        ui.remove(menuBar);
+
+        assertNotFound(url);
+    }
+
+    @Test
+    void subMenuItem_menuBarDetached_notFound() throws IOException {
+        MenuItem subItem = item.getSubMenu().addItem("Sub");
+        subItem.setDownloadHandler(handler);
+        ui.fakeClientCommunication();
+        String url = getDownloadUrl(subItem);
+        ui.remove(menuBar);
+
+        assertNotFound(url);
     }
 
     @Test
@@ -221,6 +236,14 @@ class MenuBarDownloadHandlerTest {
             Mockito.verify(response).sendError(403, "Resource not available");
         }
         return served;
+    }
+
+    private void assertNotFound(String url) throws IOException {
+        VaadinResponse response = sendRequest(url);
+
+        Assertions.assertEquals(0, downloads.get());
+        Mockito.verify(response).sendError(Mockito.eq(404),
+                Mockito.anyString());
     }
 
     private VaadinResponse sendRequest(String url) throws IOException {
