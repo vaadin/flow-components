@@ -141,7 +141,10 @@ describe('CommentNotes', () => {
     it('hangs right of its cell and above it, its line from the corner, carrying where its cell is', () => {
       const container = drawn(sheet(), 'col1 row1');
 
-      const [line, card] = Array.from(container.children) as HTMLElement[];
+      // In a holder, not held: the cell scrolls.
+      const holder = container.firstElementChild as HTMLElement;
+      expect([holder.className, holder.style.cssText]).to.eql(['comment-holder', '']);
+      const [line, card] = Array.from(holder.children) as HTMLElement[];
       expect(line.className).to.equal('comment-overlay-line');
       expect(card.style.cssText).to.equal(`left: ${100 + COMMENT_GAP}px; top: ${-COMMENT_GAP}px; position: absolute;`);
       expect([card.dataset.cellLeft, card.dataset.cellRight, card.dataset.cellTop, card.dataset.key]).to.eql([
@@ -153,6 +156,30 @@ describe('CommentNotes', () => {
       expect([card.dataset.quadrant, card.dataset.pinned]).to.eql(['main', 'false']);
       expect(card.querySelector('[part="comment-author"]')!.textContent).to.equal('Ann');
       expect(card.querySelector('[part="comment-text"]')!.textContent).to.equal('First');
+    });
+
+    it('is held with the pane of a frozen cell, placed as the cell is in that pane', () => {
+      // A1 is frozen both ways, and the sheet scrolled 30px across, 10px down.
+      const container = drawn(
+        sheet({
+          horizontalSplitPosition: 1,
+          verticalSplitPosition: 1,
+          frozenColX: [0],
+          frozenColWidths: [100],
+          frozenRowY: [0],
+          frozenRowHeights: [20],
+          scrollLeft: 30,
+          scrollTop: 10,
+          headerExtent: { width: 50, height: 27 }
+        }),
+        'col1 row1'
+      );
+
+      const holder = container.firstElementChild as HTMLElement;
+      expect([holder.style.top, holder.style.left], 'held just inside the headers').to.eql(['27px', '50px']);
+      const card = holder.querySelector<HTMLElement>('.comment-overlay')!;
+      expect([card.dataset.cellLeft, card.dataset.cellRight, card.dataset.cellTop]).to.eql(['0', '100', '0']);
+      expect([card.style.left, card.style.top]).to.eql([`${100 + COMMENT_GAP}px`, `${-COMMENT_GAP}px`]);
     });
 
     it("is pinned when the workbook shows it always, and kept to the pane of its cell", () => {

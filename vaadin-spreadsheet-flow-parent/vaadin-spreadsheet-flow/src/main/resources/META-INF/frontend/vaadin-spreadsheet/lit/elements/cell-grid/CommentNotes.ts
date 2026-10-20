@@ -129,6 +129,7 @@ export function buildCommentOverlays(
 ): TemplateResult[] {
   const authors = state.commentAuthors ?? {};
   const invalidMessage = state.invalidFormulaMessage ?? null;
+  const headers = state.headerExtent ?? { width: 0, height: 0 };
 
   const overlays: TemplateResult[] = [];
   for (const { key, coord, showsError, editing, comment, geometry } of notes) {
@@ -137,46 +138,56 @@ export function buildCommentOverlays(
     // in that pane - see CommentNotes.place.
     const quadrant = quadrantOf(coord.col, coord.row, state.horizontalSplitPosition, state.verticalSplitPosition);
     const pinned = key !== hoveredKey && !editing;
+    // The note and its line are in a holder of no size where the grid
+    // starts. On a frozen cell the holder is held in place as the cell's
+    // pane is, and the note is placed as the cell is in its pane, so it stays
+    // by the cell however fast the sheet scrolls. On a scrolling cell the
+    // holder is not held, and the note goes by the cell on the grid.
+    const heldAcross = coord.col <= state.horizontalSplitPosition;
+    const heldDown = coord.row <= state.verticalSplitPosition;
+    const hold = (heldDown ? `top:${headers.height}px;` : '') + (heldAcross ? `left:${headers.width}px;` : '');
+    const cellLeft = heldAcross ? geometry.left - state.scrollLeft : geometry.left;
+    const cellTop = heldDown ? geometry.top - state.scrollTop : geometry.top;
     // Where a note hangs: 15px right of the cell and 15px
     // above it, with a line from the cell's corner to the note's. Moved to
     // the cell's left, or down, once the note's size is known, should it
     // not fit the sheet - see CommentNotes.place.
-    const cellRight = geometry.left + geometry.width;
-    const style = `left:${cellRight + COMMENT_GAP}px;top:${geometry.top - COMMENT_GAP}px;position:absolute;`;
-    overlays.push(
-      html`<div
-        class="comment-overlay-line"
-        style=${commentLineStyle(cellRight, geometry.top, cellRight + COMMENT_GAP, geometry.top - COMMENT_GAP, 0)}
-      ></div>`
-    );
+    const cellRight = cellLeft + geometry.width;
+    const style = `left:${cellRight + COMMENT_GAP}px;top:${cellTop - COMMENT_GAP}px;position:absolute;`;
+    const line = html`<div
+      class="comment-overlay-line"
+      style=${commentLineStyle(cellRight, cellTop, cellRight + COMMENT_GAP, cellTop - COMMENT_GAP, 0)}
+    ></div>`;
     const author = authors[key];
     overlays.push(html`
-      <div
-        class="comment-overlay"
-        part="comment-overlay"
-        style=${style}
-        data-cell-left=${geometry.left}
-        data-cell-right=${cellRight}
-        data-cell-top=${geometry.top}
-        data-quadrant=${quadrant}
-        data-pinned=${pinned ? 'true' : 'false'}
-        data-key=${key}
-      >
-        ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
-        ${showsError && (editing || comment !== undefined)
-          ? html`<div class="comment-overlay-separator"></div>`
-          : nothing}
-        ${author ? html`<div class="comment-overlay-author" part="comment-author">${author}</div>` : nothing}
-        ${editing
-          ? html`<textarea
-              class="comment-overlay-edit"
-              part="comment-edit"
-              data-key=${key}
-              .value=${comment ?? ''}
-            ></textarea>`
-          : comment === undefined
-          ? nothing
-          : html`<div class="comment-overlay-label" part="comment-text">${comment}</div>`}
+      <div class="comment-holder" style=${hold}>
+        ${line}<div
+          class="comment-overlay"
+          part="comment-overlay"
+          style=${style}
+          data-cell-left=${cellLeft}
+          data-cell-right=${cellRight}
+          data-cell-top=${cellTop}
+          data-quadrant=${quadrant}
+          data-pinned=${pinned ? 'true' : 'false'}
+          data-key=${key}
+        >
+          ${showsError ? html`<div class="comment-overlay-invalidformula">${invalidMessage}</div>` : nothing}
+          ${showsError && (editing || comment !== undefined)
+            ? html`<div class="comment-overlay-separator"></div>`
+            : nothing}
+          ${author ? html`<div class="comment-overlay-author" part="comment-author">${author}</div>` : nothing}
+          ${editing
+            ? html`<textarea
+                class="comment-overlay-edit"
+                part="comment-edit"
+                data-key=${key}
+                .value=${comment ?? ''}
+              ></textarea>`
+            : comment === undefined
+            ? nothing
+            : html`<div class="comment-overlay-label" part="comment-text">${comment}</div>`}
+        </div>
       </div>
     `);
   }
@@ -311,8 +322,12 @@ export class CommentNotes {
       // right after a note became an undo of the note's text.
       const copy = note.cloneNode(true) as HTMLElement;
       copy.inert = true;
-      root.appendChild(copy);
-      animateOut(copy, () => copy.remove());
+      // In a copy of its holder, so that it fades where it was, held as it
+      // was.
+      const holder = note.parentElement!.cloneNode(false) as HTMLElement;
+      holder.appendChild(copy);
+      root.appendChild(holder);
+      animateOut(copy, () => holder.remove());
     }
   }
 
@@ -341,15 +356,17 @@ export class CommentNotes {
       return;
     }
     const panes = this.panes(container);
-    const grid = this.host.getBoundingClientRect();
     for (const note of Array.from(notes)) {
       const pane = panes[(note.dataset.quadrant as QuadrantName) ?? 'main'] ?? panes.main;
+      // Where the cell is, and where the note goes, in its holder's
+      // coordinates.
+      const frame = (note.parentElement ?? this.host).getBoundingClientRect();
       const cellLeft = Number(note.dataset.cellLeft);
       const cellRight = Number(note.dataset.cellRight);
       const cellTop = Number(note.dataset.cellTop);
       const line = note.previousElementSibling as HTMLElement | null;
-      const cornerX = grid.left + cellRight;
-      const cornerY = grid.top + cellTop;
+      const cornerX = frame.left + cellRight;
+      const cornerY = frame.top + cellTop;
       const cornerInPane =
         cornerX >= pane.left && cornerX < pane.right && cornerY >= pane.top && cornerY <= pane.bottom;
       const shown = note.dataset.pinned !== 'true' || cornerInPane;
@@ -362,21 +379,21 @@ export class CommentNotes {
       }
       const width = note.offsetWidth;
       const height = note.offsetHeight;
-      let left = grid.left + cellRight + COMMENT_GAP;
+      let left = frame.left + cellRight + COMMENT_GAP;
       if (left + width > pane.right) {
-        const leftOfCell = grid.left + cellLeft - COMMENT_GAP - width;
+        const leftOfCell = frame.left + cellLeft - COMMENT_GAP - width;
         if (pane.left < leftOfCell) {
           left = leftOfCell;
         }
       }
-      let top = grid.top + cellTop - COMMENT_GAP;
+      let top = frame.top + cellTop - COMMENT_GAP;
       if (top + height > pane.bottom) {
         top = Math.max(pane.top, top - (top + height - pane.bottom + 5));
       } else if (top < pane.top) {
         top = pane.top;
       }
-      const noteLeft = left - grid.left;
-      const noteTop = top - grid.top;
+      const noteLeft = left - frame.left;
+      const noteTop = top - frame.top;
       note.style.left = `${noteLeft}px`;
       note.style.top = `${noteTop}px`;
       if (line !== null && line.classList.contains('comment-overlay-line')) {

@@ -137,6 +137,9 @@ export const cellGridStyles = css`
    shadow, the author above the text in small bold type. */
   .comment-overlay {
     z-index: 20;
+    /* As wide as what it shows, its text up to the label's limit: its
+     holder is of no size, and would squeeze it to its longest word. */
+    width: max-content;
     padding: 7px;
     box-sizing: border-box;
     pointer-events: none;
@@ -190,6 +193,16 @@ export const cellGridStyles = css`
     font-weight: 300;
     color: inherit;
     outline: none;
+  }
+
+  /* What holds a note and its line: a box of no size where the grid starts,
+   over the panes and the editor. On a frozen cell it is sticky at the insets
+   it is given, held in place with the cell's pane as the sheet scrolls. */
+  .comment-holder {
+    position: sticky;
+    width: 0;
+    height: 0;
+    z-index: 20;
   }
 
   /* From a cell's corner to its note. Under the note, over the cells. */

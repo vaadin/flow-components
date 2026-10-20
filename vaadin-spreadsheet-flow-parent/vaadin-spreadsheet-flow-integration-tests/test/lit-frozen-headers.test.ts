@@ -320,6 +320,40 @@ describe('Frozen panes — held in place while the sheet scrolls', () => {
     });
   }
 
+  /** How far a note is from the top right corner of its cell. */
+  function noteOffCell(col: number, row: number): number[] {
+    const note = cells().querySelector('.comment-overlay')!.getBoundingClientRect();
+    const cell = cells().querySelector(`.cell.col${col}.row${row}`)!.getBoundingClientRect();
+    return [note.left - cell.right, note.top - cell.top];
+  }
+
+  // A6 rather than A5: a note hanging off A5 would be moved down into the
+  // scrolling rows' pane once the scroll is drawn, as it keeps to its pane.
+  for (const [where, col, row] of [
+    ['the frozen corner', 1, 1],
+    ["a frozen row's cell", 3, 1],
+    ["a frozen column's cell", 1, 6]
+  ] as const) {
+    it(`keeps a note shown on ${where} by its cell as the sheet scrolls`, async () => {
+      ctx.sheet.setVerticalSplitPosition(2);
+      ctx.sheet.setHorizontalSplitPosition(2);
+      const key = `col${col} row${row}`;
+      ctx.sheet.setCellComments({ [key]: 'A note' });
+      ctx.sheet.setVisibleCellComments([key]);
+      await draw();
+      const atRest = noteOffCell(col, row);
+      const scroller = ctx.sheet.getScrollContainer();
+
+      // Less than a cell each way, so the cell stays in view.
+      scroller.scrollTop = 30;
+      scroller.scrollLeft = 40;
+
+      expect(noteOffCell(col, row), 'before the scroll is handled').to.eql(atRest);
+      await draw();
+      expect(noteOffCell(col, row), 'once the scroll is drawn').to.eql(atRest);
+    });
+  }
+
   it('holds the frozen panes just inside the headers, their outline gutters included', async () => {
     ctx.sheet.setColGroupingMax(2);
     ctx.sheet.setRowGroupingMax(1);

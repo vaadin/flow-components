@@ -3426,27 +3426,29 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
     });
 
     it('hangs a note off a frozen cell where the cell is on screen', async () => {
-        // In a sheet big enough that the note needs no moving.
-        const pane = document.createElement('div');
-        pane.style.cssText = 'position:relative;width:2000px;height:1000px;';
-        document.body.appendChild(pane);
-        const el = document.createElement('vaadin-spreadsheet-internal-cell-grid') as SpreadsheetCellGrid;
-        el.style.cssText = 'position:absolute;left:0;top:100px;';
-        el.renderState = frozen({
-            scrollLeft: 200,
-            scrollTop: 300,
-            commentCells: new Set(['col1 row1']),
-            commentText: { 'col1 row1': 'A note' },
-            visibleCommentKeys: ['col1 row1'],
-        });
-        pane.appendChild(el);
-        await el.updateComplete;
-
+        // B2, at the foot of the frozen corner, so the note needs no moving.
+        const el = await attachScrolled(
+            frozen({
+                commentCells: new Set(['col2 row2']),
+                commentText: { 'col2 row2': 'A note' },
+                visibleCommentKeys: ['col2 row2'],
+            }),
+            200,
+            100
+        );
         const note = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay')!;
-        // Off A1's top-right corner, carried along with the frozen pane.
-        expect([note.style.left, note.style.top]).to.deep.equal(['265px', '285px']);
+        // Not dropping into place any more.
+        note.getAnimations().forEach((animation) => animation.finish());
 
-        pane.remove();
+        const view = el.parentElement!.getBoundingClientRect();
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.cell.col2.row2')!.getBoundingClientRect();
+        const box = note.getBoundingClientRect();
+        // B2 stays where it is in the view's corner, and the note off its
+        // top-right corner.
+        expect([cell.left - view.left, cell.top - view.top]).to.deep.equal([50, 20]);
+        expect([box.left - cell.right, box.top - cell.top]).to.deep.equal([15, -15]);
+
+        cleanup(el.parentElement!);
     });
 
     it('opens the editor over a frozen cell after a scroll', async () => {
@@ -3759,6 +3761,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         // far as it can, to the top of the column letters.
         const { note, cleanup } = await inSheet(
             withNote('col2 row1', {
+                commentText: { 'col2 row1': 'A note\nof\nfour\nlines' },
                 verticalSplitPosition: 1,
                 frozenRowY: [0],
                 frozenRowHeights: [20],
@@ -3780,6 +3783,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
             27
         );
 
+        expect(note.offsetHeight, 'taller than the pane').to.be.above(47);
         expect(note.style.top).to.equal('-27px');
 
         cleanup();
