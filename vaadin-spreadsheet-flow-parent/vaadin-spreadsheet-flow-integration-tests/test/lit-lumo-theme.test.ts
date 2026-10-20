@@ -560,7 +560,7 @@ describe('Lumo theme — comments', () => {
             visibleCommentKeys: ['col1 row2'],
         });
 
-        const card = getComputedStyle(inGrid(el, '.v-spreadsheet-comment-overlay'));
+        const card = getComputedStyle(inGrid(el, '.comment-overlay'));
         expect(card.paddingTop).to.equal('7px');
         expect(card.borderTopLeftRadius).to.equal('6px');
         expect(card.color).to.equal(BODY_TEXT);

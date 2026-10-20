@@ -268,7 +268,7 @@ describe('::part() reaches the parts documented with the Lit client', () => {
     await ctx.sheet.getCellGrid().updateComplete;
 
     const grid = ctx.sheet.getCellGrid().shadowRoot!;
-    expectStyleable('comment-overlay', grid.querySelector('.v-spreadsheet-comment-overlay')!);
+    expectStyleable('comment-overlay', grid.querySelector('.comment-overlay')!);
     expectStyleable('comment-author', grid.querySelector('.comment-overlay-author')!);
     expectStyleable('comment-text', grid.querySelector('.comment-overlay-label')!);
   });

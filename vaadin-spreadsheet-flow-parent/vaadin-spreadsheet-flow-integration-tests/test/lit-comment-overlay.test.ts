@@ -56,7 +56,7 @@ async function paint(sheet: Spreadsheet): Promise<void> {
 
 function overlays(sheet: Spreadsheet): HTMLElement[] {
   return Array.from(
-    sheet.getCellGrid().shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay')
+    sheet.getCellGrid().shadowRoot!.querySelectorAll<HTMLElement>('.comment-overlay')
   );
 }
 

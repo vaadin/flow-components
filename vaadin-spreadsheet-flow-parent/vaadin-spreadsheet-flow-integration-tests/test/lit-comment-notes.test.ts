@@ -159,7 +159,7 @@ describe('CommentNotes', () => {
       const card = drawn(
         sheet({ visibleCommentKeys: ['col1 row1'], horizontalSplitPosition: 1, frozenColX: [0], frozenColWidths: [100] }),
         null
-      ).querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+      ).querySelector<HTMLElement>('.comment-overlay')!;
 
       expect([card.dataset.pinned, card.dataset.quadrant]).to.eql(['true', 'left']);
     });
@@ -172,7 +172,7 @@ describe('CommentNotes', () => {
         editingCommentKey: 'col1 row1'
       });
 
-      const card = drawn(state, 'col1 row1').querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+      const card = drawn(state, 'col1 row1').querySelector<HTMLElement>('.comment-overlay')!;
 
       expect(Array.from(card.children, (child) => child.className)).to.eql([
         'comment-overlay-invalidformula',
@@ -189,7 +189,7 @@ describe('CommentNotes', () => {
     let container: HTMLElement;
     let host: NotesHost;
     const cards = (): HTMLElement[] =>
-      Array.from(host.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay'));
+      Array.from(host.shadowRoot!.querySelectorAll<HTMLElement>('.comment-overlay'));
 
     beforeEach(() => {
       container = document.createElement('div');

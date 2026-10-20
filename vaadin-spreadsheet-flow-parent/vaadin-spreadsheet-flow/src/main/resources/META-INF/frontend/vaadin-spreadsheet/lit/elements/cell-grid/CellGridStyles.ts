@@ -123,11 +123,11 @@ export const cellGridStyles = css`
   }
 
   /* Dropping into place as it appears and fading out as it goes. */
-  .v-spreadsheet-comment-overlay.animate-in {
+  .comment-overlay.animate-in {
     animation: overlay-animate-in 120ms;
   }
 
-  .v-spreadsheet-comment-overlay.animate-out {
+  .comment-overlay.animate-out {
     animation: overlay-animate-out 120ms;
   }
 
@@ -135,7 +135,7 @@ export const cellGridStyles = css`
    cell, since the point is to be readable over the sheet. */
   /* A comment: a white card with a soft
    shadow, the author above the text in small bold type. */
-  .v-spreadsheet-comment-overlay {
+  .comment-overlay {
     z-index: 20;
     padding: 7px;
     box-sizing: border-box;
@@ -148,8 +148,8 @@ export const cellGridStyles = css`
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px ${commentOverlayBorderColor};
   }
 
-  .v-spreadsheet-comment-overlay .comment-overlay-label,
-  .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+  .comment-overlay .comment-overlay-label,
+  .comment-overlay .comment-overlay-invalidformula {
     max-width: 168px;
     max-height: 140px;
     overflow: hidden;
@@ -157,12 +157,12 @@ export const cellGridStyles = css`
     overflow-wrap: break-word;
   }
 
-  .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+  .comment-overlay .comment-overlay-invalidformula {
     color: #ed473b;
   }
 
   /* Between an error and the comment under it. */
-  .v-spreadsheet-comment-overlay .comment-overlay-separator {
+  .comment-overlay .comment-overlay-separator {
     border-bottom: 1px solid #c7c7c7;
     margin-bottom: 7px;
   }
@@ -171,7 +171,7 @@ export const cellGridStyles = css`
  * The note being written. Sized like the note it replaces so the
  * overlay does not jump as it opens.
  */
-  .v-spreadsheet-comment-overlay .comment-overlay-edit {
+  .comment-overlay .comment-overlay-edit {
     display: block;
     box-sizing: border-box;
     /* The card lets the pointer through; the note being written takes
@@ -202,7 +202,7 @@ export const cellGridStyles = css`
     pointer-events: none;
   }
 
-  .v-spreadsheet-comment-overlay .comment-overlay-author {
+  .comment-overlay .comment-overlay-author {
     padding-bottom: 7px;
     font-size: 11px;
     font-weight: bold;
@@ -638,7 +638,7 @@ export const cellGridLumoStyles = css`
     box-shadow: var(--lumo-box-shadow-xs) inset;
   }
 
-  :host([theme~='lumo']) .v-spreadsheet-comment-overlay {
+  :host([theme~='lumo']) .comment-overlay {
     padding: var(--lumo-space-s);
     border: 1px solid ${commentOverlayBorderColor};
     border-radius: var(--lumo-border-radius-m);
@@ -646,21 +646,21 @@ export const cellGridLumoStyles = css`
     box-shadow: var(--lumo-box-shadow-m);
   }
 
-  :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-author {
+  :host([theme~='lumo']) .comment-overlay .comment-overlay-author {
     padding-bottom: var(--lumo-space-s);
     font-size: var(--lumo-font-size-xs);
   }
 
-  :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+  :host([theme~='lumo']) .comment-overlay .comment-overlay-invalidformula {
     color: var(--lumo-error-color);
   }
 
-  :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-edit {
+  :host([theme~='lumo']) .comment-overlay .comment-overlay-edit {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
 
-  :host([theme~='lumo']) .v-spreadsheet-comment-overlay .comment-overlay-separator {
+  :host([theme~='lumo']) .comment-overlay .comment-overlay-separator {
     border-bottom-color: var(--lumo-contrast-20pct);
   }
 

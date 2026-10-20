@@ -152,7 +152,7 @@ export function buildCommentOverlays(
     const author = authors[key];
     overlays.push(html`
       <div
-        class="v-spreadsheet-comment-overlay"
+        class="comment-overlay"
         part="comment-overlay"
         style=${style}
         data-cell-left=${geometry.left}
@@ -269,7 +269,7 @@ export class CommentNotes {
     this.place(root);
     // The note being written, not the copy of one fading out.
     const note = root.querySelector(
-      '.v-spreadsheet-comment-overlay:not([inert]) .comment-overlay-edit'
+      '.comment-overlay:not([inert]) .comment-overlay-edit'
     ) as HTMLTextAreaElement | null;
     if (note !== null && root.activeElement !== note) {
       note.focus();
@@ -297,7 +297,7 @@ export class CommentNotes {
       return;
     }
     const staying = new Set(this.notes.map((note) => note.key));
-    for (const note of root.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)')) {
+    for (const note of root.querySelectorAll<HTMLElement>('.comment-overlay:not(.animate-out)')) {
       if (
         staying.has(note.dataset.key ?? '') ||
         note.style.display === 'none' ||
@@ -326,7 +326,7 @@ export class CommentNotes {
    */
   private place(root: ShadowRoot): void {
     // Not the copies of notes that have gone, fading out where they were.
-    const notes = root.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)');
+    const notes = root.querySelectorAll<HTMLElement>('.comment-overlay:not(.animate-out)');
     // A note drops into place as it appears, and not again each time the
     // sheet repaints.
     const keys = new Set(Array.from(notes, (note) => note.dataset.key ?? ''));

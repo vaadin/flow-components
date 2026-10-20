@@ -3425,7 +3425,7 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
         pane.appendChild(el);
         await el.updateComplete;
 
-        const note = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+        const note = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay')!;
         // Off A1's top-right corner, carried along with the frozen pane.
         expect([note.style.left, note.style.top]).to.deep.equal(['265px', '285px']);
 
@@ -3695,7 +3695,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         el.renderState = state;
         pane.appendChild(el);
         await el.updateComplete;
-        const note = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+        const note = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay')!;
         const line = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay-line')!;
         return { el, note, line, cleanup: () => pane.remove() };
     }
@@ -3809,7 +3809,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
             el.requestUpdate();
             await el.updateComplete;
 
-            const note = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+            const note = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay')!;
             const line = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay-line')!;
             expect(getComputedStyle(note).display).to.equal('none');
             expect(getComputedStyle(line).display).to.equal('none');
@@ -3855,7 +3855,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         el.renderState = { ...el.renderState };
         await el.updateComplete;
 
-        const again = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay')!;
+        const again = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay')!;
         expect(again.getAnimations()).to.be.empty;
 
         cleanup();
@@ -3863,14 +3863,14 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
 
     /** Run the note's animations out and let their end events land. */
     async function settleNotes(el: SpreadsheetCellGrid): Promise<void> {
-        el.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay').forEach((note) =>
+        el.shadowRoot!.querySelectorAll<HTMLElement>('.comment-overlay').forEach((note) =>
             note.getAnimations().forEach((animation) => animation.finish())
         );
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }
 
     function fading(el: SpreadsheetCellGrid): HTMLElement[] {
-        return Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.v-spreadsheet-comment-overlay.animate-out'));
+        return Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.comment-overlay.animate-out'));
     }
 
     it("fades a note out where it was as it goes, as the GWT client's did", async () => {
@@ -3881,7 +3881,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         el.renderState = { ...el.renderState, visibleCommentKeys: [] };
         await el.updateComplete;
 
-        expect(el.shadowRoot!.querySelector('.v-spreadsheet-comment-overlay:not(.animate-out)'), 'the note itself').to.be.null;
+        expect(el.shadowRoot!.querySelector('.comment-overlay:not(.animate-out)'), 'the note itself').to.be.null;
         const [copy] = fading(el);
         expect(copy.textContent!.replace(/\s+/g, ' ').trim()).to.equal('Ann A note');
         expect(copy.getBoundingClientRect().toJSON()).to.deep.equal(box.toJSON());
@@ -3941,7 +3941,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         el.renderState = { ...el.renderState, visibleCommentKeys: [] };
         await el.updateComplete;
 
-        expect(el.shadowRoot!.querySelector('.v-spreadsheet-comment-overlay')).to.be.null;
+        expect(el.shadowRoot!.querySelector('.comment-overlay')).to.be.null;
 
         cleanup();
     });
@@ -3967,7 +3967,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         el.renderState = { ...el.renderState, visibleCommentKeys: ['col3 row3'] };
         await el.updateComplete;
 
-        const back = el.shadowRoot!.querySelector<HTMLElement>('.v-spreadsheet-comment-overlay:not(.animate-out)')!;
+        const back = el.shadowRoot!.querySelector<HTMLElement>('.comment-overlay:not(.animate-out)')!;
         expect(back.classList.contains('animate-in')).to.be.true;
         expect(fading(el)).to.have.length(1);
 
