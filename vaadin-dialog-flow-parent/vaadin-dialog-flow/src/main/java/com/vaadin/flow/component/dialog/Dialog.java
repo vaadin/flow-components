@@ -948,24 +948,33 @@ public class Dialog extends Component
 
     /**
      * Sets the ARIA heading level, used to set the {@code aria-level} attribute
-     * on the header title element. Defaults to {@code 2}.
+     * on the header title element.
+     * <p>
+     * By default no heading level is set, and the web component uses {@code 1}
+     * for modal dialogs and {@code 2} for modeless dialogs. Set to {@code null}
+     * to restore the default.
      *
      * @param headingLevel
-     *            the heading level
+     *            the heading level, or {@code null} to remove it
      * @since 25.4
      */
-    public void setHeadingLevel(int headingLevel) {
-        getElement().setProperty("headingLevel", headingLevel);
+    public void setHeadingLevel(Integer headingLevel) {
+        if (headingLevel == null) {
+            getElement().removeProperty("headingLevel");
+        } else {
+            getElement().setProperty("headingLevel", headingLevel);
+        }
     }
 
     /**
      * Gets the ARIA heading level of the header title element.
      *
-     * @return the heading level, {@code 2} by default
+     * @return the heading level, or {@code null} if none is set
      * @since 25.4
      */
-    public int getHeadingLevel() {
-        return getElement().getProperty("headingLevel", 2);
+    public Integer getHeadingLevel() {
+        Object value = getElement().getPropertyRaw("headingLevel");
+        return value == null ? null : ((Number) value).intValue();
     }
 
     /**

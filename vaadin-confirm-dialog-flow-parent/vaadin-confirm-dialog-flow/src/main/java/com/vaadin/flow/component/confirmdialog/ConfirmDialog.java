@@ -680,27 +680,35 @@ public class ConfirmDialog extends Component
 
     /**
      * Sets the ARIA heading level, used to set the {@code aria-level} attribute
-     * on the header element. Defaults to {@code 3}.
+     * on the header element.
+     * <p>
+     * By default no heading level is set, and the web component uses {@code 1}.
+     * Set to {@code null} to restore the default.
      * <p>
      * Only applies to the header text set with {@link #setHeader(String)}, a
      * custom header component is not changed.
      *
      * @param headingLevel
-     *            the heading level
+     *            the heading level, or {@code null} to remove it
      * @since 25.4
      */
-    public void setHeadingLevel(int headingLevel) {
-        getElement().setProperty("headingLevel", headingLevel);
+    public void setHeadingLevel(Integer headingLevel) {
+        if (headingLevel == null) {
+            getElement().removeProperty("headingLevel");
+        } else {
+            getElement().setProperty("headingLevel", headingLevel);
+        }
     }
 
     /**
      * Gets the ARIA heading level of the header element.
      *
-     * @return the heading level, {@code 3} by default
+     * @return the heading level, or {@code null} if none is set
      * @since 25.4
      */
-    public int getHeadingLevel() {
-        return getElement().getProperty("headingLevel", 3);
+    public Integer getHeadingLevel() {
+        Object value = getElement().getPropertyRaw("headingLevel");
+        return value == null ? null : ((Number) value).intValue();
     }
 
     /**
