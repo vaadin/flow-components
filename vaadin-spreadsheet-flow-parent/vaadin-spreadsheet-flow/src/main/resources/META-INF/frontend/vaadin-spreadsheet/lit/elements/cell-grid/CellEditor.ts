@@ -171,14 +171,24 @@ export function cellEditorInput(
   }
   const { col, row, initialValue } = editor;
 
-  // Over the cell where it is on screen: a frozen cell moves with the view,
-  // and an editor placed by the frozen arrays alone was left behind as soon
-  // as the sheet scrolled. Over the whole of a merged cell.
+  // Over the cell, the whole of a merged one, in a holder of no size where
+  // the grid starts. Over a frozen cell the holder is held in place as the
+  // cell's pane is, and the editor is placed as the cell is in its pane, so
+  // it stays on the cell however fast the sheet scrolls. Over a scrolling
+  // cell the holder is not held, and the editor goes where the cell is on
+  // the grid. The holder is drawn either way, which keeps the input the
+  // same one all through an edit.
   const box = drawnCellBox(state, col, row);
   if (box === null || box.width === 0 || box.height === 0) {
     return '';
   }
-  const { left, top, height } = box;
+  const heldAcross = col <= state.horizontalSplitPosition;
+  const heldDown = row <= state.verticalSplitPosition;
+  const headers = state.headerExtent ?? { width: 0, height: 0 };
+  const hold = (heldDown ? `top:${headers.height}px;` : '') + (heldAcross ? `left:${headers.width}px;` : '');
+  const left = heldAcross ? box.left - state.scrollLeft : box.left;
+  const top = heldDown ? box.top - state.scrollTop : box.top;
+  const { height } = box;
   // As wide as the text in it needs, once that has been measured.
   const width = fitWidth ?? editorWidth(state, col, row, 0);
 
@@ -195,18 +205,20 @@ export function cellEditorInput(
       : '');
 
   return html`
-    <input
-      class="cell-editor"
-      part="cell-input"
-      aria-label=${`Edit cell ${cellCoordToAddress({ col, row })}`}
-      .value=${initialValue}
-      style=${style}
-      @keydown=${(e: KeyboardEvent) => editorKeyDown(e, editor)}
-      @keyup=${caretMoved}
-      @mouseup=${caretMoved}
-      @input=${onInput}
-      @blur=${(e: FocusEvent) => editorLeft(e, editor)}
-    />
+    <div class="cell-editor-holder" style=${hold}>
+      <input
+        class="cell-editor"
+        part="cell-input"
+        aria-label=${`Edit cell ${cellCoordToAddress({ col, row })}`}
+        .value=${initialValue}
+        style=${style}
+        @keydown=${(e: KeyboardEvent) => editorKeyDown(e, editor)}
+        @keyup=${caretMoved}
+        @mouseup=${caretMoved}
+        @input=${onInput}
+        @blur=${(e: FocusEvent) => editorLeft(e, editor)}
+      />
+    </div>
   `;
 }
 

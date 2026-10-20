@@ -3450,14 +3450,16 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
     });
 
     it('opens the editor over a frozen cell after a scroll', async () => {
-        const el = await attachWithState(
-            frozen({ scrollLeft: 200, scrollTop: 300, editor: { col: 2, row: 1, initialValue: 'x' } })
-        );
+        const el = await attachScrolled(frozen({ editor: { col: 2, row: 1, initialValue: 'x' } }), 200, 100);
 
-        const editor = el.shadowRoot!.querySelector<HTMLElement>('.cell-editor')!;
-        expect([editor.style.left, editor.style.top]).to.deep.equal(['250px', '300px']);
+        const view = el.parentElement!.getBoundingClientRect();
+        const cell = el.shadowRoot!.querySelector<HTMLElement>('.cell.col2.row1')!.getBoundingClientRect();
+        const editor = el.shadowRoot!.querySelector<HTMLElement>('.cell-editor')!.getBoundingClientRect();
+        // B1 is in the frozen corner, which stays in the view's corner.
+        expect([cell.left - view.left, cell.top - view.top]).to.deep.equal([50, 0]);
+        expect([editor.left, editor.top]).to.deep.equal([cell.left, cell.top]);
 
-        cleanup(el);
+        cleanup(el.parentElement!);
     });
 
     it('draws the fill outline a piece per pane, bordered where the drag ends', async () => {

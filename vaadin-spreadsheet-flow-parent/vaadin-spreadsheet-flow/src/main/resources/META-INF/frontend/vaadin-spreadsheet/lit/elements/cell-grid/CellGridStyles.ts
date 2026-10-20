@@ -538,6 +538,16 @@ export const cellGridStyles = css`
     display: none !important;
   }
 
+  /* What holds the editor: a box of no size where the grid starts, over the
+   panes. Over a frozen cell it is sticky at the insets it is given, held in
+   place with the cell's pane as the sheet scrolls. */
+  .cell-editor-holder {
+    position: sticky;
+    width: 0;
+    height: 0;
+    z-index: 10;
+  }
+
   .cell-editor {
     position: absolute;
     box-sizing: border-box;

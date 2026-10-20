@@ -281,6 +281,45 @@ describe('Frozen panes — held in place while the sheet scrolls', () => {
     );
   });
 
+  /** Opens the editor on a cell, as F2 does on the cell selected. */
+  async function editAt(col: number, row: number): Promise<void> {
+    ctx.sheet.setSelectedCellAndRange('X', col, row, col, col, row, row, false);
+    ctx.sheet
+      .getScrollContainer()
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true, composed: true }));
+    await draw();
+  }
+
+  /** How far the editor is from the top left corner of the cell it edits. */
+  function editorOffCell(col: number, row: number): number[] {
+    const editor = cells().querySelector('.cell-editor')!.getBoundingClientRect();
+    const cell = cells().querySelector(`.cell.col${col}.row${row}`)!.getBoundingClientRect();
+    return [editor.left - cell.left, editor.top - cell.top];
+  }
+
+  for (const [where, col, row] of [
+    ['the frozen corner', 1, 1],
+    ["a frozen row's cell", 3, 1],
+    ["a frozen column's cell", 1, 5]
+  ] as const) {
+    it(`keeps the editor over ${where} as the sheet scrolls`, async () => {
+      ctx.sheet.setVerticalSplitPosition(2);
+      ctx.sheet.setHorizontalSplitPosition(2);
+      await draw();
+      await editAt(col, row);
+      expect(editorOffCell(col, row), 'at rest').to.eql([0, 0]);
+      const scroller = ctx.sheet.getScrollContainer();
+
+      // Less than a cell each way, so the cell stays in view.
+      scroller.scrollTop = 30;
+      scroller.scrollLeft = 40;
+
+      expect(editorOffCell(col, row), 'before the scroll is handled').to.eql([0, 0]);
+      await draw();
+      expect(editorOffCell(col, row), 'once the scroll is drawn').to.eql([0, 0]);
+    });
+  }
+
   it('holds the frozen panes just inside the headers, their outline gutters included', async () => {
     ctx.sheet.setColGroupingMax(2);
     ctx.sheet.setRowGroupingMax(1);
