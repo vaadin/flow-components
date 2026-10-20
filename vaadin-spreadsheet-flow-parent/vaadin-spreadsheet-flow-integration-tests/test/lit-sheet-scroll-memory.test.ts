@@ -12,8 +12,7 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 /**
  * A sheet shown again goes back to where it was scrolled. The server keeps
  * each sheet's offsets, taken from the sheet selection event, and sends them
- * in the batch that switches the sheet; neither the GWT client nor this one
- * used them before.
+ * in the batch that switches the sheet.
  */
 describe('Spreadsheet — each sheet remembers where it was scrolled', () => {
   let host: HTMLElement;

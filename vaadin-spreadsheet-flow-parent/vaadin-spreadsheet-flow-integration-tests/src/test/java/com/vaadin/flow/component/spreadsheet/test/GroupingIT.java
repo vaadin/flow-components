@@ -42,8 +42,8 @@ public class GroupingIT extends AbstractSpreadsheetIT {
             throws Exception {
         loadFile("grouping_without_headers.xlsx");
 
-        // The brackets, as long as the GWT client drew them: from just
-        // inside the first grouped header to the middle of the summary one.
+        // The brackets run from just inside the first grouped header to the
+        // middle of the summary one.
         WebElement colGrouping = findElementInShadowRoot(
                 By.cssSelector(".col-grouping-line"));
         WebElement rowGrouping = findElementInShadowRoot(
@@ -118,8 +118,8 @@ public class GroupingIT extends AbstractSpreadsheetIT {
         waitUntil(driver -> !findElementsInShadowRoot(
                 By.cssSelector(".row-header-cell.row" + LAST_ROW)).isEmpty());
 
-        // The Lit gutter draws the group's bracket and its button as
-        // separate elements; the bracket is what spans the rows.
+        // The gutter draws the group's bracket and its button as separate
+        // elements; the bracket is what spans the rows.
         WebElement bracket = findElementInShadowRoot(
                 By.cssSelector(".row-grouping-line"));
         int rowHeight = spreadsheetElement.getRowHeader(LAST_ROW).getSize()
@@ -144,8 +144,8 @@ public class GroupingIT extends AbstractSpreadsheetIT {
     }
 
     /**
-     * Whether the row's header is on screen. The Lit header draws nothing for a
-     * hidden row, where the GWT client kept a hidden element.
+     * Whether the row's header is on screen. The header draws nothing for a
+     * hidden row.
      */
     private boolean isRowHeaderShown(int row) {
         return findElementsInShadowRoot(

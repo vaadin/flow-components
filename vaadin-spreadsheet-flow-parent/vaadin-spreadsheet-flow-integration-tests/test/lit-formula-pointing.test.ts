@@ -20,11 +20,11 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/FormulaPointing.js';
 
 /**
- * Writing a formula by pointing at cells - the GWT client's point mode and
- * reference colouring - as pure rules on the text and the caret.
+ * Writing a formula by pointing at cells - point mode and reference
+ * colouring - as pure rules on the text and the caret.
  */
 describe('FormulaPointing — what is a formula', () => {
-  it('takes a value starting with = or + as a formula, as the GWT client did', () => {
+  it('takes a value starting with = or + as a formula', () => {
     expect(isFormula('=A1')).to.be.true;
     expect(isFormula('+A1')).to.be.true;
     expect(isFormula('A1')).to.be.false;
@@ -43,7 +43,7 @@ describe('FormulaPointing — the references in a formula', () => {
     ]);
   });
 
-  it('takes absolute references, which the GWT client missed', () => {
+  it('takes absolute references', () => {
     expect(refs('=$A$1+A$2+$B3').map((r) => r.text)).to.eql(['$A$1', 'A$2', '$B3']);
   });
 
@@ -60,7 +60,7 @@ describe('FormulaPointing — the references in a formula', () => {
     expect(refs('="A1"&B2').map((r) => r.text)).to.eql(['B2']);
   });
 
-  it('leaves function names and longer names alone, which the GWT client coloured', () => {
+  it('leaves function names and longer names alone', () => {
     expect(refs('=LOG10(A1)+ATAN2(B1,C1)+TAX2024A').map((r) => r.text)).to.eql(['A1', 'B1', 'C1']);
   });
 

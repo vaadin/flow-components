@@ -76,8 +76,8 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
         getSpreadsheet().getCellAt("A1")
                 .setValue("a value far too wide for one column");
 
-        // As the GWT client held it: as wide as the column, from the padding
-        // on, so it reaches past the cell's edge and under the neighbour.
+        // As wide as the column, from the padding on, so it reaches past the
+        // cell's edge and under the neighbour.
         SheetCellElement a1 = getSpreadsheet().getCellAt("A1");
         Assert.assertEquals(a1.getSize().getWidth(), renderedTextWidth(a1));
         Assert.assertEquals("visible", a1.getCssValue("overflow"));
@@ -89,8 +89,8 @@ public class CellOverflowIT extends AbstractSpreadsheetIT {
         getSpreadsheet().getCellAt("A1")
                 .setValue("a value far too wide for one column");
 
-        // The GWT client read "a value f..." here. Clipped plainly, the
-        // text ends mid-letter and nothing says there is more of it.
+        // It reads "a value f..." here. Clipped plainly, the text would end
+        // mid-letter and nothing would say there is more of it.
         SheetCellElement a1 = getSpreadsheet().getCellAt("A1");
         Object textOverflow = ((JavascriptExecutor) getDriver()).executeScript(
                 "const held = arguments[0].querySelector('.cell-spill');"

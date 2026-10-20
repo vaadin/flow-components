@@ -12,8 +12,8 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 
 /**
  * A click on a column letter selects the column and makes active the first
- * row whose top is on screen, as GWT did, rather than row 1, which can be far
- * off screen; a row number likewise the first column on screen. With rows or
+ * row whose top is on screen, rather than row 1, which can be far off
+ * screen; a row number likewise the first column on screen. With rows or
  * columns frozen, it is row or column 1.
  */
 

@@ -13,12 +13,12 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import { scrollToShow } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 
 /**
- * Scrolling a cell into view, by the GWT client's rule: a frozen cell or one
- * in full view leaves the sheet where it is; past the last whole row in view
- * the sheet scrolls on to show one row more, and before the first whole row
+ * The rule for scrolling a cell into view: a frozen cell or one in full
+ * view leaves the sheet where it is; past the last whole row in view the
+ * sheet scrolls on to show one row more, and before the first whole row
  * back to show one row more - two rows at a time while an arrow key is held.
  */
-describe('scrollToShow — the GWT client rule along one axis', () => {
+describe('scrollToShow — the rule along one axis', () => {
   // Twenty 20px rows; five whole rows fit a 100px view.
   const twenty = (i: number): number => (i >= 1 && i <= 20 ? 20 : 0);
 
@@ -135,7 +135,7 @@ describe('Spreadsheet — keyboard moves keep the cell in full view', () => {
     }
   });
 
-  it('brings the row below the cell into view too when it scrolls, as the GWT client did', async () => {
+  it('brings the row below the cell into view too when it scrolls', async () => {
     // Two rows at a time: the press that scrolls leaves a whole 20px row
     // below the active cell, and the next press moves onto it without
     // scrolling.

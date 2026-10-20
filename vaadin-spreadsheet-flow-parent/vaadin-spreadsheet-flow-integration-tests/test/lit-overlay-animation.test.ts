@@ -17,9 +17,8 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/dom/OverlayAnimation.js';
 
 /**
- * The GWT client's overlays dropped 4px into place while fading in, over
- * 120ms, with an `animate-in` class that came off once the animation had
- * run.
+ * An overlay drops 4px into place while fading in, over 120ms, with an
+ * `animate-in` class that comes off once the animation has run.
  */
 describe('Overlay opening animation', () => {
   let host: HTMLElement;
@@ -75,9 +74,9 @@ describe('Overlay opening animation', () => {
 });
 
 /**
- * The GWT client faded an overlay out over 120ms as it closed, with an
- * `animate-out` class, and took it away once the fade had run. One still
- * dropping into place finished first and then went without a fade.
+ * An overlay fades out over 120ms as it closes, with an `animate-out`
+ * class, and goes once the fade has run. One still dropping into place
+ * finishes first and then goes without a fade.
  */
 describe('Overlay closing fade', () => {
   let host: HTMLElement;
@@ -114,7 +113,7 @@ describe('Overlay closing fade', () => {
     const [animation] = overlay.getAnimations() as CSSAnimation[];
     expect(animation.animationName).to.equal('overlay-animate-out');
     expect(animation.effect!.getTiming().duration).to.equal(120);
-    // From as it was to gone, on the default easing, as the GWT client's.
+    // From as it was to gone, on the default easing.
     animation.currentTime = 0;
     expect(getComputedStyle(overlay).opacity).to.equal('1');
     animation.currentTime = 119;

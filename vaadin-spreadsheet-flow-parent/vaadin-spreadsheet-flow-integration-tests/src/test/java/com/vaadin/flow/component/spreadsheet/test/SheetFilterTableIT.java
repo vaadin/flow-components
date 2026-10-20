@@ -133,8 +133,8 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
     }
 
     private void closeFilterPopup() {
-        // The Lit popup renders its close box as a documented part inside
-        // the spreadsheet's shadow root; GWT used a Vaadin 8 window header.
+        // The popup's close box is a documented part inside the
+        // spreadsheet's shadow root.
         ((org.openqa.selenium.JavascriptExecutor) getDriver()).executeScript("""
                 arguments[0].shadowRoot
                     .querySelector('[part~="popup-close"]').click();

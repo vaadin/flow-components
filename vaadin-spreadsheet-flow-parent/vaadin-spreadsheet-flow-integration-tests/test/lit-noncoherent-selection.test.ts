@@ -16,7 +16,7 @@ import { isCellSelected } from '../../vaadin-spreadsheet-flow/src/main/resources
  *
  * `handleCellClick` read `shiftKey` and ignored `ctrlKey` / `metaKey`,
  * so Ctrl-clicking a second cell replaced the selection instead of
- * adding to it. Excel keeps both, and so did the GWT client.
+ * adding to it. Excel keeps both.
  *
  * This is what SelectionIT's `testSelectionSingleCell`,
  * `testMultipleRectSelection`, `testComplicatedCellSelection` and
@@ -164,10 +164,10 @@ describe('Spreadsheet non-coherent selection — Ctrl-click', () => {
 
   it('keeps the earlier ranges when the pointer drifts across a cell edge during a Ctrl-click', () => {
     // A hand is rarely still: the pointer often crosses into the next cell
-    // between pressing and letting go. The press started a range drag, the
-    // drift replaced every range picked out with Ctrl with one rectangle,
-    // and the server was told to discard them. The GWT client started no
-    // drag on a Ctrl, Cmd or Shift press.
+    // between pressing and letting go. Were the press to start a range drag,
+    // the drift would replace every range picked out with Ctrl with one
+    // rectangle, and the server would be told to discard them. So a Ctrl or
+    // Cmd press starts no drag.
     clickCell(ctx.sheet, 2, 2);
     clickCell(ctx.sheet, 4, 4, { ctrlKey: true });
     ctx.events.length = 0;

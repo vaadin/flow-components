@@ -79,10 +79,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         minimizeButton.click();
 
         // Minimized, the chart gives its space back: the overlay stays
-        // where it was, but takes no room in either direction. The GWT
-        // client measured 28x16 there, which was the offset it drew as
-        // padding. The button to bring the chart back is still there to
-        // click.
+        // where it was, but takes no room in either direction. The button to
+        // bring the chart back is still there to click.
         assertOverlayProperties(CHART1_CELL, CHART_MINIMIZED_WIDTH,
                 CHART_MINIMIZED_HEIGHT, CHART1_OFFSET_LEFT);
         Assert.assertTrue("Restore button should still be there",
@@ -240,11 +238,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
      * The overlay is the size the workbook gives it, and starts the workbook's
      * own offset in from the cell it is anchored to.
      * <p>
-     * The GWT client put that offset on the element as padding, so its box
-     * covered the cell corner as well and measured wider and taller by the
-     * offset; the Lit client positions the element at the offset instead. The
-     * picture is in the same place either way - these are the numbers that
-     * describe where.
+     * The element is placed at the offset, not padded by it, so its box covers
+     * the picture and nothing of the cell's corner.
      */
     private void assertOverlayProperties(String cell, double width,
             double height, double offsetLeft) {

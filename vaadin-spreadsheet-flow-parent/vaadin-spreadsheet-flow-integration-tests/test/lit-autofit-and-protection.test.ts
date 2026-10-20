@@ -234,7 +234,7 @@ describe('Spreadsheet — a write to a protected cell', () => {
     return ctx.sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.formula')!;
   }
 
-  it('turns the formula field off on a locked cell, as the GWT client did', async () => {
+  it('turns the formula field off on a locked cell', async () => {
     // Left on, the field took a whole formula and refused it only once it
     // was written.
     ctx.sheet.setSelectedCellAndRange('', 2, 2, 2, 2, 2, 2, false);
@@ -263,7 +263,7 @@ describe('Spreadsheet — a write to a protected cell', () => {
     expect(protectedReports(ctx.sent)).to.have.length(1);
   });
 
-  it('reports a burst of keys into a locked cell once, as the GWT client did', () => {
+  it('reports a burst of keys into a locked cell once', () => {
     // The server's ProtectedEditListener promises one event a second at most:
     // the default handler shows a notification for each.
     typeInto(ctx.sheet, 2, 2, 'a');

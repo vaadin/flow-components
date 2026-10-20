@@ -17,7 +17,7 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/headers/Grouping.js';
 
 /**
- * The outline gutters, in the GWT client's sizes: 18px column levels after a
+ * The sizes of the outline gutters: 18px column levels after a
  * 3px margin, 15px row levels after a pixel, and one level more for the
  * button that opens every group - while the headings show.
  */

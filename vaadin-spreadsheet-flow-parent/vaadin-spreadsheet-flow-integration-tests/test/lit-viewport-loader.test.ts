@@ -176,9 +176,9 @@ function setUp(
 
 describe('ViewportLoader', () => {
   it('asks for the drawn cells and a quarter screen below them in one request, and nothing more until the sheet scrolls', () => {
-    // A sheet is complete after one round trip, as with GWT. Asked for alone,
-    // with the margin once they were in, the cells took a round trip more;
-    // with the whole margin, the first screen came later on a slow network.
+    // A sheet is complete after one round trip. Asked for alone, with the
+    // margin once they were in, the cells would take a round trip more; with
+    // the whole margin, the first screen would come later on a slow network.
     const t = setUp();
 
     t.loader.check();
@@ -366,8 +366,7 @@ describe('ViewportLoader', () => {
 
   it('asks nothing while the sheet scrolls inside what was loaded, then says where it stopped', () => {
     // The server closes popups and lets go of pictures by the range it was
-    // last given, as it did with the GWT client, which told it after every
-    // scroll.
+    // last given.
     const t = setUp();
     t.open();
     t.scrollTo(0);
@@ -549,7 +548,7 @@ describe('ViewportLoader', () => {
   });
 
   it('holds back while the sheet flings, faster than ten screens a second, however fast the connection, and asks once it stops', () => {
-    // A fast scroll brought in five times GWT's bytes, every screen it
+    // Loading on the way, a fast scroll would bring in every screen it
     // passed, each gone before it could be read.
     const t = setUp();
     t.fastConnection();

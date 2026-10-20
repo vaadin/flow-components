@@ -12,9 +12,9 @@ import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
- * What a selection looks like, set against the GWT client side by side: the
- * tint over a range, and a selection of several ranges - picked out with
- * Ctrl-clicks - drawn without the outline and the fill handle.
+ * What a selection looks like: the tint over a range, and a selection of
+ * several ranges - picked out with Ctrl-clicks - drawn without the outline
+ * and the fill handle.
  */
 describe('Spreadsheet — how a selection looks', () => {
   let sheet: Spreadsheet;
@@ -56,9 +56,9 @@ describe('Spreadsheet — how a selection looks', () => {
     return root.querySelector<HTMLElement>(`.cell.col${col}.row${row}`)!;
   }
 
-  it("tints the range's cells the GWT client's colour, leaving the active cell clear", async () => {
-    // rgba(75, 155, 235, 0.1) over white is the GWT client's
-    // rgb(237, 245, 253), and still lets nine tenths of a fill through.
+  it("tints the range's cells light blue, leaving the active cell clear", async () => {
+    // rgba(75, 155, 235, 0.1) over white is rgb(237, 245, 253), and still
+    // lets nine tenths of a fill through.
     click(2, 2);
     click(3, 3, { shiftKey: true });
     const root = await grid();
@@ -68,8 +68,8 @@ describe('Spreadsheet — how a selection looks', () => {
   });
 
   it('leaves the outline box itself clear, so it tints nothing on its own', async () => {
-    // In a frozen pane the box lies over the active cell, which the GWT
-    // client left white.
+    // In a frozen pane the box lies over the active cell, which stays
+    // white.
     click(2, 2);
     click(3, 3, { shiftKey: true });
     const root = await grid();
@@ -124,7 +124,7 @@ describe('Spreadsheet — how a selection looks', () => {
     expect(root.querySelector('.sheet-selection')!.classList.contains('multi-range')).to.be.false;
   });
 
-  it('takes a Ctrl-click on a Mac as the Ctrl-click it is, as the GWT client did', async () => {
+  it('takes a Ctrl-click on a Mac as the Ctrl-click it is', async () => {
     // The browser reports it as a right-click with the left button, and
     // fires no click.
     click(2, 2);
@@ -140,9 +140,9 @@ describe('Spreadsheet — how a selection looks', () => {
 
 /**
  * A selected cell in hidden columns or rows, as scrolled_frozen.xlsx opens
- * with A1 selected and columns A:B and rows 1:2 hidden. The GWT client's
- * outline was placed by its first cell and hid with it; the Lit client drew
- * a sliver of outline and two pixels of fill handle on the gridline.
+ * with A1 selected and columns A:B and rows 1:2 hidden. An outline drawn for
+ * such a cell would be a sliver on the gridline, with two pixels of fill
+ * handle.
  */
 describe('Spreadsheet — a selection out of sight', () => {
   let sheet: Spreadsheet;
@@ -172,7 +172,7 @@ describe('Spreadsheet — a selection out of sight', () => {
     return sheet.getCellGrid().shadowRoot!.querySelector<HTMLElement>('.sheet-selection')!;
   }
 
-  it('draws nothing for a selected cell that is hidden, as the GWT client did', async () => {
+  it('draws nothing for a selected cell that is hidden', async () => {
     sheet.setSelectedCellAndRange('A1', 1, 1, 1, 1, 1, 1, false);
 
     const box = await selection();
@@ -189,7 +189,7 @@ describe('Spreadsheet — a selection out of sight', () => {
     expect(`${box.dataset.col} ${box.dataset.row}`).to.equal('1 1');
   });
 
-  it('draws the part of a range that shows, which the GWT client hid with its first cell', async () => {
+  it('draws the part of a range that shows when its first cell is hidden', async () => {
     sheet.setSelectedCellAndRange('A1', 1, 1, 1, 4, 1, 4, false);
 
     const box = await selection();

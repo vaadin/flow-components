@@ -44,8 +44,8 @@ describe('CellKeys — parseColRow', () => {
             .to.deep.equal({ col: 1000, row: 99999 });
     });
 
-    it('ignores characters after the second space (GWT flag-stop)', () => {
-        // GWT version: once we've seen 2 spaces (entering "row" digits then
+    it('ignores characters after the second space', () => {
+        // Once we've seen 2 spaces (entering "row" digits then
         // a separator), the scanner breaks. Anything after is ignored.
         // This is how cells with extra classes like "col1 row1 cell-range"
         // still parse correctly.

@@ -240,7 +240,7 @@ describe('SpreadsheetCellGrid — cell editor render', () => {
         ) as HTMLElement;
         // col 2 → colX[1] = 50; row 3 → rowY[2] = 40.
         // width = colWidths[1] = 50, and a pixel more over the gridline at
-        // its right, as the GWT client sized it; height = rowHeights[2] = 20.
+        // its right; height = rowHeights[2] = 20.
         expect(input.style.left).to.equal('50px');
         expect(input.style.top).to.equal('40px');
         expect(input.style.width).to.equal('51px');
@@ -263,15 +263,15 @@ describe('SpreadsheetCellGrid — cell editor render', () => {
 });
 
 /**
- * The editor's size, as the GWT client set it: the cell, or the whole merged
- * cell when the cell starts one, and a pixel more over the gridline at its
- * right. Text that outgrows it widens it by whole columns, as it is typed,
- * until the text fits; deleting narrows it again.
+ * The editor's size: the cell, or the whole merged cell when the cell starts
+ * one, and a pixel more over the gridline at its right. Text that outgrows it
+ * widens it by whole columns, as it is typed, until the text fits; deleting
+ * narrows it again.
  */
 describe('SpreadsheetCellGrid — the editor stand-in', () => {
-    // The GWT client's input was always there, hidden while nothing was
-    // edited, and TestBench's getCellValueInput() hands this one out then,
-    // so tests asking whether the editor is displayed keep working.
+    // An input is always there, hidden while nothing is edited, and
+    // TestBench's getCellValueInput() hands this one out then, so tests
+    // asking whether the editor is displayed keep working.
     /** A drawn sheet with no cell being edited. */
     function drawnWithoutEditor(): CellGridRenderState {
         return { ...buildEditorState({ col: 1, row: 1, initialValue: '' }), editor: null };
@@ -475,9 +475,9 @@ describe('SpreadsheetCellGrid — the editor grows with its text', () => {
 });
 
 /**
- * The editor's frame, as the GWT client drew it: no border, lifted off the
- * sheet on a soft shadow, with the text right at the cell's edge. The ring
- * is the editor colour, which the Lumo theme sets and an application may.
+ * The editor's frame: no border, lifted off the sheet on a soft shadow, with
+ * the text right at the cell's edge. The ring is the editor colour, which the
+ * Lumo theme sets and an application may.
  */
 describe('SpreadsheetCellGrid — the editor frame', () => {
     const SHADOW = 'rgba(0, 0, 0, 0.75) 0px 0px 10px 0px';
@@ -522,10 +522,10 @@ describe('SpreadsheetCellGrid — the editor frame', () => {
 /**
  * The editor looks like the cell it edits.
  *
- * The GWT client gave the input the edited cell's own classes, so the user
- * typed in the cell's font, colour, fill and alignment. Without them the
- * editor wrote in the page's font on white, and a bold red value turned
- * plain black the moment it was opened.
+ * The input takes the edited cell's own style, so the user types in the
+ * cell's font, colour, fill and alignment. Without it the editor would write
+ * in the page's font on white, and a bold red value would turn plain black
+ * the moment it is opened.
  */
 describe('SpreadsheetCellGrid — the editor looks like the cell it edits', () => {
     // The workbook default in the shape the server writes it.
@@ -1198,7 +1198,7 @@ describe('Spreadsheet — cell editor lifecycle through the connector', () => {
         cleanup();
     });
 
-    it('Space opens the editor empty, as the GWT client did', () => {
+    it('Space opens the editor empty', () => {
         const { sheet, cleanup } = attachSheet(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -1297,8 +1297,8 @@ describe('Spreadsheet — cell editor lifecycle through the connector', () => {
         sheet.setRowH([15, 15, 15, 15, 15]);
 
         // Enter is not in this list: on a single cell it opens the
-        // editor, the same case F2 is, which is what the GWT client did
-        // and what the ITs that fill a column depend on.
+        // editor, the same case F2 is, which is what the ITs that fill a
+        // column depend on.
         for (const key of ['ArrowDown', 'Tab', 'Home', 'End', 'Escape', 'F1', 'PageDown']) {
             sheet.getScrollContainer().dispatchEvent(new KeyboardEvent('keydown', {
                 key,
@@ -1807,11 +1807,10 @@ describe('Spreadsheet — committing an edit with a key', () => {
 });
 
 /**
- * Enter on a single cell opens its editor, exactly as F2 does. The GWT
- * client treated the two keys as one case, and the ITs that fill a
- * column type a value, press Enter to commit, and press Enter again to
- * open the next cell. Treating the second Enter as "move on" skipped
- * every other row, and the values landed in A1, A3, A5 instead of
+ * Enter on a single cell opens its editor, exactly as F2 does. The ITs that
+ * fill a column type a value, press Enter to commit, and press Enter again
+ * to open the next cell. Treating the second Enter as "move on" would skip
+ * every other row, and the values would land in A1, A3, A5 instead of
  * A1, A2, A3.
  */
 describe('Spreadsheet cell editor — Enter opens it', () => {

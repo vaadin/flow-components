@@ -14,9 +14,9 @@ import { rendered } from './spreadsheet-harness.js';
 
 /**
  * The address and formula fields follow the selection at once, from the cells
- * the client has, as in GWT. Waiting for the server's answer had them trail
- * every click by a round trip: a third of a second on a slow network. No
- * server answers in these tests.
+ * the client has. Waiting for the server's answer would have them trail every
+ * click by a round trip: a third of a second on a slow network. No server
+ * answers in these tests.
  */
 describe('Spreadsheet — the formula bar follows the selection', () => {
   let host: HTMLDivElement;

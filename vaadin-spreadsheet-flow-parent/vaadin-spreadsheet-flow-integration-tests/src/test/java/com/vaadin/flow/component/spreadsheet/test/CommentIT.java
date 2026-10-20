@@ -138,9 +138,8 @@ public class CommentIT extends AbstractSpreadsheetIT {
     /**
      * Comment notes carrying the given text.
      * <p>
-     * GWT floated them in the document body, so an xpath over the document
-     * found them; the Lit client draws them in the cell grid's shadow root,
-     * which no document query reaches.
+     * They are drawn in the cell grid's shadow root, which no document query
+     * reaches.
      */
     private long commentOverlayCount(String text) {
         Object count = executeScript("""

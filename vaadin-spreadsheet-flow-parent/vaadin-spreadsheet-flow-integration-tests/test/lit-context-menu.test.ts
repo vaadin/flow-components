@@ -75,8 +75,7 @@ async function items(sheet: Spreadsheet): Promise<HTMLElement[]> {
 }
 
 /**
- * The items left once the menu has finished closing: it fades out first, as
- * the GWT client's did.
+ * The items left once the menu has finished closing: it fades out first.
  */
 async function itemsOnceClosed(sheet: Spreadsheet): Promise<HTMLElement[]> {
   const menu = sheet.getContextMenu();
@@ -209,10 +208,10 @@ describe('Spreadsheet context menu — right-clicking a selection', () => {
     await sendMouse({ type: 'up', button: 'right' });
   }
 
-  it('keeps the range the right-click lands in, as the GWT client did', async () => {
-    // The press used to select the cell under it before the menu opened,
-    // so the server was asked about one cell, and range actions such as
-    // Unmerge cells were never offered.
+  it('keeps the range the right-click lands in', async () => {
+    // The press does not select the cell under it before the menu opens:
+    // the server is asked about the whole range, so range actions such as
+    // Unmerge cells are offered.
     await rightClickWithMouse('.cell.col2.row2');
 
     expect(ctx.sheet.getSelection().activeRange).to.eql({ c1: 1, c2: 2, r1: 1, r2: 2 });
@@ -302,7 +301,7 @@ describe('Spreadsheet context menu — where it lands', () => {
     expect(Math.round(rect.y)).to.equal(90);
   });
 
-  it('opens to the left of the point when it would cross the right edge of the window, as the GWT client did', async () => {
+  it('opens to the left of the point when it would cross the right edge of the window', async () => {
     ctx = attachSheet();
     const x = document.documentElement.clientWidth - 10;
     rightClickCell(ctx.sheet, 2, 2, x, 90);
@@ -313,7 +312,7 @@ describe('Spreadsheet context menu — where it lands', () => {
     expect(Math.round(rect.y)).to.equal(90);
   });
 
-  it('moves up to fit when it would cross the bottom of the window, as the GWT client did', async () => {
+  it('moves up to fit when it would cross the bottom of the window', async () => {
     ctx = attachSheet();
     const y = document.documentElement.clientHeight - 5;
     rightClickCell(ctx.sheet, 2, 2, 120, y);
@@ -324,7 +323,7 @@ describe('Spreadsheet context menu — where it lands', () => {
     expect(Math.round(rect.x)).to.equal(120);
   });
 
-  it('is not cut off by the edge of the sheet, as the GWT client\'s menu was not', async () => {
+  it('is not cut off by the edge of the sheet', async () => {
     // The component clips what overflows it, and the menu was drawn inside
     // it: opened near the bottom of a sheet shorter than the window, its
     // last items were cut off and could not be clicked.
@@ -407,7 +406,7 @@ describe('Spreadsheet context menu — picking an item', () => {
     expect(await itemsOnceClosed(ctx.sheet)).to.have.length(0);
   });
 
-  it('tells the server it closed, after the action, as the GWT client did', async () => {
+  it('tells the server it closed, after the action', async () => {
     // The server takes the action icons off when it hears of the close.
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
     const [item] = await items(ctx.sheet);
@@ -418,7 +417,7 @@ describe('Spreadsheet context menu — picking an item', () => {
   });
 });
 
-describe("Spreadsheet context menu — the keyboard, as the GWT client's menu had it", () => {
+describe('Spreadsheet context menu — the keyboard', () => {
   let ctx: ReturnType<typeof attachSheet>;
 
   beforeEach(async () => {
@@ -540,7 +539,7 @@ describe("Spreadsheet context menu — the keyboard, as the GWT client's menu ha
     );
   });
 
-  it('takes the item under the pointer in hand, as the GWT client did', async () => {
+  it('takes the item under the pointer in hand', async () => {
     const [, two] = await items(ctx.sheet);
 
     two.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, composed: true }));
@@ -607,7 +606,7 @@ describe('Spreadsheet context menu — dismissing', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   }
 
-  it('fades out as it closes, as the GWT client\'s menu did, taking no clicks', async () => {
+  it('fades out as it closes, taking no clicks', async () => {
     const panel = await settledMenu();
 
     closeByEscape();
@@ -807,13 +806,12 @@ describe('Spreadsheet — context-menu action icons', () => {
 });
 
 /**
- * The menu, as the GWT client drew it: a white card with a soft shadow,
- * items in 27px rows, the one under the pointer on blue with light type.
- * The Lit menu had a plain grey border and a grey highlight.
+ * The menu: a white card with a soft shadow, items in 27px rows, the one
+ * under the pointer on blue with light type.
  */
 /**
- * Assistive technology is told the menu is a menu of menu items, as the GWT
- * client's menu bar told it. The items are reached with the arrows, not Tab.
+ * Assistive technology is told the menu is a menu of menu items. The items
+ * are reached with the arrows, not Tab.
  */
 describe('Spreadsheet context menu — what assistive technology is told', () => {
   let ctx: ReturnType<typeof attachSheet>;
@@ -874,7 +872,7 @@ describe('Spreadsheet context menu — how it looks', () => {
     expect(menu.boxShadow).to.contain('rgba(0, 0, 0, 0.1) 0px 4px 10px 0px');
   });
 
-  it('edges the card with a hairline of shadow rather than a border, as the GWT client did', async () => {
+  it('edges the card with a hairline of shadow rather than a border', async () => {
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
     await items(ctx.sheet);
 
@@ -883,7 +881,7 @@ describe('Spreadsheet context menu — how it looks', () => {
     expect(menu.boxShadow).to.contain('rgba(0, 0, 0, 0.09) 0px 0px 0px 1px');
   });
 
-  it("drops into place as it opens, as the GWT client's menu did", async () => {
+  it('drops into place as it opens', async () => {
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
     await items(ctx.sheet);
 
@@ -909,7 +907,7 @@ describe('Spreadsheet context menu — how it looks', () => {
     expect(menuPanel(ctx.sheet).getAnimations()).to.be.empty;
   });
 
-  it('darkens the item being pressed, as the GWT client did', async () => {
+  it('darkens the item being pressed', async () => {
     ctx.sheet.showActions([action('Insert row', 'insert-row', 0)]);
     const [item] = await items(ctx.sheet);
     menuPanel(ctx.sheet).getAnimations().forEach((animation) => animation.finish());

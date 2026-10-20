@@ -14,14 +14,12 @@ import '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadi
 import type { SpreadsheetFormulaBar } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetFormulaBar.js';
 
 /**
- * The formula bar, laid out as the GWT client laid it out.
+ * The formula bar's layout.
  *
- * The Lit bar was 24px tall with an 80px address field, so every sheet
- * started its headers and cells six pixels higher than it used to, and a
- * long address or range name did not fit. The named-range picker was a
- * second, visible box beside the address instead of the arrow at its end.
+ * The address field is wide enough for a long address or range name. The
+ * named-range picker is an arrow at the right end of the address field.
  */
-describe('SpreadsheetFormulaBar — laid out as the GWT client laid it out', () => {
+describe('SpreadsheetFormulaBar — its layout', () => {
     async function mount(namedRanges: string[] = []): Promise<SpreadsheetFormulaBar> {
         const el = document.createElement(
             'vaadin-spreadsheet-internal-formula-bar'
@@ -84,7 +82,7 @@ describe('SpreadsheetFormulaBar — laid out as the GWT client laid it out', () 
         el.remove();
     });
 
-    it('draws the arrow where the GWT client drew it, a little below the middle', async () => {
+    it('draws the arrow a little below the middle', async () => {
         // Whatever the font: a pixel in from the left of its 15px, on a
         // 33px line from the top of the bar. Centred in the bar instead,
         // it sat a pixel and a half higher and further right.
@@ -115,10 +113,9 @@ describe('SpreadsheetFormulaBar — laid out as the GWT client laid it out', () 
 });
 
 /**
- * The address in the browser's own font for text fields, as the GWT
- * client's was: its stylesheet gave the field a size but never a font, so
- * Chrome showed Arial there, beside a formula in Helvetica. The Lit bar
- * wrote both in Helvetica, the same size but different letters.
+ * The address in the browser's own font for text fields: the stylesheet
+ * gives the field a size but never a font, so Chrome shows Arial there,
+ * beside a formula in Helvetica.
  */
 describe('SpreadsheetFormulaBar — the address in the browser\'s font for text fields', () => {
     /** The font the browser gives a text field no stylesheet has touched. */
@@ -178,10 +175,9 @@ describe('SpreadsheetFormulaBar — the address in the browser\'s font for text 
 });
 
 /**
- * The bar's lines in the documented colours, as the GWT client drew them:
- * the line under the bar in the header border colour, the divider beside the
- * address in the sheet's border colour. The Lit bar drew both in a grey of
- * its own, so an application's border colours left them behind.
+ * The bar's lines in the documented colours: the line under the bar in the
+ * header border colour, the divider beside the address in the sheet's border
+ * colour, so that both follow an application's border colours.
  */
 describe('SpreadsheetFormulaBar — its lines in the documented border colours', () => {
     async function mount(wrapperStyle: string): Promise<{ el: SpreadsheetFormulaBar; cleanup: () => void }> {
@@ -211,7 +207,7 @@ describe('SpreadsheetFormulaBar — its lines in the documented border colours',
         }
     });
 
-    it('keeps the GWT client\'s grey for both by default', async () => {
+    it('draws both in grey by default', async () => {
         const { el, cleanup } = await mount('');
         try {
             expect(lines(el)).to.equal('rgb(199, 199, 199) | rgb(199, 199, 199)');

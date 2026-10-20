@@ -217,10 +217,10 @@ describe('SpreadsheetRowHeader — render with header active', () => {
         expect(cell.style.left).to.equal('0px');
     });
 
-    it('centres the number on the whole row, divider included, as the GWT client did', async () => {
-        // The GWT client's divider took no room from the number, so the
-        // number sat half a pixel lower than in a row whose divider is a
-        // border of its own.
+    it('centres the number on the whole row, divider included', async () => {
+        // The divider takes no room from the number, so the number sits
+        // half a pixel lower than in a row whose divider is a border of its
+        // own.
         for (const height of [20, 21]) {
             const el = await attachWithState(
                 buildState({
@@ -385,7 +385,7 @@ describe('Row header — grouping outline', () => {
             rowY: [0, 20, 40, 60],
             rowHeights: [20, 20, 20, 20],
             // The row numbers' 50px, past the gutter: a 15px level per
-            // depth and one more, as the GWT client had it.
+            // depth and one more.
             headerWidth: 50 + (opts.max > 0 ? 1 + (opts.max + 1) * 15 : 0),
             totalGridHeightPx: 80,
             rowGroupings: opts.groupings,
@@ -420,9 +420,9 @@ describe('Row header — grouping outline', () => {
         cleanup(collapsed);
     });
 
-    it('keeps a toggle grey whatever the sheet\'s border colour, as the GWT client did', async () => {
-        // The GWT client's row buttons kept their grey; its column buttons
-        // took the border colour, which the Lit header does not copy.
+    it('keeps a toggle grey whatever the sheet\'s border colour', async () => {
+        // The column buttons keep their grey too: no button takes the
+        // sheet's border colour.
         const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
         el.style.setProperty('--vaadin-spreadsheet-border-color', 'rgb(9, 8, 7)');
 
@@ -457,7 +457,7 @@ describe('Row header — grouping outline', () => {
         cleanup(el);
     });
 
-    it('keeps the gutter on the left when inversed, as the GWT client did', async () => {
+    it('keeps the gutter on the left when inversed', async () => {
         // Inversed only moves a group's button to the row above it.
         const el = await attachWithState(stateWithGroupings({
             max: 1, inversed: true, groupings: oneGroup,
@@ -482,15 +482,15 @@ describe('Row header — grouping outline', () => {
         // Centred on the summary row's position.
         expect(button.style.top).to.equal(`${4 - 6}px`);
         // Its right edge 2px short of the end of the 10px tick that starts
-        // at 6px, where the GWT client put it: 6 + 10 - 2 - 12.
+        // at 6px: 6 + 10 - 2 - 12.
         expect(button.style.left).to.equal('2px');
         cleanup(el);
     });
 
-    it('writes the sign on an 11px line at the top of the button, as the GWT client did', async () => {
+    it('writes the sign on an 11px line at the top of the button', async () => {
         // Whatever the font: where a line that tall starts its text at the
-        // button's top edge. Inside a border, the Lit client's sign sat a
-        // pixel lower.
+        // button's top edge. Inside a border, the sign would sit a pixel
+        // lower.
         const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
 
         const button = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-toggle')!;
@@ -529,10 +529,9 @@ describe('Row header — grouping outline', () => {
         cleanup(el);
     });
 
-    it('starts the dotted lines at the top of the gutters, where the GWT client\'s did', async () => {
-        // A dotted line's dots are laid from where it starts; started under
-        // the corner, 66px above row 1, they fall on the GWT client's
-        // pixels instead of between them.
+    it('starts the dotted lines at the top of the gutters', async () => {
+        // A dotted line's dots are laid from where it starts, so the lines
+        // start at the top of the gutters: under the corner, 66px above row 1.
         const el = await attachWithState({ ...stateWithGroupings({ max: 1, groupings: oneGroup }), leadingPx: 66 });
 
         const divider = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-separator')!;
@@ -563,7 +562,7 @@ describe('Row header — grouping outline', () => {
         cleanup(el);
     });
 
-    it('borders the gutter off from the numbers beside it, as the GWT client did', async () => {
+    it('borders the gutter off from the numbers beside it', async () => {
         const el = await attachWithState(stateWithGroupings({ max: 1, groupings: oneGroup }));
 
         const gutter = el.shadowRoot!.querySelector<HTMLElement>('.row-grouping-gutter')!;
@@ -662,7 +661,7 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
         );
     }
 
-    it('shows the GWT client\'s select-the-row pointer over a number', async () => {
+    it('shows a select-the-row pointer over a number', async () => {
         // An arrow pointing into the row: clicking a number selects it.
         const el = await attachWithSelection(new Set());
 
@@ -672,7 +671,7 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
         cleanup(el);
     });
 
-    it('draws the divider inside the number, so the border along the cells runs past it, as the GWT client did', async () => {
+    it('draws the divider inside the number, so the border along the cells runs past it', async () => {
         // As a border of its own, the divider met the active row's 2px
         // marker in a diagonal join, and the marker's last pixel came out
         // half grey.
@@ -716,8 +715,8 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
     });
 
     it('marks the selected row along the edge facing the cells', async () => {
-        // The GWT client's two-pixel blue edge beside the tint: a border, in
-        // place of the number's own grey one.
+        // A two-pixel blue edge beside the tint: a border, in place of the
+        // number's own grey one.
         const el = await attachWithSelection(new Set([2]));
 
         const cells = el.shadowRoot!.querySelectorAll('.row-header-cell');
@@ -733,7 +732,7 @@ describe('SpreadsheetRowHeader — the active cell\'s row', () => {
         cleanup(el);
     });
 
-    it('writes the numbers in 13px on #fafafa, as the GWT client did', async () => {
+    it('writes the numbers in 13px on #fafafa', async () => {
         const el = await attachWithSelection(new Set());
 
         const style = getComputedStyle(el);

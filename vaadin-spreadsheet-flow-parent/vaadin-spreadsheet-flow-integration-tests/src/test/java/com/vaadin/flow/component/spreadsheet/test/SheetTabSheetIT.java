@@ -97,8 +97,7 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
     }
 
     private void verifySheetFocused() {
-        // The scroll container is the sheet's focusable element; GWT called
-        // the equivalent element the bottom-right pane.
+        // The scroll container is the sheet's focusable element.
         Assert.assertTrue("Sheet lost focus", getFocusedElement()
                 .getDomAttribute("class").contains("sheet-scroll"));
     }

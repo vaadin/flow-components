@@ -12,14 +12,13 @@ import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
- * A range selection reaches the server as one event, as the GWT client sent
- * it. The server keeps one selected cell, the starting point of its ranges:
- * a range grown from it - a shift-click, Shift+arrow - is `cellRangeSelected`
- * alone, and a range with a starting point of its own - a drag, select all -
- * or grown from a cell the server does not hold is `cellRangePainted`, which
- * carries the point. Telling the server the point first, as a `cellSelected`,
- * made it report a selection of that one cell in between to every selection
- * listener.
+ * A range selection reaches the server as one event. The server keeps one
+ * selected cell, the starting point of its ranges: a range grown from it - a
+ * shift-click, Shift+arrow - is `cellRangeSelected` alone, and a range with a
+ * starting point of its own - a drag, select all - or grown from a cell the
+ * server does not hold is `cellRangePainted`, which carries the point. Told
+ * the point first, as a `cellSelected`, the server would report a selection
+ * of that one cell in between to every selection listener.
  */
 
 interface Sent {
@@ -85,7 +84,7 @@ function selectionTypes(sent: Sent[]): string[] {
     .filter((type) => ['cellSelected', 'cellRangeSelected', 'cellRangePainted', 'columnSelected'].includes(type));
 }
 
-describe('Spreadsheet — a range selection is one event on the server, as the GWT client sent it', () => {
+describe('Spreadsheet — a range selection is one event on the server', () => {
   let ctx: ReturnType<typeof attachSheet>;
 
   beforeEach(() => {
@@ -135,7 +134,7 @@ describe('Spreadsheet — a range selection is one event on the server, as the G
     });
   });
 
-  it('sends a drag with its starting point even from the selected cell, as the GWT client did', () => {
+  it('sends a drag with its starting point even from the selected cell', () => {
     click(ctx.sheet, 2, 2);
     ctx.sent.length = 0;
 

@@ -200,7 +200,7 @@ describe('::part() reaches out of the nested shadow roots', () => {
   });
 });
 
-describe('::part() reaches the parts documented with the Lit client', () => {
+describe('::part() reaches the other documented parts', () => {
   let ctx: ReturnType<typeof attachSheet>;
   const originalVaadin = (window as any).Vaadin;
 

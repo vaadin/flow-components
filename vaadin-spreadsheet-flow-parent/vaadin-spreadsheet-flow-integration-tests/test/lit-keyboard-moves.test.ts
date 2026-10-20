@@ -21,9 +21,9 @@ import {
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
- * The arrow keys by the GWT client's rules (SelectionHandler): a merge is
- * one cell - entered as a whole, left on its far side in the column or row
- * it was entered by - and hidden rows and columns are stepped over.
+ * How the arrow keys move: a merge is one cell - entered as a whole, left on
+ * its far side in the column or row it was entered by - and hidden rows and
+ * columns are stepped over.
  */
 
 /** B4:D6, as in merged_cells.xlsx. */
@@ -181,7 +181,7 @@ describe('KeyboardMoves — Shift+arrow', () => {
 
   it('takes in a merge it reaches, and goes on past it the next time', () => {
     // merged_cells.xlsx from A4: Shift+Right takes in B4:D6, Shift+Down
-    // then reaches row 7 - the GWT client's A4:D7.
+    // then reaches row 7, which gives A4:D7.
     const first = moveRangeEdge({ c1: 1, c2: 1, r1: 4, r2: 4 }, { col: 1, row: 4 }, 'right', shape())!;
     expect(first.range).to.eql({ c1: 1, c2: 4, r1: 4, r2: 6 });
     const second = moveRangeEdge(first.range, { col: 1, row: 4 }, 'down', shape())!;
@@ -280,7 +280,7 @@ describe('Spreadsheet — the keyboard and merged cells', () => {
     );
   }
 
-  it('selects the whole merge on a click, as the GWT client did', () => {
+  it('selects the whole merge on a click', () => {
     click(2, 4);
 
     expect(sheet.getSelection().activeRange).to.eql({ c1: 2, c2: 4, r1: 4, r2: 6 });
@@ -294,7 +294,6 @@ describe('Spreadsheet — the keyboard and merged cells', () => {
   });
 
   it('crosses a merge in two presses and comes out in the row it went in by', () => {
-    // merged_cells.xlsx: A4, Right, Right, Down ends on E5 in the GWT client.
     click(1, 5);
     press('ArrowRight');
     expect(sheet.getSelection().activeRange).to.eql({ c1: 2, c2: 4, r1: 4, r2: 6 });
@@ -337,7 +336,7 @@ describe('Spreadsheet — the keyboard and merged cells', () => {
     expect(sheet.getSelection().activeCell).to.eql({ col: 1, row: 3 });
   });
 
-  it('grows a selection past a merge it took in, as the GWT client did', () => {
+  it('grows a selection past a merge it took in', () => {
     click(1, 4);
     press('ArrowRight', { shiftKey: true });
     press('ArrowDown', { shiftKey: true });

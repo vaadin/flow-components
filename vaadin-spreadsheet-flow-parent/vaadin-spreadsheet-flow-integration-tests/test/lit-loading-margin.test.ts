@@ -75,8 +75,8 @@ describe('Spreadsheet — the cells it asks the server for', () => {
   });
 
   it('asks for the cells it draws and a quarter screen below them, in one request', async () => {
-    // A sheet is complete after one round trip, as with GWT; the margin
-    // comes with the first scroll.
+    // A sheet is complete after one round trip; the margin comes with the
+    // first scroll.
     await open();
 
     const shown = drawn();
@@ -171,7 +171,8 @@ describe('Spreadsheet — the cells it asks the server for', () => {
   });
 
   // The server makes and sends a component or an editor for each cell it
-  // loads that has one: with a margin, a sheet opened with 2.5 times GWT's.
+  // loads that has one: with a margin, a sheet would open with 2.5 times
+  // as many.
 
   it('on a sheet whose server has a component factory, asks for the cells it draws alone', async () => {
     sheet.setHasComponentFactory(true);

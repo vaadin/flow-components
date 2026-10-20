@@ -41,10 +41,9 @@ import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/
  * SpreadsheetTheme.LUMO.
  *
  * `Spreadsheet.setTheme(SpreadsheetTheme.LUMO)` sets `theme="lumo"` on the
- * host, and the GWT client drew the whole sheet from Lumo's tokens under it.
- * The Lit rewrite dropped all of that with the GWT stylesheet, so the call
- * did nothing. The tokens here are made up, each one distinct, so every
- * assertion says which token reached which surface.
+ * host, and the whole sheet is drawn from Lumo's tokens under it. The tokens
+ * here are made up, each one distinct, so every assertion says which token
+ * reached which surface.
  */
 const TOKENS = [
     '--lumo-base-color: rgb(251, 252, 253)',
@@ -242,8 +241,8 @@ describe('Lumo theme — the host passes the theme to its parts', () => {
     });
 
     it('draws the host on Lumo\'s ground, framed in its contrast, in the page\'s font', () => {
-        // The GWT client set Lumo's font on the sheet's parts, not on the
-        // host: its notes, menu and pop-ups were drawn in the page's font.
+        // Lumo's font is set on the sheet's parts, not on the host: its
+        // notes, menu and pop-ups are drawn in the page's font.
         const { themed, sheet } = mount('lumo');
 
         const style = getComputedStyle(themed.host);
@@ -257,7 +256,7 @@ describe('Lumo theme — the host passes the theme to its parts', () => {
         themed.cleanup();
     });
 
-    it('keeps the GWT client\'s own look without the theme', () => {
+    it('keeps the default look without the theme', () => {
         const { themed, sheet } = mount(null);
 
         const style = getComputedStyle(themed.host);
@@ -271,9 +270,9 @@ describe('Lumo theme — the host passes the theme to its parts', () => {
 });
 
 describe('Lumo theme — documented properties set on an ancestor', () => {
-    // The host declared the four properties the GWT client documented, so
-    // a value set anywhere above the element - an application theme's html
-    // rule - never reached the sheet.
+    // If the host declared the documented properties itself, a value set
+    // anywhere above the element - an application theme's html rule -
+    // would never reach the sheet.
     for (const theme of [null, 'lumo']) {
         it(`reach the sheet ${theme ? 'under Lumo' : 'without a theme'}`, async () => {
             const { el, cleanup } = await grid(
@@ -337,8 +336,8 @@ describe('Lumo theme — documented properties set on an ancestor', () => {
 
 describe('Lumo theme — cells', () => {
     it('puts every cell in the Lumo font, the workbook\'s own fonts too', async () => {
-        // As the GWT client did: its Lumo rule overrode the font variable
-        // every style sets, so a cell styled in Arial showed in Lumo's font.
+        // The Lumo rule overrides the font variable every style sets, so a
+        // cell styled in Arial shows in Lumo's font.
         const { el, cleanup } = await grid('lumo');
 
         expect(getComputedStyle(inGrid(el, '.cell.col1.row1')).fontFamily).to.equal('monospace');
@@ -529,7 +528,7 @@ describe('Lumo theme — the filter button', () => {
         cleanup();
     });
 
-    it('stays the GWT client\'s small box with its arrow without the theme', async () => {
+    it('stays a small box with its arrow without the theme', async () => {
         const { el, cleanup } = await grid(null, BUTTON);
 
         const button = inGrid(el, '.popup-button');
@@ -599,9 +598,9 @@ describe('Lumo theme — the line along a freeze', () => {
             totalGridHeightPx: 500,
         });
 
-        // Lumo's line colour laid over the sheet's ground, solid, as the GWT
-        // client's pane border lay over it: see-through, it darkened where
-        // its pieces overlapped and over the cells scrolling under it.
+        // Lumo's line colour laid over the sheet's ground, solid: see-through,
+        // it would darken where its pieces overlap and over the cells
+        // scrolling under it.
         const line = getComputedStyle(inGrid(el, '.freeze-line'));
         expect(line.backgroundImage).to.equal(HALF_CONTRAST);
         expect(line.backgroundColor).to.equal(BASE);
@@ -758,7 +757,7 @@ describe('Lumo theme — the headers', () => {
         cleanup();
     });
 
-    it('gives each column letter the strip\'s tint over the Lumo ground, as the GWT client did', async () => {
+    it('gives each column letter the strip\'s tint over the Lumo ground', async () => {
         // Opaque, so a frozen column's letter covers the one scrolled under it.
         const { el, cleanup } = await columns('lumo');
 
@@ -769,7 +768,7 @@ describe('Lumo theme — the headers', () => {
         cleanup();
     });
 
-    it('gives each row number the strip\'s tint over the Lumo ground, as the GWT client did', async () => {
+    it('gives each row number the strip\'s tint over the Lumo ground', async () => {
         const { el, cleanup } = await rows('lumo');
 
         const number = getComputedStyle(el.shadowRoot!.querySelector('.row-header-cell.row1')!);
@@ -779,7 +778,7 @@ describe('Lumo theme — the headers', () => {
         cleanup();
     });
 
-    it('keeps the GWT client\'s marker without the theme', async () => {
+    it('keeps the default marker without the theme', async () => {
         const { el, cleanup } = await columns(null);
 
         const selected = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell.col2')!);
@@ -803,7 +802,6 @@ describe('Lumo theme — the headers', () => {
     });
 
     it('keeps the column outline toggle on Lumo\'s tint whatever the sheet\'s border colour', async () => {
-        // Only without the theme did the GWT client fill it with that colour.
         const { el, cleanup } = await columns('lumo', '--vaadin-spreadsheet-border-color: rgb(1, 2, 3)');
 
         const toggle = getComputedStyle(el.shadowRoot!.querySelector('.col-grouping-toggle')!);
@@ -901,7 +899,7 @@ describe('Lumo theme — the formula bar', () => {
         cleanup();
     });
 
-    it('writes both fields in Lumo\'s font, as the GWT client did', async () => {
+    it('writes both fields in Lumo\'s font', async () => {
         // Without the theme the address is in the browser's font for text
         // fields; Lumo's font reaches it too.
         const { el, cleanup } = await bar();
@@ -914,7 +912,7 @@ describe('Lumo theme — the formula bar', () => {
         cleanup();
     });
 
-    it('draws both of its lines in the header border colour, as the GWT client did', async () => {
+    it('draws both of its lines in the header border colour', async () => {
         const { el, cleanup } = await inHost<SpreadsheetFormulaBar>(
             'vaadin-spreadsheet-internal-formula-bar',
             'lumo',
@@ -1068,15 +1066,15 @@ describe('Lumo theme — the context menu', () => {
         expect(card.color).to.equal(BODY_TEXT);
         expect(card.paddingTop).to.equal('3px');
         expect(card.borderTopLeftRadius).to.equal('2px');
-        // Lumo's shadow and no edge, as the GWT client's Lumo menu had: the
-        // documented edge colour is a hairline after the shadow, clear here.
+        // Lumo's shadow and no edge: the documented edge colour is a hairline
+        // after the shadow, clear here.
         expect(card.boxShadow).to.equal(`${SHADOW_S}, rgba(0, 0, 0, 0) 0px 0px 0px 1px`);
         expect(card.borderTopWidth).to.equal('0px');
 
         cleanup();
     });
 
-    it('darkens the item being pressed in Lumo\'s primary colour, as the GWT client did', async () => {
+    it('darkens the item being pressed in Lumo\'s primary colour', async () => {
         const { el, cleanup } = await menu();
         const item = el.shadowRoot!.querySelector<HTMLElement>('.item')!;
         const box = item.getBoundingClientRect();
@@ -1162,7 +1160,7 @@ describe('Lumo theme — the popup', () => {
         themed.cleanup();
     });
 
-    it('captions the header at the left in bold, as the GWT client\'s Lumo popup did', () => {
+    it('captions the header at the left in bold', () => {
         const { themed, sheet } = open('lumo');
 
         const caption = getComputedStyle(sheet.getPopupOverlay().querySelector('.header-caption')!);
@@ -1173,7 +1171,7 @@ describe('Lumo theme — the popup', () => {
         themed.cleanup();
     });
 
-    it('keeps the GWT client\'s card and close box without the theme', () => {
+    it('keeps the default card and close box without the theme', () => {
         const { themed, sheet } = open(null);
 
         const overlay = sheet.getPopupOverlay();
@@ -1219,7 +1217,7 @@ describe('Lumo theme — the filter popup\'s content', () => {
         };
     }
 
-    it('lays the values out in a scrolling column, as the GWT client did', () => {
+    it('lays the values out in a scrolling column', () => {
         const { list, content, cleanup } = filterContent(null);
 
         const listStyle = getComputedStyle(list);

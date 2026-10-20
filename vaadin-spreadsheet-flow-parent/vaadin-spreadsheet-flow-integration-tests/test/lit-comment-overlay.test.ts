@@ -11,15 +11,12 @@ import { expect } from 'chai';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
- * Cell comments — the yellow notes.
+ * Cell comments and their notes.
  *
- * The connector stored the comment text and rendered the little triangle
- * that says a cell has one, but never the note itself: hovering showed
- * nothing, and a comment the workbook marks "always visible" showed
- * nothing either. The invalid-formula message travelled the same path and
- * was equally invisible.
- *
- * The class names are GWT's, because applications style them.
+ * A cell with a comment shows a little triangle. The note itself shows
+ * while the cell is hovered. A comment the workbook marks "always visible"
+ * shows without hovering. The invalid-formula message travels the same
+ * path.
  */
 
 const A1 = 'col1 row1';
@@ -106,8 +103,8 @@ describe('Spreadsheet — cell comment overlays', () => {
   });
 
   it('draws nothing again for a hover that shows nothing', async () => {
-    // Hovering decides only whether a note or a formula's error shows: the
-    // pointer crossing other cells repainted the whole sheet.
+    // Hovering decides only whether a note or a formula's error shows, so
+    // the pointer crossing other cells repaints nothing.
     ctx.sheet.setCellComments({ [B2]: 'a note' });
     ctx.sheet.setInvalidFormulaCells(['col3 row3']);
     await paint(ctx.sheet);
@@ -213,8 +210,8 @@ describe('Spreadsheet — cell comment overlays', () => {
 
   it('has a message to show without the server sending one', async () => {
     // The server only pushes this string when an application replaces the
-    // default, so the connector has to carry one. Without it every
-    // invalid formula hovered silently and explained nothing.
+    // default, so the connector has to carry one. Without it every invalid
+    // formula would hover silently and explain nothing.
     ctx.sheet.setInvalidFormulaCells([A1]);
     await paint(ctx.sheet);
 
@@ -265,8 +262,7 @@ describe('Spreadsheet — cell comment overlays', () => {
 /**
  * A cell comment is written in the note itself. The server's Insert
  * comment and Edit comment actions make sure there is a comment and then
- * ask the client to open it; the connector had that call stubbed out with
- * a TODO, so the note could be created and never written.
+ * ask the client to open it.
  */
 describe('Spreadsheet — writing a cell comment', () => {
   let ctx: ReturnType<typeof attachSheet>;
@@ -355,8 +351,8 @@ describe('Spreadsheet — writing a cell comment', () => {
 
   it('opens the note on the cell the server names, counting from 0 as POI does', async () => {
     // The server passes its CellReference's column and row as they are.
-    // Read as counting from 1, the note for B3 opened on A2 and what was
-    // typed into it was saved there.
+    // Read as counting from 1, the note for B3 would open on A2, and what is
+    // typed into it would be saved there.
     ctx.sheet.editCellComment(1, 2);
     const el = (await note())!;
     el.value = 'On B3';
@@ -399,8 +395,8 @@ describe('Spreadsheet — writing a cell comment', () => {
   it('takes a click inside the note, so the cell under it is not selected', async () => {
     // The card lets the pointer through to the cells so a note shown on
     // hover never gets in the way. The note being written has to take it:
-    // a click meant to place the caret otherwise selected the cell
-    // underneath, and the note lost the focus and closed.
+    // a click meant to place the caret would otherwise select the cell
+    // underneath, and the note would lose the focus and close.
     ctx.sheet.editCellComment(0, 0);
     const el = (await note())!;
     const box = el.getBoundingClientRect();
@@ -431,11 +427,10 @@ describe('Spreadsheet — writing a cell comment', () => {
 });
 
 /**
- * The comment card, as the GWT client drew it.
+ * The comment card.
  *
- * The Lit client showed comments as yellow Excel-style tooltips. The GWT
- * client drew a white card with a soft shadow, the author in small bold
- * type above the text, and a rule between an error and the comment below it.
+ * A white card with a soft shadow, the author in small bold type above the
+ * text, and a rule between an error and the comment below it.
  */
 describe('Spreadsheet — the comment card', () => {
   let ctx: ReturnType<typeof attachSheet>;

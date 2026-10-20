@@ -235,8 +235,8 @@ describe('ViewportMath — computeViewportBounds — rows beyond definedRows', (
             getColWidthActual: () => 50,
             getRowHeight: () => 20, // for rows 1-3
         });
-        // Rows 1-3 are 20 high, row 3 included: the GWT client's
-        // `>= definedRows` gave the last defined row the default height.
+        // Rows 1-3 are 20 high, row 3 included: a `>= definedRows` check
+        // would give the last defined row the default height.
         // 20 + 20 + 20 + 25 + 25 = 110 is the first position past 100.
         expect(r.firstRowIndex).to.equal(6);
         expect(r.firstRowPosition).to.equal(110);
@@ -415,7 +415,7 @@ describe('ViewportMath — computeViewportBounds — against a walk from the fir
         };
     }
 
-    /** The bounds by walking from the first row and column, as the GWT client found them. */
+    /** The bounds by walking from the first row and column. */
     function walk(s: RandomSheet) {
         const colWidth = (col: number) => (col <= s.colWidths.length ? s.colWidths[col - 1] : 64);
         const rowHeight = (row: number) => (row > s.rowHeights.length ? s.defaultRowHeightPx : s.rowHeights[row - 1]);

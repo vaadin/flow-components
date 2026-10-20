@@ -41,8 +41,7 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         cell.contextClick();
 
         var cellRect = cell.getRect();
-        // The menu is drawn inside the spreadsheet's shadow root; GWT put
-        // a .v-contextmenu div in the document body.
+        // The menu is drawn inside the spreadsheet's shadow root.
         var overlay = (WebElement) executeScript("""
                 const menu = arguments[0].shadowRoot.querySelector(
                     'vaadin-spreadsheet-internal-context-menu');

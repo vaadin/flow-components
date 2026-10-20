@@ -30,7 +30,7 @@ import type { CellData } from '../../vaadin-spreadsheet-flow/src/main/resources/
 /**
  * The lists a sheet scrolls through - its rows and cells, its pictures, its
  * column letters and row numbers - keep the element of each item still in
- * view, keyed, as the GWT client moved what it had already drawn.
+ * view, keyed: an element already drawn is moved, not drawn again.
  */
 
 const COLS = 10;

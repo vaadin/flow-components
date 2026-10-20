@@ -12,9 +12,9 @@ import { resetMouse, sendMouse } from '@web/test-runner-commands';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
- * Cells and headers are not text to select, as in the GWT client: a drag
- * across them highlighted their text along with the cells. What is typed
- * into a field can still be selected.
+ * Cells and headers are not text to select, so that a drag across them does
+ * not highlight their text along with the cells. What is typed into a field
+ * can still be selected.
  */
 describe('Spreadsheet — cells and headers are not text', () => {
   let host: HTMLElement;

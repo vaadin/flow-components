@@ -63,8 +63,7 @@ public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
      * Count the header cells drawn in a frozen strip, skipping the ones a
      * hidden row or column collapses to nothing.
      * <p>
-     * GWT drew both frozen strips inside a single top-left pane; the Lit client
-     * gives the row and column headers a frozen strip each, so the two are
+     * The row and column headers have a frozen strip each, so the two are
      * counted separately.
      */
     private void assertFrozenHeaderCount(String element, String axis,

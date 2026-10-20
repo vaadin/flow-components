@@ -178,10 +178,9 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
                 rightmostHeader);
 
         // Scrolled to the end, the last column ends exactly where the
-        // sheet's visible area does. The GWT client had a sized pane to
-        // measure that against; the Lit client's frozen quadrants are
-        // zero-size wrappers around absolutely positioned cells, so the
-        // edge to compare with is the scrolling area's own.
+        // sheet's visible area does. The frozen quadrants are zero-size
+        // wrappers around absolutely positioned cells, so the edge to compare
+        // with is the scrolling area's own.
         var headerRect = rightmostHeader.getRect();
         Assert.assertEquals(
                 "Rightmost column header should end at the sheet's right edge",

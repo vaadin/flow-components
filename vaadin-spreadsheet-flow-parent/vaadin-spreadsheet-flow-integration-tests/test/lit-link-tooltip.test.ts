@@ -16,9 +16,9 @@ import { spreadsheetStyles } from '../../vaadin-spreadsheet-flow/src/main/resour
 
 /**
  * A link cell's tooltip: the target the server names for it, shown while
- * the pointer is over the cell, as the GWT client showed it.
+ * the pointer is over the cell.
  */
-describe('linkTooltipPosition — the GWT client rule', () => {
+describe('linkTooltipPosition — where the tooltip goes', () => {
   const cell = { left: 100, top: 100, right: 150, bottom: 120 };
   const view = { width: 1000, height: 800 };
 
@@ -97,7 +97,7 @@ describe('Spreadsheet — the tooltip of a link cell', () => {
     expect(Math.round(at.top)).to.equal(Math.round(box.bottom));
   });
 
-  it('is drawn as the GWT client drew it: light text on a dark card', () => {
+  it('is drawn as light text on a dark card', () => {
     hover(2, 2);
 
     const style = getComputedStyle(tooltip());

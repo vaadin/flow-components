@@ -13,7 +13,7 @@ import { rendered } from './spreadsheet-harness.js';
 
 /**
  * Run with the browser reporting the given platform: the sheet's shortcuts
- * take Cmd on a Mac and Ctrl elsewhere, as the GWT client's did.
+ * take Cmd on a Mac and Ctrl elsewhere.
  */
 function onPlatform<T>(platform: string, body: () => T): T {
     Object.defineProperty(navigator, 'platform', { value: platform, configurable: true });
@@ -752,7 +752,6 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
 
         sheet.recomputeViewport();
 
-        // The GWT client's 50 and 27: a sheet's first cell starts where it did.
         const corner = sheet.getHeaderCorner();
         expect(corner.style.width).to.equal('50px');
         expect(corner.style.height).to.equal('27px');
@@ -1944,8 +1943,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         scroller.scrollTop = 200;
         scroller.dispatchEvent(new Event('scroll'));
         // Another scroll event at the same place: there is nothing new for
-        // the server to load. The GWT client asked only once the view had
-        // moved on.
+        // the server to load, and nothing is asked until the view moves on.
         scroller.dispatchEvent(new Event('scroll'));
 
         expect(scrolls).to.have.length(1);
@@ -1980,7 +1978,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         expect(sheet.getSelection().activeRange).to.deep.equal({
             c1: 1, c2: 10, r1: 1, r2: 20,
         });
-        // With A1 as its starting point, as the GWT client sent it.
+        // With A1 as its starting point.
         expect(received!.data).to.deep.equal({
             selectedCellRow: 1, selectedCellColumn: 1, row1: 1, col1: 1, row2: 20, col2: 10,
         });
@@ -2141,7 +2139,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
-    it('Ctrl+A and Ctrl+Z do nothing on a Mac, where the GWT client took Cmd', () => {
+    it('Ctrl+A and Ctrl+Z do nothing on a Mac, where the shortcuts take Cmd', () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(200, 100);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2413,7 +2411,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
-    it('column resize keeps the width until the drag ends, as the GWT client did', () => {
+    it('column resize keeps the width until the drag ends', () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(10);
         sheet.setCols(5);
@@ -2660,7 +2658,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
     });
 
     it('right-click on a column header leaves the selection and dispatches columnHeaderContextMenuOpen', () => {
-        // The GWT client left the selection alone: the menu acts on the
+        // The selection stays as it is: the menu acts on the
         // column whatever is selected.
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
@@ -2734,7 +2732,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
-    it('right-click leaves the browser its own menu when the sheet has no actions, as with the GWT client', async () => {
+    it('right-click leaves the browser its own menu when the sheet has no actions', async () => {
         const { host, sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2887,7 +2885,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         cleanup();
     });
 
-    it('column grouping: the gutter above the letters moves the letter row down, in the GWT client\'s sizes', async () => {
+    it('column grouping: the gutter above the letters moves the letter row down', async () => {
         const { sheet, cleanup } = attachSheetForLifecycle(400, 200);
         sheet.setRows(5);
         sheet.setCols(5);
@@ -2925,7 +2923,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
         const firstLetter = sheet.getColumnHeader().shadowRoot!.querySelector(
             '.col-header-cell'
         ) as HTMLElement;
-        // The gutter stays above the letters, as in the GWT client.
+        // The gutter stays above the letters.
         expect(firstLetter.style.top).to.equal(`${3 + 2 * 18}px`);
         // The summary column comes before the group: the 12px button is
         // centred over the middle of column A.
@@ -3177,7 +3175,7 @@ describe('Spreadsheet — recomputeViewport + ResizeObserver lifecycle', () => {
             '.sheet-selection'
         ) as HTMLElement;
         expect(selection).to.not.be.null;
-        // cell-range is the range's cells' part, as in the GWT client.
+        // cell-range is the range's cells' part.
         expect(selection.hasAttribute('part')).to.be.false;
         const corner = selection.querySelector('.selection-corner') as HTMLElement;
         expect(corner).to.not.be.null;
@@ -3383,9 +3381,8 @@ describe('Spreadsheet — how tall it is when nobody says', () => {
     /**
      * A spreadsheet in a host with no height of its own used to grow to
      * the height of the whole sheet: thousands of pixels of page pushed
-     * down by a component nobody asked to be that big. The GWT client
-     * kept its panes out of the flow and put a 100px floor under the
-     * whole thing.
+     * down by a component nobody asked to be that big. The sheet does not
+     * size the component, and a 100px floor sits under the whole thing.
      */
     function attach(
         hostStyle: string
@@ -3612,7 +3609,7 @@ describe('Spreadsheet — outline level buttons', () => {
     });
 
     it('draws one button per column outline level, and one more', async () => {
-        // As the GWT client and Excel do: the last opens every group.
+        // As in Excel: the last opens every group.
         const ctx = attach();
         ctx.sheet.setColGroupingMax(2);
         ctx.sheet.recomputeViewport();
@@ -3637,7 +3634,7 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.cleanup();
     });
 
-    it('draws the buttons as plain numbers, as the GWT client did', async () => {
+    it('draws the buttons as plain numbers', async () => {
         const ctx = attach();
         ctx.sheet.setColGroupingMax(1);
         ctx.sheet.recomputeViewport();
@@ -3650,8 +3647,8 @@ describe('Spreadsheet — outline level buttons', () => {
     });
 
     it('leaves the extra level out of the gutters while the headings are hidden', async () => {
-        // As the GWT client did: with nowhere to put the button that opens
-        // every group, there is no level for it either.
+        // With nowhere to put the button that opens every group, there is
+        // no level for it either.
         const ctx = attach();
         ctx.sheet.setColGroupingMax(1);
         ctx.sheet.setRowGroupingMax(1);
@@ -3729,9 +3726,8 @@ describe('Spreadsheet — outline level buttons', () => {
         ctx.sheet.setRowGroupingMax(1);
         ctx.sheet.recomputeViewport();
 
-        // The GWT client's gutters: a 15px column per row level and one
-        // more, after a pixel; an 18px row per column level and one more,
-        // after three.
+        // The gutters: a 15px column per row level and one more, after a
+        // pixel; an 18px row per column level and one more, after three.
         expect(ctx.sheet.getHeaderCorner().style.width).to.equal(`${50 + 1 + 2 * 15}px`);
         expect(ctx.sheet.getHeaderCorner().style.height).to.equal(`${27 + 3 + 3 * 18}px`);
         ctx.cleanup();

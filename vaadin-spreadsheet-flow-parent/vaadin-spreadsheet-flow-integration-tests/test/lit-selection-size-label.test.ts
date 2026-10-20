@@ -15,8 +15,7 @@ import { rendered } from './spreadsheet-harness.js';
 /**
  * While a selection is being grown with shift, Excel's name box counts
  * the block out - "3R x 3C" - and goes back to naming the anchor cell
- * once shift is let go. The GWT client never did this for shift+arrow;
- * its test was ignored as a known bug.
+ * once shift is let go. The address field does the same for shift+arrow.
  *
  * The part that needs care is that the server echoes every selection
  * straight back, so the count has to survive that echo or it is replaced

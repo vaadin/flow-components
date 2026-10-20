@@ -200,8 +200,7 @@ describe('Frozen panes — where the scrolling cells start', () => {
 
   it('starts the scrolling columns past the frozen ones and the freeze line', async () => {
     // Two 50px columns frozen, so column 3 starts 100px in, past the
-    // freeze line's own pixel, as the GWT client's scrolling pane started
-    // past its frozen pane's border.
+    // freeze line's own pixel.
     ctx.sheet.setHorizontalSplitPosition(2);
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getCellGrid().updateComplete;
@@ -210,8 +209,8 @@ describe('Frozen panes — where the scrolling cells start', () => {
   });
 
   it('starts the scrolling rows below the frozen ones and the freeze line', async () => {
-    // Drawn over the line instead, the first row after a freeze came out
-    // a pixel shorter than the GWT client's.
+    // Drawn over the line instead, the first row after a freeze would come
+    // out a pixel shorter.
     ctx.sheet.setVerticalSplitPosition(2);
     ctx.sheet.recomputeViewport();
     await ctx.sheet.getCellGrid().updateComplete;
@@ -343,10 +342,9 @@ describe('Frozen panes — headers that cover what scrolls under them', () => {
 });
 
 /**
- * The line along a freeze, through the headers. The GWT client drew it as
- * the border of its frozen panes, which held the headers and the outline
- * gutters too, so it ran from the top of the column gutter and from the
- * left of the row gutter. The Lit client drew it among the cells only.
+ * The line along a freeze, drawn through the headers and the outline gutters
+ * as well as among the cells: it runs from the top of the column gutter and
+ * from the left of the row gutter.
  */
 describe('Frozen panes — the freeze line through the headers', () => {
   let ctx: ReturnType<typeof attachSheet>;
@@ -377,7 +375,7 @@ describe('Frozen panes — the freeze line through the headers', () => {
     return [...header.shadowRoot!.querySelectorAll<HTMLElement>('.frozen-header-strip > .freeze-line')];
   }
 
-  it('carries the line up through the letters and the gutter when rows are frozen too, as the GWT client did', async () => {
+  it('carries the line up through the letters and the gutter when rows are frozen too', async () => {
     ctx.sheet.setColGroupingMax(1);
     ctx.sheet.setHorizontalSplitPosition(2);
     ctx.sheet.setVerticalSplitPosition(2);
@@ -388,9 +386,9 @@ describe('Frozen panes — the freeze line through the headers', () => {
     const pane = header.shadowRoot!.querySelector<HTMLElement>('.frozen-header-strip > .freeze-gutter-pane')!;
     const strip = header.getBoundingClientRect();
     // On the pixel the line among the cells is on: in the gutter the right
-    // border of the GWT client's frozen gutter pane, bordered along the
-    // bottom as the gutter is; then down the letters over the strip's
-    // bottom border, in the line's colour.
+    // border of the frozen gutter pane, bordered along the bottom as the
+    // gutter is; then down the letters over the strip's bottom border, in
+    // the line's colour.
     const cellLine = lines().find((b) => b.width === 1)!;
     const paneBox = pane.getBoundingClientRect();
     expect(`${paneBox.right - 1} ${paneBox.top}`).to.equal(`${cellLine.left} ${strip.top}`);
@@ -401,11 +399,11 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(getComputedStyle(letters).backgroundColor).to.equal('rgb(106, 106, 106)');
   });
 
-  it('leaves the letters a see-through gap at the freeze line when only columns are frozen, as the GWT client did', async () => {
-    // The GWT client's corner pane drew the line through the letters, and
-    // had no border while no rows were frozen: its pixel was see-through,
-    // the sheet's white at rest and the letters scrolling under it as the
-    // sheet scrolls. The gutter's own pane kept its line.
+  it('leaves the letters a see-through gap at the freeze line when only columns are frozen', async () => {
+    // While no rows are frozen, no line runs through the letters. The pixel
+    // at the freeze line is see-through: the sheet's white at rest, and the
+    // letters that scroll across it as the sheet scrolls. The gutter's own
+    // pane keeps its line.
     ctx.sheet.setColGroupingMax(1);
     ctx.sheet.setHorizontalSplitPosition(2);
     await settle();
@@ -433,7 +431,7 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(getComputedStyle(gap).zIndex, 'under the letters').to.equal('-1');
   });
 
-  it('carries the line across the numbers and the gutter when columns are frozen too, as the GWT client did', async () => {
+  it('carries the line across the numbers and the gutter when columns are frozen too', async () => {
     ctx.sheet.setRowGroupingMax(1);
     ctx.sheet.setVerticalSplitPosition(2);
     ctx.sheet.setHorizontalSplitPosition(2);
@@ -453,7 +451,7 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(getComputedStyle(numbers).backgroundColor).to.equal('rgb(106, 106, 106)');
   });
 
-  it('leaves the numbers a see-through gap at the freeze line when only rows are frozen, as the GWT client did', async () => {
+  it('leaves the numbers a see-through gap at the freeze line when only rows are frozen', async () => {
     ctx.sheet.setRowGroupingMax(1);
     ctx.sheet.setVerticalSplitPosition(2);
     await settle();
@@ -481,10 +479,9 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(getComputedStyle(gap).zIndex, 'under the numbers').to.equal('-1');
   });
 
-  it('shows the frozen columns\' line sliding up into the letters\' gap as the sheet scrolls down, as the GWT client did', async () => {
-    // The GWT client moved its pane of frozen columns up under the letters
-    // as the sheet scrolled down, and the pane's border showed through the
-    // gap from the bottom up.
+  it('shows the frozen columns\' line sliding up into the letters\' gap as the sheet scrolls down', async () => {
+    // As the sheet scrolls down, the frozen columns move up under the
+    // letters, and their line shows through the gap from the bottom up.
     ctx.sheet.setHorizontalSplitPosition(2);
     await settle();
     ctx.sheet.getScrollContainer().scrollTop = 10;
@@ -500,8 +497,8 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(getComputedStyle(risen).backgroundColor).to.equal('rgb(106, 106, 106)');
   });
 
-  it('shows the frozen rows\' line sliding left into the numbers\' gap as the sheet scrolls right, as the GWT client did', async () => {
-    // Under the numbers, which the GWT client drew over that pane.
+  it('shows the frozen rows\' line sliding left into the numbers\' gap as the sheet scrolls right', async () => {
+    // The line stays under the numbers, which are drawn over it.
     ctx.sheet.setVerticalSplitPosition(2);
     await settle();
     ctx.sheet.getScrollContainer().scrollLeft = 20;
@@ -518,9 +515,9 @@ describe('Frozen panes — the freeze line through the headers', () => {
     expect(getComputedStyle(slid).zIndex, 'under the numbers').to.equal('-1');
   });
 
-  it('draws the dotted level lines over the freeze line in the gutters, as the GWT client did', async () => {
-    // Its level lines' pane lay over its frozen gutter panes, so a dot that
-    // fell on the freeze line was drawn on it.
+  it('draws the dotted level lines over the freeze line in the gutters', async () => {
+    // The level lines lie over the frozen strip, so a dot that falls on the
+    // freeze line is drawn on it.
     ctx.sheet.setRowGroupingMax(1);
     ctx.sheet.setColGroupingMax(1);
     ctx.sheet.setVerticalSplitPosition(2);

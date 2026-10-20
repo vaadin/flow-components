@@ -248,7 +248,7 @@ describe('Spreadsheet — popup-button popup', () => {
     ]);
   });
 
-  it("hangs below its cell with its right edge on the cell's right edge, as the GWT client did", () => {
+  it("hangs below its cell with its right edge on the cell's right edge", () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.addPopupButton(buttonState(4, 1, { popupWidth: '120px' }));
 
@@ -276,8 +276,8 @@ describe('Spreadsheet — popup-button popup', () => {
     ctx.sheet.setHorizontalSplitPosition(2);
     ctx.sheet.recomputeViewport();
     // Column 3 ends 150px in, and a pixel more past the freeze line's own;
-    // 120px back from there is inside the two frozen columns, and the GWT
-    // client's scrolling pane starts after them.
+    // 120px back from there is inside the two frozen columns, and the
+    // scrolling pane starts after them.
     ctx.sheet.addPopupButton(buttonState(3, 1, { popupWidth: '120px' }));
 
     ctx.sheet.onPopupButtonOpen(1, 3, '42', APP);
@@ -310,7 +310,7 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(restingRect(ctx.sheet).top).to.be.closeTo(paneTop(ctx.sheet), 0.5);
   });
 
-  it("is drawn in the top layer, as the GWT client's popover was, so the sheet's edges cannot cut it off", async () => {
+  it("is drawn in the top layer, so the sheet's edges cannot cut it off", async () => {
     withFlowClient({ 42: content('filter') });
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
@@ -368,7 +368,7 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(overlay.style.height).to.equal('180px');
   });
 
-  it("shows content taller than the height the server set past it, as the GWT client's overlay did", () => {
+  it('shows content taller than the height the server set past it', () => {
     const popup = content('filter');
     popup.style.height = '300px';
     withFlowClient({ 42: popup });
@@ -376,14 +376,14 @@ describe('Spreadsheet — popup-button popup', () => {
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
 
-    // A popover scrolls its overflow unless told otherwise; the GWT
-    // client's overlay set it visible.
+    // A popover scrolls its overflow unless told otherwise; the overlay
+    // sets it visible.
     const overlay = ctx.sheet.getPopupOverlay();
     expect(getComputedStyle(overlay).overflowY).to.equal('visible');
     expect(popup.getBoundingClientRect().bottom).to.be.greaterThan(overlay.getBoundingClientRect().bottom);
   });
 
-  it("drops into place as it opens, as the GWT client's popup did", () => {
+  it('drops into place as it opens', () => {
     withFlowClient({ 42: content('filter') });
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
@@ -467,7 +467,7 @@ describe('Spreadsheet — popup-button popup', () => {
     button.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
   }
 
-  it('closes and reports when its own button is clicked, as the GWT client did', async () => {
+  it('closes and reports when its own button is clicked', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.addPopupButton(buttonState(4, 1));
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
@@ -504,7 +504,7 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sent.map((e) => e.type)).to.eql(['popupClose', 'popupButtonClick']);
   });
 
-  it('keeps the keys typed inside it away from the sheet, as the GWT client did', () => {
+  it('keeps the keys typed inside it away from the sheet', () => {
     const field = document.createElement('input');
     withFlowClient({ 42: field });
     ctx.sheet.setSelectedCellAndRange('B2', 2, 2, 2, 2, 2, 2, false);
@@ -543,7 +543,7 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sent.some((e) => e.type === 'popupClose')).to.be.true;
   });
 
-  it('follows its cell as the sheet scrolls and stays open, as the GWT client did', () => {
+  it('follows its cell as the sheet scrolls and stays open', () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.addPopupButton(buttonState(4, 6, { popupWidth: '120px', popupHeight: '60px' }));
     ctx.sheet.onPopupButtonOpen(6, 4, '42', APP);
@@ -557,15 +557,15 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(ctx.sent.filter((e) => e.type === 'popupClose')).to.be.empty;
   });
 
-  it('closes and reports when the server takes its button away, as the GWT client did', async () => {
+  it('closes and reports when the server takes its button away', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.addPopupButton(buttonState(4, 1));
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
     ctx.sent.length = 0;
 
     // What the server does once the button's cell has scrolled out of
-    // view, or the sheet has changed. The GWT client's popup closed with
-    // its button and said so.
+    // view, or the sheet has changed. The popup closes with its button and
+    // says so.
     ctx.sheet.removePopupButton(buttonState(4, 1));
     await settle(ctx.sheet.getPopupOverlay());
 
@@ -624,7 +624,7 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(close!.getAttribute('part')).to.equal('popup-close');
   });
 
-  it('draws the popup as the GWT client did: a white card with a soft shadow', () => {
+  it('draws the popup as a white card with a soft shadow', () => {
     withFlowClient({ 42: content('filter') });
 
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
@@ -644,7 +644,7 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(style.boxShadow).to.contain('rgba(0, 0, 0, 0.09) 0px 0px 0px 1px');
   });
 
-  it("captions the header with the text of the button's cell, as the GWT client did", () => {
+  it("captions the header with the text of the button's cell", () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.cellsUpdated([cellData(4, 1, 'Column 1')]);
 
@@ -731,8 +731,8 @@ describe('Spreadsheet — popup-button popup', () => {
     expect(overlay.querySelector('slot')!.assignedElements({ flatten: true })).to.be.empty;
   });
 
-  // Closed once it has dropped into place, the GWT client's popup faded out
-  // over 120ms and then went.
+  // Closed once it has dropped into place, the popup fades out over 120ms
+  // and then goes.
   it('fades out as it closes, taking no clicks, and then goes', async () => {
     withFlowClient({ 42: content('filter') });
     ctx.sheet.onPopupButtonOpen(1, 4, '42', APP);
@@ -823,7 +823,7 @@ describe('Spreadsheet — popup-button popup', () => {
   });
 });
 
-describe("popupPlacement — the GWT client's rule", () => {
+describe('popupPlacement — where a popup goes', () => {
   const pane = { left: 100, top: 50, bottom: 400 };
 
   it('hangs under the cell with the right edges together', () => {
@@ -852,10 +852,9 @@ describe("popupPlacement — the GWT client's rule", () => {
 });
 
 /**
- * The popup button is a button to assistive technology and the keyboard, as
- * the GWT client's was: it takes the focus, and Enter or Space press it. A
- * popup opened from the keyboard takes the keyboard, and gives it back to
- * its button when it closes.
+ * The popup button is a button to assistive technology and the keyboard: it
+ * takes the focus, and Enter or Space press it. A popup opened from the
+ * keyboard takes the keyboard, and gives it back to its button when it closes.
  */
 describe('Spreadsheet — the popup button and the keyboard', () => {
   let ctx: ReturnType<typeof attachSheet>;

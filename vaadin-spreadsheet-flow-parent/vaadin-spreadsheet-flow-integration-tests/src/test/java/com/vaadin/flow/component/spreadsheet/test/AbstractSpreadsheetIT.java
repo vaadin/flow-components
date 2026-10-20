@@ -853,9 +853,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     /**
      * Waits until the context menu is up and has items in it.
      * <p>
-     * The menu is drawn inside the spreadsheet's shadow root; the GWT client
-     * put a {@code .v-contextmenu} div in the document body, which nothing
-     * creates any more.
+     * The menu is drawn inside the spreadsheet's shadow root.
      */
     public void waitForContextMenu() {
         waitUntil(webDriver -> Boolean.TRUE.equals(executeScript("""

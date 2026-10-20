@@ -151,7 +151,7 @@ describe('Spreadsheet — named-range picker', () => {
   });
 
   it('shows the range the selection is on, and the blank entry anywhere else', async () => {
-    // As the GWT client did: the picker follows the address field.
+    // The picker follows the address field.
     ctx.sheet.setNamedRanges(['john', 'local']);
     ctx.sheet.updateFormulaBar('john', 1, 1);
     await rendered(ctx.sheet);

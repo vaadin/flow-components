@@ -283,10 +283,10 @@ describe('SpreadsheetColumnHeader — render with header active', () => {
         cleanup(el);
     });
 
-    it('centres the letter on the whole column, divider included, as the GWT client did', async () => {
-        // The GWT client's divider took no room from the letter, so the
-        // letter sat half a pixel further right than in a column whose
-        // divider is a border of its own.
+    it('centres the letter on the whole column, divider included', async () => {
+        // The divider takes no room from the letter, so the letter sits
+        // half a pixel further right than in a column whose divider is a
+        // border of its own.
         for (const width of [70, 71]) {
             const el = await attachWithState(
                 buildState({
@@ -483,7 +483,7 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         );
     }
 
-    it('shows the GWT client\'s select-the-column pointer over a letter', async () => {
+    it('shows a select-the-column pointer over a letter', async () => {
         // A downward arrow: clicking a letter selects its column.
         const el = await attachWithSelection(new Set());
 
@@ -523,8 +523,8 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
     });
 
     it('marks the selected column along the edge facing the cells', async () => {
-        // The GWT client's two-pixel blue edge under the tint: a border, in
-        // place of the letter's own grey one.
+        // A two-pixel blue edge under the tint: a border, in place of the
+        // letter's own grey one.
         const el = await attachWithSelection(new Set([2]));
 
         const cells = el.shadowRoot!.querySelectorAll('.col-header-cell');
@@ -540,13 +540,12 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         cleanup(el);
     });
 
-    it('draws a letter on the GWT client\'s gradient, down to a shade darker', async () => {
+    it('draws a letter on a gradient, down to a shade darker', async () => {
         const el = await attachWithSelection(new Set());
 
         const image = getComputedStyle(el.shadowRoot!.querySelector('.col-header-cell')!).backgroundImage;
-        // Blended in sRGB, as the GWT client's two hex colours were: with the
-        // mixed colour in it, the gradient would blend in Oklab, a level
-        // lighter on some rows.
+        // Blended in sRGB: with the mixed colour in it, the gradient would
+        // blend in Oklab, a level lighter on some rows.
         expect(image).to.match(/^linear-gradient\(in srgb, rgb\(250, 250, 250\) 2%, .+ 98%\)$/);
         // #fafafa four parts in a hundred towards black is #f0f0f0.
         const probe = document.createElement('div');
@@ -558,7 +557,7 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         cleanup(el);
     });
 
-    it('lets an application\'s part border replace the marker, as it did the GWT client\'s', async () => {
+    it('lets an application\'s part border replace the marker', async () => {
         const style = document.createElement('style');
         style.textContent =
             'vaadin-spreadsheet-internal-column-header::part(header-selected) { border-bottom: 2px solid rgb(0, 0, 255); }';
@@ -574,7 +573,7 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
         cleanup(el);
     });
 
-    it('writes the letters in 13px on #fafafa, as the GWT client did', async () => {
+    it('writes the letters in 13px on #fafafa', async () => {
         const el = await attachWithSelection(new Set());
 
         const style = getComputedStyle(el);
@@ -616,10 +615,8 @@ describe('SpreadsheetColumnHeader — the active cell\'s column', () => {
 
 describe('SpreadsheetColumnHeader — the documented border colour', () => {
     it('draws its borders in --vaadin-spreadsheet-header-border-color', async () => {
-        // The documented property used to be declared and read by nothing:
-        // the headers took an undocumented name with a different default,
-        // so setting the documented one did nothing and header borders came
-        // out a different grey from the cell borders beside them.
+        // The headers read the documented property, so setting it changes
+        // their borders.
         const el = await attachWithState(
             buildState({
                 firstColumnIndex: 1,
@@ -660,7 +657,7 @@ describe('SpreadsheetColumnHeader — the documented border colour', () => {
         cleanup(el);
     });
 
-    it('draws the divider inside the letter, so the border along the cells runs under it, as the GWT client did', async () => {
+    it('draws the divider inside the letter, so the border along the cells runs under it', async () => {
         // As a border of its own, the divider met the active column's 2px
         // marker in a diagonal join, and the marker's last pixel came out
         // half grey.
@@ -686,11 +683,7 @@ describe('SpreadsheetColumnHeader — the documented border colour', () => {
 });
 
 /**
- * The column outline, drawn as the GWT client drew it.
- *
- * The Lit gutter drew a hairline and a square "-" box before each group,
- * in 16px levels with no room for the level that expands everything. The
- * GWT client drew a bracket over the group - a line with a tick where it
+ * The column outline: a bracket over the group - a line with a tick where it
  * starts - and a round grey button over its summary column, in 18px levels
  * divided by dotted lines.
  */
@@ -763,9 +756,7 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
     });
 
     it('keeps a button grey whatever the sheet\'s border colour', async () => {
-        // Without the theme the GWT client filled a column's button with
-        // --vaadin-spreadsheet-border-color, though not a row's, and not in
-        // Lumo. Both keep their own colour here, which
+        // The buttons of columns and rows keep their own colour, which
         // --vaadin-spreadsheet-grouping-toggle-bg sets.
         const el = await attachWithState(withGroups([{ level: 1 }]));
         el.style.setProperty('--vaadin-spreadsheet-border-color', 'rgb(9, 8, 7)');
@@ -793,10 +784,10 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
         cleanup(el);
     });
 
-    it('starts the dotted lines at the sheet\'s edge, where the GWT client\'s did', async () => {
+    it('starts the dotted lines at the sheet\'s edge', async () => {
         // A dotted line's dots are laid from where it starts; started under
-        // the corner, 81px left of column A, they fall on the GWT client's
-        // pixels instead of between them.
+        // the corner, 81px left of column A, they fall on the same pixels as
+        // the corner's instead of between them.
         const el = await attachWithState({ ...withGroups([{ level: 1 }]), leadingPx: 81 });
 
         const divider = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-separator')!;
@@ -804,10 +795,10 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
         cleanup(el);
     });
 
-    it('writes the sign on an 11px line at the top of the button, as the GWT client did', async () => {
+    it('writes the sign on an 11px line at the top of the button', async () => {
         // Whatever the font: where a line that tall starts its text at the
-        // button's top edge. Inside a border, the Lit client's sign sat a
-        // pixel lower.
+        // button's top edge. Inside a border, the sign would sit a pixel
+        // lower.
         const el = await attachWithState(withGroups([{ level: 1 }]));
 
         const button = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-toggle')!;
@@ -821,7 +812,7 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
 
     it('gives the dotted lines an odd length, so the dots alternate from the start', async () => {
         // Along an even length the browser doubles the first dot and shifts
-        // the rest a pixel off the GWT client's.
+        // the rest by a pixel.
         const el = await attachWithState({ ...withGroups([{ level: 1 }]), leadingPx: 80 });
 
         const divider = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-separator')!;
@@ -829,7 +820,7 @@ describe('SpreadsheetColumnHeader — the outline gutter', () => {
         cleanup(el);
     });
 
-    it('borders the gutter off from the letters below it, as the GWT client did', async () => {
+    it('borders the gutter off from the letters below it', async () => {
         const el = await attachWithState(withGroups([{ level: 1 }]));
 
         const gutter = el.shadowRoot!.querySelector<HTMLElement>('.col-grouping-gutter')!;

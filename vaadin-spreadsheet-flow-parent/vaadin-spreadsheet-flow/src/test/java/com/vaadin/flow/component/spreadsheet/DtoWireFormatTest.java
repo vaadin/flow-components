@@ -38,7 +38,7 @@ import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
  * {@code cellStyle = "cs0"} field-initializer still appears on the wire because
  * {@code "cs0" != null}. A DTO that is a whole snapshot rather than a sparse
  * update overrides that with its own {@code @JsonInclude(ALWAYS)}, because a
- * field left out reads as {@code undefined} on the Lit client, not as 0.
+ * field left out reads as {@code undefined} on the client, not as 0.
  *
  * <p>
  * If a test fails, the question to answer is: "did I intend to change the wire

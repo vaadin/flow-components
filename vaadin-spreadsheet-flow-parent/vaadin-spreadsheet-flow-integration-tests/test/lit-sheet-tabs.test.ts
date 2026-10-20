@@ -199,8 +199,8 @@ describe('SpreadsheetSheetTabs — click delegation', () => {
 describe('SpreadsheetSheetTabs — the strip buttons', () => {
     /**
      * Four scroll buttons and an add button, all documented as styling
-     * parts. None of them existed in the Lit DOM: with more sheets than
-     * fit, there was no way to reach the ones off the end.
+     * parts. With more sheets than fit, the scroll buttons reach the ones
+     * off the end.
      */
     // 200px leaves 70px beside the 130px of buttons: room for one 69px tab,
     // so these tabs run past the strip and the forward buttons have work.
@@ -330,11 +330,10 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
 /**
  * Scrolling forward only while there is something to scroll to.
  *
- * The GWT client enabled the forward buttons only while tabs ran past the
- * end of the strip, and stopped them at the leftmost tab that still showed
- * the last one. The Lit strip enabled them whenever the first tab shown was
- * not the last tab: two sheets that fitted easily still offered to scroll,
- * and the end button scrolled every tab but the last out of view.
+ * The forward buttons are enabled only while tabs run past the end of the
+ * strip, and stop at the leftmost tab that still shows the last one. So a
+ * strip whose tabs all fit does not offer to scroll, and the end button does
+ * not scroll every tab but the last out of view.
  */
 describe('SpreadsheetSheetTabs — scrolling forward only into tabs', () => {
     const FIVE = ['One', 'Two', 'Three', 'Four', 'Five'];
@@ -443,8 +442,7 @@ describe('SpreadsheetSheetTabs — scrolling forward only into tabs', () => {
  * The status label.
  *
  * `Spreadsheet.setStatusLabelValue` puts a label at the right end of the
- * sheet tabs. The Lit client kept the value and showed nothing, and the
- * TestBench element's `getInfoLabel()` returned null.
+ * sheet tabs, which the TestBench element's `getInfoLabel()` reads.
  */
 describe('SpreadsheetSheetTabs — the status label', () => {
     async function strip(infoLabel: string | null | undefined): Promise<SpreadsheetSheetTabs> {
@@ -476,7 +474,7 @@ describe('SpreadsheetSheetTabs — the status label', () => {
         }
     });
 
-    it('draws it at the right end as the GWT client did', async () => {
+    it('draws it at the right end', async () => {
         const el = await strip('Sum: 42');
 
         const box = label(el)!.getBoundingClientRect();
@@ -524,14 +522,10 @@ describe('SpreadsheetSheetTabs — the status label', () => {
 });
 
 /**
- * The strip, drawn as the GWT client drew it.
- *
- * The Lit strip was 34px tall with flat tabs stretched to its height and
- * the active one underlined, so it took more room from the sheet than it
- * used to and looked nothing like the strip users knew: folder tabs hanging
- * from the top border, the active one white with its name in blue.
+ * How the strip is drawn: folder tabs hanging from the top border, the
+ * active one white with its name in blue.
  */
-describe('SpreadsheetSheetTabs — drawn as the GWT client drew it', () => {
+describe('SpreadsheetSheetTabs — how the strip is drawn', () => {
     const LONG = 'A sheet name far too long to show whole in a tab';
 
     async function strip(): Promise<SpreadsheetSheetTabs> {
@@ -594,9 +588,9 @@ describe('SpreadsheetSheetTabs — drawn as the GWT client drew it', () => {
         cleanup(el);
     });
 
-    it("turns a button GWT's blue under the pointer, whatever the active tab's colour", async () => {
+    it("turns a button blue under the pointer, whatever the active tab's colour", async () => {
         // The active tab's colour is the app's to set through its property;
-        // the GWT client's buttons kept their own blue.
+        // the buttons keep their own blue.
         const el = await strip();
         el.style.setProperty('--vaadin-spreadsheet-tabs-active-fg', 'rgb(200, 0, 0)');
         const add = el.shadowRoot!.querySelector<HTMLElement>('.add-new-tab')!;
@@ -612,7 +606,7 @@ describe('SpreadsheetSheetTabs — drawn as the GWT client drew it', () => {
         }
     });
 
-    it('leaves a tab under the pointer as it is, as the GWT client did', async () => {
+    it('leaves a tab under the pointer as it is', async () => {
         const el = await strip();
         const other = tab(el, 1);
         const before = getComputedStyle(other).backgroundColor;
@@ -845,8 +839,8 @@ describe('Spreadsheet — scrolling the tab strip', () => {
     });
 
     it('tells the server nothing — the strip position is the client\'s', () => {
-        // The GWT client told its own handler, but the Flow server has no
-        // counterpart. Scrolling the strip does not change the sheet.
+        // The Flow server has no handler for it. Scrolling the strip does
+        // not change the sheet.
         const { host, sheet, cleanup } = attach(['One', 'Two', 'Three']);
         const events: string[] = [];
         host.addEventListener('spreadsheet-event', (e) =>
@@ -893,8 +887,7 @@ describe('Spreadsheet — scrolling the tab strip', () => {
     });
 
     it('ends at the leftmost tab that still shows the last one', async () => {
-        // 400px leaves 270px beside the buttons: three 69px tabs. The end
-        // button used to scroll all but the last tab out of view.
+        // 400px leaves 270px beside the buttons: three 69px tabs.
         const { sheet, cleanup } = attach(['One', 'Two', 'Three', 'Four', 'Five']);
         const tabs = sheet.getSheetTabs();
         await rendered(sheet);
@@ -912,9 +905,9 @@ describe('Spreadsheet — scrolling the tab strip', () => {
 
 /**
  * The tab of the active sheet is scrolled into view whenever the active sheet
- * changes, as the GWT client did: a workbook that opens on a sheet further
- * right showed the first tabs, and the active one out of view. 400px leaves
- * 270px beside the buttons: three whole 69px tabs, and a part of the fourth.
+ * changes, so that a workbook that opens on a sheet further right does not
+ * show the first tabs, with the active one out of view. 400px leaves 270px
+ * beside the buttons: three whole 69px tabs, and a part of the fourth.
  */
 describe('Spreadsheet — the strip shows the active sheet', () => {
     const EIGHT = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
@@ -1035,10 +1028,10 @@ describe('Spreadsheet — the strip shows the active sheet', () => {
 });
 
 /**
- * The tab strip from the keyboard, as the tabs pattern of WAI-ARIA has it.
- * The GWT client's strip was plain boxes, so sheets could not be switched,
- * added or renamed without a mouse. 400px leaves 270px beside the buttons:
- * three whole 69px tabs and a part of the fourth.
+ * The tab strip from the keyboard, as the tabs pattern of WAI-ARIA has it,
+ * so that sheets can be switched, added and renamed without a mouse. 400px
+ * leaves 270px beside the buttons: three whole 69px tabs and a part of the
+ * fourth.
  */
 describe('Spreadsheet — the sheet tabs from the keyboard', () => {
     const EIGHT = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
@@ -1378,9 +1371,8 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
     ];
 
     it('draws an icon in each button rather than a filled box', async () => {
-        // The Lit client kept the GWT client's five buttons but not their
-        // icons, so they rendered as five grey squares that said nothing
-        // about what they did.
+        // Without their icons, the five buttons would render as grey squares
+        // that say nothing about what they do.
         const el = await attachWithState({
             ...emptySheetTabsRenderState(),
             sheetNames: ['One', 'Two'],
@@ -1420,8 +1412,8 @@ describe('SpreadsheetSheetTabs — the strip buttons', () => {
 });
 
 /**
- * A protected workbook takes no new sheet, and shows no + button for one,
- * as the GWT client did: the button was there, and did nothing.
+ * A protected workbook takes no new sheet, and shows no + button for one:
+ * a button there would do nothing.
  */
 describe('Spreadsheet — the + button of a protected workbook', () => {
     let host: HTMLElement;

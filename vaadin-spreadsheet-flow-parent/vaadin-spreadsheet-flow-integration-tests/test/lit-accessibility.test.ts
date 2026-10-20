@@ -11,9 +11,9 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import type { PopupButtonState } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/types/wire.js';
 
 /**
- * What assistive technology is told about the sheet and its fields. The GWT
- * client named none of them, so a screen reader announced unnamed edit fields
- * and buttons.
+ * What assistive technology is told about the sheet and its fields. Each one
+ * has a name, so that a screen reader does not announce an unnamed edit field
+ * or button.
  */
 describe('Spreadsheet — the names assistive technology is told', () => {
   let host: HTMLElement;

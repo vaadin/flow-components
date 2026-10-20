@@ -113,8 +113,7 @@ describe('computeCellSlots — custom editors', () => {
   });
 
   it('gives the editor the cell when it also holds a component', () => {
-    // The editor is the interactive one, and it is applied last — the same
-    // order the GWT client mounted them in.
+    // The editor is the interactive one, and it is applied last.
     const slots = slotsFor({
       componentIdToCellKey: { '31': 'col1 row1' },
       cellKeyToEditorId: { 'col1 row1': '77' }
@@ -523,10 +522,10 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
-  it('pads a cell showing a custom editor all round, as the GWT client did', async () => {
-    // The GWT client gave the cell a class of its own, with two pixels of
-    // padding on every side; the editor sat two pixels higher than in a
-    // plain cell, which pads only its sides.
+  it('pads a cell showing a custom editor all round', async () => {
+    // The cell gets a class of its own, with two pixels of padding on every
+    // side; the editor sits two pixels higher than in a plain cell, which
+    // pads only its sides.
     const { sheet, cleanup } = attachSheet({ '77': field() });
     sheet.setCellKeysToEditorIdMap({ 'col2 row2': '77' });
     sheet.recomputeViewport();
@@ -1016,9 +1015,8 @@ describe('Spreadsheet — custom cell editors', () => {
     cleanup();
   });
 
-  // Enter in a custom editor gives the keyboard back to the sheet, as in
-  // GWT, once the editor has had it: a text field has committed what was
-  // typed. In GWT this came from redrawing the cell under the editor.
+  // Enter in a custom editor gives the keyboard back to the sheet, once the
+  // editor has had it: a text field has committed what was typed.
 
   /** An editor in B2, B2 selected and the editor focused. */
   async function typingInto(editor: HTMLElement) {

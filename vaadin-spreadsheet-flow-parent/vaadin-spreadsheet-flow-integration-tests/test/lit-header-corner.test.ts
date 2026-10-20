@@ -15,17 +15,16 @@ import {
 } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/elements/SpreadsheetHeaderCorner.js';
 
 /**
- * The corner where the header strips meet, laid out as the GWT client's:
- * the square beside the letters and above the numbers, shaded as the
- * letters are; a box above it for the column outline levels and one beside
- * it for the row levels, each bordered off from the gutters; and, where
- * the gutters meet, a box over the dotted lines between their levels. The
- * Lit client drew one flat square, the level numbers a few pixels off.
+ * The corner where the header strips meet: the square beside the letters
+ * and above the numbers, shaded as the letters are; a box above it for the
+ * column outline levels and one beside it for the row levels, each bordered
+ * off from the gutters; and, where the gutters meet, a box over the dotted
+ * lines between their levels.
  */
-describe('SpreadsheetHeaderCorner — as the GWT client laid it out', () => {
-  // The GWT client's sizes: 50px numbers and 27px letters, a 15px gutter
-  // column per row level and an 18px gutter row per column level, one more
-  // of each, after 1px and 3px.
+describe('SpreadsheetHeaderCorner — how it is laid out', () => {
+  // The sizes: 50px numbers and 27px letters, a 15px gutter column per row
+  // level and an 18px gutter row per column level, one more of each, after
+  // 1px and 3px.
   const ROW_GUTTER = 1 + 2 * 15;
   const COL_GUTTER = 3 + 2 * 18;
   let corner: SpreadsheetHeaderCorner;
@@ -117,7 +116,7 @@ describe('SpreadsheetHeaderCorner — as the GWT client laid it out', () => {
     expect(part('.row-group-summary')).to.be.null;
   });
 
-  it('stacks the column levels at the right, 4px in, as the GWT client did', async () => {
+  it('stacks the column levels at the right, 4px in', async () => {
     await attach({ colGroupingMax: 1, rowGroupingMax: 1 });
 
     const buttons = [...corner.shadowRoot!.querySelectorAll('[data-axis="cols"]')].map(at);
@@ -128,14 +127,14 @@ describe('SpreadsheetHeaderCorner — as the GWT client laid it out', () => {
     ]);
   });
 
-  it('writes a column level in a span set to the top of its line, as the GWT client did', async () => {
+  it('writes a column level in a span set to the top of its line', async () => {
     await attach({ colGroupingMax: 1 });
 
     const span = corner.shadowRoot!.querySelector('[data-axis="cols"] > span')!;
     expect(getComputedStyle(span).verticalAlign).to.equal('text-top');
   });
 
-  it('lines the row levels up 4px apart in a line as tall as the letters, as the GWT client did', async () => {
+  it('lines the row levels up 4px apart in a line as tall as the letters', async () => {
     await attach({ colGroupingMax: 1, rowGroupingMax: 1 });
 
     const box = part('.row-group-summary');
@@ -148,7 +147,7 @@ describe('SpreadsheetHeaderCorner — as the GWT client laid it out', () => {
     expect(text.every((n) => n.textContent === '')).to.be.true;
   });
 
-  it('runs the dotted lines from the corner\'s edges, as the GWT client\'s did', async () => {
+  it('runs the dotted lines from the corner\'s edges', async () => {
     await attach({ colGroupingMax: 1, rowGroupingMax: 1 });
 
     const cols = part('.level-separator.cols');

@@ -421,7 +421,7 @@ describe('Formula bar — the address field', () => {
     expect(ctx.sheet.getFormulaBar().renderState.formula).to.equal('');
   });
 
-  it('shows the new active cell when the server moves the selection, as the GWT client did', async () => {
+  it('shows the new active cell when the server moves the selection', async () => {
     // An address typed into the address field, or a named range picked
     // there, comes back this way; the field kept the old cell's value.
     ctx.sheet.updateBottomRightCellValues([
@@ -518,7 +518,7 @@ describe('Formula bar — what the server says while the user moves on or writes
     );
   }
 
-  it('drops an answer about a cell the keyboard has already left, as the GWT client did', () => {
+  it('drops an answer about a cell the keyboard has already left', () => {
     key(ctx.sheet.getScrollContainer(), 'ArrowDown');
     // The answer about B2 the server sent before it heard of the move.
     ctx.sheet.updateFormulaBar('Old', 2, 2);

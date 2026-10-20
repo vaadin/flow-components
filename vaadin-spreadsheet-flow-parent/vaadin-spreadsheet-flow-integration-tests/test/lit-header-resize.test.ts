@@ -13,7 +13,7 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import { spreadsheetStyles } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/vaadin-spreadsheet-styles.js';
 
 /**
- * Dragging a header's edge, as the GWT client had it.
+ * Dragging a header's edge.
  *
  * The sheet stays as it is while the edge is dragged: a line across the
  * whole sheet shows where the edge would go, and a tooltip by the pointer
@@ -118,7 +118,7 @@ function inside(ctx: Sheet): { left: number; top: number; width: number; height:
   return { left: box.left + root.clientLeft, top: box.top + root.clientTop, width: root.clientWidth, height: root.clientHeight };
 }
 
-describe('Spreadsheet — dragging a column edge, as the GWT client did', () => {
+describe('Spreadsheet — dragging a column edge', () => {
   let ctx: Sheet;
 
   beforeEach(async () => {
@@ -149,7 +149,7 @@ describe('Spreadsheet — dragging a column edge, as the GWT client did', () => 
     expect(getComputedStyle(line(ctx)).backgroundColor).to.equal('rgb(25, 125, 225)');
   });
 
-  it('shows the width it would take by the pointer, on the GWT client\'s tooltip', () => {
+  it('shows the width it would take by the pointer, on a tooltip', () => {
     const { left, y } = dragB(columnLetter(ctx.sheet, 2).left + 80);
 
     const tip = tooltip(ctx);
@@ -286,7 +286,7 @@ describe('Spreadsheet — dragging a column edge, as the GWT client did', () => 
     return { x: Math.round(columnLetter(ctx.sheet, 2).left) + 45, y: Math.round(handle.top + handle.height / 2) };
   }
 
-  it('resizes nothing when the handle is only clicked, as the GWT client did', async () => {
+  it('resizes nothing when the handle is only clicked', async () => {
     const { x, y } = clickPoint();
 
     press(columnHandle(ctx.sheet, 2), x, y);
@@ -345,7 +345,7 @@ function sheetColumnLetters(ctx: Sheet): string[] {
   );
 }
 
-describe('Spreadsheet — dragging a row edge, as the GWT client did', () => {
+describe('Spreadsheet — dragging a row edge', () => {
   let ctx: Sheet;
 
   beforeEach(async () => {
@@ -420,7 +420,7 @@ describe('Spreadsheet — dragging a row edge, as the GWT client did', () => {
     expect(getComputedStyle(cover(ctx)).cursor).to.equal('row-resize');
   });
 
-  it('resizes nothing when the handle is only clicked, as the GWT client did', () => {
+  it('resizes nothing when the handle is only clicked', () => {
     const handle = rowHandle(ctx.sheet, 3).getBoundingClientRect();
     const x = Math.round(handle.left + handle.width / 2);
     const y = Math.round(rowNumber(ctx.sheet, 3).top) + 16;

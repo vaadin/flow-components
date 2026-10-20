@@ -13,8 +13,7 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import { rendered } from './spreadsheet-harness.js';
 
 /**
- * The formula field and the cell editor are one edit, as the GWT client had
- * them.
+ * The formula field and the cell editor are one edit.
  *
  * What is typed into the cell shows in the formula field as it is typed, and
  * Escape puts the cell's own value back there. Moving to the formula field
@@ -250,7 +249,7 @@ describe('Spreadsheet — an edit carried on in the formula field', () => {
     input.focus();
 
     ctx.sheet.getFormulaBar().shadowRoot!.querySelector<HTMLInputElement>('.address')!.focus();
-    // Once the keyboard has settled, as the GWT client's deferred commit.
+    // The edit ends once the keyboard has settled there.
     await new Promise((resolve) => setTimeout(resolve, 10));
     await settled(ctx.sheet);
 
@@ -273,9 +272,9 @@ describe('Spreadsheet — an edit carried on in the formula field', () => {
 
 /**
  * What the cell shows once an edit is committed, before the server answers:
- * the GWT client put typed text in the cell at once, but a formula kept
- * showing the old value until the server had worked it out - from the cell
- * editor and from the formula field alike.
+ * typed text goes in the cell at once, but a formula keeps showing the old
+ * value until the server has worked it out - from the cell editor and from
+ * the formula field alike.
  */
 describe('Spreadsheet — the cell once an edit is committed', () => {
   let ctx: Ctx;

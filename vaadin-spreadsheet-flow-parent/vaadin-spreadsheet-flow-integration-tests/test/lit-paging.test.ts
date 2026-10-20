@@ -14,22 +14,21 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import { pagedViewInset } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/algorithms/ViewportMath.js';
 
 /**
- * Page Up and Page Down, as the GWT client paged.
+ * Page Up and Page Down.
  *
- * Neither client handles the keys: the browser pages the view it scrolls.
- * The GWT client's was its pane of scrolling cells. The Lit client's scroll
- * container holds the headers and frozen panes too, pinned over its edges,
- * so the browser paged them in as well and moved the cells a header further:
- * 489px where the GWT client moved them 463px.
+ * The sheet does not handle the keys: the browser pages the view it scrolls.
+ * The scroll container holds the headers and frozen panes too, pinned over
+ * its edges, so its scroll padding leaves them out of a page. Without it, the
+ * browser would page them in as well and move the cells a header further.
  */
 const NO_FREEZE = { width: 0, columns: 0, height: 0, rows: 0 };
 
 describe('pagedViewInset — what the browser leaves out of a page', () => {
-  it('leaves out the headers, less the pixel the GWT pane ran under the tabs', () => {
+  it('leaves out the headers, less the pixel the pane of scrolling cells runs under the tabs', () => {
     expect(pagedViewInset({ width: 50, height: 27 }, NO_FREEZE, true)).to.eql({ top: 26, left: 50 });
   });
 
-  it('keeps that pixel with the tabs hidden, where the pane reached the bottom', () => {
+  it('keeps that pixel with the tabs hidden, where the pane reaches the bottom', () => {
     expect(pagedViewInset({ width: 50, height: 27 }, NO_FREEZE, false)).to.eql({ top: 27, left: 50 });
   });
 
@@ -110,10 +109,10 @@ describe('Spreadsheet — the view the browser pages', () => {
     expect(inset()).to.equal(`${27 + 2 * 20 + 1 - 1}px ${50 + 50 + 1}px`);
   });
 
-  it('pages the cells as far as a pane as tall as the GWT client\'s would', async () => {
+  it('pages the cells as far as a pane of the scrolling cells alone would', async () => {
     const scroller = sheet.getScrollContainer();
-    // The GWT client's pane: the scroll container's view less the headers,
-    // and a pixel under the tabs.
+    // A pane of the scrolling cells alone: the scroll container's view less
+    // the headers, and a pixel under the tabs.
     reference = document.createElement('div');
     reference.tabIndex = 0;
     reference.style.cssText = `height:${scroller.clientHeight - 26}px;width:200px;overflow:auto;`;

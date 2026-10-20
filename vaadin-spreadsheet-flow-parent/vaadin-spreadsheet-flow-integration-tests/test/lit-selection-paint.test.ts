@@ -242,7 +242,7 @@ describe('Spreadsheet — dragging the fill handle', () => {
     expect(ctx.sheet.getCellGrid().shadowRoot!.querySelector('.paintmode')).to.not.be.null;
   });
 
-  it('draws the outline, the handle and the drag preview in the GWT client\'s colours', async () => {
+  it('draws the outline, the handle and the drag preview in their default colours', async () => {
     // Blue for what is selected; green for what a drag will fill - the
     // handle and its preview share it.
     const root = ctx.sheet.getCellGrid().shadowRoot!;
@@ -298,9 +298,9 @@ describe('Spreadsheet — dragging the fill handle', () => {
 /**
  * The selection while the sheet does not have the keyboard.
  *
- * The GWT client dimmed the selection whenever the sheet lost focus, so a
- * sheet the user had left for another field did not look like it still
- * took the typing. The Lit client drew it at full strength throughout.
+ * The selection is dimmed whenever the sheet loses focus, so that a sheet
+ * the user has left for another field does not look like it still takes
+ * the typing.
  */
 describe('Spreadsheet — the selection while the sheet is not focused', () => {
   let ctx: ReturnType<typeof attachSheet>;
@@ -316,9 +316,9 @@ describe('Spreadsheet — the selection while the sheet is not focused', () => {
   });
 
   /**
-   * How strongly the outline and the handle are drawn: dimmed as one, as
-   * the GWT client dimmed them. Dimmed piece by piece, the outline was
-   * darker where its sides crossed each other and the handle.
+   * How strongly the outline and the handle are drawn: dimmed as one.
+   * Dimmed piece by piece, the outline would be darker where its sides
+   * cross each other and the handle.
    */
   function opacity(): string {
     const root = ctx.sheet.getCellGrid().shadowRoot!;

@@ -62,10 +62,9 @@ describe('computePositionedOverlays — anchor positioning', () => {
         expect(result[0].topPx).to.be.closeTo(20 + 44 / 3, 1e-9);
     });
 
-    it('keeps the fractions of a point offset and height, as the GWT client did', () => {
-        // A logo 11.0796pt down its cell and 17.9278pt tall. The GWT
-        // client set both in pt and let the browser place the edges; cut
-        // down to whole pixels, the logo sat a pixel high and short.
+    it('keeps the fractions of a point offset and height', () => {
+        // A logo 11.0796pt down its cell and 17.9278pt tall. Cut down to
+        // whole pixels, the logo would sit a pixel high and short.
         const overlays: Record<string, OverlayInfo> = {
             logo: { type: 'IMAGE', col: 1, row: 1, width: 94.0997, height: 17.9278, dx: 0, dy: 11.0796 },
         };
@@ -89,8 +88,8 @@ describe('computePositionedOverlays — anchor positioning', () => {
     });
 
     it('places a picture past the freeze line\'s own pixel when its cell is past a split', () => {
-        // The GWT client put a picture in the pane of its anchor cell; the
-        // scrolling pane started past the frozen panes' borders.
+        // A picture sits in the pane of its anchor cell, and the scrolling
+        // pane starts past the frozen panes' borders.
         const overlays: Record<string, OverlayInfo> = {
             frozen: { type: 'IMAGE', col: 2, row: 2, width: 20, height: 15, dx: 0, dy: 0 },
             past: { type: 'IMAGE', col: 3, row: 3, width: 20, height: 15, dx: 0, dy: 0 },
@@ -331,11 +330,10 @@ describe('Spreadsheet — component overlays', () => {
     });
 
     it('is exactly the size the workbook gives it', async () => {
-        // The wrapper is the picture, nothing more. The GWT client drew
-        // the workbook's offset as padding, so its box also covered the
-        // corner of the anchor cell and measured wider and taller than
-        // the picture by that offset - which is what made a minimized
-        // chart, whose size is nothing at all, still measure 28x16.
+        // The wrapper is the picture, nothing more. The workbook's offset
+        // moves the box and is not padding, so the box covers no corner of
+        // the anchor cell and is no wider or taller than the picture - and
+        // a minimized chart, whose size is nothing at all, takes no room.
         const chart = document.createElement('div');
         const { sheet, cleanup } = attachSheetWithFlow({ '31': chart });
         sheet.setOverlays({
@@ -685,8 +683,7 @@ describe('Spreadsheet — setResources + setOverlays wiring', () => {
         ) as HTMLElement;
         // col 3 = sum of widths 1..2 = 100. row 2 = height of row 1 = 20.
         // dx=5 is already pixels; dy=3 and height=40 are points, so at 96
-        // ppi they become 4px and 53.33px - the fraction kept, as the GWT
-        // client's pt kept it.
+        // ppi they become 4px and 53.33px - the fraction kept.
         expect(overlay.style.left).to.equal('105px');
         expect(overlay.style.top).to.equal('24px');
         expect(overlay.style.width).to.equal('80px');
@@ -884,7 +881,7 @@ describe('Spreadsheet — popup (filter) buttons', () => {
         ];
     }
 
-    it('draws the button as the GWT client did: a white box with a grey arrow', async () => {
+    it('draws the button as a white box with a grey arrow', async () => {
         const { sheet, cleanup } = attachSheet();
         sheet.addPopupButton(button(2, 3) as any);
 

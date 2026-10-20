@@ -13,11 +13,9 @@ import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/ME
 import { rendered } from './spreadsheet-harness.js';
 
 /**
- * Writing a formula by pointing at cells, as the GWT client let the user:
- * after an operator the arrows and the mouse put references into the
- * formula, and the formula's references are coloured on the sheet and in
- * the formula field. The Lit client had none of it - an arrow committed
- * "=SUM(" and a click took the selection away.
+ * Writing a formula by pointing at cells: after an operator the arrows and
+ * the mouse put references into the formula, and the formula's references
+ * are coloured on the sheet and in the formula field.
  */
 describe('Spreadsheet — pointing at cells while writing a formula', () => {
   let sheet: Spreadsheet;
@@ -83,7 +81,7 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
 
   it('drops the % a percentage cell gave a typed + once a cell is pointed at', async () => {
     // A + typed into a percentage cell opens on "+%", ready for a number.
-    // Pointing made it "+C4%", which takes a hundredth of C4: a GWT bug.
+    // With the % kept, pointing would make it "+C4%", which takes a hundredth of C4.
     sheet.updateBottomRightCellValues([
       { col: 3, row: 3, value: '5%', isPercentage: true, cellStyle: 'cs0', locked: false, needsMeasure: false }
     ] as never);
@@ -185,7 +183,7 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(input.value).to.equal('=SUM(C4:D5');
   });
 
-  it('goes on from the cell pointed at last after an operator is typed, as the GWT client did', async () => {
+  it('goes on from the cell pointed at last after an operator is typed', async () => {
     const input = await startTyping('=');
     press(input, 'ArrowDown');
     press(input, 'ArrowDown');
@@ -229,7 +227,7 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(editor().value).to.equal('=SUM(A1');
   });
 
-  it('neither points nor commits on an arrow after a reference, as the GWT client did', async () => {
+  it('neither points nor commits on an arrow after a reference', async () => {
     const input = await startTyping('=A1');
 
     expect(press(input, 'ArrowDown').defaultPrevented).to.be.false;
@@ -316,7 +314,7 @@ describe('Spreadsheet — pointing at cells while writing a formula', () => {
     expect(input.value).to.equal('=SUM(E7,B2');
   });
 
-  it('replaces the reference the caret is right after, which the GWT client appended to', async () => {
+  it('replaces the reference the caret is right after', async () => {
     const input = await startTyping('=A1');
     mouse('mousedown', cell(2, 2));
     document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));

@@ -402,8 +402,8 @@ describe('SpreadsheetCellGrid — cell styling', () => {
 
     it('takes no cell values given as text, rather than its characters', async () => {
         // The server sends the cells as JSON. Text walked character by
-        // character once filed one entry under "colundefined rowundefined",
-        // and every value on the sheet disappeared.
+        // character would file one entry under "colundefined rowundefined",
+        // and every value on the sheet would disappear.
         const host = document.createElement('div');
         host.style.cssText = 'width:400px;height:300px;display:flex;flex-direction:column;';
         document.body.appendChild(host);
@@ -641,8 +641,8 @@ describe('SpreadsheetCellGrid — cell styling', () => {
         expect(ourStyles).to.have.length.greaterThanOrEqual(1);
         const cssText = ourStyles.map((s) => s.textContent ?? '').join('\n');
         // The default style is laid under every cell rather than scoped to
-        // .cs0, as the GWT client did, so styles that only state what they
-        // change still get everything else from it.
+        // .cs0, so styles that only state what they change still get
+        // everything else from it.
         expect(cssText).to.include('.cell.cell { font-weight: bold;');
         expect(cssText).to.include('.cell.cs3 { color: red; }');
 
@@ -678,9 +678,9 @@ describe('SpreadsheetCellGrid — cell styling', () => {
 
     it('gives a cell the server sent nothing for the default style', async () => {
         // Cell at (1,1) has no cellData entry. It still wears cs0, the
-        // workbook's default style, as every cell did in the GWT client.
-        // Without it the cell fell through to the host's Helvetica 14px in
-        // grey rather than the sheet's Calibri 11pt in black.
+        // workbook's default style. Without it the cell would fall through
+        // to the host's Helvetica 14px in grey rather than the sheet's
+        // Calibri 11pt in black.
         const el = await attachWithState(
             build1x1State(new Map(), { 0: 'font-weight: bold;' })
         );
@@ -867,9 +867,7 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay', () => {
         // The four border divs existing is not enough. Cells are
         // positioned with z-index 1 and an opaque background, so an
         // outline left at the default z-index is in the DOM, correctly
-        // sized, and completely invisible - which is how it shipped
-        // until the baselines were read pixel by pixel. Only
-        // the corner handle, which had its own z-index, showed.
+        // sized, and completely invisible.
         const el = await attachWithState(buildOverlayState({
             activeCell: { col: 2, row: 2 },
             activeRange: { c1: 2, c2: 3, r1: 2, r2: 3 },
@@ -892,10 +890,10 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay', () => {
         cleanup(el);
     });
 
-    it('leaves the cell-range part to the cells, as the GWT client did', async () => {
+    it('leaves the cell-range part to the cells', async () => {
         // The documented part names the cells of the selected range other
-        // than the active one. The overlay carried it too, so a rule meant
-        // for those cells also outlined or shadowed the whole range, the
+        // than the active one. If the overlay carried it too, a rule meant
+        // for those cells would also outline or shadow the whole range, the
         // active cell included.
         const el = await attachWithState(buildOverlayState({
             activeCell: { col: 2, row: 2 },
@@ -932,9 +930,9 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay', () => {
         cleanup(el);
     });
 
-    it('lays each side of the outline on a gridline, as the GWT client did', async () => {
-        // A cell draws only its right and bottom borders. The outline used to
-        // start at the range's own edge, so its top and left sides sat a
+    it('lays each side of the outline on a gridline', async () => {
+        // A cell draws only its right and bottom borders. If the outline
+        // started at the range's own edge, its top and left sides would sit a
         // pixel inside the range, off the gridlines the cells beside it draw.
         const el = await attachWithState(buildOverlayState({
             activeCell: { col: 2, row: 2 },
@@ -1065,10 +1063,10 @@ describe('SpreadsheetCellGrid — .sheet-selection overlay', () => {
 describe('SpreadsheetCellGrid — clicking a merged cell', () => {
     /**
      * A merged region is drawn as one element carrying the `cell` class,
-     * so the grid's click delegation finds it — but it read the
-     * coordinates from data attributes the merged element did not have,
-     * parsed NaN and gave up. A merged cell could not be selected at
-     * all.
+     * so the grid's click delegation finds it. The delegation reads the
+     * coordinates from data attributes, so the merged element carries them
+     * too: without them it would parse NaN and give up, and a merged cell
+     * could not be selected at all.
      */
     async function attachMerged(): Promise<{
         sheet: Spreadsheet;
@@ -1970,7 +1968,7 @@ describe('Cell grid — invalid-formula indicator', () => {
         el.remove();
     });
 
-    it('is the GWT client\'s red triangle in the top-right corner, inside the border', async () => {
+    it('is a red triangle in the top-right corner, inside the border', async () => {
         const el = await attach(stateWith(['col2 row2']));
 
         const mark = el.shadowRoot!.querySelector<HTMLElement>('.invalidformula-indicator')!;
@@ -2002,7 +2000,7 @@ describe('Cell grid — invalid-formula indicator', () => {
  *
  * Sizing them to zero is not enough: a zero-width box still paints its
  * borders, still answers a hit test on its edge, and still reports itself
- * as laid out, so a hidden column showed as a hairline and could be
+ * as laid out, so a hidden column would show as a hairline and could be
  * clicked.
  */
 describe('SpreadsheetCellGrid — hidden rows and columns', () => {
@@ -2151,10 +2149,10 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
     }
 
     it('starts a right-aligned value too wide for its cell at the left edge and runs it on', async () => {
-        // A date or a number in scientific notation: the GWT client let it
-        // overflow its cell whatever the alignment, so it began at the
-        // cell's left edge and ran on into the empty cells to the right,
-        // cut off without an ellipsis where a neighbour held a value.
+        // A date or a number in scientific notation overflows its cell
+        // whatever the alignment, so it begins at the cell's left edge and
+        // runs on into the empty cells to the right, cut off without an
+        // ellipsis where a neighbour holds a value.
         const el = await attachWithState(rightAligned(stateWithSpill(150)));
 
         const cell = firstCell(el);
@@ -2170,10 +2168,10 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         cleanup(el);
     });
 
-    it('lets a blocked right-aligned value cover its own right edge, as the GWT client did', async () => {
+    it('lets a blocked right-aligned value cover its own right edge', async () => {
         // With the neighbour holding a value, the server sends the cell's
-        // own width. The GWT client's text still overflowed the padding and
-        // the border; the neighbour, drawn later, cut it off.
+        // own width. The text still overflows the padding and the border,
+        // and is cut off where the neighbour begins.
         const el = await attachWithState(rightAligned(stateWithSpill(50)));
 
         const cell = firstCell(el);
@@ -2244,8 +2242,8 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
     });
 
     it('cuts text with nowhere to go short with an ellipsis', async () => {
-        // The GWT client read "Wednesd..." where a neighbour blocked the
-        // text. Clipped plainly, it read "Wednesda" with half a letter.
+        // Where a neighbour blocks the text, it reads "Wednesd...". Clipped
+        // plainly, it would read "Wednesda" with half a letter.
         const el = await attachWithState(stateWithSpill(50));
 
         const cell = firstCell(el);
@@ -2259,11 +2257,11 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         cleanup(el);
     });
 
-    it("gives text with nowhere to go the column's width from its padding on, as the GWT client did", async () => {
-        // The GWT client's holder was as wide as the column and began after
-        // the padding, so it reached past the cell's right edge, where the
-        // neighbour - drawn later, on a ground of its own - covered it.
-        // Held inside the padding instead, "Cell Types" read "Cell Ty...".
+    it("gives text with nowhere to go the column's width from its padding on", async () => {
+        // The holder is as wide as the column and begins after the padding,
+        // so it reaches past the cell's right edge, where the neighbour -
+        // drawn later, on a ground of its own - covers it. Held inside the
+        // padding instead, "Cell Types" would read "Cell Ty...".
         const el = await attachWithState(stateWithSpill(50));
 
         const cell = firstCell(el);
@@ -2277,7 +2275,7 @@ describe('SpreadsheetCellGrid — text running past its own column', () => {
         cleanup(el);
     });
 
-    it('draws a value the server only guessed too wide as an ordinary cell, as the GWT client measured it', async () => {
+    it('draws a value the server only guessed too wide as an ordinary cell, after measuring it', async () => {
         // The server judges by character count; "1" fits a 50px column
         // whatever it guessed, and right-aligned it stays right-aligned.
         const state = stateWithSpill(150);
@@ -2518,8 +2516,8 @@ describe('SpreadsheetCellGrid — a value too wide for its column', () => {
     it('shows a flagged value that turns out to fit', async () => {
         // The server judges width by one character's width times the
         // character count, which is coarse enough to flag a date that fits.
-        // Replacing such a cell with hashes on the flag alone hid perfectly
-        // good values - it broke ValueHandlerIT's "29-Jun-06".
+        // Replacing such a cell with hashes on the flag alone would hide
+        // perfectly good values, such as ValueHandlerIT's "29-Jun-06".
         const a1 = makeCellData(1, 1, '29-Jun-06');
         const el = await attachWithState({
             ...emptyCellGridRenderState(),
@@ -2632,9 +2630,9 @@ describe('SpreadsheetCellGrid — where text sits in a tall row', () => {
     }
 
     it('puts text at the bottom by default, as Excel does', async () => {
-        // A block cell put every value at the top of its row. The GWT
-        // client made cells bottom-justified flex columns, which is also
-        // what the server's alignment rules assume.
+        // Cells are bottom-justified flex columns, which is also what the
+        // server's alignment rules assume. A block cell would put every
+        // value at the top of its row.
         const el = await attachWithState(tallState({ 1: '' }));
 
         expect(textOffsetFromTop(el)).to.be.greaterThan(40);
@@ -2643,8 +2641,8 @@ describe('SpreadsheetCellGrid — where text sits in a tall row', () => {
     });
 
     it('follows a top alignment the workbook asks for', async () => {
-        // The server says "top" with justify-content, which did nothing
-        // while the cell was a block.
+        // The server says "top" with justify-content, which a block cell
+        // would ignore.
         const el = await attachWithState(tallState({ 1: 'justify-content:flex-start;' }));
 
         expect(textOffsetFromTop(el)).to.be.lessThan(10);
@@ -2663,7 +2661,7 @@ describe('SpreadsheetCellGrid — where text sits in a tall row', () => {
     });
 
     it('does not inherit the page line height', async () => {
-        // A Vaadin page sets 1.625, which pushed a wrapped cell's second
+        // A Vaadin page sets 1.625, which would push a wrapped cell's second
         // line out of its row.
         const wrapper = document.createElement('div');
         wrapper.style.lineHeight = '1.625';
@@ -2731,8 +2729,8 @@ describe('SpreadsheetCellGrid — the workbook default style and row/column styl
     it('gives a styled cell the default colour it does not set itself', async () => {
         // A style is sent with only what it changes from the default, so
         // cs5 here - bold, automatic colour - says nothing about colour. The
-        // default had to reach it; scoped to .cs0 alone it did not, and the
-        // cell came out the host's grey instead of black.
+        // default has to reach it; scoped to .cs0 alone it would not, and
+        // the cell would come out the host's grey instead of black.
         const el = await attachWithState(
             grid({
                 cells: [['col1 row1', { ...makeCellData(1, 1, 'x'), cellStyle: 'cs5' }]],
@@ -2830,11 +2828,7 @@ describe('SpreadsheetCellGrid — the workbook default style and row/column styl
  * Blink keeps the index of a selector inside its rule in 13 bits and
  * silently drops every selector that starts past the 8192nd simple
  * selector. One rule listing every row of a formatted block, or every cell
- * a border is shifted onto, styled the first 2731 of them and no more. The
- * GWT client's rules lost their tails the same way, sooner, its selectors
- * being longer: in big_report_sample.xlsx, J10 kept its own solid bottom
- * border only because the dotted border shifted onto it came too late in
- * its rule to apply.
+ * a border is shifted onto, would style the first 2731 of them and no more.
  */
 describe('SpreadsheetCellGrid — rules that list thousands of cells', () => {
     const LAST = 4000;
@@ -2898,9 +2892,9 @@ describe('SpreadsheetCellGrid — rules that list thousands of cells', () => {
     });
 
     it('draws the last of 4000 borders shifted onto cells, over the cell\'s own', async () => {
-        // J10's shape: the cell's own style draws a solid bottom border, and
-        // the cell below shifts its dotted top border onto it. The shifted
-        // one wins, as the GWT client's rule order meant it to.
+        // J10's shape in big_report_sample.xlsx: the cell's own style draws a
+        // solid bottom border, and the cell below shifts its dotted top border
+        // onto it. The shifted rules come last, so the shifted one wins.
         const selectors: string[] = [];
         for (let row = 1; row <= LAST; row++) {
             selectors.push(`.col1.row${row}`);
@@ -2957,10 +2951,9 @@ describe('SpreadsheetCellGrid — rules that list thousands of cells', () => {
 /**
  * The line along a freeze.
  *
- * The GWT client drew a dark line under the last frozen row and beside the
- * last frozen column - the border of its frozen panes - so the user could
- * see where the sheet stops scrolling. The Lit client drew nothing, and a
- * frozen sheet read as an ordinary one until it was scrolled.
+ * A dark line runs under the last frozen row and beside the last frozen
+ * column, so the user can see where the sheet stops scrolling. Without it,
+ * a frozen sheet reads as an ordinary one until it is scrolled.
  */
 describe('SpreadsheetCellGrid — the line along a freeze', () => {
     // Rows 1-2 frozen at 20px each, columns 1-2 frozen at 50px each; rows
@@ -3019,8 +3012,8 @@ describe('SpreadsheetCellGrid — the line along a freeze', () => {
 
         const [line] = lines(el, 'top');
         expect(line, 'a line in the frozen rows pane').to.exist;
-        // One pixel below the last frozen row, where GWT drew it: over the
-        // first scrolling row, leaving the frozen row's own gridline alone.
+        // One pixel below the last frozen row: over the first scrolling row,
+        // leaving the frozen row's own gridline alone.
         expect(box(el, line)).to.deep.equal({ x: 0, y: 40, w: 1000, h: 1 });
         expect(getComputedStyle(line).backgroundColor).to.equal('rgb(106, 106, 106)');
 
@@ -3081,9 +3074,8 @@ describe('SpreadsheetCellGrid — the line along a freeze', () => {
 /**
  * A sheet with its gridlines turned off.
  *
- * The server sent the flag and the Lit client stored it, but nothing read
- * it: every sheet drew its grid, including the ones a workbook - or an
- * application calling setGridlinesVisible(false) - had turned it off for.
+ * A workbook, or an application calling setGridlinesVisible(false), can
+ * turn the grid off. The server sends the flag, and the grid follows it.
  */
 describe('SpreadsheetCellGrid — gridlines turned off', () => {
     function gridState(
@@ -3192,20 +3184,21 @@ describe('SpreadsheetCellGrid — gridlines turned off', () => {
 /**
  * Merged cells in the frozen rows and columns.
  *
- * Only the scrolling quadrant drew its merges, so a merge in the frozen
- * rows - the title across the top of a report, a centred heading over the
- * months - never appeared, and its first cell showed through instead, left
- * aligned and clipped at its own column.
+ * Each pane draws its own merges. If only the scrolling quadrant drew them,
+ * a merge in the frozen rows - the title across the top of a report, a
+ * centred heading over the months - would never appear, and its first cell
+ * would show through instead, left aligned and clipped at its own column.
  */
 /**
  * What is drawn over the cells of a frozen pane.
  *
- * The GWT client drew the selection, the fill outline, the filter buttons
- * and the pictures in the pane of their cells. The Lit grid drew them all
- * in the scrolling quadrant's coordinates: a selection in a frozen pane was
- * never outlined, a note on a frozen cell never showed, a filter button in a
- * frozen header row scrolled away from its row, and the scrolling
- * quadrant's selection painted over the frozen panes it scrolled under.
+ * The selection, the fill outline, the filter buttons, the notes and the
+ * pictures are drawn in the pane of their cells. If they were drawn in the
+ * scrolling quadrant's coordinates, a selection in a frozen pane would
+ * never be outlined, a note on a frozen cell would never show, a filter
+ * button in a frozen header row would scroll away from its row, and the
+ * scrolling quadrant's selection would paint over the frozen panes it
+ * scrolls under.
  */
 describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
     // Rows 1-2 frozen at 20px each, columns 1-2 frozen at 50px each; rows
@@ -3376,9 +3369,9 @@ describe('SpreadsheetCellGrid — over the cells of a frozen pane', () => {
         cleanup(el);
     });
 
-    it('draws the selection over a picture in the same pane, as the GWT client did', async () => {
-        // The GWT client put pictures under the selection and above the
-        // cells; a logo anchored on the selected cell hid the selection.
+    it('draws the selection over a picture in the same pane', async () => {
+        // Pictures sit under the selection and above the cells, so that a
+        // logo anchored on the selected cell does not hide the selection.
         const el = await attachWithState(
             frozen({
                 ...selecting(1, 1),
@@ -3567,9 +3560,9 @@ describe('SpreadsheetCellGrid — merged cells in a freeze', () => {
 /**
  * Merged cells drawn from the boxes the connector works out.
  *
- * A merge used to be drawn only while its top-left cell was on screen and
- * only as far as its own quadrant reached, so a tall merge vanished as soon
- * as its first row scrolled away, and one starting in the frozen rows was
+ * If a merge were drawn only while its top-left cell is on screen, and only
+ * as far as its own quadrant reaches, a tall merge would vanish as soon as
+ * its first row scrolled away, and one starting in the frozen rows would be
  * cut off at the split.
  */
 describe('SpreadsheetCellGrid — merged cells drawn from their boxes', () => {
@@ -3645,17 +3638,15 @@ describe('SpreadsheetCellGrid — merged cells drawn from their boxes', () => {
 });
 
 /**
- * The comment marker, as the GWT client drew it: a 9px amber triangle in
- * the cell's top-right corner, inside its border. The Lit client drew a
- * smaller red one over the border.
+ * The comment marker: a 9px amber triangle in the cell's top-right corner,
+ * inside its border.
  */
 /**
  * Where a note is hung.
  *
- * The GWT client hung a note 15px right of its cell and 15px above it, drew
- * a line from the cell's corner to the note's, and moved the note to the
- * cell's left or up when it did not fit the sheet. The Lit client stuck the
- * note to the cell's corner, covering the cells beside it, with no line.
+ * A note hangs 15px right of its cell and 15px above it, with a line from
+ * the cell's corner to the note's. It moves to the cell's left, or up, when
+ * it does not fit the sheet.
  */
 describe('SpreadsheetCellGrid — where a note is hung', () => {
     function withNote(key: string, extra: Partial<CellGridRenderState> = {}): CellGridRenderState {
@@ -3727,10 +3718,9 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it('keeps a note under the column letters, as the GWT client did', async () => {
-        // A1's note would start 15px above row 1. The GWT client kept a note
-        // inside the pane of its cell, and the scrolling pane starts under
-        // the headers.
+    it('keeps a note under the column letters', async () => {
+        // A1's note would start 15px above row 1. A note stays inside the
+        // pane of its cell, and the scrolling pane starts under the headers.
         const { note, cleanup } = await inSheet(withNote('col1 row1'), 800, 400, 27);
 
         expect(note.style.top).to.equal('0px');
@@ -3738,8 +3728,8 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it("lets a note in a frozen row rise over the column letters, as the GWT client's frozen pane did", async () => {
-        // A frozen pane took in the headers along its frozen side. This one
+    it('lets a note in a frozen row rise over the column letters', async () => {
+        // A frozen pane takes in the headers along its frozen side. This one
         // is 47px tall, headers and all: a note taller than that goes up as
         // far as it can, to the top of the column letters.
         const { note, cleanup } = await inSheet(
@@ -3770,7 +3760,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it("hangs a note on a merged cell off the merged cell's top-right corner, as the GWT client did", async () => {
+    it("hangs a note on a merged cell off the merged cell's top-right corner", async () => {
         // B1:C2 ends at x 150, where column B alone ends at 100.
         const { note, cleanup } = await inSheet(
             withNote('col2 row2', {
@@ -3786,7 +3776,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it("hides a pinned note while its cell's corner is out of its pane, as the GWT client did", async () => {
+    it("hides a pinned note while its cell's corner is out of its pane", async () => {
         // Column A frozen; B's right edge, scrolled 60px, is under it.
         const pane = document.createElement('div');
         pane.style.cssText = 'position:relative;width:400px;height:300px;overflow:auto;display:grid;grid-template-columns:30px auto;grid-template-rows:27px auto;';
@@ -3819,8 +3809,8 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
     });
 
     it('is not cut off where it hangs over the headers', async () => {
-        // The grid clipped whatever left its box, so a note on the first
-        // row lost its top under the column headers.
+        // If the grid clipped whatever left its box, a note on the first row
+        // would lose its top under the column headers.
         const { el, note, cleanup } = await inSheet(withNote('col1 row1'), 800, 400, 27);
         // The note takes no pointer events; given them, the hit test shows
         // whether that part of it is drawn at all.
@@ -3833,7 +3823,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it("drops a note into place as it appears, as the GWT client's did", async () => {
+    it('drops a note into place as it appears', async () => {
         const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
 
         expect(note.classList.contains('animate-in')).to.be.true;
@@ -3873,7 +3863,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         return Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.comment-overlay.animate-out'));
     }
 
-    it("fades a note out where it was as it goes, as the GWT client's did", async () => {
+    it('fades a note out where it was as it goes', async () => {
         const { el, note, cleanup } = await inSheet(withNote('col3 row3', { commentAuthors: { 'col3 row3': 'Ann' } }), 800, 400);
         await settleNotes(el);
         const box = note.getBoundingClientRect();
@@ -3889,7 +3879,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
             'overlay-animate-out',
         ]);
         expect(getComputedStyle(copy).pointerEvents).to.equal('none');
-        // The line went at once, as the GWT client's did.
+        // The line goes at once.
         expect(el.shadowRoot!.querySelector('.comment-overlay-line')).to.be.null;
 
         await settleNotes(el);
@@ -3912,8 +3902,8 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
     });
 
     it('keeps the keyboard off the fading copy of a note that was being written', async () => {
-        // UndoRedoIT: the copy's text box took the focus back on the next
-        // repaint, so the undo pressed right after a note went into the
+        // UndoRedoIT: if the copy's text box took the focus back on the next
+        // repaint, the undo pressed right after a note would go into the
         // copy's text instead of reaching the sheet.
         const { el, cleanup } = await inSheet(withNote('col3 row3', { editingCommentKey: 'col3 row3' }), 800, 400);
         await settleNotes(el);
@@ -3974,7 +3964,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it('edges a note with a hairline of shadow rather than a border, as the GWT client did', async () => {
+    it('edges a note with a hairline of shadow rather than a border', async () => {
         const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
 
         const style = getComputedStyle(note);
@@ -3984,7 +3974,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it('draws a note in the page\'s font, as the GWT client did', async () => {
+    it('draws a note in the page\'s font', async () => {
         const { note, cleanup } = await inSheet(withNote('col3 row3'), 800, 400);
 
         const style = getComputedStyle(note);
@@ -3993,7 +3983,7 @@ describe('SpreadsheetCellGrid — where a note is hung', () => {
         cleanup();
     });
 
-    it('takes a note\'s text in the sheet\'s font, as the GWT client\'s input did', async () => {
+    it('takes a note\'s text in the sheet\'s font', async () => {
         const { el, cleanup } = await inSheet(withNote('col3 row3', { editingCommentKey: 'col3 row3' }), 800, 400);
 
         const style = getComputedStyle(el.shadowRoot!.querySelector('.comment-overlay-edit')!);
@@ -4032,9 +4022,9 @@ describe('SpreadsheetCellGrid — the comment marker', () => {
         cleanup(el);
     });
 
-    it('stays inside a thicker border, as the GWT client\'s did', async () => {
+    it('stays inside a thicker border', async () => {
         // merged_cells.xlsx has a note on a cell with a 2px black right
-        // border. Placed for a 1px border, the marker covered half of it.
+        // border. Placed for a 1px border, the marker would cover half of it.
         const el = await attachWithState({
             ...emptyCellGridRenderState(),
             viewport: {
@@ -4063,9 +4053,8 @@ describe('SpreadsheetCellGrid — the comment marker', () => {
 /**
  * Hyperlink cells.
  *
- * The GWT client only gave a link the pointer: its colour and underline were
- * whatever the workbook styled it with. The Lit client painted every link
- * its own blue and underlined it, over the workbook's style.
+ * A link gets the pointer, but its colour and underline are whatever the
+ * workbook styles it with.
  */
 describe('SpreadsheetCellGrid — hyperlink cells', () => {
     function withLink(cellStyle: string, styles: Record<number, string>): CellGridRenderState {
@@ -4164,7 +4153,7 @@ describe('SpreadsheetCellGrid — the markers of a merged cell', () => {
         };
     }
 
-    it('marks a comment on a merged cell at the merged cell\'s top-right corner, as the GWT client did', async () => {
+    it('marks a comment on a merged cell at the merged cell\'s top-right corner', async () => {
         const el = await attachWithState(merged({ commentCells: new Set(['col2 row2']) }));
 
         const markers = Array.from(el.shadowRoot!.querySelectorAll<HTMLElement>('.comment-indicator'));
@@ -4178,7 +4167,7 @@ describe('SpreadsheetCellGrid — the markers of a merged cell', () => {
         cleanup(el);
     });
 
-    it('marks an invalid formula in a merged cell, as the GWT client did', async () => {
+    it('marks an invalid formula in a merged cell', async () => {
         const el = await attachWithState(merged({ invalidFormulaCells: new Set(['col2 row2']) }));
 
         const marker = el.shadowRoot!.querySelector<HTMLElement>('.merged-cell .invalidformula-indicator');
@@ -4190,8 +4179,8 @@ describe('SpreadsheetCellGrid — the markers of a merged cell', () => {
 
 describe('SpreadsheetCellGrid — measuring each value once', () => {
     // The sheet draws again on every scroll step and key press. Measuring
-    // every flagged cell each time - a forced layout per cell - held a
-    // large workbook up for a third of a second a frame.
+    // every flagged cell each time - a forced layout per cell - would hold
+    // a large workbook up for a third of a second a frame.
     // One base, as the sheet passes the same style tables on every draw
     // until the server sends new ones.
     const base = emptyCellGridRenderState();
@@ -4305,9 +4294,8 @@ describe('SpreadsheetCellGrid — measuring each value once', () => {
 });
 
 describe('SpreadsheetCellGrid — scrolling keeps the cells it can', () => {
-    // Matched by position, every cell was rewritten - its class, place and
-    // text - and restyled on every scroll step; the GWT client moved what
-    // was already drawn.
+    // Matched by position, every cell would be rewritten - its class, place
+    // and text - and restyled on every scroll step.
     const base = emptyCellGridRenderState();
 
     function rowsFrom(first: number): CellGridRenderState {
@@ -4426,8 +4414,8 @@ describe('SpreadsheetCellGrid — the cells as the sheet scrolls', () => {
 
     it('draws each row\'s cells together, so a row that leaves the view goes at once', async () => {
         // One removal per row rather than per cell: removing every cell of
-        // the rows that left the view one by one took most of a frame while
-        // scrolling fast.
+        // the rows that leave the view one by one would take most of a frame
+        // while scrolling fast.
         const el = await attachWithState(rowsFrom(1));
 
         const group = cell(el, 1, 3)!.parentElement!;

@@ -237,9 +237,9 @@ describe('Spreadsheet — cell-style width ratios', () => {
 
   it('also measures a style a cell wears that came with no rule of its own', async () => {
     // A style set on a cell straight through POI never reaches the style
-    // map, and the server then judged every value in it as fitting: a date
-    // too wide for its column was clipped instead of running on. The GWT
-    // client measured the overflow itself; this client measures the style.
+    // map, so the server would judge every value in it as fitting, and a
+    // date too wide for its column would be clipped instead of running on.
+    // So the client measures such a style too.
     ctx.sheet.setCellStyleToCSSStyle({ 0: 'font-size:10px;' });
     ctx.sheet.cellsUpdated([
       { row: 2, col: 3, value: '1999-03-19', cellStyle: 'cs1 r', locked: false, needsMeasure: false, isPercentage: false } as any,

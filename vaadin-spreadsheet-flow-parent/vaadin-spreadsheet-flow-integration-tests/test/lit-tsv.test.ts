@@ -43,7 +43,7 @@ describe('Tsv — serializeToTsv', () => {
         expect(serializeToTsv([['A', '', 'C']])).to.equal('A\t\tC');
     });
 
-    it('emits NO trailing newline on the last row (matches GWT)', () => {
+    it('emits NO trailing newline on the last row', () => {
         const grid = [
             ['A', 'B'],
             ['C', 'D'],

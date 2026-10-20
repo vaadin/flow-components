@@ -12,9 +12,9 @@ import { sendKeys } from '@web/test-runner-commands';
 import { Spreadsheet } from '../../vaadin-spreadsheet-flow/src/main/resources/META-INF/frontend/vaadin-spreadsheet/lit/Spreadsheet.js';
 
 /**
- * Enter and Space on an outline button press it, as on any button. The sheet
- * used to take both keys for its active cell: Enter opened the cell's editor
- * and Space typed into it, and the button was never pressed.
+ * Enter and Space on an outline button press it, as on any button, and do
+ * not reach the sheet: there, Enter would open the active cell's editor and
+ * Space would type into it.
  */
 describe('Spreadsheet — outline buttons and the keyboard', () => {
   let host: HTMLElement;

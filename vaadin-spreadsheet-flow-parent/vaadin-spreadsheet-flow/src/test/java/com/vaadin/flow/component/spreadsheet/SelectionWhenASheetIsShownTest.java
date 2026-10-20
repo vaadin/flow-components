@@ -29,9 +29,6 @@ import com.vaadin.tests.MockUIExtension;
  * was left with leaves it there, wherever the selected cells are. A selection
  * something leads to - a hyperlink, a named range, an undo, the application
  * selecting cells, or an address typed in - is brought into view.
- * <p>
- * GWT brought every selection into view, so every sheet came back showing its
- * selection, not where it was scrolled.
  */
 class SelectionWhenASheetIsShownTest {
 

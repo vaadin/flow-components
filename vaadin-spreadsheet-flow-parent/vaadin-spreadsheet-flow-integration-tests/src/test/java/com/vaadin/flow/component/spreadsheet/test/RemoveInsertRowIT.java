@@ -198,8 +198,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
         clickCell("B1");
         loadTestFixture(TestFixtures.PopupButton);
         clickCell("A1");
-        // A1's popup hangs over A2, as it did in the GWT client, where a
-        // click on A2 closed the popup instead of selecting the cell.
+        // A1's popup hangs over A2, where a click would close the popup
+        // instead of selecting the cell.
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
         waitUntil(driver -> !spreadsheet.isPopupButtonPopupVisible());
         clickCell("A2");

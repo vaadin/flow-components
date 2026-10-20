@@ -53,7 +53,7 @@ describe('selectedColumnSet / selectedRowSet', () => {
     expect([...selectedRowSet(selectSingleCell(3, 7))]).to.deep.equal([7]);
   });
 
-  it('heads every range, aux ranges too, as the GWT client did', () => {
+  it('heads every range, aux ranges too', () => {
     // A Ctrl-click makes the clicked cell the active range and demotes
     // the previous one to an aux range; the headers of both stay lit.
     const selection = addAuxRange(selectSingleCell(1, 1), 9, 9, 9, 9);
@@ -91,12 +91,11 @@ describe('isCellInSelection', () => {
 });
 
 /**
- * Where a group's bracket and button go, as the GWT client laid them out.
+ * Where a group's bracket and button go.
  *
  * The button sits over the group's summary column - after the group by
  * default, before it when the outline is inversed - and the bracket runs to
- * it. The Lit client had the button on the wrong side: before the group
- * by default.
+ * it.
  */
 describe('computePositionedColGroupings', () => {
   // Columns A-D; the group is B:C, at 50..180.
@@ -181,10 +180,10 @@ describe('computePositionedColGroupings', () => {
     expect(computePositionedColGroupings([], widths, false, 100)).to.deep.equal([]);
   });
 
-  it('draws the bracket and button a pixel back while the other gutter shows, as the GWT client did', () => {
-    // The GWT client measured the other outline gutter without its border,
-    // so with rows and columns both grouped every bracket started 4px into
-    // its column, not 5px, and ended and had its button a pixel early.
+  it('draws the bracket and button a pixel back while the other gutter shows', () => {
+    // The other outline gutter is measured without its border, so with rows
+    // and columns both grouped every bracket starts 4px into its column, not
+    // 5px, and ends and has its button a pixel early.
     const [plain] = computePositionedColGroupings([grouping()], widths, false, 100, 5);
     const [shifted] = computePositionedColGroupings([grouping()], widths, false, 100, 5, 1);
     expect(shifted.startPx).to.equal(plain.startPx - 1);
@@ -206,7 +205,7 @@ describe('slot names — the contract between the connector and the grid', () =>
     expect(new Set(names).size).to.equal(3);
   });
 
-  it('keeps the names the GWT client used', () => {
+  it('uses the names an application can rely on', () => {
     // Not internal: an application can style or query these.
     expect(overlayComponentSlotName('7')).to.equal('overlay-component-7');
     expect(cellComponentSlotName('7')).to.equal('custom-component-7');
@@ -313,8 +312,8 @@ describe('computeMergedRegionBoxes', () => {
       row
     );
 
-    // Drawn past the freeze lines' own pixels, as the GWT client's
-    // scrolling pane started past its frozen panes' borders.
+    // Drawn past the freeze lines' own pixels: the scrolling pane starts
+    // past the frozen panes' borders.
     expect(box).to.deep.equal({ left: 100 + 1, top: 80 + 1, width: 100, height: 80 });
   });
 

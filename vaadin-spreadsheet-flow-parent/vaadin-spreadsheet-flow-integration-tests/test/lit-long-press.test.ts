@@ -61,8 +61,8 @@ describe('isIOS — where Safari opens no menu on a long press', () => {
 });
 
 /**
- * A finger that stays put opens the menu at the point pressed, as the GWT
- * client's polyfill did on iOS. Anything else a finger does is not a long
+ * A finger that stays put opens the menu at the point pressed, since Safari
+ * on iOS opens no menu of its own. Anything else a finger does is not a long
  * press.
  */
 describe('listenForLongPress', () => {

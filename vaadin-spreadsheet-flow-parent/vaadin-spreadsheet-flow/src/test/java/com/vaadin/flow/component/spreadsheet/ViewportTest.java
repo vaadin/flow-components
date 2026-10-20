@@ -150,7 +150,7 @@ class ViewportTest {
 
     @Test
     void theRangeShown_isTheCellsDrawn_notTheMarginLoadedAhead() {
-        // As GWT gave the range it drew: rows 1-32 for 21 rows in view.
+        // The range drawn: rows 1-32 for 21 rows in view.
         clientLoadsAndDraws(1, 1, 80, 12, 1, 1, 32, 10);
 
         assertEquals(List.of(1, 1, 32, 10), shown());
