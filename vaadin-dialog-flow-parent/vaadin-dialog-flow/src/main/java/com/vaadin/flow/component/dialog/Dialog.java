@@ -951,11 +951,11 @@ public class Dialog extends Component
      * on the header title element.
      * <p>
      * By default no heading level is set, and the web component uses {@code 1}
-     * for modal dialogs and {@code 2} for modeless dialogs. Set to {@code null}
-     * to restore the default.
+     * for modal dialogs and {@code 2} for modeless dialogs.
      *
      * @param headingLevel
-     *            the heading level, or {@code null} to remove it
+     *            the heading level, or {@code null} to restore the web
+     *            component's default
      * @since 25.4
      */
     public void setHeadingLevel(Integer headingLevel) {

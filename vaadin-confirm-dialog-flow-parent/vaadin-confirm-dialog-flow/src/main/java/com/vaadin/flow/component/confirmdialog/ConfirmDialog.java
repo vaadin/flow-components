@@ -683,13 +683,13 @@ public class ConfirmDialog extends Component
      * on the header element.
      * <p>
      * By default no heading level is set, and the web component uses {@code 1}.
-     * Set to {@code null} to restore the default.
      * <p>
      * Only applies to the header text set with {@link #setHeader(String)}, a
      * custom header component is not changed.
      *
      * @param headingLevel
-     *            the heading level, or {@code null} to remove it
+     *            the heading level, or {@code null} to restore the web
+     *            component's default
      * @since 25.4
      */
     public void setHeadingLevel(Integer headingLevel) {
