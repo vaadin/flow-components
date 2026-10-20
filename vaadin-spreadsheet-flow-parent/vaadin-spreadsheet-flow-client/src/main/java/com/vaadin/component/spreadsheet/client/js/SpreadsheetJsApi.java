@@ -46,8 +46,6 @@ public class SpreadsheetJsApi {
     protected SpreadsheetConnector spreadsheetConnector;
 
     private Map<String, PopupButtonWidget> popupButtonWidgets = new HashMap<>();
-    private Map<String, PopupButtonConnector> popupButtonConnectors = new HashMap<>();
-    private Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
 
     /**
      * receives the host element, the render root where the widget must be
@@ -500,16 +498,7 @@ public class SpreadsheetJsApi {
         PopupButtonWidget widget;
 
         if (!popupButtonWidgets.containsKey(key)) {
-            popupButtonStates.put(key, state);
-            PopupButtonConnector connector = new PopupButtonConnector() {
-                @Override
-                public PopupButtonState getState() {
-                    // Flow supplies state through this bridge rather
-                    // than the legacy connector state transport.
-                    return popupButtonStates.get(key);
-                }
-            };
-            popupButtonConnectors.put(key, connector);
+            PopupButtonConnector connector = new PopupButtonConnector();
 
             widget = connector.getWidget();
             popupButtonWidgets.put(key, widget);
@@ -518,15 +507,12 @@ public class SpreadsheetJsApi {
             connector.init();
             widget.setCol(state.col);
             widget.setRow(state.row);
-            widget.setPopupHeaderHidden(state.headerHidden);
             widget.setSheetWidget(spreadsheetWidget.getSheetWidget(), DivElement
                     .as(spreadsheetWidget.getSheetWidget().getElement()));
-            widget.setPopupWidth(state.popupWidth);
-            widget.setPopupHeight(state.popupHeight);
         } else {
             widget = popupButtonWidgets.get(key);
         }
-        widget.markActive(state.active);
+        applyPopupButtonState(widget, state);
         spreadsheetWidget.addPopupButton(widget);
     }
 
@@ -537,24 +523,19 @@ public class SpreadsheetJsApi {
         }
 
         String key = getPopupKey(state.sheet, state.row, state.col);
-        PopupButtonConnector connector = popupButtonConnectors.get(key);
+        PopupButtonWidget widget = popupButtonWidgets.get(key);
 
-        // Visibility and registration own widget existence. A state update
-        // must not recreate a button that has already been removed.
-        if (connector == null) {
-            return;
+        if (widget != null) {
+            applyPopupButtonState(widget, state);
         }
-        // Replace the snapshot so omitted default values also clear old state.
-        popupButtonStates.put(key, state);
-        JsonObject changedProperties = Json.createObject();
-        for (String property : new String[] { "active", "headerHidden",
-                "popupHeight", "popupWidth" }) {
-            changedProperties.put(property, "");
-        }
-        // Let the connector apply presentation changes without re-adding the
-        // widget. Sheet, row and column identify it and are not moved here.
-        connector.onStateChanged(
-                new StateChangeEvent(connector, changedProperties, false));
+    }
+
+    private void applyPopupButtonState(PopupButtonWidget widget,
+            PopupButtonState state) {
+        widget.markActive(state.active);
+        widget.setPopupHeaderHidden(state.headerHidden);
+        widget.setPopupWidth(state.popupWidth);
+        widget.setPopupHeight(state.popupHeight);
     }
 
     public void removePopupButton(String rawState) {
@@ -565,8 +546,6 @@ public class SpreadsheetJsApi {
         if (popupButton != null) {
             spreadsheetWidget.removePopupButton(popupButton);
             popupButtonWidgets.remove(key);
-            popupButtonConnectors.remove(key);
-            popupButtonStates.remove(key);
         }
     }
 

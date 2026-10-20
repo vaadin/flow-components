@@ -10,7 +10,6 @@ package com.vaadin.component.spreadsheet.client.js;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,21 +23,18 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.thirdparty.guava.common.collect.Lists;
 import com.vaadin.addon.spreadsheet.client.CellData;
-import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
 import com.vaadin.addon.spreadsheet.client.PopupButtonState;
+import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
-import com.vaadin.client.communication.StateChangeEvent;
-
-import elemental.json.JsonObject;
 
 class SpreadsheetJsApiTest {
 
@@ -384,14 +380,19 @@ class SpreadsheetJsApiTest {
     }
 
     @Test
-    void setPopupButtonState_registeredPopup_updatesStateAndNotifiesConnector()
+    void setPopupButtonState_registeredPopup_updatesWidgetAndClearsDefaults()
             throws ReflectiveOperationException {
-        PopupButtonConnector popupConnector = Mockito
-                .mock(PopupButtonConnector.class);
-        Map<String, PopupButtonConnector> connectors = getPopupMap(
-                "popupButtonConnectors");
-        Map<String, PopupButtonState> states = getPopupMap("popupButtonStates");
-        connectors.put("Sheet1_2_3", popupConnector);
+        PopupButtonWidget widget;
+        try (var gwt = Mockito.mockStatic(GWT.class)) {
+            gwt.when(() -> GWT.create(Mockito.any())).thenAnswer(invocation -> {
+                Class<?> type = invocation.getArgument(0);
+                return Mockito.mock(type);
+            });
+            widget = Mockito.mock(PopupButtonWidget.class);
+        }
+        Map<String, PopupButtonWidget> widgets = getPopupMap(
+                "popupButtonWidgets");
+        widgets.put("Sheet1_2_3", widget);
 
         try (var parser = Mockito.mockStatic(Parser.class)) {
             for (boolean active : new boolean[] { true, false }) {
@@ -400,30 +401,27 @@ class SpreadsheetJsApiTest {
                 state.row = 2;
                 state.col = 3;
                 state.active = active;
+                state.headerHidden = active;
+                state.popupWidth = active ? "300px" : null;
+                state.popupHeight = active ? "200px" : null;
                 parser.when(() -> Parser.parsePopupButtonState("state"))
                         .thenReturn(state);
 
                 api.setPopupButtonState("state");
-
-                assertSame(state, states.get("Sheet1_2_3"));
             }
         }
 
-        var events = ArgumentCaptor.forClass(StateChangeEvent.class);
-        verify(popupConnector, times(2)).onStateChanged(events.capture());
-        // Inspect the JSON payload directly: hasPropertyChanged uses native
-        // GWT code which cannot run in this JVM test.
-        var stateJson = StateChangeEvent.class.getDeclaredField("stateJson");
-        stateJson.setAccessible(true);
-        for (StateChangeEvent event : events.getAllValues()) {
-            JsonObject changedProperties = (JsonObject) stateJson.get(event);
-            for (String property : new String[] { "active", "headerHidden",
-                    "popupHeight", "popupWidth" }) {
-                assertTrue(changedProperties.hasKey(property), property);
-            }
-            assertSame(popupConnector, event.getConnector());
-        }
-        Mockito.verifyNoMoreInteractions(popupConnector);
+        verify(widget).markActive(true);
+        verify(widget).markActive(false);
+        verify(widget).setPopupHeaderHidden(true);
+        verify(widget).setPopupHeaderHidden(false);
+        verify(widget).setPopupWidth("300px");
+        verify(widget).setPopupWidth(null);
+        verify(widget).setPopupHeight("200px");
+        verify(widget).setPopupHeight(null);
+        Mockito.verifyNoMoreInteractions(widget);
+        assertEquals(1, widgets.size());
+        assertEquals(widget, widgets.get("Sheet1_2_3"));
     }
 
     @Test
@@ -441,8 +439,6 @@ class SpreadsheetJsApiTest {
             api.setPopupButtonState("state");
         }
 
-        assertTrue(getPopupMap("popupButtonStates").isEmpty());
-        assertTrue(getPopupMap("popupButtonConnectors").isEmpty());
         assertTrue(getPopupMap("popupButtonWidgets").isEmpty());
     }
 
