@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.AreaReference;
@@ -18,11 +19,20 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.tests.MockUIExtension;
 
 class ColumnFiltersTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     final String TABLE1_RANGE = "B2:B4";
     final String TABLE2_RANGE = "B6:B8";
@@ -103,6 +113,131 @@ class ColumnFiltersTest {
 
         Assertions.assertTrue(table.getPopupButton(1).isActive());
         Assertions.assertFalse(table.getPopupButton(2).isActive());
+    }
+
+    @Test
+    void markActive_registeredPopup_sendsUpdatedSharedState() {
+        ui.add(spreadsheet);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 10, 10]");
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        popupButton.markActive(true);
+        assertPopupActiveStateSent(true);
+
+        popupButton.markActive(false);
+        assertPopupActiveStateSent(false);
+    }
+
+    @Test
+    void popupSetters_registeredPopup_sendsUpdatedSharedState() {
+        ui.add(spreadsheet);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 10, 10]");
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.dumpPendingJavaScriptInvocations();
+
+        popupButton.setHeaderHidden(true);
+        assertPopupStateSent(false, true, null, null);
+
+        popupButton.setPopupWidth("100px");
+        assertPopupStateSent(false, true, "100px", null);
+
+        popupButton.setPopupHeight("200px");
+        assertPopupStateSent(false, true, "100px", "200px");
+
+        popupButton.setHeaderHidden(false);
+        assertPopupStateSent(false, false, "100px", "200px");
+
+        popupButton.setPopupWidth(null);
+        assertPopupStateSent(false, false, null, "200px");
+
+        popupButton.setPopupHeight(null);
+        assertPopupStateSent(false, false, null, null);
+    }
+
+    @Test
+    void updateState_multipleSettersInOneRoundtrip_sendsOnlyFinalState() {
+        ui.add(spreadsheet);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 10, 10]");
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.dumpPendingJavaScriptInvocations();
+
+        popupButton.markActive(true);
+        popupButton.setPopupWidth("100px");
+        popupButton.setPopupHeight("200px");
+        popupButton.setHeaderHidden(true);
+        popupButton.setPopupWidth("300px");
+        popupButton.markActive(false);
+
+        assertPopupStateSent(false, true, "300px", "200px");
+    }
+
+    @Test
+    void markActive_unregisteredPopup_doesNotSendSharedState() {
+        ui.add(spreadsheet);
+        PopupButton popupButton = spreadsheet.getTables().iterator().next()
+                .getPopupButton(1);
+        ui.fakeClientCommunication();
+        ui.dumpPendingJavaScriptInvocations();
+
+        Assertions.assertTrue(popupButton.getParent().isEmpty());
+
+        for (boolean active : new boolean[] { true, false }) {
+            popupButton.markActive(active);
+
+            Assertions.assertEquals(active, popupButton.isActive());
+            Assertions.assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
+                    .map(PendingJavaScriptInvocation::getInvocation)
+                    .noneMatch(invocation -> isFunctionCall(invocation,
+                            "setPopupButtonState")));
+        }
+    }
+
+    private void assertPopupActiveStateSent(boolean active) {
+        assertPopupStateSent(active, false, null, null);
+    }
+
+    private void assertPopupStateSent(boolean active, boolean headerHidden,
+            String popupWidth, String popupHeight) {
+        var pendingInvocations = ui.dumpPendingJavaScriptInvocations().stream()
+                .map(PendingJavaScriptInvocation::getInvocation).toList();
+        Assertions.assertTrue(pendingInvocations.stream().noneMatch(
+                invocation -> isFunctionCall(invocation, "addPopupButton")));
+        var invocations = pendingInvocations.stream().filter(
+                invocation -> isFunctionCall(invocation, "setPopupButtonState"))
+                .toList();
+        Assertions.assertEquals(1, invocations.size());
+        var state = JacksonUtils.getMapper()
+                .readTree((String) getArguments(invocations.get(0)).get(0));
+        Assertions.assertEquals(active, state.path("active").asBoolean(false));
+        Assertions.assertEquals(headerHidden,
+                state.path("headerHidden").asBoolean(false));
+        Assertions.assertEquals(popupWidth,
+                state.path("popupWidth").asString(null));
+        Assertions.assertEquals(popupHeight,
+                state.path("popupHeight").asString(null));
+        Assertions.assertEquals(2, state.get("row").asInt());
+        Assertions.assertEquals(2, state.get("col").asInt());
+        Assertions.assertEquals(workbook.getSheetName(0),
+                state.get("sheet").asString());
+    }
+
+    private static boolean isFunctionCall(JavaScriptInvocation invocation,
+            String functionName) {
+        return invocation.getExpression().contains(functionName);
+    }
+
+    private static List<Object> getArguments(JavaScriptInvocation invocation) {
+        // The first parameter is the element the function is called on
+        return invocation.getParameters().subList(1,
+                invocation.getParameters().size());
     }
 
     @Test
