@@ -185,11 +185,6 @@ class UploadHandlerTest {
             }
 
             @Override
-            public boolean isAllowInert() {
-                return true;
-            }
-
-            @Override
             public DisabledUpdateMode getDisabledUpdateMode() {
                 return DisabledUpdateMode.ALWAYS;
             }
@@ -211,7 +206,6 @@ class UploadHandlerTest {
         Assertions.assertEquals(333L, customHandler.getFileCountMax());
         Assertions.assertEquals("custom-postfix",
                 customHandler.getUrlPostfix());
-        Assertions.assertTrue(customHandler.isAllowInert());
         Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
                 customHandler.getDisabledUpdateMode());
     }
