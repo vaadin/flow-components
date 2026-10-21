@@ -106,6 +106,33 @@ class DialogTest {
     }
 
     @Test
+    void getHeadingLevel_nullByDefault() {
+        Dialog dialog = new Dialog();
+        Assertions.assertNull(dialog.getHeadingLevel());
+        Assertions
+                .assertNull(dialog.getElement().getPropertyRaw("headingLevel"));
+    }
+
+    @Test
+    void setHeadingLevel_getHeadingLevel() {
+        Dialog dialog = new Dialog();
+        dialog.setHeadingLevel(3);
+        Assertions.assertEquals(3, dialog.getHeadingLevel());
+        Assertions.assertEquals(3,
+                dialog.getElement().getProperty("headingLevel", 0));
+    }
+
+    @Test
+    void setHeadingLevel_setNull_propertyRemoved() {
+        Dialog dialog = new Dialog();
+        dialog.setHeadingLevel(3);
+        dialog.setHeadingLevel(null);
+        Assertions.assertNull(dialog.getHeadingLevel());
+        Assertions
+                .assertNull(dialog.getElement().getPropertyRaw("headingLevel"));
+    }
+
+    @Test
     void isDraggable_falseByDefault() {
         Dialog dialog = new Dialog();
 
