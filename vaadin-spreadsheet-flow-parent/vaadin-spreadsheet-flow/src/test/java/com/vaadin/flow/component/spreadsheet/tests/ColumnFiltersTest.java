@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.AreaReference;
@@ -21,11 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class ColumnFiltersTest {
@@ -194,8 +195,8 @@ class ColumnFiltersTest {
             Assertions.assertEquals(active, popupButton.isActive());
             Assertions.assertTrue(ui.dumpPendingJavaScriptInvocations().stream()
                     .map(PendingJavaScriptInvocation::getInvocation)
-                    .noneMatch(invocation -> "setPopupButtonState".equals(
-                            JsFunctionCallUtil.getFunctionName(invocation))));
+                    .noneMatch(invocation -> isFunctionCall(invocation,
+                            "setPopupButtonState")));
         }
     }
 
@@ -207,17 +208,14 @@ class ColumnFiltersTest {
             String popupWidth, String popupHeight) {
         var pendingInvocations = ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation).toList();
-        Assertions.assertTrue(pendingInvocations.stream()
-                .noneMatch(invocation -> "addPopupButton".equals(
-                        JsFunctionCallUtil.getFunctionName(invocation))));
-        var invocations = pendingInvocations.stream()
-                .filter(invocation -> "setPopupButtonState"
-                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
+        Assertions.assertTrue(pendingInvocations.stream().noneMatch(
+                invocation -> isFunctionCall(invocation, "addPopupButton")));
+        var invocations = pendingInvocations.stream().filter(
+                invocation -> isFunctionCall(invocation, "setPopupButtonState"))
                 .toList();
         Assertions.assertEquals(1, invocations.size());
         var state = JacksonUtils.getMapper()
-                .readTree((String) JsFunctionCallUtil
-                        .getArguments(invocations.get(0)).get(0));
+                .readTree((String) getArguments(invocations.get(0)).get(0));
         Assertions.assertEquals(active, state.path("active").asBoolean(false));
         Assertions.assertEquals(headerHidden,
                 state.path("headerHidden").asBoolean(false));
@@ -229,6 +227,17 @@ class ColumnFiltersTest {
         Assertions.assertEquals(2, state.get("col").asInt());
         Assertions.assertEquals(workbook.getSheetName(0),
                 state.get("sheet").asString());
+    }
+
+    private static boolean isFunctionCall(JavaScriptInvocation invocation,
+            String functionName) {
+        return invocation.getExpression().contains(functionName);
+    }
+
+    private static List<Object> getArguments(JavaScriptInvocation invocation) {
+        // The first parameter is the element the function is called on
+        return invocation.getParameters().subList(1,
+                invocation.getParameters().size());
     }
 
     @Test
