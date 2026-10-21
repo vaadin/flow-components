@@ -400,7 +400,7 @@ public class Button extends Component
      * clicked. The download starts in the browser as part of the click, and
      * click listeners still run as usual. Setting a new handler replaces the
      * previous one, and {@code null} stops the button from starting a download.
-     * Setting a download handler removes the handler set with
+     * Setting a non-null download handler removes the handler set with
      * {@link #setOpenInNewTabHandler(DownloadHandler)}.
      * <p>
      * The handler runs only when the browser requests the file, once per click,
@@ -436,6 +436,10 @@ public class Button extends Component
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
+        if (downloadHandler == null && this.downloadHandler == null) {
+            // Keep a handler set with setOpenInNewTabHandler
+            return;
+        }
         removeHandlerRegistration();
         this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
@@ -463,7 +467,7 @@ public class Button extends Component
      * the browser as part of the click, so popup blockers let it through, and
      * click listeners still run as usual. Setting a new handler replaces the
      * previous one, and {@code null} stops the button from opening a new tab.
-     * Setting this handler removes the handler set with
+     * Setting a non-null handler removes the handler set with
      * {@link #setDownloadHandler(DownloadHandler)}.
      * <p>
      * The handler runs only when the new tab requests the content, once per
@@ -495,6 +499,10 @@ public class Button extends Component
      * @since 25.4
      */
     public void setOpenInNewTabHandler(DownloadHandler openInNewTabHandler) {
+        if (openInNewTabHandler == null && this.openInNewTabHandler == null) {
+            // Keep a handler set with setDownloadHandler
+            return;
+        }
         removeHandlerRegistration();
         this.openInNewTabHandler = openInNewTabHandler;
         if (openInNewTabHandler != null) {

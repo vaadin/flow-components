@@ -146,7 +146,7 @@ class ButtonDownloadHandlerTest {
     }
 
     @Test
-    void openInNewTabHandlerAndDownloadHandler_replaceEachOther() {
+    void openInNewTabHandlerAndDownloadHandler_replaceEachOther_nullClearsOnlyItsOwn() {
         button.setOpenInNewTabHandler(handler);
 
         Assertions.assertSame(handler, button.getOpenInNewTabHandler());
@@ -160,6 +160,25 @@ class ButtonDownloadHandlerTest {
         Assertions.assertNull(button.getOpenInNewTabHandler());
         ui.fakeClientCommunication();
         Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setOpenInNewTabHandler(null);
+
+        Assertions.assertSame(handler, button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setOpenInNewTabHandler(handler);
+        button.setDownloadHandler(null);
+
+        Assertions.assertSame(handler, button.getOpenInNewTabHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setOpenInNewTabHandler(null);
+
+        Assertions.assertNull(button.getOpenInNewTabHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(0, downloadAttributes().count());
     }
 
     /**
