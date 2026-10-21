@@ -300,6 +300,8 @@ class UploadHandlerTest {
         ui.add(modal);
         ui.getUI().setChildComponentModal(modal, true);
         ui.fakeClientCommunication();
+        Assertions.assertTrue(upload.getElement().getNode().isInert(),
+                "The modal should make the upload inert");
     }
 
     private void fireUploadDomEvent(String eventType, boolean filesUploading) {

@@ -603,6 +603,8 @@ class UploadManagerTest {
         ui.add(modal);
         ui.getUI().setChildComponentModal(modal, true);
         ui.fakeClientCommunication();
+        Assertions.assertTrue(owner.getElement().getNode().isInert(),
+                "The modal should make the owner inert");
     }
 
     // --- Wrapper delegation of ElementRequestHandler defaults ---
