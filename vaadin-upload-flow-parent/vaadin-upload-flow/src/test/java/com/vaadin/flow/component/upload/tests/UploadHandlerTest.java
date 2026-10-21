@@ -32,13 +32,16 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
@@ -276,6 +279,22 @@ class UploadHandlerTest {
                 "AllFinished should fire for an inert upload");
     }
 
+    @Test
+    void modalOpen_receiverUploadAborted_uploadInterrupted()
+            throws URISyntaxException {
+        upload.setReceiver(new MemoryBuffer());
+        ui.fakeClientCommunication();
+        StreamVariable streamVariable = getStreamReceiver().getStreamVariable();
+        streamVariable.streamingStarted(
+                Mockito.mock(StreamVariable.StreamingStartEvent.class));
+        openModal();
+
+        fireUploadDomEvent("upload-abort", false);
+
+        Assertions.assertTrue(streamVariable.isInterrupted(),
+                "Aborting an inert upload should interrupt it on the server");
+    }
+
     private void openModal() {
         Div modal = new Div();
         ui.add(modal);
@@ -303,6 +322,17 @@ class UploadHandlerTest {
         UploadHandler uploadHandler = getUploadHandler();
         uploadHandler.handleRequest(request, response, ui.getSession(),
                 upload.getElement());
+    }
+
+    private StreamReceiver getStreamReceiver() throws URISyntaxException {
+        String target = upload.getElement().getAttribute("target");
+        Assertions.assertNotNull(target, "Target attribute is not set");
+
+        Optional<AbstractStreamResource> maybeResource = ui.getSession()
+                .getResourceRegistry().getResource(new URI(target));
+        Assertions.assertTrue(maybeResource.isPresent(),
+                "No resource found for target: " + target);
+        return (StreamReceiver) maybeResource.get();
     }
 
     private UploadHandler getUploadHandler() throws URISyntaxException {
