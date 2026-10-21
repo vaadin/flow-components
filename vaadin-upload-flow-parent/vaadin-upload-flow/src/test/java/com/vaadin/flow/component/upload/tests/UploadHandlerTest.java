@@ -279,6 +279,7 @@ class UploadHandlerTest {
                 "AllFinished should fire for an inert upload");
     }
 
+    @SuppressWarnings("removal")
     @Test
     void modalOpen_receiverUploadAborted_uploadInterrupted()
             throws URISyntaxException {
@@ -326,6 +327,7 @@ class UploadHandlerTest {
                 upload.getElement());
     }
 
+    @SuppressWarnings("removal")
     private StreamReceiver getStreamReceiver() throws URISyntaxException {
         String target = upload.getElement().getAttribute("target");
         Assertions.assertNotNull(target, "Target attribute is not set");
