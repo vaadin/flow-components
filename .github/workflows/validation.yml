@@ -593,8 +593,12 @@ jobs:
           retention-days: 5
           if-no-files-found: ignore
 
+      # Keep artifacts on failure so "Re-run failed jobs" can still download
+      # build-output and integration-tests-war from the previous attempt.
       - name: Delete intermediate artifacts
-        if: always()
+        if: >-
+          !contains(needs.*.result, 'failure') &&
+          !contains(needs.*.result, 'cancelled')
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
