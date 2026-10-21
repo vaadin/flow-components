@@ -62,7 +62,7 @@ import tools.jackson.databind.node.ArrayNode;
  * @since 1.0
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.2.15")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.2.16")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
