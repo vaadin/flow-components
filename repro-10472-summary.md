@@ -11,7 +11,7 @@
 - **Reproduced on:** flow-components @ `main` (25.4-SNAPSHOT), reported on 25.3.0
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![After showing the container again and clicking the target once: no popover, log shows isOpened()=true then opened=false](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-10472.png)
+- **Screenshot** (static bug): ![After showing the container again and clicking the target once: no popover, log shows isOpened()=true then opened=false](https://raw.githubusercontent.com/vaadin/flow-components/b96554a6a1f9d2097898d32d98ab6d171f4b1f93/repro-10472.png)
 
 ## Observed behavior
 
