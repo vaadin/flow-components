@@ -42,7 +42,7 @@ public class OpenInNewTabHandlerButtonIT extends AbstractComponentIT {
 
     @Test
     public void clickButtonDisabledOnClick_opensInlineContentInNewTab() {
-        ButtonElement button = $(ButtonElement.class).first();
+        ButtonElement button = $(ButtonElement.class).single();
         button.click();
         Assert.assertNotNull("Click did not open a new tab",
                 executeScript("return window.__openedUrl;"));
