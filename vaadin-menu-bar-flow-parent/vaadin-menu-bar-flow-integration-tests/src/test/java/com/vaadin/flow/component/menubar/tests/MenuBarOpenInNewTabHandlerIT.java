@@ -42,7 +42,7 @@ public class MenuBarOpenInNewTabHandlerIT extends AbstractComponentIT {
 
     @Test
     public void clickItem_opensInlineContentInNewTab() {
-        $(MenuBarElement.class).first().getButtons().get(0).click();
+        $(MenuBarElement.class).single().getButtons().get(0).click();
         Assert.assertNotNull("Click did not open a new tab",
                 executeScript("return window.__openedUrl;"));
 
