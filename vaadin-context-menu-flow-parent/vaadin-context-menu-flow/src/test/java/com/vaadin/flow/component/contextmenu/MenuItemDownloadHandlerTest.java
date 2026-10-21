@@ -325,7 +325,7 @@ class MenuItemDownloadHandlerTest {
     }
 
     @Test
-    void openInNewTabHandlerAndDownloadHandler_replaceEachOther() {
+    void openInNewTabHandlerAndDownloadHandler_replaceEachOther_nullClearsOnlyItsOwn() {
         String downloadUrl = getDownloadUrl();
         item.setOpenInNewTabHandler(handler);
 
@@ -342,7 +342,17 @@ class MenuItemDownloadHandlerTest {
         Assertions.assertEquals(1, downloadAttributes(target).count());
         Assertions.assertNotEquals(openInNewTabUrl, getDownloadUrl());
 
+        item.setOpenInNewTabHandler(null);
+
+        Assertions.assertSame(handler, item.getDownloadHandler());
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+
         item.setOpenInNewTabHandler(handler);
+        item.setDownloadHandler(null);
+
+        Assertions.assertSame(handler, item.getOpenInNewTabHandler());
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+
         item.setOpenInNewTabHandler(null);
 
         Assertions.assertEquals(0, downloadAttributes(target).count());

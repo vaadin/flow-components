@@ -92,7 +92,7 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * The download starts in the browser as part of the click, and click
      * listeners still run as usual. Setting a new handler replaces the previous
      * one, and {@code null} stops the item from starting a download. Setting a
-     * download handler removes the handler set with
+     * non-null download handler removes the handler set with
      * {@link #setOpenInNewTabHandler(DownloadHandler)}.
      * <p>
      * The handler runs only when the browser requests the file, once per click,
@@ -141,7 +141,9 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
         this.downloadHandler = downloadHandler;
-        this.openInNewTabHandler = null;
+        if (downloadHandler != null) {
+            this.openInNewTabHandler = null;
+        }
         updateDownloadManager();
     }
 
@@ -163,8 +165,8 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * the item is clicked, for example a PDF or an image. The tab opens in the
      * browser as part of the click, so popup blockers let it through, and click
      * listeners still run as usual. Setting a new handler replaces the previous
-     * one, and {@code null} stops the item from opening a new tab. Setting this
-     * handler removes the handler set with
+     * one, and {@code null} stops the item from opening a new tab. Setting a
+     * non-null handler removes the handler set with
      * {@link #setDownloadHandler(DownloadHandler)}.
      * <p>
      * The handler runs only when the new tab requests the content, once per
@@ -201,7 +203,9 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
             builtIn.inline();
         }
         this.openInNewTabHandler = openInNewTabHandler;
-        this.downloadHandler = null;
+        if (openInNewTabHandler != null) {
+            this.downloadHandler = null;
+        }
         updateDownloadManager();
     }
 
