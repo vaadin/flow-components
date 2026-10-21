@@ -41,6 +41,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.download.Download;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.newtab.OpenInNewTab;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
@@ -54,6 +55,7 @@ import com.vaadin.flow.internal.nodefeature.SignalBindingFeature;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -80,7 +82,8 @@ public class Button extends Component
     private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
     private DownloadHandler downloadHandler;
-    private Registration downloadRegistration;
+    private DownloadHandler openInNewTabHandler;
+    private Registration handlerRegistration;
 
     private final SignalPropertySupport<String> textSupport = SignalPropertySupport
             .create(this, this::textChangeHandler);
@@ -397,6 +400,8 @@ public class Button extends Component
      * clicked. The download starts in the browser as part of the click, and
      * click listeners still run as usual. Setting a new handler replaces the
      * previous one, and {@code null} stops the button from starting a download.
+     * Setting a download handler removes the handler set with
+     * {@link #setOpenInNewTabHandler(DownloadHandler)}.
      * <p>
      * The handler runs only when the browser requests the file, once per click,
      * so you can create the content, file name and response headers at that
@@ -431,15 +436,89 @@ public class Button extends Component
      * @since 25.4
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
-        if (downloadRegistration != null) {
-            downloadRegistration.remove();
-            downloadRegistration = null;
-        }
+        removeHandlerRegistration();
         this.downloadHandler = downloadHandler;
         if (downloadHandler != null) {
-            downloadRegistration = Download.onClick(this,
+            handlerRegistration = Download.onClick(this,
                     allowDisabledByClick(downloadHandler));
         }
+    }
+
+    /**
+     * Gets the handler that produces the content opened in a new browser tab
+     * when the button is clicked.
+     *
+     * @return the handler, or {@code null} if clicking the button does not open
+     *         a new tab
+     * @see #setOpenInNewTabHandler(DownloadHandler)
+     * @since 25.4
+     */
+    public DownloadHandler getOpenInNewTabHandler() {
+        return openInNewTabHandler;
+    }
+
+    /**
+     * Sets a handler that produces content to show in a new browser tab when
+     * the button is clicked, for example a PDF or an image. The tab opens in
+     * the browser as part of the click, so popup blockers let it through, and
+     * click listeners still run as usual. Setting a new handler replaces the
+     * previous one, and {@code null} stops the button from opening a new tab.
+     * Setting this handler removes the handler set with
+     * {@link #setDownloadHandler(DownloadHandler)}.
+     * <p>
+     * The handler runs only when the new tab requests the content, once per
+     * click. The browser shows the content when it can, otherwise it downloads
+     * it. The built-in handlers, such as
+     * {@link DownloadHandler#forFile(java.io.File)}, are switched to serve the
+     * content inline. This changes the given handler instance, so it also
+     * serves inline wherever else it is used. A custom handler should call
+     * {@link DownloadEvent#inline(String)} itself, since content served as an
+     * attachment is downloaded instead of shown.
+     * <p>
+     * The content is only served while the button is attached, visible and
+     * enabled, with the same exception for {@link #setDisableOnClick(boolean)
+     * disable on click} as described in
+     * {@link #setDownloadHandler(DownloadHandler)}. To serve the content
+     * regardless of the enabled state, call
+     * {@link AbstractDownloadHandler#inline() inline()} on a built-in handler
+     * before {@link DownloadHandler#allowDisabled() allowDisabled()}, for
+     * example {@code DownloadHandler.forFile(file).inline().allowDisabled()}.
+     *
+     * <pre>{@code
+     * Button view = new Button("View invoice");
+     * view.setOpenInNewTabHandler(DownloadHandler.forFile(invoicePdf));
+     * }</pre>
+     *
+     * @param openInNewTabHandler
+     *            the handler that produces the content, or {@code null} to not
+     *            open a new tab on click
+     * @since 25.4
+     */
+    public void setOpenInNewTabHandler(DownloadHandler openInNewTabHandler) {
+        removeHandlerRegistration();
+        this.openInNewTabHandler = openInNewTabHandler;
+        if (openInNewTabHandler != null) {
+            if (openInNewTabHandler instanceof AbstractDownloadHandler<?> builtIn) {
+                // Switch to inline before wrapping, since OpenInNewTab can
+                // not switch the wrapper
+                builtIn.inline();
+            }
+            handlerRegistration = OpenInNewTab.onClick(this,
+                    allowDisabledByClick(openInNewTabHandler));
+        }
+    }
+
+    /**
+     * Removes the registration of the download or open in new tab handler, so
+     * that a click starts neither of them.
+     */
+    private void removeHandlerRegistration() {
+        if (handlerRegistration != null) {
+            handlerRegistration.remove();
+            handlerRegistration = null;
+        }
+        downloadHandler = null;
+        openInNewTabHandler = null;
     }
 
     /**
