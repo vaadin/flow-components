@@ -623,8 +623,11 @@ class UploadManagerTest {
         };
 
         manager.setUploadHandler(handler);
-
         Assertions.assertTrue(getRegisteredHandler().isAllowInert());
+
+        manager.setUploadHandler(event -> {
+        });
+        Assertions.assertFalse(getRegisteredHandler().isAllowInert());
     }
 
     @Test
