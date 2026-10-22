@@ -581,16 +581,11 @@ class UploadManagerTest {
     }
 
     @Test
-    void modalOpen_uploadReceivedAndAllFinishedFired() {
-        manager.setUploadHandler(UploadHandler.inMemory((metadata, data) -> {
-        }));
+    void modalOpen_allFinishedDomEvent_firesAllFinished() {
         AtomicInteger finishedCount = new AtomicInteger(0);
         manager.addAllFinishedListener(
                 event -> finishedCount.incrementAndGet());
         openModal();
-
-        Assertions.assertTrue(getRegisteredHandler().isAllowInert(),
-                "Files should be received for an inert owner");
 
         simulateAllFinishedDomEvent(manager);
 
@@ -633,6 +628,25 @@ class UploadManagerTest {
 
         Assertions.assertEquals("custom-postfix",
                 getRegisteredHandler().getUrlPostfix());
+    }
+
+    @Test
+    void setUploadHandler_handlerDisallowsInert_allowsInert() {
+        UploadHandler handler = new UploadHandler() {
+            @Override
+            public void handleUploadRequest(
+                    com.vaadin.flow.server.streams.UploadEvent event) {
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return false;
+            }
+        };
+
+        manager.setUploadHandler(handler);
+
+        Assertions.assertTrue(getRegisteredHandler().isAllowInert());
     }
 
     @Test
