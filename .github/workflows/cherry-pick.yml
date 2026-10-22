@@ -57,4 +57,4 @@ jobs:
           extra-allowed-tools: Bash(mvn:*)
           # Trial of the cherry-pick prompt with resolution notes from
           # vaadin/platform-build-script#214; remove once that PR is merged.
-          script-ref: e9fae50ee696c7304fb0671019592fceae3ab00d
+          script-ref: 0b2a72d2238a44705df607a5a5e8e24e2aa9cab3
