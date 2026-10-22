@@ -217,14 +217,14 @@ public class Icon extends ImageStyle {
      *            the new scaling
      * @throws IllegalStateException
      *             if the icon has a {@link #getWidth() width} or
-     *             {@link #getHeight() height}, which can not be combined with a
-     *             scale
+     *             {@link #getHeight() height} and the scale is not {@code 1},
+     *             as a size can not be combined with a scale
      */
     @Override
     public void setScale(double scale) {
-        if (hasSize()) {
+        if (hasSize() && scale != 1) {
             throw new IllegalStateException(
-                    "The scale of an icon with a width or height can not be changed");
+                    "The scale of an icon with a width or height can not be changed from 1");
         }
         super.setScale(scale);
     }

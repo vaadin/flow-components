@@ -106,12 +106,13 @@ class IconTest {
     }
 
     @Test
-    void withSize_setScale_throws() {
+    void withSize_setScaleOtherThanOne_throws() {
         Icon.Options options = new Icon.Options();
         options.setSrc("test");
         options.setHeight(40);
         Icon icon = new Icon(options);
 
+        icon.setScale(1);
         Assertions.assertThrows(IllegalStateException.class,
                 () -> icon.setScale(2));
     }
