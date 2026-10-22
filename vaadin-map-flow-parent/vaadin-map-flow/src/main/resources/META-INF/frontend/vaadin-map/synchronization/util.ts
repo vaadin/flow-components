@@ -9,9 +9,8 @@
  */
 import type Collection from 'ol/Collection';
 import type { Coordinate } from 'ol/coordinate';
-import type { Size } from 'ol/size';
 import type { MapSyncContext } from '../vaadin-map-types.js';
-import type { MapCoordinate, MapSize } from './synchronization-types.js';
+import type { MapCoordinate } from './synchronization-types.js';
 
 /**
  * Helper to convert a coordinate object with the shape { x: number, y: number}
@@ -33,14 +32,6 @@ export function convertToGeoJSONCoordinateArray(coordinates: MapCoordinate[][]):
       // Each subsequent linear ring defines a hole in the surface of the polygon
       .map((linearRing) => linearRing.map((coordinate) => convertToCoordinateArray(coordinate)))
   );
-}
-
-/**
- * Helper to convert a size object with the shape { width: number, height: number}
- * into a size array used by OpenLayers
- */
-export function convertToSizeArray(size: MapSize): Size {
-  return [size.width, size.height];
 }
 
 /**

@@ -33,7 +33,6 @@ class IconTest {
         Assertions.assertEquals("test", icon.getSrc());
         Assertions.assertNull(icon.getImg());
         Assertions.assertNull(icon.getImgHandler());
-        Assertions.assertNull(icon.getImgSize());
     }
 
     @Test
