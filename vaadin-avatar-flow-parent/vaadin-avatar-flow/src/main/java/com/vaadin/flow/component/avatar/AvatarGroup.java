@@ -22,10 +22,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,10 +45,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.NodeOwner;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
@@ -95,11 +92,10 @@ public class AvatarGroup extends Component
         private Set<String> classNames = new LinkedHashSet<>();
 
         private AvatarGroup host;
-        private StreamRegistration resourceRegistration;
-        private Registration pendingRegistration;
-        private Command pendingHandle;
+        private Registration resourceRegistration;
 
         private AbstractStreamResource imageResource;
+        private DownloadHandler imageHandler;
 
         /**
          * Creates a new empty avatar group item.
@@ -191,6 +187,10 @@ public class AvatarGroup extends Component
 
         /**
          * Gets the image url that was set for the avatar.
+         * <p>
+         * When the image is set with {@link #setImageHandler(DownloadHandler)},
+         * this returns the URL that the handler is served from. The URL changes
+         * when the item is added to another avatar group.
          *
          * @return the image url
          */
@@ -201,6 +201,10 @@ public class AvatarGroup extends Component
 
         /**
          * Gets the image that was set for the avatar.
+         * <p>
+         * When the image is set with {@link #setImageHandler(DownloadHandler)},
+         * this returns the resource that serves the handler. A new resource is
+         * created when the item is added to another avatar group.
          *
          * @return the image resource value or {@code null} if the resource has
          *         not been set
@@ -223,7 +227,7 @@ public class AvatarGroup extends Component
          *            the image url
          */
         public void setImage(String url) {
-            unsetResource();
+            setImageSource(null, null);
 
             this.img = url;
             if (getHost() != null) {
@@ -241,6 +245,12 @@ public class AvatarGroup extends Component
          * <code>inline</code> for pre-defined download handlers, created by
          * factory methods in {@link DownloadHandler}, as well as for other
          * {@link AbstractDownloadHandler} implementations.
+         * <p>
+         * The handler is registered as a resource of the avatar group that the
+         * item belongs to while the group is attached, and is unregistered when
+         * the group is detached or the item is removed from the group. When the
+         * item is added to another avatar group, the handler is served from a
+         * new resource with a new URL.
          *
          * @see AvatarGroupItem#setImage(String)
          * @param downloadHandler
@@ -249,19 +259,15 @@ public class AvatarGroup extends Component
          * @since 24.8
          */
         public void setImageHandler(DownloadHandler downloadHandler) {
-            if (downloadHandler == null) {
-                unsetResource();
-                return;
-            }
             if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
                 // change disposition to inline in pre-defined handlers,
                 // where it is 'attachment' by default
                 handler.inline();
             }
-
-            setImageResource(new StreamResourceRegistry.ElementStreamResource(
-                    downloadHandler, getHost() != null ? getHost().getElement()
-                            : UI.getCurrentOrThrow().getElement()));
+            setImageSource(downloadHandler, null);
+            if (getHost() != null) {
+                getHost().clientItemsUpdate.schedule();
+            }
         }
 
         /**
@@ -269,6 +275,10 @@ public class AvatarGroup extends Component
          * <p>
          * Setting the image as a resource with this method resets the image URL
          * that was set with {@link AvatarGroupItem#setImage(String)}
+         * <p>
+         * The resource is registered with the session while the avatar group
+         * that the item belongs to is attached, and is unregistered when the
+         * group is detached or the item is removed from the group.
          *
          * @see AvatarGroupItem#setImage(String)
          * @param resource
@@ -277,22 +287,7 @@ public class AvatarGroup extends Component
          */
         @Deprecated(since = "24.8", forRemoval = true)
         public void setImageResource(AbstractStreamResource resource) {
-            imageResource = resource;
-
-            if (resource == null) {
-                unsetResource();
-                return;
-            }
-
-            // The following is the copy of functionality from the
-            // ElementAttributeMap
-            doSetResource(resource);
-            if (getHost() != null
-                    && getHost().getElement().getNode().isAttached()) {
-                registerResource(resource);
-            } else {
-                deferRegistration(resource);
-            }
+            setImageSource(null, resource);
             if (getHost() != null) {
                 getHost().clientItemsUpdate.schedule();
             }
@@ -310,80 +305,53 @@ public class AvatarGroup extends Component
             this.img = targetUri.toASCIIString();
         }
 
-        private void unregisterResource() {
-            StreamRegistration registration = resourceRegistration;
-            Registration handle = pendingRegistration;
-            if (handle != null) {
-                handle.remove();
-            }
-            if (registration != null) {
-                registration.unregister();
-            }
+        /**
+         * Replaces the image handler or the image resource of this item. At
+         * most one of them is set.
+         */
+        private void setImageSource(DownloadHandler handler,
+                AbstractStreamResource resource) {
+            unbindImage();
+            imageHandler = handler;
+            imageResource = resource;
             this.img = null;
+            bindImage();
         }
 
-        private void deferRegistration(AbstractStreamResource resource) {
-            if (pendingRegistration != null) {
+        /**
+         * Binds the image to the current host. An image handler is wrapped in a
+         * resource owned by the host, and the resource is registered with the
+         * session of the host while the host is attached.
+         */
+        private void bindImage() {
+            if (imageHandler != null) {
+                // Requests for a handler resource are rejected while its
+                // owner element is detached, so the resource is created for
+                // the current host
+                imageResource = new StreamResourceRegistry.ElementStreamResource(
+                        imageHandler, getHost() != null ? getHost().getElement()
+                                : UI.getCurrentOrThrow().getElement());
+            }
+            if (imageResource == null) {
                 return;
             }
-
-            pendingHandle = () -> {
-                doSetResource(resource);
-                registerResource(resource);
-            };
-
-            if (getHost() != null) {
-                attachPendingRegistration(pendingHandle);
-                pendingHandle = null;
-            }
-        }
-
-        private void attachPendingRegistration(Command pendingHandle) {
-            if (getHost().getElement().getNode().isAttached()) {
-                pendingHandle.execute();
+            doSetResource(imageResource);
+            if (getHost() == null) {
                 return;
             }
-            Registration handle = getHost().getElement().getNode()
-                    // Do not convert to lambda
-                    .addAttachListener(pendingHandle);
-            pendingRegistration = handle;
+            AbstractStreamResource resource = imageResource;
+            resourceRegistration = getHost().getElement().whenAttached(ui -> {
+                StreamRegistration registration = ui.getSessionOrThrow()
+                        .getResourceRegistry().registerResource(resource);
+                return registration::unregister;
+            });
         }
 
-        private void registerResource(AbstractStreamResource resource) {
-            assert resourceRegistration == null;
-            StreamRegistration registration = getSession().getResourceRegistry()
-                    .registerResource(resource);
-            resourceRegistration = registration;
-            Registration handle = pendingRegistration;
-            if (handle != null) {
-                handle.remove();
+        private void unbindImage() {
+            if (resourceRegistration != null) {
+                resourceRegistration.remove();
+                resourceRegistration = null;
             }
-            pendingRegistration = getHost().getElement().getNode()
-                    .addDetachListener(
-                            // Do not convert to lambda
-                            new Command() {
-                                @Override
-                                public void execute() {
-                                    AvatarGroupItem.this.unsetResource();
-                                }
-                            });
-        }
-
-        private void unsetResource() {
-            imageResource = null;
-            StreamRegistration registration = resourceRegistration;
-            Optional<AbstractStreamResource> resource = Optional.empty();
-            if (registration != null) {
-                resource = Optional.ofNullable(registration.getResource());
-            }
-            unregisterResource();
-            resource.ifPresent(this::deferRegistration);
-        }
-
-        private VaadinSession getSession() {
-            NodeOwner owner = getHost().getElement().getNode().getOwner();
-            assert owner instanceof StateTree;
-            return ((StateTree) owner).getUI().getSessionOrThrow();
         }
 
         /**
@@ -461,10 +429,13 @@ public class AvatarGroup extends Component
         }
 
         private void setHost(AvatarGroup host) {
+            if (this.host == host) {
+                return;
+            }
+            unbindImage();
             this.host = host;
-            if (pendingHandle != null) {
-                attachPendingRegistration(pendingHandle);
-                pendingHandle = null;
+            if (host != null) {
+                bindImage();
             }
         }
     }
@@ -634,7 +605,12 @@ public class AvatarGroup extends Component
     }
 
     private void updateItems(Collection<AvatarGroupItem> items) {
-        this.items.forEach(item -> item.setHost(null));
+        var newItems = new HashSet<>(items);
+        // Only release the items that were removed, and only when this group
+        // still hosts them, so that the others keep their image resource
+        this.items.stream().filter(
+                item -> !newItems.contains(item) && item.getHost() == this)
+                .forEach(item -> item.setHost(null));
         this.items = new ArrayList<>(items);
         this.items.forEach(item -> item.setHost(this));
         clientItemsUpdate.schedule();

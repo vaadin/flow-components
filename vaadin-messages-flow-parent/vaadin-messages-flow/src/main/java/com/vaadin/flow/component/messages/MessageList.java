@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -157,7 +158,12 @@ public class MessageList extends Component implements HasStyle, HasSize,
     }
 
     private void updateItems(Collection<MessageListItem> items) {
-        this.items.forEach(item -> item.setHost(null));
+        var newItems = new HashSet<>(items);
+        // Only release the items that were removed, and only when this list
+        // still hosts them, so that the others keep their image resource
+        this.items.stream().filter(
+                item -> !newItems.contains(item) && item.getHost() == this)
+                .forEach(item -> item.setHost(null));
         this.items = new ArrayList<>(items);
         this.items.forEach(item -> item.setHost(this));
         scheduleItemsUpdate();
