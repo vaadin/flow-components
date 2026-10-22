@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.signals.Signal;
 
@@ -220,12 +221,21 @@ public class Icon extends AbstractIcon<Icon> {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Sets both the {@code fill} and {@code color} CSS properties so that the
+     * color applies to icons that use filled paths as well as icons that use
+     * stroked paths (which rely on {@code currentColor}).
+     */
     @Override
     public void setColor(String color) {
         if (color == null) {
             getStyle().remove(STYLE_FILL);
+            getStyle().remove(ElementConstants.STYLE_COLOR);
         } else {
             getStyle().set(STYLE_FILL, color);
+            getStyle().set(ElementConstants.STYLE_COLOR, color);
         }
     }
 
