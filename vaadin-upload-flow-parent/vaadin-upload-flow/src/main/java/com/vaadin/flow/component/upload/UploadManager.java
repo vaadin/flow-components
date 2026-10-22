@@ -147,12 +147,10 @@ public class UploadManager implements Serializable {
                 .addEventData(eventDetailErrorMessage);
 
         // Listen for all-finished event from client (triggered when all
-        // uploads are complete, including success, error, or abort), also
-        // when a modal component makes the owner inert
-        connector.getElement()
-                .addEventListener("all-finished", event -> ComponentUtil
-                        .fireEvent(owner, new AllFinishedEvent(owner)))
-                .allowInert();
+        // uploads are complete, including success, error, or abort)
+        connector.getElement().addEventListener("all-finished",
+                event -> ComponentUtil.fireEvent(owner,
+                        new AllFinishedEvent(owner)));
 
         // Register internal listeners for upload state tracking
         ComponentUtil.addListener(connector, UploadStartEvent.class,
@@ -173,12 +171,6 @@ public class UploadManager implements Serializable {
     /**
      * Sets the upload handler that processes uploaded files.
      * <p>
-     * Uploads are received also while a modal component makes the owner inert,
-     * so that opening a modal before or during an upload does not reject the
-     * files the user selected. The handler's
-     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
-     * disable the owner component.
-     * <p>
      * This overload uses the default upload target name {@code "upload"}, which
      * becomes the last segment of the dynamically generated upload URL.
      *
@@ -191,12 +183,6 @@ public class UploadManager implements Serializable {
 
     /**
      * Sets the upload handler that processes uploaded files.
-     * <p>
-     * Uploads are received also while a modal component makes the owner inert,
-     * so that opening a modal before or during an upload does not reject the
-     * files the user selected. The handler's
-     * {@link UploadHandler#isAllowInert()} is ignored. To block uploads,
-     * disable the owner component.
      *
      * @param handler
      *            the upload handler, not {@code null}
