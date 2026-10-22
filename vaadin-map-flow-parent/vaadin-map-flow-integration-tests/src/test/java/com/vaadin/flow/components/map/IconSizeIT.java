@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.components.map;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,36 +23,32 @@ public class IconSizeIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        MapElement map = $(MapElement.class).waitForFirst();
+        MapElement map = $(MapElement.class).single();
         features = map.getMapReference().getLayers().getLayer(1).getSource()
                 .asVectorSource().getFeatures();
     }
 
     @Test
     public void widthAndHeight_iconStretchedToSize() {
-        waitUntilIconSize(0, 40, 40);
+        assertIconSize(0, 40, 40);
     }
 
     @Test
     public void widthOnly_heightPreservesAspectRatio() {
-        waitUntilIconSize(1, 40, 52);
+        assertIconSize(1, 40, 52);
     }
 
     @Test
     public void heightOnly_widthPreservesAspectRatio() {
-        waitUntilIconSize(2, 40, 52);
+        assertIconSize(2, 40, 52);
     }
 
-    private void waitUntilIconSize(int featureIndex, double width,
-            double height) {
+    private void assertIconSize(int featureIndex, double width, double height) {
         MapElement.IconReference icon = features.getFeature(featureIndex)
                 .getStyle().getImage();
-        waitUntil(driver -> {
-            Double iconWidth = icon.getWidth();
-            Double iconHeight = icon.getHeight();
-            return iconWidth != null && iconHeight != null
-                    && Math.abs(iconWidth - width) < 0.001
-                    && Math.abs(iconHeight - height) < 0.001;
-        });
+        // Rendered size is only available once the image has loaded
+        waitUntil(driver -> icon.getWidth() != null);
+        Assert.assertEquals(width, icon.getWidth(), 0.001);
+        Assert.assertEquals(height, icon.getHeight(), 0.001);
     }
 }
