@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
@@ -30,6 +31,7 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -144,6 +146,21 @@ class MapSerializationTest {
     }
 
     @Test
+    void serializeIcon_imgSizeNotSerialized() {
+        // The built-in pin icon has an image size set
+        MarkerFeature marker = new MarkerFeature();
+        map.getFeatureLayer().addFeature(marker);
+        Assertions.assertNotNull(marker.getIcon().getImgSize());
+
+        ui.fakeClientCommunication();
+        ObjectNode iconNode = findSyncedItem(getSynchronizedItems(),
+                marker.getIcon().getId());
+
+        Assertions.assertTrue(iconNode.has("scale"));
+        Assertions.assertFalse(iconNode.has("imgSize"));
+    }
+
+    @Test
     void detachMap_unregisterStreamResources() {
         // Sync a marker with an icon to register the stream resource
         setupMarker();
@@ -185,12 +202,13 @@ class MapSerializationTest {
 
     private ArrayNode getSynchronizedItems() {
         var syncInvocation = ui.dumpPendingJavaScriptInvocations().stream()
-                .filter(invocation -> invocation.getInvocation().getExpression()
-                        .contains("$connector.synchronize"))
+                .map(PendingJavaScriptInvocation::getInvocation)
+                .filter(invocation -> "$connector.synchronize"
+                        .equals(JsFunctionCallUtil.getFunctionName(invocation)))
                 .findFirst().orElseThrow(() -> new AssertionError(
                         "No synchronize invocation found"));
 
-        return (ArrayNode) syncInvocation.getInvocation().getParameters()
+        return (ArrayNode) JsFunctionCallUtil.getArguments(syncInvocation)
                 .get(0);
     }
 

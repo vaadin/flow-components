@@ -18,6 +18,7 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -114,11 +115,9 @@ public class TreeGrid<T> extends Grid<T>
         // Using Page.executeJs to ensure this runs before any other
         // executeJs calls scheduled on the component that require the
         // connector.
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached Grid"))
-                .getPage().executeJs(
-                        "if ($0) window.Vaadin.Flow.treeGridConnector.initLazy($0)",
-                        getElement());
+        getUIOrThrow().getPage().executeJs(
+                "if ($0) window.Vaadin.Flow.treeGridConnector.initLazy($0)",
+                getElement());
     }
 
     /**
@@ -1005,7 +1004,7 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void scrollToIndex(int index) {
         scheduleScrollExecution(
-                () -> getElement().executeJs("this.scrollToIndex($0);", index));
+                () -> getElement().callJsFunction("scrollToIndex", index));
     }
 
     /**
@@ -1049,14 +1048,16 @@ public class TreeGrid<T> extends Grid<T>
                     "At least one index should be provided.");
         }
 
-        scheduleScrollExecution(() -> getElement()
-                .executeJs("this.scrollToIndex(...$0);", path));
+        Object[] arguments = Arrays.stream(path).boxed().toArray();
+        scheduleScrollExecution(
+                () -> getElement().callJsFunction("scrollToIndex", arguments));
     }
 
     @Override
     public void scrollToEnd() {
-        scheduleScrollExecution(() -> getElement()
-                .executeJs("this.scrollToIndex(...Array(10).fill(-1))"));
+        Object[] arguments = Collections.nCopies(10, -1).toArray();
+        scheduleScrollExecution(
+                () -> getElement().callJsFunction("scrollToIndex", arguments));
     }
 
     /**
@@ -1181,9 +1182,10 @@ public class TreeGrid<T> extends Grid<T>
         var itemKey = dataCommunicator.getKeyMapper().key(item);
         var itemIndexPath = dataCommunicator.resolveItem(item);
 
-        scheduleScrollExecution(() -> getElement().executeJs(
-                "this.$connector.scrollToItem($0, ...$1)", itemKey,
-                itemIndexPath));
+        Object[] arguments = Stream.concat(Stream.of(itemKey),
+                Arrays.stream(itemIndexPath).boxed()).toArray();
+        scheduleScrollExecution(() -> getElement()
+                .callJsFunction("$connector.scrollToItem", arguments));
     }
 
     @Override

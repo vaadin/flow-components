@@ -42,7 +42,7 @@ import com.vaadin.flow.signals.BindingActiveException;
  * @since 24.7
  */
 @Tag("vaadin-card")
-@NpmPackage(value = "@vaadin/card", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/card", version = "25.4.0-alpha4")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component implements HasSize, HasAriaLabel,
         HasAriaRole, HasComponents, HasThemeVariant<CardVariant> {
@@ -56,7 +56,7 @@ public class Card extends Component implements HasSize, HasAriaLabel,
     private static final String FOOTER_SLOT_NAME = "footer";
 
     private static final String CARD_TITLE_PROPERTY = "cardTitle";
-    private static final String TITLE_HEADING_LEVEL_PROPERTY = "titleHeadingLevel";
+    private static final String HEADING_LEVEL_PROPERTY = "headingLevel";
 
     /**
      * Sets the component used as the card's media. The media slot is typically
@@ -92,7 +92,7 @@ public class Card extends Component implements HasSize, HasAriaLabel,
      * @param title
      *            the title property
      * @see #setTitle(String, Integer)
-     * @see #setTitleHeadingLevel(Integer)
+     * @see #setHeadingLevel(Integer)
      * @see #getTitleAsText()
      * @since 24.7.2
      */
@@ -113,12 +113,12 @@ public class Card extends Component implements HasSize, HasAriaLabel,
      * @param titleHeadingLevel
      *            the title heading level property,
      * @see #setTitle(String)
-     * @see #setTitleHeadingLevel(Integer)
+     * @see #setHeadingLevel(Integer)
      * @see #getTitleAsText()
      * @since 24.7.2
      */
     public void setTitle(String title, Integer titleHeadingLevel) {
-        setTitleHeadingLevel(titleHeadingLevel);
+        setHeadingLevel(titleHeadingLevel);
         setTitle(title);
     }
 
@@ -131,13 +131,43 @@ public class Card extends Component implements HasSize, HasAriaLabel,
      * @param titleHeadingLevel
      *            the title heading level property, {@code null} to remove
      * @since 24.7.2
+     * @deprecated since 25.4, for removal in 26.0. Use
+     *             {@link #setHeadingLevel(Integer)} instead.
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     public void setTitleHeadingLevel(Integer titleHeadingLevel) {
-        if (titleHeadingLevel == null) {
-            getElement().removeProperty(TITLE_HEADING_LEVEL_PROPERTY);
+        setHeadingLevel(titleHeadingLevel);
+    }
+
+    /**
+     * Gets the heading level of the titles set using {@link #setTitle(String)}.
+     *
+     * @return the heading level, or {@code null} if none is set
+     * @since 25.4
+     */
+    public Integer getHeadingLevel() {
+        if (getElement().getPropertyRaw(HEADING_LEVEL_PROPERTY) == null) {
+            return null;
+        }
+        return (int) getElement().getProperty(HEADING_LEVEL_PROPERTY, 0.0);
+    }
+
+    /**
+     * Sets the heading level for the titles set using
+     * {@link #setTitle(String)}. This sets the {@code aria-level} attribute on
+     * the title. The default is 2. Setting {@code null} restores the default.
+     * Does not affect the title components set using
+     * {@link #setTitle(Component)}.
+     *
+     * @param headingLevel
+     *            the heading level, or {@code null} to remove it
+     * @since 25.4
+     */
+    public void setHeadingLevel(Integer headingLevel) {
+        if (headingLevel == null) {
+            getElement().removeProperty(HEADING_LEVEL_PROPERTY);
         } else {
-            getElement().setProperty(TITLE_HEADING_LEVEL_PROPERTY,
-                    titleHeadingLevel);
+            getElement().setProperty(HEADING_LEVEL_PROPERTY, headingLevel);
         }
     }
 

@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.treegrid;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
@@ -35,6 +37,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -292,20 +295,25 @@ class TreeGridScrollToItemTest {
         Assertions.assertEquals(1, invocations.size());
 
         var invocation = invocations.get(0);
-        Assertions.assertTrue(
-                invocation.getExpression().contains("scrollToItem"));
-        Assertions.assertEquals(expectedItemKey,
-                invocation.getParameters().get(0));
-        Assertions.assertArrayEquals(expectedPath,
-                (int[]) invocation.getParameters().get(1));
+        var expectedArguments = new ArrayList<Object>();
+        expectedArguments.add(expectedItemKey);
+        Arrays.stream(expectedPath).forEach(expectedArguments::add);
+        Assertions.assertEquals("$connector.scrollToItem",
+                JsFunctionCallUtil.getFunctionName(invocation));
+        Assertions.assertEquals(expectedArguments,
+                JsFunctionCallUtil.getArguments(invocation));
     }
 
     private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
         return ui.dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> invocation.getExpression()
-                        .contains("scroll"))
-                .toList();
+                .filter(invocation -> {
+                    var functionName = JsFunctionCallUtil
+                            .getFunctionName(invocation);
+                    return functionName != null
+                            ? functionName.contains("scroll")
+                            : invocation.getExpression().contains("scroll");
+                }).toList();
     }
 
     private void sortDescending() {

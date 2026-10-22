@@ -27,6 +27,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 class MasterDetailLayoutTest {
@@ -509,15 +510,13 @@ class MasterDetailLayoutTest {
 
         Assertions.assertEquals(1, pendingJavaScriptInvocations.size());
 
-        var pendingJavaScriptInvocation = pendingJavaScriptInvocations.get(0);
-        var parameters = pendingJavaScriptInvocation.getInvocation()
-                .getParameters();
+        var invocation = pendingJavaScriptInvocations.get(0).getInvocation();
+        var arguments = JsFunctionCallUtil.getArguments(invocation);
         var element = component != null ? component.getElement() : null;
 
-        Assertions.assertEquals(
-                "return (async function() { this._setDetail($0, $1)}).apply($2)",
-                pendingJavaScriptInvocation.getInvocation().getExpression());
-        Assertions.assertEquals(element, parameters.get(0));
-        Assertions.assertEquals(skipTransition, parameters.get(1));
+        Assertions.assertEquals("_setDetail",
+                JsFunctionCallUtil.getFunctionName(invocation));
+        Assertions.assertEquals(element, arguments.get(0));
+        Assertions.assertEquals(skipTransition, arguments.get(1));
     }
 }

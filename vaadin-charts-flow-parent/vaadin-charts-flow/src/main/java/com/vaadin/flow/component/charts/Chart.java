@@ -89,7 +89,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 6.0.1
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/charts", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/charts", version = "25.4.0-alpha4")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
@@ -736,9 +736,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
                 int pointIndex, Series drilldownSeries) {
-            getElement().executeJs(
-                    "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)",
-                    "addSeriesAsDrilldown", seriesIndex, pointIndex,
+            getElement().executeJs(ChartJs.class).addSeriesAsDrilldown(
+                    seriesIndex, pointIndex,
                     toJsonValue((AbstractConfigurationObject) drilldownSeries));
         }
 

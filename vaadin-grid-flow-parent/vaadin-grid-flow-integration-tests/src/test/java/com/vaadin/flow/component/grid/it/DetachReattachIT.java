@@ -115,7 +115,7 @@ public class DetachReattachIT extends AbstractComponentIT {
         open();
         GridElement grid = $(GridElement.class).first();
 
-        grid.getHeaderCell(0).$("vaadin-grid-sorter").first().click();
+        grid.getHeaderCell(0).getSorter().click();
 
         // Detach, reset sorting and re-attach
         $("button").id("detach-button").click();
@@ -208,17 +208,81 @@ public class DetachReattachIT extends AbstractComponentIT {
         open();
 
         GridElement grid = $(GridElement.class).first();
-        var sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        var sorter = grid.getHeaderCell(0).getSorter();
         sorter.click();
-        var direction = sorter.getProperty("direction");
-        Assert.assertNotNull(direction);
+        Assert.assertTrue(sorter.isAscending());
 
         $("button").id("detach-and-reattach-button").click();
         $("button").id("detach-and-reattach-button").click();
 
         grid = $(GridElement.class).first();
-        sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
-        Assert.assertEquals(direction, sorter.getProperty("direction"));
+        sorter = grid.getHeaderCell(0).getSorter();
+        Assert.assertTrue(sorter.isAscending());
+    }
+
+    @Test
+    public void selectItem_detach_setItemsAndAttach_rowsAreRendered() {
+        open();
+        $(GridElement.class).first().select(0);
+
+        $("button").id("detach-button").click();
+        $("button").id("set-items-and-attach-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertEquals("Component A", grid.getCell(0, 1).getText());
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void selectItem_moveToContainer_rowsAndSelectionKept() {
+        open();
+        // Moving keeps the client element, so the reference does not go stale
+        GridElement grid = $(GridElement.class).first();
+        grid.select(0);
+
+        $("button").id("move-to-container-button").click();
+        Assert.assertTrue(
+                $("div").id("container").$(GridElement.class).exists());
+        Assert.assertEquals("A", grid.getCell(0, 0).getText());
+        Assert.assertTrue(grid.getRow(0).isSelected());
+
+        grid.select(1);
+        $("button").id("attach-button").click();
+        Assert.assertFalse(
+                $("div").id("container").$(GridElement.class).exists());
+        Assert.assertEquals("A", grid.getCell(0, 0).getText());
+        Assert.assertFalse(grid.getRow(0).isSelected());
+        Assert.assertTrue(grid.getRow(1).isSelected());
+    }
+
+    @Test
+    public void selectItem_hideAndShow_rowsAndSelectionKept() {
+        open();
+        GridElement grid = $(GridElement.class).first();
+        grid.select(0);
+
+        $("button").id("hide-grid-button").click();
+        waitUntil(driver -> grid.hasAttribute("hidden"));
+        $("button").id("show-grid-button").click();
+        waitUntil(driver -> !grid.hasAttribute("hidden"));
+
+        Assert.assertEquals("A", grid.getCell(0, 0).getText());
+        Assert.assertTrue(grid.getRow(0).isSelected());
+    }
+
+    @Test
+    public void scrollDown_detachAndAttach_firstRowsRendered() {
+        open();
+        $("button").id("set-many-items-button").click();
+        $(GridElement.class).first().scrollToRow(150);
+
+        $("button").id("detach-button").click();
+        $("button").id("attach-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
+        Assert.assertEquals("Item 0", grid.getCell(0, 0).getText());
+        checkLogsForErrors();
     }
 
     @Test

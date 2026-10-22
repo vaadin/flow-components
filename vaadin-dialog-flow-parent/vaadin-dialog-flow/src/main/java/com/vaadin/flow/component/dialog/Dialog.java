@@ -79,7 +79,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/dialog", version = "25.4.0-alpha4")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @ModalRoot
 public class Dialog extends Component
@@ -947,6 +947,37 @@ public class Dialog extends Component
     }
 
     /**
+     * Sets the ARIA heading level, used to set the {@code aria-level} attribute
+     * on the header title element.
+     * <p>
+     * By default no heading level is set, and the web component uses {@code 1}
+     * for modal dialogs and {@code 2} for modeless dialogs.
+     *
+     * @param headingLevel
+     *            the heading level, or {@code null} to restore the web
+     *            component's default
+     * @since 25.4
+     */
+    public void setHeadingLevel(Integer headingLevel) {
+        if (headingLevel == null) {
+            getElement().removeProperty("headingLevel");
+        } else {
+            getElement().setProperty("headingLevel", headingLevel);
+        }
+    }
+
+    /**
+     * Gets the ARIA heading level of the header title element.
+     *
+     * @return the heading level, or {@code null} if none is set
+     * @since 25.4
+     */
+    public Integer getHeadingLevel() {
+        Object value = getElement().getPropertyRaw("headingLevel");
+        return value == null ? null : ((Number) value).intValue();
+    }
+
+    /**
      * Gets the object from which components can be added or removed from the
      * dialog header area. The header is displayed only if there's a
      * {@link #getHeaderTitle()} or at least one component added with
@@ -1369,9 +1400,9 @@ public class Dialog extends Component
 
     private void applyModality() {
         getUI().ifPresent(ui -> {
-            boolean modal = isOpened() && isVisible()
-                    && modality == ModalityMode.STRICT;
-            ui.setChildComponentModal(this, modal);
+            ModalityMode mode = isOpened() && isVisible() ? modality
+                    : ModalityMode.MODELESS;
+            ui.setChildComponentModal(this, mode);
         });
     }
 

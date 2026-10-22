@@ -47,7 +47,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 25.2
  */
 @Tag("vaadin-breadcrumbs-item")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.4.0-alpha4")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs-item.js")
 public class BreadcrumbsItem extends Component
         implements HasText, HasEnabled, HasPrefix {
@@ -271,11 +271,7 @@ public class BreadcrumbsItem extends Component
     }
 
     private void doSetPath(String path) {
-        if (path == null) {
-            getElement().removeAttribute("path");
-        } else {
-            getElement().setAttribute("path", path);
-        }
+        getElement().setAttribute("path", path);
     }
 
     /**

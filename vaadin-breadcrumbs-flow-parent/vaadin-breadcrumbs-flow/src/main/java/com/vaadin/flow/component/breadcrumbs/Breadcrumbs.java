@@ -59,7 +59,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 25.2
  */
 @Tag("vaadin-breadcrumbs")
-@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/breadcrumbs", version = "25.4.0-alpha4")
 @JsModule("@vaadin/breadcrumbs/src/vaadin-breadcrumbs.js")
 public class Breadcrumbs extends Component implements HasSize, HasStyle,
         HasAriaLabel, HasComponentsOfType<BreadcrumbsItem>,
@@ -145,7 +145,7 @@ public class Breadcrumbs extends Component implements HasSize, HasStyle,
         if (newMode == Mode.ROUTER) {
             // MANUAL -> ROUTER: start listening for navigation.
             if (isAttached()) {
-                registerNavigationListener(getUI().orElseThrow());
+                registerNavigationListener(getUIOrThrow());
             }
         } else {
             // ROUTER -> MANUAL: stop listening for navigation.

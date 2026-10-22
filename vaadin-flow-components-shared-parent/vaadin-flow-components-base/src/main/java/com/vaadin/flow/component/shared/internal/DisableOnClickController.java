@@ -25,6 +25,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
+import com.vaadin.flow.js.JsDefinition;
+import com.vaadin.flow.js.JsExpression;
 
 /**
  * An internal controller for handling disabling a component when it is clicked.
@@ -51,6 +53,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     private final BeforeClientResponseAction clientUpdate;
     private final BeforeClientResponseAction enable;
     private boolean updatingEnabled = false;
+    private boolean disabledByClick = false;
+    private boolean clientMayDisableItself = false;
 
     /**
      * Creates a new controller for the given component.
@@ -62,8 +66,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     public DisableOnClickController(C component) {
         this.component = Objects.requireNonNull(component);
         clientUpdate = new BeforeClientResponseAction(component,
-                () -> component.getElement().executeJs("this.disabled = $0",
-                        !component.isEnabled()));
+                () -> component.getElement().executeJs(DisableOnClickJs.class)
+                        .setDisabled(!component.isEnabled()));
         enable = new BeforeClientResponseAction(component,
                 () -> setEnabledInternal(true));
 
@@ -96,6 +100,8 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     public void setDisableOnClick(boolean disableOnClick) {
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
+            // Never reset, the client may still be disabled from a click
+            clientMayDisableItself = true;
             component.getElement().setAttribute("disableonclick", "true");
         } else {
             component.getElement().removeAttribute("disableonclick");
@@ -138,10 +144,25 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     }
 
     /**
+     * Gets whether the component is currently disabled because it was clicked
+     * while disable on click was turned on. This is no longer the case once the
+     * enabled state is set by application code, or the component is enabled
+     * again automatically.
+     *
+     * @return whether the component was disabled by disable on click and has
+     *         not been enabled or disabled explicitly since
+     * @since 25.4
+     */
+    public boolean isDisabledByClick() {
+        return disabledByClick;
+    }
+
+    /**
      * Forces the client-side component's {@code disabled} property to be
      * updated before the response is sent to the client, so that it matches the
      * component's effective enabled state, including whether any parent is
-     * disabled.
+     * disabled. Does nothing if disable on click has never been turned on for
+     * the component.
      * <p>
      * This method should be called from the component's
      * {@link HasEnabled#setEnabled} method, after the enabled state has been
@@ -154,6 +175,10 @@ public class DisableOnClickController<C extends Component & HasEnabled>
             // The enabled state was set explicitly by application code, so
             // don't override it after the round trip.
             enable.cancel();
+            disabledByClick = false;
+        }
+        if (!clientMayDisableItself) {
+            return;
         }
         // If the component is disabled and re-enabled during the same round
         // trip, Flow will not detect any changes and the client side component
@@ -167,8 +192,26 @@ public class DisableOnClickController<C extends Component & HasEnabled>
         updatingEnabled = true;
         try {
             component.setEnabled(enabled);
+            disabledByClick = !enabled;
         } finally {
             updatingEnabled = false;
         }
+    }
+
+    /**
+     * The JavaScript that the controller runs in the browser, for
+     * {@link com.vaadin.flow.dom.Element#executeJs(Class)}.
+     */
+    @JsDefinition
+    interface DisableOnClickJs extends Serializable {
+
+        /**
+         * Sets the disabled property of the element.
+         *
+         * @param disabled
+         *            whether the element is disabled
+         */
+        @JsExpression("this.disabled = $0")
+        void setDisabled(boolean disabled);
     }
 }

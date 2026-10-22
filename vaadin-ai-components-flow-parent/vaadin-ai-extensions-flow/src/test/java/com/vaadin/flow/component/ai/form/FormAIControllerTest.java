@@ -145,6 +145,8 @@ class FormAIControllerTest {
             for (var anchor : List.of("get_form_state", "fill_form",
                     "query_field_options", "queryable", "enum", "rejected",
                     ".ignoreField()", "SAME turn", "newly-appeared",
+                    // a near-miss option must not replace the user's value
+                    "similar-looking",
                     // bean-level cross-field rejections key on the "__form__"
                     // sentinel id, not a real field id.
                     "__form__", "cross-field")) {
@@ -2452,9 +2454,9 @@ class FormAIControllerTest {
         @Test
         void fieldRevealedDuringTurnIsMarked() {
             // A field hidden at turn start gets no working state, so nothing
-            // has put a marker on it yet. When the AI reveals and fills it
-            // during the turn — the cascade case — the turn-end marking is
-            // what has to add one.
+            // has put a marker on it yet. When it is revealed and filled
+            // during the turn without going through fill_form, the turn-end
+            // marking is what has to add one.
             var trigger = new TestField();
             var revealed = new TestField();
             revealed.setVisible(false);

@@ -72,9 +72,6 @@ requests picked that way say so in their description and are labeled
 `ai-resolved-conflict`; review them with that in mind. A pick that cannot be
 completed is labeled `need to pick manually <branch>` and is left to a human.
 
-The workflow is currently in dry-run mode: it only logs what it would pick,
-while the existing cherry-pick job keeps doing the picking.
-
 Configuration:
 
 | Name | Kind | Purpose |

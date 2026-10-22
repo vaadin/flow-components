@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +60,7 @@ import com.vaadin.flow.signals.Signal;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/message-list", version = "25.4.0-alpha4")
 public class MessageList extends Component implements HasStyle, HasSize,
         LocaleChangeObserver, HasThemeVariant<MessageListVariant> {
 
@@ -157,7 +158,12 @@ public class MessageList extends Component implements HasStyle, HasSize,
     }
 
     private void updateItems(Collection<MessageListItem> items) {
-        this.items.forEach(item -> item.setHost(null));
+        var newItems = new HashSet<>(items);
+        // Only release the items that were removed, and only when this list
+        // still hosts them, so that the others keep their image resource
+        this.items.stream().filter(
+                item -> !newItems.contains(item) && item.getHost() == this)
+                .forEach(item -> item.setHost(null));
         this.items = new ArrayList<>(items);
         this.items.forEach(item -> item.setHost(this));
         scheduleItemsUpdate();
@@ -629,7 +635,7 @@ public class MessageList extends Component implements HasStyle, HasSize,
      */
     private void checkTypingIndicatorFeatureFlag(UI ui) {
         var featureFlags = FeatureFlags
-                .get(ui.getSession().getService().getContext());
+                .get(ui.getSessionOrThrow().getService().getContext());
         if (!featureFlags.isEnabled(
                 MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID)
                 && !featureFlags.isEnabled(AI_COMPONENTS_FEATURE_FLAG_ID)) {

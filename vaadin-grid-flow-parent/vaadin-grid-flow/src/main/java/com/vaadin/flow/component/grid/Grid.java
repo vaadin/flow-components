@@ -98,6 +98,8 @@ import com.vaadin.flow.data.provider.HasDataGenerators;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ItemIndexProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
@@ -216,8 +218,8 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha4")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha4")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -1851,6 +1853,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         updateMultiSortPriority(defaultMultiSortPriority);
 
         initSelectionPreservationHandler();
+
+        // Update the IDs of the selected items when the identifier provider
+        // is changed through a data view
+        ComponentEventListener<IdentifierProviderChangeEvent<T, ?>> identifierProviderChangeListener = event -> {
+            if (getSelectionModel() instanceof AbstractGridMultiSelectionModel<T> model) {
+                model.refreshSelectedItemIds();
+            }
+        };
+        addListener(IdentifierProviderChangeEvent.class,
+                (ComponentEventListener) identifierProviderChangeListener);
     }
 
     private void generateUniqueKeyData(T item, ObjectNode jsonObject) {
@@ -1871,8 +1883,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
-                        .stream().collect(Collectors
-                                .toMap(getDataProvider()::getId, item -> item));
+                        .stream().collect(Collectors.toMap(Grid.this::getItemId,
+                                item -> item));
                 if (deselectionCandidateIdsToItems.isEmpty()) {
                     return;
                 }
@@ -1880,7 +1892,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 Stream<T> itemsStream = getDataProvider().fetch(
                         getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
                 Set<Object> existingItemIds = itemsStream
-                        .map(getDataProvider()::getId)
+                        .map(Grid.this::getItemId)
                         .filter(deselectionCandidateIdsToItems::containsKey)
                         .limit(deselectionCandidateIdsToItems.size())
                         .collect(Collectors.toSet());
@@ -1912,11 +1924,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // Using Page.executeJs to ensure this runs before any other
         // executeJs calls scheduled on the component that require the
         // connector.
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached Grid"))
-                .getPage().executeJs(
-                        "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
-                        getElement());
+        getUIOrThrow().getPage().executeJs(
+                "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
+                getElement());
     }
 
     /**
@@ -3196,6 +3206,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public DataCommunicator<T> getDataCommunicator() {
         return dataCommunicator;
+    }
+
+    /**
+     * Gets the identifier of the given item, used to compare items for
+     * selection. Uses the identifier provider set through a data view, if any,
+     * otherwise the identifier from the data provider.
+     *
+     * @param item
+     *            the item to get the identifier for
+     * @return the identifier of the item
+     */
+    @SuppressWarnings("unchecked")
+    Object getItemId(T item) {
+        IdentifierProvider<T> identifierProvider = (IdentifierProvider<T>) ComponentUtil
+                .getData(this, IdentifierProvider.class);
+        if (identifierProvider != null) {
+            return identifierProvider.apply(item);
+        }
+        return getDataCommunicator().getDataProvider().getId(item);
     }
 
     /**

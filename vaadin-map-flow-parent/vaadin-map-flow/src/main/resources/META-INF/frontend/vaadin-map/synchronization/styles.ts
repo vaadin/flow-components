@@ -24,7 +24,7 @@ import type {
   StyleChange,
   TextStyleChange
 } from './synchronization-types.js';
-import { convertEnumValue, convertToCoordinateArray, convertToSizeArray, createOptions } from './util.ts';
+import { convertEnumValue, convertToCoordinateArray, createOptions } from './util.ts';
 
 export function synchronizeFill(target: Fill | undefined, source: FillChange, context: MapSyncContext): Fill {
   if (!target) {
@@ -80,7 +80,6 @@ export function synchronizeIcon(target: Icon | undefined, source: IconChange, co
         ...source,
         img: undefined,
         src: src ?? undefined,
-        imgSize: source.imgSize ? convertToSizeArray(source.imgSize) : undefined,
         scale: hasSize ? undefined : source.scale,
         anchor: source.anchor ? convertToCoordinateArray(source.anchor) : undefined,
         anchorOrigin: source.anchorOrigin ? (convertEnumValue(source.anchorOrigin) as IconOrigin) : undefined

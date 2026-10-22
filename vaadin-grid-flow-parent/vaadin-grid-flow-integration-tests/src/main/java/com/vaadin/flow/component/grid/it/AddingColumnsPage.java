@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -70,6 +71,11 @@ public class AddingColumnsPage extends Div {
                 new NativeButtonRenderer<>("click", person -> {
                     // NO-OP
                 }));
+
+        addButton("add-icon-column",
+                new IconRenderer<>(
+                        person -> new Span(person.getAge() > 25 ? "$$$" : "$"),
+                        Person::getFirstName));
     }
 
     private void addButton(String id, Renderer<Person> renderer) {

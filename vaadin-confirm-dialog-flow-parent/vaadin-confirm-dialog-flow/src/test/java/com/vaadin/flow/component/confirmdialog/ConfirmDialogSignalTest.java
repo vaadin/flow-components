@@ -15,111 +15,26 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
 
-import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ValueSignal;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+
 import com.vaadin.tests.AbstractSignalsTest;
 
 class ConfirmDialogSignalTest extends AbstractSignalsTest {
-    private ConfirmDialog dialog;
 
-    @BeforeEach
-    void setUp() {
-        dialog = new ConfirmDialog();
-        ui.add(dialog);
+    @TestFactory
+    Stream<DynamicTest> bindWidth() {
+        return generateBindingTests(ConfirmDialog::new,
+                ConfirmDialog::bindWidth, ConfirmDialog::getWidth,
+                ConfirmDialog::setWidth, "400px", "500px");
     }
 
-    @Test
-    void bindWidth_widthSynchronized() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindWidth(signal);
-        Assertions.assertEquals("400px", dialog.getWidth());
-
-        signal.set("500px");
-        Assertions.assertEquals("500px", dialog.getWidth());
+    @TestFactory
+    Stream<DynamicTest> bindHeight() {
+        return generateBindingTests(ConfirmDialog::new,
+                ConfirmDialog::bindHeight, ConfirmDialog::getHeight,
+                ConfirmDialog::setHeight, "400px", "500px");
     }
-
-    @Test
-    void bindWidth_detachAndReattach_widthSynchronizedWhenAttached() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindWidth(signal);
-        Assertions.assertEquals("400px", dialog.getWidth());
-
-        dialog.removeFromParent();
-
-        signal.set("500px");
-        Assertions.assertEquals("400px", dialog.getWidth());
-
-        ui.add(dialog);
-        Assertions.assertEquals("500px", dialog.getWidth());
-    }
-
-    @Test
-    void bindWidth_setWidthWhileBound_throws() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindWidth(signal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> dialog.setWidth("500px"));
-    }
-
-    @Test
-    void bindWidth_bindWidthWhileBound_throws() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindWidth(signal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> dialog.bindWidth(new ValueSignal<>("500px")));
-    }
-
-    @Test
-    void bindHeight_heightSynchronized() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindHeight(signal);
-        Assertions.assertEquals("400px", dialog.getHeight());
-
-        signal.set("500px");
-        Assertions.assertEquals("500px", dialog.getHeight());
-    }
-
-    @Test
-    void bindHeight_detachAndReattach_heightSynchronizedWhenAttached() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindHeight(signal);
-        Assertions.assertEquals("400px", dialog.getHeight());
-
-        dialog.removeFromParent();
-
-        signal.set("500px");
-        Assertions.assertEquals("400px", dialog.getHeight());
-
-        ui.add(dialog);
-        Assertions.assertEquals("500px", dialog.getHeight());
-    }
-
-    @Test
-    void bindHeight_setHeightWhileBound_throws() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindHeight(signal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> dialog.setHeight("500px"));
-    }
-
-    @Test
-    void bindHeight_bindHeightWhileBound_throws() {
-        var signal = new ValueSignal<>("400px");
-
-        dialog.bindHeight(signal);
-        Assertions.assertThrows(BindingActiveException.class,
-                () -> dialog.bindHeight(new ValueSignal<>("500px")));
-    }
-
 }

@@ -110,8 +110,7 @@ public abstract class MapBase extends Component
 
         BaseJsonNode jsonChanges = getSerializer().toJson(changedObjects);
 
-        this.getElement().executeJs("this.$connector.synchronize($0)",
-                jsonChanges);
+        this.getElement().callJsFunction("$connector.synchronize", jsonChanges);
     }
 
     private void configurationPropertyChange(PropertyChangeEvent e) {

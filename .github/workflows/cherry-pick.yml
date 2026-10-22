@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   cherry-pick:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 180
     permissions:
       contents: read
@@ -51,10 +51,10 @@ jobs:
         with:
           github-token: ${{ secrets.CHERRY_PICK_TOKEN }}
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Rollout: only log what would be picked while the existing
-          # cherry-pick job is still active.
-          dry-run: true
           verify-instructions: |
             - Run the unit tests of the affected component module(s), e.g. mvn test -pl <module>
             - Run the formatter: mvn spotless:apply
           extra-allowed-tools: Bash(mvn:*)
+          # Trial of the cherry-pick prompt with resolution notes from
+          # vaadin/platform-build-script#214; remove once that PR is merged.
+          script-ref: 0b2a72d2238a44705df607a5a5e8e24e2aa9cab3

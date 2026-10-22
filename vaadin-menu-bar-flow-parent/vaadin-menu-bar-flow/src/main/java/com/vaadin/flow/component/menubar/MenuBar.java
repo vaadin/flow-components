@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
+import com.vaadin.flow.component.contextmenu.MenuDownloadManager;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuItemsArrayGenerator;
 import com.vaadin.flow.component.contextmenu.MenuManager;
@@ -53,13 +54,16 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("./vaadin-menu-bar/menubarConnector.ts")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.4.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.4.0-alpha4")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha4")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
+
+    private final MenuDownloadManager downloadManager = new MenuDownloadManager(
+            this, this::getItems, item -> item);
 
     private MenuBarI18n i18n;
 
@@ -69,7 +73,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     // item properties on render.
     private final BeforeClientResponseAction buttonsUpdate = new BeforeClientResponseAction(
             this,
-            () -> getElement().executeJs("this.$connector.generateItems()"));
+            () -> getElement().callJsFunction("$connector.generateItems"));
 
     /**
      * Creates an empty menu bar component.
@@ -83,6 +87,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
             @Override
             public void run() {
                 resetContent();
+                downloadManager.update();
             }
         };
         menuManager = new MenuManager<>(this, resetContent,
@@ -457,6 +462,10 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
 
     void updateButtons() {
         buttonsUpdate.schedule();
+    }
+
+    MenuDownloadManager getDownloadManager() {
+        return downloadManager;
     }
 
     private void initConnector() {

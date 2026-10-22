@@ -35,6 +35,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;
@@ -548,6 +549,112 @@ class FillFormToolTest {
                         + "fill_form post-write snapshot; got: " + entry);
         Assertions.assertEquals("filled", field.getValue(),
                 "Write to a turn-locked (but app-writable) field must land");
+    }
+
+    @Test
+    void fillForm_locksFieldEnabledAndFilledInSamePayload() {
+        // A field disabled at turn start is skipped by the turn-start lock.
+        // When an earlier write in the payload enables it and the AI fills
+        // it, the field must be locked like the others for the rest of the
+        // turn, so the user cannot type into it while the AI works.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+
+        var args = JacksonUtils.createObjectNode();
+        args.put(idOf(trigger), "business");
+        args.put(idOf(dependent), "CC-42");
+        fillFormResult(controller, args);
+
+        Assertions.assertEquals("CC-42", dependent.getValue());
+        Assertions.assertTrue(isWorking(dependent),
+                "A field enabled and filled during the turn must be locked");
+    }
+
+    @Test
+    void fillForm_locksFieldEnabledByWriteBeforeItIsFilled() {
+        // The AI may fill a field enabled by a write in a later fill_form
+        // call of the same turn. The field must be locked as soon as it is
+        // enabled, not left editable until then.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertTrue(isWorking(dependent),
+                "A field enabled by a write must be locked right away");
+    }
+
+    @Test
+    void fillForm_locksFieldRevealedByWrite() {
+        // Same as for a disabled field, for a field hidden at turn start that
+        // a write reveals.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setVisible(false);
+        trigger.addValueChangeListener(e -> dependent.setVisible(true));
+        var controller = controllerFor(trigger, dependent);
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertTrue(isWorking(dependent),
+                "A field revealed by a write must be locked right away");
+    }
+
+    @Test
+    void fillForm_doesNotLockFieldsTheAiStillCannotWrite() {
+        // Only fields the AI can write join the lock. A disabled or read-only
+        // field the writes left as it was must stay untouched.
+        var trigger = new TestField();
+        var disabled = new TestField();
+        disabled.setEnabled(false);
+        var readOnly = new TestField();
+        readOnly.setReadOnly(true);
+        var controller = controllerFor(trigger, disabled, readOnly);
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertFalse(isWorking(disabled));
+        Assertions.assertFalse(isWorking(readOnly));
+    }
+
+    @Test
+    void fillForm_fieldLockedMidTurnIsReleasedAtTurnEnd() {
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        controller.onResponse(AITurnEvents.success());
+
+        Assertions.assertFalse(isWorking(dependent),
+                "A field locked mid-turn must be released at turn end");
+    }
+
+    @Test
+    void fillForm_afterTurnEndLocksNoField() {
+        // Only the turn end releases the lock, so a fill that lands after it,
+        // for example from a tool call still running when the stream timed
+        // out, must not lock any field: it would stay locked until the next
+        // turn.
+        var trigger = new TestField();
+        var dependent = new TestField();
+        dependent.setEnabled(false);
+        trigger.addValueChangeListener(e -> dependent.setEnabled(true));
+        var controller = controllerFor(trigger, dependent);
+        controller.onResponse(AITurnEvents.success());
+
+        fillFormResult(controller, payload(trigger, "\"business\""));
+
+        Assertions.assertFalse(isWorking(trigger));
+        Assertions.assertFalse(isWorking(dependent));
     }
 
     @Test
@@ -2304,6 +2411,16 @@ class FillFormToolTest {
             }
         }
         return null;
+    }
+
+    /**
+     * @return whether the field's marker is in the "AI is working" state, which
+     *         carries the turn lock; {@code false} when the field has no marker
+     */
+    private static boolean isWorking(Component field) {
+        return field.getElement().getChildren().filter(
+                child -> "vaadin-ai-field-marker".equals(child.getTag()))
+                .anyMatch(marker -> marker.getProperty("working", false));
     }
 
     /**

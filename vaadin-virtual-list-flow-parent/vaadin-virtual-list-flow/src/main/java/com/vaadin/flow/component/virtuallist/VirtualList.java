@@ -71,7 +71,7 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 21.0
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/virtual-list", version = "25.4.0-alpha1")
+@NpmPackage(value = "@vaadin/virtual-list", version = "25.4.0-alpha4")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./vaadin-virtual-list/virtualListConnector.ts")
@@ -147,11 +147,9 @@ public class VirtualList<T> extends Component
         // Using Page.executeJs to ensure this runs before any other
         // executeJs calls scheduled on the component that require the
         // connector.
-        getUI().orElseThrow(() -> new IllegalStateException(
-                "Connector can only be initialized for an attached VirtualList"))
-                .getPage().executeJs(
-                        "if ($0) window.Vaadin.Flow.virtualListConnector.initLazy($0)",
-                        getElement());
+        getUIOrThrow().getPage().executeJs(
+                "if ($0) window.Vaadin.Flow.virtualListConnector.initLazy($0)",
+                getElement());
     }
 
     private void generateItemAccessibleName(T item, ObjectNode jsonObject) {
@@ -325,9 +323,9 @@ public class VirtualList<T> extends Component
      * @since 24.3
      */
     public void scrollToIndex(int rowIndex) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex($0)", rowIndex)));
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
+                this,
+                ctx -> getElement().callJsFunction("scrollToIndex", rowIndex)));
     }
 
     /**

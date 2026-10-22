@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -25,17 +26,14 @@ import com.vaadin.tests.AbstractComponentIT;
 public class RefreshAndMakeVisibleGridIT extends AbstractComponentIT {
 
     @Test
-    public void refreshDataProviderAndMakeGridVisible() {
+    public void refreshDataProviderAndMakeGridVisible_itemsAreRendered() {
         open();
 
         $("button").id("refresh").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertEquals(1, grid.getRowCount());
+        Assert.assertEquals("foo", grid.getCell(0, 0).getText());
         checkLogsForErrors();
-
-        boolean hasFooCell = $("vaadin-grid-cell-content").all().stream()
-                .anyMatch(element -> "foo".equals(element.getText()));
-
-        Assert.assertTrue(
-                "Grid has no 'foo' cell after making it visible and refresh data provider",
-                hasFooCell);
     }
 }

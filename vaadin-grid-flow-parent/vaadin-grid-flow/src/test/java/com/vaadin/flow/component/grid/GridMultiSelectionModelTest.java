@@ -33,6 +33,7 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -40,8 +41,13 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.MockUIExtension;
 
 class GridMultiSelectionModelTest {
+
+    @RegisterExtension
+    MockUIExtension ui = new MockUIExtension();
 
     private static final Person PERSON_C = new Person("c", 3);
     private static final Person PERSON_B = new Person("b", 2);
@@ -268,6 +274,44 @@ class GridMultiSelectionModelTest {
         selectionModel.deselect(PERSON_C);
         assertEquals(Collections.emptySet(), currentSelectionCapture.get());
         assertEquals(asSet(PERSON_C), oldSelectionCapture.get());
+    }
+
+    @Test
+    void setSelectionColumnFrozen_frozenPropertyUpdated() {
+        ui.add(grid);
+        Element selectionColumn = grid.getElement().getChildren()
+                .filter(child -> child.getTag()
+                        .equals("vaadin-grid-flow-selection-column"))
+                .findFirst().orElseThrow();
+        Assertions.assertFalse(selectionModel.isSelectionColumnFrozen());
+        Assertions.assertFalse(selectionColumn.getProperty("frozen", false));
+
+        selectionModel.setSelectionColumnFrozen(true);
+        Assertions.assertTrue(selectionModel.isSelectionColumnFrozen());
+        Assertions.assertTrue(selectionColumn.getProperty("frozen", false));
+
+        selectionModel.setSelectionColumnFrozen(false);
+        Assertions.assertFalse(selectionModel.isSelectionColumnFrozen());
+        Assertions.assertFalse(selectionColumn.getProperty("frozen", true));
+    }
+
+    @Test
+    void selectionEvent_isFromClient() {
+        AtomicReference<Boolean> fromClient = new AtomicReference<>();
+        selectionModel.addMultiSelectionListener(
+                event -> fromClient.set(event.isFromClient()));
+
+        selectionModel.select(PERSON_A);
+        assertFalse(fromClient.get());
+
+        selectionModel.selectFromClient(PERSON_B);
+        assertTrue(fromClient.get());
+
+        selectionModel.deselect(PERSON_B);
+        assertFalse(fromClient.get());
+
+        selectionModel.deselectFromClient(PERSON_A);
+        assertTrue(fromClient.get());
     }
 
     @Test

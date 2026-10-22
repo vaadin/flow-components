@@ -19,13 +19,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.thirdparty.guava.common.collect.Lists;
 import com.vaadin.addon.spreadsheet.client.CellData;
+import com.vaadin.addon.spreadsheet.client.PopupButtonState;
+import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
@@ -373,6 +377,77 @@ class SpreadsheetJsApiTest {
     void should_updateState_when_setShowCustomEditorOnFocus_isCalled() {
         api.setShowCustomEditorOnFocus(true);
         assertEquals(true, sharedState.showCustomEditorOnFocus);
+    }
+
+    @Test
+    void setPopupButtonState_registeredPopup_updatesWidgetAndClearsDefaults()
+            throws ReflectiveOperationException {
+        PopupButtonWidget widget;
+        try (var gwt = Mockito.mockStatic(GWT.class)) {
+            gwt.when(() -> GWT.create(Mockito.any())).thenAnswer(invocation -> {
+                Class<?> type = invocation.getArgument(0);
+                return Mockito.mock(type);
+            });
+            widget = Mockito.mock(PopupButtonWidget.class);
+        }
+        Map<String, PopupButtonWidget> widgets = getPopupMap(
+                "popupButtonWidgets");
+        widgets.put("Sheet1_2_3", widget);
+
+        try (var parser = Mockito.mockStatic(Parser.class)) {
+            for (boolean active : new boolean[] { true, false }) {
+                PopupButtonState state = new PopupButtonState();
+                state.sheet = "Sheet1";
+                state.row = 2;
+                state.col = 3;
+                state.active = active;
+                state.headerHidden = active;
+                state.popupWidth = active ? "300px" : null;
+                state.popupHeight = active ? "200px" : null;
+                parser.when(() -> Parser.parsePopupButtonState("state"))
+                        .thenReturn(state);
+
+                api.setPopupButtonState("state");
+            }
+        }
+
+        verify(widget).markActive(true);
+        verify(widget).markActive(false);
+        verify(widget).setPopupHeaderHidden(true);
+        verify(widget).setPopupHeaderHidden(false);
+        verify(widget).setPopupWidth("300px");
+        verify(widget).setPopupWidth(null);
+        verify(widget).setPopupHeight("200px");
+        verify(widget).setPopupHeight(null);
+        Mockito.verifyNoMoreInteractions(widget);
+        assertEquals(1, widgets.size());
+        assertEquals(widget, widgets.get("Sheet1_2_3"));
+    }
+
+    @Test
+    void setPopupButtonState_unregisteredPopup_doesNotCreateStateOrWidget()
+            throws ReflectiveOperationException {
+        PopupButtonState state = new PopupButtonState();
+        state.sheet = "Sheet1";
+        state.row = 2;
+        state.col = 3;
+        state.active = true;
+        try (var parser = Mockito.mockStatic(Parser.class)) {
+            parser.when(() -> Parser.parsePopupButtonState("state"))
+                    .thenReturn(state);
+
+            api.setPopupButtonState("state");
+        }
+
+        assertTrue(getPopupMap("popupButtonWidgets").isEmpty());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Map<String, T> getPopupMap(String fieldName)
+            throws ReflectiveOperationException {
+        var field = SpreadsheetJsApi.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return (Map<String, T>) field.get(api);
     }
 
     // CLIENT RPC METHODS
