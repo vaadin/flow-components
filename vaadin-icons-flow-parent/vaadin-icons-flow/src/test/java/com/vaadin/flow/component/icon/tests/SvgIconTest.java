@@ -176,6 +176,7 @@ class SvgIconTest {
         icon.setColor("red");
         Assertions.assertEquals("red", icon.getColor());
         Assertions.assertEquals("red", icon.getStyle().get("fill"));
+        Assertions.assertEquals("red", icon.getStyle().get("color"));
     }
 
     @Test
@@ -185,6 +186,7 @@ class SvgIconTest {
         icon.setColor(null);
         Assertions.assertNull(icon.getColor());
         Assertions.assertNull(icon.getStyle().get("fill"));
+        Assertions.assertNull(icon.getStyle().get("color"));
     }
 
     private static StreamResource getStreamResource() {
