@@ -11,7 +11,6 @@ package com.vaadin.flow.component.map;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Icon;
@@ -29,27 +28,16 @@ public class IconSizePage extends Div {
         });
         addMarker(map, options -> options.setWidth(40));
         addMarker(map, options -> options.setHeight(52));
-        MarkerFeature scaledMarker = addMarker(map, options -> {
-            options.setWidth(40);
-            options.setHeight(40);
-            options.setScale(2);
-        });
 
-        NativeButton setScale = new NativeButton("Set scale",
-                e -> scaledMarker.getIcon().setScale(3));
-        setScale.setId("set-scale");
-
-        add(map, setScale);
+        add(map);
     }
 
-    private static MarkerFeature addMarker(Map map,
-            Consumer<Icon.Options> configurer) {
+    private static void addMarker(Map map, Consumer<Icon.Options> configurer) {
         Icon.Options options = new Icon.Options();
         options.setImg(Assets.PIN.getHandler());
         configurer.accept(options);
         MarkerFeature marker = new MarkerFeature(new Coordinate(0, 0),
                 new Icon(options));
         map.getFeatureLayer().addFeature(marker);
-        return marker;
     }
 }

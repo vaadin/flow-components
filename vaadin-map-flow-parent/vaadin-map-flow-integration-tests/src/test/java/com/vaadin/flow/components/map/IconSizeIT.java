@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-map/icon-size")
@@ -41,15 +40,6 @@ public class IconSizeIT extends AbstractComponentIT {
     @Test
     public void heightOnly_widthPreservesAspectRatio() {
         waitUntilIconSize(2, 40, 52);
-    }
-
-    @Test
-    public void sizeAndScale_scaleAppliedOnTopOfSize() {
-        waitUntilIconSize(3, 80, 80);
-
-        $(TestBenchElement.class).id("set-scale").click();
-
-        waitUntilIconSize(3, 120, 120);
     }
 
     private void waitUntilIconSize(int featureIndex, double width,

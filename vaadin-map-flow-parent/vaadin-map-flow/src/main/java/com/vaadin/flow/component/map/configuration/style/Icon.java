@@ -161,9 +161,8 @@ public class Icon extends ImageStyle {
      * be set initially by passing an options object to the constructor.
      *
      * @return the size of the image
-     * @deprecated this option has no effect on how the icon is rendered, use
-     *             {@link #getWidth()} and {@link #getHeight()} to control the
-     *             rendered size of the icon instead
+     * @deprecated this option has no effect on how the icon is rendered, and
+     *             calls to it can be removed
      */
     @Deprecated(since = "25.4")
     @JsonIgnore
@@ -178,9 +177,8 @@ public class Icon extends ImageStyle {
      * exactly that size. If neither is specified, the image is rendered at its
      * natural size.
      * <p>
-     * The {@link #getScale() scale} is applied on top of this size, for example
-     * a width of {@code 50} combined with a scale of {@code 2} renders the icon
-     * 100 pixels wide.
+     * Sizing the icon in pixels can not be combined with a {@link #getScale()
+     * scale}, an icon with a width or height always has a scale of {@code 1}.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
@@ -199,9 +197,8 @@ public class Icon extends ImageStyle {
      * exactly that size. If neither is specified, the image is rendered at its
      * natural size.
      * <p>
-     * The {@link #getScale() scale} is applied on top of this size, for example
-     * a height of {@code 50} combined with a scale of {@code 2} renders the
-     * icon 100 pixels high.
+     * Sizing the icon in pixels can not be combined with a {@link #getScale()
+     * scale}, an icon with a width or height always has a scale of {@code 1}.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
@@ -211,6 +208,29 @@ public class Icon extends ImageStyle {
      */
     public Integer getHeight() {
         return height;
+    }
+
+    /**
+     * Sets the scaling of the image's size.
+     *
+     * @param scale
+     *            the new scaling
+     * @throws IllegalStateException
+     *             if the icon has a {@link #getWidth() width} or
+     *             {@link #getHeight() height}, which can not be combined with a
+     *             scale
+     */
+    @Override
+    public void setScale(double scale) {
+        if (hasSize()) {
+            throw new IllegalStateException(
+                    "The scale of an icon with a width or height can not be changed");
+        }
+        super.setScale(scale);
+    }
+
+    private boolean hasSize() {
+        return width != null || height != null;
     }
 
     public Icon(Options options) {
@@ -235,6 +255,10 @@ public class Icon extends ImageStyle {
         imgSize = options.imgSize;
         width = options.width;
         height = options.height;
+        if (hasSize() && getScale() != 1) {
+            throw new IllegalStateException(
+                    "Both a width or height and a scale were specified in the options. You must only specify one of these options.");
+        }
     }
 
     public static class Options extends ImageStyle.Options {
@@ -309,9 +333,7 @@ public class Icon extends ImageStyle {
         /**
          * @see Icon#getImgSize()
          * @deprecated this option has no effect on how the icon is rendered,
-         *             use {@link #setWidth(Integer)} and
-         *             {@link #setHeight(Integer)} to control the rendered size
-         *             of the icon instead
+         *             and calls to it can be removed
          */
         @Deprecated(since = "25.4")
         public void setImgSize(ImageSize imgSize) {
