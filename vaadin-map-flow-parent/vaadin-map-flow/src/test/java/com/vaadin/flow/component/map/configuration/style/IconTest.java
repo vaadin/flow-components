@@ -43,6 +43,7 @@ class IconTest {
         Icon.AnchorOrigin anchorOrigin = Icon.AnchorOrigin.TOP_RIGHT;
         String color = "cornflowerblue";
         String crossOrigin = "customCrossOrigin";
+        Icon.ImageSize imgSize = new Icon.ImageSize(40, 30);
 
         Icon.Options options = new Icon.Options();
         options.setOpacity(0.8f);
@@ -52,6 +53,7 @@ class IconTest {
         options.setAnchorOrigin(anchorOrigin);
         options.setColor(color);
         options.setCrossOrigin(crossOrigin);
+        options.setImgSize(imgSize);
         Icon icon = new Icon(options);
 
         Assertions.assertEquals(0.8, icon.getOpacity(), 0.001);
@@ -63,6 +65,7 @@ class IconTest {
         Assertions.assertEquals(anchorOrigin, icon.getAnchorOrigin());
         Assertions.assertEquals(color, icon.getColor());
         Assertions.assertEquals(crossOrigin, icon.getCrossOrigin());
+        Assertions.assertSame(imgSize, icon.getImgSize());
     }
 
     @Test

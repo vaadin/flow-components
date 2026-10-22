@@ -146,6 +146,21 @@ class MapSerializationTest {
     }
 
     @Test
+    void serializeIcon_imgSizeNotSerialized() {
+        // The built-in pin icon has an image size set
+        MarkerFeature marker = new MarkerFeature();
+        map.getFeatureLayer().addFeature(marker);
+        Assertions.assertNotNull(marker.getIcon().getImgSize());
+
+        ui.fakeClientCommunication();
+        ObjectNode iconNode = findSyncedItem(getSynchronizedItems(),
+                marker.getIcon().getId());
+
+        Assertions.assertTrue(iconNode.has("scale"));
+        Assertions.assertFalse(iconNode.has("imgSize"));
+    }
+
+    @Test
     void detachMap_unregisterStreamResources() {
         // Sync a marker with an icon to register the stream resource
         setupMarker();

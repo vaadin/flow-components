@@ -10,6 +10,7 @@ package com.vaadin.flow.component.map.configuration.style;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.map.configuration.Constants;
@@ -158,7 +159,11 @@ public class Icon extends ImageStyle {
      * be set initially by passing an options object to the constructor.
      *
      * @return the size of the image
+     * @deprecated this option has no effect on how the icon is rendered, and
+     *             calls to it can be removed
      */
+    @Deprecated(since = "25.4")
+    @JsonIgnore
     public ImageSize getImgSize() {
         return imgSize;
     }
@@ -254,7 +259,10 @@ public class Icon extends ImageStyle {
 
         /**
          * @see Icon#getImgSize()
+         * @deprecated this option has no effect on how the icon is rendered,
+         *             and calls to it can be removed
          */
+        @Deprecated(since = "25.4")
         public void setImgSize(ImageSize imgSize) {
             this.imgSize = imgSize;
         }
@@ -285,6 +293,11 @@ public class Icon extends ImageStyle {
         BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT,
     }
 
+    /**
+     * @deprecated only used by the deprecated {@link Icon#getImgSize()} option,
+     *             which has no effect on how the icon is rendered
+     */
+    @Deprecated(since = "25.4")
     public static class ImageSize implements Serializable {
         int width;
         int height;
