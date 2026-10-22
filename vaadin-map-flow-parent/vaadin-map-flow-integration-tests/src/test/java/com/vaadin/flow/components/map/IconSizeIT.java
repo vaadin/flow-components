@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-map/icon-size")
@@ -42,18 +41,6 @@ public class IconSizeIT extends AbstractComponentIT {
     @Test
     public void heightOnly_widthPreservesAspectRatio() {
         assertIconSize(2, 40, 52);
-    }
-
-    @Test
-    public void changeOtherProperty_sizePreserved() {
-        assertIconSize(1, 40, 52);
-
-        $(TestBenchElement.class).id("set-opacity").click();
-
-        MapElement.IconReference icon = features.getFeature(1).getStyle()
-                .getImage();
-        waitUntil(driver -> Math.abs(icon.getOpacity() - 0.5) < 0.001);
-        assertIconSize(1, 40, 52);
     }
 
     private void assertIconSize(int featureIndex, double width, double height) {

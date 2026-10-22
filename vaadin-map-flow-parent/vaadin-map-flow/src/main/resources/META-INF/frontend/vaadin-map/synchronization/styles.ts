@@ -55,8 +55,7 @@ export function synchronizeStroke(target: Stroke | undefined, source: StrokeChan
 function synchronizeImageStyle(
   target: ImageStyle | undefined,
   source: ImageStyleChange,
-  _context?: MapSyncContext,
-  syncScale = true
+  _context?: MapSyncContext
 ): ImageStyle {
   if (!target) {
     throw new Error('Can not instantiate base class: ol/style/Image');
@@ -65,16 +64,14 @@ function synchronizeImageStyle(
   target.setOpacity(source.opacity);
   target.setRotateWithView(source.rotateWithView);
   target.setRotation(source.rotation);
-  if (syncScale) {
-    target.setScale(source.scale);
-  }
+  // Scale must be synchronized by subclasses, as Icon needs its own logic
 
   return target;
 }
 
 export function synchronizeIcon(target: Icon | undefined, source: IconChange, context: MapSyncContext): Icon {
-  // OL calculates the scale from width and height, and does not allow
-  // combining them with a scale
+  // OL calculates the scale from width and height, so an icon with a size
+  // must never get a scale, neither when created nor when synced later
   const hasSize = source.width != null || source.height != null;
   if (!target) {
     const src = source.img || source.src;
@@ -89,7 +86,10 @@ export function synchronizeIcon(target: Icon | undefined, source: IconChange, co
       })
     );
   }
-  synchronizeImageStyle(target, source, context, !hasSize);
+  synchronizeImageStyle(target, source, context);
+  if (!hasSize) {
+    target.setScale(source.scale);
+  }
 
   context.connector.forceRender();
 

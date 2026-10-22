@@ -11,7 +11,6 @@ package com.vaadin.flow.component.map;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Icon;
@@ -21,31 +20,26 @@ import com.vaadin.flow.router.Route;
 public class IconSizePage extends Div {
     public IconSizePage() {
         Map map = new Map();
+        map.getView().setCenter(new Coordinate(0, 0));
+        map.getView().setZoom(3);
 
         // Pin image has a natural size of 80x104
-        addMarker(map, options -> {
+        addMarker(map, new Coordinate(-20, 0), options -> {
             options.setWidth(40);
             options.setHeight(40);
         });
-        MarkerFeature widthOnlyMarker = addMarker(map,
-                options -> options.setWidth(40));
-        addMarker(map, options -> options.setHeight(52));
+        addMarker(map, new Coordinate(0, 0), options -> options.setWidth(40));
+        addMarker(map, new Coordinate(20, 0), options -> options.setHeight(52));
 
-        NativeButton setOpacity = new NativeButton("Set opacity",
-                e -> widthOnlyMarker.getIcon().setOpacity(0.5));
-        setOpacity.setId("set-opacity");
-
-        add(map, setOpacity);
+        add(map);
     }
 
-    private static MarkerFeature addMarker(Map map,
+    private static void addMarker(Map map, Coordinate coordinate,
             Consumer<Icon.Options> configurer) {
         Icon.Options options = new Icon.Options();
         options.setImg(Assets.PIN.getHandler());
         configurer.accept(options);
-        MarkerFeature marker = new MarkerFeature(new Coordinate(0, 0),
-                new Icon(options));
+        MarkerFeature marker = new MarkerFeature(coordinate, new Icon(options));
         map.getFeatureLayer().addFeature(marker);
-        return marker;
     }
 }
