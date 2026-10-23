@@ -34,6 +34,8 @@ class IconTest {
         Assertions.assertNull(icon.getImg());
         Assertions.assertNull(icon.getImgHandler());
         Assertions.assertNull(icon.getImgSize());
+        Assertions.assertNull(icon.getWidth());
+        Assertions.assertNull(icon.getHeight());
     }
 
     @Test
@@ -69,6 +71,19 @@ class IconTest {
     }
 
     @Test
+    void withSize() {
+        Icon.Options options = new Icon.Options();
+        options.setSrc("test");
+        options.setWidth(40);
+        options.setHeight(30);
+        Icon icon = new Icon(options);
+
+        Assertions.assertEquals(40, icon.getWidth());
+        Assertions.assertEquals(30, icon.getHeight());
+        Assertions.assertEquals(1, icon.getScale(), 0);
+    }
+
+    @Test
     void failsWithoutSourceUrlOrImage() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> new Icon(new Icon.Options()));
@@ -82,5 +97,28 @@ class IconTest {
             options.setImg(Assets.PIN.getHandler());
             new Icon(options);
         });
+    }
+
+    @Test
+    void failsWithBothSizeAndScale() {
+        Icon.Options options = new Icon.Options();
+        options.setSrc("test");
+        options.setWidth(40);
+        options.setScale(2);
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> new Icon(options));
+    }
+
+    @Test
+    void withSize_setScale_throws() {
+        Icon.Options options = new Icon.Options();
+        options.setSrc("test");
+        options.setHeight(40);
+        Icon icon = new Icon(options);
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> icon.setScale(1));
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> icon.setScale(2));
     }
 }

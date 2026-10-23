@@ -132,6 +132,8 @@ export interface ImageStyleChange extends MapChangeBase {
 export interface IconChange extends ImageStyleChange {
   img?: string | null;
   src?: string | null;
+  width?: number | null;
+  height?: number | null;
   anchor?: MapCoordinate | null;
   anchorOrigin?: string | null;
 }

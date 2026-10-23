@@ -35,6 +35,8 @@ public class Icon extends ImageStyle {
     private final StreamResource img;
     private final DownloadHandler imgHandler;
     private final ImageSize imgSize;
+    private final Integer width;
+    private final Integer height;
 
     @Override
     public String getType() {
@@ -168,6 +170,69 @@ public class Icon extends ImageStyle {
         return imgSize;
     }
 
+    /**
+     * The width in pixels at which the icon's image is rendered. If only the
+     * width is specified, the height is adjusted to preserve the image's aspect
+     * ratio. If both width and height are specified, the image is stretched to
+     * exactly that size. If neither is specified, the image is rendered at its
+     * natural size.
+     * <p>
+     * Sizing the icon in pixels can not be combined with a {@link #getScale()
+     * scale}, an icon with a width or height always has a scale of {@code 1}.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     *
+     * @return the width in pixels, or {@code null} if not specified
+     * @since 25.4
+     */
+    public Integer getWidth() {
+        return width;
+    }
+
+    /**
+     * The height in pixels at which the icon's image is rendered. If only the
+     * height is specified, the width is adjusted to preserve the image's aspect
+     * ratio. If both width and height are specified, the image is stretched to
+     * exactly that size. If neither is specified, the image is rendered at its
+     * natural size.
+     * <p>
+     * Sizing the icon in pixels can not be combined with a {@link #getScale()
+     * scale}, an icon with a width or height always has a scale of {@code 1}.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     *
+     * @return the height in pixels, or {@code null} if not specified
+     * @since 25.4
+     */
+    public Integer getHeight() {
+        return height;
+    }
+
+    /**
+     * Sets the scaling of the image's size.
+     *
+     * @param scale
+     *            the new scaling
+     * @throws IllegalStateException
+     *             if the icon has a {@link #getWidth() width} or
+     *             {@link #getHeight() height}, as a size can not be combined
+     *             with a scale
+     */
+    @Override
+    public void setScale(double scale) {
+        if (hasSize()) {
+            throw new IllegalStateException(
+                    "The scale of an icon with a width or height can not be set");
+        }
+        super.setScale(scale);
+    }
+
+    private boolean hasSize() {
+        return width != null || height != null;
+    }
+
     public Icon(Options options) {
         super(options);
         boolean hasImage = options.img != null || options.imgHandler != null;
@@ -188,6 +253,12 @@ public class Icon extends ImageStyle {
         img = options.img;
         imgHandler = options.imgHandler;
         imgSize = options.imgSize;
+        width = options.width;
+        height = options.height;
+        if (hasSize() && getScale() != 1) {
+            throw new IllegalStateException(
+                    "Both a width or height and a scale were specified in the options. You must only specify one of these options.");
+        }
     }
 
     public static class Options extends ImageStyle.Options {
@@ -199,6 +270,8 @@ public class Icon extends ImageStyle {
         private StreamResource img;
         private DownloadHandler imgHandler;
         private ImageSize imgSize;
+        private Integer width;
+        private Integer height;
 
         /**
          * @see Icon#getAnchor()
@@ -265,6 +338,22 @@ public class Icon extends ImageStyle {
         @Deprecated(since = "25.4")
         public void setImgSize(ImageSize imgSize) {
             this.imgSize = imgSize;
+        }
+
+        /**
+         * @see Icon#getWidth()
+         * @since 25.4
+         */
+        public void setWidth(Integer width) {
+            this.width = width;
+        }
+
+        /**
+         * @see Icon#getHeight()
+         * @since 25.4
+         */
+        public void setHeight(Integer height) {
+            this.height = height;
         }
     }
 
