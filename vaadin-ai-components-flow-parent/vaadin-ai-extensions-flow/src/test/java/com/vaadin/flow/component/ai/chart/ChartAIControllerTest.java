@@ -295,6 +295,20 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void updateData_treemapRowsWithoutValues_rejected() {
+            var row = new LinkedHashMap<String, Object>();
+            row.put("_id", null);
+            row.put("_parent", null);
+            row.put("_value", "n/a");
+            databaseProvider.results = List.of(row);
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+        }
+
+        @Test
         void updateData_heatmapRowsWithNumericCoordinates_rendered() {
             databaseProvider.results = List.of(
                     Map.of("_x", 0, "_y", 9, "_value", 120),
