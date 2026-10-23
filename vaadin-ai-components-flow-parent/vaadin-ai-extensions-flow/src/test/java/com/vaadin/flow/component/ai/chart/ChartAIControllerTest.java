@@ -278,6 +278,20 @@ class ChartAIControllerTest {
 
             Assertions.assertTrue(result.startsWith("Error"), result);
             Assertions.assertTrue(result.contains("can be plotted"), result);
+            Assertions.assertTrue(result.contains("_open"), result);
+            Assertions.assertFalse(result.contains("_value"),
+                    "Columns the query lacks must not be named: " + result);
+        }
+
+        @Test
+        void updateData_unplottableRowsWithoutAliases_columnNamesNotRelayed() {
+            databaseProvider.results = List.of(Map.of("salary_band", "high"));
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertFalse(result.contains("salary_band"),
+                    "Result columns must not reach the LLM: " + result);
         }
 
         @Test

@@ -134,6 +134,18 @@ public class ChartAIController implements AIController {
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_chart_instructions";
 
+    /**
+     * Aliases the default converter reads as numbers. The error for rows that
+     * cannot be plotted names those the query uses; other column names are part
+     * of the query results, so they never reach the LLM.
+     */
+    private static final List<String> NUMERIC_ALIASES = List.of(ColumnNames.X,
+            ColumnNames.X2, ColumnNames.Y, ColumnNames.Z, ColumnNames.VALUE,
+            ColumnNames.COLOR_VALUE, ColumnNames.OPEN, ColumnNames.HIGH,
+            ColumnNames.LOW, ColumnNames.CLOSE, ColumnNames.Q1,
+            ColumnNames.MEDIAN, ColumnNames.Q3, ColumnNames.WEIGHT,
+            ColumnNames.TARGET, ColumnNames.COMPLETED);
+
     private static final String INSTRUCTIONS_TEXT = """
             Chart visualization workflow. Follow this for every chart request:
 
@@ -247,9 +259,11 @@ public class ChartAIController implements AIController {
     }
 
     /**
-     * Rejects a query whose rows convert to series without any point, which
-     * happens when the columns the chart reads as numbers hold text or nulls.
-     * The chart would otherwise render empty while the turn reports success.
+     * Rejects a query whose rows convert to series without any point, typically
+     * because the columns the chart reads as numbers hold text or nulls. The
+     * chart would otherwise render empty while the turn reports success. The
+     * error names no row values, and of the column names only the
+     * {@link #NUMERIC_ALIASES} the query uses.
      */
     private void checkPlottable(int queryNumber,
             List<Map<String, Object>> rows) {
@@ -259,15 +273,26 @@ public class ChartAIController implements AIController {
         var series = dataConverter.convertToSeries(rows);
         if (!series.isEmpty()
                 && series.stream().allMatch(ChartAIController::hasNoPoints)) {
+            var aliases = numericAliasesOf(rows.getFirst());
             throw new ToolException("Query " + queryNumber
                     + " returned rows, but none of them can be plotted: the"
-                    + " columns the chart reads as numbers, such as "
-                    + ColumnNames.X + ", " + ColumnNames.Y + " or "
-                    + ColumnNames.VALUE + ", hold text or nulls. Return"
-                    + " numbers in them; for a label, return its position on"
-                    + " the axis, starting at 0, and list the labels in that"
-                    + " order in the axis categories.");
+                    + " columns the chart reads as numbers"
+                    + (aliases.isEmpty() ? ""
+                            : ", among " + String.join(", ", aliases) + ",")
+                    + " hold text or nulls. Return numbers in them; for a"
+                    + " label, return its position on the axis, starting at"
+                    + " 0, and list the labels in that order in the axis"
+                    + " categories.");
         }
+    }
+
+    /**
+     * Returns the {@link #NUMERIC_ALIASES} the row has, matched ignoring case
+     * like the default converter does.
+     */
+    private static List<String> numericAliasesOf(Map<String, Object> row) {
+        return NUMERIC_ALIASES.stream().filter(alias -> row.keySet().stream()
+                .anyMatch(alias::equalsIgnoreCase)).toList();
     }
 
     /**
