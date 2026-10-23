@@ -37,6 +37,13 @@ public interface DataConverter extends Serializable {
      * Each element in the input list represents a single row, with column names
      * as keys and column values as values.
      * </p>
+     * <p>
+     * May be called from a background thread, where Vaadin thread locals such
+     * as {@code UI.getCurrent()} return {@code null}, and more than once per
+     * chart update. An implementation that depends on UI state, such as the
+     * locale for formatting labels, should capture that state when the
+     * converter is created rather than read thread locals here.
+     * </p>
      *
      * @param data
      *            the tabular data to convert, not {@code null}
