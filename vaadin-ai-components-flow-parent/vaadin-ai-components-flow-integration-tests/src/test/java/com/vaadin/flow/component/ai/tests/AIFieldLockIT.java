@@ -43,9 +43,7 @@ public class AIFieldLockIT extends AbstractComponentIT {
         $("button").id("fill").click();
         waitUntil(driver -> costCenter.hasAttribute("ai-working"));
 
-        Assert.assertTrue(
-                "Cost center is in the working state, so it must be locked "
-                        + "on the client",
+        Assert.assertTrue("Should be read-only during the turn",
                 costCenter.getPropertyBoolean("readonly"));
     }
 
@@ -65,9 +63,7 @@ public class AIFieldLockIT extends AbstractComponentIT {
         waitUntil(driver -> "false"
                 .equals($("span").id("server-read-only").getText()));
 
-        Assert.assertFalse(
-                "Cost center is writable on the server, so it must be "
-                        + "editable on the client after the turn",
+        Assert.assertFalse("Should be editable after the turn",
                 costCenter.getPropertyBoolean("readonly"));
     }
 }
