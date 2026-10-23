@@ -70,18 +70,6 @@ public class ModifyStyleIT extends AbstractComponentIT {
         Assert.assertEquals(initialRevision + 1, featureLayer.getRevision());
     }
 
-    @Test
-    public void setImageScale_scaleUpdated() {
-        MapElement.IconReference icon = map.getMapReference().getLayers()
-                .getLayer("feature-layer").getSource().asVectorSource()
-                .getFeatures().getFeature(0).getStyle().getImage();
-        Assert.assertEquals(0.25, icon.getScale(), 0.001);
-
-        setImageScale.click();
-
-        waitUntil(driver -> icon.getScale() == 5);
-    }
-
     private void waitUntilRenderCount(int count) {
         waitUntil(driver -> getRenderCount() == count);
     }

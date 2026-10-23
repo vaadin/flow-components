@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-map/icon-size")
@@ -43,9 +44,26 @@ public class IconSizeIT extends AbstractComponentIT {
         assertIconSize(2, 40, 52);
     }
 
+    @Test
+    public void scale_iconScaledFromNaturalSize() {
+        assertIconSize(3, 40, 52);
+    }
+
+    @Test
+    public void changeScale_iconResized() {
+        $(TestBenchElement.class).id("change-scale").click();
+        MapElement.IconReference icon = getIcon(3);
+        waitUntil(driver -> icon.getScale() == 0.25);
+
+        assertIconSize(3, 20, 26);
+    }
+
+    private MapElement.IconReference getIcon(int featureIndex) {
+        return features.getFeature(featureIndex).getStyle().getImage();
+    }
+
     private void assertIconSize(int featureIndex, double width, double height) {
-        MapElement.IconReference icon = features.getFeature(featureIndex)
-                .getStyle().getImage();
+        MapElement.IconReference icon = getIcon(featureIndex);
         // Rendered size is only available once the image has loaded
         waitUntil(driver -> icon.getWidth() != null);
         Assert.assertEquals(width, icon.getWidth(), 0.001);
