@@ -57,8 +57,8 @@ public class AIFieldLockIT extends AbstractComponentIT {
 
         // The working guard is lifted after a short wind-down; once the trip
         // type field is editable again, the guard has been lifted
-        waitUntil(driver -> "Business".equals(tripType.getValue()));
-        waitUntil(driver -> !tripType.getPropertyBoolean("readonly"));
+        waitUntil(driver -> "Business".equals(tripType.getValue())
+                && !tripType.getPropertyBoolean("readonly"));
         $("button").id("check").click();
         waitUntil(driver -> "false"
                 .equals($("span").id("server-read-only").getText()));
