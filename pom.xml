@@ -119,7 +119,7 @@
         <junit.jupiter.version>6.1.3</junit.jupiter.version>
 
         <!-- spreadsheet -->
-        <poi.version>5.5.1</poi.version>
+        <poi.version>6.0.0</poi.version>
         <javaparser.version>3.28.0</javaparser.version>
 
         <!-- Additional Surefire argLine - set to -javaagent:${org.mockito:mockito-core:jar} in modules using Mockito -->
