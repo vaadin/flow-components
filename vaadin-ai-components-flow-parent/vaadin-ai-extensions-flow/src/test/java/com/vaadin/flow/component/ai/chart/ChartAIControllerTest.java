@@ -33,6 +33,7 @@ import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.GanttSeries;
 import com.vaadin.flow.component.charts.model.HeatSeries;
 import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
@@ -301,6 +302,17 @@ class ChartAIControllerTest {
             row.put("_parent", null);
             row.put("_value", "n/a");
             databaseProvider.results = List.of(row);
+
+            var result = updateData();
+
+            Assertions.assertTrue(result.startsWith("Error"), result);
+            Assertions.assertTrue(result.contains("can be plotted"), result);
+        }
+
+        @Test
+        void updateData_emptyGanttSeriesFromCustomConverter_rejected() {
+            databaseProvider.results = List.of(Map.of("_name", "Design"));
+            controller.setDataConverter(data -> List.of(new GanttSeries()));
 
             var result = updateData();
 
