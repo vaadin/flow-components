@@ -55,6 +55,6 @@ jobs:
             - Run the unit tests of the affected component module(s), e.g. mvn test -pl <module>
             - Run the formatter: mvn spotless:apply
           extra-allowed-tools: Bash(mvn:*)
-          # Trial of the cherry-pick prompt with resolution notes from
-          # vaadin/platform-build-script#214; remove once that PR is merged.
-          script-ref: 0b2a72d2238a44705df607a5a5e8e24e2aa9cab3
+          # Trial of the cherry-pick changes from vaadin/platform-build-script#214
+          # (resolution notes, stop reasons, chained picks); remove once it is merged.
+          script-ref: 4d80fb3a528ef91d68db19171f473abbc47dddf4
