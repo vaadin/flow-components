@@ -31,39 +31,39 @@ public class IconSizeIT extends AbstractComponentIT {
 
     @Test
     public void widthAndHeight_iconStretchedToSize() {
-        assertIconSize(0, 40, 40);
+        assertIconSize("width-and-height", 40, 40);
     }
 
     @Test
     public void widthOnly_heightPreservesAspectRatio() {
-        assertIconSize(1, 40, 52);
+        assertIconSize("width-only", 40, 52);
     }
 
     @Test
     public void heightOnly_widthPreservesAspectRatio() {
-        assertIconSize(2, 40, 52);
+        assertIconSize("height-only", 40, 52);
     }
 
     @Test
     public void scale_iconScaledFromNaturalSize() {
-        assertIconSize(3, 40, 52);
+        assertIconSize("scale", 40, 52);
     }
 
     @Test
     public void changeScale_iconResized() {
         $(TestBenchElement.class).id("change-scale").click();
-        MapElement.IconReference icon = getIcon(3);
+        MapElement.IconReference icon = getIcon("scale");
         waitUntil(driver -> icon.getScale() == 0.25);
 
-        assertIconSize(3, 20, 26);
+        assertIconSize("scale", 20, 26);
     }
 
-    private MapElement.IconReference getIcon(int featureIndex) {
-        return features.getFeature(featureIndex).getStyle().getImage();
+    private MapElement.IconReference getIcon(String featureId) {
+        return features.getFeature(featureId).getStyle().getImage();
     }
 
-    private void assertIconSize(int featureIndex, double width, double height) {
-        MapElement.IconReference icon = getIcon(featureIndex);
+    private void assertIconSize(String featureId, double width, double height) {
+        MapElement.IconReference icon = getIcon(featureId);
         // Rendered size is only available once the image has loaded
         waitUntil(driver -> icon.getWidth() != null);
         Assert.assertEquals(width, icon.getWidth(), 0.001);
