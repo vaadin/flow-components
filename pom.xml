@@ -73,7 +73,7 @@
         <url>https://github.com/vaadin/flow-components</url>
     </scm>
     <properties>
-        <flow.version>25.4-SNAPSHOT</flow.version>
+        <flow.version>25.4.client-actions-for-client-rendered-templates-SNAPSHOT</flow.version>
         <testbench.version>25.4.0-alpha1</testbench.version>
         <license-checker.version>3.1.4</license-checker.version>
         <maven.compiler.release>21</maven.compiler.release>
