@@ -57,7 +57,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   throws `IllegalStateException`.
 - The extensions module plugs into core only through core's public API —
   mainly `AIController`, `LLMProvider.ToolSpec`,
-  `QueryableProvider`/`DatabaseProvider`/`DatabaseProviderAITools`, and the
+  `QueryableProvider`/`DatabaseProvider`/`QueryableProviderAITools`, and the
   shared value types. There is no SPI, registry, or reflection between the
   modules; keep the boundary that narrow.
 - The controllers are neutral about the query language. They never read or

@@ -21,16 +21,15 @@ import java.util.Objects;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Factory for creating reusable data source {@link LLMProvider.ToolSpec}
- * instances. These tools can be used by any controller that works with a
- * {@link QueryableProvider}.
+ * Factory for the reusable {@link LLMProvider.ToolSpec} instances every
+ * controller that works with a {@link QueryableProvider} adds to its own tools.
  *
  * @author Vaadin Ltd
- * @since 25.3
+ * @since 25.4
  */
-public final class DatabaseProviderAITools {
+public final class QueryableProviderAITools {
 
-    private DatabaseProviderAITools() {
+    private QueryableProviderAITools() {
     }
 
     /**
@@ -74,11 +73,11 @@ public final class DatabaseProviderAITools {
     }
 
     /**
-     * Creates all database provider tools for the given provider.
+     * Creates all tools for the given provider.
      *
      * @param provider
      *            the provider, not {@code null}
-     * @return a list of all database provider tools, never {@code null}
+     * @return the tools for the provider, never {@code null}
      */
     public static List<LLMProvider.ToolSpec> createAll(
             QueryableProvider provider) {

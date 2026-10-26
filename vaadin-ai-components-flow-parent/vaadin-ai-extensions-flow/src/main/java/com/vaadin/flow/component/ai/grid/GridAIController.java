@@ -22,9 +22,9 @@ import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.QueryableProvider;
+import com.vaadin.flow.component.ai.provider.QueryableProviderAITools;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -106,7 +106,7 @@ import tools.jackson.databind.JsonNode;
  * @see GridAITools
  * @see GridRenderer
  * @see GridState
- * @see DatabaseProviderAITools
+ * @see QueryableProviderAITools
  * @since 25.3
  */
 public class GridAIController implements AIController {
@@ -174,7 +174,7 @@ public class GridAIController implements AIController {
     public List<LLMProvider.ToolSpec> getTools() {
         var tools = new ArrayList<LLMProvider.ToolSpec>();
         tools.add(createInstructionsTool());
-        tools.addAll(DatabaseProviderAITools.createAll(provider));
+        tools.addAll(QueryableProviderAITools.createAll(provider));
         tools.addAll(GridAITools.createAll(new GridAITools.Callbacks() {
             @Override
             public String getState(String gridId) {
