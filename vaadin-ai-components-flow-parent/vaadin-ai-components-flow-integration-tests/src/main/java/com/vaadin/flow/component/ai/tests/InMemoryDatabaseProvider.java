@@ -26,6 +26,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
@@ -38,6 +41,9 @@ import com.vaadin.flow.component.ai.tests.endpoints.SampleH2Database;
  * @author Vaadin Ltd
  */
 public class InMemoryDatabaseProvider implements DatabaseProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(InMemoryDatabaseProvider.class);
 
     private static final String DB_URL = SampleH2Database.TEST_DB_URL;
     private static final String DB_USER = SampleH2Database.ADMIN_USER;
@@ -120,14 +126,17 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
             return "Error retrieving database schema: " + e.getMessage();
         }
 
+        LOGGER.info("Schema requested, {} characters", schema.length());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String query) {
+        LOGGER.info("SQL query from the LLM: {}", query);
         String trimmedQuery = query.trim();
         if (!trimmedQuery.toUpperCase().startsWith("SELECT")) {
-            throw new ToolException("Only SELECT queries are allowed.");
+            throw relayed(
+                    new ToolException("Only SELECT queries are allowed."));
         }
 
         String upperQuery = trimmedQuery.toUpperCase();
@@ -135,8 +144,8 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
                 "CREATE", "ALTER", "TRUNCATE", "EXEC", "EXECUTE" };
         for (String keyword : dangerousKeywords) {
             if (upperQuery.contains(keyword)) {
-                throw new ToolException(
-                        "Query contains forbidden keyword: " + keyword);
+                throw relayed(new ToolException(
+                        "Query contains forbidden keyword: " + keyword));
             }
         }
 
@@ -166,12 +175,18 @@ public class InMemoryDatabaseProvider implements DatabaseProvider {
             // Other errors, such as data conversion errors, can quote row
             // values, so the LLM only gets a generic error for them.
             if (e.getSQLState() != null && e.getSQLState().startsWith("42")) {
-                throw new ToolException(e.getMessage(), e);
+                throw relayed(new ToolException(e.getMessage(), e));
             }
             throw new RuntimeException(
                     "Failed to execute query: " + e.getMessage(), e);
         }
 
+        LOGGER.info("Returned {} rows", results.size());
         return results;
+    }
+
+    private static ToolException relayed(ToolException e) {
+        LOGGER.warn("Query failed, telling the LLM: {}", e.getMessage());
+        return e;
     }
 }

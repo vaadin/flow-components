@@ -27,6 +27,8 @@ import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 import org.h2.tools.Csv;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.QueryableProvider;
@@ -41,6 +43,9 @@ import com.vaadin.flow.component.ai.provider.ToolException;
  * {@link CsvDatabaseProvider}, which loads the files into SQL instead.
  */
 public class CsvQueryableProvider implements QueryableProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(CsvQueryableProvider.class);
 
     private final String directory;
     private final String notes;
@@ -82,23 +87,29 @@ public class CsvQueryableProvider implements QueryableProvider {
         if (!notes.isBlank()) {
             schema.append("\nNOTES:\n").append(notes);
         }
+        ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String query) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
         var request = CollectionQuery.parse(query);
         var items = items(request);
         var rows = new ArrayList<Map<String, Object>>(items.size());
         for (var item : items) {
             rows.add(request.project(item));
         }
+        ProviderLog.rows(LOGGER, rows.size());
         return rows;
     }
 
     @Override
     public OptionalInt count(String query) {
-        return OptionalInt.of(items(CollectionQuery.parse(query)).size());
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
+        var count = items(CollectionQuery.parse(query)).size();
+        ProviderLog.count(LOGGER, count);
+        return OptionalInt.of(count);
     }
 
     /**
@@ -107,21 +118,27 @@ public class CsvQueryableProvider implements QueryableProvider {
     private List<Map<String, Object>> items(CollectionQuery query) {
         var file = Path.of(directory, query.source() + ".csv");
         if (!query.source().matches("[A-Za-z0-9_-]+") || !Files.exists(file)) {
-            throw new ToolException("Unknown file " + query.source()
+            throw relayed(new ToolException("Unknown file " + query.source()
                     + ". Available: " + files().stream()
-                            .map(CsvQueryableProvider::sourceName).toList());
+                            .map(CsvQueryableProvider::sourceName).toList()));
         }
+        ProviderLog.backend(LOGGER, "reading " + file);
         var header = header(file);
         for (var field : query.fields()) {
             if (!header.contains(field)) {
-                throw new ToolException("File " + query.source()
-                        + " has no column " + field + ". Columns: " + header);
+                throw relayed(new ToolException("File " + query.source()
+                        + " has no column " + field + ". Columns: " + header));
             }
         }
         var items = new ArrayList<>(
                 read(file).stream().filter(query::matches).toList());
         items.sort(query.comparator());
         return items;
+    }
+
+    private static ToolException relayed(ToolException e) {
+        ProviderLog.relayed(LOGGER, e);
+        return e;
     }
 
     private List<Path> files() {

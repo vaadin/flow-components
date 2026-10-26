@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
@@ -33,6 +36,9 @@ import com.vaadin.flow.component.ai.tests.endpoints.TenantScopedH2Database;
  * tables fails with a rights error that is relayed to the LLM.
  */
 public class TenantScopedDatabaseProvider implements DatabaseProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(TenantScopedDatabaseProvider.class);
 
     private final String tenant;
     private final JdbcDatabaseProvider delegate;
@@ -70,6 +76,7 @@ public class TenantScopedDatabaseProvider implements DatabaseProvider {
 
     @Override
     public List<Map<String, Object>> executeQuery(String sql) {
+        LOGGER.info("Running as the {} tenant", tenant);
         return delegate.executeQuery(sql);
     }
 

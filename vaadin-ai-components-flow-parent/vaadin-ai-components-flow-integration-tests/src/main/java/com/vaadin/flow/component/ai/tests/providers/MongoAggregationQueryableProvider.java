@@ -24,6 +24,8 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
@@ -47,6 +49,8 @@ import com.vaadin.flow.data.provider.SortDirection;
  */
 public class MongoAggregationQueryableProvider implements QueryableProvider {
 
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MongoAggregationQueryableProvider.class);
     private static final Set<String> WRITE_STAGES = Set.of("$out", "$merge");
 
     private final transient Supplier<MongoDatabase> database;
@@ -89,11 +93,13 @@ public class MongoAggregationQueryableProvider implements QueryableProvider {
         if (!notes.isBlank()) {
             schema.append("\nNOTES:\n").append(notes);
         }
+        ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String query) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
         var request = parse(query);
         return run(request.collection(), request.pipeline());
     }
@@ -101,6 +107,8 @@ public class MongoAggregationQueryableProvider implements QueryableProvider {
     @Override
     public List<Map<String, Object>> executeQuery(String query,
             QueryPage page) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
+        ProviderLog.page(LOGGER, page);
         var request = parse(query);
         var pipeline = new ArrayList<>(request.pipeline());
         if (!page.sortOrders().isEmpty()) {
@@ -116,12 +124,15 @@ public class MongoAggregationQueryableProvider implements QueryableProvider {
 
     @Override
     public OptionalInt count(String query) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
         var request = parse(query);
         var pipeline = new ArrayList<>(request.pipeline());
         pipeline.add(new Document("$count", "n"));
         var rows = run(request.collection(), pipeline);
-        return OptionalInt.of(rows.isEmpty() ? 0
-                : ((Number) rows.getFirst().get("n")).intValue());
+        var count = rows.isEmpty() ? 0
+                : ((Number) rows.getFirst().get("n")).intValue();
+        ProviderLog.count(LOGGER, count);
+        return OptionalInt.of(count);
     }
 
     private record Request(String collection, List<Document> pipeline) {
@@ -132,10 +143,10 @@ public class MongoAggregationQueryableProvider implements QueryableProvider {
         try {
             request = Document.parse(query.trim());
         } catch (RuntimeException e) {
-            throw new ToolException(
+            throw relayed(new ToolException(
                     "The query must be a JSON object with \"collection\" and \"pipeline\": "
                             + e.getMessage(),
-                    e);
+                    e));
         }
         var db = database.get();
         var collections = collectionNames(db);
@@ -149,17 +160,17 @@ public class MongoAggregationQueryableProvider implements QueryableProvider {
         try {
             pipeline = request.getList("pipeline", Document.class);
         } catch (ClassCastException e) {
-            throw new ToolException(
-                    "\"pipeline\" must be an array of stage objects", e);
+            throw relayed(new ToolException(
+                    "\"pipeline\" must be an array of stage objects", e));
         }
         if (pipeline == null) {
-            throw new ToolException("\"pipeline\" is missing");
+            throw relayed(new ToolException("\"pipeline\" is missing"));
         }
         for (var stage : pipeline) {
             for (var stageName : stage.keySet()) {
                 if (WRITE_STAGES.contains(stageName)) {
-                    throw new ToolException(
-                            "Stage " + stageName + " is not allowed");
+                    throw relayed(new ToolException(
+                            "Stage " + stageName + " is not allowed"));
                 }
             }
         }
@@ -168,6 +179,8 @@ public class MongoAggregationQueryableProvider implements QueryableProvider {
 
     private List<Map<String, Object>> run(String collection,
             List<Document> pipeline) {
+        ProviderLog.backend(LOGGER,
+                collection + ".aggregate(" + pipeline + ")");
         var rows = new ArrayList<Map<String, Object>>();
         try {
             for (var document : database.get().getCollection(collection)
@@ -177,9 +190,15 @@ public class MongoAggregationQueryableProvider implements QueryableProvider {
         } catch (MongoException e) {
             // The server describes what is wrong with the pipeline the LLM
             // wrote, so the LLM can correct it
-            throw new ToolException(e.getMessage(), e);
+            throw relayed(new ToolException(e.getMessage(), e));
         }
+        ProviderLog.rows(LOGGER, rows.size());
         return rows;
+    }
+
+    private static ToolException relayed(ToolException e) {
+        ProviderLog.relayed(LOGGER, e);
+        return e;
     }
 
     private static Set<String> collectionNames(MongoDatabase db) {

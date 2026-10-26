@@ -21,6 +21,9 @@ import java.util.OptionalInt;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
@@ -31,6 +34,8 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
  * {@link #refresh()} discards it, so the next query copies again.
  */
 public abstract class MirrorDatabaseProvider implements DatabaseProvider {
+
+    private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
     private transient volatile JdbcDatabaseProvider mirror;
 
@@ -63,6 +68,7 @@ public abstract class MirrorDatabaseProvider implements DatabaseProvider {
      * Discards the copied data, so the next query copies it again.
      */
     public void refresh() {
+        logger.info("Discarding the mirrored data");
         mirror = null;
     }
 
@@ -87,7 +93,11 @@ public abstract class MirrorDatabaseProvider implements DatabaseProvider {
             synchronized (this) {
                 current = mirror;
                 if (current == null) {
-                    var dataSource = copy().dataSource();
+                    logger.info(
+                            "Copying the source into an in-memory SQL database");
+                    var sqlMirror = copy();
+                    logger.info("Copied tables: {}", sqlMirror.tables());
+                    var dataSource = sqlMirror.dataSource();
                     Supplier<DataSource> supplier = () -> dataSource;
                     current = new JdbcDatabaseProvider(supplier,
                             QueryLanguage.SQL, null, notes());

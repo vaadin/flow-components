@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.TreeMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.QueryableProvider;
@@ -54,6 +57,8 @@ import com.vaadin.flow.internal.JacksonUtils;
  */
 public class RestQueryableProvider implements QueryableProvider {
 
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(RestQueryableProvider.class);
     private static final HttpClient HTTP = HttpClient.newHttpClient();
     private static final int PAGE_SIZE = 100;
 
@@ -93,11 +98,13 @@ public class RestQueryableProvider implements QueryableProvider {
         if (!notes.isBlank()) {
             schema.append("\nNOTES:\n").append(notes);
         }
+        ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String query) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
         var request = validate(CollectionQuery.parse(query));
         var rows = new ArrayList<Map<String, Object>>();
         int page = 0;
@@ -110,12 +117,15 @@ public class RestQueryableProvider implements QueryableProvider {
             totalPages = pageInfo(body, "totalPages");
             page++;
         } while (page < totalPages);
+        ProviderLog.rows(LOGGER, rows.size());
         return rows;
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String query,
             QueryPage page) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
+        ProviderLog.page(LOGGER, page);
         var request = validate(CollectionQuery.parse(query));
         var sort = request.sort();
         if (!page.sortOrders().isEmpty()) {
@@ -141,30 +151,39 @@ public class RestQueryableProvider implements QueryableProvider {
                 Math.min(skip + page.limit(), items.size()))) {
             rows.add(request.project(item));
         }
+        ProviderLog.rows(LOGGER, rows.size());
         return rows;
     }
 
     @Override
     public OptionalInt count(String query) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
         var request = validate(CollectionQuery.parse(query));
-        return OptionalInt
-                .of(pageInfo(get(request, List.of(), 0, 1), "totalElements"));
+        var count = pageInfo(get(request, List.of(), 0, 1), "totalElements");
+        ProviderLog.count(LOGGER, count);
+        return OptionalInt.of(count);
     }
 
     private CollectionQuery validate(CollectionQuery query) {
         var fields = collections().get(query.source());
         if (fields == null) {
-            throw new ToolException("Unknown collection " + query.source()
-                    + ". Available: " + collections().keySet());
+            throw relayed(
+                    new ToolException("Unknown collection " + query.source()
+                            + ". Available: " + collections().keySet()));
         }
         for (var field : query.fields()) {
             if (!fields.containsKey(field)) {
-                throw new ToolException(
+                throw relayed(new ToolException(
                         "Collection " + query.source() + " has no field "
-                                + field + ". Fields: " + fields.keySet());
+                                + field + ". Fields: " + fields.keySet()));
             }
         }
         return query;
+    }
+
+    private static ToolException relayed(ToolException e) {
+        ProviderLog.relayed(LOGGER, e);
+        return e;
     }
 
     /**
@@ -231,7 +250,8 @@ public class RestQueryableProvider implements QueryableProvider {
             if (response.statusCode() == 400 && body.get("error") != null) {
                 // The API describes what is wrong with the request the LLM
                 // made, so the LLM can correct it
-                throw new ToolException(String.valueOf(body.get("error")));
+                throw relayed(
+                        new ToolException(String.valueOf(body.get("error"))));
             }
             if (response.statusCode() != 200) {
                 throw new IllegalStateException(

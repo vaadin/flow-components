@@ -25,6 +25,9 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -40,6 +43,9 @@ import com.vaadin.flow.component.ai.provider.ToolException;
  * </p>
  */
 public class JdbcDatabaseProvider implements DatabaseProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(JdbcDatabaseProvider.class);
 
     private final transient Supplier<DataSource> dataSource;
     private final QueryLanguage language;
@@ -88,14 +94,17 @@ public class JdbcDatabaseProvider implements DatabaseProvider {
         if (!notes.isBlank()) {
             schema.append("NOTES:\n").append(notes);
         }
+        ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String sql) {
+        ProviderLog.query(LOGGER, language, sql);
         var upper = sql.trim().toUpperCase(Locale.ROOT);
         if (!upper.startsWith("SELECT") && !upper.startsWith("WITH")) {
-            throw new ToolException("Only SELECT queries are allowed.");
+            throw relayed(
+                    new ToolException("Only SELECT queries are allowed."));
         }
         var results = new ArrayList<Map<String, Object>>();
         try (var connection = dataSource.get().getConnection();
@@ -112,11 +121,17 @@ public class JdbcDatabaseProvider implements DatabaseProvider {
             }
         } catch (SQLException e) {
             if (isSafeToRelay(e)) {
-                throw new ToolException(e.getMessage(), e);
+                throw relayed(new ToolException(e.getMessage(), e));
             }
             throw new IllegalStateException("Failed to execute query", e);
         }
+        ProviderLog.rows(LOGGER, results.size());
         return results;
+    }
+
+    private static ToolException relayed(ToolException e) {
+        ProviderLog.relayed(LOGGER, e);
+        return e;
     }
 
     /**

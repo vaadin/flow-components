@@ -24,6 +24,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -43,6 +46,9 @@ import jakarta.persistence.metamodel.SingularAttribute;
  * expanded into its basic attributes.
  */
 public class JpqlQueryableProvider implements QueryableProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(JpqlQueryableProvider.class);
 
     private final transient Supplier<EntityManagerFactory> entityManagerFactory;
     private final String notes;
@@ -84,13 +90,16 @@ public class JpqlQueryableProvider implements QueryableProvider {
         if (!notes.isBlank()) {
             schema.append("NOTES:\n").append(notes);
         }
+        ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String query) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
         if (!query.trim().toUpperCase(Locale.ROOT).startsWith("SELECT")) {
-            throw new ToolException("Only SELECT queries are allowed.");
+            throw relayed(
+                    new ToolException("Only SELECT queries are allowed."));
         }
         try (var entityManager = entityManagerFactory.get()
                 .createEntityManager()) {
@@ -100,14 +109,20 @@ public class JpqlQueryableProvider implements QueryableProvider {
                         .getResultList();
             } catch (IllegalArgumentException e) {
                 // JPQL syntax and semantic errors quote the query itself
-                throw new ToolException(e.getMessage(), e);
+                throw relayed(new ToolException(e.getMessage(), e));
             }
             var rows = new ArrayList<Map<String, Object>>(tuples.size());
             for (var tuple : tuples) {
                 rows.add(toRow(tuple));
             }
+            ProviderLog.rows(LOGGER, rows.size());
             return rows;
         }
+    }
+
+    private static ToolException relayed(ToolException e) {
+        ProviderLog.relayed(LOGGER, e);
+        return e;
     }
 
     private Map<String, Object> toRow(Tuple tuple) {

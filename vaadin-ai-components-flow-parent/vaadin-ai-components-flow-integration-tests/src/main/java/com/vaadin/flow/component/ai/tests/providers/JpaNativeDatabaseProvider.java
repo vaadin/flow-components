@@ -30,6 +30,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
@@ -51,6 +54,9 @@ import jakarta.persistence.metamodel.EntityType;
  * so no second connection is configured.
  */
 public class JpaNativeDatabaseProvider implements DatabaseProvider {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(JpaNativeDatabaseProvider.class);
 
     private final transient Supplier<EntityManagerFactory> entityManagerFactory;
 
@@ -82,14 +88,17 @@ public class JpaNativeDatabaseProvider implements DatabaseProvider {
             schema.append('\n');
         }
         schema.append("NOTES:\n").append(SampleData.NOTES);
+        ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String sql) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), sql);
         var upper = sql.trim().toUpperCase(Locale.ROOT);
         if (!upper.startsWith("SELECT") && !upper.startsWith("WITH")) {
-            throw new ToolException("Only SELECT queries are allowed.");
+            throw relayed(
+                    new ToolException("Only SELECT queries are allowed."));
         }
         try (var entityManager = entityManagerFactory.get()
                 .createEntityManager()) {
@@ -105,16 +114,22 @@ public class JpaNativeDatabaseProvider implements DatabaseProvider {
                 }
                 rows.add(row);
             }
+            ProviderLog.rows(LOGGER, rows.size());
             return rows;
         } catch (PersistenceException e) {
             var cause = sqlCause(e);
             if (cause != null && cause.getSQLState() != null
                     && cause.getSQLState().startsWith("42")) {
                 // Syntax errors and unknown names quote only the query
-                throw new ToolException(cause.getMessage(), e);
+                throw relayed(new ToolException(cause.getMessage(), e));
             }
             throw new IllegalStateException("Failed to execute query", e);
         }
+    }
+
+    private static ToolException relayed(ToolException e) {
+        ProviderLog.relayed(LOGGER, e);
+        return e;
     }
 
     private static SQLException sqlCause(Throwable e) {

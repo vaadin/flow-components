@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -44,6 +47,8 @@ import graphql.schema.idl.SchemaPrinter;
  */
 public class GraphQLQueryableProvider implements QueryableProvider {
 
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(GraphQLQueryableProvider.class);
     private static final HttpClient HTTP = HttpClient.newHttpClient();
 
     private final URI endpoint;
@@ -69,6 +74,7 @@ public class GraphQLQueryableProvider implements QueryableProvider {
 
     @Override
     public String getSchema() {
+        LOGGER.info("Introspecting the GraphQL API at {}", endpoint);
         var document = new IntrospectionResultToSchema().createSchemaDefinition(
                 data(post(IntrospectionQuery.INTROSPECTION_QUERY)));
         var sdl = new SchemaPrinter(
@@ -79,27 +85,29 @@ public class GraphQLQueryableProvider implements QueryableProvider {
         if (!notes.isBlank()) {
             schema.append("\nNOTES:\n").append(notes);
         }
+        ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }
 
     @Override
     public List<Map<String, Object>> executeQuery(String query) {
+        ProviderLog.query(LOGGER, getQueryLanguage(), query);
         var result = post(query);
         if (result.get("errors") instanceof List<?> errors
                 && !errors.isEmpty()) {
             // GraphQL errors describe the query the LLM wrote, so the LLM
             // can correct it
-            throw new ToolException(errors.stream()
+            throw relayed(new ToolException(errors.stream()
                     .map(error -> error instanceof Map<?, ?> map
                             ? String.valueOf(map.get("message"))
                             : String.valueOf(error))
-                    .collect(Collectors.joining("; ")));
+                    .collect(Collectors.joining("; "))));
         }
         var data = data(result);
         if (data.size() != 1) {
-            throw new ToolException(
+            throw relayed(new ToolException(
                     "Select exactly one field of the Query type; the query selected "
-                            + data.size());
+                            + data.size()));
         }
         var root = data.entrySet().iterator().next();
         var rows = new ArrayList<Map<String, Object>>();
@@ -113,7 +121,13 @@ public class GraphQLQueryableProvider implements QueryableProvider {
         } else {
             rows.add(singleColumn(root.getKey(), root.getValue()));
         }
+        ProviderLog.rows(LOGGER, rows.size());
         return rows;
+    }
+
+    private static ToolException relayed(ToolException e) {
+        ProviderLog.relayed(LOGGER, e);
+        return e;
     }
 
     @SuppressWarnings("unchecked")
