@@ -24,8 +24,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.chart.ChartAIController;
 import com.vaadin.flow.component.ai.chart.ChartState;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
+import com.vaadin.flow.component.ai.tests.providers.SampleProviders;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -36,17 +36,23 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.aura.Aura;
 
 /**
  * Page for trying out {@link ChartAIController} with a real AI chat against
  * OpenAI, rendered with the Aura theme. The chart on the left shows whatever
- * the chat on the right asks for, built from the sample data of
- * {@link InMemoryDatabaseProvider}. The API key is read from the
- * {@code OPENAI_API_KEY} environment variable. Not covered by automated tests.
+ * the chat on the right asks for, built from the sample data behind the
+ * provider chosen in the selector above the chart: any of
+ * {@link SampleProviders}, from the H2 database to the GraphQL API and the
+ * MongoDB documents. Changing the provider starts a new chat. The
+ * {@code provider} query parameter picks the provider to start with. The API
+ * key is read from the {@code OPENAI_API_KEY} environment variable. Not covered
+ * by automated tests.
  * <p>
  * The buttons above the message input send example prompts, one for each kind
  * of chart the sample tables are shaped for.
@@ -92,9 +98,7 @@ public class ChartAIChatPage extends HorizontalLayout {
             new ExamplePrompts.Prompt("Organization",
                     "Draw the organization chart with names and job titles, colored by team."));
 
-    // One shared instance, so concurrent page loads can't fill the database
-    // twice
-    private static final DatabaseProvider DATABASE = new InMemoryDatabaseProvider();
+    private final Select<String> providerSelect = new Select<>();
 
     private final VerticalLayout chartPane = new VerticalLayout();
     private final VerticalLayout chatPane = new VerticalLayout();
@@ -125,9 +129,23 @@ public class ChartAIChatPage extends HorizontalLayout {
         var options = OpenAiChatOptions.builder().apiKey(apiKey)
                 .model(MODEL_NAME).build();
         chatModel = OpenAiChatModel.builder().options(options).build();
+
+        providerSelect.setId("provider-select");
+        providerSelect.setLabel("Data provider");
+        providerSelect.setItems(SampleProviders.names());
+        providerSelect.setItemLabelGenerator(
+                name -> name + ": " + SampleProviders.describe(name));
+        providerSelect.setValue(initialProvider());
+        providerSelect.addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                startChat();
+                status.setText("Started a new chat with the " + event.getValue()
+                        + " provider.");
+            }
+        });
         startChat();
 
-        var controls = new HorizontalLayout(
+        var controls = new HorizontalLayout(providerSelect,
                 new NativeButton("Save state", e -> saveState()),
                 new NativeButton("Restore state", e -> restoreState()));
         savedStateView.setWidthFull();
@@ -164,7 +182,8 @@ public class ChartAIChatPage extends HorizontalLayout {
         }
         chart = newChart;
         chartPane.expand(chart);
-        controller = new ChartAIController(chart, DATABASE);
+        controller = new ChartAIController(chart,
+                SampleProviders.get(providerSelect.getValue()));
 
         var messageList = new MessageList();
         messageList.setMarkdown(true);
@@ -182,6 +201,19 @@ public class ChartAIChatPage extends HorizontalLayout {
         chatPane.add(messageList, new ExamplePrompts(orchestrator, PROMPTS),
                 messageInput);
         chatPane.expand(messageList);
+    }
+
+    /**
+     * Returns the provider named by the {@code provider} query parameter, or
+     * the default one.
+     */
+    private static String initialProvider() {
+        var request = VaadinRequest.getCurrent();
+        var requested = request == null ? null
+                : request.getParameter("provider");
+        return requested != null && SampleProviders.names().contains(requested)
+                ? requested
+                : SampleProviders.DEFAULT;
     }
 
     private void saveState() {

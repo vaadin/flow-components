@@ -25,6 +25,7 @@ import com.vaadin.flow.component.ai.grid.AIDataRow;
 import com.vaadin.flow.component.ai.grid.GridAIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
+import com.vaadin.flow.component.ai.tests.providers.SampleProviders;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Pre;
@@ -33,19 +34,27 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.aura.Aura;
 
 /**
  * Page for trying out {@link GridAIController} with a real AI chat against
  * OpenAI, rendered with the Aura theme. The grid on the left shows whatever the
- * chat on the right asks for, built from the sample data of
- * {@link InMemoryDatabaseProvider}, and the query the LLM wrote last is shown
- * under the grid. The buttons above the message input send example prompts that
- * need joins, aggregates or comparisons across rows. The API key is read from
- * the {@code OPENAI_API_KEY} environment variable. Not covered by automated
- * tests.
+ * chat on the right asks for, built from the sample data behind the provider
+ * chosen in the selector above the grid: any of {@link SampleProviders}. The
+ * grid pages, sorts and counts through the provider, so the selector also shows
+ * how each kind of endpoint handles those. Changing the provider starts a new
+ * chat, and the query the LLM wrote last is shown under the grid. The
+ * {@code provider} query parameter picks the provider to start with. The API
+ * key is read from the {@code OPENAI_API_KEY} environment variable. Not covered
+ * by automated tests.
+ * <p>
+ * The buttons above the message input send example prompts that need joins,
+ * aggregates or comparisons across rows.
+ * </p>
  * <p>
  * Open at {@code http://localhost:8080/vaadin-ai/grid-ai-chat}.
  * </p>
@@ -79,6 +88,16 @@ public class GridAIChatPage extends HorizontalLayout {
             new ExamplePrompts.Prompt("Rising trading days",
                     "Show the trading days on which ACME closed higher than it opened, with the gain in percent and the day's price range."));
 
+    private final Select<String> providerSelect = new Select<>();
+    private final VerticalLayout gridPane = new VerticalLayout();
+    private final VerticalLayout chatPane = new VerticalLayout();
+    private final Span status = new Span();
+    private final Pre queryView = new Pre();
+
+    private transient OpenAiChatModel chatModel;
+    private Grid<AIDataRow> grid;
+    private GridAIController controller;
+
     public GridAIChatPage() {
         setSizeFull();
         // The response arrives on the LLM client's threads, so it needs push
@@ -92,20 +111,58 @@ public class GridAIChatPage extends HorizontalLayout {
             return;
         }
 
-        var grid = new Grid<AIDataRow>();
-        grid.setSizeFull();
+        var options = OpenAiChatOptions.builder().apiKey(apiKey)
+                .model(MODEL_NAME).build();
+        chatModel = OpenAiChatModel.builder().options(options).build();
 
-        var queryView = new Pre();
+        providerSelect.setId("provider-select");
+        providerSelect.setLabel("Data provider");
+        providerSelect.setItems(SampleProviders.names());
+        providerSelect.setItemLabelGenerator(
+                name -> name + ": " + SampleProviders.describe(name));
+        providerSelect.setValue(initialProvider());
+        providerSelect.addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                startChat();
+                status.setText("Started a new chat with the " + event.getValue()
+                        + " provider.");
+            }
+        });
+        startChat();
+
         queryView.setId("query-view");
         queryView.setWidthFull();
         queryView.getStyle().set("max-height", "8em").set("overflow", "auto")
                 .set("white-space", "pre-wrap")
                 .set("overflow-wrap", "anywhere");
 
-        var controller = new GridAIController(grid,
-                new InMemoryDatabaseProvider());
+        gridPane.setSizeFull();
+        gridPane.add(providerSelect, status, queryView);
+        chatPane.setSizeFull();
+
+        add(gridPane, chatPane);
+        expand(gridPane, chatPane);
+    }
+
+    /**
+     * Creates a grid with its controller and a chat with a new orchestrator,
+     * replacing the current ones in the page.
+     */
+    private void startChat() {
+        var newGrid = new Grid<AIDataRow>();
+        newGrid.setSizeFull();
+        if (grid == null) {
+            gridPane.addComponentAsFirst(newGrid);
+        } else {
+            gridPane.replace(grid, newGrid);
+        }
+        grid = newGrid;
+        gridPane.expand(grid);
+        controller = new GridAIController(grid,
+                SampleProviders.get(providerSelect.getValue()));
         controller.addStateChangeListener(
                 state -> queryView.setText(state.query()));
+        queryView.setText("");
 
         var messageList = new MessageList();
         messageList.setMarkdown(true);
@@ -114,24 +171,27 @@ public class GridAIChatPage extends HorizontalLayout {
         var messageInput = new MessageInput();
         messageInput.setWidthFull();
 
-        var options = OpenAiChatOptions.builder().apiKey(apiKey)
-                .model(MODEL_NAME).build();
-        var chatModel = OpenAiChatModel.builder().options(options).build();
         var orchestrator = AIOrchestrator
                 .builder(new SpringAILLMProvider(chatModel), SYSTEM_PROMPT)
                 .withMessageList(messageList).withInput(messageInput)
                 .withController(controller).build();
 
-        var gridPane = new VerticalLayout(grid, queryView);
-        gridPane.setSizeFull();
-        gridPane.expand(grid);
-
-        var chatPane = new VerticalLayout(messageList,
-                new ExamplePrompts(orchestrator, PROMPTS), messageInput);
-        chatPane.setSizeFull();
+        chatPane.removeAll();
+        chatPane.add(messageList, new ExamplePrompts(orchestrator, PROMPTS),
+                messageInput);
         chatPane.expand(messageList);
+    }
 
-        add(gridPane, chatPane);
-        expand(gridPane, chatPane);
+    /**
+     * Returns the provider named by the {@code provider} query parameter, or
+     * the default one.
+     */
+    private static String initialProvider() {
+        var request = VaadinRequest.getCurrent();
+        var requested = request == null ? null
+                : request.getParameter("provider");
+        return requested != null && SampleProviders.names().contains(requested)
+                ? requested
+                : SampleProviders.DEFAULT;
     }
 }
