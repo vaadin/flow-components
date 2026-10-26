@@ -51,8 +51,8 @@ class SqlProvidersParityTest {
     private static final Set<String> NO_STOCK_PRICES = Set.of("mongo-mirror");
 
     @ParameterizedTest
-    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest", "csv",
-            "jpa-native", "mongo-mirror" })
+    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest-mirror",
+            "csv-mirror", "jpa-native", "mongo-mirror" })
     void returnsTheSampleRows(String name) {
         var provider = (DatabaseProvider) SampleProviders.get(name);
         Assertions.assertTrue(
@@ -88,8 +88,8 @@ class SqlProvidersParityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest", "csv",
-            "jpa-native", "mongo-mirror" })
+    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest-mirror",
+            "csv-mirror", "jpa-native", "mongo-mirror" })
     void aggregatesPagesAndCounts(String name) {
         var provider = (DatabaseProvider) SampleProviders.get(name);
         var totals = normalize(provider.executeQuery(
@@ -113,8 +113,8 @@ class SqlProvidersParityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest", "csv",
-            "jpa-native", "mongo-mirror" })
+    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest-mirror",
+            "csv-mirror", "jpa-native", "mongo-mirror" })
     void rejectsWrites(String name) {
         var provider = (DatabaseProvider) SampleProviders.get(name);
         Assertions.assertThrows(ToolException.class,
@@ -124,8 +124,8 @@ class SqlProvidersParityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest", "csv",
-            "jpa-native", "mongo-mirror" })
+    @ValueSource(strings = { "h2", "postgresql", "mysql", "rest-mirror",
+            "csv-mirror", "jpa-native", "mongo-mirror" })
     void describesEveryTable(String name) {
         var schema = SampleProviders.get(name).getSchema();
         for (var table : SampleData.TABLES) {

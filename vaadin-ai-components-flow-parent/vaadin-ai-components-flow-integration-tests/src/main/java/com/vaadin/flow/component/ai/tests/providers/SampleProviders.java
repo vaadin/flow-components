@@ -70,10 +70,16 @@ public final class SampleProviders {
                 () -> new TenantScopedDatabaseProvider("North"));
         register("tenant-south", "Tenant-scoped H2, South region only, SQL",
                 () -> new TenantScopedDatabaseProvider("South"));
-        register("rest", "REST API mirrored into SQL",
+        register("rest", "REST API, its own query JSON",
+                () -> new RestQueryableProvider(SampleApiServer.get().restUri(),
+                        CAMEL_CASE_NOTES));
+        register("rest-mirror", "REST API mirrored into SQL",
                 () -> new RestMirrorDatabaseProvider(
                         SampleApiServer.get().restUri()));
-        register("csv", "CSV exports loaded into SQL",
+        register("csv", "CSV exports, their own query JSON",
+                () -> new CsvQueryableProvider(SampleCsvFiles.directory(),
+                        SampleData.NOTES));
+        register("csv-mirror", "CSV exports loaded into SQL",
                 () -> new CsvDatabaseProvider(SampleCsvFiles.directory()));
         register("jpa-native", "JPA entities, native SQL",
                 () -> new JpaNativeDatabaseProvider(

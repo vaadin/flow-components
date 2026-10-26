@@ -25,14 +25,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.sql.DataSource;
 
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
@@ -52,10 +50,6 @@ import com.vaadin.flow.component.ai.tests.endpoints.SampleH2Database;
  * </p>
  */
 public final class SqlMirror {
-
-    private static final Pattern INTEGER = Pattern.compile("-?\\d{1,18}");
-    private static final Pattern DECIMAL = Pattern
-            .compile("-?\\d{1,15}\\.\\d{1,10}");
 
     private final String url;
     private final boolean parseNumbers;
@@ -212,36 +206,7 @@ public final class SqlMirror {
     }
 
     private Object convertString(String string) {
-        if (string.isEmpty()) {
-            return null;
-        }
-        if (string.length() == 10 && string.charAt(4) == '-') {
-            try {
-                return LocalDate.parse(string);
-            } catch (DateTimeParseException e) {
-                // Not a date after all, keep the text
-            }
-        }
-        if (string.length() >= 19 && string.charAt(10) == 'T') {
-            try {
-                return LocalDateTime.parse(string);
-            } catch (DateTimeParseException e) {
-                // Not a timestamp after all, keep the text
-            }
-        }
-        if (parseNumbers) {
-            if (INTEGER.matcher(string).matches()) {
-                return Long.parseLong(string);
-            }
-            if (DECIMAL.matcher(string).matches()) {
-                return new BigDecimal(string);
-            }
-            if (string.equalsIgnoreCase("true")
-                    || string.equalsIgnoreCase("false")) {
-                return Boolean.parseBoolean(string);
-            }
-        }
-        return string;
+        return TextValues.parse(string, parseNumbers);
     }
 
     /** The inferred type of a column, widened as values are seen. */
