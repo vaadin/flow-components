@@ -108,8 +108,11 @@ public class JpqlQueryableProvider implements QueryableProvider {
                 tuples = entityManager.createQuery(query, Tuple.class)
                         .getResultList();
             } catch (IllegalArgumentException e) {
-                // JPQL syntax and semantic errors quote the query itself
-                throw relayed(new ToolException(e.getMessage(), e));
+                // JPQL syntax and semantic errors quote the query itself;
+                // Hibernate prefixes some with its exception class name
+                throw relayed(new ToolException(
+                        e.getMessage().replaceFirst("^[\\w.]+Exception: ", ""),
+                        e));
             }
             var rows = new ArrayList<Map<String, Object>>(tuples.size());
             for (var tuple : tuples) {
