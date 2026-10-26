@@ -57,9 +57,17 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
   throws `IllegalStateException`.
 - The extensions module plugs into core only through core's public API —
   mainly `AIController`, `LLMProvider.ToolSpec`,
-  `DatabaseProvider`/`DatabaseProviderAITools`, and the shared value types.
-  There is no SPI, registry, or reflection between the modules; keep the
-  boundary that narrow.
+  `QueryableProvider`/`DatabaseProvider`/`DatabaseProviderAITools`, and the
+  shared value types. There is no SPI, registry, or reflection between the
+  modules; keep the boundary that narrow.
+- The controllers are neutral about the query language. They never read or
+  rewrite the query string the LLM wrote: paging, sorting and counting go
+  through `QueryableProvider` (`executeQuery(query, QueryPage)`, `count`),
+  and every language-specific word in a tool description (the name, rules
+  and rendered examples) comes from the provider's `QueryLanguage`.
+  `DatabaseProvider` is the SQL specialisation of `QueryableProvider` and the
+  only place where SQL is composed; the extensions module contains no SQL
+  text.
 - Vendor LLM integrations (Spring AI, LangChain4j) live in core behind
   `optional` dependencies. `reactor-core` is a non-optional dependency
   because `Flux` is part of the `LLMProvider` API. A new vendor provider
@@ -155,7 +163,7 @@ The group has no `-testbench` module and, apart from `FormFieldMarker`'s
 - Error hygiene toward the model: only the message of a
   `ToolException` (public, in `com.vaadin.flow.component.ai.provider`) is
   forwarded verbatim — throw it, from built-in tool code or an application's
-  `DatabaseProvider`/`ToolSpec`, only with deliberately-safe text. Any other
+  `QueryableProvider`/`ToolSpec`, only with deliberately-safe text. Any other
   exception is caught, logged, and replaced with a generic string so SQL,
   schema names, or paths never leak. Tool failures are returned as strings
   to the model, never thrown. This contract covers only framework-agnostic
