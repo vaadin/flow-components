@@ -20,8 +20,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -29,8 +27,11 @@ import java.util.Set;
 /**
  * Builds a text description of a database schema from {@link DatabaseMetaData}:
  * tables and views of one schema with their columns, primary keys and foreign
- * keys. Columns whose names are keywords of the database are marked so the LLM
- * quotes them.
+ * keys. A column whose bare name the database rejects in a query, because it is
+ * a reserved word, is marked so the LLM quotes it. That check runs the name in
+ * a query returning no rows, since the keyword list of
+ * {@link DatabaseMetaData#getSQLKeywords()} leaves out words the database still
+ * reserves, such as H2's {@code MONTH}.
  */
 public final class JdbcSchemaDescriber {
 
@@ -56,7 +57,6 @@ public final class JdbcSchemaDescriber {
     public static String describe(Connection connection, String schema)
             throws SQLException {
         var metaData = connection.getMetaData();
-        var keywords = keywords(metaData);
         var description = new StringBuilder();
         try (ResultSet tables = metaData.getTables(connection.getCatalog(),
                 schema, "%", new String[] { "TABLE", "BASE TABLE", "VIEW" })) {
@@ -70,8 +70,7 @@ public final class JdbcSchemaDescriber {
                 var tableType = tables.getString("TABLE_TYPE");
                 description.append("VIEW".equalsIgnoreCase(tableType) ? "View: "
                         : "Table: ").append(tableName).append('\n');
-                appendColumns(description, metaData, tableSchema, tableName,
-                        keywords);
+                appendColumns(description, connection, tableSchema, tableName);
                 appendPrimaryKey(description, metaData, tableSchema, tableName);
                 appendForeignKeys(description, metaData, tableSchema,
                         tableName);
@@ -81,24 +80,12 @@ public final class JdbcSchemaDescriber {
         return description.toString();
     }
 
-    private static Set<String> keywords(DatabaseMetaData metaData)
-            throws SQLException {
-        var keywords = new HashSet<String>();
-        var sqlKeywords = metaData.getSQLKeywords();
-        if (sqlKeywords != null && !sqlKeywords.isBlank()) {
-            Arrays.stream(sqlKeywords.split(","))
-                    .map(k -> k.trim().toUpperCase(Locale.ROOT))
-                    .forEach(keywords::add);
-        }
-        return keywords;
-    }
-
     private static void appendColumns(StringBuilder description,
-            DatabaseMetaData metaData, String schema, String table,
-            Set<String> keywords) throws SQLException {
+            Connection connection, String schema, String table)
+            throws SQLException {
         description.append("Columns:\n");
-        try (ResultSet columns = metaData.getColumns(null, schema, table,
-                "%")) {
+        try (ResultSet columns = connection.getMetaData().getColumns(null,
+                schema, table, "%")) {
             while (columns.next()) {
                 var name = columns.getString("COLUMN_NAME");
                 var type = columns.getString("TYPE_NAME");
@@ -119,12 +106,29 @@ public final class JdbcSchemaDescriber {
                 if ("NO".equals(columns.getString("IS_NULLABLE"))) {
                     description.append(" NOT NULL");
                 }
-                if (keywords.contains(name.toUpperCase(Locale.ROOT))) {
+                if (isReservedWord(connection, schema, table, name)) {
                     description.append(" -- reserved word, write it as \"")
                             .append(name).append('"');
                 }
                 description.append('\n');
             }
+        }
+    }
+
+    /**
+     * Tells whether a column needs quoting, by running a query that names it
+     * bare and returns no rows. A failure means the name is a reserved word.
+     */
+    private static boolean isReservedWord(Connection connection, String schema,
+            String table, String column) {
+        var qualifiedTable = (schema == null ? "" : "\"" + schema + "\".")
+                + "\"" + table + "\"";
+        try (var statement = connection.createStatement();
+                var resultSet = statement.executeQuery("SELECT " + column
+                        + " FROM " + qualifiedTable + " WHERE 1 = 0")) {
+            return false;
+        } catch (SQLException e) {
+            return true;
         }
     }
 
