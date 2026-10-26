@@ -56,6 +56,23 @@ class CsvQueryableProviderTest {
     }
 
     @Test
+    void query_rejectsFiltersNoItemCanEqual() {
+        var comparison = Assertions.assertThrows(ToolException.class,
+                () -> provider.executeQuery(
+                        "{\"source\": \"products\", \"columns\": {\"Name\": \"product_name\"}, \"filter\": {\"price\": \">100\"}}"));
+        Assertions.assertTrue(comparison.getMessage().contains("equality"),
+                comparison.getMessage());
+        var text = Assertions.assertThrows(ToolException.class,
+                () -> provider.executeQuery(
+                        "{\"source\": \"products\", \"columns\": {\"Name\": \"product_name\"}, \"filter\": {\"price\": \"cheap\"}}"));
+        Assertions.assertTrue(text.getMessage().contains("number"),
+                text.getMessage());
+        Assertions.assertEquals(1, provider.executeQuery(
+                "{\"source\": \"products\", \"columns\": {\"Name\": \"product_name\"}, \"filter\": {\"price\": 899.99}}")
+                .size());
+    }
+
+    @Test
     void query_filtersSortsAndTypesTheText() {
         var rows = provider.executeQuery(SALES_BY_SALARY);
         Assertions.assertEquals(

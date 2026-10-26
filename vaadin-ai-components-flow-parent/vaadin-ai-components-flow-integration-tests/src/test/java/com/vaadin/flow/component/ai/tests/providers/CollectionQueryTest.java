@@ -85,6 +85,44 @@ class CollectionQueryTest {
                 "sort");
     }
 
+    @Test
+    void rejectsFilterValuesNoItemCanEqual() {
+        var number = CollectionQuery.FieldKind.of(899.99);
+        Assertions.assertEquals(CollectionQuery.FieldKind.NUMBER, number);
+        Assertions.assertEquals(CollectionQuery.FieldKind.DATE,
+                CollectionQuery.FieldKind.of("2025-01-06"));
+        Assertions.assertEquals(CollectionQuery.FieldKind.TEXT,
+                CollectionQuery.FieldKind.of("Laptop"));
+        Assertions.assertNull(CollectionQuery.FieldKind.of(null));
+
+        CollectionQuery.checkFilterValue("price", 100, number);
+        CollectionQuery.checkFilterValue("price", "100", number);
+        CollectionQuery.checkFilterValue("price", null, number);
+        CollectionQuery.checkFilterValue("price", "whatever", null);
+        CollectionQuery.checkFilterValue("day", "2025-01-06",
+                CollectionQuery.FieldKind.DATE);
+        CollectionQuery.checkFilterValue("name", 7,
+                CollectionQuery.FieldKind.TEXT);
+
+        assertFilterRejected("price", ">100", number, "comparison");
+        assertFilterRejected("name", "!= Laptop",
+                CollectionQuery.FieldKind.TEXT, "comparison");
+        assertFilterRejected("price", "cheap", number, "number values");
+        assertFilterRejected("day", "yesterday", CollectionQuery.FieldKind.DATE,
+                "date values");
+        assertFilterRejected("done", "maybe", CollectionQuery.FieldKind.BOOLEAN,
+                "boolean values");
+    }
+
+    private static void assertFilterRejected(String field, Object value,
+            CollectionQuery.FieldKind kind, String messagePart) {
+        var e = Assertions.assertThrows(ToolException.class,
+                () -> CollectionQuery.checkFilterValue(field, value, kind),
+                String.valueOf(value));
+        Assertions.assertTrue(e.getMessage().contains(messagePart),
+                e.getMessage());
+    }
+
     private static void assertRejected(String json, String messagePart) {
         var e = Assertions.assertThrows(ToolException.class,
                 () -> CollectionQuery.parse(json), json);

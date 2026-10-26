@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
@@ -130,8 +131,20 @@ public class CsvQueryableProvider implements QueryableProvider {
                         + " has no column " + field + ". Columns: " + header));
             }
         }
+        var rows = read(file);
+        try {
+            query.filter()
+                    .forEach((field, value) -> CollectionQuery
+                            .checkFilterValue(field, value,
+                                    CollectionQuery.FieldKind.of(rows.stream()
+                                            .map(row -> row.get(field))
+                                            .filter(Objects::nonNull)
+                                            .findFirst().orElse(null))));
+        } catch (ToolException e) {
+            throw relayed(e);
+        }
         var items = new ArrayList<>(
-                read(file).stream().filter(query::matches).toList());
+                rows.stream().filter(query::matches).toList());
         items.sort(query.comparator());
         return items;
     }

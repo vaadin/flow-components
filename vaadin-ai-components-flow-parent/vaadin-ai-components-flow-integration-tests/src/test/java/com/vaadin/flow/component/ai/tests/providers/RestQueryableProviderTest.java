@@ -70,6 +70,23 @@ class RestQueryableProviderTest {
     }
 
     @Test
+    void query_rejectsFiltersNoItemCanEqual() {
+        var comparison = Assertions.assertThrows(ToolException.class,
+                () -> provider.executeQuery(
+                        "{\"source\": \"products\", \"columns\": {\"Name\": \"productName\"}, \"filter\": {\"price\": \">100\"}}"));
+        Assertions.assertTrue(comparison.getMessage().contains("equality"),
+                comparison.getMessage());
+        var text = Assertions.assertThrows(ToolException.class,
+                () -> provider.executeQuery(
+                        "{\"source\": \"products\", \"columns\": {\"Name\": \"productName\"}, \"filter\": {\"price\": \"cheap\"}}"));
+        Assertions.assertTrue(text.getMessage().contains("number"),
+                text.getMessage());
+        Assertions.assertEquals(1, provider.executeQuery(
+                "{\"source\": \"products\", \"columns\": {\"Name\": \"productName\"}, \"filter\": {\"price\": 899.99}}")
+                .size());
+    }
+
+    @Test
     void paging_usesTheApisPagesAndSort() {
         var page = provider.executeQuery(NORTH_SALES, new QueryPage(1, 2,
                 List.of(new QuerySortOrder("_y", SortDirection.DESCENDING))));

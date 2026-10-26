@@ -64,7 +64,7 @@ public class RestQueryableProvider implements QueryableProvider {
 
     private final URI apiUri;
     private final String notes;
-    private transient volatile Map<String, Map<String, String>> collections;
+    private transient volatile Map<String, Map<String, Object>> collections;
 
     /**
      * Creates a provider for the REST API at the given URI.
@@ -91,8 +91,8 @@ public class RestQueryableProvider implements QueryableProvider {
         collections().forEach((name, fields) -> {
             schema.append("- ").append(name).append(": ");
             var described = new ArrayList<String>();
-            fields.forEach(
-                    (field, type) -> described.add(field + " (" + type + ")"));
+            fields.forEach((field, sample) -> described
+                    .add(field + " (" + typeName(sample) + ")"));
             schema.append(String.join(", ", described)).append('\n');
         });
         if (!notes.isBlank()) {
@@ -178,6 +178,14 @@ public class RestQueryableProvider implements QueryableProvider {
                                 + field + ". Fields: " + fields.keySet()));
             }
         }
+        try {
+            query.filter()
+                    .forEach((field, value) -> CollectionQuery.checkFilterValue(
+                            field, value,
+                            CollectionQuery.FieldKind.of(fields.get(field))));
+        } catch (ToolException e) {
+            throw relayed(e);
+        }
         return query;
     }
 
@@ -187,23 +195,22 @@ public class RestQueryableProvider implements QueryableProvider {
     }
 
     /**
-     * Returns the collections with their fields and types, sampled from the
-     * first item of each on the first call.
+     * Returns the collections with their fields, each with a sample value from
+     * the first item of the collection, read on the first call.
      */
     @SuppressWarnings("unchecked")
-    private Map<String, Map<String, String>> collections() {
+    private Map<String, Map<String, Object>> collections() {
         var current = collections;
         if (current == null) {
-            var result = new TreeMap<String, Map<String, String>>();
+            var result = new TreeMap<String, Map<String, Object>>();
             var index = (Map<String, String>) getJson(apiUri)
                     .get("collections");
             index.forEach((name, href) -> {
-                var fields = new LinkedHashMap<String, String>();
+                var fields = new LinkedHashMap<String, Object>();
                 var sample = content(
                         getJson(URI.create(apiUri.resolve(href) + "?size=1")));
                 if (!sample.isEmpty()) {
-                    sample.getFirst().forEach((field, value) -> fields
-                            .put(field, typeName(value)));
+                    fields.putAll(sample.getFirst());
                 }
                 result.put(name, fields);
             });

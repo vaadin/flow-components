@@ -16,11 +16,14 @@
 package com.vaadin.flow.component.ai.tests.providers;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -54,6 +57,57 @@ public record CollectionQuery(String source, Map<String, String> columns,
      *            {@code true} for descending order
      */
     public record Sort(String field, boolean descending) {
+    }
+
+    /**
+     * What a field holds, as far as a filter value needs to match it.
+     */
+    public enum FieldKind {
+        NUMBER, DATE, BOOLEAN, TEXT;
+
+        /**
+         * Tells the kind from a value of the field.
+         *
+         * @param sample
+         *            a value the field holds, or {@code null} if none is known
+         * @return the kind, or {@code null} for a {@code null} sample
+         */
+        public static FieldKind of(Object sample) {
+            return switch (sample) {
+            case null -> null;
+            case Number n -> NUMBER;
+            case Boolean b -> BOOLEAN;
+            case Temporal t -> DATE;
+            case String s ->
+                TextValues.parse(s, false) instanceof LocalDate ? DATE : TEXT;
+            default -> TEXT;
+            };
+        }
+
+        private boolean canEqual(Object value) {
+            return switch (this) {
+            case NUMBER -> value instanceof Number
+                    || value instanceof String s && isNumber(s);
+            case DATE -> value instanceof String s && isDate(s);
+            case BOOLEAN -> value instanceof Boolean
+                    || value instanceof String s && (s.equalsIgnoreCase("true")
+                            || s.equalsIgnoreCase("false"));
+            case TEXT -> true;
+            };
+        }
+
+        private static boolean isNumber(String text) {
+            try {
+                new BigDecimal(text.trim());
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        private static boolean isDate(String text) {
+            return TextValues.parse(text, false) instanceof LocalDate;
+        }
     }
 
     /**
@@ -130,6 +184,41 @@ public record CollectionQuery(String source, Map<String, String> columns,
             }
         }
         return new CollectionQuery(source, columns, filter, sort);
+    }
+
+    /**
+     * Rejects a filter value no value of the field can equal: a comparison
+     * written as text, such as {@code ">100"}, or a value of another kind than
+     * the field holds. Without the check such a filter matches nothing, and the
+     * LLM takes the empty result for the answer.
+     *
+     * @param field
+     *            the filtered field
+     * @param value
+     *            the filter value
+     * @param kind
+     *            what the field holds, or {@code null} if unknown, which
+     *            accepts every value that is not a comparison
+     * @throws ToolException
+     *             if no value of the field can equal the filter value
+     */
+    public static void checkFilterValue(String field, Object value,
+            FieldKind kind) {
+        if (value instanceof String text && text.trim().matches("[<>=!].*")) {
+            throw new ToolException("Filter value \"" + text + "\" of " + field
+                    + " is a comparison; only equality is supported, so give the exact value the field must have");
+        }
+        if (kind != null && value != null && !kind.canEqual(value)) {
+            throw new ToolException("Filter value " + describe(value) + " of "
+                    + field + " cannot match: the field holds "
+                    + kind.name().toLowerCase(Locale.ROOT)
+                    + " values and only equality with one of them is supported");
+        }
+    }
+
+    private static String describe(Object value) {
+        return value instanceof String s ? "\"" + s + "\""
+                : String.valueOf(value);
     }
 
     /**
