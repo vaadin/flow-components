@@ -32,7 +32,7 @@ public final class SqlDialectQueryLanguage implements QueryLanguage {
      */
     public static final SqlDialectQueryLanguage H2 = new SqlDialectQueryLanguage(
             "SQL",
-            "- H2 dialect: reserved words such as VALUE, KEY, ORDER, MONTH, YEAR, DAY and HOUR are only valid as names in double quotes; prefer another alias, for example total instead of value");
+            "- H2 database: reserved words such as VALUE, KEY, ORDER, MONTH, YEAR, DAY and HOUR are only valid as names in double quotes. Do NOT use them as column aliases; use descriptive names instead, for example total_revenue");
 
     private final String name;
     private final String dialectRules;
@@ -54,6 +54,15 @@ public final class SqlDialectQueryLanguage implements QueryLanguage {
     @Override
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the rules specific to the dialect, without the general SQL rules.
+     *
+     * @return the dialect rules, possibly empty
+     */
+    public String getDialectRules() {
+        return dialectRules;
     }
 
     @Override

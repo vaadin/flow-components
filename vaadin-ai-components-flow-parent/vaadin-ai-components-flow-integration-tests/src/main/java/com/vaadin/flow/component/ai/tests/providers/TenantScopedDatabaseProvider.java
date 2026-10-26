@@ -58,7 +58,8 @@ public class TenantScopedDatabaseProvider implements DatabaseProvider {
                 """
                         - The tables hold the data of the %s region only; other regions are not visible to this connection.
                         """
-                        .formatted(tenant) + SampleData.NOTES);
+                        .formatted(tenant) + SampleData.NOTES
+                        + SqlDialectQueryLanguage.H2.getDialectRules());
     }
 
     /**

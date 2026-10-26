@@ -100,7 +100,10 @@ public abstract class MirrorDatabaseProvider implements DatabaseProvider {
                     var dataSource = sqlMirror.dataSource();
                     Supplier<DataSource> supplier = () -> dataSource;
                     current = new JdbcDatabaseProvider(supplier,
-                            SqlDialectQueryLanguage.H2, null, notes());
+                            SqlDialectQueryLanguage.H2, null,
+                            notes().stripTrailing() + "\n"
+                                    + SqlDialectQueryLanguage.H2
+                                            .getDialectRules());
                     mirror = current;
                 }
             }

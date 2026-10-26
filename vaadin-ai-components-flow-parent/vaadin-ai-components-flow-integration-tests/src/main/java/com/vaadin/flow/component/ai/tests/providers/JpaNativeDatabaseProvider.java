@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
-import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityManagerFactory;
@@ -61,6 +60,7 @@ public class JpaNativeDatabaseProvider implements DatabaseProvider {
 
     private final transient Supplier<EntityManagerFactory> entityManagerFactory;
     private final QueryLanguage language;
+    private final String notes;
 
     /**
      * Creates a provider over the persistence unit the supplier returns.
@@ -70,12 +70,16 @@ public class JpaNativeDatabaseProvider implements DatabaseProvider {
      * @param language
      *            the SQL dialect of the database behind the persistence unit,
      *            {@link QueryLanguage#SQL} for plain SQL
+     * @param notes
+     *            free-form notes appended to the schema description, or
+     *            {@code null}
      */
     public JpaNativeDatabaseProvider(
             Supplier<EntityManagerFactory> entityManagerFactory,
-            QueryLanguage language) {
+            QueryLanguage language, String notes) {
         this.entityManagerFactory = entityManagerFactory;
         this.language = language;
+        this.notes = notes == null ? "" : notes;
     }
 
     @Override
@@ -100,7 +104,9 @@ public class JpaNativeDatabaseProvider implements DatabaseProvider {
             }
             schema.append('\n');
         }
-        schema.append("NOTES:\n").append(SampleData.NOTES);
+        if (!notes.isBlank()) {
+            schema.append("NOTES:\n").append(notes);
+        }
         ProviderLog.schema(LOGGER, schema.toString());
         return schema.toString();
     }

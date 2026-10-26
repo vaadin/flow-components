@@ -84,7 +84,9 @@ public final class SampleProviders {
         register("jpa-native", "JPA entities, native SQL",
                 () -> new JpaNativeDatabaseProvider(
                         SampleJpaDatabase::entityManagerFactory,
-                        SqlDialectQueryLanguage.H2));
+                        SqlDialectQueryLanguage.H2,
+                        SampleData.NOTES + SqlDialectQueryLanguage.H2
+                                .getDialectRules()));
         register("jpql", "JPA entities, JPQL", () -> new JpqlQueryableProvider(
                 SampleJpaDatabase::entityManagerFactory,
                 """
