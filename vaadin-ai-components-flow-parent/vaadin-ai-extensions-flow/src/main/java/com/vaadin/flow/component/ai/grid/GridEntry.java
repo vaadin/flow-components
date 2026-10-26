@@ -105,7 +105,7 @@ class GridEntry implements Serializable {
      * Returns the current query that was last successfully rendered, or
      * {@code null} if no query has been applied yet.
      *
-     * @return the current SQL query, or {@code null}
+     * @return the current query, or {@code null}
      */
     public String getCurrentQuery() {
         return currentQuery;
@@ -115,7 +115,7 @@ class GridEntry implements Serializable {
      * Sets the current query after successful rendering.
      *
      * @param query
-     *            the SQL query
+     *            the query
      */
     public void setCurrentQuery(String query) {
         this.currentQuery = query;
@@ -125,7 +125,7 @@ class GridEntry implements Serializable {
      * Returns the pending query waiting to be rendered, or {@code null} if
      * none.
      *
-     * @return the pending SQL query, or {@code null}
+     * @return the pending query, or {@code null}
      */
     public String getPendingQuery() {
         return pendingQuery;
@@ -135,7 +135,7 @@ class GridEntry implements Serializable {
      * Sets a pending query to be rendered.
      *
      * @param query
-     *            the SQL query
+     *            the query
      */
     public void setPendingQuery(String query) {
         this.pendingQuery = query;

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
@@ -33,8 +34,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AITurnEvents;
+import com.vaadin.flow.component.ai.FakeGraphQLLanguage;
+import com.vaadin.flow.component.ai.common.QueryLanguage;
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.Query;
@@ -902,7 +907,7 @@ class GridAIControllerTest {
             // the sample row fetch in renderGrid
             var sampleSql = dbProvider.executedQueries.get(1);
             Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 1",
+                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 1 OFFSET 0",
                     sampleSql);
         }
 
@@ -955,38 +960,17 @@ class GridAIControllerTest {
         }
 
         @Test
-        void count_wrapsQueryWithCount() {
+        void count_wrapsQueryWithCountOnRender() {
             dbProvider.queryResults = List.of(row("COUNT(*)", 42));
-            var size = grid.getDataProvider().size(new Query<>());
+            simulateUpdate("SELECT a FROM t");
 
-            Assertions.assertEquals(42, size);
-            var sql = dbProvider.executedQueries.getFirst();
+            // Validation, sample row, then the count
             Assertions.assertEquals(
-                    "SELECT COUNT(*) FROM (SELECT a FROM t) AS _counted", sql);
-        }
-
-        @Test
-        void count_emptyResult_returnsZero() {
-            dbProvider.queryResults = List.of();
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
-        }
-
-        @Test
-        void count_nonNumericResult_returnsZero() {
-            dbProvider.queryResults = List.of(row("COUNT(*)", "not a number"));
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
-        }
-
-        @Test
-        void count_rowWithNoColumns_returnsZero() {
-            dbProvider.queryResults = List.of(new LinkedHashMap<>());
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
+                    "SELECT COUNT(*) FROM (SELECT a FROM t) AS _counted",
+                    dbProvider.executedQueries.get(2));
+            Assertions.assertEquals(42,
+                    grid.getDataProvider().size(new Query<>()));
+            Assertions.assertTrue(grid.getDataCommunicator().isDefinedSize());
         }
 
         @Test
@@ -997,6 +981,132 @@ class GridAIControllerTest {
             var second = grid.getDataProvider();
 
             Assertions.assertNotSame(first, second);
+        }
+    }
+
+    // --- Providers of other query languages ---
+
+    @Nested
+    class PagedProviderTests {
+
+        private RecordingQueryableProvider paged;
+        private GridAIController pagedController;
+
+        @BeforeEach
+        void setUp() {
+            paged = new RecordingQueryableProvider();
+            pagedController = new GridAIController(grid, paged);
+        }
+
+        @Test
+        void validationAndSample_fetchFirstRowOfTheUnchangedQuery() {
+            update("{ items { a } }");
+
+            Assertions.assertEquals(
+                    List.of(Map.entry("{ items { a } }", QueryPage.first(1)),
+                            Map.entry("{ items { a } }", QueryPage.first(1))),
+                    paged.pagedQueries);
+            Assertions.assertTrue(paged.executedQueries.isEmpty(),
+                    "The grid must not run a query of its own");
+        }
+
+        @Test
+        void fetch_passesOffsetLimitAndSortOrdersThrough() {
+            update("{ items { a } }");
+            var sort = List
+                    .of(new QuerySortOrder("a", SortDirection.DESCENDING));
+            paged.pagedQueries.clear();
+
+            grid.getDataProvider().fetch(new Query<>(20, 10, sort, null, null));
+
+            Assertions.assertEquals(List.of(
+                    Map.entry("{ items { a } }", new QueryPage(20, 10, sort))),
+                    paged.pagedQueries);
+        }
+
+        @Test
+        void knownCount_definesTheGridSize() {
+            paged.countResult = OptionalInt.of(7);
+            update("{ items { a } }");
+
+            Assertions.assertEquals(List.of("{ items { a } }"),
+                    paged.countedQueries);
+            Assertions.assertTrue(grid.getDataCommunicator().isDefinedSize());
+            Assertions.assertEquals(7,
+                    grid.getDataProvider().size(new Query<>()));
+        }
+
+        @Test
+        void unknownCount_leavesTheGridSizeUndefined() {
+            paged.countResult = OptionalInt.empty();
+            paged.rows = List.of(row("a", 1), row("a", 2));
+            update("{ items { a } }");
+
+            Assertions.assertFalse(grid.getDataCommunicator().isDefinedSize());
+            var rows = grid.getDataProvider()
+                    .fetch(new Query<>(0, 50, List.of(), null, null)).toList();
+            Assertions.assertEquals(2, rows.size());
+        }
+
+        private void update(String query) {
+            pagedController.getTools().stream()
+                    .filter(t -> t.getName().equals("update_grid_data"))
+                    .findFirst().orElseThrow()
+                    .execute(json("{\"query\": \"" + query + "\"}"));
+            pagedController.onResponse(AITurnEvents.success());
+        }
+    }
+
+    @Nested
+    class NonSqlProviderTests {
+
+        private GridAIController graphQlController;
+
+        @BeforeEach
+        void setUp() {
+            var provider = new RecordingQueryableProvider();
+            provider.language = new FakeGraphQLLanguage();
+            graphQlController = new GridAIController(grid, provider);
+        }
+
+        @Test
+        void updateDataTool_describesTheProvidersLanguage() {
+            var description = tool("update_grid_data").getDescription();
+            Assertions.assertTrue(description.contains("using a GraphQL query"),
+                    description);
+            Assertions.assertTrue(
+                    description.contains(FakeGraphQLLanguage.RULES),
+                    description);
+            Assertions.assertTrue(description.contains(
+                    "{ TableName { Readable A: ColumnA Readable B: ColumnB } }"),
+                    description);
+            Assertions.assertFalse(description.contains("SELECT"), description);
+            Assertions.assertFalse(description.contains("SQL"), description);
+        }
+
+        @Test
+        void schemaTool_describesTheProvidersLanguage() {
+            var description = tool("get_database_schema").getDescription();
+            Assertions.assertTrue(description.contains("GraphQL"), description);
+            Assertions.assertFalse(description.contains("SQL"), description);
+        }
+
+        @Test
+        void instructionsTool_namesTheProvidersLanguage() {
+            var tool = tool("get_grid_instructions");
+            Assertions.assertTrue(
+                    tool.getDescription().contains("a GraphQL query"),
+                    tool.getDescription());
+            Assertions.assertFalse(tool.getDescription().contains("SQL"),
+                    tool.getDescription());
+            Assertions.assertTrue(
+                    tool.execute(json("{}")).contains("a GraphQL query"));
+        }
+
+        private LLMProvider.ToolSpec tool(String name) {
+            return graphQlController.getTools().stream()
+                    .filter(t -> t.getName().equals(name)).findFirst()
+                    .orElseThrow();
         }
     }
 
@@ -1027,6 +1137,48 @@ class GridAIControllerTest {
             map.put((String) keysAndValues[i], keysAndValues[i + 1]);
         }
         return map;
+    }
+
+    /**
+     * A provider of any query language that records how the grid uses it.
+     */
+    private static class RecordingQueryableProvider
+            implements QueryableProvider {
+        private QueryLanguage language = QueryLanguage.SQL;
+        private List<Map<String, Object>> rows = List.of(row("a", 1));
+        private OptionalInt countResult = OptionalInt.of(1);
+        private final List<String> executedQueries = new ArrayList<>();
+        private final List<Map.Entry<String, QueryPage>> pagedQueries = new ArrayList<>();
+        private final List<String> countedQueries = new ArrayList<>();
+
+        @Override
+        public QueryLanguage getQueryLanguage() {
+            return language;
+        }
+
+        @Override
+        public String getSchema() {
+            return "schema";
+        }
+
+        @Override
+        public List<Map<String, Object>> executeQuery(String query) {
+            executedQueries.add(query);
+            return rows;
+        }
+
+        @Override
+        public List<Map<String, Object>> executeQuery(String query,
+                QueryPage page) {
+            pagedQueries.add(Map.entry(query, page));
+            return rows;
+        }
+
+        @Override
+        public OptionalInt count(String query) {
+            countedQueries.add(query);
+            return countResult;
+        }
     }
 
     /**

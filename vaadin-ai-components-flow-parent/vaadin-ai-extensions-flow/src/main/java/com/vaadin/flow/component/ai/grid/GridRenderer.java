@@ -15,26 +15,24 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.common.QueryPage;
+import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 
 /**
- * Stateless utility for rendering grid data from SQL queries. Handles column
- * creation, type-based rendering, column grouping, and lazy loading via
- * {@link CallbackDataProvider}.
+ * Stateless utility for rendering grid data from the query results of a
+ * {@link QueryableProvider}. Handles column creation, type-based rendering,
+ * column grouping, and lazy loading through the provider's paged query
+ * execution.
  *
  * @author Vaadin Ltd
  * @see GridAIController
@@ -51,23 +49,23 @@ public final class GridRenderer implements Serializable {
     }
 
     /**
-     * Renders the grid with results from the given SQL query. Columns are
-     * created dynamically from the query result, with type-appropriate
-     * renderers, grouping, and lazy loading.
+     * Renders the grid with the results of the given query. Columns are created
+     * dynamically from the query result, with type-appropriate renderers,
+     * grouping, and lazy loading.
      * <p>
      * The caller is responsible for ensuring this method runs on the UI thread
      * (e.g., via {@code runWhenAttached} and {@code UI.access()}).
      *
      * @param grid
      *            the grid to render, not {@code null}
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
+     * @param provider
+     *            the provider executing the query, not {@code null}
      * @param query
-     *            the SQL SELECT query, not {@code null}
+     *            the query, in the provider's language, not {@code null}
      */
     public static void renderGrid(Grid<AIDataRow> grid,
-            DatabaseProvider databaseProvider, String query) {
-        var sampleRows = databaseProvider.executeQuery(wrapWithLimit(query, 1));
+            QueryableProvider provider, String query) {
+        var sampleRows = provider.executeQuery(query, QueryPage.first(1));
         removeExtraHeaderRows(grid);
         grid.removeAllColumns();
         if (sampleRows.isEmpty()) {
@@ -90,8 +88,7 @@ public final class GridRenderer implements Serializable {
             addColumn(grid, entry.getKey(), entry.getValue());
         }
         applyColumnGrouping(grid);
-        var dataProvider = createDataProvider(databaseProvider, query);
-        grid.setItems(dataProvider);
+        setLazyItems(grid, provider, query);
         LOGGER.info("Grid configured with {} columns", sortedColumns.size());
     }
 
@@ -161,28 +158,29 @@ public final class GridRenderer implements Serializable {
         }
     }
 
-    private static DataProvider<AIDataRow, Void> createDataProvider(
-            DatabaseProvider databaseProvider, String query) {
-        var countQuery = wrapWithCount(query);
-        return new CallbackDataProvider<>(fetchQuery -> {
-            var sql = enrichQuery(query, fetchQuery.getOffset(),
+    /**
+     * Loads the rows lazily through the provider. The count is taken once per
+     * render: sorting cannot change it, and a provider that cannot count leaves
+     * the grid to find the end of the result by fetching.
+     */
+    private static void setLazyItems(Grid<AIDataRow> grid,
+            QueryableProvider provider, String query) {
+        CallbackDataProvider.FetchCallback<AIDataRow, Void> fetch = fetchQuery -> {
+            var page = new QueryPage(fetchQuery.getOffset(),
                     fetchQuery.getLimit(), fetchQuery.getSortOrders());
-            LOGGER.debug("Fetching rows: {}", sql);
-            return databaseProvider.executeQuery(sql).stream()
+            LOGGER.debug("Fetching rows: offset={} limit={}", page.offset(),
+                    page.limit());
+            return provider.executeQuery(query, page).stream()
                     .map(AIDataRow::new);
-        }, countFetchQuery -> {
-            LOGGER.debug("Counting rows: {}", countQuery);
-            var countResult = databaseProvider.executeQuery(countQuery);
-            if (countResult.isEmpty()) {
-                return 0;
-            }
-            var entries = new AIDataRow(countResult.getFirst()).entries();
-            if (entries.isEmpty()) {
-                return 0;
-            }
-            var firstValue = entries.iterator().next().getValue();
-            return firstValue instanceof Number n ? n.intValue() : 0;
-        }, row -> row);
+        };
+        var count = provider.count(query);
+        if (count.isPresent()) {
+            var size = count.getAsInt();
+            grid.setItems(new CallbackDataProvider<>(fetch, countQuery -> size,
+                    row -> row));
+        } else {
+            grid.setItems(fetch);
+        }
     }
 
     // --- Type conversion helpers ---
@@ -207,29 +205,4 @@ public final class GridRenderer implements Serializable {
         return null;
     }
 
-    // --- SQL helpers ---
-
-    private static String enrichQuery(String query, int offset, int limit,
-            List<QuerySortOrder> sortOrders) {
-        var sortOrdersExpression = sortOrders.stream().map(sortOrder -> {
-            var col = sortOrder.getSorted();
-            var dir = sortOrder.getDirection() == SortDirection.ASCENDING
-                    ? "ASC"
-                    : "DESC";
-            return "\"" + col + "\" " + dir;
-        }).collect(Collectors.joining(", "));
-        if (!sortOrdersExpression.isEmpty()) {
-            query = "SELECT * FROM (" + query + ") AS _t ORDER BY "
-                    + sortOrdersExpression;
-        }
-        return wrapWithLimit(query, limit) + " OFFSET " + offset;
-    }
-
-    private static String wrapWithLimit(String query, int limit) {
-        return "SELECT * FROM (" + query + ") AS _limited LIMIT " + limit;
-    }
-
-    private static String wrapWithCount(String query) {
-        return "SELECT COUNT(*) FROM (" + query + ") AS _counted";
-    }
 }

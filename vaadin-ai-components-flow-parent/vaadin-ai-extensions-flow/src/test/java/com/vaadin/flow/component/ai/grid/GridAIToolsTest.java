@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.FakeGraphQLLanguage;
+import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -261,6 +263,66 @@ class GridAIToolsTest {
         Assertions.assertNotNull(tool.getParametersSchema());
         Assertions.assertTrue(tool.getParametersSchema().contains("query"));
         Assertions.assertTrue(tool.getParametersSchema().contains("gridId"));
+    }
+
+    @Test
+    void updateGridData_description_defaultsToSql() {
+        var description = GridAITools
+                .updateGridData(singleGridCallbacks(null, null))
+                .getDescription();
+        Assertions.assertTrue(description.contains("using a SQL query"),
+                description);
+        Assertions.assertTrue(
+                description.contains(QueryLanguage.SQL.getRules()),
+                description);
+        Assertions.assertTrue(description.contains(
+                "SELECT ColumnA AS \"Readable A\", ColumnB AS \"Readable B\" FROM TableName"),
+                description);
+        Assertions.assertTrue(description.contains(
+                "SELECT ColumnA AS \"GroupName.Readable A\", ColumnB AS \"GroupName.Readable B\" FROM TableName"),
+                description);
+    }
+
+    @Test
+    void updateGridData_description_usesTheCallbacksLanguage() {
+        var callbacks = new GridAITools.Callbacks() {
+            @Override
+            public String getState(String gridId) {
+                return "{}";
+            }
+
+            @Override
+            public void updateData(String gridId, String query) {
+            }
+
+            @Override
+            public Set<String> getGridIds() {
+                return Set.of("grid");
+            }
+
+            @Override
+            public QueryLanguage getQueryLanguage() {
+                return new FakeGraphQLLanguage();
+            }
+        };
+        var description = GridAITools.updateGridData(callbacks)
+                .getDescription();
+        Assertions.assertTrue(description.contains("using a GraphQL query"),
+                description);
+        Assertions.assertTrue(description.contains(FakeGraphQLLanguage.RULES),
+                description);
+        Assertions.assertTrue(description.contains(
+                "{ TableName { Readable A: ColumnA Readable B: ColumnB } }"),
+                description);
+        Assertions.assertFalse(description.contains("SELECT"), description);
+        Assertions.assertFalse(description.contains("SQL"), description);
+    }
+
+    @Test
+    void updateGridData_parameterSchema_isJson() {
+        var tool = GridAITools.updateGridData(singleGridCallbacks(null, null));
+        var schema = JacksonUtils.readTree(tool.getParametersSchema());
+        Assertions.assertTrue(schema.get("properties").has("query"));
     }
 
     @Test

@@ -16,7 +16,7 @@ import java.io.Serializable;
  * {@link GridAIController#restoreState(GridState)}.
  *
  * @param query
- *            the SQL query that populates the grid
+ *            the query that populates the grid
  * @author Vaadin Ltd
  * @since 25.3
  */

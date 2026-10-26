@@ -16,13 +16,15 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.common.QueryLanguage;
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -30,8 +32,9 @@ import com.vaadin.flow.shared.Registration;
 import tools.jackson.databind.JsonNode;
 
 /**
- * AI controller for populating a {@link Grid Grid&lt;AIDataRow&gt;} with
- * database data via LLM tool calls. Attach it to an {@link AIOrchestrator} via
+ * AI controller for populating a {@link Grid Grid&lt;AIDataRow&gt;} with data
+ * from a {@link QueryableProvider} via LLM tool calls. Attach it to an
+ * {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
  * tools to the LLM. Workflow instructions are delivered through the description
  * of the {@code get_grid_instructions} tool, which the LLM reads as part of the
@@ -41,7 +44,7 @@ import tools.jackson.databind.JsonNode;
  *
  * <pre>
  * var grid = new Grid&lt;AIDataRow&gt;();
- * var controller = new GridAIController(grid, databaseProvider);
+ * var controller = new GridAIController(grid, provider);
  * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .withMessageList(messageList).build();
@@ -55,7 +58,7 @@ import tools.jackson.databind.JsonNode;
  * The grid automatically creates columns from query results with:
  * </p>
  * <ul>
- * <li>Lazy loading with SQL {@code LIMIT}/{@code OFFSET}</li>
+ * <li>Lazy loading through the provider's paged query execution</li>
  * <li>Built-in renderers for dates and numbers</li>
  * <li>Right-alignment for numeric columns</li>
  * <li>Resizable, sortable columns with auto-width</li>
@@ -86,7 +89,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new GridAIController(grid, databaseProvider);
+ * var controller = new GridAIController(grid, provider);
  * orchestrator.reconnect(llmProvider).withController(controller).apply();
  * if (savedState != null) {
  *     controller.restoreState(savedState);
@@ -115,23 +118,27 @@ public class GridAIController implements AIController {
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_grid_instructions";
 
-    private static final String INSTRUCTIONS_TEXT = """
+    /**
+     * The workflow instructions, with {@code {LANGUAGE}} standing for the name
+     * of the provider's query language.
+     */
+    private static final String INSTRUCTIONS_TEMPLATE = """
             Grid data display workflow. Follow this for every grid request:
 
             TOOLS:
-            1. get_database_schema() - Retrieves database schema (tables, columns, types)
+            1. get_database_schema() - Retrieves the schema of the data (tables or types, columns, types)
             2. get_grid_state() - Returns current grid state (query)
-            3. update_grid_data(query) - Updates grid data with SQL SELECT query
+            3. update_grid_data(query) - Updates grid data with a {LANGUAGE} query
 
             WORKFLOW:
             Complete the user's request in a SINGLE response by calling all needed tools.
-            1. Call get_database_schema() to learn the exact table and column names
-            2. Call update_grid_data() with a SQL SELECT query using only columns from the schema
+            1. Call get_database_schema() to learn the exact names to use in the query
+            2. Call update_grid_data() with a {LANGUAGE} query using only names from the schema
 
             Call get_grid_state() only when the request changes what is already
             shown (for example "sort by date" or "add a column"). Write the new
             query from the schema rather than editing the previous one, so every
-            column keeps the table qualifier the schema gives it.
+            column keeps the qualifier the schema gives it.
 
             IMPORTANT:
             - Always finish the response with update_grid_data()
@@ -141,7 +148,8 @@ public class GridAIController implements AIController {
             """;
 
     private final Grid<AIDataRow> grid;
-    private final DatabaseProvider databaseProvider;
+    private final QueryableProvider provider;
+    private final String instructionsText;
     private final List<SerializableConsumer<GridState>> stateChangeListeners = new ArrayList<>();
 
     /**
@@ -149,23 +157,24 @@ public class GridAIController implements AIController {
      *
      * @param grid
      *            the grid to populate, not {@code null}
-     * @param databaseProvider
-     *            the database provider for schema and query execution, not
+     * @param provider
+     *            the provider of the schema and of the query execution, not
      *            {@code null}
      */
-    public GridAIController(Grid<AIDataRow> grid,
-            DatabaseProvider databaseProvider) {
+    public GridAIController(Grid<AIDataRow> grid, QueryableProvider provider) {
         AIExtensionsLicense.check();
         this.grid = Objects.requireNonNull(grid, "Grid must not be null");
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "DatabaseProvider must not be null");
+        this.provider = Objects.requireNonNull(provider,
+                "QueryableProvider must not be null");
+        instructionsText = INSTRUCTIONS_TEMPLATE.replace("{LANGUAGE}",
+                provider.getQueryLanguage().getName());
     }
 
     @Override
     public List<LLMProvider.ToolSpec> getTools() {
         var tools = new ArrayList<LLMProvider.ToolSpec>();
         tools.add(createInstructionsTool());
-        tools.addAll(DatabaseProviderAITools.createAll(databaseProvider));
+        tools.addAll(DatabaseProviderAITools.createAll(provider));
         tools.addAll(GridAITools.createAll(new GridAITools.Callbacks() {
             @Override
             public String getState(String gridId) {
@@ -174,14 +183,18 @@ public class GridAIController implements AIController {
 
             @Override
             public void updateData(String gridId, String query) {
-                // Validate eagerly so an invalid query is rejected
-                // within the turn. A DatabaseProvider that throws
-                // ToolException gets its message relayed to the LLM so
-                // it can fix the query; any other exception is replaced
-                // with a generic error.
-                databaseProvider.executeQuery(
-                        "SELECT * FROM (" + query + ") AS _v LIMIT 1");
+                // Validate eagerly by fetching one row, so an invalid
+                // query is rejected within the turn. A provider that
+                // throws ToolException gets its message relayed to the
+                // LLM so it can fix the query; any other exception is
+                // replaced with a generic error.
+                provider.executeQuery(query, QueryPage.first(1));
                 GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
+            }
+
+            @Override
+            public QueryLanguage getQueryLanguage() {
+                return provider.getQueryLanguage();
             }
 
             @Override
@@ -207,7 +220,7 @@ public class GridAIController implements AIController {
                         normally unnecessary since you are already reading them here.
 
                         """
-                        + INSTRUCTIONS_TEXT;
+                        + instructionsText;
             }
 
             @Override
@@ -217,7 +230,7 @@ public class GridAIController implements AIController {
 
             @Override
             public String execute(JsonNode arguments) {
-                return INSTRUCTIONS_TEXT;
+                return instructionsText;
             }
         };
     }
@@ -285,7 +298,7 @@ public class GridAIController implements AIController {
 
     private void render(GridEntry entry, String query, boolean fireListeners) {
         try {
-            GridRenderer.renderGrid(grid, databaseProvider, query);
+            GridRenderer.renderGrid(grid, provider, query);
             entry.setCurrentQuery(query);
             if (fireListeners) {
                 fireStateChangeListeners();
