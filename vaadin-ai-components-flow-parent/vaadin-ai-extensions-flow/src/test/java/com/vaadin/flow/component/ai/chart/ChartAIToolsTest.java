@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.FakeGraphQLLanguage;
+import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 
@@ -75,6 +77,12 @@ class ChartAIToolsTest {
         @Test
         void description_isNotEmpty() {
             Assertions.assertFalse(tool.getDescription().isEmpty());
+        }
+
+        @Test
+        void description_doesNotMentionSql() {
+            Assertions.assertFalse(tool.getDescription().contains("SQL"),
+                    tool.getDescription());
         }
 
         @Test
@@ -290,6 +298,69 @@ class ChartAIToolsTest {
         }
 
         @Test
+        void description_rendersSqlExamplesByDefault() {
+            var description = tool.getDescription();
+            Assertions.assertTrue(
+                    description.contains("using SQL queries (one per series)"),
+                    description);
+            Assertions.assertTrue(
+                    description.contains(QueryLanguage.SQL.getRules()),
+                    description);
+            Assertions.assertTrue(description.contains(
+                    "Example: SELECT temperature AS _x, sales AS _y FROM data"),
+                    description);
+            Assertions.assertTrue(description.contains(
+                    "Example: SELECT date AS _x, open AS _open, high AS _high, low AS _low, close AS _close FROM stock_prices"),
+                    description);
+            Assertions.assertTrue(description.contains(
+                    "Example: SELECT month AS category, SUM(revenue) AS value FROM sales GROUP BY month")
+                    || description.contains(
+                            "SELECT month AS category, revenue AS value FROM sales"),
+                    description);
+        }
+
+        @Test
+        void description_rendersTheCallbacksLanguage() {
+            callbacks.language = new FakeGraphQLLanguage();
+            var description = ChartAITools.updateChartDataSource(callbacks)
+                    .getDescription();
+            Assertions.assertTrue(
+                    description
+                            .contains("using GraphQL queries (one per series)"),
+                    description);
+            Assertions.assertTrue(
+                    description.contains(FakeGraphQLLanguage.RULES),
+                    description);
+            Assertions.assertTrue(
+                    description.contains(
+                            "Example: { data { _x: temperature _y: sales } }"),
+                    description);
+            Assertions.assertFalse(description.contains("SELECT"), description);
+            Assertions.assertFalse(description.contains("SQL"), description);
+        }
+
+        @Test
+        void description_keepsBracesOfTheLanguageRules() {
+            callbacks.language = new FakeGraphQLLanguage() {
+                @Override
+                public String getRules() {
+                    return "- Project with {\"$project\": {\"_x\": 1, \"{X}\": 2}}";
+                }
+            };
+            var description = ChartAITools.updateChartDataSource(callbacks)
+                    .getDescription();
+            Assertions.assertTrue(description.contains(
+                    "- Project with {\"$project\": {\"_x\": 1, \"{X}\": 2}}"),
+                    description);
+        }
+
+        @Test
+        void parametersSchema_isJson() {
+            var schema = JacksonUtils.readTree(tool.getParametersSchema());
+            Assertions.assertTrue(schema.get("properties").has("queries"));
+        }
+
+        @Test
         void parametersSchema_requiresQueries() {
             Assertions.assertTrue(tool.getParametersSchema()
                     .contains("\"required\": [\"queries\"]"));
@@ -449,6 +520,7 @@ class ChartAIToolsTest {
     private static class TestCallbacks implements ChartAITools.Callbacks {
 
         Set<String> chartIds = Set.of("chart-1");
+        QueryLanguage language = QueryLanguage.SQL;
         String stateToReturn = "{}";
         RuntimeException getStateException;
         RuntimeException updateConfigException;
@@ -490,6 +562,11 @@ class ChartAIToolsTest {
         @Override
         public Set<String> getChartIds() {
             return chartIds;
+        }
+
+        @Override
+        public QueryLanguage getQueryLanguage() {
+            return language;
         }
     }
 }

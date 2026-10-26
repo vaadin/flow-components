@@ -99,19 +99,19 @@ class ChartEntry implements Serializable {
     }
 
     /**
-     * Gets the current SQL queries for this chart's data series.
+     * Gets the current queries for this chart's data series.
      *
-     * @return an unmodifiable list of SQL queries, never {@code null}
+     * @return an unmodifiable list of queries, never {@code null}
      */
     public List<String> getQueries() {
         return Collections.unmodifiableList(queries);
     }
 
     /**
-     * Sets the SQL queries for this chart's data series.
+     * Sets the queries for this chart's data series.
      *
      * @param queries
-     *            the SQL queries, not {@code null}
+     *            the queries, not {@code null}
      */
     public void setQueries(List<String> queries) {
         this.queries = new ArrayList<>(queries);
@@ -140,10 +140,10 @@ class ChartEntry implements Serializable {
     }
 
     /**
-     * Returns the staged SQL queries waiting to be committed by the next
-     * successful {@code onResponseComplete}, or {@code null} if none.
+     * Returns the staged queries waiting to be committed by the next successful
+     * {@code onResponseComplete}, or {@code null} if none.
      *
-     * @return the pending SQL queries, or {@code null}
+     * @return the pending queries, or {@code null}
      */
     public List<String> getPendingQueries() {
         return pendingQueries == null ? null
@@ -151,11 +151,11 @@ class ChartEntry implements Serializable {
     }
 
     /**
-     * Stages SQL queries to be applied on the next successful
+     * Stages queries to be applied on the next successful
      * {@code onResponseComplete}. Pass {@code null} to clear.
      *
      * @param queries
-     *            the SQL queries to stage, or {@code null}
+     *            the queries to stage, or {@code null}
      */
     public void setPendingQueries(List<String> queries) {
         this.pendingQueries = queries == null ? null : new ArrayList<>(queries);
@@ -216,7 +216,7 @@ class ChartEntry implements Serializable {
     /**
      * Returns the current state of the chart as a JSON string suitable for LLM
      * tool responses. Includes the chart ID, the configuration the LLM has set,
-     * and any SQL queries. Nothing in it comes from the query results.
+     * and any queries. Nothing in it comes from the query results.
      *
      * @param chart
      *            the chart component, not {@code null}

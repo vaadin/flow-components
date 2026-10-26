@@ -18,7 +18,7 @@ import com.vaadin.flow.component.ai.common.QueryLanguage;
  * neutrality: its examples are selection sets with field aliases and contain no
  * SQL.
  */
-public final class FakeGraphQLLanguage implements QueryLanguage {
+public class FakeGraphQLLanguage implements QueryLanguage {
 
     public static final String NAME = "GraphQL";
 

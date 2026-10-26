@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
@@ -31,9 +31,10 @@ import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
 import com.vaadin.flow.component.charts.model.Series;
 
 /**
- * Stateless utility for rendering chart data from SQL queries. Encapsulates the
- * query-execution-to-drawChart pipeline so that different controllers
- * (standalone chart, dashboard) share the same rendering logic.
+ * Stateless utility for rendering chart data from the query results of a
+ * {@link QueryableProvider}. Encapsulates the query-execution-to-drawChart
+ * pipeline so that different controllers (standalone chart, dashboard) share
+ * the same rendering logic.
  *
  * @author Vaadin Ltd
  * @since 25.3
@@ -49,34 +50,34 @@ public final class ChartRenderer implements Serializable {
      *
      * @param chart
      *            the chart to render, not {@code null}
-     * @param databaseProvider
-     *            the database provider for query execution, not {@code null}
+     * @param provider
+     *            the provider executing the queries, not {@code null}
      * @param dataConverter
      *            the data converter for transforming query results, not
      *            {@code null}
      * @param queries
-     *            the SQL queries to execute (one per series), not {@code null}
+     *            the queries to execute (one per series), not {@code null}
      * @param configJson
      *            the chart configuration JSON, or {@code null} to keep current
      */
-    public static void renderChart(Chart chart,
-            DatabaseProvider databaseProvider, DataConverter dataConverter,
-            List<String> queries, String configJson) {
-        renderChart(chart, databaseProvider, dataConverter, queries,
+    public static void renderChart(Chart chart, QueryableProvider provider,
+            DataConverter dataConverter, List<String> queries,
+            String configJson) {
+        renderChart(chart, provider, dataConverter, queries,
                 configJson == null ? List.of() : List.of(configJson));
     }
 
     /**
      * Renders a chart like
-     * {@link #renderChart(Chart, DatabaseProvider, DataConverter, List, String)},
+     * {@link #renderChart(Chart, QueryableProvider, DataConverter, List, String)},
      * applying each of the configuration JSON strings in order.
      */
-    static void renderChart(Chart chart, DatabaseProvider databaseProvider,
+    static void renderChart(Chart chart, QueryableProvider provider,
             DataConverter dataConverter, List<String> queries,
             List<String> configJsons) {
         List<Series> allSeries = new ArrayList<>();
         for (String query : queries) {
-            var results = databaseProvider.executeQuery(query);
+            var results = provider.executeQuery(query);
             allSeries.addAll(dataConverter.convertToSeries(results));
         }
 
@@ -98,7 +99,7 @@ public final class ChartRenderer implements Serializable {
         }
 
         // Extract per-series config (plotOptions, yAxis) from the
-        // configuration's series before replacing them with SQL data.
+        // configuration's series before replacing them with the query data.
         // The config series act as templates set by the parser.
         var seriesConfig = extractSeriesConfig(config);
         config.setSeries(allSeries.toArray(new Series[0]));

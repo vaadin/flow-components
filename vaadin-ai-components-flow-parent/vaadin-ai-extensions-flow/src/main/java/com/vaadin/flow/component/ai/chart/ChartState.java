@@ -24,7 +24,7 @@ import tools.jackson.databind.node.ObjectNode;
  * {@link ChartAIController#restoreState(ChartState)}.
  *
  * @param queries
- *            the SQL queries for the chart's data series
+ *            the queries for the chart's data series
  * @param configuration
  *            the chart configuration
  * @param llmConfiguration
@@ -39,7 +39,7 @@ public record ChartState(List<String> queries, Configuration configuration,
      * Creates a new state instance.
      *
      * @param queries
-     *            the SQL queries, not {@code null}
+     *            the queries, not {@code null}
      * @param configuration
      *            the chart configuration, not {@code null}
      * @param llmConfiguration
@@ -63,7 +63,7 @@ public record ChartState(List<String> queries, Configuration configuration,
      * series and x-axis categories, as those may come from the query results.
      *
      * @param queries
-     *            the SQL queries, not {@code null}
+     *            the queries, not {@code null}
      * @param configuration
      *            the chart configuration, not {@code null}
      */

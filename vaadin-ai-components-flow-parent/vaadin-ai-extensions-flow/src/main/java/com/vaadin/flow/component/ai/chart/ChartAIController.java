@@ -17,13 +17,14 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
 import com.vaadin.flow.component.ai.orchestrator.ResponseListener;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.DatabaseProviderAITools;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -40,10 +41,10 @@ import com.vaadin.flow.shared.Registration;
 import tools.jackson.databind.JsonNode;
 
 /**
- * AI controller for creating interactive chart visualizations from database
- * data.
+ * AI controller for creating interactive chart visualizations from the data of
+ * a {@link QueryableProvider}.
  * <p>
- * This controller provides tools that allow the LLM to query database schemas
+ * This controller provides tools that let the LLM read the provider's schema
  * and create or update chart visualizations based on natural language requests.
  * Attach it to an {@link AIOrchestrator} via
  * {@link AIOrchestrator.Builder#withController(AIController)} to expose its
@@ -55,7 +56,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new ChartAIController(chart, databaseProvider);
+ * var controller = new ChartAIController(chart, provider);
  * AIOrchestrator orchestrator = AIOrchestrator
  *         .builder(llmProvider, systemPrompt).withController(controller)
  *         .withMessageList(messageList).build();
@@ -74,15 +75,15 @@ import tools.jackson.databind.JsonNode;
  * </p>
  * <p>
  * The controller sends the LLM nothing from the query results: when it reads
- * the chart state, it gets the SQL queries and the configuration it has set
- * itself, not the series, axis categories or other values the chart builds from
- * the rows. Only the schema description your {@link DatabaseProvider} returns
- * from {@link DatabaseProvider#getSchema()} and the message of a
+ * the chart state, it gets the queries and the configuration it has set itself,
+ * not the series, axis categories or other values the chart builds from the
+ * rows. Only the schema description your {@link QueryableProvider} returns from
+ * {@link QueryableProvider#getSchema()} and the message of a
  * {@link ToolException} it throws reach the LLM as is, so keep row values out
  * of both.
  * </p>
  * <p>
- * Data conversion from SQL query results to chart series is handled by a
+ * Data conversion from query results to chart series is handled by a
  * {@link DataConverter}. A default implementation is used unless overridden via
  * {@link #setDataConverter(DataConverter)}.
  * </p>
@@ -96,7 +97,7 @@ import tools.jackson.databind.JsonNode;
  * </p>
  *
  * <pre>
- * var controller = new ChartAIController(chart, databaseProvider);
+ * var controller = new ChartAIController(chart, provider);
  * orchestrator.reconnect(llmProvider).withController(controller).apply();
  * if (savedState != null) {
  *     controller.restoreState(savedState);
@@ -146,7 +147,11 @@ public class ChartAIController implements AIController {
             ColumnNames.MEDIAN, ColumnNames.Q3, ColumnNames.WEIGHT,
             ColumnNames.TARGET, ColumnNames.COMPLETED);
 
-    private static final String INSTRUCTIONS_TEXT = """
+    /**
+     * The workflow instructions, with {@code {LANGUAGE}} standing for the name
+     * of the provider's query language.
+     */
+    private static final String INSTRUCTIONS_TEMPLATE = """
             Chart visualization workflow. Follow this for every chart request:
 
             1. Call get_chart_state() to see the current chart state
@@ -155,11 +160,11 @@ public class ChartAIController implements AIController {
             as needed — they can be called independently
 
             Data and configuration are separate concerns:
-            - update_chart_data_source() populates chart series from SQL queries; each call \
+            - update_chart_data_source() populates chart series from {LANGUAGE} queries; each call \
             replaces all series, so pass every query the chart should keep
             - update_chart_configuration() controls visual appearance (type, styling, axes, etc.)
             - NEVER include series data in configuration — data comes only from queries
-            - When changing chart type, ensure the query column aliases match the new type
+            - When changing chart type, ensure the result column names of the queries match the new type
 
             Per-series styling and mixed chart types:
             - Use the series array in update_chart_configuration() to override chart type or \
@@ -172,7 +177,8 @@ public class ChartAIController implements AIController {
             """;
 
     private final Chart chart;
-    private final DatabaseProvider databaseProvider;
+    private final QueryableProvider provider;
+    private final String instructionsText;
     private final List<SerializableConsumer<ChartState>> stateChangeListeners = new ArrayList<>();
     private DataConverter dataConverter;
 
@@ -181,22 +187,24 @@ public class ChartAIController implements AIController {
      *
      * @param chart
      *            the chart component to update, not {@code null}
-     * @param databaseProvider
-     *            the database provider for schema and query execution, not
+     * @param provider
+     *            the provider of the schema and of the query execution, not
      *            {@code null}
      */
-    public ChartAIController(Chart chart, DatabaseProvider databaseProvider) {
+    public ChartAIController(Chart chart, QueryableProvider provider) {
         AIExtensionsLicense.check();
         this.chart = Objects.requireNonNull(chart, "Chart cannot be null");
-        this.databaseProvider = Objects.requireNonNull(databaseProvider,
-                "Database provider cannot be null");
+        this.provider = Objects.requireNonNull(provider,
+                "QueryableProvider cannot be null");
         this.dataConverter = new DefaultDataConverter();
+        instructionsText = INSTRUCTIONS_TEMPLATE.replace("{LANGUAGE}",
+                provider.getQueryLanguage().getName());
     }
 
     /**
      * Sets a custom data converter for transforming query results into chart
      * series data. Replaces the default converter used to produce series points
-     * from the rows returned by the configured SQL queries.
+     * from the rows returned by the configured queries.
      *
      * @param dataConverter
      *            the data converter to use, not {@code null}
@@ -210,7 +218,7 @@ public class ChartAIController implements AIController {
     public List<LLMProvider.ToolSpec> getTools() {
         List<LLMProvider.ToolSpec> tools = new ArrayList<>();
         tools.add(createInstructionsTool());
-        tools.addAll(DatabaseProviderAITools.createAll(databaseProvider));
+        tools.addAll(DatabaseProviderAITools.createAll(provider));
         tools.addAll(ChartAITools.createAll(new ChartAITools.Callbacks() {
             @Override
             public String getState(String chartId) {
@@ -236,7 +244,7 @@ public class ChartAIController implements AIController {
             @Override
             public void updateData(String chartId, List<String> queries) {
                 // Execute queries eagerly so an invalid query is
-                // rejected within the turn. A DatabaseProvider that
+                // rejected within the turn. A provider that
                 // throws ToolException gets its message relayed to the
                 // LLM so it can fix the query; any other exception is
                 // replaced with a generic error. Results are only checked
@@ -244,7 +252,7 @@ public class ChartAIController implements AIController {
                 // ChartRenderer.
                 for (var i = 0; i < queries.size(); i++) {
                     checkPlottable(i + 1,
-                            databaseProvider.executeQuery(queries.get(i)));
+                            provider.executeQuery(queries.get(i)));
                 }
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingQueries(queries);
@@ -253,6 +261,11 @@ public class ChartAIController implements AIController {
             @Override
             public Set<String> getChartIds() {
                 return Set.of(CHART_ID);
+            }
+
+            @Override
+            public QueryLanguage getQueryLanguage() {
+                return provider.getQueryLanguage();
             }
         }));
         return tools;
@@ -327,7 +340,7 @@ public class ChartAIController implements AIController {
                         normally unnecessary since you are already reading them here.
 
                         """
-                        + INSTRUCTIONS_TEXT;
+                        + instructionsText;
             }
 
             @Override
@@ -337,13 +350,13 @@ public class ChartAIController implements AIController {
 
             @Override
             public String execute(JsonNode arguments) {
-                return INSTRUCTIONS_TEXT;
+                return instructionsText;
             }
         };
     }
 
     /**
-     * Returns the current chart state, including the SQL queries, the chart
+     * Returns the current chart state, including the queries, the chart
      * configuration and the part of it the LLM has set. Returns {@code null} if
      * the chart has no data queries.
      *
@@ -449,8 +462,8 @@ public class ChartAIController implements AIController {
             // decided the same way for both.
             entry.getLlmConfiguration().getChart()
                     .setType(chart.getConfiguration().getChart().getType());
-            ChartRenderer.renderChart(chart, databaseProvider, dataConverter,
-                    queries, configJsons);
+            ChartRenderer.renderChart(chart, provider, dataConverter, queries,
+                    configJsons);
             configJsons.forEach(entry::applyLlmConfiguration);
             entry.setQueries(queries);
             if (fireListeners) {

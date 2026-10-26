@@ -21,6 +21,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -71,7 +72,7 @@ public final class ChartAITools {
 
         /**
          * Returns the current state of a chart as a JSON string holding the
-         * Highcharts configuration the LLM has set and the SQL queries used to
+         * Highcharts configuration the LLM has set and the queries used to
          * populate the chart series. The LLM gets the state as is, so the
          * configuration must not include values from the query results, such as
          * series names, axis categories or points. Should throw if the chart is
@@ -80,7 +81,7 @@ public final class ChartAITools {
          * @param chartId
          *            the chart ID
          * @return the chart state as a JSON string containing the configuration
-         *         the LLM has set and the SQL queries
+         *         the LLM has set and the queries
          */
         String getState(String chartId);
 
@@ -100,14 +101,15 @@ public final class ChartAITools {
         void updateConfiguration(String chartId, String configJson);
 
         /**
-         * Validates and executes SQL SELECT queries that populate the chart
-         * series data. Each query corresponds to one chart series. Should throw
-         * if the chart is not found or if any query is invalid.
+         * Validates and executes the queries that populate the chart series
+         * data. Each query corresponds to one chart series. Should throw if the
+         * chart is not found or if any query is invalid.
          *
          * @param chartId
          *            the chart ID
          * @param queries
-         *            SQL SELECT queries, one per chart series
+         *            the queries, one per chart series, in the language of
+         *            {@link #getQueryLanguage()}
          */
         void updateData(String chartId, List<String> queries);
 
@@ -117,6 +119,19 @@ public final class ChartAITools {
          * @return the chart IDs, never {@code null}
          */
         Set<String> getChartIds();
+
+        /**
+         * Returns the language the LLM writes the queries in. The tools name it
+         * and show its rules and examples in their descriptions, which the LLM
+         * providers cache, so the language must be the same on every call.
+         * Defaults to {@link QueryLanguage#SQL}.
+         *
+         * @return the query language, never {@code null}
+         * @since 25.4
+         */
+        default QueryLanguage getQueryLanguage() {
+            return QueryLanguage.SQL;
+        }
     }
 
     private static final Map<String, String> COLUMN_PARAMS = buildPlaceholderMap(
@@ -224,6 +239,213 @@ public final class ChartAITools {
     }
 
     /**
+     * Description of the {@code update_chart_data_source} tool. The
+     * {@code {X}}-style placeholders are the column names of
+     * {@link ColumnNames}; {@code {LANGUAGE}}, {@code {RULES}} and the
+     * {@code {EXAMPLE_*}} placeholders are filled from the callbacks' query
+     * language, so the LLM sees the examples in the language it writes.
+     */
+    private static final String UPDATE_CHART_DATA_SOURCE_DESCRIPTION = """
+            Updates the chart data using {LANGUAGE} queries (one per series). \
+            The queries replace all current series of the chart: to add a series, pass \
+            the current queries from get_chart_state together with the new one; to remove \
+            a series, leave its query out.
+
+            IMPORTANT: The result column names control how data is mapped to series. \
+            Give the result columns exactly the names below (prefixed with '{PREFIX}').
+
+            {LANGUAGE} RULES:
+            {RULES}
+
+            Multi-series: add a {SERIES} column to group rows into separate named series. \
+            It is removed before chart type detection.
+
+            Basic charts (line, bar, column, area, spline, pie):
+            - 2 columns: category, value (no special names needed)
+            - Example: {EXAMPLE_BASIC}
+
+            Scatter plot:
+            - 2 numeric columns: {X}, {Y}
+            - Example: {EXAMPLE_SCATTER}
+
+            Bubble chart:
+            - 3 numeric columns: {X}, {Y}, {Z}
+            - Example: {EXAMPLE_BUBBLE}
+
+            Bullet chart:
+            - Columns: {Y}, {TARGET} (optionally {X})
+            - Example: {EXAMPLE_BULLET}
+
+            Range charts (arearange, columnrange, areasplinerange):
+            - Columns: {LOW}, {HIGH} (optionally {X})
+            - Example: {EXAMPLE_RANGE}
+
+            BoxPlot:
+            - 5 columns: {LOW}, {Q1}, {MEDIAN}, {Q3}, {HIGH}
+            - Example: {EXAMPLE_BOXPLOT}
+
+            OHLC/Candlestick:
+            - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
+            - Example: {EXAMPLE_OHLC}
+            - When adding a volume series alongside OHLC/candlestick data, pass the OHLC query and a \
+            second query with {X}, {Y}, and {SERIES} columns, where {SERIES} holds the constant \
+            series name, for example 'Volume', and {X} and {Y} come from the same source \
+            (e.g. {EXAMPLE_VOLUME}). The {SERIES} name lets the series be configured via \
+            update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
+
+            Sankey diagram:
+            - 3 columns: {FROM}, {TO}, {WEIGHT}
+            - Example: {EXAMPLE_SANKEY}
+
+            Xrange:
+            - 3 columns: {X}, {X2}, {Y}
+            - Example: {EXAMPLE_XRANGE}
+
+            Gantt:
+            - Columns: {NAME}, {START}, {END} (optionally {ID}, {PARENT}, {DEPENDENCY}, {COMPLETED}, {COLOR})
+            - {START} and {END} must be date/timestamp values
+            - {PARENT} holds the {ID} of the parent row, or null for a root
+            - Example: {EXAMPLE_GANTT}
+
+            Timeline:
+            - Columns: {NAME}, {LABEL}, {DESCRIPTION} (optionally {X})
+            - Example: {EXAMPLE_TIMELINE}
+
+            Flags:
+            - Columns: {TITLE} (optionally {TEXT}, {X})
+            - Example: {EXAMPLE_FLAGS}
+
+            Organization:
+            - Columns: {ID}, {NAME}, {PARENT}, {TITLE} (optionally {DESCRIPTION}, {IMAGE}, {COLOR})
+            - {PARENT} holds the {ID} of the parent row, or null for a root
+            - Example: {EXAMPLE_ORGANIZATION}
+
+            Treemap:
+            - Columns: {ID}, {PARENT}, {VALUE} (optionally {NAME}, {COLOR_VALUE})
+            - {PARENT} holds the {ID} of the parent row, or null for a root
+            - Example: {EXAMPLE_TREEMAP}
+
+            Heatmap:
+            - 3 columns: {X}, {Y}, {VALUE}
+            - Example: {EXAMPLE_HEATMAP}
+
+            Waterfall:
+            - Columns: {Y}, {WATERFALL_TYPE} (optionally {NAME}); type values: 'sum', 'intermediate', or null for data points
+            - Example: {EXAMPLE_WATERFALL}
+
+            Optional: any pattern supporting DataSeriesItem accepts a {COLOR} column for per-point coloring.
+
+            Parameters:
+            - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
+            - queries (array of strings, required): {LANGUAGE} queries, one per series, replacing the current ones
+
+            Changes are applied when the request completes.""";
+
+    /**
+     * The source, columns and result column names of an example query of the
+     * {@code update_chart_data_source} description, rendered by the query
+     * language.
+     */
+    private record Example(String source, List<String> columns,
+            List<String> aliases) {
+
+        String render(QueryLanguage language) {
+            return language.exampleQuery(source, columns, aliases);
+        }
+    }
+
+    private static final Map<String, Example> EXAMPLES = Map.ofEntries(
+            Map.entry("EXAMPLE_BASIC",
+                    new Example("sales", List.of("month", "revenue"),
+                            List.of("category", "value"))),
+            Map.entry("EXAMPLE_SCATTER",
+                    new Example("data", List.of("temperature", "sales"),
+                            List.of(ColumnNames.X, ColumnNames.Y))),
+            Map.entry("EXAMPLE_BUBBLE",
+                    new Example("countries",
+                            List.of("gdp", "life_exp", "population"),
+                            List.of(ColumnNames.X, ColumnNames.Y,
+                                    ColumnNames.Z))),
+            Map.entry("EXAMPLE_BULLET",
+                    new Example("sales", List.of("revenue", "goal"),
+                            List.of(ColumnNames.Y, ColumnNames.TARGET))),
+            Map.entry("EXAMPLE_RANGE",
+                    new Example("weather", List.of("temp_low", "temp_high"),
+                            List.of(ColumnNames.LOW, ColumnNames.HIGH))),
+            Map.entry("EXAMPLE_BOXPLOT", new Example("stats",
+                    List.of("min_val", "lower_q", "med", "upper_q", "max_val"),
+                    List.of(ColumnNames.LOW, ColumnNames.Q1, ColumnNames.MEDIAN,
+                            ColumnNames.Q3, ColumnNames.HIGH))),
+            Map.entry("EXAMPLE_OHLC", new Example("stock_prices",
+                    List.of("date", "open", "high", "low", "close"),
+                    List.of(ColumnNames.X, ColumnNames.OPEN, ColumnNames.HIGH,
+                            ColumnNames.LOW, ColumnNames.CLOSE))),
+            Map.entry("EXAMPLE_VOLUME",
+                    new Example("stock_prices", List.of("date", "volume"),
+                            List.of(ColumnNames.X, ColumnNames.Y))),
+            Map.entry("EXAMPLE_SANKEY",
+                    new Example("energy_flow",
+                            List.of("source", "destination", "flow"),
+                            List.of(ColumnNames.FROM, ColumnNames.TO,
+                                    ColumnNames.WEIGHT))),
+            Map.entry("EXAMPLE_XRANGE",
+                    new Example("tasks",
+                            List.of("start_ts", "end_ts", "task_id"),
+                            List.of(ColumnNames.X, ColumnNames.X2,
+                                    ColumnNames.Y))),
+            Map.entry("EXAMPLE_GANTT",
+                    new Example("project_tasks",
+                            List.of("task", "start_date", "end_date"),
+                            List.of(ColumnNames.NAME, ColumnNames.START,
+                                    ColumnNames.END))),
+            Map.entry("EXAMPLE_TIMELINE",
+                    new Example("events", List.of("event", "short", "detail"),
+                            List.of(ColumnNames.NAME, ColumnNames.LABEL,
+                                    ColumnNames.DESCRIPTION))),
+            Map.entry("EXAMPLE_FLAGS",
+                    new Example("flags", List.of("flag_title", "note"),
+                            List.of(ColumnNames.TITLE, ColumnNames.TEXT))),
+            Map.entry(
+                    "EXAMPLE_ORGANIZATION",
+                    new Example("employees",
+                            List.of("emp_id", "full_name", "mgr_id", "role"),
+                            List.of(ColumnNames.ID, ColumnNames.NAME,
+                                    ColumnNames.PARENT, ColumnNames.TITLE))),
+            Map.entry("EXAMPLE_TREEMAP",
+                    new Example("categories",
+                            List.of("cat_id", "parent_id", "amount"),
+                            List.of(ColumnNames.ID, ColumnNames.PARENT,
+                                    ColumnNames.VALUE))),
+            Map.entry("EXAMPLE_HEATMAP",
+                    new Example("activity", List.of("day", "hour", "count"),
+                            List.of(ColumnNames.X, ColumnNames.Y,
+                                    ColumnNames.VALUE))),
+            Map.entry("EXAMPLE_WATERFALL",
+                    new Example("waterfall_data",
+                            List.of("label", "amount", "wf_type"),
+                            List.of(ColumnNames.NAME, ColumnNames.Y,
+                                    ColumnNames.WATERFALL_TYPE))));
+
+    /**
+     * Fills the language into the {@code update_chart_data_source} description:
+     * the column name placeholders first, then the examples rendered by the
+     * language, then its rules and name. The replacements are plain, not format
+     * strings, as the rules of a language may contain any character, braces
+     * included.
+     */
+    private static String describeUpdateChartDataSource(
+            QueryLanguage language) {
+        var description = resolveColumnNames(
+                UPDATE_CHART_DATA_SOURCE_DESCRIPTION);
+        for (var example : EXAMPLES.entrySet()) {
+            description = description.replace("{" + example.getKey() + "}",
+                    example.getValue().render(language));
+        }
+        return description.replace("{RULES}", language.getRules())
+                .replace("{LANGUAGE}", language.getName());
+    }
+
+    /**
      * Creates all chart tools for the given callbacks.
      *
      * @param callbacks
@@ -249,7 +471,7 @@ public final class ChartAITools {
             @Override
             public String getDescription() {
                 return "Gets the current state of a chart: the configuration "
-                        + "set through update_chart_configuration and the SQL "
+                        + "set through update_chart_configuration and the "
                         + "queries that populate its series. Values from the "
                         + "query results, such as series names, axis "
                         + "categories and points, are never included, even "
@@ -554,6 +776,8 @@ public final class ChartAITools {
     }
 
     static LLMProvider.ToolSpec updateChartDataSource(Callbacks callbacks) {
+        var description = describeUpdateChartDataSource(
+                callbacks.getQueryLanguage());
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -562,98 +786,7 @@ public final class ChartAITools {
 
             @Override
             public String getDescription() {
-                return resolveColumnNames(
-                        """
-                                Updates the chart data using SQL SELECT queries (one per series). \
-                                The queries replace all current series of the chart: to add a series, pass \
-                                the current queries from get_chart_state together with the new one; to remove \
-                                a series, leave its query out.
-
-                                IMPORTANT: Column names control how data is mapped to series. \
-                                Use the exact aliases below (prefixed with '{PREFIX}') in your SELECT statements.
-
-                                Multi-series: add a {SERIES} column to group rows into separate named series. \
-                                It is removed before chart type detection.
-
-                                Basic charts (line, bar, column, area, spline, pie):
-                                - 2 columns: category, value (no special aliases needed)
-                                - Example: SELECT month AS category, SUM(revenue) AS value FROM sales GROUP BY month
-
-                                Scatter plot:
-                                - 2 numeric columns: {X}, {Y}
-                                - Example: SELECT temperature AS {X}, sales AS {Y} FROM data
-
-                                Bubble chart:
-                                - 3 numeric columns: {X}, {Y}, {Z}
-                                - Example: SELECT gdp AS {X}, life_exp AS {Y}, population AS {Z} FROM countries
-
-                                Bullet chart:
-                                - Columns: {Y}, {TARGET} (optionally {X})
-                                - Example: SELECT revenue AS {Y}, goal AS {TARGET} FROM sales
-
-                                Range charts (arearange, columnrange, areasplinerange):
-                                - Columns: {LOW}, {HIGH} (optionally {X})
-                                - Example: SELECT temp_low AS {LOW}, temp_high AS {HIGH} FROM weather
-
-                                BoxPlot:
-                                - 5 columns: {LOW}, {Q1}, {MEDIAN}, {Q3}, {HIGH}
-                                - Example: SELECT min_val AS {LOW}, lower_q AS {Q1}, med AS {MEDIAN}, upper_q AS {Q3}, max_val AS {HIGH} FROM stats
-
-                                OHLC/Candlestick:
-                                - Columns: {X}, {OPEN}, {HIGH}, {LOW}, {CLOSE} ({X} is required for proper date axis)
-                                - Example: SELECT date AS {X}, open AS {OPEN}, high AS {HIGH}, low AS {LOW}, close AS {CLOSE} FROM stock_prices
-                                - When adding a volume series alongside OHLC/candlestick data, pass the OHLC query and a \
-                                second query with {X}, {Y}, and {SERIES} aliases (e.g. SELECT date AS {X}, volume AS {Y}, \
-                                'Volume' AS {SERIES} FROM stock_prices). The {SERIES} alias names the series so it can be \
-                                configured via update_chart_configuration() with type "column" and yAxis 1 on a dual y-axis setup.
-
-                                Sankey diagram:
-                                - 3 columns: {FROM}, {TO}, {WEIGHT}
-                                - Example: SELECT source AS {FROM}, destination AS {TO}, flow AS {WEIGHT} FROM energy_flow
-
-                                Xrange:
-                                - 3 columns: {X}, {X2}, {Y}
-                                - Example: SELECT start_ts AS {X}, end_ts AS {X2}, task_id AS {Y} FROM tasks
-
-                                Gantt:
-                                - Columns: {NAME}, {START}, {END} (optionally {ID}, {PARENT}, {DEPENDENCY}, {COMPLETED}, {COLOR})
-                                - {START} and {END} must be date/timestamp values
-                                - {PARENT} holds the {ID} of the parent row, or NULL for a root
-                                - Example: SELECT task AS {NAME}, start_date AS {START}, end_date AS {END} FROM project_tasks
-
-                                Timeline:
-                                - Columns: {NAME}, {LABEL}, {DESCRIPTION} (optionally {X})
-                                - Example: SELECT event AS {NAME}, short AS {LABEL}, detail AS {DESCRIPTION} FROM events
-
-                                Flags:
-                                - Columns: {TITLE} (optionally {TEXT}, {X})
-                                - Example: SELECT flag_title AS {TITLE}, note AS {TEXT} FROM flags
-
-                                Organization:
-                                - Columns: {ID}, {NAME}, {PARENT}, {TITLE} (optionally {DESCRIPTION}, {IMAGE}, {COLOR})
-                                - {PARENT} holds the {ID} of the parent row, or NULL for a root
-                                - Example: SELECT emp_id AS {ID}, full_name AS {NAME}, mgr_id AS {PARENT}, role AS {TITLE} FROM employees
-
-                                Treemap:
-                                - Columns: {ID}, {PARENT}, {VALUE} (optionally {NAME}, {COLOR_VALUE})
-                                - {PARENT} holds the {ID} of the parent row, or NULL for a root
-                                - Example: SELECT cat_id AS {ID}, parent_id AS {PARENT}, amount AS {VALUE} FROM categories
-
-                                Heatmap:
-                                - 3 columns: {X}, {Y}, {VALUE}
-                                - Example: SELECT day AS {X}, hour AS {Y}, count AS {VALUE} FROM activity
-
-                                Waterfall:
-                                - Columns: {Y}, {WATERFALL_TYPE} (optionally {NAME}); type values: 'sum', 'intermediate', or null for data points
-                                - Example: SELECT label AS {NAME}, amount AS {Y}, wf_type AS {WATERFALL_TYPE} FROM waterfall_data
-
-                                Optional: any pattern supporting DataSeriesItem accepts a {COLOR} column for per-point coloring.
-
-                                Parameters:
-                                - chartId (string, optional): The ID of the chart to update. Required when multiple charts exist.
-                                - queries (array of strings, required): SQL SELECT queries, one per series, replacing the current ones
-
-                                Changes are applied when the request completes.""");
+                return description;
             }
 
             @Override
@@ -669,7 +802,7 @@ public final class ChartAITools {
                             "queries": {
                               "type": "array",
                               "items": { "type": "string" },
-                              "description": "SQL queries to execute against the database, one per chart series"
+                              "description": "Queries to execute, one per chart series"
                             }
                           },
                           "required": ["queries"]

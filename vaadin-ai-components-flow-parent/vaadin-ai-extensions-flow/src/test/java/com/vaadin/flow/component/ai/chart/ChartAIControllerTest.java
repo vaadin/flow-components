@@ -25,8 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AITurnEvents;
+import com.vaadin.flow.component.ai.FakeGraphQLLanguage;
+import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.provider.QueryableProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -1217,6 +1220,71 @@ class ChartAIControllerTest {
             List<LLMProvider.ToolSpec> tools, String name) {
         return tools.stream().filter(t -> t.getName().equals(name)).findFirst()
                 .orElseThrow();
+    }
+
+    @Nested
+    class NonSqlProvider {
+
+        private final List<String> executed = new ArrayList<>();
+        private ChartAIController graphQlController;
+
+        @BeforeEach
+        void setUp() {
+            var provider = new QueryableProvider() {
+                @Override
+                public QueryLanguage getQueryLanguage() {
+                    return new FakeGraphQLLanguage();
+                }
+
+                @Override
+                public String getSchema() {
+                    return "type Sale { month: String! revenue: Int! }";
+                }
+
+                @Override
+                public List<Map<String, Object>> executeQuery(String query) {
+                    executed.add(query);
+                    return List.of(Map.of(ColumnNames.NAME, "January",
+                            ColumnNames.Y, 45000));
+                }
+            };
+            graphQlController = new ChartAIController(chart, provider);
+        }
+
+        @Test
+        void instructionsNameTheProvidersLanguage() {
+            var tool = findTool(graphQlController.getTools(),
+                    "get_chart_instructions");
+            Assertions.assertTrue(
+                    tool.getDescription().contains("from GraphQL queries"),
+                    tool.getDescription());
+            Assertions.assertFalse(tool.getDescription().contains("SQL"),
+                    tool.getDescription());
+            Assertions.assertTrue(
+                    tool.execute(json("{}")).contains("from GraphQL queries"));
+        }
+
+        @Test
+        void dataSourceToolDescribesTheProvidersLanguage() {
+            var description = findTool(graphQlController.getTools(),
+                    "update_chart_data_source").getDescription();
+            Assertions.assertTrue(description.contains("using GraphQL queries"),
+                    description);
+            Assertions.assertFalse(description.contains("SQL"), description);
+        }
+
+        @Test
+        void queriesReachTheProviderUnchanged() {
+            var query = "{ sales { _name: month _y: revenue } }";
+            var result = findTool(graphQlController.getTools(),
+                    "update_chart_data_source")
+                    .execute(json("{\"queries\": [\"" + query + "\"]}"));
+            Assertions.assertFalse(result.startsWith("Error"), result);
+            graphQlController.onResponse(AITurnEvents.success());
+
+            // Validated once in the tool call, run again when rendered
+            Assertions.assertEquals(List.of(query, query), executed);
+        }
     }
 
     private static JsonNode json(String json) {

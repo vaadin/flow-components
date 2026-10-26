@@ -12,11 +12,11 @@ import java.io.Serializable;
 
 /**
  * Column name constants used by {@link DefaultDataConverter} for pattern
- * matching. These names are the expected SQL column aliases that the LLM should
- * produce in its queries.
+ * matching. These are the result column names the LLM must give in its queries,
+ * whatever its query language.
  * <p>
  * All names are lowercase and prefixed with {@value #PREFIX} to avoid
- * collisions with real database column names.
+ * collisions with real data column names.
  * </p>
  *
  * @author Vaadin Ltd
