@@ -1665,6 +1665,7 @@ export const spreadsheetOverlayStyles = css`
     gap: 4px;
     max-height: 275px;
     overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 
   #spreadsheet-overlays .spreadsheet-filter-table-content {
