@@ -347,7 +347,7 @@ public final class ChartAITools {
      * language.
      */
     private record Example(String source, List<String> columns,
-            List<String> aliases) {
+            List<String> aliases) implements Serializable {
 
         String render(QueryLanguage language) {
             return language.exampleQuery(source, columns, aliases);
