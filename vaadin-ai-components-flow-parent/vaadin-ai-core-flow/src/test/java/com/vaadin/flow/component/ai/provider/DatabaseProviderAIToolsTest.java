@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.internal.JacksonUtils;
 
 class DatabaseProviderAIToolsTest {
@@ -62,6 +63,53 @@ class DatabaseProviderAIToolsTest {
         var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
         Assertions.assertNotNull(tool.getDescription());
         Assertions.assertFalse(tool.getDescription().isEmpty());
+    }
+
+    @Test
+    void getDatabaseSchema_descriptionNamesSqlForDatabaseProvider() {
+        var tool = DatabaseProviderAITools.getDatabaseSchema(provider);
+        Assertions.assertTrue(tool.getDescription().contains("SQL"),
+                tool.getDescription());
+    }
+
+    @Test
+    void getDatabaseSchema_descriptionNamesTheProvidersLanguage() {
+        var graphQl = new QueryableProvider() {
+            @Override
+            public QueryLanguage getQueryLanguage() {
+                return new QueryLanguage() {
+                    @Override
+                    public String getName() {
+                        return "GraphQL";
+                    }
+
+                    @Override
+                    public String getRules() {
+                        return "";
+                    }
+
+                    @Override
+                    public String exampleQuery(String source,
+                            List<String> columns, List<String> aliases) {
+                        return "";
+                    }
+                };
+            }
+
+            @Override
+            public String getSchema() {
+                return SCHEMA;
+            }
+
+            @Override
+            public List<Map<String, Object>> executeQuery(String query) {
+                return List.of();
+            }
+        };
+        var description = DatabaseProviderAITools.getDatabaseSchema(graphQl)
+                .getDescription();
+        Assertions.assertTrue(description.contains("GraphQL"), description);
+        Assertions.assertFalse(description.contains("SQL "), description);
     }
 
     @Test

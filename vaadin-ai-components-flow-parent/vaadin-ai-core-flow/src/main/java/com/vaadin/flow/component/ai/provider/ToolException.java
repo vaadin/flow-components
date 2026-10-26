@@ -21,11 +21,12 @@ package com.vaadin.flow.component.ai.provider;
  * Throw this from tool code — a
  * {@link LLMProvider.ToolSpec#execute(tools.jackson.databind.JsonNode)
  * ToolSpec.execute} implementation, a controller callback, or a
- * {@link DatabaseProvider} — when the LLM should see why the call failed so it
- * can correct its next attempt instead of retrying blindly. The
- * {@link #getMessage() message} is forwarded verbatim as the tool's error
- * output, so you must ensure it is safe to expose: no PII, no internal
- * identifiers beyond what the LLM already sent, no third-party error text.
+ * {@link QueryableProvider} such as a {@link DatabaseProvider} — when the LLM
+ * should see why the call failed so it can correct its next attempt instead of
+ * retrying blindly. The {@link #getMessage() message} is forwarded verbatim as
+ * the tool's error output, so you must ensure it is safe to expose: no PII, no
+ * internal identifiers beyond what the LLM already sent, no third-party error
+ * text.
  * <p>
  * Any other exception thrown from tool code is caught, logged, and replaced
  * with a generic error message before reaching the LLM, so internal details are
@@ -34,7 +35,7 @@ package com.vaadin.flow.component.ai.provider;
  * This contract applies only to tools defined through the framework-agnostic
  * {@link LLMProvider.ToolSpec} API — the tools registered by
  * {@link com.vaadin.flow.component.ai.orchestrator.AIController}
- * implementations and by {@link DatabaseProvider}-backed tools. Tools defined
+ * implementations and by {@link QueryableProvider}-backed tools. Tools defined
  * with vendor-specific annotations (LangChain4j's or Spring AI's {@code @Tool})
  * are executed by the vendor framework itself, whose own error handling decides
  * what reaches the LLM — by default both frameworks relay the raw message of

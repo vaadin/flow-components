@@ -21,9 +21,9 @@ import java.util.Objects;
 import tools.jackson.databind.JsonNode;
 
 /**
- * Factory for creating reusable database {@link LLMProvider.ToolSpec}
+ * Factory for creating reusable data source {@link LLMProvider.ToolSpec}
  * instances. These tools can be used by any controller that works with a
- * {@link DatabaseProvider}.
+ * {@link QueryableProvider}.
  *
  * @author Vaadin Ltd
  * @since 25.3
@@ -34,16 +34,22 @@ public final class DatabaseProviderAITools {
     }
 
     /**
-     * Creates a tool that retrieves the database schema from the
-     * {@link DatabaseProvider}.
+     * Creates a tool that retrieves the schema from the
+     * {@link QueryableProvider}. The description names the provider's query
+     * language.
      *
      * @param provider
-     *            the database provider, not {@code null}
+     *            the provider, not {@code null}
      * @return the tool definition, never {@code null}
      */
     public static LLMProvider.ToolSpec getDatabaseSchema(
-            DatabaseProvider provider) {
+            QueryableProvider provider) {
         Objects.requireNonNull(provider, "provider must not be null");
+        var language = provider.getQueryLanguage().getName();
+        var description = "Gets the schema the " + language
+                + " queries run against: the tables or types, their columns "
+                + "or fields with types, and notes on writing " + language
+                + " queries.";
         return new LLMProvider.ToolSpec() {
             @Override
             public String getName() {
@@ -52,8 +58,7 @@ public final class DatabaseProviderAITools {
 
             @Override
             public String getDescription() {
-                return "Gets the database schema including table names, "
-                        + "column names with their types, and the SQL dialect.";
+                return description;
             }
 
             @Override
@@ -72,11 +77,11 @@ public final class DatabaseProviderAITools {
      * Creates all database provider tools for the given provider.
      *
      * @param provider
-     *            the database provider, not {@code null}
+     *            the provider, not {@code null}
      * @return a list of all database provider tools, never {@code null}
      */
     public static List<LLMProvider.ToolSpec> createAll(
-            DatabaseProvider provider) {
+            QueryableProvider provider) {
         return List.of(getDatabaseSchema(provider));
     }
 }

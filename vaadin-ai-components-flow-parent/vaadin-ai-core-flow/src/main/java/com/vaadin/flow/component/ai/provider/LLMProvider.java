@@ -258,7 +258,7 @@ public interface LLMProvider {
          * {
          *   "type": "object",
          *   "properties": {
-         *     "query": { "type": "string", "description": "The SQL query" }
+         *     "query": { "type": "string", "description": "The query" }
          *   },
          *   "required": ["query"]
          * }
@@ -276,7 +276,7 @@ public interface LLMProvider {
          * import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
          *
          * record UpdateGridArgs(
-         *         &#064;JsonPropertyDescription("The SQL query") String query) {}
+         *         &#064;JsonPropertyDescription("The query") String query) {}
          *
          * private static final String SCHEMA = JsonSchemaGenerator
          *         .generateForType(UpdateGridArgs.class);

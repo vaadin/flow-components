@@ -15,9 +15,14 @@
  */
 package com.vaadin.flow.component.ai.provider;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.ai.common.QueryLanguage;
+import com.vaadin.flow.component.ai.common.QueryPage;
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * Provider for database schema information and SQL query execution on behalf of
@@ -27,6 +32,15 @@ import java.util.Map;
  * Applications implement this interface with their own database connection. The
  * provider exposes the schema so the LLM can generate valid SQL, and executes
  * the resulting queries.
+ * </p>
+ * <p>
+ * This is the SQL form of {@link QueryableProvider}: the query language is
+ * {@link QueryLanguage#SQL}, a page of a result is fetched by wrapping the
+ * query in a subquery with {@code ORDER BY}, {@code LIMIT} and {@code OFFSET},
+ * and the size of a result with a {@code COUNT(*)} subquery. A SQL dialect
+ * without that syntax overrides {@link #executeQuery(String, QueryPage)} and
+ * {@link #count(String)}; a data source that is not a SQL database implements
+ * {@link QueryableProvider} directly.
  * </p>
  * <p>
  * <b>Note:</b> For security, the implementation should use a database account
@@ -99,7 +113,7 @@ import java.util.Map;
  * @author Vaadin Ltd
  * @since 25.3
  */
-public interface DatabaseProvider extends Serializable {
+public interface DatabaseProvider extends QueryableProvider {
 
     /**
      * Returns a text description of the database schema available to the LLM.
@@ -114,6 +128,7 @@ public interface DatabaseProvider extends Serializable {
      *
      * @return a text description of the database schema, never {@code null}
      */
+    @Override
     String getSchema();
 
     /**
@@ -141,5 +156,84 @@ public interface DatabaseProvider extends Serializable {
      *             LLM why; any other exception is reported to the LLM as a
      *             generic error
      */
+    @Override
     List<Map<String, Object>> executeQuery(String sql);
+
+    /**
+     * Returns {@link QueryLanguage#SQL}.
+     *
+     * @return SQL
+     * @since 25.4
+     */
+    @Override
+    default QueryLanguage getQueryLanguage() {
+        return QueryLanguage.SQL;
+    }
+
+    /**
+     * Returns one page of a query's rows by wrapping the query in a subquery:
+     * {@code SELECT * FROM (SELECT * FROM (sql) AS _t ORDER BY "column" ASC)
+     * AS _limited LIMIT limit OFFSET offset}, without the {@code ORDER BY}
+     * level when the page has no sort orders. The sort orders name result
+     * columns of the query, quoted as identifiers. The wrapped query runs
+     * through {@link #executeQuery(String)}.
+     * <p>
+     * Override this for a dialect that pages differently.
+     * </p>
+     *
+     * @param sql
+     *            the SQL query, not {@code null}
+     * @param page
+     *            the page to return, not {@code null}
+     * @return the rows of the page, never {@code null} but may be empty
+     * @throws ToolException
+     *             if the query fails and the implementation chooses to tell the
+     *             LLM why
+     * @since 25.4
+     */
+    @Override
+    default List<Map<String, Object>> executeQuery(String sql, QueryPage page) {
+        var ordered = sql;
+        if (!page.sortOrders().isEmpty()) {
+            var orderBy = page.sortOrders().stream().map(sortOrder -> "\""
+                    + sortOrder.getSorted() + "\" "
+                    + (sortOrder.getDirection() == SortDirection.ASCENDING
+                            ? "ASC"
+                            : "DESC"))
+                    .collect(Collectors.joining(", "));
+            ordered = "SELECT * FROM (" + sql + ") AS _t ORDER BY " + orderBy;
+        }
+        return executeQuery("SELECT * FROM (" + ordered + ") AS _limited LIMIT "
+                + page.limit() + " OFFSET " + page.offset());
+    }
+
+    /**
+     * Returns the number of rows a query has by running
+     * {@code SELECT COUNT(*) FROM (sql) AS _counted} through
+     * {@link #executeQuery(String)} and reading the first value of the first
+     * row. The count is {@code 0} when that query returns no row, a row without
+     * columns, or a value that is not a number.
+     * <p>
+     * Override this for a dialect that counts differently.
+     * </p>
+     *
+     * @param sql
+     *            the SQL query, not {@code null}
+     * @return the number of rows, never empty
+     * @throws ToolException
+     *             if the query fails and the implementation chooses to tell the
+     *             LLM why
+     * @since 25.4
+     */
+    @Override
+    default OptionalInt count(String sql) {
+        var result = executeQuery(
+                "SELECT COUNT(*) FROM (" + sql + ") AS _counted");
+        if (result.isEmpty() || result.getFirst().isEmpty()) {
+            return OptionalInt.of(0);
+        }
+        var first = result.getFirst().values().iterator().next();
+        return OptionalInt
+                .of(first instanceof Number number ? number.intValue() : 0);
+    }
 }
