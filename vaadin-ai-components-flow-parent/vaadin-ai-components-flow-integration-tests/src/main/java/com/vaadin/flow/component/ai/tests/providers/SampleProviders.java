@@ -83,7 +83,8 @@ public final class SampleProviders {
                 () -> new CsvDatabaseProvider(SampleCsvFiles.directory()));
         register("jpa-native", "JPA entities, native SQL",
                 () -> new JpaNativeDatabaseProvider(
-                        SampleJpaDatabase::entityManagerFactory));
+                        SampleJpaDatabase::entityManagerFactory,
+                        SqlDialectQueryLanguage.H2));
         register("jpql", "JPA entities, JPQL", () -> new JpqlQueryableProvider(
                 SampleJpaDatabase::entityManagerFactory,
                 """

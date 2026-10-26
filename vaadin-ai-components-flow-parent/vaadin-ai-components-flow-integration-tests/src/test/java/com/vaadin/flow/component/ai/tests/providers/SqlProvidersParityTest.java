@@ -134,7 +134,9 @@ class SqlProvidersParityTest {
                             .contains(table.sqlName().toLowerCase(Locale.ROOT)),
                     name + " schema lacks " + table.sqlName());
         }
-        if (SampleProviders.get(name).getQueryLanguage() == QueryLanguage.SQL) {
+        var language = SampleProviders.get(name).getQueryLanguage();
+        if (language == QueryLanguage.SQL
+                || language instanceof SqlDialectQueryLanguage) {
             Assertions.assertTrue(schema.contains("month_order")
                     || schema.contains("MONTH_ORDER"), name);
         }
@@ -168,5 +170,13 @@ class SqlProvidersParityTest {
         case LocalDate date -> date.toString();
         default -> String.valueOf(value);
         };
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "tenant-north", "tenant-south", "rest-mirror",
+            "csv-mirror", "jpa-native", "mongo-mirror" })
+    void h2BackedProviders_tellTheLlmAboutH2(String name) {
+        Assertions.assertSame(SqlDialectQueryLanguage.H2,
+                SampleProviders.get(name).getQueryLanguage(), name);
     }
 }

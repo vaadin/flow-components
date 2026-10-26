@@ -26,6 +26,14 @@ import com.vaadin.flow.component.ai.common.QueryLanguage;
  */
 public final class SqlDialectQueryLanguage implements QueryLanguage {
 
+    /**
+     * SQL on an H2 database, whose reserved words include names an LLM likes as
+     * aliases, such as VALUE. The rules tell it to pick other aliases.
+     */
+    public static final SqlDialectQueryLanguage H2 = new SqlDialectQueryLanguage(
+            "SQL",
+            "- H2 dialect: reserved words such as VALUE, KEY, ORDER, MONTH, YEAR, DAY and HOUR are only valid as names in double quotes; prefer another alias, for example total instead of value");
+
     private final String name;
     private final String dialectRules;
 

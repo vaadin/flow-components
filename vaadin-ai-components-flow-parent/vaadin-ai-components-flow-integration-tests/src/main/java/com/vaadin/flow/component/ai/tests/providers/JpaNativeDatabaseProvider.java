@@ -33,6 +33,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.common.QueryLanguage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
@@ -59,22 +60,34 @@ public class JpaNativeDatabaseProvider implements DatabaseProvider {
             .getLogger(JpaNativeDatabaseProvider.class);
 
     private final transient Supplier<EntityManagerFactory> entityManagerFactory;
+    private final QueryLanguage language;
 
     /**
      * Creates a provider over the persistence unit the supplier returns.
      *
      * @param entityManagerFactory
      *            supplies the entity manager factory; called on every use
+     * @param language
+     *            the SQL dialect of the database behind the persistence unit,
+     *            {@link QueryLanguage#SQL} for plain SQL
      */
     public JpaNativeDatabaseProvider(
-            Supplier<EntityManagerFactory> entityManagerFactory) {
+            Supplier<EntityManagerFactory> entityManagerFactory,
+            QueryLanguage language) {
         this.entityManagerFactory = entityManagerFactory;
+        this.language = language;
+    }
+
+    @Override
+    public QueryLanguage getQueryLanguage() {
+        return language;
     }
 
     @Override
     public String getSchema() {
         var schema = new StringBuilder(
-                "DATABASE SCHEMA (from the JPA entity mappings; query it with SQL):\n\n");
+                "DATABASE SCHEMA (from the JPA entity mappings; query it with ")
+                .append(language.getName()).append("):\n\n");
         var entities = new ArrayList<>(
                 entityManagerFactory.get().getMetamodel().getEntities());
         entities.sort(

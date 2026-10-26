@@ -101,7 +101,8 @@ class SampleH2DatabaseTest {
             throws SQLException {
         var reader = variant.readOnlyDataSource();
         Assertions.assertEquals(12, Jdbc.count(reader, "sales"));
-        // The SQL wrapping of the DatabaseProvider paging default, quoting the column label
+        // The SQL wrapping of the DatabaseProvider paging default, quoting the
+        // column label
         // as the database reports it
         var label = variant == SampleH2Database.Variant.DEFAULT ? "REVENUE"
                 : "revenue";

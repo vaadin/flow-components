@@ -41,7 +41,7 @@ public abstract class MirrorDatabaseProvider implements DatabaseProvider {
 
     @Override
     public QueryLanguage getQueryLanguage() {
-        return QueryLanguage.SQL;
+        return SqlDialectQueryLanguage.H2;
     }
 
     @Override
@@ -100,7 +100,7 @@ public abstract class MirrorDatabaseProvider implements DatabaseProvider {
                     var dataSource = sqlMirror.dataSource();
                     Supplier<DataSource> supplier = () -> dataSource;
                     current = new JdbcDatabaseProvider(supplier,
-                            QueryLanguage.SQL, null, notes());
+                            SqlDialectQueryLanguage.H2, null, notes());
                     mirror = current;
                 }
             }

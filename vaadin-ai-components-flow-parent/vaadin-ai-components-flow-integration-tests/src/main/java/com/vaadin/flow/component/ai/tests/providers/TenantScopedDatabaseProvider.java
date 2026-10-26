@@ -53,7 +53,8 @@ public class TenantScopedDatabaseProvider implements DatabaseProvider {
         this.tenant = tenant;
         delegate = new JdbcDatabaseProvider(
                 () -> TenantScopedH2Database.dataSource(tenant),
-                QueryLanguage.SQL, TenantScopedH2Database.schemaName(tenant),
+                SqlDialectQueryLanguage.H2,
+                TenantScopedH2Database.schemaName(tenant),
                 """
                         - The tables hold the data of the %s region only; other regions are not visible to this connection.
                         """
@@ -67,6 +68,11 @@ public class TenantScopedDatabaseProvider implements DatabaseProvider {
      */
     public String getTenant() {
         return tenant;
+    }
+
+    @Override
+    public QueryLanguage getQueryLanguage() {
+        return delegate.getQueryLanguage();
     }
 
     @Override
