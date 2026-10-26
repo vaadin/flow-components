@@ -38,8 +38,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.aura.Aura;
 
@@ -69,7 +70,8 @@ import com.vaadin.flow.theme.aura.Aura;
  */
 @Route("vaadin-ai/chart-ai-chat")
 @StyleSheet(Aura.STYLESHEET)
-public class ChartAIChatPage extends HorizontalLayout {
+public class ChartAIChatPage extends HorizontalLayout
+        implements BeforeEnterObserver {
 
     private static final String MODEL_NAME = "gpt-5.4-mini";
 
@@ -135,7 +137,7 @@ public class ChartAIChatPage extends HorizontalLayout {
         providerSelect.setItems(SampleProviders.names());
         providerSelect.setItemLabelGenerator(
                 name -> name + ": " + SampleProviders.describe(name));
-        providerSelect.setValue(initialProvider());
+        providerSelect.setValue(SampleProviders.DEFAULT);
         providerSelect.addValueChangeListener(event -> {
             if (event.isFromClient()) {
                 startChat();
@@ -204,16 +206,22 @@ public class ChartAIChatPage extends HorizontalLayout {
     }
 
     /**
-     * Returns the provider named by the {@code provider} query parameter, or
-     * the default one.
+     * Starts with the provider named by the {@code provider} query parameter,
+     * when there is one. The constructor cannot read it: the view is created in
+     * the request of the client-side navigation, not in the page request.
      */
-    private static String initialProvider() {
-        var request = VaadinRequest.getCurrent();
-        var requested = request == null ? null
-                : request.getParameter("provider");
-        return requested != null && SampleProviders.names().contains(requested)
-                ? requested
-                : SampleProviders.DEFAULT;
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (chatModel == null) {
+            return;
+        }
+        event.getLocation().getQueryParameters().getSingleParameter("provider")
+                .filter(SampleProviders.names()::contains)
+                .filter(name -> !name.equals(providerSelect.getValue()))
+                .ifPresent(name -> {
+                    providerSelect.setValue(name);
+                    startChat();
+                });
     }
 
     private void saveState() {
