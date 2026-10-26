@@ -11,6 +11,17 @@
     <name>Vaadin AI Components Integration Tests</name>
     <description>Vaadin AI Components Integration Tests</description>
     <dependencies>
+        <!-- Sample data endpoints: GraphQL -->
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java</artifactId>
+            <version>26.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.3.232</version>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-client</artifactId>
@@ -96,6 +107,24 @@
             <artifactId>vaadin-upload-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <!-- Sample data endpoints: an in-memory MongoDB server -->
+        <dependency>
+            <groupId>de.bwaldvogel</groupId>
+            <artifactId>mongo-java-server-memory-backend</artifactId>
+            <version>1.47.0</version>
+        </dependency>
+        <!-- Sample data endpoints: JPA and JPQL -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>7.4.14.Final</version>
+        </dependency>
+        <!-- Sample data endpoints: the MongoDB driver -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>5.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
