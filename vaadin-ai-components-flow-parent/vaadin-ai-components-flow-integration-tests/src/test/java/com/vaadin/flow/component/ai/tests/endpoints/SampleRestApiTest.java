@@ -77,6 +77,43 @@ class SampleRestApiTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void collectionsFilterByFieldEquality() throws Exception {
+        var response = get(api + "/sales?region=North");
+        var content = (List<Map<String, Object>>) response.body()
+                .get("content");
+        Assertions.assertEquals(6, content.size());
+        Assertions.assertTrue(content.stream()
+                .allMatch(item -> "North".equals(item.get("region"))));
+        var page = (Map<String, Object>) response.body().get("page");
+        Assertions.assertEquals(6, page.get("totalElements"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void collectionsSortByOneField() throws Exception {
+        var content = (List<Map<String, Object>>) get(
+                api + "/employees?sort=salary,desc").body().get("content");
+        Assertions.assertEquals("Bob Johnson", content.getFirst().get("name"));
+        Assertions.assertEquals("Alice Williams",
+                content.getLast().get("name"));
+        var ascending = (List<Map<String, Object>>) get(
+                api + "/employees?sort=salary,asc").body().get("content");
+        Assertions.assertEquals("Alice Williams",
+                ascending.getFirst().get("name"));
+    }
+
+    @Test
+    void unknownFieldIs400() throws Exception {
+        var response = get(api + "/sales?colour=red");
+        Assertions.assertEquals(400, response.status());
+        Assertions.assertTrue(
+                response.body().get("error").toString().contains("colour"));
+        Assertions.assertEquals(400,
+                get(api + "/sales?sort=colour,asc").status());
+    }
+
+    @Test
     void unknownCollectionIs404() throws Exception {
         var response = get(api + "/invoices");
         Assertions.assertEquals(404, response.status());

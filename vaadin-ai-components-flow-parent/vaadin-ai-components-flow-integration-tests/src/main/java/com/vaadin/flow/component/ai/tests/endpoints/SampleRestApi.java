@@ -16,9 +16,13 @@
 package com.vaadin.flow.component.ai.tests.endpoints;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -30,11 +34,22 @@ import com.sun.net.httpserver.HttpHandler;
  * {@code {"content": [...], "page": {"size", "number", "totalElements",
  * "totalPages"}}}. Fields are camelCase, dates are ISO strings and decimals are
  * numbers, as a typical JSON API has them.
+ * <p>
+ * Like most such APIs it filters and sorts, but only so much: any other query
+ * parameter is an equality filter on a field of the collection
+ * ({@code ?region=North}), and {@code sort=field,asc} or
+ * {@code sort=field,desc} orders the items by one field. There are no joins,
+ * aggregations or computed values; an unknown field is a {@code 400} with an
+ * {@code error} message.
+ * </p>
  */
 final class SampleRestApi implements HttpHandler {
 
     static final int DEFAULT_PAGE_SIZE = 20;
     static final int MAX_PAGE_SIZE = 100;
+
+    private static final Set<String> PAGING_PARAMETERS = Set.of("page", "size",
+            "sort");
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -55,10 +70,40 @@ final class SampleRestApi implements HttpHandler {
             return;
         }
         var parameters = SampleApiServer.queryParameters(exchange);
+        var fields = table.componentNames();
+        var items = table.rowMaps();
+        for (var parameter : parameters.entrySet()) {
+            if (PAGING_PARAMETERS.contains(parameter.getKey())) {
+                continue;
+            }
+            if (!fields.contains(parameter.getKey())) {
+                SampleApiServer.sendError(exchange, 400, "Unknown field: "
+                        + parameter.getKey() + ". Fields: " + fields);
+                return;
+            }
+            var value = parameter.getValue();
+            items = items.stream().filter(item -> String
+                    .valueOf(item.get(parameter.getKey())).equals(value))
+                    .toList();
+        }
+        var sort = parameters.get("sort");
+        if (sort != null && !sort.isBlank()) {
+            var parts = sort.split(",", 2);
+            if (!fields.contains(parts[0])) {
+                SampleApiServer.sendError(exchange, 400, "Unknown sort field: "
+                        + parts[0] + ". Fields: " + fields);
+                return;
+            }
+            var descending = parts.length > 1
+                    && parts[1].equalsIgnoreCase("desc");
+            var sorted = new ArrayList<>(items);
+            sorted.sort(byField(parts[0], descending));
+            items = sorted;
+        }
         int page = parseInt(parameters.get("page"), 0);
         int size = Math.min(MAX_PAGE_SIZE, Math.max(1,
                 parseInt(parameters.get("size"), DEFAULT_PAGE_SIZE)));
-        SampleApiServer.sendJson(exchange, 200, page(table, page, size));
+        SampleApiServer.sendJson(exchange, 200, page(items, page, size));
     }
 
     private static Map<String, Object> index() {
@@ -70,20 +115,41 @@ final class SampleRestApi implements HttpHandler {
         return Map.of("collections", collections);
     }
 
-    private static Map<String, Object> page(SampleData.Table<?> table, int page,
-            int size) {
-        var rows = table.rows();
-        int from = Math.min(rows.size(), page * size);
-        int to = Math.min(rows.size(), from + size);
+    private static Map<String, Object> page(List<Map<String, Object>> items,
+            int page, int size) {
+        int from = Math.min(items.size(), page * size);
+        int to = Math.min(items.size(), from + size);
         var pageInfo = new LinkedHashMap<String, Object>();
         pageInfo.put("size", size);
         pageInfo.put("number", page);
-        pageInfo.put("totalElements", rows.size());
-        pageInfo.put("totalPages", (rows.size() + size - 1) / size);
+        pageInfo.put("totalElements", items.size());
+        pageInfo.put("totalPages", (items.size() + size - 1) / size);
         var body = new LinkedHashMap<String, Object>();
-        body.put("content", List.copyOf(rows.subList(from, to)));
+        body.put("content", List.copyOf(items.subList(from, to)));
         body.put("page", pageInfo);
         return body;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static Comparator<Map<String, Object>> byField(String field,
+            boolean descending) {
+        Comparator<Map<String, Object>> comparator = (a, b) -> {
+            var x = a.get(field);
+            var y = b.get(field);
+            if (x == null || y == null) {
+                return x == null ? (y == null ? 0 : 1) : -1;
+            }
+            if (x instanceof Number m && y instanceof Number n) {
+                return new BigDecimal(m.toString())
+                        .compareTo(new BigDecimal(n.toString()));
+            }
+            if (x instanceof Comparable c
+                    && x.getClass().equals(y.getClass())) {
+                return c.compareTo(y);
+            }
+            return String.valueOf(x).compareTo(String.valueOf(y));
+        };
+        return descending ? comparator.reversed() : comparator;
     }
 
     private static int parseInt(String value, int defaultValue) {
