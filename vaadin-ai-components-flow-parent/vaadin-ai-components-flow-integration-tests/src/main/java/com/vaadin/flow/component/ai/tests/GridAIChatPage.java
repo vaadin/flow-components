@@ -24,15 +24,16 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.grid.AIDataRow;
 import com.vaadin.flow.component.ai.grid.GridAIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
@@ -43,18 +44,18 @@ import com.vaadin.flow.theme.aura.Aura;
  * Page for trying out {@link GridAIController} with a real AI chat against
  * OpenAI, rendered with the Aura theme. The grid on the left shows whatever the
  * chat on the right asks for, built from the sample data behind the provider
- * the {@code provider} query parameter names, see
- * {@link SampleDatabaseProviders}; without the parameter it is the H2 database
- * of {@link InMemoryDatabaseProvider}. The API key is read from the
- * {@code OPENAI_API_KEY} environment variable. Not covered by automated tests.
+ * chosen in the select above the grid, see {@link SampleDatabaseProviders}; the
+ * {@code provider} query parameter preselects one. The query the LLM wrote last
+ * is shown under the grid. The API key is read from the {@code OPENAI_API_KEY}
+ * environment variable. Not covered by automated tests.
  * <p>
  * The buttons above the message input send example prompts that need joins,
  * aggregates or comparisons across rows.
  * </p>
  * <p>
  * Open at {@code http://localhost:8080/vaadin-ai/grid-ai-chat}, or at
- * {@code http://localhost:8080/vaadin-ai/grid-ai-chat?provider=federated} for
- * the REST and CSV endpoints federated with Apache Calcite.
+ * {@code http://localhost:8080/vaadin-ai/grid-ai-chat?provider=federated} to
+ * start with the endpoints federated with Apache Calcite.
  * </p>
  */
 @Route("vaadin-ai/grid-ai-chat")
@@ -87,11 +88,15 @@ public class GridAIChatPage extends HorizontalLayout
             new ExamplePrompts.Prompt("Rising trading days",
                     "Show the trading days on which ACME closed higher than it opened, with the gain in percent and the day's price range."));
 
+    private final Select<String> providerSelect = new Select<>();
+
     private final VerticalLayout gridPane = new VerticalLayout();
     private final VerticalLayout chatPane = new VerticalLayout();
     private final Span status = new Span();
+    private final Pre queryView = new Pre();
 
     private transient OpenAiChatModel chatModel;
+    private Grid<AIDataRow> grid;
 
     public GridAIChatPage() {
         setSizeFull();
@@ -110,31 +115,72 @@ public class GridAIChatPage extends HorizontalLayout
                 .model(MODEL_NAME).build();
         chatModel = OpenAiChatModel.builder().options(options).build();
 
+        providerSelect.setId("provider-select");
+        providerSelect.setLabel("Data provider");
+        providerSelect.setItems(SampleDatabaseProviders.names());
+        providerSelect.setItemLabelGenerator(
+                name -> name + ": " + SampleDatabaseProviders.describe(name));
+        providerSelect.setValue(SampleDatabaseProviders.DEFAULT);
+        providerSelect.addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                startChat();
+                status.setText("Started a new chat with the " + event.getValue()
+                        + " provider.");
+            }
+        });
+
+        queryView.setId("query-view");
+        queryView.setWidthFull();
+        queryView.getStyle().set("max-height", "8em").set("overflow", "auto")
+                .set("white-space", "pre-wrap")
+                .set("overflow-wrap", "anywhere");
+
         gridPane.setSizeFull();
-        gridPane.add(status);
+        gridPane.add(new HorizontalLayout(providerSelect), status, queryView);
         chatPane.setSizeFull();
         add(gridPane, chatPane);
         expand(gridPane, chatPane);
+        startChat();
     }
 
+    /**
+     * Starts with the provider named by the {@code provider} query parameter,
+     * when there is one. The constructor cannot read it: the view is created in
+     * the request of the client-side navigation, not in the page request.
+     */
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (chatModel == null) {
             return;
         }
-        var name = event.getLocation().getQueryParameters()
-                .getSingleParameter("provider")
-                .orElse(SampleDatabaseProviders.DEFAULT);
-        status.setText("Data: " + SampleDatabaseProviders.describe(name));
-        startChat(SampleDatabaseProviders.get(name));
+        event.getLocation().getQueryParameters().getSingleParameter("provider")
+                .filter(SampleDatabaseProviders.names()::contains)
+                .filter(name -> !name.equals(providerSelect.getValue()))
+                .ifPresent(name -> {
+                    providerSelect.setValue(name);
+                    startChat();
+                });
     }
 
-    private void startChat(DatabaseProvider provider) {
-        var grid = new Grid<AIDataRow>();
-        grid.setSizeFull();
-        gridPane.add(grid);
+    /**
+     * Creates a grid with its controller and a chat with a new orchestrator,
+     * replacing the current ones in the page.
+     */
+    private void startChat() {
+        var newGrid = new Grid<AIDataRow>();
+        newGrid.setSizeFull();
+        if (grid == null) {
+            gridPane.addComponentAtIndex(gridPane.indexOf(queryView), newGrid);
+        } else {
+            gridPane.replace(grid, newGrid);
+        }
+        grid = newGrid;
         gridPane.expand(grid);
-        var controller = new GridAIController(grid, provider);
+        var controller = new GridAIController(grid,
+                SampleDatabaseProviders.get(providerSelect.getValue()));
+        controller.addStateChangeListener(
+                state -> queryView.setText(state.query()));
+        queryView.setText("");
 
         var messageList = new MessageList();
         messageList.setMarkdown(true);
@@ -148,6 +194,7 @@ public class GridAIChatPage extends HorizontalLayout
                 .withMessageList(messageList).withInput(messageInput)
                 .withController(controller).build();
 
+        chatPane.removeAll();
         chatPane.add(messageList, new ExamplePrompts(orchestrator, PROMPTS),
                 messageInput);
         chatPane.expand(messageList);

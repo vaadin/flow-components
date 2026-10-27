@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.ai.tests;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -24,13 +25,14 @@ import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.tests.providers.FederatedSampleProvider;
 
 /**
- * The database providers the AI chat pages can run against, chosen with the
- * {@code provider} query parameter. Each provider is created on first use and
- * shared by every page, so concurrent page loads cannot fill a database twice.
+ * The database providers the AI chat pages can run against, chosen in their
+ * provider select or with the {@code provider} query parameter. Each provider
+ * is created on first use and shared by every page, so concurrent page loads
+ * cannot fill a database twice.
  */
 final class SampleDatabaseProviders {
 
-    /** The provider the pages use without a {@code provider} parameter. */
+    /** The provider the pages start with. */
     static final String DEFAULT = "h2";
 
     private record Entry(String description,
@@ -41,15 +43,31 @@ final class SampleDatabaseProviders {
     private static final Map<String, DatabaseProvider> INSTANCES = new ConcurrentHashMap<>();
 
     static {
-        ENTRIES.put(DEFAULT, new Entry("H2 in-memory database",
+        ENTRIES.put(DEFAULT, new Entry("H2 in-memory database, SQL",
                 InMemoryDatabaseProvider::new));
+        ENTRIES.put("rest", new Entry("REST API through Calcite",
+                FederatedSampleProvider::rest));
+        ENTRIES.put("graphql", new Entry("GraphQL API through Calcite",
+                FederatedSampleProvider::graphql));
+        ENTRIES.put("mongo", new Entry("MongoDB through Calcite's adapter",
+                FederatedSampleProvider::mongo));
+        ENTRIES.put("csv", new Entry("CSV files through Calcite",
+                FederatedSampleProvider::csv));
         ENTRIES.put("federated",
-                new Entry(
-                        "REST API and CSV files, federated with Apache Calcite",
-                        FederatedSampleProvider::create));
+                new Entry("REST, GraphQL, MongoDB and CSV in one schema",
+                        FederatedSampleProvider::federated));
     }
 
     private SampleDatabaseProviders() {
+    }
+
+    /**
+     * Returns the provider names, in selector order.
+     *
+     * @return the names
+     */
+    static List<String> names() {
+        return List.copyOf(ENTRIES.keySet());
     }
 
     /**

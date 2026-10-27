@@ -24,7 +24,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.chart.ChartAIController;
 import com.vaadin.flow.component.ai.chart.ChartState;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
-import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
@@ -36,6 +35,7 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -47,10 +47,10 @@ import com.vaadin.flow.theme.aura.Aura;
  * Page for trying out {@link ChartAIController} with a real AI chat against
  * OpenAI, rendered with the Aura theme. The chart on the left shows whatever
  * the chat on the right asks for, built from the sample data behind the
- * provider the {@code provider} query parameter names, see
- * {@link SampleDatabaseProviders}; without the parameter it is the H2 database
- * of {@link InMemoryDatabaseProvider}. The API key is read from the
- * {@code OPENAI_API_KEY} environment variable. Not covered by automated tests.
+ * provider chosen in the select above the chart, see
+ * {@link SampleDatabaseProviders}; the {@code provider} query parameter
+ * preselects one. The API key is read from the {@code OPENAI_API_KEY}
+ * environment variable. Not covered by automated tests.
  * <p>
  * The buttons above the message input send example prompts, one for each kind
  * of chart the sample tables are shaped for.
@@ -63,8 +63,8 @@ import com.vaadin.flow.theme.aura.Aura;
  * </p>
  * <p>
  * Open at {@code http://localhost:8080/vaadin-ai/chart-ai-chat}, or at
- * {@code http://localhost:8080/vaadin-ai/chart-ai-chat?provider=federated} for
- * the REST and CSV endpoints federated with Apache Calcite.
+ * {@code http://localhost:8080/vaadin-ai/chart-ai-chat?provider=federated} to
+ * start with the endpoints federated with Apache Calcite.
  * </p>
  */
 @Route("vaadin-ai/chart-ai-chat")
@@ -99,6 +99,8 @@ public class ChartAIChatPage extends HorizontalLayout
             new ExamplePrompts.Prompt("Organization",
                     "Draw the organization chart with names and job titles, colored by team."));
 
+    private final Select<String> providerSelect = new Select<>();
+
     private final VerticalLayout chartPane = new VerticalLayout();
     private final VerticalLayout chatPane = new VerticalLayout();
     private final Span status = new Span();
@@ -109,7 +111,6 @@ public class ChartAIChatPage extends HorizontalLayout
     private static ChartState savedState;
 
     private transient OpenAiChatModel chatModel;
-    private DatabaseProvider provider;
     private Chart chart;
     private ChartAIController controller;
 
@@ -130,7 +131,22 @@ public class ChartAIChatPage extends HorizontalLayout
                 .model(MODEL_NAME).build();
         chatModel = OpenAiChatModel.builder().options(options).build();
 
-        var controls = new HorizontalLayout(
+        providerSelect.setId("provider-select");
+        providerSelect.setLabel("Data provider");
+        providerSelect.setItems(SampleDatabaseProviders.names());
+        providerSelect.setItemLabelGenerator(
+                name -> name + ": " + SampleDatabaseProviders.describe(name));
+        providerSelect.setValue(SampleDatabaseProviders.DEFAULT);
+        providerSelect.addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                startChat();
+                status.setText("Started a new chat with the " + event.getValue()
+                        + " provider.");
+            }
+        });
+        startChat();
+
+        var controls = new HorizontalLayout(providerSelect,
                 new NativeButton("Save state", e -> saveState()),
                 new NativeButton("Restore state", e -> restoreState()));
         savedStateView.setWidthFull();
@@ -153,17 +169,23 @@ public class ChartAIChatPage extends HorizontalLayout
         expand(chartPane, chatPane);
     }
 
+    /**
+     * Starts with the provider named by the {@code provider} query parameter,
+     * when there is one. The constructor cannot read it: the view is created in
+     * the request of the client-side navigation, not in the page request.
+     */
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (chatModel == null) {
             return;
         }
-        var name = event.getLocation().getQueryParameters()
-                .getSingleParameter("provider")
-                .orElse(SampleDatabaseProviders.DEFAULT);
-        provider = SampleDatabaseProviders.get(name);
-        status.setText("Data: " + SampleDatabaseProviders.describe(name));
-        startChat();
+        event.getLocation().getQueryParameters().getSingleParameter("provider")
+                .filter(SampleDatabaseProviders.names()::contains)
+                .filter(name -> !name.equals(providerSelect.getValue()))
+                .ifPresent(name -> {
+                    providerSelect.setValue(name);
+                    startChat();
+                });
     }
 
     /**
@@ -180,7 +202,8 @@ public class ChartAIChatPage extends HorizontalLayout
         }
         chart = newChart;
         chartPane.expand(chart);
-        controller = new ChartAIController(chart, provider);
+        controller = new ChartAIController(chart,
+                SampleDatabaseProviders.get(providerSelect.getValue()));
 
         var messageList = new MessageList();
         messageList.setMarkdown(true);
