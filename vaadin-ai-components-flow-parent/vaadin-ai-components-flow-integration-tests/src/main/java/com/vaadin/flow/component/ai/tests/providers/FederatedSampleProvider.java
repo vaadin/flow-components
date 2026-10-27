@@ -19,18 +19,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.flow.component.ai.provider.DataProviderTableSource;
 import com.vaadin.flow.component.ai.provider.FederatedDatabaseProvider;
 import com.vaadin.flow.component.ai.provider.TableSource;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleApiServer;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleCsvFiles;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleMongoServer;
+import com.vaadin.flow.component.ai.tests.endpoints.jpa.SampleJpaDatabase;
+import com.vaadin.flow.data.provider.DataProvider;
 
 /**
  * {@link FederatedDatabaseProvider}s over the sample data endpoints: one per
- * endpoint type with the whole data set, and {@link #federated()}, which splits
- * the data set between the four endpoints the way an application might find it,
- * so that the LLM writes one SQL across them. The REST, GraphQL and MongoDB
- * endpoints name their tables in camelCase, the CSV files in snake_case.
+ * endpoint type with the whole data set, one over the JPA entities through Flow
+ * data providers, and {@link #federated()}, which splits the data set between
+ * the four endpoints the way an application might find it, so that the LLM
+ * writes one SQL across them. The REST, GraphQL and MongoDB endpoints name
+ * their tables in camelCase, the CSV files in snake_case.
  */
 public final class FederatedSampleProvider {
 
@@ -108,6 +112,52 @@ public final class FederatedSampleProvider {
     public static FederatedDatabaseProvider mongo() {
         return new FederatedDatabaseProvider(List.copyOf(mongoSources()),
                 CAMEL_CASE_NOTES + MONGO_NOTES);
+    }
+
+    /**
+     * Creates a provider over the JPA entities, each through the kind of Flow
+     * {@link DataProvider} an application would already have for its grids: a
+     * callback provider that runs a JPQL query per fetch.
+     *
+     * @return the provider
+     */
+    public static FederatedDatabaseProvider jpa() {
+        var sources = new ArrayList<TableSource>();
+        for (var entity : SampleJpaDatabase.ENTITY_CLASSES) {
+            sources.add(jpaSource(entity));
+        }
+        return new FederatedDatabaseProvider(sources,
+                """
+                        - Sale: order by monthOrder for a chronological series
+                        - TrafficCell: dayOfWeek 0=Monday ... 4=Friday and hourOfDay 0=9am ... 7=4pm are 0-based indices; set the axis categories to show labels
+                        """);
+    }
+
+    private static <T> TableSource jpaSource(Class<T> entity) {
+        var jpql = "SELECT e FROM " + entity.getSimpleName()
+                + " e ORDER BY e.id";
+        DataProvider<T, Void> dataProvider = DataProvider
+                .fromCallbacks(query -> {
+                    try (var entityManager = SampleJpaDatabase
+                            .entityManagerFactory().createEntityManager()) {
+                        return entityManager.createQuery(jpql, entity)
+                                .setFirstResult(query.getOffset())
+                                .setMaxResults(query.getLimit()).getResultList()
+                                .stream();
+                    }
+                }, query -> {
+                    try (var entityManager = SampleJpaDatabase
+                            .entityManagerFactory().createEntityManager()) {
+                        return entityManager
+                                .createQuery(
+                                        "SELECT COUNT(e) FROM "
+                                                + entity.getSimpleName() + " e",
+                                        Long.class)
+                                .getSingleResult().intValue();
+                    }
+                });
+        return new DataProviderTableSource<>(entity.getSimpleName(), entity,
+                dataProvider);
     }
 
     /**

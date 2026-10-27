@@ -61,6 +61,10 @@ final class SampleDatabaseProviders {
                 FederatedSampleProvider::mongo));
         ENTRIES.put("csv", new Entry("CSV files through Calcite",
                 FederatedSampleProvider::csv));
+        ENTRIES.put("jpa",
+                new Entry(
+                        "JPA entities through Flow data providers and Calcite",
+                        FederatedSampleProvider::jpa));
         ENTRIES.put("federated",
                 new Entry("REST, GraphQL, MongoDB and CSV in one schema",
                         FederatedSampleProvider::federated));
