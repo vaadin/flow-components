@@ -119,6 +119,19 @@
             <artifactId>mongo-java-server-memory-backend</artifactId>
             <version>1.47.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-core</artifactId>
+            <version>${calcite.version}</version>
+            <exclusions>
+                <!-- Calcite's Jackson 2 annotations shadow the Jackson 3
+                     annotations Flow needs; the two share a package -->
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- Sample data endpoints: JPA and JPQL -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
