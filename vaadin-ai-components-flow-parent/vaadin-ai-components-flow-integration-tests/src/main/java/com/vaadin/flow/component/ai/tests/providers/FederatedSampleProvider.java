@@ -100,8 +100,8 @@ public final class FederatedSampleProvider {
     }
 
     /**
-     * Creates a provider over every collection of the sample MongoDB database,
-     * through Calcite's MongoDB adapter.
+     * Creates a provider over every collection of the sample MongoDB
+     * database.
      *
      * @return the provider
      */
