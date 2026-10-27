@@ -135,6 +135,13 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-annotations</artifactId>
                 </exclusion>
+                <!-- Calcite declares slf4j-api 1.7, which wins the
+                     resolution and cannot be bound by a 2.x SLF4J
+                     implementation; Flow brings the 2.x API -->
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!-- Sample data endpoints: JPA and JPQL -->
