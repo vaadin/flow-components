@@ -29,7 +29,7 @@ import com.vaadin.flow.component.ai.tests.endpoints.jpa.SampleJpaDatabase;
 class FederatedJpaProviderTest {
 
     private static final FederatedDatabaseProvider PROVIDER = FederatedSampleProvider
-            .jpa();
+            .dataProviders();
 
     @Test
     void schema_listsEveryEntityWithItsProperties() {

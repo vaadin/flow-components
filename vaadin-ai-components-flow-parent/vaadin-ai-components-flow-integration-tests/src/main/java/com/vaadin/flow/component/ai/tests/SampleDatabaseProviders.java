@@ -75,6 +75,12 @@ final class SampleDatabaseProviders {
                         () -> new JdbcDatabaseProvider(
                                 SampleJpaDatabase::dataSource, "SQL", "PUBLIC",
                                 SampleData.NOTES + H2_RULES)));
+        ENTRIES.put("jpql",
+                new Entry("JPA entities read with JPQL, through Calcite",
+                        FederatedSampleProvider::jpql));
+        ENTRIES.put("data-provider", new Entry(
+                "JPA entities through Flow data providers, through Calcite",
+                FederatedSampleProvider::dataProviders));
         ENTRIES.put("rest", new Entry("REST API through Calcite",
                 FederatedSampleProvider::rest));
         ENTRIES.put("rest-direct",
@@ -89,10 +95,6 @@ final class SampleDatabaseProviders {
                 FederatedSampleProvider::mongo));
         ENTRIES.put("csv", new Entry("CSV files through Calcite",
                 FederatedSampleProvider::csv));
-        ENTRIES.put("jpa",
-                new Entry(
-                        "JPA entities through Flow data providers and Calcite",
-                        FederatedSampleProvider::jpa));
         ENTRIES.put("federated",
                 new Entry("REST, GraphQL, MongoDB and CSV in one schema",
                         FederatedSampleProvider::federated));

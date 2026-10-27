@@ -61,6 +61,11 @@ public final class FederatedSampleProvider {
             - website_traffic: day_of_week 0=Monday ... 4=Friday and hour_of_day 0=9am ... 7=4pm are 0-based indices; set the axis categories to show labels
             """;
 
+    private static final String ENTITY_NOTES = """
+            - Sale: order by monthOrder for a chronological series
+            - TrafficCell: dayOfWeek 0=Monday ... 4=Friday and hourOfDay 0=9am ... 7=4pm are 0-based indices; set the axis categories to show labels
+            """;
+
     private static final String MONGO_NOTES = """
             - stockPrices keeps its prices and orgChart its manager in nested documents, which are not exposed
             """;
@@ -115,22 +120,33 @@ public final class FederatedSampleProvider {
     }
 
     /**
+     * Creates a provider over the JPA entities, each read with JPQL. Equality
+     * filters in the SQL become a {@code WHERE} clause of the JPQL query.
+     *
+     * @return the provider
+     */
+    public static FederatedDatabaseProvider jpql() {
+        var sources = new ArrayList<TableSource>();
+        for (var entity : SampleJpaDatabase.ENTITY_CLASSES) {
+            sources.add(new JpqlTableSource(
+                    SampleJpaDatabase::entityManagerFactory, entity));
+        }
+        return new FederatedDatabaseProvider(sources, ENTITY_NOTES);
+    }
+
+    /**
      * Creates a provider over the JPA entities, each through the kind of Flow
      * {@link DataProvider} an application would already have for its grids: a
      * callback provider that runs a JPQL query per fetch.
      *
      * @return the provider
      */
-    public static FederatedDatabaseProvider jpa() {
+    public static FederatedDatabaseProvider dataProviders() {
         var sources = new ArrayList<TableSource>();
         for (var entity : SampleJpaDatabase.ENTITY_CLASSES) {
             sources.add(jpaSource(entity));
         }
-        return new FederatedDatabaseProvider(sources,
-                """
-                        - Sale: order by monthOrder for a chronological series
-                        - TrafficCell: dayOfWeek 0=Monday ... 4=Friday and hourOfDay 0=9am ... 7=4pm are 0-based indices; set the axis categories to show labels
-                        """);
+        return new FederatedDatabaseProvider(sources, ENTITY_NOTES);
     }
 
     private static <T> TableSource jpaSource(Class<T> entity) {
