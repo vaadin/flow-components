@@ -15,6 +15,9 @@
         <module>vaadin-ai-extensions-flow</module>
         <module>vaadin-ai-components-flow-benchmark</module>
     </modules>
+    <properties>
+        <calcite.version>1.42.0</calcite.version>
+    </properties>
     <dependencies/>
     <profiles>
         <profile>
