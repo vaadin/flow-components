@@ -30,6 +30,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.calcite.DataContext;
+import org.apache.calcite.linq4j.Enumerable;
+import org.apache.calcite.linq4j.Linq4j;
+import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.rel.type.RelDataTypeFactory;
+import org.apache.calcite.schema.ScannableTable;
+import org.apache.calcite.schema.SchemaPlus;
+import org.apache.calcite.schema.Table;
+import org.apache.calcite.schema.impl.AbstractTable;
+import org.apache.calcite.sql.type.SqlTypeName;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,6 +107,45 @@ class FederatedDatabaseProviderTest {
                             .allMatch(filter -> filter.getValue()
                                     .equals(row.get(filter.getKey()))))
                     .toList();
+        }
+    }
+
+    /**
+     * An adapter table with fixed rows, standing in for one of Calcite's
+     * adapters: the engine reads it as a Calcite table, not through a source.
+     */
+    static class FixedAdapterTable implements AdapterTable {
+
+        @Override
+        public String getName() {
+            return "cities";
+        }
+
+        @Override
+        public String getDescription() {
+            return "adapter rows";
+        }
+
+        @Override
+        public Table createTable(SchemaPlus rootSchema) {
+            return new ScannableFixedTable();
+        }
+    }
+
+    static class ScannableFixedTable extends AbstractTable
+            implements ScannableTable {
+
+        @Override
+        public RelDataType getRowType(RelDataTypeFactory typeFactory) {
+            return typeFactory.builder().add("city", SqlTypeName.VARCHAR)
+                    .add("population", SqlTypeName.INTEGER).build();
+        }
+
+        @Override
+        public Enumerable<Object[]> scan(DataContext root) {
+            return Linq4j
+                    .asEnumerable(List.of(new Object[] { "Turku", 200_000 },
+                            new Object[] { "Oulu", 210_000 }));
         }
     }
 
@@ -450,9 +499,48 @@ class FederatedDatabaseProviderTest {
     }
 
     @Test
+    void adapterTable_joinsTheSchemaAndTheQueries() {
+        var provider = new FederatedDatabaseProvider(List.of(people),
+                List.of(new FixedAdapterTable()), null);
+
+        var schema = provider.getSchema();
+        var rows = provider.executeQuery("""
+                SELECT p.name AS "Name", c.population AS "Population"
+                FROM people p JOIN cities c ON c.city = p.city
+                ORDER BY p.id""");
+
+        Assertions.assertTrue(schema.contains("TABLE cities  (adapter rows)\n"),
+                schema);
+        Assertions.assertTrue(schema.contains("  population INTEGER\n"),
+                schema);
+        Assertions.assertEquals(List.of("Ann", "Bob", "Cid"),
+                rows.stream().map(row -> row.get("Name")).toList());
+        Assertions.assertEquals(210_000, rows.get(1).get("Population"));
+    }
+
+    @Test
+    void explain_showsThePhysicalPlan() {
+        var plan = provider.explain(
+                "SELECT name FROM people WHERE city = 'Turku' ORDER BY name");
+
+        Assertions.assertTrue(plan.contains("BindableTableScan"), plan);
+        Assertions.assertTrue(plan.contains("federated, people"), plan);
+        Assertions.assertThrows(ToolException.class,
+                () -> provider.explain("SELECT nothing FROM nowhere"));
+    }
+
+    @Test
     void constructor_rejectsBadSources() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new FederatedDatabaseProvider(List.of()));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new FederatedDatabaseProvider(List.of(people),
+                        List.of(new FixedAdapterTable() {
+                            @Override
+                            public String getName() {
+                                return "People";
+                            }
+                        }), null));
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new FederatedDatabaseProvider(
                         List.of(people, new RecordingSource("PEOPLE",

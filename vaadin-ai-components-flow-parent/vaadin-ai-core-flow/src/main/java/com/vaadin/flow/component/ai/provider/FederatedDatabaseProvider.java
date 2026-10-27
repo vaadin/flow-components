@@ -32,16 +32,23 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.calcite.adapter.enumerable.EnumerableConvention;
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.interpreter.Bindables;
+import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.jdbc.Driver;
+import org.apache.calcite.jdbc.JavaTypeFactoryImpl;
 import org.apache.calcite.plan.RelOptTable;
+import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelHomogeneousShuttle;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.TableScan;
+import org.apache.calcite.rel.logical.LogicalProject;
+import org.apache.calcite.rel.logical.LogicalSort;
 import org.apache.calcite.rel.logical.LogicalTableScan;
+import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.runtime.CalciteContextException;
-import org.apache.calcite.schema.Table;
+import org.apache.calcite.schema.SchemaPlus;
 import org.apache.calcite.schema.impl.AbstractSchema;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.parser.SqlParseException;
@@ -49,6 +56,7 @@ import org.apache.calcite.sql.parser.SqlParser;
 import org.apache.calcite.sql.validate.SqlValidatorException;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.calcite.tools.Frameworks;
+import org.apache.calcite.tools.Programs;
 import org.apache.calcite.tools.RelConversionException;
 import org.apache.calcite.tools.RelRunner;
 import org.apache.calcite.tools.ValidationException;
@@ -59,29 +67,33 @@ import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
 
 /**
  * A {@link DatabaseProvider} that lets the LLM write SQL over data that is not
- * in a SQL database: each {@link TableSource} you give it, a REST collection, a
- * CSV file or any other listing of rows, becomes one table of one schema, and
- * Apache Calcite runs the SQL over them. Joins, aggregation, sorting and paging
- * work across sources, because the engine computes in memory whatever a source
+ * in a SQL database. Each {@link TableSource} you give it, a REST collection, a
+ * CSV file or any other listing of rows, and each {@link AdapterTable}, a table
+ * one of Apache Calcite's own adapters reads, becomes one table of one schema,
+ * and Calcite runs the SQL over them. Joins, aggregation, sorting and paging
+ * work across tables, because the engine computes in memory whatever a backend
  * cannot do itself; a source that can filter declares it and receives the
- * filters of a query as a {@link Pushdown}.
+ * filters of a query as a {@link Pushdown}, and an adapter pushes down whatever
+ * its backend supports.
  * <p>
  * The schema text lists the tables with their columns and SQL types, and quotes
  * a column name the LLM has to quote because it is a reserved word. Identifiers
  * are matched case-insensitively, so sources may keep the names of their
  * backend, {@code monthOrder} as well as {@code month_order}. Only
- * {@code SELECT} statements are accepted; the sources are never written to.
+ * {@code SELECT} statements are accepted; the backends are never written to.
  * </p>
  * <p>
- * A query scans every source it reads from, and a grid reads its query several
+ * A query scans every table it reads from, and a grid reads its query several
  * times when it renders: once for the columns, once for the count, and once per
  * page. Rows fetched from a source are therefore kept for a short while, see
  * {@link #setCacheDuration(Duration)}, so that these reads reach the backend
- * once.
+ * once. The provider keeps one Calcite connection for its lifetime and runs one
+ * query at a time on it.
  * </p>
  * <p>
  * Apache Calcite is an optional dependency of this module: add
- * {@code org.apache.calcite:calcite-core} to your project to use this class.
+ * {@code org.apache.calcite:calcite-core} to your project to use this class,
+ * and the adapter module of each adapter table.
  * </p>
  *
  * @author Vaadin Ltd
@@ -101,11 +113,68 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
             - Only SELECT statements are accepted
             """;
 
+    /**
+     * Replaces the logical scans of sources with bindable ones, which read the
+     * source through the plan itself instead of looking the table up in the
+     * schema, as Calcite's {@code RelRunners} does. Adapter tables are left to
+     * their adapters.
+     */
+    private static final RelHomogeneousShuttle BINDABLE_SCANS = new RelHomogeneousShuttle() {
+        @Override
+        public RelNode visit(TableScan scan) {
+            RelOptTable table = scan.getTable();
+            if (scan instanceof LogicalTableScan
+                    && Bindables.BindableTableScan.canHandle(table)) {
+                return Bindables.BindableTableScan.create(scan.getCluster(),
+                        table);
+            }
+            return super.visit(scan);
+        }
+    };
+
+    /**
+     * Merges a limit directly over a sorted subquery, {@code SELECT * FROM
+     * (... ORDER BY x) LIMIT n OFFSET m} as the grid writes it, into one sort
+     * with the order, the offset and the limit. Kept as two operators, an
+     * adapter's sort rule is free to drop the inner order, because SQL does not
+     * promise it; Calcite's MongoDB rule does exactly that.
+     */
+    private static final RelHomogeneousShuttle MERGE_SORTS = new RelHomogeneousShuttle() {
+        @Override
+        public RelNode visit(RelNode other) {
+            var visited = super.visit(other);
+            if (!(visited instanceof LogicalSort outer)
+                    || !outer.getCollation().getFieldCollations().isEmpty()
+                    || (outer.offset == null && outer.fetch == null)) {
+                return visited;
+            }
+            var input = outer.getInput();
+            LogicalProject project = null;
+            if (input instanceof LogicalProject candidate
+                    && RexUtil.isIdentity(candidate.getProjects(),
+                            candidate.getInput().getRowType())) {
+                project = candidate;
+                input = candidate.getInput();
+            }
+            if (!(input instanceof LogicalSort inner) || inner.offset != null
+                    || inner.fetch != null) {
+                return visited;
+            }
+            var merged = LogicalSort.create(inner.getInput(),
+                    inner.getCollation(), outer.offset, outer.fetch);
+            return project == null ? merged
+                    : project.copy(project.getTraitSet(), List.of(merged));
+        }
+    };
+
     private final List<TableSource> sources;
+    private final List<AdapterTable> adapterTables;
     private final String notes;
     private Duration cacheDuration = Duration.ofSeconds(10);
 
-    private transient Map<String, Table> tables;
+    private transient CalciteConnection connection;
+    private transient SchemaPlus schema;
+    private transient Map<String, String> descriptions;
     private transient Map<CacheKey, CacheEntry> cache;
 
     private record CacheKey(String source, Pushdown pushdown) {
@@ -143,17 +212,34 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
      *             type a source may not use
      */
     public FederatedDatabaseProvider(List<TableSource> sources, String notes) {
+        this(sources, List.of(), notes);
+    }
+
+    /**
+     * Creates a provider over the given sources and adapter tables, with notes
+     * for the LLM appended to the schema.
+     *
+     * @param sources
+     *            the sources, each becoming a table, not {@code null}
+     * @param adapterTables
+     *            the adapter tables, each becoming a table, not {@code null}
+     * @param notes
+     *            notes appended to the schema text, or {@code null} for none
+     * @throws IllegalArgumentException
+     *             if there are no tables at all, two share a name, or a source
+     *             column has a type a source may not use
+     */
+    public FederatedDatabaseProvider(List<TableSource> sources,
+            List<AdapterTable> adapterTables, String notes) {
         Objects.requireNonNull(sources, "sources must not be null");
-        if (sources.isEmpty()) {
-            throw new IllegalArgumentException("At least one source is needed");
+        Objects.requireNonNull(adapterTables, "adapterTables must not be null");
+        if (sources.isEmpty() && adapterTables.isEmpty()) {
+            throw new IllegalArgumentException("At least one table is needed");
         }
         var names = new HashSet<String>();
         for (var source : sources) {
             var name = source.getName();
-            if (!names.add(name.toLowerCase(Locale.ROOT))) {
-                throw new IllegalArgumentException(
-                        "Two sources are named " + name);
-            }
+            requireUniqueName(names, name);
             if (source.getColumns().isEmpty()) {
                 throw new IllegalArgumentException(
                         "Source " + name + " has no columns");
@@ -166,8 +252,18 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
                 }
             }
         }
+        for (var adapterTable : adapterTables) {
+            requireUniqueName(names, adapterTable.getName());
+        }
         this.sources = List.copyOf(sources);
+        this.adapterTables = List.copyOf(adapterTables);
         this.notes = notes;
+    }
+
+    private static void requireUniqueName(HashSet<String> names, String name) {
+        if (!names.add(name.toLowerCase(Locale.ROOT))) {
+            throw new IllegalArgumentException("Two tables are named " + name);
+        }
     }
 
     /**
@@ -183,7 +279,8 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     /**
      * Sets how long rows fetched from a source are reused for later queries
      * with the same pushdown. The default is ten seconds; {@link Duration#ZERO}
-     * fetches on every query.
+     * fetches on every query. Adapter tables are not cached; their adapters
+     * decide what reaches the backend.
      *
      * @param cacheDuration
      *            the cache duration, not {@code null} or negative
@@ -198,43 +295,46 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     }
 
     @Override
-    public String getSchema() {
+    public synchronized String getSchema() {
+        connect();
         var metadata = SqlParser.create(new StringReader(""), parserConfig())
                 .getMetadata();
-        var schema = new StringBuilder("DATABASE SCHEMA:\n\n");
-        for (var source : sources) {
-            schema.append("TABLE ").append(source.getName());
-            if (source.getDescription() != null) {
-                schema.append("  (").append(source.getDescription())
-                        .append(')');
+        var typeFactory = new JavaTypeFactoryImpl();
+        var text = new StringBuilder("DATABASE SCHEMA:\n\n");
+        for (var entry : descriptions.entrySet()) {
+            var name = entry.getKey();
+            text.append("TABLE ").append(name);
+            if (entry.getValue() != null) {
+                text.append("  (").append(entry.getValue()).append(')');
             }
-            schema.append('\n');
-            for (var column : source.getColumns()) {
-                var name = column.name();
-                if (metadata.isReservedWord(name.toUpperCase(Locale.ROOT))) {
-                    name = '"' + name + '"';
+            text.append('\n');
+            var rowType = Objects.requireNonNull(schema.tables().get(name))
+                    .getRowType(typeFactory);
+            for (var field : rowType.getFieldList()) {
+                var column = field.getName();
+                if (metadata.isReservedWord(column.toUpperCase(Locale.ROOT))) {
+                    column = '"' + column + '"';
                 }
-                schema.append("  ").append(name).append(' ')
-                        .append(SourceTable.sqlType(column.type()).getName())
+                text.append("  ").append(column).append(' ')
+                        .append(field.getType().getSqlTypeName().getName())
                         .append('\n');
             }
-            schema.append('\n');
+            text.append('\n');
         }
-        schema.append("NOTES:\n").append(DIALECT_NOTES);
+        text.append("NOTES:\n").append(DIALECT_NOTES);
         if (notes != null) {
-            schema.append(notes);
+            text.append(notes);
         }
-        return schema.toString();
+        return text.toString();
     }
 
     @Override
-    public List<Map<String, Object>> executeQuery(String sql) {
+    public synchronized List<Map<String, Object>> executeQuery(String sql) {
         Objects.requireNonNull(sql, "sql must not be null");
-        var plan = plan(sql);
-        try (var connection = new Driver().connect("jdbc:calcite:",
-                new Properties());
-                var statement = connection.unwrap(RelRunner.class)
-                        .prepareStatement(plan);
+        connect();
+        var plan = plan(sql, false);
+        try (var statement = connection.unwrap(RelRunner.class)
+                .prepareStatement(plan);
                 var resultSet = statement.executeQuery()) {
             return readRows(resultSet);
         } catch (SQLException e) {
@@ -243,22 +343,35 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     }
 
     /**
-     * Parses, validates and converts the query over the sources. Planning goes
-     * through the Frameworks API rather than a JDBC connection, because the
-     * conversion has to keep an {@code ORDER BY} inside a subquery: SQL does
-     * not promise that order and Calcite drops it by default, but the grid
-     * sorts its rows exactly that way.
+     * Returns the plan Calcite runs for a query, as a tree of relational
+     * operators, which shows what reaches each backend: for example a
+     * {@code MongoFilter} below a {@code MongoToEnumerableConverter} is a
+     * filter MongoDB evaluates, and a {@code BindableTableScan} reads a source.
+     * Meant for looking at what a backend gets to do.
+     *
+     * @param sql
+     *            the query, not {@code null}
+     * @return the plan, one operator per line
+     * @throws ToolException
+     *             if the query does not parse or validate
      */
-    private RelNode plan(String sql) {
-        var rootSchema = Frameworks.createRootSchema(true);
-        var schema = rootSchema.add(SCHEMA_NAME, new AbstractSchema() {
-            @Override
-            protected Map<String, Table> getTableMap() {
-                return sourceTables();
-            }
-        });
+    public synchronized String explain(String sql) {
+        Objects.requireNonNull(sql, "sql must not be null");
+        connect();
+        return RelOptUtil.toString(plan(sql, true));
+    }
+
+    /**
+     * Parses, validates and converts the query over the tables, optimised into
+     * the physical plan on request. Planning goes through the Frameworks API
+     * rather than the connection, because the conversion has to keep an
+     * {@code ORDER BY} inside a subquery: SQL does not promise that order and
+     * Calcite drops it by default, but the grid sorts its rows exactly that
+     * way.
+     */
+    private RelNode plan(String sql, boolean optimize) {
         var config = Frameworks.newConfigBuilder().parserConfig(parserConfig())
-                .defaultSchema(schema)
+                .defaultSchema(schema).programs(Programs.standard())
                 .sqlToRelConverterConfig(
                         SqlToRelConverter.config().withTrimUnusedFields(true)
                                 .withRemoveSortInSubQuery(false))
@@ -269,7 +382,13 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
                 throw new ToolException("Only SELECT queries are allowed.");
             }
             var validated = planner.validate(statement);
-            return planner.rel(validated).project().accept(BINDABLE_SCANS);
+            var plan = planner.rel(validated).project().accept(MERGE_SORTS)
+                    .accept(BINDABLE_SCANS);
+            if (!optimize) {
+                return plan;
+            }
+            return planner.transform(0, planner.getEmptyTraitSet()
+                    .replace(EnumerableConvention.INSTANCE), plan);
         } catch (SqlParseException e) {
             throw new ToolException(parseMessage(e), e);
         } catch (ValidationException e) {
@@ -280,26 +399,55 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
         }
     }
 
-    /**
-     * Replaces the logical scans with bindable ones, which read the sources
-     * through the plan itself instead of looking the tables up in the schema of
-     * the executing connection, as {@code RelRunners} does.
-     */
-    private static final RelHomogeneousShuttle BINDABLE_SCANS = new RelHomogeneousShuttle() {
-        @Override
-        public RelNode visit(TableScan scan) {
-            RelOptTable table = scan.getTable();
-            if (scan instanceof LogicalTableScan
-                    && Bindables.BindableTableScan.canHandle(table)) {
-                return Bindables.BindableTableScan.create(scan.getCluster(),
-                        table);
-            }
-            return super.visit(scan);
-        }
-    };
-
     private static SqlParser.Config parserConfig() {
         return SqlParser.config().withLex(Lex.MYSQL_ANSI);
+    }
+
+    /**
+     * Opens the connection and registers every table on the first call. The
+     * connection and the adapters' schemas live as long as the provider.
+     */
+    private void connect() {
+        if (connection != null) {
+            return;
+        }
+        var properties = new Properties();
+        properties.setProperty("lex", Lex.MYSQL_ANSI.name());
+        CalciteConnection calcite;
+        try {
+            calcite = new Driver().connect("jdbc:calcite:", properties)
+                    .unwrap(CalciteConnection.class);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Could not connect", e);
+        }
+        try {
+            var root = calcite.getRootSchema();
+            var federated = root.add(SCHEMA_NAME, new AbstractSchema());
+            var tableDescriptions = new LinkedHashMap<String, String>();
+            for (var source : sources) {
+                federated.add(source.getName(), new SourceTable(source,
+                        pushdown -> fetch(source, pushdown)));
+                tableDescriptions.put(source.getName(),
+                        source.getDescription());
+            }
+            for (var adapterTable : adapterTables) {
+                federated.add(adapterTable.getName(),
+                        adapterTable.createTable(root));
+                tableDescriptions.put(adapterTable.getName(),
+                        adapterTable.getDescription());
+            }
+            calcite.setSchema(SCHEMA_NAME);
+            schema = federated;
+            descriptions = tableDescriptions;
+            connection = calcite;
+        } catch (SQLException | RuntimeException e) {
+            try {
+                calcite.close();
+            } catch (SQLException closeException) {
+                e.addSuppressed(closeException);
+            }
+            throw new IllegalStateException("Could not register the tables", e);
+        }
     }
 
     private static List<Map<String, Object>> readRows(ResultSet resultSet)
@@ -331,14 +479,25 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
 
     /**
      * Turns an execution failure into what the LLM may see: the message of a
-     * {@link ToolException} a source threw. Anything else stays a generic
-     * failure.
+     * {@link ToolException} a source threw, or a fixed hint when an adapter
+     * could not implement its part of the plan, which happens when a query
+     * applies a function the adapter cannot push to its backend. Anything else
+     * stays a generic failure.
      */
     private static RuntimeException translate(SQLException exception) {
         for (Throwable cause = exception; cause != null; cause = cause
                 .getCause()) {
             if (cause instanceof ToolException toolException) {
                 return new ToolException(toolException.getMessage(), exception);
+            }
+            if (cause.getMessage() != null
+                    && cause.getMessage().startsWith("Unable to implement")) {
+                return new ToolException(
+                        "A data source cannot evaluate an expression of the "
+                                + "query. On its columns use only comparisons, "
+                                + "arithmetic, CASE, CONCAT and SUBSTRING, and "
+                                + "do other work on the result.",
+                        exception);
             }
         }
         LOGGER.warn("Query failed", exception);
@@ -381,18 +540,6 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
         return message;
     }
 
-    private synchronized Map<String, Table> sourceTables() {
-        if (tables == null) {
-            var map = new LinkedHashMap<String, Table>();
-            for (var source : sources) {
-                map.put(source.getName(), new SourceTable(source,
-                        pushdown -> fetch(source, pushdown)));
-            }
-            tables = map;
-        }
-        return tables;
-    }
-
     private List<Map<String, Object>> fetch(TableSource source,
             Pushdown pushdown) {
         if (cacheDuration.isZero()) {
@@ -410,7 +557,7 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
         return rows;
     }
 
-    private synchronized Map<CacheKey, CacheEntry> cache() {
+    private Map<CacheKey, CacheEntry> cache() {
         if (cache == null) {
             cache = new ConcurrentHashMap<>();
         }
