@@ -28,24 +28,40 @@ import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 class FederatedSampleProviderTest {
 
     private static final FederatedDatabaseProvider PROVIDER = FederatedSampleProvider
-            .create();
+            .federated();
 
     @Test
-    void schema_listsEveryTableOnce_fromEitherEndpoint() {
+    void schema_listsEveryTableOnce_fromItsEndpoint() {
         var schema = PROVIDER.getSchema();
 
         Assertions.assertTrue(
                 schema.contains("TABLE sales  (REST collection /api/sales)"),
                 schema);
         Assertions.assertTrue(
-                schema.contains("TABLE employees  (CSV file employees.csv)"),
+                schema.contains("TABLE employees  (GraphQL field employees)"),
                 schema);
-        Assertions.assertFalse(schema.contains("TABLE sales.csv"), schema);
-        Assertions.assertFalse(schema.contains("TABLE employees  (REST"),
+        Assertions.assertTrue(
+                schema.contains(
+                        "TABLE kpiMetrics  (MongoDB collection kpiMetrics)"),
+                schema);
+        Assertions.assertTrue(
+                schema.contains("TABLE org_chart  (CSV file org_chart.csv)"),
                 schema);
         Assertions.assertEquals(SampleData.TABLES.size(),
                 schema.split("\nTABLE ").length - 1, schema);
         Assertions.assertTrue(schema.contains("  \"month\" VARCHAR"), schema);
+    }
+
+    @Test
+    void everyEndpointAlone_servesTheWholeDataSet() {
+        for (var provider : List.of(FederatedSampleProvider.rest(),
+                FederatedSampleProvider.csv(),
+                FederatedSampleProvider.graphql(),
+                FederatedSampleProvider.mongo())) {
+            var schema = provider.getSchema();
+            Assertions.assertEquals(SampleData.TABLES.size(),
+                    schema.split("\nTABLE ").length - 1, schema);
+        }
     }
 
     @Test
@@ -64,10 +80,10 @@ class FederatedSampleProviderTest {
     }
 
     @Test
-    void join_acrossTheRestAndCsvEndpoints() {
+    void join_acrossTheRestAndMongoEndpoints() {
         var rows = PROVIDER.executeQuery("""
-                SELECT p.productName AS "Product", k.metric_name AS "Metric"
-                FROM products p JOIN kpi_metrics k ON k.id = p.id
+                SELECT p.productName AS "Product", k.metricName AS "Metric"
+                FROM products p JOIN kpiMetrics k ON k.id = p.id
                 ORDER BY p.id""");
 
         Assertions.assertEquals(Math.min(SampleData.PRODUCTS.size(),
@@ -79,7 +95,22 @@ class FederatedSampleProviderTest {
     }
 
     @Test
-    void gridWrappers_pageAndCountTheCsvTable() {
+    void join_acrossTheGraphQLAndCsvEndpoints() {
+        var rows = PROVIDER.executeQuery("""
+                SELECT e.name AS "Employee", s.stage AS "Stage"
+                FROM employees e JOIN sales_pipeline s ON s.id = e.id
+                ORDER BY e.id""");
+
+        Assertions.assertEquals(Math.min(SampleData.EMPLOYEES.size(),
+                SampleData.SALES_PIPELINE.size()), rows.size());
+        Assertions.assertEquals(SampleData.EMPLOYEES.get(0).name(),
+                rows.get(0).get("Employee"));
+        Assertions.assertEquals(SampleData.SALES_PIPELINE.get(0).stage(),
+                rows.get(0).get("Stage"));
+    }
+
+    @Test
+    void gridWrappers_pageAndCountTheGraphQLTable() {
         var query = "SELECT name AS \"Name\", salary AS \"Salary\" FROM employees";
         var page = PROVIDER.executeQuery("SELECT * FROM (SELECT * FROM ("
                 + query

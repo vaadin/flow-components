@@ -19,55 +19,144 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.flow.component.ai.provider.AdapterTable;
 import com.vaadin.flow.component.ai.provider.FederatedDatabaseProvider;
 import com.vaadin.flow.component.ai.provider.TableSource;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleApiServer;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleCsvFiles;
-import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
+import com.vaadin.flow.component.ai.tests.endpoints.SampleMongoServer;
 
 /**
- * The sample data set behind one {@link FederatedDatabaseProvider}, split
- * between two endpoints the way an application might find it: the web-facing
- * collections come from the REST API, under their camelCase names, and the
- * back-office exports come from CSV files, under their snake_case names. The
- * LLM writes one SQL over both.
+ * {@link FederatedDatabaseProvider}s over the sample data endpoints: one per
+ * endpoint type with the whole data set, and {@link #federated()}, which splits
+ * the data set between the four endpoints the way an application might find it,
+ * so that the LLM writes one SQL across them. The REST, GraphQL and MongoDB
+ * endpoints name their tables in camelCase, the CSV files in snake_case.
  */
 public final class FederatedSampleProvider {
 
-    /** The collections served by the REST API; the rest come from CSV. */
-    static final Set<String> REST_COLLECTIONS = Set.of("sales", "products",
-            "stockPrices", "pipelineStages", "energyFlows", "websiteTraffic");
+    static final Set<String> REST_TABLES = Set.of("sales", "products",
+            "websiteTraffic");
 
-    static final String NOTES = """
+    static final Set<String> GRAPHQL_TABLES = Set.of("employees",
+            "projectTasks", "stockPrices");
+
+    static final Set<String> MONGO_TABLES = Set.of("energyFlow", "kpiMetrics",
+            "budgetItems");
+
+    static final Set<String> CSV_TABLES = Set.of("org_chart", "sales_pipeline",
+            "expense_categories");
+
+    private static final String CAMEL_CASE_NOTES = """
             - sales: order by monthOrder for a chronological series
             - websiteTraffic: dayOfWeek 0=Monday ... 4=Friday and hourOfDay 0=9am ... 7=4pm are 0-based indices; set the axis categories to show labels
+            """;
+
+    private static final String SNAKE_CASE_NOTES = """
+            - sales: order by month_order for a chronological series
+            - website_traffic: day_of_week 0=Monday ... 4=Friday and hour_of_day 0=9am ... 7=4pm are 0-based indices; set the axis categories to show labels
+            """;
+
+    private static final String MONGO_NOTES = """
+            - MongoDB tables: a comparison with a DATE literal matches no rows and a function other than CASE, CONCAT, SUBSTRING and arithmetic fails, so filter and compute on other columns
+            """;
+
+    private static final String MONGO_NESTED_NOTES = """
+            - stockPrices keeps its prices and orgChart its manager in nested documents, which are not exposed
             """;
 
     private FederatedSampleProvider() {
     }
 
     /**
-     * Creates the provider, starting the sample API server and writing the CSV
-     * files if they do not exist yet.
+     * Creates a provider over every collection of the sample REST API.
      *
      * @return the provider
      */
-    public static FederatedDatabaseProvider create() {
+    public static FederatedDatabaseProvider rest() {
+        return new FederatedDatabaseProvider(
+                List.copyOf(RestTableSource
+                        .discover(SampleApiServer.get().restUri())),
+                CAMEL_CASE_NOTES);
+    }
+
+    /**
+     * Creates a provider over every sample CSV file.
+     *
+     * @return the provider
+     */
+    public static FederatedDatabaseProvider csv() {
+        return new FederatedDatabaseProvider(
+                List.copyOf(
+                        CsvTableSource.inDirectory(SampleCsvFiles.directory())),
+                SNAKE_CASE_NOTES);
+    }
+
+    /**
+     * Creates a provider over every list field of the sample GraphQL API.
+     *
+     * @return the provider
+     */
+    public static FederatedDatabaseProvider graphql() {
+        return new FederatedDatabaseProvider(
+                List.copyOf(GraphQLTableSource
+                        .discover(SampleApiServer.get().graphQlUri())),
+                CAMEL_CASE_NOTES);
+    }
+
+    /**
+     * Creates a provider over every collection of the sample MongoDB database,
+     * through Calcite's MongoDB adapter.
+     *
+     * @return the provider
+     */
+    public static FederatedDatabaseProvider mongo() {
+        return new FederatedDatabaseProvider(List.of(),
+                List.copyOf(mongoTables()),
+                CAMEL_CASE_NOTES + MONGO_NOTES + MONGO_NESTED_NOTES);
+    }
+
+    /**
+     * Creates a provider with the data set split between the four endpoints:
+     * the web-facing collections from the REST API, the people and project data
+     * from the GraphQL API, the metrics from MongoDB and the back-office
+     * exports from CSV files.
+     *
+     * @return the provider
+     */
+    public static FederatedDatabaseProvider federated() {
         var sources = new ArrayList<TableSource>();
         for (var source : RestTableSource
                 .discover(SampleApiServer.get().restUri())) {
-            if (REST_COLLECTIONS.contains(source.getName())) {
+            if (REST_TABLES.contains(source.getName())) {
+                sources.add(source);
+            }
+        }
+        for (var source : GraphQLTableSource
+                .discover(SampleApiServer.get().graphQlUri())) {
+            if (GRAPHQL_TABLES.contains(source.getName())) {
                 sources.add(source);
             }
         }
         for (var source : CsvTableSource
                 .inDirectory(SampleCsvFiles.directory())) {
-            var table = SampleData.table(source.getName());
-            if (table != null
-                    && !REST_COLLECTIONS.contains(table.resourceName())) {
+            if (CSV_TABLES.contains(source.getName())) {
                 sources.add(source);
             }
         }
-        return new FederatedDatabaseProvider(List.copyOf(sources), NOTES);
+        var adapterTables = new ArrayList<AdapterTable>();
+        for (var table : mongoTables()) {
+            if (MONGO_TABLES.contains(table.getName())) {
+                adapterTables.add(table);
+            }
+        }
+        return new FederatedDatabaseProvider(sources, adapterTables,
+                CAMEL_CASE_NOTES + MONGO_NOTES);
+    }
+
+    private static List<MongoAdapterTable> mongoTables() {
+        var server = SampleMongoServer.get();
+        return MongoAdapterTable.discover(server.connectionString(),
+                SampleMongoServer.DATABASE_NAME);
     }
 }

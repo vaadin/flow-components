@@ -132,6 +132,17 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-mongodb</artifactId>
+            <version>${calcite.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- Sample data endpoints: JPA and JPQL -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
@@ -142,7 +153,11 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>5.13.0</version>
+            <!-- Calcite's MongoDB adapter is compiled against driver 4.x;
+                 the 5.x driver changed the return type of
+                 MongoDatabase.listCollectionNames(), which the adapter calls
+                 to list the tables -->
+            <version>4.10.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
