@@ -24,15 +24,17 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.grid.AIDataRow;
 import com.vaadin.flow.component.ai.grid.GridAIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
+import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.SpringAILLMProvider;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.aura.Aura;
@@ -40,26 +42,32 @@ import com.vaadin.flow.theme.aura.Aura;
 /**
  * Page for trying out {@link GridAIController} with a real AI chat against
  * OpenAI, rendered with the Aura theme. The grid on the left shows whatever the
- * chat on the right asks for, built from the sample data of
- * {@link InMemoryDatabaseProvider}, and the query the LLM wrote last is shown
- * under the grid. The buttons above the message input send example prompts that
- * need joins, aggregates or comparisons across rows. The API key is read from
- * the {@code OPENAI_API_KEY} environment variable. Not covered by automated
- * tests.
+ * chat on the right asks for, built from the sample data behind the provider
+ * the {@code provider} query parameter names, see
+ * {@link SampleDatabaseProviders}; without the parameter it is the H2 database
+ * of {@link InMemoryDatabaseProvider}. The API key is read from the
+ * {@code OPENAI_API_KEY} environment variable. Not covered by automated tests.
  * <p>
- * Open at {@code http://localhost:8080/vaadin-ai/grid-ai-chat}.
+ * The buttons above the message input send example prompts that need joins,
+ * aggregates or comparisons across rows.
+ * </p>
+ * <p>
+ * Open at {@code http://localhost:8080/vaadin-ai/grid-ai-chat}, or at
+ * {@code http://localhost:8080/vaadin-ai/grid-ai-chat?provider=federated} for
+ * the REST and CSV endpoints federated with Apache Calcite.
  * </p>
  */
 @Route("vaadin-ai/grid-ai-chat")
 @StyleSheet(Aura.STYLESHEET)
-public class GridAIChatPage extends HorizontalLayout {
+public class GridAIChatPage extends HorizontalLayout
+        implements BeforeEnterObserver {
 
     private static final String MODEL_NAME = "gpt-5.4-mini";
 
     private static final String SYSTEM_PROMPT = """
             You are a data assistant. Answer the user's questions about the \
-            data by showing the matching rows in the grid next to the chat, \
-            and keep your text answers short.""";
+            data in the database by showing the rows in the grid next to the \
+            chat, and keep your text answers short.""";
 
     private static final List<ExamplePrompts.Prompt> PROMPTS = List.of(
             new ExamplePrompts.Prompt("Salaries vs. average",
@@ -79,6 +87,12 @@ public class GridAIChatPage extends HorizontalLayout {
             new ExamplePrompts.Prompt("Rising trading days",
                     "Show the trading days on which ACME closed higher than it opened, with the gain in percent and the day's price range."));
 
+    private final VerticalLayout gridPane = new VerticalLayout();
+    private final VerticalLayout chatPane = new VerticalLayout();
+    private final Span status = new Span();
+
+    private transient OpenAiChatModel chatModel;
+
     public GridAIChatPage() {
         setSizeFull();
         // The response arrives on the LLM client's threads, so it needs push
@@ -92,20 +106,35 @@ public class GridAIChatPage extends HorizontalLayout {
             return;
         }
 
+        var options = OpenAiChatOptions.builder().apiKey(apiKey)
+                .model(MODEL_NAME).build();
+        chatModel = OpenAiChatModel.builder().options(options).build();
+
+        gridPane.setSizeFull();
+        gridPane.add(status);
+        chatPane.setSizeFull();
+        add(gridPane, chatPane);
+        expand(gridPane, chatPane);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (chatModel == null) {
+            return;
+        }
+        var name = event.getLocation().getQueryParameters()
+                .getSingleParameter("provider")
+                .orElse(SampleDatabaseProviders.DEFAULT);
+        status.setText("Data: " + SampleDatabaseProviders.describe(name));
+        startChat(SampleDatabaseProviders.get(name));
+    }
+
+    private void startChat(DatabaseProvider provider) {
         var grid = new Grid<AIDataRow>();
         grid.setSizeFull();
-
-        var queryView = new Pre();
-        queryView.setId("query-view");
-        queryView.setWidthFull();
-        queryView.getStyle().set("max-height", "8em").set("overflow", "auto")
-                .set("white-space", "pre-wrap")
-                .set("overflow-wrap", "anywhere");
-
-        var controller = new GridAIController(grid,
-                new InMemoryDatabaseProvider());
-        controller.addStateChangeListener(
-                state -> queryView.setText(state.query()));
+        gridPane.add(grid);
+        gridPane.expand(grid);
+        var controller = new GridAIController(grid, provider);
 
         var messageList = new MessageList();
         messageList.setMarkdown(true);
@@ -114,24 +143,13 @@ public class GridAIChatPage extends HorizontalLayout {
         var messageInput = new MessageInput();
         messageInput.setWidthFull();
 
-        var options = OpenAiChatOptions.builder().apiKey(apiKey)
-                .model(MODEL_NAME).build();
-        var chatModel = OpenAiChatModel.builder().options(options).build();
         var orchestrator = AIOrchestrator
                 .builder(new SpringAILLMProvider(chatModel), SYSTEM_PROMPT)
                 .withMessageList(messageList).withInput(messageInput)
                 .withController(controller).build();
 
-        var gridPane = new VerticalLayout(grid, queryView);
-        gridPane.setSizeFull();
-        gridPane.expand(grid);
-
-        var chatPane = new VerticalLayout(messageList,
-                new ExamplePrompts(orchestrator, PROMPTS), messageInput);
-        chatPane.setSizeFull();
+        chatPane.add(messageList, new ExamplePrompts(orchestrator, PROMPTS),
+                messageInput);
         chatPane.expand(messageList);
-
-        add(gridPane, chatPane);
-        expand(gridPane, chatPane);
     }
 }

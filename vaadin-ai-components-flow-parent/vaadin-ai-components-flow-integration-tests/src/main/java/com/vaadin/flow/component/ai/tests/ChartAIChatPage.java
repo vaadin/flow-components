@@ -37,6 +37,8 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.aura.Aura;
@@ -44,8 +46,10 @@ import com.vaadin.flow.theme.aura.Aura;
 /**
  * Page for trying out {@link ChartAIController} with a real AI chat against
  * OpenAI, rendered with the Aura theme. The chart on the left shows whatever
- * the chat on the right asks for, built from the sample data of
- * {@link InMemoryDatabaseProvider}. The API key is read from the
+ * the chat on the right asks for, built from the sample data behind the
+ * provider the {@code provider} query parameter names, see
+ * {@link SampleDatabaseProviders}; without the parameter it is the H2 database
+ * of {@link InMemoryDatabaseProvider}. The API key is read from the
  * {@code OPENAI_API_KEY} environment variable. Not covered by automated tests.
  * <p>
  * The buttons above the message input send example prompts, one for each kind
@@ -58,12 +62,15 @@ import com.vaadin.flow.theme.aura.Aura;
  * the LLM sees after a restore are shown as text.
  * </p>
  * <p>
- * Open at {@code http://localhost:8080/vaadin-ai/chart-ai-chat}.
+ * Open at {@code http://localhost:8080/vaadin-ai/chart-ai-chat}, or at
+ * {@code http://localhost:8080/vaadin-ai/chart-ai-chat?provider=federated} for
+ * the REST and CSV endpoints federated with Apache Calcite.
  * </p>
  */
 @Route("vaadin-ai/chart-ai-chat")
 @StyleSheet(Aura.STYLESHEET)
-public class ChartAIChatPage extends HorizontalLayout {
+public class ChartAIChatPage extends HorizontalLayout
+        implements BeforeEnterObserver {
 
     private static final String MODEL_NAME = "gpt-5.4-mini";
 
@@ -92,10 +99,6 @@ public class ChartAIChatPage extends HorizontalLayout {
             new ExamplePrompts.Prompt("Organization",
                     "Draw the organization chart with names and job titles, colored by team."));
 
-    // One shared instance, so concurrent page loads can't fill the database
-    // twice
-    private static final DatabaseProvider DATABASE = new InMemoryDatabaseProvider();
-
     private final VerticalLayout chartPane = new VerticalLayout();
     private final VerticalLayout chatPane = new VerticalLayout();
     private final Span status = new Span();
@@ -106,6 +109,7 @@ public class ChartAIChatPage extends HorizontalLayout {
     private static ChartState savedState;
 
     private transient OpenAiChatModel chatModel;
+    private DatabaseProvider provider;
     private Chart chart;
     private ChartAIController controller;
 
@@ -125,7 +129,6 @@ public class ChartAIChatPage extends HorizontalLayout {
         var options = OpenAiChatOptions.builder().apiKey(apiKey)
                 .model(MODEL_NAME).build();
         chatModel = OpenAiChatModel.builder().options(options).build();
-        startChat();
 
         var controls = new HorizontalLayout(
                 new NativeButton("Save state", e -> saveState()),
@@ -150,6 +153,19 @@ public class ChartAIChatPage extends HorizontalLayout {
         expand(chartPane, chatPane);
     }
 
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (chatModel == null) {
+            return;
+        }
+        var name = event.getLocation().getQueryParameters()
+                .getSingleParameter("provider")
+                .orElse(SampleDatabaseProviders.DEFAULT);
+        provider = SampleDatabaseProviders.get(name);
+        status.setText("Data: " + SampleDatabaseProviders.describe(name));
+        startChat();
+    }
+
     /**
      * Creates a chart with its controller and a chat with a new orchestrator,
      * replacing the current ones in the page.
@@ -164,7 +180,7 @@ public class ChartAIChatPage extends HorizontalLayout {
         }
         chart = newChart;
         chartPane.expand(chart);
-        controller = new ChartAIController(chart, DATABASE);
+        controller = new ChartAIController(chart, provider);
 
         var messageList = new MessageList();
         messageList.setMarkdown(true);
