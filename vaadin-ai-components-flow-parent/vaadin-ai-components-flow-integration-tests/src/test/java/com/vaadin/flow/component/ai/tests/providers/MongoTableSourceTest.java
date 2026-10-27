@@ -18,43 +18,49 @@ package com.vaadin.flow.component.ai.tests.providers;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ai.provider.FederatedDatabaseProvider;
+import com.vaadin.flow.component.ai.provider.TableSource.Capability;
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
-import com.vaadin.flow.component.ai.provider.ToolException;
+import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleMongoServer;
 
-class MongoAdapterTableTest {
+class MongoTableSourceTest {
 
     private static final FederatedDatabaseProvider PROVIDER = FederatedSampleProvider
             .mongo();
 
-    private static Map<String, Class<?>> columnTypes(String collection) {
+    private static MongoTableSource source(String collection) {
         var server = SampleMongoServer.get();
-        return new MongoAdapterTable(server.connectionString(),
-                SampleMongoServer.DATABASE_NAME, collection).getColumns()
-                .stream().collect(Collectors.toMap(Column::name, Column::type));
+        return new MongoTableSource(server.connectionString(),
+                SampleMongoServer.DATABASE_NAME, collection);
+    }
+
+    private static Map<String, Class<?>> columnTypes(String collection) {
+        return source(collection).getColumns().stream()
+                .collect(Collectors.toMap(Column::name, Column::type));
     }
 
     @Test
-    void discover_createsOneTablePerCollection() {
+    void discover_createsOneSourcePerCollection() {
         var server = SampleMongoServer.get();
 
-        var tables = MongoAdapterTable.discover(server.connectionString(),
+        var sources = MongoTableSource.discover(server.connectionString(),
                 SampleMongoServer.DATABASE_NAME);
 
-        Assertions.assertEquals(SampleData.TABLES.size(), tables.size());
-        Assertions.assertTrue(tables.stream().map(MongoAdapterTable::getName)
+        Assertions.assertEquals(SampleData.TABLES.size(), sources.size());
+        Assertions.assertTrue(sources.stream().map(MongoTableSource::getName)
                 .anyMatch("kpiMetrics"::equals));
         Assertions.assertEquals("MongoDB collection kpiMetrics",
-                tables.stream()
-                        .filter(table -> table.getName().equals("kpiMetrics"))
-                        .findFirst().orElseThrow().getDescription());
+                source("kpiMetrics").getDescription());
+        Assertions.assertEquals(Set.of(Capability.EQUALITY_FILTER),
+                source("kpiMetrics").getCapabilities());
     }
 
     @Test
@@ -74,7 +80,37 @@ class MongoAdapterTableTest {
     }
 
     @Test
-    void schema_listsTheViewColumns() {
+    void fetch_returnsTypedRows() {
+        var rows = source("stockPrices").fetch(Pushdown.NONE);
+
+        Assertions.assertEquals(SampleData.STOCK_PRICES.size(), rows.size());
+        var first = SampleData.STOCK_PRICES.get(0);
+        Assertions.assertEquals(first.id(), rows.get(0).get("id"));
+        Assertions.assertEquals(first.ticker(), rows.get(0).get("ticker"));
+        Assertions.assertEquals(first.tradeDate(),
+                rows.get(0).get("tradeDate"));
+        Assertions.assertEquals(first.volume(), rows.get(0).get("volume"));
+    }
+
+    @Test
+    void fetch_pushesEqualityFiltersIncludingDatesAndIds() {
+        var date = SampleData.STOCK_PRICES.get(0).tradeDate();
+
+        var byDate = source("stockPrices")
+                .fetch(new Pushdown(Map.of("tradeDate", date)));
+        var byId = source("kpiMetrics").fetch(new Pushdown(Map.of("id", 2)));
+
+        var expected = SampleData.STOCK_PRICES.stream()
+                .filter(price -> price.tradeDate().equals(date)).count();
+        Assertions.assertEquals(expected, byDate.size());
+        Assertions.assertTrue(expected < SampleData.STOCK_PRICES.size());
+        Assertions.assertEquals(1, byId.size());
+        Assertions.assertEquals(SampleData.KPI_METRICS.get(1).metricName(),
+                byId.get(0).get("metricName"));
+    }
+
+    @Test
+    void schema_listsTheColumns() {
         var schema = PROVIDER.getSchema();
 
         Assertions.assertTrue(
@@ -88,47 +124,23 @@ class MongoAdapterTableTest {
     }
 
     @Test
-    void rows_comeThroughTheAdapterTyped() {
-        var rows = PROVIDER.executeQuery(
-                "SELECT metricName, currentVal FROM kpiMetrics ORDER BY id");
+    void queries_filterByDate_applyFunctions_andAggregate() {
+        var date = SampleData.STOCK_PRICES.get(0).tradeDate();
 
-        Assertions.assertEquals(SampleData.KPI_METRICS.size(), rows.size());
-        var first = SampleData.KPI_METRICS.get(0);
-        Assertions.assertEquals(first.metricName(),
-                rows.get(0).get("metricName"));
-        Assertions.assertEquals(first.currentVal().doubleValue(),
-                rows.get(0).get("currentVal"));
-    }
-
-    @Test
-    void filter_isPushedIntoThePipeline() {
-        var metric = SampleData.KPI_METRICS.get(1);
-        var sql = "SELECT metricName, targetVal FROM kpiMetrics WHERE metricName = '"
-                + metric.metricName() + "'";
-
-        var rows = PROVIDER.executeQuery(sql);
-        var plan = PROVIDER.explain(sql);
-
-        Assertions.assertEquals(1, rows.size());
-        Assertions.assertEquals(metric.targetVal().doubleValue(),
-                rows.get(0).get("targetVal"));
-        Assertions.assertTrue(plan.contains("MongoFilter"), plan);
-        Assertions.assertTrue(plan.contains("MongoToEnumerableConverter"),
-                plan);
-    }
-
-    @Test
-    void dateValues_andAggregates_work() {
-        var acme = PROVIDER.executeQuery(
-                "SELECT ticker, tradeDate FROM stockPrices WHERE ticker = 'ACME' ORDER BY tradeDate");
+        var byDate = PROVIDER.executeQuery(
+                "SELECT ticker FROM stockPrices WHERE tradeDate = DATE '" + date
+                        + "' ORDER BY ticker");
+        var upper = PROVIDER.executeQuery(
+                "SELECT UPPER(metricName) AS m FROM kpiMetrics ORDER BY id");
         var total = PROVIDER.executeQuery(
                 "SELECT COUNT(*) AS n, SUM(amount) AS total FROM energyFlow");
 
-        var expectedFirst = SampleData.STOCK_PRICES.stream()
-                .filter(price -> price.ticker().equals("ACME"))
-                .map(SampleData.StockPrice::tradeDate).sorted().findFirst()
-                .orElseThrow();
-        Assertions.assertEquals(expectedFirst, acme.get(0).get("tradeDate"));
+        var expectedByDate = SampleData.STOCK_PRICES.stream()
+                .filter(price -> price.tradeDate().equals(date)).count();
+        Assertions.assertEquals(expectedByDate, byDate.size());
+        Assertions.assertEquals(
+                SampleData.KPI_METRICS.get(0).metricName().toUpperCase(),
+                upper.get(0).get("m"));
         Assertions.assertEquals((long) SampleData.ENERGY_FLOW.size(),
                 total.get(0).get("n"));
         var expectedTotal = SampleData.ENERGY_FLOW.stream()
@@ -138,37 +150,12 @@ class MongoAdapterTableTest {
     }
 
     @Test
-    void dateFilter_isPushedButMatchesNothing_adapterLimitation() {
-        var date = SampleData.STOCK_PRICES.get(0).tradeDate();
-        var sql = "SELECT ticker FROM stockPrices WHERE tradeDate = DATE '"
-                + date + "'";
-
-        var plan = PROVIDER.explain(sql);
-        var rows = PROVIDER.executeQuery(sql);
-
-        Assertions.assertTrue(plan.contains("MongoFilter"), plan);
-        Assertions.assertEquals(List.of(), rows);
-    }
-
-    @Test
-    void functionTheAdapterCannotPush_isReportedToTheLlm() {
-        var exception = Assertions.assertThrows(ToolException.class,
-                () -> PROVIDER.executeQuery(
-                        "SELECT UPPER(metricName) AS m FROM kpiMetrics"));
-
-        Assertions.assertTrue(
-                exception.getMessage().contains("cannot evaluate"),
-                exception.getMessage());
-    }
-
-    @Test
     void gridWrappers_pageSortAndCount() {
         var query = "SELECT itemName AS \"Item\", amount AS \"Amount\" FROM budgetItems";
 
-        var wrapped = "SELECT * FROM (SELECT * FROM (" + query
-                + ") AS _t ORDER BY \"Amount\" DESC) AS _limited LIMIT 2 OFFSET 1";
-        var page = PROVIDER.executeQuery(wrapped);
-        var plan = PROVIDER.explain(wrapped);
+        var page = PROVIDER.executeQuery("SELECT * FROM (SELECT * FROM ("
+                + query
+                + ") AS _t ORDER BY \"Amount\" DESC) AS _limited LIMIT 2 OFFSET 1");
         var count = PROVIDER.executeQuery(
                 "SELECT COUNT(*) FROM (" + query + ") AS _counted");
 
@@ -177,8 +164,6 @@ class MongoAdapterTableTest {
                 .map(SampleData.BudgetItem::itemName).toList();
         Assertions.assertEquals(byAmount.subList(1, 3),
                 page.stream().map(row -> row.get("Item")).toList());
-        Assertions.assertTrue(
-                plan.contains("dir0=[DESC], offset=[1], fetch=[2]"), plan);
         Assertions.assertEquals((long) SampleData.BUDGET_ITEMS.size(),
                 count.get(0).values().iterator().next());
     }

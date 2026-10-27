@@ -49,7 +49,7 @@ final class SampleDatabaseProviders {
                 FederatedSampleProvider::rest));
         ENTRIES.put("graphql", new Entry("GraphQL API through Calcite",
                 FederatedSampleProvider::graphql));
-        ENTRIES.put("mongo", new Entry("MongoDB through Calcite's adapter",
+        ENTRIES.put("mongo", new Entry("MongoDB through Calcite",
                 FederatedSampleProvider::mongo));
         ENTRIES.put("csv", new Entry("CSV files through Calcite",
                 FederatedSampleProvider::csv));

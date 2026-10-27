@@ -25,35 +25,25 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-import org.apache.calcite.adapter.mongodb.MongoSchemaFactory;
-import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.schema.Table;
-import org.apache.calcite.schema.impl.ViewTable;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.Decimal128;
 
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.vaadin.flow.component.ai.provider.AdapterTable;
-import com.vaadin.flow.component.ai.provider.TableSource.Column;
+import com.mongodb.client.model.Filters;
+import com.vaadin.flow.component.ai.provider.TableSource;
 
 /**
- * An {@link AdapterTable} over one MongoDB collection, read by Apache Calcite's
- * own MongoDB adapter, which pushes filters, projections, sorts, limits and
- * aggregates into the database as pipeline stages.
- * <p>
- * The adapter presents a collection as a single {@code _MAP} column, so this
- * table is a view over it that casts each top-level field to a typed column,
- * the way Calcite's documentation shows. The types are inferred from a sample
- * of documents. Nested documents and arrays are left out: the adapter cannot
- * translate an access into them. The {@code _id} field is exposed as
- * {@code id}.
- * </p>
+ * A {@link TableSource} over one MongoDB collection, read with the MongoDB
+ * driver. The column types are inferred from a sample of documents; nested
+ * documents and arrays are left out, fields with mixed types become text, and
+ * the {@code _id} field is exposed as {@code id}. Equality filters are pushed
+ * down as a {@code find} filter; everything else the engine does.
  */
-public class MongoAdapterTable implements AdapterTable {
-
-    private static final String MONGO_SCHEMA = "mongo";
+public class MongoTableSource implements TableSource {
 
     private static final int SAMPLE_SIZE = 100;
 
@@ -62,8 +52,10 @@ public class MongoAdapterTable implements AdapterTable {
     private final String collection;
     private final List<Column> columns;
 
+    private transient MongoClient client;
+
     /**
-     * Creates a table over a collection, sampling its documents to infer the
+     * Creates a source over a collection, sampling its documents to infer the
      * columns.
      *
      * @param connectionString
@@ -73,7 +65,7 @@ public class MongoAdapterTable implements AdapterTable {
      * @param collection
      *            the collection name
      */
-    public MongoAdapterTable(String connectionString, String database,
+    public MongoTableSource(String connectionString, String database,
             String collection) {
         this.connectionString = connectionString;
         this.database = database;
@@ -82,15 +74,15 @@ public class MongoAdapterTable implements AdapterTable {
     }
 
     /**
-     * Creates a table for every collection of a database.
+     * Creates a source for every collection of a database.
      *
      * @param connectionString
      *            the MongoDB connection string
      * @param database
      *            the database name
-     * @return the tables, in collection name order
+     * @return the sources, in collection name order
      */
-    public static List<MongoAdapterTable> discover(String connectionString,
+    public static List<MongoTableSource> discover(String connectionString,
             String database) {
         var names = new ArrayList<String>();
         try (var client = MongoClients.create(connectionString)) {
@@ -98,7 +90,7 @@ public class MongoAdapterTable implements AdapterTable {
         }
         Collections.sort(names);
         return names.stream().map(
-                name -> new MongoAdapterTable(connectionString, database, name))
+                name -> new MongoTableSource(connectionString, database, name))
                 .toList();
     }
 
@@ -108,88 +100,106 @@ public class MongoAdapterTable implements AdapterTable {
     }
 
     @Override
-    public String getDescription() {
-        return "MongoDB collection " + collection;
-    }
-
-    /**
-     * Returns the columns of the view, with their Java types.
-     *
-     * @return the columns
-     */
     public List<Column> getColumns() {
         return columns;
     }
 
     @Override
-    public Table createTable(SchemaPlus rootSchema) {
-        if (rootSchema.subSchemas().get(MONGO_SCHEMA) == null) {
-            rootSchema.add(MONGO_SCHEMA, new MongoSchemaFactory().create(
-                    rootSchema, MONGO_SCHEMA,
-                    Map.of("host", connectionString, "database", database)));
+    public Set<Capability> getCapabilities() {
+        return Set.of(Capability.EQUALITY_FILTER);
+    }
+
+    @Override
+    public String getDescription() {
+        return "MongoDB collection " + collection;
+    }
+
+    @Override
+    public List<Map<String, Object>> fetch(Pushdown pushdown) {
+        var filters = new ArrayList<Bson>();
+        for (var filter : pushdown.equalityFilters().entrySet()) {
+            filters.add(Filters.eq(fieldOf(filter.getKey()),
+                    toBson(filter.getValue())));
         }
-        return ViewTable
-                .viewMacro(rootSchema, viewSql(), List.of(), null, false)
-                .apply(List.of());
+        var documents = client().getDatabase(database).getCollection(collection)
+                .find(filters.isEmpty() ? new Document()
+                        : Filters.and(filters));
+        var rows = new ArrayList<Map<String, Object>>();
+        for (var document : documents) {
+            var row = new LinkedHashMap<String, Object>();
+            for (var column : columns) {
+                row.put(column.name(), toValue(
+                        document.get(fieldOf(column.name())), column.type()));
+            }
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    private synchronized MongoClient client() {
+        if (client == null) {
+            client = MongoClients.create(connectionString);
+        }
+        return client;
+    }
+
+    private static String fieldOf(String column) {
+        return column.equals("id") ? "_id" : column;
     }
 
     /**
-     * Returns the SQL of the view: one cast per column over the adapter's
-     * {@code _MAP} column.
-     *
-     * @return the view SQL
+     * Converts a filter value of a column's Java type to what the driver
+     * compares with the stored BSON value.
      */
-    String viewSql() {
-        var casts = columns.stream()
-                .map(column -> "CAST(\"_MAP\"['"
-                        + fieldOf(column).replace("'", "''") + "'] AS "
-                        + sqlType(column.type()) + ") AS \""
-                        + column.name().replace("\"", "\"\"") + "\"")
-                .collect(Collectors.joining(", "));
-        return "SELECT " + casts + " FROM \"" + MONGO_SCHEMA + "\".\""
-                + collection.replace("\"", "\"\"") + "\"";
-    }
-
-    private static String fieldOf(Column column) {
-        return column.name().equals("id") ? "_id" : column.name();
-    }
-
-    private static String sqlType(Class<?> type) {
-        if (type == Integer.class) {
-            return "INTEGER";
-        } else if (type == Long.class) {
-            return "BIGINT";
-        } else if (type == Double.class) {
-            return "DOUBLE";
-        } else if (type == BigDecimal.class) {
-            return "DECIMAL(19, 4)";
-        } else if (type == Boolean.class) {
-            return "BOOLEAN";
-        } else if (type == LocalDate.class) {
-            return "DATE";
-        } else if (type == LocalDateTime.class) {
-            return "TIMESTAMP";
+    private static Object toBson(Object value) {
+        if (value instanceof LocalDate date) {
+            return Date.from(date.atStartOfDay(ZoneOffset.UTC).toInstant());
+        } else if (value instanceof LocalDateTime dateTime) {
+            return Date.from(dateTime.toInstant(ZoneOffset.UTC));
+        } else if (value instanceof BigDecimal decimal) {
+            return new Decimal128(decimal);
         }
-        return "VARCHAR";
+        return value;
+    }
+
+    private static Object toValue(Object value, Class<?> type) {
+        if (value == null) {
+            return null;
+        }
+        if (type == Integer.class) {
+            return ((Number) value).intValue();
+        } else if (type == Long.class) {
+            return ((Number) value).longValue();
+        } else if (type == Double.class) {
+            return ((Number) value).doubleValue();
+        } else if (type == BigDecimal.class) {
+            return value instanceof Decimal128 decimal
+                    ? decimal.bigDecimalValue()
+                    : new BigDecimal(value.toString());
+        } else if (type == Boolean.class) {
+            return value;
+        } else if (type == LocalDate.class) {
+            return ((Date) value).toInstant().atOffset(ZoneOffset.UTC)
+                    .toLocalDate();
+        } else if (type == LocalDateTime.class) {
+            return ((Date) value).toInstant().atOffset(ZoneOffset.UTC)
+                    .toLocalDateTime();
+        }
+        return String.valueOf(value);
     }
 
     /**
      * Samples the collection and types each top-level field by the values it
-     * holds; fields holding documents or arrays are left out, and fields with
-     * mixed types become text.
+     * holds.
      */
     private List<Column> inferColumns() {
         var types = new LinkedHashMap<String, Class<?>>();
-        try (var client = MongoClients.create(connectionString)) {
-            var documents = client.getDatabase(database)
-                    .getCollection(collection).find().limit(SAMPLE_SIZE);
-            for (var document : documents) {
-                for (var entry : document.entrySet()) {
-                    var type = typeOf(entry.getValue());
-                    if (type == null) {
-                        continue;
-                    }
-                    types.merge(entry.getKey(), type, MongoAdapterTable::merge);
+        for (var document : client().getDatabase(database)
+                .getCollection(collection).find().limit(SAMPLE_SIZE)) {
+            for (var entry : document.entrySet()) {
+                var type = typeOf(entry.getValue());
+                if (type != null) {
+                    types.merge(entry.getKey(), type, MongoTableSource::merge);
                 }
             }
         }

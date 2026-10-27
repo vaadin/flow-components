@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.flow.component.ai.provider.AdapterTable;
 import com.vaadin.flow.component.ai.provider.FederatedDatabaseProvider;
 import com.vaadin.flow.component.ai.provider.TableSource;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleApiServer;
@@ -58,10 +57,6 @@ public final class FederatedSampleProvider {
             """;
 
     private static final String MONGO_NOTES = """
-            - MongoDB tables: a comparison with a DATE literal matches no rows and a function other than CASE, CONCAT, SUBSTRING and arithmetic fails, so filter and compute on other columns
-            """;
-
-    private static final String MONGO_NESTED_NOTES = """
             - stockPrices keeps its prices and orgChart its manager in nested documents, which are not exposed
             """;
 
@@ -111,9 +106,8 @@ public final class FederatedSampleProvider {
      * @return the provider
      */
     public static FederatedDatabaseProvider mongo() {
-        return new FederatedDatabaseProvider(List.of(),
-                List.copyOf(mongoTables()),
-                CAMEL_CASE_NOTES + MONGO_NOTES + MONGO_NESTED_NOTES);
+        return new FederatedDatabaseProvider(List.copyOf(mongoSources()),
+                CAMEL_CASE_NOTES + MONGO_NOTES);
     }
 
     /**
@@ -144,19 +138,17 @@ public final class FederatedSampleProvider {
                 sources.add(source);
             }
         }
-        var adapterTables = new ArrayList<AdapterTable>();
-        for (var table : mongoTables()) {
-            if (MONGO_TABLES.contains(table.getName())) {
-                adapterTables.add(table);
+        for (var source : mongoSources()) {
+            if (MONGO_TABLES.contains(source.getName())) {
+                sources.add(source);
             }
         }
-        return new FederatedDatabaseProvider(sources, adapterTables,
-                CAMEL_CASE_NOTES + MONGO_NOTES);
+        return new FederatedDatabaseProvider(sources, CAMEL_CASE_NOTES);
     }
 
-    private static List<MongoAdapterTable> mongoTables() {
+    private static List<MongoTableSource> mongoSources() {
         var server = SampleMongoServer.get();
-        return MongoAdapterTable.discover(server.connectionString(),
+        return MongoTableSource.discover(server.connectionString(),
                 SampleMongoServer.DATABASE_NAME);
     }
 }
