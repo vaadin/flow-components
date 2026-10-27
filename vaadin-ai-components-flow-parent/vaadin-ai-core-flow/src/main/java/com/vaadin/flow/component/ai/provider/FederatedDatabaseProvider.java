@@ -549,6 +549,10 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
         var now = System.nanoTime();
         var entry = cache().get(key);
         if (entry != null && now - entry.expiresAt() < 0) {
+            LOGGER.info(
+                    "Cache hit for {} with filters {}: {} rows, fetch skipped",
+                    source.getName(), pushdown.equalityFilters(),
+                    entry.rows().size());
             return entry.rows();
         }
         var rows = List.copyOf(source.fetch(pushdown));

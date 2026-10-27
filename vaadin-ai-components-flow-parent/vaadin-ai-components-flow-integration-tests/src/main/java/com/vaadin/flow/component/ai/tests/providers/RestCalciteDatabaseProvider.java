@@ -483,6 +483,9 @@ public class RestCalciteDatabaseProvider implements DatabaseProvider {
         var now = System.nanoTime();
         var entry = cache.get(key);
         if (entry != null && now - entry.expiresAt() < 0) {
+            LOGGER.info("Cache hit for {}?size={}{}: {} items, fetch skipped",
+                    collectionUri(collection), PAGE_SIZE, filters,
+                    entry.rows().size());
             return entry.rows();
         }
         var rows = fetchRows(collection, filters);
