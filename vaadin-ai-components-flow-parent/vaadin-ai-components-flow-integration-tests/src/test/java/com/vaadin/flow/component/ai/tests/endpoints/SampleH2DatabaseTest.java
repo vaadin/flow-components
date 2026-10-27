@@ -74,6 +74,20 @@ class SampleH2DatabaseTest {
                         "SELECT month FROM sales WHERE id = 1"));
     }
 
+    @ParameterizedTest
+    @EnumSource(value = SampleH2Database.Variant.class, names = {
+            "POSTGRESQL_MODE", "MYSQL_MODE" })
+    void compatibilityModesAcceptValueAsAlias(SampleH2Database.Variant variant)
+            throws SQLException {
+        Assertions.assertEquals(45000, Jdbc.scalar(variant.readOnlyDataSource(),
+                "SELECT revenue AS value FROM sales WHERE id = 1"));
+        Assertions.assertThrows(SQLException.class,
+                () -> Jdbc.scalar(
+                        SampleH2Database.Variant.DEFAULT.readOnlyDataSource(),
+                        "SELECT revenue AS value FROM sales WHERE id = 1"),
+                "plain H2 keeps VALUE reserved");
+    }
+
     @Test
     void mysqlModeAcceptsBackticks() throws SQLException {
         Assertions.assertEquals(45000,

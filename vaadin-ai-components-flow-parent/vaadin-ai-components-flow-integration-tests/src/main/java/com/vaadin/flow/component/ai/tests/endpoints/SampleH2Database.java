@@ -67,18 +67,18 @@ public final class SampleH2Database {
         /**
          * H2 in PostgreSQL compatibility mode with lower-case identifiers. The
          * month column is a plain {@code month}, as in PostgreSQL, where MONTH
-         * is not reserved.
+         * is not reserved; neither is VALUE, a common alias.
          */
         POSTGRESQL_MODE(
-                "jdbc:h2:mem:sampledb_pg;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=MONTH;DB_CLOSE_DELAY=-1",
+                "jdbc:h2:mem:sampledb_pg;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;NON_KEYWORDS=MONTH,VALUE;DB_CLOSE_DELAY=-1",
                 "PostgreSQL", false),
 
         /**
          * H2 in MySQL compatibility mode with lower-case identifiers and a
-         * plain {@code month} column.
+         * plain {@code month} column; VALUE is not reserved either.
          */
         MYSQL_MODE(
-                "jdbc:h2:mem:sampledb_mysql;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=MONTH;DB_CLOSE_DELAY=-1",
+                "jdbc:h2:mem:sampledb_mysql;MODE=MySQL;DATABASE_TO_LOWER=TRUE;NON_KEYWORDS=MONTH,VALUE;DB_CLOSE_DELAY=-1",
                 "MySQL", false);
 
         private final String url;
