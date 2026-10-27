@@ -23,7 +23,12 @@ import java.util.function.Supplier;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleApiServer;
+import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
+import com.vaadin.flow.component.ai.tests.endpoints.SampleH2Database;
+import com.vaadin.flow.component.ai.tests.endpoints.TenantScopedH2Database;
+import com.vaadin.flow.component.ai.tests.endpoints.jpa.SampleJpaDatabase;
 import com.vaadin.flow.component.ai.tests.providers.FederatedSampleProvider;
+import com.vaadin.flow.component.ai.tests.providers.JdbcDatabaseProvider;
 import com.vaadin.flow.component.ai.tests.providers.RestCalciteDatabaseProvider;
 
 /**
@@ -37,6 +42,10 @@ final class SampleDatabaseProviders {
     /** The provider the pages start with. */
     static final String DEFAULT = "h2";
 
+    private static final String H2_RULES = """
+            - H2 database: reserved words such as VALUE, KEY, ORDER, MONTH, YEAR, DAY and HOUR are only valid as names in double quotes. Do NOT use them as column aliases; use descriptive names instead, for example total_revenue
+            """;
+
     private record Entry(String description,
             Supplier<DatabaseProvider> factory) {
     }
@@ -47,6 +56,25 @@ final class SampleDatabaseProviders {
     static {
         ENTRIES.put(DEFAULT, new Entry("H2 in-memory database, SQL",
                 InMemoryDatabaseProvider::new));
+        ENTRIES.put("postgresql", new Entry(
+                "H2 in PostgreSQL mode, PostgreSQL SQL",
+                () -> dialect(SampleH2Database.Variant.POSTGRESQL_MODE,
+                        "- PostgreSQL dialect: unquoted identifiers are lower case; quote with double quotes only when needed\n")));
+        ENTRIES.put("mysql",
+                new Entry("H2 in MySQL mode, MySQL SQL", () -> dialect(
+                        SampleH2Database.Variant.MYSQL_MODE,
+                        "- MySQL dialect: quote identifiers with backticks when needed\n")));
+        ENTRIES.put("tenant-north",
+                new Entry("Tenant-scoped H2, North region only, SQL",
+                        () -> tenant("North")));
+        ENTRIES.put("tenant-south",
+                new Entry("Tenant-scoped H2, South region only, SQL",
+                        () -> tenant("South")));
+        ENTRIES.put("jpa-native",
+                new Entry("JPA entities' tables, native SQL",
+                        () -> new JdbcDatabaseProvider(
+                                SampleJpaDatabase::dataSource, "SQL", "PUBLIC",
+                                SampleData.NOTES + H2_RULES)));
         ENTRIES.put("rest", new Entry("REST API through Calcite",
                 FederatedSampleProvider::rest));
         ENTRIES.put("rest-direct",
@@ -71,6 +99,22 @@ final class SampleDatabaseProviders {
     }
 
     private SampleDatabaseProviders() {
+    }
+
+    private static DatabaseProvider dialect(SampleH2Database.Variant variant,
+            String dialectRules) {
+        return new JdbcDatabaseProvider(variant::readOnlyDataSource,
+                variant.dialect() + " SQL", null,
+                SampleData.NOTES + dialectRules);
+    }
+
+    private static DatabaseProvider tenant(String tenant) {
+        return new JdbcDatabaseProvider(
+                () -> TenantScopedH2Database.dataSource(tenant), "SQL",
+                TenantScopedH2Database.schemaName(tenant),
+                "- The tables hold the data of the " + tenant
+                        + " region only; other regions are not visible to this connection.\n"
+                        + SampleData.NOTES + H2_RULES);
     }
 
     /**
