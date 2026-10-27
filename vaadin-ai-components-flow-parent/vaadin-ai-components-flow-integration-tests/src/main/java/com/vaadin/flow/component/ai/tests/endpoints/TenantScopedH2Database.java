@@ -34,6 +34,10 @@ import javax.sql.DataSource;
  * The tenants are the two sales regions, North and South. Tables without a
  * region are shared by both tenants as unfiltered views.
  * </p>
+ * <p>
+ * Once created, H2 logs every statement on the database, see
+ * {@link SampleH2Database#logStatements(String)}.
+ * </p>
  */
 public final class TenantScopedH2Database {
 
@@ -122,6 +126,7 @@ public final class TenantScopedH2Database {
             throw new IllegalStateException(
                     "Failed to create the tenant-scoped database", e);
         }
+        SampleH2Database.logStatements(URL);
         initialized = true;
     }
 

@@ -21,9 +21,14 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -33,9 +38,13 @@ import com.vaadin.flow.internal.JacksonUtils;
  * A small HTTP server on a loopback port that serves {@link SampleData} as a
  * REST API under {@code /api} and as a GraphQL API under {@code /graphql}, so
  * the web endpoints have a real network hop to make. Started on first use and
- * shared by every page of the application.
+ * shared by every page of the application. Every call is logged at {@code INFO}
+ * with what was asked and what came back.
  */
 public final class SampleApiServer {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(SampleApiServer.class);
 
     private static SampleApiServer instance;
 
@@ -96,7 +105,8 @@ public final class SampleApiServer {
     }
 
     /**
-     * Writes a JSON response and closes the exchange.
+     * Writes a JSON response, logs the call with the request method and URI,
+     * and closes the exchange.
      *
      * @param exchange
      *            the exchange to respond to
@@ -109,6 +119,29 @@ public final class SampleApiServer {
      */
     static void sendJson(HttpExchange exchange, int status, Object body)
             throws IOException {
+        sendJson(exchange,
+                exchange.getRequestMethod() + " " + exchange.getRequestURI(),
+                status, body);
+    }
+
+    /**
+     * Writes a JSON response, logs the call with the given description of the
+     * request, and closes the exchange.
+     *
+     * @param exchange
+     *            the exchange to respond to
+     * @param request
+     *            what was asked, for the log
+     * @param status
+     *            the HTTP status code
+     * @param body
+     *            the body, serialized as JSON
+     * @throws IOException
+     *             if writing fails
+     */
+    static void sendJson(HttpExchange exchange, String request, int status,
+            Object body) throws IOException {
+        LOGGER.info("{} -> {}", request, describe(status, body));
         var bytes = JacksonUtils.getMapper().writeValueAsString(body)
                 .getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type",
@@ -117,6 +150,47 @@ public final class SampleApiServer {
         try (var out = exchange.getResponseBody()) {
             out.write(bytes);
         }
+    }
+
+    /**
+     * Describes a response for the log: the error of a failed call, the number
+     * of items of a REST page or index, or the number of items of each field of
+     * a GraphQL result.
+     */
+    private static String describe(int status, Object body) {
+        if (!(body instanceof Map<?, ?> map)) {
+            return "HTTP " + status;
+        }
+        if (map.get("error") instanceof String error) {
+            return "HTTP " + status + " " + error;
+        }
+        if (map.get("content") instanceof List<?> content
+                && map.get("page") instanceof Map<?, ?> page) {
+            return content.size() + " items of " + page.get("totalElements");
+        }
+        if (map.get("collections") instanceof Map<?, ?> collections) {
+            return collections.size() + " collections";
+        }
+        if (map.get("errors") instanceof List<?> errors && !errors.isEmpty()) {
+            return "error: " + (errors.get(0) instanceof Map<?, ?> error
+                    ? error.get("message")
+                    : errors.get(0));
+        }
+        if (map.get("data") instanceof Map<?, ?> data) {
+            return describeFields(data);
+        }
+        return "HTTP " + status;
+    }
+
+    private static String describeFields(Map<?, ?> data) {
+        var counts = new ArrayList<String>();
+        for (var field : data.entrySet()) {
+            counts.add(field.getKey() + ": "
+                    + (field.getValue() instanceof List<?> items
+                            ? items.size() + " items"
+                            : "object"));
+        }
+        return String.join(", ", counts);
     }
 
     /**

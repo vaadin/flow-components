@@ -34,7 +34,8 @@ import org.h2.jdbcx.JdbcDataSource;
  * like different SQL products: plain H2, and H2 in its PostgreSQL and MySQL
  * compatibility modes, where the LLM has to follow the dialect it is told. Each
  * database also offers a read-only user, the account a production provider
- * should connect with.
+ * should connect with. Once seeded, H2 logs every statement on the database,
+ * see {@link #logStatements(String)}.
  */
 public final class SampleH2Database {
 
@@ -138,9 +139,9 @@ public final class SampleH2Database {
     }
 
     /**
-     * Seeds the database at the given URL with the sample tables, once per URL.
-     * Connects as the admin user, which creates an in-memory database if it
-     * does not exist yet.
+     * Seeds the database at the given URL with the sample tables, once per URL,
+     * and has H2 log every later statement on it. Connects as the admin user,
+     * which creates an in-memory database if it does not exist yet.
      *
      * @param url
      *            the JDBC URL, which should keep the database open with
@@ -162,7 +163,28 @@ public final class SampleH2Database {
             throw new IllegalStateException(
                     "Failed to seed sample database " + url, e);
         }
+        logStatements(url);
         SEEDED_URLS.add(url);
+    }
+
+    /**
+     * Has H2 log every later statement on the database at the given URL, from
+     * any connection: at {@code INFO} with its parameters and the number of
+     * rows, or at {@code ERROR} with the exception when it fails. H2 writes the
+     * log through SLF4J under the {@code h2database} logger.
+     *
+     * @param url
+     *            the JDBC URL of an open database
+     */
+    public static void logStatements(String url) {
+        try (var connection = DriverManager.getConnection(url, ADMIN_USER,
+                ADMIN_PASSWORD); var statement = connection.createStatement()) {
+            // Trace level 4 hands H2's trace to SLF4J
+            statement.execute("SET TRACE_LEVEL_FILE 4");
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Failed to switch on the statement log of " + url, e);
+        }
     }
 
     /**

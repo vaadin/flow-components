@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import javax.sql.DataSource;
 
+import org.hibernate.cfg.JdbcSettings;
+
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleH2Database;
 
@@ -32,7 +34,9 @@ import jakarta.persistence.PersistenceConfiguration;
  * the rows of {@link SampleData} are persisted as entities. This is the
  * endpoint a Spring Data JPA application has: entities with a schema of their
  * own, an {@link EntityManagerFactory}, and a database reachable both with JPQL
- * and, through the same connection, with native SQL.
+ * and, through the same connection, with native SQL. Once seeded, H2 logs every
+ * statement on the database, the SQL Hibernate runs for JPQL included, see
+ * {@link SampleH2Database#logStatements(String)}.
  */
 public final class SampleJpaDatabase {
 
@@ -59,12 +63,14 @@ public final class SampleJpaDatabase {
      */
     public static synchronized EntityManagerFactory entityManagerFactory() {
         if (entityManagerFactory == null) {
+            // H2 logs only the statements of connections opened after its
+            // log is switched on, so Hibernate gets a data source without a
+            // pool that would keep the connections of the seeding
             var configuration = new PersistenceConfiguration("sample-data")
-                    .property(PersistenceConfiguration.JDBC_URL, JDBC_URL)
-                    .property(PersistenceConfiguration.JDBC_USER,
-                            SampleH2Database.ADMIN_USER)
-                    .property(PersistenceConfiguration.JDBC_PASSWORD,
-                            SampleH2Database.ADMIN_PASSWORD)
+                    .property(JdbcSettings.JAKARTA_NON_JTA_DATASOURCE,
+                            SampleH2Database.dataSource(JDBC_URL,
+                                    SampleH2Database.ADMIN_USER,
+                                    SampleH2Database.ADMIN_PASSWORD))
                     .property(
                             PersistenceConfiguration.SCHEMAGEN_DATABASE_ACTION,
                             "drop-and-create");
@@ -73,6 +79,7 @@ public final class SampleJpaDatabase {
             try (var entityManager = factory.createEntityManager()) {
                 seed(entityManager);
             }
+            SampleH2Database.logStatements(JDBC_URL);
             entityManagerFactory = factory;
         }
         return entityManagerFactory;

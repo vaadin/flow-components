@@ -247,8 +247,26 @@ final class SampleGraphQLApi implements HttpHandler {
         }
         var input = ExecutionInput.newExecutionInput().query(query)
                 .variables(variables).operationName(operationName).build();
-        SampleApiServer.sendJson(exchange, 200,
-                graphQL.execute(input).toSpecification());
+        SampleApiServer.sendJson(exchange,
+                exchange.getRequestMethod() + " "
+                        + exchange.getRequestURI().getPath() + " "
+                        + describe(query, variables),
+                200, graphQL.execute(input).toSpecification());
+    }
+
+    /**
+     * Describes a query on one line for the log, with its variables if there
+     * are any. The introspection query, hundreds of lines long, is only named.
+     */
+    private static String describe(String query,
+            Map<String, Object> variables) {
+        if (query.contains("__schema")) {
+            return "<introspection query>";
+        }
+        var text = query.strip().replaceAll("\\s+", " ");
+        return variables.isEmpty() ? text
+                : text + " " + JacksonUtils.getMapper()
+                        .writeValueAsString(variables);
     }
 
     @SuppressWarnings("unchecked")

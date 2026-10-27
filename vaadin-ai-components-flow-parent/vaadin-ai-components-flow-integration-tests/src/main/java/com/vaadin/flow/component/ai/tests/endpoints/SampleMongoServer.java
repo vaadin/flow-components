@@ -30,12 +30,12 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
 import de.bwaldvogel.mongo.MongoServer;
-import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 
 /**
  * An in-memory MongoDB server holding {@link SampleData} as documents, with a
  * client connected to it. The server speaks the MongoDB wire protocol, so the
- * official driver talks to it as to a real deployment.
+ * official driver talks to it as to a real deployment. Once loaded, the server
+ * logs every command clients send at {@code INFO}.
  * <p>
  * The documents are shaped the way a document store would hold the data rather
  * than as copies of the SQL rows: field names are camelCase, the {@code _id} is
@@ -58,12 +58,14 @@ public final class SampleMongoServer {
     private final String connectionString;
 
     private SampleMongoServer() {
-        server = new MongoServer(new MemoryBackend());
+        var backend = new LoggingMongoBackend();
+        server = new MongoServer(backend);
         var address = server.bind();
         connectionString = "mongodb://" + address.getHostString() + ":"
                 + address.getPort();
         client = MongoClients.create(connectionString);
         load();
+        backend.startLogging();
     }
 
     /**
