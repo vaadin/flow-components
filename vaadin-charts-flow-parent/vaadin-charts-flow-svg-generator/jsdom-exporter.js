@@ -408,8 +408,9 @@ const jsdomExporter = ({ chartConfigurationFile, chartConfiguration, outFile = '
         }
 
         // Sanitize the DOM tree and remove the <div> element rendered before the <svg> element
-        let svg = chart.sanitizeSVG(
-            chart.container.innerHTML
+        let svg = Highcharts.Exporting.sanitizeSVG(
+            chart.container.innerHTML,
+            chart.options
         ).replace(/^.*<\/div>/g, '');
         
         fs.writeFile(path.join(__dirname, outFile), svg, function (err) {
