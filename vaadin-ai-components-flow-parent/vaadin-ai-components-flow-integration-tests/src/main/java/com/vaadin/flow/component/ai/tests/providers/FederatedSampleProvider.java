@@ -46,7 +46,8 @@ public final class FederatedSampleProvider {
     static final Set<String> CSV_TABLES = Set.of("org_chart", "sales_pipeline",
             "expense_categories");
 
-    private static final String CAMEL_CASE_NOTES = """
+    /** Notes for the endpoints whose names are camelCase. */
+    public static final String CAMEL_CASE_NOTES = """
             - sales: order by monthOrder for a chronological series
             - websiteTraffic: dayOfWeek 0=Monday ... 4=Friday and hourOfDay 0=9am ... 7=4pm are 0-based indices; set the axis categories to show labels
             """;
@@ -100,8 +101,7 @@ public final class FederatedSampleProvider {
     }
 
     /**
-     * Creates a provider over every collection of the sample MongoDB
-     * database.
+     * Creates a provider over every collection of the sample MongoDB database.
      *
      * @return the provider
      */

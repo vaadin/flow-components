@@ -22,7 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
+import com.vaadin.flow.component.ai.tests.endpoints.SampleApiServer;
 import com.vaadin.flow.component.ai.tests.providers.FederatedSampleProvider;
+import com.vaadin.flow.component.ai.tests.providers.RestCalciteDatabaseProvider;
 
 /**
  * The database providers the AI chat pages can run against, chosen in their
@@ -47,6 +49,12 @@ final class SampleDatabaseProviders {
                 InMemoryDatabaseProvider::new));
         ENTRIES.put("rest", new Entry("REST API through Calcite",
                 FederatedSampleProvider::rest));
+        ENTRIES.put("rest-direct",
+                new Entry(
+                        "REST API through Calcite, written without the helper",
+                        () -> new RestCalciteDatabaseProvider(
+                                SampleApiServer.get().restUri(),
+                                FederatedSampleProvider.CAMEL_CASE_NOTES)));
         ENTRIES.put("graphql", new Entry("GraphQL API through Calcite",
                 FederatedSampleProvider::graphql));
         ENTRIES.put("mongo", new Entry("MongoDB through Calcite",
