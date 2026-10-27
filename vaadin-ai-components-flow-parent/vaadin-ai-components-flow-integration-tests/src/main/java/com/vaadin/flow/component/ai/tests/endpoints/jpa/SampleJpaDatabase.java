@@ -20,6 +20,12 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.hibernate.cfg.JdbcSettings;
+import org.hibernate.cfg.StatisticsSettings;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.stat.internal.StatisticsImpl;
+import org.hibernate.stat.spi.StatisticsFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleH2Database;
@@ -34,11 +40,19 @@ import jakarta.persistence.PersistenceConfiguration;
  * the rows of {@link SampleData} are persisted as entities. This is the
  * endpoint a Spring Data JPA application has: entities with a schema of their
  * own, an {@link EntityManagerFactory}, and a database reachable both with JPQL
- * and, through the same connection, with native SQL. Once seeded, H2 logs every
- * statement on the database, the SQL Hibernate runs for JPQL included, see
+ * and, through the same connection, with native SQL.
+ * <p>
+ * Every query an entity manager runs is logged at {@code INFO} with the number
+ * of rows it returned, JPQL as it was written. A query that fails is not, but
+ * H2 logs every statement on the database once it is seeded, the SQL Hibernate
+ * runs for a query included, see
  * {@link SampleH2Database#logStatements(String)}.
+ * </p>
  */
 public final class SampleJpaDatabase {
+
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(SampleJpaDatabase.class);
 
     /** URL of the in-memory database the persistence unit uses. */
     public static final String JDBC_URL = "jdbc:h2:mem:sampledb_jpa;DB_CLOSE_DELAY=-1";
@@ -73,7 +87,10 @@ public final class SampleJpaDatabase {
                                     SampleH2Database.ADMIN_PASSWORD))
                     .property(
                             PersistenceConfiguration.SCHEMAGEN_DATABASE_ACTION,
-                            "drop-and-create");
+                            "drop-and-create")
+                    .property(StatisticsSettings.GENERATE_STATISTICS, true)
+                    .property(StatisticsSettings.STATS_BUILDER,
+                            (StatisticsFactory) LoggingStatistics::new);
             ENTITY_CLASSES.forEach(configuration::managedClass);
             var factory = configuration.createEntityManagerFactory();
             try (var entityManager = factory.createEntityManager()) {
@@ -164,5 +181,22 @@ public final class SampleJpaDatabase {
             categories.put(category.categoryName(), entity);
         }
         transaction.commit();
+    }
+
+    /**
+     * Hibernate's statistics, which also log each query run with the number of
+     * rows it returned.
+     */
+    private static final class LoggingStatistics extends StatisticsImpl {
+
+        LoggingStatistics(SessionFactoryImplementor sessionFactory) {
+            super(sessionFactory);
+        }
+
+        @Override
+        public void queryExecuted(String query, int rows, long time) {
+            super.queryExecuted(query, rows, time);
+            LOGGER.info("{} -> {} rows", query, rows);
+        }
     }
 }
