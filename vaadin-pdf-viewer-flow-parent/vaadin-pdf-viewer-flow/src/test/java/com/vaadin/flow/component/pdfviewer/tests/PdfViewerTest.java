@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.pdfviewer.tests;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,8 +25,11 @@ import com.vaadin.flow.component.pdfviewer.DocumentErrorReason;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
+import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.tests.MockUIExtension;
@@ -94,6 +99,70 @@ class PdfViewerTest {
     }
 
     @Test
+    void defaultPage() {
+        Assertions.assertEquals(1, viewer.getPage());
+    }
+
+    @Test
+    void setPage_propertySet() {
+        viewer.setPage(3);
+        Assertions.assertEquals(3, viewer.getElement().getProperty("page", 0));
+        Assertions.assertEquals(3, viewer.getPage());
+    }
+
+    @Test
+    void setPage_lessThanOne_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> viewer.setPage(0));
+    }
+
+    @Test
+    void setPage_pageChangeEventFired() {
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        viewer.setPage(3);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertEquals(3, events.get(0).getPage());
+    }
+
+    @Test
+    void setSamePage_pageChangeEventNotFired() {
+        viewer.setPage(3);
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        viewer.setPage(3);
+
+        Assertions.assertTrue(events.isEmpty());
+    }
+
+    @Test
+    void pageChangedOnClient_pageChangeEventFired() {
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        fakeClientPropertyChange("page", 4);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertTrue(events.get(0).isFromClient());
+        Assertions.assertEquals(4, events.get(0).getPage());
+    }
+
+    @Test
+    void defaultPageCount() {
+        Assertions.assertEquals(0, viewer.getPageCount());
+    }
+
+    @Test
+    void pageCountChangedOnClient_pageCountUpdated() {
+        fakeClientPropertyChange("pageCount", 6);
+        Assertions.assertEquals(6, viewer.getPageCount());
+    }
+
+    @Test
     void documentLoadListener_eventFired() {
         var eventRef = new AtomicReference<DocumentLoadEvent>();
         viewer.addDocumentLoadListener(eventRef::set);
@@ -144,6 +213,15 @@ class PdfViewerTest {
     @Test
     void implementsHasSize() {
         Assertions.assertTrue(HasSize.class.isAssignableFrom(PdfViewer.class));
+    }
+
+    private void fakeClientPropertyChange(String property, Serializable value) {
+        try {
+            viewer.getElement().getNode().getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient(property, value).run();
+        } catch (PropertyChangeDeniedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private DownloadHandler createDownloadHandler() {
