@@ -46,24 +46,6 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
-     * Gets the previous page button in the toolbar.
-     *
-     * @return the previous page button, or {@code null} if there is none
-     */
-    public TestBenchElement getPreviousPageButton() {
-        return getToolbarButton("previous-page");
-    }
-
-    /**
-     * Gets the next page button in the toolbar.
-     *
-     * @return the next page button, or {@code null} if there is none
-     */
-    public TestBenchElement getNextPageButton() {
-        return getToolbarButton("next-page");
-    }
-
-    /**
      * Checks whether a document is being loaded.
      *
      * @return {@code true} if a document is being loaded, {@code false}
@@ -83,8 +65,4 @@ public class PdfViewerElement extends TestBenchElement {
         return hasAttribute("has-error");
     }
 
-    private TestBenchElement getToolbarButton(String icon) {
-        return $("vaadin-pdf-viewer-button").withAttribute("icon", icon).all()
-                .stream().findFirst().orElse(null);
-    }
 }
