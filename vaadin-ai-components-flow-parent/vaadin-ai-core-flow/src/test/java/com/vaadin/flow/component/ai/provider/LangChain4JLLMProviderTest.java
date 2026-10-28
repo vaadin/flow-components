@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
@@ -59,6 +60,10 @@ import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.guardrail.InputGuardrail;
+import dev.langchain4j.guardrail.InputGuardrailException;
+import dev.langchain4j.guardrail.InputGuardrailResult;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -2266,6 +2271,118 @@ class LangChain4JLLMProviderTest {
     private boolean hasMissingFinishReasonWarning() {
         return logger.getLoggingEvents().stream().anyMatch(
                 event -> event.getMessage().contains("no finish reason"));
+    }
+
+    // --- Builder and customizer tests ---
+
+    @Test
+    void builder_systemPrompt_sentWhenRequestHasNone() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .systemPrompt("Be brief").build();
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var first = captor.getValue().messages().getFirst();
+        Assertions.assertInstanceOf(SystemMessage.class, first);
+        Assertions.assertEquals("Be brief", ((SystemMessage) first).text());
+    }
+
+    @Test
+    void builder_systemPrompt_requestPromptTakesPrecedence() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .systemPrompt("Be brief").build();
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var request = new TestLLMRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var first = captor.getValue().messages().getFirst();
+        Assertions.assertEquals("From the request",
+                ((SystemMessage) first).text());
+    }
+
+    @Test
+    void builder_customizer_contentRetrieverAugmentsUserMessage() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .customize(service -> service.contentRetriever(
+                        query -> List.of(dev.langchain4j.rag.content.Content
+                                .from("The codename is Bluefin"))))
+                .build();
+        var response = mockSimpleResponse("Bluefin");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("What is the codename?"))
+                .blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userText = getUserMessageContents(captor.getValue(),
+                TextContent.class).stream().map(TextContent::text)
+                .collect(Collectors.joining());
+        Assertions.assertTrue(userText.contains("What is the codename?"));
+        Assertions.assertTrue(userText.contains("The codename is Bluefin"),
+                "The retrieved content should reach the model: " + userText);
+    }
+
+    @Test
+    void builder_customizer_inputGuardrailFailsTurnBeforeModelCall() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .customize(service -> service
+                        .inputGuardrails(new InputGuardrail() {
+                            @Override
+                            public InputGuardrailResult validate(
+                                    UserMessage userMessage) {
+                                return userMessage.singleText().contains(
+                                        "password") ? failure("Blocked")
+                                                : success();
+                            }
+                        }))
+                .build();
+
+        Assertions.assertThrows(InputGuardrailException.class,
+                () -> customized.stream(createSimpleRequest("The password?"))
+                        .collectList().block(TURN_TIMEOUT));
+        Mockito.verify(mockChatModel, Mockito.never())
+                .chat(Mockito.any(ChatRequest.class));
+    }
+
+    @Test
+    void builder_customizerChatMemory_isUsedInsteadOfTheProviderOwn() {
+        var memory = MessageWindowChatMemory.withMaxMessages(10);
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .customize(service -> service.chatMemory(memory)).build();
+        var response = mockSimpleResponse("Hi there");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var texts = memory.messages().stream()
+                .map(message -> message instanceof UserMessage user
+                        ? user.singleText()
+                        : ((AiMessage) message).text())
+                .toList();
+        Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
+    }
+
+    @Test
+    void builder_customizers_runInOrder() {
+        var order = new ArrayList<String>();
+        LangChain4JLLMProvider.builder(mockChatModel)
+                .customize(service -> order.add("first"))
+                .customize(service -> order.add("second")).build();
+        Assertions.assertEquals(List.of("first", "second"), order);
     }
 
     // --- Tool call limit tests ---

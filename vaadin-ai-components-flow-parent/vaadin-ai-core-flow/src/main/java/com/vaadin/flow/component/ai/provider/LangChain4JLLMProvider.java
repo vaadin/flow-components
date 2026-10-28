@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,8 +208,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *             if chatModel is {@code null}
      */
     public LangChain4JLLMProvider(StreamingChatModel chatModel) {
-        this(null, Objects.requireNonNull(chatModel,
-                "StreamingChatModel must not be null"), null);
+        this(builder(chatModel));
     }
 
     /**
@@ -220,29 +220,63 @@ public class LangChain4JLLMProvider implements LLMProvider {
      *             if chatModel is {@code null}
      */
     public LangChain4JLLMProvider(ChatModel chatModel) {
-        this(Objects.requireNonNull(chatModel, "ChatModel must not be null"),
-                null, null);
+        this(builder(chatModel));
     }
 
-    LangChain4JLLMProvider(ChatModel chatModel,
-            StreamingChatModel streamingChatModel, String systemPrompt) {
-        this.streaming = streamingChatModel != null;
-        this.service = createService(chatModel, streamingChatModel,
-                systemPrompt);
+    private LangChain4JLLMProvider(Builder settings) {
+        this.streaming = settings.streamingChatModel != null;
+        this.service = createService(settings);
     }
 
-    private ChatService createService(ChatModel chatModel,
-            StreamingChatModel streamingChatModel, String systemPrompt) {
+    /**
+     * Creates a builder for a provider on a streaming chat model. The builder
+     * takes the system prompt and lets the application customize the AI service
+     * the provider is built on, see {@link Builder#customize}.
+     *
+     * @param chatModel
+     *            the streaming chat model, not {@code null}
+     * @return the builder
+     * @throws NullPointerException
+     *             if chatModel is {@code null}
+     * @since 25.4
+     */
+    public static Builder builder(StreamingChatModel chatModel) {
+        return new Builder(null, Objects.requireNonNull(chatModel,
+                "StreamingChatModel must not be null"));
+    }
+
+    /**
+     * Creates a builder for a provider on a non-streaming chat model. The
+     * builder takes the system prompt and lets the application customize the AI
+     * service the provider is built on, see {@link Builder#customize}.
+     *
+     * @param chatModel
+     *            the non-streaming chat model, not {@code null}
+     * @return the builder
+     * @throws NullPointerException
+     *             if chatModel is {@code null}
+     * @since 25.4
+     */
+    public static Builder builder(ChatModel chatModel) {
+        return new Builder(
+                Objects.requireNonNull(chatModel, "ChatModel must not be null"),
+                null);
+    }
+
+    private ChatService createService(Builder settings) {
         var context = AiServiceContext.create(ChatService.class);
         var builder = AiServices.<ChatService> builder(context);
-        if (chatModel != null) {
-            builder.chatModel(chatModel);
+        if (settings.chatModel != null) {
+            builder.chatModel(settings.chatModel);
         }
-        if (streamingChatModel != null) {
-            builder.streamingChatModel(streamingChatModel);
+        if (settings.streamingChatModel != null) {
+            builder.streamingChatModel(settings.streamingChatModel);
         }
         prepare(builder);
-        wire(context, builder, systemPrompt);
+        if (settings.customizer != null) {
+            settings.customizer.accept(builder);
+        }
+        wire(context, builder, settings.systemPrompt);
         return builder.build();
     }
 
@@ -1033,6 +1067,92 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     + "error, or LangChain4j dropped a value its integration does "
                     + "not recognize; if the response appears truncated this "
                     + "warning is the signal.");
+        }
+    }
+
+    /**
+     * Builds a {@link LangChain4JLLMProvider} on a chat model, with the system
+     * prompt and the LangChain4j features the application wants on the AI
+     * service behind the provider.
+     *
+     * <pre>
+     * var provider = LangChain4JLLMProvider.builder(streamingChatModel)
+     *         .systemPrompt("You are a support assistant.")
+     *         .customize(service -&gt; service.contentRetriever(retriever)
+     *                 .toolProvider(mcpToolProvider)
+     *                 .inputGuardrails(new PromptInjectionGuardrail()))
+     *         .build();
+     * </pre>
+     *
+     * @since 25.4
+     */
+    public static final class Builder {
+        private final ChatModel chatModel;
+        private final StreamingChatModel streamingChatModel;
+        private String systemPrompt;
+        private Consumer<AiServices<ChatService>> customizer;
+
+        private Builder(ChatModel chatModel,
+                StreamingChatModel streamingChatModel) {
+            this.chatModel = chatModel;
+            this.streamingChatModel = streamingChatModel;
+        }
+
+        /**
+         * Sets the system prompt the model sees on every turn. A system prompt
+         * carried by the request of a turn takes precedence, and when neither
+         * is given the service's own configuration applies, for example a
+         * {@code systemMessage(...)} set in {@link #customize}.
+         *
+         * @param systemPrompt
+         *            the system prompt, or {@code null} for none
+         * @return this builder
+         */
+        public Builder systemPrompt(String systemPrompt) {
+            this.systemPrompt = systemPrompt;
+            return this;
+        }
+
+        /**
+         * Customizes the AI service the provider is built on. The customizer
+         * receives LangChain4j's {@link AiServices} builder with the model
+         * already set, and may configure anything the builder offers: retrieval
+         * augmentation, tool providers such as MCP, tool objects, guardrails,
+         * moderation, listeners, model request transformation, and so on.
+         * Customizers run in the order they were added.
+         * <p>
+         * The provider completes the service after the customizers ran, and
+         * keeps what they configured: it adds its own chat memory only when
+         * none was configured, adds the tool provider that supplies the tools
+         * of each turn next to any tool providers of the customizer, composes
+         * its system prompt lookup, its cancellation check and its tool error
+         * handling with the ones configured, and registers a listener for the
+         * response metadata. Before the customizers run it lifts LangChain4j's
+         * round trip limit, as the provider bounds the tool-calling loop with
+         * its own tool call limits, and makes a tool the model made up an error
+         * result for the model rather than a failure of the turn; a customizer
+         * may override both.
+         *
+         * @param customizer
+         *            the customizer, not {@code null}
+         * @return this builder
+         * @throws NullPointerException
+         *             if customizer is {@code null}
+         */
+        public Builder customize(Consumer<AiServices<ChatService>> customizer) {
+            Objects.requireNonNull(customizer, "Customizer must not be null");
+            this.customizer = this.customizer == null ? customizer
+                    : this.customizer.andThen(customizer);
+            return this;
+        }
+
+        /**
+         * Builds the provider.
+         *
+         * @return the provider
+         */
+        public LangChain4JLLMProvider build() {
+            return new LangChain4JLLMProvider(this);
         }
     }
 }
