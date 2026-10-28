@@ -844,6 +844,10 @@ Branches A and B share the rebuild of `LangChain4JLLMProvider` on
   client defaults. MCP tools on the client and controller tools per request
   therefore coexist.
 - The deprecated `toolCallbacks(...)` call is replaced with `tools(List)`.
+- `DefaultChatClientUtils` attaches the tools of a request to the model's
+  options only when `ChatModel.getOptions()` returns a
+  `ToolCallingChatOptions`; a `ChatModel` that keeps the plain default never
+  sees a tool, and the tool call its response carries is not executed.
 - Controller tools: on A and B the controller `ToolSpec`s reach the model
   through `TurnToolProvider` on LangChain4j and through per-request
   `tools(...)` callbacks on Spring AI, where `ToolCallingAdvisor` invokes
@@ -878,9 +882,14 @@ harder than today, a `ToolSpec` one-liner) is still to run before any removal.
 
 ### 8.7 Remaining work on `prototype/pipeline-customizer`
 
-1. S7: an integration test view per vendor with a fake retriever and a fake
-   tool provider, so the browser checks become `AbstractComponentIT` tests;
-   the AI benchmark base versus branch with the Spring AI provider.
+1. S7, second half: the AI benchmark base versus branch with the Spring AI
+   provider. The first half is done: `LangChain4JPipelinePage` and
+   `SpringAIPipelinePage` (routes `vaadin-ai/pipeline/langchain4j` and
+   `vaadin-ai/pipeline/spring-ai`) run a scripted model behind a provider
+   built with a retriever or advisor, a tool provider standing in for MCP, a
+   guardrail and a controller tool; `LangChain4JPipelineIT` and
+   `SpringAIPipelineIT` check the retrieved fact, both tools and the
+   guardrail in the browser, 4 tests each.
 2. Docs pages listed under S5, once the API is final.
 3. Split the branch into reviewable pull requests: the `AiServices` rebuild
    with `TurnScopedChatMemory`, the two builders, the orchestrator
