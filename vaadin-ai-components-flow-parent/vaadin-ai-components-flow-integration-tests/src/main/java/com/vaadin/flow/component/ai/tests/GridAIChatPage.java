@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import java.util.List;
+
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
@@ -40,8 +42,10 @@ import com.vaadin.flow.theme.aura.Aura;
  * OpenAI, rendered with the Aura theme. The grid on the left shows whatever the
  * chat on the right asks for, built from the sample data of
  * {@link InMemoryDatabaseProvider}, and the query the LLM wrote last is shown
- * under the grid. The API key is read from the {@code OPENAI_API_KEY}
- * environment variable. Not covered by automated tests.
+ * under the grid. The buttons above the message input send example prompts that
+ * need joins, aggregates or comparisons across rows. The API key is read from
+ * the {@code OPENAI_API_KEY} environment variable. Not covered by automated
+ * tests.
  * <p>
  * Open at {@code http://localhost:8080/vaadin-ai/grid-ai-chat}.
  * </p>
@@ -56,6 +60,24 @@ public class GridAIChatPage extends HorizontalLayout {
             You are a data assistant. Answer the user's questions about the \
             data by showing the matching rows in the grid next to the chat, \
             and keep your text answers short.""";
+
+    private static final List<ExamplePrompts.Prompt> PROMPTS = List.of(
+            new ExamplePrompts.Prompt("Salaries vs. average",
+                    "List the employees with their salary, their department's average salary and how far above or below it they are."),
+            new ExamplePrompts.Prompt("Month-over-month revenue",
+                    "Show the monthly revenue of each region in chronological order, with the change from the previous month in percent."),
+            new ExamplePrompts.Prompt("Product revenue share",
+                    "Rank the products by revenue, units sold times price, and show each product's share of the total revenue."),
+            new ExamplePrompts.Prompt("Reporting lines",
+                    "Show every member of the organization with their manager's name and the number of people reporting directly to them."),
+            new ExamplePrompts.Prompt("Task dependencies",
+                    "List the project tasks in start order with the task each one depends on, the duration in days and the progress in percent."),
+            new ExamplePrompts.Prompt("Pipeline conversion",
+                    "Show the sales pipeline stages in order with the conversion rate from the previous stage and from the first stage."),
+            new ExamplePrompts.Prompt("Busiest hours",
+                    "Which hours of the day get the most website visitors on average across the weekdays? Show every hour as a clock time, busiest first."),
+            new ExamplePrompts.Prompt("Rising trading days",
+                    "Show the trading days on which ACME closed higher than it opened, with the gain in percent and the day's price range."));
 
     public GridAIChatPage() {
         setSizeFull();
@@ -95,7 +117,7 @@ public class GridAIChatPage extends HorizontalLayout {
         var options = OpenAiChatOptions.builder().apiKey(apiKey)
                 .model(MODEL_NAME).build();
         var chatModel = OpenAiChatModel.builder().options(options).build();
-        AIOrchestrator
+        var orchestrator = AIOrchestrator
                 .builder(new SpringAILLMProvider(chatModel), SYSTEM_PROMPT)
                 .withMessageList(messageList).withInput(messageInput)
                 .withController(controller).build();
@@ -104,7 +126,8 @@ public class GridAIChatPage extends HorizontalLayout {
         gridPane.setSizeFull();
         gridPane.expand(grid);
 
-        var chatPane = new VerticalLayout(messageList, messageInput);
+        var chatPane = new VerticalLayout(messageList,
+                new ExamplePrompts(orchestrator, PROMPTS), messageInput);
         chatPane.setSizeFull();
         chatPane.expand(messageList);
 

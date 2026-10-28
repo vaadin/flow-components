@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import java.util.List;
+
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
@@ -46,6 +48,10 @@ import com.vaadin.flow.theme.aura.Aura;
  * {@link InMemoryDatabaseProvider}. The API key is read from the
  * {@code OPENAI_API_KEY} environment variable. Not covered by automated tests.
  * <p>
+ * The buttons above the message input send example prompts, one for each kind
+ * of chart the sample tables are shaped for.
+ * </p>
+ * <p>
  * The buttons under the chart exercise {@link ChartAIController#getState()} and
  * {@link ChartAIController#restoreState(ChartState)}: save the current state
  * and restore it into the running chat. The saved queries and the configuration
@@ -65,6 +71,26 @@ public class ChartAIChatPage extends HorizontalLayout {
             You are a data visualization assistant. Answer the user's \
             questions about the data in the database by drawing them in \
             the chart next to the chat, and keep your text answers short.""";
+
+    private static final List<ExamplePrompts.Prompt> PROMPTS = List.of(
+            new ExamplePrompts.Prompt("Revenue by month",
+                    "Compare the monthly revenue of the North and South regions as a line chart, in chronological order."),
+            new ExamplePrompts.Prompt("Stock candlesticks",
+                    "Show ACME's daily prices as a candlestick chart, with the trading volume as columns in a separate pane below it."),
+            new ExamplePrompts.Prompt("Energy flow",
+                    "Draw how energy flows from its sources through electricity to the consumers as a Sankey diagram."),
+            new ExamplePrompts.Prompt("Traffic heatmap",
+                    "Show the website visitors as a heatmap of weekdays against hours of the day, with day names and clock times as labels."),
+            new ExamplePrompts.Prompt("Budget waterfall",
+                    "Show the budget as a waterfall chart from revenue down to net profit, with gross profit and net profit as subtotals."),
+            new ExamplePrompts.Prompt("Sales funnel",
+                    "Visualize the sales pipeline as a funnel from leads to closed deals, and show how many prospects each stage keeps."),
+            new ExamplePrompts.Prompt("Expense treemap",
+                    "Break down the expenses by top-level category and subcategory as a treemap."),
+            new ExamplePrompts.Prompt("Project timeline",
+                    "Plot the project tasks as a Gantt chart grouped by phase, with their dependencies and progress."),
+            new ExamplePrompts.Prompt("Organization",
+                    "Draw the organization chart with names and job titles, colored by team."));
 
     // One shared instance, so concurrent page loads can't fill the database
     // twice
@@ -147,13 +173,14 @@ public class ChartAIChatPage extends HorizontalLayout {
         var messageInput = new MessageInput();
         messageInput.setWidthFull();
 
-        AIOrchestrator
+        var orchestrator = AIOrchestrator
                 .builder(new SpringAILLMProvider(chatModel), SYSTEM_PROMPT)
                 .withMessageList(messageList).withInput(messageInput)
                 .withController(controller).build();
 
         chatPane.removeAll();
-        chatPane.add(messageList, messageInput);
+        chatPane.add(messageList, new ExamplePrompts(orchestrator, PROMPTS),
+                messageInput);
         chatPane.expand(messageList);
     }
 
