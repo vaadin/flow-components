@@ -46,6 +46,8 @@ import org.apache.calcite.rel.core.TableScan;
 import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rel.logical.LogicalSort;
 import org.apache.calcite.rel.logical.LogicalTableScan;
+import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.rel.type.RelDataTypeSystemImpl;
 import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.runtime.CalciteContextException;
 import org.apache.calcite.schema.SchemaPlus;
@@ -372,6 +374,7 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     private RelNode plan(String sql, boolean optimize) {
         var config = Frameworks.newConfigBuilder().parserConfig(parserConfig())
                 .defaultSchema(schema).programs(Programs.standard())
+                .typeSystem(TYPE_SYSTEM)
                 .sqlToRelConverterConfig(
                         SqlToRelConverter.config().withTrimUnusedFields(true)
                                 .withRemoveSortInSubQuery(false))
@@ -402,6 +405,20 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     private static SqlParser.Config parserConfig() {
         return SqlParser.config().withLex(Lex.MYSQL_ANSI);
     }
+
+    /**
+     * Calcite's default types, except that a UNION or CASE of string literals
+     * of different lengths has a VARCHAR type. By default Calcite pads them to
+     * a common CHAR length, so {@code 'Rent'} next to {@code 'Marketing'}
+     * becomes {@code 'Rent     '}, no longer equals the same value read from a
+     * table, and a join on it silently drops the row.
+     */
+    private static final RelDataTypeSystem TYPE_SYSTEM = new RelDataTypeSystemImpl() {
+        @Override
+        public boolean shouldConvertRaggedUnionTypesToVarying() {
+            return true;
+        }
+    };
 
     /**
      * Opens the connection and registers every table on the first call. The

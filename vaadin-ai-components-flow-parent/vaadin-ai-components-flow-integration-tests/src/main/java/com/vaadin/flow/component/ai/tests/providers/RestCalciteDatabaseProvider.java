@@ -50,6 +50,8 @@ import org.apache.calcite.linq4j.Linq4j;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
+import org.apache.calcite.rel.type.RelDataTypeSystem;
+import org.apache.calcite.rel.type.RelDataTypeSystemImpl;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
@@ -185,7 +187,7 @@ public class RestCalciteDatabaseProvider implements DatabaseProvider {
         // conversion must keep an ORDER BY inside a subquery, which Calcite
         // drops by default and which the grid's sort wrapper relies on
         var config = Frameworks.newConfigBuilder().parserConfig(parserConfig())
-                .defaultSchema(schema)
+                .defaultSchema(schema).typeSystem(TYPE_SYSTEM)
                 .sqlToRelConverterConfig(
                         SqlToRelConverter.config().withTrimUnusedFields(true)
                                 .withRemoveSortInSubQuery(false))
@@ -218,6 +220,16 @@ public class RestCalciteDatabaseProvider implements DatabaseProvider {
     private static SqlParser.Config parserConfig() {
         return SqlParser.config().withLex(Lex.MYSQL_ANSI);
     }
+
+    // A UNION or CASE of string literals of different lengths gets a VARCHAR
+    // type; by default Calcite pads them to one CHAR length, and a join on a
+    // padded value silently drops rows
+    private static final RelDataTypeSystem TYPE_SYSTEM = new RelDataTypeSystemImpl() {
+        @Override
+        public boolean shouldConvertRaggedUnionTypesToVarying() {
+            return true;
+        }
+    };
 
     private void connect() {
         if (connection != null) {

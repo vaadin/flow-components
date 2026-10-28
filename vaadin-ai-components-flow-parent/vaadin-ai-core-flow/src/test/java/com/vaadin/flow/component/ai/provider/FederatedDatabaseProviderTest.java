@@ -236,6 +236,25 @@ class FederatedDatabaseProviderTest {
     }
 
     @Test
+    void stringLiteralsOfAUnion_joinWithTableValues() {
+        var rows = provider.executeQuery(
+                "SELECT p.name, t.town FROM people p JOIN (SELECT 'Oulu' AS town UNION ALL SELECT 'Turku' AS town) t ON t.town = p.city ORDER BY p.id");
+
+        Assertions.assertEquals(List.of("Ann", "Bob", "Cid"),
+                rows.stream().map(row -> row.get("name")).toList());
+        Assertions.assertEquals("Oulu", rows.get(1).get("town"));
+    }
+
+    @Test
+    void stringLiteralsOfACase_joinWithTableValues() {
+        var rows = provider.executeQuery(
+                "SELECT p.name FROM people p JOIN (SELECT DISTINCT CASE WHEN amount > 50 THEN 'Oulu' ELSE 'Turku' END AS town FROM orders) t ON t.town = p.city ORDER BY p.id");
+
+        Assertions.assertEquals(List.of("Ann", "Bob", "Cid"),
+                rows.stream().map(row -> row.get("name")).toList());
+    }
+
+    @Test
     void select_returnsRowsWithLabelsAsWritten() {
         var rows = provider.executeQuery(
                 "SELECT name AS \"Full name\", city FROM people ORDER BY id");

@@ -98,6 +98,17 @@ class RestCalciteDatabaseProviderTest {
     }
 
     @Test
+    void stringLiteralsOfAUnion_joinWithTableValues() {
+        var rows = PROVIDER.executeQuery(
+                "SELECT COUNT(*) AS n FROM sales s JOIN (SELECT 'North' AS r UNION ALL SELECT 'Central' AS r) t ON t.r = s.region");
+
+        Assertions.assertEquals(
+                SampleData.SALES.stream()
+                        .filter(sale -> sale.region().equals("North")).count(),
+                ((Number) rows.get(0).get("n")).longValue());
+    }
+
+    @Test
     void gridWrappers_pageSortAndCount() {
         var query = "SELECT name AS \"Name\", salary AS \"Salary\" FROM employees";
 
