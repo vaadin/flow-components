@@ -24,6 +24,7 @@ import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
 import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.tool.annotation.ToolParam;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
@@ -40,6 +41,7 @@ import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 
+import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.guardrail.InputGuardrail;
 import dev.langchain4j.guardrail.InputGuardrailResult;
@@ -49,8 +51,9 @@ import dev.langchain4j.rag.content.Content;
 /**
  * Page for trying out the AI chat against OpenAI through either built-in
  * provider, with the LLM pipeline customized through the provider builders: the
- * system prompt, a retriever that injects a fixed fact into every turn, and an
- * input guardrail that refuses a message mentioning a blocked word. The route
+ * system prompt, a retriever that injects a fixed fact into every turn, an
+ * input guardrail that refuses a message mentioning a blocked word, and a tool
+ * method of this page that carries both vendors' tool annotations. The route
  * parameter selects the provider: {@code vaadin-ai/chat/spring-ai} (the
  * default) or {@code vaadin-ai/chat/langchain4j}. The API key is read from the
  * {@code OPENAI_API_KEY} environment variable and the model name from
@@ -70,6 +73,8 @@ public class ChatPage extends VerticalLayout
             + "support assistant project is Bluefin.";
     private static final String BLOCKED_WORD = "password";
     private static final String GUARDRAIL_REPLY = "I cannot help with that.";
+    private static final String ORDER_TOOL_DESCRIPTION = "Returns the "
+            + "delivery status of a customer order";
 
     public ChatPage() {
         setHeightFull();
@@ -122,39 +127,57 @@ public class ChatPage extends VerticalLayout
 
         var providerInfo = new Span("Provider: " + name + ", model: "
                 + modelName + ". Pipeline: fixed-fact retriever (ask for the "
-                + "project codename) and an input guardrail (mention '"
-                + BLOCKED_WORD + "').");
+                + "project codename), an input guardrail (mention '"
+                + BLOCKED_WORD + "') and an order status tool (ask about "
+                + "order 1234).");
         providerInfo.setId("provider-info");
 
         add(providerInfo, messageList, messageInput);
     }
 
-    private static LLMProvider createSpringAIProvider(String apiKey,
+    private LLMProvider createSpringAIProvider(String apiKey,
             String modelName) {
         var options = OpenAiChatOptions.builder().apiKey(apiKey)
                 .model(modelName).build();
         var chatModel = OpenAiChatModel.builder().options(options).build();
-        return SpringAILLMProvider.builder(chatModel).customize(
-                client -> client.defaultSystem(SYSTEM_PROMPT).defaultAdvisors(
-                        new FixedFactAdvisor(FACT),
+        return SpringAILLMProvider.builder(chatModel).customize(client -> client
+                .defaultSystem(SYSTEM_PROMPT)
+                .defaultAdvisors(new FixedFactAdvisor(FACT),
                         SafeGuardAdvisor.builder()
                                 .sensitiveWords(List.of(BLOCKED_WORD))
-                                .failureResponse(GUARDRAIL_REPLY).build()))
-                .build();
+                                .failureResponse(GUARDRAIL_REPLY).build())
+                .defaultTools(this)).build();
     }
 
-    private static LLMProvider createLangChain4JProvider(String apiKey,
+    private LLMProvider createLangChain4JProvider(String apiKey,
             String modelName) {
         var chatModel = OpenAiStreamingChatModel.builder().apiKey(apiKey)
                 .modelName(modelName).build();
         return LangChain4JLLMProvider.builder(chatModel)
                 .customize(service -> service.systemMessage(SYSTEM_PROMPT)
                         .contentRetriever(query -> List.of(Content.from(FACT)))
-                        .inputGuardrails(
-                                new BlockedWordGuardrail(BLOCKED_WORD)))
+                        .inputGuardrails(new BlockedWordGuardrail(BLOCKED_WORD))
+                        .tools(this))
                 .build();
     }
 
+    /**
+     * A tool the model may call, registered on both pipelines through the
+     * vendor API of each: the method carries the LangChain4j and the Spring AI
+     * tool annotations, which replace the orchestrator's deprecated
+     * {@code withTools(...)}.
+     *
+     * @param orderNumber
+     *            the order number the user asked about
+     * @return the delivery status of the order
+     */
+    @dev.langchain4j.agent.tool.Tool(ORDER_TOOL_DESCRIPTION)
+    @org.springframework.ai.tool.annotation.Tool(description = ORDER_TOOL_DESCRIPTION)
+    public String getOrderStatus(
+            @P("The order number") @ToolParam(description = "The order number") String orderNumber) {
+        return "Order " + orderNumber
+                + " was shipped yesterday and arrives tomorrow.";
+    }
     /**
      * A Spring AI advisor that adds a fixed fact to every user message,
      * standing in for a retrieval advisor backed by a vector store.
