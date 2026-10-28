@@ -992,7 +992,7 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void setHistory_withChatClientConstructor_isNoOp() {
+    void setHistory_withChatClientConstructor_restoresIntoProviderMemory() {
         var chatClient = ChatClient.builder(mockChatModel).build();
         var chatClientProvider = new SpringAILLMProvider(chatClient);
         chatClientProvider.setStreaming(false);
@@ -1013,8 +1013,10 @@ class SpringAILLMProviderTest {
         var captor = ArgumentCaptor.forClass(Prompt.class);
         Mockito.verify(mockChatModel).call(captor.capture());
         var messages = captor.getValue().getInstructions();
-        Assertions.assertFalse(messages.stream()
-                .anyMatch(msg -> Objects.equals(msg.getText(), "Old message")));
+        Assertions.assertTrue(
+                messages.stream().anyMatch(
+                        msg -> Objects.equals(msg.getText(), "Old message")),
+                "A client without memory advisor gets the provider's memory");
     }
 
     @Test
@@ -1048,7 +1050,7 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void setHistory_chatClientWithoutMemoryAdvisor_warns() {
+    void setHistory_chatClientWithoutMemoryAdvisor_doesNotWarn() {
         var chatClientProvider = new SpringAILLMProvider(
                 ChatClient.builder(mockChatModel).build());
 
@@ -1056,9 +1058,8 @@ class SpringAILLMProviderTest {
                 .of(new ChatMessage(ChatMessage.Role.USER, "Hi", null, null)),
                 Collections.emptyMap());
 
-        Assertions.assertEquals(1, warningCount("no chat memory advisor"));
-        Assertions.assertEquals(1, warningCount(""),
-                "Expected the missing-advisor warning to be the only one");
+        Assertions.assertEquals(0, warningCount(""),
+                "The provider added its own memory, so nothing is missing");
     }
 
     @Test
@@ -1127,10 +1128,11 @@ class SpringAILLMProviderTest {
         Assertions.assertEquals(0, warningCount(""));
         Assertions.assertEquals(1,
                 debugCount("provider was created with a ChatClient"));
-        Assertions.assertEquals(1,
+        Assertions.assertEquals(2,
                 debugCount("did not accept a bare prompt()"));
-        Assertions.assertEquals(1, debugCount(""),
-                "Expected the rejected inspection to be reported once");
+        Assertions.assertEquals(2, debugCount(""),
+                "Expected the rejected inspection to be reported at "
+                        + "construction and at the restore, nothing else");
     }
 
     /**
@@ -1315,12 +1317,13 @@ class SpringAILLMProviderTest {
     @Test
     void stream_streamingCompletesEmptyWithNoChunks_logsWarning() {
         // Zero-chunk stream: nothing ever flips the terminal gate.
-        // Uses the ChatClient constructor so no MessageChatMemoryAdvisor
-        // sits on the chain. The advisor's stream aggregation requires
-        // at least one emitted chunk to propagate the conversation id,
-        // which would fail an empty-flux test before the warn-on-no-
-        // terminal logic could run.
-        var chatClient = ChatClient.builder(mockChatModel).build();
+        // Uses a client the provider cannot inspect, so it adds no
+        // MessageChatMemoryAdvisor to the chain. The advisor's stream
+        // aggregation requires at least one emitted chunk to propagate the
+        // conversation id, which would fail an empty-flux test before the
+        // warn-on-no-terminal logic could run.
+        var chatClient = uninspectableClient(
+                ChatClient.builder(mockChatModel).build());
         var chatClientProvider = new SpringAILLMProvider(chatClient);
         var request = createSimpleRequest("Hello");
         Mockito.when(mockChatModel.stream(Mockito.any(Prompt.class)))

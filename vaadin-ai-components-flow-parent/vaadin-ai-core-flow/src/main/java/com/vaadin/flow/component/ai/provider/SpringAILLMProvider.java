@@ -104,12 +104,13 @@ import tools.jackson.databind.JsonNode;
  * {@link #SpringAILLMProvider(ChatClient)} needs no builder code.
  * </p>
  * <p>
- * With the {@link #SpringAILLMProvider(ChatModel)} constructor the provider
- * maintains its own chat memory, and {@link #setHistory(List, Map)} restores a
- * saved conversation into it. To share conversation history across components,
- * reuse the same provider instance. With the
- * {@link #SpringAILLMProvider(ChatClient)} constructor the application owns the
- * chat memory, so giving the LLM its context is up to the application and
+ * The provider maintains its own chat memory, and
+ * {@link #setHistory(List, Map)} restores a saved conversation into it. To
+ * share conversation history across components, reuse the same provider
+ * instance. When the client the provider is built on already carries a memory
+ * advisor, through the builder's customizer or on the client given to
+ * {@link #SpringAILLMProvider(ChatClient)}, the application owns the chat
+ * memory: giving the LLM its context is up to the application and
  * {@link #setHistory(List, Map)} does nothing. Restoring a conversation through
  * {@code AIOrchestrator.Builder.withHistory(List, Map)} still matters on that
  * path: the message list the user sees and the orchestrator's own conversation
@@ -160,27 +161,56 @@ public class SpringAILLMProvider implements LLMProvider {
      *             if chatModel is {@code null}
      */
     public SpringAILLMProvider(ChatModel chatModel) {
-        this(builder(chatModel));
+        this(ChatClient.builder(
+                Objects.requireNonNull(chatModel, "ChatModel must not be null"))
+                .build());
     }
 
-    private SpringAILLMProvider(Builder settings) {
-        var clientBuilder = settings.clientBuilder;
-        if (settings.systemPrompt != null && !settings.systemPrompt.isBlank()) {
-            clientBuilder.defaultSystem(settings.systemPrompt.trim());
-        }
-        if (settings.customizer != null) {
-            settings.customizer.accept(clientBuilder);
-        }
-        var client = clientBuilder.build();
-        if (hasMemoryAdvisor(client)) {
+    /**
+     * Constructor with a chat client the application assembled: its default
+     * system text, advisors for retrieval augmentation or guardrails, default
+     * tools including MCP tool callback providers, options and observability
+     * all apply to every turn. {@link #builder(ChatClient.Builder)} does the
+     * same for a client builder, for example the one Spring Boot
+     * auto-configures.
+     *
+     * <pre>
+     * var chatClient = ChatClient.builder(chatModel)
+     *         .defaultSystem("You are a support assistant.")
+     *         .defaultAdvisors(
+     *                 QuestionAnswerAdvisor.builder(vectorStore).build())
+     *         .defaultTools(mcpToolCallbackProvider).build();
+     * var provider = new SpringAILLMProvider(chatClient);
+     * </pre>
+     * <p>
+     * Unless the client carries a memory advisor of its own, the provider
+     * derives a client that adds its chat memory, so the conversation is kept
+     * and {@link #setHistory(List, Map)} restores one. A client that carries a
+     * {@link MessageChatMemoryAdvisor} is used as it is: the application owns
+     * that memory, {@link #setHistory(List, Map)} does nothing, and a
+     * conversation loaded from external storage must be written into the
+     * {@link ChatMemory} before the client is passed here, with a default
+     * {@link ChatMemory#CONVERSATION_ID} advisor parameter on the client.
+     * Passing the same conversation to
+     * {@code AIOrchestrator.Builder.withHistory(List, Map)} still restores the
+     * message list and the orchestrator's own history snapshot either way.
+     *
+     * @param chatClient
+     *            the chat client, not {@code null}
+     * @throws NullPointerException
+     *             if chatClient is {@code null}
+     */
+    public SpringAILLMProvider(ChatClient chatClient) {
+        Objects.requireNonNull(chatClient, "ChatClient must not be null");
+        if (hasMemoryAdvisor(chatClient)) {
             // The application configured the conversation memory itself
-            chatClient = client;
+            this.chatClient = chatClient;
             chatMemory = null;
             hasManagedMemory = false;
         } else {
             chatMemory = MessageWindowChatMemory.builder()
                     .maxMessages(MAX_MESSAGES).build();
-            chatClient = client.mutate().defaultAdvisors(
+            this.chatClient = chatClient.mutate().defaultAdvisors(
                     MessageChatMemoryAdvisor.builder(chatMemory).build())
                     .build();
             hasManagedMemory = true;
@@ -240,31 +270,6 @@ public class SpringAILLMProvider implements LLMProvider {
                     + "memory", e);
             return true;
         }
-    }
-
-    /**
-     * Constructor with a chat client. Conversation memory must be configured on
-     * the {@link ChatClient} itself, for example with a
-     * {@link MessageChatMemoryAdvisor} and a default
-     * {@link ChatMemory#CONVERSATION_ID} advisor parameter.
-     * <p>
-     * The application owns that memory, so {@link #setHistory(List, Map)} does
-     * nothing on a provider created this way. A conversation loaded from
-     * external storage must be written into the {@link ChatMemory} before the
-     * client is passed here. Passing the same conversation to
-     * {@code AIOrchestrator.Builder.withHistory(List, Map)} still restores the
-     * message list and the orchestrator's own history snapshot.
-     *
-     * @param chatClient
-     *            the chat client, not {@code null}
-     * @throws NullPointerException
-     *             if chatClient is {@code null}
-     */
-    public SpringAILLMProvider(ChatClient chatClient) {
-        Objects.requireNonNull(chatClient, "ChatClient must not be null");
-        this.chatClient = chatClient;
-        chatMemory = null;
-        hasManagedMemory = false;
     }
 
     @Override
@@ -368,16 +373,15 @@ public class SpringAILLMProvider implements LLMProvider {
      * {@inheritDoc}
      * <p>
      * Restores the conversation into the provider's own chat memory. Does
-     * nothing when the provider was created with the
-     * {@link #SpringAILLMProvider(ChatClient) ChatClient} constructor, because
-     * the application owns the chat memory in that case and is expected to have
-     * populated it before passing the client in. A warning is logged when that
-     * client is missing the chat memory configuration the conversation would
-     * need. Whether the memory actually holds the conversation is not visible
-     * to the provider, so a client configured correctly but never loaded is
-     * indistinguishable from one that was. Doing nothing here does not reduce
-     * what the caller restores: an orchestrator rebuilds the message list and
-     * its own conversation history itself.
+     * nothing when the application owns the chat memory, that is when the
+     * client the provider is built on carries a memory advisor of its own,
+     * which the application is expected to have populated before passing the
+     * client in. A warning is logged when that client is missing the
+     * conversation id the advisor would need. Whether the memory actually holds
+     * the conversation is not visible to the provider, so a client configured
+     * correctly but never loaded is indistinguishable from one that was. Doing
+     * nothing here does not reduce what the caller restores: an orchestrator
+     * rebuilds the message list and its own conversation history itself.
      */
     @Override
     public void setHistory(List<ChatMessage> history,
@@ -403,14 +407,13 @@ public class SpringAILLMProvider implements LLMProvider {
     /**
      * Reports a client that cannot hold the conversation the application asked
      * to restore. The provider cannot populate an application-owned chat
-     * memory, but it can tell that a client carrying no memory advisor, or one
-     * whose memory has no conversation to read, is very likely to never see the
-     * restored messages -- the first case forgets every turn, the second fails
-     * each prompt inside the standard advisor. Both are worth a warning at the
-     * point where the application asks for a restore that cannot happen.
-     * Neither is certain, since a client can carry the conversation in ways
-     * this check cannot see, so both messages say what was observed rather than
-     * promising the outcome.
+     * memory, but it can tell that a client whose memory advisor has no
+     * conversation to read is very likely to never see the restored messages,
+     * as every prompt fails inside the standard advisor. That is worth a
+     * warning at the point where the application asks for a restore that cannot
+     * happen. It is not certain, since a client can carry the conversation in
+     * ways this check cannot see, so the message says what was observed rather
+     * than promising the outcome.
      * <p>
      * Only clients built by {@link ChatClient#builder(ChatModel)} can be
      * inspected. Anything else is left alone, since a custom implementation may
@@ -420,18 +423,6 @@ public class SpringAILLMProvider implements LLMProvider {
         var requestSpec = inspectableRequestSpec();
         if (requestSpec == null) {
             // inspectableRequestSpec() logged why it could not be read
-            return;
-        }
-        if (requestSpec.getAdvisors().stream()
-                .noneMatch(MemoryAdvisor.class::isInstance)) {
-            LOGGER.warn("History restoration was requested, but no chat "
-                    + "memory advisor was found on the ChatClient given to "
-                    + "this provider. Unless that client keeps the "
-                    + "conversation some other way, the LLM will see neither "
-                    + "the restored conversation nor the turns that follow. "
-                    + "Add for example a MessageChatMemoryAdvisor to the "
-                    + "client, and load the restored conversation into its "
-                    + "ChatMemory before passing the client to the provider.");
             return;
         }
         if (requestSpec.getAdvisorParams()
@@ -910,7 +901,13 @@ public class SpringAILLMProvider implements LLMProvider {
          * @return the provider
          */
         public SpringAILLMProvider build() {
-            return new SpringAILLMProvider(this);
+            if (systemPrompt != null && !systemPrompt.isBlank()) {
+                clientBuilder.defaultSystem(systemPrompt.trim());
+            }
+            if (customizer != null) {
+                customizer.accept(clientBuilder);
+            }
+            return new SpringAILLMProvider(clientBuilder.build());
         }
     }
 
