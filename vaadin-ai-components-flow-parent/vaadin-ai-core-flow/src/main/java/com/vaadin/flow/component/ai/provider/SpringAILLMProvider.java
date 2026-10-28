@@ -611,9 +611,8 @@ public class SpringAILLMProvider implements LLMProvider {
         var explicitTools = request.explicitTools();
         if (explicitTools != null && !explicitTools.isEmpty()) {
             var callbacks = explicitTools.stream()
-                    .map(SpringAILLMProvider::toToolCallback)
-                    .toArray(ToolCallback[]::new);
-            promptSpec = promptSpec.toolCallbacks(callbacks);
+                    .map(SpringAILLMProvider::toToolCallback).toList();
+            promptSpec = promptSpec.tools(callbacks);
         }
         return promptSpec;
     }
