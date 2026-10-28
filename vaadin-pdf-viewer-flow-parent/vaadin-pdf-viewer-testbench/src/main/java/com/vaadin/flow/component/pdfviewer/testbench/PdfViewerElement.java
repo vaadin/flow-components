@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.pdfviewer.testbench;
 
+import java.util.Map;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -43,6 +45,25 @@ public class PdfViewerElement extends TestBenchElement {
      */
     public int getPage() {
         return getPropertyInteger("page");
+    }
+
+    /**
+     * Emulates the user entering a page in the page field of the toolbar, which
+     * makes the viewer go to that page. The emulation is done by setting the
+     * value of the input element and then triggering synthetic {@code input},
+     * {@code change} and {@code focusout} DOM events.
+     *
+     * @param page
+     *            the page to go to, starting from {@code 1}
+     */
+    public void setPage(int page) {
+        TestBenchElement input = $("vaadin-integer-field")
+                .withAttribute("slot", "toolbar-navigation").first().$("input")
+                .first();
+        input.setProperty("value", String.valueOf(page));
+        input.dispatchEvent("input", Map.of("bubbles", true));
+        input.dispatchEvent("change", Map.of("bubbles", true));
+        input.dispatchEvent("focusout", Map.of("bubbles", true));
     }
 
     /**
