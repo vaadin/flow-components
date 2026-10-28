@@ -550,6 +550,25 @@ class ChartAIControllerTest {
         }
 
         @Test
+        void plotOptionsUpdateForSameType_keepsEarlierOptionsInState() {
+            databaseProvider.results = List
+                    .of(Map.of("category", "A", "value", 10));
+
+            completeTurn("{\"chart\": {\"type\": \"column\"},"
+                    + " \"plotOptions\": {\"column\": {\"stacking\": \"normal\"}}}");
+            completeTurn("{\"plotOptions\": {\"column\":"
+                    + " {\"dataLabels\": {\"enabled\": true}}}}");
+
+            var column = JacksonUtils.readTree(chartState())
+                    .get("configuration").get("plotOptions").get("column");
+            Assertions.assertEquals("normal",
+                    column.path("stacking").asString(), column.toString());
+            Assertions.assertTrue(
+                    column.path("dataLabels").path("enabled").asBoolean(),
+                    column.toString());
+        }
+
+        @Test
         void seriesSettingsSentTwice_keepsTheLatest() {
             databaseProvider.results = List.of(
                     Map.of("_series", "North", "category", "Jan", "value", 10));
