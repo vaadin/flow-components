@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.tests;
 
 import java.util.List;
 
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
@@ -140,13 +141,13 @@ public class ChatPage extends VerticalLayout
         var options = OpenAiChatOptions.builder().apiKey(apiKey)
                 .model(modelName).build();
         var chatModel = OpenAiChatModel.builder().options(options).build();
-        return SpringAILLMProvider.builder(chatModel).customize(client -> client
+        return new SpringAILLMProvider(ChatClient.builder(chatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(new FixedFactAdvisor(FACT),
                         SafeGuardAdvisor.builder()
                                 .sensitiveWords(List.of(BLOCKED_WORD))
                                 .failureResponse(GUARDRAIL_REPLY).build())
-                .defaultTools(this)).build();
+                .defaultTools(this).build());
     }
 
     private LLMProvider createLangChain4JProvider(String apiKey,

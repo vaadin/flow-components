@@ -1640,12 +1640,12 @@ class SpringAILLMProviderTest {
                 "Expected no abnormal-termination warning");
     }
 
-    // --- Builder and customizer tests ---
+    // --- ChatClient constructor tests ---
 
     @Test
-    void builder_customizerDefaultSystem_isSent() {
-        var customized = SpringAILLMProvider.builder(mockChatModel)
-                .customize(client -> client.defaultSystem("Be brief")).build();
+    void chatClient_defaultSystemIsSent() {
+        var customized = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel).defaultSystem("Be brief").build());
         customized.setStreaming(false);
         mockSimpleChat("ok");
 
@@ -1659,9 +1659,9 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void builder_requestPrompt_replacesCustomizerDefaultSystem() {
-        var customized = SpringAILLMProvider.builder(mockChatModel)
-                .customize(client -> client.defaultSystem("Be brief")).build();
+    void requestPrompt_replacesChatClientDefaultSystem() {
+        var customized = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel).defaultSystem("Be brief").build());
         customized.setStreaming(false);
         mockSimpleChat("ok");
         var request = new TestLLMRequest("Hello", "From the request",
@@ -1678,11 +1678,10 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void builder_customizerToolObject_isCalled() {
-        var customized = SpringAILLMProvider.builder(mockChatModel)
-                .customize(
-                        client -> client.defaultTools(new SampleToolsClass()))
-                .build();
+    void chatClient_defaultToolObjectIsCalled() {
+        var customized = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel)
+                        .defaultTools(new SampleToolsClass()).build());
         customized.setStreaming(false);
         var toolCall = mockChatResponseWithPendingToolCall("getTemperature");
         var answer = mockSimpleChatResponse("It is 22°C");
@@ -1702,11 +1701,12 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void builder_customizer_advisorAugmentsUserMessage() {
-        var customized = SpringAILLMProvider.builder(mockChatModel)
-                .customize(client -> client.defaultAdvisors(
-                        new FixedFactAdvisor("The codename is Bluefin")))
-                .build();
+    void chatClient_advisorAugmentsUserMessage() {
+        var customized = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel)
+                        .defaultAdvisors(
+                                new FixedFactAdvisor("The codename is Bluefin"))
+                        .build());
         customized.setStreaming(false);
         mockSimpleChat("Bluefin");
 
@@ -1722,8 +1722,9 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void builder_withoutMemoryAdvisor_providerKeepsTheConversation() {
-        var customized = SpringAILLMProvider.builder(mockChatModel).build();
+    void chatClient_withoutMemoryAdvisor_providerKeepsTheConversation() {
+        var customized = new SpringAILLMProvider(
+                ChatClient.builder(mockChatModel).build());
         customized.setStreaming(false);
         mockSimpleChat("First answer");
 
@@ -1739,14 +1740,15 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void builder_customizerMemoryAdvisor_isUsedInsteadOfTheProviderOwn() {
+    void chatClient_memoryAdvisor_isUsedInsteadOfTheProviderOwn() {
         var memory = MessageWindowChatMemory.builder().build();
-        var customized = SpringAILLMProvider.builder(mockChatModel)
-                .customize(client -> client.defaultAdvisors(advisors -> advisors
+        var customized = new SpringAILLMProvider(ChatClient
+                .builder(mockChatModel)
+                .defaultAdvisors(advisors -> advisors
                         .advisors(MessageChatMemoryAdvisor.builder(memory)
                                 .build())
-                        .param(ChatMemory.CONVERSATION_ID, "app")))
-                .build();
+                        .param(ChatMemory.CONVERSATION_ID, "app"))
+                .build());
         customized.setStreaming(false);
         mockSimpleChat("Hi there");
 
@@ -1754,15 +1756,6 @@ class SpringAILLMProviderTest {
 
         var texts = memory.get("app").stream().map(Message::getText).toList();
         Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
-    }
-
-    @Test
-    void builder_customizers_runInOrder() {
-        var order = new ArrayList<String>();
-        SpringAILLMProvider.builder(mockChatModel)
-                .customize(client -> order.add("first"))
-                .customize(client -> order.add("second")).build();
-        Assertions.assertEquals(List.of("first", "second"), order);
     }
 
     /**

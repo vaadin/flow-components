@@ -170,9 +170,9 @@ public class SpringAILLMProvider implements LLMProvider {
      * Constructor with a chat client the application assembled: its default
      * system text, advisors for retrieval augmentation or guardrails, default
      * tools including MCP tool callback providers, options and observability
-     * all apply to every turn. {@link #builder(ChatClient.Builder)} does the
-     * same for a client builder, for example the one Spring Boot
-     * auto-configures.
+     * all apply to every turn. In a Spring Boot application, build the client
+     * from the auto-configured {@code ChatClient.Builder} bean to keep the
+     * application's observability and tool call limit settings.
      *
      * <pre>
      * var chatClient = ChatClient.builder(chatModel)
@@ -182,6 +182,14 @@ public class SpringAILLMProvider implements LLMProvider {
      *         .defaultTools(mcpToolCallbackProvider).build();
      * var provider = new SpringAILLMProvider(chatClient);
      * </pre>
+     * <p>
+     * The system prompt is the client's default system text and Spring AI
+     * {@code @Tool} objects are its default tools; these replace the system
+     * prompt and the tool objects given to the orchestrator through its
+     * deprecated {@code AIOrchestrator.builder(LLMProvider, String)} and
+     * {@code withTools(Object...)}. A system prompt the orchestrator still
+     * sends with a request is set on that request and overrides the default
+     * system text for the turn.
      * <p>
      * Unless the client carries a memory advisor of its own, the provider
      * derives a client that adds its chat memory, so the conversation is kept
@@ -215,42 +223,6 @@ public class SpringAILLMProvider implements LLMProvider {
                     .build();
             hasManagedMemory = true;
         }
-    }
-
-    /**
-     * Creates a builder for a provider on a chat model. The builder takes the
-     * system prompt and lets the application customize the {@link ChatClient}
-     * the provider is built on, see {@link Builder#customize}.
-     *
-     * @param chatModel
-     *            the chat model, not {@code null}
-     * @return the builder
-     * @throws NullPointerException
-     *             if chatModel is {@code null}
-     * @since 25.4
-     */
-    public static Builder builder(ChatModel chatModel) {
-        Objects.requireNonNull(chatModel, "ChatModel must not be null");
-        return new Builder(ChatClient.builder(chatModel));
-    }
-
-    /**
-     * Creates a builder for a provider on a {@link ChatClient.Builder}, for
-     * example the one Spring Boot auto-configures with the application's
-     * observability and tool call limit settings. The builder takes the system
-     * prompt and lets the application customize the client further, see
-     * {@link Builder#customize}.
-     *
-     * @param chatClientBuilder
-     *            the chat client builder, not {@code null}
-     * @return the builder
-     * @throws NullPointerException
-     *             if chatClientBuilder is {@code null}
-     * @since 25.4
-     */
-    public static Builder builder(ChatClient.Builder chatClientBuilder) {
-        return new Builder(Objects.requireNonNull(chatClientBuilder,
-                "ChatClient.Builder must not be null"));
     }
 
     /**
@@ -826,79 +798,4 @@ public class SpringAILLMProvider implements LLMProvider {
             }
         };
     }
-
-    /**
-     * Builds a {@link SpringAILLMProvider} on a chat model or a
-     * {@link ChatClient.Builder}, with the Spring AI features the application
-     * wants on the client behind the provider, the system prompt included.
-     *
-     * <pre>
-     * var provider = SpringAILLMProvider.builder(chatModel)
-     *         .customize(client -&gt; client
-     *                 .defaultSystem("You are a support assistant.")
-     *                 .defaultAdvisors(QuestionAnswerAdvisor
-     *                         .builder(vectorStore).build())
-     *                 .defaultTools(mcpToolCallbackProvider))
-     *         .build();
-     * </pre>
-     *
-     * @since 25.4
-     */
-    public static final class Builder {
-        private final ChatClient.Builder clientBuilder;
-        private Consumer<ChatClient.Builder> customizer;
-
-        private Builder(ChatClient.Builder clientBuilder) {
-            this.clientBuilder = clientBuilder;
-        }
-
-        /**
-         * Customizes the client the provider is built on. The customizer
-         * receives Spring AI's {@link ChatClient.Builder} with the model set,
-         * and may configure anything the builder offers: the default system
-         * text, advisors for retrieval augmentation or guardrails, default
-         * tools including MCP tool callback providers, default options, and so
-         * on. Customizers run in the order they were added.
-         * <p>
-         * The system prompt is set with {@code defaultSystem(...)} and Spring
-         * AI {@code @Tool} objects are registered with
-         * {@code defaultTools(...)}; these replace the system prompt and the
-         * tool objects given to the orchestrator through its deprecated
-         * {@code AIOrchestrator.builder(LLMProvider, String)} and
-         * {@code withTools(Object...)}. A system prompt the orchestrator still
-         * sends with a request is set on that request and overrides the
-         * client's default system text for the turn.
-         * <p>
-         * The provider completes the client after the customizers ran: it adds
-         * its own chat memory advisor only when the client carries no
-         * {@code MemoryAdvisor}, so an application that configures the
-         * conversation memory keeps it, in which case
-         * {@link SpringAILLMProvider#setHistory(List, Map)} does nothing.
-         *
-         * @param customizer
-         *            the customizer, not {@code null}
-         * @return this builder
-         * @throws NullPointerException
-         *             if customizer is {@code null}
-         */
-        public Builder customize(Consumer<ChatClient.Builder> customizer) {
-            Objects.requireNonNull(customizer, "Customizer must not be null");
-            this.customizer = this.customizer == null ? customizer
-                    : this.customizer.andThen(customizer);
-            return this;
-        }
-
-        /**
-         * Builds the provider.
-         *
-         * @return the provider
-         */
-        public SpringAILLMProvider build() {
-            if (customizer != null) {
-                customizer.accept(clientBuilder);
-            }
-            return new SpringAILLMProvider(clientBuilder.build());
-        }
-    }
-
 }

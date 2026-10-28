@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.tests;
 
 import java.util.List;
 
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
@@ -78,16 +79,15 @@ public class SpringAIPipelinePage extends VerticalLayout {
         // the push setup a real one needs
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
 
-        var provider = SpringAILLMProvider.builder(new ScriptedChatModel())
-                .customize(client -> client.defaultSystem(SYSTEM_PROMPT)
-                        .defaultAdvisors(new FixedFactAdvisor(),
-                                SafeGuardAdvisor.builder()
-                                        .sensitiveWords(List.of(BLOCKED_WORD))
-                                        .failureResponse(GUARDRAIL_REPLY)
-                                        .build())
-                        .defaultTools(ToolCallbackProvider
-                                .from(new WeatherToolCallback())))
-                .build();
+        var provider = new SpringAILLMProvider(ChatClient
+                .builder(new ScriptedChatModel()).defaultSystem(SYSTEM_PROMPT)
+                .defaultAdvisors(new FixedFactAdvisor(),
+                        SafeGuardAdvisor.builder()
+                                .sensitiveWords(List.of(BLOCKED_WORD))
+                                .failureResponse(GUARDRAIL_REPLY).build())
+                .defaultTools(
+                        ToolCallbackProvider.from(new WeatherToolCallback()))
+                .build());
 
         var messageList = new MessageList();
         messageList.setId("message-list");
