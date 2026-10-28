@@ -10,6 +10,13 @@ package com.vaadin.flow.component.ai.chart;
 
 import static com.vaadin.flow.component.ai.chart.ConfigurationKeys.*;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -20,6 +27,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -265,6 +273,90 @@ public final class ChartConfigurationParser implements Serializable {
         READER.readerForUpdating(target).readValue(jsonNode);
     }
 
+    /**
+     * Returns a copy of the existing plot options with the JSON properties
+     * merged in. Nested objects (e.g. {@code dataLabels}) keep the earlier
+     * values the JSON does not mention; any other value replaces the earlier
+     * one. Values the JSON does not mention, such as gradient colors or marker
+     * symbols set in Java, are kept as they are. The existing instance is left
+     * unchanged, as the application may share it with other charts.
+     */
+    private static AbstractPlotOptions mergePlotOptions(
+            AbstractPlotOptions existing, JsonNode jsonNode) {
+        var merged = copy(existing);
+        mergeNested(merged, jsonNode);
+        return merged;
+    }
+
+    /**
+     * Merges JSON properties into the target, descending into nested model
+     * objects for JSON object values instead of replacing them.
+     */
+    private static void mergeNested(Object target, JsonNode jsonNode) {
+        var otherProperties = JacksonUtils.createObjectNode();
+        for (var property : jsonNode.properties()) {
+            var nested = property.getValue().isObject()
+                    ? getNestedObject(target, property.getKey())
+                    : null;
+            if (nested != null) {
+                mergeNested(nested, property.getValue());
+            } else {
+                otherProperties.set(property.getKey(), property.getValue());
+            }
+        }
+        if (!otherProperties.isEmpty()) {
+            mergeInto(target, otherProperties);
+        }
+    }
+
+    /**
+     * Returns the model object held in the named property of the target, or
+     * {@code null} if the property does not hold a model object. The model
+     * getters create a missing nested object on first access.
+     */
+    private static AbstractConfigurationObject getNestedObject(Object target,
+            String name) {
+        try {
+            for (var descriptor : Introspector.getBeanInfo(target.getClass())
+                    .getPropertyDescriptors()) {
+                if (descriptor.getName().equals(name)
+                        && descriptor.getReadMethod() != null
+                        && AbstractConfigurationObject.class.isAssignableFrom(
+                                descriptor.getPropertyType())) {
+                    return (AbstractConfigurationObject) descriptor
+                            .getReadMethod().invoke(target);
+                }
+            }
+            return null;
+        } catch (IntrospectionException | ReflectiveOperationException e) {
+            throw new IllegalStateException(
+                    "Unable to read chart option " + name, e);
+        }
+    }
+
+    /**
+     * Returns a deep copy of the given model object, keeping every value as it
+     * is, unlike a round trip through JSON.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T extends Serializable> T copy(T object) {
+        try {
+            var bytes = new ByteArrayOutputStream();
+            try (var out = new ObjectOutputStream(bytes)) {
+                out.writeObject(object);
+            }
+            try (var in = new ObjectInputStream(
+                    new ByteArrayInputStream(bytes.toByteArray()))) {
+                return (T) in.readObject();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            throw new IllegalStateException(
+                    "Unable to copy chart options of type "
+                            + object.getClass().getName(),
+                    e);
+        }
+    }
+
     // --- ChartType resolution ---
 
     private static final Map<String, ChartType> CHART_TYPES_BY_NAME;
@@ -328,7 +420,8 @@ public final class ChartConfigurationParser implements Serializable {
     /**
      * Applies global plot options from the {@code plotOptions} configuration
      * section. Each key (e.g. "series", "column", "pie") maps to a chart type
-     * whose PlotOptions class is resolved and deserialized.
+     * whose PlotOptions class is resolved and deserialized. Options for a type
+     * the configuration already has are merged into the existing ones.
      */
     private static void applyPlotOptionsConfig(Configuration config,
             JsonNode plotOptionsNode) {
@@ -343,9 +436,21 @@ public final class ChartConfigurationParser implements Serializable {
             if (clazz == null) {
                 continue;
             }
-            var plotOptions = READER.treeToValue(optionNode, clazz);
-            config.addPlotOptions(plotOptions);
+            var existing = findPlotOptions(config, clazz);
+            config.addPlotOptions(
+                    existing != null ? mergePlotOptions(existing, optionNode)
+                            : READER.treeToValue(optionNode, clazz));
         }
+    }
+
+    private static AbstractPlotOptions findPlotOptions(Configuration config,
+            Class<? extends AbstractPlotOptions> clazz) {
+        for (var plotOptions : config.getPlotOptions()) {
+            if (plotOptions.getClass() == clazz) {
+                return plotOptions;
+            }
+        }
+        return null;
     }
 
     // --- Per-series configuration ---
@@ -392,7 +497,8 @@ public final class ChartConfigurationParser implements Serializable {
                                     type.toLowerCase(Locale.ENGLISH)))) {
                 // Same type as before: the entry adds to the options
                 if (!plotOptionsNode.isEmpty()) {
-                    mergeInto(existing, plotOptionsNode);
+                    series.setPlotOptions(
+                            mergePlotOptions(existing, plotOptionsNode));
                 }
             } else if (type != null || !plotOptionsNode.isEmpty()) {
                 AbstractPlotOptions plotOptions = deserializePlotOptions(type,
