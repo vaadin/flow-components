@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -24,6 +25,8 @@ import com.vaadin.flow.component.charts.model.Dimension;
 import com.vaadin.flow.component.charts.model.Frame;
 import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
+import com.vaadin.flow.component.charts.model.Marker;
+import com.vaadin.flow.component.charts.model.MarkerSymbolEnum;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
@@ -33,11 +36,31 @@ import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.charts.model.YAxis;
+import com.vaadin.flow.component.charts.model.style.Color;
+import com.vaadin.flow.component.charts.model.style.GradientColor;
+import com.vaadin.flow.component.charts.model.style.SolidColor;
 
 class ChartConfigurationParserTest {
 
     private static Configuration parse(String json) {
         return ChartConfigurationParser.parse(json);
+    }
+
+    private static GradientColor createGradient() {
+        var gradient = GradientColor.createLinear(0, 0, 0, 1);
+        gradient.addColorStop(0, new SolidColor("#ffffff"));
+        gradient.addColorStop(1, new SolidColor("#000000"));
+        return gradient;
+    }
+
+    private static void assertTestGradient(Color color) {
+        var gradient = Assertions.assertInstanceOf(GradientColor.class, color);
+        Assertions.assertEquals(1,
+                gradient.getLinearGradient().getY2().intValue());
+        var stops = gradient.getStops();
+        Assertions.assertEquals(2, stops.size());
+        Assertions.assertEquals("#ffffff", stops.get(0).getColor().toString());
+        Assertions.assertEquals("#000000", stops.get(1).getColor().toString());
     }
 
     @Nested
@@ -550,6 +573,81 @@ class ChartConfigurationParserTest {
             Assertions.assertEquals("#ff0000", column.getColor().toString());
         }
 
+        @Test
+        void mergeIntoExistingTypeOptions_keepsEarlierOptions() {
+            var config = parse(
+                    "{\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
+            ChartConfigurationParser.merge("{\"plotOptions\":{\"column\":"
+                    + "{\"dataLabels\":{\"enabled\":true}}}}", config);
+
+            Assertions.assertEquals(1, config.getPlotOptions().size());
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertEquals(Stacking.NORMAL, column.getStacking());
+            Assertions.assertTrue(column.getDataLabels().getEnabled());
+        }
+
+        @Test
+        void mergeNestedOptionIntoExistingTypeOptions_keepsEarlierNestedValues() {
+            var config = parse("{\"plotOptions\":{\"column\":"
+                    + "{\"dataLabels\":{\"enabled\":true}}}}");
+            ChartConfigurationParser.merge(
+                    "{\"plotOptions\":{\"column\":"
+                            + "{\"dataLabels\":{\"format\":\"{y}%\"}}}}",
+                    config);
+
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertEquals("{y}%", column.getDataLabels().getFormat());
+            Assertions.assertEquals(Boolean.TRUE,
+                    column.getDataLabels().getEnabled(),
+                    "dataLabels.enabled from the earlier turn must be kept");
+        }
+
+        @Test
+        void mergeDataLabelsArrayIntoExistingTypeOptions_keepsEarlierOptions() {
+            var config = parse(
+                    "{\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
+            ChartConfigurationParser.merge(
+                    "{\"plotOptions\":{\"column\":" + "{\"color\":\"#ff0000\","
+                            + "\"dataLabels\":[{\"enabled\":true}]}}}",
+                    config);
+
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertEquals(Stacking.NORMAL, column.getStacking());
+            Assertions.assertEquals("#ff0000", column.getColor().toString());
+        }
+
+        @Test
+        void mergeIntoSharedTypeOptions_leavesSharedInstanceUnchanged() {
+            var shared = new PlotOptionsColumn();
+            shared.setStacking(Stacking.NORMAL);
+            var config = new Configuration();
+            config.setPlotOptions(shared);
+            ChartConfigurationParser.merge("{\"plotOptions\":{\"column\":"
+                    + "{\"dataLabels\":{\"enabled\":true}}}}", config);
+
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertEquals(Stacking.NORMAL, column.getStacking());
+            Assertions.assertTrue(column.getDataLabels().getEnabled());
+            Assertions.assertNull(shared.getDataLabels().getEnabled(),
+                    "options shared with other charts must not change");
+        }
+
+        @Test
+        void mergeIntoTypeOptionsWithGradientColor_appliesUpdateAndKeepsColor() {
+            var options = new PlotOptionsColumn();
+            options.setColor(createGradient());
+            var config = new Configuration();
+            config.setPlotOptions(options);
+            ChartConfigurationParser.merge("{\"plotOptions\":{\"column\":"
+                    + "{\"stacking\":\"normal\","
+                    + "\"dataLabels\":{\"enabled\":true}}}}", config);
+
+            var column = getPlotOption(config, PlotOptionsColumn.class);
+            Assertions.assertEquals(Stacking.NORMAL, column.getStacking());
+            Assertions.assertTrue(column.getDataLabels().getEnabled());
+            assertTestGradient(column.getColor());
+        }
+
         @SuppressWarnings("unchecked")
         private <T> T getPlotOption(Configuration config, Class<T> type) {
             return (T) config.getPlotOptions().stream().filter(type::isInstance)
@@ -895,6 +993,51 @@ class ChartConfigurationParserTest {
             var options = (PlotOptionsArea) volume.getPlotOptions();
             Assertions.assertEquals(0.5, options.getFillOpacity());
             Assertions.assertEquals(3, options.getLineWidth());
+        }
+
+        @Test
+        void seriesEntryForSeriesWithGradientColor_keepsColorAndMergesDataLabels() {
+            var options = new PlotOptionsColumn();
+            options.setColor(createGradient());
+            options.getDataLabels().setFormat("{y}%");
+            var config = createConfigWithRevenueSeries(options);
+            ChartConfigurationParser.merge("{\"series\":[{\"name\":\"Revenue\","
+                    + "\"dataLabels\":{\"enabled\":true}}]}", config);
+
+            var column = (PlotOptionsColumn) findSeries(config, "Revenue")
+                    .getPlotOptions();
+            Assertions.assertTrue(column.getDataLabels().getEnabled());
+            Assertions.assertEquals("{y}%", column.getDataLabels().getFormat());
+            assertTestGradient(column.getColor());
+        }
+
+        @Test
+        void seriesEntryForSeriesWithMarkerSymbol_keepsSymbolAndRgbaColor() {
+            var marker = new Marker(true);
+            marker.setSymbol(MarkerSymbolEnum.SQUARE);
+            var options = new PlotOptionsLine();
+            options.setColor(new SolidColor(255, 0, 0, 0.5));
+            options.setMarker(marker);
+            var config = createConfigWithRevenueSeries(options);
+            ChartConfigurationParser.merge("{\"series\":[{\"name\":\"Revenue\","
+                    + "\"marker\":{\"radius\":6}}]}", config);
+
+            var line = (PlotOptionsLine) findSeries(config, "Revenue")
+                    .getPlotOptions();
+            Assertions.assertEquals(6, line.getMarker().getRadius());
+            Assertions.assertEquals(MarkerSymbolEnum.SQUARE,
+                    line.getMarker().getSymbol());
+            Assertions.assertEquals("rgba(255,0,0,0.50)",
+                    line.getColor().toString());
+        }
+
+        private static Configuration createConfigWithRevenueSeries(
+                AbstractPlotOptions options) {
+            var revenue = new DataSeries("Revenue");
+            revenue.setPlotOptions(options);
+            var config = new Configuration();
+            config.addSeries(revenue);
+            return config;
         }
 
         @Test

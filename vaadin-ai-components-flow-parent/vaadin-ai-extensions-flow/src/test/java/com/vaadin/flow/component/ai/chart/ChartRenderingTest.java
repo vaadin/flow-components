@@ -221,6 +221,24 @@ class ChartRenderingTest {
             Assertions.assertDoesNotThrow(
                     () -> controller.onResponse(AITurnEvents.success()));
         }
+
+        @Test
+        void sameChartTypePlotOptionsUpdateKeepsEarlierPlotOptions() {
+            databaseProvider.results = List
+                    .of(row("category", "A", "value", 10));
+            updateConfiguration("{\"chart\":{\"type\":\"column\"},"
+                    + "\"plotOptions\":{\"column\":{\"stacking\":\"normal\"}}}");
+            updateData("SELECT category, value FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            updateConfiguration("{\"plotOptions\":{\"column\":"
+                    + "{\"dataLabels\":{\"enabled\":true}}}}");
+            controller.onResponse(AITurnEvents.success());
+
+            String json = ChartSerialization.toJSON(chart.getConfiguration());
+            Assertions.assertTrue(json.contains("\"stacking\":\"normal\""),
+                    "Stacking should be kept: " + json);
+        }
     }
 
     @Nested
