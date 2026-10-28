@@ -92,7 +92,10 @@ public final class ChartConfigurationParser implements Serializable {
     /**
      * Parses a JSON configuration string and applies the values onto the given
      * {@link Configuration}. Only properties present in the JSON are modified;
-     * existing properties not mentioned in the JSON are preserved.
+     * existing properties not mentioned in the JSON are preserved. Plot options
+     * the configuration already holds for a chart type or series that the JSON
+     * mentions are replaced with a copy holding the merged values. The original
+     * instance is left unchanged.
      *
      * @param configJson
      *            the Highcharts JSON configuration string to parse
