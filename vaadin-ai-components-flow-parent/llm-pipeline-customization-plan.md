@@ -241,33 +241,34 @@ sees the bridge.
 LangChain4j:
 
 ```java
-var provider = LangChain4JLLMProvider.builder(streamingChatModel)
-        .customize(service -> service
-                .systemMessage("You are a support assistant for ACME.")
-                .contentRetriever(retriever)          // RAG
-                .toolProvider(mcpToolProvider)        // MCP
-                .inputGuardrails(new PromptInjectionGuardrail())
-                .tools(new WeatherTools()))           // @Tool objects
-        .build();
+var provider = new LangChain4JLLMProvider(streamingChatModel, service -> service
+        .systemMessage("You are a support assistant for ACME.")
+        .contentRetriever(retriever)          // RAG
+        .toolProvider(mcpToolProvider)        // MCP
+        .inputGuardrails(new PromptInjectionGuardrail())
+        .tools(new WeatherTools()));          // @Tool objects
 ```
 
 Spring AI:
 
 ```java
-var provider = SpringAILLMProvider.builder(chatModel)
-        .customize(client -> client
-                .defaultSystem("You are a support assistant for ACME.")
-                .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
-                .defaultAdvisors(new SafeGuardAdvisor(List.of("secret")))
-                .defaultTools(mcpToolCallbackProvider, new WeatherTools())) // MCP and @Tool objects
-        .build();
+var provider = new SpringAILLMProvider(ChatClient.builder(chatModel)
+        .defaultSystem("You are a support assistant for ACME.")
+        .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+        .defaultAdvisors(new SafeGuardAdvisor(List.of("secret")))
+        .defaultTools(mcpToolCallbackProvider, new WeatherTools()) // MCP and @Tool objects
+        .build());
 ```
 
-The plain path stays a one-liner: `LangChain4JLLMProvider.builder(model).build()`.
-In a Spring Boot application the entry point should also accept the
-auto-configured `ChatClient.Builder` bean, so observability and
-`spring.ai.tools.limits` from the application configuration are kept:
-`SpringAILLMProvider.builder(chatClientBuilder)`.
+The plain path stays a one-liner: `new LangChain4JLLMProvider(model)`. In a
+Spring Boot application the client is built from the auto-configured
+`ChatClient.Builder` bean, so observability and `spring.ai.tools.limits` from
+the application configuration are kept:
+`new SpringAILLMProvider(chatClientBuilder.build())`.
+
+(The examples above show the final shape. The plan first proposed
+`builder(model).systemPrompt(..).customize(..).build()` on both providers;
+section 8.7 records why the builders went.)
 
 How the bridge is met, LangChain4j side:
 
@@ -748,7 +749,7 @@ and the message list shows the generic error).
 
 | Branch | Option | Shape |
 | --- | --- | --- |
-| `prototype/pipeline-customizer` | A | `LangChain4JLLMProvider.builder(model).customize(AiServices<ChatService>)`, `SpringAILLMProvider.builder(chatModel or ChatClient.Builder).customize(ChatClient.Builder)`, `AIOrchestrator.builder(provider)`; the builders first had a `systemPrompt(...)`, dropped the same day (5.1) |
+| `prototype/pipeline-customizer` | A | `new LangChain4JLLMProvider(model, Consumer<AiServices<ChatService>>)`, `new SpringAILLMProvider(chatClient)` with memory added through `mutate()`, `AIOrchestrator.builder(provider)`; the branch first had `builder(model).systemPrompt(..).customize(..).build()` on both providers, see 8.7 |
 | `prototype/pipeline-byo` | B | `new LangChain4JLLMProvider(AiServices<ChatService>, streaming)`, `new SpringAILLMProvider(chatClient)` adding memory through `mutate()` |
 | `prototype/pipeline-bridge-helpers` | C | public `LangChain4JBridge` and `SpringAIBridge` conversion helpers, the built-in providers delegate to them, the page runs two custom providers written on them |
 
@@ -907,6 +908,16 @@ harder than today, a `ToolSpec` one-liner) is still to run before any removal.
 - The chat page sets the prompt through the customizer on both routes and
   registers one dual-annotated tool method on both pipelines; the pipeline
   integration test pages set the prompt the same way.
+- The builders went too. With the prompt gone, each held one method, and a
+  builder for one argument is a smell. LangChain4j still needs a hook, since
+  the provider must own the `AiServices` build (its defaults before the
+  application's configuration, its wiring after); the hook is now a
+  constructor overload, `LangChain4JLLMProvider(model, customizer)`, next to
+  the existing constructors. Spring AI needs no hook: `ChatClient.Builder` is
+  the vendor builder already, and the `ChatClient` constructor with memory
+  through `mutate()` covers everything the Vaadin builder did, including the
+  Boot builder bean through its `build()`. The asymmetry is deliberate: on
+  Spring the application calls `build()`, on LangChain4j the provider must.
 
 ### 8.8 Remaining work on `prototype/pipeline-customizer`
 
