@@ -47,6 +47,7 @@ import dev.langchain4j.data.message.AudioContent;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.PdfFileContent;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
@@ -64,6 +65,9 @@ import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.observability.api.event.AiServiceResponseReceivedEvent;
 import dev.langchain4j.observability.api.listener.AiServiceListener;
+import dev.langchain4j.rag.AugmentationRequest;
+import dev.langchain4j.rag.AugmentationResult;
+import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.service.AiServiceContext;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
@@ -298,6 +302,11 @@ public class LangChain4JLLMProvider implements LLMProvider {
      * observer, the cancellation check before each model call, and the tool
      * error handling that lets a limit or a cancellation end the turn. Whatever
      * the service already carries is kept and composed with.
+     * <p>
+     * The system prompt is placed on the model request by the request
+     * transformer rather than through the service's system message provider:
+     * the service renders that one as a prompt template, which would fail on a
+     * prompt containing braces, such as a JSON example.
      */
     private void wire(AiServiceContext context, AiServices<ChatService> builder,
             String systemPrompt) {
@@ -311,19 +320,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
         builder.toolProvider(new TurnToolProvider());
         builder.registerListener(new ResponseObserver());
-
-        var configuredSystemMessage = context.systemMessageProvider;
-        context.systemMessageProvider = memoryId -> {
-            var turn = currentTurn.get();
-            var fromRequest = turn == null ? null : turn.request.systemPrompt();
-            if (fromRequest != null && !fromRequest.isBlank()) {
-                return Optional.of(fromRequest.trim());
-            }
-            if (systemPrompt != null && !systemPrompt.isBlank()) {
-                return Optional.of(systemPrompt.trim());
-            }
-            return configuredSystemMessage.apply(memoryId);
-        };
+        if (context.retrievalAugmentor != null) {
+            context.retrievalAugmentor = new AttachmentKeepingAugmentor(
+                    context.retrievalAugmentor);
+        }
 
         BiFunction<ChatRequest, Object, ChatRequest> configuredTransformer = context.chatRequestTransformer;
         context.chatRequestTransformer = (request, memoryId) -> {
@@ -335,7 +335,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 LOGGER.debug("The turn was cancelled, skipping the model call");
                 throw new TurnCancelledException();
             }
-            return configuredTransformer.apply(request, memoryId);
+            var prompt = effectiveSystemPrompt(turn, systemPrompt);
+            return configuredTransformer.apply(prompt == null ? request
+                    : withSystemMessage(request, prompt), memoryId);
         };
 
         var configuredErrorHandler = context.toolService
@@ -347,6 +349,39 @@ public class LangChain4JLLMProvider implements LLMProvider {
             }
             return configuredErrorHandler.handle(error, errorContext);
         });
+    }
+
+    /**
+     * Returns the system prompt of the turn: the one its request carries, else
+     * the one the builder was given, or {@code null} when there is neither and
+     * the service's own configuration applies.
+     */
+    private static String effectiveSystemPrompt(Turn turn,
+            String builderPrompt) {
+        var fromRequest = turn == null ? null : turn.request.systemPrompt();
+        if (fromRequest != null && !fromRequest.isBlank()) {
+            return fromRequest.trim();
+        }
+        if (builderPrompt != null && !builderPrompt.isBlank()) {
+            return builderPrompt.trim();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the request with the given system message in place of the one it
+     * starts with, or ahead of its messages when it has none.
+     */
+    private static ChatRequest withSystemMessage(ChatRequest request,
+            String prompt) {
+        var messages = new ArrayList<>(request.messages());
+        if (!messages.isEmpty()
+                && messages.getFirst() instanceof SystemMessage) {
+            messages.set(0, SystemMessage.from(prompt));
+        } else {
+            messages.addFirst(SystemMessage.from(prompt));
+        }
+        return request.toBuilder().messages(messages).build();
     }
 
     @Override
@@ -833,6 +868,50 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
+     * Lets retrieval augmentation work on a turn that carries attachments.
+     * LangChain4j's default content injector expects a user message with a
+     * single text content and fails on one that also carries an image or a
+     * file. This wrapper hands the augmentor the text alone and puts the other
+     * contents back on the augmented message.
+     */
+    private static final class AttachmentKeepingAugmentor
+            implements RetrievalAugmentor {
+        private final RetrievalAugmentor delegate;
+
+        AttachmentKeepingAugmentor(RetrievalAugmentor delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public AugmentationResult augment(AugmentationRequest request) {
+            if (!(request.chatMessage() instanceof UserMessage userMessage)
+                    || userMessage.hasSingleText()) {
+                return delegate.augment(request);
+            }
+            var texts = userMessage.contents().stream()
+                    .filter(TextContent.class::isInstance).toList();
+            if (texts.size() != 1) {
+                // Not a message the provider built; the augmentor decides
+                return delegate.augment(request);
+            }
+            var textOnly = userMessage.toBuilder().contents(texts).build();
+            var result = delegate.augment(
+                    new AugmentationRequest(textOnly, request.metadata()));
+            if (!(result.chatMessage() instanceof UserMessage augmented)) {
+                return result;
+            }
+            var contents = new ArrayList<>(augmented.contents());
+            userMessage.contents().stream()
+                    .filter(content -> !(content instanceof TextContent))
+                    .forEach(contents::add);
+            return AugmentationResult.builder()
+                    .chatMessage(
+                            augmented.toBuilder().contents(contents).build())
+                    .contents(result.contents()).build();
+        }
+    }
+
+    /**
      * Ends the loop of a turn whose subscriber has cancelled.
      */
     private static final class TurnCancelledException extends RuntimeException {
@@ -1102,7 +1181,9 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * Sets the system prompt the model sees on every turn. A system prompt
          * carried by the request of a turn takes precedence, and when neither
          * is given the service's own configuration applies, for example a
-         * {@code systemMessage(...)} set in {@link #customize}.
+         * {@code systemMessage(...)} set in {@link #customize}. Unlike that
+         * one, the prompts given here or on a request are sent as they are, not
+         * rendered as LangChain4j prompt templates, so they may contain braces.
          *
          * @param systemPrompt
          *            the system prompt, or {@code null} for none
@@ -1125,9 +1206,12 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * keeps what they configured: it adds its own chat memory only when
          * none was configured, adds the tool provider that supplies the tools
          * of each turn next to any tool providers of the customizer, composes
-         * its system prompt lookup, its cancellation check and its tool error
-         * handling with the ones configured, and registers a listener for the
-         * response metadata. Before the customizers run it lifts LangChain4j's
+         * its system prompt, its cancellation check and its tool error handling
+         * with the request transformer and the error handler configured,
+         * registers a listener for the response metadata, and wraps the
+         * retrieval augmentor so that retrieval also works on a turn with
+         * attachments, which LangChain4j's default content injector would
+         * otherwise reject. Before the customizers run it lifts LangChain4j's
          * round trip limit, as the provider bounds the tool-calling loop with
          * its own tool call limits, and makes a tool the model made up an error
          * result for the model rather than a failure of the turn; a customizer

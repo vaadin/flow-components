@@ -2312,6 +2312,46 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
+    void builder_customizerSystemMessage_appliesWhenNoPromptIsGiven() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .customize(service -> service.systemMessage("Configured"))
+                .build();
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var first = captor.getValue().messages().getFirst();
+        Assertions.assertEquals("Configured", ((SystemMessage) first).text());
+    }
+
+    @Test
+    void builder_systemPrompt_replacesCustomizerSystemMessage() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .systemPrompt("Be brief")
+                .customize(service -> service.systemMessage("Configured"))
+                .build();
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var messages = captor.getValue().messages();
+        Assertions.assertEquals("Be brief",
+                ((SystemMessage) messages.getFirst()).text());
+        Assertions.assertEquals(1,
+                messages.stream().filter(SystemMessage.class::isInstance)
+                        .count(),
+                "The service's own system message is replaced, not kept");
+    }
+
+    @Test
     void builder_customizer_contentRetrieverAugmentsUserMessage() {
         var customized = LangChain4JLLMProvider.builder(mockChatModel)
                 .customize(service -> service.contentRetriever(
@@ -2333,6 +2373,74 @@ class LangChain4JLLMProviderTest {
         Assertions.assertTrue(userText.contains("What is the codename?"));
         Assertions.assertTrue(userText.contains("The codename is Bluefin"),
                 "The retrieved content should reach the model: " + userText);
+    }
+
+    @Test
+    void builder_systemPrompt_bracesAreSentLiterally() {
+        var prompt = "Answer as JSON like {{\"answer\": \"...\"}}, or {{it}}";
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .systemPrompt(prompt).build();
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var first = captor.getValue().messages().getFirst();
+        Assertions.assertEquals(prompt, ((SystemMessage) first).text(),
+                "The provider's prompt is not a LangChain4j template");
+    }
+
+    @Test
+    void builder_systemPrompt_requestPromptWithBracesIsSentLiterally() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .systemPrompt("Be brief").build();
+        var response = mockSimpleResponse("ok");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var request = new TestLLMRequest("Hello", "Reply with {{status}}",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var first = captor.getValue().messages().getFirst();
+        Assertions.assertEquals("Reply with {{status}}",
+                ((SystemMessage) first).text());
+    }
+
+    @Test
+    void builder_customizer_contentRetrieverKeepsAttachments() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel)
+                .customize(service -> service.contentRetriever(
+                        query -> List.of(dev.langchain4j.rag.content.Content
+                                .from("The codename is Bluefin"))))
+                .build();
+        var response = mockSimpleResponse("Bluefin");
+        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
+                .thenReturn(response);
+        var attachment = new AIAttachment("photo.png", "image/png",
+                "fake-image-data".getBytes());
+        var request = new TestLLMRequest("What is on the photo?", null,
+                List.of(attachment), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(ChatRequest.class);
+        Mockito.verify(mockChatModel).chat(captor.capture());
+        var userText = getUserMessageContents(captor.getValue(),
+                TextContent.class).stream().map(TextContent::text)
+                .collect(Collectors.joining());
+        Assertions.assertTrue(userText.contains("What is on the photo?"));
+        Assertions.assertTrue(userText.contains("The codename is Bluefin"),
+                "The retrieved content should reach the model: " + userText);
+        Assertions.assertEquals(1,
+                getUserMessageContents(captor.getValue(), ImageContent.class)
+                        .size(),
+                "The attachment should stay");
     }
 
     @Test
