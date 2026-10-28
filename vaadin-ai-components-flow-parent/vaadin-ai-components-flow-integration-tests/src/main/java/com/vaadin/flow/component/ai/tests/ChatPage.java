@@ -15,6 +15,13 @@
  */
 package com.vaadin.flow.component.ai.tests;
 
+import java.util.List;
+
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
+import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
+import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
@@ -33,12 +40,18 @@ import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
 
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.guardrail.InputGuardrail;
+import dev.langchain4j.guardrail.InputGuardrailResult;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
+import dev.langchain4j.rag.content.Content;
 
 /**
  * Page for trying out the AI chat against OpenAI through either built-in
- * provider, the baseline for the LLM pipeline customization experiments. The
- * route parameter selects the provider: {@code vaadin-ai/chat/spring-ai} (the
+ * provider, with the LLM pipeline customized through the provider builders: the
+ * system prompt, a retriever that injects a fixed fact into every turn, and an
+ * input guardrail that refuses a message mentioning a blocked word. The route
+ * parameter selects the provider: {@code vaadin-ai/chat/spring-ai} (the
  * default) or {@code vaadin-ai/chat/langchain4j}. The API key is read from the
  * {@code OPENAI_API_KEY} environment variable and the model name from
  * {@code OPENAI_MODEL}. Not covered by automated tests.
@@ -53,6 +66,10 @@ public class ChatPage extends VerticalLayout
     private static final String DEFAULT_MODEL_NAME = "gpt-5.4-mini";
     private static final String SYSTEM_PROMPT = "You are a helpful assistant. "
             + "Keep your answers short.";
+    private static final String FACT = "The internal codename of the ACME "
+            + "support assistant project is Bluefin.";
+    private static final String BLOCKED_WORD = "password";
+    private static final String GUARDRAIL_REPLY = "I cannot help with that.";
 
     public ChatPage() {
         setHeightFull();
@@ -100,11 +117,13 @@ public class ChatPage extends VerticalLayout
         messageInput.setId("message-input");
         messageInput.setWidthFull();
 
-        AIOrchestrator.builder(provider, SYSTEM_PROMPT)
-                .withMessageList(messageList).withInput(messageInput).build();
+        AIOrchestrator.builder(provider).withMessageList(messageList)
+                .withInput(messageInput).build();
 
-        var providerInfo = new Span(
-                "Provider: " + name + ", model: " + modelName);
+        var providerInfo = new Span("Provider: " + name + ", model: "
+                + modelName + ". Pipeline: fixed-fact retriever (ask for the "
+                + "project codename) and an input guardrail (mention '"
+                + BLOCKED_WORD + "').");
         providerInfo.setId("provider-info");
 
         add(providerInfo, messageList, messageInput);
@@ -115,13 +134,79 @@ public class ChatPage extends VerticalLayout
         var options = OpenAiChatOptions.builder().apiKey(apiKey)
                 .model(modelName).build();
         var chatModel = OpenAiChatModel.builder().options(options).build();
-        return new SpringAILLMProvider(chatModel);
+        return SpringAILLMProvider.builder(chatModel)
+                .systemPrompt(SYSTEM_PROMPT)
+                .customize(client -> client.defaultAdvisors(
+                        new FixedFactAdvisor(FACT),
+                        SafeGuardAdvisor.builder()
+                                .sensitiveWords(List.of(BLOCKED_WORD))
+                                .failureResponse(GUARDRAIL_REPLY).build()))
+                .build();
     }
 
     private static LLMProvider createLangChain4JProvider(String apiKey,
             String modelName) {
         var chatModel = OpenAiStreamingChatModel.builder().apiKey(apiKey)
                 .modelName(modelName).build();
-        return new LangChain4JLLMProvider(chatModel);
+        return LangChain4JLLMProvider.builder(chatModel)
+                .systemPrompt(SYSTEM_PROMPT)
+                .customize(service -> service
+                        .contentRetriever(query -> List.of(Content.from(FACT)))
+                        .inputGuardrails(
+                                new BlockedWordGuardrail(BLOCKED_WORD)))
+                .build();
+    }
+
+    /**
+     * A Spring AI advisor that adds a fixed fact to every user message,
+     * standing in for a retrieval advisor backed by a vector store.
+     */
+    private static final class FixedFactAdvisor implements BaseAdvisor {
+        private final String fact;
+
+        FixedFactAdvisor(String fact) {
+            this.fact = fact;
+        }
+
+        @Override
+        public ChatClientRequest before(ChatClientRequest request,
+                AdvisorChain chain) {
+            var augmented = request.prompt().augmentUserMessage(
+                    request.prompt().getUserMessage().getText()
+                            + "\n\nContext: " + fact);
+            return request.mutate().prompt(augmented).build();
+        }
+
+        @Override
+        public ChatClientResponse after(ChatClientResponse response,
+                AdvisorChain chain) {
+            return response;
+        }
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+    }
+
+    /**
+     * A LangChain4j input guardrail that refuses a user message mentioning the
+     * blocked word. The refusal ends the turn with an error before the model is
+     * called.
+     */
+    private static final class BlockedWordGuardrail implements InputGuardrail {
+        private final String blockedWord;
+
+        BlockedWordGuardrail(String blockedWord) {
+            this.blockedWord = blockedWord;
+        }
+
+        @Override
+        public InputGuardrailResult validate(UserMessage userMessage) {
+            if (userMessage.singleText().toLowerCase().contains(blockedWord)) {
+                return failure("The message mentions '" + blockedWord + "'");
+            }
+            return success();
+        }
     }
 }
