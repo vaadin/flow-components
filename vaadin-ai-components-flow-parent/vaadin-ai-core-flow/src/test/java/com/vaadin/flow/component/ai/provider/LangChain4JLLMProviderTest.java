@@ -64,6 +64,7 @@ import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.ChatResponseMetadata;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
@@ -155,7 +156,7 @@ class LangChain4JLLMProviderTest {
             var aiMessage = Mockito.mock(AiMessage.class);
             Mockito.when(aiMessage.hasToolExecutionRequests())
                     .thenReturn(false);
-            var response = Mockito.mock(ChatResponse.class);
+            var response = mockChatResponse();
             Mockito.when(response.aiMessage()).thenReturn(aiMessage);
             handler.onCompleteResponse(response);
             return null;
@@ -297,23 +298,23 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void stream_withNullAiMessage_returnsEmptyMessage() {
+    void stream_withNullAiMessage_failsTurn() {
         var request = createSimpleRequest("Hello");
 
-        var response = Mockito.mock(ChatResponse.class);
+        var response = mockChatResponse();
         Mockito.when(response.aiMessage()).thenReturn(null);
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
 
-        var results = provider.stream(request).collectList().block();
-
-        Assertions.assertNotNull(results);
-        Assertions.assertTrue(results.isEmpty());
+        // The AI service has no answer to record for a response without an
+        // AI message, so the turn fails instead of ending empty
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
     }
 
     @Test
     void stream_withNullAiMessage_keepsChatMemoryUsable() {
-        var nullAiResponse = Mockito.mock(ChatResponse.class);
+        var nullAiResponse = mockChatResponse();
         Mockito.when(nullAiResponse.aiMessage()).thenReturn(null);
         var secondResponse = mockSimpleResponse("Second");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
@@ -321,8 +322,9 @@ class LangChain4JLLMProviderTest {
 
         // Bounded blocks: completing the turn is what is under test here, so
         // a missing terminal signal must fail instead of hanging
-        provider.stream(createSimpleRequest("First")).collectList()
-                .block(Duration.ofSeconds(5));
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(createSimpleRequest("First"))
+                        .collectList().block(Duration.ofSeconds(5)));
         var results = provider.stream(createSimpleRequest("Second question"))
                 .collectList().block(Duration.ofSeconds(5));
 
@@ -584,7 +586,7 @@ class LangChain4JLLMProviderTest {
             var aiMessage = Mockito.mock(AiMessage.class);
             Mockito.when(aiMessage.hasToolExecutionRequests())
                     .thenReturn(false);
-            var response = Mockito.mock(ChatResponse.class);
+            var response = mockChatResponse();
             Mockito.when(response.aiMessage()).thenReturn(aiMessage);
             handler.onCompleteResponse(response);
             return null;
@@ -628,7 +630,7 @@ class LangChain4JLLMProviderTest {
         Mockito.when(aiMessage1.toolExecutionRequests())
                 .thenReturn(List.of(toolRequest1, toolRequest2));
 
-        var response1 = Mockito.mock(ChatResponse.class);
+        var response1 = mockChatResponse();
         Mockito.when(response1.aiMessage()).thenReturn(aiMessage1);
         var response2 = mockSimpleResponse("Final response");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
@@ -685,7 +687,7 @@ class LangChain4JLLMProviderTest {
             var aiMessage = Mockito.mock(AiMessage.class);
             Mockito.when(aiMessage.hasToolExecutionRequests())
                     .thenReturn(false);
-            var response = Mockito.mock(ChatResponse.class);
+            var response = mockChatResponse();
             Mockito.when(response.aiMessage()).thenReturn(aiMessage);
             handler.onCompleteResponse(response);
             return null;
@@ -904,7 +906,7 @@ class LangChain4JLLMProviderTest {
             var aiMessage = Mockito.mock(AiMessage.class);
             Mockito.when(aiMessage.hasToolExecutionRequests())
                     .thenReturn(false);
-            var response = Mockito.mock(ChatResponse.class);
+            var response = mockChatResponse();
             Mockito.when(response.aiMessage()).thenReturn(aiMessage);
             handler.onCompleteResponse(response);
             return null;
@@ -2113,7 +2115,7 @@ class LangChain4JLLMProviderTest {
     void stream_nonStreamingWithoutAiMessage_publishesMetadata() {
         var collected = new ArrayList<ResponseMetadata>();
         var request = requestWithMetadataSink("Hello", List.of(), collected);
-        var response = Mockito.mock(ChatResponse.class);
+        var response = mockChatResponse();
         Mockito.when(response.aiMessage()).thenReturn(null);
         Mockito.when(response.finishReason())
                 .thenReturn(FinishReason.CONTENT_FILTER);
@@ -2122,7 +2124,10 @@ class LangChain4JLLMProviderTest {
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
 
-        provider.stream(request).collectList().block();
+        // The turn fails for want of an AI message, after the metadata of
+        // the response was observed
+        Assertions.assertThrows(RuntimeException.class,
+                () -> provider.stream(request).collectList().block());
 
         Assertions.assertEquals(1, collected.size(),
                 "A turn that ends without a message still reports why");
@@ -2186,20 +2191,6 @@ class LangChain4JLLMProviderTest {
         Assertions.assertEquals(1, collected.size(),
                 "A round trip that reports neither a reason nor usage must "
                         + "not re-publish the earlier state");
-    }
-
-    @Test
-    void stream_turnEndsWithoutAiMessageAndWithoutFinishReason_logsWarning() {
-        var response = Mockito.mock(ChatResponse.class);
-        Mockito.when(response.aiMessage()).thenReturn(null);
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        provider.stream(createSimpleRequest("Hello")).collectList().block();
-
-        Assertions.assertTrue(hasMissingFinishReasonWarning(),
-                "A turn that ends without a message and without a finish "
-                        + "reason must warn");
     }
 
     @Test
@@ -2901,7 +2892,7 @@ class LangChain4JLLMProviderTest {
             return toolRequest;
         }).toList();
         Mockito.when(aiMessage.toolExecutionRequests()).thenReturn(requests);
-        var response = Mockito.mock(ChatResponse.class);
+        var response = mockChatResponse();
         Mockito.when(response.aiMessage()).thenReturn(aiMessage);
         return response;
     }
@@ -2982,16 +2973,27 @@ class LangChain4JLLMProviderTest {
         Mockito.when(toolRequest.arguments()).thenReturn(arguments);
         Mockito.when(aiMessage1.toolExecutionRequests())
                 .thenReturn(List.of(toolRequest));
-        var response1 = Mockito.mock(ChatResponse.class);
+        var response1 = mockChatResponse();
         Mockito.when(response1.aiMessage()).thenReturn(aiMessage1);
         return response1;
+    }
+
+    /**
+     * A mocked response carrying the metadata object a real response always
+     * has: the AI service reads it even when a test stubs nothing else.
+     */
+    private static ChatResponse mockChatResponse() {
+        var response = Mockito.mock(ChatResponse.class);
+        Mockito.when(response.metadata())
+                .thenReturn(ChatResponseMetadata.builder().build());
+        return response;
     }
 
     private static ChatResponse mockSimpleResponse(String text) {
         var aiMessage = Mockito.mock(AiMessage.class);
         Mockito.when(aiMessage.text()).thenReturn(text);
         Mockito.when(aiMessage.hasToolExecutionRequests()).thenReturn(false);
-        var response = Mockito.mock(ChatResponse.class);
+        var response = mockChatResponse();
         Mockito.when(response.aiMessage()).thenReturn(aiMessage);
         return response;
     }

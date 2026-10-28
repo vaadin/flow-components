@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,11 +46,11 @@ import dev.langchain4j.data.message.AudioContent;
 import dev.langchain4j.data.message.Content;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.PdfFileContent;
-import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.data.message.VideoContent;
+import dev.langchain4j.invocation.InvocationParameters;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -56,20 +59,38 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonRawSchema;
 import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
+import dev.langchain4j.observability.api.event.AiServiceResponseReceivedEvent;
+import dev.langchain4j.observability.api.listener.AiServiceListener;
+import dev.langchain4j.service.AiServiceContext;
+import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.Result;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.memory.ChatMemoryAccess;
+import dev.langchain4j.service.memory.ChatMemoryService;
 import dev.langchain4j.service.tool.DefaultToolExecutor;
 import dev.langchain4j.service.tool.ToolExecutor;
+import dev.langchain4j.service.tool.ToolProvider;
+import dev.langchain4j.service.tool.ToolProviderRequest;
+import dev.langchain4j.service.tool.ToolProviderResult;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import tools.jackson.databind.JsonNode;
 
 /**
- * LangChain4j implementation of {@link LLMProvider}.
+ * LangChain4j implementation of {@link LLMProvider}, built on a LangChain4j AI
+ * service.
  * <p>
- * Supports both streaming and non-streaming LangChain4j models. Tool calling is
- * supported through LangChain4j's {@link Tool} annotation.
+ * The provider drives a {@link ChatService} that LangChain4j's
+ * {@link AiServices} implements. The service owns the conversation memory and
+ * the tool-calling loop, and everything LangChain4j offers on
+ * {@code AiServices} (retrieval augmentation, tool providers such as MCP,
+ * guardrails, moderation, listeners) can be configured on it. The provider adds
+ * what the orchestrator needs: the tools of the turn, the attachments and the
+ * session context as message contents, the system prompt, response metadata,
+ * the tool call limits and the tool error policy for
+ * {@link LLMProvider.ToolSpec} tools.
  * </p>
  * <p>
  * <b>Streaming vs. non-streaming:</b> The mode is determined by the constructor
@@ -118,6 +139,43 @@ import tools.jackson.databind.JsonNode;
  */
 public class LangChain4JLLMProvider implements LLMProvider {
 
+    /**
+     * The AI service the provider drives. LangChain4j implements it through
+     * {@link AiServices}; the provider calls {@link #stream} with a
+     * {@link StreamingChatModel} and {@link #call} with a {@link ChatModel}.
+     * The user message of a turn is passed as a list of contents, so that
+     * attachments and the session context reach the model as they are, and the
+     * state of the turn travels in the invocation parameters.
+     */
+    public interface ChatService extends ChatMemoryAccess {
+
+        /**
+         * Runs a turn against a streaming model.
+         *
+         * @param message
+         *            the contents of the user message
+         * @param parameters
+         *            the invocation parameters carrying the turn
+         * @return the token stream of the turn
+         */
+        TokenStream stream(
+                @dev.langchain4j.service.UserMessage List<Content> message,
+                InvocationParameters parameters);
+
+        /**
+         * Runs a turn against a blocking model.
+         *
+         * @param message
+         *            the contents of the user message
+         * @param parameters
+         *            the invocation parameters carrying the turn
+         * @return the result of the turn
+         */
+        Result<String> call(
+                @dev.langchain4j.service.UserMessage List<Content> message,
+                InvocationParameters parameters);
+    }
+
     private static final Logger LOGGER = LoggerFactory
             .getLogger(LangChain4JLLMProvider.class);
 
@@ -125,9 +183,16 @@ public class LangChain4JLLMProvider implements LLMProvider {
     private static final int DEFAULT_MAX_CALLS_PER_TOOL = 40;
     private static final int DEFAULT_MAX_TOTAL_TOOL_CALLS = 150;
 
-    private final transient StreamingChatModel streamingChatModel;
-    private final transient ChatModel nonStreamingChatModel;
-    private final transient ChatMemory chatMemory;
+    /**
+     * The invocation parameter under which the turn travels to the hooks the
+     * provider registers on the service.
+     */
+    static final String TURN_PARAMETER = LangChain4JLLMProvider.class.getName()
+            + ".turn";
+
+    private final transient ChatService service;
+    private final transient boolean streaming;
+    private final transient AtomicReference<Turn> currentTurn = new AtomicReference<>();
     private final BackgroundExecution backgroundExecution = new BackgroundExecution(
             LangChain4JLLMProvider.class);
     private int maxCallsPerTool = DEFAULT_MAX_CALLS_PER_TOOL;
@@ -143,7 +208,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
      */
     public LangChain4JLLMProvider(StreamingChatModel chatModel) {
         this(null, Objects.requireNonNull(chatModel,
-                "StreamingChatModel must not be null"));
+                "StreamingChatModel must not be null"), null);
     }
 
     /**
@@ -156,14 +221,98 @@ public class LangChain4JLLMProvider implements LLMProvider {
      */
     public LangChain4JLLMProvider(ChatModel chatModel) {
         this(Objects.requireNonNull(chatModel, "ChatModel must not be null"),
-                null);
+                null, null);
     }
 
-    private LangChain4JLLMProvider(ChatModel chatModel,
-            StreamingChatModel streamingChatModel) {
-        this.streamingChatModel = streamingChatModel;
-        this.nonStreamingChatModel = chatModel;
-        this.chatMemory = MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES);
+    LangChain4JLLMProvider(ChatModel chatModel,
+            StreamingChatModel streamingChatModel, String systemPrompt) {
+        this.streaming = streamingChatModel != null;
+        this.service = createService(chatModel, streamingChatModel,
+                systemPrompt);
+    }
+
+    private ChatService createService(ChatModel chatModel,
+            StreamingChatModel streamingChatModel, String systemPrompt) {
+        var context = AiServiceContext.create(ChatService.class);
+        var builder = AiServices.<ChatService> builder(context);
+        if (chatModel != null) {
+            builder.chatModel(chatModel);
+        }
+        if (streamingChatModel != null) {
+            builder.streamingChatModel(streamingChatModel);
+        }
+        prepare(builder);
+        wire(context, builder, systemPrompt);
+        return builder.build();
+    }
+
+    /**
+     * Applies the defaults the provider wants on the service before the
+     * application gets to customize it, so that each can be overridden: the
+     * tool-calling loop is bounded by the provider's own tool call limits
+     * rather than by LangChain4j's round trip count, and a tool the model made
+     * up is reported back to it instead of failing the turn.
+     */
+    private void prepare(AiServices<ChatService> builder) {
+        builder.maxToolCallingRoundTrips(Integer.MAX_VALUE);
+        builder.hallucinatedToolNameStrategy(this::toolNotFound);
+    }
+
+    /**
+     * Installs the hooks the provider needs on the service: the memory, the
+     * tools of the turn, the system prompt, the metadata and tool call limit
+     * observer, the cancellation check before each model call, and the tool
+     * error handling that lets a limit or a cancellation end the turn. Whatever
+     * the service already carries is kept and composed with.
+     */
+    private void wire(AiServiceContext context, AiServices<ChatService> builder,
+            String systemPrompt) {
+        if (!context.hasChatMemory()) {
+            // The service reads the memory before it adds the user message
+            // of the turn, so a request carries the window plus that
+            // message. The window is sized one short to keep a request
+            // within MAX_MESSAGES.
+            builder.chatMemory(new TurnScopedChatMemory(
+                    MessageWindowChatMemory.withMaxMessages(MAX_MESSAGES - 1)));
+        }
+        builder.toolProvider(new TurnToolProvider());
+        builder.registerListener(new ResponseObserver());
+
+        var configuredSystemMessage = context.systemMessageProvider;
+        context.systemMessageProvider = memoryId -> {
+            var turn = currentTurn.get();
+            var fromRequest = turn == null ? null : turn.request.systemPrompt();
+            if (fromRequest != null && !fromRequest.isBlank()) {
+                return Optional.of(fromRequest.trim());
+            }
+            if (systemPrompt != null && !systemPrompt.isBlank()) {
+                return Optional.of(systemPrompt.trim());
+            }
+            return configuredSystemMessage.apply(memoryId);
+        };
+
+        BiFunction<ChatRequest, Object, ChatRequest> configuredTransformer = context.chatRequestTransformer;
+        context.chatRequestTransformer = (request, memoryId) -> {
+            var turn = currentTurn.get();
+            if (turn != null && turn.isCancelled()) {
+                // The subscriber is gone, typically because the
+                // orchestrator's timeout fired. Another model call would only
+                // cost money for a result nobody receives.
+                LOGGER.debug("The turn was cancelled, skipping the model call");
+                throw new TurnCancelledException();
+            }
+            return configuredTransformer.apply(request, memoryId);
+        };
+
+        var configuredErrorHandler = context.toolService
+                .executionErrorHandler();
+        builder.toolExecutionErrorHandler((error, errorContext) -> {
+            if (error instanceof ToolCallLimitExceededException
+                    || error instanceof TurnCancelledException) {
+                throw (RuntimeException) error;
+            }
+            return configuredErrorHandler.handle(error, errorContext);
+        });
     }
 
     @Override
@@ -172,27 +321,33 @@ public class LangChain4JLLMProvider implements LLMProvider {
         Objects.requireNonNull(request.userMessage(),
                 "User message must not be null");
         var response = Flux.<String> create(sink -> {
+            if (sink.isCancelled()) {
+                // Checked before the question is recorded: a turn
+                // abandoned before it started must leave the conversation
+                // as it was, not a question the next turn would repeat.
+                LOGGER.debug("The turn was cancelled before it started");
+                return;
+            }
+            var turn = new Turn(request, sink,
+                    new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls));
+            currentTurn.set(turn);
             try {
-                if (sink.isCancelled()) {
-                    // Checked before the question is recorded: a turn
-                    // abandoned before it started must leave the conversation
-                    // as it was, not a question the next turn would repeat.
-                    LOGGER.debug("The turn was cancelled before it started");
-                    return;
+                var contents = buildContents(request);
+                var parameters = InvocationParameters.from(TURN_PARAMETER,
+                        turn);
+                if (streaming) {
+                    service.stream(contents, parameters)
+                            .onPartialResponse(sink::next)
+                            .onCompleteResponse(turn::complete)
+                            .onError(turn::fail).start();
+                } else {
+                    turn.complete(service.call(contents, parameters));
                 }
-                var userMessage = buildUserMessage(request);
-                chatMemory.add(userMessage);
-                var toolContext = new ToolContext(prepareToolExecutors(request),
-                        prepareToolSpecifications(request));
-                var context = new ChatExecutionContext(request, sink,
-                        chatMemory, toolContext,
-                        new ToolCallLimits(maxCallsPerTool, maxTotalToolCalls));
-                executeChat(context);
             } catch (Exception e) {
-                sink.error(e);
+                turn.fail(e);
             }
         }, FluxSink.OverflowStrategy.BUFFER);
-        return streamingChatModel != null
+        return streaming
                 ? backgroundExecution.applyToStreamingResponse(response)
                 : backgroundExecution.applyToBlockingResponse(response);
     }
@@ -356,6 +511,13 @@ public class LangChain4JLLMProvider implements LLMProvider {
         Objects.requireNonNull(history, "History must not be null");
         Objects.requireNonNull(attachmentsByMessageId,
                 "Attachments map must not be null");
+        var chatMemory = getChatMemory();
+        if (chatMemory == null) {
+            LOGGER.warn("History restoration was requested, but the service "
+                    + "has no chat memory for the default conversation, so "
+                    + "the restored conversation does not reach the LLM.");
+            return;
+        }
         chatMemory.clear();
         for (var message : history) {
             var attachments = message.messageId() != null
@@ -364,6 +526,10 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     : Collections.<AIAttachment> emptyList();
             chatMemory.add(toVendorMessage(message, attachments));
         }
+    }
+
+    private ChatMemory getChatMemory() {
+        return service.getChatMemory(ChatMemoryService.DEFAULT);
     }
 
     private static dev.langchain4j.data.message.ChatMessage toVendorMessage(
@@ -386,43 +552,145 @@ public class LangChain4JLLMProvider implements LLMProvider {
         return UserMessage.from(contents);
     }
 
-    private Map<String, ToolExecutor> prepareToolExecutors(LLMRequest request) {
-        var tools = request.tools();
-        var explicitTools = request.explicitTools();
-        var toolExecutors = new HashMap<String, ToolExecutor>();
-        // Add tools from LangChain4j @Tool annotated methods. Create executors
-        // for each annotated method including private methods.
-        if (tools != null) {
-            for (var toolObject : tools) {
-                Arrays.stream(toolObject.getClass().getDeclaredMethods())
-                        .filter(method -> method
-                                .isAnnotationPresent(Tool.class))
-                        .forEach(method -> {
-                            var toolExecutorKey = ToolSpecifications
-                                    .toolSpecificationFrom(method).name();
-                            var toolExecutor = getToolExecutor(toolObject,
-                                    method);
-                            toolExecutors.put(toolExecutorKey, toolExecutor);
-                        });
+    private ToolExecutionResultMessage toolNotFound(
+            ToolExecutionRequest toolRequest) {
+        var turn = currentTurn.get();
+        if (turn != null) {
+            turn.beforeTool();
+        }
+        return ToolExecutionResultMessage.from(toolRequest,
+                "Tool not found: " + toolRequest.name());
+    }
+
+    private static List<Content> buildContents(LLMRequest request) {
+        var contents = new ArrayList<Content>();
+        contents.add(TextContent.from(LLMProviderHelpers.withSessionContext(
+                request.userMessage(), request.sessionContext())));
+        var attachments = request.attachments();
+        if (attachments != null) {
+            attachments.stream()
+                    .map(LangChain4JLLMProvider::getAttachmentContent)
+                    .flatMap(Optional::stream).forEach(contents::add);
+        }
+        return contents;
+    }
+
+    private static Optional<Content> getAttachmentContent(
+            AIAttachment attachment) {
+        LLMProviderHelpers.validateAttachment(attachment);
+        var contentType = AttachmentContentType
+                .fromMimeType(attachment.mimeType());
+        return switch (contentType) {
+        case IMAGE -> Optional.of(getImageAttachmentContent(attachment));
+        case TEXT -> Optional.of(getTextAttachmentContent(attachment));
+        case PDF -> Optional.of(getPdfAttachmentContent(attachment));
+        case AUDIO -> Optional.of(getAudioAttachmentContent(attachment));
+        case VIDEO -> Optional.of(getVideoAttachmentContent(attachment));
+        case UNSUPPORTED -> Optional.empty();
+        };
+    }
+
+    private static TextContent getTextAttachmentContent(
+            AIAttachment attachment) {
+        var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
+                attachment.name(), false);
+        return TextContent.from(LLMProviderHelpers
+                .formatTextAttachment(attachment.name(), textContent));
+    }
+
+    private static PdfFileContent getPdfAttachmentContent(
+            AIAttachment attachment) {
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return PdfFileContent.from(base64, attachment.mimeType());
+    }
+
+    private static ImageContent getImageAttachmentContent(
+            AIAttachment attachment) {
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return ImageContent.from(base64, attachment.mimeType());
+    }
+
+    private static AudioContent getAudioAttachmentContent(
+            AIAttachment attachment) {
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return AudioContent.from(base64, attachment.mimeType());
+    }
+
+    private static VideoContent getVideoAttachmentContent(
+            AIAttachment attachment) {
+        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
+        return VideoContent.from(base64, attachment.mimeType());
+    }
+
+    /**
+     * Provides the tools of the turn to the service: the vendor-annotated tool
+     * objects and the controller's {@link LLMProvider.ToolSpec} tools of the
+     * request the turn was started with, read from the invocation parameters.
+     * Every executor checks the state of the turn before it runs, so a tool
+     * call limit or a cancellation ends the turn before any tool of the round
+     * executes.
+     */
+    private static final class TurnToolProvider implements ToolProvider {
+
+        @Override
+        public ToolProviderResult provideTools(ToolProviderRequest request) {
+            Turn turn = request.invocationParameters().get(TURN_PARAMETER);
+            var result = ToolProviderResult.builder();
+            if (turn == null) {
+                return result.build();
             }
-        }
-        // Add explicit (framework-agnostic) tools
-        for (var tool : explicitTools) {
-            var placeholderSchema = usesPlaceholderSchema(tool);
-            toolExecutors.put(tool.getName(), (execReq, memoryId) -> {
-                if (placeholderSchema) {
-                    // The model saw the placeholder schema; the tool did not
-                    // declare a usable one, so it receives no arguments.
-                    // Decided before parsing, so the tool stays callable even
-                    // on the malformed arguments — an empty string, say —
-                    // that the placeholder schema exists to work around.
-                    return tool.execute(JacksonUtils.createObjectNode());
+            var tools = turn.request.tools();
+            if (tools != null) {
+                for (var toolObject : tools) {
+                    Arrays.stream(toolObject.getClass().getDeclaredMethods())
+                            .filter(method -> method
+                                    .isAnnotationPresent(Tool.class))
+                            .forEach(method -> result.add(
+                                    ToolSpecifications
+                                            .toolSpecificationFrom(method),
+                                    turn.guard(getToolExecutor(toolObject,
+                                            method))));
                 }
-                return tool.execute(
-                        parseExplicitToolArguments(execReq.arguments()));
-            });
+            }
+            for (var tool : turn.request.explicitTools()) {
+                result.add(toToolSpecification(tool),
+                        turn.guard(toExplicitToolExecutor(tool)));
+            }
+            return result.build();
         }
-        return toolExecutors;
+
+        private static ToolExecutor getToolExecutor(Object toolObject,
+                Method method) {
+            var baseExecutor = new DefaultToolExecutor(toolObject, method);
+            return baseExecutor::execute;
+        }
+
+        private static ToolExecutor toExplicitToolExecutor(
+                LLMProvider.ToolSpec tool) {
+            var placeholderSchema = usesPlaceholderSchema(tool);
+            return (execReq, memoryId) -> {
+                try {
+                    if (placeholderSchema) {
+                        // The model saw the placeholder schema; the tool did
+                        // not declare a usable one, so it receives no
+                        // arguments. Decided before parsing, so the tool
+                        // stays callable even on the malformed arguments —
+                        // an empty string, say — that the placeholder schema
+                        // exists to work around.
+                        return tool.execute(JacksonUtils.createObjectNode());
+                    }
+                    return tool.execute(
+                            parseExplicitToolArguments(execReq.arguments()));
+                } catch (ToolException e) {
+                    LOGGER.warn("Tool '{}' failed: {}", tool.getName(),
+                            e.getMessage(), e);
+                    return "Error executing tool: " + e.getMessage();
+                } catch (Exception e) {
+                    LOGGER.error("Tool '{}' failed", tool.getName(), e);
+                    return "Error executing tool.";
+                }
+            };
+        }
     }
 
     /**
@@ -447,25 +715,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
             throw new ToolException("invalid JSON arguments: " + e.getMessage(),
                     e);
         }
-    }
-
-    private ToolExecutor getToolExecutor(Object toolObject, Method method) {
-        var baseExecutor = new DefaultToolExecutor(toolObject, method);
-        return baseExecutor::execute;
-    }
-
-    private List<ToolSpecification> prepareToolSpecifications(
-            LLMRequest request) {
-        var specs = new ArrayList<ToolSpecification>();
-        if (request.tools() != null) {
-            Arrays.stream(request.tools())
-                    .map(ToolSpecifications::toolSpecificationsFrom)
-                    .flatMap(List::stream).forEach(specs::add);
-        }
-        request.explicitTools().stream()
-                .map(LangChain4JLLMProvider::toToolSpecification)
-                .forEach(specs::add);
-        return specs;
     }
 
     private static ToolSpecification toToolSpecification(
@@ -526,278 +775,36 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
     }
 
-    private void executeChat(ChatExecutionContext context) {
-        if (context.getSink().isCancelled()) {
-            // The subscriber is gone, typically because the orchestrator's
-            // timeout fired. Another model call would only cost money for a
-            // result nobody receives.
-            LOGGER.debug("The turn was cancelled, skipping the model call");
-            return;
+    /**
+     * Receives every model response of a turn, in both modes and before the
+     * tools of the response run: publishes the metadata observed so far and
+     * screens the tool calls of the round against the limits.
+     */
+    private static final class ResponseObserver
+            implements AiServiceListener<AiServiceResponseReceivedEvent> {
+
+        @Override
+        public Class<AiServiceResponseReceivedEvent> getEventClass() {
+            return AiServiceResponseReceivedEvent.class;
         }
-        var messages = buildMessages(context.getRequest(),
-                context.getChatMemory(), context.getTurnMessages());
-        if (streamingChatModel != null) {
-            executeStreamingChat(messages, context);
-        } else {
-            executeNonStreamingChat(messages, context);
-        }
-    }
 
-    private void executeStreamingChat(
-            List<dev.langchain4j.data.message.ChatMessage> messages,
-            ChatExecutionContext context) {
-        var chatRequestBuilder = ChatRequest.builder().messages(messages);
-        var specifications = context.getToolContext().specifications();
-        if (!specifications.isEmpty()) {
-            chatRequestBuilder = chatRequestBuilder
-                    .toolSpecifications(specifications);
-        }
-        var chatRequest = chatRequestBuilder.build();
-        streamingChatModel.chat(chatRequest,
-                new StreamingChatResponseHandler() {
-                    @Override
-                    public void onPartialResponse(String partialResponse) {
-                        context.getSink().next(partialResponse);
-                    }
-
-                    @Override
-                    public void onCompleteResponse(ChatResponse response) {
-                        handleResponse(context, response);
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-                        context.getSink().error(error);
-                    }
-                });
-    }
-
-    private void executeToolRequests(AiMessage aiMessage,
-            ChatExecutionContext context) {
-        var toolExecutionRequests = aiMessage.toolExecutionRequests();
-        for (var toolExecRequest : toolExecutionRequests) {
-            var toolExecutor = context.getToolContext().executors()
-                    .get(toolExecRequest.name());
-            var result = executeToolRequest(toolExecutor, toolExecRequest);
-            context.addTurnMessage(result);
-        }
-    }
-
-    private void executeNonStreamingChat(
-            List<dev.langchain4j.data.message.ChatMessage> messages,
-            ChatExecutionContext context) {
-        try {
-            var requestBuilder = ChatRequest.builder().messages(messages);
-            var specifications = context.getToolContext().specifications();
-            if (!specifications.isEmpty()) {
-                requestBuilder.toolSpecifications(specifications);
+        @Override
+        public void onEvent(AiServiceResponseReceivedEvent event) {
+            Turn turn = event.invocationContext().invocationParameters()
+                    .get(TURN_PARAMETER);
+            if (turn != null) {
+                turn.observeResponse(event.response());
             }
-            var response = nonStreamingChatModel.chat(requestBuilder.build());
-            handleResponse(context, response);
-        } catch (Exception e) {
-            context.getSink().error(e);
-        }
-    }
-
-    private void handleResponse(ChatExecutionContext context,
-            ChatResponse response) {
-        context.observeMetadata(response);
-        var aiMessage = response.aiMessage();
-        if (aiMessage == null) {
-            warnOnMissingFinishReason(response);
-            context.getSink().complete();
-            return;
-        }
-        var hasToolRequests = aiMessage.hasToolExecutionRequests();
-        if (hasToolRequests
-                && !context.admitToolCalls(aiMessage.toolExecutionRequests())) {
-            // Decided before any tool of this round runs. A turn that ends
-            // here leaves nothing behind: its tool traffic is discarded with
-            // it, so the next turn continues from the chat memory as the last
-            // completed turn left it.
-            return;
-        }
-        if (!isStreaming()) {
-            var text = aiMessage.text();
-            if (text != null && !text.isEmpty()) {
-                context.getSink().next(text);
-            }
-        }
-        if (hasToolRequests) {
-            // Tool calls and their results stay within the turn: the
-            // follow-up round trips of this turn need them, but on later
-            // turns they would only be replayed as stale copies of state the
-            // model is told to fetch again, at the cost of every past tool
-            // result on every request. Only the user message and the final
-            // answer enter the chat memory, as with SpringAILLMProvider.
-            context.addTurnMessage(aiMessage);
-            executeToolRequests(aiMessage, context);
-            executeChat(context);
-        } else {
-            rememberAnswer(aiMessage, context);
-            warnOnMissingFinishReason(response);
-            context.getSink().complete();
         }
     }
 
     /**
-     * Adds the answer that ends the turn to the chat memory, unless it has no
-     * text. A turn may end that way: once a tool call has done what the user
-     * asked, a model may have nothing left to say, and LangChain4j hands such
-     * an answer over as an {@link AiMessage} whose text is {@code null}. Stored
-     * in the chat memory it would be replayed on every later turn as an
-     * assistant message with neither content nor tool calls, which the OpenAI
-     * Chat Completions API rejects, so the conversation would fail from then
-     * on. Skipping it leaves only the user message of the turn in the memory,
-     * as a response without any AI message does.
+     * Ends the loop of a turn whose subscriber has cancelled.
      */
-    private static void rememberAnswer(AiMessage aiMessage,
-            ChatExecutionContext context) {
-        var text = aiMessage.text();
-        if (text == null || text.isEmpty()) {
-            LOGGER.debug("The turn ended with an answer without text, which "
-                    + "is not added to the chat memory");
-            return;
+    private static final class TurnCancelledException extends RuntimeException {
+        TurnCancelledException() {
+            super("The turn was cancelled");
         }
-        context.getChatMemory().add(aiMessage);
-    }
-
-    /**
-     * Warns when the round trip that ends the turn carries no finish reason.
-     * <p>
-     * Only that round trip counts. A reason reported by an earlier round trip
-     * describes why <i>that</i> round trip stopped — {@code TOOL_EXECUTION},
-     * typically — and says nothing about how the turn ended, so it must not
-     * silence the warning. This mirrors {@code SpringAILLMProvider}, whose
-     * terminal-chunk check likewise ignores a reason that arrives with tool
-     * calls still pending. Called only from the points where the turn ends with
-     * the model's own answer, so the response passed in is by construction the
-     * terminal one. A turn ended by a tool call limit or by a cancelled sink
-     * does not pass through here, since neither is a normal completion.
-     * <p>
-     * This provider drives the tool-calling loop itself, so unlike
-     * {@code SpringAILLMProvider} a turn cannot end with tool calls still
-     * pending; a missing finish reason is the one terminal state left that may
-     * indicate a silent abnormal termination. It does not prove the model
-     * reported nothing: LangChain4j also leaves the reason unset when its
-     * integration does not recognize the value the model sent.
-     */
-    private static void warnOnMissingFinishReason(ChatResponse response) {
-        if (response.finishReason() != null) {
-            return;
-        }
-        LOGGER.warn("LLM turn ended with no finish reason for its final "
-                + "round trip. Either the model reported none, which may "
-                + "indicate a silent abnormal termination such as an upstream "
-                + "error, or LangChain4j dropped a value its integration does "
-                + "not recognize; if the response appears truncated this "
-                + "warning is the signal.");
-    }
-
-    private static ToolExecutionResultMessage executeToolRequest(
-            ToolExecutor toolExecutor, ToolExecutionRequest toolExecRequest) {
-        String result;
-        if (toolExecutor == null) {
-            result = "Tool not found: " + toolExecRequest.name();
-        } else {
-            try {
-                result = toolExecutor.execute(toolExecRequest, null);
-            } catch (ToolException e) {
-                LOGGER.warn("Tool '{}' failed: {}", toolExecRequest.name(),
-                        e.getMessage(), e);
-                result = "Error executing tool: " + e.getMessage();
-            } catch (Exception e) {
-                LOGGER.error("Tool '{}' failed", toolExecRequest.name(), e);
-                result = "Error executing tool.";
-            }
-        }
-        return ToolExecutionResultMessage.from(toolExecRequest, result);
-    }
-
-    private List<dev.langchain4j.data.message.ChatMessage> buildMessages(
-            LLMRequest request, ChatMemory chatMemory,
-            List<dev.langchain4j.data.message.ChatMessage> turnMessages) {
-        var messages = new ArrayList<dev.langchain4j.data.message.ChatMessage>();
-        if (request.systemPrompt() != null) {
-            var systemPrompt = request.systemPrompt().trim();
-            if (!systemPrompt.isEmpty()) {
-                messages.add(SystemMessage.from(systemPrompt));
-            }
-        }
-        messages.addAll(chatMemory.messages());
-        messages.addAll(turnMessages);
-        return messages;
-    }
-
-    private UserMessage buildUserMessage(LLMRequest request) {
-        var contents = new ArrayList<Content>();
-        contents.add(TextContent.from(LLMProviderHelpers.withSessionContext(
-                request.userMessage(), request.sessionContext())));
-        var attachments = request.attachments();
-        if (attachments != null) {
-            attachments.stream()
-                    .map(LangChain4JLLMProvider::getAttachmentContent)
-                    .flatMap(Optional::stream).forEach(contents::add);
-        }
-        return UserMessage.from(contents);
-    }
-
-    private boolean isStreaming() {
-        return streamingChatModel != null;
-    }
-
-    private static Optional<Content> getAttachmentContent(
-            AIAttachment attachment) {
-        LLMProviderHelpers.validateAttachment(attachment);
-        var contentType = AttachmentContentType
-                .fromMimeType(attachment.mimeType());
-        return switch (contentType) {
-        case IMAGE -> Optional.of(getImageAttachmentContent(attachment));
-        case TEXT -> Optional.of(getTextAttachmentContent(attachment));
-        case PDF -> Optional.of(getPdfAttachmentContent(attachment));
-        case AUDIO -> Optional.of(getAudioAttachmentContent(attachment));
-        case VIDEO -> Optional.of(getVideoAttachmentContent(attachment));
-        case UNSUPPORTED -> Optional.empty();
-        };
-    }
-
-    private static TextContent getTextAttachmentContent(
-            AIAttachment attachment) {
-        var textContent = LLMProviderHelpers.decodeAsUtf8(attachment.data(),
-                attachment.name(), false);
-        return TextContent.from(LLMProviderHelpers
-                .formatTextAttachment(attachment.name(), textContent));
-    }
-
-    private static PdfFileContent getPdfAttachmentContent(
-            AIAttachment attachment) {
-        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return PdfFileContent.from(base64, attachment.mimeType());
-    }
-
-    private static ImageContent getImageAttachmentContent(
-            AIAttachment attachment) {
-        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return ImageContent.from(base64, attachment.mimeType());
-    }
-
-    private static AudioContent getAudioAttachmentContent(
-            AIAttachment attachment) {
-        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return AudioContent.from(base64, attachment.mimeType());
-    }
-
-    private static VideoContent getVideoAttachmentContent(
-            AIAttachment attachment) {
-        var base64 = LLMProviderHelpers.getBase64Data(attachment.data());
-        return VideoContent.from(base64, attachment.mimeType());
-    }
-
-    /**
-     * Encapsulates tool-related data for chat execution.
-     */
-    private record ToolContext(Map<String, ToolExecutor> executors,
-            List<ToolSpecification> specifications) {
     }
 
     /**
@@ -849,58 +856,120 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
-     * Encapsulates execution state for a chat stream.
+     * The state of one turn: the request it answers, the sink its tokens go to,
+     * the limits, and the metadata observed so far. Shared with the hooks the
+     * provider registers on the service through the invocation parameters and
+     * the provider's current-turn reference.
      */
-    private static class ChatExecutionContext {
+    private final class Turn {
         private final LLMRequest request;
         private final FluxSink<String> sink;
-        private final ChatMemory chatMemory;
-        private final ToolContext toolContext;
         private final ToolCallLimits toolCallLimits;
-        /**
-         * Tool calls and tool results of this turn, in order. Sent after the
-         * chat memory on every round trip of the turn and discarded with it.
-         */
-        private final List<dev.langchain4j.data.message.ChatMessage> turnMessages = new ArrayList<>();
+        private final AtomicBoolean ended = new AtomicBoolean(false);
         private FinishReason lastFinishReason;
+        private boolean lastResponseHadFinishReason;
         private TokenUsage accumulatedUsage;
+        private ToolCallLimitExceededException limitBreach;
 
-        ChatExecutionContext(LLMRequest request, FluxSink<String> sink,
-                ChatMemory chatMemory, ToolContext toolContext,
+        Turn(LLMRequest request, FluxSink<String> sink,
                 ToolCallLimits toolCallLimits) {
             this.request = request;
             this.sink = sink;
-            this.chatMemory = chatMemory;
-            this.toolContext = toolContext;
             this.toolCallLimits = toolCallLimits;
         }
 
+        boolean isCancelled() {
+            return sink.isCancelled();
+        }
+
         /**
-         * Decides whether the tool calls the model requested in this round may
-         * run. Nothing runs for a turn whose subscriber has cancelled, and
-         * nothing runs once a call exceeds a tool call limit; the turn then
-         * fails with the exception describing the limit.
-         *
-         * @param requests
-         *            the tool calls the model requested in this round
-         * @return {@code true} if the calls may run, {@code false} if the turn
-         *         has ended instead
+         * Wraps a tool executor so that the state of the turn is checked before
+         * the tool runs.
          */
-        boolean admitToolCalls(List<ToolExecutionRequest> requests) {
-            if (sink.isCancelled()) {
+        ToolExecutor guard(ToolExecutor executor) {
+            return (toolRequest, memoryId) -> {
+                beforeTool();
+                return executor.execute(toolRequest, memoryId);
+            };
+        }
+
+        /**
+         * Ends the turn instead of running a tool when the subscriber has
+         * cancelled or a tool call of the round exceeded a limit. The round was
+         * screened when the model's response arrived, so the first tool of a
+         * refused round is the one that ends the turn.
+         */
+        void beforeTool() {
+            if (isCancelled()) {
                 LOGGER.debug("The turn was cancelled, skipping the tool "
                         + "calls the model requested");
-                return false;
+                throw new TurnCancelledException();
             }
-            for (var request : requests) {
+            if (limitBreach != null) {
+                throw limitBreach;
+            }
+        }
+
+        /**
+         * Records one model response: its metadata, and whether the tool calls
+         * it requests stay within the limits of the turn.
+         */
+        void observeResponse(ChatResponse response) {
+            observeMetadata(response);
+            var aiMessage = response.aiMessage();
+            if (aiMessage == null || !aiMessage.hasToolExecutionRequests()
+                    || limitBreach != null) {
+                return;
+            }
+            for (var toolRequest : aiMessage.toolExecutionRequests()) {
                 var exceededLimit = toolCallLimits
-                        .countAndCheck(request.name());
+                        .countAndCheck(toolRequest.name());
                 if (exceededLimit.isPresent()) {
-                    sink.error(exceededLimit.get());
-                    return false;
+                    limitBreach = exceededLimit.get();
+                    return;
                 }
             }
-            return true;
+        }
+
+        void complete(ChatResponse finalResponse) {
+            if (!ended.compareAndSet(false, true)) {
+                return;
+            }
+            warnOnMissingFinishReason();
+            currentTurn.compareAndSet(this, null);
+            sink.complete();
+        }
+
+        void complete(Result<String> result) {
+            if (!ended.compareAndSet(false, true)) {
+                return;
+            }
+            warnOnMissingFinishReason();
+            currentTurn.compareAndSet(this, null);
+            var text = result.content();
+            if (text != null && !text.isEmpty()) {
+                sink.next(text);
+            }
+            sink.complete();
+        }
+
+        void fail(Throwable error) {
+            if (!ended.compareAndSet(false, true)) {
+                return;
+            }
+            currentTurn.compareAndSet(this, null);
+            // The traffic of a failed turn is discarded with it, so the next
+            // turn continues from the chat memory as the last completed turn
+            // left it.
+            if (getChatMemory() instanceof TurnScopedChatMemory memory) {
+                memory.endTurn();
+            }
+            if (error instanceof TurnCancelledException) {
+                // Nobody is listening; the cancellation is the subscriber's
+                // own doing.
+                return;
+            }
+            sink.error(error);
         }
 
         /**
@@ -910,7 +979,8 @@ public class LangChain4JLLMProvider implements LLMProvider {
          * The reason that ends the turn wins; token usage accumulates across
          * the round trips.
          */
-        void observeMetadata(ChatResponse response) {
+        private void observeMetadata(ChatResponse response) {
+            lastResponseHadFinishReason = response.finishReason() != null;
             if (response.finishReason() == null
                     && response.tokenUsage() == null) {
                 // Nothing new in this round trip, nothing to re-publish.
@@ -944,28 +1014,25 @@ public class LangChain4JLLMProvider implements LLMProvider {
                     .accept(new ResponseMetadata(finishReason, tokenUsage));
         }
 
-        LLMRequest getRequest() {
-            return request;
-        }
-
-        FluxSink<String> getSink() {
-            return sink;
-        }
-
-        ChatMemory getChatMemory() {
-            return chatMemory;
-        }
-
-        List<dev.langchain4j.data.message.ChatMessage> getTurnMessages() {
-            return turnMessages;
-        }
-
-        void addTurnMessage(dev.langchain4j.data.message.ChatMessage message) {
-            turnMessages.add(message);
-        }
-
-        ToolContext getToolContext() {
-            return toolContext;
+        /**
+         * Warns when the round trip that ends the turn carries no finish
+         * reason. Only that round trip counts: a reason reported by an earlier
+         * round trip describes why that round trip stopped, typically
+         * {@code TOOL_EXECUTION}, and says nothing about how the turn ended. A
+         * missing finish reason does not prove the model reported nothing:
+         * LangChain4j also leaves the reason unset when its integration does
+         * not recognize the value the model sent.
+         */
+        private void warnOnMissingFinishReason() {
+            if (lastResponseHadFinishReason) {
+                return;
+            }
+            LOGGER.warn("LLM turn ended with no finish reason for its final "
+                    + "round trip. Either the model reported none, which may "
+                    + "indicate a silent abnormal termination such as an upstream "
+                    + "error, or LangChain4j dropped a value its integration does "
+                    + "not recognize; if the response appears truncated this "
+                    + "warning is the signal.");
         }
     }
 }
