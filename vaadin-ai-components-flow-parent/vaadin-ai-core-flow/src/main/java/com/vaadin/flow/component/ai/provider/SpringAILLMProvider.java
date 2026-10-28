@@ -160,14 +160,86 @@ public class SpringAILLMProvider implements LLMProvider {
      *             if chatModel is {@code null}
      */
     public SpringAILLMProvider(ChatModel chatModel) {
+        this(builder(chatModel));
+    }
+
+    private SpringAILLMProvider(Builder settings) {
+        var clientBuilder = settings.clientBuilder;
+        if (settings.systemPrompt != null && !settings.systemPrompt.isBlank()) {
+            clientBuilder.defaultSystem(settings.systemPrompt.trim());
+        }
+        if (settings.customizer != null) {
+            settings.customizer.accept(clientBuilder);
+        }
+        var client = clientBuilder.build();
+        if (hasMemoryAdvisor(client)) {
+            // The application configured the conversation memory itself
+            chatClient = client;
+            chatMemory = null;
+            hasManagedMemory = false;
+        } else {
+            chatMemory = MessageWindowChatMemory.builder()
+                    .maxMessages(MAX_MESSAGES).build();
+            chatClient = client.mutate().defaultAdvisors(
+                    MessageChatMemoryAdvisor.builder(chatMemory).build())
+                    .build();
+            hasManagedMemory = true;
+        }
+    }
+
+    /**
+     * Creates a builder for a provider on a chat model. The builder takes the
+     * system prompt and lets the application customize the {@link ChatClient}
+     * the provider is built on, see {@link Builder#customize}.
+     *
+     * @param chatModel
+     *            the chat model, not {@code null}
+     * @return the builder
+     * @throws NullPointerException
+     *             if chatModel is {@code null}
+     * @since 25.4
+     */
+    public static Builder builder(ChatModel chatModel) {
         Objects.requireNonNull(chatModel, "ChatModel must not be null");
-        chatMemory = MessageWindowChatMemory.builder().maxMessages(MAX_MESSAGES)
-                .build();
-        chatClient = ChatClient.builder(chatModel)
-                .defaultAdvisors(
-                        MessageChatMemoryAdvisor.builder(chatMemory).build())
-                .build();
-        hasManagedMemory = true;
+        return new Builder(ChatClient.builder(chatModel));
+    }
+
+    /**
+     * Creates a builder for a provider on a {@link ChatClient.Builder}, for
+     * example the one Spring Boot auto-configures with the application's
+     * observability and tool call limit settings. The builder takes the system
+     * prompt and lets the application customize the client further, see
+     * {@link Builder#customize}.
+     *
+     * @param chatClientBuilder
+     *            the chat client builder, not {@code null}
+     * @return the builder
+     * @throws NullPointerException
+     *             if chatClientBuilder is {@code null}
+     * @since 25.4
+     */
+    public static Builder builder(ChatClient.Builder chatClientBuilder) {
+        return new Builder(Objects.requireNonNull(chatClientBuilder,
+                "ChatClient.Builder must not be null"));
+    }
+
+    /**
+     * Tells whether the client carries a memory advisor of its own. Only Spring
+     * AI's own client implementation can be inspected; any other is assumed to
+     * manage the conversation itself.
+     */
+    private static boolean hasMemoryAdvisor(ChatClient client) {
+        try {
+            return !(client
+                    .prompt() instanceof DefaultChatClientRequestSpec spec)
+                    || spec.getAdvisors().stream()
+                            .anyMatch(MemoryAdvisor.class::isInstance);
+        } catch (RuntimeException e) {
+            LOGGER.debug("The ChatClient did not accept a bare prompt() for "
+                    + "inspection, assuming the application owns the chat "
+                    + "memory", e);
+            return true;
+        }
     }
 
     /**
@@ -763,6 +835,83 @@ public class SpringAILLMProvider implements LLMProvider {
                 }
             }
         };
+    }
+
+    /**
+     * Builds a {@link SpringAILLMProvider} on a chat model or a
+     * {@link ChatClient.Builder}, with the system prompt and the Spring AI
+     * features the application wants on the client behind the provider.
+     *
+     * <pre>
+     * var provider = SpringAILLMProvider.builder(chatModel)
+     *         .systemPrompt("You are a support assistant.")
+     *         .customize(client -&gt; client
+     *                 .defaultAdvisors(QuestionAnswerAdvisor
+     *                         .builder(vectorStore).build())
+     *                 .defaultTools(mcpToolCallbackProvider))
+     *         .build();
+     * </pre>
+     *
+     * @since 25.4
+     */
+    public static final class Builder {
+        private final ChatClient.Builder clientBuilder;
+        private String systemPrompt;
+        private Consumer<ChatClient.Builder> customizer;
+
+        private Builder(ChatClient.Builder clientBuilder) {
+            this.clientBuilder = clientBuilder;
+        }
+
+        /**
+         * Sets the system prompt the model sees on every turn, as the client's
+         * default system text. A system prompt carried by the request of a turn
+         * takes precedence.
+         *
+         * @param systemPrompt
+         *            the system prompt, or {@code null} for none
+         * @return this builder
+         */
+        public Builder systemPrompt(String systemPrompt) {
+            this.systemPrompt = systemPrompt;
+            return this;
+        }
+
+        /**
+         * Customizes the client the provider is built on. The customizer
+         * receives Spring AI's {@link ChatClient.Builder} with the model and
+         * the system prompt already set, and may configure anything the builder
+         * offers: advisors for retrieval augmentation or guardrails, default
+         * tools including MCP tool callback providers, default options, and so
+         * on. Customizers run in the order they were added.
+         * <p>
+         * The provider completes the client after the customizers ran: it adds
+         * its own chat memory advisor only when the client carries no
+         * {@code MemoryAdvisor}, so an application that configures the
+         * conversation memory keeps it, in which case
+         * {@link SpringAILLMProvider#setHistory(List, Map)} does nothing.
+         *
+         * @param customizer
+         *            the customizer, not {@code null}
+         * @return this builder
+         * @throws NullPointerException
+         *             if customizer is {@code null}
+         */
+        public Builder customize(Consumer<ChatClient.Builder> customizer) {
+            Objects.requireNonNull(customizer, "Customizer must not be null");
+            this.customizer = this.customizer == null ? customizer
+                    : this.customizer.andThen(customizer);
+            return this;
+        }
+
+        /**
+         * Builds the provider.
+         *
+         * @return the provider
+         */
+        public SpringAILLMProvider build() {
+            return new SpringAILLMProvider(this);
+        }
     }
 
 }

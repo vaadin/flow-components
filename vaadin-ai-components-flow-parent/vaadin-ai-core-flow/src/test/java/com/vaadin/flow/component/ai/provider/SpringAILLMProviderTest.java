@@ -41,11 +41,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.event.Level;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
+import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
@@ -1629,6 +1634,139 @@ class SpringAILLMProviderTest {
                 .findFirst();
         Assertions.assertFalse(warning.isPresent(),
                 "Expected no abnormal-termination warning");
+    }
+
+    // --- Builder and customizer tests ---
+
+    @Test
+    void builder_systemPrompt_sentWhenRequestHasNone() {
+        var customized = SpringAILLMProvider.builder(mockChatModel)
+                .systemPrompt("Be brief").build();
+        customized.setStreaming(false);
+        mockSimpleChat("ok");
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var first = captor.getValue().getInstructions().getFirst();
+        Assertions.assertInstanceOf(SystemMessage.class, first);
+        Assertions.assertEquals("Be brief", first.getText());
+    }
+
+    @Test
+    void builder_systemPrompt_requestPromptTakesPrecedence() {
+        var customized = SpringAILLMProvider.builder(mockChatModel)
+                .systemPrompt("Be brief").build();
+        customized.setStreaming(false);
+        mockSimpleChat("ok");
+        var request = new TestLLMRequest("Hello", "From the request",
+                Collections.emptyList(), new Object[0]);
+
+        customized.stream(request).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var systemTexts = captor.getValue().getInstructions().stream()
+                .filter(SystemMessage.class::isInstance).map(Message::getText)
+                .toList();
+        Assertions.assertEquals(List.of("From the request"), systemTexts);
+    }
+
+    @Test
+    void builder_customizer_advisorAugmentsUserMessage() {
+        var customized = SpringAILLMProvider.builder(mockChatModel)
+                .customize(client -> client.defaultAdvisors(
+                        new FixedFactAdvisor("The codename is Bluefin")))
+                .build();
+        customized.setStreaming(false);
+        mockSimpleChat("Bluefin");
+
+        customized.stream(createSimpleRequest("What is the codename?"))
+                .blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel).call(captor.capture());
+        var userText = captor.getValue().getUserMessage().getText();
+        Assertions.assertTrue(userText.contains("What is the codename?"));
+        Assertions.assertTrue(userText.contains("The codename is Bluefin"),
+                "The advisor's context should reach the model: " + userText);
+    }
+
+    @Test
+    void builder_withoutMemoryAdvisor_providerKeepsTheConversation() {
+        var customized = SpringAILLMProvider.builder(mockChatModel).build();
+        customized.setStreaming(false);
+        mockSimpleChat("First answer");
+
+        customized.stream(createSimpleRequest("First")).blockFirst();
+        customized.stream(createSimpleRequest("Second")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).call(captor.capture());
+        var texts = captor.getAllValues().get(1).getInstructions().stream()
+                .map(Message::getText).toList();
+        Assertions.assertEquals(List.of("First", "First answer", "Second"),
+                texts);
+    }
+
+    @Test
+    void builder_customizerMemoryAdvisor_isUsedInsteadOfTheProviderOwn() {
+        var memory = MessageWindowChatMemory.builder().build();
+        var customized = SpringAILLMProvider.builder(mockChatModel)
+                .customize(client -> client.defaultAdvisors(advisors -> advisors
+                        .advisors(MessageChatMemoryAdvisor.builder(memory)
+                                .build())
+                        .param(ChatMemory.CONVERSATION_ID, "app")))
+                .build();
+        customized.setStreaming(false);
+        mockSimpleChat("Hi there");
+
+        customized.stream(createSimpleRequest("Hello")).blockFirst();
+
+        var texts = memory.get("app").stream().map(Message::getText).toList();
+        Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
+    }
+
+    @Test
+    void builder_customizers_runInOrder() {
+        var order = new ArrayList<String>();
+        SpringAILLMProvider.builder(mockChatModel)
+                .customize(client -> order.add("first"))
+                .customize(client -> order.add("second")).build();
+        Assertions.assertEquals(List.of("first", "second"), order);
+    }
+
+    /**
+     * An advisor that adds a fixed fact to the user message, standing in for a
+     * retrieval advisor.
+     */
+    private static final class FixedFactAdvisor implements BaseAdvisor {
+        private final String fact;
+
+        FixedFactAdvisor(String fact) {
+            this.fact = fact;
+        }
+
+        @Override
+        public ChatClientRequest before(ChatClientRequest request,
+                AdvisorChain chain) {
+            var augmented = request.prompt().augmentUserMessage(
+                    request.prompt().getUserMessage().getText()
+                            + "\n\nContext: " + fact);
+            return request.mutate().prompt(augmented).build();
+        }
+
+        @Override
+        public ChatClientResponse after(ChatClientResponse response,
+                AdvisorChain chain) {
+            return response;
+        }
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
     }
 
     private void mockSimpleChat(String responseText) {
