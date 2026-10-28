@@ -74,13 +74,12 @@ public class LangChain4JPipelinePage extends VerticalLayout {
         // the push setup a real one needs
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
 
-        var provider = LangChain4JLLMProvider
-                .builder(new ScriptedStreamingChatModel())
-                .customize(service -> service.systemMessage(SYSTEM_PROMPT)
+        var provider = new LangChain4JLLMProvider(
+                new ScriptedStreamingChatModel(),
+                service -> service.systemMessage(SYSTEM_PROMPT)
                         .contentRetriever(query -> List.of(Content.from(FACT)))
                         .toolProvider(new WeatherToolProvider())
-                        .inputGuardrails(new BlockedWordGuardrail()))
-                .build();
+                        .inputGuardrails(new BlockedWordGuardrail()));
 
         var messageList = new MessageList();
         messageList.setId("message-list");

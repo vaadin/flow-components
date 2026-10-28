@@ -2273,13 +2273,12 @@ class LangChain4JLLMProviderTest {
                 event -> event.getMessage().contains("no finish reason"));
     }
 
-    // --- Builder and customizer tests ---
+    // --- Customizer tests ---
 
     @Test
-    void builder_requestPrompt_replacesCustomizerSystemMessage() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> service.systemMessage("Configured"))
-                .build();
+    void requestPrompt_replacesCustomizerSystemMessage() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.systemMessage("Configured"));
         var response = mockSimpleResponse("ok");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -2300,10 +2299,9 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_customizerSystemMessage_isSent() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> service.systemMessage("Configured"))
-                .build();
+    void customizer_systemMessage_isSent() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.systemMessage("Configured"));
         var response = mockSimpleResponse("ok");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -2317,10 +2315,9 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_customizerToolObject_isCalled() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> service.tools(new SampleToolsClass()))
-                .build();
+    void customizer_toolObject_isCalled() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.tools(new SampleToolsClass()));
         var toolCall = mockSimpleResponseWithTool("getTemperature");
         var answer = mockSimpleResponse("It is 22°C");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
@@ -2338,12 +2335,11 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_customizer_contentRetrieverAugmentsUserMessage() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> service.contentRetriever(
+    void customizer_contentRetrieverAugmentsUserMessage() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.contentRetriever(
                         query -> List.of(dev.langchain4j.rag.content.Content
-                                .from("The codename is Bluefin"))))
-                .build();
+                                .from("The codename is Bluefin"))));
         var response = mockSimpleResponse("Bluefin");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -2362,8 +2358,8 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_requestPromptWithBraces_isSentLiterally() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel).build();
+    void requestPromptWithBraces_isSentLiterally() {
+        var customized = new LangChain4JLLMProvider(mockChatModel);
         var response = mockSimpleResponse("ok");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -2380,12 +2376,11 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_customizer_contentRetrieverKeepsAttachments() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> service.contentRetriever(
+    void customizer_contentRetrieverKeepsAttachments() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.contentRetriever(
                         query -> List.of(dev.langchain4j.rag.content.Content
-                                .from("The codename is Bluefin"))))
-                .build();
+                                .from("The codename is Bluefin"))));
         var response = mockSimpleResponse("Bluefin");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -2411,19 +2406,17 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_customizer_inputGuardrailFailsTurnBeforeModelCall() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> service
-                        .inputGuardrails(new InputGuardrail() {
-                            @Override
-                            public InputGuardrailResult validate(
-                                    UserMessage userMessage) {
-                                return userMessage.singleText().contains(
-                                        "password") ? failure("Blocked")
-                                                : success();
-                            }
-                        }))
-                .build();
+    void customizer_inputGuardrailFailsTurnBeforeModelCall() {
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.inputGuardrails(new InputGuardrail() {
+                    @Override
+                    public InputGuardrailResult validate(
+                            UserMessage userMessage) {
+                        return userMessage.singleText().contains("password")
+                                ? failure("Blocked")
+                                : success();
+                    }
+                }));
 
         Assertions.assertThrows(InputGuardrailException.class,
                 () -> customized.stream(createSimpleRequest("The password?"))
@@ -2433,10 +2426,10 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_customizerChatMemory_isUsedInsteadOfTheProviderOwn() {
+    void customizer_chatMemory_isUsedInsteadOfTheProviderOwn() {
         var memory = MessageWindowChatMemory.withMaxMessages(10);
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> service.chatMemory(memory)).build();
+        var customized = new LangChain4JLLMProvider(mockChatModel,
+                service -> service.chatMemory(memory));
         var response = mockSimpleResponse("Hi there");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -2449,15 +2442,6 @@ class LangChain4JLLMProviderTest {
                         : ((AiMessage) message).text())
                 .toList();
         Assertions.assertEquals(List.of("Hello", "Hi there"), texts);
-    }
-
-    @Test
-    void builder_customizers_runInOrder() {
-        var order = new ArrayList<String>();
-        LangChain4JLLMProvider.builder(mockChatModel)
-                .customize(service -> order.add("first"))
-                .customize(service -> order.add("second")).build();
-        Assertions.assertEquals(List.of("first", "second"), order);
     }
 
     // --- Tool call limit tests ---

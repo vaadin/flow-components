@@ -153,12 +153,11 @@ public class ChatPage extends VerticalLayout
             String modelName) {
         var chatModel = OpenAiStreamingChatModel.builder().apiKey(apiKey)
                 .modelName(modelName).build();
-        return LangChain4JLLMProvider.builder(chatModel)
-                .customize(service -> service.systemMessage(SYSTEM_PROMPT)
+        return new LangChain4JLLMProvider(chatModel,
+                service -> service.systemMessage(SYSTEM_PROMPT)
                         .contentRetriever(query -> List.of(Content.from(FACT)))
                         .inputGuardrails(new BlockedWordGuardrail(BLOCKED_WORD))
-                        .tools(this))
-                .build();
+                        .tools(this));
     }
 
     /**
@@ -178,6 +177,7 @@ public class ChatPage extends VerticalLayout
         return "Order " + orderNumber
                 + " was shipped yesterday and arrives tomorrow.";
     }
+
     /**
      * A Spring AI advisor that adds a fixed fact to every user message,
      * standing in for a retrieval advisor backed by a vector store.
