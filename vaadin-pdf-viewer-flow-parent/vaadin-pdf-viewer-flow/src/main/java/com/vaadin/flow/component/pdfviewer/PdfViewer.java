@@ -8,7 +8,9 @@
  */
 package com.vaadin.flow.component.pdfviewer;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
@@ -23,7 +25,10 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -39,6 +44,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  *         DownloadHandler.forClassResource(getClass(), "report.pdf"));
  * viewer.setHeight("600px");
  * </pre>
+ * <p>
+ * The toolbar above the pages lets the user navigate between pages. You can add
+ * your own controls to the end of the toolbar with
+ * {@link #addToToolbar(Component...)}.
  * <p>
  * This component is experimental and needs to be enabled with the
  * {@code com.vaadin.experimental.pdfViewerComponent} feature flag, either in
@@ -57,8 +66,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
+    private static final String TOOLBAR_SLOT_NAME = "toolbar-actions";
+
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
+
+    private PdfViewerI18n i18n;
 
     /**
      * Creates a PDF viewer without a document.
@@ -207,6 +220,89 @@ public class PdfViewer extends Component implements HasSize {
      */
     public Signal<Integer> pageCountSignal() {
         return pageCountSignal.asReadonly();
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(PdfViewerI18n)}.
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public PdfViewerI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component. It enables you
+     * to customize and translate the texts used in the viewer. Properties that
+     * are not set use the default texts.
+     * <p>
+     * Note: updating the object properties after setting the i18n will not
+     * update the component. To make the changes effective, you need to set the
+     * updated object again.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(PdfViewerI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
+    }
+
+    /**
+     * Adds components to the end of the toolbar, after the page navigation, for
+     * example buttons for actions on the document. To remove them, use
+     * {@link #remove(Component...)}.
+     *
+     * @param components
+     *            the components to add, not {@code null}
+     */
+    public void addToToolbar(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+        var componentsToAdd = Arrays.stream(components).map(component -> Objects
+                .requireNonNull(component, "Component to add cannot be null"))
+                .toList();
+        componentsToAdd.forEach(component -> SlotUtils.addToSlot(this,
+                TOOLBAR_SLOT_NAME, component));
+    }
+
+    /**
+     * Removes components from the toolbar.
+     *
+     * @param components
+     *            the components to remove, not {@code null}
+     * @throws IllegalArgumentException
+     *             if a component is not a child of this viewer
+     */
+    public void remove(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+        for (Component component : components) {
+            Objects.requireNonNull(component,
+                    "Component to remove cannot be null");
+            Element element = component.getElement();
+            if (!getElement().equals(element.getParent())) {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+            element.removeAttribute("slot");
+            getElement().removeChild(element);
+        }
+    }
+
+    /**
+     * Gets the components added to the toolbar.
+     *
+     * @return the components in the toolbar, in the order they were added
+     * @see #addToToolbar(Component...)
+     */
+    public Component[] getToolbarComponents() {
+        return SlotUtils.getElementsInSlot(this, TOOLBAR_SLOT_NAME)
+                .map(Element::getComponent).map(Optional::orElseThrow)
+                .toArray(Component[]::new);
     }
 
     /**
