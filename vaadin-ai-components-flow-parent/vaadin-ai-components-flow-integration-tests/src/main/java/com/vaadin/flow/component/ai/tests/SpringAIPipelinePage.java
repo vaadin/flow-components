@@ -78,20 +78,15 @@ public class SpringAIPipelinePage extends VerticalLayout {
         // the push setup a real one needs
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
 
-        var provider = SpringAILLMProvider
-                .builder(new ScriptedChatModel()).systemPrompt(
-                        SYSTEM_PROMPT)
-                .customize(
-                        client -> client
-                                .defaultAdvisors(new FixedFactAdvisor(),
-                                        SafeGuardAdvisor.builder()
-                                                .sensitiveWords(
-                                                        List.of(BLOCKED_WORD))
-                                                .failureResponse(
-                                                        GUARDRAIL_REPLY)
-                                                .build())
-                                .defaultTools(ToolCallbackProvider
-                                        .from(new WeatherToolCallback())))
+        var provider = SpringAILLMProvider.builder(new ScriptedChatModel())
+                .customize(client -> client.defaultSystem(SYSTEM_PROMPT)
+                        .defaultAdvisors(new FixedFactAdvisor(),
+                                SafeGuardAdvisor.builder()
+                                        .sensitiveWords(List.of(BLOCKED_WORD))
+                                        .failureResponse(GUARDRAIL_REPLY)
+                                        .build())
+                        .defaultTools(ToolCallbackProvider
+                                .from(new WeatherToolCallback())))
                 .build();
 
         var messageList = new MessageList();

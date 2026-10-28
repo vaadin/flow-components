@@ -52,6 +52,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
@@ -1642,9 +1643,9 @@ class SpringAILLMProviderTest {
     // --- Builder and customizer tests ---
 
     @Test
-    void builder_systemPrompt_sentWhenRequestHasNone() {
+    void builder_customizerDefaultSystem_isSent() {
         var customized = SpringAILLMProvider.builder(mockChatModel)
-                .systemPrompt("Be brief").build();
+                .customize(client -> client.defaultSystem("Be brief")).build();
         customized.setStreaming(false);
         mockSimpleChat("ok");
 
@@ -1658,9 +1659,9 @@ class SpringAILLMProviderTest {
     }
 
     @Test
-    void builder_systemPrompt_requestPromptTakesPrecedence() {
+    void builder_requestPrompt_replacesCustomizerDefaultSystem() {
         var customized = SpringAILLMProvider.builder(mockChatModel)
-                .systemPrompt("Be brief").build();
+                .customize(client -> client.defaultSystem("Be brief")).build();
         customized.setStreaming(false);
         mockSimpleChat("ok");
         var request = new TestLLMRequest("Hello", "From the request",
@@ -1674,6 +1675,30 @@ class SpringAILLMProviderTest {
                 .filter(SystemMessage.class::isInstance).map(Message::getText)
                 .toList();
         Assertions.assertEquals(List.of("From the request"), systemTexts);
+    }
+
+    @Test
+    void builder_customizerToolObject_isCalled() {
+        var customized = SpringAILLMProvider.builder(mockChatModel)
+                .customize(
+                        client -> client.defaultTools(new SampleToolsClass()))
+                .build();
+        customized.setStreaming(false);
+        var toolCall = mockChatResponseWithPendingToolCall("getTemperature");
+        var answer = mockSimpleChatResponse("It is 22°C");
+        Mockito.when(mockChatModel.call(Mockito.any(Prompt.class)))
+                .thenReturn(toolCall).thenReturn(answer);
+
+        customized.stream(createSimpleRequest("Get temperature")).blockFirst();
+
+        var captor = ArgumentCaptor.forClass(Prompt.class);
+        Mockito.verify(mockChatModel, Mockito.times(2)).call(captor.capture());
+        var toolResponses = captor.getAllValues().get(1).getInstructions()
+                .stream().filter(ToolResponseMessage.class::isInstance)
+                .map(ToolResponseMessage.class::cast).toList();
+        Assertions.assertEquals(1, toolResponses.size());
+        Assertions.assertTrue(toolResponses.getFirst().getResponses().getFirst()
+                .responseData().contains("22°C"));
     }
 
     @Test

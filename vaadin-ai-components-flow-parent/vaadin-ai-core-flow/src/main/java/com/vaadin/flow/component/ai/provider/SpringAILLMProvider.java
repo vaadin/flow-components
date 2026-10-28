@@ -829,13 +829,13 @@ public class SpringAILLMProvider implements LLMProvider {
 
     /**
      * Builds a {@link SpringAILLMProvider} on a chat model or a
-     * {@link ChatClient.Builder}, with the system prompt and the Spring AI
-     * features the application wants on the client behind the provider.
+     * {@link ChatClient.Builder}, with the Spring AI features the application
+     * wants on the client behind the provider, the system prompt included.
      *
      * <pre>
      * var provider = SpringAILLMProvider.builder(chatModel)
-     *         .systemPrompt("You are a support assistant.")
      *         .customize(client -&gt; client
+     *                 .defaultSystem("You are a support assistant.")
      *                 .defaultAdvisors(QuestionAnswerAdvisor
      *                         .builder(vectorStore).build())
      *                 .defaultTools(mcpToolCallbackProvider))
@@ -846,7 +846,6 @@ public class SpringAILLMProvider implements LLMProvider {
      */
     public static final class Builder {
         private final ChatClient.Builder clientBuilder;
-        private String systemPrompt;
         private Consumer<ChatClient.Builder> customizer;
 
         private Builder(ChatClient.Builder clientBuilder) {
@@ -854,26 +853,21 @@ public class SpringAILLMProvider implements LLMProvider {
         }
 
         /**
-         * Sets the system prompt the model sees on every turn, as the client's
-         * default system text. A system prompt carried by the request of a turn
-         * takes precedence.
-         *
-         * @param systemPrompt
-         *            the system prompt, or {@code null} for none
-         * @return this builder
-         */
-        public Builder systemPrompt(String systemPrompt) {
-            this.systemPrompt = systemPrompt;
-            return this;
-        }
-
-        /**
          * Customizes the client the provider is built on. The customizer
-         * receives Spring AI's {@link ChatClient.Builder} with the model and
-         * the system prompt already set, and may configure anything the builder
-         * offers: advisors for retrieval augmentation or guardrails, default
+         * receives Spring AI's {@link ChatClient.Builder} with the model set,
+         * and may configure anything the builder offers: the default system
+         * text, advisors for retrieval augmentation or guardrails, default
          * tools including MCP tool callback providers, default options, and so
          * on. Customizers run in the order they were added.
+         * <p>
+         * The system prompt is set with {@code defaultSystem(...)} and Spring
+         * AI {@code @Tool} objects are registered with
+         * {@code defaultTools(...)}; these replace the system prompt and the
+         * tool objects given to the orchestrator through its deprecated
+         * {@code AIOrchestrator.builder(LLMProvider, String)} and
+         * {@code withTools(Object...)}. A system prompt the orchestrator still
+         * sends with a request is set on that request and overrides the
+         * client's default system text for the turn.
          * <p>
          * The provider completes the client after the customizers ran: it adds
          * its own chat memory advisor only when the client carries no
@@ -900,9 +894,6 @@ public class SpringAILLMProvider implements LLMProvider {
          * @return the provider
          */
         public SpringAILLMProvider build() {
-            if (systemPrompt != null && !systemPrompt.isBlank()) {
-                clientBuilder.defaultSystem(systemPrompt.trim());
-            }
             if (customizer != null) {
                 customizer.accept(clientBuilder);
             }

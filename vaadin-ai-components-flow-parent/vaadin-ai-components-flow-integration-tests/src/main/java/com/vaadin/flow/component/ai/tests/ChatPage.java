@@ -134,9 +134,8 @@ public class ChatPage extends VerticalLayout
         var options = OpenAiChatOptions.builder().apiKey(apiKey)
                 .model(modelName).build();
         var chatModel = OpenAiChatModel.builder().options(options).build();
-        return SpringAILLMProvider.builder(chatModel)
-                .systemPrompt(SYSTEM_PROMPT)
-                .customize(client -> client.defaultAdvisors(
+        return SpringAILLMProvider.builder(chatModel).customize(
+                client -> client.defaultSystem(SYSTEM_PROMPT).defaultAdvisors(
                         new FixedFactAdvisor(FACT),
                         SafeGuardAdvisor.builder()
                                 .sensitiveWords(List.of(BLOCKED_WORD))
