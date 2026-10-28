@@ -10,6 +10,41 @@
     <packaging>war</packaging>
     <name>Vaadin AI Components Integration Tests</name>
     <description>Vaadin AI Components Integration Tests</description>
+    <properties>
+        <!-- The chat page talks to OpenAI through both vendor frameworks.
+             Spring AI's OpenAI module brings the OpenAI Java SDK, whose
+             Jackson 2.18 line would otherwise win over the newer
+             jackson-annotations that Flow's Jackson 3 databind needs, so
+             the Jackson 2 line is pinned to what Spring AI itself resolves. -->
+        <it.jackson2.version>2.22.4</it.jackson2.version>
+        <it.jackson2.annotations.version>2.22</it.jackson2.annotations.version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${it.jackson2.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${it.jackson2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${it.jackson2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -97,9 +132,29 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- The AI core module declares both vendor frameworks as optional,
+             so the chat page pulls in the ones it builds providers from. -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-client-chat</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai</artifactId>
         </dependency>
     </dependencies>
     <build>
