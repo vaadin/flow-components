@@ -1,6 +1,10 @@
 # LLM pipeline customization with vendor features: investigation plan
 
-Status: investigation plan, 2026-10-28. Nothing here is implemented.
+Status: investigation plan, 2026-10-28, with the prototype results of the
+same day in section 8. Sections 1 to 7 are the plan as it was written before
+the prototypes; where a prototype answered a question, the answer is in
+section 8 and the earlier text is marked. The prototypes live on branches,
+nothing is merged.
 Module: `vaadin-ai-core-flow` (experimental, breaking changes allowed).
 Vendor versions the facts below were checked against: LangChain4j 1.22.0 and
 Spring AI 2.0.2, the versions pinned in the root pom.
@@ -145,7 +149,7 @@ Facts that matter for a bridge, checked in the 1.22.0 sources:
   text is harmless. A text parameter next to the list would be templated.
 - `systemMessage(...)` and `systemMessageProvider(...)` do pass through
   `PromptTemplate`, so a system prompt containing `{{...}}` needs a check
-  (spike S1).
+  (spike S1). Checked: it does not survive, see 8.2.
 - A parameter of type `InvocationParameters` is picked up by type and reaches
   `ToolProviderRequest.invocationParameters()` and `ToolErrorContext`. Every
   registered `ToolProvider` is asked once per invocation, that is once per
@@ -315,7 +319,7 @@ Breaking changes: constructors become builders; `LangChain4JLLMProvider`
 loses `setMaxCallsPerTool` and `setMaxTotalToolCalls`; see section 5 for the
 orchestrator side.
 
-Open questions:
+Open questions (answered by the prototype, see 8.2 and 8.3):
 
 - A customizer that replaces what the provider pre-wired (its own
   `chatMemory(...)`, `tools(...)` for the controller tools) must either be
@@ -396,7 +400,7 @@ service, which brings option A back in through the side door. A pure option B
 means every LangChain4j user writes the `AiServices` builder, including the
 plain case.
 
-Open questions:
+Open questions (the prototype took a different shape, see 8.4):
 
 - A forgotten `controllerTools()` registration silently drops every
   controller tool. The provider can detect it: the tools travel in the
@@ -589,7 +593,7 @@ Belong to the loop, which the vendor owns. Proposal: remove them; the limit is
 set in the customizer (`maxToolCallingRoundTrips`), as it is on the Spring
 `ChatClient` today. Whether the turn still fails with
 `ToolCallLimitExceededException` is spike S3; the docs promise that today for
-both providers.
+both providers. Prototype outcome: the setters stay, see 8.3.
 
 ### 5.7 `setStreaming`, `setBackgroundExecution`
 
@@ -609,7 +613,7 @@ pipeline configuration.
 | Removes system prompt and `withTools` from the orchestrator | yes | yes | no |
 | New public types | 2 builders, `ChatService` | `ChatService`, `controllerTools()` | 2 request types or helper classes |
 | Fits a hand-written `ChatService` or custom loop | no | yes (interface) | yes |
-| Cancellation stops the loop | Spring yes, LangChain4j no | Spring yes, LangChain4j no | yes, the application's loop |
+| Cancellation stops the loop | Spring yes; LangChain4j refuses the next model call and tool, the in-flight call completes (8.3) | same as A | yes, the application's loop |
 
 Recommendation to carry into the spikes: option A as the primary API, with
 the Spring side also accepting a `ChatClient.Builder` and a built
@@ -626,6 +630,12 @@ traffic in memory (S2).
 
 Ordered so that each spike settles something the next one depends on. Each
 produces a throwaway branch and a short note; nothing ships from a spike.
+
+Status after the prototypes of 2026-10-28 (details in section 8): S1, S2, S3,
+S4 and S6 are answered on `prototype/pipeline-customizer`. S5 is half done,
+the orchestrator APIs are deprecated rather than removed, by decision, and
+the condition check of 5.1 and 5.2 is still to run before a removal. S7 is
+open.
 
 S1. LangChain4j bridge on `AiServices` (option A core). About 2 days.
 Build `ChatService` with the `@UserMessage List<Content>` and
@@ -705,6 +715,177 @@ the browser is proven once per vendor.
 
 Out of scope for the spikes: a Vaadin-shipped MCP or RAG convenience, and any
 new vendor-neutral abstraction in `ai-core`.
+
+## 8. Prototype results, 2026-10-28
+
+Each option was prototyped on its own branch off
+`research/llm-pipeline-vendor-customization`, with the OpenAI chat page
+`ChatPage` of the AI integration test module (route
+`vaadin-ai/chat/{spring-ai|langchain4j}`) changed to carry the same demo
+pipeline: a fixed-fact content retriever (the codename "Bluefin") and an input
+guardrail that blocks the word "password". Every branch was checked in a
+browser on both routes against gpt-5.4-mini: the retrieved fact reaches the
+answer, and the blocked word ends the turn (Spring AI's `SafeGuardAdvisor`
+replies with its failure text, LangChain4j's `InputGuardrail` fails the turn
+and the message list shows the generic error).
+
+| Branch | Option | Shape |
+| --- | --- | --- |
+| `prototype/pipeline-customizer` | A | `LangChain4JLLMProvider.builder(model).systemPrompt(..).customize(AiServices<ChatService>)`, `SpringAILLMProvider.builder(chatModel or ChatClient.Builder).systemPrompt(..).customize(ChatClient.Builder)`, `AIOrchestrator.builder(provider)` |
+| `prototype/pipeline-byo` | B | `new LangChain4JLLMProvider(AiServices<ChatService>, streaming)`, `new SpringAILLMProvider(chatClient)` adding memory through `mutate()` |
+| `prototype/pipeline-bridge-helpers` | C | public `LangChain4JBridge` and `SpringAIBridge` conversion helpers, the built-in providers delegate to them, the page runs two custom providers written on them |
+
+Decision taken on the results: continue with A. B's Spring entry point is
+folded into A (the `ChatClient` constructor now adds memory the same way the
+builder does), C's helpers stay available as a follow-up for custom
+providers.
+
+### 8.1 The LangChain4j bridge on `AiServices` (S1)
+
+Branches A and B share the rebuild of `LangChain4JLLMProvider` on
+`AiServices`:
+
+- `ChatService extends ChatMemoryAccess` with
+  `TokenStream stream(@UserMessage List<Content>, InvocationParameters)` and
+  `Result<String> call(...)`. The turn travels in the invocation parameters.
+- `TurnToolProvider`, a static `ToolProvider` asked once per turn, converts
+  the controller `ToolSpec`s and the deprecated `@Tool` objects of the turn.
+  Every executor is wrapped in the turn's guard, which enforces the Vaadin
+  tool call limits and the cancellation check before each tool. LangChain4j's
+  loop invokes the wrapped executors, so the `ToolException` policy is kept.
+- `ResponseObserver`, an `AiServiceListener<AiServiceResponseReceivedEvent>`,
+  collects finish reason and token usage per round trip and screens the
+  limits before the tools of a round run.
+- `prepare()` runs before the customizer and lifts `maxToolCallingRoundTrips`
+  to `Integer.MAX_VALUE` and makes a made-up tool name an error result for
+  the model; `wire()` runs after the customizer and composes with what it
+  configured: memory only when none is set, the tool provider next to the
+  customizer's, the request transformer and the tool execution error handler
+  wrapped around the configured ones.
+- Streaming with tool calls works through `TokenStream`. A response without
+  an AI message is not stored (the service hands the memory a `null`, which
+  the window memory would store and fail the next turn on) and fails the
+  turn; the related tests were adapted to that.
+- All 132 `LangChain4JLLMProviderTest` scenarios pass on the rebuild, with
+  the adaptations noted: `ChatResponse` mocks need `metadata()` stubbed, and
+  a request carries the window plus the user message, so the durable window
+  is one message short of `MAX_MESSAGES`.
+
+### 8.2 Answers to the option A questions
+
+- System prompt with braces: through `systemMessage(...)` a prompt containing
+  `{{"answer": ...}}` fails the turn with
+  `IllegalArgumentException: Value for the variable ... is missing`, and
+  `{{it}}` with `IllegalConfigurationException`. Fixed on A: the builder's
+  prompt and a request prompt are placed on the `ChatRequest` by the request
+  transformer, replacing the service's own system message when it has one.
+  A `systemMessage(...)` set in the customizer stays a LangChain4j template;
+  the builder Javadoc says so.
+- Retrieval with attachments: `DefaultContentInjector` calls `singleText()`
+  on the user message, so `contentRetriever(...)` fails a turn that carries an
+  image or a file. Fixed on A: `wire()` wraps `context.retrievalAugmentor`
+  in `AttachmentKeepingAugmentor`, which hands the augmentor the text content
+  alone and puts the other contents back on the augmented message.
+- Guardrail and moderation failures arrive as the error of the turn, as
+  predicted. `RequestInterceptor` stays the place for user-facing validation.
+- Output guardrails buffer the stream until they pass; vendor behaviour,
+  documented, unchanged.
+- The duplicate memory question on the Spring side: a `MemoryAdvisor` on the
+  client is detected through `DefaultChatClientRequestSpec.getAdvisors()`,
+  and the provider then skips its own advisor and `setHistory()` does
+  nothing. A client that cannot be inspected is assumed to own its memory.
+  The `SpringAILLMProvider(ChatClient)` constructor now adds memory the same
+  way, so its "application owns memory" meaning is gone unless the client
+  carries a memory advisor, and its "no chat memory advisor" warning with it.
+- Replaced pre-wiring: a customizer's `chatMemory(...)` replaces the
+  provider's memory and `setHistory()` still reaches it through
+  `ChatMemoryAccess`; the controller tools come through the provider's own
+  tool provider and cannot be dropped by a customizer.
+
+### 8.3 Memory, limits, cancellation and history (S2, S3, S6)
+
+- Memory: `TurnScopedChatMemory` is the provider's default memory. It keeps a
+  durable `MessageWindowChatMemory` and a turn list: tool requests and
+  results go to the turn list, the final answer ends the turn and is added to
+  the durable memory unless its text is empty, `messages()` returns both,
+  and a failed turn drops its list. This re-establishes the Vaadin memory
+  policy on top of LangChain4j's loop. A memory configured in the customizer
+  replaces it and gets LangChain4j's tool-traffic-in-memory behaviour.
+- Limits: the provider setters `setMaxCallsPerTool` and
+  `setMaxTotalToolCalls` stay, so 5.6's proposal is withdrawn. The turn's
+  guard throws `ToolCallLimitExceededException` from the executor wrapper,
+  and the provider's tool execution error handler rethrows it instead of
+  sending it to the model, which ends the turn in both modes: the streaming
+  handler routes a handler exception to `onError`. The response observer
+  screens a round that would breach a limit before its tools run.
+- Cancellation: `AiServices` has none. The provider checks the cancelled flag
+  in the request transformer before each model call and in the guard before
+  each tool, so an abandoned turn costs at most the in-flight model response.
+  Tokens of that response are not forwarded. The `beforeToolExecution` hook
+  was not needed, the executor wrapper does it.
+- History: `setHistory()` writes through
+  `service.getChatMemory(ChatMemoryService.DEFAULT)` on LangChain4j and into
+  the provider's memory on Spring AI, and does nothing when the application
+  owns the memory. The throwing default on `LLMProvider` is unchanged.
+
+### 8.4 Spring AI (S4) and the controller tools
+
+- `SpringAILLMProvider.builder(chatModel)` and `builder(ChatClient.Builder)`
+  with `systemPrompt(...)` as `defaultSystem` and `customize(...)` running
+  after it; the provider completes the client with `mutate()` and its memory
+  advisor unless a `MemoryAdvisor` is present. `defaultSystem()` is honoured
+  because the provider only sends `.system(...)` per request when the request
+  carries a prompt, which is the deprecated orchestrator path.
+- Default tools and per-request tools combine: `prompt()` copies the client's
+  default callbacks and providers into the request spec, `tools(...)` appends,
+  and `DefaultChatClientUtils` merges callbacks and providers into the chat
+  options. The "runtime tools completely override the defaults" note in the
+  `defaultTools` Javadoc refers to the chat options of the model, not to the
+  client defaults. MCP tools on the client and controller tools per request
+  therefore coexist.
+- The deprecated `toolCallbacks(...)` call is replaced with `tools(List)`.
+- Controller tools: on A and B the controller `ToolSpec`s reach the model
+  through `TurnToolProvider` on LangChain4j and through per-request
+  `tools(...)` callbacks on Spring AI, where `ToolCallingAdvisor` invokes
+  them. On C the built-in providers behave as before through the helpers; the
+  page's custom Spring provider passes `SpringAIBridge.toToolCallbacks(...)`
+  per request, the page's custom LangChain4j provider does not wire tools,
+  because an `AiServices` proxy takes its tools at build time or from a
+  `ToolProvider`, as 4.C predicted.
+
+### 8.5 Option B and C findings
+
+- B on LangChain4j: the application's `AiServices` builder is opaque, so the
+  provider overwrites the tool execution error handler slot (a handler the
+  application set is lost; A composes with it), a chat memory is mandatory
+  (`ChatMemoryAccess` validation throws `IllegalConfigurationException`
+  without one), the streaming mode has to be passed as a flag, and a system
+  prompt on a request cannot be applied (warned once). B is weaker than A for
+  the same use cases, which is why only its Spring entry point is kept.
+- C: the helpers are small and tested (`LangChain4JBridgeTest`,
+  `SpringAIBridgeTest`), but a custom provider still re-implements memory,
+  the loop, limits, cancellation and metadata, as 4.C said.
+
+### 8.6 Orchestrator APIs (S5, partial)
+
+`AIOrchestrator.builder(provider)` is the new entry point.
+`builder(provider, systemPrompt)`, `Builder.withTools` and
+`Reconnector.withTools` are deprecated since 25.4 and kept working, by
+decision, so existing call sites need no change; the "no system prompt"
+warning only fires on the deprecated path. The condition check of 5.1 and 5.2
+(one statement per setting, no vendor code in the plain case, restore no
+harder than today, a `ToolSpec` one-liner) is still to run before any removal.
+
+### 8.7 Remaining work on `prototype/pipeline-customizer`
+
+1. S7: an integration test view per vendor with a fake retriever and a fake
+   tool provider, so the browser checks become `AbstractComponentIT` tests;
+   the AI benchmark base versus branch with the Spring AI provider.
+2. Docs pages listed under S5, once the API is final.
+3. Split the branch into reviewable pull requests: the `AiServices` rebuild
+   with `TurnScopedChatMemory`, the two builders, the orchestrator
+   deprecations, docs. Decide whether the OpenAI chat page and the vendor
+   dependencies it brought into the integration test module stay.
 
 ## Appendix: verified facts and where they come from
 
