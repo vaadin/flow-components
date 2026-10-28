@@ -258,8 +258,10 @@ public class AIOrchestrator implements Serializable {
      *            the system prompt for the LLM, or {@code null} to omit
      * @return a new builder
      * @deprecated the system prompt belongs to the LLM pipeline: configure it
-     *             on the provider, for example with the
-     *             {@code systemPrompt(...)} method of the built-in providers'
+     *             on the provider with the vendor's own API, for example
+     *             {@code systemMessage(...)} on the LangChain4j service or
+     *             {@code defaultSystem(...)} on the Spring AI client, through
+     *             the {@code customize(...)} method of the built-in providers'
      *             builders, and use {@link #builder(LLMProvider)}. A prompt
      *             given here still reaches the provider in every request and
      *             takes precedence over the provider's own.
