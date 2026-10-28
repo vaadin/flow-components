@@ -2276,26 +2276,10 @@ class LangChain4JLLMProviderTest {
     // --- Builder and customizer tests ---
 
     @Test
-    void builder_systemPrompt_sentWhenRequestHasNone() {
+    void builder_requestPrompt_replacesCustomizerSystemMessage() {
         var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .systemPrompt("Be brief").build();
-        var response = mockSimpleResponse("ok");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        customized.stream(createSimpleRequest("Hello")).blockFirst();
-
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel).chat(captor.capture());
-        var first = captor.getValue().messages().getFirst();
-        Assertions.assertInstanceOf(SystemMessage.class, first);
-        Assertions.assertEquals("Be brief", ((SystemMessage) first).text());
-    }
-
-    @Test
-    void builder_systemPrompt_requestPromptTakesPrecedence() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .systemPrompt("Be brief").build();
+                .customize(service -> service.systemMessage("Configured"))
+                .build();
         var response = mockSimpleResponse("ok");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);
@@ -2306,13 +2290,17 @@ class LangChain4JLLMProviderTest {
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
         Mockito.verify(mockChatModel).chat(captor.capture());
-        var first = captor.getValue().messages().getFirst();
+        var messages = captor.getValue().messages();
         Assertions.assertEquals("From the request",
-                ((SystemMessage) first).text());
+                ((SystemMessage) messages.getFirst()).text());
+        Assertions.assertEquals(1,
+                messages.stream().filter(SystemMessage.class::isInstance)
+                        .count(),
+                "The service's own system message is replaced, not kept");
     }
 
     @Test
-    void builder_customizerSystemMessage_appliesWhenNoPromptIsGiven() {
+    void builder_customizerSystemMessage_isSent() {
         var customized = LangChain4JLLMProvider.builder(mockChatModel)
                 .customize(service -> service.systemMessage("Configured"))
                 .build();
@@ -2329,26 +2317,24 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_systemPrompt_replacesCustomizerSystemMessage() {
+    void builder_customizerToolObject_isCalled() {
         var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .systemPrompt("Be brief")
-                .customize(service -> service.systemMessage("Configured"))
+                .customize(service -> service.tools(new SampleToolsClass()))
                 .build();
-        var response = mockSimpleResponse("ok");
+        var toolCall = mockSimpleResponseWithTool("getTemperature");
+        var answer = mockSimpleResponse("It is 22°C");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
+                .thenReturn(toolCall).thenReturn(answer);
 
-        customized.stream(createSimpleRequest("Hello")).blockFirst();
+        customized.stream(createSimpleRequest("Get temperature")).blockFirst();
 
         var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel).chat(captor.capture());
-        var messages = captor.getValue().messages();
-        Assertions.assertEquals("Be brief",
-                ((SystemMessage) messages.getFirst()).text());
-        Assertions.assertEquals(1,
-                messages.stream().filter(SystemMessage.class::isInstance)
-                        .count(),
-                "The service's own system message is replaced, not kept");
+        Mockito.verify(mockChatModel, Mockito.times(2)).chat(captor.capture());
+        var toolResults = captor.getAllValues().get(1).messages().stream()
+                .filter(ToolExecutionResultMessage.class::isInstance)
+                .map(ToolExecutionResultMessage.class::cast).toList();
+        Assertions.assertEquals(1, toolResults.size());
+        Assertions.assertEquals("22°C", toolResults.getFirst().text());
     }
 
     @Test
@@ -2376,27 +2362,8 @@ class LangChain4JLLMProviderTest {
     }
 
     @Test
-    void builder_systemPrompt_bracesAreSentLiterally() {
-        var prompt = "Answer as JSON like {{\"answer\": \"...\"}}, or {{it}}";
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .systemPrompt(prompt).build();
-        var response = mockSimpleResponse("ok");
-        Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
-                .thenReturn(response);
-
-        customized.stream(createSimpleRequest("Hello")).blockFirst();
-
-        var captor = ArgumentCaptor.forClass(ChatRequest.class);
-        Mockito.verify(mockChatModel).chat(captor.capture());
-        var first = captor.getValue().messages().getFirst();
-        Assertions.assertEquals(prompt, ((SystemMessage) first).text(),
-                "The provider's prompt is not a LangChain4j template");
-    }
-
-    @Test
-    void builder_systemPrompt_requestPromptWithBracesIsSentLiterally() {
-        var customized = LangChain4JLLMProvider.builder(mockChatModel)
-                .systemPrompt("Be brief").build();
+    void builder_requestPromptWithBraces_isSentLiterally() {
+        var customized = LangChain4JLLMProvider.builder(mockChatModel).build();
         var response = mockSimpleResponse("ok");
         Mockito.when(mockChatModel.chat(Mockito.any(ChatRequest.class)))
                 .thenReturn(response);

@@ -149,8 +149,7 @@ public class ChatPage extends VerticalLayout
         var chatModel = OpenAiStreamingChatModel.builder().apiKey(apiKey)
                 .modelName(modelName).build();
         return LangChain4JLLMProvider.builder(chatModel)
-                .systemPrompt(SYSTEM_PROMPT)
-                .customize(service -> service
+                .customize(service -> service.systemMessage(SYSTEM_PROMPT)
                         .contentRetriever(query -> List.of(Content.from(FACT)))
                         .inputGuardrails(
                                 new BlockedWordGuardrail(BLOCKED_WORD)))

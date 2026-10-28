@@ -93,9 +93,8 @@ import tools.jackson.databind.JsonNode;
  * {@code AiServices} (retrieval augmentation, tool providers such as MCP,
  * guardrails, moderation, listeners) can be configured on it. The provider adds
  * what the orchestrator needs: the tools of the turn, the attachments and the
- * session context as message contents, the system prompt, response metadata,
- * the tool call limits and the tool error policy for
- * {@link LLMProvider.ToolSpec} tools.
+ * session context as message contents, response metadata, the tool call limits
+ * and the tool error policy for {@link LLMProvider.ToolSpec} tools.
  * </p>
  * <p>
  * <b>Streaming vs. non-streaming:</b> The mode is determined by the constructor
@@ -280,7 +279,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
         if (settings.customizer != null) {
             settings.customizer.accept(builder);
         }
-        wire(context, builder, settings.systemPrompt);
+        wire(context, builder);
         return builder.build();
     }
 
@@ -298,18 +297,19 @@ public class LangChain4JLLMProvider implements LLMProvider {
 
     /**
      * Installs the hooks the provider needs on the service: the memory, the
-     * tools of the turn, the system prompt, the metadata and tool call limit
-     * observer, the cancellation check before each model call, and the tool
-     * error handling that lets a limit or a cancellation end the turn. Whatever
-     * the service already carries is kept and composed with.
+     * tools of the turn, the metadata and tool call limit observer, the
+     * cancellation check before each model call, and the tool error handling
+     * that lets a limit or a cancellation end the turn. Whatever the service
+     * already carries is kept and composed with.
      * <p>
-     * The system prompt is placed on the model request by the request
-     * transformer rather than through the service's system message provider:
-     * the service renders that one as a prompt template, which would fail on a
-     * prompt containing braces, such as a JSON example.
+     * A system prompt carried by a request, which the orchestrator's deprecated
+     * {@code builder(provider, systemPrompt)} still sends, is placed on the
+     * model request by the request transformer in place of the service's own
+     * system message. It is sent as it is, not through the service's system
+     * message provider, which renders a prompt template.
      */
-    private void wire(AiServiceContext context, AiServices<ChatService> builder,
-            String systemPrompt) {
+    private void wire(AiServiceContext context,
+            AiServices<ChatService> builder) {
         if (!context.hasChatMemory()) {
             // The service reads the memory before it adds the user message
             // of the turn, so a request carries the window plus that
@@ -335,7 +335,7 @@ public class LangChain4JLLMProvider implements LLMProvider {
                 LOGGER.debug("The turn was cancelled, skipping the model call");
                 throw new TurnCancelledException();
             }
-            var prompt = effectiveSystemPrompt(turn, systemPrompt);
+            var prompt = requestSystemPrompt(turn);
             return configuredTransformer.apply(prompt == null ? request
                     : withSystemMessage(request, prompt), memoryId);
         };
@@ -352,18 +352,14 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
-     * Returns the system prompt of the turn: the one its request carries, else
-     * the one the builder was given, or {@code null} when there is neither and
-     * the service's own configuration applies.
+     * Returns the system prompt the request of the turn carries, trimmed, or
+     * {@code null} when it has none and the service's own configuration
+     * applies.
      */
-    private static String effectiveSystemPrompt(Turn turn,
-            String builderPrompt) {
+    private static String requestSystemPrompt(Turn turn) {
         var fromRequest = turn == null ? null : turn.request.systemPrompt();
         if (fromRequest != null && !fromRequest.isBlank()) {
             return fromRequest.trim();
-        }
-        if (builderPrompt != null && !builderPrompt.isBlank()) {
-            return builderPrompt.trim();
         }
         return null;
     }
@@ -1150,14 +1146,15 @@ public class LangChain4JLLMProvider implements LLMProvider {
     }
 
     /**
-     * Builds a {@link LangChain4JLLMProvider} on a chat model, with the system
-     * prompt and the LangChain4j features the application wants on the AI
-     * service behind the provider.
+     * Builds a {@link LangChain4JLLMProvider} on a chat model, with the
+     * LangChain4j features the application wants on the AI service behind the
+     * provider, the system prompt included.
      *
      * <pre>
      * var provider = LangChain4JLLMProvider.builder(streamingChatModel)
-     *         .systemPrompt("You are a support assistant.")
-     *         .customize(service -&gt; service.contentRetriever(retriever)
+     *         .customize(service -&gt; service
+     *                 .systemMessage("You are a support assistant.")
+     *                 .contentRetriever(retriever)
      *                 .toolProvider(mcpToolProvider)
      *                 .inputGuardrails(new PromptInjectionGuardrail()))
      *         .build();
@@ -1168,7 +1165,6 @@ public class LangChain4JLLMProvider implements LLMProvider {
     public static final class Builder {
         private final ChatModel chatModel;
         private final StreamingChatModel streamingChatModel;
-        private String systemPrompt;
         private Consumer<AiServices<ChatService>> customizer;
 
         private Builder(ChatModel chatModel,
@@ -1178,44 +1174,40 @@ public class LangChain4JLLMProvider implements LLMProvider {
         }
 
         /**
-         * Sets the system prompt the model sees on every turn. A system prompt
-         * carried by the request of a turn takes precedence, and when neither
-         * is given the service's own configuration applies, for example a
-         * {@code systemMessage(...)} set in {@link #customize}. Unlike that
-         * one, the prompts given here or on a request are sent as they are, not
-         * rendered as LangChain4j prompt templates, so they may contain braces.
-         *
-         * @param systemPrompt
-         *            the system prompt, or {@code null} for none
-         * @return this builder
-         */
-        public Builder systemPrompt(String systemPrompt) {
-            this.systemPrompt = systemPrompt;
-            return this;
-        }
-
-        /**
          * Customizes the AI service the provider is built on. The customizer
          * receives LangChain4j's {@link AiServices} builder with the model
-         * already set, and may configure anything the builder offers: retrieval
-         * augmentation, tool providers such as MCP, tool objects, guardrails,
-         * moderation, listeners, model request transformation, and so on.
-         * Customizers run in the order they were added.
+         * already set, and may configure anything the builder offers: the
+         * system prompt, retrieval augmentation, tool providers such as MCP,
+         * tool objects, guardrails, moderation, listeners, model request
+         * transformation, and so on. Customizers run in the order they were
+         * added.
+         * <p>
+         * The system prompt is set with {@code systemMessage(...)} and
+         * LangChain4j {@code @Tool} objects are registered with
+         * {@code tools(...)}; these replace the system prompt and the tool
+         * objects given to the orchestrator through its deprecated
+         * {@code AIOrchestrator.builder(LLMProvider, String)} and
+         * {@code withTools(Object...)}. LangChain4j renders the system message
+         * as a prompt template: a {@code {{name}}} placeholder needs a value,
+         * and {@code {{current_date}}}, {@code {{current_time}}} and
+         * {@code {{current_date_time}}} are substituted, so a prompt must not
+         * contain braces for any other purpose. A system prompt the
+         * orchestrator still sends with a request replaces the service's own on
+         * that turn and is sent as it is.
          * <p>
          * The provider completes the service after the customizers ran, and
          * keeps what they configured: it adds its own chat memory only when
          * none was configured, adds the tool provider that supplies the tools
          * of each turn next to any tool providers of the customizer, composes
-         * its system prompt, its cancellation check and its tool error handling
-         * with the request transformer and the error handler configured,
-         * registers a listener for the response metadata, and wraps the
-         * retrieval augmentor so that retrieval also works on a turn with
-         * attachments, which LangChain4j's default content injector would
-         * otherwise reject. Before the customizers run it lifts LangChain4j's
-         * round trip limit, as the provider bounds the tool-calling loop with
-         * its own tool call limits, and makes a tool the model made up an error
-         * result for the model rather than a failure of the turn; a customizer
-         * may override both.
+         * its cancellation check and its tool error handling with the request
+         * transformer and the error handler configured, registers a listener
+         * for the response metadata, and wraps the retrieval augmentor so that
+         * retrieval also works on a turn with attachments, which LangChain4j's
+         * default content injector would otherwise reject. Before the
+         * customizers run it lifts LangChain4j's round trip limit, as the
+         * provider bounds the tool-calling loop with its own tool call limits,
+         * and makes a tool the model made up an error result for the model
+         * rather than a failure of the turn; a customizer may override both.
          *
          * @param customizer
          *            the customizer, not {@code null}

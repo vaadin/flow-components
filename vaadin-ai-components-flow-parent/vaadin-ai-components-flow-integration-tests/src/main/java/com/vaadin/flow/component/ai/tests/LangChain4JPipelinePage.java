@@ -76,8 +76,7 @@ public class LangChain4JPipelinePage extends VerticalLayout {
 
         var provider = LangChain4JLLMProvider
                 .builder(new ScriptedStreamingChatModel())
-                .systemPrompt(SYSTEM_PROMPT)
-                .customize(service -> service
+                .customize(service -> service.systemMessage(SYSTEM_PROMPT)
                         .contentRetriever(query -> List.of(Content.from(FACT)))
                         .toolProvider(new WeatherToolProvider())
                         .inputGuardrails(new BlockedWordGuardrail()))
