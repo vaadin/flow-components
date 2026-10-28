@@ -97,11 +97,10 @@ import tools.jackson.databind.json.JsonMapper;
  * </p>
  *
  * <pre>
- * AIOrchestrator orchestrator = AIOrchestrator
- *         .builder(llmProvider, systemPrompt).withInput(messageInput) // optional
+ * AIOrchestrator orchestrator = AIOrchestrator.builder(llmProvider)
+ *         .withInput(messageInput) // optional
  *         .withMessageList(messageList) // optional
  *         .withFileReceiver(uploadManager) // optional
- *         .withTools(toolObj) // optional, for @Tool annotations
  *         .withUserName(userName) // optional
  *         .withAssistantName(assistantName) // optional
  *         .withResponseListener(e -&gt; save(e.getResponse())) // optional
@@ -229,6 +228,24 @@ public class AIOrchestrator implements Serializable {
     }
 
     /**
+     * Creates a new builder for AIOrchestrator.
+     * <p>
+     * The system prompt is part of the LLM pipeline and is configured on the
+     * provider, for example with the {@code systemPrompt(...)} method of the
+     * built-in providers' builders, together with the vendor-annotated tool
+     * objects and any other pipeline feature.
+     * </p>
+     *
+     * @param provider
+     *            the LLM provider
+     * @return a new builder
+     * @since 25.4
+     */
+    public static Builder builder(LLMProvider provider) {
+        return new Builder(provider, null, false);
+    }
+
+    /**
      * Creates a new builder for AIOrchestrator with a system prompt.
      * <p>
      * A system prompt is strongly recommended — without one, the LLM has no
@@ -240,9 +257,16 @@ public class AIOrchestrator implements Serializable {
      * @param systemPrompt
      *            the system prompt for the LLM, or {@code null} to omit
      * @return a new builder
+     * @deprecated the system prompt belongs to the LLM pipeline: configure it
+     *             on the provider, for example with the
+     *             {@code systemPrompt(...)} method of the built-in providers'
+     *             builders, and use {@link #builder(LLMProvider)}. A prompt
+     *             given here still reaches the provider in every request and
+     *             takes precedence over the provider's own.
      */
+    @Deprecated(since = "25.4")
     public static Builder builder(LLMProvider provider, String systemPrompt) {
-        return new Builder(provider, systemPrompt);
+        return new Builder(provider, systemPrompt, true);
     }
 
     /**
@@ -1046,7 +1070,11 @@ public class AIOrchestrator implements Serializable {
          * @param tools
          *            the objects containing tool methods
          * @return this reconnector
+         * @deprecated vendor-annotated tool objects belong to the LLM pipeline:
+         *             register them on the recreated provider, see
+         *             {@link Builder#withTools(Object...)}.
          */
+        @Deprecated(since = "25.4")
         public Reconnector withTools(Object... tools) {
             this.tools = tools;
             return this;
@@ -1202,9 +1230,11 @@ public class AIOrchestrator implements Serializable {
         private SerializableSupplier<String> contextSupplier;
         private boolean contextSupplierSet;
 
-        private Builder(LLMProvider provider, String systemPrompt) {
+        private Builder(LLMProvider provider, String systemPrompt,
+                boolean promptExpected) {
             Objects.requireNonNull(provider, "Provider cannot be null");
-            if (systemPrompt == null || systemPrompt.isBlank()) {
+            if (promptExpected
+                    && (systemPrompt == null || systemPrompt.isBlank())) {
                 LOGGER.warn("No system prompt was provided to the "
                         + "AIOrchestrator. Pass a system prompt to "
                         + "AIOrchestrator.builder(provider, systemPrompt) "
@@ -1362,7 +1392,15 @@ public class AIOrchestrator implements Serializable {
          * @param tools
          *            the objects containing tool methods
          * @return this builder
+         * @deprecated vendor-annotated tool objects belong to the LLM pipeline:
+         *             register them on the provider, for example with
+         *             {@code tools(...)} on the LangChain4j service or
+         *             {@code defaultTools(...)} on the Spring AI client through
+         *             the {@code customize(...)} method of the built-in
+         *             providers' builders. Tools given here are still sent to
+         *             the provider with every request.
          */
+        @Deprecated(since = "25.4")
         public Builder withTools(Object... tools) {
             if (this.tools != null) {
                 warnIfAlreadySet(this.tools, "Tools");

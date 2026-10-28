@@ -126,6 +126,31 @@ class AIOrchestratorTest {
     }
 
     @Test
+    void builder_withoutSystemPrompt_sendsNoPromptAndDoesNotWarn() {
+        var mockMessage = createMockMessage();
+        Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
+                Mockito.anyString(), Mockito.anyList()))
+                .thenReturn(mockMessage);
+        Mockito.when(
+                mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
+                .thenReturn(Flux.just("Response"));
+
+        var orchestrator = AIOrchestrator.builder(mockProvider)
+                .withMessageList(mockMessageList).build();
+        orchestrator.prompt("Hello");
+
+        var captor = ArgumentCaptor.forClass(LLMProvider.LLMRequest.class);
+        Mockito.verify(mockProvider).stream(captor.capture());
+        Assertions.assertNull(captor.getValue().systemPrompt(),
+                "The prompt lives in the pipeline, so the request carries none");
+        Assertions.assertTrue(
+                logger.getLoggingEvents().stream()
+                        .noneMatch(event -> event.getMessage()
+                                .contains("No system prompt")),
+                "The pipeline owns the prompt, so its absence here is expected");
+    }
+
+    @Test
     void builder_withSystemPrompt_includesSystemPromptInRequest() {
         var systemPrompt = "You are a helpful assistant";
         var mockMessage = createMockMessage();
