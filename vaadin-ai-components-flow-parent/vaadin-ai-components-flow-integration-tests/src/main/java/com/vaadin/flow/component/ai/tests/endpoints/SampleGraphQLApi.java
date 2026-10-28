@@ -249,6 +249,7 @@ final class SampleGraphQLApi implements HttpHandler {
                 .variables(variables).operationName(operationName).build();
         SampleApiServer.sendJson(exchange,
                 exchange.getRequestMethod() + " "
+                        + SampleApiServer.serverUrl(exchange)
                         + exchange.getRequestURI().getPath() + " "
                         + describe(query, variables),
                 200, graphQL.execute(input).toSpecification());

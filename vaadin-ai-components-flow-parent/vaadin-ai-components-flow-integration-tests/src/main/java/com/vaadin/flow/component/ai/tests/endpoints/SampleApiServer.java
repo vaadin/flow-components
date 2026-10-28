@@ -105,8 +105,22 @@ public final class SampleApiServer {
     }
 
     /**
-     * Writes a JSON response, logs the call with the request method and URI,
-     * and closes the exchange.
+     * Returns the address of the server that received a request, for example
+     * {@code http://127.0.0.1:54321}, so that a logged call reads as a URL that
+     * can be opened.
+     *
+     * @param exchange
+     *            the request
+     * @return the scheme, host and port of the server
+     */
+    static String serverUrl(HttpExchange exchange) {
+        var address = exchange.getLocalAddress();
+        return "http://" + address.getHostString() + ":" + address.getPort();
+    }
+
+    /**
+     * Writes a JSON response, logs the call with the request method and the
+     * full URL, and closes the exchange.
      *
      * @param exchange
      *            the exchange to respond to
@@ -119,8 +133,9 @@ public final class SampleApiServer {
      */
     static void sendJson(HttpExchange exchange, int status, Object body)
             throws IOException {
-        sendJson(exchange,
-                exchange.getRequestMethod() + " " + exchange.getRequestURI(),
+        sendJson(
+                exchange, exchange.getRequestMethod() + " "
+                        + serverUrl(exchange) + exchange.getRequestURI(),
                 status, body);
     }
 
