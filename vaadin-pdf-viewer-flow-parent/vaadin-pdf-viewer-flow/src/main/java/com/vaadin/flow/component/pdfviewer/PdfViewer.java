@@ -18,6 +18,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -57,12 +58,8 @@ public class PdfViewer extends Component implements HasSize {
      * Creates a PDF viewer without a document.
      */
     public PdfViewer() {
-        getElement().addPropertyChangeListener("page", "page-changed",
-                event -> fireEvent(
-                        new PageChangeEvent(this, event.isUserOriginated())));
-        getElement().addPropertyChangeListener("pageCount",
-                "page-count-changed", event -> {
-                });
+        getElement().addPropertyChangeListener("page", event -> fireEvent(
+                new PageChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -147,6 +144,7 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the current page, starting from {@code 1}
      */
+    @Synchronize(property = "page", value = "page-changed")
     public int getPage() {
         return getElement().getProperty("page", 1);
     }
@@ -181,6 +179,7 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the number of pages, or {@code 0} if no document is loaded
      */
+    @Synchronize(property = "pageCount", value = "page-count-changed")
     public int getPageCount() {
         return getElement().getProperty("pageCount", 0);
     }
