@@ -242,8 +242,8 @@ LangChain4j:
 
 ```java
 var provider = LangChain4JLLMProvider.builder(streamingChatModel)
-        .systemPrompt("You are a support assistant for ACME.")
         .customize(service -> service
+                .systemMessage("You are a support assistant for ACME.")
                 .contentRetriever(retriever)          // RAG
                 .toolProvider(mcpToolProvider)        // MCP
                 .inputGuardrails(new PromptInjectionGuardrail())
@@ -255,8 +255,8 @@ Spring AI:
 
 ```java
 var provider = SpringAILLMProvider.builder(chatModel)
-        .systemPrompt("You are a support assistant for ACME.")
         .customize(client -> client
+                .defaultSystem("You are a support assistant for ACME.")
                 .defaultAdvisors(QuestionAnswerAdvisor.builder(vectorStore).build())
                 .defaultAdvisors(new SafeGuardAdvisor(List.of("secret")))
                 .defaultTools(mcpToolCallbackProvider, new WeatherTools())) // MCP and @Tool objects
@@ -311,9 +311,8 @@ Vaadin policies:
 | Cancellation | lost: `AiServices` offers no cancellation, so a turn abandoned by the orchestrator's timeout keeps calling the model and the tools until the round-trip limit; measured in S1 | kept, the client's stream is a `Flux` and cancellation propagates |
 | Streaming with output guardrails | the whole answer is buffered until the guardrails pass, so the typing indicator stays for the turn; to document | advisor-dependent |
 
-Parity: full. Both providers have `builder(model)`, `systemPrompt(...)`,
-`customize(...)`, `build()`; the type the customizer receives is the vendor's
-own builder.
+Parity: full. Both providers have `builder(model)`, `customize(...)` and
+`build()`; the type the customizer receives is the vendor's own builder.
 
 Breaking changes: constructors become builders; `LangChain4JLLMProvider`
 loses `setMaxCallsPerTool` and `setMaxTotalToolCalls`; see section 5 for the
@@ -524,6 +523,17 @@ that, the prompt stays on the orchestrator. The case for moving it is weaker
 than for `withTools`: the prompt is the one thing every application writes,
 and keeping it framework-agnostic has value on its own.
 
+Decision, 2026-10-28, after the prototype: no `systemPrompt(...)` on the
+Vaadin builders either. The prompt is set with the vendor's own method in the
+customizer, `systemMessage(...)` on LangChain4j and `defaultSystem(...)` on
+Spring AI. Reasons: one place to set it, so there is no precedence question
+between a Vaadin prompt and the vendor's (the prototype had the customizer win
+on Spring AI and the Vaadin prompt win on LangChain4j); and once the deprecated
+orchestrator prompt is removed, the providers carry no prompt logic at all. The
+convenience lost is one lambda in the plain case. `builder(provider,
+systemPrompt)` on the orchestrator stays deprecated and keeps working: the
+prompt it sends replaces the vendor's on that turn, sent as it is.
+
 ### 5.2 `withTools(Object...)`, `Reconnector.withTools`, `LLMRequest.tools()`
 
 `@Tool` objects are vendor-specific already (the annotation comes from the
@@ -543,6 +553,13 @@ Condition: a framework-agnostic way to add a tool without writing a controller
 must remain, for example `withTools(ToolSpec...)` taking over the name on the
 orchestrator. Otherwise a small application loses today's one-line path and
 has to implement `AIController` for a single tool.
+
+Decision, 2026-10-28: `@Tool` objects are registered with `tools(...)` on the
+LangChain4j service and `defaultTools(...)` on the Spring AI client through the
+customizer; `withTools` stays deprecated and keeps working. The chat page shows
+one method carrying both vendors' tool annotations, registered on both
+pipelines, and the provider tests cover a tool object from the customizer.
+The `withTools(ToolSpec...)` condition above is still open.
 
 ### 5.3 `RequestInterceptor`
 
@@ -731,7 +748,7 @@ and the message list shows the generic error).
 
 | Branch | Option | Shape |
 | --- | --- | --- |
-| `prototype/pipeline-customizer` | A | `LangChain4JLLMProvider.builder(model).systemPrompt(..).customize(AiServices<ChatService>)`, `SpringAILLMProvider.builder(chatModel or ChatClient.Builder).systemPrompt(..).customize(ChatClient.Builder)`, `AIOrchestrator.builder(provider)` |
+| `prototype/pipeline-customizer` | A | `LangChain4JLLMProvider.builder(model).customize(AiServices<ChatService>)`, `SpringAILLMProvider.builder(chatModel or ChatClient.Builder).customize(ChatClient.Builder)`, `AIOrchestrator.builder(provider)`; the builders first had a `systemPrompt(...)`, dropped the same day (5.1) |
 | `prototype/pipeline-byo` | B | `new LangChain4JLLMProvider(AiServices<ChatService>, streaming)`, `new SpringAILLMProvider(chatClient)` adding memory through `mutate()` |
 | `prototype/pipeline-bridge-helpers` | C | public `LangChain4JBridge` and `SpringAIBridge` conversion helpers, the built-in providers delegate to them, the page runs two custom providers written on them |
 
@@ -776,11 +793,12 @@ Branches A and B share the rebuild of `LangChain4JLLMProvider` on
 - System prompt with braces: through `systemMessage(...)` a prompt containing
   `{{"answer": ...}}` fails the turn with
   `IllegalArgumentException: Value for the variable ... is missing`, and
-  `{{it}}` with `IllegalConfigurationException`. Fixed on A: the builder's
-  prompt and a request prompt are placed on the `ChatRequest` by the request
-  transformer, replacing the service's own system message when it has one.
-  A `systemMessage(...)` set in the customizer stays a LangChain4j template;
-  the builder Javadoc says so.
+  `{{it}}` with `IllegalConfigurationException`. Fixed on A for the prompt a
+  request carries, the deprecated orchestrator prompt: the request transformer
+  places it on the `ChatRequest` in place of the service's own system
+  message, as it is. A `systemMessage(...)` set in the customizer is a
+  LangChain4j template, which the `customize` Javadoc documents together with
+  the special date variables; that is vendor behaviour and stays.
 - Retrieval with attachments: `DefaultContentInjector` calls `singleText()`
   on the user message, so `contentRetriever(...)` fails a turn that carries an
   image or a file. Fixed on A: `wire()` wraps `context.retrievalAugmentor`
@@ -831,11 +849,11 @@ Branches A and B share the rebuild of `LangChain4JLLMProvider` on
 ### 8.4 Spring AI (S4) and the controller tools
 
 - `SpringAILLMProvider.builder(chatModel)` and `builder(ChatClient.Builder)`
-  with `systemPrompt(...)` as `defaultSystem` and `customize(...)` running
-  after it; the provider completes the client with `mutate()` and its memory
-  advisor unless a `MemoryAdvisor` is present. `defaultSystem()` is honoured
-  because the provider only sends `.system(...)` per request when the request
-  carries a prompt, which is the deprecated orchestrator path.
+  with `customize(...)`, where the system prompt is `defaultSystem(...)`; the
+  provider completes the client with `mutate()` and its memory advisor unless
+  a `MemoryAdvisor` is present. `defaultSystem()` is honoured because the
+  provider only sends `.system(...)` per request when the request carries a
+  prompt, which is the deprecated orchestrator path.
 - Default tools and per-request tools combine: `prompt()` copies the client's
   default callbacks and providers into the request spec, `tools(...)` appends,
   and `DefaultChatClientUtils` merges callbacks and providers into the chat
@@ -880,7 +898,17 @@ warning only fires on the deprecated path. The condition check of 5.1 and 5.2
 (one statement per setting, no vendor code in the plain case, restore no
 harder than today, a `ToolSpec` one-liner) is still to run before any removal.
 
-### 8.7 Remaining work on `prototype/pipeline-customizer`
+### 8.7 Decisions taken on the results, same day
+
+- `systemPrompt(...)` dropped from both builders, see 5.1.
+- `@Tool` objects through the vendor API in the customizer, see 5.2; the
+  deprecated orchestrator prompt and `withTools` point at those in their
+  Javadoc.
+- The chat page sets the prompt through the customizer on both routes and
+  registers one dual-annotated tool method on both pipelines; the pipeline
+  integration test pages set the prompt the same way.
+
+### 8.8 Remaining work on `prototype/pipeline-customizer`
 
 1. S7, second half: the AI benchmark base versus branch with the Spring AI
    provider. The first half is done: `LangChain4JPipelinePage` and
