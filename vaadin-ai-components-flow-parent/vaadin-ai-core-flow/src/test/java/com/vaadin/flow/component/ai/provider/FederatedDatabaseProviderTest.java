@@ -45,10 +45,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.TableSource.Capability;
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
 import com.vaadin.flow.component.ai.provider.TableSource.SortKey;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 
 class FederatedDatabaseProviderTest {
 
@@ -526,6 +529,70 @@ class FederatedDatabaseProviderTest {
                                 new SortKey("name", true)),
                         0, 1L),
                 people.pushdowns.get(0));
+    }
+
+    @Test
+    void page_isReadAsOnePageOfTheSource() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(GRID_QUERY,
+                new QueryPage(1, 1, List.of(new QuerySortOrder("Salary",
+                        SortDirection.DESCENDING))));
+
+        Assertions.assertEquals(List.of("Ann"), column(rows, "Name"));
+        Assertions.assertEquals(List.of("Name", "Salary"),
+                new ArrayList<>(rows.get(0).keySet()));
+        Assertions.assertEquals(
+                List.of(new Pushdown(Map.of("active", true),
+                        List.of(new SortKey("salary", true)), 1, 1L)),
+                people.pushdowns);
+    }
+
+    @Test
+    void pageWithoutSortOrders_followsTheOrderOfTheQuery() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name FROM people ORDER BY born DESC",
+                new QueryPage(0, 2, List.of()));
+
+        Assertions.assertEquals(List.of("Cid", "Ann"), column(rows, "name"));
+        Assertions.assertEquals(List.of(new SortKey("born", true)),
+                people.pushdowns.get(0).sort());
+    }
+
+    @Test
+    void count_ofAQuery_isCountedByTheSource() {
+        var people = pagingPeople();
+
+        var count = providerOf(people).count(GRID_QUERY + " ORDER BY name");
+
+        Assertions.assertEquals(2, count);
+        Assertions.assertEquals(List.of(new Pushdown(Map.of("active", true))),
+                people.counts);
+        Assertions.assertTrue(people.pushdowns.isEmpty());
+    }
+
+    @Test
+    void pageAndCount_runInTheEngineWithoutTheCapabilities() {
+        var page = provider.executeQuery(
+                "SELECT p.name AS \"Name\", o.amount AS \"Amount\" FROM people p JOIN orders o ON o.personId = p.id",
+                new QueryPage(1, 2, List.of(new QuerySortOrder("Amount",
+                        SortDirection.ASCENDING))));
+        var count = provider.count(GRID_QUERY);
+
+        Assertions.assertEquals(List.of(12.5, 100.0), column(page, "Amount"));
+        Assertions.assertEquals(2, count);
+        Assertions.assertTrue(people.counts.isEmpty());
+    }
+
+    @Test
+    void page_byAColumnTheQueryDoesNotReturn_isRejected() {
+        var page = new QueryPage(0, 1,
+                List.of(new QuerySortOrder("salary", SortDirection.ASCENDING)));
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> provider.executeQuery("SELECT name FROM people", page));
     }
 
     @Test

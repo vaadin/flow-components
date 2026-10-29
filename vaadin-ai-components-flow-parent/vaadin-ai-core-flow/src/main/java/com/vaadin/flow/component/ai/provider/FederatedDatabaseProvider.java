@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import org.apache.calcite.adapter.enumerable.EnumerableConvention;
 import org.apache.calcite.config.Lex;
@@ -43,12 +44,15 @@ import org.apache.calcite.plan.RelOptTable;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelHomogeneousShuttle;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.core.RelFactories;
+import org.apache.calcite.rel.core.Sort;
 import org.apache.calcite.rel.core.TableScan;
 import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rel.logical.LogicalSort;
 import org.apache.calcite.rel.logical.LogicalTableScan;
 import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.rel.type.RelDataTypeSystemImpl;
+import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.runtime.CalciteContextException;
 import org.apache.calcite.schema.SchemaPlus;
@@ -66,7 +70,9 @@ import org.apache.calcite.tools.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * A {@link DatabaseProvider} that lets the LLM write SQL over data that is not
@@ -138,10 +144,11 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
 
     /**
      * Merges a limit directly over a sorted subquery, {@code SELECT * FROM
-     * (... ORDER BY x) LIMIT n OFFSET m} as the grid writes it, into one sort
-     * with the order, the offset and the limit. Kept as two operators, an
-     * adapter's sort rule is free to drop the inner order, because SQL does not
-     * promise it; Calcite's MongoDB rule does exactly that.
+     * (... ORDER BY x) LIMIT n OFFSET m} as SQL that pages a query writes it,
+     * into one sort with the order, the offset and the limit. Kept as two
+     * operators, an adapter's sort rule is free to drop the inner order,
+     * because SQL does not promise it; Calcite's MongoDB rule does exactly
+     * that.
      */
     private static final RelHomogeneousShuttle MERGE_SORTS = new RelHomogeneousShuttle() {
         @Override
@@ -336,7 +343,74 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     public synchronized List<Map<String, Object>> executeQuery(String sql) {
         Objects.requireNonNull(sql, "sql must not be null");
         connect();
-        var plan = plan(sql, false);
+        return run(plan(sql, false, UnaryOperator.identity()));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The page's order, offset and limit are applied to the query as Calcite
+     * plans it rather than written around it as SQL, so a source that takes the
+     * whole query reads only the rows of the page, see {@link TableSource}.
+     * </p>
+     */
+    @Override
+    public synchronized List<Map<String, Object>> executeQuery(String sql,
+            QueryPage page) {
+        Objects.requireNonNull(sql, "sql must not be null");
+        Objects.requireNonNull(page, "page must not be null");
+        connect();
+        return run(plan(sql, false, query -> paged(query, page)));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The count is applied to the query as Calcite plans it, so a source that
+     * takes the whole query counts its rows itself, see {@link TableSource}.
+     * </p>
+     */
+    @Override
+    public synchronized int count(String sql) {
+        Objects.requireNonNull(sql, "sql must not be null");
+        connect();
+        var rows = run(plan(sql, false, FederatedDatabaseProvider::counted));
+        return ((Number) rows.getFirst().values().iterator().next()).intValue();
+    }
+
+    /**
+     * Puts the page's order, offset and limit on top of the planned query. The
+     * sort orders name result columns, as the rows returned name them.
+     */
+    private static RelNode paged(RelNode query, QueryPage page) {
+        var builder = RelFactories.LOGICAL_BUILDER.create(query.getCluster(),
+                null);
+        builder.push(query);
+        var keys = new ArrayList<RexNode>();
+        for (var sortOrder : page.sortOrders()) {
+            RexNode field = builder.field(sortOrder.getSorted());
+            keys.add(sortOrder.getDirection() == SortDirection.DESCENDING
+                    ? builder.desc(field)
+                    : field);
+        }
+        return builder.sortLimit(page.offset(), page.limit(), keys).build();
+    }
+
+    /**
+     * Puts a count of all rows on top of the planned query, without its own
+     * order, which a count does not need.
+     */
+    private static RelNode counted(RelNode query) {
+        var input = query instanceof Sort sort && sort.offset == null
+                && sort.fetch == null ? sort.getInput() : query;
+        var builder = RelFactories.LOGICAL_BUILDER.create(query.getCluster(),
+                null);
+        return builder.push(input)
+                .aggregate(builder.groupKey(), builder.countStar("count"))
+                .build();
+    }
+
+    private List<Map<String, Object>> run(RelNode plan) {
         try (var statement = connection.unwrap(RelRunner.class)
                 .prepareStatement(plan);
                 var resultSet = statement.executeQuery()) {
@@ -363,7 +437,7 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     public synchronized String explain(String sql) {
         Objects.requireNonNull(sql, "sql must not be null");
         connect();
-        return RelOptUtil.toString(plan(sql, true));
+        return RelOptUtil.toString(plan(sql, true, UnaryOperator.identity()));
     }
 
     /**
@@ -371,10 +445,14 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
      * the physical plan on request. Planning goes through the Frameworks API
      * rather than the connection, because the conversion has to keep an
      * {@code ORDER BY} inside a subquery: SQL does not promise that order and
-     * Calcite drops it by default, but the grid sorts its rows exactly that
-     * way.
+     * Calcite drops it by default, but SQL that pages a query sorts its rows
+     * exactly that way, as the default
+     * {@link DatabaseProvider#executeQuery(String, QueryPage)} writes it. The
+     * shape adds what the caller asks of the query on top of it, a page or a
+     * count, before the plan is rewritten for the sources.
      */
-    private RelNode plan(String sql, boolean optimize) {
+    private RelNode plan(String sql, boolean optimize,
+            UnaryOperator<RelNode> shape) {
         var config = Frameworks.newConfigBuilder().parserConfig(parserConfig())
                 .defaultSchema(schema).programs(Programs.standard())
                 .typeSystem(TYPE_SYSTEM)
@@ -388,8 +466,9 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
                 throw new ToolException("Only SELECT queries are allowed.");
             }
             var validated = planner.validate(statement);
-            var plan = planner.rel(validated).project().accept(MERGE_SORTS)
-                    .accept(SourcePushdown.SHUTTLE).accept(BINDABLE_SCANS);
+            var plan = shape.apply(planner.rel(validated).project())
+                    .accept(MERGE_SORTS).accept(SourcePushdown.SHUTTLE)
+                    .accept(BINDABLE_SCANS);
             if (!optimize) {
                 return plan;
             }
