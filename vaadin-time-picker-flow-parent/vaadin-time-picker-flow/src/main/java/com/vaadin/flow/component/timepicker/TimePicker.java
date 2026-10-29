@@ -113,7 +113,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.3.4")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.3.5")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.ts")
 public class TimePicker
