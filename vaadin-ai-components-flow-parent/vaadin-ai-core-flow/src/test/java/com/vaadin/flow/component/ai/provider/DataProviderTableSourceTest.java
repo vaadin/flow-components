@@ -17,16 +17,22 @@ package com.vaadin.flow.component.ai.provider;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.ai.provider.TableSource.Capability;
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
+import com.vaadin.flow.component.ai.provider.TableSource.SortKey;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.SortDirection;
 
 class DataProviderTableSourceTest {
 
@@ -115,6 +121,91 @@ class DataProviderTableSourceTest {
         Assertions.assertEquals("Ann", rows.get(0).get("customer"));
         Assertions.assertEquals(0, new BigDecimal("12.50")
                 .compareTo((BigDecimal) rows.get(0).get("total")));
+    }
+
+    @Test
+    void source_sortsPagesAndCounts() {
+        var source = new DataProviderTableSource<>("orders", Order.class,
+                ORDERS);
+
+        Assertions.assertEquals(
+                Set.of(Capability.SORT, Capability.LIMIT, Capability.COUNT),
+                source.getCapabilities());
+        Assertions.assertEquals(2, source.count(Pushdown.NONE));
+    }
+
+    @Test
+    void inMemoryDataProvider_sortsWithNullsAfterOtherValues() {
+        var source = new DataProviderTableSource<>("orders", Order.class,
+                ORDERS);
+
+        var ascending = source.fetch(new Pushdown(Map.of(),
+                List.of(new SortKey("total", false)), 0, null));
+        var descending = source.fetch(new Pushdown(Map.of(),
+                List.of(new SortKey("total", true)), 0, 1L));
+
+        Assertions.assertEquals(List.of("Ann", "Bob"),
+                ascending.stream().map(row -> row.get("customer")).toList());
+        Assertions.assertEquals(List.of("Bob"),
+                descending.stream().map(row -> row.get("customer")).toList());
+    }
+
+    @Test
+    void backendDataProvider_receivesTheSortOrdersAndThePage() {
+        var queries = new ArrayList<Query<Order, Void>>();
+        DataProvider<Order, Void> backend = DataProvider
+                .fromCallbacks(query -> {
+                    queries.add(query);
+                    return ORDERS.getItems().stream().skip(query.getOffset())
+                            .limit(query.getLimit());
+                }, query -> ORDERS.getItems().size());
+        var source = new DataProviderTableSource<>("orders", Order.class,
+                backend);
+
+        var rows = source.fetch(new Pushdown(Map.of(),
+                List.of(new SortKey("placed", true)), 1, 5L));
+
+        Assertions.assertEquals(1, rows.size());
+        Assertions.assertEquals(1, queries.get(0).getOffset());
+        Assertions.assertEquals(5, queries.get(0).getLimit());
+        var sortOrder = queries.get(0).getSortOrders().get(0);
+        Assertions.assertEquals("placed", sortOrder.getSorted());
+        Assertions.assertEquals(SortDirection.DESCENDING,
+                sortOrder.getDirection());
+    }
+
+    @Test
+    void federatedProvider_readsAGridPageAndCountFromTheDataProvider() {
+        var queries = new ArrayList<Query<Order, Void>>();
+        var counts = new ArrayList<Query<Order, Void>>();
+        DataProvider<Order, Void> backend = DataProvider
+                .fromCallbacks(query -> {
+                    queries.add(query);
+                    return ORDERS.getItems().stream().sorted(
+                            (a, b) -> -a.customer().compareTo(b.customer()))
+                            .skip(query.getOffset()).limit(query.getLimit());
+                }, query -> {
+                    counts.add(query);
+                    return ORDERS.getItems().size();
+                });
+        var provider = new FederatedDatabaseProvider(List.of(
+                new DataProviderTableSource<>("orders", Order.class, backend)));
+        var query = "SELECT customer AS \"Customer\" FROM orders";
+
+        var page = provider.executeQuery("SELECT * FROM (SELECT * FROM ("
+                + query
+                + ") AS _t ORDER BY \"Customer\" DESC) AS _limited LIMIT 1 OFFSET 0");
+        var count = provider.executeQuery(
+                "SELECT COUNT(*) FROM (" + query + ") AS _counted");
+
+        Assertions.assertEquals(List.of(Map.of("Customer", "Bob")), page);
+        var sortOrder = queries.get(0).getSortOrders().get(0);
+        Assertions.assertEquals("customer", sortOrder.getSorted());
+        Assertions.assertEquals(SortDirection.DESCENDING,
+                sortOrder.getDirection());
+        Assertions.assertEquals(1, queries.get(0).getLimit());
+        Assertions.assertEquals(2L, count.get(0).values().iterator().next());
+        Assertions.assertEquals(1, counts.size());
     }
 
     @Test

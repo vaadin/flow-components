@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.data.binder.BeanPropertySet;
@@ -32,6 +33,8 @@ import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * A {@link TableSource} over a Flow {@link DataProvider}, so that data an
@@ -42,8 +45,14 @@ import com.vaadin.flow.data.provider.Query;
  * are left out. The item type's property names are the column names, in name
  * order.
  * <p>
- * Every fetch asks the data provider for all of its items; nothing is pushed
- * down, because a data provider's filter type is its own.
+ * The source sorts, pages and counts through the data provider, so a grid over
+ * a query of one such table reads one page at a time, the way the data provider
+ * serves its own grids. A sort reaches the data provider as a
+ * {@link QuerySortOrder} on the property of the column's name and, for an
+ * in-memory data provider, as a comparator that places null values after all
+ * others when ascending; a backend data provider places null values its own
+ * way. Filters are not pushed down, because a data provider's filter type is
+ * its own: a query that filters reads every item and filters in the engine.
  * </p>
  *
  * @param <T>
@@ -113,11 +122,24 @@ public class DataProviderTableSource<T> implements TableSource {
     }
 
     @Override
+    public Set<Capability> getCapabilities() {
+        return Set.of(Capability.SORT, Capability.LIMIT, Capability.COUNT);
+    }
+
+    @Override
     public List<Map<String, Object>> fetch(Pushdown pushdown) {
-        var getters = new LinkedHashMap<String, PropertyDefinition<T, ?>>();
-        properties()
-                .forEach(property -> getters.put(property.getName(), property));
-        return dataProvider.fetch(new Query<>()).map(item -> {
+        var getters = getters();
+        var sortOrders = pushdown.sort().stream()
+                .map(key -> new QuerySortOrder(key.column(),
+                        key.descending() ? SortDirection.DESCENDING
+                                : SortDirection.ASCENDING))
+                .toList();
+        var limit = pushdown.limit() == null ? Integer.MAX_VALUE
+                : (int) Math.min(pushdown.limit(), Integer.MAX_VALUE);
+        var query = new Query<T, Object>(
+                (int) Math.min(pushdown.offset(), Integer.MAX_VALUE), limit,
+                sortOrders, comparator(pushdown.sort(), getters), null);
+        return fetch(dataProvider, query).map(item -> {
             var row = new LinkedHashMap<String, Object>();
             for (var column : columns) {
                 row.put(column.name(),
@@ -125,6 +147,53 @@ public class DataProviderTableSource<T> implements TableSource {
             }
             return (Map<String, Object>) row;
         }).toList();
+    }
+
+    @Override
+    public long count(Pushdown pushdown) {
+        return size(dataProvider);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T, F> Stream<T> fetch(DataProvider<T, F> dataProvider,
+            Query<T, Object> query) {
+        return dataProvider.fetch((Query<T, F>) (Query<T, ?>) query);
+    }
+
+    private static <T, F> int size(DataProvider<T, F> dataProvider) {
+        return dataProvider.size(new Query<>());
+    }
+
+    private Map<String, PropertyDefinition<T, ?>> getters() {
+        var getters = new LinkedHashMap<String, PropertyDefinition<T, ?>>();
+        properties()
+                .forEach(property -> getters.put(property.getName(), property));
+        return getters;
+    }
+
+    /**
+     * Returns the order of the sort keys as a comparator of items, for an
+     * in-memory data provider, which sorts with the query's comparator rather
+     * than its sort orders. Null values sort as the greatest values.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <T> Comparator<T> comparator(List<SortKey> sort,
+            Map<String, PropertyDefinition<T, ?>> getters) {
+        if (sort.isEmpty()) {
+            return null;
+        }
+        Comparator<T> result = null;
+        for (var key : sort) {
+            var getter = getters.get(key.column()).getGetter();
+            Comparator<T> byKey = Comparator.comparing(
+                    item -> (Comparable) getter.apply(item),
+                    Comparator.nullsLast(Comparator.naturalOrder()));
+            if (key.descending()) {
+                byKey = byKey.reversed();
+            }
+            result = result == null ? byKey : result.thenComparing(byKey);
+        }
+        return result;
     }
 
     private Stream<PropertyDefinition<T, ?>> properties() {
