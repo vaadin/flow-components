@@ -131,7 +131,7 @@ final class SourceTable extends AbstractTable implements FilterableTable {
                 .contains(Capability.EQUALITY_FILTER)
                         ? takeEqualityFilters(
                                 new RexBuilder(root.getTypeFactory()), filters,
-                                source.getColumns())
+                                source)
                         : Map.<String, Object> of();
         return Linq4j.asEnumerable(rows(new Pushdown(equalityFilters)));
     }
@@ -239,15 +239,17 @@ final class SourceTable extends AbstractTable implements FilterableTable {
     }
 
     /**
-     * Collects the filters of the form {@code column = literal} as column name
-     * to value. Calcite folds comparisons into {@code SEARCH} calls and
-     * {@code column = TRUE} into the bare column, so both forms are recognised.
-     * A filter whose conjuncts were all collected is removed from the list; the
-     * engine applies the ones that remain, which may repeat a collected
-     * equality when it shares a filter with another condition.
+     * Collects the filters of the form {@code column = literal} on a column the
+     * source filters by as column name to value. Calcite folds comparisons into
+     * {@code SEARCH} calls and {@code column = TRUE} into the bare column, so
+     * both forms are recognised. A filter whose conjuncts were all collected is
+     * removed from the list; the engine applies the ones that remain, which may
+     * repeat a collected equality when it shares a filter with another
+     * condition.
      */
     static Map<String, Object> takeEqualityFilters(RexBuilder rexBuilder,
-            List<RexNode> filters, List<Column> columns) {
+            List<RexNode> filters, TableSource source) {
+        var columns = source.getColumns();
         var result = new LinkedHashMap<String, Object>();
         var iterator = filters.iterator();
         while (iterator.hasNext()) {
@@ -256,7 +258,8 @@ final class SourceTable extends AbstractTable implements FilterableTable {
             var handled = true;
             for (var conjunct : RelOptUtil.conjunctions(expanded)) {
                 var equality = equality(conjunct, columns);
-                if (equality == null || result.containsKey(equality.getKey())) {
+                if (equality == null || result.containsKey(equality.getKey())
+                        || !source.supportsEqualityFilter(equality.getKey())) {
                     handled = false;
                 } else {
                     result.put(equality.getKey(), equality.getValue());

@@ -90,7 +90,8 @@ public interface TableSource extends Serializable {
     enum Capability {
         /**
          * The source can return only the rows whose columns equal given values,
-         * see {@link Pushdown#equalityFilters()}.
+         * see {@link Pushdown#equalityFilters()} and
+         * {@link TableSource#supportsEqualityFilter(String)}.
          */
         EQUALITY_FILTER,
         /**
@@ -232,6 +233,23 @@ public interface TableSource extends Serializable {
      */
     default Set<Capability> getCapabilities() {
         return Set.of();
+    }
+
+    /**
+     * Returns whether the source can filter by the value of the given column,
+     * for a source with the {@link Capability#EQUALITY_FILTER} capability.
+     * Override it when the source filters by some columns only, for example by
+     * the arguments of an API; the engine then filters by the other columns in
+     * memory, and keeps a limit in memory too when a query filters by them. The
+     * default is {@code true}.
+     *
+     * @param column
+     *            the column name
+     * @return {@code true} if {@link #fetch(Pushdown)} and
+     *         {@link #count(Pushdown)} can filter by the column
+     */
+    default boolean supportsEqualityFilter(String column) {
+        return true;
     }
 
     /**

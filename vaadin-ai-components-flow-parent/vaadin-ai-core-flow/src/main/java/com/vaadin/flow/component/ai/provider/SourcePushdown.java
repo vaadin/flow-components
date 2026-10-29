@@ -280,8 +280,7 @@ final class SourcePushdown {
         }
         var remaining = new ArrayList<>(chain.conditions());
         var filters = SourceTable.takeEqualityFilters(
-                chain.scan().getCluster().getRexBuilder(), remaining,
-                source.getColumns());
+                chain.scan().getCluster().getRexBuilder(), remaining, source);
         return remaining.isEmpty() ? Optional.of(filters) : Optional.empty();
     }
 

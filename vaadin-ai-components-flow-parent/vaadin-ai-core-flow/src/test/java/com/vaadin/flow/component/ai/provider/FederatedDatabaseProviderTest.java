@@ -66,6 +66,7 @@ class FederatedDatabaseProviderTest {
         final List<Pushdown> pushdowns = new ArrayList<>();
         final List<Pushdown> counts = new ArrayList<>();
         int sortKeysSupported = Integer.MAX_VALUE;
+        Set<String> unfilterableColumns = Set.of();
         RuntimeException failure;
 
         RecordingSource(String name, List<Column> columns,
@@ -94,6 +95,11 @@ class FederatedDatabaseProviderTest {
         @Override
         public String getDescription() {
             return "fixture rows of " + name;
+        }
+
+        @Override
+        public boolean supportsEqualityFilter(String column) {
+            return !unfilterableColumns.contains(column);
         }
 
         @Override
@@ -520,6 +526,31 @@ class FederatedDatabaseProviderTest {
                                 new SortKey("name", true)),
                         0, 1L),
                 people.pushdowns.get(0));
+    }
+
+    @Test
+    void equalityFilter_onAColumnTheSourceCannotFilterBy_staysInTheEngine() {
+        var people = pagingPeople();
+        people.unfilterableColumns = Set.of("city");
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name FROM people WHERE city = 'Turku' AND active = TRUE ORDER BY name");
+
+        Assertions.assertEquals(List.of("Ann", "Cid"), column(rows, "name"));
+        Assertions.assertEquals(Map.of("active", true),
+                people.pushdowns.get(0).equalityFilters());
+    }
+
+    @Test
+    void limit_staysInTheEngineWhenTheSourceCannotFilterByAColumn() {
+        var people = pagingPeople();
+        people.unfilterableColumns = Set.of("city");
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name FROM people WHERE city = 'Turku' ORDER BY name DESC LIMIT 1");
+
+        Assertions.assertEquals(List.of("Cid"), column(rows, "name"));
+        Assertions.assertEquals(List.of(Pushdown.NONE), people.pushdowns);
     }
 
     @Test
