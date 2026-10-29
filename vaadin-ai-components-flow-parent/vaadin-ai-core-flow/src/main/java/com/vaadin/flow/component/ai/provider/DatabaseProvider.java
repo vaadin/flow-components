@@ -18,6 +18,11 @@ package com.vaadin.flow.component.ai.provider;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.ai.common.QueryPage;
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * Provider for database schema information and SQL query execution on behalf of
@@ -27,6 +32,17 @@ import java.util.Map;
  * Applications implement this interface with their own database connection. The
  * provider exposes the schema so the LLM can generate valid SQL, and executes
  * the resulting queries.
+ * </p>
+ * <p>
+ * A component that loads rows lazily, such as a grid, asks for one page of a
+ * query's rows at a time with {@link #executeQuery(String, QueryPage)} and for
+ * the size of the result with {@link #count(String)}. By default both wrap the
+ * query in a subquery with {@code ORDER BY}, {@code LIMIT} and {@code OFFSET},
+ * or with {@code COUNT(*)}, and run it through {@link #executeQuery(String)}.
+ * Override them when your SQL dialect pages or counts differently, or when your
+ * provider can do it more efficiently. A provider that delegates to another
+ * provider should delegate these methods too, so that the other provider's own
+ * paging is used.
  * </p>
  * <p>
  * <b>Note:</b> For security, the implementation should use a database account
@@ -142,4 +158,76 @@ public interface DatabaseProvider extends Serializable {
      *             generic error
      */
     List<Map<String, Object>> executeQuery(String sql);
+
+    /**
+     * Executes the given SQL query and returns one page of its rows, for a
+     * component that loads rows lazily. The default wraps the query in
+     * subqueries and runs the result through {@link #executeQuery(String)}:
+     * {@code SELECT * FROM (SELECT * FROM (sql) AS _t ORDER BY "column" ASC)
+     * AS _limited LIMIT limit OFFSET offset}, without the {@code ORDER BY}
+     * level when the page has no sort orders. The sort orders name result
+     * columns of the query, written as quoted identifiers.
+     * <p>
+     * Override this when your SQL dialect pages differently, for example with
+     * {@code OFFSET ... FETCH}, or when your provider can page more
+     * efficiently.
+     * </p>
+     *
+     * @param sql
+     *            the SQL query, not {@code null}
+     * @param page
+     *            the page to return, not {@code null}
+     * @return the rows of the page, never {@code null} but may be empty
+     * @throws ToolException
+     *             if the query fails and the implementation chooses to tell the
+     *             LLM why
+     * @since 25.4
+     */
+    default List<Map<String, Object>> executeQuery(String sql, QueryPage page) {
+        Objects.requireNonNull(sql, "sql must not be null");
+        Objects.requireNonNull(page, "page must not be null");
+        var ordered = sql;
+        if (!page.sortOrders().isEmpty()) {
+            var orderBy = page.sortOrders().stream().map(sortOrder -> "\""
+                    + sortOrder.getSorted().replace("\"", "\"\"") + "\" "
+                    + (sortOrder.getDirection() == SortDirection.DESCENDING
+                            ? "DESC"
+                            : "ASC"))
+                    .collect(Collectors.joining(", "));
+            ordered = "SELECT * FROM (" + sql + ") AS _t ORDER BY " + orderBy;
+        }
+        return executeQuery("SELECT * FROM (" + ordered + ") AS _limited LIMIT "
+                + page.limit() + " OFFSET " + page.offset());
+    }
+
+    /**
+     * Returns the number of rows the given SQL query returns, for a component
+     * that loads rows lazily and needs the size of the result. The default runs
+     * {@code SELECT COUNT(*) FROM (sql) AS _counted} through
+     * {@link #executeQuery(String)} and reads the first value of the first row.
+     * The count is {@code 0} when that query returns no row, a row without
+     * columns, or a value that is not a number.
+     * <p>
+     * Override this when your SQL dialect counts differently, or when your
+     * provider can count more efficiently.
+     * </p>
+     *
+     * @param sql
+     *            the SQL query, not {@code null}
+     * @return the number of rows
+     * @throws ToolException
+     *             if the query fails and the implementation chooses to tell the
+     *             LLM why
+     * @since 25.4
+     */
+    default int count(String sql) {
+        Objects.requireNonNull(sql, "sql must not be null");
+        var result = executeQuery(
+                "SELECT COUNT(*) FROM (" + sql + ") AS _counted");
+        if (result.isEmpty() || result.getFirst().isEmpty()) {
+            return 0;
+        }
+        var first = result.getFirst().values().iterator().next();
+        return first instanceof Number number ? number.intValue() : 0;
+    }
 }
