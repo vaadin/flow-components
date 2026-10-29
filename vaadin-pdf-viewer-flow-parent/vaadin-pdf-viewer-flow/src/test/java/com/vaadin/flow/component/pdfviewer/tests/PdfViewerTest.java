@@ -202,41 +202,33 @@ class PdfViewerTest {
     }
 
     @Test
-    void addToToolbar_slotSet() {
+    void noToolbarActions_noChildren() {
+        Assertions.assertEquals(0, viewer.getElement().getChildCount());
+    }
+
+    @Test
+    void getToolbarActions_sameInstance() {
+        Assertions.assertSame(viewer.getToolbarActions(),
+                viewer.getToolbarActions());
+    }
+
+    @Test
+    void getToolbarActions_slottedWrapperAdded() {
+        var root = viewer.getToolbarActions().getElement();
+        Assertions.assertEquals(viewer.getElement(), root.getParent());
+        Assertions.assertEquals("toolbar-actions", root.getAttribute("slot"));
+        Assertions.assertEquals("contents", root.getStyle().get("display"));
+    }
+
+    @Test
+    void toolbarActionsAdd_componentsInWrapper() {
         var first = new Span();
         var second = new Span();
-        viewer.addToToolbar(first, second);
+        viewer.getToolbarActions().add(first, second);
 
-        Assertions.assertEquals("toolbar-actions",
-                first.getElement().getAttribute("slot"));
-        Assertions.assertEquals("toolbar-actions",
-                second.getElement().getAttribute("slot"));
-        Assertions.assertArrayEquals(new Span[] { first, second },
-                viewer.getToolbarComponents());
-    }
-
-    @Test
-    void remove_slotRemoved() {
-        var action = new Span();
-        viewer.addToToolbar(action);
-
-        viewer.remove(action);
-
-        Assertions.assertFalse(action.getElement().hasAttribute("slot"));
-        Assertions.assertFalse(action.getParent().isPresent());
-        Assertions.assertEquals(0, viewer.getToolbarComponents().length);
-    }
-
-    @Test
-    void remove_notChild_throws() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> viewer.remove(new Span()));
-    }
-
-    @Test
-    void addToToolbar_null_throws() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> viewer.addToToolbar((Span) null));
+        var root = viewer.getToolbarActions().getElement();
+        Assertions.assertEquals(root, first.getElement().getParent());
+        Assertions.assertEquals(root, second.getElement().getParent());
     }
 
     @Test
