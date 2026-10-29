@@ -140,8 +140,12 @@ final class SampleRestApi implements HttpHandler {
         return body;
     }
 
+    /**
+     * Returns the order of items by one field, with null values after all
+     * others when ascending and before them when descending.
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static Comparator<Map<String, Object>> byField(String field,
+    static Comparator<Map<String, Object>> byField(String field,
             boolean descending) {
         Comparator<Map<String, Object>> comparator = (a, b) -> {
             var x = a.get(field);

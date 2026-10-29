@@ -92,6 +92,51 @@ class SampleGraphQLApiTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void listsSortAndPage() throws Exception {
+        var sales = (List<Map<String, Object>>) data(post(
+                "{ sales(region: \"North\", orderBy: [{field: \"revenue\", direction: DESC}], offset: 1, limit: 2) { revenue } }"))
+                .get("sales");
+        var expected = SampleData.SALES.stream()
+                .filter(sale -> sale.region().equals("North"))
+                .map(SampleData.Sale::revenue)
+                .sorted((a, b) -> Integer.compare(b, a)).skip(1).limit(2)
+                .toList();
+        Assertions.assertEquals(expected,
+                sales.stream().map(sale -> sale.get("revenue")).toList());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void listsSortByAFieldThenAnother_withNullValuesLastWhenAscending()
+            throws Exception {
+        var items = (List<Map<String, Object>>) data(post(
+                "{ budgetItems(orderBy: [{field: \"itemType\"}, {field: \"amount\", direction: DESC}]) { itemName itemType } }"))
+                .get("budgetItems");
+        Assertions.assertEquals("intermediate",
+                items.getFirst().get("itemType"));
+        Assertions.assertEquals("Revenue", items.get(2).get("itemName"));
+        Assertions.assertNull(items.getLast().get("itemType"));
+    }
+
+    @Test
+    void countsHonorTheFilterArgument() throws Exception {
+        var counts = data(post(
+                "{ all: salesCount north: salesCount(region: \"North\") }"));
+        Assertions.assertEquals(SampleData.SALES.size(), counts.get("all"));
+        Assertions.assertEquals(6, counts.get("north"));
+    }
+
+    @Test
+    void unknownSortFieldIsReported() throws Exception {
+        var result = post(
+                "{ projectTasks(orderBy: [{field: \"dependsOn\"}]) { taskName } }");
+        var errors = (List<?>) result.get("errors");
+        Assertions.assertTrue(((Map<?, ?>) errors.getFirst()).get("message")
+                .toString().contains("dependsOn"));
+    }
+
+    @Test
     void validationErrorsAreReported() throws Exception {
         var result = post("{ sales { revenue nonexistent } }");
         var errors = (List<?>) result.get("errors");

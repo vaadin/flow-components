@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.tests.endpoints;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +32,11 @@ import graphql.ExecutionInput;
 import graphql.GraphQL;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLTypeUtil;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
@@ -41,9 +46,12 @@ import graphql.schema.idl.TypeRuntimeWiring;
  * Serves {@link SampleData} as a GraphQL API: one list field per table on the
  * {@code Query} type with simple filter arguments, and object fields for the
  * relations the SQL tables express as foreign keys ({@code dependsOn},
- * {@code manager}, {@code parent}). Accepts {@code POST} requests with a JSON
- * body of {@code {"query": ..., "variables": ..., "operationName": ...}} and
- * {@code GET} requests with a {@code query} parameter.
+ * {@code manager}, {@code parent}). Like many such APIs, a list field also
+ * takes {@code orderBy}, a list of scalar fields with a direction, and
+ * {@code offset} and {@code limit} for a page, and has a {@code <field>Count}
+ * beside it with the same filter arguments. Accepts {@code POST} requests with
+ * a JSON body of {@code {"query": ..., "variables": ..., "operationName": ...}}
+ * and {@code GET} requests with a {@code query} parameter.
  */
 final class SampleGraphQLApi implements HttpHandler {
 
@@ -181,33 +189,94 @@ final class SampleGraphQLApi implements HttpHandler {
               children: [ExpenseCategory!]!
             }
 
+            "Sort direction. Null values sort after all others when ascending and before them when descending."
+            enum SortDirection {
+              ASC
+              DESC
+            }
+
+            "One sort key: a scalar field of the listed type and its direction."
+            input OrderBy {
+              field: String!
+              direction: SortDirection = ASC
+            }
+
+            "List fields apply their filter, then orderBy key by key, then offset and limit."
             type Query {
               "Monthly sales, optionally of one region."
-              sales(region: String): [Sale!]!
+              sales(region: String, orderBy: [OrderBy!], offset: Int, limit: Int): [Sale!]!
+              "The number of monthly sales, optionally of one region."
+              salesCount(region: String): Int!
               "Employees, optionally of one department."
-              employees(department: String): [Employee!]!
+              employees(department: String, orderBy: [OrderBy!], offset: Int, limit: Int): [Employee!]!
+              "The number of employees, optionally of one department."
+              employeesCount(department: String): Int!
               "Products, optionally of one category."
-              products(category: String): [Product!]!
+              products(category: String, orderBy: [OrderBy!], offset: Int, limit: Int): [Product!]!
+              "The number of products, optionally of one category."
+              productsCount(category: String): Int!
               "Daily prices, optionally of one ticker."
-              stockPrices(ticker: String): [StockPrice!]!
+              stockPrices(ticker: String, orderBy: [OrderBy!], offset: Int, limit: Int): [StockPrice!]!
+              "The number of daily prices, optionally of one ticker."
+              stockPricesCount(ticker: String): Int!
               "Project tasks, optionally of one phase."
-              projectTasks(phase: String): [ProjectTask!]!
+              projectTasks(phase: String, orderBy: [OrderBy!], offset: Int, limit: Int): [ProjectTask!]!
+              "The number of project tasks, optionally of one phase."
+              projectTasksCount(phase: String): Int!
               "All members of the organization."
-              orgMembers: [OrgMember!]!
+              orgMembers(orderBy: [OrderBy!], offset: Int, limit: Int): [OrgMember!]!
+              "The number of members of the organization."
+              orgMembersCount: Int!
               "All energy flows."
-              energyFlows: [EnergyFlow!]!
+              energyFlows(orderBy: [OrderBy!], offset: Int, limit: Int): [EnergyFlow!]!
+              "The number of energy flows."
+              energyFlowsCount: Int!
               "Hourly website traffic, optionally of one weekday."
-              websiteTraffic(dayOfWeek: Int): [TrafficCell!]!
+              websiteTraffic(dayOfWeek: Int, orderBy: [OrderBy!], offset: Int, limit: Int): [TrafficCell!]!
+              "The number of hourly traffic cells, optionally of one weekday."
+              websiteTrafficCount(dayOfWeek: Int): Int!
               "All budget lines in statement order."
-              budgetItems: [BudgetItem!]!
+              budgetItems(orderBy: [OrderBy!], offset: Int, limit: Int): [BudgetItem!]!
+              "The number of budget lines."
+              budgetItemsCount: Int!
               "All pipeline stages."
-              salesPipeline: [PipelineStage!]!
+              salesPipeline(orderBy: [OrderBy!], offset: Int, limit: Int): [PipelineStage!]!
+              "The number of pipeline stages."
+              salesPipelineCount: Int!
               "All KPIs."
-              kpiMetrics: [KpiMetric!]!
+              kpiMetrics(orderBy: [OrderBy!], offset: Int, limit: Int): [KpiMetric!]!
+              "The number of KPIs."
+              kpiMetricsCount: Int!
               "Expense categories, optionally the children of one parent category."
-              expenseCategories(parent: String): [ExpenseCategory!]!
+              expenseCategories(parent: String, orderBy: [OrderBy!], offset: Int, limit: Int): [ExpenseCategory!]!
+              "The number of expense categories, optionally the children of one parent category."
+              expenseCategoriesCount(parent: String): Int!
             }
             """;
+
+    /**
+     * A list field of the {@code Query} type: the table it lists, and the
+     * argument that filters it by a field of the rows, if any.
+     */
+    private record RootField(String name, String resource, String argument,
+            String field) {
+    }
+
+    private static final List<RootField> ROOT_FIELDS = List.of(
+            new RootField("sales", "sales", "region", "region"),
+            new RootField("employees", "employees", "department", "department"),
+            new RootField("products", "products", "category", "category"),
+            new RootField("stockPrices", "stockPrices", "ticker", "ticker"),
+            new RootField("projectTasks", "projectTasks", "phase", "phase"),
+            new RootField("orgMembers", "orgChart", null, null),
+            new RootField("energyFlows", "energyFlow", null, null),
+            new RootField("websiteTraffic", "websiteTraffic", "dayOfWeek",
+                    "dayOfWeek"),
+            new RootField("budgetItems", "budgetItems", null, null),
+            new RootField("salesPipeline", "salesPipeline", null, null),
+            new RootField("kpiMetrics", "kpiMetrics", null, null),
+            new RootField("expenseCategories", "expenseCategories", "parent",
+                    "parentCategory"));
 
     private final GraphQL graphQL;
 
@@ -288,26 +357,14 @@ final class SampleGraphQLApi implements HttpHandler {
 
     private static GraphQLSchema buildSchema() {
         var registry = new SchemaParser().parse(SDL);
-        var wiring = RuntimeWiring.newRuntimeWiring().type(TypeRuntimeWiring
-                .newTypeWiring("Query")
-                .dataFetcher("sales", list("sales", "region", "region"))
-                .dataFetcher("employees",
-                        list("employees", "department", "department"))
-                .dataFetcher("products",
-                        list("products", "category", "category"))
-                .dataFetcher("stockPrices",
-                        list("stockPrices", "ticker", "ticker"))
-                .dataFetcher("projectTasks",
-                        list("projectTasks", "phase", "phase"))
-                .dataFetcher("orgMembers", list("orgChart", null, null))
-                .dataFetcher("energyFlows", list("energyFlow", null, null))
-                .dataFetcher("websiteTraffic",
-                        list("websiteTraffic", "dayOfWeek", "dayOfWeek"))
-                .dataFetcher("budgetItems", list("budgetItems", null, null))
-                .dataFetcher("salesPipeline", list("salesPipeline", null, null))
-                .dataFetcher("kpiMetrics", list("kpiMetrics", null, null))
-                .dataFetcher("expenseCategories",
-                        list("expenseCategories", "parent", "parentCategory")))
+        var query = TypeRuntimeWiring.newTypeWiring("Query");
+        for (var field : ROOT_FIELDS) {
+            query.dataFetcher(field.name(),
+                    list(field.resource(), field.argument(), field.field()));
+            query.dataFetcher(field.name() + "Count",
+                    count(field.resource(), field.argument(), field.field()));
+        }
+        var wiring = RuntimeWiring.newRuntimeWiring().type(query)
                 .type(TypeRuntimeWiring.newTypeWiring("ProjectTask")
                         .dataFetcher("dependsOn",
                                 environment -> findById("projectTasks",
@@ -343,16 +400,81 @@ final class SampleGraphQLApi implements HttpHandler {
 
     /**
      * A fetcher returning the rows of a table as maps, filtered by one argument
-     * when it is given.
+     * when it is given, then sorted and paged.
      */
     private static DataFetcher<List<Map<String, Object>>> list(String resource,
             String argument, String field) {
-        return environment -> {
-            Object value = argument == null ? null
-                    : environment.getArgument(argument);
-            return value == null ? rows(resource)
-                    : filter(resource, field, value);
-        };
+        return environment -> page(
+                filtered(resource, argument, field, environment), environment);
+    }
+
+    /**
+     * A fetcher returning the number of rows of a table, filtered by one
+     * argument when it is given.
+     */
+    private static DataFetcher<Integer> count(String resource, String argument,
+            String field) {
+        return environment -> filtered(resource, argument, field, environment)
+                .size();
+    }
+
+    private static List<Map<String, Object>> filtered(String resource,
+            String argument, String field,
+            DataFetchingEnvironment environment) {
+        Object value = argument == null ? null
+                : environment.getArgument(argument);
+        return value == null ? rows(resource) : filter(resource, field, value);
+    }
+
+    /**
+     * Sorts the rows by the {@code orderBy} argument, key by key, and cuts the
+     * page of the {@code offset} and {@code limit} arguments.
+     */
+    private static List<Map<String, Object>> page(
+            List<Map<String, Object>> rows,
+            DataFetchingEnvironment environment) {
+        List<Map<String, Object>> orderBy = environment
+                .getArgumentOrDefault("orderBy", List.of());
+        var sortable = sortableFields(environment);
+        Comparator<Map<String, Object>> order = null;
+        for (var key : orderBy) {
+            var field = String.valueOf(key.get("field"));
+            if (!sortable.contains(field)) {
+                throw new IllegalArgumentException("Unknown sort field: "
+                        + field + ". Fields: " + sortable);
+            }
+            var byField = SampleRestApi.byField(field,
+                    "DESC".equals(String.valueOf(key.get("direction"))));
+            order = order == null ? byField : order.thenComparing(byField);
+        }
+        var result = new ArrayList<>(rows);
+        if (order != null) {
+            result.sort(order);
+        }
+        Integer offset = environment.getArgument("offset");
+        Integer limit = environment.getArgument("limit");
+        if ((offset != null && offset < 0) || (limit != null && limit < 0)) {
+            throw new IllegalArgumentException(
+                    "offset and limit must not be negative");
+        }
+        var from = Math.min(result.size(), offset == null ? 0 : offset);
+        var to = limit == null ? result.size()
+                : Math.min(result.size(), from + limit);
+        return List.copyOf(result.subList(from, to));
+    }
+
+    /**
+     * Returns the scalar fields of the type a list field lists, which are the
+     * fields its rows can be sorted by.
+     */
+    private static List<String> sortableFields(
+            DataFetchingEnvironment environment) {
+        var type = (GraphQLObjectType) GraphQLTypeUtil
+                .unwrapAll(environment.getFieldType());
+        return type.getFieldDefinitions().stream()
+                .filter(definition -> GraphQLTypeUtil.unwrapAll(
+                        definition.getType()) instanceof GraphQLScalarType)
+                .map(GraphQLFieldDefinition::getName).toList();
     }
 
     private static List<Map<String, Object>> rows(String resource) {
