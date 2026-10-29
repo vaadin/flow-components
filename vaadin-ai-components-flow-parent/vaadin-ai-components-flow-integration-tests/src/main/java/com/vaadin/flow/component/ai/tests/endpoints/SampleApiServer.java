@@ -227,6 +227,35 @@ public final class SampleApiServer {
     }
 
     /**
+     * Returns every value of a query parameter that a request repeats, such as
+     * {@code sort=a,asc&sort=b,desc}, in request order.
+     *
+     * @param exchange
+     *            the request
+     * @param name
+     *            the parameter name
+     * @return the values, empty if the parameter is absent
+     */
+    static List<String> queryParameterValues(HttpExchange exchange,
+            String name) {
+        var values = new ArrayList<String>();
+        var query = exchange.getRequestURI().getRawQuery();
+        if (query == null || query.isEmpty()) {
+            return values;
+        }
+        for (var pair : query.split("&")) {
+            var separator = pair.indexOf('=');
+            var key = separator < 0 ? pair : pair.substring(0, separator);
+            if (URLDecoder.decode(key, StandardCharsets.UTF_8).equals(name)) {
+                values.add(separator < 0 ? ""
+                        : URLDecoder.decode(pair.substring(separator + 1),
+                                StandardCharsets.UTF_8));
+            }
+        }
+        return values;
+    }
+
+    /**
      * Parses the query string of a request into a map.
      *
      * @param exchange

@@ -104,6 +104,31 @@ class SampleRestApiTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void collectionsSortBySeveralFields() throws Exception {
+        var content = (List<Map<String, Object>>) get(
+                api + "/sales?sort=region,desc&sort=revenue,asc&size=100")
+                .body().get("content");
+        Assertions.assertEquals("South", content.getFirst().get("region"));
+        var south = content.stream()
+                .filter(item -> "South".equals(item.get("region")))
+                .map(item -> (Integer) item.get("revenue")).toList();
+        Assertions.assertEquals(south.stream().sorted().toList(), south);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void nullValuesSortAfterOthersWhenAscending() throws Exception {
+        var ascending = (List<Map<String, Object>>) get(
+                api + "/projectTasks?sort=dependsOn,asc").body().get("content");
+        var descending = (List<Map<String, Object>>) get(
+                api + "/projectTasks?sort=dependsOn,desc").body()
+                .get("content");
+        Assertions.assertNull(ascending.getLast().get("dependsOn"));
+        Assertions.assertNull(descending.getFirst().get("dependsOn"));
+    }
+
+    @Test
     void unknownFieldIs400() throws Exception {
         var response = get(api + "/sales?colour=red");
         Assertions.assertEquals(400, response.status());

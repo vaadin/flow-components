@@ -38,7 +38,9 @@ import com.sun.net.httpserver.HttpHandler;
  * Like most such APIs it filters and sorts, but only so much: any other query
  * parameter is an equality filter on a field of the collection
  * ({@code ?region=North}), and {@code sort=field,asc} or
- * {@code sort=field,desc} orders the items by one field. There are no joins,
+ * {@code sort=field,desc} orders the items by a field, repeated for more than
+ * one ({@code sort=region,asc&sort=revenue,desc}), with null values after all
+ * others when ascending and before them when descending. There are no joins,
  * aggregations or computed values; an unknown field is a {@code 400} with an
  * {@code error} message.
  * </p>
@@ -86,8 +88,12 @@ final class SampleRestApi implements HttpHandler {
                     .valueOf(item.get(parameter.getKey())).equals(value))
                     .toList();
         }
-        var sort = parameters.get("sort");
-        if (sort != null && !sort.isBlank()) {
+        Comparator<Map<String, Object>> order = null;
+        for (var sort : SampleApiServer.queryParameterValues(exchange,
+                "sort")) {
+            if (sort.isBlank()) {
+                continue;
+            }
             var parts = sort.split(",", 2);
             if (!fields.contains(parts[0])) {
                 SampleApiServer.sendError(exchange, 400, "Unknown sort field: "
@@ -96,8 +102,12 @@ final class SampleRestApi implements HttpHandler {
             }
             var descending = parts.length > 1
                     && parts[1].equalsIgnoreCase("desc");
+            var byField = byField(parts[0], descending);
+            order = order == null ? byField : order.thenComparing(byField);
+        }
+        if (order != null) {
             var sorted = new ArrayList<>(items);
-            sorted.sort(byField(parts[0], descending));
+            sorted.sort(order);
             items = sorted;
         }
         int page = parseInt(parameters.get("page"), 0);
