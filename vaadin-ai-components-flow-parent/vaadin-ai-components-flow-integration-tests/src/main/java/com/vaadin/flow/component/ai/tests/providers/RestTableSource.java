@@ -47,8 +47,10 @@ import tools.jackson.databind.JsonNode;
  * tell an integer from a decimal unless the value has a fraction.
  * <p>
  * Equality filters are pushed down as the API's {@code field=value} query
- * parameters; everything else the engine does. Every page of the collection is
- * fetched, so the API's own paging stays invisible to the engine.
+ * parameters, a sort as its {@code sort} parameters, and an offset and limit as
+ * the pages that hold those rows; a count reads the total of the first page.
+ * Without a limit every page of the collection is fetched. Everything else the
+ * engine does.
  * </p>
  */
 public class RestTableSource implements TableSource {
@@ -113,7 +115,8 @@ public class RestTableSource implements TableSource {
 
     @Override
     public Set<Capability> getCapabilities() {
-        return Set.of(Capability.EQUALITY_FILTER);
+        return Set.of(Capability.EQUALITY_FILTER, Capability.SORT,
+                Capability.LIMIT, Capability.COUNT);
     }
 
     @Override
@@ -121,26 +124,54 @@ public class RestTableSource implements TableSource {
         return "REST collection " + collectionUri.getPath();
     }
 
+    /**
+     * Reads the pages that hold the requested rows: pages as large as the limit
+     * where the API allows it, starting at the one the offset falls on.
+     */
     @Override
     public List<Map<String, Object>> fetch(Pushdown pushdown) {
-        var filters = new StringBuilder();
-        for (var filter : pushdown.equalityFilters().entrySet()) {
-            filters.append('&').append(encode(filter.getKey())).append('=')
-                    .append(encode(String.valueOf(filter.getValue())));
+        var parameters = parameters(pushdown);
+        for (var key : pushdown.sort()) {
+            parameters.append("&sort=").append(encode(key.column()))
+                    .append(key.descending() ? ",desc" : ",asc");
         }
+        var limit = pushdown.limit() == null ? Long.MAX_VALUE
+                : pushdown.limit();
+        var size = (int) Math.min(PAGE_SIZE, Math.max(1, limit));
+        var pageNumber = pushdown.offset() / size;
+        var skip = pushdown.offset() % size;
         var rows = new ArrayList<Map<String, Object>>();
-        var pageNumber = 0;
         while (true) {
             var page = getJson(collectionUri,
-                    "size=" + PAGE_SIZE + "&page=" + pageNumber + filters);
+                    "size=" + size + "&page=" + pageNumber + parameters);
             for (var item : page.get("content")) {
-                rows.add(toRow(item));
+                if (skip > 0) {
+                    skip--;
+                } else if (rows.size() < limit) {
+                    rows.add(toRow(item));
+                }
             }
             var totalPages = page.get("page").get("totalPages").intValue();
-            if (++pageNumber >= totalPages) {
+            if (rows.size() >= limit || ++pageNumber >= totalPages) {
                 return rows;
             }
         }
+    }
+
+    @Override
+    public long count(Pushdown pushdown) {
+        var page = getJson(collectionUri,
+                "size=1&page=0" + parameters(pushdown));
+        return page.get("page").get("totalElements").longValue();
+    }
+
+    private static StringBuilder parameters(Pushdown pushdown) {
+        var parameters = new StringBuilder();
+        for (var filter : pushdown.equalityFilters().entrySet()) {
+            parameters.append('&').append(encode(filter.getKey())).append('=')
+                    .append(encode(String.valueOf(filter.getValue())));
+        }
+        return parameters;
     }
 
     private Map<String, Object> toRow(JsonNode item) {

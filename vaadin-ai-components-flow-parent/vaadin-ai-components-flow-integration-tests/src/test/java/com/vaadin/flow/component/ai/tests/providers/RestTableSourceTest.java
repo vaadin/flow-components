@@ -17,6 +17,7 @@ package com.vaadin.flow.component.ai.tests.providers;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
+import com.vaadin.flow.component.ai.provider.TableSource.SortKey;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleApiServer;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
@@ -95,6 +97,40 @@ class RestTableSourceTest {
         Assertions.assertTrue(expected < SampleData.SALES.size());
         Assertions.assertTrue(rows.stream()
                 .allMatch(row -> "North".equals(row.get("region"))));
+    }
+
+    @Test
+    void fetch_readsASortedPageThatSpansTwoPagesOfTheApi() {
+        var rows = sales.fetch(new Pushdown(Map.of(),
+                List.of(new SortKey("revenue", true)), 3, 4L));
+
+        var expected = SampleData.SALES.stream()
+                .sorted(Comparator.comparing(SampleData.Sale::revenue)
+                        .reversed())
+                .skip(3).limit(4).map(SampleData.Sale::revenue).toList();
+        Assertions.assertEquals(expected,
+                rows.stream().map(row -> row.get("revenue")).toList());
+    }
+
+    @Test
+    void fetch_appliesFiltersBeforeThePage() {
+        var rows = sales.fetch(new Pushdown(Map.of("region", "South"),
+                List.of(new SortKey("monthOrder", false)), 0, 2L));
+
+        Assertions.assertEquals(List.of(1, 2),
+                rows.stream().map(row -> row.get("monthOrder")).toList());
+        Assertions.assertTrue(rows.stream()
+                .allMatch(row -> "South".equals(row.get("region"))));
+    }
+
+    @Test
+    void count_readsTheTotalOfTheApi() {
+        Assertions.assertEquals(SampleData.SALES.size(),
+                sales.count(Pushdown.NONE));
+        Assertions.assertEquals(
+                SampleData.SALES.stream()
+                        .filter(sale -> sale.region().equals("North")).count(),
+                sales.count(new Pushdown(Map.of("region", "North"))));
     }
 
     @Test
