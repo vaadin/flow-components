@@ -19,6 +19,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -61,6 +62,8 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
      * Creates a PDF viewer without a document.
      */
     public PdfViewer() {
+        getElement().addPropertyChangeListener("page", event -> fireEvent(
+                new PageChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -71,6 +74,7 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
      * @see #setSrc(String)
      */
     public PdfViewer(String src) {
+        this();
         setSrc(src);
     }
 
@@ -84,6 +88,7 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
      * @see #setSrc(DownloadHandler)
      */
     public PdfViewer(DownloadHandler downloadHandler) {
+        this();
         setSrc(downloadHandler);
     }
 
@@ -97,9 +102,11 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
     }
 
     /**
-     * Sets the URL of the document to show. The current document is replaced.
-     * {@link DocumentLoadEvent} fires when the document has loaded,
-     * {@link DocumentErrorEvent} if it could not be loaded.
+     * Sets the URL of the document to show. The current document is replaced,
+     * and the new one opens on its first page unless you also call
+     * {@link #setPage(int)} in the same request. {@link DocumentLoadEvent}
+     * fires when the document has loaded, {@link DocumentErrorEvent} if it
+     * could not be loaded.
      * <p>
      * The browser fetches the document, so the URL must be on the same origin
      * as the application, or the server must allow it with CORS headers. To
@@ -141,6 +148,63 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
     }
 
     /**
+     * Gets the current page, which is the page that takes up most of the
+     * visible area. It changes when the user scrolls or navigates between
+     * pages. The default value is {@code 1}.
+     *
+     * @return the current page, starting from {@code 1}
+     */
+    @Synchronize(property = "page", value = "page-changed")
+    public int getPage() {
+        return getElement().getProperty("page", 1);
+    }
+
+    /**
+     * Sets the current page, which scrolls the viewer to the start of that
+     * page. A page that the document does not have is ignored. You can call
+     * this before the document has loaded to open it on that page.
+     *
+     * @param page
+     *            the page to show, starting from {@code 1}
+     * @throws IllegalArgumentException
+     *             if the page is less than {@code 1}
+     */
+    public void setPage(int page) {
+        if (page < 1) {
+            throw new IllegalArgumentException(
+                    "The page should be greater than or equal to 1");
+        }
+        getElement().setProperty("page", page);
+    }
+
+    /**
+     * Gets the number of pages in the document, or {@code 0} while no document
+     * is loaded. The default value is {@code 0}.
+     * <p>
+     * The browser reports the value and the server does not verify it, so don't
+     * use it for access control or other security decisions.
+     *
+     * @return the number of pages, or {@code 0} if no document is loaded
+     */
+    @Synchronize(property = "pageCount", value = "page-count-changed")
+    public int getPageCount() {
+        return getElement().getProperty("pageCount", 0);
+    }
+
+    /**
+     * Adds a listener that is called when the current page changes, either by
+     * the user or by {@link #setPage(int)}.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addPageChangeListener(
+            ComponentEventListener<PageChangeEvent> listener) {
+        return addListener(PageChangeEvent.class, listener);
+    }
+
+    /**
      * Adds a listener that is called when a document has been loaded.
      *
      * @param listener
@@ -176,6 +240,33 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
         if (!featureFlags
                 .isEnabled(PdfViewerFeatureFlagProvider.PDF_VIEWER_COMPONENT)) {
             throw new PdfViewerExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Event fired when the current page changes.
+     */
+    public static class PageChangeEvent extends ComponentEvent<PdfViewer> {
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         */
+        public PageChangeEvent(PdfViewer source, boolean fromClient) {
+            super(source, fromClient);
+        }
+
+        /**
+         * Gets the current page.
+         *
+         * @return the current page, starting from {@code 1}
+         */
+        public int getPage() {
+            return getSource().getPage();
         }
     }
 

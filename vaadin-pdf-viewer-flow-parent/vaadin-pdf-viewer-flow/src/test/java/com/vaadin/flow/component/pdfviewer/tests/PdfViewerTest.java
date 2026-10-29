@@ -8,7 +8,10 @@
  */
 package com.vaadin.flow.component.pdfviewer.tests;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
@@ -22,9 +25,14 @@ import com.vaadin.flow.component.pdfviewer.DocumentErrorReason;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
+import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
@@ -91,6 +99,82 @@ class PdfViewerTest {
     void setSrc_nullDownloadHandler_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> viewer.setSrc((DownloadHandler) null));
+    }
+
+    @Test
+    void defaultPage() {
+        Assertions.assertEquals(1, viewer.getPage());
+    }
+
+    @Test
+    void setPage_propertySet() {
+        viewer.setPage(3);
+        Assertions.assertEquals(3, viewer.getElement().getProperty("page", 0));
+        Assertions.assertEquals(3, viewer.getPage());
+    }
+
+    @Test
+    void setPage_lessThanOne_throws() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> viewer.setPage(0));
+    }
+
+    @Test
+    void setPage_pageChangeEventFired() {
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        viewer.setPage(3);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertEquals(3, events.get(0).getPage());
+    }
+
+    @Test
+    void setSamePage_pageChangeEventNotFired() {
+        viewer.setPage(3);
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        viewer.setPage(3);
+
+        Assertions.assertTrue(events.isEmpty());
+    }
+
+    @Test
+    void pageChangedOnClient_pageChangeEventFired() {
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        fakeClientPropertyChange("page", 4);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertTrue(events.get(0).isFromClient());
+        Assertions.assertEquals(4, events.get(0).getPage());
+    }
+
+    @Test
+    void pageSynchronizedOnPageChangedEvent() {
+        Assertions.assertTrue(getSyncExpressions("page-changed")
+                .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "page"));
+    }
+
+    @Test
+    void defaultPageCount() {
+        Assertions.assertEquals(0, viewer.getPageCount());
+    }
+
+    @Test
+    void pageCountChangedOnClient_pageCountUpdated() {
+        fakeClientPropertyChange("pageCount", 6);
+        Assertions.assertEquals(6, viewer.getPageCount());
+    }
+
+    @Test
+    void pageCountSynchronizedOnPageCountChangedEvent() {
+        Assertions.assertTrue(getSyncExpressions("page-count-changed").contains(
+                JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "pageCount"));
     }
 
     @Test
@@ -163,6 +247,20 @@ class PdfViewerTest {
     void implementsHasAriaLabel() {
         Assertions.assertTrue(
                 HasAriaLabel.class.isAssignableFrom(PdfViewer.class));
+    }
+
+    private Set<String> getSyncExpressions(String eventName) {
+        return viewer.getElement().getNode()
+                .getFeature(ElementListenerMap.class).getExpressions(eventName);
+    }
+
+    private void fakeClientPropertyChange(String property, Serializable value) {
+        try {
+            viewer.getElement().getNode().getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient(property, value).run();
+        } catch (PropertyChangeDeniedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private InputStreamDownloadHandler createDownloadHandler() {
