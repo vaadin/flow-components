@@ -8,9 +8,7 @@
  */
 package com.vaadin.flow.component.pdfviewer;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
@@ -19,13 +17,13 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -45,9 +43,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * viewer.setHeight("600px");
  * </pre>
  * <p>
- * The toolbar above the pages lets the user navigate between pages. You can add
- * your own controls to the end of the toolbar with
- * {@link #addToToolbar(Component...)}.
+ * The toolbar above the pages has built-in controls for moving between pages.
+ * You can add your own controls, such as a button, at the end of the toolbar
+ * with {@link #getToolbarActions()}.
  * <p>
  * This component is experimental and needs to be enabled with the
  * {@code com.vaadin.experimental.pdfViewerComponent} feature flag, either in
@@ -66,12 +64,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
-    private static final String TOOLBAR_SLOT_NAME = "toolbar-actions";
-
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
 
     private PdfViewerI18n i18n;
+
+    private ToolbarActions toolbarActions;
 
     /**
      * Creates a PDF viewer without a document.
@@ -254,55 +252,21 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Adds components to the end of the toolbar, after the page navigation, for
-     * example buttons for actions on the document. To remove them, use
-     * {@link #remove(Component...)}.
+     * Gets the area at the end of the toolbar where you can add your own
+     * controls, such as a button. It is empty by default.
      *
-     * @param components
-     *            the components to add, not {@code null}
-     */
-    public void addToToolbar(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        var componentsToAdd = Arrays.stream(components).map(component -> Objects
-                .requireNonNull(component, "Component to add cannot be null"))
-                .toList();
-        componentsToAdd.forEach(component -> SlotUtils.addToSlot(this,
-                TOOLBAR_SLOT_NAME, component));
-    }
-
-    /**
-     * Removes components from the toolbar.
+     * <pre>
+     * viewer.getToolbarActions().add(button);
+     * </pre>
      *
-     * @param components
-     *            the components to remove, not {@code null}
-     * @throws IllegalArgumentException
-     *             if a component is not a child of this viewer
+     * @return the toolbar actions
      */
-    public void remove(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to remove cannot be null");
-            Element element = component.getElement();
-            if (!getElement().equals(element.getParent())) {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-            element.removeAttribute("slot");
-            getElement().removeChild(element);
+    public ToolbarActions getToolbarActions() {
+        if (toolbarActions == null) {
+            toolbarActions = new ToolbarActions();
+            getElement().appendChild(toolbarActions.getElement());
         }
-    }
-
-    /**
-     * Gets the components added to the toolbar.
-     *
-     * @return the components in the toolbar, in the order they were added
-     * @see #addToToolbar(Component...)
-     */
-    public Component[] getToolbarComponents() {
-        return SlotUtils.getElementsInSlot(this, TOOLBAR_SLOT_NAME)
-                .map(Element::getComponent).map(Optional::orElseThrow)
-                .toArray(Component[]::new);
+        return toolbarActions;
     }
 
     /**
@@ -353,6 +317,27 @@ public class PdfViewer extends Component implements HasSize {
         if (!featureFlags
                 .isEnabled(PdfViewerFeatureFlagProvider.PDF_VIEWER_COMPONENT)) {
             throw new PdfViewerExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * The area at the end of the toolbar of a {@link PdfViewer} that holds your
+     * own controls, such as a button.
+     *
+     * @see PdfViewer#getToolbarActions()
+     */
+    public static final class ToolbarActions implements HasComponents {
+        private final Element root;
+
+        private ToolbarActions() {
+            root = new Element("div");
+            root.setAttribute("slot", "toolbar-actions");
+            root.getStyle().set("display", "contents");
+        }
+
+        @Override
+        public Element getElement() {
+            return root;
         }
     }
 
