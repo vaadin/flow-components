@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -33,7 +34,11 @@ import org.bson.types.Decimal128;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
 import com.vaadin.flow.component.ai.provider.TableSource;
 
 /**
@@ -41,7 +46,12 @@ import com.vaadin.flow.component.ai.provider.TableSource;
  * driver. The column types are inferred from a sample of documents; nested
  * documents and arrays are left out, fields with mixed types become text, and
  * the {@code _id} field is exposed as {@code id}. Equality filters are pushed
- * down as a {@code find} filter; everything else the engine does.
+ * down as a {@code find} filter, an offset and limit as its {@code skip} and
+ * {@code limit}, and a count as {@code countDocuments}. A sort runs as an
+ * aggregation pipeline, since MongoDB sorts null values before all others when
+ * ascending, the other way round from SQL: each sort key is preceded by a
+ * computed flag that moves the null values to where SQL has them. Everything
+ * else the engine does.
  */
 public class MongoTableSource implements TableSource {
 
@@ -106,7 +116,8 @@ public class MongoTableSource implements TableSource {
 
     @Override
     public Set<Capability> getCapabilities() {
-        return Set.of(Capability.EQUALITY_FILTER);
+        return Set.of(Capability.EQUALITY_FILTER, Capability.SORT,
+                Capability.LIMIT, Capability.COUNT);
     }
 
     @Override
@@ -116,14 +127,22 @@ public class MongoTableSource implements TableSource {
 
     @Override
     public List<Map<String, Object>> fetch(Pushdown pushdown) {
-        var filters = new ArrayList<Bson>();
-        for (var filter : pushdown.equalityFilters().entrySet()) {
-            filters.add(Filters.eq(fieldOf(filter.getKey()),
-                    toBson(filter.getValue())));
+        if (pushdown.limit() != null && pushdown.limit() == 0) {
+            return List.of();
         }
-        var documents = client().getDatabase(database).getCollection(collection)
-                .find(filters.isEmpty() ? new Document()
-                        : Filters.and(filters));
+        var filter = filter(pushdown);
+        Iterable<Document> documents;
+        if (!pushdown.sort().isEmpty()) {
+            documents = collection().aggregate(pipeline(filter, pushdown));
+        } else if (pushdown.offset() > 0 || pushdown.limit() != null) {
+            // Paging needs the same order on every read
+            var find = collection().find(filter).sort(Sorts.ascending("_id"))
+                    .skip(intValue(pushdown.offset()));
+            documents = pushdown.limit() == null ? find
+                    : find.limit(intValue(pushdown.limit()));
+        } else {
+            documents = collection().find(filter);
+        }
         var rows = new ArrayList<Map<String, Object>>();
         for (var document : documents) {
             var row = new LinkedHashMap<String, Object>();
@@ -134,6 +153,65 @@ public class MongoTableSource implements TableSource {
             rows.add(row);
         }
         return rows;
+    }
+
+    @Override
+    public long count(Pushdown pushdown) {
+        return collection().countDocuments(filter(pushdown));
+    }
+
+    private MongoCollection<Document> collection() {
+        return client().getDatabase(database).getCollection(collection);
+    }
+
+    private static Bson filter(Pushdown pushdown) {
+        var filters = new ArrayList<Bson>();
+        for (var filter : pushdown.equalityFilters().entrySet()) {
+            filters.add(Filters.eq(fieldOf(filter.getKey()),
+                    toBson(filter.getValue())));
+        }
+        return filters.isEmpty() ? new Document() : Filters.and(filters);
+    }
+
+    /**
+     * Returns the pipeline of a sorted read: the filter, a flag per sort key
+     * that is 1 for a null or missing value and 0 otherwise, the sort by each
+     * flag and value in the key's direction, which puts null values last when
+     * ascending and first when descending, and the page.
+     */
+    private static List<Bson> pipeline(Bson filter, Pushdown pushdown) {
+        var pipeline = new ArrayList<Bson>();
+        pipeline.add(Aggregates.match(filter));
+        var flags = new ArrayList<Field<?>>();
+        var sorts = new ArrayList<Bson>();
+        for (int i = 0; i < pushdown.sort().size(); i++) {
+            var key = pushdown.sort().get(i);
+            var field = fieldOf(key.column());
+            var flag = "_null" + i;
+            flags.add(new Field<>(flag,
+                    new Document("$cond",
+                            Arrays.asList(new Document("$eq",
+                                    Arrays.asList(new Document("$ifNull",
+                                            Arrays.asList("$" + field, null)),
+                                            null)),
+                                    1, 0))));
+            sorts.add(key.descending() ? Sorts.descending(flag, field)
+                    : Sorts.ascending(flag, field));
+        }
+        sorts.add(Sorts.ascending("_id"));
+        pipeline.add(Aggregates.addFields(flags));
+        pipeline.add(Aggregates.sort(Sorts.orderBy(sorts)));
+        if (pushdown.offset() > 0) {
+            pipeline.add(Aggregates.skip(intValue(pushdown.offset())));
+        }
+        if (pushdown.limit() != null) {
+            pipeline.add(Aggregates.limit(intValue(pushdown.limit())));
+        }
+        return pipeline;
+    }
+
+    private static int intValue(long value) {
+        return (int) Math.min(value, Integer.MAX_VALUE);
     }
 
     private synchronized MongoClient client() {

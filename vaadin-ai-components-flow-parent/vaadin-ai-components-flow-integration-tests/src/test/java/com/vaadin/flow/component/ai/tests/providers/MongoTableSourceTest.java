@@ -28,6 +28,7 @@ import com.vaadin.flow.component.ai.provider.FederatedDatabaseProvider;
 import com.vaadin.flow.component.ai.provider.TableSource.Capability;
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
+import com.vaadin.flow.component.ai.provider.TableSource.SortKey;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleMongoServer;
 
@@ -59,7 +60,9 @@ class MongoTableSourceTest {
                 .anyMatch("kpiMetrics"::equals));
         Assertions.assertEquals("MongoDB collection kpiMetrics",
                 source("kpiMetrics").getDescription());
-        Assertions.assertEquals(Set.of(Capability.EQUALITY_FILTER),
+        Assertions.assertEquals(
+                Set.of(Capability.EQUALITY_FILTER, Capability.SORT,
+                        Capability.LIMIT, Capability.COUNT),
                 source("kpiMetrics").getCapabilities());
     }
 
@@ -107,6 +110,62 @@ class MongoTableSourceTest {
         Assertions.assertEquals(1, byId.size());
         Assertions.assertEquals(SampleData.KPI_METRICS.get(1).metricName(),
                 byId.get(0).get("metricName"));
+    }
+
+    @Test
+    void fetch_sortsNullValuesAfterOthersWhenAscending() {
+        var ascending = source("budgetItems").fetch(new Pushdown(Map.of(),
+                List.of(new SortKey("itemType", false)), 0, null));
+        var descending = source("budgetItems").fetch(
+                new Pushdown(Map.of(), List.of(new SortKey("itemType", true),
+                        new SortKey("amount", false)), 0, 3L));
+
+        Assertions.assertEquals(List.of("intermediate", "sum"),
+                ascending.subList(0, 2).stream().map(row -> row.get("itemType"))
+                        .toList());
+        Assertions.assertNull(ascending.getLast().get("itemType"));
+        Assertions.assertEquals(
+                List.of("Cost of Goods", "Salaries", "Marketing"),
+                descending.stream().map(row -> row.get("itemName")).toList());
+    }
+
+    @Test
+    void fetch_pagesInIdOrderWithoutASort() {
+        var rows = source("kpiMetrics")
+                .fetch(new Pushdown(Map.of(), List.of(), 1, 2L));
+
+        Assertions.assertEquals(List.of(2, 3),
+                rows.stream().map(row -> row.get("id")).toList());
+    }
+
+    @Test
+    void count_countsTheMatchingDocuments() {
+        var ticker = SampleData.STOCK_PRICES.get(0).ticker();
+
+        var count = source("stockPrices")
+                .count(new Pushdown(Map.of("ticker", ticker)));
+
+        Assertions.assertEquals(
+                SampleData.STOCK_PRICES.stream()
+                        .filter(price -> price.ticker().equals(ticker)).count(),
+                count);
+    }
+
+    @Test
+    void gridPageAndCount_areReadFromMongoDb() {
+        var query = "SELECT itemName AS \"Item\" FROM budgetItems WHERE itemType = 'sum'";
+
+        var page = PROVIDER.explain("SELECT * FROM (SELECT * FROM (" + query
+                + ") AS _t ORDER BY \"Item\") AS _limited LIMIT 50 OFFSET 0");
+        var count = PROVIDER
+                .explain("SELECT COUNT(*) FROM (" + query + ") AS _counted");
+
+        Assertions.assertTrue(page.contains(
+                "fetch Pushdown[equalityFilters={itemType=sum}, sort=[SortKey[column=itemName, descending=false]], offset=0, limit=50]"),
+                page);
+        Assertions.assertTrue(
+                count.contains("count Pushdown[equalityFilters={itemType=sum}"),
+                count);
     }
 
     @Test
