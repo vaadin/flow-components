@@ -16,6 +16,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.extensions.AIExtensionsLicense;
 import com.vaadin.flow.component.ai.orchestrator.AIController;
 import com.vaadin.flow.component.ai.orchestrator.AIOrchestrator;
@@ -55,7 +56,9 @@ import tools.jackson.databind.JsonNode;
  * The grid automatically creates columns from query results with:
  * </p>
  * <ul>
- * <li>Lazy loading with SQL {@code LIMIT}/{@code OFFSET}</li>
+ * <li>Lazy loading, one page at a time, through
+ * {@link DatabaseProvider#executeQuery(String, QueryPage)} and
+ * {@link DatabaseProvider#count(String)}</li>
  * <li>Built-in renderers for dates and numbers</li>
  * <li>Right-alignment for numeric columns</li>
  * <li>Resizable, sortable columns with auto-width</li>
@@ -174,13 +177,12 @@ public class GridAIController implements AIController {
 
             @Override
             public void updateData(String gridId, String query) {
-                // Validate eagerly so an invalid query is rejected
-                // within the turn. A DatabaseProvider that throws
-                // ToolException gets its message relayed to the LLM so
-                // it can fix the query; any other exception is replaced
-                // with a generic error.
-                databaseProvider.executeQuery(
-                        "SELECT * FROM (" + query + ") AS _v LIMIT 1");
+                // Validate eagerly by fetching one row, so an invalid
+                // query is rejected within the turn. A DatabaseProvider
+                // that throws ToolException gets its message relayed to
+                // the LLM so it can fix the query; any other exception is
+                // replaced with a generic error.
+                databaseProvider.executeQuery(query, QueryPage.first(1));
                 GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
             }
 

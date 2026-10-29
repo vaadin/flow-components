@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AITurnEvents;
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -902,7 +903,7 @@ class GridAIControllerTest {
             // the sample row fetch in renderGrid
             var sampleSql = dbProvider.executedQueries.get(1);
             Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 1",
+                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 1 OFFSET 0",
                     sampleSql);
         }
 
@@ -987,6 +988,61 @@ class GridAIControllerTest {
             var size = grid.getDataProvider().size(new Query<>());
 
             Assertions.assertEquals(0, size);
+        }
+
+        @Test
+        void providerWithItsOwnPaging_receivesPagesAndCountsInsteadOfSql() {
+            var statements = new ArrayList<String>();
+            var pages = new ArrayList<QueryPage>();
+            var counts = new ArrayList<String>();
+            controller = new GridAIController(grid, new DatabaseProvider() {
+                @Override
+                public String getSchema() {
+                    return "test schema";
+                }
+
+                @Override
+                public List<Map<String, Object>> executeQuery(String sql) {
+                    statements.add(sql);
+                    return List.of();
+                }
+
+                @Override
+                public List<Map<String, Object>> executeQuery(String sql,
+                        QueryPage page) {
+                    pages.add(page);
+                    return List.of(row("a", 1));
+                }
+
+                @Override
+                public int count(String sql) {
+                    counts.add(sql);
+                    return 7;
+                }
+            });
+
+            simulateUpdate("SELECT a FROM t");
+            var size = grid.getDataProvider().size(new Query<>());
+            grid.getDataProvider()
+                    .fetch(new Query<>(20, 10,
+                            List.of(new QuerySortOrder("a",
+                                    SortDirection.DESCENDING)),
+                            null, null))
+                    .toList();
+
+            Assertions.assertEquals(7, size);
+            Assertions.assertEquals(List.of("SELECT a FROM t"), counts);
+            // The validation in updateData and the sample row in renderGrid
+            Assertions.assertEquals(
+                    List.of(QueryPage.first(1), QueryPage.first(1)),
+                    pages.subList(0, 2));
+            var page = pages.getLast();
+            Assertions.assertEquals(20, page.offset());
+            Assertions.assertEquals(10, page.limit());
+            Assertions.assertEquals("a", page.sortOrders().get(0).getSorted());
+            Assertions.assertEquals(SortDirection.DESCENDING,
+                    page.sortOrders().get(0).getDirection());
+            Assertions.assertTrue(statements.isEmpty(), statements::toString);
         }
 
         @Test
