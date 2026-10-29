@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +48,14 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.ai.provider.TableSource.Capability;
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
+import com.vaadin.flow.component.ai.provider.TableSource.SortKey;
 
 class FederatedDatabaseProviderTest {
 
     /**
      * A source over fixed rows that records every pushdown it receives and
-     * applies the equality filters itself when it has the capability, like a
-     * backend would.
+     * applies what it was given itself, the equality filters, the sort, the
+     * offset and the limit, like a backend would.
      */
     static class RecordingSource implements TableSource {
 
@@ -62,6 +64,8 @@ class FederatedDatabaseProviderTest {
         private final Set<Capability> capabilities;
         private final List<Map<String, Object>> rows;
         final List<Pushdown> pushdowns = new ArrayList<>();
+        final List<Pushdown> counts = new ArrayList<>();
+        int sortKeysSupported = Integer.MAX_VALUE;
         RuntimeException failure;
 
         RecordingSource(String name, List<Column> columns,
@@ -93,11 +97,31 @@ class FederatedDatabaseProviderTest {
         }
 
         @Override
+        public boolean supportsSort(List<SortKey> sort) {
+            return sort.size() <= sortKeysSupported;
+        }
+
+        @Override
         public List<Map<String, Object>> fetch(Pushdown pushdown) {
             pushdowns.add(pushdown);
             if (failure != null) {
                 throw failure;
             }
+            var result = new ArrayList<>(filtered(pushdown));
+            result.sort(comparator(pushdown.sort()));
+            var from = (int) Math.min(result.size(), pushdown.offset());
+            var to = pushdown.limit() == null ? result.size()
+                    : (int) Math.min(result.size(), from + pushdown.limit());
+            return result.subList(from, to);
+        }
+
+        @Override
+        public long count(Pushdown pushdown) {
+            counts.add(pushdown);
+            return filtered(pushdown).size();
+        }
+
+        private List<Map<String, Object>> filtered(Pushdown pushdown) {
             if (!capabilities.contains(Capability.EQUALITY_FILTER)) {
                 return rows;
             }
@@ -107,6 +131,20 @@ class FederatedDatabaseProviderTest {
                             .allMatch(filter -> filter.getValue()
                                     .equals(row.get(filter.getKey()))))
                     .toList();
+        }
+
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        private static Comparator<Map<String, Object>> comparator(
+                List<SortKey> sort) {
+            Comparator<Map<String, Object>> result = (a, b) -> 0;
+            for (var key : sort) {
+                Comparator<Map<String, Object>> byKey = Comparator.comparing(
+                        row -> (Comparable) row.get(key.column()),
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+                result = result.thenComparing(
+                        key.descending() ? byKey.reversed() : byKey);
+            }
+            return result;
         }
     }
 
@@ -187,6 +225,12 @@ class FederatedDatabaseProviderTest {
                     LocalDateTime.of(2024, 2, 3, 11, 30)),
             row("id", 12, "personId", 2, "amount", 100.0, "placed",
                     LocalDateTime.of(2024, 3, 4, 12, 45)));
+
+    private static final Set<Capability> ALL_CAPABILITIES = Set.of(
+            Capability.EQUALITY_FILTER, Capability.SORT, Capability.LIMIT,
+            Capability.COUNT);
+
+    private static final String GRID_QUERY = "SELECT name AS \"Name\", salary AS \"Salary\" FROM people WHERE active = TRUE";
 
     private RecordingSource people;
     private RecordingSource orders;
@@ -388,6 +432,255 @@ class FederatedDatabaseProviderTest {
         Assertions.assertEquals(List.of("Ann", "Bob"),
                 page.stream().map(row -> row.get("Name")).toList());
         Assertions.assertEquals(3L, count.get(0).values().iterator().next());
+    }
+
+    private FederatedDatabaseProvider providerOf(RecordingSource... sources) {
+        var provider = new FederatedDatabaseProvider(List.of(sources));
+        provider.setCacheDuration(Duration.ZERO);
+        return provider;
+    }
+
+    private static RecordingSource pagingPeople() {
+        return new RecordingSource("people", PEOPLE_COLUMNS, ALL_CAPABILITIES,
+                PEOPLE_ROWS);
+    }
+
+    private static List<Object> column(List<Map<String, Object>> rows,
+            String column) {
+        return rows.stream().map(row -> row.get(column)).toList();
+    }
+
+    @Test
+    void gridPage_isReadAsOnePageOfTheSource() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people)
+                .executeQuery("SELECT * FROM (SELECT * FROM (" + GRID_QUERY
+                        + ") AS _t ORDER BY \"Salary\" DESC) AS _limited LIMIT 1 OFFSET 1");
+
+        Assertions.assertEquals(List.of("Ann"), column(rows, "Name"));
+        Assertions.assertEquals(List.of("Name", "Salary"),
+                new ArrayList<>(rows.get(0).keySet()));
+        Assertions.assertEquals(
+                List.of(new Pushdown(Map.of("active", true),
+                        List.of(new SortKey("salary", true)), 1, 1L)),
+                people.pushdowns);
+    }
+
+    @Test
+    void gridCount_isCountedByTheSource() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT COUNT(*) FROM (" + GRID_QUERY + ") AS _counted");
+
+        Assertions.assertEquals(2L, rows.get(0).values().iterator().next());
+        Assertions.assertEquals(List.of(new Pushdown(Map.of("active", true))),
+                people.counts);
+        Assertions.assertTrue(people.pushdowns.isEmpty());
+    }
+
+    @Test
+    void gridValidation_readsOneRow() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT * FROM (" + GRID_QUERY + ") AS _v LIMIT 1");
+
+        Assertions.assertEquals(1, rows.size());
+        Assertions.assertEquals(
+                List.of(new Pushdown(Map.of("active", true), List.of(), 0, 1L)),
+                people.pushdowns);
+    }
+
+    @Test
+    void gridPageWithoutSort_followsTheOrderOfTheQuery() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT * FROM (SELECT name FROM people ORDER BY born DESC) AS _limited LIMIT 2 OFFSET 0");
+
+        Assertions.assertEquals(List.of("Cid", "Ann"), column(rows, "name"));
+        Assertions.assertEquals(List.of(new SortKey("born", true)),
+                people.pushdowns.get(0).sort());
+        Assertions.assertEquals(2L, people.pushdowns.get(0).limit());
+    }
+
+    @Test
+    void topRows_ofOneTable_areReadFromTheSource() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name, city FROM people WHERE city = 'Turku' ORDER BY born, name DESC LIMIT 1");
+
+        Assertions.assertEquals(List.of("Ann"), column(rows, "name"));
+        Assertions.assertEquals(
+                new Pushdown(Map.of("city", "Turku"),
+                        List.of(new SortKey("born", false),
+                                new SortKey("name", true)),
+                        0, 1L),
+                people.pushdowns.get(0));
+    }
+
+    @Test
+    void limitZero_readsNothing() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people)
+                .executeQuery("SELECT name FROM people LIMIT 0");
+
+        Assertions.assertTrue(rows.isEmpty());
+        Assertions.assertTrue(people.pushdowns.isEmpty());
+    }
+
+    @Test
+    void limit_staysInTheEngineWhenAFilterDoes() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name FROM people WHERE salary > 4500 ORDER BY salary LIMIT 1");
+
+        Assertions.assertEquals(List.of("Ann"), column(rows, "name"));
+        Assertions.assertEquals(List.of(Pushdown.NONE), people.pushdowns);
+    }
+
+    @Test
+    void limit_staysInTheEngineWithoutTheCapability() {
+        var rows = provider.executeQuery("SELECT * FROM (SELECT * FROM ("
+                + GRID_QUERY
+                + ") AS _t ORDER BY \"Salary\" DESC) AS _limited LIMIT 1 OFFSET 1");
+
+        Assertions.assertEquals(List.of("Ann"), column(rows, "Name"));
+        Assertions.assertEquals(List.of(new Pushdown(Map.of("active", true))),
+                people.pushdowns);
+    }
+
+    @Test
+    void sort_staysInTheEngineWhenTheSourceCannotSortThatWay() {
+        var people = pagingPeople();
+        people.sortKeysSupported = 1;
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name FROM people ORDER BY city, name DESC LIMIT 2");
+
+        Assertions.assertEquals(List.of("Bob", "Cid"), column(rows, "name"));
+        Assertions.assertEquals(List.of(Pushdown.NONE), people.pushdowns);
+    }
+
+    @Test
+    void sort_staysInTheEngineWhenNullsArePlacedOtherwise() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name FROM people ORDER BY born NULLS FIRST LIMIT 1");
+
+        Assertions.assertEquals(List.of("Cid"), column(rows, "name"));
+        Assertions.assertEquals(List.of(Pushdown.NONE), people.pushdowns);
+    }
+
+    @Test
+    void sort_staysInTheEngineForAComputedValue() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT name, salary * 2 AS doubled FROM people ORDER BY doubled DESC LIMIT 1");
+
+        Assertions.assertEquals(List.of("Cid"), column(rows, "name"));
+        Assertions.assertEquals(List.of(Pushdown.NONE), people.pushdowns);
+    }
+
+    @Test
+    void computedColumns_areComputedOverThePushedPage() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT UPPER(name) AS loud FROM people ORDER BY id DESC LIMIT 1");
+
+        Assertions.assertEquals(List.of("CID"), column(rows, "loud"));
+        Assertions.assertEquals(List.of(new SortKey("id", true)),
+                people.pushdowns.get(0).sort());
+    }
+
+    @Test
+    void limitOverAJoin_staysInTheEngine() {
+        var people = pagingPeople();
+        var orders = new RecordingSource("orders", ORDER_COLUMNS,
+                ALL_CAPABILITIES, ORDER_ROWS);
+
+        var rows = providerOf(people, orders).executeQuery(
+                "SELECT p.name, o.amount FROM people p JOIN orders o ON o.personId = p.id ORDER BY o.amount DESC LIMIT 1");
+
+        Assertions.assertEquals(List.of("Bob"), column(rows, "name"));
+        Assertions.assertEquals(List.of(Pushdown.NONE), people.pushdowns);
+        Assertions.assertEquals(List.of(Pushdown.NONE), orders.pushdowns);
+    }
+
+    @Test
+    void count_staysInTheEngineForGroupsAndDistinctValues() {
+        var people = pagingPeople();
+        var provider = providerOf(people);
+
+        var distinct = provider
+                .executeQuery("SELECT COUNT(DISTINCT city) AS n FROM people");
+        var grouped = provider.executeQuery(
+                "SELECT city, COUNT(*) AS n FROM people GROUP BY city ORDER BY city");
+
+        Assertions.assertEquals(2L, distinct.get(0).get("n"));
+        Assertions.assertEquals(List.of(1L, 2L), column(grouped, "n"));
+        Assertions.assertTrue(people.counts.isEmpty());
+    }
+
+    @Test
+    void count_staysInTheEngineWhenAFilterDoes() {
+        var people = pagingPeople();
+
+        var rows = providerOf(people).executeQuery(
+                "SELECT COUNT(*) AS n FROM people WHERE salary > 4500");
+
+        Assertions.assertEquals(2L, rows.get(0).get("n"));
+        Assertions.assertTrue(people.counts.isEmpty());
+    }
+
+    @Test
+    void cache_keepsCountsAndPagesApart() {
+        var people = pagingPeople();
+        var provider = providerOf(people);
+        provider.setCacheDuration(Duration.ofMinutes(1));
+        var count = "SELECT COUNT(*) FROM (" + GRID_QUERY + ") AS _counted";
+        var page = "SELECT * FROM (" + GRID_QUERY + ") AS _limited LIMIT 1";
+
+        provider.executeQuery(count);
+        provider.executeQuery(count);
+        provider.executeQuery(page);
+        provider.executeQuery(page);
+
+        Assertions.assertEquals(1, people.counts.size());
+        Assertions.assertEquals(1, people.pushdowns.size());
+    }
+
+    @Test
+    void explain_namesThePageAndTheCountASourceReads() {
+        var provider = providerOf(pagingPeople());
+
+        var page = provider.explain(
+                "SELECT name FROM people WHERE city = 'Turku' ORDER BY name LIMIT 5");
+        var count = provider
+                .explain("SELECT COUNT(*) FROM people WHERE city = 'Turku'");
+
+        Assertions.assertTrue(page.contains(
+                "fetch Pushdown[equalityFilters={city=Turku}, sort=[SortKey[column=name, descending=false]], offset=0, limit=5]"),
+                page);
+        Assertions.assertTrue(
+                count.contains("count Pushdown[equalityFilters={city=Turku}"),
+                count);
+    }
+
+    @Test
+    void pushdown_rejectsNegativeOffsetAndLimit() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Pushdown(Map.of(), List.of(), -1, null));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new Pushdown(Map.of(), List.of(), 0, -1L));
     }
 
     @Test

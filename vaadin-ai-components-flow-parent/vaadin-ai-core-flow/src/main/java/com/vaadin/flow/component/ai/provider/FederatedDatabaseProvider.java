@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import org.apache.calcite.adapter.enumerable.EnumerableConvention;
 import org.apache.calcite.config.Lex;
@@ -74,9 +75,10 @@ import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
  * one of Apache Calcite's own adapters reads, becomes one table of one schema,
  * and Calcite runs the SQL over them. Joins, aggregation, sorting and paging
  * work across tables, because the engine computes in memory whatever a backend
- * cannot do itself; a source that can filter declares it and receives the
- * filters of a query as a {@link Pushdown}, and an adapter pushes down whatever
- * its backend supports.
+ * cannot do itself. A source declares what it can do on its own and receives
+ * those parts of a query as a {@link Pushdown}: the equality filters, and for a
+ * query it takes entirely, its page or its count, see {@link TableSource}. An
+ * adapter pushes down whatever its backend supports.
  * <p>
  * The schema text lists the tables with their columns and SQL types, and quotes
  * a column name the LLM has to quote because it is a reserved word. Identifiers
@@ -85,12 +87,12 @@ import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
  * {@code SELECT} statements are accepted; the backends are never written to.
  * </p>
  * <p>
- * A query scans every table it reads from, and a grid reads its query several
- * times when it renders: once for the columns, once for the count, and once per
- * page. Rows fetched from a source are therefore kept for a short while, see
- * {@link #setCacheDuration(Duration)}, so that these reads reach the backend
- * once. The provider keeps one Calcite connection for its lifetime and runs one
- * query at a time on it.
+ * A grid reads its query several times when it renders: once for the columns,
+ * once for the count, and once per page. Rows and counts read from a source are
+ * therefore kept for a short while, see {@link #setCacheDuration(Duration)}, so
+ * that a read with the same pushdown reaches the backend once. The provider
+ * keeps one Calcite connection for its lifetime and runs one query at a time on
+ * it.
  * </p>
  * <p>
  * Apache Calcite is an optional dependency of this module: add
@@ -179,10 +181,10 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     private transient Map<String, String> descriptions;
     private transient Map<CacheKey, CacheEntry> cache;
 
-    private record CacheKey(String source, Pushdown pushdown) {
+    private record CacheKey(String source, String read, Pushdown pushdown) {
     }
 
-    private record CacheEntry(List<Map<String, Object>> rows, long expiresAt) {
+    private record CacheEntry(Object value, long expiresAt) {
     }
 
     /**
@@ -269,8 +271,8 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     }
 
     /**
-     * Returns how long rows fetched from a source are reused for later queries
-     * with the same pushdown. The default is ten seconds.
+     * Returns how long rows and counts read from a source are reused for later
+     * queries with the same pushdown. The default is ten seconds.
      *
      * @return the cache duration, never {@code null}
      */
@@ -279,10 +281,10 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
     }
 
     /**
-     * Sets how long rows fetched from a source are reused for later queries
-     * with the same pushdown. The default is ten seconds; {@link Duration#ZERO}
-     * fetches on every query. Adapter tables are not cached; their adapters
-     * decide what reaches the backend.
+     * Sets how long rows and counts read from a source are reused for later
+     * queries with the same pushdown. The default is ten seconds;
+     * {@link Duration#ZERO} reads on every query. Adapter tables are not
+     * cached; their adapters decide what reaches the backend.
      *
      * @param cacheDuration
      *            the cache duration, not {@code null} or negative
@@ -348,8 +350,9 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
      * Returns the plan Calcite runs for a query, as a tree of relational
      * operators, which shows what reaches each backend: for example a
      * {@code MongoFilter} below a {@code MongoToEnumerableConverter} is a
-     * filter MongoDB evaluates, and a {@code BindableTableScan} reads a source.
-     * Meant for looking at what a backend gets to do.
+     * filter MongoDB evaluates, and a {@code BindableTableScan} reads a source,
+     * with the page or count the source answers named after the table. Meant
+     * for looking at what a backend gets to do.
      *
      * @param sql
      *            the query, not {@code null}
@@ -386,7 +389,7 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
             }
             var validated = planner.validate(statement);
             var plan = planner.rel(validated).project().accept(MERGE_SORTS)
-                    .accept(BINDABLE_SCANS);
+                    .accept(SourcePushdown.SHUTTLE).accept(BINDABLE_SCANS);
             if (!optimize) {
                 return plan;
             }
@@ -442,8 +445,10 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
             var federated = root.add(SCHEMA_NAME, new AbstractSchema());
             var tableDescriptions = new LinkedHashMap<String, String>();
             for (var source : sources) {
-                federated.add(source.getName(), new SourceTable(source,
-                        pushdown -> fetch(source, pushdown)));
+                federated.add(source.getName(),
+                        new SourceTable(source,
+                                pushdown -> fetch(source, pushdown),
+                                pushdown -> count(source, pushdown)));
                 tableDescriptions.put(source.getName(),
                         source.getDescription());
             }
@@ -559,23 +564,36 @@ public class FederatedDatabaseProvider implements DatabaseProvider {
 
     private List<Map<String, Object>> fetch(TableSource source,
             Pushdown pushdown) {
+        return read(source, "rows", pushdown,
+                () -> List.copyOf(source.fetch(pushdown)));
+    }
+
+    private long count(TableSource source, Pushdown pushdown) {
+        return read(source, "count", pushdown, () -> source.count(pushdown));
+    }
+
+    /**
+     * Reads from a source through the cache, so that the same read with the
+     * same pushdown within the cache duration reaches the backend once.
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T read(TableSource source, String read, Pushdown pushdown,
+            Supplier<T> reader) {
         if (cacheDuration.isZero()) {
-            return source.fetch(pushdown);
+            return reader.get();
         }
-        var key = new CacheKey(source.getName(), pushdown);
+        var key = new CacheKey(source.getName(), read, pushdown);
         var now = System.nanoTime();
         var entry = cache().get(key);
         if (entry != null && now - entry.expiresAt() < 0) {
-            LOGGER.info(
-                    "Cache hit for {} with filters {}: {} rows, fetch skipped",
-                    source.getName(), pushdown.equalityFilters(),
-                    entry.rows().size());
-            return entry.rows();
+            LOGGER.info("Cache hit for {} of {} with {}, read skipped", read,
+                    source.getName(), pushdown);
+            return (T) entry.value();
         }
-        var rows = List.copyOf(source.fetch(pushdown));
+        var value = reader.get();
         cache().values().removeIf(other -> now - other.expiresAt() >= 0);
-        cache().put(key, new CacheEntry(rows, now + cacheDuration.toNanos()));
-        return rows;
+        cache().put(key, new CacheEntry(value, now + cacheDuration.toNanos()));
+        return value;
     }
 
     private Map<CacheKey, CacheEntry> cache() {

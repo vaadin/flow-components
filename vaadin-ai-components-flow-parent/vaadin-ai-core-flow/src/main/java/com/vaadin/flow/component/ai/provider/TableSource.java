@@ -28,12 +28,23 @@ import java.util.Set;
  * joins, filters, sorts and aggregates over the rows a source returns, so a
  * source only needs to know how to list them.
  * <p>
- * A source that can filter or project on its own declares that with
+ * A source that can do more on its own declares that with
  * {@link #getCapabilities()}, and the engine pushes those parts of a query down
- * to {@link #fetch(Pushdown)} so that fewer rows travel. The engine applies the
- * same filters again to the rows it receives, so a source may push down less
- * than it was asked for without changing the result.
+ * to {@link #fetch(Pushdown)} and {@link #count(Pushdown)} so that fewer rows
+ * travel:
  * </p>
+ * <ul>
+ * <li>Equality filters are pushed into every read of the source. The engine
+ * applies them again to the rows it receives, so a source may filter less than
+ * it was asked to without changing the result, unless the read also has a
+ * limit.</li>
+ * <li>A limit, with an offset and a sort, is pushed only when the source takes
+ * the whole query below it: every filter, and the order when the query sorts.
+ * This is how a grid's pages reach the source. Joins, aggregates and
+ * expressions the source cannot evaluate keep the read in the engine.</li>
+ * <li>A count of all rows is pushed under the same condition, which is how a
+ * grid learns its size.</li>
+ * </ul>
  *
  * @author Vaadin Ltd
  * @since 25.4
@@ -81,21 +92,77 @@ public interface TableSource extends Serializable {
          * The source can return only the rows whose columns equal given values,
          * see {@link Pushdown#equalityFilters()}.
          */
-        EQUALITY_FILTER
+        EQUALITY_FILTER,
+        /**
+         * The source can return its rows in a given order, see
+         * {@link Pushdown#sort()} and {@link #supportsSort(List)}. A sort is
+         * pushed only together with a limit, since that is when it saves
+         * reading rows.
+         */
+        SORT,
+        /**
+         * The source can skip a number of rows and return at most a number of
+         * rows, see {@link Pushdown#offset()} and {@link Pushdown#limit()}. The
+         * rows are skipped and limited after the pushed filters and the pushed
+         * sort, so a source with this capability applies every pushed filter
+         * exactly. Without a sort, the rows come in the source's own order,
+         * which has to be the same on every read so that pages do not overlap.
+         */
+        LIMIT,
+        /**
+         * The source can count the rows that match the pushed filters, see
+         * {@link TableSource#count(Pushdown)}.
+         */
+        COUNT
     }
 
     /**
-     * The parts of a query the engine pushes down to a source. A source without
-     * the matching {@link Capability} receives nothing; the engine applies the
-     * filters again either way.
+     * One key of the order in which a source returns its rows. Null values sort
+     * after every other value when ascending and before every other value when
+     * descending, as they do in the provider's SQL.
+     *
+     * @param column
+     *            the name of the column to sort by
+     * @param descending
+     *            {@code true} for descending order, {@code false} for ascending
+     * @since 25.4
+     */
+    record SortKey(String column, boolean descending) implements Serializable {
+
+        /**
+         * Creates a sort key.
+         *
+         * @param column
+         *            the column name, not {@code null}
+         * @param descending
+         *            {@code true} for descending order
+         */
+        public SortKey {
+            Objects.requireNonNull(column, "column must not be null");
+        }
+    }
+
+    /**
+     * The parts of a query the engine pushes down to a source. A source
+     * receives only the parts its {@link Capability capabilities} declare;
+     * every other part is empty.
      *
      * @param equalityFilters
      *            column name to the value the column must equal, of the
      *            column's type; empty when nothing is pushed
+     * @param sort
+     *            the order of the rows, first key first; empty for the source's
+     *            own order
+     * @param offset
+     *            the number of rows to skip after filtering and sorting;
+     *            {@code 0} when nothing is pushed
+     * @param limit
+     *            the largest number of rows to return after the offset, or
+     *            {@code null} for all of them
      * @since 25.4
      */
-    record Pushdown(
-            Map<String, Object> equalityFilters) implements Serializable {
+    record Pushdown(Map<String, Object> equalityFilters, List<SortKey> sort,
+            long offset, Long limit) implements Serializable {
 
         /**
          * A pushdown of nothing: every row of the source.
@@ -107,11 +174,38 @@ public interface TableSource extends Serializable {
          *
          * @param equalityFilters
          *            column name to value, not {@code null}
+         * @param sort
+         *            the sort keys, not {@code null}
+         * @param offset
+         *            the rows to skip, not negative
+         * @param limit
+         *            the largest number of rows, not negative, or {@code null}
+         *            for no limit
          */
         public Pushdown {
             Objects.requireNonNull(equalityFilters,
                     "equalityFilters must not be null");
+            Objects.requireNonNull(sort, "sort must not be null");
+            if (offset < 0) {
+                throw new IllegalArgumentException(
+                        "offset must not be negative");
+            }
+            if (limit != null && limit < 0) {
+                throw new IllegalArgumentException(
+                        "limit must not be negative");
+            }
             equalityFilters = Map.copyOf(equalityFilters);
+            sort = List.copyOf(sort);
+        }
+
+        /**
+         * Creates a pushdown of equality filters only.
+         *
+         * @param equalityFilters
+         *            column name to value, not {@code null}
+         */
+        public Pushdown(Map<String, Object> equalityFilters) {
+            this(equalityFilters, List.of(), 0, null);
         }
     }
 
@@ -138,6 +232,21 @@ public interface TableSource extends Serializable {
      */
     default Set<Capability> getCapabilities() {
         return Set.of();
+    }
+
+    /**
+     * Returns whether the source can return its rows in the given order, for a
+     * source with the {@link Capability#SORT} capability. Override it when the
+     * source sorts by some orders only, for example by one column at a time;
+     * the engine then sorts in memory instead. The default is {@code true}.
+     *
+     * @param sort
+     *            the sort keys, first key first, never empty
+     * @return {@code true} if {@link #fetch(Pushdown)} can return the rows in
+     *         that order
+     */
+    default boolean supportsSort(List<SortKey> sort) {
+        return true;
     }
 
     /**
@@ -169,4 +278,26 @@ public interface TableSource extends Serializable {
      *             if the request fails and the LLM should learn why
      */
     List<Map<String, Object>> fetch(Pushdown pushdown);
+
+    /**
+     * Returns the number of rows that match the pushed equality filters, for a
+     * source with the {@link Capability#COUNT} capability. The engine calls it
+     * instead of {@link #fetch(Pushdown)} for a count of all the rows of a
+     * query the source takes entirely. The default throws
+     * {@link UnsupportedOperationException}.
+     * <p>
+     * Failures are reported as for {@link #fetch(Pushdown)}.
+     * </p>
+     *
+     * @param pushdown
+     *            the equality filters to count with; its sort, offset and limit
+     *            are empty
+     * @return the number of matching rows
+     * @throws ToolException
+     *             if the request fails and the LLM should learn why
+     */
+    default long count(Pushdown pushdown) {
+        throw new UnsupportedOperationException(
+                getName() + " cannot count its rows");
+    }
 }

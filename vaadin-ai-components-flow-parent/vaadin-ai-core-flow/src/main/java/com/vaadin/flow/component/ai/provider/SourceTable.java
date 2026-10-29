@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.ToLongFunction;
 
 import org.apache.calcite.DataContext;
 import org.apache.calcite.linq4j.Enumerable;
@@ -40,6 +41,8 @@ import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.schema.FilterableTable;
+import org.apache.calcite.schema.ScannableTable;
+import org.apache.calcite.schema.Table;
 import org.apache.calcite.schema.impl.AbstractTable;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.type.SqlTypeName;
@@ -52,8 +55,9 @@ import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
 
 /**
  * Presents a {@link TableSource} to Apache Calcite as a table that can take
- * equality filters. Rows are fetched through the provider so that its cache
- * applies.
+ * equality filters, and makes the tables a plan reads instead when the source
+ * takes a limit or a count, see {@link SourcePushdown}. Rows and counts are
+ * read through the provider so that its cache applies.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  * </p>
@@ -62,11 +66,18 @@ final class SourceTable extends AbstractTable implements FilterableTable {
 
     private final TableSource source;
     private final Function<Pushdown, List<Map<String, Object>>> fetcher;
+    private final ToLongFunction<Pushdown> counter;
 
     SourceTable(TableSource source,
-            Function<Pushdown, List<Map<String, Object>>> fetcher) {
+            Function<Pushdown, List<Map<String, Object>>> fetcher,
+            ToLongFunction<Pushdown> counter) {
         this.source = source;
         this.fetcher = fetcher;
+        this.counter = counter;
+    }
+
+    TableSource source() {
+        return source;
     }
 
     /**
@@ -116,17 +127,88 @@ final class SourceTable extends AbstractTable implements FilterableTable {
 
     @Override
     public Enumerable<Object[]> scan(DataContext root, List<RexNode> filters) {
-        var columns = source.getColumns();
         var equalityFilters = source.getCapabilities()
                 .contains(Capability.EQUALITY_FILTER)
-                        ? takeEqualityFilters(root, filters, columns)
+                        ? takeEqualityFilters(
+                                new RexBuilder(root.getTypeFactory()), filters,
+                                source.getColumns())
                         : Map.<String, Object> of();
-        var rows = fetcher.apply(new Pushdown(equalityFilters));
+        return Linq4j.asEnumerable(rows(new Pushdown(equalityFilters)));
+    }
+
+    /**
+     * Returns a table of this source's columns whose rows are the source's rows
+     * for the given pushdown, in the order the source returns them.
+     *
+     * @param pushdown
+     *            the pushdown, with every filter of the query it replaces
+     * @return the table
+     */
+    Table pushedTable(Pushdown pushdown) {
+        return new FixedScan(this::getRowType,
+                root -> Linq4j.asEnumerable(rows(pushdown)));
+    }
+
+    /**
+     * Returns a table with one row and one column, the number of the source's
+     * rows that match the pushdown's filters.
+     *
+     * @param pushdown
+     *            the pushdown, with every filter of the query it replaces
+     * @param rowType
+     *            the row type of the count the table replaces
+     * @return the table
+     */
+    Table countTable(Pushdown pushdown, RelDataType rowType) {
+        return new FixedScan(typeFactory -> rowType,
+                root -> Linq4j.singletonEnumerable(
+                        new Object[] { counter.applyAsLong(pushdown) }));
+    }
+
+    /**
+     * A table whose rows are fixed by the plan that reads it.
+     */
+    private static final class FixedScan extends AbstractTable
+            implements ScannableTable {
+
+        private final Function<RelDataTypeFactory, RelDataType> rowType;
+        private final Function<DataContext, Enumerable<Object[]>> rows;
+
+        FixedScan(Function<RelDataTypeFactory, RelDataType> rowType,
+                Function<DataContext, Enumerable<Object[]>> rows) {
+            this.rowType = rowType;
+            this.rows = rows;
+        }
+
+        @Override
+        public RelDataType getRowType(RelDataTypeFactory typeFactory) {
+            return rowType.apply(typeFactory);
+        }
+
+        @Override
+        public Enumerable<Object[]> scan(DataContext root) {
+            return rows.apply(root);
+        }
+    }
+
+    /**
+     * Fetches the rows for a pushdown and converts them to Calcite's values.
+     * The pushed filters are checked once more, since a source may have
+     * filtered more loosely than SQL equality, and a pushed limit once more,
+     * since nothing above the scan applies it any longer.
+     */
+    private List<Object[]> rows(Pushdown pushdown) {
+        if (pushdown.limit() != null && pushdown.limit() == 0) {
+            return List.of();
+        }
+        var columns = source.getColumns();
+        var rows = fetcher.apply(pushdown);
         var result = new ArrayList<Object[]>(rows.size());
         for (var row : rows) {
-            // The source may have filtered more loosely than SQL equality,
-            // so the pushed filters are checked once more here
-            if (!matches(row, equalityFilters)) {
+            if (pushdown.limit() != null && result.size() == pushdown.limit()) {
+                break;
+            }
+            if (!matches(row, pushdown.equalityFilters())) {
                 continue;
             }
             var values = new Object[columns.size()];
@@ -136,7 +218,7 @@ final class SourceTable extends AbstractTable implements FilterableTable {
             }
             result.add(values);
         }
-        return Linq4j.asEnumerable(result);
+        return result;
     }
 
     private static boolean matches(Map<String, Object> row,
@@ -164,10 +246,9 @@ final class SourceTable extends AbstractTable implements FilterableTable {
      * engine applies the ones that remain, which may repeat a collected
      * equality when it shares a filter with another condition.
      */
-    private static Map<String, Object> takeEqualityFilters(DataContext root,
+    static Map<String, Object> takeEqualityFilters(RexBuilder rexBuilder,
             List<RexNode> filters, List<Column> columns) {
         var result = new LinkedHashMap<String, Object>();
-        var rexBuilder = new RexBuilder(root.getTypeFactory());
         var iterator = filters.iterator();
         while (iterator.hasNext()) {
             var expanded = RexUtil.expandSearch(rexBuilder, null,
