@@ -18,6 +18,7 @@ package com.vaadin.flow.component.ai.tests.providers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.ai.provider.DataProviderTableSource;
 import com.vaadin.flow.component.ai.provider.FederatedDatabaseProvider;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.ai.tests.endpoints.SampleCsvFiles;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleMongoServer;
 import com.vaadin.flow.component.ai.tests.endpoints.jpa.SampleJpaDatabase;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * {@link FederatedDatabaseProvider}s over the sample data endpoints: one per
@@ -150,10 +152,20 @@ public final class FederatedSampleProvider {
     }
 
     private static <T> TableSource jpaSource(Class<T> entity) {
-        var jpql = "SELECT e FROM " + entity.getSimpleName()
-                + " e ORDER BY e.id";
         DataProvider<T, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> {
+                    // The sort orders of a sorted grid, then the id so that
+                    // pages do not overlap
+                    var orderBy = query.getSortOrders().stream()
+                            .map(order -> "e." + order.getSorted() + (order
+                                    .getDirection() == SortDirection.DESCENDING
+                                            ? " DESC"
+                                            : " ASC"))
+                            .collect(Collectors.joining(", "));
+                    var jpql = "SELECT e FROM " + entity.getSimpleName()
+                            + " e ORDER BY "
+                            + (orderBy.isEmpty() ? "" : orderBy + ", ")
+                            + "e.id";
                     try (var entityManager = SampleJpaDatabase
                             .entityManagerFactory().createEntityManager()) {
                         return entityManager.createQuery(jpql, entity)

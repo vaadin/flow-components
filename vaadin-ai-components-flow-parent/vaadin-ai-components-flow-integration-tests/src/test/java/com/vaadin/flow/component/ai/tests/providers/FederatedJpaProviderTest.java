@@ -88,4 +88,20 @@ class FederatedJpaProviderTest {
         Assertions.assertEquals((long) SampleData.EMPLOYEES.size(),
                 count.get(0).values().iterator().next());
     }
+
+    @Test
+    void gridPageAndCount_areReadFromTheDataProvider() {
+        var query = "SELECT name AS \"Name\" FROM Employee";
+
+        var page = PROVIDER.explain("SELECT * FROM (SELECT * FROM (" + query
+                + ") AS _t ORDER BY \"Name\" DESC) AS _limited LIMIT 2 OFFSET 1");
+        var count = PROVIDER
+                .explain("SELECT COUNT(*) FROM (" + query + ") AS _counted");
+
+        Assertions.assertTrue(page.contains(
+                "fetch Pushdown[equalityFilters={}, sort=[SortKey[column=name, descending=true]], offset=1, limit=2]"),
+                page);
+        Assertions.assertTrue(
+                count.contains("count Pushdown[equalityFilters={}"), count);
+    }
 }
