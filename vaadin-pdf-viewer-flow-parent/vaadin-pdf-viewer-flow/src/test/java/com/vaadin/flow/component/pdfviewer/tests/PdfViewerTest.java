@@ -21,11 +21,13 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.pdfviewer.DocumentErrorReason;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
@@ -35,6 +37,8 @@ import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
 import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
+
+import tools.jackson.databind.node.ObjectNode;
 
 class PdfViewerTest {
 
@@ -169,6 +173,62 @@ class PdfViewerTest {
     void pageCountChangedOnClient_pageCountUpdated() {
         fakeClientPropertyChange("pageCount", 6);
         Assertions.assertEquals(6, viewer.getPageCount());
+    }
+
+    @Test
+    void getI18n_null() {
+        Assertions.assertNull(viewer.getI18n());
+    }
+
+    @Test
+    void setI18n_propertySet() {
+        var i18n = new PdfViewerI18n().setPreviousPage("Edellinen sivu")
+                .setNextPage("Seuraava sivu");
+        viewer.setI18n(i18n);
+
+        Assertions.assertSame(i18n, viewer.getI18n());
+        var json = (ObjectNode) viewer.getElement().getPropertyRaw("i18n");
+        Assertions.assertEquals("Edellinen sivu",
+                json.get("previousPage").asString());
+        Assertions.assertEquals("Seuraava sivu",
+                json.get("nextPage").asString());
+        Assertions.assertFalse(json.has("pageError"));
+    }
+
+    @Test
+    void setI18n_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> viewer.setI18n(null));
+    }
+
+    @Test
+    void noToolbarActions_noChildren() {
+        Assertions.assertEquals(0, viewer.getElement().getChildCount());
+    }
+
+    @Test
+    void getToolbarActions_sameInstance() {
+        Assertions.assertSame(viewer.getToolbarActions(),
+                viewer.getToolbarActions());
+    }
+
+    @Test
+    void getToolbarActions_slottedWrapperAdded() {
+        var root = viewer.getToolbarActions().getElement();
+        Assertions.assertEquals(viewer.getElement(), root.getParent());
+        Assertions.assertEquals("toolbar-actions", root.getAttribute("slot"));
+        Assertions.assertEquals("contents", root.getStyle().get("display"));
+    }
+
+    @Test
+    void toolbarActionsAdd_componentsInWrapper() {
+        var first = new Span();
+        var second = new Span();
+        viewer.getToolbarActions().add(first, second);
+
+        var root = viewer.getToolbarActions().getElement();
+        Assertions.assertEquals(root, first.getElement().getParent());
+        Assertions.assertEquals(root, second.getElement().getParent());
     }
 
     @Test
