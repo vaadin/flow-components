@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.ai.provider.FederatedDatabaseProvider;
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
+import com.vaadin.flow.component.ai.provider.TableSource.SortKey;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 import com.vaadin.flow.component.ai.tests.endpoints.jpa.Employee;
 import com.vaadin.flow.component.ai.tests.endpoints.jpa.OrgMember;
@@ -96,6 +97,61 @@ class JpqlTableSourceTest {
         Assertions.assertEquals(SampleData.ORG_CHART.size(), rows.size());
         Assertions.assertTrue(
                 rows.stream().anyMatch(row -> row.get("managerId") == null));
+    }
+
+    @Test
+    void fetch_sortsAnAssociationIdWithNullsAfterOthersWhenAscending() {
+        var members = new JpqlTableSource(
+                SampleJpaDatabase::entityManagerFactory, OrgMember.class);
+
+        var ascending = members.fetch(new Pushdown(Map.of(),
+                List.of(new SortKey("managerId", false)), 0, null));
+        var descending = members.fetch(new Pushdown(Map.of(),
+                List.of(new SortKey("managerId", true)), 0, 2L));
+
+        Assertions.assertEquals("Sarah CEO",
+                ascending.getLast().get("empName"));
+        Assertions.assertEquals(List.of("Sarah CEO", "Anna Dev"),
+                descending.stream().map(row -> row.get("empName")).toList());
+    }
+
+    @Test
+    void fetch_pagesInIdOrderWithoutASort() {
+        var members = new JpqlTableSource(
+                SampleJpaDatabase::entityManagerFactory, OrgMember.class);
+
+        var rows = members.fetch(new Pushdown(Map.of(), List.of(), 2, 2L));
+
+        Assertions.assertEquals(List.of(3, 4),
+                rows.stream().map(row -> row.get("id")).toList());
+    }
+
+    @Test
+    void count_countsTheFilteredEntities() {
+        var employees = new JpqlTableSource(
+                SampleJpaDatabase::entityManagerFactory, Employee.class);
+
+        Assertions.assertEquals(SampleData.EMPLOYEES.size(),
+                employees.count(Pushdown.NONE));
+        Assertions.assertEquals(
+                SampleData.EMPLOYEES.stream()
+                        .filter(employee -> employee.department()
+                                .equals("Sales"))
+                        .count(),
+                employees.count(new Pushdown(Map.of("department", "Sales"))));
+    }
+
+    @Test
+    void provider_readsAGridPageFromTheEntityQuery() {
+        var page = PROVIDER.executeQuery(
+                "SELECT * FROM (SELECT * FROM (SELECT empName AS \"Name\" FROM OrgMember WHERE managerId = 1) AS _t ORDER BY \"Name\" DESC) AS _limited LIMIT 1 OFFSET 1");
+        var plan = PROVIDER.explain(
+                "SELECT * FROM (SELECT empName AS \"Name\" FROM OrgMember WHERE managerId = 1) AS _limited LIMIT 1");
+
+        Assertions.assertEquals(List.of(Map.of("Name", "Lisa VP Sales")), page);
+        Assertions.assertTrue(plan.contains(
+                "fetch Pushdown[equalityFilters={managerId=1}, sort=[], offset=0, limit=1]"),
+                plan);
     }
 
     @Test

@@ -40,8 +40,10 @@ import jakarta.persistence.metamodel.SingularAttribute;
  * One JPA entity as a table, read with JPQL. The columns are the entity's basic
  * attributes and, for each to-one association, the id of the associated entity
  * as {@code <attribute>Id}, in name order. Equality filters on any column are
- * pushed down into the {@code WHERE} clause of the JPQL query, so the JPA
- * endpoint returns only the matching rows.
+ * pushed down into the {@code WHERE} clause of the JPQL query, a sort into its
+ * {@code ORDER BY} with the null values placed as SQL has them, an offset and
+ * limit as the query's first result and maximum results, and a count as a
+ * {@code COUNT} query, so the JPA endpoint returns only the rows asked for.
  */
 public class JpqlTableSource implements TableSource {
 
@@ -57,6 +59,7 @@ public class JpqlTableSource implements TableSource {
     // of the join of an association
     private final Map<String, String> paths = new LinkedHashMap<>();
     private final List<String> joinedAssociations = new ArrayList<>();
+    private final String idPath;
 
     /**
      * Creates a source over one entity of a persistence unit.
@@ -91,6 +94,10 @@ public class JpqlTableSource implements TableSource {
         }
         found.sort(Comparator.comparing(Column::name));
         columns = List.copyOf(found);
+        idPath = entityType.getSingularAttributes().stream()
+                .filter(SingularAttribute::isId)
+                .map(attribute -> "e." + attribute.getName()).findFirst()
+                .orElse(null);
     }
 
     /**
@@ -138,7 +145,8 @@ public class JpqlTableSource implements TableSource {
 
     @Override
     public Set<Capability> getCapabilities() {
-        return Set.of(Capability.EQUALITY_FILTER);
+        return Set.of(Capability.EQUALITY_FILTER, Capability.SORT,
+                Capability.LIMIT, Capability.COUNT);
     }
 
     @Override
@@ -154,24 +162,32 @@ public class JpqlTableSource implements TableSource {
                     .append(paths.get(columns.get(i).name())).append(" AS c")
                     .append(i);
         }
-        jpql.append(" FROM ").append(name).append(" e");
-        for (int i = 0; i < joinedAssociations.size(); i++) {
-            jpql.append(" LEFT JOIN e.").append(joinedAssociations.get(i))
-                    .append(" j").append(i);
+        var filters = appendFromAndWhere(jpql, pushdown);
+        var orderBy = new ArrayList<String>();
+        for (var key : pushdown.sort()) {
+            orderBy.add(paths.get(key.column())
+                    + (key.descending() ? " DESC NULLS FIRST"
+                            : " ASC NULLS LAST"));
         }
-        // A filter on a column this source does not know is left to the engine
-        var filters = pushdown.equalityFilters().entrySet().stream()
-                .filter(filter -> paths.containsKey(filter.getKey())).toList();
-        for (int i = 0; i < filters.size(); i++) {
-            jpql.append(i == 0 ? " WHERE " : " AND ")
-                    .append(paths.get(filters.get(i).getKey())).append(" = :p")
-                    .append(i);
+        if (idPath != null && (!orderBy.isEmpty() || pushdown.offset() > 0
+                || pushdown.limit() != null)) {
+            // Paging needs the same order on every read
+            orderBy.add(idPath);
+        }
+        if (!orderBy.isEmpty()) {
+            jpql.append(" ORDER BY ").append(String.join(", ", orderBy));
         }
         try (var entityManager = entityManagerFactory.get()
                 .createEntityManager()) {
             var query = entityManager.createQuery(jpql.toString(), Tuple.class);
             for (int i = 0; i < filters.size(); i++) {
                 query.setParameter("p" + i, filters.get(i).getValue());
+            }
+            query.setFirstResult(
+                    (int) Math.min(pushdown.offset(), Integer.MAX_VALUE));
+            if (pushdown.limit() != null) {
+                query.setMaxResults(
+                        (int) Math.min(pushdown.limit(), Integer.MAX_VALUE));
             }
             var rows = new ArrayList<Map<String, Object>>();
             for (var tuple : query.getResultList()) {
@@ -183,6 +199,43 @@ public class JpqlTableSource implements TableSource {
             }
             return rows;
         }
+    }
+
+    @Override
+    public long count(Pushdown pushdown) {
+        var jpql = new StringBuilder("SELECT COUNT(e)");
+        var filters = appendFromAndWhere(jpql, pushdown);
+        try (var entityManager = entityManagerFactory.get()
+                .createEntityManager()) {
+            var query = entityManager.createQuery(jpql.toString(), Long.class);
+            for (int i = 0; i < filters.size(); i++) {
+                query.setParameter("p" + i, filters.get(i).getValue());
+            }
+            return query.getSingleResult();
+        }
+    }
+
+    /**
+     * Appends the {@code FROM} clause with the joins of the associations and
+     * the {@code WHERE} clause of the filters, whose values are the parameters
+     * {@code p0}, {@code p1} and so on.
+     *
+     * @return the filters in parameter order
+     */
+    private List<Map.Entry<String, Object>> appendFromAndWhere(
+            StringBuilder jpql, Pushdown pushdown) {
+        jpql.append(" FROM ").append(name).append(" e");
+        for (int i = 0; i < joinedAssociations.size(); i++) {
+            jpql.append(" LEFT JOIN e.").append(joinedAssociations.get(i))
+                    .append(" j").append(i);
+        }
+        var filters = List.copyOf(pushdown.equalityFilters().entrySet());
+        for (int i = 0; i < filters.size(); i++) {
+            jpql.append(i == 0 ? " WHERE " : " AND ")
+                    .append(paths.get(filters.get(i).getKey())).append(" = :p")
+                    .append(i);
+        }
+        return filters;
     }
 
     private static Class<?> boxed(Class<?> type) {
