@@ -203,26 +203,19 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
     }
 
     /**
-     * Gets the internationalization object previously set for this component.
-     * <p>
-     * NOTE: Updating the instance that is returned from this method will not
-     * update the component if not set again using
-     * {@link #setI18n(PdfViewerI18n)}.
+     * Gets the i18n object set with {@link #setI18n(PdfViewerI18n)}. Changes to
+     * the returned object take effect only when you set it again.
      *
-     * @return the i18n object or {@code null} if no i18n object has been set
+     * @return the i18n object, or {@code null} if none has been set
      */
     public PdfViewerI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization object for this component. It enables you
-     * to customize and translate the texts used in the viewer. Properties that
-     * are not set use the default texts.
-     * <p>
-     * Note: updating the object properties after setting the i18n will not
-     * update the component. To make the changes effective, you need to set the
-     * updated object again.
+     * Sets the i18n object, which translates the texts of the viewer. Texts it
+     * does not set keep their defaults. Changes to the object after this call
+     * take effect only when you set it again.
      *
      * @param i18n
      *            the i18n object, not {@code null}

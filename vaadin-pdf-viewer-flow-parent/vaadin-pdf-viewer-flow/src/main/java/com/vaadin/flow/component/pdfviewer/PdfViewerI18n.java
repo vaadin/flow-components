@@ -13,9 +13,8 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * The internationalization properties for {@link PdfViewer}. Use it to
- * customize and translate the texts used in the viewer. Properties that are not
- * set use the default texts.
+ * The i18n object of {@link PdfViewer}, which translates the texts of the
+ * viewer. Texts it does not set keep their defaults.
  *
  * @see PdfViewer#setI18n(PdfViewerI18n)
  *
