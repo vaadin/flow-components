@@ -12,9 +12,10 @@ chart and grid AI chat pages run over `InMemoryDatabaseProvider` (H2).
 
 On this branch the LLM keeps writing SQL with the prompts of today, and the
 endpoints look like the tables of one schema.
-Apache Calcite runs the SQL in the JVM, pushes the equality filters a source
-supports down to it, and computes joins, `GROUP BY`, sorting and paging in
-memory.
+Apache Calcite runs the SQL in the JVM and pushes down to a source what it
+can do itself: the equality filters, and for a query over that one source its
+sort, page and count, which is what a grid reads. Joins, `GROUP BY`, other
+filters and expressions run in memory.
 
 The controllers stay as they are by construction: the result is a plain
 `DatabaseProvider`, so the tools, their texts and parameter schemas, the
@@ -37,12 +38,12 @@ Paths are relative to `vaadin-ai-components-flow-parent/`; `core` is
 
 | Endpoint (base) | Source on this branch | One table per | Pushed down | Column types from |
 |---|---|---|---|---|
-| `it/endpoints/SampleRestApi` | `it/providers/RestTableSource` | collection of the API index | equality filters as `field=value` query parameters | the first page |
-| `it/endpoints/SampleGraphQLApi` | `it/providers/GraphQLTableSource` | root field returning a list of objects | root field arguments that match a column by name and type | introspection, ISO dates from a first fetch |
-| `it/endpoints/SampleMongoServer` | `it/providers/MongoTableSource` | collection | equality filters as a `find` filter, dates, decimals and ids included | a sample of 100 documents |
+| `it/endpoints/SampleRestApi` | `it/providers/RestTableSource` | collection of the API index | equality filters as `field=value` query parameters; sort as `sort` parameters; offset and limit as the pages that hold them; count as the page's `totalElements` | the first page |
+| `it/endpoints/SampleGraphQLApi` | `it/providers/GraphQLTableSource` | root field returning a list of objects | root field arguments that match a column by name and type; sort by scalar fields as `orderBy`; `offset` and `limit`; count as `<field>Count` | introspection, ISO dates from a first fetch |
+| `it/endpoints/SampleMongoServer` | `it/providers/MongoTableSource` | collection | equality filters as a `find` filter, dates, decimals and ids included; `skip` and `limit`; sort as an aggregation pipeline; count as `countDocuments` | a sample of 100 documents |
 | `it/endpoints/SampleCsvFiles` | `it/providers/CsvTableSource` | `.csv` file | nothing | every value of the file |
-| `it/endpoints/jpa/SampleJpaDatabase`, JPQL | `it/providers/JpqlTableSource` | entity of `ENTITY_CLASSES` | equality filters in the JPQL `WHERE`, association ids included | the entity's attributes |
-| `it/endpoints/jpa/SampleJpaDatabase`, Flow data providers | `core/provider/DataProviderTableSource` over a callback `DataProvider` | entity of `ENTITY_CLASSES` | nothing | the entity's properties |
+| `it/endpoints/jpa/SampleJpaDatabase`, JPQL | `it/providers/JpqlTableSource` | entity of `ENTITY_CLASSES` | equality filters in the JPQL `WHERE`, association ids included; `ORDER BY` with `NULLS LAST`/`FIRST`; first and maximum results; a `COUNT` query | the entity's attributes |
+| `it/endpoints/jpa/SampleJpaDatabase`, Flow data providers | `core/provider/DataProviderTableSource` over a callback `DataProvider` | entity of `ENTITY_CLASSES` | sort orders, offset and limit of the `Query`; count as `size` | the entity's properties |
 | `it/endpoints/SampleH2Database`, `TenantScopedH2Database`, the JPA tables | none: `it/InMemoryDatabaseProvider` and `it/providers/JdbcDatabaseProvider` | | | |
 
 The SQL endpoints need no Calcite: the H2 variants, the tenant-scoped database
@@ -61,10 +62,15 @@ The design rests on these choices:
    `FederatedDatabaseProvider` and the package-private `SourceTable`.
    `AdapterTable` is the one public type that names Calcite, for one of
    Calcite's own adapters.
-3. Push-down is equality filters only, and the engine checks them again on
-   the rows, so a source may push down less than it was asked for.
-   Projection, sort, limit and count stay in the engine. A short row cache
-   per source and pushdown keeps a grid render to one fetch per backend.
+3. Push-down covers equality filters, sort, offset and limit, and the count
+   of all rows. Equality filters reach every read of a source that declares
+   them, and the engine checks them again on the rows. A limit, with its
+   offset and sort, and a count reach the source only when it takes
+   everything between them and its scan (Step 3b), which is the shape of a
+   grid's pages and count and of a query over one table. Projection,
+   aggregation, joins and other filters stay in the engine. A short cache per
+   source, read and pushdown keeps repeated reads of a grid render to one
+   call each.
 4. Calcite is an optional dependency of core, like LangChain4j and Spring AI.
 
 Branch: `prototype/federated-sql-calcite`, on top of
@@ -92,24 +98,37 @@ Branch: `prototype/federated-sql-calcite`, on top of
 ```java
 public interface TableSource extends Serializable {
     record Column(String name, Class<?> type) implements Serializable { }  // both non-null
-    enum Capability { EQUALITY_FILTER }
-    record Pushdown(Map<String, Object> equalityFilters) implements Serializable {
-        public static final Pushdown NONE = new Pushdown(Map.of());       // compact constructor: Map.copyOf
+    enum Capability { EQUALITY_FILTER, SORT, LIMIT, COUNT }
+    record SortKey(String column, boolean descending) implements Serializable { }  // nulls sort as the greatest values
+    record Pushdown(Map<String, Object> equalityFilters, List<SortKey> sort, long offset, Long limit) implements Serializable {
+        public static final Pushdown NONE = new Pushdown(Map.of());       // compact constructor: copies, offset and limit not negative
+        public Pushdown(Map<String, Object> equalityFilters) { ... }     // no sort, offset 0, no limit
     }
     String getName();                                    // table name in SQL, matched case-insensitively
     List<Column> getColumns();                           // at least one, in the order the LLM sees them
     default Set<Capability> getCapabilities() { return Set.of(); }
+    default boolean supportsEqualityFilter(String column) { return true; }  // narrows EQUALITY_FILTER per column
+    default boolean supportsSort(List<SortKey> sort) { return true; }       // narrows SORT per order
     default String getDescription() { return null; }    // shown next to the table name
     List<Map<String, Object>> fetch(Pushdown pushdown);  // every column of each row; a missing one is null
+    default long count(Pushdown pushdown) { throw new UnsupportedOperationException(...); }  // filters only, for COUNT
 }
 ```
 
 Javadoc: column types are `String`, `Integer`, `Long`, `Double`,
 `BigDecimal`, `Boolean`, `LocalDate`, `LocalDateTime` or `LocalTime`; a
 numeric column may return any `Number`; every column is nullable; a pushed
-value has the column's type. A `ToolException` from `fetch` carries a
-message safe for the LLM, any other exception becomes a generic error. The
-nested types carry `@since 25.4` too.
+value has the column's type. A `ToolException` from `fetch` or `count`
+carries a message safe for the LLM, any other exception becomes a generic
+error. The nested types carry `@since 25.4` too.
+
+The class Javadoc says what is pushed when: equality filters into every read;
+a limit with its offset and sort, and a count, only when the source takes the
+whole query below them. `LIMIT` says the rows are skipped and limited after
+the pushed filters and sort, so a source with it applies every pushed filter
+exactly, and that without a sort its own order must be the same on every read
+so that pages do not overlap. `SortKey` says null values sort after all others
+when ascending and before them when descending, as Calcite does by default.
 
 ### Step 3: core `FederatedDatabaseProvider` and `SourceTable`
 
@@ -158,10 +177,13 @@ public List<Map<String, Object>> executeQuery(String sql)
   `ToolException` from a source is found in the cause chain and relayed;
   anything else is logged at `WARN` and thrown as
   `IllegalStateException("Query failed")`.
-- Cache: a source's rows are kept per source name and `Pushdown` for
-  `getCacheDuration()`. A grid render runs the same query for validation, the
-  sample row, the count and each page, so it reaches each backend once. A hit
-  is logged at `INFO` with the table, filters and row count.
+- Cache: a source's rows and counts are kept per source name, read (rows or
+  count) and `Pushdown` for `getCacheDuration()`. A grid render reads the same
+  query for validation and the sample row, so that pair reaches the backend
+  once; the count and each page are reads of their own. A hit is logged at
+  `INFO` with the read, the table and the pushdown.
+- Planning runs `MERGE_SORTS`, then `SourcePushdown.SHUTTLE` (Step 3b), then
+  `BINDABLE_SCANS`.
 
 **`SourceTable`** (new, package-private, `final`, `extends AbstractTable implements FilterableTable`)
 
@@ -182,6 +204,39 @@ public List<Map<String, Object>> executeQuery(String sql)
 - `FilterableTable`, not `ProjectableFilterableTable`: with assertions on
   (surefire's default) the planner asserts on a filtered and sorted
   projectable scan.
+- `pushedTable(Pushdown)` and `countTable(Pushdown, RelDataType)`: tables
+  with fixed rows that a rewritten plan reads instead of the source table,
+  the source's rows for that pushdown in its order, and one row with its
+  count. Rows of a pushed table are checked against the pushed filters and cut
+  to the limit once more; a `LIMIT 0` reads nothing.
+- `takeEqualityFilters` skips a column the source does not filter by
+  (`supportsEqualityFilter`), so that filter stays in the engine.
+
+### Step 3b: core `SourcePushdown` (new, package-private, `final`)
+
+A rewrite of the logical plan before it is optimised, like `MERGE_SORTS`,
+rather than planner rules on a convention of its own (see Alternatives):
+
+- **The chain**: from an operator down to a `LogicalTableScan` of a
+  `SourceTable`, through projections (a non-reference expression is a
+  computed column), filters (their conditions mapped onto the source's
+  columns) and sorts without a limit (the uppermost gives the order). Any
+  other operator, a join, an aggregate, a limited sort, ends the chain, and
+  nothing is pushed.
+- **A limit**: a `LogicalSort` with a literal offset or fetch over a chain
+  whose source has `LIMIT`, whose filters are all equality filters the source
+  takes (`EQUALITY_FILTER` and `supportsEqualityFilter`), and whose order (the
+  sort's own, or else the chain's) is by source columns with the default null
+  placement and accepted by `SORT` and `supportsSort`. The chain is rebuilt
+  over a scan of `pushedTable`, keeping its projections and dropping its
+  filters and sorts; the sort's own order stays above it, without offset and
+  fetch, to keep the page's order.
+- **A count**: a `LogicalAggregate` with no groups and one `COUNT(*)` (not
+  distinct, no filter) over a chain whose source has `COUNT` and takes its
+  filters. It becomes a scan of `countTable`.
+- The new scan's table is named after the source with `fetch Pushdown[...]` or
+  `count Pushdown[...]` appended, so `explain` shows what was pushed. A
+  rewrite whose row type differs from the original is not applied.
 
 ### Step 4: core `AdapterTable` (new, `@since 25.4`)
 
@@ -226,22 +281,36 @@ Data an application already serves to its grids joins the schema. The
 columns are the top-level `BeanPropertySet` properties of the item type
 (beans and records), primitives boxed, in name order, of the Step 2 types
 only; an item type with none throws `IllegalArgumentException`. The
-description is `"Flow data provider of <simple name>"`. `fetch` asks for
-every item with `new Query<>()` and pushes nothing down, since a data
-provider's filter type is its own. `flow-data` comes through
-`vaadin-flow-components-base`.
+description is `"Flow data provider of <simple name>"`. The source declares
+`SORT`, `LIMIT` and `COUNT`: `fetch` passes the offset, the limit, a
+`QuerySortOrder` per sort key and, for an in-memory data provider, a
+comparator with null values greatest; `count` is the data provider's `size`.
+Filters are not pushed, since a data provider's filter type is its own.
+`flow-data` comes through `vaadin-flow-components-base`.
 
 ### Step 6: table sources over the sample endpoints (`it/providers`)
 
 The IT pom declares `calcite-core` with the exclusions of Step 1, because
 core's optional dependency does not reach it.
 
+Two endpoints of the base change on this branch, so that the sources have
+something to push to: `SampleRestApi` sorts by several fields
+(`sort=region,desc&sort=revenue,asc`, read with
+`SampleApiServer.queryParameterValues`), and `SampleGraphQLApi` gives every
+list field `orderBy: [OrderBy!]` (`{field, direction}` over the type's scalar
+fields), `offset` and `limit`, and a `<field>Count` with the same filter
+argument. Both sort null values after all others when ascending, with the
+same comparator.
+
 - **`RestTableSource`**: `discover(URI api)` returns one source per
   collection of the index; `of(URI api, String collection)` infers the
   columns from the first page of 100 (`Integer`, `Long`, `BigDecimal`,
   `Boolean`, ISO `LocalDate` and `LocalDateTime`, else `String`). Filters go
-  out as `field=value`; `fetch` reads every page. A `400` becomes a
-  `ToolException` with the API's `error` text, which names only fields.
+  out as `field=value` and a sort as `sort=<column>,asc|desc`. Without a
+  limit `fetch` reads every page; with one it reads pages as large as the
+  limit (at most 100) from the one the offset falls on, skipping into the
+  first. `count` reads the `totalElements` of a page of one. A `400` becomes
+  a `ToolException` with the API's `error` text, which names only fields.
 - **`GraphQLTableSource`**: `discover(URI endpoint)` posts graphql-java's
   `IntrospectionQuery.INTROSPECTION_QUERY` (a hand-written query that asks
   for `fields` in more than one place is refused) and finds the query type
@@ -249,15 +318,22 @@ core's optional dependency does not reach it.
   `id` becomes `<field>Id`, list fields are left out, and a string column
   whose first-fetch values all parse as ISO dates becomes a date column.
   Root field arguments that match a column by name and type are the
-  push-down (`getArguments()`); the capability is declared only when there
-  is one.
+  equality filters (`getArguments()`, `supportsEqualityFilter`); the
+  capability is declared only when there is one. `orderBy` declares `SORT`
+  (scalar columns only, `supportsSort`), `offset` and `limit` declare
+  `LIMIT`, and a root field `<field>Count` returning `Int` declares `COUNT`;
+  `orderBy` is written as a GraphQL input literal.
 - **`MongoTableSource`**: `MongoTableSource(String connectionString, String database, String collection)`
   and `discover(String connectionString, String database)` over the base's
   5.x driver, with a lazily created `transient` `MongoClient`. Types come
   from 100 sampled documents (numbers widen, a `Date` at midnight UTC is a
   `LocalDate`, mixed types become `String`), `_id` is `id`, nested documents
   and arrays are left out. Filters go into `find` as `Filters.eq`, dates as
-  `Date` in UTC and decimals as `Decimal128`.
+  `Date` in UTC and decimals as `Decimal128`. A page without a sort is
+  `find` sorted by `_id` with `skip` and `limit`; a sort is an aggregation
+  pipeline of `$match`, an `$addFields` flag per key that is 1 for a null or
+  missing value, `$sort` by each flag and field in the key's direction then
+  `_id`, `$skip` and `$limit`; `count` is `countDocuments`.
 - **`CsvTableSource`**: `CsvTableSource(Path file)` and
   `inDirectory(Path directory)`. The table is the file name without `.csv`,
   the first row is the header, quoted fields are handled, types come from
@@ -269,7 +345,10 @@ core's optional dependency does not reach it.
   The table is the entity name, and the columns are the basic attributes and
   `<attribute>Id` for each to-one association, in name order. One JPQL query
   selects the columns, left-joins the associations and takes the equality
-  filters as `WHERE <path> = :p<n>`.
+  filters as `WHERE <path> = :p<n>`, a sort as `ORDER BY <path> ASC NULLS
+  LAST` or `DESC NULLS FIRST` then the id when it pages, and an offset and
+  limit as `setFirstResult` and `setMaxResults`. `count` runs `SELECT
+  COUNT(e)` with the same joins and filters.
 
 The sources do not log their calls: the base logs them where they are served
 (`SampleApiServer`, `LoggingMongoBackend`, `SampleJpaDatabase`).
@@ -284,8 +363,8 @@ The sources do not log their calls: the base logs them where they are served
   - `dataProviders()`: a `DataProviderTableSource` per entity of
     `ENTITY_CLASSES`, over
     `DataProvider.fromCallbacks` with a paged
-    `SELECT e FROM <Entity> e ORDER BY e.id` and a `COUNT(e)` query, the data
-    provider an application already has for its grids.
+    `SELECT e FROM <Entity> e ORDER BY <sort orders>, e.id` and a `COUNT(e)`
+    query, the data provider an application already has for its grids.
   - `federated()`: `sales`, `products`, `websiteTraffic` from REST;
     `employees`, `projectTasks`, `stockPrices` from GraphQL; `energyFlow`,
     `kpiMetrics`, `budgetItems` from MongoDB; `org_chart`, `sales_pipeline`,
@@ -331,17 +410,28 @@ The sources do not log their calls: the base logs them where they are served
 ### Step 8: tests
 
 Core (`vaadin-ai-core-flow/src/test/java/com/vaadin/flow/component/ai/provider/`):
-- `FederatedDatabaseProviderTest` with a recording `TableSource` and a fixed
-  adapter table: schema text and quoting; labels and identifiers; equality
-  push-down with and without the capability, per column type; other filters
+- `FederatedDatabaseProviderTest` with a recording `TableSource` that applies
+  filters, sort, offset and limit like a backend, and a fixed adapter table:
+  schema text and quoting; labels and identifiers; equality push-down with
+  and without the capability, per column type, and per column; other filters
   in the engine; joins and aggregation across sources; the grid's three
-  wrappers; `java.time` values and nulls; safe `ToolException`s for unknown
-  names and syntax errors; writes rejected before any fetch; a source's
-  `ToolException` relayed, other failures not; the cache; serialization; an
-  adapter table in a join; `explain`; constructor rejections.
+  wrappers; the grid's page, count and validation read from a source that
+  takes them, a page that follows the query's own order, the top rows of one
+  table, `LIMIT 0`; a limit kept in the engine for a filter it keeps, a
+  missing capability, an order the source refuses, other null placement, a
+  computed sort key and a join; expressions over a pushed page; counts kept
+  in the engine for groups, distinct values and a kept filter; the cache
+  keeping counts and pages apart; `explain` naming the pushdown; `java.time`
+  values and nulls; safe `ToolException`s for unknown names and syntax
+  errors; writes rejected before any fetch; a source's `ToolException`
+  relayed, other failures not; the cache; serialization; an adapter table in
+  a join; `explain`; constructor and `Pushdown` rejections.
 - `DataProviderTableSourceTest`: records and beans, supported properties in
   name order, every item fetched, a query through the provider, an unusable
-  item type rejected.
+  item type rejected; the capabilities and the count; an in-memory data
+  provider sorting with nulls greatest; a backend data provider receiving the
+  sort orders, offset and limit; a grid page and count read from the data
+  provider.
 - `AIComponentsSerializableTest` excludes the `provider` package, so the
   serialization test above covers it.
 
@@ -351,20 +441,31 @@ JUnit against the sample endpoints:
   `CsvTableSourceTest`: discovery, inferred columns, typed rows, push-down
   reaching the endpoint (dates and ids included), the REST API's rejection
   of an unknown field relayed, CSV quoting; for MongoDB also functions such
-  as `UPPER` and aggregation in the engine.
+  as `UPPER` and aggregation in the engine. For REST, GraphQL and MongoDB
+  also a sorted page (across two API pages for REST), the count, and the
+  capabilities; for MongoDB null values sorted last ascending and first
+  descending, unsorted pages in `_id` order, and the grid's page and count in
+  the plan; for GraphQL the filter columns and the sortable columns.
+- `SampleRestApiTest` and `SampleGraphQLApiTest`: sorting by several fields
+  with null values last ascending; for GraphQL also `offset`, `limit`, the
+  count fields and an unknown sort field reported.
 - `FederatedSampleProviderTest`: every endpoint alone serves all of
   `SampleData.TABLES`; `federated()` lists each table once; aggregation over
   REST; joins of REST with MongoDB and of GraphQL with CSV; the grid
   wrappers; date literals; a quoted reserved column.
 - `JpqlTableSourceTest`: columns in name order with the association id,
   equality filters, dates and association ids pushed into the JPQL, a null
-  association, and aggregation and a self-join through the provider.
+  association, and aggregation and a self-join through the provider; a sort
+  by an association id with null values last ascending and first
+  descending, unsorted pages in id order, the count with a filter, and a grid
+  page through the provider.
 - `JdbcDatabaseProviderTest`: the dialect in the schema text, PostgreSQL's
   plain `month`, MySQL's backticks, a tenant that sees its region only with
   the reserved `MONTH` marked, native SQL over the JPA tables, and writes
   rejected.
 - `FederatedJpaProviderTest` and `RestCalciteDatabaseProviderTest`: schema,
-  aggregation, dates and the grid wrappers; for the direct provider also safe
+  aggregation, dates and the grid wrappers; for the data providers also the
+  grid's page and count in the plan; for the direct provider also safe
   errors and serialization.
 
 ### Step 9: findings
@@ -393,6 +494,16 @@ adapter that does not exist, and a verdict.
   providers of its grids, so `DataProviderTableSource` goes that way.
 - **`ProjectableFilterableTable`**: the planner assertion above, and the
   sample APIs have no field selection to push to.
+- **Planner rules on a convention of the sources' own** for sort, limit and
+  count, the way Calcite's adapters do it (a convention for source scans,
+  rules that move `Sort` and `Aggregate` into them, a converter to
+  `Enumerable`): the general route, which also weighs the alternatives by
+  cost. But the shapes worth pushing are few (a grid's page, count and
+  validation, and the top rows of one table), the rules would run inside the
+  Volcano planner that already asserted on projectable scans, and a rule
+  that does not fire shows only as a slower plan. A rewrite of the logical
+  plan before planning, as `MERGE_SORTS` already does, decides the same cases
+  in one place and is tested shape by shape.
 - **No helper**: `RestCalciteDatabaseProvider` shows that each provider
   written against Calcite has to learn every workaround again, so a framework
   that takes this route ships `FederatedDatabaseProvider` and `TableSource`.
@@ -407,16 +518,19 @@ adapter that does not exist, and a verdict.
 
 ### Follow-ups
 
-1. Sort, limit and count push-down: more `Capability` values, which need
-   planner rules on a custom convention. Until then a source returns every
-   row of a scan, and a count is a full fetch.
-2. A row cap per source, so the scan of a large collection stops.
+1. Push-down beyond one table and equality: `GROUP BY` with simple aggregates
+   for a source that can aggregate (MongoDB's `$group`, JPQL), range
+   filters, and `IN`. Until then a query with them reads every row the
+   equality filters leave.
+2. A row cap per source, so the scan of a large collection stops; a grid over
+   one table no longer scans, but a join or an aggregate still does.
 3. Projection push-down for APIs with field selection, once the planner
    assertion is avoided.
 4. Type inference beyond the first page or sample, and nested JSON and
    documents (`stockPrices.prices`, `orgChart.manager`).
-5. `DataProviderTableSource`: page through the data provider, and push
-   filters where the application maps them to its filter type.
+5. `DataProviderTableSource`: push filters where the application maps them to
+   its filter type, and a way for it to say where its backend puts null
+   values.
 6. Concurrency: one connection runs one query at a time, and the sample
    providers are shared by every page.
 7. Packaging: about 23 MB in 30 jars that Calcite does not split. Decide
@@ -478,6 +592,69 @@ The query parameters, the field arguments, the `find` filter and the JPQL
 `WHERE` in those lines are the push-down at work; a source without the
 capability, or a query with no equality filter, shows the bare call. The CSV
 source reads its files directly, so nothing logs its reads.
+
+A grid over one table now reads in pieces. With the `rest` provider and the
+LLM's query `SELECT "month" AS "Month", monthOrder AS "Month Order", revenue
+AS "Revenue" FROM sales WHERE region = 'North' ORDER BY monthOrder`, a render
+and a click on the Revenue header show:
+
+```
+SampleApiServer - GET .../api/sales?size=1&page=0&region=North&sort=monthOrder,asc -> 1 items of 6   (validation)
+FederatedDatabaseProvider - Cache hit for rows of sales with Pushdown[... limit=1], read skipped     (sample row)
+SampleApiServer - GET .../api/sales?size=1&page=0&region=North -> 1 items of 6                       (count)
+SampleApiServer - GET .../api/sales?size=6&page=0&region=North&sort=monthOrder,asc -> 6 items of 6   (page)
+SampleApiServer - GET .../api/sales?size=6&page=0&region=North&sort=revenue,asc -> 6 items of 6      (sorted page)
+FederatedDatabaseProvider - Cache hit for count of sales with Pushdown[equalityFilters={region=North}, ...]
+```
+
+With the `mongo` provider, sorting the budget items by their nullable item
+type runs the pipeline, and the grid shows the two typed lines first and the
+untyped ones after them:
+
+```
+LoggingMongoBackend - aggregate sample.budgetItems {"pipeline" : [ { "$match" : {  } }, { "$addFields" : { "_null0" : { "$cond" : [ { "$eq" : [ { "$ifNull" : [ "$itemType", null ] }, null ] }, 1, 0 ] } } }, { "$sort" : { "_null0" : 1, "itemType" : 1, "_id" : 1 } }, { "$limit" : 7 } ], "cursor" : {}} -> 7 documents
+```
+
+### Sort, limit and count push-down
+
+What pushing a grid's reads down to the sources taught:
+
+- **A pushed limit needs every filter applied exactly.** Equality filters
+  could be pushed loosely before, since the engine checks them again; under a
+  limit, a filter the source skipped returns the wrong page. The GraphQL
+  source filters only by the API's arguments and used to drop the other
+  filters silently, so the contract gained `supportsEqualityFilter(column)`,
+  and a limit stays in the engine when a query filters by a column the
+  source cannot.
+- **Null values sort differently per backend.** Calcite, like Oracle and
+  PostgreSQL, sorts null values as the greatest; MongoDB and H2 sort them as
+  the smallest. The contract fixes the SQL order in `SortKey`, and the engine
+  pushes only sorts with that placement. MongoDB needs a computed flag per
+  key in an aggregation pipeline, JPQL says `NULLS LAST` or `NULLS FIRST`, and
+  the sample APIs follow SQL by construction. A Flow data provider cannot be
+  told: `QuerySortOrder` has no null placement, so a backend data provider
+  places null values its own way, first when ascending for the sample's H2
+  queries.
+- **A data provider that ignores sort orders returns wrong pages.** The
+  sample's callback data provider ordered by id only, which was harmless while
+  the engine sorted every item. With the sort pushed, a page sorted by salary
+  came back as the second and third employees by id, sorted among
+  themselves. A data provider behind a sortable grid has to honour the sort
+  orders anyway; the sample now does.
+- **Pages without a sort need a stable order.** The sources add one where
+  the backend does not promise it: `_id` for MongoDB, the id for JPQL. The
+  sample APIs return their items in a fixed order.
+- **A grid render makes more calls, each small.** Before, the cache let a
+  render reach each backend once with a full read. Now validation reads one
+  row, the count reads a total, and each page reads its rows, so a render is
+  three calls and a sort one more. On the sample's dozen rows that is more
+  traffic; it pays off as soon as a collection outgrows a page.
+- **The rewrite stays small.** Pushing the shapes a grid writes needed one
+  class of 353 lines, 261 of them code, and a few methods on
+  `SourceTable`. Counted the same way before and after, the helper grew from
+  705 to 1,055 code lines and `RestTableSource` from 196 to 219. The table
+  under "Without the helper" predates this and was counted slightly
+  differently.
 
 ### What Calcite taught
 
@@ -652,10 +829,13 @@ of Hasura-style APIs as pushed sort and limit.
 
 The approach does what it set out to do: the LLM writes the SQL it writes
 today, the prompts and tools are untouched, and the collection-shaped
-endpoints gain joins and aggregation without a copy of the data. The costs
-are concrete now: a heavy optional dependency, a growing list of Calcite
-behaviours that have to be known and worked around, and in-memory sorting and
-paging for hand-written sources until push-down rules are written. Calcite's
+endpoints gain joins and aggregation without a copy of the data. A grid over
+one table now pages, sorts and counts in the backend, through the same small
+`TableSource` contract. The costs are concrete now: a heavy optional
+dependency, a growing list of Calcite behaviours that have to be known and
+worked around, null placement that differs per backend, and in-memory work
+for joins, aggregates and range filters, which still read every row the
+equality filters leave. Calcite's
 own adapters cut both ways: the MongoDB one brings real push-down for free,
 and also a driver version pin, a silent miss on date filters and a hard
 failure on most functions, which is why the prototype ended up reading
