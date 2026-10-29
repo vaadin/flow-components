@@ -26,7 +26,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -47,8 +49,11 @@ import tools.jackson.databind.JsonNode;
  * root field returning a list of objects becomes a table, the object's scalar
  * fields become columns, and an object-valued field with an {@code id} becomes
  * an {@code <field>Id} column holding that id. Arguments of the root field that
- * share a name and type with a column are pushed down as equality filters;
- * everything else the engine does. The schema is read with graphql-java's
+ * share a name and type with a column are pushed down as equality filters.
+ * Where the API offers them, the conventional {@code orderBy}, {@code offset}
+ * and {@code limit} arguments take a sort by scalar fields and a page, and a
+ * root field {@code <field>Count} with the same filter arguments takes a count.
+ * Everything else the engine does. The schema is read with graphql-java's
  * standard introspection query.
  * <p>
  * GraphQL has no date scalar, so a string column whose values all parse as ISO
@@ -64,14 +69,24 @@ public class GraphQLTableSource implements TableSource {
     private final List<Column> columns;
     private final Map<String, String> selections;
     private final Set<String> arguments;
+    private final Set<Capability> capabilities;
+
+    /**
+     * An argument value written into the query as it is, such as an input
+     * object or an enum value, rather than as a JSON value.
+     */
+    record Literal(String text) {
+    }
 
     private GraphQLTableSource(URI endpoint, String field, List<Column> columns,
-            Map<String, String> selections, Set<String> arguments) {
+            Map<String, String> selections, Set<String> arguments,
+            Set<Capability> capabilities) {
         this.endpoint = endpoint;
         this.field = field;
         this.columns = columns;
         this.selections = selections;
         this.arguments = arguments;
+        this.capabilities = capabilities;
     }
 
     /**
@@ -91,6 +106,13 @@ public class GraphQLTableSource implements TableSource {
         }
         var queryType = types
                 .get(schema.get("queryType").get("name").stringValue());
+        var countFields = new HashSet<String>();
+        for (var rootField : queryType.get("fields")) {
+            if ("Int".equals(
+                    named(rootField.get("type")).get("name").stringValue())) {
+                countFields.add(rootField.get("name").stringValue());
+            }
+        }
         var sources = new ArrayList<GraphQLTableSource>();
         for (var rootField : queryType.get("fields")) {
             var listOf = listOf(rootField.get("type"));
@@ -102,13 +124,14 @@ public class GraphQLTableSource implements TableSource {
                     || !"OBJECT".equals(type.get("kind").stringValue())) {
                 continue;
             }
-            sources.add(of(endpoint, rootField, type, types));
+            sources.add(of(endpoint, rootField, type, types, countFields));
         }
         return sources;
     }
 
     private static GraphQLTableSource of(URI endpoint, JsonNode rootField,
-            JsonNode type, Map<String, JsonNode> types) {
+            JsonNode type, Map<String, JsonNode> types,
+            Set<String> countFields) {
         var name = rootField.get("name").stringValue();
         var columns = new ArrayList<Column>();
         var selections = new LinkedHashMap<String, String>();
@@ -133,8 +156,10 @@ public class GraphQLTableSource implements TableSource {
             }
         }
         var arguments = new LinkedHashSet<String>();
+        var argumentNames = new HashSet<String>();
         for (var argument : rootField.get("args")) {
             var argumentName = argument.get("name").stringValue();
+            argumentNames.add(argumentName);
             var argumentType = named(argument.get("type"));
             columns.stream()
                     .filter(column -> column.name().equals(argumentName)
@@ -143,9 +168,24 @@ public class GraphQLTableSource implements TableSource {
                     .findFirst()
                     .ifPresent(column -> arguments.add(argumentName));
         }
+        var capabilities = EnumSet.noneOf(Capability.class);
+        if (!arguments.isEmpty()) {
+            capabilities.add(Capability.EQUALITY_FILTER);
+        }
+        if (argumentNames.contains("orderBy")) {
+            capabilities.add(Capability.SORT);
+        }
+        if (argumentNames.contains("offset")
+                && argumentNames.contains("limit")) {
+            capabilities.add(Capability.LIMIT);
+        }
+        if (countFields.contains(name + "Count")) {
+            capabilities.add(Capability.COUNT);
+        }
         var items = post(endpoint, query(name, Map.of(), selections)).get(name);
         return new GraphQLTableSource(endpoint, name,
-                refineDates(columns, items, selections), selections, arguments);
+                refineDates(columns, items, selections), selections, arguments,
+                Set.copyOf(capabilities));
     }
 
     /**
@@ -251,8 +291,25 @@ public class GraphQLTableSource implements TableSource {
 
     @Override
     public Set<Capability> getCapabilities() {
-        return arguments.isEmpty() ? Set.of()
-                : Set.of(Capability.EQUALITY_FILTER);
+        return capabilities;
+    }
+
+    /**
+     * Filters only by the columns the root field has an argument for.
+     */
+    @Override
+    public boolean supportsEqualityFilter(String column) {
+        return arguments.contains(column);
+    }
+
+    /**
+     * Sorts only by scalar fields; an id column of an object field has no field
+     * of its own to order by.
+     */
+    @Override
+    public boolean supportsSort(List<SortKey> sort) {
+        return sort.stream().allMatch(
+                key -> key.column().equals(selections.get(key.column())));
     }
 
     @Override
@@ -271,12 +328,19 @@ public class GraphQLTableSource implements TableSource {
 
     @Override
     public List<Map<String, Object>> fetch(Pushdown pushdown) {
-        var pushed = new LinkedHashMap<String, Object>();
-        pushdown.equalityFilters().forEach((column, value) -> {
-            if (arguments.contains(column)) {
-                pushed.put(column, value);
-            }
-        });
+        var pushed = filterArguments(pushdown);
+        if (!pushdown.sort().isEmpty()) {
+            pushed.put("orderBy", new Literal(pushdown.sort().stream()
+                    .map(key -> "{field: \"" + key.column() + "\", direction: "
+                            + (key.descending() ? "DESC" : "ASC") + "}")
+                    .collect(Collectors.joining(", ", "[", "]"))));
+        }
+        if (pushdown.offset() > 0) {
+            pushed.put("offset", pushdown.offset());
+        }
+        if (pushdown.limit() != null) {
+            pushed.put("limit", Math.min(pushdown.limit(), Integer.MAX_VALUE));
+        }
         var items = post(endpoint, query(field, pushed, selections)).get(field);
         var rows = new ArrayList<Map<String, Object>>();
         for (var item : items) {
@@ -287,6 +351,23 @@ public class GraphQLTableSource implements TableSource {
             rows.add(row);
         }
         return rows;
+    }
+
+    @Override
+    public long count(Pushdown pushdown) {
+        var countField = field + "Count";
+        var query = query(countField, filterArguments(pushdown), Map.of());
+        return post(endpoint, query).get(countField).longValue();
+    }
+
+    private Map<String, Object> filterArguments(Pushdown pushdown) {
+        var pushed = new LinkedHashMap<String, Object>();
+        pushdown.equalityFilters().forEach((column, value) -> {
+            if (arguments.contains(column)) {
+                pushed.put(column, value);
+            }
+        });
+        return pushed;
     }
 
     private Object toValue(JsonNode item, Column column) {
@@ -319,24 +400,27 @@ public class GraphQLTableSource implements TableSource {
 
     /**
      * Renders the query for a root field: its arguments as literals and the
-     * selections of every column.
+     * selections of every column, or no selection set for a field of a scalar
+     * type such as a count.
      */
     static String query(String field, Map<String, Object> arguments,
             Map<String, String> selections) {
         var query = new StringBuilder("{ ").append(field);
         if (!arguments.isEmpty()) {
-            query.append('(')
-                    .append(arguments
-                            .entrySet().stream().map(
-                                    argument -> argument.getKey() + ": "
-                                            + JacksonUtils.getMapper()
-                                                    .writeValueAsString(argument
-                                                            .getValue()))
-                            .collect(Collectors.joining(", ")))
-                    .append(')');
+            query.append('(').append(arguments.entrySet().stream()
+                    .map(argument -> argument.getKey() + ": "
+                            + (argument.getValue() instanceof Literal literal
+                                    ? literal.text()
+                                    : JacksonUtils.getMapper()
+                                            .writeValueAsString(
+                                                    argument.getValue())))
+                    .collect(Collectors.joining(", "))).append(')');
         }
-        return query.append(" { ").append(String.join(" ", selections.values()))
-                .append(" } }").toString();
+        if (!selections.isEmpty()) {
+            query.append(" { ").append(String.join(" ", selections.values()))
+                    .append(" }");
+        }
+        return query.append(" }").toString();
     }
 
     /**

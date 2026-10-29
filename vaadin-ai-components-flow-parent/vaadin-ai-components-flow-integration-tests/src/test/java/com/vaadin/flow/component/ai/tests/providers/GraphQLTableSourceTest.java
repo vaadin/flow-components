@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.ai.provider.TableSource.Capability;
 import com.vaadin.flow.component.ai.provider.TableSource.Column;
 import com.vaadin.flow.component.ai.provider.TableSource.Pushdown;
+import com.vaadin.flow.component.ai.provider.TableSource.SortKey;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleApiServer;
 import com.vaadin.flow.component.ai.tests.endpoints.SampleData;
 
@@ -77,10 +78,17 @@ class GraphQLTableSourceTest {
     void arguments_matchingAColumn_becomeEqualityFilters() {
         Assertions.assertEquals(Set.of("department"),
                 source("employees").getArguments());
-        Assertions.assertEquals(Set.of(Capability.EQUALITY_FILTER),
+        Assertions.assertEquals(
+                Set.of(Capability.EQUALITY_FILTER, Capability.SORT,
+                        Capability.LIMIT, Capability.COUNT),
                 source("employees").getCapabilities());
+        Assertions.assertTrue(
+                source("employees").supportsEqualityFilter("department"));
+        Assertions.assertFalse(
+                source("employees").supportsEqualityFilter("name"));
         Assertions.assertEquals(Set.of(), source("kpiMetrics").getArguments());
-        Assertions.assertEquals(Set.of(),
+        Assertions.assertEquals(
+                Set.of(Capability.SORT, Capability.LIMIT, Capability.COUNT),
                 source("kpiMetrics").getCapabilities());
         // expenseCategories(parent: String) filters by name, not by the
         // parentId column, so it is not an equality filter on a column
@@ -116,6 +124,42 @@ class GraphQLTableSourceTest {
         Assertions.assertEquals(expected, engineering.size());
         Assertions.assertTrue(expected < SampleData.EMPLOYEES.size());
         Assertions.assertEquals(SampleData.EMPLOYEES.size(), byName.size());
+    }
+
+    @Test
+    void fetch_pushesTheSortAndThePageAsArguments() {
+        var rows = source("employees")
+                .fetch(new Pushdown(Map.of("department", "Engineering"),
+                        List.of(new SortKey("salary", true)), 1, 1L));
+
+        var expected = SampleData.EMPLOYEES.stream()
+                .filter(employee -> employee.department().equals("Engineering"))
+                .sorted((a, b) -> Integer.compare(b.salary(), a.salary()))
+                .skip(1).map(SampleData.Employee::name).findFirst()
+                .orElseThrow();
+        Assertions.assertEquals(List.of(expected),
+                rows.stream().map(row -> row.get("name")).toList());
+    }
+
+    @Test
+    void sort_byAnIdColumnOfAnObjectField_isNotSupported() {
+        Assertions.assertTrue(source("projectTasks")
+                .supportsSort(List.of(new SortKey("taskName", false))));
+        Assertions.assertFalse(source("projectTasks")
+                .supportsSort(List.of(new SortKey("dependsOnId", false))));
+    }
+
+    @Test
+    void count_readsTheCountField() {
+        Assertions.assertEquals(SampleData.EMPLOYEES.size(),
+                source("employees").count(Pushdown.NONE));
+        Assertions.assertEquals(
+                SampleData.EMPLOYEES.stream()
+                        .filter(employee -> employee.department()
+                                .equals("Sales"))
+                        .count(),
+                source("employees")
+                        .count(new Pushdown(Map.of("department", "Sales"))));
     }
 
     @Test
