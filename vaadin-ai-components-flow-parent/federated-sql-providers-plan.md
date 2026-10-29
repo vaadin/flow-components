@@ -468,7 +468,59 @@ JUnit against the sample endpoints:
   grid's page and count in the plan; for the direct provider also safe
   errors and serialization.
 
-### Step 9: findings
+### Step 9: page and count through the provider (branch `prototype/federated-sql-query-page`)
+
+On a branch of its own, started from `prototype/federated-sql-calcite`: the
+grid no longer writes SQL around the LLM's query to page and count it, and
+asks the provider for a page and a count instead, so the federated provider no
+longer has to recognise the grid's SQL in the plan.
+
+- **Core `common/QueryPage`** (new record, `@since 25.4`): `offset` (0 or
+  more), `limit` (1 or more) and `sortOrders` (`QuerySortOrder` by result
+  column name, `null` for none), and `first(int limit)`. Taken from
+  `prototype/query-language-neutral-providers`, without its `apply(rows)`,
+  which pages in memory for providers that are not SQL databases.
+- **Core `DatabaseProvider`**: two default methods,
+  `executeQuery(String sql, QueryPage page)` and `int count(String sql)`.
+  The defaults write the SQL the grid wrote,
+  `SELECT * FROM (SELECT * FROM (sql) AS _t ORDER BY "c" DESC) AS _limited LIMIT n OFFSET m`
+  (the `ORDER BY` level only with sort orders) and
+  `SELECT COUNT(*) FROM (sql) AS _counted`, and run it through
+  `executeQuery(String)`; a double quote in a sort column name is doubled.
+  The class Javadoc says to override them for another dialect or for paging
+  of one's own, and that a provider that delegates to another provider
+  delegates these too.
+- **Extensions `GridRenderer` and `GridAIController`**: the sample row and the
+  validation of `update_grid_data` read `QueryPage.first(1)`, each page is a
+  `QueryPage` of the grid's offset, limit and sort orders, and the count is
+  `count(query)`. The SQL helpers of `GridRenderer` are gone.
+- **Core `FederatedDatabaseProvider`** overrides both: it plans the query as
+  before and puts the page (a `RelBuilder.sortLimit` by the named result
+  columns) or the count (an aggregate of `COUNT(*)` over the query without its
+  own top-level order) on top of the plan, before `MERGE_SORTS`,
+  `SourcePushdown` and `BINDABLE_SCANS`. `SourcePushdown` then takes the same
+  shapes as for the grid's SQL. A sort order naming a column the query does
+  not return throws `IllegalArgumentException`.
+
+What an existing `DatabaseProvider` sees: the pages, the sorted pages and the
+count are the same SQL as before. The two reads of the first row change: the
+sample row gains `OFFSET 0`, and the validation is the same statement as the
+sample row instead of `SELECT * FROM (sql) AS _v LIMIT 1`. The one test that
+pinned the sample row's SQL, in `GridAIControllerTest`, expects the
+`OFFSET 0` now. An application test that mocks `DatabaseProvider` with
+Mockito and stubs only `executeQuery(String)` gets empty pages and a zero
+count, since a mock does not run default methods.
+
+Tests: `DatabaseProviderTest` (the SQL of a page with and without sort
+orders, the quoting, the count and its fallbacks, the `QueryPage` checks);
+`GridAIControllerTest` (a provider with its own paging receives the two
+first-row reads, the grid's page with its sort order and the count, and no
+SQL); `FederatedDatabaseProviderTest` (a page and a count read from a source
+that takes them, a page in the query's own order, both in the engine without
+the capabilities and over a join, a sort by a column the query does not
+return).
+
+### Step 10: findings
 
 The Findings section at the end of this plan is kept up to date as the steps
 land: what the console shows, what Calcite taught, the replaced MongoDB
@@ -538,6 +590,15 @@ adapter that does not exist, and a verdict.
    document the pom exclusions for applications.
 8. Evaluation: a benchmark over the federated providers, and a comparison
    with the research branch's mirror providers on the same chat pages.
+9. The page API of Step 9 belongs in `custom-data-providers-base`, since both
+   provider prototypes need it, with one shape for `count`: an `int` here, an
+   `OptionalInt` on the research branch, where a provider may not know its
+   size. With the grid no longer writing a subquery `ORDER BY`, the provider's
+   `withRemoveSortInSubQuery(false)` and `MERGE_SORTS` serve only SQL that
+   callers page themselves, such as the default of
+   `executeQuery(String, QueryPage)` on another provider; whether to keep
+   them is untested. `JdbcDatabaseProvider` could override the defaults for
+   its dialects, MySQL's backticks first.
 
 ## Verification
 
@@ -556,10 +617,15 @@ adapter that does not exist, and a verdict.
    shows `jackson-annotations` only at the version Flow's Jackson 3 needs and
    `slf4j-api` only at 2.x; the endpoints' `INFO` lines appear in the IT
    server console.
-4. The SQL path is unchanged:
+4. The SQL path is unchanged on `prototype/federated-sql-calcite`:
    `git diff --stat custom-data-providers-base -- vaadin-ai-components-flow-parent/vaadin-ai-extensions-flow vaadin-ai-components-flow-parent/vaadin-ai-components-flow-benchmark`
    is empty, and core's `DatabaseProvider` and `DatabaseProviderAITools` are
-   untouched, so the SQL benchmark is not run again.
+   untouched, so the SQL benchmark is not run again. On
+   `prototype/federated-sql-query-page` (Step 9) the grid pages through the
+   provider, but the tools, their texts and the SQL a database runs for a
+   page do not change, so the benchmark is not run again there either; the
+   whole extensions suite runs instead, and the `h2` grid page shows the
+   wrapped SQL in H2's trace.
 5. Manual, with `OPENAI_API_KEY` set: start the IT server
    (`mvn package jetty:run -Dvaadin.frontend.hotdeploy=true -am -B -DskipTests -pl vaadin-ai-components-flow-parent/vaadin-ai-components-flow-integration-tests`),
    open `vaadin-ai/grid-ai-chat?provider=federated` and
