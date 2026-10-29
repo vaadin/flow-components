@@ -98,11 +98,11 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the URL of the document to show. The current document is replaced.
-     * {@link DocumentLoadEvent} fires when the document has loaded,
-     * {@link DocumentErrorEvent} if it could not be loaded. The new document
-     * opens on the first page, unless you also call {@link #setPage(int)} in
-     * the same request.
+     * Sets the URL of the document to show. The current document is replaced,
+     * and the new one opens on its first page unless you also call
+     * {@link #setPage(int)} in the same request. {@link DocumentLoadEvent}
+     * fires when the document has loaded, {@link DocumentErrorEvent} if it
+     * could not be loaded.
      * <p>
      * The browser fetches the document, so the URL must be on the same origin
      * as the application, or the server must allow it with CORS headers. To
@@ -138,9 +138,9 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Gets the current page. The current page changes when the user scrolls or
-     * navigates between pages, and is the page that takes up most of the
-     * visible area. The default value is {@code 1}.
+     * Gets the current page, which is the page that takes up most of the
+     * visible area. It changes when the user scrolls or navigates between
+     * pages. The default value is {@code 1}.
      *
      * @return the current page, starting from {@code 1}
      */
@@ -150,10 +150,9 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the current page and scrolls to the start of that page. A page that
-     * does not exist in the document is ignored and the viewer does not scroll.
-     * You can call this before the document has loaded, in which case the
-     * viewer opens the document on that page.
+     * Sets the current page, which scrolls the viewer to the start of that
+     * page. A page that the document does not have is ignored. You can call
+     * this before the document has loaded to open it on that page.
      *
      * @param page
      *            the page to show, starting from {@code 1}
@@ -169,13 +168,11 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Gets the number of pages in the loaded document. The value is updated
-     * when a document loads or is unloaded, and is {@code 0} while no document
+     * Gets the number of pages in the document, or {@code 0} while no document
      * is loaded. The default value is {@code 0}.
      * <p>
-     * The value is reported by the browser and is not verified by the server. A
-     * modified client can report any value, so don't rely on it for access
-     * control or other security decisions.
+     * The browser reports the value and the server does not verify it, so don't
+     * use it for access control or other security decisions.
      *
      * @return the number of pages, or {@code 0} if no document is loaded
      */
@@ -185,9 +182,8 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Adds a listener that is called when the current page changes, either
-     * because the user scrolled or navigated to another page, or because
-     * {@link #setPage(int)} was called.
+     * Adds a listener that is called when the current page changes, either by
+     * the user or by {@link #setPage(int)}.
      *
      * @param listener
      *            the listener to add, not {@code null}
