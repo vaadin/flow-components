@@ -21,10 +21,14 @@ public class LocaleTest {
 
     private Spreadsheet spreadsheet;
 
+    // UI.setCurrent only keeps a weak reference to the UI
+    private UI ui;
+
     @Before
     public void init() {
-        UI.setCurrent(new UI());
-        UI.getCurrent().setLocale(Locale.US);
+        ui = new UI();
+        ui.setLocale(Locale.US);
+        UI.setCurrent(ui);
         spreadsheet = new Spreadsheet();
     }
 
