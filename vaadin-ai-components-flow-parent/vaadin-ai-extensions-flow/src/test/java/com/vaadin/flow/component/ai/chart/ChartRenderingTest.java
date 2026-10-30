@@ -557,6 +557,36 @@ class ChartRenderingTest {
                             .map(item -> item.getX().longValue()).toList());
         }
 
+        @Test
+        void seriesWithoutXIsDrawnUnderItsCategoriesNextToSeriesWithX() {
+            databaseProvider.results = List.of(row("x", 1, "y", 10));
+            controller.setDataConverter(data -> {
+                DataSeries planned = new DataSeries();
+                DataSeriesItem jan = new DataSeriesItem(0, 10);
+                jan.setName("Jan");
+                DataSeriesItem feb = new DataSeriesItem(1, 20);
+                feb.setName("Feb");
+                planned.add(jan);
+                planned.add(feb);
+                DataSeries actual = new DataSeries();
+                actual.add(new DataSeriesItem("Feb", 15));
+                return List.of(planned, actual);
+            });
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT 1");
+            controller.onResponse(AITurnEvents.success());
+
+            DataSeries planned = (DataSeries) chart.getConfiguration()
+                    .getSeries().get(0);
+            DataSeries actual = (DataSeries) chart.getConfiguration()
+                    .getSeries().get(1);
+            Assertions.assertEquals(List.of(0, 1), planned.getData().stream()
+                    .map(item -> item.getX().intValue()).toList());
+            Assertions.assertEquals(List.of("Feb"),
+                    drawnUnderCategories(actual));
+        }
+
         /**
          * Returns the X position Highcharts draws the item at: its X value, or
          * its index in the series when it has none.

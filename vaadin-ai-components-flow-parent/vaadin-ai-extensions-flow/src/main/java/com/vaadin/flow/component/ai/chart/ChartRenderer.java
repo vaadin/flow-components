@@ -230,8 +230,7 @@ public final class ChartRenderer implements Serializable {
         // different months).
         if ((chartType == null || !NO_CATEGORY_AXIS_TYPES.contains(chartType))
                 && allItems.stream().allMatch(item -> item.getName() != null)) {
-            var categories = placeItemsInCategories(dataSeries,
-                    allItems.stream().anyMatch(item -> item.getX() != null));
+            var categories = placeItemsInCategories(dataSeries);
             xAxis.setCategories(categories.toArray(new String[0]));
         }
 
@@ -264,31 +263,31 @@ public final class ChartRenderer implements Serializable {
      * <p>
      * Highcharts places named items by their position in their own series when
      * the categories are given explicitly, so a series that lacks some of the
-     * categories would draw its items under the wrong ones. Unless the items
-     * have X values of their own, the X value of each item is set to the index
-     * of its category, and the items are sorted by X so that lines are drawn
-     * from left to right.
+     * categories would draw its items under the wrong ones. In each series
+     * whose items have no X values of their own, the X value of each item is
+     * set to the index of its category, and the items are sorted by X so that
+     * lines are drawn from left to right.
      */
     private static List<String> placeItemsInCategories(
-            List<DataSeries> allSeries, boolean hasOwnXValues) {
+            List<DataSeries> allSeries) {
         var keysBySeries = allSeries.stream()
                 .map(series -> toCategoryKeys(series.getData())).toList();
         var categories = mergeCategoryKeys(keysBySeries);
-        if (!hasOwnXValues) {
-            var indexes = new HashMap<CategoryKey, Integer>();
-            for (var i = 0; i < categories.size(); i++) {
-                indexes.put(categories.get(i), i);
+        var indexes = new HashMap<CategoryKey, Integer>();
+        for (var i = 0; i < categories.size(); i++) {
+            indexes.put(categories.get(i), i);
+        }
+        for (var i = 0; i < allSeries.size(); i++) {
+            var keys = keysBySeries.get(i);
+            var items = new ArrayList<>(allSeries.get(i).getData());
+            if (items.stream().anyMatch(item -> item.getX() != null)) {
+                continue;
             }
-            for (var i = 0; i < allSeries.size(); i++) {
-                var keys = keysBySeries.get(i);
-                var items = new ArrayList<>(allSeries.get(i).getData());
-                for (var j = 0; j < items.size(); j++) {
-                    items.get(j).setX(indexes.get(keys.get(j)));
-                }
-                items.sort(Comparator
-                        .comparingInt(item -> item.getX().intValue()));
-                allSeries.get(i).setData(items);
+            for (var j = 0; j < items.size(); j++) {
+                items.get(j).setX(indexes.get(keys.get(j)));
             }
+            items.sort(Comparator.comparingInt(item -> item.getX().intValue()));
+            allSeries.get(i).setData(items);
         }
         return categories.stream().map(CategoryKey::name).toList();
     }
