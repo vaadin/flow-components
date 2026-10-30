@@ -875,12 +875,15 @@ public class DefaultDataConverter implements DataConverter {
      * {@link Timestamp}, {@link java.sql.Date}, {@link LocalDate},
      * {@link LocalDateTime}, {@link java.sql.Time} and {@link LocalTime} (both
      * placed on {@link #TIME_OF_DAY_ANCHOR}), {@link Date}, and numeric values
-     * (interpreted as milliseconds since epoch).
+     * (interpreted as milliseconds since epoch). Wall-clock values, including
+     * the JDBC types, are placed in UTC.
      */
     private static Instant toInstant(Object value) {
         return switch (value) {
         case Instant instant -> instant;
-        case Timestamp timestamp -> timestamp.toInstant();
+        // Timestamp is a wall-clock value like LocalDateTime, while its
+        // toInstant() reads it in the JVM default time zone
+        case Timestamp timestamp -> toInstant(timestamp.toLocalDateTime());
         case java.sql.Date sqlDate ->
             sqlDate.toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant();
         case LocalDate localDate ->
