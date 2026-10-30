@@ -106,7 +106,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         waitUntil(attributeToBe(numberField, "required", "true"));
 
         button.click();
-        waitUntil(attributeToBe(numberField, "required", ""));
+        waitUntil(driver -> !numberField.hasAttribute("required"));
     }
 
     @Test

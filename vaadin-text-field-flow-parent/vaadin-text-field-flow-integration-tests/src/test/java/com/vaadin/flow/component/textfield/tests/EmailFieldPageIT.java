@@ -99,7 +99,7 @@ public class EmailFieldPageIT extends AbstractComponentIT {
         waitUntil(attributeToBe(emailField, "required", "true"));
 
         button.click();
-        waitUntil(attributeToBe(emailField, "required", ""));
+        waitUntil(driver -> !emailField.hasAttribute("required"));
     }
 
     @Test

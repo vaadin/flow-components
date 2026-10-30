@@ -149,7 +149,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         waitUntil(attributeToBe(field, "required", "true"));
 
         toggleRequired.click();
-        waitUntil(attributeToBe(field, "required", ""));
+        waitUntil(driver -> !field.hasAttribute("required"));
     }
 
     @Test
