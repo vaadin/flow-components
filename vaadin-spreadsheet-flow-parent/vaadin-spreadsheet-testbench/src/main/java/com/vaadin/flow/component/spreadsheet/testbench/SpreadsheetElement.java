@@ -293,9 +293,10 @@ public class SpreadsheetElement extends TestBenchElement {
     boolean isElementSelected(WebElement element) {
         updateSelectionLocationAndSize();
         Point location = element.getLocation();
-        location.x += element.getSize().getWidth() / 2;
-        location.y += element.getSize().getHeight() / 2;
-        return isInSelection(location) || isNonCoherentlySelected(element);
+        int centerX = location.x + element.getSize().getWidth() / 2;
+        int centerY = location.y + element.getSize().getHeight() / 2;
+        return isInSelection(centerX, centerY)
+                || isNonCoherentlySelected(element);
     }
 
     private void findSelectionOutline() {
@@ -330,15 +331,14 @@ public class SpreadsheetElement extends TestBenchElement {
                 bottomY + bottomH - sLocation.getY());
     }
 
-    private boolean isInSelection(Point location) {
+    private boolean isInSelection(int locationX, int locationY) {
         // Test top left corner
-        if (location.getX() < sLocation.getX()
-                || location.getY() < sLocation.getY()) {
+        if (locationX < sLocation.getX() || locationY < sLocation.getY()) {
             return false;
         }
         // Test lower right corner
-        if (location.getX() - sLocation.getX() > sSize.getWidth()
-                || location.getY() - sLocation.getY() > sSize.getHeight()) {
+        if (locationX - sLocation.getX() > sSize.getWidth()
+                || locationY - sLocation.getY() > sSize.getHeight()) {
             return false;
         }
         // Everything is inside the selection
