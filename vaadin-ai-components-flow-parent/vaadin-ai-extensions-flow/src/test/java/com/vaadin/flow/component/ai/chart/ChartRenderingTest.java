@@ -405,6 +405,182 @@ class ChartRenderingTest {
         }
 
         @Test
+        void multiSeriesItemsAreDrawnUnderTheirOwnCategories() {
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "North", "category", "Jan", "value",
+                            100),
+                    row(ColumnNames.SERIES, "North", "category", "Feb", "value",
+                            200),
+                    row(ColumnNames.SERIES, "South", "category", "Jan", "value",
+                            150),
+                    row(ColumnNames.SERIES, "South", "category", "Mar", "value",
+                            180));
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            Configuration config = chart.getConfiguration();
+            String[] categories = config.getxAxis().getCategories();
+            DataSeries south = (DataSeries) config.getSeries().get(1);
+            DataSeriesItem mar = south.get("Mar");
+            int x = mar.getX() != null ? mar.getX().intValue()
+                    : south.getData().indexOf(mar);
+            Assertions.assertEquals("Mar", categories[x]);
+        }
+
+        @Test
+        void multiSeriesItemsInOtherCategoryOrderAreDrawnLeftToRight() {
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "North", "category", "Feb", "value",
+                            200),
+                    row(ColumnNames.SERIES, "North", "category", "Mar", "value",
+                            300),
+                    row(ColumnNames.SERIES, "South", "category", "Mar", "value",
+                            180),
+                    row(ColumnNames.SERIES, "South", "category", "Feb", "value",
+                            150));
+
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            DataSeries south = (DataSeries) chart.getConfiguration().getSeries()
+                    .get(1);
+            Assertions.assertEquals(List.of("Feb", "Mar"), south.getData()
+                    .stream().map(DataSeriesItem::getName).toList());
+            Assertions.assertEquals(List.of("Feb", "Mar"),
+                    drawnUnderCategories(south));
+        }
+
+        @Test
+        void multiSeriesWaterfallSumStaysAfterTheItemsItAddsUp() {
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "North", ColumnNames.NAME, "Start",
+                            ColumnNames.Y, 100, ColumnNames.WATERFALL_TYPE,
+                            null),
+                    row(ColumnNames.SERIES, "North", ColumnNames.NAME, "Cost",
+                            ColumnNames.Y, -20, ColumnNames.WATERFALL_TYPE,
+                            null),
+                    row(ColumnNames.SERIES, "North", ColumnNames.NAME, "Total",
+                            ColumnNames.Y, null, ColumnNames.WATERFALL_TYPE,
+                            "sum"),
+                    row(ColumnNames.SERIES, "South", ColumnNames.NAME, "Start",
+                            ColumnNames.Y, 100, ColumnNames.WATERFALL_TYPE,
+                            null),
+                    row(ColumnNames.SERIES, "South", ColumnNames.NAME, "Extra",
+                            ColumnNames.Y, -10, ColumnNames.WATERFALL_TYPE,
+                            null),
+                    row(ColumnNames.SERIES, "South", ColumnNames.NAME, "Total",
+                            ColumnNames.Y, null, ColumnNames.WATERFALL_TYPE,
+                            "sum"));
+
+            updateConfiguration("{\"chart\":{\"type\":\"waterfall\"}}");
+            updateData("SELECT s, name, y, type FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            DataSeries south = (DataSeries) chart.getConfiguration().getSeries()
+                    .get(1);
+            Assertions.assertEquals(List.of("Start", "Extra", "Total"), south
+                    .getData().stream().map(DataSeriesItem::getName).toList());
+            Assertions.assertEquals(List.of("Start", "Extra", "Total"),
+                    drawnUnderCategories(south));
+        }
+
+        @Test
+        void repeatedCategoryItemsAreDrawnAtTheirOwnPositions() {
+            databaseProvider.results = List.of(
+                    row("customer", "Acme", "amount", 10),
+                    row("customer", "Globex", "amount", 20),
+                    row("customer", "Acme", "amount", 30));
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT customer, amount FROM orders");
+            controller.onResponse(AITurnEvents.success());
+
+            DataSeries series = (DataSeries) chart.getConfiguration()
+                    .getSeries().get(0);
+            Assertions.assertEquals(List.of(0, 1, 2), series.getData().stream()
+                    .map(item -> positionOf(series, item)).toList());
+            Assertions.assertEquals(List.of("Acme", "Globex", "Acme"),
+                    drawnUnderCategories(series));
+        }
+
+        @Test
+        void multiSeriesWithRepeatedCategoryItemsAreDrawnUnderTheirOwnCategories() {
+            databaseProvider.results = List.of(
+                    row(ColumnNames.SERIES, "North", "category", "Jan", "value",
+                            100),
+                    row(ColumnNames.SERIES, "North", "category", "Jan", "value",
+                            120),
+                    row(ColumnNames.SERIES, "North", "category", "Feb", "value",
+                            200),
+                    row(ColumnNames.SERIES, "South", "category", "Mar", "value",
+                            180));
+
+            updateConfiguration("{\"chart\":{\"type\":\"column\"}}");
+            updateData("SELECT s, c, v FROM t");
+            controller.onResponse(AITurnEvents.success());
+
+            DataSeries north = (DataSeries) chart.getConfiguration().getSeries()
+                    .get(0);
+            DataSeries south = (DataSeries) chart.getConfiguration().getSeries()
+                    .get(1);
+            Assertions.assertEquals(List.of("Jan", "Jan", "Feb"),
+                    drawnUnderCategories(north));
+            Assertions.assertEquals(List.of("Mar"),
+                    drawnUnderCategories(south));
+        }
+
+        @Test
+        void namedItemsWithDatetimeXKeepTheirDates() {
+            databaseProvider.results = List.of(row("x", 1, "y", 10));
+            controller.setDataConverter(data -> {
+                DataSeries series = new DataSeries();
+                DataSeriesItem launch = new DataSeriesItem(1704067200000L, 10);
+                launch.setName("Launch");
+                DataSeriesItem update = new DataSeriesItem(1706745600000L, 20);
+                update.setName("Update");
+                series.add(launch);
+                series.add(update);
+                return List.of(series);
+            });
+
+            updateConfiguration("{\"chart\":{\"type\":\"line\"}}");
+            updateData("SELECT 1");
+            controller.onResponse(AITurnEvents.success());
+
+            DataSeries series = (DataSeries) chart.getConfiguration()
+                    .getSeries().get(0);
+            Assertions.assertEquals(List.of(1704067200000L, 1706745600000L),
+                    series.getData().stream()
+                            .map(item -> item.getX().longValue()).toList());
+        }
+
+        /**
+         * Returns the X position Highcharts draws the item at: its X value, or
+         * its index in the series when it has none.
+         */
+        private int positionOf(DataSeries series, DataSeriesItem item) {
+            return item.getX() != null ? item.getX().intValue()
+                    : series.getData().indexOf(item);
+        }
+
+        /**
+         * Returns the axis label each item of the series is drawn under, or the
+         * position itself when it is outside the categories.
+         */
+        private List<String> drawnUnderCategories(DataSeries series) {
+            String[] categories = chart.getConfiguration().getxAxis()
+                    .getCategories();
+            return series.getData().stream().map(item -> {
+                int position = positionOf(series, item);
+                return position < categories.length ? categories[position]
+                        : String.valueOf(position);
+            }).toList();
+        }
+
+        @Test
         void mixedNamesAndNullDoesNotSetCategories() {
             // When some items have names and some don't, categories should
             // not be set (extractCategories returns null)

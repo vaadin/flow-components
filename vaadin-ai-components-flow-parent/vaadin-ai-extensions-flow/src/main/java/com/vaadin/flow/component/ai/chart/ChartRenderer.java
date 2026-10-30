@@ -10,12 +10,14 @@ package com.vaadin.flow.component.ai.chart;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.charts.Chart;
@@ -213,12 +215,10 @@ public final class ChartRenderer implements Serializable {
         }
 
         // Collect all DataSeries items for inspection.
-        var allItems = new ArrayList<DataSeriesItem>();
-        for (var series : allSeries) {
-            if (series instanceof DataSeries ds) {
-                allItems.addAll(ds.getData());
-            }
-        }
+        var dataSeries = allSeries.stream().filter(DataSeries.class::isInstance)
+                .map(DataSeries.class::cast).toList();
+        var allItems = dataSeries.stream()
+                .flatMap(series -> series.getData().stream()).toList();
         if (allItems.isEmpty()) {
             return;
         }
@@ -228,11 +228,11 @@ public final class ChartRenderer implements Serializable {
         // Collects from all series to handle multi-series with different
         // categories (e.g. stacked by region where each region has
         // different months).
-        if (chartType == null || !NO_CATEGORY_AXIS_TYPES.contains(chartType)) {
-            var categories = extractCategories(allItems);
-            if (!categories.isEmpty()) {
-                xAxis.setCategories(categories.toArray(new String[0]));
-            }
+        if ((chartType == null || !NO_CATEGORY_AXIS_TYPES.contains(chartType))
+                && allItems.stream().allMatch(item -> item.getName() != null)) {
+            var categories = placeItemsInCategories(dataSeries,
+                    allItems.stream().anyMatch(item -> item.getX() != null));
+            xAxis.setCategories(categories.toArray(new String[0]));
         }
 
         // Detect datetime X values (epoch ms from year 2000 on).
@@ -248,19 +248,103 @@ public final class ChartRenderer implements Serializable {
     }
 
     /**
-     * Returns unique category names extracted from items (preserving insertion
-     * order), or an empty list if any item has no name.
+     * A category on the X-axis: the n-th item with the given name in a series.
+     * Repeated names within a series get their own categories so that their
+     * items are not drawn on top of each other.
      */
-    private static List<String> extractCategories(List<DataSeriesItem> items) {
-        var seen = new LinkedHashSet<String>();
-        for (var item : items) {
-            var name = item.getName();
-            if (name == null) {
-                return List.of();
+    private record CategoryKey(String name,
+            int occurrence) implements Serializable {
+    }
+
+    /**
+     * Returns the X-axis categories for the named items of the given series.
+     * The categories keep the item order of every series where the series
+     * agree, so that, for example, a waterfall sum stays after the items it
+     * adds up.
+     * <p>
+     * Highcharts places named items by their position in their own series when
+     * the categories are given explicitly, so a series that lacks some of the
+     * categories would draw its items under the wrong ones. Unless the items
+     * have X values of their own, the X value of each item is set to the index
+     * of its category, and the items are sorted by X so that lines are drawn
+     * from left to right.
+     */
+    private static List<String> placeItemsInCategories(
+            List<DataSeries> allSeries, boolean hasOwnXValues) {
+        var keysBySeries = allSeries.stream()
+                .map(series -> toCategoryKeys(series.getData())).toList();
+        var categories = mergeCategoryKeys(keysBySeries);
+        if (!hasOwnXValues) {
+            var indexes = new HashMap<CategoryKey, Integer>();
+            for (var i = 0; i < categories.size(); i++) {
+                indexes.put(categories.get(i), i);
             }
-            seen.add(name);
+            for (var i = 0; i < allSeries.size(); i++) {
+                var keys = keysBySeries.get(i);
+                var items = new ArrayList<>(allSeries.get(i).getData());
+                for (var j = 0; j < items.size(); j++) {
+                    items.get(j).setX(indexes.get(keys.get(j)));
+                }
+                items.sort(Comparator
+                        .comparingInt(item -> item.getX().intValue()));
+                allSeries.get(i).setData(items);
+            }
         }
-        return new ArrayList<>(seen);
+        return categories.stream().map(CategoryKey::name).toList();
+    }
+
+    private static List<CategoryKey> toCategoryKeys(
+            List<DataSeriesItem> items) {
+        var counts = new HashMap<String, Integer>();
+        var keys = new ArrayList<CategoryKey>();
+        for (var item : items) {
+            var occurrence = counts.merge(item.getName(), 1, Integer::sum) - 1;
+            keys.add(new CategoryKey(item.getName(), occurrence));
+        }
+        return keys;
+    }
+
+    /**
+     * Merges the category keys of all series into one list that keeps the order
+     * of each series. Categories that no series orders against each other keep
+     * the order in which they are first seen. Where the series disagree on the
+     * order, the category seen first comes first.
+     */
+    private static List<CategoryKey> mergeCategoryKeys(
+            List<List<CategoryKey>> keysBySeries) {
+        var indexes = new LinkedHashMap<CategoryKey, Integer>();
+        keysBySeries.forEach(keys -> keys
+                .forEach(key -> indexes.putIfAbsent(key, indexes.size())));
+        var successors = new ArrayList<Set<Integer>>();
+        indexes.forEach((key, index) -> successors.add(new HashSet<>()));
+        var predecessorCounts = new int[indexes.size()];
+        for (var keys : keysBySeries) {
+            for (var i = 1; i < keys.size(); i++) {
+                var next = indexes.get(keys.get(i));
+                if (successors.get(indexes.get(keys.get(i - 1))).add(next)) {
+                    predecessorCounts[next]++;
+                }
+            }
+        }
+
+        var remaining = new TreeSet<>(indexes.values());
+        var ready = new TreeSet<Integer>();
+        remaining.stream().filter(index -> predecessorCounts[index] == 0)
+                .forEach(ready::add);
+        var keys = new ArrayList<>(indexes.keySet());
+        var merged = new ArrayList<CategoryKey>();
+        while (!remaining.isEmpty()) {
+            var index = ready.isEmpty() ? remaining.first() : ready.pollFirst();
+            remaining.remove(index);
+            merged.add(keys.get(index));
+            for (var successor : successors.get(index)) {
+                if (--predecessorCounts[successor] == 0
+                        && remaining.contains(successor)) {
+                    ready.add(successor);
+                }
+            }
+        }
+        return merged;
     }
 
     /**
