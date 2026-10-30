@@ -337,12 +337,8 @@ public class SpreadsheetElement extends TestBenchElement {
             return false;
         }
         // Test lower right corner
-        if (locationX - sLocation.getX() > sSize.getWidth()
-                || locationY - sLocation.getY() > sSize.getHeight()) {
-            return false;
-        }
-        // Everything is inside the selection
-        return true;
+        return locationX - sLocation.getX() <= sSize.getWidth()
+                && locationY - sLocation.getY() <= sSize.getHeight();
     }
 
     public WebElement getCellValueInput() {
