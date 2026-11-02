@@ -12,7 +12,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 @Route("vaadin-pdf-viewer")
 public class PdfViewerPage extends Div {
@@ -42,6 +44,18 @@ public class PdfViewerPage extends Div {
                         DownloadHandler.forServletResource("/sample.pdf")));
         setHandlerSrc.setId("set-handler-src");
 
+        // The URL of this handler has no file name, so the viewer can only
+        // get the name from the Content-Disposition header
+        var setNamedHandlerSrc = new NativeButton(
+                "Set download handler src with file name",
+                event -> viewer.setSrc(DownloadHandler
+                        .fromInputStream(downloadEvent -> new DownloadResponse(
+                                ((VaadinServletRequest) downloadEvent
+                                        .getRequest()).getServletContext()
+                                        .getResourceAsStream("/sample.pdf"),
+                                "report.pdf", "application/pdf", -1))));
+        setNamedHandlerSrc.setId("set-named-handler-src");
+
         var setInvalidSrc = new NativeButton("Set invalid src",
                 event -> viewer.setSrc("invalid.pdf"));
         setInvalidSrc.setId("set-invalid-src");
@@ -50,6 +64,7 @@ public class PdfViewerPage extends Div {
                 event -> viewer.setSrc((String) null));
         clearSrc.setId("clear-src");
 
-        add(setUrlSrc, setHandlerSrc, setInvalidSrc, clearSrc);
+        add(setUrlSrc, setHandlerSrc, setNamedHandlerSrc, setInvalidSrc,
+                clearSrc);
     }
 }

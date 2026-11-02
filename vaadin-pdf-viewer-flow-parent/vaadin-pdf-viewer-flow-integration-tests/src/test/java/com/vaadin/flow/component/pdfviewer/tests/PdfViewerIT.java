@@ -55,6 +55,15 @@ public class PdfViewerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setDownloadHandlerSrc_fileNameFromResponseInHeader() {
+        clickElementWithJs("set-named-handler-src");
+
+        waitUntil(driver -> viewer.getPageCount() == 6);
+        Assert.assertFalse(viewer.getSrc().endsWith(".pdf"));
+        Assert.assertEquals("report.pdf", getHeaderTitle());
+    }
+
+    @Test
     public void setUrlSrc_firstPageRendered() {
         clickElementWithJs("set-url-src");
 
@@ -80,6 +89,13 @@ public class PdfViewerIT extends AbstractComponentIT {
 
         waitUntil(driver -> viewer.getPageCount() == 0);
         Assert.assertNull(viewer.getSrc());
+    }
+
+    private String getHeaderTitle() {
+        return (String) executeScript("""
+                return arguments[0].shadowRoot
+                    .querySelector('[part="title"]').textContent;
+                """, viewer);
     }
 
     private boolean isFirstPageRendered() {
