@@ -167,6 +167,10 @@ final class FormValueConverter {
         RejectedValueException(String message) {
             super(message);
         }
+
+        RejectedValueException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     /**
@@ -427,7 +431,8 @@ final class FormValueConverter {
             }
             return integer.intValueExact();
         } catch (ArithmeticException ex) {
-            throw new RejectedValueException("Integer out of range: " + value);
+            throw new RejectedValueException("Integer out of range: " + value,
+                    ex);
         }
     }
 
