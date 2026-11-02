@@ -33,12 +33,6 @@ class PdfViewerTest {
     private final PdfViewer viewer = new PdfViewer();
 
     @Test
-    void defaultConstructor_noSrc() {
-        Assertions.assertNull(viewer.getSrc());
-        Assertions.assertFalse(viewer.getElement().hasAttribute("src"));
-    }
-
-    @Test
     void srcConstructor_srcSet() {
         Assertions.assertEquals("report.pdf",
                 new PdfViewer("report.pdf").getSrc());
@@ -53,6 +47,9 @@ class PdfViewerTest {
 
     @Test
     void setSrc_getSrc() {
+        Assertions.assertNull(viewer.getSrc());
+        Assertions.assertFalse(viewer.getElement().hasAttribute("src"));
+
         viewer.setSrc("report.pdf");
         Assertions.assertEquals("report.pdf",
                 viewer.getElement().getAttribute("src"));
