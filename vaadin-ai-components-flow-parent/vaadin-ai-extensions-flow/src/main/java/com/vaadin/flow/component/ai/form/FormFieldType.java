@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.HasItems;
@@ -86,18 +85,6 @@ enum FormFieldType {
         }
     };
 
-    /**
-     * Memoizes the resolved {@code HasValue<?, V>} value type per concrete
-     * field class. {@link Optional#empty()} marks classes whose {@code V}
-     * cannot be narrowed to a concrete {@link Class}.
-     */
-    private static final ClassValue<Optional<Class<?>>> VALUE_TYPE_CACHE = new ClassValue<>() {
-        @Override
-        protected Optional<Class<?>> computeValue(Class<?> type) {
-            return Optional.ofNullable(resolveValueType(type));
-        }
-    };
-
     static FormFieldType classify(HasValue<?, ?> field) {
         return CLASSIFY_CACHE.get(field.getClass());
     }
@@ -114,7 +101,7 @@ enum FormFieldType {
      *         narrowed to a concrete class
      */
     static Class<?> valueType(HasValue<?, ?> field) {
-        return VALUE_TYPE_CACHE.get(field.getClass()).orElse(null);
+        return resolveValueType(field.getClass());
     }
 
     /**
@@ -173,7 +160,7 @@ enum FormFieldType {
                 || HasItems.class.isAssignableFrom(fieldClass)) {
             return SINGLE_SELECT;
         }
-        var valueType = VALUE_TYPE_CACHE.get(fieldClass).orElse(null);
+        var valueType = resolveValueType(fieldClass);
         if (valueType == null) {
             return STRING;
         }
