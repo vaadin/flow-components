@@ -33,7 +33,7 @@ public class PdfViewerElement extends TestBenchElement {
      * @return the title shown in the header
      */
     public String getHeaderTitle() {
-        return $("span").withAttribute("part", "title").first().getText();
+        return $("span").withAttribute("part", "title").single().getText();
     }
 
     /**
