@@ -357,6 +357,19 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_rejectsTooLargeFloatForIntegerField() {
+        var field = new IntField();
+        field.setValue(42);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "1e400"));
+
+        Assertions.assertEquals(42, field.getValue());
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("integer"),
+                "Result: " + result);
+    }
+
+    @Test
     void fillForm_writesBigDecimalFromStringToBigDecField() {
         // Schema declares BigDecimal as type=string with the BIG_DECIMAL
         // pattern; the LLM emits the value as a JSON string and the

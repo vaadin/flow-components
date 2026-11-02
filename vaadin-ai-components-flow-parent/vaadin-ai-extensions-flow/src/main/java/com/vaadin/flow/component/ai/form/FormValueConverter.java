@@ -434,17 +434,9 @@ final class FormValueConverter {
     private static BigInteger toBigInteger(JsonNode value) {
         // Accept JSON integers and whole-number floating-point values (e.g.
         // 3.0) — LLMs sometimes emit the latter for integer fields.
-        // Fractional values are rejected.
-        if (value.isIntegralNumber()) {
+        // Fractional and infinite values are rejected.
+        if (value.canConvertToExactIntegral()) {
             return value.bigIntegerValue();
-        }
-        if (value.isFloatingPointNumber()) {
-            try {
-                return value.decimalValue().toBigIntegerExact();
-            } catch (ArithmeticException ex) {
-                throw new RejectedValueException(
-                        "Expected integer, got " + value);
-            }
         }
         throw new RejectedValueException("Expected integer, got " + value);
     }
