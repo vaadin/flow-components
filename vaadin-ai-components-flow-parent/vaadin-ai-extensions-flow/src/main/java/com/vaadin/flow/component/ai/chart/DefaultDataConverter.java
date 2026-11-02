@@ -881,8 +881,8 @@ public class DefaultDataConverter implements DataConverter {
     private static Instant toInstant(Object value) {
         return switch (value) {
         case Instant instant -> instant;
-        // Timestamp is a wall-clock value like LocalDateTime, while its
-        // toInstant() reads it in the JVM default time zone
+        // JDBC drivers usually build a Timestamp from the column's wall-clock
+        // value in the JVM default time zone; toLocalDateTime() recovers it
         case Timestamp timestamp -> toInstant(timestamp.toLocalDateTime());
         case java.sql.Date sqlDate ->
             sqlDate.toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant();
