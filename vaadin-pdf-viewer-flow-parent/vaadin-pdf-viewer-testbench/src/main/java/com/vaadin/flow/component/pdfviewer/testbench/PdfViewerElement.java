@@ -28,6 +28,15 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
+     * Gets the title shown in the header of the viewer.
+     *
+     * @return the title shown in the header
+     */
+    public String getHeaderTitle() {
+        return $("span").withAttribute("part", "title").first().getText();
+    }
+
+    /**
      * Gets the number of pages in the loaded document.
      *
      * @return the number of pages, or {@code 0} if no document is loaded
