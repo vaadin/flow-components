@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
@@ -21,6 +23,8 @@ import com.vaadin.flow.component.pdfviewer.DocumentErrorReason;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
+import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.tests.MockUIExtension;
@@ -68,6 +72,25 @@ class PdfViewerTest {
 
         Assertions.assertThrows(NullPointerException.class,
                 () -> viewer.setSrc((DownloadHandler) null));
+    }
+
+    @Test
+    void setSrc_downloadHandler_disabledUpdateModeIsAlways() {
+        var element = Mockito.mock(Element.class);
+        var viewer = new PdfViewer() {
+            @Override
+            public Element getElement() {
+                return element;
+            }
+        };
+
+        viewer.setSrc(createDownloadHandler());
+
+        var captor = ArgumentCaptor.forClass(DownloadHandler.class);
+        Mockito.verify(element).setAttribute(Mockito.eq("src"),
+                captor.capture());
+        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
+                captor.getValue().getDisabledUpdateMode());
     }
 
     @Test
