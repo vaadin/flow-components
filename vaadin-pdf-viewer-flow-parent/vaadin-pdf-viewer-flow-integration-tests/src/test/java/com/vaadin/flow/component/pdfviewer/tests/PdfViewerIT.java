@@ -31,22 +31,38 @@ public class PdfViewerIT extends AbstractComponentIT {
     public void setUrlSrc_documentLoads() {
         clickElementWithJs("set-url-src");
 
-        waitUntil(driver -> viewer.getPageCount() == 6);
+        waitUntil(driver -> !viewer.isLoading());
+        Assert.assertFalse(viewer.hasError());
+        Assert.assertEquals(6, viewer.getPageCount());
+        Assert.assertEquals("sample.pdf", viewer.getHeaderTitle());
     }
 
     @Test
-    public void setDownloadHandlerSrc_documentLoadsWithFileNameFromResponse() {
-        clickElementWithJs("set-handler-src");
+    public void setInvalidSrc_hasError() {
+        clickElementWithJs("set-invalid-src");
 
-        waitUntil(driver -> viewer.getPageCount() == 6);
-        Assert.assertFalse(viewer.getSrc().endsWith(".pdf"));
-        Assert.assertEquals("report.pdf", getHeaderTitle());
+        waitUntil(driver -> !viewer.isLoading());
+        Assert.assertTrue(viewer.hasError());
     }
 
-    private String getHeaderTitle() {
-        return (String) executeScript("""
-                return arguments[0].shadowRoot
-                    .querySelector('[part="title"]').textContent;
-                """, viewer);
+    @Test
+    public void setDownloadHandlerSrc_documentLoads() {
+        clickElementWithJs("set-handler-src");
+
+        waitUntil(driver -> !viewer.isLoading());
+        Assert.assertFalse(viewer.hasError());
+        Assert.assertEquals(6, viewer.getPageCount());
+        Assert.assertEquals("report.pdf", viewer.getHeaderTitle());
+    }
+
+    @Test
+    public void setSlowDownloadHandlerSrc_isLoadingUntilDocumentLoads() {
+        Assert.assertFalse(viewer.isLoading());
+
+        clickElementWithJs("set-slow-handler-src");
+        waitUntil(driver -> viewer.isLoading());
+
+        clickElementWithJs("release-slow-handler");
+        waitUntil(driver -> !viewer.isLoading());
     }
 }
