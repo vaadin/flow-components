@@ -35,15 +35,8 @@ public class PdfViewerIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setDownloadHandlerSrc_documentLoads() {
+    public void setDownloadHandlerSrc_documentLoadsWithFileNameFromResponse() {
         clickElementWithJs("set-handler-src");
-
-        waitUntil(driver -> viewer.getPageCount() == 6);
-    }
-
-    @Test
-    public void setDownloadHandlerSrc_fileNameFromResponseInHeader() {
-        clickElementWithJs("set-named-handler-src");
 
         waitUntil(driver -> viewer.getPageCount() == 6);
         Assert.assertFalse(viewer.getSrc().endsWith(".pdf"));
