@@ -36,8 +36,6 @@ import com.vaadin.flow.shared.Registration;
  *         DownloadHandler.forClassResource(getClass(), "report.pdf"));
  * viewer.setHeight("600px");
  * </pre>
- *
- * The default height is 400px. Set the height to fit your layout.
  * <p>
  * This component is experimental and needs to be enabled with the
  * {@code com.vaadin.experimental.pdfViewerComponent} feature flag, either in
