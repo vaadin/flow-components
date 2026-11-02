@@ -54,30 +54,23 @@ class PdfViewerTest {
     }
 
     @Test
-    void setSrc_attributeSet() {
+    void setSrc_getSrc() {
         viewer.setSrc("report.pdf");
         Assertions.assertEquals("report.pdf",
                 viewer.getElement().getAttribute("src"));
         Assertions.assertEquals("report.pdf", viewer.getSrc());
-    }
 
-    @Test
-    void setSrc_null_attributeRemoved() {
-        viewer.setSrc("report.pdf");
         viewer.setSrc((String) null);
         Assertions.assertFalse(viewer.getElement().hasAttribute("src"));
         Assertions.assertNull(viewer.getSrc());
     }
 
     @Test
-    void setSrc_downloadHandler_attributeSet() {
+    void setSrc_downloadHandler() {
         viewer.setSrc(createDownloadHandler());
         Assertions.assertTrue(
                 viewer.getSrc().startsWith("VAADIN/dynamic/resource/"));
-    }
 
-    @Test
-    void setSrc_nullDownloadHandler_throws() {
         Assertions.assertThrows(NullPointerException.class,
                 () -> viewer.setSrc((DownloadHandler) null));
     }
