@@ -40,6 +40,8 @@ Use this template, in this fixed section order:
 
 Fixes https://github.com/vaadin/flow-components/issues/951
 
+<Prose: one short paragraph above the bullets, or instead of them for a single bullet. See Prose>
+
 - <What changed, one behavior per bullet>
 - <…>
   - <Sub-bullet: a detail or the reason, only when the parent bullet needs it>
@@ -55,8 +57,10 @@ Fixes https://github.com/vaadin/flow-components/issues/951
 3. <What you should see>
 ```
 
-Nothing above `## Description`, nothing below the last section — no `## Checklist` block,
-no footer, no AI attribution. Omit a section instead of leaving it empty.
+Put nothing above `## Description` and nothing below the last section. Do not add the
+`## Checklist` block, a footer, or AI attribution. Omit a section instead of leaving it empty.
+
+When you update an existing PR body, keep its issue links and hand-written notes.
 
 ### Issue links
 
@@ -89,6 +93,8 @@ One short paragraph between the links and the bullets, only when the bullets can
 the _why_: a non-obvious root cause, a rejected alternative a reviewer would otherwise
 propose, a constraint that shaped the approach. A subtle bug fix usually earns one;
 a feature almost never does.
+
+Write one prose paragraph instead of the bullets when there would be only one bullet, with or without sub-bullets.
 
 Use plain, common English. Most Vaadin readers are non-native English speakers, so avoid
 advanced or uncommon vocabulary.
@@ -124,3 +130,4 @@ Only when the change genuinely needs them, always after `How to test`:
 - `> [!NOTE]` — a single callout for a side effect a reviewer should know about but that
   is not the point of the PR.
 - `> [!WARNING]` — for breaking changes, explaining what breaks and why.
+- `## Before / After` screenshots for a visual change. Ask the user to attach them, because Claude cannot upload images.
