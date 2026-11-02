@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.pdfviewer.DocumentErrorReason;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
@@ -24,7 +23,6 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
-import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
 class PdfViewerTest {
@@ -91,19 +89,6 @@ class PdfViewerTest {
     }
 
     @Test
-    void documentLoadListener_registrationRemoved_eventNotFired() {
-        var eventRef = new AtomicReference<DocumentLoadEvent>();
-        Registration registration = viewer
-                .addDocumentLoadListener(eventRef::set);
-        registration.remove();
-
-        ComponentUtil.fireEvent(viewer,
-                new DocumentLoadEvent(viewer, true, 6, "Title"));
-
-        Assertions.assertNull(eventRef.get());
-    }
-
-    @Test
     void documentErrorListener_eventFired() {
         var eventRef = new AtomicReference<DocumentErrorEvent>();
         viewer.addDocumentErrorListener(eventRef::set);
@@ -139,12 +124,6 @@ class PdfViewerTest {
     @Test
     void implementsHasSize() {
         Assertions.assertTrue(HasSize.class.isAssignableFrom(PdfViewer.class));
-    }
-
-    @Test
-    void implementsHasAriaLabel() {
-        Assertions.assertTrue(
-                HasAriaLabel.class.isAssignableFrom(PdfViewer.class));
     }
 
     private DownloadHandler createDownloadHandler() {

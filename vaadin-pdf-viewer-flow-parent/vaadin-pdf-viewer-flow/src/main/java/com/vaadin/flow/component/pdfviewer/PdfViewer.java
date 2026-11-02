@@ -17,7 +17,6 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
-import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -52,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-pdf-viewer")
 @NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-alpha5")
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
-public class PdfViewer extends Component implements HasAriaLabel, HasSize {
+public class PdfViewer extends Component implements HasSize {
 
     /**
      * Creates a PDF viewer without a document.
