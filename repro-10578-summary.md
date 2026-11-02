@@ -13,7 +13,7 @@
 - **Reproduced on:** flow-components @ `main` (25.4-SNAPSHOT, e7a5d2cdc9)
 - **Present on main?:** yes (still broken)
 - **Theme / Browser:** Lumo / Chromium (Playwright)
-- **Screenshot** (static bug): ![Dropdown showed real items, but the click on "Option A" left the field blank](https://raw.githubusercontent.com/vaadin/flow-components/<commit-sha>/repro-10578.png)
+- **Screenshot** (static bug): ![Dropdown showed real items, but the click on "Option A" left the field blank](https://raw.githubusercontent.com/vaadin/flow-components/95f7d233b4ac154bdaeeb05d1ba7442c03011984/repro-10578.png)
 
 ## Observed behavior
 
