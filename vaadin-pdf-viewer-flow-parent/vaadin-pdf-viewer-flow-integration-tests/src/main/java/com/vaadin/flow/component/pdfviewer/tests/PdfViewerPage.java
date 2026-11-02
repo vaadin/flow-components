@@ -46,15 +46,6 @@ public class PdfViewerPage extends Div {
                                 "report.pdf", "application/pdf", -1))));
         setNamedHandlerSrc.setId("set-named-handler-src");
 
-        var setInvalidSrc = new NativeButton("Set invalid src",
-                event -> viewer.setSrc("invalid.pdf"));
-        setInvalidSrc.setId("set-invalid-src");
-
-        var clearSrc = new NativeButton("Clear src",
-                event -> viewer.setSrc((String) null));
-        clearSrc.setId("clear-src");
-
-        add(setUrlSrc, setHandlerSrc, setNamedHandlerSrc, setInvalidSrc,
-                clearSrc);
+        add(setUrlSrc, setHandlerSrc, setNamedHandlerSrc);
     }
 }

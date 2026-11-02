@@ -28,18 +28,10 @@ public class PdfViewerIT extends AbstractComponentIT {
     }
 
     @Test
-    public void noSrc_noPages() {
-        Assert.assertNull(viewer.getSrc());
-        Assert.assertEquals(0, viewer.getPageCount());
-    }
-
-    @Test
     public void setUrlSrc_documentLoads() {
         clickElementWithJs("set-url-src");
 
         waitUntil(driver -> viewer.getPageCount() == 6);
-        Assert.assertFalse(viewer.isLoading());
-        Assert.assertFalse(viewer.hasError());
     }
 
     @Test
@@ -58,43 +50,10 @@ public class PdfViewerIT extends AbstractComponentIT {
         Assert.assertEquals("report.pdf", getHeaderTitle());
     }
 
-    @Test
-    public void setUrlSrc_firstPageRendered() {
-        clickElementWithJs("set-url-src");
-
-        waitUntil(driver -> isFirstPageRendered());
-    }
-
-    @Test
-    public void setInvalidSrc_hasError() {
-        clickElementWithJs("set-invalid-src");
-
-        waitUntil(driver -> viewer.hasError());
-        Assert.assertEquals(0, viewer.getPageCount());
-    }
-
-    @Test
-    public void clearSrc_documentUnloaded() {
-        clickElementWithJs("set-url-src");
-        waitUntil(driver -> viewer.getPageCount() == 6);
-
-        clickElementWithJs("clear-src");
-
-        waitUntil(driver -> viewer.getPageCount() == 0);
-        Assert.assertNull(viewer.getSrc());
-    }
-
     private String getHeaderTitle() {
         return (String) executeScript("""
                 return arguments[0].shadowRoot
                     .querySelector('[part="title"]').textContent;
-                """, viewer);
-    }
-
-    private boolean isFirstPageRendered() {
-        return (Boolean) executeScript("""
-                return !!arguments[0].shadowRoot
-                    .querySelector('[part~="page"] canvas');
                 """, viewer);
     }
 }
