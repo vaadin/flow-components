@@ -134,7 +134,7 @@ public class ExampleIT extends AbstractComponentIT {
 
     @Test
     public void defaultValue_isEmpty() {
-        Assert.assertEquals("", $(ExampleElement.class).first().getValue());
+        Assert.assertEquals("", $(ExampleElement.class).single().getValue());
     }
 }
 ```
