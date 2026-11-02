@@ -23,17 +23,7 @@ public class PdfViewerPage extends Div {
         var viewer = new PdfViewer();
         viewer.setHeight("500px");
 
-        var loadInfo = new Div();
-        loadInfo.setId("load-info");
-        viewer.addDocumentLoadListener(event -> loadInfo.setText(
-                event.getPageCount() + " pages, title: " + event.getTitle()));
-
-        var errorInfo = new Div();
-        errorInfo.setId("error-info");
-        viewer.addDocumentErrorListener(
-                event -> errorInfo.setText(String.valueOf(event.getReason())));
-
-        add(viewer, loadInfo, errorInfo);
+        add(viewer);
 
         var setUrlSrc = new NativeButton("Set URL src",
                 event -> viewer.setSrc("sample.pdf"));

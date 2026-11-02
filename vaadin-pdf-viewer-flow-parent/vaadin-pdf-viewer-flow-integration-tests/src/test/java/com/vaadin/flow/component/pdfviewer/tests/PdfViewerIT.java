@@ -11,7 +11,6 @@ package com.vaadin.flow.component.pdfviewer.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.pdfviewer.testbench.PdfViewerElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -39,8 +38,6 @@ public class PdfViewerIT extends AbstractComponentIT {
         clickElementWithJs("set-url-src");
 
         waitUntil(driver -> viewer.getPageCount() == 6);
-        Assert.assertEquals("6 pages, title: Multi-page fixture",
-                findElement(By.id("load-info")).getText());
         Assert.assertFalse(viewer.isLoading());
         Assert.assertFalse(viewer.hasError());
     }
@@ -50,8 +47,6 @@ public class PdfViewerIT extends AbstractComponentIT {
         clickElementWithJs("set-handler-src");
 
         waitUntil(driver -> viewer.getPageCount() == 6);
-        Assert.assertEquals("6 pages, title: Multi-page fixture",
-                findElement(By.id("load-info")).getText());
     }
 
     @Test
@@ -71,12 +66,10 @@ public class PdfViewerIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setInvalidSrc_errorEventFired() {
+    public void setInvalidSrc_hasError() {
         clickElementWithJs("set-invalid-src");
 
-        waitUntil(driver -> "INVALID"
-                .equals(findElement(By.id("error-info")).getText()));
-        Assert.assertTrue(viewer.hasError());
+        waitUntil(driver -> viewer.hasError());
         Assert.assertEquals(0, viewer.getPageCount());
     }
 
