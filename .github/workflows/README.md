@@ -77,4 +77,4 @@ Configuration:
 | Name | Kind | Purpose |
 |---|---|---|
 | `CHERRY_PICK_TOKEN` | organization secret | Token used to read the cherry-pick script from vaadin/platform-build-script, push the pick branches, open the pull requests and label them. The workflow token is not enough: pull requests it opens do not trigger the validation workflow. |
-| `ANTHROPIC_API_KEY` | secret | Used by Claude Code to resolve conflicts, shared with `claude.yml`. |
+| `ANTHROPIC_API_KEY` | secret | Used by Claude Code to resolve conflicts. |
