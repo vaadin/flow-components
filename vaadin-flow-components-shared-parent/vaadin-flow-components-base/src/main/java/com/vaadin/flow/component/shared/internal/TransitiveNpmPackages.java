@@ -108,7 +108,7 @@ final class TransitiveNpmPackages implements Serializable {
             "@vaadin/react-components-pro",
             List.of("@vaadin/board", "@vaadin/charts", "@vaadin/crud",
                     "@vaadin/dashboard", "@vaadin/grid-pro", "@vaadin/map",
-                    "@vaadin/rich-text-editor"));
+                    "@vaadin/pdf-viewer", "@vaadin/rich-text-editor"));
 
     private TransitiveNpmPackages() {
     }
