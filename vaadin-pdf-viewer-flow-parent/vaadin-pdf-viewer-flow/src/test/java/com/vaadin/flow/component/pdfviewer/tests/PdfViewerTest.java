@@ -24,7 +24,6 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
-import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
@@ -49,11 +48,9 @@ class PdfViewerTest {
 
     @Test
     void downloadHandlerConstructor_srcSet() {
-        var handler = createDownloadHandler();
-        var viewer = new PdfViewer(handler);
+        var viewer = new PdfViewer(createDownloadHandler());
         Assertions.assertTrue(
                 viewer.getSrc().startsWith("VAADIN/dynamic/resource/"));
-        Assertions.assertTrue(handler.isInline());
     }
 
     @Test
@@ -77,14 +74,6 @@ class PdfViewerTest {
         viewer.setSrc(createDownloadHandler());
         Assertions.assertTrue(
                 viewer.getSrc().startsWith("VAADIN/dynamic/resource/"));
-    }
-
-    @Test
-    void setSrc_abstractDownloadHandler_servedInline() {
-        var handler = createDownloadHandler();
-        Assertions.assertFalse(handler.isInline());
-        viewer.setSrc(handler);
-        Assertions.assertTrue(handler.isInline());
     }
 
     @Test
@@ -165,7 +154,7 @@ class PdfViewerTest {
                 HasAriaLabel.class.isAssignableFrom(PdfViewer.class));
     }
 
-    private InputStreamDownloadHandler createDownloadHandler() {
+    private DownloadHandler createDownloadHandler() {
         return DownloadHandler
                 .fromInputStream(event -> DownloadResponse.error(500));
     }

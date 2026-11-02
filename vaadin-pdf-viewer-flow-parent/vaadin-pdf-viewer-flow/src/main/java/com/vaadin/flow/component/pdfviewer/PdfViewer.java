@@ -23,7 +23,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -123,9 +122,6 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
      * framework generates a URL for the handler, which {@link #getSrc()}
      * returns, and the viewer loads it like a URL set with
      * {@link #setSrc(String)}.
-     * <p>
-     * Handlers that extend {@link AbstractDownloadHandler} are set to serve the
-     * document inline instead of as a download.
      *
      * @param downloadHandler
      *            the download handler that serves the document, not
@@ -134,9 +130,6 @@ public class PdfViewer extends Component implements HasAriaLabel, HasSize {
     public void setSrc(DownloadHandler downloadHandler) {
         Objects.requireNonNull(downloadHandler,
                 "The download handler should not be null");
-        if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
-            handler.inline();
-        }
         getElement().setAttribute("src", downloadHandler.allowDisabled());
     }
 
