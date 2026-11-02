@@ -50,7 +50,7 @@ import com.vaadin.flow.shared.Registration;
  * @since 25.4
  */
 @Tag("vaadin-pdf-viewer")
-@NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-alpha4")
+@NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-alpha5")
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasAriaLabel, HasSize {
 
