@@ -139,7 +139,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
 
         void selectedItem(String expectedItemText, String expectedItemLabel) {
             Assert.assertEquals("Invalid selected visual text",
-                    expectedItemLabel, selectElement.getSelectedText());
+                    expectedItemLabel, getSelectedVisualText());
             Assert.assertEquals("Invalid options selected from popup",
                     expectedItemText,
                     selectElement.getSelectedOptionItem().getText());
@@ -284,6 +284,31 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
     @Before
     public void init() {
         open(getDefaultParameter());
+    }
+
+    /*
+     * Reads the item's text content instead of using getText(), which only
+     * returns text of rendered elements. Items are projected into the select's
+     * overlay, which is not rendered while the dropdown is closed.
+     */
+    protected static String getItemText(TestBenchElement item) {
+        return item.getPropertyString("textContent").trim();
+    }
+
+    /*
+     * The select keeps the cloned selected item in its value element, but
+     * leaves that element unslotted, and thus not rendered, when the item has
+     * no content to show. getText() on such an element is not reliable on
+     * current Chrome, so treat an unslotted value element as empty.
+     */
+    private String getSelectedVisualText() {
+        SelectElement.ItemElement selectedItem = selectElement
+                .getSelectedItem();
+        String slot = selectedItem.getPropertyString("parentElement", "slot");
+        if (slot == null || slot.isEmpty()) {
+            return "";
+        }
+        return selectedItem.getText();
     }
 
     protected abstract int getInitialNumberOfItems();
