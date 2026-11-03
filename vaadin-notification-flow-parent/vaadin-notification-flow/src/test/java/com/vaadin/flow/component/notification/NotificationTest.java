@@ -30,6 +30,9 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -254,6 +257,27 @@ class NotificationTest {
         Assertions.assertFalse(notification.isOpened());
         // The parent reference should not have changed
         Assertions.assertEquals(notification.getParent().get(), parent);
+    }
+
+    @Test
+    void showNotification_closedAndOpenedAgain_isAddedAndStaysOpen() {
+        Notification notification = Notification.show("foo");
+        ui.fakeClientCommunication();
+
+        // Close it as the client does, which removes the auto-added
+        // notification from the UI
+        notification.getElement().setProperty("opened", false);
+        notification.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(notification.getElement(), "closed",
+                        JacksonUtils.createObjectNode()));
+        ui.fakeClientCommunication();
+        Assertions.assertFalse(notification.isAttached());
+
+        notification.open();
+        ui.fakeClientCommunication();
+
+        Assertions.assertTrue(notification.isOpened());
+        Assertions.assertTrue(notification.isAttached());
     }
 
     @Test
