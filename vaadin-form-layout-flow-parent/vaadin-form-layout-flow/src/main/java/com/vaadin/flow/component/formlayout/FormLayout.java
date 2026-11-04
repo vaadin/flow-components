@@ -37,6 +37,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.UsageStatistics;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
@@ -733,6 +734,8 @@ public class FormLayout extends Component
      *            list of {@link ResponsiveStep}s to set
      */
     public void setResponsiveSteps(List<ResponsiveStep> steps) {
+        UsageStatistics.markAsUsed("flow-components/FormLayout/ResponsiveSteps",
+                null);
         getElement().setPropertyJson("responsiveSteps", steps.stream()
                 .map(ResponsiveStep::toJson).collect(JacksonUtils.asArray()));
     }

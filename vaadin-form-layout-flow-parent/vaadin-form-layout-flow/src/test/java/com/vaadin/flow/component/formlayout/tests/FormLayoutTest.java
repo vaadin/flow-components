@@ -27,6 +27,7 @@ import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.UsageStatistics;
 
 class FormLayoutTest {
 
@@ -88,6 +89,17 @@ class FormLayoutTest {
         layout.add(compUnset);
         Assertions.assertEquals(1, layout.getColspan(compUnset));
 
+    }
+
+    @Test
+    void setResponsiveSteps_usageIsReported() {
+        String feature = "flow-components/FormLayout/ResponsiveSteps";
+        UsageStatistics.removeEntry(feature);
+        Assertions.assertFalse(isMarkedAsUsed(feature));
+
+        new FormLayout().setResponsiveSteps(new ResponsiveStep(null, 1));
+
+        Assertions.assertTrue(isMarkedAsUsed(feature));
     }
 
     @Test
@@ -425,5 +437,10 @@ class FormLayoutTest {
         FormRow row = new FormRow();
         row.add(input, 2);
         Assertions.assertEquals(2, row.getColspan(input));
+    }
+
+    private static boolean isMarkedAsUsed(String feature) {
+        return UsageStatistics.getEntries()
+                .anyMatch(entry -> feature.equals(entry.getName()));
     }
 }
