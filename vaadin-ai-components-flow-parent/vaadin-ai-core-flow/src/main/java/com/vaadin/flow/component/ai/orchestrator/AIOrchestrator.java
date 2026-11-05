@@ -261,9 +261,9 @@ public class AIOrchestrator implements Serializable {
      * <p>
      * If a request is already being processed, this method logs a warning and
      * returns without processing the new prompt. The same applies while a file
-     * is still being uploaded to an {@link UploadManager} or {@link Upload}
-     * configured as the file receiver, so that the file is not left out of the
-     * prompt.
+     * is still being uploaded to the file receiver (see
+     * {@link AIFileReceiver#isUploading()}), so that the file is not left out
+     * of the prompt.
      * </p>
      * <p>
      * An interceptor configured via
@@ -782,13 +782,7 @@ public class AIOrchestrator implements Serializable {
      * file would then be sent with a later prompt.
      */
     private boolean isFileReceiverUploading() {
-        if (fileReceiver instanceof UploadManagerWrapper w) {
-            return w.isUploading();
-        }
-        if (fileReceiver instanceof UploadWrapper w) {
-            return w.isUploading();
-        }
-        return false;
+        return fileReceiver != null && fileReceiver.isUploading();
     }
 
     private List<AIAttachment> getAttachmentsToProcess(
@@ -1317,6 +1311,10 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the file receiver component for file uploads.
+         * <p>
+         * While {@link AIFileReceiver#isUploading()} returns {@code true},
+         * prompts from the input and from {@link AIOrchestrator#prompt(String)}
+         * are ignored, so that the file is not left out of the prompt.
          *
          * @param fileReceiver
          *            the file receiver

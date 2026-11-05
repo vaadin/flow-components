@@ -31,6 +31,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
+import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
 import com.vaadin.flow.component.ai.ui.AIMessage;
 import com.vaadin.flow.component.ai.ui.AIMessageList;
@@ -138,6 +139,20 @@ class UploadInProgressTest {
         orchestrator.prompt("Hello");
 
         assertPromptSent("Hello");
+    }
+
+    @Test
+    void prompt_whileCustomReceiverUploading_promptIgnored() {
+        var receiver = Mockito.mock(AIFileReceiver.class);
+        Mockito.when(receiver.isUploading()).thenReturn(true);
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withMessageList(mockMessageList).withFileReceiver(receiver)
+                .build();
+
+        orchestrator.prompt("Hello");
+
+        assertPromptIgnored();
+        Mockito.verify(receiver, Mockito.never()).takeAttachments();
     }
 
     @Test

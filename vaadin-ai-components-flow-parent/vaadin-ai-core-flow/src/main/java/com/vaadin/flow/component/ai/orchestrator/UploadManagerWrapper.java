@@ -49,12 +49,8 @@ class UploadManagerWrapper implements AIFileReceiver {
                 .removeIf(a -> a.name().equals(event.getFileName())));
     }
 
-    /**
-     * Returns whether a file is currently being uploaded.
-     *
-     * @return {@code true} if an upload is in progress, {@code false} otherwise
-     */
-    boolean isUploading() {
+    @Override
+    public boolean isUploading() {
         return uploadManager.isUploading();
     }
 
