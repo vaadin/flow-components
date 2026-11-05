@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
@@ -32,6 +33,15 @@ public class PdfViewerPage extends Div {
         viewer.setHeight("500px");
 
         add(viewer);
+
+        // Shows the values the server has when the document load event fires
+        var documentLoadListenerPageCount = new Span();
+        documentLoadListenerPageCount
+                .setId("document-load-listener-page-count");
+        viewer.addDocumentLoadListener(event -> documentLoadListenerPageCount
+                .setText(event.getPageCount() + "," + viewer.getPageCount()
+                        + "," + viewer.pageCountSignal().peek()));
+        add(documentLoadListenerPageCount);
 
         var setUrlSrc = new NativeButton("Set URL src",
                 event -> viewer.setSrc("sample.pdf"));
