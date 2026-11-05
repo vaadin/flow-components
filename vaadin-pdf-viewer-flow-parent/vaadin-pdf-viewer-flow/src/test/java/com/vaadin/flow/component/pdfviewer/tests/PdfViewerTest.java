@@ -119,6 +119,49 @@ class PdfViewerTest {
     }
 
     @Test
+    void pageChangedOnClient_setSrc_pageReset() {
+        fakeClientPropertyChange("page", 4);
+
+        viewer.setSrc("report.pdf");
+
+        Assertions.assertEquals(1, viewer.getPage());
+        Assertions.assertEquals(1, viewer.pageSignal().peek());
+    }
+
+    @Test
+    void pageChangedOnClient_setSrcDownloadHandler_pageReset() {
+        fakeClientPropertyChange("page", 4);
+
+        viewer.setSrc(createDownloadHandler());
+
+        Assertions.assertEquals(1, viewer.getPage());
+        Assertions.assertEquals(1, viewer.pageSignal().peek());
+    }
+
+    @Test
+    void pageChangedOnClient_setSrc_pageChangeEventFired() {
+        fakeClientPropertyChange("page", 4);
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        viewer.setSrc("report.pdf");
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertEquals(1, events.get(0).getPage());
+    }
+
+    @Test
+    void setSrc_pageAlreadyFirst_noPageChangeEvent() {
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        viewer.setSrc("report.pdf");
+
+        Assertions.assertTrue(events.isEmpty());
+    }
+
+    @Test
     void pageSynchronizedOnPageChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("page-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "page"));

@@ -126,6 +126,7 @@ public class PdfViewer extends Component implements HasSize {
         } else {
             getElement().setAttribute("src", src);
         }
+        resetPage();
     }
 
     /**
@@ -143,6 +144,19 @@ public class PdfViewer extends Component implements HasSize {
         Objects.requireNonNull(downloadHandler,
                 "The download handler should not be null");
         getElement().setAttribute("src", downloadHandler.allowDisabled());
+        resetPage();
+    }
+
+    /**
+     * Resets the page to the first one when the document changes. The web
+     * component does this on its own, but a page left over on the server would
+     * be sent to a new client element together with the new document, for
+     * example after the viewer is detached and attached again.
+     */
+    private void resetPage() {
+        if (getPage() != 1) {
+            getElement().setProperty("page", 1);
+        }
     }
 
     /**
