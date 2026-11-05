@@ -24,6 +24,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -59,6 +60,8 @@ public class PdfViewer extends Component implements HasSize {
 
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
+
+    private PdfViewerI18n i18n;
 
     /**
      * Creates a PDF viewer without a document.
@@ -207,6 +210,30 @@ public class PdfViewer extends Component implements HasSize {
      */
     public Signal<Integer> pageCountSignal() {
         return pageCountSignal.asReadonly();
+    }
+
+    /**
+     * Gets the i18n object set with {@link #setI18n(PdfViewerI18n)}. Changes to
+     * the returned object take effect only when you set it again.
+     *
+     * @return the i18n object, or {@code null} if none has been set
+     */
+    public PdfViewerI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the i18n object, which translates the texts of the viewer. Texts it
+     * does not set keep their defaults. Changes to the object after this call
+     * take effect only when you set it again.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(PdfViewerI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**

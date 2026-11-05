@@ -27,6 +27,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
@@ -268,6 +269,32 @@ class PdfViewerTest {
         Assertions.assertNotNull(event);
         Assertions.assertTrue(event.isFromClient());
         Assertions.assertEquals(DocumentErrorReason.INVALID, event.getReason());
+    }
+
+    @Test
+    void getI18n_null() {
+        Assertions.assertNull(viewer.getI18n());
+    }
+
+    @Test
+    void setI18n_propertySet() {
+        var i18n = new PdfViewerI18n().setPreviousPage("Edellinen sivu")
+                .setNextPage("Seuraava sivu");
+        viewer.setI18n(i18n);
+
+        Assertions.assertSame(i18n, viewer.getI18n());
+        var json = (ObjectNode) viewer.getElement().getPropertyRaw("i18n");
+        Assertions.assertEquals("Edellinen sivu",
+                json.get("previousPage").asString());
+        Assertions.assertEquals("Seuraava sivu",
+                json.get("nextPage").asString());
+        Assertions.assertFalse(json.has("pageError"));
+    }
+
+    @Test
+    void setI18n_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> viewer.setI18n(null));
     }
 
     @Test
