@@ -176,7 +176,7 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Binds the current page to the given signal. The binding is two-way:
      * signal changes scroll the viewer to the page, and page changes by the
-     * user or by {@link #setPage(int)} invoke the write callback.
+     * user invoke the write callback.
      *
      * @param pageSignal
      *            the signal to bind, not {@code null}
