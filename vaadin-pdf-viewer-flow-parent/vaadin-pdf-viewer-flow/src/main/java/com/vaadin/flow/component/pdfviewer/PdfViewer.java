@@ -68,9 +68,7 @@ public class PdfViewer extends Component implements HasSize {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated()));
         });
-        // The page count is not synchronized from the client, because users
-        // can not change it. It is taken from the document events instead,
-        // which also makes it up to date in document load listeners.
+        // Not synchronized, as users can't change the page count
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
         addDocumentErrorListener(event -> pageCountSignal.set(0));
