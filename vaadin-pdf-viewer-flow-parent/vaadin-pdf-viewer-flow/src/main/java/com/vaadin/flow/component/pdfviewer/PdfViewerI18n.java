@@ -81,7 +81,8 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the error message for a page that does not exist.
+     * Gets the error message of the page number field, shown when the user
+     * enters a page that does not exist.
      *
      * @return the error message
      */
@@ -90,9 +91,9 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Sets the error message for a page that does not exist.
-     * {@code {pageCount}} is replaced with the page count, for example
-     * {@code "Enter 1–{pageCount}"}.
+     * Sets the error message of the page number field, shown when the user
+     * enters a page that does not exist. {@code {pageCount}} is replaced with
+     * the page count, for example {@code "Enter 1–{pageCount}"}.
      *
      * @param pageError
      *            the error message
