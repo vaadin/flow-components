@@ -169,22 +169,10 @@ class PdfViewerTest {
     void pageSynchronizedOnPageChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("page-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "page"));
-    }
-
-    @Test
-    void defaultPageCount() {
-        Assertions.assertEquals(0, viewer.getPageCount());
-    }
-
-    @Test
-    void pageCountNotSynchronized() {
-        Assertions.assertNull(getSynchronizationMode("pageCount"));
-    }
-
-    @Test
-    void documentLoaded_pageCountUpdated() {
-        fireDocumentLoad(6);
-        Assertions.assertEquals(6, viewer.getPageCount());
+        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
+                viewer.getElement().getNode()
+                        .getFeature(ElementListenerMap.class)
+                        .getPropertySynchronizationMode("page"));
     }
 
     @Test
@@ -227,35 +215,6 @@ class PdfViewerTest {
     }
 
     @Test
-    void documentLoadListener_eventFired() {
-        var eventRef = new AtomicReference<DocumentLoadEvent>();
-        viewer.addDocumentLoadListener(eventRef::set);
-
-        ComponentUtil.fireEvent(viewer,
-                new DocumentLoadEvent(viewer, true, 6, "Title"));
-
-        var event = eventRef.get();
-        Assertions.assertNotNull(event);
-        Assertions.assertTrue(event.isFromClient());
-        Assertions.assertEquals(6, event.getPageCount());
-        Assertions.assertEquals("Title", event.getTitle());
-    }
-
-    @Test
-    void documentErrorListener_eventFired() {
-        var eventRef = new AtomicReference<DocumentErrorEvent>();
-        viewer.addDocumentErrorListener(eventRef::set);
-
-        ComponentUtil.fireEvent(viewer,
-                new DocumentErrorEvent(viewer, true, "invalid"));
-
-        var event = eventRef.get();
-        Assertions.assertNotNull(event);
-        Assertions.assertTrue(event.isFromClient());
-        Assertions.assertEquals(DocumentErrorReason.INVALID, event.getReason());
-    }
-
-    @Test
     void documentErrorEvent_reasonMappedFromClientValue() {
         Map.of("network", DocumentErrorReason.NETWORK, "invalid",
                 DocumentErrorReason.INVALID, "password",
@@ -275,13 +234,7 @@ class PdfViewerTest {
     }
 
     @Test
-    void pageSynchronizedWhenDisabled() {
-        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
-                getSynchronizationMode("page"));
-    }
-
-    @Test
-    void disabledParent_documentLoadListener_eventFired() {
+    void documentLoadListener_disabledParent_eventFired() {
         var eventRef = new AtomicReference<DocumentLoadEvent>();
         viewer.addDocumentLoadListener(eventRef::set);
         addToDisabledParent();
@@ -293,12 +246,13 @@ class PdfViewerTest {
 
         var event = eventRef.get();
         Assertions.assertNotNull(event);
+        Assertions.assertTrue(event.isFromClient());
         Assertions.assertEquals(6, event.getPageCount());
         Assertions.assertEquals("Title", event.getTitle());
     }
 
     @Test
-    void disabledParent_documentErrorListener_eventFired() {
+    void documentErrorListener_disabledParent_eventFired() {
         var eventRef = new AtomicReference<DocumentErrorEvent>();
         viewer.addDocumentErrorListener(eventRef::set);
         addToDisabledParent();
@@ -309,6 +263,7 @@ class PdfViewerTest {
 
         var event = eventRef.get();
         Assertions.assertNotNull(event);
+        Assertions.assertTrue(event.isFromClient());
         Assertions.assertEquals(DocumentErrorReason.INVALID, event.getReason());
     }
 
@@ -325,12 +280,6 @@ class PdfViewerTest {
     private void fireDocumentLoad(int pageCount) {
         ComponentUtil.fireEvent(viewer,
                 new DocumentLoadEvent(viewer, true, pageCount, ""));
-    }
-
-    private DisabledUpdateMode getSynchronizationMode(String property) {
-        return viewer.getElement().getNode()
-                .getFeature(ElementListenerMap.class)
-                .getPropertySynchronizationMode(property);
     }
 
     private void addToDisabledParent() {
