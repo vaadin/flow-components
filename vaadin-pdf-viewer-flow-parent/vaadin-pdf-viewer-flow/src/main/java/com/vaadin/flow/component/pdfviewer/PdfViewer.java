@@ -66,7 +66,8 @@ public class PdfViewer extends Component implements HasSize {
     public PdfViewer() {
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
-            fireEvent(new PageChangeEvent(this, event.isUserOriginated()));
+            fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
+                    getPage()));
         });
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
@@ -263,6 +264,7 @@ public class PdfViewer extends Component implements HasSize {
      * Event fired when the current page changes.
      */
     public static class PageChangeEvent extends ComponentEvent<PdfViewer> {
+        private final int page;
 
         /**
          * Creates a new event.
@@ -271,18 +273,21 @@ public class PdfViewer extends Component implements HasSize {
          *            the source component
          * @param fromClient
          *            {@code true} if the event originated from the client
+         * @param page
+         *            the new current page, starting from {@code 1}
          */
-        public PageChangeEvent(PdfViewer source, boolean fromClient) {
+        public PageChangeEvent(PdfViewer source, boolean fromClient, int page) {
             super(source, fromClient);
+            this.page = page;
         }
 
         /**
-         * Gets the current page.
+         * Gets the new current page.
          *
-         * @return the current page, starting from {@code 1}
+         * @return the new current page, starting from {@code 1}
          */
         public int getPage() {
-            return getSource().getPage();
+            return page;
         }
     }
 
