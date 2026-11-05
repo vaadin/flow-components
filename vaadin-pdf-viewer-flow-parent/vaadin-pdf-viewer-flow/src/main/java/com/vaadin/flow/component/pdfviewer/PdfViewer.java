@@ -23,8 +23,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.dom.SignalBinding;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -58,14 +56,17 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
+    private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
 
     /**
      * Creates a PDF viewer without a document.
      */
     public PdfViewer() {
-        getElement().addPropertyChangeListener("page", event -> fireEvent(
-                new PageChangeEvent(this, event.isUserOriginated())));
+        getElement().addPropertyChangeListener("page", event -> {
+            pageSignal.set(getPage());
+            fireEvent(new PageChangeEvent(this, event.isUserOriginated()));
+        });
         getElement().addPropertyChangeListener("pageCount",
                 event -> pageCountSignal.set(getPageCount()));
     }
@@ -174,30 +175,13 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Binds the current page to the given signal. The binding is two-way:
-     * signal changes scroll the viewer to the page, and page changes by the
-     * user invoke the write callback.
+     * Gets a read-only signal with the current page, which is the page that
+     * takes up most of the visible area.
      *
-     * @param pageSignal
-     *            the signal to bind, not {@code null}
-     * @param writeCallback
-     *            the callback to propagate page changes back, not {@code null}
-     * @return a {@link SignalBinding} that can be used to register
-     *         {@link SignalBinding#onChange(SerializableConsumer) onChange}
-     *         callbacks
-     * @throws com.vaadin.flow.signals.BindingActiveException
-     *             if a binding is already active
-     * @see #setPage(int)
+     * @return a read-only signal with the current page, starting from {@code 1}
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public SignalBinding<Integer> bindPage(Signal<Integer> pageSignal,
-            SerializableConsumer<Integer> writeCallback) {
-        Objects.requireNonNull(pageSignal, "Signal cannot be null");
-        Objects.requireNonNull(writeCallback, "Write callback cannot be null");
-        SerializableConsumer<Object> callback = value -> writeCallback
-                .accept(((Number) value).intValue());
-        return getElement().bindProperty("page", pageSignal,
-                (SerializableConsumer) callback);
+    public Signal<Integer> pageSignal() {
+        return pageSignal.asReadonly();
     }
 
     /**

@@ -308,89 +308,10 @@ public class AbstractSignalsTest {
             Supplier<C> componentFactory, TwoWayBindMethod<C, T> bind,
             Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
             T initialValue, T updatedValue) {
+
         var oneWayTests = generateBindingTests(componentFactory,
                 (component, signal) -> bind.bind(component, signal, null),
                 getter, setter, initialValue, updatedValue);
-        return Stream.concat(oneWayTests,
-                generateWriteCallbackTests(componentFactory, bind, getter,
-                        setter, propertyName, initialValue, updatedValue));
-    }
-
-    /**
-     * Generates a suite of JUnit 5 dynamic tests that verify the standard
-     * behavior of a two-way signal binding that requires a write callback. Use
-     * it instead of
-     * {@link #generateTwoWayBindingTests(Supplier, TwoWayBindMethod, Function, BiConsumer, String, Object, Object)}
-     * when a one-way binding is not supported, for example because the user can
-     * change the property on the client.
-     * <p>
-     * The suite contains the same test cases as
-     * {@link #generateTwoWayBindingTests(Supplier, TwoWayBindMethod, Function, BiConsumer, String, Object, Object)},
-     * except that the test cases of
-     * {@link #generateBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)}
-     * run with a write callback that ignores the value, and
-     * <b>manualSetWhileBoundThrows</b> is left out. In addition, the following
-     * test case is generated:
-     * <ul>
-     * <li><b>bindNullWriteCallbackThrows</b> – verifies that passing a
-     * {@code null} write callback to the bind method throws a
-     * {@link NullPointerException}.</li>
-     * </ul>
-     *
-     * @param <C>
-     *            the component type
-     * @param <T>
-     *            the property value type
-     * @param componentFactory
-     *            supplier that creates a new component instance for each test
-     * @param bind
-     *            the bind method under test
-     * @param getter
-     *            the getter for the bound property
-     * @param setter
-     *            the setter for the bound property
-     * @param propertyName
-     *            the name of the bound element property, used to simulate a
-     *            property change from the client
-     * @param initialValue
-     *            the initial value of the signal created for each test
-     * @param updatedValue
-     *            a value different from {@code initialValue}, used to test
-     *            synchronization behavior. Must be a type that the client can
-     *            send as a property value.
-     * @return a stream of dynamic tests to be returned from a
-     *         {@link org.junit.jupiter.api.TestFactory} method
-     */
-    protected <C extends Component, T> Stream<DynamicTest> generateRequiredWriteCallbackBindingTests(
-            Supplier<C> componentFactory, TwoWayBindMethod<C, T> bind,
-            Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
-            T initialValue, T updatedValue) {
-        var bindingTests = generateBindingTests(componentFactory,
-                (component, signal) -> bind.bind(component, signal, value -> {
-                }), getter, setter, initialValue, updatedValue)
-                .filter(test -> !test.getDisplayName()
-                        .equals("manualSetWhileBoundThrows"));
-
-        var bindNullWriteCallbackThrows = createTest(
-                "bindNullWriteCallbackThrows", () -> {
-                    var component = componentFactory.get();
-                    var signal = new ValueSignal<>(initialValue);
-
-                    assertThrows(NullPointerException.class,
-                            () -> bind.bind(component, signal, null));
-                });
-
-        return Stream.concat(
-                Stream.concat(bindingTests,
-                        Stream.of(bindNullWriteCallbackThrows)),
-                generateWriteCallbackTests(componentFactory, bind, getter,
-                        setter, propertyName, initialValue, updatedValue));
-    }
-
-    private <C extends Component, T> Stream<DynamicTest> generateWriteCallbackTests(
-            Supplier<C> componentFactory, TwoWayBindMethod<C, T> bind,
-            Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
-            T initialValue, T updatedValue) {
 
         var setterWhileBoundCallsWriteCallback = createTest(
                 "setterWhileBoundCallsWriteCallback", () -> {
@@ -455,10 +376,11 @@ public class AbstractSignalsTest {
                     assertEquals(List.of(), writtenValues);
                 });
 
-        return Stream.of(setterWhileBoundCallsWriteCallback,
-                setterWhileBoundRevertsWhenCallbackIgnoresValue,
-                clientUpdateCallsWriteCallback,
-                signalChangeDoesNotCallWriteCallback);
+        return Stream.concat(oneWayTests,
+                Stream.of(setterWhileBoundCallsWriteCallback,
+                        setterWhileBoundRevertsWhenCallbackIgnoresValue,
+                        clientUpdateCallsWriteCallback,
+                        signalChangeDoesNotCallWriteCallback));
     }
 
     /**

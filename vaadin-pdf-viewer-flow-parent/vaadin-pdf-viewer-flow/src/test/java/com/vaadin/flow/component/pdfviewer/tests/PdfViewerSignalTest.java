@@ -9,18 +9,12 @@
 package com.vaadin.flow.component.pdfviewer.tests;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
-import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
@@ -36,38 +30,26 @@ class PdfViewerSignalTest extends AbstractSignalsTest {
 
     private final PdfViewer viewer = new PdfViewer();
 
-    @TestFactory
-    Stream<DynamicTest> bindPage() {
-        return generateRequiredWriteCallbackBindingTests(PdfViewer::new,
-                PdfViewer::bindPage, PdfViewer::getPage, PdfViewer::setPage,
-                "page", 1, 3);
+    @Test
+    void pageSignal_defaultValue() {
+        Assertions.assertEquals(1, viewer.pageSignal().peek());
     }
 
     @Test
-    void bindPage_clientSendsDouble_writeCallbackReceivesInteger() {
-        var signal = new ValueSignal<>(1);
-        UI.getCurrent().add(viewer);
-        viewer.bindPage(signal, signal::set);
+    void pageSignal_setPage_signalUpdated() {
+        viewer.setPage(3);
+        Assertions.assertEquals(3, viewer.pageSignal().peek());
+    }
 
+    @Test
+    void pageSignal_pageChangedOnClient_signalUpdated() {
         fakeClientPropertyChange("page", 4.0);
-
-        Assertions.assertEquals(4, signal.peek());
-        Assertions.assertEquals(4, viewer.getPage());
+        Assertions.assertEquals(4, viewer.pageSignal().peek());
     }
 
     @Test
-    void bindPage_signalChange_pageChangeEventFired() {
-        var signal = new ValueSignal<>(1);
-        UI.getCurrent().add(viewer);
-        viewer.bindPage(signal, signal::set);
-        var events = new ArrayList<PageChangeEvent>();
-        viewer.addPageChangeListener(events::add);
-
-        signal.set(3);
-
-        Assertions.assertEquals(1, events.size());
-        Assertions.assertFalse(events.get(0).isFromClient());
-        Assertions.assertEquals(3, events.get(0).getPage());
+    void pageSignal_isReadOnly() {
+        Assertions.assertFalse(viewer.pageSignal() instanceof ValueSignal<?>);
     }
 
     @Test
