@@ -67,9 +67,9 @@ class UploadInProgressTest {
     void setup() throws ReflectiveOperationException {
         mockProvider = Mockito.mock(LLMProvider.class);
         mockMessageList = Mockito.mock(AIMessageList.class);
+        var message = Mockito.mock(AIMessage.class);
         Mockito.when(mockMessageList.addMessage(Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyList()))
-                .thenReturn(Mockito.mock(AIMessage.class));
+                Mockito.anyString(), Mockito.anyList())).thenReturn(message);
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
                 .thenReturn(Flux.just("Response"));
