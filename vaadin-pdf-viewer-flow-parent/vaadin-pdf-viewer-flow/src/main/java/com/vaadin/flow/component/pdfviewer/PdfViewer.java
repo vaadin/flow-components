@@ -42,9 +42,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * viewer.setHeight("600px");
  * </pre>
  * <p>
- * The toolbar above the pages has built-in controls for moving between pages.
- * You can add your own controls, such as a button, at the end of the toolbar
- * with {@link #getToolbarActions()}.
+ * You can add your own controls to the end of the toolbar with
+ * {@link #getToolbarActions()}.
  * <p>
  * This component is experimental and needs to be enabled with the
  * {@code com.vaadin.experimental.pdfViewerComponent} feature flag, either in
@@ -218,14 +217,10 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Gets the area at the end of the toolbar where you can add your own
-     * controls, such as a button. It is empty by default.
+     * Gets the container at the end of the toolbar for your own controls, such
+     * as buttons. Empty by default.
      *
-     * <pre>
-     * viewer.getToolbarActions().add(button);
-     * </pre>
-     *
-     * @return the toolbar actions
+     * @return the toolbar actions container
      */
     public ToolbarActions getToolbarActions() {
         if (toolbarActions == null) {
@@ -287,8 +282,8 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * The area at the end of the toolbar of a {@link PdfViewer} that holds your
-     * own controls, such as a button.
+     * Container at the end of the {@link PdfViewer} toolbar for your own
+     * controls.
      *
      * @see PdfViewer#getToolbarActions()
      */
