@@ -107,10 +107,10 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Sets the URL of the document to show. The current document is replaced,
-     * and the new one opens on its first page unless you also call
-     * {@link #setPage(int)} in the same request. {@link DocumentLoadEvent}
-     * fires when the document has loaded, {@link DocumentErrorEvent} if it
-     * could not be loaded.
+     * and the new one opens on the first page, unless {@link #setPage(int)} is
+     * called in the same request. {@link DocumentLoadEvent} fires when the
+     * document has loaded, {@link DocumentErrorEvent} if it could not be
+     * loaded.
      * <p>
      * The browser fetches the document, so the URL must be on the same origin
      * as the application, or the server must allow it with CORS headers. To
@@ -147,8 +147,7 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Gets the current page, which is the page that takes up most of the
-     * visible area. It changes when the user scrolls or navigates between
-     * pages. The default value is {@code 1}.
+     * visible area. The default value is {@code 1}.
      *
      * @return the current page, starting from {@code 1}
      */
@@ -158,9 +157,9 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the current page, which scrolls the viewer to the start of that
-     * page. A page that the document does not have is ignored. You can call
-     * this before the document has loaded to open it on that page.
+     * Sets the current page and scrolls the viewer to it. Pages beyond the end
+     * of the document are ignored. Can be called before the document has
+     * loaded.
      *
      * @param page
      *            the page to show, starting from {@code 1}
@@ -178,23 +177,7 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Binds the current page to the given signal. The binding is two-way:
      * signal changes scroll the viewer to the page, and page changes by the
-     * user or by {@link #setPage(int)} invoke the write callback, which can
-     * update the signal.
-     * <p>
-     * With a {@code null} write callback, the binding is one-way: calling
-     * {@link #setPage(int)} throws a
-     * {@link com.vaadin.flow.signals.BindingActiveException}, and page changes
-     * by the user are reverted to the signal value.
-     * <p>
-     * As with {@link #setPage(int)}, a page that the document does not have is
-     * ignored.
-     * <p>
-     * Example of keeping a signal in sync with the page:
-     *
-     * <pre>
-     * ValueSignal&lt;Integer&gt; page = new ValueSignal&lt;&gt;(1);
-     * viewer.bindPage(page, page::set);
-     * </pre>
+     * user or by {@link #setPage(int)} invoke the write callback.
      *
      * @param pageSignal
      *            the signal to bind, not {@code null}
@@ -219,11 +202,7 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Gets the number of pages in the document, or {@code 0} while no document
-     * is loaded. The default value is {@code 0}.
-     * <p>
-     * The browser reports the value and the server does not verify it, so don't
-     * use it for access control or other security decisions.
+     * Gets the number of pages in the document.
      *
      * @return the number of pages, or {@code 0} if no document is loaded
      */
@@ -234,11 +213,7 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Gets a read-only signal with the number of pages in the document, or
-     * {@code 0} while no document is loaded. The signal changes together with
-     * {@link #getPageCount()}.
-     * <p>
-     * The browser reports the value and the server does not verify it, so don't
-     * use it for access control or other security decisions.
+     * {@code 0} if no document is loaded.
      *
      * @return a read-only signal with the number of pages
      */
