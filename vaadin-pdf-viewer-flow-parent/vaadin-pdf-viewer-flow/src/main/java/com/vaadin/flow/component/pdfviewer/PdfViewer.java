@@ -158,8 +158,7 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Sets the current page and scrolls the viewer to it. Pages beyond the end
-     * of the document are ignored. Can be called before the document has
-     * loaded.
+     * of the loaded document are ignored.
      *
      * @param page
      *            the page to show, starting from {@code 1}
