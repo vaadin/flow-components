@@ -18,12 +18,16 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * PDF Viewer is a component for showing PDF documents. Give the document as a
@@ -53,10 +57,21 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
+    private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
+    private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
+
     /**
      * Creates a PDF viewer without a document.
      */
     public PdfViewer() {
+        getElement().addPropertyChangeListener("page", event -> {
+            pageSignal.set(getPage());
+            fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
+                    getPage()));
+        });
+        addDocumentLoadListener(
+                event -> pageCountSignal.set(event.getPageCount()));
+        addDocumentErrorListener(event -> resetDocumentState());
     }
 
     /**
@@ -67,6 +82,7 @@ public class PdfViewer extends Component implements HasSize {
      * @see #setSrc(String)
      */
     public PdfViewer(String src) {
+        this();
         setSrc(src);
     }
 
@@ -80,6 +96,7 @@ public class PdfViewer extends Component implements HasSize {
      * @see #setSrc(DownloadHandler)
      */
     public PdfViewer(DownloadHandler downloadHandler) {
+        this();
         setSrc(downloadHandler);
     }
 
@@ -93,9 +110,10 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the URL of the document to show. The current document is replaced.
-     * {@link DocumentLoadEvent} fires when the document has loaded,
-     * {@link DocumentErrorEvent} if it could not be loaded.
+     * Sets the URL of the document to show. The current document is replaced,
+     * and the new one opens on the first page. {@link DocumentLoadEvent} fires
+     * when the document has loaded, {@link DocumentErrorEvent} if it could not
+     * be loaded.
      * <p>
      * The browser fetches the document, so the URL must be on the same origin
      * as the application, or the server must allow it with CORS headers. To
@@ -111,6 +129,7 @@ public class PdfViewer extends Component implements HasSize {
         } else {
             getElement().setAttribute("src", src);
         }
+        resetDocumentState();
     }
 
     /**
@@ -128,6 +147,78 @@ public class PdfViewer extends Component implements HasSize {
         Objects.requireNonNull(downloadHandler,
                 "The download handler should not be null");
         getElement().setAttribute("src", downloadHandler.allowDisabled());
+        resetDocumentState();
+    }
+
+    private void resetDocumentState() {
+        if (getPage() != 1) {
+            getElement().setProperty("page", 1);
+        }
+        pageCountSignal.set(0);
+    }
+
+    /**
+     * Gets the current page, which is the page that takes up most of the
+     * visible area. The default value is {@code 1}.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
+     *
+     * @return the current page, starting from {@code 1}
+     */
+    @Synchronize(property = "page", value = "page-changed", allowUpdates = DisabledUpdateMode.ALWAYS)
+    public int getPage() {
+        return getElement().getProperty("page", 1);
+    }
+
+    /**
+     * Gets a read-only signal with the current page, which is the page that
+     * takes up most of the visible area.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
+     *
+     * @return a read-only signal with the current page, starting from {@code 1}
+     */
+    public Signal<Integer> pageSignal() {
+        return pageSignal.asReadonly();
+    }
+
+    /**
+     * Gets the number of pages in the document.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
+     *
+     * @return the number of pages, or {@code 0} if no document is loaded
+     */
+    public int getPageCount() {
+        return pageCountSignal.peek();
+    }
+
+    /**
+     * Gets a read-only signal with the number of pages in the document, or
+     * {@code 0} if no document is loaded.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
+     *
+     * @return a read-only signal with the number of pages
+     */
+    public Signal<Integer> pageCountSignal() {
+        return pageCountSignal.asReadonly();
+    }
+
+    /**
+     * Adds a listener that is called when the current page changes.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addPageChangeListener(
+            ComponentEventListener<PageChangeEvent> listener) {
+        return addListener(PageChangeEvent.class, listener);
     }
 
     /**
@@ -170,9 +261,40 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Event fired when the current page changes.
+     */
+    public static class PageChangeEvent extends ComponentEvent<PdfViewer> {
+        private final int page;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         * @param page
+         *            the new current page, starting from {@code 1}
+         */
+        public PageChangeEvent(PdfViewer source, boolean fromClient, int page) {
+            super(source, fromClient);
+            this.page = page;
+        }
+
+        /**
+         * Gets the new current page.
+         *
+         * @return the new current page, starting from {@code 1}
+         */
+        public int getPage() {
+            return page;
+        }
+    }
+
+    /**
      * Event fired when a document has been loaded, before its pages are shown.
      */
-    @DomEvent("document-load")
+    @DomEvent(value = "document-load", allowUpdates = DisabledUpdateMode.ALWAYS)
     public static class DocumentLoadEvent extends ComponentEvent<PdfViewer> {
         private final int pageCount;
         private final String title;
@@ -220,7 +342,7 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Event fired when a document could not be loaded.
      */
-    @DomEvent("document-error")
+    @DomEvent(value = "document-error", allowUpdates = DisabledUpdateMode.ALWAYS)
     public static class DocumentErrorEvent extends ComponentEvent<PdfViewer> {
         private final DocumentErrorReason reason;
 
