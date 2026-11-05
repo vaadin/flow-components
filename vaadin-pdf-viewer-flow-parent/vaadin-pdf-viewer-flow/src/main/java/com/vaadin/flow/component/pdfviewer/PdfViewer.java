@@ -64,12 +64,11 @@ public class PdfViewer extends Component implements HasSize {
      */
     public PdfViewer() {
         getElement().addPropertyChangeListener("page", event -> {
-            pageSignal.set(getElement().getProperty("page", 1));
+            pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated()));
         });
         getElement().addPropertyChangeListener("pageCount",
-                event -> pageCountSignal
-                        .set(getElement().getProperty("pageCount", 0)));
+                event -> pageCountSignal.set(getPageCount()));
     }
 
     /**
@@ -157,7 +156,7 @@ public class PdfViewer extends Component implements HasSize {
      */
     @Synchronize(property = "page", value = "page-changed")
     public int getPage() {
-        return pageSignal.peek();
+        return getElement().getProperty("page", 1);
     }
 
     /**
@@ -183,7 +182,7 @@ public class PdfViewer extends Component implements HasSize {
      */
     @Synchronize(property = "pageCount", value = "page-count-changed")
     public int getPageCount() {
-        return pageCountSignal.peek();
+        return getElement().getProperty("pageCount", 0);
     }
 
     /**
