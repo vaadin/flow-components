@@ -70,20 +70,6 @@ class PdfViewerSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void bindPage_nullOrLessThanOne_firstPageShown() {
-        var signal = new ValueSignal<>(3);
-        UI.getCurrent().add(viewer);
-        viewer.bindPage(signal, null);
-
-        signal.set(0);
-        Assertions.assertEquals(1, viewer.getPage());
-
-        signal.set(3);
-        signal.set(null);
-        Assertions.assertEquals(1, viewer.getPage());
-    }
-
-    @Test
     void pageCountSignal_defaultValue() {
         Assertions.assertEquals(0, viewer.pageCountSignal().peek());
     }

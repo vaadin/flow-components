@@ -186,9 +186,8 @@ public class PdfViewer extends Component implements HasSize {
      * {@link com.vaadin.flow.signals.BindingActiveException}, and page changes
      * by the user are reverted to the signal value.
      * <p>
-     * A {@code null} signal value, or one less than {@code 1}, shows the first
-     * page. As with {@link #setPage(int)}, a page that the document does not
-     * have is ignored.
+     * As with {@link #setPage(int)}, a page that the document does not have is
+     * ignored.
      * <p>
      * Example of keeping a signal in sync with the page:
      *
@@ -209,16 +208,14 @@ public class PdfViewer extends Component implements HasSize {
      *             if a binding is already active
      * @see #setPage(int)
      */
-    public SignalBinding<Number> bindPage(Signal<Integer> pageSignal,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public SignalBinding<Integer> bindPage(Signal<Integer> pageSignal,
             SerializableConsumer<Integer> writeCallback) {
         Objects.requireNonNull(pageSignal, "Signal cannot be null");
-        // The client sends numbers as Double, so the element property is
-        // bound to a Number and converted to an Integer for the callback.
-        return getElement().bindProperty("page",
-                pageSignal.map(page -> (Number) (page == null || page < 1 ? 1.0
-                        : page.doubleValue())),
-                writeCallback == null ? null
-                        : page -> writeCallback.accept(page.intValue()));
+        SerializableConsumer<Object> callback = writeCallback == null ? null
+                : value -> writeCallback.accept(((Number) value).intValue());
+        return getElement().bindProperty("page", pageSignal,
+                (SerializableConsumer) callback);
     }
 
     /**
