@@ -70,7 +70,7 @@ public class PdfViewer extends Component implements HasSize {
         });
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
-        addDocumentErrorListener(event -> pageCountSignal.set(0));
+        addDocumentErrorListener(event -> resetDocumentState());
     }
 
     /**

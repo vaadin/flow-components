@@ -187,12 +187,15 @@ class PdfViewerTest {
     }
 
     @Test
-    void documentLoaded_documentError_pageCountReset() {
+    void documentLoaded_pageChangedOnClient_documentError_documentStateReset() {
         fireDocumentLoad(6);
+        fakeClientPropertyChange("page", 4);
 
         ComponentUtil.fireEvent(viewer,
                 new DocumentErrorEvent(viewer, true, "invalid"));
 
+        Assertions.assertEquals(1, viewer.getPage());
+        Assertions.assertEquals(1, viewer.pageSignal().peek());
         Assertions.assertEquals(0, viewer.getPageCount());
     }
 
