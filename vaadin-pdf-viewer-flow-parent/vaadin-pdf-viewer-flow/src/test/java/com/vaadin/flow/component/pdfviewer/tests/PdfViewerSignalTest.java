@@ -38,8 +38,9 @@ class PdfViewerSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindPage() {
-        return generateTwoWayBindingTests(PdfViewer::new, PdfViewer::bindPage,
-                PdfViewer::getPage, PdfViewer::setPage, "page", 1, 3);
+        return generateRequiredWriteCallbackBindingTests(PdfViewer::new,
+                PdfViewer::bindPage, PdfViewer::getPage, PdfViewer::setPage,
+                "page", 1, 3);
     }
 
     @Test
@@ -58,7 +59,7 @@ class PdfViewerSignalTest extends AbstractSignalsTest {
     void bindPage_signalChange_pageChangeEventFired() {
         var signal = new ValueSignal<>(1);
         UI.getCurrent().add(viewer);
-        viewer.bindPage(signal, null);
+        viewer.bindPage(signal, signal::set);
         var events = new ArrayList<PageChangeEvent>();
         viewer.addPageChangeListener(events::add);
 

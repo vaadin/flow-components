@@ -181,8 +181,7 @@ public class PdfViewer extends Component implements HasSize {
      * @param pageSignal
      *            the signal to bind, not {@code null}
      * @param writeCallback
-     *            the callback to propagate page changes back, or {@code null}
-     *            for a one-way binding
+     *            the callback to propagate page changes back, not {@code null}
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(SerializableConsumer) onChange}
      *         callbacks
@@ -194,8 +193,9 @@ public class PdfViewer extends Component implements HasSize {
     public SignalBinding<Integer> bindPage(Signal<Integer> pageSignal,
             SerializableConsumer<Integer> writeCallback) {
         Objects.requireNonNull(pageSignal, "Signal cannot be null");
-        SerializableConsumer<Object> callback = writeCallback == null ? null
-                : value -> writeCallback.accept(((Number) value).intValue());
+        Objects.requireNonNull(writeCallback, "Write callback cannot be null");
+        SerializableConsumer<Object> callback = value -> writeCallback
+                .accept(((Number) value).intValue());
         return getElement().bindProperty("page", pageSignal,
                 (SerializableConsumer) callback);
     }
