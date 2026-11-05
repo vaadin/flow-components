@@ -141,7 +141,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           INPUT_COMPONENTS: ${{ github.event.inputs.components || '' }}
         run: |
-          if [ -n "$INPUT_COMPONENTS" ]; then
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Pushes to the target branch always validate everything, not
+            # only the components changed by the latest commit
+            elements=""
+          elif [ -n "$INPUT_COMPONENTS" ]; then
             # Explicitly specified components are used as-is, without adding
             # dependent components
             elements="$INPUT_COMPONENTS"
