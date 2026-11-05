@@ -210,8 +210,8 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the accessible name of a link without text whose destination is
-     * unknown.
+     * Gets the accessible name of a link in the document that has no text and
+     * no known destination.
      *
      * @return the accessible name
      */
@@ -220,8 +220,8 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Sets the accessible name of a link without text whose destination is
-     * unknown.
+     * Sets the accessible name of a link in the document that has no text and
+     * no known destination.
      *
      * @param link
      *            the accessible name
@@ -233,7 +233,8 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the accessible name of a link without text to another page.
+     * Gets the accessible name of a link in the document that has no text and
+     * goes to another page.
      *
      * @return the accessible name
      */
@@ -242,9 +243,9 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Sets the accessible name of a link without text to another page.
-     * {@code {page}} is replaced with the page number, for example
-     * {@code "Go to page {page}"}.
+     * Sets the accessible name of a link in the document that has no text and
+     * goes to another page. {@code {page}} is replaced with the page number,
+     * for example {@code "Go to page {page}"}.
      *
      * @param goToPage
      *            the accessible name
