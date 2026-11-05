@@ -23,8 +23,12 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * PDF Viewer is a component for showing PDF documents. Give the document as a
@@ -54,12 +58,16 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
 public class PdfViewer extends Component implements HasSize {
 
+    private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
+
     /**
      * Creates a PDF viewer without a document.
      */
     public PdfViewer() {
         getElement().addPropertyChangeListener("page", event -> fireEvent(
                 new PageChangeEvent(this, event.isUserOriginated())));
+        getElement().addPropertyChangeListener("pageCount",
+                event -> pageCountSignal.set(getPageCount()));
     }
 
     /**
@@ -168,6 +176,52 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Binds the current page to the given signal. The binding is two-way:
+     * signal changes scroll the viewer to the page, and page changes by the
+     * user or by {@link #setPage(int)} invoke the write callback, which can
+     * update the signal.
+     * <p>
+     * With a {@code null} write callback, the binding is one-way: calling
+     * {@link #setPage(int)} throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}, and page changes
+     * by the user are reverted to the signal value.
+     * <p>
+     * A {@code null} signal value, or one less than {@code 1}, shows the first
+     * page. As with {@link #setPage(int)}, a page that the document does not
+     * have is ignored.
+     * <p>
+     * Example of keeping a signal in sync with the page:
+     *
+     * <pre>
+     * ValueSignal&lt;Integer&gt; page = new ValueSignal&lt;&gt;(1);
+     * viewer.bindPage(page, page::set);
+     * </pre>
+     *
+     * @param pageSignal
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback to propagate page changes back, or {@code null}
+     *            for a one-way binding
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(SerializableConsumer) onChange}
+     *         callbacks
+     * @throws com.vaadin.flow.signals.BindingActiveException
+     *             if a binding is already active
+     * @see #setPage(int)
+     */
+    public SignalBinding<Number> bindPage(Signal<Integer> pageSignal,
+            SerializableConsumer<Integer> writeCallback) {
+        Objects.requireNonNull(pageSignal, "Signal cannot be null");
+        // The client sends numbers as Double, so the element property is
+        // bound to a Number and converted to an Integer for the callback.
+        return getElement().bindProperty("page",
+                pageSignal.map(page -> (Number) (page == null || page < 1 ? 1.0
+                        : page.doubleValue())),
+                writeCallback == null ? null
+                        : page -> writeCallback.accept(page.intValue()));
+    }
+
+    /**
      * Gets the number of pages in the document, or {@code 0} while no document
      * is loaded. The default value is {@code 0}.
      * <p>
@@ -179,6 +233,20 @@ public class PdfViewer extends Component implements HasSize {
     @Synchronize(property = "pageCount", value = "page-count-changed")
     public int getPageCount() {
         return getElement().getProperty("pageCount", 0);
+    }
+
+    /**
+     * Gets a read-only signal with the number of pages in the document, or
+     * {@code 0} while no document is loaded. The signal changes together with
+     * {@link #getPageCount()}.
+     * <p>
+     * The browser reports the value and the server does not verify it, so don't
+     * use it for access control or other security decisions.
+     *
+     * @return a read-only signal with the number of pages
+     */
+    public Signal<Integer> pageCountSignal() {
+        return pageCountSignal.asReadonly();
     }
 
     /**
