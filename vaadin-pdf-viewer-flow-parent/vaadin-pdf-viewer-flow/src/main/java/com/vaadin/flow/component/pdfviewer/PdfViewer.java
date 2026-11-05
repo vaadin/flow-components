@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -168,7 +169,7 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the current page, starting from {@code 1}
      */
-    @Synchronize(property = "page", value = "page-changed")
+    @Synchronize(property = "page", value = "page-changed", allowUpdates = DisabledUpdateMode.ALWAYS)
     public int getPage() {
         return getElement().getProperty("page", 1);
     }
@@ -194,7 +195,7 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the number of pages, or {@code 0} if no document is loaded
      */
-    @Synchronize(property = "pageCount", value = "page-count-changed")
+    @Synchronize(property = "pageCount", value = "page-count-changed", allowUpdates = DisabledUpdateMode.ALWAYS)
     public int getPageCount() {
         return getElement().getProperty("pageCount", 0);
     }
@@ -293,7 +294,7 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Event fired when a document has been loaded, before its pages are shown.
      */
-    @DomEvent("document-load")
+    @DomEvent(value = "document-load", allowUpdates = DisabledUpdateMode.ALWAYS)
     public static class DocumentLoadEvent extends ComponentEvent<PdfViewer> {
         private final int pageCount;
         private final String title;
@@ -341,7 +342,7 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Event fired when a document could not be loaded.
      */
-    @DomEvent("document-error")
+    @DomEvent(value = "document-error", allowUpdates = DisabledUpdateMode.ALWAYS)
     public static class DocumentErrorEvent extends ComponentEvent<PdfViewer> {
         private final DocumentErrorReason reason;
 

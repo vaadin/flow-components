@@ -28,7 +28,9 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
@@ -36,6 +38,8 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.tests.MockUIExtension;
+
+import tools.jackson.databind.node.ObjectNode;
 
 class PdfViewerTest {
 
@@ -233,6 +237,50 @@ class PdfViewerTest {
     }
 
     @Test
+    void pageSynchronizedWhenDisabled() {
+        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
+                getSynchronizationMode("page"));
+    }
+
+    @Test
+    void pageCountSynchronizedWhenDisabled() {
+        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
+                getSynchronizationMode("pageCount"));
+    }
+
+    @Test
+    void disabledParent_documentLoadListener_eventFired() {
+        var eventRef = new AtomicReference<DocumentLoadEvent>();
+        viewer.addDocumentLoadListener(eventRef::set);
+        addToDisabledParent();
+
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.pageCount", 6);
+        eventData.put("event.detail.title", "Title");
+        fakeClientDomEvent("document-load", eventData);
+
+        var event = eventRef.get();
+        Assertions.assertNotNull(event);
+        Assertions.assertEquals(6, event.getPageCount());
+        Assertions.assertEquals("Title", event.getTitle());
+    }
+
+    @Test
+    void disabledParent_documentErrorListener_eventFired() {
+        var eventRef = new AtomicReference<DocumentErrorEvent>();
+        viewer.addDocumentErrorListener(eventRef::set);
+        addToDisabledParent();
+
+        var eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.reason", "invalid");
+        fakeClientDomEvent("document-error", eventData);
+
+        var event = eventRef.get();
+        Assertions.assertNotNull(event);
+        Assertions.assertEquals(DocumentErrorReason.INVALID, event.getReason());
+    }
+
+    @Test
     void implementsHasSize() {
         Assertions.assertTrue(HasSize.class.isAssignableFrom(PdfViewer.class));
     }
@@ -240,6 +288,25 @@ class PdfViewerTest {
     private Set<String> getSyncExpressions(String eventName) {
         return viewer.getElement().getNode()
                 .getFeature(ElementListenerMap.class).getExpressions(eventName);
+    }
+
+    private DisabledUpdateMode getSynchronizationMode(String property) {
+        return viewer.getElement().getNode()
+                .getFeature(ElementListenerMap.class)
+                .getPropertySynchronizationMode(property);
+    }
+
+    private void addToDisabledParent() {
+        var parent = new Element("div");
+        parent.appendChild(viewer.getElement());
+        parent.setEnabled(false);
+        Assertions.assertFalse(viewer.getElement().isEnabled());
+    }
+
+    private void fakeClientDomEvent(String eventName, ObjectNode eventData) {
+        viewer.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(viewer.getElement(), eventName,
+                        eventData));
     }
 
     private void fakeClientPropertyChange(String property, Serializable value) {
