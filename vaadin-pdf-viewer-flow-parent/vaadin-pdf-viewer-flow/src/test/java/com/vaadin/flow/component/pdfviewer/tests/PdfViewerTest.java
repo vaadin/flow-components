@@ -10,6 +10,7 @@ package com.vaadin.flow.component.pdfviewer.tests;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -278,17 +279,32 @@ class PdfViewerTest {
 
     @Test
     void setI18n_propertySet() {
-        var i18n = new PdfViewerI18n().setPreviousPage("Edellinen sivu")
-                .setNextPage("Seuraava sivu");
+        var i18n = new PdfViewerI18n().setPreviousPage("previousPage")
+                .setNextPage("nextPage").setPageError("pageError")
+                .setZoomIn("zoomIn").setZoomOut("zoomOut")
+                .setPageWidth("pageWidth").setPageFit("pageFit")
+                .setDocument("document").setLink("link").setGoToPage("goToPage")
+                .setExternalLink("externalLink").setDownload("download");
         viewer.setI18n(i18n);
 
         Assertions.assertSame(i18n, viewer.getI18n());
         var json = (ObjectNode) viewer.getElement().getPropertyRaw("i18n");
+        var keys = List.of("previousPage", "nextPage", "pageError", "zoomIn",
+                "zoomOut", "pageWidth", "pageFit", "document", "link",
+                "goToPage", "externalLink", "download");
+        Assertions.assertEquals(keys.size(), json.size());
+        keys.forEach(
+                key -> Assertions.assertEquals(key, json.get(key).asString()));
+    }
+
+    @Test
+    void setI18n_unsetPropertiesNotSent() {
+        viewer.setI18n(new PdfViewerI18n().setPreviousPage("Edellinen sivu"));
+
+        var json = (ObjectNode) viewer.getElement().getPropertyRaw("i18n");
+        Assertions.assertEquals(1, json.size());
         Assertions.assertEquals("Edellinen sivu",
                 json.get("previousPage").asString());
-        Assertions.assertEquals("Seuraava sivu",
-                json.get("nextPage").asString());
-        Assertions.assertFalse(json.has("pageError"));
     }
 
     @Test
