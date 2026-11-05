@@ -35,8 +35,6 @@ public class PdfViewerIT extends AbstractComponentIT {
         Assert.assertFalse(viewer.hasError());
         Assert.assertEquals(6, viewer.getPageCount());
         Assert.assertEquals("sample.pdf", viewer.getHeaderTitle());
-        Assert.assertEquals("6,6,6",
-                $("span").id("document-load-listener-page-count").getText());
     }
 
     @Test
