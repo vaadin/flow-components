@@ -13,8 +13,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * The i18n object of {@link PdfViewer}, which translates the texts of the
- * viewer. Texts it does not set keep their defaults.
+ * Translatable texts of {@link PdfViewer}. Unset texts keep their defaults.
  *
  * @see PdfViewer#setI18n(PdfViewerI18n)
  *
@@ -37,21 +36,20 @@ public class PdfViewerI18n implements Serializable {
     private String download;
 
     /**
-     * Gets the tooltip of the previous page button, also used as the accessible
-     * name of a link to the previous page.
+     * Gets the tooltip of the previous page button.
      *
-     * @return the tooltip of the previous page button
+     * @return the tooltip
      */
     public String getPreviousPage() {
         return previousPage;
     }
 
     /**
-     * Sets the tooltip of the previous page button, also used as the accessible
-     * name of a link to the previous page.
+     * Sets the tooltip of the previous page button. Also the accessible name of
+     * links to the previous page.
      *
      * @param previousPage
-     *            the tooltip of the previous page button
+     *            the tooltip
      * @return this instance for method chaining
      */
     public PdfViewerI18n setPreviousPage(String previousPage) {
@@ -60,21 +58,20 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the tooltip of the next page button, also used as the accessible
-     * name of a link to the next page.
+     * Gets the tooltip of the next page button.
      *
-     * @return the tooltip of the next page button
+     * @return the tooltip
      */
     public String getNextPage() {
         return nextPage;
     }
 
     /**
-     * Sets the tooltip of the next page button, also used as the accessible
-     * name of a link to the next page.
+     * Sets the tooltip of the next page button. Also the accessible name of
+     * links to the next page.
      *
      * @param nextPage
-     *            the tooltip of the next page button
+     *            the tooltip
      * @return this instance for method chaining
      */
     public PdfViewerI18n setNextPage(String nextPage) {
@@ -83,24 +80,21 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the error message shown when the user enters a page that does not
-     * exist.
+     * Gets the error message for a page that does not exist.
      *
-     * @return the error message shown when the user enters a page that does not
-     *         exist
+     * @return the error message
      */
     public String getPageError() {
         return pageError;
     }
 
     /**
-     * Sets the error message shown when the user enters a page that does not
-     * exist. The {@code {pageCount}} placeholder is replaced with the number of
-     * pages in the document, for example {@code "Enter 1–{pageCount}"}.
+     * Sets the error message for a page that does not exist.
+     * {@code {pageCount}} is replaced with the page count, for example
+     * {@code "Enter 1–{pageCount}"}.
      *
      * @param pageError
-     *            the error message shown when the user enters a page that does
-     *            not exist
+     *            the error message
      * @return this instance for method chaining
      */
     public PdfViewerI18n setPageError(String pageError) {
@@ -111,7 +105,7 @@ public class PdfViewerI18n implements Serializable {
     /**
      * Gets the tooltip of the zoom in button.
      *
-     * @return the tooltip of the zoom in button
+     * @return the tooltip
      */
     public String getZoomIn() {
         return zoomIn;
@@ -121,7 +115,7 @@ public class PdfViewerI18n implements Serializable {
      * Sets the tooltip of the zoom in button.
      *
      * @param zoomIn
-     *            the tooltip of the zoom in button
+     *            the tooltip
      * @return this instance for method chaining
      */
     public PdfViewerI18n setZoomIn(String zoomIn) {
@@ -132,7 +126,7 @@ public class PdfViewerI18n implements Serializable {
     /**
      * Gets the tooltip of the zoom out button.
      *
-     * @return the tooltip of the zoom out button
+     * @return the tooltip
      */
     public String getZoomOut() {
         return zoomOut;
@@ -142,7 +136,7 @@ public class PdfViewerI18n implements Serializable {
      * Sets the tooltip of the zoom out button.
      *
      * @param zoomOut
-     *            the tooltip of the zoom out button
+     *            the tooltip
      * @return this instance for method chaining
      */
     public PdfViewerI18n setZoomOut(String zoomOut) {
@@ -151,21 +145,19 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the text of the zoom option that fits the page width to the viewer.
+     * Gets the text of the zoom option that fits the page width.
      *
-     * @return the text of the zoom option that fits the page width to the
-     *         viewer
+     * @return the text
      */
     public String getPageWidth() {
         return pageWidth;
     }
 
     /**
-     * Sets the text of the zoom option that fits the page width to the viewer.
+     * Sets the text of the zoom option that fits the page width.
      *
      * @param pageWidth
-     *            the text of the zoom option that fits the page width to the
-     *            viewer
+     *            the text
      * @return this instance for method chaining
      */
     public PdfViewerI18n setPageWidth(String pageWidth) {
@@ -174,23 +166,19 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the text of the zoom option that fits the whole page into the
-     * viewer.
+     * Gets the text of the zoom option that fits the whole page.
      *
-     * @return the text of the zoom option that fits the whole page into the
-     *         viewer
+     * @return the text
      */
     public String getPageFit() {
         return pageFit;
     }
 
     /**
-     * Sets the text of the zoom option that fits the whole page into the
-     * viewer.
+     * Sets the text of the zoom option that fits the whole page.
      *
      * @param pageFit
-     *            the text of the zoom option that fits the whole page into the
-     *            viewer
+     *            the text
      * @return this instance for method chaining
      */
     public PdfViewerI18n setPageFit(String pageFit) {
@@ -199,19 +187,19 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Gets the header title for a document without a file name.
+     * Gets the header title of a document without a file name.
      *
-     * @return the header title for a document without a file name
+     * @return the title
      */
     public String getDocument() {
         return document;
     }
 
     /**
-     * Sets the header title for a document without a file name.
+     * Sets the header title of a document without a file name.
      *
      * @param document
-     *            the header title for a document without a file name
+     *            the title
      * @return this instance for method chaining
      */
     public PdfViewerI18n setDocument(String document) {
@@ -223,8 +211,7 @@ public class PdfViewerI18n implements Serializable {
      * Gets the accessible name of a link without text whose destination is
      * unknown.
      *
-     * @return the accessible name of a link without text whose destination is
-     *         unknown
+     * @return the accessible name
      */
     public String getLink() {
         return link;
@@ -235,8 +222,7 @@ public class PdfViewerI18n implements Serializable {
      * unknown.
      *
      * @param link
-     *            the accessible name of a link without text whose destination
-     *            is unknown
+     *            the accessible name
      * @return this instance for method chaining
      */
     public PdfViewerI18n setLink(String link) {
@@ -247,19 +233,19 @@ public class PdfViewerI18n implements Serializable {
     /**
      * Gets the accessible name of a link without text to another page.
      *
-     * @return the accessible name of a link without text to another page
+     * @return the accessible name
      */
     public String getGoToPage() {
         return goToPage;
     }
 
     /**
-     * Sets the accessible name of a link without text to another page. The
-     * {@code {page}} placeholder is replaced with the page number, for example
+     * Sets the accessible name of a link without text to another page.
+     * {@code {page}} is replaced with the page number, for example
      * {@code "Go to page {page}"}.
      *
      * @param goToPage
-     *            the accessible name of a link without text to another page
+     *            the accessible name
      * @return this instance for method chaining
      */
     public PdfViewerI18n setGoToPage(String goToPage) {
@@ -270,19 +256,19 @@ public class PdfViewerI18n implements Serializable {
     /**
      * Gets the accessible name of a link that opens in a new tab.
      *
-     * @return the accessible name of a link that opens in a new tab
+     * @return the accessible name
      */
     public String getExternalLink() {
         return externalLink;
     }
 
     /**
-     * Sets the accessible name of a link that opens in a new tab. The
-     * {@code {text}} placeholder is replaced with the text of the link, or its
-     * URL, for example {@code "{text} (opens in a new tab)"}.
+     * Sets the accessible name of a link that opens in a new tab.
+     * {@code {text}} is replaced with the link text or URL, for example
+     * {@code "{text} (opens in a new tab)"}.
      *
      * @param externalLink
-     *            the accessible name of a link that opens in a new tab
+     *            the accessible name
      * @return this instance for method chaining
      */
     public PdfViewerI18n setExternalLink(String externalLink) {
@@ -293,7 +279,7 @@ public class PdfViewerI18n implements Serializable {
     /**
      * Gets the tooltip of the download button.
      *
-     * @return the tooltip of the download button
+     * @return the tooltip
      */
     public String getDownload() {
         return download;
@@ -303,7 +289,7 @@ public class PdfViewerI18n implements Serializable {
      * Sets the tooltip of the download button.
      *
      * @param download
-     *            the tooltip of the download button
+     *            the tooltip
      * @return this instance for method chaining
      */
     public PdfViewerI18n setDownload(String download) {
