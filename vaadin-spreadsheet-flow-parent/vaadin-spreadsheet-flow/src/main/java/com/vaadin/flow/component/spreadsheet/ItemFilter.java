@@ -122,7 +122,8 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      */
     @Deprecated(since = "25.3", forRemoval = true)
     protected void initAllItemsCheckbox() {
-        allItems = new Checkbox("(Select All)", true);
+        allItems = new Checkbox();
+        allItems.setValue(true);
         allItems.addValueChangeListener(event -> {
             if (!cancelValueChangeUpdate) {
                 Boolean value = allItems.getValue();
@@ -198,6 +199,8 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
                     .compareToIgnoreCase(s2);
             Collections.sort(filterOptions, byString);
         }
+
+        allItems.setLabel("(Select all " + allCellValues.size() + " items)");
 
         // Hide "Select All" when there are no values to control, i.e. all of
         // this column's values are hidden by other columns' filters.

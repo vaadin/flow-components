@@ -57,12 +57,12 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
         loadTestFixture(TestFixtures.SpreadsheetTable);
         final var cell = getSpreadsheet().getCellAt("B2");
 
-        assertSelectAll(cell);
+        assertSelectAll(cell, 4);
 
         contextClickOnRowHeader(4);
         clickItem("Delete row 4");
 
-        assertSelectAll(cell);
+        assertSelectAll(cell, 3);
     }
 
     @Test
@@ -114,9 +114,9 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
                 getFilterPopup().getSelectedTexts());
     }
 
-    private void assertSelectAll(SheetCellElement cell) {
+    private void assertSelectAll(SheetCellElement cell, int itemCount) {
         cell.popupButtonClick();
-        Assert.assertTrue(hasOption("(Select All)"));
+        Assert.assertTrue(hasOption("(Select all " + itemCount + " items)"));
     }
 
     private CheckboxGroupElement getFilterPopup() {
