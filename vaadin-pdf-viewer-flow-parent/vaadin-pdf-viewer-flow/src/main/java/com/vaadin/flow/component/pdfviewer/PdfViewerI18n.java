@@ -13,7 +13,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * Translatable texts of {@link PdfViewer}. Unset texts keep their defaults.
+ * Translatable texts of {@link PdfViewer}.
  *
  * @see PdfViewer#setI18n(PdfViewerI18n)
  *

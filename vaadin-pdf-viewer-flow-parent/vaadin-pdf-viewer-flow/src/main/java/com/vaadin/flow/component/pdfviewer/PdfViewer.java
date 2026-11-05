@@ -222,9 +222,8 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the i18n object that translates the texts of the viewer. Unset texts
-     * keep their defaults. Changes to the object take effect only when you set
-     * it again.
+     * Sets the i18n object that translates the texts of the viewer. Changes to
+     * the object take effect only when you set it again.
      *
      * @param i18n
      *            the i18n object, not {@code null}
