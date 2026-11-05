@@ -1,6 +1,8 @@
 name: Validation
 
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: '30 23 * * *'
   pull_request:
@@ -26,7 +28,7 @@ on:
         default: ''
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.ref }}
   cancel-in-progress: true
 
 env:
