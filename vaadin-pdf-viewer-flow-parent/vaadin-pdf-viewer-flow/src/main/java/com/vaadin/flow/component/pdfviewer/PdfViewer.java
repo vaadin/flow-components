@@ -108,10 +108,9 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Sets the URL of the document to show. The current document is replaced,
-     * and the new one opens on the first page, unless {@link #setPage(int)} is
-     * called in the same request. {@link DocumentLoadEvent} fires when the
-     * document has loaded, {@link DocumentErrorEvent} if it could not be
-     * loaded.
+     * and the new one opens on the first page. {@link DocumentLoadEvent} fires
+     * when the document has loaded, {@link DocumentErrorEvent} if it could not
+     * be loaded.
      * <p>
      * The browser fetches the document, so the URL must be on the same origin
      * as the application, or the server must allow it with CORS headers. To
@@ -158,23 +157,6 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the current page and scrolls the viewer to it. Pages beyond the end
-     * of the loaded document are ignored.
-     *
-     * @param page
-     *            the page to show, starting from {@code 1}
-     * @throws IllegalArgumentException
-     *             if the page is less than {@code 1}
-     */
-    public void setPage(int page) {
-        if (page < 1) {
-            throw new IllegalArgumentException(
-                    "The page should be greater than or equal to 1");
-        }
-        getElement().setProperty("page", page);
-    }
-
-    /**
      * Gets a read-only signal with the current page, which is the page that
      * takes up most of the visible area.
      *
@@ -205,8 +187,7 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Adds a listener that is called when the current page changes, either by
-     * the user or by {@link #setPage(int)}.
+     * Adds a listener that is called when the current page changes.
      *
      * @param listener
      *            the listener to add, not {@code null}

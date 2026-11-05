@@ -36,12 +36,6 @@ class PdfViewerSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void pageSignal_setPage_signalUpdated() {
-        viewer.setPage(3);
-        Assertions.assertEquals(3, viewer.pageSignal().peek());
-    }
-
-    @Test
     void pageSignal_pageChangedOnClient_signalUpdated() {
         fakeClientPropertyChange("page", 4.0);
         Assertions.assertEquals(4, viewer.pageSignal().peek());

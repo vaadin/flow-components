@@ -107,42 +107,6 @@ class PdfViewerTest {
     }
 
     @Test
-    void setPage_propertySet() {
-        viewer.setPage(3);
-        Assertions.assertEquals(3, viewer.getElement().getProperty("page", 0));
-        Assertions.assertEquals(3, viewer.getPage());
-    }
-
-    @Test
-    void setPage_lessThanOne_throws() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> viewer.setPage(0));
-    }
-
-    @Test
-    void setPage_pageChangeEventFired() {
-        var events = new ArrayList<PageChangeEvent>();
-        viewer.addPageChangeListener(events::add);
-
-        viewer.setPage(3);
-
-        Assertions.assertEquals(1, events.size());
-        Assertions.assertFalse(events.get(0).isFromClient());
-        Assertions.assertEquals(3, events.get(0).getPage());
-    }
-
-    @Test
-    void setSamePage_pageChangeEventNotFired() {
-        viewer.setPage(3);
-        var events = new ArrayList<PageChangeEvent>();
-        viewer.addPageChangeListener(events::add);
-
-        viewer.setPage(3);
-
-        Assertions.assertTrue(events.isEmpty());
-    }
-
-    @Test
     void pageChangedOnClient_pageChangeEventFired() {
         var events = new ArrayList<PageChangeEvent>();
         viewer.addPageChangeListener(events::add);
