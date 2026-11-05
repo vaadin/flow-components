@@ -304,7 +304,10 @@ public class AIOrchestrator implements Serializable {
      * </p>
      * <p>
      * If a request is already being processed, this method logs a warning and
-     * returns without processing the new prompt.
+     * returns without processing the new prompt. Unlike
+     * {@link #prompt(String)}, it is not ignored while a file is still being
+     * uploaded to the file receiver, since it does not take attachments from
+     * the receiver.
      * </p>
      * <p>
      * An interceptor configured via
