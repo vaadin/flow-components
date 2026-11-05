@@ -148,6 +148,9 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Gets the current page, which is the page that takes up most of the
      * visible area. The default value is {@code 1}.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
      *
      * @return the current page, starting from {@code 1}
      */
@@ -159,6 +162,9 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Gets a read-only signal with the current page, which is the page that
      * takes up most of the visible area.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
      *
      * @return a read-only signal with the current page, starting from {@code 1}
      */
@@ -168,6 +174,9 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Gets the number of pages in the document.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
      *
      * @return the number of pages, or {@code 0} if no document is loaded
      */
@@ -179,6 +188,9 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Gets a read-only signal with the number of pages in the document, or
      * {@code 0} if no document is loaded.
+     * <p>
+     * The value comes from the browser and must not be trusted for security
+     * decisions.
      *
      * @return a read-only signal with the number of pages
      */
