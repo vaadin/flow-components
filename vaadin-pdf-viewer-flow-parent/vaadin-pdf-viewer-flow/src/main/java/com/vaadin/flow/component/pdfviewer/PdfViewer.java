@@ -17,6 +17,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -24,6 +25,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -39,6 +41,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  *         DownloadHandler.forClassResource(getClass(), "report.pdf"));
  * viewer.setHeight("600px");
  * </pre>
+ * <p>
+ * The toolbar above the pages has built-in controls for moving between pages.
+ * You can add your own controls, such as a button, at the end of the toolbar
+ * with {@link #getToolbarActions()}.
  * <p>
  * This component is experimental and needs to be enabled with the
  * {@code com.vaadin.experimental.pdfViewerComponent} feature flag, either in
@@ -59,6 +65,8 @@ public class PdfViewer extends Component implements HasSize {
 
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
+
+    private ToolbarActions toolbarActions;
 
     /**
      * Creates a PDF viewer without a document.
@@ -210,6 +218,24 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Gets the area at the end of the toolbar where you can add your own
+     * controls, such as a button. It is empty by default.
+     *
+     * <pre>
+     * viewer.getToolbarActions().add(button);
+     * </pre>
+     *
+     * @return the toolbar actions
+     */
+    public ToolbarActions getToolbarActions() {
+        if (toolbarActions == null) {
+            toolbarActions = new ToolbarActions();
+            getElement().appendChild(toolbarActions.getElement());
+        }
+        return toolbarActions;
+    }
+
+    /**
      * Adds a listener that is called when the current page changes.
      *
      * @param listener
@@ -257,6 +283,27 @@ public class PdfViewer extends Component implements HasSize {
         if (!featureFlags
                 .isEnabled(PdfViewerFeatureFlagProvider.PDF_VIEWER_COMPONENT)) {
             throw new PdfViewerExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * The area at the end of the toolbar of a {@link PdfViewer} that holds your
+     * own controls, such as a button.
+     *
+     * @see PdfViewer#getToolbarActions()
+     */
+    public static final class ToolbarActions implements HasComponents {
+        private final Element root;
+
+        private ToolbarActions() {
+            root = new Element("div");
+            root.setAttribute("slot", "toolbar-actions");
+            root.getStyle().set("display", "contents");
+        }
+
+        @Override
+        public Element getElement() {
+            return root;
         }
     }
 
