@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
@@ -52,8 +54,9 @@ class PdfViewerSignalTest extends AbstractSignalsTest {
     }
 
     @Test
-    void pageCountSignal_pageCountChangedOnClient_signalUpdated() {
-        fakeClientPropertyChange("pageCount", 6.0);
+    void pageCountSignal_documentLoaded_signalUpdated() {
+        ComponentUtil.fireEvent(viewer,
+                new DocumentLoadEvent(viewer, true, 6, ""));
         Assertions.assertEquals(6, viewer.pageCountSignal().peek());
     }
 

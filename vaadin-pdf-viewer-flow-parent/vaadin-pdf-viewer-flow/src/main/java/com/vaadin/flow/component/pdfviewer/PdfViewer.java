@@ -68,8 +68,12 @@ public class PdfViewer extends Component implements HasSize {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated()));
         });
-        getElement().addPropertyChangeListener("pageCount",
-                event -> pageCountSignal.set(getPageCount()));
+        // The page count is not synchronized from the client, because users
+        // can not change it. It is taken from the document events instead,
+        // which also makes it up to date in document load listeners.
+        addDocumentLoadListener(
+                event -> pageCountSignal.set(event.getPageCount()));
+        addDocumentErrorListener(event -> pageCountSignal.set(0));
     }
 
     /**
@@ -127,7 +131,7 @@ public class PdfViewer extends Component implements HasSize {
         } else {
             getElement().setAttribute("src", src);
         }
-        resetPage();
+        resetDocumentState();
     }
 
     /**
@@ -145,19 +149,14 @@ public class PdfViewer extends Component implements HasSize {
         Objects.requireNonNull(downloadHandler,
                 "The download handler should not be null");
         getElement().setAttribute("src", downloadHandler.allowDisabled());
-        resetPage();
+        resetDocumentState();
     }
 
-    /**
-     * Resets the page to the first one when the document changes. The web
-     * component does this on its own, but a page left over on the server would
-     * be sent to a new client element together with the new document, for
-     * example after the viewer is detached and attached again.
-     */
-    private void resetPage() {
+    private void resetDocumentState() {
         if (getPage() != 1) {
             getElement().setProperty("page", 1);
         }
+        pageCountSignal.set(0);
     }
 
     /**
@@ -195,9 +194,8 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the number of pages, or {@code 0} if no document is loaded
      */
-    @Synchronize(property = "pageCount", value = "page-count-changed", allowUpdates = DisabledUpdateMode.ALWAYS)
     public int getPageCount() {
-        return getElement().getProperty("pageCount", 0);
+        return pageCountSignal.peek();
     }
 
     /**

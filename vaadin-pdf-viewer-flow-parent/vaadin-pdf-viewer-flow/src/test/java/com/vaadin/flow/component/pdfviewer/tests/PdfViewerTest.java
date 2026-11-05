@@ -88,7 +88,7 @@ class PdfViewerTest {
 
     @Test
     void setSrc_downloadHandler_disabledUpdateModeIsAlways() {
-        var element = Mockito.mock(Element.class);
+        var element = Mockito.mock(Element.class, Mockito.RETURNS_DEEP_STUBS);
         var viewer = new PdfViewer() {
             @Override
             public Element getElement() {
@@ -177,15 +177,53 @@ class PdfViewerTest {
     }
 
     @Test
-    void pageCountChangedOnClient_pageCountUpdated() {
-        fakeClientPropertyChange("pageCount", 6);
+    void pageCountNotSynchronized() {
+        Assertions.assertNull(getSynchronizationMode("pageCount"));
+    }
+
+    @Test
+    void documentLoaded_pageCountUpdated() {
+        fireDocumentLoad(6);
         Assertions.assertEquals(6, viewer.getPageCount());
     }
 
     @Test
-    void pageCountSynchronizedOnPageCountChangedEvent() {
-        Assertions.assertTrue(getSyncExpressions("page-count-changed").contains(
-                JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "pageCount"));
+    void documentLoaded_pageCountUpdatedBeforeDocumentLoadListener() {
+        var pageCount = new AtomicReference<Integer>();
+        viewer.addDocumentLoadListener(
+                event -> pageCount.set(viewer.getPageCount()));
+
+        fireDocumentLoad(6);
+
+        Assertions.assertEquals(6, pageCount.get());
+    }
+
+    @Test
+    void documentLoaded_documentError_pageCountReset() {
+        fireDocumentLoad(6);
+
+        ComponentUtil.fireEvent(viewer,
+                new DocumentErrorEvent(viewer, true, "invalid"));
+
+        Assertions.assertEquals(0, viewer.getPageCount());
+    }
+
+    @Test
+    void documentLoaded_setSrc_pageCountReset() {
+        fireDocumentLoad(6);
+
+        viewer.setSrc("report.pdf");
+
+        Assertions.assertEquals(0, viewer.getPageCount());
+    }
+
+    @Test
+    void documentLoaded_setSrcDownloadHandler_pageCountReset() {
+        fireDocumentLoad(6);
+
+        viewer.setSrc(createDownloadHandler());
+
+        Assertions.assertEquals(0, viewer.getPageCount());
     }
 
     @Test
@@ -243,12 +281,6 @@ class PdfViewerTest {
     }
 
     @Test
-    void pageCountSynchronizedWhenDisabled() {
-        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
-                getSynchronizationMode("pageCount"));
-    }
-
-    @Test
     void disabledParent_documentLoadListener_eventFired() {
         var eventRef = new AtomicReference<DocumentLoadEvent>();
         viewer.addDocumentLoadListener(eventRef::set);
@@ -288,6 +320,11 @@ class PdfViewerTest {
     private Set<String> getSyncExpressions(String eventName) {
         return viewer.getElement().getNode()
                 .getFeature(ElementListenerMap.class).getExpressions(eventName);
+    }
+
+    private void fireDocumentLoad(int pageCount) {
+        ComponentUtil.fireEvent(viewer,
+                new DocumentLoadEvent(viewer, true, pageCount, ""));
     }
 
     private DisabledUpdateMode getSynchronizationMode(String property) {
