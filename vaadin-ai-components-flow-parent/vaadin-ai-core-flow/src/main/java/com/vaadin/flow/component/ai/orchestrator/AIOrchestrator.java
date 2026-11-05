@@ -260,7 +260,10 @@ public class AIOrchestrator implements Serializable {
      * </p>
      * <p>
      * If a request is already being processed, this method logs a warning and
-     * returns without processing the new prompt.
+     * returns without processing the new prompt. The same applies while a file
+     * is still being uploaded to an {@link UploadManager} or {@link Upload}
+     * configured as the file receiver, so that the file is not left out of the
+     * prompt.
      * </p>
      * <p>
      * An interceptor configured via
@@ -523,6 +526,10 @@ public class AIOrchestrator implements Serializable {
                     "AIOrchestrator needs to be reconnected after "
                             + "deserialization. Call reconnect(provider) first.");
         }
+        if (explicitAttachments == null && isFileReceiverUploading()) {
+            LOGGER.warn("Ignoring prompt: a file is still being uploaded");
+            return;
+        }
         if (!isProcessing.compareAndSet(false, true)) {
             LOGGER.warn(
                     "Ignoring prompt: another request is already in progress");
@@ -764,6 +771,21 @@ public class AIOrchestrator implements Serializable {
             LOGGER.warn("Postponed prompt abandoned: its UI was detached "
                     + "before interception completed");
         }).run();
+    }
+
+    /**
+     * Sending while a file is still uploading would leave the file out of the
+     * prompt and clear it from the file list, while the upload goes on and the
+     * file would then be sent with a later prompt.
+     */
+    private boolean isFileReceiverUploading() {
+        if (fileReceiver instanceof UploadManagerWrapper w) {
+            return w.isUploading();
+        }
+        if (fileReceiver instanceof UploadWrapper w) {
+            return w.isUploading();
+        }
+        return false;
     }
 
     private List<AIAttachment> getAttachmentsToProcess(
@@ -1306,6 +1328,10 @@ public class AIOrchestrator implements Serializable {
         /**
          * Sets the file receiver component using a Flow UploadManager. The
          * provided manager should not have an UploadHandler set beforehand.
+         * <p>
+         * While a file is being uploaded, prompts from the input and from
+         * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
+         * is not left out of the prompt.
          *
          * @param uploadManager
          *            the Flow UploadManager
@@ -1329,6 +1355,10 @@ public class AIOrchestrator implements Serializable {
          * Sets the file receiver component using a Flow Upload component. The
          * provided upload should not have an UploadHandler or a Receiver set
          * beforehand.
+         * <p>
+         * While a file is being uploaded, prompts from the input and from
+         * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
+         * is not left out of the prompt.
          *
          * @param upload
          *            the Flow Upload component
