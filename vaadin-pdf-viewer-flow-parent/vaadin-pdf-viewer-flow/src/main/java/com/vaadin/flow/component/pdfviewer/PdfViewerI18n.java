@@ -45,8 +45,9 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Sets the tooltip of the previous page button. Also the accessible name of
-     * links to the previous page.
+     * Sets the tooltip of the previous page button. The viewer also uses it as
+     * the accessible name of links in the document that go to the previous
+     * page.
      *
      * @param previousPage
      *            the tooltip
@@ -67,8 +68,8 @@ public class PdfViewerI18n implements Serializable {
     }
 
     /**
-     * Sets the tooltip of the next page button. Also the accessible name of
-     * links to the next page.
+     * Sets the tooltip of the next page button. The viewer also uses it as the
+     * accessible name of links in the document that go to the next page.
      *
      * @param nextPage
      *            the tooltip
