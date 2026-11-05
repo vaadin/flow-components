@@ -680,7 +680,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
         // the auto-closing logic to before client response, which is not called
         // when reloading the page. This also prevents an exception when trying
         // to remove an auto-added notification from its parent.
-        detachEvent.getUI().beforeClientResponse(this, executionContext -> {
+        // The task is registered for the UI, as a task registered for the
+        // detached notification would only run once it gets attached again.
+        UI ui = detachEvent.getUI();
+        ui.beforeClientResponse(ui, executionContext -> {
             // Close the notification, and remove it from its parent if it was
             // auto-added. This ensures that the notification doesn't re-open
             // itself when its parent, for example a dialog, gets attached
