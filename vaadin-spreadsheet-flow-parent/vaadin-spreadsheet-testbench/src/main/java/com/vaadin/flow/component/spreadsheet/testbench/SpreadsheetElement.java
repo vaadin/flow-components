@@ -64,36 +64,9 @@ public class SpreadsheetElement extends TestBenchElement {
         // the same col/row/cell class names as the cell being edited. The
         // div prefix keeps the editor from being matched as a second cell.
         String selector = String.format("div.col%d.row%d.cell", column, row);
-        String mergedSelector = selector + ".merged-cell";
-        // Single async JS call to find the cell, preferring merged cell
-        // when multiple matches exist. Polls to handle cases where the
-        // cell hasn't been rendered yet (e.g. after scrolling).
-        WebElement cell = (WebElement) getCommandExecutor().getDriver()
-                .executeAsyncScript(
-                        """
-                                const root = arguments[0].shadowRoot
-                                    .querySelector('.v-spreadsheet');
-                                const selector = arguments[1];
-                                const mergedSelector = arguments[2];
-                                const callback = arguments[arguments.length - 1];
-
-                                const MAX_ATTEMPTS = 50;
-                                const delay = () => new Promise(r => setTimeout(r, 100));
-
-                                for (let i = 0; i < MAX_ATTEMPTS; i++) {
-                                    const cells = root.querySelectorAll(selector);
-                                    if (cells.length > 1) {
-                                        callback(root.querySelector(mergedSelector));
-                                        return;
-                                    } else if (cells.length === 1) {
-                                        callback(cells[0]);
-                                        return;
-                                    }
-                                    await delay();
-                                }
-                                callback(null);
-                                """,
-                        this, selector, mergedSelector);
+        // Prefer the merged cell when multiple matches exist
+        WebElement cell = waitForElementInShadowRoot(selector,
+                selector + ".merged-cell");
         if (cell == null) {
             throw new NoSuchElementException(
                     "Cell not found: row=" + row + ", column=" + column);
@@ -126,11 +99,12 @@ public class SpreadsheetElement extends TestBenchElement {
      * @param rowIndex
      *            Index of target row, 1-based
      * @return Header of the row at the given index
+     * @throws NoSuchElementException
+     *             if the row header is not found.
      */
     public SheetHeaderElement getRowHeader(int rowIndex) {
-        TestBenchElement cell = (TestBenchElement) findElementInShadowRoot(
-                By.cssSelector(String.format(".rh.row%d", rowIndex)));
-        return cell.wrap(SheetHeaderElement.class);
+        return getHeader(String.format(".rh.row%d", rowIndex),
+                "Row header not found: row=" + rowIndex);
     }
 
     /**
@@ -139,11 +113,63 @@ public class SpreadsheetElement extends TestBenchElement {
      * @param columnIndex
      *            Index of target column, 1-based
      * @return Header of the column at the given index
+     * @throws NoSuchElementException
+     *             if the column header is not found.
      */
     public SheetHeaderElement getColumnHeader(int columnIndex) {
-        TestBenchElement cell = (TestBenchElement) findElementInShadowRoot(
-                By.cssSelector(String.format(".ch.col%d", columnIndex)));
-        return cell.wrap(SheetHeaderElement.class);
+        return getHeader(String.format(".ch.col%d", columnIndex),
+                "Column header not found: column=" + columnIndex);
+    }
+
+    private SheetHeaderElement getHeader(String selector,
+            String notFoundMessage) {
+        WebElement header = waitForElementInShadowRoot(selector, selector);
+        if (header == null) {
+            throw new NoSuchElementException(notFoundMessage);
+        }
+        return wrapElement(header, getCommandExecutor())
+                .wrap(SheetHeaderElement.class);
+    }
+
+    /**
+     * Finds an element in the spreadsheet's shadow root with a single async
+     * script call that polls until the element is rendered, e.g. after
+     * scrolling, as rows and columns are rendered asynchronously.
+     *
+     * @param selector
+     *            CSS selector of the element
+     * @param preferredSelector
+     *            CSS selector of the element to return if {@code selector}
+     *            matches more than one element
+     * @return the element, or {@code null} if it is not rendered in time
+     */
+    private WebElement waitForElementInShadowRoot(String selector,
+            String preferredSelector) {
+        return (WebElement) getCommandExecutor().getDriver().executeAsyncScript(
+                """
+                        const root = arguments[0].shadowRoot
+                            .querySelector('.v-spreadsheet');
+                        const selector = arguments[1];
+                        const preferredSelector = arguments[2];
+                        const callback = arguments[arguments.length - 1];
+
+                        const MAX_ATTEMPTS = 50;
+                        const delay = () => new Promise(r => setTimeout(r, 100));
+
+                        for (let i = 0; i < MAX_ATTEMPTS; i++) {
+                            const elements = root.querySelectorAll(selector);
+                            if (elements.length > 1) {
+                                callback(root.querySelector(preferredSelector));
+                                return;
+                            } else if (elements.length === 1) {
+                                callback(elements[0]);
+                                return;
+                            }
+                            await delay();
+                        }
+                        callback(null);
+                        """,
+                this, selector, preferredSelector);
     }
 
     /**

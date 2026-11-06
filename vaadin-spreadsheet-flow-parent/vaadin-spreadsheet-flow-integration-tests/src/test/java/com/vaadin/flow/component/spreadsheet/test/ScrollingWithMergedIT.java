@@ -29,8 +29,7 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void scrolling_mergedCellsAtTop_notMovedToTheBottom()
-            throws Exception {
+    public void scrolling_mergedCellsAtTop_notMovedToTheBottom() {
         loadFile("mergedA1B2.xlsx");
 
         final SpreadsheetElement spreadsheetElement = getSpreadsheet();
@@ -39,7 +38,6 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
         spreadsheetElement
                 .scroll(findElementInShadowRoot(By.className("floater"))
                         .getSize().height + 100);
-        Thread.sleep(1000);
 
         try {
             spreadsheetElement.getCellAt("A200");
@@ -59,8 +57,7 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void scrolling_mergedCellsAtRight_notMovedToTheLeft()
-            throws Exception {
+    public void scrolling_mergedCellsAtRight_notMovedToTheLeft() {
         loadFile("mergedAY1AZ2.xlsx");
 
         final SpreadsheetElement spreadsheetElement = $(
@@ -72,13 +69,11 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
         int scrollLeft = findElementInShadowRoot(By.className("floater"))
                 .getSize().width + 100;
         spreadsheetElement.scrollLeft(scrollLeft);
-        Thread.sleep(1000);
 
         Assert.assertNotNull(spreadsheetElement.getCellAt("AY1"));
 
         // scroll back to left
         spreadsheetElement.scrollLeft(-scrollLeft);
-        Thread.sleep(1000);
 
         try {
             spreadsheetElement.getCellAt("A1");
