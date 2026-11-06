@@ -63,8 +63,6 @@ public class PdfViewer extends Component implements HasSize {
      * Creates a PDF viewer without a document.
      */
     public PdfViewer() {
-        // Set the default so that the client does not sync it to the server on
-        // the first render, which would fire a change event
         getElement().setProperty("page", 1);
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
