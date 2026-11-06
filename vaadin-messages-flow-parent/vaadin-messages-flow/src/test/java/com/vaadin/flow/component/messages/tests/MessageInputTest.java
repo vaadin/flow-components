@@ -27,6 +27,11 @@ import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+
+import tools.jackson.databind.node.ObjectNode;
 
 class MessageInputTest {
 
@@ -73,6 +78,102 @@ class MessageInputTest {
     }
 
     @Test
+    void submitDisabled() {
+        Assertions.assertFalse(messageInput.isSubmitDisabled());
+        Assertions.assertFalse(
+                messageInput.getElement().getProperty("submitDisabled", false));
+
+        messageInput.setSubmitDisabled(true);
+        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        Assertions.assertTrue(
+                messageInput.getElement().getProperty("submitDisabled", false));
+
+        messageInput.setSubmitDisabled(false);
+        Assertions.assertFalse(messageInput.isSubmitDisabled());
+        Assertions.assertFalse(
+                messageInput.getElement().getProperty("submitDisabled", true));
+    }
+
+    @Test
+    void submitDisabled_submitFromClient_listenerNotCalled() {
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
+        messageInput.addSubmitListener(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+
+        submitFromClient("foo");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
+    void submitDisabled_constructorListener_submitFromClient_listenerNotCalled() {
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
+        messageInput = new MessageInput(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+
+        submitFromClient("foo");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
+    void submitDisabled_fireServerEvent_listenerCalled() {
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
+        messageInput.addSubmitListener(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+
+        MessageInput.SubmitEvent event = new MessageInput.SubmitEvent(
+                messageInput, false, "foo");
+        ComponentUtil.fireEvent(messageInput, event);
+        Assertions.assertSame(event, eventRef.get());
+    }
+
+    @Test
+    void submitReEnabled_submitFromClient_listenerCalled() {
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
+        messageInput.addSubmitListener(eventRef::set);
+        messageInput.setSubmitDisabled(true);
+        messageInput.setSubmitDisabled(false);
+
+        submitFromClient("foo");
+        Assertions.assertEquals("foo", eventRef.get().getValue());
+    }
+
+    @Test
+    void listenerDisablesSubmit_submitFromClient_laterListenerCalled() {
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
+        messageInput.addSubmitListener(
+                event -> messageInput.setSubmitDisabled(true));
+        messageInput.addSubmitListener(eventRef::set);
+
+        submitFromClient("foo");
+        Assertions.assertEquals("foo", eventRef.get().getValue());
+
+        eventRef.set(null);
+        submitFromClient("bar");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
+    void listenerEnablesSubmit_submitFromClient_laterListenerNotCalled() {
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
+        messageInput.setSubmitDisabled(true);
+        messageInput.addSubmitListener(
+                event -> messageInput.setSubmitDisabled(false));
+        messageInput.addSubmitListener(eventRef::set);
+
+        submitFromClient("foo");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
+    void removeSubmitListener_submitFromClient_listenerNotCalled() {
+        AtomicReference<MessageInput.SubmitEvent> eventRef = new AtomicReference<>();
+        messageInput.addSubmitListener(eventRef::set).remove();
+
+        submitFromClient("foo");
+        Assertions.assertNull(eventRef.get());
+    }
+
+    @Test
     void implementsHasTooltip() {
         Assertions.assertTrue(messageInput instanceof HasTooltip);
     }
@@ -88,5 +189,13 @@ class MessageInputTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(MessageInput.class));
+    }
+
+    private void submitFromClient(String value) {
+        ObjectNode eventData = JacksonUtils.createObjectNode();
+        eventData.put("event.detail.value", value);
+        messageInput.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(messageInput.getElement(), "submit",
+                        eventData));
     }
 }
