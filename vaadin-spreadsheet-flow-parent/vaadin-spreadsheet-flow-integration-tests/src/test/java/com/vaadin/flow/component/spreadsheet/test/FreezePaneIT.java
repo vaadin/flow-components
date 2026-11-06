@@ -213,9 +213,8 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         // Scroll all the way down
         getSpreadsheet().scroll(10000);
 
-        // The sheet renders the new rows in its scroll event handler, which
-        // the browser fires asynchronously after scrollTop has been set, so
-        // wait for the last row header (by default, there are 200 rows)
+        // Check that the last row header is visible
+        // By default, there are 200 rows
         waitUntil(driver -> !findElementsInShadowRoot(
                 By.cssSelector(".rh.row200")).isEmpty());
         var bottommostHeader = findElementInShadowRoot(
