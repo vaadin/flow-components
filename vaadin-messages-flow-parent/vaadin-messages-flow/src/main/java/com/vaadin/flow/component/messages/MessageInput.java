@@ -57,6 +57,14 @@ public class MessageInput extends Component
     private MessageInputI18n i18n;
 
     /**
+     * Whether submitting was disabled when the latest submit event arrived from
+     * the client. Stored once per event so that all submit listeners handle the
+     * event in the same way, even if a listener changes
+     * {@link #setSubmitDisabled(boolean)}.
+     */
+    private boolean ignoreClientSubmit;
+
+    /**
      * The {@code submit} event which is fired by {@link MessageInput}
      * component.
      */
@@ -95,6 +103,10 @@ public class MessageInput extends Component
      * Creates a new message input component.
      */
     public MessageInput() {
+        // Registered before any submit listener, so it runs first for each
+        // submit event from the client
+        getElement().addEventListener("submit",
+                event -> ignoreClientSubmit = isSubmitDisabled());
     }
 
     /**
@@ -106,6 +118,7 @@ public class MessageInput extends Component
      * @see #addSubmitListener(ComponentEventListener)
      */
     public MessageInput(ComponentEventListener<SubmitEvent> listener) {
+        this();
         addSubmitListener(listener);
     }
 
@@ -114,7 +127,9 @@ public class MessageInput extends Component
      * input field, which can be obtained with {@link SubmitEvent#getValue()}.
      * <p>
      * The event is fired when clicking the Send button or pressing the Enter
-     * key.
+     * key. The event is not fired while submitting is disabled with
+     * {@link #setSubmitDisabled(boolean)}. If a listener disables submitting,
+     * the remaining listeners still receive the current event.
      *
      * @param listener
      *            the listener
@@ -122,7 +137,38 @@ public class MessageInput extends Component
      */
     public Registration addSubmitListener(
             ComponentEventListener<SubmitEvent> listener) {
-        return addListener(SubmitEvent.class, listener);
+        return addListener(SubmitEvent.class, event -> {
+            if (event.isFromClient() && ignoreClientSubmit) {
+                return;
+            }
+            listener.onComponentEvent(event);
+        });
+    }
+
+    /**
+     * Gets whether submitting a message is disabled.
+     *
+     * @return {@code true} if submitting is disabled, {@code false} otherwise
+     * @see #setSubmitDisabled(boolean)
+     */
+    public boolean isSubmitDisabled() {
+        return getElement().getProperty("submitDisabled", false);
+    }
+
+    /**
+     * Sets whether submitting a message is disabled. When disabled, the Send
+     * button is disabled and pressing the Enter key does not submit the
+     * message. Unlike {@link #setEnabled(boolean)}, you can still type in the
+     * input field, and the typed text is kept. Use this, for example, to
+     * prevent sending a message while a file is still uploading.
+     * <p>
+     * The default value is {@code false}.
+     *
+     * @param submitDisabled
+     *            {@code true} to disable submitting, {@code false} to enable it
+     */
+    public void setSubmitDisabled(boolean submitDisabled) {
+        getElement().setProperty("submitDisabled", submitDisabled);
     }
 
     /**
