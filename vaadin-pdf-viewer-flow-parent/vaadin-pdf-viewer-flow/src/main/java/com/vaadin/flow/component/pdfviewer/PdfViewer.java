@@ -283,8 +283,7 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Container for your own controls in the {@link PdfViewer} toolbar, before
-     * the download button.
+     * Container for your own controls in the {@link PdfViewer} toolbar.
      *
      * @see PdfViewer#getToolbarActions()
      */
