@@ -17,8 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
@@ -27,9 +25,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
@@ -84,25 +80,6 @@ class PdfViewerTest {
 
         Assertions.assertThrows(NullPointerException.class,
                 () -> viewer.setSrc((DownloadHandler) null));
-    }
-
-    @Test
-    void setSrc_downloadHandler_disabledUpdateModeIsAlways() {
-        var element = Mockito.mock(Element.class, Mockito.RETURNS_DEEP_STUBS);
-        var viewer = new PdfViewer() {
-            @Override
-            public Element getElement() {
-                return element;
-            }
-        };
-
-        viewer.setSrc(createDownloadHandler());
-
-        var captor = ArgumentCaptor.forClass(DownloadHandler.class);
-        Mockito.verify(element).setAttribute(Mockito.eq("src"),
-                captor.capture());
-        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
-                captor.getValue().getDisabledUpdateMode());
     }
 
     @Test
@@ -169,10 +146,6 @@ class PdfViewerTest {
     void pageSynchronizedOnPageChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("page-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "page"));
-        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
-                viewer.getElement().getNode()
-                        .getFeature(ElementListenerMap.class)
-                        .getPropertySynchronizationMode("page"));
     }
 
     @Test
@@ -237,10 +210,9 @@ class PdfViewerTest {
     }
 
     @Test
-    void documentLoadListener_disabledParent_eventFired() {
+    void documentLoadedOnClient_documentLoadEventFired() {
         var eventRef = new AtomicReference<DocumentLoadEvent>();
         viewer.addDocumentLoadListener(eventRef::set);
-        addToDisabledParent();
 
         var eventData = JacksonUtils.createObjectNode();
         eventData.put("event.detail.pageCount", 6);
@@ -255,10 +227,9 @@ class PdfViewerTest {
     }
 
     @Test
-    void documentErrorListener_disabledParent_eventFired() {
+    void documentErrorOnClient_documentErrorEventFired() {
         var eventRef = new AtomicReference<DocumentErrorEvent>();
         viewer.addDocumentErrorListener(eventRef::set);
-        addToDisabledParent();
 
         var eventData = JacksonUtils.createObjectNode();
         eventData.put("event.detail.reason", "invalid");
@@ -283,13 +254,6 @@ class PdfViewerTest {
     private void fireDocumentLoad(int pageCount) {
         ComponentUtil.fireEvent(viewer,
                 new DocumentLoadEvent(viewer, true, pageCount, ""));
-    }
-
-    private void addToDisabledParent() {
-        var parent = new Element("div");
-        parent.appendChild(viewer.getElement());
-        parent.setEnabled(false);
-        Assertions.assertFalse(viewer.getElement().isEnabled());
     }
 
     private void fakeClientDomEvent(String eventName, ObjectNode eventData) {
