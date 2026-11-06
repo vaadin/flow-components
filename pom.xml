@@ -410,6 +410,16 @@
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
                         <skip>${skipUnitTests}</skip>
+                        <!-- Fail a hung test with a stack trace instead of
+                             blocking the build. Only works for code that
+                             reacts to an interrupt. -->
+                        <properties>
+                            <configurationParameters>junit.jupiter.execution.timeout.default = 2 m
+                                junit.jupiter.execution.timeout.mode = disabled_on_debug</configurationParameters>
+                        </properties>
+                        <!-- Kill a test JVM that still hangs, for example in a
+                             busy loop or a deadlock -->
+                        <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
                     </configuration>
                 </plugin>
                 <plugin>
