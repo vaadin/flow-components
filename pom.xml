@@ -96,7 +96,7 @@
             it on its own. -->
         <jandex.format.version>13</jandex.format.version>
         <spotless.plugin.version>3.10.4</spotless.plugin.version>
-        <checkstyle.version>14.3.0</checkstyle.version>
+        <checkstyle.version>14.4.0</checkstyle.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
@@ -113,7 +113,7 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.1.2</spring-data-commons.version>
         <reactor-core.version>3.8.8</reactor-core.version>
-        <langchain4j.version>1.22.0</langchain4j.version>
+        <langchain4j.version>1.23.0</langchain4j.version>
         <spring-ai.version>2.0.2</spring-ai.version>
         <slf4j.version>2.0.20</slf4j.version>
         <junit.version>4.13.2</junit.version>
@@ -419,6 +419,16 @@
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
                         <skip>${skipUnitTests}</skip>
+                        <!-- Fail a hung test with a stack trace instead of
+                             blocking the build. Only works for code that
+                             reacts to an interrupt. -->
+                        <properties>
+                            <configurationParameters>junit.jupiter.execution.timeout.default = 2 m
+                                junit.jupiter.execution.timeout.mode = disabled_on_debug</configurationParameters>
+                        </properties>
+                        <!-- Kill a test JVM that still hangs, for example in a
+                             busy loop or a deadlock -->
+                        <forkedProcessTimeoutInSeconds>600</forkedProcessTimeoutInSeconds>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -546,7 +556,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.3</version>
+                    <version>3.7.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

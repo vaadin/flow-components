@@ -14,6 +14,7 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.requestEvent;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,13 +38,18 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
+import com.vaadin.flow.component.ai.form.FormTestFields.BigIntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
+import com.vaadin.flow.component.ai.form.FormTestFields.ByteField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateTimeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
+import com.vaadin.flow.component.ai.form.FormTestFields.FloatField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.LabeledStringField;
+import com.vaadin.flow.component.ai.form.FormTestFields.LongField;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.ShortField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
@@ -241,6 +247,94 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_writesLongToLongField() {
+        var field = new LongField();
+        fillFormPayload(controllerFor(field), payload(field, "3"));
+
+        Assertions.assertEquals(3L, field.getValue());
+    }
+
+    @Test
+    void fillForm_writesLargeLongToLongField() {
+        var field = new LongField();
+        fillFormPayload(controllerFor(field),
+                payload(field, "9007199254740993"));
+
+        Assertions.assertEquals(9007199254740993L, field.getValue());
+    }
+
+    @Test
+    void fillForm_writesShortToShortField() {
+        var field = new ShortField();
+        fillFormPayload(controllerFor(field), payload(field, "3.0"));
+
+        Assertions.assertEquals((short) 3, field.getValue());
+    }
+
+    @Test
+    void fillForm_rejectsOutOfRangeValueForShortField() {
+        var field = new ShortField();
+        field.setValue((short) 42);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "40000"));
+
+        Assertions.assertEquals((short) 42, field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_writesByteToByteField() {
+        var field = new ByteField();
+        fillFormPayload(controllerFor(field), payload(field, "3"));
+
+        Assertions.assertEquals((byte) 3, field.getValue());
+    }
+
+    @Test
+    void fillForm_rejectsOutOfRangeValueForByteField() {
+        var field = new ByteField();
+        field.setValue((byte) 7);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "200"));
+
+        Assertions.assertEquals((byte) 7, field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_writesBigIntegerToBigIntField() {
+        var field = new BigIntField();
+        fillFormPayload(controllerFor(field),
+                payload(field, "123456789012345678901234567890"));
+
+        Assertions.assertEquals(
+                new BigInteger("123456789012345678901234567890"),
+                field.getValue());
+    }
+
+    @Test
+    void fillForm_writesFloatToFloatField() {
+        var field = new FloatField();
+        fillFormPayload(controllerFor(field), payload(field, "58.4"));
+
+        Assertions.assertEquals(58.4f, field.getValue());
+    }
+
+    @Test
+    void fillForm_rejectsOutOfRangeValueForFloatField() {
+        var field = new FloatField();
+        field.setValue(1.5f);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "1e300"));
+
+        Assertions.assertEquals(1.5f, field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
     void fillForm_acceptsWholeNumberFloatForIntegerField() {
         // LLMs sometimes emit "3.0" for integer fields; the converter
         // recognises whole-number floats and casts them down. Fractional
@@ -260,6 +354,19 @@ class FillFormToolTest {
         Assertions.assertEquals(42, field.getValue(),
                 "Fractional JSON for an integer field must be rejected; "
                         + "the field's prior value must remain unchanged");
+    }
+
+    @Test
+    void fillForm_rejectsTooLargeFloatForIntegerField() {
+        var field = new IntField();
+        field.setValue(42);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "1e400"));
+
+        Assertions.assertEquals(42, field.getValue());
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("integer"),
+                "Result: " + result);
     }
 
     @Test

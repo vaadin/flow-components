@@ -24,8 +24,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.Signal;
@@ -66,6 +66,7 @@ public class PdfViewer extends Component implements HasSize {
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
 
     private PdfViewerToolbarActions toolbarActions;
+    private PdfViewerI18n i18n;
 
     /**
      * Creates a PDF viewer without a document.
@@ -153,7 +154,7 @@ public class PdfViewer extends Component implements HasSize {
     public void setSrc(DownloadHandler downloadHandler) {
         Objects.requireNonNull(downloadHandler,
                 "The download handler should not be null");
-        getElement().setAttribute("src", downloadHandler.allowDisabled());
+        getElement().setAttribute("src", downloadHandler);
         resetDocumentState();
     }
 
@@ -173,7 +174,7 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the current page, starting from {@code 1}
      */
-    @Synchronize(property = "page", value = "page-changed", allowUpdates = DisabledUpdateMode.ALWAYS)
+    @Synchronize(property = "page", value = "page-changed")
     public int getPage() {
         return getElement().getProperty("page", 1);
     }
@@ -229,6 +230,28 @@ public class PdfViewer extends Component implements HasSize {
             getElement().appendChild(toolbarActions.getElement());
         }
         return toolbarActions;
+    }
+
+    /**
+     * Gets the i18n object.
+     *
+     * @return the i18n object, or {@code null} if not set
+     */
+    public PdfViewerI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the i18n object that translates the texts of the viewer. Changes to
+     * the object take effect only when you set it again.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(PdfViewerI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n object should not be null");
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**
@@ -336,7 +359,7 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Event fired when a document has been loaded, before its pages are shown.
      */
-    @DomEvent(value = "document-load", allowUpdates = DisabledUpdateMode.ALWAYS)
+    @DomEvent("document-load")
     public static class DocumentLoadEvent extends ComponentEvent<PdfViewer> {
         private final int pageCount;
         private final String title;
@@ -384,7 +407,7 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Event fired when a document could not be loaded.
      */
-    @DomEvent(value = "document-error", allowUpdates = DisabledUpdateMode.ALWAYS)
+    @DomEvent("document-error")
     public static class DocumentErrorEvent extends ComponentEvent<PdfViewer> {
         private final DocumentErrorReason reason;
 
