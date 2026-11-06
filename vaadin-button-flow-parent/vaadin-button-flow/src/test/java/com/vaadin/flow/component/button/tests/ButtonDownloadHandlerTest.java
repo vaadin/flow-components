@@ -31,6 +31,7 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
 import com.vaadin.tests.MockUIExtension;
 
 class ButtonDownloadHandlerTest {
@@ -121,6 +122,61 @@ class ButtonDownloadHandlerTest {
         button.setDownloadHandler(null);
 
         Assertions.assertNull(button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(0, downloadAttributes().count());
+    }
+
+    @Test
+    void openInNewTabHandler_disabledByClick_served() throws IOException {
+        button.setOpenInNewTabHandler(handler);
+        button.setDisableOnClick(true);
+        button.click();
+
+        Assertions.assertFalse(button.isEnabled());
+        Assertions.assertTrue(requestDownload());
+    }
+
+    @Test
+    void openInNewTabHandler_builtInHandler_switchedToInline() {
+        InputStreamDownloadHandler builtIn = DownloadHandler
+                .fromInputStream(event -> null);
+        button.setOpenInNewTabHandler(builtIn);
+
+        Assertions.assertTrue(builtIn.isInline());
+    }
+
+    @Test
+    void openInNewTabHandlerAndDownloadHandler_replaceEachOther_nullClearsOnlyItsOwn() {
+        button.setOpenInNewTabHandler(handler);
+
+        Assertions.assertSame(handler, button.getOpenInNewTabHandler());
+        Assertions.assertNull(button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setDownloadHandler(handler);
+
+        Assertions.assertSame(handler, button.getDownloadHandler());
+        Assertions.assertNull(button.getOpenInNewTabHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setOpenInNewTabHandler(null);
+
+        Assertions.assertSame(handler, button.getDownloadHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setOpenInNewTabHandler(handler);
+        button.setDownloadHandler(null);
+
+        Assertions.assertSame(handler, button.getOpenInNewTabHandler());
+        ui.fakeClientCommunication();
+        Assertions.assertEquals(1, downloadAttributes().count());
+
+        button.setOpenInNewTabHandler(null);
+
+        Assertions.assertNull(button.getOpenInNewTabHandler());
         ui.fakeClientCommunication();
         Assertions.assertEquals(0, downloadAttributes().count());
     }
