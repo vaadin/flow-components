@@ -3399,10 +3399,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * the predicate set with
      * {@link #setItemSelectableProvider(SerializablePredicate)}. Returns
      * {@code true} for all items when no predicate is set.
-     * <p>
-     * Programmatic selection does not check the predicate. Use this method to
-     * apply the same rule when changing the selection in response to user
-     * actions, for example when toggling the selection of a clicked row.
      *
      * @param item
      *            the item to check
