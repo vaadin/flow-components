@@ -24,7 +24,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -252,7 +251,7 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the zoom level, not {@code null}
      */
-    @Synchronize(property = "zoom", value = "zoom-changed", allowUpdates = DisabledUpdateMode.ALWAYS)
+    @Synchronize(property = "zoom", value = "zoom-changed")
     public Zoom getZoom() {
         return Zoom.fromClientValue(getElement().getPropertyRaw("zoom"));
     }

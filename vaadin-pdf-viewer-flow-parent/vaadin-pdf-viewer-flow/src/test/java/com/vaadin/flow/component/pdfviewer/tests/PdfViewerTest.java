@@ -29,7 +29,6 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
 import com.vaadin.flow.component.pdfviewer.Zoom;
-import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
@@ -253,10 +252,6 @@ class PdfViewerTest {
     void zoomSynchronizedOnZoomChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("zoom-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "zoom"));
-        Assertions.assertEquals(DisabledUpdateMode.ALWAYS,
-                viewer.getElement().getNode()
-                        .getFeature(ElementListenerMap.class)
-                        .getPropertySynchronizationMode("zoom"));
     }
 
     @Test
