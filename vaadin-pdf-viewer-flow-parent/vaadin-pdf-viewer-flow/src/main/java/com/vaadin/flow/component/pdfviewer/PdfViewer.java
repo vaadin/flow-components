@@ -24,6 +24,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.SignalBindingUtil;
+import com.vaadin.flow.dom.SignalBinding;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -276,6 +279,41 @@ public class PdfViewer extends Component implements HasSize {
         } else {
             getElement().setProperty("zoom", zoom.toString());
         }
+    }
+
+    /**
+     * Binds the zoom level of the pages to the given signal, see
+     * {@link #setZoom(Zoom)}. The zoom is set to the signal value when the
+     * binding is created, and follows the signal while the viewer is attached.
+     * A {@code null} signal value is treated as {@link Zoom#PAGE_WIDTH}.
+     * <p>
+     * The binding is two-way: a zoom change with {@link #setZoom(Zoom)} or by
+     * the user with the toolbar calls the write callback with the new zoom, so
+     * that it can update the signal. If the signal does not take the new zoom,
+     * the zoom goes back to the signal value. The write callback is required
+     * because the user can always change the zoom with the toolbar, which a
+     * one-way binding would reject.
+     *
+     * @param signal
+     *            the signal to bind, not {@code null}
+     * @param writeCallback
+     *            the callback that updates the signal with a new zoom, for
+     *            example {@code zoomSignal::set}, not {@code null}
+     * @return a {@link SignalBinding} that can be used to register
+     *         {@link SignalBinding#onChange(SerializableConsumer) onChange}
+     *         callbacks
+     * @throws com.vaadin.flow.signals.BindingActiveException
+     *             if a signal is already bound
+     */
+    public SignalBinding<Zoom> bindZoom(Signal<Zoom> signal,
+            SerializableConsumer<Zoom> writeCallback) {
+        Objects.requireNonNull(signal, "The signal should not be null");
+        Objects.requireNonNull(writeCallback,
+                "The write callback should not be null");
+        return SignalBindingUtil.mapBinding(signal, Zoom::toClientValue,
+                mapped -> getElement().bindProperty("zoom", mapped,
+                        clientValue -> writeCallback
+                                .accept(Zoom.fromClientValue(clientValue))));
     }
 
     /**
