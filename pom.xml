@@ -113,7 +113,7 @@
         <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
         <spring-data-commons.version>4.1.2</spring-data-commons.version>
         <reactor-core.version>3.8.8</reactor-core.version>
-        <langchain4j.version>1.22.0</langchain4j.version>
+        <langchain4j.version>1.23.0</langchain4j.version>
         <spring-ai.version>2.0.2</spring-ai.version>
         <slf4j.version>2.0.20</slf4j.version>
         <junit.version>4.13.2</junit.version>
