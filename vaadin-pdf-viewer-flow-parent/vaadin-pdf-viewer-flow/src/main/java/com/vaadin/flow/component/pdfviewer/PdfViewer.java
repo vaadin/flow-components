@@ -65,7 +65,7 @@ public class PdfViewer extends Component implements HasSize {
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
 
-    private ToolbarActions toolbarActions;
+    private PdfViewerToolbarActions toolbarActions;
 
     /**
      * Creates a PDF viewer without a document.
@@ -223,9 +223,9 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @return the toolbar actions container
      */
-    public ToolbarActions getToolbarActions() {
+    public PdfViewerToolbarActions getToolbarActions() {
         if (toolbarActions == null) {
-            toolbarActions = new ToolbarActions();
+            toolbarActions = new PdfViewerToolbarActions();
             getElement().appendChild(toolbarActions.getElement());
         }
         return toolbarActions;
@@ -287,10 +287,10 @@ public class PdfViewer extends Component implements HasSize {
      *
      * @see PdfViewer#getToolbarActions()
      */
-    public static final class ToolbarActions implements HasComponents {
+    public static final class PdfViewerToolbarActions implements HasComponents {
         private final Element root;
 
-        private ToolbarActions() {
+        private PdfViewerToolbarActions() {
             root = new Element("div");
             root.setAttribute("slot", "toolbar-actions");
             root.getStyle().set("display", "contents");
