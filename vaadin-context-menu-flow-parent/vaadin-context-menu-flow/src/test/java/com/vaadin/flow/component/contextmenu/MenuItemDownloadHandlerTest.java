@@ -34,6 +34,7 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.communication.StreamRequestHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
 import com.vaadin.tests.MockUIExtension;
 
 class MenuItemDownloadHandlerTest {
@@ -302,6 +303,58 @@ class MenuItemDownloadHandlerTest {
         item.setDownloadHandler(null);
 
         Assertions.assertNull(item.getDownloadHandler());
+        Assertions.assertEquals(0, downloadAttributes(target).count());
+    }
+
+    @Test
+    void openInNewTabHandler_served_ownedByTarget() throws IOException {
+        item.setOpenInNewTabHandler(handler);
+
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+        Assertions.assertTrue(requestDownload());
+        Assertions.assertSame(target, owningComponent.get());
+    }
+
+    @Test
+    void openInNewTabHandler_builtInHandler_switchedToInline() {
+        InputStreamDownloadHandler builtIn = DownloadHandler
+                .fromInputStream(event -> null);
+        item.setOpenInNewTabHandler(builtIn);
+
+        Assertions.assertTrue(builtIn.isInline());
+    }
+
+    @Test
+    void openInNewTabHandlerAndDownloadHandler_replaceEachOther_nullClearsOnlyItsOwn() {
+        String downloadUrl = getDownloadUrl();
+        item.setOpenInNewTabHandler(handler);
+
+        Assertions.assertSame(handler, item.getOpenInNewTabHandler());
+        Assertions.assertNull(item.getDownloadHandler());
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+        String openInNewTabUrl = getDownloadUrl();
+        Assertions.assertNotEquals(downloadUrl, openInNewTabUrl);
+
+        item.setDownloadHandler(handler);
+
+        Assertions.assertSame(handler, item.getDownloadHandler());
+        Assertions.assertNull(item.getOpenInNewTabHandler());
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+        Assertions.assertNotEquals(openInNewTabUrl, getDownloadUrl());
+
+        item.setOpenInNewTabHandler(null);
+
+        Assertions.assertSame(handler, item.getDownloadHandler());
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+
+        item.setOpenInNewTabHandler(handler);
+        item.setDownloadHandler(null);
+
+        Assertions.assertSame(handler, item.getOpenInNewTabHandler());
+        Assertions.assertEquals(1, downloadAttributes(target).count());
+
+        item.setOpenInNewTabHandler(null);
+
         Assertions.assertEquals(0, downloadAttributes(target).count());
     }
 

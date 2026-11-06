@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.download.Download;
+import com.vaadin.flow.component.newtab.OpenInNewTab;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
@@ -40,8 +41,9 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * Manages the download registrations of the items of a menu, including the
- * items of its sub menus. The menu calls {@link #update()} whenever its items,
- * or the download handler of an item, change, or whenever the component that
+ * items of its sub menus. This covers both the download handler and the open in
+ * new tab handler of an item. The menu calls {@link #update()} whenever its
+ * items, or the handlers of an item, change, or whenever the component that
  * owns the registrations changes, for example the target of a context menu.
  * <p>
  * The download registration of an item is kept on a component that stays
@@ -93,22 +95,26 @@ public class MenuDownloadManager implements Serializable {
         registrations = new HashMap<>();
         for (MenuItem item : items) {
             Component owner = ownerProvider.apply(item);
-            DownloadHandler handler = item.getDownloadHandler();
+            boolean openInNewTab = item.getOpenInNewTabHandler() != null;
+            DownloadHandler handler = openInNewTab
+                    ? item.getOpenInNewTabHandler()
+                    : item.getDownloadHandler();
             ItemRegistration registration = previous.remove(item);
             if (registration != null && (registration.owner() != owner
-                    || registration.handler() != handler)) {
+                    || registration.handler() != handler
+                    || registration.openInNewTab() != openInNewTab)) {
                 registration.registration().remove();
                 registration = null;
             }
             if (registration == null && owner != null) {
-                registration = register(item, handler, owner);
+                registration = register(item, handler, openInNewTab, owner);
             }
             if (registration != null) {
                 registrations.put(item, registration);
             }
         }
         // The items that are no longer in the menu or no longer have a
-        // download handler
+        // handler
         previous.values()
                 .forEach(registration -> registration.registration().remove());
     }
@@ -116,7 +122,8 @@ public class MenuDownloadManager implements Serializable {
     private static void collectDownloadItems(List<MenuItem> items,
             List<MenuItem> downloadItems) {
         for (MenuItem item : items) {
-            if (item.getDownloadHandler() != null) {
+            if (item.getDownloadHandler() != null
+                    || item.getOpenInNewTabHandler() != null) {
                 downloadItems.add(item);
             }
             if (item.isParentItem()) {
@@ -127,15 +134,17 @@ public class MenuDownloadManager implements Serializable {
     }
 
     private ItemRegistration register(MenuItem item, DownloadHandler handler,
-            Component owner) {
+            boolean openInNewTab, Component owner) {
         Element ownerElement = owner.getElement();
         StreamResourceRegistry.ElementStreamResource resource = new StreamResourceRegistry.ElementStreamResource(
                 new ItemDownloadHandler(item, handler), ownerElement);
         String attribute = "data-menu-item-download-" + resource.getId();
         ownerElement.setAttribute(attribute, resource);
-        Registration clickRegistration = Download.onClick(item,
-                StreamResourceRegistry.getURI(resource).toASCIIString());
-        return new ItemRegistration(owner, handler, () -> {
+        String url = StreamResourceRegistry.getURI(resource).toASCIIString();
+        Registration clickRegistration = openInNewTab
+                ? OpenInNewTab.onClick(item, url)
+                : Download.onClick(item, url);
+        return new ItemRegistration(owner, handler, openInNewTab, () -> {
             clickRegistration.remove();
             ownerElement.removeAttribute(attribute);
         });
@@ -158,6 +167,7 @@ public class MenuDownloadManager implements Serializable {
     }
 
     private record ItemRegistration(Component owner, DownloadHandler handler,
+            boolean openInNewTab,
             Registration registration) implements Serializable {
     }
 

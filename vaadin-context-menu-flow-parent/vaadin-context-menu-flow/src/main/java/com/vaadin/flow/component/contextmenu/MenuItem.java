@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
@@ -36,6 +37,7 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
 
     private final SerializableRunnable contentReset;
     private DownloadHandler downloadHandler;
+    private DownloadHandler openInNewTabHandler;
 
     public MenuItem(ContextMenu contextMenu,
             SerializableRunnable contentReset) {
@@ -89,7 +91,9 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      * Sets a handler that produces a file to download when the item is clicked.
      * The download starts in the browser as part of the click, and click
      * listeners still run as usual. Setting a new handler replaces the previous
-     * one, and {@code null} stops the item from starting a download.
+     * one, and {@code null} stops the item from starting a download. Setting a
+     * non-null download handler removes the handler set with
+     * {@link #setOpenInNewTabHandler(DownloadHandler)}.
      * <p>
      * The handler runs only when the browser requests the file, once per click,
      * so you can create the content, file name and response headers at that
@@ -137,6 +141,75 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
      */
     public void setDownloadHandler(DownloadHandler downloadHandler) {
         this.downloadHandler = downloadHandler;
+        if (downloadHandler != null) {
+            this.openInNewTabHandler = null;
+        }
+        updateDownloadManager();
+    }
+
+    /**
+     * Gets the handler that produces the content opened in a new browser tab
+     * when the item is clicked.
+     *
+     * @return the handler, or {@code null} if clicking the item does not open a
+     *         new tab
+     * @see #setOpenInNewTabHandler(DownloadHandler)
+     * @since 25.4
+     */
+    public DownloadHandler getOpenInNewTabHandler() {
+        return openInNewTabHandler;
+    }
+
+    /**
+     * Sets a handler that produces content to show in a new browser tab when
+     * the item is clicked, for example a PDF or an image. The tab opens in the
+     * browser as part of the click, so popup blockers let it through, and click
+     * listeners still run as usual. Setting a new handler replaces the previous
+     * one, and {@code null} stops the item from opening a new tab. Setting a
+     * non-null handler removes the handler set with
+     * {@link #setDownloadHandler(DownloadHandler)}.
+     * <p>
+     * The handler runs only when the new tab requests the content, once per
+     * click. The browser shows the content when it can, otherwise it downloads
+     * it. The built-in handlers, such as
+     * {@link DownloadHandler#forFile(java.io.File)}, are switched to serve the
+     * content inline. This changes the given handler instance, so it also
+     * serves inline wherever else it is used. A custom handler should call
+     * {@link DownloadEvent#inline(String)} itself, since content served as an
+     * attachment is downloaded instead of shown.
+     * <p>
+     * The content is served under the same conditions, and on behalf of the
+     * same component, as described in
+     * {@link #setDownloadHandler(DownloadHandler)}. To serve the content
+     * regardless of the enabled state, call
+     * {@link AbstractDownloadHandler#inline() inline()} on a built-in handler
+     * before {@link DownloadHandler#allowDisabled() allowDisabled()}, for
+     * example {@code DownloadHandler.forFile(file).inline().allowDisabled()}.
+     *
+     * <pre>{@code
+     * MenuItem view = menu.addItem("View invoice");
+     * view.setOpenInNewTabHandler(DownloadHandler.forFile(invoicePdf));
+     * }</pre>
+     *
+     * @param openInNewTabHandler
+     *            the handler that produces the content, or {@code null} to not
+     *            open a new tab on click
+     * @since 25.4
+     */
+    public void setOpenInNewTabHandler(DownloadHandler openInNewTabHandler) {
+        if (openInNewTabHandler instanceof AbstractDownloadHandler<?> builtIn) {
+            // The menu wraps the handler, which OpenInNewTab can not switch
+            // to inline
+            builtIn.inline();
+        }
+        this.openInNewTabHandler = openInNewTabHandler;
+        if (openInNewTabHandler != null) {
+            this.downloadHandler = null;
+        }
+        updateDownloadManager();
+    }
+
+    private void updateDownloadManager() {
         MenuDownloadManager downloadManager = getMenuDownloadManager();
         if (downloadManager != null) {
             downloadManager.update();
