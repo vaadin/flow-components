@@ -212,14 +212,14 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
 
         // Scroll all the way down
         getSpreadsheet().scroll(10000);
-        getCommandExecutor().waitForVaadin();
 
-        // Check that the last row header is visible
-        // By default, there are 200 rows
+        // The sheet renders the new rows in its scroll event handler, which
+        // the browser fires asynchronously after scrollTop has been set, so
+        // wait for the last row header (by default, there are 200 rows)
+        waitUntil(driver -> !findElementsInShadowRoot(
+                By.cssSelector(".rh.row200")).isEmpty());
         var bottommostHeader = findElementInShadowRoot(
                 By.cssSelector(".rh.row200"));
-        Assert.assertNotNull("Should have the last column header visible",
-                bottommostHeader);
 
         // Get the bottommost visible row header
         var headerRect = bottommostHeader.getRect();
