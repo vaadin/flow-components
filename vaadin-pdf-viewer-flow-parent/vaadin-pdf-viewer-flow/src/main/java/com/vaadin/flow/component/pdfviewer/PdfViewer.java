@@ -159,6 +159,49 @@ public class PdfViewer extends Component implements HasSize {
         resetDocumentState();
     }
 
+    /**
+     * Gets the name of the file that {@link #download()} saves. The default
+     * value is {@code null}.
+     *
+     * @return the file name, or {@code null} if the name of the document is
+     *         used
+     */
+    public String getFileName() {
+        return getElement().getProperty("fileName");
+    }
+
+    /**
+     * Sets the name of the file that {@link #download()} saves, which the
+     * header of the viewer also shows. The name is used as given. When not set,
+     * the file name is the PDF file name from the {@code Content-Disposition}
+     * header of the response, else the PDF file name at the end of the path of
+     * the URL, else {@code document.pdf}.
+     *
+     * @param fileName
+     *            the file name, or {@code null} to use the name of the document
+     */
+    public void setFileName(String fileName) {
+        if (fileName == null) {
+            getElement().removeProperty("fileName");
+        } else {
+            getElement().setProperty("fileName", fileName);
+        }
+    }
+
+    /**
+     * Downloads the document in the browser, like the download button of the
+     * toolbar does. The file has the original bytes of the document, so the
+     * viewer does not request it again, and signatures stay intact. The file
+     * name is the one set with {@link #setFileName(String)}, or else the name
+     * of the document.
+     * <p>
+     * If the document is still loading, it is downloaded once it has loaded.
+     * Does nothing if no document is set, or the document could not be loaded.
+     */
+    public void download() {
+        getElement().callJsFunction("download");
+    }
+
     private void resetDocumentState() {
         if (getPage() != 1) {
             getElement().setProperty("page", 1);
