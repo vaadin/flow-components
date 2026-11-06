@@ -61,27 +61,6 @@ public final class Zoom implements Serializable {
     }
 
     /**
-     * Checks whether this zoom fits the width of the current page to the
-     * viewer.
-     *
-     * @return {@code true} if this zoom is {@link #PAGE_WIDTH}, {@code false}
-     *         otherwise
-     */
-    public boolean isPageWidth() {
-        return PAGE_WIDTH.mode.equals(mode);
-    }
-
-    /**
-     * Checks whether this zoom fits the whole current page into the viewer.
-     *
-     * @return {@code true} if this zoom is {@link #PAGE_FIT}, {@code false}
-     *         otherwise
-     */
-    public boolean isPageFit() {
-        return PAGE_FIT.mode.equals(mode);
-    }
-
-    /**
      * Gets the factor of the actual size of the pages, see {@link #of(double)}.
      *
      * @return the factor, or empty for {@link #PAGE_WIDTH} and

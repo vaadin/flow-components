@@ -246,9 +246,6 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Gets the zoom level of the pages. The default value is
      * {@link Zoom#PAGE_WIDTH}.
-     * <p>
-     * The user can change the zoom with the toolbar, so the value comes from
-     * the browser and must not be trusted for security decisions.
      *
      * @return the zoom level, not {@code null}
      */
@@ -273,9 +270,6 @@ public class PdfViewer extends Component implements HasSize {
      */
     public void setZoom(Zoom zoom) {
         Objects.requireNonNull(zoom, "The zoom should not be null");
-        if (zoom.equals(getZoom())) {
-            return;
-        }
         OptionalDouble factor = zoom.getFactor();
         if (factor.isPresent()) {
             getElement().setProperty("zoom", factor.getAsDouble());
@@ -287,9 +281,6 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Gets a read-only signal with the zoom level of the pages, see
      * {@link #getZoom()}.
-     * <p>
-     * The user can change the zoom with the toolbar, so the value comes from
-     * the browser and must not be trusted for security decisions.
      *
      * @return a read-only signal with the zoom level
      */

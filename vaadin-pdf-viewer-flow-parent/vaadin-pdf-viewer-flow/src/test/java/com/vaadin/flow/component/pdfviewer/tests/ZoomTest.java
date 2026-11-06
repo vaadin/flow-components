@@ -19,16 +19,12 @@ class ZoomTest {
 
     @Test
     void pageWidth() {
-        Assertions.assertTrue(Zoom.PAGE_WIDTH.isPageWidth());
-        Assertions.assertFalse(Zoom.PAGE_WIDTH.isPageFit());
         Assertions.assertTrue(Zoom.PAGE_WIDTH.getFactor().isEmpty());
         Assertions.assertEquals("page-width", Zoom.PAGE_WIDTH.toString());
     }
 
     @Test
     void pageFit() {
-        Assertions.assertFalse(Zoom.PAGE_FIT.isPageWidth());
-        Assertions.assertTrue(Zoom.PAGE_FIT.isPageFit());
         Assertions.assertTrue(Zoom.PAGE_FIT.getFactor().isEmpty());
         Assertions.assertEquals("page-fit", Zoom.PAGE_FIT.toString());
     }
@@ -36,8 +32,6 @@ class ZoomTest {
     @Test
     void of_factor() {
         var zoom = Zoom.of(1.5);
-        Assertions.assertFalse(zoom.isPageWidth());
-        Assertions.assertFalse(zoom.isPageFit());
         Assertions.assertEquals(1.5, zoom.getFactor().orElseThrow());
         Assertions.assertEquals("1.5", zoom.toString());
     }
