@@ -85,8 +85,35 @@ enum FormFieldType {
         }
     };
 
+    /**
+     * Memoizes the resolved {@code HasValue<?, V>} value type per concrete
+     * field class. Holds {@code null} for classes whose {@code V} cannot be
+     * narrowed to a concrete {@link Class}.
+     */
+    private static final ClassValue<Class<?>> VALUE_TYPE_CACHE = new ClassValue<>() {
+        @Override
+        protected Class<?> computeValue(Class<?> type) {
+            return resolveValueType(type);
+        }
+    };
+
     static FormFieldType classify(HasValue<?, ?> field) {
         return CLASSIFY_CACHE.get(field.getClass());
+    }
+
+    /**
+     * Returns the {@code V} type argument of the field's
+     * {@code HasValue<?, V>}. The write path uses it to check that a converted
+     * value can be stored in the field, and to narrow numbers to the exact type
+     * the field holds.
+     *
+     * @param field
+     *            the field, not {@code null}
+     * @return the resolved value type, or {@code null} when it cannot be
+     *         narrowed to a concrete class
+     */
+    static Class<?> valueType(HasValue<?, ?> field) {
+        return VALUE_TYPE_CACHE.get(field.getClass());
     }
 
     /**
@@ -145,7 +172,7 @@ enum FormFieldType {
                 || HasItems.class.isAssignableFrom(fieldClass)) {
             return SINGLE_SELECT;
         }
-        var valueType = resolveValueType(fieldClass);
+        var valueType = VALUE_TYPE_CACHE.get(fieldClass);
         if (valueType == null) {
             return STRING;
         }
@@ -157,9 +184,10 @@ enum FormFieldType {
      * Walks the class hierarchy of the given concrete field class to find the
      * {@code V} type argument of {@code HasValue<?, V>}, resolving type
      * variables through any intermediate generic superclasses and
-     * super-interfaces. Returns {@code null} when {@code V} cannot be narrowed
-     * to a concrete {@link Class} (for example {@code ComboBox<T>} where
-     * {@code T} is left generic).
+     * super-interfaces. A parameterized {@code V} such as {@code Set<T>}
+     * resolves to its raw class. Returns {@code null} when {@code V} cannot be
+     * narrowed to a concrete {@link Class} (for example {@code ComboBox<T>}
+     * where {@code T} is left generic).
      */
     private static Class<?> resolveValueType(Class<?> startClass) {
         var bindings = new HashMap<TypeVariable<?>, Type>();
@@ -198,6 +226,11 @@ enum FormFieldType {
         if (raw == HasValue.class) {
             var resolved = resolveType(pt.getActualTypeArguments()[1],
                     bindings);
+            if (resolved instanceof ParameterizedType parameterized) {
+                // For example List<String>: the raw class is enough to check
+                // a converted value against.
+                return (Class<?>) parameterized.getRawType();
+            }
             return resolved instanceof Class<?> cls ? cls : null;
         }
         var deeper = new HashMap<>(bindings);

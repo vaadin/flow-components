@@ -10,6 +10,7 @@ package com.vaadin.flow.component.ai.form;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -183,11 +184,19 @@ final class FormValueConverter {
      * naming the missing registration. Multi-select fields expect a JSON array
      * of labels; single-select and other label-routed fields expect a single
      * string.
+     * <p>
+     * The converted value is then checked against the field's
+     * {@code HasValue<?, V>} value type, see {@link #toFieldValueType}.
      */
     static Object convert(FormFieldDescriptor field, JsonNode value) {
         if (value == null || value.isNull()) {
             return field.field().getEmptyValue();
         }
+        return toFieldValueType(field, convertByType(field, value), value);
+    }
+
+    private static Object convertByType(FormFieldDescriptor field,
+            JsonNode value) {
         // Multi-select takes an array of labels; handled before the
         // fieldValueOptions check so the array shape is enforced even on
         // fields whose value type is itself a String set.
@@ -215,6 +224,74 @@ final class FormValueConverter {
         default -> throw new RejectedValueException(
                 "Unsupported field type: " + field.type());
         };
+    }
+
+    /**
+     * Makes sure a converted value can be stored in the field. Integral numbers
+     * are converted as {@link BigInteger} and decimal numbers as
+     * {@link Double}, so they are narrowed here to the field's exact value type
+     * ({@link Integer}, {@link Long}, {@link Short}, {@link Byte} or
+     * {@link Float}). Any other value that is not an instance of the field's
+     * value type is rejected instead of being written: for example a
+     * {@link String} for a field whose value type has no type mapping and
+     * therefore falls back to {@link FormFieldType#STRING}. Fields whose value
+     * type cannot be resolved (for example a generic {@code ComboBox<T>}) are
+     * not checked.
+     */
+    private static Object toFieldValueType(FormFieldDescriptor field,
+            Object converted, JsonNode value) {
+        var valueType = FormFieldType.valueType(field.field());
+        if (converted == null || valueType == null
+                || valueType.isInstance(converted)) {
+            return converted;
+        }
+        if (converted instanceof BigInteger integer) {
+            var narrowed = narrowInteger(integer, valueType, value);
+            if (narrowed != null) {
+                return narrowed;
+            }
+        }
+        if (converted instanceof Double d && valueType == Float.class) {
+            var f = d.floatValue();
+            if (Float.isInfinite(f)) {
+                throw new RejectedValueException(
+                        "Number out of range: " + value);
+            }
+            return f;
+        }
+        LOGGER.debug(
+                "Converted value of type {} does not match value type {}"
+                        + " of field {}",
+                converted.getClass().getName(), valueType.getName(),
+                field.id());
+        throw new RejectedValueException(
+                "Field cannot be filled: its value type is not supported.");
+    }
+
+    /**
+     * Narrows an integer to the given integral value type, or returns
+     * {@code null} when the type is not an integral type. Values outside the
+     * range of the type are rejected.
+     */
+    private static Number narrowInteger(BigInteger integer, Class<?> valueType,
+            JsonNode value) {
+        try {
+            if (valueType == Integer.class) {
+                return integer.intValueExact();
+            }
+            if (valueType == Long.class) {
+                return integer.longValueExact();
+            }
+            if (valueType == Short.class) {
+                return integer.shortValueExact();
+            }
+            if (valueType == Byte.class) {
+                return integer.byteValueExact();
+            }
+        } catch (ArithmeticException ex) {
+            throw new RejectedValueException("Integer out of range: " + value);
+        }
+        return null;
     }
 
     /**
@@ -388,18 +465,13 @@ final class FormValueConverter {
         return value.asDouble();
     }
 
-    private static Integer convertInteger(JsonNode value) {
+    private static BigInteger convertInteger(JsonNode value) {
         // Accept JSON integers and whole-number floating-point values (e.g.
         // 3.0) — LLMs sometimes emit the latter for integer fields.
-        // Fractional values are rejected.
-        if (value.isIntegralNumber()) {
-            return value.asInt();
-        }
-        if (value.isFloatingPointNumber()) {
-            var d = value.asDouble();
-            if (d == Math.floor(d) && !Double.isInfinite(d)) {
-                return (int) d;
-            }
+        // Fractional and infinite values are rejected. The result is narrowed
+        // to the field's value type in toFieldValueType.
+        if (value.canConvertToExactIntegral()) {
+            return value.bigIntegerValue();
         }
         throw new RejectedValueException("Expected integer, got " + value);
     }
