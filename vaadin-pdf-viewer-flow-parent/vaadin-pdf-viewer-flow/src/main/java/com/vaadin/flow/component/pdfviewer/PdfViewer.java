@@ -17,12 +17,14 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -39,6 +41,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  *         DownloadHandler.forClassResource(getClass(), "report.pdf"));
  * viewer.setHeight("600px");
  * </pre>
+ * <p>
+ * You can add your own controls to the toolbar with
+ * {@link #getToolbarActions()}.
  * <p>
  * This component is experimental and needs to be enabled with the
  * {@code com.vaadin.experimental.pdfViewerComponent} feature flag, either in
@@ -60,6 +65,7 @@ public class PdfViewer extends Component implements HasSize {
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
 
+    private PdfViewerToolbarActions toolbarActions;
     private PdfViewerI18n i18n;
 
     /**
@@ -213,6 +219,21 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Gets the container for your own controls, such as buttons, in the
+     * toolbar. The controls are placed after the built-in page and zoom
+     * controls, before the download button. Empty by default.
+     *
+     * @return the toolbar actions container
+     */
+    public PdfViewerToolbarActions getToolbarActions() {
+        if (toolbarActions == null) {
+            toolbarActions = new PdfViewerToolbarActions();
+            getElement().appendChild(toolbarActions.getElement());
+        }
+        return toolbarActions;
+    }
+
+    /**
      * Gets the i18n object.
      *
      * @return the i18n object, or {@code null} if not set
@@ -282,6 +303,26 @@ public class PdfViewer extends Component implements HasSize {
         if (!featureFlags
                 .isEnabled(PdfViewerFeatureFlagProvider.PDF_VIEWER_COMPONENT)) {
             throw new PdfViewerExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Container for your own controls in the {@link PdfViewer} toolbar.
+     *
+     * @see PdfViewer#getToolbarActions()
+     */
+    public static final class PdfViewerToolbarActions implements HasComponents {
+        private final Element root;
+
+        private PdfViewerToolbarActions() {
+            root = new Element("div");
+            root.setAttribute("slot", "toolbar-actions");
+            root.getStyle().set("display", "contents");
+        }
+
+        @Override
+        public Element getElement() {
+            return root;
         }
     }
 
