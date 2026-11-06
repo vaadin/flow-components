@@ -56,6 +56,30 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
+     * Sets the zoom to a mode that fits the pages to the viewer, like selecting
+     * it in the zoom select of the toolbar.
+     *
+     * @param mode
+     *            the zoom mode
+     */
+    public void setZoom(ZoomMode mode) {
+        setProperty("zoom", mode.value);
+    }
+
+    /**
+     * Sets the zoom to a factor of the actual size of the pages, for example
+     * {@code 1} for 100% and {@code 1.5} for 150%. The factor does not need to
+     * be one of the levels of the zoom select of the toolbar.
+     *
+     * @param factor
+     *            the factor of the actual size of the pages, greater than
+     *            {@code 0}
+     */
+    public void setZoom(double factor) {
+        setProperty("zoom", factor);
+    }
+
+    /**
      * Zooms in to the next zoom level with the zoom in button of the toolbar.
      */
     public void zoomIn() {
@@ -93,5 +117,27 @@ public class PdfViewerElement extends TestBenchElement {
      */
     public boolean hasError() {
         return hasAttribute("has-error");
+    }
+
+    /**
+     * The zoom modes that fit the pages to the viewer, see
+     * {@link #setZoom(ZoomMode)}.
+     */
+    public enum ZoomMode {
+        /**
+         * Fits the width of the current page to the viewer. The default zoom.
+         */
+        PAGE_WIDTH("page-width"),
+
+        /**
+         * Fits the whole current page into the viewer.
+         */
+        PAGE_FIT("page-fit");
+
+        private final String value;
+
+        ZoomMode(String value) {
+            this.value = value;
+        }
     }
 }
