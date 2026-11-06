@@ -125,10 +125,11 @@ export class ComboBoxConnector {
     this.#cache = {};
     this.#lastRequestedRange = [-1, -1];
     this.#lastTypedFilter = '';
-    comboBox.clearCache();
     // The server resets the data communicator itself before calling this, so
-    // the next request must not ask for another reset
+    // the next request must not ask for another reset. Skip the clearCache
+    // override, because it flags a reset.
     this.#needsDataCommunicatorReset = false;
+    Object.getPrototypeOf(comboBox).clearCache.call(comboBox);
   }
 
   confirm(id: number, filter: string): void {
