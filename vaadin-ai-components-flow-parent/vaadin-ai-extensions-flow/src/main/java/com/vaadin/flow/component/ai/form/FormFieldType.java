@@ -90,6 +90,21 @@ enum FormFieldType {
     }
 
     /**
+     * Returns the {@code V} type argument of the field's
+     * {@code HasValue<?, V>}, used by the write path to produce a value of the
+     * exact type the field holds (for example {@link Long} rather than
+     * {@link Integer} for an {@link #INTEGER} field).
+     *
+     * @param field
+     *            the field, not {@code null}
+     * @return the resolved value type, or {@code null} when it cannot be
+     *         narrowed to a concrete class
+     */
+    static Class<?> valueType(HasValue<?, ?> field) {
+        return resolveValueType(field.getClass());
+    }
+
+    /**
      * Classifies a field's resolved {@code HasValue<?, V>} value type into the
      * taxonomy. Returns {@code null} when the type does not map to a concrete
      * variant; the caller in {@link #doClassify} falls back to {@link #STRING}.
