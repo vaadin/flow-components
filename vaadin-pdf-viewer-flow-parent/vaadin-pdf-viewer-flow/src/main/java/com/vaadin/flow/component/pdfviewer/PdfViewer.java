@@ -17,6 +17,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -40,6 +41,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * viewer.setHeight("600px");
  * </pre>
  * <p>
+ * {@link #focus()} focuses the page area once a document has loaded, so that
+ * the user can scroll the pages with the keyboard.
+ * <p>
  * This component is experimental and needs to be enabled with the
  * {@code com.vaadin.experimental.pdfViewerComponent} feature flag, either in
  * the experimental features tab of Copilot or in
@@ -55,7 +59,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Tag("vaadin-pdf-viewer")
 @NpmPackage(value = "@vaadin/pdf-viewer", version = "25.4.0-alpha5")
 @JsModule("@vaadin/pdf-viewer/src/vaadin-pdf-viewer.js")
-public class PdfViewer extends Component implements HasSize {
+public class PdfViewer extends Component
+        implements Focusable<PdfViewer>, HasSize {
 
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);

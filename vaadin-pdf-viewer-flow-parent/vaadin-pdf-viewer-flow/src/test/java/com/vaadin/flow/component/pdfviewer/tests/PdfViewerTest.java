@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.pdfviewer.DocumentErrorReason;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
@@ -273,6 +274,12 @@ class PdfViewerTest {
     @Test
     void implementsHasSize() {
         Assertions.assertTrue(HasSize.class.isAssignableFrom(PdfViewer.class));
+    }
+
+    @Test
+    void implementsFocusable() {
+        Assertions
+                .assertTrue(Focusable.class.isAssignableFrom(PdfViewer.class));
     }
 
     private Set<String> getSyncExpressions(String eventName) {

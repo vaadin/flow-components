@@ -64,4 +64,13 @@ public class PdfViewerElement extends TestBenchElement {
     public boolean hasError() {
         return hasAttribute("has-error");
     }
+
+    /**
+     * Checks whether the page area is focused.
+     *
+     * @return {@code true} if the page area is focused, {@code false} otherwise
+     */
+    public boolean isFocused() {
+        return hasAttribute("focused");
+    }
 }
