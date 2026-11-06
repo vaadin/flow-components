@@ -156,7 +156,8 @@ class PdfViewerTest {
     @Test
     void defaultZoom() {
         Assertions.assertEquals(Zoom.PAGE_WIDTH, viewer.getZoom());
-        Assertions.assertFalse(viewer.getElement().hasProperty("zoom"));
+        Assertions.assertEquals("page-width",
+                viewer.getElement().getProperty("zoom"));
     }
 
     @Test

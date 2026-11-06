@@ -70,6 +70,7 @@ public class PdfViewer extends Component implements HasSize {
      */
     public PdfViewer() {
         getElement().setProperty("page", 1);
+        getElement().setProperty("zoom", Zoom.PAGE_WIDTH.toString());
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
