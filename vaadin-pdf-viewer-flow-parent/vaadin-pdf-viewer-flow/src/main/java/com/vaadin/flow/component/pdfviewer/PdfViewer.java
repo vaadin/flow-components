@@ -218,8 +218,8 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Gets the container for your own controls, such as buttons, in the
-     * toolbar. The controls come after the built-in page and zoom controls,
-     * before the download button. Empty by default.
+     * toolbar. The controls are placed after the built-in page and zoom
+     * controls, before the download button. Empty by default.
      *
      * @return the toolbar actions container
      */
