@@ -169,4 +169,17 @@ class GridTest {
             Assertions.fail("Could not call Grid.setViewportRange");
         }
     }
+
+    @Test
+    void isItemSelectable_followsItemSelectableProvider() {
+        Grid<String> grid = new Grid<>();
+        Assertions.assertTrue(grid.isItemSelectable("foo"));
+
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+        Assertions.assertFalse(grid.isItemSelectable("foo"));
+        Assertions.assertTrue(grid.isItemSelectable("bar"));
+
+        grid.setItemSelectableProvider(null);
+        Assertions.assertTrue(grid.isItemSelectable("foo"));
+    }
 }

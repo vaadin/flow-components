@@ -3394,7 +3394,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    boolean isItemSelectable(T item) {
+    /**
+     * Checks whether the user may select or deselect the given item, based on
+     * the predicate set with
+     * {@link #setItemSelectableProvider(SerializablePredicate)}. Returns
+     * {@code true} for all items when no predicate is set.
+     * <p>
+     * Programmatic selection does not check the predicate. Use this method to
+     * apply the same rule when changing the selection in response to user
+     * actions, for example when toggling the selection of a clicked row.
+     *
+     * @param item
+     *            the item to check
+     * @return {@code true} if the user may change the selection state of the
+     *         item, {@code false} otherwise
+     * @see #setItemSelectableProvider(SerializablePredicate)
+     * @since 25.4
+     */
+    public boolean isItemSelectable(T item) {
         return selectableProvider == null || selectableProvider.test(item);
     }
 
