@@ -3411,7 +3411,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #setItemSelectableProvider(SerializablePredicate)
      * @since 25.4
      */
-    public boolean isItemSelectable(T item) {
+    public final boolean isItemSelectable(T item) {
         return selectableProvider == null || selectableProvider.test(item);
     }
 
