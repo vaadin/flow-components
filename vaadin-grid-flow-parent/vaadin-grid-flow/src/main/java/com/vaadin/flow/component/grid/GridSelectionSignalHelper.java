@@ -60,8 +60,7 @@ class GridSelectionSignalHelper {
      * @param valueSignal
      *            the signal to bind
      * @param writeCallback
-     *            the callback to propagate value changes back, or {@code null}
-     *            for a read-only binding
+     *            the callback to propagate value changes back, not {@code null}
      * @param <E>
      *            the value change event type
      * @param <V>
@@ -74,6 +73,7 @@ class GridSelectionSignalHelper {
             Component owner, HasValueAndElement<E, V> target,
             Signal<V> valueSignal, SerializableConsumer<V> writeCallback) {
         Objects.requireNonNull(valueSignal, "Signal cannot be null");
+        Objects.requireNonNull(writeCallback, "Write callback cannot be null");
 
         SignalBinding<V> binding = new SignalBinding<>();
         boolean[] fromSignal = { false };
@@ -101,7 +101,7 @@ class GridSelectionSignalHelper {
         });
 
         Registration listenerReg = target.addValueChangeListener(event -> {
-            if (!fromSignal[0] && writeCallback != null) {
+            if (!fromSignal[0]) {
                 writeCallback.accept(target.getValue());
             }
         });
