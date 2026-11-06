@@ -87,6 +87,7 @@ class PdfViewerTest {
     @Test
     void defaultPage() {
         Assertions.assertEquals(1, viewer.getPage());
+        Assertions.assertEquals(1, viewer.getElement().getProperty("page", 0));
     }
 
     @Test

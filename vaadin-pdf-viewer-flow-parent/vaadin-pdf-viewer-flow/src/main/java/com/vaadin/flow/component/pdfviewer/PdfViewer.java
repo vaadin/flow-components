@@ -66,6 +66,7 @@ public class PdfViewer extends Component implements HasSize {
      * Creates a PDF viewer without a document.
      */
     public PdfViewer() {
+        getElement().setProperty("page", 1);
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
