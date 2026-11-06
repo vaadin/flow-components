@@ -3395,15 +3395,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Checks whether the user may select or deselect the given item, based on
-     * the predicate set with
+     * Checks whether the given item passes the predicate set with
      * {@link #setItemSelectableProvider(SerializablePredicate)}. Returns
      * {@code true} for all items when no predicate is set.
+     * <p>
+     * The selection model can apply further rules to user selection, for
+     * example whether deselection is allowed in single-selection mode.
      *
      * @param item
      *            the item to check
-     * @return {@code true} if the user may change the selection state of the
-     *         item, {@code false} otherwise
+     * @return {@code true} if the predicate allows the user to change the
+     *         selection state of the item, {@code false} otherwise
      * @see #setItemSelectableProvider(SerializablePredicate)
      * @since 25.4
      */
