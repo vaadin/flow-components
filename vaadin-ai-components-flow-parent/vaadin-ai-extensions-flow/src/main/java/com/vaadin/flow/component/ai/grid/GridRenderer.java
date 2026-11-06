@@ -9,7 +9,9 @@
 package com.vaadin.flow.component.ai.grid;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -111,9 +113,9 @@ public final class GridRenderer implements Serializable {
             column = grid.addColumn(new LocalDateTimeRenderer<>(
                     row -> toLocalDateTime(row.get(columnName))));
         } else if (sampleValue instanceof Number) {
-            column = grid.addColumn(
-                    new NumberRenderer<>(row -> (Number) row.get(columnName),
-                            java.text.NumberFormat.getInstance()));
+            column = grid.addColumn(new NumberRenderer<>(
+                    row -> toFormattableNumber((Number) row.get(columnName)),
+                    createNumberFormat()));
             column.setTextAlign(ColumnTextAlign.END);
         } else {
             column = grid.addColumn(row -> {
@@ -124,6 +126,24 @@ public final class GridRenderer implements Serializable {
 
         column.setHeader(header).setKey(columnName).setSortable(true)
                 .setAutoWidth(true).setResizable(true);
+    }
+
+    private static NumberFormat createNumberFormat() {
+        var numberFormat = NumberFormat.getInstance();
+        // The default format rounds to three fraction digits, which would
+        // show values that differ from the query result
+        numberFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
+        return numberFormat;
+    }
+
+    private static Number toFormattableNumber(Number value) {
+        // NumberFormat widens a Float to double, which adds binary rounding
+        // digits (19.99f becomes 19.989999771118164). The shortest decimal
+        // representation of the float is the value the query returned.
+        if (value instanceof Float floatValue && Float.isFinite(floatValue)) {
+            return new BigDecimal(Float.toString(floatValue));
+        }
+        return value;
     }
 
     private static void applyColumnGrouping(Grid<AIDataRow> grid) {
