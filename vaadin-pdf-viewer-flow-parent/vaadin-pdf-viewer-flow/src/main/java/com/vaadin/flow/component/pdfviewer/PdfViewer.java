@@ -265,8 +265,7 @@ public class PdfViewer extends Component implements HasSize {
      * when the viewer resizes, while scrolling to a page of another size keeps
      * the scale.
      * <p>
-     * The zoom stays when another document is set. {@link ZoomChangeEvent}
-     * fires when the zoom changes.
+     * The zoom stays when another document is set.
      *
      * @param zoom
      *            the zoom level, not {@code null}
@@ -283,22 +282,15 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Binds the zoom level of the pages to the given signal, see
-     * {@link #setZoom(Zoom)}. The zoom is set to the signal value when the
-     * binding is created, and follows the signal while the viewer is attached.
-     * A {@code null} signal value is treated as {@link Zoom#PAGE_WIDTH}.
-     * <p>
-     * The binding is two-way: a zoom change with {@link #setZoom(Zoom)} or by
-     * the user with the toolbar calls the write callback with the new zoom, so
-     * that it can update the signal. If the signal does not take the new zoom,
-     * the zoom goes back to the signal value. The write callback is required
-     * because the user can always change the zoom with the toolbar, which a
-     * one-way binding would reject.
+     * {@link #setZoom(Zoom)}. The binding is two-way: signal changes update the
+     * zoom, and zoom changes invoke the write callback. The write callback is
+     * required, since the user can always change the zoom with the toolbar. A
+     * {@code null} signal value is treated as {@link Zoom#PAGE_WIDTH}.
      *
      * @param signal
      *            the signal to bind, not {@code null}
      * @param writeCallback
-     *            the callback that updates the signal with a new zoom, for
-     *            example {@code zoomSignal::set}, not {@code null}
+     *            the callback to propagate zoom changes back, not {@code null}
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(SerializableConsumer) onChange}
      *         callbacks
@@ -339,8 +331,7 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Adds a listener that is called when the zoom level changes, either with
-     * {@link #setZoom(Zoom)} or by the user with the toolbar.
+     * Adds a listener that is called when the zoom level changes.
      *
      * @param listener
      *            the listener to add, not {@code null}

@@ -56,8 +56,7 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
-     * Sets the zoom to a mode that fits the pages to the viewer, like selecting
-     * it in the zoom select of the toolbar.
+     * Sets the zoom to a mode that fits the pages to the viewer.
      *
      * @param mode
      *            the zoom mode
@@ -68,8 +67,7 @@ public class PdfViewerElement extends TestBenchElement {
 
     /**
      * Sets the zoom to a factor of the actual size of the pages, for example
-     * {@code 1} for 100% and {@code 1.5} for 150%. The factor does not need to
-     * be one of the levels of the zoom select of the toolbar.
+     * {@code 1} for 100% and {@code 1.5} for 150%.
      *
      * @param factor
      *            the factor of the actual size of the pages, greater than
