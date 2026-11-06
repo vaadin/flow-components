@@ -85,6 +85,18 @@ class PdfViewerTest {
     @Test
     void defaultPage() {
         Assertions.assertEquals(1, viewer.getPage());
+        Assertions.assertEquals(1, viewer.getElement().getProperty("page", 0));
+    }
+
+    @Test
+    void defaultPageSyncedFromClient_noPageChangeEvent() {
+        var events = new ArrayList<PageChangeEvent>();
+        viewer.addPageChangeListener(events::add);
+
+        fakeClientPropertyChange("page", 1.0);
+
+        Assertions.assertTrue(events.isEmpty());
+        Assertions.assertEquals(1, viewer.getPage());
     }
 
     @Test
