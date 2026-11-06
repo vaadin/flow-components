@@ -10,6 +10,7 @@ package com.vaadin.flow.component.ai.form;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -166,6 +167,10 @@ final class FormValueConverter {
         RejectedValueException(String message) {
             super(message);
         }
+
+        RejectedValueException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     /**
@@ -205,8 +210,10 @@ final class FormValueConverter {
         return switch (field.type()) {
         case STRING, EMAIL -> convertString(value);
         case BIG_DECIMAL -> convertBigDecimal(value);
-        case NUMBER -> convertNumber(value);
-        case INTEGER -> convertInteger(value);
+        case NUMBER ->
+            convertNumber(value, FormFieldType.valueType(field.field()));
+        case INTEGER ->
+            convertInteger(value, FormFieldType.valueType(field.field()));
         case BOOLEAN -> convertBoolean(value);
         case DATE -> convertDate(value);
         case DATE_TIME -> convertDateTime(value);
@@ -381,25 +388,60 @@ final class FormValueConverter {
         }
     }
 
-    private static Double convertNumber(JsonNode value) {
+    /**
+     * Converts a JSON number to the field's value type: {@link Float} for
+     * {@code Float} fields, {@link Double} otherwise.
+     */
+    private static Number convertNumber(JsonNode value, Class<?> valueType) {
         if (!value.isNumber()) {
             throw new RejectedValueException("Expected number, got " + value);
         }
-        return value.asDouble();
+        var d = value.asDouble();
+        if (valueType == Float.class) {
+            var f = (float) d;
+            if (Float.isInfinite(f)) {
+                throw new RejectedValueException(
+                        "Number out of range: " + value);
+            }
+            return f;
+        }
+        return d;
     }
 
-    private static Integer convertInteger(JsonNode value) {
+    /**
+     * Converts a JSON number to the field's integral value type ({@link Long},
+     * {@link Short}, {@link Byte} or {@link BigInteger}), or {@link Integer}
+     * when the field's value type is not one of those. Values outside the range
+     * of the target type are rejected.
+     */
+    private static Number convertInteger(JsonNode value, Class<?> valueType) {
+        var integer = toBigInteger(value);
+        try {
+            if (valueType == BigInteger.class) {
+                return integer;
+            }
+            if (valueType == Long.class) {
+                return integer.longValueExact();
+            }
+            if (valueType == Short.class) {
+                return integer.shortValueExact();
+            }
+            if (valueType == Byte.class) {
+                return integer.byteValueExact();
+            }
+            return integer.intValueExact();
+        } catch (ArithmeticException ex) {
+            throw new RejectedValueException("Integer out of range: " + value,
+                    ex);
+        }
+    }
+
+    private static BigInteger toBigInteger(JsonNode value) {
         // Accept JSON integers and whole-number floating-point values (e.g.
         // 3.0) — LLMs sometimes emit the latter for integer fields.
-        // Fractional values are rejected.
-        if (value.isIntegralNumber()) {
-            return value.asInt();
-        }
-        if (value.isFloatingPointNumber()) {
-            var d = value.asDouble();
-            if (d == Math.floor(d) && !Double.isInfinite(d)) {
-                return (int) d;
-            }
+        // Fractional and infinite values are rejected.
+        if (value.canConvertToExactIntegral()) {
+            return value.bigIntegerValue();
         }
         throw new RejectedValueException("Expected integer, got " + value);
     }
