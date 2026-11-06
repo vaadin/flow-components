@@ -113,13 +113,11 @@ public class GroupingIT extends AbstractSpreadsheetIT {
                 .first();
         // the group is at the end of the sheet, scroll it into view
         spreadsheetElement.scroll(100000);
-        waitUntil(driver -> !findElementsInShadowRoot(
-                By.cssSelector(".rh.row" + LAST_ROW)).isEmpty());
+        int rowHeight = spreadsheetElement.getRowHeader(LAST_ROW).getSize()
+                .getHeight();
 
         WebElement rowGrouping = findElementInShadowRoot(
                 By.cssSelector(".row-group-pane .grouping.minus"));
-        int rowHeight = spreadsheetElement.getRowHeader(LAST_ROW).getSize()
-                .getHeight();
         Assert.assertTrue("Row grouping height",
                 rowGrouping.getSize().getHeight() >= GROUPED_ROWS * rowHeight);
 
