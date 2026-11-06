@@ -46,6 +46,36 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
+     * Gets the zoom level of the pages.
+     *
+     * @return {@code page-width}, {@code page-fit}, or the factor of the actual
+     *         size of the pages
+     */
+    public String getZoom() {
+        return String.valueOf(getProperty("zoom"));
+    }
+
+    /**
+     * Zooms in to the next zoom level with the zoom in button of the toolbar.
+     */
+    public void zoomIn() {
+        getToolbarButton("zoom-in").click();
+    }
+
+    /**
+     * Zooms out to the previous zoom level with the zoom out button of the
+     * toolbar.
+     */
+    public void zoomOut() {
+        getToolbarButton("zoom-out").click();
+    }
+
+    private TestBenchElement getToolbarButton(String icon) {
+        return $("vaadin-pdf-viewer-button").withAttribute("icon", icon)
+                .single();
+    }
+
+    /**
      * Checks whether a document is being loaded.
      *
      * @return {@code true} if a document is being loaded, {@code false}

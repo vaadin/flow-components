@@ -18,6 +18,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
+import com.vaadin.flow.component.pdfviewer.Zoom;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
 import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.signals.local.ValueSignal;
@@ -64,6 +65,28 @@ class PdfViewerSignalTest extends AbstractSignalsTest {
     void pageCountSignal_isReadOnly() {
         Assertions.assertFalse(
                 viewer.pageCountSignal() instanceof ValueSignal<?>);
+    }
+
+    @Test
+    void zoomSignal_defaultValue() {
+        Assertions.assertEquals(Zoom.PAGE_WIDTH, viewer.zoomSignal().peek());
+    }
+
+    @Test
+    void zoomSignal_setZoom_signalUpdated() {
+        viewer.setZoom(Zoom.of(2));
+        Assertions.assertEquals(Zoom.of(2), viewer.zoomSignal().peek());
+    }
+
+    @Test
+    void zoomSignal_zoomChangedOnClient_signalUpdated() {
+        fakeClientPropertyChange("zoom", "page-fit");
+        Assertions.assertEquals(Zoom.PAGE_FIT, viewer.zoomSignal().peek());
+    }
+
+    @Test
+    void zoomSignal_isReadOnly() {
+        Assertions.assertFalse(viewer.zoomSignal() instanceof ValueSignal<?>);
     }
 
     private void fakeClientPropertyChange(String property, Serializable value) {

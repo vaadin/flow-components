@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.pdfviewer;
 
 import java.util.Objects;
+import java.util.OptionalDouble;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
@@ -23,6 +24,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -59,6 +61,8 @@ public class PdfViewer extends Component implements HasSize {
 
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
+    private final ValueSignal<Zoom> zoomSignal = new ValueSignal<>(
+            Zoom.PAGE_WIDTH);
 
     private PdfViewerI18n i18n;
 
@@ -71,6 +75,11 @@ public class PdfViewer extends Component implements HasSize {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
                     getPage()));
+        });
+        getElement().addPropertyChangeListener("zoom", event -> {
+            zoomSignal.set(getZoom());
+            fireEvent(new ZoomChangeEvent(this, event.isUserOriginated(),
+                    getZoom()));
         });
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
@@ -235,6 +244,60 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Gets the zoom level of the pages. The default value is
+     * {@link Zoom#PAGE_WIDTH}.
+     * <p>
+     * The user can change the zoom with the toolbar, so the value comes from
+     * the browser and must not be trusted for security decisions.
+     *
+     * @return the zoom level, not {@code null}
+     */
+    @Synchronize(property = "zoom", value = "zoom-changed", allowUpdates = DisabledUpdateMode.ALWAYS)
+    public Zoom getZoom() {
+        return Zoom.fromClientValue(getElement().getPropertyRaw("zoom"));
+    }
+
+    /**
+     * Sets the zoom level of the pages. {@link Zoom#PAGE_WIDTH} fits the width
+     * of the current page to the viewer, {@link Zoom#PAGE_FIT} fits the whole
+     * current page into the viewer, and {@link Zoom#of(double)} scales the
+     * pages relative to their actual size. The fit follows the current page
+     * when the viewer resizes, while scrolling to a page of another size keeps
+     * the scale.
+     * <p>
+     * The zoom stays when another document is set. {@link ZoomChangeEvent}
+     * fires when the zoom changes.
+     *
+     * @param zoom
+     *            the zoom level, not {@code null}
+     */
+    public void setZoom(Zoom zoom) {
+        Objects.requireNonNull(zoom, "The zoom should not be null");
+        if (zoom.equals(getZoom())) {
+            return;
+        }
+        OptionalDouble factor = zoom.getFactor();
+        if (factor.isPresent()) {
+            getElement().setProperty("zoom", factor.getAsDouble());
+        } else {
+            getElement().setProperty("zoom", zoom.toString());
+        }
+    }
+
+    /**
+     * Gets a read-only signal with the zoom level of the pages, see
+     * {@link #getZoom()}.
+     * <p>
+     * The user can change the zoom with the toolbar, so the value comes from
+     * the browser and must not be trusted for security decisions.
+     *
+     * @return a read-only signal with the zoom level
+     */
+    public Signal<Zoom> zoomSignal() {
+        return zoomSignal.asReadonly();
+    }
+
+    /**
      * Adds a listener that is called when the current page changes.
      *
      * @param listener
@@ -244,6 +307,19 @@ public class PdfViewer extends Component implements HasSize {
     public Registration addPageChangeListener(
             ComponentEventListener<PageChangeEvent> listener) {
         return addListener(PageChangeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called when the zoom level changes, either with
+     * {@link #setZoom(Zoom)} or by the user with the toolbar.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addZoomChangeListener(
+            ComponentEventListener<ZoomChangeEvent> listener) {
+        return addListener(ZoomChangeEvent.class, listener);
     }
 
     /**
@@ -313,6 +389,38 @@ public class PdfViewer extends Component implements HasSize {
          */
         public int getPage() {
             return page;
+        }
+    }
+
+    /**
+     * Event fired when the zoom level changes.
+     */
+    public static class ZoomChangeEvent extends ComponentEvent<PdfViewer> {
+        private final Zoom zoom;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         * @param zoom
+         *            the new zoom level
+         */
+        public ZoomChangeEvent(PdfViewer source, boolean fromClient,
+                Zoom zoom) {
+            super(source, fromClient);
+            this.zoom = zoom;
+        }
+
+        /**
+         * Gets the new zoom level.
+         *
+         * @return the new zoom level
+         */
+        public Zoom getZoom() {
+            return zoom;
         }
     }
 
