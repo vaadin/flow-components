@@ -42,7 +42,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * viewer.setHeight("600px");
  * </pre>
  * <p>
- * You can add your own controls to the end of the toolbar with
+ * You can add your own controls to the toolbar with
  * {@link #getToolbarActions()}.
  * <p>
  * This component is experimental and needs to be enabled with the
@@ -217,8 +217,9 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Gets the container at the end of the toolbar for your own controls, such
-     * as buttons. Empty by default.
+     * Gets the container for your own controls, such as buttons, in the
+     * toolbar. The controls come after the built-in page and zoom controls,
+     * before the download button. Empty by default.
      *
      * @return the toolbar actions container
      */
@@ -282,8 +283,8 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Container at the end of the {@link PdfViewer} toolbar for your own
-     * controls.
+     * Container for your own controls in the {@link PdfViewer} toolbar, before
+     * the download button.
      *
      * @see PdfViewer#getToolbarActions()
      */
