@@ -94,7 +94,8 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Gets the row header element at the given index.
+     * Gets the row header element at the given index. Waits up to five seconds
+     * for the header to be rendered, e.g. after scrolling.
      *
      * @param rowIndex
      *            Index of target row, 1-based
@@ -108,7 +109,8 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     /**
-     * Gets the column header element at the given index.
+     * Gets the column header element at the given index. Waits up to five
+     * seconds for the header to be rendered, e.g. after scrolling.
      *
      * @param columnIndex
      *            Index of target column, 1-based
