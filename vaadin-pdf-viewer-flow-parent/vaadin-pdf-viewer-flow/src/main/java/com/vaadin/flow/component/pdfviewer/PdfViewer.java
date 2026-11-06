@@ -258,12 +258,17 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the zoom level of the pages. {@link Zoom#PAGE_WIDTH} fits the width
-     * of the current page to the viewer, {@link Zoom#PAGE_FIT} fits the whole
-     * current page into the viewer, and {@link Zoom#of(double)} scales the
-     * pages relative to their actual size. The fit follows the current page
-     * when the viewer resizes, while scrolling to a page of another size keeps
-     * the scale.
+     * Sets the zoom level of the pages:
+     * <ul>
+     * <li>{@link Zoom#PAGE_WIDTH} fits the width of the current page to the
+     * viewer</li>
+     * <li>{@link Zoom#PAGE_FIT} fits the whole current page into the
+     * viewer</li>
+     * <li>{@link Zoom#of(double)} scales the pages relative to their actual
+     * size</li>
+     * </ul>
+     * The fit modes update the scale when the viewer resizes. Scrolling to a
+     * page of another size does not change the scale.
      * <p>
      * The zoom stays when another document is set.
      *
