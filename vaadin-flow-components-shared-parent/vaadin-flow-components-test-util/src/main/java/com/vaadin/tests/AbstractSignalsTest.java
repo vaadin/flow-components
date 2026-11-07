@@ -54,13 +54,7 @@ public class AbstractSignalsTest {
      * is intended to be used with {@link org.junit.jupiter.api.TestFactory}.
      * <p>
      * The suite contains the test cases of
-     * {@link #generateCommonBindingTests(Supplier, BiConsumer, Function, Object, Object)}.
-     * In addition, the following test case is generated:
-     * <ul>
-     * <li><b>manualSetWhileBoundThrows</b> – verifies that imperative updates
-     * to a bound property via its setter throws a
-     * {@link com.vaadin.flow.signals.BindingActiveException}.</li>
-     * </ul>
+     * {@link #generateCommonBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)}.
      * <p>
      * <b>NOTE:</b> The tests are not necessarily exhaustive for all aspects of
      * a specific signal binding, but only cover common expected behaviors.
@@ -94,23 +88,8 @@ public class AbstractSignalsTest {
             Supplier<C> componentFactory, BiConsumer<C, ValueSignal<T>> bind,
             Function<C, T> getter, BiConsumer<C, T> setter, T initialValue,
             T updatedValue) {
-
-        var manualSetWhileBoundThrows = createTest("manualSetWhileBoundThrows",
-                () -> {
-                    var component = componentFactory.get();
-                    var signal = new ValueSignal<>(initialValue);
-
-                    UI.getCurrent().add(component);
-                    bind.accept(component, signal);
-
-                    assertThrows(BindingActiveException.class,
-                            () -> setter.accept(component, updatedValue));
-                });
-
-        return Stream.concat(
-                generateCommonBindingTests(componentFactory, bind, getter,
-                        initialValue, updatedValue),
-                Stream.of(manualSetWhileBoundThrows));
+        return generateCommonBindingTests(componentFactory, bind, getter,
+                setter, initialValue, updatedValue);
     }
 
     /**
@@ -136,6 +115,9 @@ public class AbstractSignalsTest {
      * changes are not propagated after an attached component is detached, and
      * that the component property catches up with the latest signal value when
      * the component is attached again.</li>
+     * <li><b>manualSetWhileBoundThrows</b> – verifies that imperative updates
+     * to a bound property via its setter throws a
+     * {@link com.vaadin.flow.signals.BindingActiveException}.</li>
      * <li><b>rebindWhileBoundThrows</b> – verifies that calling the bind method
      * again while a binding is already active throws a
      * {@link com.vaadin.flow.signals.BindingActiveException}.</li>
@@ -145,7 +127,8 @@ public class AbstractSignalsTest {
      */
     private <C extends Component, T> Stream<DynamicTest> generateCommonBindingTests(
             Supplier<C> componentFactory, BiConsumer<C, ValueSignal<T>> bind,
-            Function<C, T> getter, T initialValue, T updatedValue) {
+            Function<C, T> getter, BiConsumer<C, T> setter, T initialValue,
+            T updatedValue) {
 
         var synchronizesWhileAttached = createTest("synchronizesWhileAttached",
                 () -> {
@@ -211,6 +194,18 @@ public class AbstractSignalsTest {
                     assertEquals(updatedValue, getter.apply(component));
                 });
 
+        var manualSetWhileBoundThrows = createTest("manualSetWhileBoundThrows",
+                () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+
+                    UI.getCurrent().add(component);
+                    bind.accept(component, signal);
+
+                    assertThrows(BindingActiveException.class,
+                            () -> setter.accept(component, updatedValue));
+                });
+
         var rebindWhileBoundThrows = createTest("rebindWhileBoundThrows",
                 () -> {
                     var component = componentFactory.get();
@@ -234,8 +229,8 @@ public class AbstractSignalsTest {
         return Stream.of(synchronizesWhileAttached,
                 appliesInitialValueWhileDetached,
                 doesNotSynchronizeWhileDetached, resynchronizesAfterAttach,
-                resynchronizesAfterReattach, rebindWhileBoundThrows,
-                bindNullSignalThrows);
+                resynchronizesAfterReattach, manualSetWhileBoundThrows,
+                rebindWhileBoundThrows, bindNullSignalThrows);
     }
 
     /**
@@ -273,7 +268,7 @@ public class AbstractSignalsTest {
      * {@link org.junit.jupiter.api.TestFactory}.
      * <p>
      * The suite contains all test cases of
-     * {@link #generateOneWayBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)},
+     * {@link #generateCommonBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)},
      * run with a {@code null} write callback, which verifies that such a
      * binding is one-way. In addition, the following test cases are generated:
      * <ul>
@@ -329,7 +324,7 @@ public class AbstractSignalsTest {
             Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
             T initialValue, T updatedValue) {
 
-        var oneWayTests = generateOneWayBindingTests(componentFactory,
+        var commonTests = generateCommonBindingTests(componentFactory,
                 (component, signal) -> bind.bind(component, signal, null),
                 getter, setter, initialValue, updatedValue);
 
@@ -396,7 +391,7 @@ public class AbstractSignalsTest {
                     assertEquals(List.of(), writtenValues);
                 });
 
-        return Stream.concat(oneWayTests,
+        return Stream.concat(commonTests,
                 Stream.of(setterWhileBoundCallsWriteCallback,
                         setterWhileBoundRevertsWhenCallbackIgnoresValue,
                         clientUpdateCallsWriteCallback,
