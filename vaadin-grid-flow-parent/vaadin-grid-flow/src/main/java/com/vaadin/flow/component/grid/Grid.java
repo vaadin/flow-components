@@ -3444,6 +3444,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Throws {@link IllegalStateException} if the grid is not using a
      * {@link GridSingleSelectionModel}.
+     * <p>
+     * Binding the selection to a signal with {@code bindValue} on the returned
+     * wrapper requires a write callback, since the user can always change the
+     * selection. A {@code null} write callback throws
+     * {@link NullPointerException}.
      *
      * @return the single select wrapper that can be used in binder
      * @throws IllegalStateException
@@ -3467,6 +3472,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Throws {@link IllegalStateException} if the grid is not using a
      * {@link GridMultiSelectionModel}.
+     * <p>
+     * Binding the selection to a signal with {@code bindValue} on the returned
+     * wrapper requires a write callback, since the user can always change the
+     * selection. A {@code null} write callback throws
+     * {@link NullPointerException}.
      *
      * @return the multiselect wrapper that can be used in binder
      * @throws IllegalStateException

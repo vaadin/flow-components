@@ -86,6 +86,15 @@ class GridSignalTest extends AbstractSignalsTest {
     }
 
     @Test
+    void singleSelect_bindValue_nullWriteCallback_throwsException() {
+        grid.setItems("foo", "bar");
+        var signal = new ValueSignal<String>(null);
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> grid.asSingleSelect().bindValue(signal, null));
+    }
+
+    @Test
     void singleSelect_bindValue_noEffectWhenDetached() {
         grid.setItems("foo", "bar", "baz");
         var signal = new ValueSignal<>("foo");
@@ -161,6 +170,16 @@ class GridSignalTest extends AbstractSignalsTest {
                 () -> grid.asMultiSelect()
                         .bindValue(new ValueSignal<>(Set.of("foo")), v -> {
                         }));
+    }
+
+    @Test
+    void multiSelect_bindValue_nullWriteCallback_throwsException() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        var signal = new ValueSignal<Set<String>>(Set.of());
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> grid.asMultiSelect().bindValue(signal, null));
     }
 
     @Test

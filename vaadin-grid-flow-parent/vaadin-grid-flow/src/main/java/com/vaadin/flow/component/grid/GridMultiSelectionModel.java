@@ -76,6 +76,11 @@ public interface GridMultiSelectionModel<T>
     /**
      * Gets a wrapper to use this multiselection model as a multiselect in
      * {@link Binder}.
+     * <p>
+     * Binding the selection to a signal with {@code bindValue} on the returned
+     * wrapper requires a write callback, since the user can always change the
+     * selection. A {@code null} write callback throws
+     * {@link NullPointerException}.
      *
      * @return the multiselect wrapper
      */

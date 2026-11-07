@@ -163,8 +163,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * @param signal
      *            the signal to bind, not {@code null}
      * @param writeCallback
-     *            the callback to propagate value changes back, or {@code null}
-     *            for one-way binding
+     *            the callback to propagate value changes back, not {@code null}
      * @return a {@link SignalBinding} that can be used to register
      *         {@link SignalBinding#onChange(com.vaadin.flow.function.SerializableConsumer)
      *         onChange} callbacks
@@ -173,6 +172,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     public SignalBinding<Boolean> bindDrawerOpened(Signal<Boolean> signal,
             SerializableConsumer<Boolean> writeCallback) {
         Objects.requireNonNull(signal, "Signal cannot be null");
+        Objects.requireNonNull(writeCallback, "Write callback cannot be null");
         return getElement().bindProperty("drawerOpened",
                 signal.map(v -> v == null ? Boolean.FALSE : v), writeCallback);
     }
