@@ -26,7 +26,9 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
+import com.vaadin.flow.component.pdfviewer.Zoom;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
@@ -149,6 +151,108 @@ class PdfViewerTest {
     void pageSynchronizedOnPageChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("page-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "page"));
+    }
+
+    @Test
+    void defaultZoom() {
+        Assertions.assertEquals(Zoom.PAGE_WIDTH, viewer.getZoom());
+        Assertions.assertEquals("page-width",
+                viewer.getElement().getProperty("zoom"));
+    }
+
+    @Test
+    void setZoom_getZoom() {
+        viewer.setZoom(Zoom.PAGE_FIT);
+        Assertions.assertEquals("page-fit",
+                viewer.getElement().getProperty("zoom"));
+        Assertions.assertEquals(Zoom.PAGE_FIT, viewer.getZoom());
+
+        viewer.setZoom(Zoom.of(1.5));
+        Assertions.assertEquals(1.5,
+                viewer.getElement().getPropertyRaw("zoom"));
+        Assertions.assertEquals(Zoom.of(1.5), viewer.getZoom());
+
+        viewer.setZoom(Zoom.PAGE_WIDTH);
+        Assertions.assertEquals("page-width",
+                viewer.getElement().getProperty("zoom"));
+        Assertions.assertEquals(Zoom.PAGE_WIDTH, viewer.getZoom());
+    }
+
+    @Test
+    void setZoom_null_throws() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> viewer.setZoom(null));
+    }
+
+    @Test
+    void setZoom_zoomChangeEventFired() {
+        var events = new ArrayList<ZoomChangeEvent>();
+        viewer.addZoomChangeListener(events::add);
+
+        viewer.setZoom(Zoom.of(2));
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertEquals(Zoom.of(2), events.get(0).getZoom());
+    }
+
+    @Test
+    void setZoom_sameZoom_noZoomChangeEvent() {
+        var events = new ArrayList<ZoomChangeEvent>();
+        viewer.addZoomChangeListener(events::add);
+
+        viewer.setZoom(Zoom.PAGE_WIDTH);
+        viewer.setZoom(Zoom.of(2));
+        viewer.setZoom(Zoom.of(2));
+
+        Assertions.assertEquals(1, events.size());
+    }
+
+    @Test
+    void zoomChangedOnClient_zoomChangeEventFired() {
+        var events = new ArrayList<ZoomChangeEvent>();
+        viewer.addZoomChangeListener(events::add);
+
+        fakeClientPropertyChange("zoom", 2.0);
+        fakeClientPropertyChange("zoom", "page-fit");
+
+        Assertions.assertEquals(2, events.size());
+        Assertions.assertTrue(events.get(0).isFromClient());
+        Assertions.assertEquals(Zoom.of(2), events.get(0).getZoom());
+        Assertions.assertTrue(events.get(1).isFromClient());
+        Assertions.assertEquals(Zoom.PAGE_FIT, events.get(1).getZoom());
+    }
+
+    @Test
+    void zoomChangedOnClient_factorAsString_factor() {
+        fakeClientPropertyChange("zoom", "1.5");
+        Assertions.assertEquals(Zoom.of(1.5), viewer.getZoom());
+    }
+
+    @Test
+    void zoomChangedOnClient_invalidValue_pageWidth() {
+        for (Serializable value : new Serializable[] { "invalid", "", -1.0, 0.0,
+                Double.NaN, true, null }) {
+            fakeClientPropertyChange("zoom", 2.0);
+            fakeClientPropertyChange("zoom", value);
+            Assertions.assertEquals(Zoom.PAGE_WIDTH, viewer.getZoom(),
+                    "Zoom for client value " + value);
+        }
+    }
+
+    @Test
+    void zoomChangedOnClient_setSrc_zoomKept() {
+        fakeClientPropertyChange("zoom", 2.0);
+
+        viewer.setSrc("report.pdf");
+
+        Assertions.assertEquals(Zoom.of(2), viewer.getZoom());
+    }
+
+    @Test
+    void zoomSynchronizedOnZoomChangedEvent() {
+        Assertions.assertTrue(getSyncExpressions("zoom-changed")
+                .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "zoom"));
     }
 
     @Test

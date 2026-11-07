@@ -115,6 +115,33 @@ public class AbstractSignalsTest {
             Function<C, T> getter, BiConsumer<C, T> setter, T initialValue,
             T updatedValue) {
 
+        var manualSetWhileBoundThrows = createTest("manualSetWhileBoundThrows",
+                () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+
+                    UI.getCurrent().add(component);
+                    bind.accept(component, signal);
+
+                    assertThrows(BindingActiveException.class,
+                            () -> setter.accept(component, updatedValue));
+                });
+
+        return Stream.concat(
+                generateCommonBindingTests(componentFactory, bind, getter,
+                        initialValue, updatedValue),
+                Stream.of(manualSetWhileBoundThrows));
+    }
+
+    /**
+     * Generates the test cases of
+     * {@link #generateBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)}
+     * that do not use the setter.
+     */
+    private <C extends Component, T> Stream<DynamicTest> generateCommonBindingTests(
+            Supplier<C> componentFactory, BiConsumer<C, ValueSignal<T>> bind,
+            Function<C, T> getter, T initialValue, T updatedValue) {
+
         var synchronizesWhileAttached = createTest("synchronizesWhileAttached",
                 () -> {
                     var component = componentFactory.get();
@@ -179,18 +206,6 @@ public class AbstractSignalsTest {
                     assertEquals(updatedValue, getter.apply(component));
                 });
 
-        var manualSetWhileBoundThrows = createTest("manualSetWhileBoundThrows",
-                () -> {
-                    var component = componentFactory.get();
-                    var signal = new ValueSignal<>(initialValue);
-
-                    UI.getCurrent().add(component);
-                    bind.accept(component, signal);
-
-                    assertThrows(BindingActiveException.class,
-                            () -> setter.accept(component, updatedValue));
-                });
-
         var rebindWhileBoundThrows = createTest("rebindWhileBoundThrows",
                 () -> {
                     var component = componentFactory.get();
@@ -214,8 +229,8 @@ public class AbstractSignalsTest {
         return Stream.of(synchronizesWhileAttached,
                 appliesInitialValueWhileDetached,
                 doesNotSynchronizeWhileDetached, resynchronizesAfterAttach,
-                resynchronizesAfterReattach, manualSetWhileBoundThrows,
-                rebindWhileBoundThrows, bindNullSignalThrows);
+                resynchronizesAfterReattach, rebindWhileBoundThrows,
+                bindNullSignalThrows);
     }
 
     /**
@@ -313,6 +328,94 @@ public class AbstractSignalsTest {
                 (component, signal) -> bind.bind(component, signal, null),
                 getter, setter, initialValue, updatedValue);
 
+        var writeCallbackTests = generateWriteCallbackTests(componentFactory,
+                bind, getter, setter, propertyName, initialValue, updatedValue,
+                (Serializable) updatedValue);
+
+        return Stream.concat(oneWayTests, writeCallbackTests);
+    }
+
+    /**
+     * Generates a suite of JUnit 5 dynamic tests that verify the standard
+     * behavior of a two-way signal binding on a component property, whose bind
+     * method requires a write callback. The returned stream is intended to be
+     * used with {@link org.junit.jupiter.api.TestFactory}.
+     * <p>
+     * The suite contains the test cases of
+     * {@link #generateBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)},
+     * run with a write callback that sets the signal, except
+     * <b>manualSetWhileBoundThrows</b>, since the setter calls the write
+     * callback instead of throwing. It also contains the write callback test
+     * cases of
+     * {@link #generateTwoWayBindingTests(Supplier, TwoWayBindMethod, Function, BiConsumer, String, Object, Object)}.
+     * In addition, the following test case is generated:
+     * <ul>
+     * <li><b>bindNullWriteCallbackThrows</b> – verifies that passing a
+     * {@code null} write callback to the bind method throws a
+     * {@link NullPointerException}.</li>
+     * </ul>
+     *
+     * @param <C>
+     *            the component type
+     * @param <T>
+     *            the property value type
+     * @param componentFactory
+     *            supplier that creates a new component instance for each test
+     * @param bind
+     *            the bind method under test
+     * @param getter
+     *            the getter for the bound property
+     * @param setter
+     *            the setter for the bound property
+     * @param propertyName
+     *            the name of the bound element property, used to simulate a
+     *            property change from the client
+     * @param initialValue
+     *            the initial value of the signal created for each test
+     * @param updatedValue
+     *            a value different from {@code initialValue}, used to test
+     *            synchronization behavior
+     * @param updatedClientValue
+     *            the value that the client sends for {@code updatedValue}
+     * @return a stream of dynamic tests to be returned from a
+     *         {@link org.junit.jupiter.api.TestFactory} method
+     */
+    protected <C extends Component, T> Stream<DynamicTest> generateRequiredWriteCallbackBindingTests(
+            Supplier<C> componentFactory, TwoWayBindMethod<C, T> bind,
+            Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
+            T initialValue, T updatedValue, Serializable updatedClientValue) {
+
+        var bindNullWriteCallbackThrows = createTest(
+                "bindNullWriteCallbackThrows", () -> {
+                    var component = componentFactory.get();
+                    var signal = new ValueSignal<>(initialValue);
+
+                    assertThrows(NullPointerException.class,
+                            () -> bind.bind(component, signal, null));
+                });
+
+        return Stream
+                .of(generateCommonBindingTests(componentFactory,
+                        (component, signal) -> bind.bind(component, signal,
+                                value -> signal.set(value)),
+                        getter, initialValue, updatedValue),
+                        generateWriteCallbackTests(componentFactory, bind,
+                                getter, setter, propertyName, initialValue,
+                                updatedValue, updatedClientValue),
+                        Stream.of(bindNullWriteCallbackThrows))
+                .flatMap(Function.identity());
+    }
+
+    /**
+     * Generates the test cases of
+     * {@link #generateTwoWayBindingTests(Supplier, TwoWayBindMethod, Function, BiConsumer, String, Object, Object)}
+     * that use the write callback.
+     */
+    private <C extends Component, T> Stream<DynamicTest> generateWriteCallbackTests(
+            Supplier<C> componentFactory, TwoWayBindMethod<C, T> bind,
+            Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
+            T initialValue, T updatedValue, Serializable updatedClientValue) {
+
         var setterWhileBoundCallsWriteCallback = createTest(
                 "setterWhileBoundCallsWriteCallback", () -> {
                     var component = componentFactory.get();
@@ -354,7 +457,7 @@ public class AbstractSignalsTest {
                     component.getElement().getNode()
                             .getFeature(ElementPropertyMap.class)
                             .deferredUpdateFromClient(propertyName,
-                                    (Serializable) updatedValue)
+                                    updatedClientValue)
                             .run();
 
                     assertEquals(updatedValue, signal.peek());
@@ -376,11 +479,10 @@ public class AbstractSignalsTest {
                     assertEquals(List.of(), writtenValues);
                 });
 
-        return Stream.concat(oneWayTests,
-                Stream.of(setterWhileBoundCallsWriteCallback,
-                        setterWhileBoundRevertsWhenCallbackIgnoresValue,
-                        clientUpdateCallsWriteCallback,
-                        signalChangeDoesNotCallWriteCallback));
+        return Stream.of(setterWhileBoundCallsWriteCallback,
+                setterWhileBoundRevertsWhenCallbackIgnoresValue,
+                clientUpdateCallsWriteCallback,
+                signalChangeDoesNotCallWriteCallback);
     }
 
     /**

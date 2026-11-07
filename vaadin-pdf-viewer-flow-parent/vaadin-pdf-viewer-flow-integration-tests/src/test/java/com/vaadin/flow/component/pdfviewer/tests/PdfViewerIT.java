@@ -24,7 +24,7 @@ public class PdfViewerIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        viewer = $(PdfViewerElement.class).waitForSingle();
+        viewer = $(PdfViewerElement.class).single();
     }
 
     @Test
