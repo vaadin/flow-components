@@ -27,14 +27,14 @@ class FontIconSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindLigature() {
-        return generateBindingTests(FontIcon::new, FontIcon::bindLigature,
+        return generateOneWayBindingTests(FontIcon::new, FontIcon::bindLigature,
                 FontIcon::getLigature, FontIcon::setLigature, "home",
                 "settings");
     }
 
     @TestFactory
     Stream<DynamicTest> bindCharCode() {
-        return generateBindingTests(FontIcon::new, FontIcon::bindCharCode,
+        return generateOneWayBindingTests(FontIcon::new, FontIcon::bindCharCode,
                 FontIcon::getCharCode, FontIcon::setCharCode, "e001", "e002");
     }
 }
