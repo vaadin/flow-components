@@ -46,7 +46,7 @@ class DialogSignalTest extends AbstractSignalsTest {
     @TestFactory
     Stream<DynamicTest> bindVisible() {
         // Dialog is visible by default, so start with false
-        return generateBindingTests(Dialog::new, Dialog::bindVisible,
+        return generateOneWayBindingTests(Dialog::new, Dialog::bindVisible,
                 Dialog::isVisible, Dialog::setVisible, false, true);
     }
 

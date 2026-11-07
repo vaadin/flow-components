@@ -54,15 +54,16 @@ class MarkdownSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindContent() {
-        return generateBindingTests(Markdown::new, Markdown::bindContent,
+        return generateOneWayBindingTests(Markdown::new, Markdown::bindContent,
                 Markdown::getContent, Markdown::setContent, "**foo**",
                 "**bar**");
     }
 
     @TestFactory
     Stream<DynamicTest> bindLineBreaks() {
-        return generateBindingTests(Markdown::new, Markdown::bindLineBreaks,
-                Markdown::isLineBreaks, Markdown::setLineBreaks, true, false);
+        return generateOneWayBindingTests(Markdown::new,
+                Markdown::bindLineBreaks, Markdown::isLineBreaks,
+                Markdown::setLineBreaks, true, false);
     }
 
     @Test

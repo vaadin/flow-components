@@ -27,19 +27,22 @@ class ProgressBarSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindMin() {
-        return generateBindingTests(ProgressBar::new, ProgressBar::bindMin,
-                ProgressBar::getMin, ProgressBar::setMin, 0.1, 0.2);
+        return generateOneWayBindingTests(ProgressBar::new,
+                ProgressBar::bindMin, ProgressBar::getMin, ProgressBar::setMin,
+                0.1, 0.2);
     }
 
     @TestFactory
     Stream<DynamicTest> bindMax() {
-        return generateBindingTests(ProgressBar::new, ProgressBar::bindMax,
-                ProgressBar::getMax, ProgressBar::setMax, 2.0, 3.0);
+        return generateOneWayBindingTests(ProgressBar::new,
+                ProgressBar::bindMax, ProgressBar::getMax, ProgressBar::setMax,
+                2.0, 3.0);
     }
 
     @TestFactory
     Stream<DynamicTest> bindValue() {
-        return generateBindingTests(ProgressBar::new, ProgressBar::bindValue,
-                ProgressBar::getValue, ProgressBar::setValue, 0.2, 0.5);
+        return generateOneWayBindingTests(ProgressBar::new,
+                ProgressBar::bindValue, ProgressBar::getValue,
+                ProgressBar::setValue, 0.2, 0.5);
     }
 }

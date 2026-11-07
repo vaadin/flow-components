@@ -26,14 +26,14 @@ class ConfirmDialogSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindWidth() {
-        return generateBindingTests(ConfirmDialog::new,
+        return generateOneWayBindingTests(ConfirmDialog::new,
                 ConfirmDialog::bindWidth, ConfirmDialog::getWidth,
                 ConfirmDialog::setWidth, "400px", "500px");
     }
 
     @TestFactory
     Stream<DynamicTest> bindHeight() {
-        return generateBindingTests(ConfirmDialog::new,
+        return generateOneWayBindingTests(ConfirmDialog::new,
                 ConfirmDialog::bindHeight, ConfirmDialog::getHeight,
                 ConfirmDialog::setHeight, "400px", "500px");
     }
