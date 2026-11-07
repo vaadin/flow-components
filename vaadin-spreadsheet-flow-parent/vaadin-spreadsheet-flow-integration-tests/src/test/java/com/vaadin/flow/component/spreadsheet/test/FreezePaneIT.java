@@ -168,14 +168,10 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
 
         // Scroll all the way to the right
         getSpreadsheet().scrollLeft(10000);
-        getCommandExecutor().waitForVaadin();
 
         // Check that the last column header is visible
         // By default, there are 52 columns (A, B, ..., AZ)
-        var rightmostHeader = findElementInShadowRoot(
-                By.cssSelector(".ch.col52"));
-        Assert.assertNotNull("Should have the last column header visible",
-                rightmostHeader);
+        var rightmostHeader = getSpreadsheet().getColumnHeader(52);
 
         // Get the rightmost visible column header
         var headerRect = rightmostHeader.getRect();
@@ -212,14 +208,10 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
 
         // Scroll all the way down
         getSpreadsheet().scroll(10000);
-        getCommandExecutor().waitForVaadin();
 
         // Check that the last row header is visible
         // By default, there are 200 rows
-        var bottommostHeader = findElementInShadowRoot(
-                By.cssSelector(".rh.row200"));
-        Assert.assertNotNull("Should have the last column header visible",
-                bottommostHeader);
+        var bottommostHeader = getSpreadsheet().getRowHeader(200);
 
         // Get the bottommost visible row header
         var headerRect = bottommostHeader.getRect();
