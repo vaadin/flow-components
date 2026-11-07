@@ -40,21 +40,21 @@ class DateTimePickerSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindMin() {
-        return generateBindingTests(DateTimePicker::new,
+        return generateOneWayBindingTests(DateTimePicker::new,
                 DateTimePicker::bindMin, DateTimePicker::getMin,
                 DateTimePicker::setMin, INITIAL_VALUE, UPDATED_VALUE);
     }
 
     @TestFactory
     Stream<DynamicTest> bindMax() {
-        return generateBindingTests(DateTimePicker::new,
+        return generateOneWayBindingTests(DateTimePicker::new,
                 DateTimePicker::bindMax, DateTimePicker::getMax,
                 DateTimePicker::setMax, INITIAL_VALUE, UPDATED_VALUE);
     }
 
     @TestFactory
     Stream<DynamicTest> bindReadOnly() {
-        return generateBindingTests(DateTimePicker::new,
+        return generateOneWayBindingTests(DateTimePicker::new,
                 DateTimePicker::bindReadOnly, DateTimePicker::isReadOnly,
                 DateTimePicker::setReadOnly, true, false);
     }

@@ -32,14 +32,16 @@ class IntegerFieldSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindMin() {
-        return generateBindingTests(IntegerField::new, IntegerField::bindMin,
-                IntegerField::getMin, IntegerField::setMin, 0, 10);
+        return generateOneWayBindingTests(IntegerField::new,
+                IntegerField::bindMin, IntegerField::getMin,
+                IntegerField::setMin, 0, 10);
     }
 
     @TestFactory
     Stream<DynamicTest> bindMax() {
-        return generateBindingTests(IntegerField::new, IntegerField::bindMax,
-                IntegerField::getMax, IntegerField::setMax, 100, 200);
+        return generateOneWayBindingTests(IntegerField::new,
+                IntegerField::bindMax, IntegerField::getMax,
+                IntegerField::setMax, 100, 200);
     }
 
     @Test

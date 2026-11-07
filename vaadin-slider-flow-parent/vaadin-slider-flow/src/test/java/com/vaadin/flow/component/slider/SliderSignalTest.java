@@ -26,19 +26,22 @@ class SliderSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindMin() {
-        return generateBindingTests(DecimalSlider::new, DecimalSlider::bindMin,
-                DecimalSlider::getMin, DecimalSlider::setMin, 10.0, 20.0);
+        return generateOneWayBindingTests(DecimalSlider::new,
+                DecimalSlider::bindMin, DecimalSlider::getMin,
+                DecimalSlider::setMin, 10.0, 20.0);
     }
 
     @TestFactory
     Stream<DynamicTest> bindMax() {
-        return generateBindingTests(DecimalSlider::new, DecimalSlider::bindMax,
-                DecimalSlider::getMax, DecimalSlider::setMax, 200.0, 300.0);
+        return generateOneWayBindingTests(DecimalSlider::new,
+                DecimalSlider::bindMax, DecimalSlider::getMax,
+                DecimalSlider::setMax, 200.0, 300.0);
     }
 
     @TestFactory
     Stream<DynamicTest> bindStep() {
-        return generateBindingTests(DecimalSlider::new, DecimalSlider::bindStep,
-                DecimalSlider::getStep, DecimalSlider::setStep, 2.0, 5.0);
+        return generateOneWayBindingTests(DecimalSlider::new,
+                DecimalSlider::bindStep, DecimalSlider::getStep,
+                DecimalSlider::setStep, 2.0, 5.0);
     }
 }

@@ -110,7 +110,7 @@ public class AbstractSignalsTest {
      * @return a stream of dynamic tests to be returned from a
      *         {@link org.junit.jupiter.api.TestFactory} method
      */
-    protected <C extends Component, T> Stream<DynamicTest> generateBindingTests(
+    protected <C extends Component, T> Stream<DynamicTest> generateOneWayBindingTests(
             Supplier<C> componentFactory, BiConsumer<C, ValueSignal<T>> bind,
             Function<C, T> getter, BiConsumer<C, T> setter, T initialValue,
             T updatedValue) {
@@ -253,7 +253,7 @@ public class AbstractSignalsTest {
      * {@link org.junit.jupiter.api.TestFactory}.
      * <p>
      * The suite contains all test cases of
-     * {@link #generateBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)},
+     * {@link #generateOneWayBindingTests(Supplier, BiConsumer, Function, BiConsumer, Object, Object)},
      * run with a {@code null} write callback, which verifies that such a
      * binding is one-way. In addition, the following test cases are generated:
      * <ul>
@@ -309,7 +309,7 @@ public class AbstractSignalsTest {
             Function<C, T> getter, BiConsumer<C, T> setter, String propertyName,
             T initialValue, T updatedValue) {
 
-        var oneWayTests = generateBindingTests(componentFactory,
+        var oneWayTests = generateOneWayBindingTests(componentFactory,
                 (component, signal) -> bind.bind(component, signal, null),
                 getter, setter, initialValue, updatedValue);
 

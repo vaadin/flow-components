@@ -66,7 +66,7 @@ class ButtonSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindText() {
-        return generateBindingTests(Button::new, Button::bindText,
+        return generateOneWayBindingTests(Button::new, Button::bindText,
                 Button::getText, Button::setText, "foo", "bar");
     }
 
