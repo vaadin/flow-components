@@ -56,9 +56,9 @@ public class DrilldownEvent extends ComponentEvent<Chart> implements HasItem {
     }
 
     /**
-     * Gets the name of the drilldown
+     * Gets the id of the drilldown
      *
-     * @return
+     * @return the id of the drilldown
      */
     public String getDrilldown() {
         return drilldown;
