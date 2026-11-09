@@ -190,4 +190,55 @@ public interface GridMultiSelectionModel<T>
      * @since 24.2
      */
     boolean isDragSelect();
+
+    /**
+     * Gets whether a click on a row toggles the selection of the row's item.
+     * <p>
+     * The default implementation throws an
+     * {@link UnsupportedOperationException}. The selection models that Grid
+     * uses override it.
+     *
+     * @return {@code true} if a click on a row toggles the selection,
+     *         {@code false} otherwise
+     * @throws UnsupportedOperationException
+     *             if the implementation does not support this feature
+     * @see #setSelectOnItemClick(boolean)
+     * @since 25.4
+     */
+    default boolean isSelectOnItemClick() {
+        throw new UnsupportedOperationException(
+                "Select on item click is not supported by this selection model");
+    }
+
+    /**
+     * Sets whether a click on a row toggles the selection of the row's item.
+     * When enabled, you can select and deselect items with a click anywhere in
+     * the row, not only with the checkbox in the selection column.
+     * <ul>
+     * <li>A click on an item that is not selected selects it. A click on a
+     * selected item deselects it.</li>
+     * <li><kbd>Space</kbd> on a focused row or cell counts as a click.</li>
+     * <li>A click on focusable content in a cell, such as a button or a text
+     * field, does not change the selection.</li>
+     * <li>The selection of items that
+     * {@link Grid#setItemSelectableProvider(SerializablePredicate)} does not
+     * allow does not change.</li>
+     * </ul>
+     * The default value is {@code false}.
+     * <p>
+     * The default implementation throws an
+     * {@link UnsupportedOperationException}. The selection models that Grid
+     * uses override it.
+     *
+     * @param selectOnItemClick
+     *            {@code true} to toggle the selection on a click on a row,
+     *            {@code false} to not change the selection on a click on a row
+     * @throws UnsupportedOperationException
+     *             if the implementation does not support this feature
+     * @since 25.4
+     */
+    default void setSelectOnItemClick(boolean selectOnItemClick) {
+        throw new UnsupportedOperationException(
+                "Select on item click is not supported by this selection model");
+    }
 }

@@ -129,6 +129,32 @@ public class GridSelectionColumn extends Component {
         return getElement().getProperty("dragSelect", false);
     }
 
+    /**
+     * Gets whether a click on a row toggles the selection of the row's item.
+     *
+     * @return {@code true} if a click on a row toggles the selection,
+     *         {@code false} otherwise
+     * @see GridMultiSelectionModel#setSelectOnItemClick(boolean)
+     * @since 25.4
+     */
+    public boolean isSelectOnItemClick() {
+        return getElement().getProperty("autoSelect", false);
+    }
+
+    /**
+     * Sets whether a click on a row toggles the selection of the row's item.
+     * The default value is {@code false}.
+     *
+     * @param selectOnItemClick
+     *            {@code true} to toggle the selection on a click on a row,
+     *            {@code false} to not change the selection on a click on a row
+     * @see GridMultiSelectionModel#setSelectOnItemClick(boolean)
+     * @since 25.4
+     */
+    public void setSelectOnItemClick(boolean selectOnItemClick) {
+        getElement().setProperty("autoSelect", selectOnItemClick);
+    }
+
     @ClientCallable
     private void setShiftKeyDown(boolean shiftKeyDown) {
         this.shiftKeyDown = shiftKeyDown;
