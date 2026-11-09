@@ -690,6 +690,22 @@ public class MapElement extends TestBenchElement {
         public String getSrc() {
             return getString("getSrc()");
         }
+
+        /**
+         * Get the rendered width of the icon in pixels, including its scale, or
+         * null if the icon's image has not been loaded yet
+         */
+        public Double getWidth() {
+            return getDouble("getWidth()");
+        }
+
+        /**
+         * Get the rendered height of the icon in pixels, including its scale,
+         * or null if the icon's image has not been loaded yet
+         */
+        public Double getHeight() {
+            return getDouble("getHeight()");
+        }
     }
 
     public static class TextReference extends ConfigurationObjectReference {

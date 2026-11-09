@@ -57,12 +57,9 @@ public class ModifyStylePage extends Div {
     }
 
     private Icon createIcon() {
-        Icon.ImageSize pointImageSize = new Icon.ImageSize(
-                Assets.POINT.getWidth(), Assets.POINT.getHeight());
         Icon.Options iconOptions = new Icon.Options();
         iconOptions.setSrc(MarkerFeature.POINT_ICON.getSrc());
         iconOptions.setImg(Assets.POINT.getHandler());
-        iconOptions.setImgSize(pointImageSize);
         iconOptions.setScale(0.25f);
         iconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
         iconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));

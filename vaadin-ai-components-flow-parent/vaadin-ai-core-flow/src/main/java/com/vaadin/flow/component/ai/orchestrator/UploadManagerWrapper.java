@@ -50,6 +50,11 @@ class UploadManagerWrapper implements AIFileReceiver {
     }
 
     @Override
+    public boolean isUploading() {
+        return uploadManager.isUploading();
+    }
+
+    @Override
     public List<AIAttachment> takeAttachments() {
         var result = List.copyOf(pendingAttachments);
         pendingAttachments.clear();

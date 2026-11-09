@@ -79,7 +79,7 @@ import com.vaadin.flow.signals.Signal;
  * @since 1.0
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.4.0-alpha3")
+@NpmPackage(value = "@vaadin/dialog", version = "25.4.0-alpha5")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @ModalRoot
 public class Dialog extends Component
@@ -944,6 +944,37 @@ public class Dialog extends Component
      */
     public String getHeaderTitle() {
         return getElement().getProperty("headerTitle", "");
+    }
+
+    /**
+     * Sets the ARIA heading level, used to set the {@code aria-level} attribute
+     * on the header title element.
+     * <p>
+     * By default no heading level is set, and the web component uses {@code 1}
+     * for modal dialogs and {@code 2} for modeless dialogs.
+     *
+     * @param headingLevel
+     *            the heading level, or {@code null} to restore the web
+     *            component's default
+     * @since 25.4
+     */
+    public void setHeadingLevel(Integer headingLevel) {
+        if (headingLevel == null) {
+            getElement().removeProperty("headingLevel");
+        } else {
+            getElement().setProperty("headingLevel", headingLevel);
+        }
+    }
+
+    /**
+     * Gets the ARIA heading level of the header title element.
+     *
+     * @return the heading level, or {@code null} if none is set
+     * @since 25.4
+     */
+    public Integer getHeadingLevel() {
+        Object value = getElement().getPropertyRaw("headingLevel");
+        return value == null ? null : ((Number) value).intValue();
     }
 
     /**

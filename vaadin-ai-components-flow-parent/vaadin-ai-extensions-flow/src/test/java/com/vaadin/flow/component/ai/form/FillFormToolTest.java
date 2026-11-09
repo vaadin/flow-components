@@ -14,6 +14,7 @@ import static com.vaadin.flow.component.ai.form.FormTestSupport.idOf;
 import static com.vaadin.flow.component.ai.form.FormTestSupport.requestEvent;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -30,23 +32,32 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.AITurnEvents;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
+import com.vaadin.flow.component.ai.form.FormTestFields.BigIntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
+import com.vaadin.flow.component.ai.form.FormTestFields.ByteField;
+import com.vaadin.flow.component.ai.form.FormTestFields.CollectionWithoutMultiSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateTimeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
+import com.vaadin.flow.component.ai.form.FormTestFields.FloatField;
 import com.vaadin.flow.component.ai.form.FormTestFields.IntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.LabeledStringField;
+import com.vaadin.flow.component.ai.form.FormTestFields.LongField;
 import com.vaadin.flow.component.ai.form.FormTestFields.MultiSelectField;
+import com.vaadin.flow.component.ai.form.FormTestFields.ShortField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
+import com.vaadin.flow.component.ai.form.FormTestFields.UuidField;
 import com.vaadin.flow.component.ai.form.FormTestFields.ValidatedField;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.html.Div;
@@ -241,6 +252,157 @@ class FillFormToolTest {
     }
 
     @Test
+    void fillForm_writesLongToLongField() {
+        var field = new LongField();
+        fillFormPayload(controllerFor(field), payload(field, "3"));
+
+        Assertions.assertEquals(3L, field.getValue());
+    }
+
+    @Test
+    void fillForm_writesLargeLongToLongField() {
+        var field = new LongField();
+        fillFormPayload(controllerFor(field),
+                payload(field, "9007199254740993"));
+
+        Assertions.assertEquals(9007199254740993L, field.getValue());
+    }
+
+    @Test
+    void fillForm_writesShortToShortField() {
+        var field = new ShortField();
+        fillFormPayload(controllerFor(field), payload(field, "3.0"));
+
+        Assertions.assertEquals((short) 3, field.getValue());
+    }
+
+    @Test
+    void fillForm_rejectsOutOfRangeValueForShortField() {
+        var field = new ShortField();
+        field.setValue((short) 42);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "40000"));
+
+        Assertions.assertEquals((short) 42, field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_writesByteToByteField() {
+        var field = new ByteField();
+        fillFormPayload(controllerFor(field), payload(field, "3"));
+
+        Assertions.assertEquals((byte) 3, field.getValue());
+    }
+
+    @Test
+    void fillForm_rejectsOutOfRangeValueForByteField() {
+        var field = new ByteField();
+        field.setValue((byte) 7);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "200"));
+
+        Assertions.assertEquals((byte) 7, field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_writesBigIntegerToBigIntField() {
+        var field = new BigIntField();
+        fillFormPayload(controllerFor(field),
+                payload(field, "123456789012345678901234567890"));
+
+        Assertions.assertEquals(
+                new BigInteger("123456789012345678901234567890"),
+                field.getValue());
+    }
+
+    @Test
+    void fillForm_writesFloatToFloatField() {
+        var field = new FloatField();
+        fillFormPayload(controllerFor(field), payload(field, "58.4"));
+
+        Assertions.assertEquals(58.4f, field.getValue());
+    }
+
+    @Test
+    void fillForm_rejectsOutOfRangeValueForFloatField() {
+        var field = new FloatField();
+        field.setValue(1.5f);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "1e300"));
+
+        Assertions.assertEquals(1.5f, field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_rejectsValueOfOtherTypeThanFieldValueType() {
+        // A UUID field has no type mapping and is listed as a string field.
+        // The string the LLM sends must not be written into it.
+        var field = new UuidField();
+        var uuid = UUID.randomUUID();
+        field.setValue(uuid);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "\"abc\""));
+
+        Assertions.assertEquals(uuid, field.getValue());
+        Assertions.assertEquals(
+                "Field cannot be filled: its value type is not supported.",
+                rejectionReason(result, idOf(field)), "Result: " + result);
+    }
+
+    @Test
+    void fillForm_valueOfOtherTypeThanFieldValueType_logsTypes() {
+        // The rejection reason sent to the LLM has no class names, so the
+        // debug log is where the developer finds the mismatching types.
+        var logger = TestLoggerFactory.getTestLogger(FormValueConverter.class);
+        logger.clearAll();
+        var field = new UuidField();
+        fillFormResult(controllerFor(field), payload(field, "\"abc\""));
+
+        var messages = logger.getLoggingEvents().stream()
+                .filter(e -> e.getLevel() == Level.DEBUG)
+                .map(e -> e.getFormattedMessage()).toList();
+        Assertions.assertTrue(
+                messages.stream()
+                        .anyMatch(m -> m.contains(String.class.getName())
+                                && m.contains(UUID.class.getName())
+                                && m.contains(idOf(field))),
+                "Debug log: " + messages);
+    }
+
+    @Test
+    void fillForm_rejectsStringForListValuedField() {
+        // The value type List<String> is checked by its raw class.
+        var field = new CollectionWithoutMultiSelectField();
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "\"abc\""));
+
+        Assertions.assertEquals(List.of(), field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_typedSingleSelect_writesNullItem() {
+        // The value type check lets null through: an item list may contain
+        // null, which renders as an empty label.
+        var field = new SingleSelectField<String>() {
+        };
+        field.setItems("EUR", null);
+        field.setValue("EUR");
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "\"\""));
+
+        Assertions.assertNull(field.getValue());
+        Assertions.assertTrue(success(result), "Result: " + result);
+    }
+
+    @Test
     void fillForm_acceptsWholeNumberFloatForIntegerField() {
         // LLMs sometimes emit "3.0" for integer fields; the converter
         // recognises whole-number floats and casts them down. Fractional
@@ -260,6 +422,19 @@ class FillFormToolTest {
         Assertions.assertEquals(42, field.getValue(),
                 "Fractional JSON for an integer field must be rejected; "
                         + "the field's prior value must remain unchanged");
+    }
+
+    @Test
+    void fillForm_rejectsTooLargeFloatForIntegerField() {
+        var field = new IntField();
+        field.setValue(42);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "1e400"));
+
+        Assertions.assertEquals(42, field.getValue());
+        Assertions.assertTrue(
+                rejectionReason(result, idOf(field)).contains("integer"),
+                "Result: " + result);
     }
 
     @Test

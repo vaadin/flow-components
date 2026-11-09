@@ -178,14 +178,14 @@ public class VirtualListIT extends AbstractComponentIT {
     public void lastVisibleRowIndex() {
         VirtualListElement list = $(VirtualListElement.class)
                 .id("component-renderer");
-        Assert.assertEquals(5, list.getLastVisibleRowIndex());
+        waitUntil(driver -> list.getLastVisibleRowIndex() == 5);
     }
 
     @Test
     public void rowIndexInView() {
         VirtualListElement list = $(VirtualListElement.class)
                 .id("component-renderer");
-        Assert.assertTrue(list.isRowInView(3));
+        waitUntil(driver -> list.isRowInView(3));
     }
 
     @Test

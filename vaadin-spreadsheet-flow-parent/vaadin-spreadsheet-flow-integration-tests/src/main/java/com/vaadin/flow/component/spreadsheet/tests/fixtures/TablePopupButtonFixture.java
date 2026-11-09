@@ -10,6 +10,8 @@ package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
 import java.io.Serializable;
 
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
@@ -21,7 +23,11 @@ public class TablePopupButtonFixture implements SpreadsheetFixture {
     public void loadFixture(final Spreadsheet spreadsheet) {
 
         spreadsheet.addSelectionChangeListener(e -> {
-            PopupButton popupButton = new PopupButton(new Span("TABLE"));
+            PopupButton popupButton = new PopupButton();
+            NativeButton toggleActive = new NativeButton("Toggle active",
+                    event -> popupButton.markActive(!popupButton.isActive()));
+            toggleActive.setId("toggle-popup-active");
+            popupButton.setContent(new Div(new Span("TABLE"), toggleActive));
             spreadsheet.setPopup(spreadsheet.getSelectedCellReference(),
                     popupButton);
         });

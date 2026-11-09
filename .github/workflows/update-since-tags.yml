@@ -51,7 +51,7 @@ jobs:
   # target version once, so neither the matrix nor the PR title needs a hardcoded
   # list of components.
   discover:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.gen.outputs.matrix }}
       count: ${{ steps.gen.outputs.count }}
@@ -140,7 +140,7 @@ jobs:
   # index axis contains only that artifact's release timeline.
   reconcile:
     needs: discover
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       max-parallel: 10
@@ -217,7 +217,7 @@ jobs:
   # instead -- the shards that succeeded keep their uploaded patches.
   open-pr:
     needs: [discover, reconcile]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Only this job writes: it pushes the branch and opens the PR. Reconciling
     # needs nothing beyond the read access inherited from the workflow.
     permissions:

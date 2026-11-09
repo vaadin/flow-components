@@ -94,7 +94,7 @@ Name tests by scenario and observable outcome. Simple tests covering a feature o
 
 When adding a new component module, add a serializable test that extends from `com.vaadin.flow.testutil.ClassesSerializableTest`.
 
-Component getters and setters should be covered by unit tests. When those delegate to Element APIs, tests should verify via the Element API that a value was properly applied. Simple properties can be covered with a single unit test instead of splitting up testing over multiple tests.
+Component getters and setters should be covered by unit tests. When those delegate to Element APIs, tests should verify via the Element API that a value was properly applied. Cover simple properties with a single unit test named after the property (e.g. `setSrc_getSrc`) that checks the default value, setting a value, and resetting it (e.g. to `null`), asserting both the getter and the Element state at each step.
 
 When a component mutates a child's slot attribute, unit tests must verify that the slot attribute is added when the child is added, and removed when the child is removed from the component.
 

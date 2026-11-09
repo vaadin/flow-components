@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -89,7 +94,12 @@ public class ComponentColumnsPage extends Div {
         Grid<Person> grid = new Grid<>();
         // The tests only exercise the first rows, so a small data set keeps
         // the page light
-        grid.setItems(new PeopleGenerator().generatePeople(50));
+        PeopleGenerator generator = new PeopleGenerator();
+        List<Person> people = generator.generatePeople(50);
+        List<Person> otherPeople = IntStream.rangeClosed(101, 105)
+                .mapToObj(generator::createPerson)
+                .collect(Collectors.toCollection(ArrayList::new));
+        grid.setItems(people);
 
         // Use the component constructor that accepts an item ->
         // new PersonComponent(Person person)
@@ -125,13 +135,23 @@ public class ComponentColumnsPage extends Div {
 
         });
 
+        NativeButton changeItemsButton = new NativeButton("Change items",
+                event -> {
+                    ListDataProvider<Person> dataProvider = (ListDataProvider<Person>) grid
+                            .getDataProvider();
+                    grid.setItems(
+                            dataProvider.getItems() == people ? otherPeople
+                                    : people);
+                });
+
         grid.setSelectionMode(SelectionMode.NONE);
 
         grid.setId("component-renderer");
         idField.setId("component-renderer-id-field");
         nameField.setId("component-renderer-name-field");
         updateButton.setId("component-renderer-update-button");
-        add(grid, idField, nameField, updateButton);
+        changeItemsButton.setId("component-renderer-change-items-button");
+        add(grid, idField, nameField, updateButton, changeItemsButton);
     }
 
     /**

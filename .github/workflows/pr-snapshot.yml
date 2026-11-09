@@ -48,7 +48,7 @@ env:
 jobs:
   snapshot:
     name: Snapshot
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     # A deploy needs the credentials, and secrets are only handed to pull
     # requests from a branch of this repository, never to a fork. Which is also

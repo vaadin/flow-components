@@ -8,10 +8,12 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -54,6 +56,32 @@ public class PopupButtonIT extends AbstractSpreadsheetIT {
 
         assertTrue("PopupButton popup not visible",
                 spreadsheetElement.isPopupButtonPopupVisible());
+    }
+
+    @Test
+    public void popupButton_toggleActive_updatesStyleWithoutReplacingWidget() {
+        loadTestFixture(TestFixtures.TablePopupButton);
+        SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class)
+                .first();
+        SheetCellElement cell = spreadsheetElement.getCellAt("D1");
+        clickCell("D1");
+        waitUntil(webDriver -> cell.hasPopupButton());
+        var popupButton = cell.findElement(By.className("popupbutton"));
+        cell.popupButtonClick();
+
+        getDriver().findElement(By.id("toggle-popup-active")).click();
+        waitUntil(webDriver -> !cell
+                .findElements(By.cssSelector(".popupbutton.active")).isEmpty());
+        assertEquals(popupButton,
+                cell.findElement(By.className("popupbutton")));
+        assertTrue(spreadsheetElement.isPopupButtonPopupVisible());
+
+        getDriver().findElement(By.id("toggle-popup-active")).click();
+        waitUntil(webDriver -> cell
+                .findElements(By.cssSelector(".popupbutton.active")).isEmpty());
+        assertEquals(popupButton,
+                cell.findElement(By.className("popupbutton")));
+        assertTrue(spreadsheetElement.isPopupButtonPopupVisible());
     }
 
     @Test

@@ -50,12 +50,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */
-@NpmPackage(value = "@vaadin/a11y-base", version = "25.4.0-alpha3")
-@NpmPackage(value = "@vaadin/component-base", version = "25.4.0-alpha3")
-@NpmPackage(value = "@vaadin/field-base", version = "25.4.0-alpha3")
-@NpmPackage(value = "@vaadin/input-container", version = "25.4.0-alpha3")
-@NpmPackage(value = "@vaadin/lit-renderer", version = "25.4.0-alpha3")
-@NpmPackage(value = "@vaadin/overlay", version = "25.4.0-alpha3")
+@NpmPackage(value = "@vaadin/a11y-base", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/component-base", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/field-base", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/input-container", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/lit-renderer", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/overlay", version = "25.4.0-alpha5")
 final class TransitiveNpmPackages implements Serializable {
 
     /**
@@ -108,7 +108,7 @@ final class TransitiveNpmPackages implements Serializable {
             "@vaadin/react-components-pro",
             List.of("@vaadin/board", "@vaadin/charts", "@vaadin/crud",
                     "@vaadin/dashboard", "@vaadin/grid-pro", "@vaadin/map",
-                    "@vaadin/rich-text-editor"));
+                    "@vaadin/pdf-viewer", "@vaadin/rich-text-editor"));
 
     private TransitiveNpmPackages() {
     }

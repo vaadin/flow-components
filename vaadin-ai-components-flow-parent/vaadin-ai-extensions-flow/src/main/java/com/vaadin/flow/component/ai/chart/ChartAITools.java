@@ -618,6 +618,7 @@ public final class ChartAITools {
                                 Gantt:
                                 - Columns: {NAME}, {START}, {END} (optionally {ID}, {PARENT}, {DEPENDENCY}, {COMPLETED}, {COLOR})
                                 - {START} and {END} must be date/timestamp values
+                                - {PARENT} holds the {ID} of the parent row, or NULL for a root
                                 - Example: SELECT task AS {NAME}, start_date AS {START}, end_date AS {END} FROM project_tasks
 
                                 Timeline:
@@ -630,10 +631,12 @@ public final class ChartAITools {
 
                                 Organization:
                                 - Columns: {ID}, {NAME}, {PARENT}, {TITLE} (optionally {DESCRIPTION}, {IMAGE}, {COLOR})
+                                - {PARENT} holds the {ID} of the parent row, or NULL for a root
                                 - Example: SELECT emp_id AS {ID}, full_name AS {NAME}, mgr_id AS {PARENT}, role AS {TITLE} FROM employees
 
                                 Treemap:
                                 - Columns: {ID}, {PARENT}, {VALUE} (optionally {NAME}, {COLOR_VALUE})
+                                - {PARENT} holds the {ID} of the parent row, or NULL for a root
                                 - Example: SELECT cat_id AS {ID}, parent_id AS {PARENT}, amount AS {VALUE} FROM categories
 
                                 Heatmap:

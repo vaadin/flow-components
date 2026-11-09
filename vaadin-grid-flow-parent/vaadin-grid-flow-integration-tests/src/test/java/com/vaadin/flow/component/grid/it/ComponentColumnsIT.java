@@ -92,6 +92,46 @@ public class ComponentColumnsIT extends AbstractComponentIT {
     }
 
     @Test
+    public void gridWithComponentRenderer_changeItems_componentsAreRendered() {
+        GridElement grid = $(GridElement.class).id("component-renderer");
+        TestBenchElement changeItems = $("button")
+                .id("component-renderer-change-items-button");
+
+        changeItems.click();
+        Assert.assertEquals(5, grid.getRowCount());
+        assertPersonComponents(grid, 101, 102, 103, 104, 105);
+
+        changeItems.click();
+        Assert.assertEquals(50, grid.getRowCount());
+        assertPersonComponents(grid, 1, 2, 3);
+    }
+
+    @Test
+    public void gridWithComponentRenderer_removeItems_componentsAreRemoved() {
+        GridElement grid = $(GridElement.class).id("component-renderer");
+
+        clickRemoveButton(grid, 0);
+        Assert.assertEquals(49, grid.getRowCount());
+        assertPersonComponents(grid, 2, 3, 4);
+
+        clickRemoveButton(grid, 1);
+        Assert.assertEquals(48, grid.getRowCount());
+        assertPersonComponents(grid, 2, 4, 5);
+    }
+
+    private void clickRemoveButton(GridElement grid, int row) {
+        grid.getCell(row, grid.getColumn("Actions")).$("button").first()
+                .click();
+    }
+
+    private void assertPersonComponents(GridElement grid, int... ids) {
+        for (int row = 0; row < ids.length; row++) {
+            Assert.assertEquals("Hi, I'm Person " + ids[row] + "!",
+                    grid.getCell(row, grid.getColumn("Person")).getText());
+        }
+    }
+
+    @Test
     public void gridWithComponentRenderer_cellsAreRenderered() {
         WebElement grid = findElement(By.id("component-renderer"));
         scrollToElement(grid);

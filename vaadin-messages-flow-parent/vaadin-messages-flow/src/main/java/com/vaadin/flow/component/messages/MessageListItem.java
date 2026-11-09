@@ -33,10 +33,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.internal.NodeOwner;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
@@ -68,10 +65,9 @@ public class MessageListItem implements Serializable {
     private String userImage;
     private Integer userColorIndex;
 
-    private StreamRegistration resourceRegistration;
-    private Registration pendingRegistration;
-    private Command pendingHandle;
+    private Registration resourceRegistration;
     private AbstractStreamResource imageResource;
+    private DownloadHandler imageHandler;
 
     private Set<String> themeNames = new LinkedHashSet<>();
     private Set<String> classNames = new LinkedHashSet<>();
@@ -283,7 +279,8 @@ public class MessageListItem implements Serializable {
      * <p>
      * If the image is set as a stream resource with
      * {@link MessageListItem#setUserImageHandler(DownloadHandler)}, this method
-     * will return a URL that is generated for that resource.
+     * will return a URL that is generated for that resource. The URL changes
+     * when the item is added to another message list.
      *
      * @return the URL to the message sender's image, or {@code null} if none is
      *         set
@@ -306,7 +303,7 @@ public class MessageListItem implements Serializable {
      * @see MessageListItem#setUserImageHandler(DownloadHandler)
      */
     public void setUserImage(String userImage) {
-        unsetResource();
+        setImageSource(null, null);
         this.userImage = userImage;
         propsChanged();
     }
@@ -517,6 +514,10 @@ public class MessageListItem implements Serializable {
 
     /**
      * Gets the image resource of the message sender's avatar.
+     * <p>
+     * When the image is set with {@link #setUserImageHandler(DownloadHandler)},
+     * this returns the resource that serves the handler. A new resource is
+     * created when the item is added to another message list.
      *
      * @return the image resource value, or {@code null} if the image has not
      *         been set, or if the image is set with a URL by using
@@ -537,6 +538,12 @@ public class MessageListItem implements Serializable {
      * for pre-defined download handlers, created by factory methods in
      * {@link DownloadHandler}, as well as for other
      * {@link AbstractDownloadHandler} implementations.
+     * <p>
+     * The handler is registered as a resource of the message list that the item
+     * belongs to while the list is attached, and is unregistered when the list
+     * is detached or the item is removed from the list. When the item is added
+     * to another message list, the handler is served from a new resource with a
+     * new URL.
      *
      * @param downloadHandler
      *            download handler for the image resource, or {@code null} to
@@ -545,19 +552,13 @@ public class MessageListItem implements Serializable {
      * @since 24.8
      */
     public void setUserImageHandler(DownloadHandler downloadHandler) {
-        if (downloadHandler == null) {
-            unsetResource();
-            return;
-        }
         if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
             // change disposition to inline in pre-defined handlers,
             // where it is 'attachment' by default
             handler.inline();
         }
-
-        setUserImageResource(new StreamResourceRegistry.ElementStreamResource(
-                downloadHandler, getHost() != null ? getHost().getElement()
-                        : UI.getCurrentOrThrow().getElement()));
+        setImageSource(downloadHandler, null);
+        propsChanged();
     }
 
     /**
@@ -565,6 +566,10 @@ public class MessageListItem implements Serializable {
      * <p>
      * Setting the image as a resource with this method overrides the image URL
      * set with {@link MessageListItem#setUserImage(String)}.
+     * <p>
+     * The resource is registered with the session while the message list that
+     * the item belongs to is attached, and is unregistered when the list is
+     * detached or the item is removed from the list.
      *
      * @param resource
      *            the image resource, or {@code null} to remove the resource
@@ -573,22 +578,7 @@ public class MessageListItem implements Serializable {
      */
     @Deprecated(since = "24.8", forRemoval = true)
     public void setUserImageResource(AbstractStreamResource resource) {
-        imageResource = resource;
-
-        if (resource == null) {
-            unsetResource();
-            return;
-        }
-
-        // The following is the copy of functionality from the
-        // ElementAttributeMap and AvatarGroupItem.
-        doSetResource(resource);
-        if (getHost() != null
-                && getHost().getElement().getNode().isAttached()) {
-            registerResource(resource);
-        } else {
-            deferRegistration(resource);
-        }
+        setImageSource(null, resource);
         propsChanged();
     }
 
@@ -604,80 +594,53 @@ public class MessageListItem implements Serializable {
         this.userImage = targetUri.toASCIIString();
     }
 
-    private void unregisterResource() {
-        StreamRegistration registration = resourceRegistration;
-        Registration handle = pendingRegistration;
-        if (handle != null) {
-            handle.remove();
-        }
-        if (registration != null) {
-            registration.unregister();
-        }
+    /**
+     * Replaces the image handler or the image resource of this item. At most
+     * one of them is set.
+     */
+    private void setImageSource(DownloadHandler handler,
+            AbstractStreamResource resource) {
+        unbindImage();
+        imageHandler = handler;
+        imageResource = resource;
         this.userImage = null;
+        bindImage();
     }
 
-    private void deferRegistration(AbstractStreamResource resource) {
-        if (pendingRegistration != null) {
+    /**
+     * Binds the image to the current host. An image handler is wrapped in a
+     * resource owned by the host, and the resource is registered with the
+     * session of the host while the host is attached.
+     */
+    private void bindImage() {
+        if (imageHandler != null) {
+            // Requests for a handler resource are rejected while its owner
+            // element is detached, so the resource is created for the current
+            // host
+            imageResource = new StreamResourceRegistry.ElementStreamResource(
+                    imageHandler, getHost() != null ? getHost().getElement()
+                            : UI.getCurrentOrThrow().getElement());
+        }
+        if (imageResource == null) {
             return;
         }
-
-        pendingHandle = () -> {
-            doSetResource(resource);
-            registerResource(resource);
-        };
-
-        if (getHost() != null) {
-            attachPendingRegistration(pendingHandle);
-            pendingHandle = null;
-        }
-    }
-
-    private void attachPendingRegistration(Command pendingHandle) {
-        if (getHost().getElement().getNode().isAttached()) {
-            pendingHandle.execute();
+        doSetResource(imageResource);
+        if (getHost() == null) {
             return;
         }
-        Registration handle = getHost().getElement().getNode()
-                // Do not convert to lambda
-                .addAttachListener(pendingHandle);
-        pendingRegistration = handle;
+        AbstractStreamResource resource = imageResource;
+        resourceRegistration = getHost().getElement().whenAttached(ui -> {
+            StreamRegistration registration = ui.getSessionOrThrow()
+                    .getResourceRegistry().registerResource(resource);
+            return registration::unregister;
+        });
     }
 
-    private void registerResource(AbstractStreamResource resource) {
-        assert resourceRegistration == null;
-        StreamRegistration registration = getSession().getResourceRegistry()
-                .registerResource(resource);
-        resourceRegistration = registration;
-        Registration handle = pendingRegistration;
-        if (handle != null) {
-            handle.remove();
+    private void unbindImage() {
+        if (resourceRegistration != null) {
+            resourceRegistration.remove();
+            resourceRegistration = null;
         }
-        pendingRegistration = getHost().getElement().getNode()
-                .addDetachListener(
-                        // Do not convert to lambda
-                        new Command() {
-                            @Override
-                            public void execute() {
-                                MessageListItem.this.unsetResource();
-                            }
-                        });
-    }
-
-    private void unsetResource() {
-        imageResource = null;
-        StreamRegistration registration = resourceRegistration;
-        Optional<AbstractStreamResource> resource = Optional.empty();
-        if (registration != null) {
-            resource = Optional.ofNullable(registration.getResource());
-        }
-        unregisterResource();
-        resource.ifPresent(this::deferRegistration);
-    }
-
-    private VaadinSession getSession() {
-        NodeOwner owner = getHost().getElement().getNode().getOwner();
-        assert owner instanceof StateTree;
-        return ((StateTree) owner).getUI().getSessionOrThrow();
     }
 
     private void propsChanged() {
@@ -687,10 +650,13 @@ public class MessageListItem implements Serializable {
     }
 
     void setHost(MessageList host) {
+        if (this.host == host) {
+            return;
+        }
+        unbindImage();
         this.host = host;
-        if (pendingHandle != null) {
-            attachPendingRegistration(pendingHandle);
-            pendingHandle = null;
+        if (host != null) {
+            bindImage();
         }
     }
 

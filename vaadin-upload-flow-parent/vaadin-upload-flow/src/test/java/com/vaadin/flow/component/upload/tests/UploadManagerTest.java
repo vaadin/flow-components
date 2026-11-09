@@ -580,6 +580,28 @@ class UploadManagerTest {
                 "AllFinished should fire twice");
     }
 
+    @Test
+    void modalOpen_allFinishedDomEvent_firesAllFinished() {
+        AtomicInteger finishedCount = new AtomicInteger(0);
+        manager.addAllFinishedListener(
+                event -> finishedCount.incrementAndGet());
+        openModal();
+
+        simulateAllFinishedDomEvent(manager);
+
+        Assertions.assertEquals(1, finishedCount.get(),
+                "AllFinished should fire for an inert owner");
+    }
+
+    private void openModal() {
+        Div modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
+        Assertions.assertTrue(owner.getElement().getNode().isInert(),
+                "The modal should make the owner inert");
+    }
+
     // --- Wrapper delegation of ElementRequestHandler defaults ---
     //
     // These tests verify that the file-type-validation wrapper created
@@ -609,7 +631,7 @@ class UploadManagerTest {
     }
 
     @Test
-    void setUploadHandler_delegatesIsAllowInert() {
+    void setUploadHandler_handlerDisallowsInert_allowsInert() {
         UploadHandler handler = new UploadHandler() {
             @Override
             public void handleUploadRequest(
@@ -618,7 +640,7 @@ class UploadManagerTest {
 
             @Override
             public boolean isAllowInert() {
-                return true;
+                return false;
             }
         };
 

@@ -386,6 +386,16 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-pdf-viewer-flow</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-pdf-viewer-testbench</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-popover-flow</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -536,7 +546,7 @@
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>3.10.4</version>
+                <version>3.11.0</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>

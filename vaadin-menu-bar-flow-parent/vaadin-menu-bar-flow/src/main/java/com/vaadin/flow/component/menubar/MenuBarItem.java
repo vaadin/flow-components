@@ -16,9 +16,9 @@
 package com.vaadin.flow.component.menubar;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.contextmenu.MenuDownloadManager;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.function.SerializableRunnable;
-import com.vaadin.flow.server.streams.DownloadHandler;
 
 @Tag("vaadin-menu-bar-item")
 class MenuBarItem extends MenuItem {
@@ -68,11 +68,8 @@ class MenuBarItem extends MenuItem {
     }
 
     @Override
-    public void setDownloadHandler(DownloadHandler downloadHandler) {
-        if (downloadHandler != null) {
-            throw new UnsupportedOperationException(
-                    "Items in a MenuBar do not support download handlers yet");
-        }
+    protected MenuDownloadManager getMenuDownloadManager() {
+        return menuBar.getDownloadManager();
     }
 
 }

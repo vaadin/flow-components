@@ -10,6 +10,7 @@ package com.vaadin.flow.component.ai.chart;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,6 +27,12 @@ import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.GanttSeries;
+import com.vaadin.flow.component.charts.model.HeatSeries;
+import com.vaadin.flow.component.charts.model.NodeSeries;
+import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
@@ -127,6 +134,18 @@ public class ChartAIController implements AIController {
 
     private static final String INSTRUCTIONS_TOOL_NAME = "get_chart_instructions";
 
+    /**
+     * Aliases the default converter reads as numbers. The error for rows that
+     * cannot be plotted names those the query uses; other column names are part
+     * of the query results, so they never reach the LLM.
+     */
+    private static final List<String> NUMERIC_ALIASES = List.of(ColumnNames.X,
+            ColumnNames.X2, ColumnNames.Y, ColumnNames.Z, ColumnNames.VALUE,
+            ColumnNames.COLOR_VALUE, ColumnNames.OPEN, ColumnNames.HIGH,
+            ColumnNames.LOW, ColumnNames.CLOSE, ColumnNames.Q1,
+            ColumnNames.MEDIAN, ColumnNames.Q3, ColumnNames.WEIGHT,
+            ColumnNames.TARGET, ColumnNames.COMPLETED);
+
     private static final String INSTRUCTIONS_TEXT = """
             Chart visualization workflow. Follow this for every chart request:
 
@@ -220,11 +239,12 @@ public class ChartAIController implements AIController {
                 // rejected within the turn. A DatabaseProvider that
                 // throws ToolException gets its message relayed to the
                 // LLM so it can fix the query; any other exception is
-                // replaced with a generic error. Results are discarded
+                // replaced with a generic error. Results are only checked
                 // here; they will be re-executed at render time in
                 // ChartRenderer.
-                for (String q : queries) {
-                    databaseProvider.executeQuery(q);
+                for (var i = 0; i < queries.size(); i++) {
+                    checkPlottable(i + 1,
+                            databaseProvider.executeQuery(queries.get(i)));
                 }
                 ChartEntry.getOrCreate(chart, chartId)
                         .setPendingQueries(queries);
@@ -236,6 +256,60 @@ public class ChartAIController implements AIController {
             }
         }));
         return tools;
+    }
+
+    /**
+     * Rejects a query whose rows convert to series without any point, typically
+     * because the columns the chart reads as numbers hold text or nulls. The
+     * chart would otherwise render empty while the turn reports success. The
+     * error names no row values, and of the column names only the
+     * {@link #NUMERIC_ALIASES} the query uses.
+     */
+    private void checkPlottable(int queryNumber,
+            List<Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            return;
+        }
+        var series = dataConverter.convertToSeries(rows);
+        if (!series.isEmpty()
+                && series.stream().allMatch(ChartAIController::hasNoPoints)) {
+            var aliases = numericAliasesOf(rows.getFirst());
+            throw new ToolException("Query " + queryNumber
+                    + " returned rows, but none of them can be plotted: the"
+                    + " columns the chart reads as numbers"
+                    + (aliases.isEmpty() ? ""
+                            : ", among " + String.join(", ", aliases) + ",")
+                    + " hold text or nulls. Return numbers in them; for a"
+                    + " label, return its position on the axis, starting at"
+                    + " 0, and list the labels in that order in the axis"
+                    + " categories.");
+        }
+    }
+
+    /**
+     * Returns the {@link #NUMERIC_ALIASES} the row has, matched ignoring case
+     * like the default converter does.
+     */
+    private static List<String> numericAliasesOf(Map<String, Object> row) {
+        return NUMERIC_ALIASES.stream().filter(alias -> row.keySet().stream()
+                .anyMatch(alias::equalsIgnoreCase)).toList();
+    }
+
+    /**
+     * Returns whether a series has nothing to draw. A series of a type not
+     * handled here counts as drawable, so a custom converter is never rejected
+     * for a series this check cannot inspect.
+     */
+    private static boolean hasNoPoints(Series series) {
+        return switch (series) {
+        case DataSeries data -> data.getData().isEmpty();
+        case HeatSeries heat -> heat.getData() == null;
+        case TreeSeries tree -> tree.getData().isEmpty();
+        case NodeSeries nodes ->
+            nodes.getData().isEmpty() && nodes.getNodes().isEmpty();
+        case GanttSeries gantt -> gantt.getData().isEmpty();
+        default -> false;
+        };
     }
 
     private LLMProvider.ToolSpec createInstructionsTool() {

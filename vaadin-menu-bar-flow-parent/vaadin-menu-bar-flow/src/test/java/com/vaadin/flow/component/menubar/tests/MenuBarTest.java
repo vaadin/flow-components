@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.server.streams.DownloadHandler;
 
 class MenuBarTest {
 
@@ -40,16 +39,6 @@ class MenuBarTest {
     void rootMenuItem_setCheckableTrue_throws() {
         Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> item1.setCheckable(true));
-    }
-
-    @Test
-    void setDownloadHandler_throws() {
-        DownloadHandler handler = event -> {
-        };
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> item1.setDownloadHandler(handler));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> item1
-                .getSubMenu().addItem("baz").setDownloadHandler(handler));
     }
 
     // Note that the MenuManager is already tested in vaadin-context-menu-flow.

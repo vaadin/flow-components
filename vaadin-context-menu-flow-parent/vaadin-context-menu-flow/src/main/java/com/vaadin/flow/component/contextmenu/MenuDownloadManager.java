@@ -45,9 +45,10 @@ import com.vaadin.flow.shared.Registration;
  * owns the registrations changes, for example the target of a context menu.
  * <p>
  * The download registration of an item is kept on a component that stays
- * attached while the item can be clicked, for example the target for a context
- * menu. Removed items are no longer reachable from the menu, so this remembers
- * the items that have a registration to be able to remove it.
+ * attached while the item can be clicked: the target for a context menu, and
+ * the item itself for a menu bar. Removed items are no longer reachable from
+ * the menu, so this remembers the items that have a registration to be able to
+ * remove it.
  * <p>
  * For internal use only. May be renamed or removed in a future release.
  */

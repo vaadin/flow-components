@@ -218,8 +218,8 @@ import tools.jackson.databind.node.ObjectNode;
  * @since 1.0
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha3")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha3")
+@NpmPackage(value = "@vaadin/grid", version = "25.4.0-alpha5")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.4.0-alpha5")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -3394,7 +3394,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    boolean isItemSelectable(T item) {
+    /**
+     * Checks whether the given item passes the predicate set with
+     * {@link #setItemSelectableProvider(SerializablePredicate)}. Returns
+     * {@code true} for all items when no predicate is set.
+     * <p>
+     * The selection model can apply further rules to user selection, for
+     * example whether deselection is allowed in single-selection mode.
+     *
+     * @param item
+     *            the item to check
+     * @return {@code true} if the predicate allows the user to change the
+     *         selection state of the item, {@code false} otherwise
+     * @see #setItemSelectableProvider(SerializablePredicate)
+     * @since 25.4
+     */
+    public final boolean isItemSelectable(T item) {
         return selectableProvider == null || selectableProvider.test(item);
     }
 
