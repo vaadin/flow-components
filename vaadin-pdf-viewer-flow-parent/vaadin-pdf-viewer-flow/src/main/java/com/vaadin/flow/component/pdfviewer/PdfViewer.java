@@ -73,11 +73,15 @@ public class PdfViewer extends Component implements HasSize {
      */
     public PdfViewer() {
         getElement().setProperty("page", 1);
+        getElement().setProperty("zoom", Zoom.PAGE_WIDTH.getMode());
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
                     getPage()));
         });
+        getElement().addPropertyChangeListener("zoom",
+                event -> fireEvent(new ZoomChangeEvent(this,
+                        event.isUserOriginated(), getZoom())));
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
         addDocumentErrorListener(event -> resetDocumentState());
@@ -256,6 +260,45 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Gets the zoom level of the pages. The default value is
+     * {@link Zoom#PAGE_WIDTH}.
+     *
+     * @return the zoom level, not {@code null}
+     */
+    @Synchronize(property = "zoom", value = "zoom-changed")
+    public Zoom getZoom() {
+        return Zoom.fromClientValue(getElement().getPropertyRaw("zoom"));
+    }
+
+    /**
+     * Sets the zoom level of the pages:
+     * <ul>
+     * <li>{@link Zoom#PAGE_WIDTH} fits the width of the current page to the
+     * viewer</li>
+     * <li>{@link Zoom#PAGE_FIT} fits the whole current page into the
+     * viewer</li>
+     * <li>{@link Zoom#of(double)} scales the pages relative to their actual
+     * size</li>
+     * </ul>
+     * The fit modes update the scale when the viewer resizes. Scrolling to a
+     * page of another size does not change the scale.
+     * <p>
+     * The zoom stays when another document is set.
+     *
+     * @param zoom
+     *            the zoom level, not {@code null}
+     */
+    public void setZoom(Zoom zoom) {
+        Objects.requireNonNull(zoom, "The zoom should not be null");
+        String mode = zoom.getMode();
+        if (mode != null) {
+            getElement().setProperty("zoom", mode);
+        } else {
+            getElement().setProperty("zoom", zoom.getFactor());
+        }
+    }
+
+    /**
      * Adds a listener that is called when the current page changes.
      *
      * @param listener
@@ -265,6 +308,18 @@ public class PdfViewer extends Component implements HasSize {
     public Registration addPageChangeListener(
             ComponentEventListener<PageChangeEvent> listener) {
         return addListener(PageChangeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called when the zoom level changes.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addZoomChangeListener(
+            ComponentEventListener<ZoomChangeEvent> listener) {
+        return addListener(ZoomChangeEvent.class, listener);
     }
 
     /**
@@ -354,6 +409,38 @@ public class PdfViewer extends Component implements HasSize {
          */
         public int getPage() {
             return page;
+        }
+    }
+
+    /**
+     * Event fired when the zoom level changes.
+     */
+    public static class ZoomChangeEvent extends ComponentEvent<PdfViewer> {
+        private final Zoom zoom;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         * @param zoom
+         *            the new zoom level
+         */
+        public ZoomChangeEvent(PdfViewer source, boolean fromClient,
+                Zoom zoom) {
+            super(source, fromClient);
+            this.zoom = zoom;
+        }
+
+        /**
+         * Gets the new zoom level.
+         *
+         * @return the new zoom level
+         */
+        public Zoom getZoom() {
+            return zoom;
         }
     }
 
