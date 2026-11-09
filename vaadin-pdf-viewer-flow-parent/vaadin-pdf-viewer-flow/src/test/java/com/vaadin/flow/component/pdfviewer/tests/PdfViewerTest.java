@@ -202,9 +202,10 @@ class PdfViewerTest {
         viewer.addZoomChangeListener(events::add);
 
         viewer.setZoom(Zoom.PAGE_WIDTH);
-        viewer.setZoom(Zoom.of(2));
-        viewer.setZoom(Zoom.of(2));
+        Assertions.assertEquals(0, events.size());
 
+        viewer.setZoom(Zoom.of(2));
+        viewer.setZoom(Zoom.of(2));
         Assertions.assertEquals(1, events.size());
     }
 
