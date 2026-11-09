@@ -10,7 +10,6 @@ package com.vaadin.flow.component.pdfviewer;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.OptionalDouble;
 
 /**
  * The zoom level of the pages of {@link PdfViewer}: {@link #PAGE_WIDTH},
@@ -62,13 +61,19 @@ public final class Zoom implements Serializable {
 
     /**
      * Gets the factor of the actual size of the pages, see {@link #of(double)}.
+     * {@link #PAGE_WIDTH} and {@link #PAGE_FIT} do not have a factor, so
+     * compare the zoom with them before calling this method.
      *
-     * @return the factor, or empty for {@link #PAGE_WIDTH} and
-     *         {@link #PAGE_FIT}
+     * @return the factor, greater than {@code 0}
+     * @throws IllegalStateException
+     *             if this zoom is {@link #PAGE_WIDTH} or {@link #PAGE_FIT}
      */
-    public OptionalDouble getFactor() {
-        return mode == null ? OptionalDouble.of(factor)
-                : OptionalDouble.empty();
+    public double getFactor() {
+        if (mode != null) {
+            throw new IllegalStateException(
+                    "The zoom " + mode + " does not have a factor");
+        }
+        return factor;
     }
 
     /**

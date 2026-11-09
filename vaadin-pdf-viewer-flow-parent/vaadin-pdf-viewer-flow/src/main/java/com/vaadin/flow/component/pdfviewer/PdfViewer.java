@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.pdfviewer;
 
 import java.util.Objects;
-import java.util.OptionalDouble;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
@@ -291,11 +290,10 @@ public class PdfViewer extends Component implements HasSize {
      */
     public void setZoom(Zoom zoom) {
         Objects.requireNonNull(zoom, "The zoom should not be null");
-        OptionalDouble factor = zoom.getFactor();
-        if (factor.isPresent()) {
-            getElement().setProperty("zoom", factor.getAsDouble());
-        } else {
+        if (zoom.equals(Zoom.PAGE_WIDTH) || zoom.equals(Zoom.PAGE_FIT)) {
             getElement().setProperty("zoom", zoom.toString());
+        } else {
+            getElement().setProperty("zoom", zoom.getFactor());
         }
     }
 
