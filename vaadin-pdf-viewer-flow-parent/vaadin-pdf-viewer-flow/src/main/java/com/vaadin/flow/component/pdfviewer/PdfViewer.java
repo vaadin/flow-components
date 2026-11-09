@@ -25,10 +25,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.SignalBindingUtil;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.SignalBinding;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
@@ -68,8 +65,6 @@ public class PdfViewer extends Component implements HasSize {
 
     private final ValueSignal<Integer> pageSignal = new ValueSignal<>(1);
     private final ValueSignal<Integer> pageCountSignal = new ValueSignal<>(0);
-    private final ValueSignal<Zoom> zoomSignal = new ValueSignal<>(
-            Zoom.PAGE_WIDTH);
 
     private PdfViewerToolbarActions toolbarActions;
     private PdfViewerI18n i18n;
@@ -85,11 +80,9 @@ public class PdfViewer extends Component implements HasSize {
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
                     getPage()));
         });
-        getElement().addPropertyChangeListener("zoom", event -> {
-            zoomSignal.set(getZoom());
-            fireEvent(new ZoomChangeEvent(this, event.isUserOriginated(),
-                    getZoom()));
-        });
+        getElement().addPropertyChangeListener("zoom",
+                event -> fireEvent(new ZoomChangeEvent(this,
+                        event.isUserOriginated(), getZoom())));
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
         addDocumentErrorListener(event -> resetDocumentState());
@@ -304,44 +297,6 @@ public class PdfViewer extends Component implements HasSize {
         } else {
             getElement().setProperty("zoom", zoom.toString());
         }
-    }
-
-    /**
-     * Binds the zoom level of the pages to the given signal, see
-     * {@link #setZoom(Zoom)}. The binding is two-way: signal changes update the
-     * zoom, and zoom changes invoke the write callback. The write callback is
-     * required, since the user can always change the zoom with the toolbar. A
-     * {@code null} signal value is treated as {@link Zoom#PAGE_WIDTH}.
-     *
-     * @param signal
-     *            the signal to bind, not {@code null}
-     * @param writeCallback
-     *            the callback to propagate zoom changes back, not {@code null}
-     * @return a {@link SignalBinding} that can be used to register
-     *         {@link SignalBinding#onChange(SerializableConsumer) onChange}
-     *         callbacks
-     * @throws com.vaadin.flow.signals.BindingActiveException
-     *             if a signal is already bound
-     */
-    public SignalBinding<Zoom> bindZoom(Signal<Zoom> signal,
-            SerializableConsumer<Zoom> writeCallback) {
-        Objects.requireNonNull(signal, "The signal should not be null");
-        Objects.requireNonNull(writeCallback,
-                "The write callback should not be null");
-        return SignalBindingUtil.mapBinding(signal, Zoom::toClientValue,
-                mapped -> getElement().bindProperty("zoom", mapped,
-                        clientValue -> writeCallback
-                                .accept(Zoom.fromClientValue(clientValue))));
-    }
-
-    /**
-     * Gets a read-only signal with the zoom level of the pages, see
-     * {@link #getZoom()}.
-     *
-     * @return a read-only signal with the zoom level
-     */
-    public Signal<Zoom> zoomSignal() {
-        return zoomSignal.asReadonly();
     }
 
     /**

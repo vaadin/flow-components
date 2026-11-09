@@ -100,23 +100,6 @@ public final class Zoom implements Serializable {
         return PAGE_WIDTH;
     }
 
-    /**
-     * Gets the value that the client takes for the given zoom.
-     *
-     * @param zoom
-     *            the zoom, or {@code null} for {@link #PAGE_WIDTH}
-     * @return {@code page-width}, {@code page-fit}, or the factor as a number
-     */
-    static Serializable toClientValue(Zoom zoom) {
-        if (zoom == null) {
-            return PAGE_WIDTH.mode;
-        }
-        if (zoom.mode != null) {
-            return zoom.mode;
-        }
-        return zoom.factor;
-    }
-
     private static Zoom ofFactorOrDefault(double factor) {
         return isValidFactor(factor) ? new Zoom(null, factor) : PAGE_WIDTH;
     }
