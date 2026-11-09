@@ -11,6 +11,8 @@ package com.vaadin.flow.component.richtexteditor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,11 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ArrayNode;
@@ -211,6 +216,66 @@ class RichTextEditorTest {
     }
 
     @Test
+    void deltaValueNotSynchronizedByDefault() {
+        RichTextEditor rte = new RichTextEditor();
+
+        Assertions.assertTrue(
+                getSynchronizedProperties(rte, "change").contains("htmlValue"));
+        Assertions.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+        Assertions.assertFalse(getSynchronizedProperties(rte, "value-changed")
+                .contains("value"));
+    }
+
+    @Test
+    void asDelta_deltaValueSynchronizedWithHtmlValue() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.asDelta();
+
+        Assertions.assertTrue(getSynchronizedProperties(rte, "change")
+                .containsAll(Set.of("htmlValue", "value")));
+        Assertions.assertFalse(getSynchronizedProperties(rte, "value-changed")
+                .contains("value"));
+    }
+
+    @Test
+    void setValueChangeMode_asDelta_deltaValueSynchronizedWithHtmlValue() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setValueChangeMode(ValueChangeMode.ON_BLUR);
+        rte.asDelta();
+
+        Assertions.assertTrue(getSynchronizedProperties(rte, "blur")
+                .containsAll(Set.of("htmlValue", "value")));
+        Assertions.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+    }
+
+    @Test
+    void asDelta_setValueChangeMode_deltaValueSynchronizedWithHtmlValue() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.asDelta();
+        rte.setValueChangeMode(ValueChangeMode.EAGER);
+
+        Assertions
+                .assertTrue(getSynchronizedProperties(rte, "html-value-changed")
+                        .containsAll(Set.of("htmlValue", "value")));
+        Assertions.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+    }
+
+    @Test
+    void asDelta_setValueChangeModeNull_noSynchronization() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.asDelta();
+        rte.setValueChangeMode(null);
+
+        Assertions.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+        Assertions.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("htmlValue"));
+    }
+
+    @Test
     void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-rich-text-editor");
 
@@ -260,5 +325,16 @@ class RichTextEditorTest {
     void implementsHasThemeVariant() {
         Assertions.assertTrue(
                 HasThemeVariant.class.isAssignableFrom(RichTextEditor.class));
+    }
+
+    private static Set<String> getSynchronizedProperties(RichTextEditor rte,
+            String eventType) {
+        return rte.getElement().getNode().getFeature(ElementListenerMap.class)
+                .getExpressions(eventType).stream()
+                .filter(expression -> expression
+                        .startsWith(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN))
+                .map(expression -> expression.substring(
+                        JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN.length()))
+                .collect(Collectors.toSet());
     }
 }

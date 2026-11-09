@@ -26,7 +26,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -35,6 +34,7 @@ import com.vaadin.flow.component.shared.internal.BeforeClientResponseAction;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
@@ -153,6 +153,11 @@ public class RichTextEditor
         currentMode = valueChangeMode;
         setSynchronizedEvent(ValueChangeMode.eventForMode(valueChangeMode,
                 "html-value-changed"));
+        // Setting the synchronized event replaces the synchronization
+        // registration, so the Delta value needs to be added again
+        if (asDelta != null) {
+            asDelta.synchronizeDeltaValue();
+        }
     }
 
     /**
@@ -282,19 +287,6 @@ public class RichTextEditor
     @Deprecated
     public String getHtmlValue() {
         return getValue();
-    }
-
-    /**
-     * The value of the editor in Delta format.
-     * <p>
-     * This property only exists to force synchronization of the {@code value}
-     * property.
-     *
-     * @return the value of the editor in Delta format
-     */
-    @Synchronize(property = "value", value = "value-changed")
-    private String getDeltaValue() {
-        return getElement().getProperty("value");
     }
 
     /**
@@ -1125,6 +1117,8 @@ public class RichTextEditor
             // Initialize empty value
             RichTextEditor.this.getElement().setProperty("value", "");
 
+            synchronizeDeltaValue();
+
             // Fire delta value change event when HTML value changes
             RichTextEditor.this.addValueChangeListener(event -> {
                 // If the component's value changes due to syncing the HTML
@@ -1167,8 +1161,7 @@ public class RichTextEditor
                     // then we can immediately dispatch the delta value change
                     // event as well, as both properties have been synced to the
                     // server in the same roundtrip.
-                    // See the synchronized `getDeltaValue` property on the
-                    // component.
+                    // See `synchronizeDeltaValue`.
                     fireChangeEvent(event.isFromClient());
                     // Update old value after all change listeners have been
                     // processed
@@ -1230,6 +1223,19 @@ public class RichTextEditor
             return ComponentUtil.addListener(RichTextEditor.this,
                     DeltaValueChangeEvent.class,
                     valueChangeListener::valueChanged);
+        }
+
+        /**
+         * Synchronizes the Delta value together with the HTML value, using the
+         * same DOM event. This ensures that the server has an up-to-date Delta
+         * value whenever the HTML value changes from the client.
+         */
+        private void synchronizeDeltaValue() {
+            DomListenerRegistration registration = RichTextEditor.this
+                    .getSynchronizationRegistration();
+            if (registration != null) {
+                registration.synchronizeProperty("value");
+            }
         }
 
         private void fireChangeEvent(boolean isFromClient) {
