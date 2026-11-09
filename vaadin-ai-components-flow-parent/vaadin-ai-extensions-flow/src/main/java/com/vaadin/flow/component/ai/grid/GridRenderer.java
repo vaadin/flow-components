@@ -15,18 +15,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
@@ -67,7 +65,8 @@ public final class GridRenderer implements Serializable {
      */
     public static void renderGrid(Grid<AIDataRow> grid,
             DatabaseProvider databaseProvider, String query) {
-        var sampleRows = databaseProvider.executeQuery(wrapWithLimit(query, 1));
+        var sampleRows = databaseProvider.executeQuery(query,
+                QueryPage.first(1));
         removeExtraHeaderRows(grid);
         grid.removeAllColumns();
         if (sampleRows.isEmpty()) {
@@ -163,25 +162,16 @@ public final class GridRenderer implements Serializable {
 
     private static DataProvider<AIDataRow, Void> createDataProvider(
             DatabaseProvider databaseProvider, String query) {
-        var countQuery = wrapWithCount(query);
         return new CallbackDataProvider<>(fetchQuery -> {
-            var sql = enrichQuery(query, fetchQuery.getOffset(),
+            var page = new QueryPage(fetchQuery.getOffset(),
                     fetchQuery.getLimit(), fetchQuery.getSortOrders());
-            LOGGER.debug("Fetching rows: {}", sql);
-            return databaseProvider.executeQuery(sql).stream()
+            LOGGER.debug("Fetching rows: offset={} limit={}", page.offset(),
+                    page.limit());
+            return databaseProvider.executeQuery(query, page).stream()
                     .map(AIDataRow::new);
         }, countFetchQuery -> {
-            LOGGER.debug("Counting rows: {}", countQuery);
-            var countResult = databaseProvider.executeQuery(countQuery);
-            if (countResult.isEmpty()) {
-                return 0;
-            }
-            var entries = new AIDataRow(countResult.getFirst()).entries();
-            if (entries.isEmpty()) {
-                return 0;
-            }
-            var firstValue = entries.iterator().next().getValue();
-            return firstValue instanceof Number n ? n.intValue() : 0;
+            LOGGER.debug("Counting rows");
+            return databaseProvider.count(query);
         }, row -> row);
     }
 
@@ -205,31 +195,5 @@ public final class GridRenderer implements Serializable {
             return ts.toLocalDateTime();
         }
         return null;
-    }
-
-    // --- SQL helpers ---
-
-    private static String enrichQuery(String query, int offset, int limit,
-            List<QuerySortOrder> sortOrders) {
-        var sortOrdersExpression = sortOrders.stream().map(sortOrder -> {
-            var col = sortOrder.getSorted();
-            var dir = sortOrder.getDirection() == SortDirection.ASCENDING
-                    ? "ASC"
-                    : "DESC";
-            return "\"" + col + "\" " + dir;
-        }).collect(Collectors.joining(", "));
-        if (!sortOrdersExpression.isEmpty()) {
-            query = "SELECT * FROM (" + query + ") AS _t ORDER BY "
-                    + sortOrdersExpression;
-        }
-        return wrapWithLimit(query, limit) + " OFFSET " + offset;
-    }
-
-    private static String wrapWithLimit(String query, int limit) {
-        return "SELECT * FROM (" + query + ") AS _limited LIMIT " + limit;
-    }
-
-    private static String wrapWithCount(String query) {
-        return "SELECT COUNT(*) FROM (" + query + ") AS _counted";
     }
 }
