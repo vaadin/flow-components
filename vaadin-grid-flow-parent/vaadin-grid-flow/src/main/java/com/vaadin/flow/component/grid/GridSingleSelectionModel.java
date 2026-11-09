@@ -36,11 +36,6 @@ public interface GridSingleSelectionModel<T>
     /**
      * Gets a wrapper to use this single selection model as a single select in
      * {@link Binder}.
-     * <p>
-     * Binding the selection to a signal with {@code bindValue} on the returned
-     * wrapper requires a write callback, since the user can always change the
-     * selection. A {@code null} write callback throws
-     * {@link NullPointerException}.
      *
      * @return the single select wrapper
      */
