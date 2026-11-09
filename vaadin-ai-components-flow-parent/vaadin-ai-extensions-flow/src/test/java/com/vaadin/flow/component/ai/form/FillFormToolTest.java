@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +32,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
+import org.slf4j.event.Level;
 
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasValue;
@@ -41,6 +44,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.BigDecField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BigIntField;
 import com.vaadin.flow.component.ai.form.FormTestFields.BoolField;
 import com.vaadin.flow.component.ai.form.FormTestFields.ByteField;
+import com.vaadin.flow.component.ai.form.FormTestFields.CollectionWithoutMultiSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DateTimeField;
 import com.vaadin.flow.component.ai.form.FormTestFields.DoubleField;
@@ -53,6 +57,7 @@ import com.vaadin.flow.component.ai.form.FormTestFields.ShortField;
 import com.vaadin.flow.component.ai.form.FormTestFields.SingleSelectField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TestField;
 import com.vaadin.flow.component.ai.form.FormTestFields.TimeField;
+import com.vaadin.flow.component.ai.form.FormTestFields.UuidField;
 import com.vaadin.flow.component.ai.form.FormTestFields.ValidatedField;
 import com.vaadin.flow.component.ai.provider.ToolException;
 import com.vaadin.flow.component.html.Div;
@@ -332,6 +337,69 @@ class FillFormToolTest {
         Assertions.assertEquals(1.5f, field.getValue());
         Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
                 "Result: " + result);
+    }
+
+    @Test
+    void fillForm_rejectsValueOfOtherTypeThanFieldValueType() {
+        // A UUID field has no type mapping and is listed as a string field.
+        // The string the LLM sends must not be written into it.
+        var field = new UuidField();
+        var uuid = UUID.randomUUID();
+        field.setValue(uuid);
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "\"abc\""));
+
+        Assertions.assertEquals(uuid, field.getValue());
+        Assertions.assertEquals(
+                "Field cannot be filled: its value type is not supported.",
+                rejectionReason(result, idOf(field)), "Result: " + result);
+    }
+
+    @Test
+    void fillForm_valueOfOtherTypeThanFieldValueType_logsTypes() {
+        // The rejection reason sent to the LLM has no class names, so the
+        // debug log is where the developer finds the mismatching types.
+        var logger = TestLoggerFactory.getTestLogger(FormValueConverter.class);
+        logger.clearAll();
+        var field = new UuidField();
+        fillFormResult(controllerFor(field), payload(field, "\"abc\""));
+
+        var messages = logger.getLoggingEvents().stream()
+                .filter(e -> e.getLevel() == Level.DEBUG)
+                .map(e -> e.getFormattedMessage()).toList();
+        Assertions.assertTrue(
+                messages.stream()
+                        .anyMatch(m -> m.contains(String.class.getName())
+                                && m.contains(UUID.class.getName())
+                                && m.contains(idOf(field))),
+                "Debug log: " + messages);
+    }
+
+    @Test
+    void fillForm_rejectsStringForListValuedField() {
+        // The value type List<String> is checked by its raw class.
+        var field = new CollectionWithoutMultiSelectField();
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "\"abc\""));
+
+        Assertions.assertEquals(List.of(), field.getValue());
+        Assertions.assertTrue(rejectedIds(result).contains(idOf(field)),
+                "Result: " + result);
+    }
+
+    @Test
+    void fillForm_typedSingleSelect_writesNullItem() {
+        // The value type check lets null through: an item list may contain
+        // null, which renders as an empty label.
+        var field = new SingleSelectField<String>() {
+        };
+        field.setItems("EUR", null);
+        field.setValue("EUR");
+        var result = fillFormResult(controllerFor(field),
+                payload(field, "\"\""));
+
+        Assertions.assertNull(field.getValue());
+        Assertions.assertTrue(success(result), "Result: " + result);
     }
 
     @Test
