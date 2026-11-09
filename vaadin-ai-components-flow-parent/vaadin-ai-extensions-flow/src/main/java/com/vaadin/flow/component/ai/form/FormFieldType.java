@@ -91,9 +91,10 @@ enum FormFieldType {
 
     /**
      * Returns the {@code V} type argument of the field's
-     * {@code HasValue<?, V>}, used by the write path to produce a value of the
+     * {@code HasValue<?, V>}. The write path uses it to produce a value of the
      * exact type the field holds (for example {@link Long} rather than
-     * {@link Integer} for an {@link #INTEGER} field).
+     * {@link Integer} for an {@link #INTEGER} field), and to check that a
+     * converted value can be stored in the field.
      *
      * @param field
      *            the field, not {@code null}
@@ -172,9 +173,10 @@ enum FormFieldType {
      * Walks the class hierarchy of the given concrete field class to find the
      * {@code V} type argument of {@code HasValue<?, V>}, resolving type
      * variables through any intermediate generic superclasses and
-     * super-interfaces. Returns {@code null} when {@code V} cannot be narrowed
-     * to a concrete {@link Class} (for example {@code ComboBox<T>} where
-     * {@code T} is left generic).
+     * super-interfaces. A parameterized {@code V} such as {@code List<T>}
+     * resolves to its raw class. Returns {@code null} when {@code V} cannot be
+     * narrowed to a concrete {@link Class} (for example {@code ComboBox<T>}
+     * where {@code T} is left generic).
      */
     private static Class<?> resolveValueType(Class<?> startClass) {
         var bindings = new HashMap<TypeVariable<?>, Type>();
@@ -213,6 +215,11 @@ enum FormFieldType {
         if (raw == HasValue.class) {
             var resolved = resolveType(pt.getActualTypeArguments()[1],
                     bindings);
+            if (resolved instanceof ParameterizedType parameterized) {
+                // For example List<String>: the raw class is enough to check
+                // a converted value against.
+                return (Class<?>) parameterized.getRawType();
+            }
             return resolved instanceof Class<?> cls ? cls : null;
         }
         var deeper = new HashMap<>(bindings);
