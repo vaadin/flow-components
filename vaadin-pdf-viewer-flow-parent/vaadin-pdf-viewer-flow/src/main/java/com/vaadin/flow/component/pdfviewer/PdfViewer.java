@@ -73,7 +73,7 @@ public class PdfViewer extends Component implements HasSize {
      */
     public PdfViewer() {
         getElement().setProperty("page", 1);
-        getElement().setProperty("zoom", Zoom.PAGE_WIDTH.toString());
+        getElement().setProperty("zoom", Zoom.PAGE_WIDTH.getMode());
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
@@ -290,8 +290,9 @@ public class PdfViewer extends Component implements HasSize {
      */
     public void setZoom(Zoom zoom) {
         Objects.requireNonNull(zoom, "The zoom should not be null");
-        if (zoom.equals(Zoom.PAGE_WIDTH) || zoom.equals(Zoom.PAGE_FIT)) {
-            getElement().setProperty("zoom", zoom.toString());
+        String mode = zoom.getMode();
+        if (mode != null) {
+            getElement().setProperty("zoom", mode);
         } else {
             getElement().setProperty("zoom", zoom.getFactor());
         }

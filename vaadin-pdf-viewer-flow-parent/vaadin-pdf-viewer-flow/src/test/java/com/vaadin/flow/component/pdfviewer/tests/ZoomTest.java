@@ -18,24 +18,20 @@ import com.vaadin.flow.component.pdfviewer.Zoom;
 class ZoomTest {
 
     @Test
-    void pageWidth() {
-        Assertions.assertEquals("page-width", Zoom.PAGE_WIDTH.toString());
+    void pageWidth_getFactor_throws() {
         Assertions.assertThrows(IllegalStateException.class,
                 Zoom.PAGE_WIDTH::getFactor);
     }
 
     @Test
-    void pageFit() {
-        Assertions.assertEquals("page-fit", Zoom.PAGE_FIT.toString());
+    void pageFit_getFactor_throws() {
         Assertions.assertThrows(IllegalStateException.class,
                 Zoom.PAGE_FIT::getFactor);
     }
 
     @Test
-    void of_factor() {
-        var zoom = Zoom.of(1.5);
-        Assertions.assertEquals(1.5, zoom.getFactor());
-        Assertions.assertEquals("1.5", zoom.toString());
+    void of_getFactor() {
+        Assertions.assertEquals(1.5, Zoom.of(1.5).getFactor());
     }
 
     @ParameterizedTest

@@ -77,6 +77,16 @@ public final class Zoom implements Serializable {
     }
 
     /**
+     * Gets the mode that the client takes for this zoom.
+     *
+     * @return {@code page-width} or {@code page-fit}, or {@code null} for a
+     *         factor
+     */
+    String getMode() {
+        return mode;
+    }
+
+    /**
      * Gets the zoom that the client reports with the given value.
      *
      * @param clientValue
@@ -122,13 +132,5 @@ public final class Zoom implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(mode, factor);
-    }
-
-    /**
-     * Returns {@code page-width}, {@code page-fit}, or the factor.
-     */
-    @Override
-    public String toString() {
-        return mode != null ? mode : String.valueOf(factor);
     }
 }
