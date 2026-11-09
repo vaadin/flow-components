@@ -50,6 +50,26 @@ class PdfViewerDownloadTest {
     }
 
     @Test
+    void defaultDownloadButtonVisible() {
+        Assertions.assertTrue(viewer.isDownloadButtonVisible());
+        Assertions.assertFalse(
+                viewer.getElement().hasProperty("downloadButtonHidden"));
+    }
+
+    @Test
+    void setDownloadButtonVisible_isDownloadButtonVisible() {
+        viewer.setDownloadButtonVisible(false);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("downloadButtonHidden", false));
+        Assertions.assertFalse(viewer.isDownloadButtonVisible());
+
+        viewer.setDownloadButtonVisible(true);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("downloadButtonHidden", true));
+        Assertions.assertTrue(viewer.isDownloadButtonVisible());
+    }
+
+    @Test
     void download_downloadCalledOnClient() {
         ui.add(viewer);
 

@@ -164,8 +164,7 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Gets the name of the file that {@link #download()} saves. The default
-     * value is {@code null}.
+     * Gets the file name used by {@link #download()}.
      *
      * @return the file name, or {@code null} if the name of the document is
      *         used
@@ -175,11 +174,9 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Sets the name of the file that {@link #download()} saves, which the
-     * header of the viewer also shows. The name is used as given. When not set,
-     * the file name is the PDF file name from the {@code Content-Disposition}
-     * header of the response, else the PDF file name at the end of the path of
-     * the URL, else {@code document.pdf}.
+     * Sets the file name used by {@link #download()} and shown in the header.
+     * When not set, the name comes from the {@code Content-Disposition} header
+     * of the response or from the URL of the document.
      *
      * @param fileName
      *            the file name, or {@code null} to use the name of the document
@@ -193,14 +190,33 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Gets whether the toolbar shows the download button. The default is
+     * {@code true}.
+     *
+     * @return {@code true} if the download button is visible, {@code false}
+     *         otherwise
+     */
+    public boolean isDownloadButtonVisible() {
+        return !getElement().getProperty("downloadButtonHidden", false);
+    }
+
+    /**
+     * Sets whether the toolbar shows the download button. {@link #download()}
+     * works also while the button is hidden.
+     *
+     * @param downloadButtonVisible
+     *            {@code true} to show the download button, {@code false} to
+     *            hide it
+     */
+    public void setDownloadButtonVisible(boolean downloadButtonVisible) {
+        getElement().setProperty("downloadButtonHidden",
+                !downloadButtonVisible);
+    }
+
+    /**
      * Downloads the document in the browser, like the download button of the
-     * toolbar does. The file has the original bytes of the document, so the
-     * viewer does not request it again, and signatures stay intact. The file
-     * name is the one set with {@link #setFileName(String)}, or else the name
-     * of the document.
-     * <p>
-     * If the document is still loading, it is downloaded once it has loaded.
-     * Does nothing if no document is set, or the document could not be loaded.
+     * toolbar does. If the document is still loading, it is downloaded once
+     * loaded. Does nothing if no document is set or it could not be loaded.
      */
     public void download() {
         getElement().callJsFunction("download");
