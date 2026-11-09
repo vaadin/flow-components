@@ -34,7 +34,7 @@ class RadioButtonGroupSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindReadOnly() {
-        return generateBindingTests(RadioButtonGroup<String>::new,
+        return generateOneWayBindingTests(RadioButtonGroup<String>::new,
                 RadioButtonGroup::bindReadOnly, RadioButtonGroup::isReadOnly,
                 RadioButtonGroup::setReadOnly, true, false);
     }

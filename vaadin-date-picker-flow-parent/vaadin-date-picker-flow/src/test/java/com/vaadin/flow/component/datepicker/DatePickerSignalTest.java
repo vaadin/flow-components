@@ -30,21 +30,21 @@ class DatePickerSignalTest extends AbstractSignalsTest {
 
     @TestFactory
     Stream<DynamicTest> bindMin() {
-        return generateBindingTests(DatePicker::new, DatePicker::bindMin,
+        return generateOneWayBindingTests(DatePicker::new, DatePicker::bindMin,
                 DatePicker::getMin, DatePicker::setMin, INITIAL_VALUE,
                 UPDATED_VALUE);
     }
 
     @TestFactory
     Stream<DynamicTest> bindMax() {
-        return generateBindingTests(DatePicker::new, DatePicker::bindMax,
+        return generateOneWayBindingTests(DatePicker::new, DatePicker::bindMax,
                 DatePicker::getMax, DatePicker::setMax, INITIAL_VALUE,
                 UPDATED_VALUE);
     }
 
     @TestFactory
     Stream<DynamicTest> bindInitialPosition() {
-        return generateBindingTests(DatePicker::new,
+        return generateOneWayBindingTests(DatePicker::new,
                 DatePicker::bindInitialPosition, DatePicker::getInitialPosition,
                 DatePicker::setInitialPosition, INITIAL_VALUE, UPDATED_VALUE);
     }
