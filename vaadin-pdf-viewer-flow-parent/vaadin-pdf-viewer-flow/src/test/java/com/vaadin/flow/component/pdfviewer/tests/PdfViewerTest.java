@@ -224,15 +224,9 @@ class PdfViewerTest {
     }
 
     @Test
-    void zoomChangedOnClient_factorAsString_factor() {
-        fakeClientPropertyChange("zoom", "1.5");
-        Assertions.assertEquals(Zoom.of(1.5), viewer.getZoom());
-    }
-
-    @Test
     void zoomChangedOnClient_invalidValue_pageWidth() {
-        for (Serializable value : new Serializable[] { "invalid", "", -1.0, 0.0,
-                Double.NaN, true, null }) {
+        for (Serializable value : new Serializable[] { "invalid", "1.5", "",
+                -1.0, 0.0, Double.NaN, true, null }) {
             fakeClientPropertyChange("zoom", 2.0);
             fakeClientPropertyChange("zoom", value);
             Assertions.assertEquals(Zoom.PAGE_WIDTH, viewer.getZoom(),

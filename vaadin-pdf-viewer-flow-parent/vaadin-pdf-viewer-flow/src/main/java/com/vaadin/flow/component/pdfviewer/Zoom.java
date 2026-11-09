@@ -91,7 +91,7 @@ public final class Zoom implements Serializable {
      *
      * @param clientValue
      *            the value reported by the client: {@code page-width},
-     *            {@code page-fit}, or a factor as a number or a string
+     *            {@code page-fit}, or a factor as a number
      * @return the zoom, or {@link #PAGE_WIDTH} if the value is not a zoom,
      *         which is what the client falls back to
      */
@@ -99,18 +99,8 @@ public final class Zoom implements Serializable {
         if (clientValue instanceof Number number) {
             return ofFactorOrDefault(number.doubleValue());
         }
-        if (clientValue instanceof String string) {
-            if (PAGE_FIT.mode.equals(string)) {
-                return PAGE_FIT;
-            }
-            if (PAGE_WIDTH.mode.equals(string)) {
-                return PAGE_WIDTH;
-            }
-            try {
-                return ofFactorOrDefault(Double.parseDouble(string));
-            } catch (NumberFormatException e) {
-                return PAGE_WIDTH;
-            }
+        if (PAGE_FIT.mode.equals(clientValue)) {
+            return PAGE_FIT;
         }
         return PAGE_WIDTH;
     }
