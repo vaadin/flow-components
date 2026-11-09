@@ -27,9 +27,11 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
 import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
 import com.vaadin.flow.component.pdfviewer.Zoom;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
@@ -37,6 +39,7 @@ import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.shared.JsonConstants;
+import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -45,6 +48,10 @@ class PdfViewerTest {
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
+
+    @RegisterExtension
+    EnableFeatureFlagExtension featureFlagExtension = new EnableFeatureFlagExtension(
+            PdfViewerFeatureFlagProvider.PDF_VIEWER_COMPONENT);
 
     private final PdfViewer viewer = new PdfViewer();
 
@@ -84,6 +91,57 @@ class PdfViewerTest {
 
         Assertions.assertThrows(NullPointerException.class,
                 () -> viewer.setSrc((DownloadHandler) null));
+    }
+
+    @Test
+    void defaultFileName() {
+        Assertions.assertNull(viewer.getFileName());
+        Assertions.assertFalse(viewer.getElement().hasProperty("fileName"));
+    }
+
+    @Test
+    void setFileName_getFileName() {
+        viewer.setFileName("report.pdf");
+        Assertions.assertEquals("report.pdf",
+                viewer.getElement().getProperty("fileName"));
+        Assertions.assertEquals("report.pdf", viewer.getFileName());
+
+        viewer.setFileName(null);
+        Assertions.assertFalse(viewer.getElement().hasProperty("fileName"));
+        Assertions.assertNull(viewer.getFileName());
+    }
+
+    @Test
+    void defaultDownloadButtonVisible() {
+        Assertions.assertTrue(viewer.isDownloadButtonVisible());
+        Assertions.assertFalse(
+                viewer.getElement().hasProperty("downloadButtonHidden"));
+    }
+
+    @Test
+    void setDownloadButtonVisible_isDownloadButtonVisible() {
+        viewer.setDownloadButtonVisible(false);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("downloadButtonHidden", false));
+        Assertions.assertFalse(viewer.isDownloadButtonVisible());
+
+        viewer.setDownloadButtonVisible(true);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("downloadButtonHidden", true));
+        Assertions.assertTrue(viewer.isDownloadButtonVisible());
+    }
+
+    @Test
+    void download_downloadCalledOnClient() {
+        ui.add(viewer);
+
+        viewer.download();
+
+        var calls = ui.dumpJsCalls(viewer.getElement(),
+                Element.CallFunctionJs.class);
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(List.of("download"),
+                calls.get(0).flattenArguments());
     }
 
     @Test
