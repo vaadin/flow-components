@@ -188,11 +188,19 @@ final class FormValueConverter {
      * naming the missing registration. Multi-select fields expect a JSON array
      * of labels; single-select and other label-routed fields expect a single
      * string.
+     * <p>
+     * The converted value is then checked against the field's
+     * {@code HasValue<?, V>} value type, see {@link #checkValueType}.
      */
     static Object convert(FormFieldDescriptor field, JsonNode value) {
         if (value == null || value.isNull()) {
             return field.field().getEmptyValue();
         }
+        return checkValueType(field, convertByType(field, value));
+    }
+
+    private static Object convertByType(FormFieldDescriptor field,
+            JsonNode value) {
         // Multi-select takes an array of labels; handled before the
         // fieldValueOptions check so the array shape is enforced even on
         // fields whose value type is itself a String set.
@@ -222,6 +230,31 @@ final class FormValueConverter {
         default -> throw new RejectedValueException(
                 "Unsupported field type: " + field.type());
         };
+    }
+
+    /**
+     * Rejects a converted value that is not an instance of the field's value
+     * type, instead of writing it. For example, a field whose value type has no
+     * type mapping (such as {@code UUID}) is classified as
+     * {@link FormFieldType#STRING} and would otherwise get a {@link String}.
+     * Fields whose value type cannot be resolved (for example a generic
+     * {@code ComboBox<T>}) are not checked.
+     */
+    private static Object checkValueType(FormFieldDescriptor field,
+            Object converted) {
+        var valueType = FormFieldType.valueType(field.field());
+        if (converted == null || valueType == null
+                || valueType.isInstance(converted)) {
+            return converted;
+        }
+        // The reason goes to the LLM, so the type names are only logged.
+        LOGGER.debug(
+                "Converted value of type {} does not match value type {}"
+                        + " of field {}",
+                converted.getClass().getName(), valueType.getName(),
+                field.id());
+        throw new RejectedValueException(
+                "Field cannot be filled: its value type is not supported.");
     }
 
     /**
