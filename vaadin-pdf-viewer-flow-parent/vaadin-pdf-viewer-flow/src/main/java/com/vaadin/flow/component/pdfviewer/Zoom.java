@@ -96,17 +96,14 @@ public final class Zoom implements Serializable {
      *         which is what the client falls back to
      */
     static Zoom fromClientValue(Serializable clientValue) {
-        if (clientValue instanceof Number number) {
-            return ofFactorOrDefault(number.doubleValue());
+        if (clientValue instanceof Number number
+                && isValidFactor(number.doubleValue())) {
+            return new Zoom(null, number.doubleValue());
         }
         if (PAGE_FIT.mode.equals(clientValue)) {
             return PAGE_FIT;
         }
         return PAGE_WIDTH;
-    }
-
-    private static Zoom ofFactorOrDefault(double factor) {
-        return isValidFactor(factor) ? new Zoom(null, factor) : PAGE_WIDTH;
     }
 
     private static boolean isValidFactor(double factor) {
