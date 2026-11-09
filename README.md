@@ -154,3 +154,6 @@ Run `mvn spotless:apply` before pushing your code.
 
 ## LICENSE
 For specific module(s), check the LICENSE file under the parent module.
+
+## Known documentation issues
+- `DrilldownEvent.getDrilldown` JavaDoc incorrectly states it "Gets the name of the drilldown"; it actually returns the "id" of the drilldown (see issue #1188).
