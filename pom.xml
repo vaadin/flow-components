@@ -384,6 +384,11 @@
                         <stopWait>5</stopWait>
                         <stopKey>foo</stopKey>
                         <scan>${jetty.scan}</scan>
+                        <webApp>
+                            <!-- Fail the build when the webapp does not deploy,
+                                 instead of serving 503 for every request -->
+                            <throwUnavailableOnStartupException>true</throwUnavailableOnStartupException>
+                        </webApp>
                         <systemProperties>
                             <force>true</force>
                             <project.basedir>${project.basedir}</project.basedir>
