@@ -27,7 +27,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -76,8 +75,9 @@ class DatePickerLocaleTest {
         int initIndex = indexOf(invocations, invocation -> invocation
                 .getExpression().contains("datepickerConnector.initLazy"));
         int i18nIndex = indexOf(invocations,
-                invocation -> "$connector.updateI18n".equals(
-                        JsFunctionCallUtil.getFunctionName(invocation)));
+                invocation -> invocation.getJsCall() != null
+                        && invocation.getJsCall().arguments()
+                                .contains("$connector.updateI18n"));
         Assertions.assertTrue(initIndex >= 0, "initLazy was not invoked");
         Assertions.assertTrue(i18nIndex > initIndex,
                 "I18n must be updated after the connector is initialized");

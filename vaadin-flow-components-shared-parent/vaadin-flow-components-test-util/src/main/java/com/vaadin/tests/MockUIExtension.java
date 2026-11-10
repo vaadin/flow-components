@@ -277,6 +277,32 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
                 .toList();
     }
 
+    /**
+     * Dump the pending JavaScript invocations from the UI internals, and get
+     * the calls among them that were made on the given element with
+     * {@link Element#callJsFunction(String, Object...) callJsFunction} for the
+     * given function.
+     * <p>
+     * {@link JsCall#flattenArguments()} of a returned call is the function name
+     * followed by the arguments of the function. To get the calls of all
+     * functions, use {@link #dumpJsCalls(Element, Class)} with
+     * {@link Element.CallFunctionJs}.
+     * <p>
+     * Like {@link #dumpPendingJavaScriptInvocations()}, this clears all pending
+     * invocations, including those that are not returned.
+     *
+     * @param owner
+     *            the element that the function was called on
+     * @param functionName
+     *            the name of the called function
+     * @return a list of the matching calls, in the order they were made
+     */
+    public List<JsCall> dumpJsCalls(Element owner, String functionName) {
+        return dumpJsCalls(owner, Element.CallFunctionJs.class).stream()
+                .filter(call -> functionName.equals(call.arguments().get(0)))
+                .toList();
+    }
+
     private static class AlwaysLockedVaadinSession extends VaadinSession {
         private final ReentrantLock lock = new ReentrantLock();
 
