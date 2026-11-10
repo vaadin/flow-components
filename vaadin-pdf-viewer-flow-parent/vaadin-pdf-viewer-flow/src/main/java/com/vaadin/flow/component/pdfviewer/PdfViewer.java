@@ -74,6 +74,7 @@ public class PdfViewer extends Component implements HasSize {
     public PdfViewer() {
         getElement().setProperty("page", 1);
         getElement().setProperty("zoom", Zoom.PAGE_WIDTH.getMode());
+        getElement().setProperty("toolbarCollapsed", false);
         getElement().addPropertyChangeListener("page", event -> {
             pageSignal.set(getPage());
             fireEvent(new PageChangeEvent(this, event.isUserOriginated(),
@@ -82,6 +83,9 @@ public class PdfViewer extends Component implements HasSize {
         getElement().addPropertyChangeListener("zoom",
                 event -> fireEvent(new ZoomChangeEvent(this,
                         event.isUserOriginated(), getZoom())));
+        getElement().addPropertyChangeListener("toolbarCollapsed",
+                event -> fireEvent(new ToolbarCollapsedChangeEvent(this,
+                        event.isUserOriginated(), isToolbarCollapsed())));
         addDocumentLoadListener(
                 event -> pageCountSignal.set(event.getPageCount()));
         addDocumentErrorListener(event -> resetDocumentState());
@@ -223,6 +227,86 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Gets whether the viewer shows the header above the toolbar. The default
+     * value is {@code true}.
+     *
+     * @return {@code true} if the header is visible, {@code false} otherwise
+     */
+    public boolean isHeaderVisible() {
+        return !getElement().getProperty("headerHidden", false);
+    }
+
+    /**
+     * Sets whether the viewer shows the header above the toolbar. The header
+     * shows the title, see {@link #setHeaderTitle(String)}, and collapses and
+     * expands the toolbar when the user clicks it.
+     * <p>
+     * While the header is hidden, the toolbar is always shown, also when it is
+     * collapsed with {@link #setToolbarCollapsed(boolean)}.
+     *
+     * @param headerVisible
+     *            {@code true} to show the header, {@code false} to hide it
+     */
+    public void setHeaderVisible(boolean headerVisible) {
+        getElement().setProperty("headerHidden", !headerVisible);
+    }
+
+    /**
+     * Gets the title shown in the header.
+     *
+     * @return the title, or {@code null} if the header shows the file name of
+     *         the document
+     */
+    public String getHeaderTitle() {
+        return getElement().getProperty("headerTitle");
+    }
+
+    /**
+     * Sets the title shown in the header. By default, no title is set, and the
+     * header shows the file name of the document, or the text from
+     * {@link PdfViewerI18n#setDocument(String)} if the document has no file
+     * name.
+     *
+     * @param headerTitle
+     *            the title, or {@code null} to show the file name of the
+     *            document
+     * @see #setHeaderVisible(boolean)
+     */
+    public void setHeaderTitle(String headerTitle) {
+        if (headerTitle == null) {
+            getElement().removeProperty("headerTitle");
+        } else {
+            getElement().setProperty("headerTitle", headerTitle);
+        }
+    }
+
+    /**
+     * Gets whether the toolbar is collapsed. The default value is
+     * {@code false}.
+     *
+     * @return {@code true} if the toolbar is collapsed, {@code false} otherwise
+     */
+    @Synchronize(property = "toolbarCollapsed", value = "toolbar-collapsed-changed")
+    public boolean isToolbarCollapsed() {
+        return getElement().getProperty("toolbarCollapsed", false);
+    }
+
+    /**
+     * Sets whether the toolbar is collapsed. A collapsed toolbar is hidden, and
+     * the user can expand it again by clicking the header.
+     * <p>
+     * The toolbar collapses only while the header is visible, see
+     * {@link #setHeaderVisible(boolean)}.
+     *
+     * @param toolbarCollapsed
+     *            {@code true} to collapse the toolbar, {@code false} to expand
+     *            it
+     */
+    public void setToolbarCollapsed(boolean toolbarCollapsed) {
+        getElement().setProperty("toolbarCollapsed", toolbarCollapsed);
+    }
+
+    /**
      * Gets the container for your own controls, such as buttons, in the
      * toolbar. The controls are placed after the built-in page and zoom
      * controls, before the download button. Empty by default.
@@ -320,6 +404,20 @@ public class PdfViewer extends Component implements HasSize {
     public Registration addZoomChangeListener(
             ComponentEventListener<ZoomChangeEvent> listener) {
         return addListener(ZoomChangeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called when the toolbar is collapsed or expanded,
+     * either by the user clicking the header or with
+     * {@link #setToolbarCollapsed(boolean)}.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addToolbarCollapsedChangeListener(
+            ComponentEventListener<ToolbarCollapsedChangeEvent> listener) {
+        return addListener(ToolbarCollapsedChangeEvent.class, listener);
     }
 
     /**
@@ -441,6 +539,41 @@ public class PdfViewer extends Component implements HasSize {
          */
         public Zoom getZoom() {
             return zoom;
+        }
+    }
+
+    /**
+     * Event fired when the toolbar is collapsed or expanded.
+     */
+    public static class ToolbarCollapsedChangeEvent
+            extends ComponentEvent<PdfViewer> {
+        private final boolean toolbarCollapsed;
+
+        /**
+         * Creates a new event.
+         *
+         * @param source
+         *            the source component
+         * @param fromClient
+         *            {@code true} if the event originated from the client
+         * @param toolbarCollapsed
+         *            {@code true} if the toolbar is now collapsed,
+         *            {@code false} if it is now expanded
+         */
+        public ToolbarCollapsedChangeEvent(PdfViewer source, boolean fromClient,
+                boolean toolbarCollapsed) {
+            super(source, fromClient);
+            this.toolbarCollapsed = toolbarCollapsed;
+        }
+
+        /**
+         * Gets whether the toolbar is now collapsed.
+         *
+         * @return {@code true} if the toolbar is collapsed, {@code false} if it
+         *         is expanded
+         */
+        public boolean isToolbarCollapsed() {
+            return toolbarCollapsed;
         }
     }
 

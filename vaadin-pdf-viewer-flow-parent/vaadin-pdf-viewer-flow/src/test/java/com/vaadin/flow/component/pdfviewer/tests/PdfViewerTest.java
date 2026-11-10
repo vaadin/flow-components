@@ -26,6 +26,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentLoadEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.PageChangeEvent;
+import com.vaadin.flow.component.pdfviewer.PdfViewer.ToolbarCollapsedChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.ZoomChangeEvent;
 import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
 import com.vaadin.flow.component.pdfviewer.Zoom;
@@ -248,6 +249,110 @@ class PdfViewerTest {
     void zoomSynchronizedOnZoomChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("zoom-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN + "zoom"));
+    }
+
+    @Test
+    void setHeaderVisible_isHeaderVisible() {
+        Assertions.assertTrue(viewer.isHeaderVisible());
+        Assertions.assertFalse(viewer.getElement().hasProperty("headerHidden"));
+
+        viewer.setHeaderVisible(false);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("headerHidden", false));
+        Assertions.assertFalse(viewer.isHeaderVisible());
+
+        viewer.setHeaderVisible(true);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("headerHidden", true));
+        Assertions.assertTrue(viewer.isHeaderVisible());
+    }
+
+    @Test
+    void setHeaderTitle_getHeaderTitle() {
+        Assertions.assertNull(viewer.getHeaderTitle());
+        Assertions.assertFalse(viewer.getElement().hasProperty("headerTitle"));
+
+        viewer.setHeaderTitle("Annual report");
+        Assertions.assertEquals("Annual report",
+                viewer.getElement().getProperty("headerTitle"));
+        Assertions.assertEquals("Annual report", viewer.getHeaderTitle());
+
+        viewer.setHeaderTitle(null);
+        Assertions.assertFalse(viewer.getElement().hasProperty("headerTitle"));
+        Assertions.assertNull(viewer.getHeaderTitle());
+    }
+
+    @Test
+    void setToolbarCollapsed_isToolbarCollapsed() {
+        Assertions.assertFalse(viewer.isToolbarCollapsed());
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("toolbarCollapsed", true));
+
+        viewer.setToolbarCollapsed(true);
+        Assertions.assertTrue(
+                viewer.getElement().getProperty("toolbarCollapsed", false));
+        Assertions.assertTrue(viewer.isToolbarCollapsed());
+
+        viewer.setToolbarCollapsed(false);
+        Assertions.assertFalse(
+                viewer.getElement().getProperty("toolbarCollapsed", true));
+        Assertions.assertFalse(viewer.isToolbarCollapsed());
+    }
+
+    @Test
+    void setToolbarCollapsed_toolbarCollapsedChangeEventFired() {
+        var events = new ArrayList<ToolbarCollapsedChangeEvent>();
+        viewer.addToolbarCollapsedChangeListener(events::add);
+
+        viewer.setToolbarCollapsed(true);
+
+        Assertions.assertEquals(1, events.size());
+        Assertions.assertFalse(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isToolbarCollapsed());
+    }
+
+    @Test
+    void setToolbarCollapsed_sameValue_noToolbarCollapsedChangeEvent() {
+        var events = new ArrayList<ToolbarCollapsedChangeEvent>();
+        viewer.addToolbarCollapsedChangeListener(events::add);
+
+        viewer.setToolbarCollapsed(false);
+        Assertions.assertEquals(0, events.size());
+
+        viewer.setToolbarCollapsed(true);
+        viewer.setToolbarCollapsed(true);
+        Assertions.assertEquals(1, events.size());
+    }
+
+    @Test
+    void toolbarCollapsedOnClient_toolbarCollapsedChangeEventFired() {
+        var events = new ArrayList<ToolbarCollapsedChangeEvent>();
+        viewer.addToolbarCollapsedChangeListener(events::add);
+
+        fakeClientPropertyChange("toolbarCollapsed", true);
+        fakeClientPropertyChange("toolbarCollapsed", false);
+
+        Assertions.assertEquals(2, events.size());
+        Assertions.assertTrue(events.get(0).isFromClient());
+        Assertions.assertTrue(events.get(0).isToolbarCollapsed());
+        Assertions.assertTrue(events.get(1).isFromClient());
+        Assertions.assertFalse(events.get(1).isToolbarCollapsed());
+    }
+
+    @Test
+    void toolbarCollapsedOnClient_setSrc_toolbarCollapsedKept() {
+        fakeClientPropertyChange("toolbarCollapsed", true);
+
+        viewer.setSrc("report.pdf");
+
+        Assertions.assertTrue(viewer.isToolbarCollapsed());
+    }
+
+    @Test
+    void toolbarCollapsedSynchronizedOnToolbarCollapsedChangedEvent() {
+        Assertions.assertTrue(getSyncExpressions("toolbar-collapsed-changed")
+                .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN
+                        + "toolbarCollapsed"));
     }
 
     @Test

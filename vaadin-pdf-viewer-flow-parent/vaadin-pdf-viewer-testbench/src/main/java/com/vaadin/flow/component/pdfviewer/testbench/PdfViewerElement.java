@@ -37,6 +37,23 @@ public class PdfViewerElement extends TestBenchElement {
     }
 
     /**
+     * Checks whether the toolbar is collapsed.
+     *
+     * @return {@code true} if the toolbar is collapsed, {@code false} otherwise
+     */
+    public boolean isToolbarCollapsed() {
+        return getPropertyBoolean("toolbarCollapsed");
+    }
+
+    /**
+     * Collapses the toolbar if it is expanded, or expands it if it is
+     * collapsed, by clicking the header of the viewer.
+     */
+    public void toggleToolbar() {
+        $("button").withAttribute("part", "header").single().click();
+    }
+
+    /**
      * Gets the number of pages in the loaded document.
      *
      * @return the number of pages, or {@code 0} if no document is loaded
