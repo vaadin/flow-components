@@ -22,7 +22,8 @@ client-side state, split coverage by what varies:
   to cover the full scenario matrix — whether an invocation happens at all,
   and with which arguments. A call scheduled with `Element.callJsFunction` does
   not name the function in the invocation expression, so match it by the called
-  function instead, with `JsFunctionCallUtil`.
+  function instead, with `MockUIExtension.dumpJsCalls`: pass the function name,
+  or `Element.CallFunctionJs.class` to get the calls of all functions.
 - Keep a single integration test as a smoke test per distinct client
   operation, to prove the JS reaches the client and produces a real effect.
 

@@ -29,15 +29,14 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.HierarchicalTestBean;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.hierarchy.AbstractBackEndHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
-import com.vaadin.tests.JsFunctionCallUtil;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -282,8 +281,7 @@ class TreeGridScrollToItemTest {
     }
 
     private void assertNoJavaScriptScrollToItemInvocation() {
-        List<JavaScriptInvocation> invocations = getJavaScriptScrollInvocations();
-        Assertions.assertTrue(invocations.isEmpty());
+        Assertions.assertTrue(getJavaScriptScrollCalls().isEmpty());
     }
 
     private void assertSingleJavaScriptScrollToItemInvocation(
@@ -291,29 +289,27 @@ class TreeGridScrollToItemTest {
         var expectedItemKey = treeGrid.getDataCommunicator().getKeyMapper()
                 .key(expectedItem);
 
-        var invocations = getJavaScriptScrollInvocations();
-        Assertions.assertEquals(1, invocations.size());
-
-        var invocation = invocations.get(0);
-        var expectedArguments = new ArrayList<Object>();
-        expectedArguments.add(expectedItemKey);
-        Arrays.stream(expectedPath).forEach(expectedArguments::add);
-        Assertions.assertEquals("$connector.scrollToItem",
-                JsFunctionCallUtil.getFunctionName(invocation));
-        Assertions.assertEquals(expectedArguments,
-                JsFunctionCallUtil.getArguments(invocation));
+        var expectedCall = new ArrayList<Object>();
+        expectedCall.add("$connector.scrollToItem");
+        expectedCall.add(expectedItemKey);
+        Arrays.stream(expectedPath).forEach(expectedCall::add);
+        Assertions.assertEquals(List.of(expectedCall),
+                getJavaScriptScrollCalls());
     }
 
-    private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(invocation -> {
-                    var functionName = JsFunctionCallUtil
-                            .getFunctionName(invocation);
-                    return functionName != null
-                            ? functionName.contains("scroll")
-                            : invocation.getExpression().contains("scroll");
-                }).toList();
+    /**
+     * Scrolling is a call of a function named after it.
+     *
+     * @return the scroll calls, each as the function name followed by the
+     *         arguments of the function
+     */
+    private List<List<Object>> getJavaScriptScrollCalls() {
+        return ui
+                .dumpJsCalls(treeGrid.getElement(),
+                        Element.CallFunctionJs.class)
+                .stream().map(JsCall::flattenArguments)
+                .filter(call -> ((String) call.get(0)).contains("scroll"))
+                .toList();
     }
 
     private void sortDescending() {

@@ -24,8 +24,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -147,14 +147,15 @@ class GridScrollToIndexTest {
         assertSingleJavaScriptScrollInvocation("scrollToIndex(this._flatSize)");
     }
 
-    private void assertSingleJavaScriptScrollCall(String expectedFunction,
-            Object... expectedArguments) {
+    /**
+     * @param expectedCall
+     *            the function name followed by the arguments of the function
+     */
+    private void assertSingleJavaScriptScrollCall(Object... expectedCall) {
         var invocation = getSingleJavaScriptScrollInvocation();
 
-        Assertions.assertEquals(expectedFunction,
-                JsFunctionCallUtil.getFunctionName(invocation));
-        Assertions.assertEquals(List.of(expectedArguments),
-                JsFunctionCallUtil.getArguments(invocation));
+        Assertions.assertEquals(List.of(expectedCall),
+                invocation.getJsCall().flattenArguments());
     }
 
     private void assertSingleJavaScriptScrollInvocation(
@@ -184,9 +185,12 @@ class GridScrollToIndexTest {
      * before scrolling.
      */
     private static boolean isScrollInvocation(JavaScriptInvocation invocation) {
-        var functionName = JsFunctionCallUtil.getFunctionName(invocation);
-        return functionName != null ? functionName.contains("scroll")
-                : invocation.getExpression().contains("scroll");
+        var call = invocation.getJsCall();
+        var script = call != null
+                && call.definitionType() == Element.CallFunctionJs.class
+                        ? (String) call.arguments().get(0)
+                        : invocation.getExpression();
+        return script.contains("scroll");
     }
 
     private String getViewportRange(Grid<String> grid) {

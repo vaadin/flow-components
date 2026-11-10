@@ -24,10 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.Range;
-import com.vaadin.tests.JsFunctionCallUtil;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -127,28 +126,23 @@ class GridScrollToItemTest {
         var expectedItemKey = grid.getDataCommunicator().getKeyMapper()
                 .key(expectedItem);
 
-        var invocations = getJavaScriptScrollInvocations();
-        Assertions.assertEquals(1, invocations.size());
-
-        var invocation = invocations.get(0);
-        Assertions.assertEquals("$connector.scrollToItem",
-                JsFunctionCallUtil.getFunctionName(invocation));
-        Assertions.assertEquals(List.of(expectedItemKey, expectedIndex),
-                JsFunctionCallUtil.getArguments(invocation));
-    }
-
-    private List<JavaScriptInvocation> getJavaScriptScrollInvocations() {
-        return ui.dumpPendingJavaScriptInvocations().stream()
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .filter(GridScrollToItemTest::isScrollInvocation).toList();
+        var expectedCall = List.of("$connector.scrollToItem", expectedItemKey,
+                expectedIndex);
+        Assertions.assertEquals(List.of(expectedCall),
+                getJavaScriptScrollCalls());
     }
 
     /**
      * Scrolling to an item or an index is a call of a function named after it.
+     *
+     * @return the scroll calls, each as the function name followed by the
+     *         arguments of the function
      */
-    private static boolean isScrollInvocation(JavaScriptInvocation invocation) {
-        var functionName = JsFunctionCallUtil.getFunctionName(invocation);
-        return functionName != null && functionName.contains("scroll");
+    private List<List<Object>> getJavaScriptScrollCalls() {
+        return ui.dumpJsCalls(grid.getElement(), Element.CallFunctionJs.class)
+                .stream().map(JsCall::flattenArguments)
+                .filter(call -> ((String) call.get(0)).contains("scroll"))
+                .toList();
     }
 
     private String getViewportRange(Grid<String> grid) {

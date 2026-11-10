@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.tests.JsFunctionCallUtil;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.tests.MockUIExtension;
 
 class MasterDetailLayoutTest {
@@ -505,18 +507,13 @@ class MasterDetailLayoutTest {
     private void assertSetDetailCall(Component component,
             boolean skipTransition) {
         ui.fakeClientCommunication();
-        var pendingJavaScriptInvocations = ui
-                .dumpPendingJavaScriptInvocations();
-
-        Assertions.assertEquals(1, pendingJavaScriptInvocations.size());
-
-        var invocation = pendingJavaScriptInvocations.get(0).getInvocation();
-        var arguments = JsFunctionCallUtil.getArguments(invocation);
+        var calls = ui.dumpJsCalls(layout.getElement(),
+                Element.CallFunctionJs.class);
         var element = component != null ? component.getElement() : null;
 
-        Assertions.assertEquals("_setDetail",
-                JsFunctionCallUtil.getFunctionName(invocation));
-        Assertions.assertEquals(element, arguments.get(0));
-        Assertions.assertEquals(skipTransition, arguments.get(1));
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(
+                Arrays.asList("_setDetail", element, skipTransition),
+                calls.get(0).flattenArguments());
     }
 }
