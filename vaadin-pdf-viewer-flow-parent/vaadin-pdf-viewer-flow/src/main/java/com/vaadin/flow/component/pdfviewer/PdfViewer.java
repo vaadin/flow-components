@@ -252,10 +252,9 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
-     * Gets the title shown in the header.
+     * Gets the title set with {@link #setHeaderTitle(String)}.
      *
-     * @return the title, or {@code null} if the header shows the file name of
-     *         the document
+     * @return the title, or {@code null} if no title is set
      */
     public String getHeaderTitle() {
         return getElement().getProperty("headerTitle");
@@ -268,8 +267,8 @@ public class PdfViewer extends Component implements HasSize {
      * name.
      *
      * @param headerTitle
-     *            the title, or {@code null} to show the file name of the
-     *            document
+     *            the title, or {@code null} or an empty string to show the file
+     *            name of the document
      * @see #setHeaderVisible(boolean)
      */
     public void setHeaderTitle(String headerTitle) {
@@ -283,6 +282,9 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Gets whether the toolbar is collapsed. The default value is
      * {@code false}.
+     * <p>
+     * While the header is hidden, the toolbar is shown also when this is
+     * {@code true}, see {@link #setHeaderVisible(boolean)}.
      *
      * @return {@code true} if the toolbar is collapsed, {@code false} otherwise
      */
