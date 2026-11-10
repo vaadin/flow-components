@@ -1044,7 +1044,8 @@ class GridAIControllerTest {
             Assertions.assertEquals(List.of("SELECT a FROM t"), counts);
             // The validation in updateData and the sample row in renderGrid
             Assertions.assertEquals(
-                    List.of(QueryPage.first(1), QueryPage.first(1)),
+                    List.of(new QueryPage(0, 1, List.of()),
+                            new QueryPage(0, 1, List.of())),
                     pages.subList(0, 2));
             var page = pages.getLast();
             Assertions.assertEquals(20, page.offset());

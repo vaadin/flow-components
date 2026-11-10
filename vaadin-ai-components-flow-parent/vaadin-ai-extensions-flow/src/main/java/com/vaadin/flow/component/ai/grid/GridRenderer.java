@@ -67,7 +67,7 @@ public final class GridRenderer implements Serializable {
     public static void renderGrid(Grid<AIDataRow> grid,
             DatabaseProvider databaseProvider, String query) {
         var sampleRows = databaseProvider.executeQuery(query,
-                QueryPage.first(1));
+                new QueryPage(0, 1, List.of()));
         removeExtraHeaderRows(grid);
         grid.removeAllColumns();
         if (sampleRows.isEmpty()) {

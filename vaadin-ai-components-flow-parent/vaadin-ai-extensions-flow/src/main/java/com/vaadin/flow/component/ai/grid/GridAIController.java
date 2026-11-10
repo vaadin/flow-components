@@ -182,7 +182,8 @@ public class GridAIController implements AIController {
                 // that throws ToolException gets its message relayed to
                 // the LLM so it can fix the query; any other exception is
                 // replaced with a generic error.
-                databaseProvider.executeQuery(query, QueryPage.first(1));
+                databaseProvider.executeQuery(query,
+                        new QueryPage(0, 1, List.of()));
                 GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
             }
 

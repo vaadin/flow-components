@@ -58,13 +58,4 @@ class QueryPageTest {
         Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> page.sortOrders().clear());
     }
-
-    @Test
-    void first_startsAtZeroInTheQuerysOwnOrder() {
-        var page = QueryPage.first(25);
-
-        Assertions.assertEquals(0, page.offset());
-        Assertions.assertEquals(25, page.limit());
-        Assertions.assertEquals(List.of(), page.sortOrders());
-    }
 }

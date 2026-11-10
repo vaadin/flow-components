@@ -31,6 +31,8 @@ class DatabaseProviderTest {
 
     private static final String QUERY = "SELECT name AS \"Name\", salary AS \"Salary\" FROM employees";
 
+    private static final QueryPage FIRST_ROW = new QueryPage(0, 1, List.of());
+
     /** Records the SQL it runs and answers with fixed rows. */
     private static class RecordingProvider implements DatabaseProvider {
 
@@ -91,8 +93,8 @@ class DatabaseProviderTest {
 
     @Test
     void page_ignoresASemicolonAtTheEndOfTheQuery() {
-        provider.executeQuery(QUERY, QueryPage.first(1));
-        provider.executeQuery(QUERY + " ;\n", QueryPage.first(1));
+        provider.executeQuery(QUERY, FIRST_ROW);
+        provider.executeQuery(QUERY + " ;\n", FIRST_ROW);
 
         Assertions.assertEquals(provider.statements.get(0),
                 provider.statements.get(1));
@@ -100,7 +102,7 @@ class DatabaseProviderTest {
 
     @Test
     void page_endsALineCommentAtTheEndOfTheQuery() {
-        provider.executeQuery(QUERY + " -- everyone", QueryPage.first(1));
+        provider.executeQuery(QUERY + " -- everyone", FIRST_ROW);
 
         Assertions.assertEquals(
                 List.of("SELECT * FROM (" + QUERY
@@ -113,7 +115,7 @@ class DatabaseProviderTest {
         provider.rows = List.of(Map.of("Name", "Ann"));
 
         Assertions.assertEquals(provider.rows,
-                provider.executeQuery(QUERY, QueryPage.first(1)));
+                provider.executeQuery(QUERY, FIRST_ROW));
     }
 
     @Test
@@ -148,9 +150,8 @@ class DatabaseProviderTest {
 
     @Test
     void nullArguments_throw() {
-        var page = QueryPage.first(1);
         Assertions.assertThrows(NullPointerException.class,
-                () -> provider.executeQuery(null, page));
+                () -> provider.executeQuery(null, FIRST_ROW));
         Assertions.assertThrows(NullPointerException.class,
                 () -> provider.executeQuery(QUERY, null));
         Assertions.assertThrows(NullPointerException.class,

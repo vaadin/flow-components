@@ -68,16 +68,4 @@ public record QueryPage(int offset, int limit,
         }
         sortOrders = sortOrders == null ? List.of() : List.copyOf(sortOrders);
     }
-
-    /**
-     * Creates the page holding the first rows of a result, in the query's own
-     * order.
-     *
-     * @param limit
-     *            the maximum number of rows, {@code 1} or more
-     * @return the page
-     */
-    public static QueryPage first(int limit) {
-        return new QueryPage(0, limit, List.of());
-    }
 }
