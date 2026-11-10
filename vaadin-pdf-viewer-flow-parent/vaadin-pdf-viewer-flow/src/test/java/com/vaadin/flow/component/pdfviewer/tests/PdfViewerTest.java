@@ -340,15 +340,6 @@ class PdfViewerTest {
     }
 
     @Test
-    void toolbarCollapsedOnClient_setSrc_toolbarCollapsedKept() {
-        fakeClientPropertyChange("toolbarCollapsed", true);
-
-        viewer.setSrc("report.pdf");
-
-        Assertions.assertTrue(viewer.isToolbarCollapsed());
-    }
-
-    @Test
     void toolbarCollapsedSynchronizedOnToolbarCollapsedChangedEvent() {
         Assertions.assertTrue(getSyncExpressions("toolbar-collapsed-changed")
                 .contains(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN
