@@ -189,6 +189,104 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         Assert.assertEquals("<h1>initial-value</h1>", valueChangeEvent.value);
     }
 
+    @Test
+    public void eagerMode_writeText_valuesUpdated() {
+        $("button").id("set-eager-mode").click();
+
+        editor.getEditor().sendKeys("Foo");
+        waitUntil(driver -> !asDeltaValueOutput.getText().isEmpty());
+
+        ValueChangeEventData valueChangeEvent = new ValueChangeEventData(
+                valueOutput);
+        ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
+                asDeltaValueOutput);
+
+        Assert.assertEquals("<p>Foo</p>", valueChangeEvent.value);
+        Assert.assertEquals("[{\"insert\":\"Foo\\n\"}]",
+                asDeltaValueChangeEvent.value);
+        Assert.assertTrue(valueChangeEvent.isFromClient);
+        Assert.assertTrue(asDeltaValueChangeEvent.isFromClient);
+    }
+
+    @Test
+    public void eagerMode_multipleClientUpdates_oldDeltaValueUpdated() {
+        $("button").id("set-eager-mode").click();
+
+        editor.getEditor().sendKeys("foo");
+        waitUntil(driver -> asDeltaValueOutput.getText().contains("foo"));
+        editor.getEditor().sendKeys("bar");
+        waitUntil(driver -> asDeltaValueOutput.getText().contains("foobar"));
+
+        ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
+                asDeltaValueOutput);
+
+        Assert.assertEquals("[{\"insert\":\"foobar\\n\"}]",
+                asDeltaValueChangeEvent.value);
+        Assert.assertEquals("[{\"insert\":\"foo\\n\"}]",
+                asDeltaValueChangeEvent.oldValue);
+    }
+
+    @Test
+    public void eagerMode_setValue_valuesUpdated() {
+        $("button").id("set-eager-mode").click();
+
+        setValue.click();
+        waitUntil(driver -> !asDeltaValueOutput.getText().isEmpty());
+
+        ValueChangeEventData valueChangeEvent = new ValueChangeEventData(
+                valueOutput);
+        ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
+                asDeltaValueOutput);
+
+        Assert.assertEquals("<h1>value</h1>", valueChangeEvent.value);
+        Assert.assertEquals(
+                "[{\"insert\":\"value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
+                asDeltaValueChangeEvent.value);
+        Assert.assertFalse(valueChangeEvent.isFromClient);
+        Assert.assertFalse(asDeltaValueChangeEvent.isFromClient);
+    }
+
+    @Test
+    public void eagerMode_setAsDeltaValue_valuesUpdated() {
+        $("button").id("set-eager-mode").click();
+
+        setAsDeltaValue.click();
+        waitUntil(driver -> !valueOutput.getText().isEmpty());
+
+        ValueChangeEventData valueChangeEvent = new ValueChangeEventData(
+                valueOutput);
+        ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
+                asDeltaValueOutput);
+
+        Assert.assertEquals("<h1>as-delta-value</h1>", valueChangeEvent.value);
+        Assert.assertEquals(
+                "[{\"insert\":\"as-delta-value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
+                asDeltaValueChangeEvent.value);
+    }
+
+    @Test
+    public void onBlurMode_writeText_valuesUpdated() {
+        $("button").id("set-on-blur-mode").click();
+
+        editor.getEditor().sendKeys("Foo");
+        // Wait for the debounced client-side value update before blurring
+        waitUntil(driver -> editor.getPropertyString("htmlValue")
+                .contains("Foo"));
+        executeScript("arguments[0].blur()", editor.getEditor());
+        waitUntil(driver -> !asDeltaValueOutput.getText().isEmpty());
+
+        ValueChangeEventData valueChangeEvent = new ValueChangeEventData(
+                valueOutput);
+        ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
+                asDeltaValueOutput);
+
+        Assert.assertEquals("<p>Foo</p>", valueChangeEvent.value);
+        Assert.assertEquals("[{\"insert\":\"Foo\\n\"}]",
+                asDeltaValueChangeEvent.value);
+        Assert.assertTrue(valueChangeEvent.isFromClient);
+        Assert.assertTrue(asDeltaValueChangeEvent.isFromClient);
+    }
+
     private void writeAndBlur(CharSequence... keysToSend) {
         editor.getEditor().sendKeys(keysToSend);
         editor.getEditor().dispatchEvent("focusout");
