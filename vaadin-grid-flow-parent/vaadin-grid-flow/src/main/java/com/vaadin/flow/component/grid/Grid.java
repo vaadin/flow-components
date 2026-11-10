@@ -1924,9 +1924,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // Using Page.executeJs to ensure this runs before any other
         // executeJs calls scheduled on the component that require the
         // connector.
-        getUIOrThrow().getPage().executeJs(
-                "if ($0) window.Vaadin.Flow.gridConnector.initLazy($0)",
-                getElement());
+        getUIOrThrow().getPage().executeJs(GridJs.class)
+                .initConnector(getElement());
     }
 
     /**
@@ -2226,9 +2225,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 if (!column.isVisible() && column.getUI().isPresent()) {
                     int nodeId = column.getElement().getNode().getId();
                     String appId = e.getUI().getInternals().getAppId();
-                    this.getElement().executeJs(
-                            "Vaadin.Flow.clients[$0].getByNodeId($1)._flowId = $2",
-                            appId, nodeId, columnId);
+                    getElement().executeJs(GridJs.class).setColumnFlowId(appId,
+                            nodeId, columnId);
                 }
             });
         });
@@ -3264,7 +3262,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement().executeJs("this.$connector?.reset()");
+        getElement().executeJs(GridJs.class).resetConnector();
         getDataCommunicator().setPageSize(pageSize);
         setViewportRange(0, pageSize);
         getDataCommunicator().reset();
@@ -3324,8 +3322,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void updateClientSelectionMode() {
-        getElement().executeJs("this.$connector?.setSelectionMode($0)",
-                selectionMode.name());
+        getElement().executeJs(GridJs.class)
+                .setSelectionMode(selectionMode.name());
     }
 
     /**
@@ -4371,8 +4369,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            this.pendingSorterUpdate = getElement().executeJs(
-                    "this.$connector?.setSorterDirections($0)", directions);
+            this.pendingSorterUpdate = getElement().executeJs(GridJs.class)
+                    .setSorterDirections(directions);
         }
     }
 
@@ -5246,15 +5244,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         tooltipElement.addAttachListener(e -> {
             // Assigns a generator that returns a column-specific
             // tooltip text from the item
-            tooltipElement.executeJs(
-                    """
-                            this.generator = ({ item, column }) => {
-                                const { gridtooltips } = item ?? {};
-                                if (gridtooltips) {
-                                    return (column ? gridtooltips[column._flowId] : null) ?? gridtooltips.row;
-                                }
-                            }
-                            """);
+            tooltipElement.executeJs(GridJs.class).initTooltipGenerator();
         });
         SlotUtils.addToSlot(this, "tooltip", tooltipElement);
     }
@@ -5475,8 +5465,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @since 4.1
      */
     public void scrollToEnd() {
-        scheduleScrollExecution(() -> getElement()
-                .executeJs("this.scrollToIndex(this._flatSize)"));
+        scheduleScrollExecution(
+                () -> getElement().executeJs(GridJs.class).scrollToEnd());
     }
 
     /**

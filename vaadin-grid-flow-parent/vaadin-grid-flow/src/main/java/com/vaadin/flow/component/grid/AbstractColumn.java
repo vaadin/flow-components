@@ -83,17 +83,16 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 ? HtmlUtils.escape(getBottomLevelColumn().getInternalId())
                 : null;
 
-        var jsExpression = "this.$connector.setHeaderRenderer($0, { content: $1, showSorter: $2, sorterPath: $3 });";
         // The JS execution of setting the actual header component will be
         // delayed until when the header is set visible. Therefore, we
         // explicitly set the header empty if the header component is initially
         // hidden.
         if (headerComponent != null && !headerComponent.isVisible()) {
-            grid.getElement().executeJs(jsExpression, getElement(), "",
-                    showSorter, sorterPath);
+            grid.getElement().executeJs(GridJs.class).setHeaderRenderer(
+                    getElement(), "", showSorter, sorterPath);
         }
-        grid.getElement().executeJs(jsExpression, getElement(), headerContent,
-                showSorter, sorterPath);
+        grid.getElement().executeJs(GridJs.class).setHeaderRenderer(
+                getElement(), headerContent, showSorter, sorterPath);
     }
 
     private void renderFooter() {
@@ -101,9 +100,8 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 ? footerComponent.getElement()
                 : footerText;
 
-        grid.getElement().executeJs(
-                "this.$connector.setFooterRenderer($0, { content: $1 })",
-                this.getElement(), footerContent);
+        grid.getElement().executeJs(GridJs.class)
+                .setFooterRenderer(getElement(), footerContent);
     }
 
     /**
