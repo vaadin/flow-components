@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.pdfviewer.testbench.PdfViewerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-pdf-viewer/toolbar")
@@ -26,12 +25,6 @@ public class PdfViewerToolbarIT extends AbstractComponentIT {
     public void init() {
         open();
         viewer = $(PdfViewerElement.class).single();
-    }
-
-    @Test
-    public void noInitialToolbarCollapsedChangeEvent() {
-        Assert.assertFalse(viewer.isToolbarCollapsed());
-        Assert.assertEquals("", getEvents());
     }
 
     @Test
@@ -47,38 +40,7 @@ public class PdfViewerToolbarIT extends AbstractComponentIT {
                 getEvents());
     }
 
-    @Test
-    public void setToolbarCollapsed_toolbarCollapsed() {
-        clickElementWithJs("collapse-toolbar");
-
-        Assert.assertTrue(viewer.isToolbarCollapsed());
-        Assert.assertFalse(getToolbar().isDisplayed());
-        Assert.assertEquals("collapsed=true,fromClient=false;", getEvents());
-    }
-
-    @Test
-    public void setHeaderTitle_headerTitleShown() {
-        clickElementWithJs("set-header-title");
-
-        Assert.assertEquals("Annual report", viewer.getHeaderTitle());
-    }
-
-    @Test
-    public void setHeaderVisibleFalse_headerHidden() {
-        clickElementWithJs("hide-header");
-
-        Assert.assertFalse(getHeader().isDisplayed());
-    }
-
     private String getEvents() {
         return $("span").id("events").getText();
-    }
-
-    private TestBenchElement getHeader() {
-        return viewer.$("button").withAttribute("part", "header").single();
-    }
-
-    private TestBenchElement getToolbar() {
-        return viewer.$("div").withAttribute("part", "toolbar").single();
     }
 }

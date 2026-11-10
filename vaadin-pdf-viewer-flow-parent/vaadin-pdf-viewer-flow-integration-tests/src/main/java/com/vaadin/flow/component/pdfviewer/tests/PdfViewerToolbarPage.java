@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.pdfviewer.tests;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.router.Route;
@@ -28,18 +27,6 @@ public class PdfViewerToolbarPage extends Div {
                 events.getText() + "collapsed=" + event.isToolbarCollapsed()
                         + ",fromClient=" + event.isFromClient() + ";"));
 
-        var collapseToolbar = new NativeButton("Collapse toolbar",
-                event -> viewer.setToolbarCollapsed(true));
-        collapseToolbar.setId("collapse-toolbar");
-
-        var setHeaderTitle = new NativeButton("Set header title",
-                event -> viewer.setHeaderTitle("Annual report"));
-        setHeaderTitle.setId("set-header-title");
-
-        var hideHeader = new NativeButton("Hide header",
-                event -> viewer.setHeaderVisible(false));
-        hideHeader.setId("hide-header");
-
-        add(collapseToolbar, setHeaderTitle, hideHeader, events);
+        add(events);
     }
 }
