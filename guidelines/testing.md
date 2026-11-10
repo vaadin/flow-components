@@ -20,10 +20,10 @@ client-side state, split coverage by what varies:
 
 - Use unit tests that dump and assert the UI's pending JavaScript invocations
   to cover the full scenario matrix — whether an invocation happens at all,
-  and with which arguments. Get the calls with `MockUIExtension.dumpJsCalls`.
-  For `Element.callJsFunction`, pass the function name, or
-  `Element.CallFunctionJs.class` to get the calls of all functions:
-  `flattenArguments()` returns the function name followed by the arguments.
+  and with which arguments. A call scheduled with `Element.callJsFunction` does
+  not name the function in the invocation expression, so match it by the called
+  function instead, with `MockUIExtension.dumpJsCalls`: pass the function name,
+  or `Element.CallFunctionJs.class` to get the calls of all functions.
 - Keep a single integration test as a smoke test per distinct client
   operation, to prove the JS reaches the client and produces a real effect.
 
