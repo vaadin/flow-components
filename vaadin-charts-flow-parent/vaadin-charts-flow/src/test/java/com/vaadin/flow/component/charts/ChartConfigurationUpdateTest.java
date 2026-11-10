@@ -98,7 +98,6 @@ class ChartConfigurationUpdateTest {
 
     private List<Object> getConfigurationResets() {
         return ui.dumpJsCalls(chart.getElement(), "updateConfiguration")
-                .stream().map(call -> call.flattenArguments().getLast())
-                .toList();
+                .stream().map(List::getLast).toList();
     }
 }

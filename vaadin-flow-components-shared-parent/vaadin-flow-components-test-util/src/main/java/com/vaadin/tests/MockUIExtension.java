@@ -279,14 +279,14 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
 
     /**
      * Dump the pending JavaScript invocations from the UI internals, and get
-     * the calls among them that were made on the given element with
-     * {@link Element#callJsFunction(String, Object...) callJsFunction} for the
-     * given function.
+     * the arguments of the calls among them that were made on the given element
+     * with {@link Element#callJsFunction(String, Object...) callJsFunction} for
+     * the given function.
      * <p>
-     * {@link JsCall#flattenArguments()} of a returned call is the function name
-     * followed by the arguments of the function. To get the calls of all
-     * functions, use {@link #dumpJsCalls(Element, Class)} with
-     * {@link Element.CallFunctionJs}.
+     * To get the calls of all functions, use
+     * {@link #dumpJsCalls(Element, Class)} with {@link Element.CallFunctionJs}.
+     * {@link JsCall#flattenArguments()} of such a call is the function name
+     * followed by the arguments of the function.
      * <p>
      * Like {@link #dumpPendingJavaScriptInvocations()}, this clears all pending
      * invocations, including those that are not returned.
@@ -295,11 +295,14 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
      *            the element that the function was called on
      * @param functionName
      *            the name of the called function
-     * @return a list of the matching calls, in the order they were made
+     * @return the arguments of each matching call, without the function name,
+     *         in the order the calls were made
      */
-    public List<JsCall> dumpJsCalls(Element owner, String functionName) {
+    public List<List<Object>> dumpJsCalls(Element owner, String functionName) {
         return dumpJsCalls(owner, Element.CallFunctionJs.class).stream()
-                .filter(call -> functionName.equals(call.arguments().get(0)))
+                .map(JsCall::flattenArguments)
+                .filter(arguments -> functionName.equals(arguments.get(0)))
+                .map(arguments -> arguments.subList(1, arguments.size()))
                 .toList();
     }
 

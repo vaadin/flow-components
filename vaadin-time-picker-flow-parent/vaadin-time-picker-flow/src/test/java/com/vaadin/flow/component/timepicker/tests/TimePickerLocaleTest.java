@@ -88,7 +88,6 @@ class TimePickerLocaleTest {
 
         var calls = ui.dumpJsCalls(timePicker.getElement(),
                 "$connector.setLocale");
-        Assertions.assertEquals(List.of("$connector.setLocale", expectedTag),
-                calls.getLast().flattenArguments());
+        Assertions.assertEquals(List.of(expectedTag), calls.getLast());
     }
 }

@@ -202,8 +202,7 @@ class MapSerializationTest {
         var calls = ui.dumpJsCalls(map.getElement(), "$connector.synchronize");
         Assertions.assertFalse(calls.isEmpty(), "No synchronize call found");
 
-        // The function name is followed by the synchronized items
-        return (ArrayNode) calls.get(0).flattenArguments().get(1);
+        return (ArrayNode) calls.get(0).get(0);
     }
 
     private ObjectNode findSyncedItem(ArrayNode syncedItems, String id) {
