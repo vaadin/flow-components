@@ -956,6 +956,15 @@ class GridAIControllerTest {
         }
 
         @Test
+        void fetch_withZeroLimit_returnsNoRowsWithoutQuerying() {
+            var rows = grid.getDataProvider()
+                    .fetch(new Query<>(0, 0, List.of(), null, null)).toList();
+
+            Assertions.assertTrue(rows.isEmpty());
+            Assertions.assertTrue(dbProvider.executedQueries.isEmpty());
+        }
+
+        @Test
         void count_wrapsQueryWithCount() {
             dbProvider.queryResults = List.of(row("COUNT(*)", 42));
             var size = grid.getDataProvider().size(new Query<>());

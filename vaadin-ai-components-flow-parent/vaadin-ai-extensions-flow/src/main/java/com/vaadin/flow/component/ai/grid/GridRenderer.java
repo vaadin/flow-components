@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,6 +164,11 @@ public final class GridRenderer implements Serializable {
     private static DataProvider<AIDataRow, Void> createDataProvider(
             DatabaseProvider databaseProvider, String query) {
         return new CallbackDataProvider<>(fetchQuery -> {
+            if (fetchQuery.getLimit() == 0) {
+                // A data view asks for zero rows when it reads the rows of a
+                // query that has none. A QueryPage has at least one row.
+                return Stream.empty();
+            }
             var page = new QueryPage(fetchQuery.getOffset(),
                     fetchQuery.getLimit(), fetchQuery.getSortOrders());
             LOGGER.debug("Fetching rows: offset={} limit={}", page.offset(),
