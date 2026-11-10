@@ -169,6 +169,14 @@
                     <includes>
                         <include>**/*Benchmark.java</include>
                     </includes>
+                    <!-- The unit test timeouts of the root pom do not fit a
+                         benchmark: a scenario waits for several LLM turns
+                         per attempt, and a run takes far longer than ten
+                         minutes. The harness limits each turn itself. -->
+                    <properties>
+                        <configurationParameters>junit.jupiter.execution.timeout.mode = disabled</configurationParameters>
+                    </properties>
+                    <forkedProcessTimeoutInSeconds>0</forkedProcessTimeoutInSeconds>
                 </configuration>
             </plugin>
             <plugin>
