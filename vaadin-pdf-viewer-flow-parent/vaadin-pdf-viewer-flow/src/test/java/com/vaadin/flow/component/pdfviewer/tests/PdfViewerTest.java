@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,7 +21,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.pdfviewer.DocumentErrorReason;
 import com.vaadin.flow.component.pdfviewer.PdfViewer;
 import com.vaadin.flow.component.pdfviewer.PdfViewer.DocumentErrorEvent;
@@ -33,6 +31,7 @@ import com.vaadin.flow.component.pdfviewer.PdfViewerFeatureFlagProvider;
 import com.vaadin.flow.component.pdfviewer.PdfViewerI18n;
 import com.vaadin.flow.component.pdfviewer.Zoom;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
@@ -41,7 +40,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.shared.JsonConstants;
 import com.vaadin.tests.EnableFeatureFlagExtension;
-import com.vaadin.tests.JsFunctionCallUtil;
 import com.vaadin.tests.MockUIExtension;
 
 import tools.jackson.databind.node.ObjectNode;
@@ -133,7 +131,11 @@ class PdfViewerTest {
 
         viewer.download();
 
-        Assertions.assertEquals(List.of("download"), dumpCalledFunctionNames());
+        var calls = ui.dumpJsCalls(viewer.getElement(),
+                Element.CallFunctionJs.class);
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(List.of("download"),
+                calls.get(0).flattenArguments());
     }
 
     @Test
@@ -142,7 +144,9 @@ class PdfViewerTest {
 
         ui.add(viewer);
 
-        Assertions.assertEquals(List.of(), dumpCalledFunctionNames());
+        var calls = ui.dumpJsCalls(viewer.getElement(),
+                Element.CallFunctionJs.class);
+        Assertions.assertTrue(calls.isEmpty());
     }
 
     @Test
@@ -446,14 +450,6 @@ class PdfViewerTest {
     @Test
     void implementsHasSize() {
         Assertions.assertTrue(HasSize.class.isAssignableFrom(PdfViewer.class));
-    }
-
-    private List<String> dumpCalledFunctionNames() {
-        return ui.dumpPendingJavaScriptInvocations().stream().filter(
-                pending -> pending.getOwner() == viewer.getElement().getNode())
-                .map(PendingJavaScriptInvocation::getInvocation)
-                .map(JsFunctionCallUtil::getFunctionName)
-                .filter(Objects::nonNull).toList();
     }
 
     private Set<String> getSyncExpressions(String eventName) {
