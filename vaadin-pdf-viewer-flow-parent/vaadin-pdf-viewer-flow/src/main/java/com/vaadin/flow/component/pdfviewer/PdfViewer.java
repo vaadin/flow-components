@@ -175,8 +175,7 @@ public class PdfViewer extends Component implements HasSize {
 
     /**
      * Sets the file name used by {@link #download()} and shown in the header.
-     * When not set, the name comes from the {@code Content-Disposition} header
-     * of the response or from the URL of the document.
+     * When not set, the name of the document is used.
      *
      * @param fileName
      *            the file name, or {@code null} to use the name of the document
@@ -216,9 +215,13 @@ public class PdfViewer extends Component implements HasSize {
     /**
      * Downloads the document in the browser, like the download button of the
      * toolbar does. If the document is still loading, it is downloaded once
-     * loaded. Does nothing if no document is set or it could not be loaded.
+     * loaded. Does nothing if no document is set, it could not be loaded, or
+     * the viewer is not attached.
      */
     public void download() {
+        if (!isAttached()) {
+            return;
+        }
         getElement().callJsFunction("download");
     }
 
