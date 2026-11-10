@@ -20,9 +20,15 @@ client-side state, split coverage by what varies:
 
 - Use unit tests that dump and assert the UI's pending JavaScript invocations
   to cover the full scenario matrix — whether an invocation happens at all,
-  and with which arguments. A call scheduled with `Element.callJsFunction` does
-  not name the function in the invocation expression, so match it by the called
-  function instead, with `JsFunctionCallUtil`.
+  and with which arguments. Get the calls with `MockUIExtension.dumpJsCalls`,
+  passing the component's `@JsDefinition` interface, or
+  `Element.CallFunctionJs` for calls scheduled with `Element.callJsFunction`.
+  A `callJsFunction` call does not name the function in the invocation
+  expression, so never match it by expression text: `flattenArguments()` of
+  the call is the function name followed by the arguments. Use
+  `JsFunctionCallUtil` on the raw pending invocations only when the test also
+  needs invocations of another kind from the same dump, e.g. to check the
+  order relative to an `executeJs` expression.
 - Keep a single integration test as a smoke test per distinct client
   operation, to prove the JS reaches the client and produces a real effect.
 
