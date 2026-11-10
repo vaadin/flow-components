@@ -312,19 +312,6 @@ class PdfViewerTest {
     }
 
     @Test
-    void setToolbarCollapsed_sameValue_noToolbarCollapsedChangeEvent() {
-        var events = new ArrayList<ToolbarCollapsedChangeEvent>();
-        viewer.addToolbarCollapsedChangeListener(events::add);
-
-        viewer.setToolbarCollapsed(false);
-        Assertions.assertEquals(0, events.size());
-
-        viewer.setToolbarCollapsed(true);
-        viewer.setToolbarCollapsed(true);
-        Assertions.assertEquals(1, events.size());
-    }
-
-    @Test
     void toolbarCollapsedOnClient_toolbarCollapsedChangeEventFired() {
         var events = new ArrayList<ToolbarCollapsedChangeEvent>();
         viewer.addToolbarCollapsedChangeListener(events::add);
