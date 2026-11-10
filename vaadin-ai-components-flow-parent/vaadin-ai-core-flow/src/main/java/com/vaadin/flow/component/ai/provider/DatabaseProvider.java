@@ -167,7 +167,7 @@ public interface DatabaseProvider extends Serializable {
      * AS _limited LIMIT limit OFFSET offset}, without the {@code ORDER BY}
      * level when the page has no sort orders. The sort orders name result
      * columns of the query, written as quoted identifiers. The query may end in
-     * a semicolon, which is left out.
+     * a semicolon, which is left out, or in a line comment.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
      * {@code OFFSET ... FETCH}, or when your provider can page more
@@ -210,9 +210,9 @@ public interface DatabaseProvider extends Serializable {
      * that loads rows lazily and needs the size of the result. The default runs
      * {@code SELECT COUNT(*) FROM (sql) AS _counted} through
      * {@link #executeQuery(String)} and reads the first value of the first row.
-     * The query may end in a semicolon, which is left out. The count is
-     * {@code 0} when that query returns no row, a row without columns, or a
-     * value that is not a number.
+     * The query may end in a semicolon, which is left out, or in a line
+     * comment. The count is {@code 0} when that query returns no row, a row
+     * without columns, or a value that is not a number.
      * <p>
      * Override this when your SQL dialect counts differently, or when your
      * provider can count more efficiently.
@@ -242,7 +242,8 @@ public interface DatabaseProvider extends Serializable {
 
     /**
      * Returns the given query as it is written between the parentheses of a
-     * subquery.
+     * subquery. The line break at its end keeps a line comment that ends the
+     * query from reaching the closing parenthesis.
      */
     private static String asSubquery(String sql) {
         var end = sql.length();
@@ -250,6 +251,6 @@ public interface DatabaseProvider extends Serializable {
                 || Character.isWhitespace(sql.charAt(end - 1)))) {
             end--;
         }
-        return sql.substring(0, end);
+        return sql.substring(0, end) + "\n";
     }
 }

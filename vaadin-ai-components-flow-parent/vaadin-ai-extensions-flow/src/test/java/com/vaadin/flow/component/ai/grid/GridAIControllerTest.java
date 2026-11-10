@@ -903,7 +903,7 @@ class GridAIControllerTest {
             // the sample row fetch in renderGrid
             var sampleSql = dbProvider.executedQueries.get(1);
             Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 1 OFFSET 0",
+                    "SELECT * FROM (SELECT a FROM t\n) AS _limited LIMIT 1 OFFSET 0",
                     sampleSql);
         }
 
@@ -914,7 +914,7 @@ class GridAIControllerTest {
 
             var sql = dbProvider.executedQueries.getFirst();
             Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 10 OFFSET 20",
+                    "SELECT * FROM (SELECT a FROM t\n) AS _limited LIMIT 10 OFFSET 20",
                     sql);
         }
 
@@ -963,7 +963,8 @@ class GridAIControllerTest {
             Assertions.assertEquals(42, size);
             var sql = dbProvider.executedQueries.getFirst();
             Assertions.assertEquals(
-                    "SELECT COUNT(*) FROM (SELECT a FROM t) AS _counted", sql);
+                    "SELECT COUNT(*) FROM (SELECT a FROM t\n) AS _counted",
+                    sql);
         }
 
         @Test

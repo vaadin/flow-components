@@ -62,7 +62,7 @@ class DatabaseProviderTest {
 
         Assertions.assertEquals(
                 List.of("SELECT * FROM (" + QUERY
-                        + ") AS _limited LIMIT 50 OFFSET 100"),
+                        + "\n) AS _limited LIMIT 50 OFFSET 100"),
                 provider.statements);
     }
 
@@ -74,7 +74,7 @@ class DatabaseProviderTest {
                         new QuerySortOrder("Name", SortDirection.ASCENDING))));
 
         Assertions.assertEquals(List.of("SELECT * FROM (SELECT * FROM (" + QUERY
-                + ") AS _t ORDER BY \"Salary\" DESC, \"Name\" ASC) AS _limited LIMIT 50 OFFSET 0"),
+                + "\n) AS _t ORDER BY \"Salary\" DESC, \"Name\" ASC) AS _limited LIMIT 50 OFFSET 0"),
                 provider.statements);
     }
 
@@ -99,6 +99,16 @@ class DatabaseProviderTest {
     }
 
     @Test
+    void page_endsALineCommentAtTheEndOfTheQuery() {
+        provider.executeQuery(QUERY + " -- everyone", QueryPage.first(1));
+
+        Assertions.assertEquals(
+                List.of("SELECT * FROM (" + QUERY
+                        + " -- everyone\n) AS _limited LIMIT 1 OFFSET 0"),
+                provider.statements);
+    }
+
+    @Test
     void page_returnsTheRowsOfTheWrappedQuery() {
         provider.rows = List.of(Map.of("Name", "Ann"));
 
@@ -112,7 +122,7 @@ class DatabaseProviderTest {
 
         Assertions.assertEquals(42, provider.count(QUERY));
         Assertions.assertEquals(
-                List.of("SELECT COUNT(*) FROM (" + QUERY + ") AS _counted"),
+                List.of("SELECT COUNT(*) FROM (" + QUERY + "\n) AS _counted"),
                 provider.statements);
     }
 
@@ -123,6 +133,17 @@ class DatabaseProviderTest {
 
         Assertions.assertEquals(provider.statements.get(0),
                 provider.statements.get(1));
+    }
+
+    @Test
+    void count_endsALineCommentAtTheEndOfTheQuery() {
+        provider.count(QUERY + " -- everyone");
+
+        Assertions
+                .assertEquals(
+                        List.of("SELECT COUNT(*) FROM (" + QUERY
+                                + " -- everyone\n) AS _counted"),
+                        provider.statements);
     }
 
     @Test
