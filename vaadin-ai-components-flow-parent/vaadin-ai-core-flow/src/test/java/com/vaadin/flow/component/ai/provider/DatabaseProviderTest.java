@@ -22,6 +22,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -150,12 +151,9 @@ class DatabaseProviderTest {
 
     @Test
     void nullArguments_throw() {
-        Assertions.assertThrows(NullPointerException.class,
-                () -> provider.executeQuery(null, FIRST_ROW));
-        Assertions.assertThrows(NullPointerException.class,
-                () -> provider.executeQuery(QUERY, null));
-        Assertions.assertThrows(NullPointerException.class,
-                () -> provider.count(null));
+        assertNullRejected(() -> provider.executeQuery(null, FIRST_ROW));
+        assertNullRejected(() -> provider.executeQuery(QUERY, null));
+        assertNullRejected(() -> provider.count(null));
         Assertions.assertTrue(provider.statements.isEmpty());
     }
 
@@ -166,5 +164,17 @@ class DatabaseProviderTest {
         Assertions.assertEquals(0, provider.count(QUERY));
         provider.rows = List.of(Map.of("n", "many"));
         Assertions.assertEquals(0, provider.count(QUERY));
+    }
+
+    /**
+     * Using a {@code null} argument throws a {@link NullPointerException} too,
+     * so the message is what shows that the argument was checked.
+     */
+    private static void assertNullRejected(Executable call) {
+        var message = Assertions.assertThrows(NullPointerException.class, call)
+                .getMessage();
+        Assertions.assertTrue(
+                message != null && message.contains("must not be null"),
+                message);
     }
 }
