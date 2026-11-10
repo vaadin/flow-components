@@ -90,6 +90,15 @@ class DatabaseProviderTest {
     }
 
     @Test
+    void page_ignoresASemicolonAtTheEndOfTheQuery() {
+        provider.executeQuery(QUERY, QueryPage.first(1));
+        provider.executeQuery(QUERY + " ;\n", QueryPage.first(1));
+
+        Assertions.assertEquals(provider.statements.get(0),
+                provider.statements.get(1));
+    }
+
+    @Test
     void page_returnsTheRowsOfTheWrappedQuery() {
         provider.rows = List.of(Map.of("Name", "Ann"));
 
@@ -105,6 +114,15 @@ class DatabaseProviderTest {
         Assertions.assertEquals(
                 List.of("SELECT COUNT(*) FROM (" + QUERY + ") AS _counted"),
                 provider.statements);
+    }
+
+    @Test
+    void count_ignoresASemicolonAtTheEndOfTheQuery() {
+        provider.count(QUERY);
+        provider.count(QUERY + " ;\n");
+
+        Assertions.assertEquals(provider.statements.get(0),
+                provider.statements.get(1));
     }
 
     @Test

@@ -166,7 +166,8 @@ public interface DatabaseProvider extends Serializable {
      * {@code SELECT * FROM (SELECT * FROM (sql) AS _t ORDER BY "column" ASC)
      * AS _limited LIMIT limit OFFSET offset}, without the {@code ORDER BY}
      * level when the page has no sort orders. The sort orders name result
-     * columns of the query, written as quoted identifiers.
+     * columns of the query, written as quoted identifiers. The query may end in
+     * a semicolon, which is left out.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
      * {@code OFFSET ... FETCH}, or when your provider can page more
@@ -189,7 +190,7 @@ public interface DatabaseProvider extends Serializable {
     default List<Map<String, Object>> executeQuery(String sql, QueryPage page) {
         Objects.requireNonNull(sql, "sql must not be null");
         Objects.requireNonNull(page, "page must not be null");
-        var ordered = sql;
+        var ordered = asSubquery(sql);
         if (!page.sortOrders().isEmpty()) {
             var orderBy = page.sortOrders().stream().map(sortOrder -> "\""
                     + sortOrder.getSorted().replace("\"", "\"\"") + "\" "
@@ -197,7 +198,8 @@ public interface DatabaseProvider extends Serializable {
                             ? "DESC"
                             : "ASC"))
                     .collect(Collectors.joining(", "));
-            ordered = "SELECT * FROM (" + sql + ") AS _t ORDER BY " + orderBy;
+            ordered = "SELECT * FROM (" + ordered + ") AS _t ORDER BY "
+                    + orderBy;
         }
         return executeQuery("SELECT * FROM (" + ordered + ") AS _limited LIMIT "
                 + page.limit() + " OFFSET " + page.offset());
@@ -208,8 +210,9 @@ public interface DatabaseProvider extends Serializable {
      * that loads rows lazily and needs the size of the result. The default runs
      * {@code SELECT COUNT(*) FROM (sql) AS _counted} through
      * {@link #executeQuery(String)} and reads the first value of the first row.
-     * The count is {@code 0} when that query returns no row, a row without
-     * columns, or a value that is not a number.
+     * The query may end in a semicolon, which is left out. The count is
+     * {@code 0} when that query returns no row, a row without columns, or a
+     * value that is not a number.
      * <p>
      * Override this when your SQL dialect counts differently, or when your
      * provider can count more efficiently.
@@ -229,11 +232,24 @@ public interface DatabaseProvider extends Serializable {
     default int count(String sql) {
         Objects.requireNonNull(sql, "sql must not be null");
         var result = executeQuery(
-                "SELECT COUNT(*) FROM (" + sql + ") AS _counted");
+                "SELECT COUNT(*) FROM (" + asSubquery(sql) + ") AS _counted");
         if (result.isEmpty() || result.getFirst().isEmpty()) {
             return 0;
         }
         var first = result.getFirst().values().iterator().next();
         return first instanceof Number number ? number.intValue() : 0;
+    }
+
+    /**
+     * Returns the given query as it is written between the parentheses of a
+     * subquery.
+     */
+    private static String asSubquery(String sql) {
+        var end = sql.length();
+        while (end > 0 && (sql.charAt(end - 1) == ';'
+                || Character.isWhitespace(sql.charAt(end - 1)))) {
+            end--;
+        }
+        return sql.substring(0, end);
     }
 }
