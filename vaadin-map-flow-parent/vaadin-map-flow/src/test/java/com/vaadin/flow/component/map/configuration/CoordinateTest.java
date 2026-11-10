@@ -28,7 +28,15 @@ class CoordinateTest {
 
         Assertions.assertNotEquals(coordinate, new Coordinate(1.123, 0));
         Assertions.assertNotEquals(coordinate, new Coordinate(0, 2.345));
-        Assertions.assertNotEquals(coordinate, null);
-        Assertions.assertNotEquals(coordinate, "Coordinate");
+    }
+
+    @Test
+    void equals_nullOrOtherType_notEqual() {
+        Coordinate coordinate = new Coordinate(1.123, 2.345);
+        Object nullObject = null;
+        Object otherType = "Coordinate";
+
+        Assertions.assertNotEquals(coordinate, nullObject);
+        Assertions.assertNotEquals(coordinate, otherType);
     }
 }
