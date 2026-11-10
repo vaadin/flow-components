@@ -43,10 +43,10 @@ class MenuItemsArrayGeneratorTest {
     void attach_generateItemsWithAppIdAndContainerNodeId() {
         ui.add(contextMenu);
 
-        var arguments = getGenerateItemsArguments();
-        Assertions.assertEquals(2, arguments.size());
-        Assertions.assertEquals(APP_ID, arguments.get(0));
-        Assertions.assertInstanceOf(Integer.class, arguments.get(1));
+        var call = getGenerateItemsCall();
+        Assertions.assertEquals(3, call.size());
+        Assertions.assertEquals(APP_ID, call.get(1));
+        Assertions.assertInstanceOf(Integer.class, call.get(2));
     }
 
     @Test
@@ -56,12 +56,18 @@ class MenuItemsArrayGeneratorTest {
 
         contextMenu.addItem("Other");
 
-        var arguments = getGenerateItemsArguments();
-        Assertions.assertEquals(APP_ID, arguments.get(0));
+        var call = getGenerateItemsCall();
+        Assertions.assertEquals(APP_ID, call.get(1));
     }
 
-    private List<Object> getGenerateItemsArguments() {
-        return ui.dumpJsCalls(contextMenu.getElement(),
-                "$connector.generateItems").getFirst();
+    /**
+     * Gets the first call that generates the items: the function name, the app
+     * id and the node id of the container.
+     */
+    private List<Object> getGenerateItemsCall() {
+        return ui
+                .dumpJsCalls(contextMenu.getElement(),
+                        "$connector.generateItems")
+                .getFirst().flattenArguments();
     }
 }

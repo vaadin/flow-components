@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals.JavaScriptInvocation;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -330,7 +331,7 @@ class DatePickerDisabledDatesTest {
                 .orElse(-1);
     }
 
-    private List<List<Object>> getDateMetadataConfigCalls() {
+    private List<JsCall> getDateMetadataConfigCalls() {
         return ui.dumpJsCalls(picker.getElement(),
                 "$connector.setDateMetadataConfig");
     }

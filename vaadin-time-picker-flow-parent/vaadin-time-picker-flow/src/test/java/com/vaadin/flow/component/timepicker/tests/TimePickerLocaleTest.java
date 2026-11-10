@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Assertions;
@@ -88,6 +87,8 @@ class TimePickerLocaleTest {
 
         var calls = ui.dumpJsCalls(timePicker.getElement(),
                 "$connector.setLocale");
-        Assertions.assertEquals(List.of(expectedTag), calls.getLast());
+        // The function name is followed by the language tag
+        Assertions.assertEquals(expectedTag,
+                calls.getLast().flattenArguments().get(1));
     }
 }

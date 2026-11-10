@@ -273,8 +273,8 @@ class ComboBoxTest extends ComboBoxBaseTest {
 
         var calls = ui.dumpJsCalls(comboBox.getElement(), "__focusIndex");
         Assertions.assertEquals(1, calls.size());
-        // The only argument is the index of the selected item
-        Assertions.assertEquals(List.of(2), calls.get(0));
+        // The function name is followed by the index of the selected item
+        Assertions.assertEquals(2, calls.get(0).flattenArguments().get(1));
     }
 
     @Test
@@ -304,7 +304,7 @@ class ComboBoxTest extends ComboBoxBaseTest {
 
         var calls = ui.dumpJsCalls(comboBox.getElement(), "__focusIndex");
         Assertions.assertEquals(1, calls.size());
-        Assertions.assertEquals(List.of(2), calls.get(0));
+        Assertions.assertEquals(2, calls.get(0).flattenArguments().get(1));
     }
 
     @Test
