@@ -18,13 +18,18 @@ package com.vaadin.flow.component.ai.orchestrator;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
@@ -36,7 +41,6 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.ai.AIComponentsFeatureFlagProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
@@ -51,9 +55,11 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-import com.vaadin.flow.internal.streams.UploadCompleteEvent;
-import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
 
@@ -61,8 +67,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 class SubmitDisabledTest {
-    private static final String FILES_UPLOADING = "element.files.some(file => file.uploading)";
-    private static final String MANAGER_FILES_UPLOADING = "element.manager.files.some(file => file.uploading)";
+    private static final byte[] CONTENT = "content"
+            .getBytes(StandardCharsets.UTF_8);
 
     @RegisterExtension
     MockUIExtension ui = new MockUIExtension();
@@ -76,6 +82,7 @@ class SubmitDisabledTest {
     private UploadManager uploadManager;
     private Element uploadManagerConnector;
     private Upload upload;
+    private int fileCount;
 
     @BeforeEach
     void setup() throws ReflectiveOperationException {
@@ -231,12 +238,12 @@ class SubmitDisabledTest {
                         .set(event.postpone(Duration.ofMinutes(1))))
                 .build();
         orchestrator.prompt("Hello");
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
 
-        continuation.get().fail(new RuntimeException("Failed"));
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        receiveFile(uploadManagerConnector, () -> {
+            continuation.get().fail(new RuntimeException("Failed"));
+            Assertions.assertTrue(messageInput.isSubmitDisabled());
+        });
 
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
 
@@ -273,10 +280,8 @@ class SubmitDisabledTest {
                         event -> messageInput.setSubmitDisabled(true))
                 .build();
         submitFromClient("Hello");
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
 
-        response.tryEmitComplete();
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
+        receiveFile(uploadManagerConnector, response::tryEmitComplete);
 
         Assertions.assertTrue(messageInput.isSubmitDisabled());
     }
@@ -288,12 +293,12 @@ class SubmitDisabledTest {
                     // Does not disable submitting
                 }).build();
         submitFromClient("Hello");
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
 
-        response.tryEmitComplete();
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        receiveFile(uploadManagerConnector, () -> {
+            response.tryEmitComplete();
+            Assertions.assertTrue(messageInput.isSubmitDisabled());
+        });
 
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
 
@@ -324,13 +329,12 @@ class SubmitDisabledTest {
     }
 
     @Test
-    void uploadStarted_submitDisabledByApplication_submitStaysDisabled() {
+    void fileReceived_submitDisabledByApplication_submitStaysDisabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
         messageInput.setSubmitDisabled(true);
 
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
+        receiveFile(uploadManagerConnector);
 
         Assertions.assertTrue(messageInput.isSubmitDisabled());
     }
@@ -385,47 +389,20 @@ class SubmitDisabledTest {
     }
 
     @Test
-    void uploadManagerUploadStarted_submitDisabled() {
+    void uploadManagerReceivingFile_submitDisabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
 
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        receiveFile(uploadManagerConnector,
+                () -> Assertions.assertTrue(messageInput.isSubmitDisabled()));
     }
 
     @Test
-    void uploadManagerUploadsFinished_submitEnabled() {
+    void uploadManagerFileReceived_submitEnabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
 
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
-
-        Assertions.assertFalse(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void uploadManagerUploadStartedAgain_submitDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(uploadManager).build();
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
-
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void uploadManagerDisabledWhileUploading_uploadsFinished_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(uploadManager).build();
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-
-        uploadManager.setEnabled(false);
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
-        uploadManager.setEnabled(true);
+        receiveFile(uploadManagerConnector);
 
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
@@ -435,9 +412,8 @@ class SubmitDisabledTest {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withFileReceiver(uploadManager)
                 .build();
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
 
-        cancelUpload(uploadManagerConnector);
+        receiveCanceledFile(uploadManagerConnector);
         Assertions.assertFalse(messageInput.isSubmitDisabled());
 
         orchestrator.prompt("Hello");
@@ -446,35 +422,20 @@ class SubmitDisabledTest {
     }
 
     @Test
-    void uploadUploadStarted_submitDisabled() {
+    void uploadReceivingFile_submitDisabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(upload).build();
 
-        fireDomEvent(upload.getElement(), "upload-start", true);
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        receiveFile(upload.getElement(),
+                () -> Assertions.assertTrue(messageInput.isSubmitDisabled()));
     }
 
     @Test
-    void uploadUploadsFinished_submitEnabled() {
+    void uploadFileReceived_submitEnabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(upload).build();
-        fireDomEvent(upload.getElement(), "upload-start", true);
 
-        fireDomEvent(upload.getElement(), "upload-success", false);
-
-        Assertions.assertFalse(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void uploadDisabledWhileUploading_uploadsFinished_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(upload).build();
-        fireDomEvent(upload.getElement(), "upload-start", true);
-
-        upload.setEnabled(false);
-        fireDomEvent(upload.getElement(), "upload-success", false);
-        upload.setEnabled(true);
+        receiveFile(upload.getElement());
 
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
@@ -483,9 +444,8 @@ class SubmitDisabledTest {
     void uploadUploadCanceled_submitEnabledAndPromptAccepted() {
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
                 .withInput(messageInput).withFileReceiver(upload).build();
-        fireDomEvent(upload.getElement(), "upload-start", true);
 
-        cancelUpload(upload.getElement());
+        receiveCanceledFile(upload.getElement());
         Assertions.assertFalse(messageInput.isSubmitDisabled());
 
         orchestrator.prompt("Hello");
@@ -494,53 +454,45 @@ class SubmitDisabledTest {
     }
 
     @Test
-    void uploadManagerUploadCanceled_serverStillReceiving_submitEnabled() {
+    void fileReceivedWhileAnotherReceiving_submitStaysDisabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
-        var connector = uploadManagerConnector.getComponent().orElseThrow();
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-        ComponentUtil.fireEvent(connector, new UploadStartEvent(connector));
 
-        cancelUpload(uploadManagerConnector);
-        Assertions.assertFalse(messageInput.isSubmitDisabled());
+        receiveFile(uploadManagerConnector, () -> {
+            receiveFile(uploadManagerConnector);
+            Assertions.assertTrue(messageInput.isSubmitDisabled());
+        });
 
-        ComponentUtil.fireEvent(connector, new UploadCompleteEvent(connector));
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
 
     @Test
-    void uploadUploadCanceled_serverStillReceiving_submitEnabled() {
+    void fileFailedAfterReceivedWhileAnotherReceiving_submitStaysDisabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(upload).build();
-        fireDomEvent(upload.getElement(), "upload-start", true);
-        ComponentUtil.fireEvent(upload, new UploadStartEvent(upload));
+                .withFileReceiver(uploadManager).build();
 
-        cancelUpload(upload.getElement());
-        Assertions.assertFalse(messageInput.isSubmitDisabled());
-
-        ComponentUtil.fireEvent(upload, new UploadCompleteEvent(upload));
-        Assertions.assertFalse(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void uploadDetached_submitEnabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(upload).build();
-        fireDomEvent(upload.getElement(), "upload-start", true);
-
-        ui.remove(upload);
+        receiveFile(uploadManagerConnector, () -> {
+            // Closing the request fails after the file has been received,
+            // which reports the same file as failed after it has completed
+            receive(uploadManagerConnector, new ByteArrayInputStream(CONTENT) {
+                @Override
+                public void close() throws IOException {
+                    throw new IOException("Connection reset");
+                }
+            });
+            Assertions.assertTrue(messageInput.isSubmitDisabled());
+        });
 
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
 
     @Test
-    void uploadsFinishedWhileResponseStreaming_submitStaysDisabled() {
+    void fileReceivedWhileResponseStreaming_submitStaysDisabled() {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
         submitFromClient("Hello");
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
 
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
+        receiveFile(uploadManagerConnector);
         Assertions.assertTrue(messageInput.isSubmitDisabled());
 
         response.tryEmitComplete();
@@ -552,72 +504,13 @@ class SubmitDisabledTest {
         AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
                 .withFileReceiver(uploadManager).build();
         submitFromClient("Hello");
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
 
-        response.tryEmitComplete();
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        receiveFile(uploadManagerConnector, () -> {
+            response.tryEmitComplete();
+            Assertions.assertTrue(messageInput.isSubmitDisabled());
+        });
 
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
         Assertions.assertFalse(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void uploadStartedInBrowser_beforeUploadRequest_clientSubmitIgnored() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(uploadManager).build();
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-
-        submitFromClient("Hello");
-
-        Mockito.verifyNoInteractions(mockProvider);
-    }
-
-    @Test
-    void uploadManagerAllFinishedListenerAddedBefore_promptAccepted() {
-        var orchestrator = new AtomicReference<AIOrchestrator>();
-        uploadManager.addAllFinishedListener(
-                event -> orchestrator.get().prompt("Hello"));
-        orchestrator.set(AIOrchestrator.builder(mockProvider, null)
-                .withInput(messageInput).withFileReceiver(uploadManager)
-                .build());
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
-
-        Mockito.verify(mockProvider)
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
-    }
-
-    @Test
-    void uploadAllFinishedListenerAddedBefore_promptAccepted() {
-        var orchestrator = new AtomicReference<AIOrchestrator>();
-        upload.addAllFinishedListener(
-                event -> orchestrator.get().prompt("Hello"));
-        orchestrator.set(AIOrchestrator.builder(mockProvider, null)
-                .withInput(messageInput).withFileReceiver(upload).build());
-        fireDomEvent(upload.getElement(), "upload-start", true);
-
-        fireDomEvent(upload.getElement(), "upload-success", false);
-
-        Mockito.verify(mockProvider)
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
-    }
-
-    @Test
-    void uploadsFinishedInBrowser_serverStillUploading_promptIgnored() {
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withFileReceiver(upload).build();
-        fireDomEvent(upload.getElement(), "upload-start", true);
-        ComponentUtil.fireEvent(upload, new UploadStartEvent(upload));
-        fireDomEvent(upload.getElement(), "upload-success", false);
-
-        orchestrator.prompt("Hello");
-        Mockito.verifyNoInteractions(mockProvider);
-
-        ComponentUtil.fireEvent(upload, new UploadCompleteEvent(upload));
-        orchestrator.prompt("Hello");
-        Mockito.verify(mockProvider)
-                .stream(Mockito.any(LLMProvider.LLMRequest.class));
     }
 
     @Test
@@ -829,11 +722,11 @@ class SubmitDisabledTest {
         orchestrator.prompt("Hello");
 
         refreshPreservingInput();
-        fireDomEvent(uploadManagerConnector, "upload-start", true);
-        continuation.get().fail(new RuntimeException("Failed"));
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        receiveFile(uploadManagerConnector, () -> {
+            continuation.get().fail(new RuntimeException("Failed"));
+            Assertions.assertTrue(messageInput.isSubmitDisabled());
+        });
 
-        fireDomEvent(uploadManagerConnector, "all-finished", false);
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
 
@@ -880,13 +773,64 @@ class SubmitDisabledTest {
                         eventData));
     }
 
+    private void receiveFile(Element owner) {
+        receiveFile(owner, () -> {
+            // Nothing to do while the file is being received
+        });
+    }
+
     /**
-     * The browser dispatches upload-abort while the file is still uploading,
-     * and file-remove once it has been removed from the files.
+     * Uploads a file to the upload handler of the given element, as the browser
+     * does, and runs the given action while the server is receiving the file.
      */
-    private static void cancelUpload(Element element) {
-        fireDomEvent(element, "upload-abort", true);
-        fireDomEvent(element, "file-remove", false);
+    private void receiveFile(Element owner, Runnable whileReceiving) {
+        var received = new AtomicBoolean();
+        receive(owner, new ByteArrayInputStream(CONTENT) {
+            @Override
+            public synchronized int read(byte[] buffer, int offset,
+                    int length) {
+                if (!received.getAndSet(true)) {
+                    whileReceiving.run();
+                }
+                return super.read(buffer, offset, length);
+            }
+        });
+        Assertions.assertTrue(received.get(), "The file was not received");
+    }
+
+    /**
+     * Uploads a file to the upload handler of the given element, and cancels it
+     * in the browser while the server is receiving it.
+     */
+    private void receiveCanceledFile(Element owner) {
+        receive(owner, new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw new IOException("Connection reset");
+            }
+        });
+    }
+
+    private void receive(Element owner, InputStream content) {
+        var request = Mockito.mock(VaadinRequest.class);
+        Mockito.when(request.getHeader("X-Filename"))
+                .thenReturn("file" + (++fileCount) + ".txt");
+        try {
+            Mockito.when(request.getInputStream()).thenReturn(content);
+            getUploadHandler(owner).handleRequest(request,
+                    Mockito.mock(VaadinResponse.class), ui.getSession(), owner);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private UploadHandler getUploadHandler(Element owner) {
+        ui.fakeClientCommunication();
+        var target = URI.create(owner.getAttribute("target"));
+        var resource = ui.getSession().getResourceRegistry().getResource(target)
+                .orElseThrow();
+        return (UploadHandler) ((StreamResourceRegistry.ElementStreamResource) resource)
+                .getElementRequestHandler();
     }
 
     /**
@@ -918,21 +862,6 @@ class SubmitDisabledTest {
             }
             return CompletableFuture.completedFuture(null);
         }).when(session).access(Mockito.any());
-    }
-
-    private static void fireDomEvent(Element element, String eventType,
-            boolean uploading) {
-        // Only the expression of the given element is sent, as for the
-        // event data of a browser event
-        var filesUploading = "vaadin-upload".equals(element.getTag())
-                ? FILES_UPLOADING
-                : MANAGER_FILES_UPLOADING;
-        var eventData = JacksonUtils.createObjectNode()
-                .put(filesUploading, uploading)
-                .put("event.detail.file.name", "file.txt")
-                .put("event.detail.fileName", "file.txt");
-        element.getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(new DomEvent(element, eventType, eventData));
     }
 
     /**

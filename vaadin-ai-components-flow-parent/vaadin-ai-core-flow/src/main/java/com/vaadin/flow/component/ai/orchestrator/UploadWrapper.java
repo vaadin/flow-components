@@ -20,7 +20,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.server.streams.UploadHandler;
 
@@ -33,17 +32,11 @@ class UploadWrapper implements UploadTrackingReceiver {
 
     final Upload upload;
     private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
-    /**
-     * Whether the browser reports that files are uploading. Unlike the
-     * server-side state, this is set already before the upload request reaches
-     * the server.
-     */
-    private boolean clientUploading;
-    private SerializableRunnable uploadStateListener;
+    private final UploadTracker uploadTracker = new UploadTracker();
 
     UploadWrapper(Upload upload) {
         this.upload = upload;
-        upload.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
+        var handler = UploadHandler.inMemory((meta, data) -> {
             var isDuplicate = pendingAttachments.stream()
                     .anyMatch(a -> a.name().equals(meta.fileName()));
             if (isDuplicate) {
@@ -52,33 +45,26 @@ class UploadWrapper implements UploadTrackingReceiver {
             }
             pendingAttachments.add(new AIAttachment(meta.fileName(),
                     meta.contentType(), data));
-        }));
+        });
+        uploadTracker.track(handler);
+        upload.setUploadHandler(handler);
         upload.addFileRemovedListener(event -> pendingAttachments
                 .removeIf(a -> a.name().equals(event.getFileName())));
-        UploadHelper.addUploadingChangeListener(upload,
-                this::setClientUploading);
-    }
-
-    private void setClientUploading(boolean clientUploading) {
-        this.clientUploading = clientUploading;
-        if (uploadStateListener != null) {
-            uploadStateListener.run();
-        }
-    }
-
-    @Override
-    public void setUploadStateListener(SerializableRunnable listener) {
-        uploadStateListener = listener;
-    }
-
-    @Override
-    public boolean isClientUploading() {
-        return clientUploading;
     }
 
     @Override
     public boolean isUploading() {
         return upload.isUploading();
+    }
+
+    @Override
+    public boolean isReceivingFiles() {
+        return uploadTracker.isReceiving();
+    }
+
+    @Override
+    public void setUploadStateListener(SerializableRunnable listener) {
+        uploadTracker.setListener(listener);
     }
 
     @Override

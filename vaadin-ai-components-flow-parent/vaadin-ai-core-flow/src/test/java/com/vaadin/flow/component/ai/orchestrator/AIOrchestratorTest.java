@@ -67,7 +67,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.server.streams.UploadHandler;
-import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.tests.EnableFeatureFlagExtension;
 import com.vaadin.tests.MockUIExtension;
@@ -3547,12 +3546,7 @@ class AIOrchestratorTest {
 
     private static void assertClaimed(Method setter, Class<?> resourceType)
             throws Exception {
-        // The file receiver wrappers listen to the elements of the upload
-        // components
-        var shared = Mockito.mock(resourceType,
-                invocation -> isListenerSetup(invocation.getMethod())
-                        ? Mockito.RETURNS_DEEP_STUBS.answer(invocation)
-                        : Mockito.RETURNS_DEFAULTS.answer(invocation));
+        var shared = Mockito.mock(resourceType);
         buildWith(setter, shared);
         Assertions.assertThrows(IllegalStateException.class,
                 () -> buildWith(setter, shared),
@@ -3560,11 +3554,6 @@ class AIOrchestratorTest {
                         + " passed to "
                         + (setter == null ? "builder()" : setter.getName())
                         + " to prevent sharing between orchestrators");
-    }
-
-    private static boolean isListenerSetup(Method method) {
-        return Set.of("getElement", "getConnector").contains(method.getName())
-                || Registration.class.isAssignableFrom(method.getReturnType());
     }
 
     private static AIOrchestrator buildWith(Method setter, Object shared)

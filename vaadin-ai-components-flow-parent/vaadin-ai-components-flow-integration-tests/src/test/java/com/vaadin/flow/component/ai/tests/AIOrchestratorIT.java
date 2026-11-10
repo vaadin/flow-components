@@ -19,10 +19,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.Proxy;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import org.junit.Assert;
@@ -117,127 +113,6 @@ public class AIOrchestratorIT extends AbstractComponentIT {
         waitUntil(driver -> !clickedInfo.getText().isEmpty(), 5);
         Assert.assertTrue("Clicked attachment info should contain filename",
                 clickedInfo.getText().contains("report.txt"));
-    }
-
-    @Test
-    public void uploadStarted_submitDisabledUntilUploadsFinished()
-            throws Exception {
-        uploadDropZone.getCommandExecutor().executeScript(
-                "arguments[0].manager.dispatchEvent(new CustomEvent('upload-start'))",
-                uploadDropZone);
-        waitUntil(driver -> isSubmitDisabled(), 5);
-
-        uploadFile("test-file.txt");
-        waitUntil(driver -> !isSubmitDisabled(), 5);
-    }
-
-    @Test
-    public void uploadCanceled_submitEnabled() {
-        startUploadWithoutSending();
-        waitUntil(driver -> isSubmitDisabled(), 5);
-
-        cancelUpload();
-        waitUntil(driver -> !isSubmitDisabled(), 5);
-
-        messageInput.submit("Hello");
-        waitUntil(driver -> getMessageCount() >= 2, 5);
-    }
-
-    @Test
-    public void uploadCanceledWhileServerReceiving_submitEnabled()
-            throws IOException {
-        startUploadWithoutSending();
-        waitUntil(driver -> isSubmitDisabled(), 5);
-
-        // Sends an upload request that the server is still receiving when the
-        // browser cancels its upload, and that finishes outside of a
-        // client-server round-trip
-        var request = openUploadRequest();
-        try (var body = request.getOutputStream()) {
-            body.write("content".getBytes(StandardCharsets.UTF_8));
-            body.flush();
-            waitUntil(driver -> isServerUploading(), 5);
-
-            cancelUpload();
-            waitUntil(driver -> !isSubmitDisabled(), 5);
-        }
-        Assert.assertEquals(200, request.getResponseCode());
-        Assert.assertFalse(isSubmitDisabled());
-
-        messageInput.submit("Hello");
-        waitUntil(driver -> getMessageCount() >= 2, 5);
-    }
-
-    @Test
-    public void uploadManagerDisabledWhileUploading_submitEnabledAfterUpload() {
-        startUploadWithoutSending();
-        waitUntil(driver -> isSubmitDisabled(), 5);
-
-        clickElementWithJs("toggle-upload-enabled-button");
-        executeScript("window.sendUpload();");
-        waitUntil(driver -> (Boolean) executeScript(
-                "return !arguments[0].manager.files.some(file => file.uploading);",
-                uploadDropZone), 5);
-        clickElementWithJs("toggle-upload-enabled-button");
-
-        waitUntil(driver -> !isSubmitDisabled(), 5);
-        messageInput.submit("Hello");
-        waitUntil(driver -> getMessageCount() >= 2, 5);
-    }
-
-    private boolean isSubmitDisabled() {
-        return Boolean.TRUE
-                .equals(messageInput.getPropertyBoolean("submitDisabled"));
-    }
-
-    /**
-     * Starts an upload in the browser without sending it, which keeps the
-     * upload in progress until it is canceled, or sent with
-     * {@code window.sendUpload()}.
-     */
-    private void startUploadWithoutSending() {
-        executeScript(
-                """
-                        const send = XMLHttpRequest.prototype.send;
-                        XMLHttpRequest.prototype.send = function (body) {
-                          if (body instanceof File || body instanceof FormData) {
-                            this.upload.onloadstart();
-                            window.sendUpload = () => send.call(this, body);
-                            return;
-                          }
-                          return send.call(this, body);
-                        };
-                        arguments[0].manager.addFiles([new File(['content'], 'test-file.txt')]);
-                        """,
-                uploadDropZone);
-    }
-
-    private void cancelUpload() {
-        executeScript(
-                "const manager = arguments[0].manager; manager.abortUpload(manager.files[0]);",
-                uploadDropZone);
-    }
-
-    private boolean isServerUploading() {
-        clickElementWithJs("check-uploading-button");
-        return "true".equals($("span").id("uploading-info").getText());
-    }
-
-    private HttpURLConnection openUploadRequest() throws IOException {
-        var target = (String) executeScript(
-                "return new URL(arguments[0].manager.target, document.baseURI).href;",
-                uploadDropZone);
-        var session = getDriver().manage().getCookieNamed("JSESSIONID")
-                .getValue();
-        var request = (HttpURLConnection) URI.create(target).toURL()
-                .openConnection(Proxy.NO_PROXY);
-        request.setRequestMethod("POST");
-        request.setDoOutput(true);
-        request.setChunkedStreamingMode(0);
-        request.setRequestProperty("Cookie", "JSESSIONID=" + session);
-        request.setRequestProperty("Content-Type", "text/plain");
-        request.setRequestProperty("X-Filename", "server-file.txt");
-        return request;
     }
 
     private int getMessageCount() {

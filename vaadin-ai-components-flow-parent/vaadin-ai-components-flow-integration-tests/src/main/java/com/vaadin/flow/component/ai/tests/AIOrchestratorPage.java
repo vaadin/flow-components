@@ -122,26 +122,12 @@ public class AIOrchestratorPage extends UploadDropZone {
                 e -> orchestrator.prompt("Hello from button"));
         promptButton.setId("prompt-button");
 
-        // Shows whether the server is receiving an upload
-        var uploadingInfo = new Span();
-        uploadingInfo.setId("uploading-info");
-        var checkUploadingButton = new NativeButton("Check uploading",
-                e -> uploadingInfo
-                        .setText(String.valueOf(uploadManager.isUploading())));
-        checkUploadingButton.setId("check-uploading-button");
-
-        var toggleUploadEnabledButton = new NativeButton(
-                "Toggle upload enabled",
-                e -> uploadManager.setEnabled(!uploadManager.isEnabled()));
-        toggleUploadEnabledButton.setId("toggle-upload-enabled-button");
-
         var inputLayout = new Div(uploadButton, messageInput);
         inputLayout.getStyle().set("display", "flex");
         inputLayout.setWidthFull();
 
         var chatLayout = new Div(messageList, fileList, inputLayout,
-                promptButton, clickedAttachmentInfo, checkUploadingButton,
-                uploadingInfo, toggleUploadEnabledButton);
+                promptButton, clickedAttachmentInfo);
         chatLayout.getStyle().set("display", "flex");
         chatLayout.getStyle().set("flexDirection", "column");
         chatLayout.setSizeFull();

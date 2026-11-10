@@ -17,8 +17,6 @@ import { UploadManager, type UploadFormat } from '@vaadin/upload/vaadin-upload-m
  * Events dispatched to the connector element for server-side handling:
  * - file-remove: When a file is removed
  * - file-reject: When a file is rejected
- * - upload-start: When a file starts uploading
- * - all-finished: When all uploads have finished
  */
 class UploadManagerConnector extends HTMLElement {
   public manager = new UploadManager();
@@ -89,7 +87,6 @@ class UploadManagerConnector extends HTMLElement {
     // Track upload state to detect when all uploads finish
     this.manager.addEventListener('upload-start', () => {
       this.uploading = true;
-      this.dispatchEvent(new CustomEvent('upload-start', { bubbles: false }));
     });
 
     const checkAllFinished = () => {

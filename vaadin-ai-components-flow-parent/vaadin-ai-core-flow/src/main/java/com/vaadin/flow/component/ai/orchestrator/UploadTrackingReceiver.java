@@ -19,33 +19,26 @@ import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
- * A file receiver that notifies when a file starts uploading and when all
- * uploads have finished, so that the orchestrator can disable submitting on the
- * input meanwhile.
+ * A file receiver that notifies when a file starts or stops being received, so
+ * that the orchestrator can disable submitting on the input meanwhile.
  */
 interface UploadTrackingReceiver extends AIFileReceiver {
 
     /**
-     * Checks whether the browser reports that files are uploading. Unlike
-     * {@link #isUploading()}, which reports whether the server is receiving
-     * files, this already includes the time before the upload request reaches
-     * the server, and does not include uploads that the server is still
-     * receiving after the browser canceled them, as nothing would notify when
-     * the server finishes those.
-     * <p>
-     * Prompts are not ignored based on this state, as the browser reports that
-     * all uploads have finished through the same event as the
-     * {@code AllFinishedEvent}, and an application listener for that event may
-     * run before this state is updated.
+     * Checks whether a file is being received. Unlike {@link #isUploading()},
+     * this changes only right before the listener is notified. The upload
+     * request is still being handled when the listener is notified that the
+     * last file has been received, so {@link #isUploading()} would still return
+     * {@code true} at that point.
      *
-     * @return {@code true} if the browser reports that files are uploading
+     * @return {@code true} if a file is being received
      */
-    boolean isClientUploading();
+    boolean isReceivingFiles();
 
     /**
-     * Sets the listener that is notified when {@link #isClientUploading()} may
-     * have changed. The listener is notified while the session is locked,
-     * during a client-server round-trip.
+     * Sets the listener that is notified when {@link #isReceivingFiles()}
+     * changes. The listener is notified while the session is locked, during the
+     * upload request rather than a client-server round-trip.
      *
      * @param listener
      *            the listener to notify
