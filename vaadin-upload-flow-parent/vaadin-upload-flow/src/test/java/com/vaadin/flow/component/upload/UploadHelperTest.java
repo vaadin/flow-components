@@ -17,6 +17,7 @@ package com.vaadin.flow.component.upload;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.tests.MockUIExtension;
 
@@ -89,6 +94,259 @@ class UploadHelperTest {
         });
         upload.setUploadHandler(handler);
         Assertions.assertTrue(UploadHelper.hasUploadHandler(upload));
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_uploadStartedAndFinished() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add);
+        var connector = manager.getConnector().getElement();
+
+        fireDomEvent(connector, "upload-start", false);
+        Assertions.assertEquals(List.of(true), notifications);
+
+        fireDomEvent(connector, "all-finished", false);
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_lastUploadingFileCanceled_notifiesNotUploading() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add);
+        var connector = manager.getConnector().getElement();
+        fireDomEvent(connector, "upload-start", false);
+
+        // The file is still uploading when the abort event is dispatched
+        fireDomEvent(connector, "upload-abort", true);
+        Assertions.assertEquals(List.of(true), notifications);
+
+        fireDomEvent(connector, "file-remove", false);
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_fileRemovedWhileOthersUploading_notNotified() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add);
+        var connector = manager.getConnector().getElement();
+        fireDomEvent(connector, "upload-start", false);
+
+        fireDomEvent(connector, "file-remove", true);
+
+        Assertions.assertEquals(List.of(true), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_ownerDetached_notifiesNotUploading() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add);
+        fireDomEvent(manager.getConnector().getElement(), "upload-start",
+                false);
+
+        ui.remove(owner);
+
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_ownerInert_uploadStarted() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add);
+        openModal();
+
+        fireDomEvent(manager.getConnector().getElement(), "upload-start",
+                false);
+
+        Assertions.assertEquals(List.of(true), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_disabledWhileUploading_notifiesNotUploading() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add);
+        var connector = manager.getConnector().getElement();
+        fireDomEvent(connector, "upload-start", false);
+
+        manager.setEnabled(false);
+        fireDomEvent(connector, "all-finished", false);
+
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_disabledWhileUploading_lastUploadingFileCanceled_notifiesNotUploading() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add);
+        var connector = manager.getConnector().getElement();
+        fireDomEvent(connector, "upload-start", false);
+
+        manager.setEnabled(false);
+        fireDomEvent(connector, "file-remove", false);
+
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_uploadManager_removed_notNotified() {
+        var manager = new UploadManager(owner);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(manager, notifications::add)
+                .remove();
+        var connector = manager.getConnector().getElement();
+
+        fireDomEvent(connector, "upload-start", false);
+        fireDomEvent(connector, "all-finished", false);
+        ui.remove(owner);
+
+        Assertions.assertTrue(notifications.isEmpty());
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_uploadStartedAndFinished() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+
+        fireDomEvent(upload.getElement(), "upload-start", true);
+        Assertions.assertEquals(List.of(true), notifications);
+
+        fireDomEvent(upload.getElement(), "upload-success", false);
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_lastUploadingFileCanceled_notifiesNotUploading() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        // The file is still uploading when the abort event is dispatched
+        fireDomEvent(upload.getElement(), "upload-abort", true);
+        Assertions.assertEquals(List.of(true), notifications);
+
+        fireDomEvent(upload.getElement(), "file-remove", false);
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_fileRemovedWhileOthersUploading_notNotified() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        fireDomEvent(upload.getElement(), "file-remove", true);
+
+        Assertions.assertEquals(List.of(true), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_detached_notifiesNotUploading() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        owner.remove(upload);
+
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_inert_uploadStarted() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        openModal();
+
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        Assertions.assertEquals(List.of(true), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_uploadFailed_notifiesNotUploading() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        fireDomEvent(upload.getElement(), "upload-error", false);
+
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_otherFileStillUploading_notNotified() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        fireDomEvent(upload.getElement(), "upload-success", true);
+        fireDomEvent(upload.getElement(), "upload-error", true);
+        fireDomEvent(upload.getElement(), "upload-abort", true);
+
+        Assertions.assertEquals(List.of(true), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_disabledWhileUploading_notifiesNotUploading() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        upload.setEnabled(false);
+        fireDomEvent(upload.getElement(), "upload-success", false);
+
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_disabledWhileUploading_lastUploadingFileCanceled_notifiesNotUploading() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add);
+        fireDomEvent(upload.getElement(), "upload-start", true);
+
+        upload.setEnabled(false);
+        fireDomEvent(upload.getElement(), "upload-abort", true);
+        fireDomEvent(upload.getElement(), "file-remove", false);
+
+        Assertions.assertEquals(List.of(true, false), notifications);
+    }
+
+    @Test
+    void addUploadingChangeListener_upload_removed_notNotified() {
+        var upload = new Upload();
+        owner.add(upload);
+        var notifications = new ArrayList<Boolean>();
+        UploadHelper.addUploadingChangeListener(upload, notifications::add)
+                .remove();
+
+        fireDomEvent(upload.getElement(), "upload-start", true);
+        fireDomEvent(upload.getElement(), "upload-success", false);
+        owner.remove(upload);
+
+        Assertions.assertTrue(notifications.isEmpty());
     }
 
     @Test
@@ -229,6 +487,28 @@ class UploadHelperTest {
                     "Validation wrapper must delegate: " + sig
                             + ". See NOTE in wrapWithFileTypeValidation.");
         }
+    }
+
+    private void openModal() {
+        var modal = new Div();
+        ui.add(modal);
+        ui.getUI().setChildComponentModal(modal, true);
+        ui.fakeClientCommunication();
+    }
+
+    private static void fireDomEvent(Element element, String eventType,
+            boolean uploading) {
+        // Only the expression of the given element is sent, as for the
+        // event data of a browser event
+        var filesUploading = "vaadin-upload".equals(element.getTag())
+                ? "element.files.some(file => file.uploading)"
+                : "element.manager.files.some(file => file.uploading)";
+        var eventData = JacksonUtils.createObjectNode()
+                .put(filesUploading, uploading)
+                .put("event.detail.file.name", "file.txt")
+                .put("event.detail.fileName", "file.txt");
+        element.getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(element, eventType, eventData));
     }
 
     /**

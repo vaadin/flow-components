@@ -24,11 +24,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.DomEventListener;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Utility methods for Upload and UploadManager components.
@@ -38,6 +42,9 @@ import com.vaadin.flow.server.streams.UploadHandler;
  * @since 25.1
  */
 public class UploadHelper implements Serializable {
+
+    private static final String UPLOAD_FILES_UPLOADING = "element.files.some(file => file.uploading)";
+    private static final String MANAGER_FILES_UPLOADING = "element.manager.files.some(file => file.uploading)";
 
     /**
      * Checks whether the given {@link UploadManager} has an explicitly
@@ -63,6 +70,108 @@ public class UploadHelper implements Serializable {
      */
     public static boolean hasUploadHandler(Upload upload) {
         return upload.isHandlerExplicitlyConfigured();
+    }
+
+    /**
+     * Adds a listener that is notified when the browser starts or stops
+     * uploading files to the given {@link UploadManager}. The listener receives
+     * {@code true} when a file starts uploading, and {@code false} when all
+     * uploads have finished, when a removed or canceled file was the last one
+     * uploading, or when the owner is detached. Unlike
+     * {@link UploadManager#isUploading()}, the notifications arrive through
+     * regular client-server round-trips, so that UI changes made by the
+     * listener are sent to the browser. The listener is notified also while a
+     * modal component makes the owner inert, and while the upload manager is
+     * disabled, as uploads that have started go on.
+     *
+     * @param uploadManager
+     *            the upload manager to listen to, not {@code null}
+     * @param listener
+     *            the listener to notify, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public static Registration addUploadingChangeListener(
+            UploadManager uploadManager,
+            SerializableConsumer<Boolean> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        return Registration.combine(
+                addUploadStartListener(
+                        uploadManager.getConnector().getElement(), listener),
+                addTrackingListener(uploadManager.getConnector().getElement(),
+                        "all-finished", event -> listener.accept(false)),
+                addUploadEndListener(uploadManager.getConnector().getElement(),
+                        "file-remove", MANAGER_FILES_UPLOADING, listener),
+                uploadManager.getConnector().getElement()
+                        .addDetachListener(event -> listener.accept(false)));
+    }
+
+    /**
+     * Adds a listener that is notified when the browser starts or stops
+     * uploading files to the given {@link Upload}. The listener receives
+     * {@code true} when a file starts uploading, and {@code false} when all
+     * uploads have finished, when a removed or canceled file was the last one
+     * uploading, or when the upload is detached. Unlike
+     * {@link Upload#isUploading()}, the notifications arrive through regular
+     * client-server round-trips, so that UI changes made by the listener are
+     * sent to the browser. The listener is notified also while a modal
+     * component makes the upload inert, and while the upload is disabled, as
+     * uploads that have started go on.
+     *
+     * @param upload
+     *            the upload component to listen to, not {@code null}
+     * @param listener
+     *            the listener to notify, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public static Registration addUploadingChangeListener(Upload upload,
+            SerializableConsumer<Boolean> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        return Registration.combine(
+                addUploadStartListener(upload.getElement(), listener),
+                addUploadEndListener(upload.getElement(), "upload-success",
+                        UPLOAD_FILES_UPLOADING, listener),
+                addUploadEndListener(upload.getElement(), "upload-error",
+                        UPLOAD_FILES_UPLOADING, listener),
+                addUploadEndListener(upload.getElement(), "upload-abort",
+                        UPLOAD_FILES_UPLOADING, listener),
+                addUploadEndListener(upload.getElement(), "file-remove",
+                        UPLOAD_FILES_UPLOADING, listener),
+                upload.addDetachListener(event -> listener.accept(false)));
+    }
+
+    private static Registration addUploadStartListener(Element element,
+            SerializableConsumer<Boolean> listener) {
+        return addTrackingListener(element, "upload-start",
+                event -> listener.accept(true));
+    }
+
+    /**
+     * Notifies that no file is uploading when the given event is dispatched
+     * while no file is uploading. Canceling an upload does not produce an
+     * all-finished event, as the upload-abort event is dispatched while the
+     * file is still uploading. The file-remove event that follows is dispatched
+     * after the file has been removed from the files.
+     */
+    private static Registration addUploadEndListener(Element element,
+            String eventType, String filesUploading,
+            SerializableConsumer<Boolean> listener) {
+        return addTrackingListener(element, eventType, event -> {
+            if (!event.getEventData().get(filesUploading).booleanValue()) {
+                listener.accept(false);
+            }
+        }).addEventData(filesUploading);
+    }
+
+    /**
+     * Adds a listener that follows the uploads of the browser. Uploads go on
+     * while a modal component makes the element inert, and also when the
+     * element is disabled during an upload, so the events are received in both
+     * cases. Otherwise the end of an upload would never be noticed.
+     */
+    private static DomListenerRegistration addTrackingListener(Element element,
+            String eventType, DomEventListener listener) {
+        return element.addEventListener(eventType, listener).allowInert()
+                .setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
     }
 
     /**

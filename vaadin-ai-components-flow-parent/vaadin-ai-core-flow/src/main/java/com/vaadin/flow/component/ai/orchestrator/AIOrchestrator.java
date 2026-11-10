@@ -63,6 +63,7 @@ import com.vaadin.flow.component.upload.UploadHelper;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 import reactor.core.scheduler.Schedulers;
@@ -209,9 +210,35 @@ public class AIOrchestrator implements Serializable {
      * postponement abort/resume/detach handlers (including their
      * release-then-rethrow catches), and {@code Reconnector#apply()} after
      * deserialization. When adding a new path out of a prompt, decide which of
-     * these owns the release; a missed release blocks all later prompts.
+     * these owns the release; a missed release blocks all later prompts. Every
+     * claim and release is followed by {@code updateSubmitDisabled}, run while
+     * the session is locked, so that the input reflects the flag.
      */
     private final AtomicBoolean isProcessing = new AtomicBoolean(false);
+    /**
+     * Counts the claims of {@link #isProcessing}. Written while the session is
+     * locked, like {@link #finishedTurn}.
+     */
+    private int turnCount;
+    /**
+     * The latest turn whose response has been reported. Its claim of
+     * {@link #isProcessing} no longer disables submitting, so that a response
+     * listener can disable submitting before the stream releases the claim.
+     */
+    private int finishedTurn;
+    /**
+     * Whether the orchestrator has disabled submitting on the input. Submitting
+     * that was disabled by the application is not enabled again. Accessed only
+     * while the session is locked.
+     */
+    private boolean submitDisabledByOrchestrator;
+    /**
+     * The session of the UI that the latest prompt was made in. Submitting is
+     * updated in the session rather than in that UI, as a view with
+     * {@code @PreserveOnRefresh} moves its components to a new UI of the same
+     * session when the page is refreshed.
+     */
+    private transient volatile VaadinSession session;
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
 
     /**
@@ -466,8 +493,10 @@ public class AIOrchestrator implements Serializable {
         var responseBuilder = new StringBuilder();
         var responseStream = provider.stream(request)
                 .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
+        var turn = turnCount;
         responseStream.doFinally(signal -> {
             isProcessing.set(false);
+            updateSubmitDisabledLater();
         }).subscribe(token -> {
             responseBuilder.append(token);
             if (messageList != null) {
@@ -496,7 +525,8 @@ public class AIOrchestrator implements Serializable {
                     }
                 });
             }
-            fireResponseListener("", error, ui, metadataHolder.get());
+            fireResponseListener("", error, ui, metadataHolder.get(),
+                    () -> finishTurn(turn));
         }, () -> {
             if (messageList != null) {
                 // Hides the indicator of a turn that produced no tokens, for
@@ -514,7 +544,8 @@ public class AIOrchestrator implements Serializable {
                         .add(new ChatMessage(ChatMessage.Role.ASSISTANT,
                                 responseText, null, Instant.now()));
             }
-            fireResponseListener(responseText, null, ui, metadataHolder.get());
+            fireResponseListener(responseText, null, ui, metadataHolder.get(),
+                    () -> finishTurn(turn));
             LOGGER.debug("LLM streaming completed successfully");
         });
     }
@@ -538,6 +569,7 @@ public class AIOrchestrator implements Serializable {
                     "Ignoring prompt: another request is already in progress");
             return;
         }
+        turnCount++;
         try {
             processUserInput(userMessage, explicitAttachments);
         } catch (Throwable t) { // NOSONAR — Throwable for cleanup-then-rethrow
@@ -557,11 +589,13 @@ public class AIOrchestrator implements Serializable {
             }
             throw t;
         }
+        updateSubmitDisabled();
     }
 
     private void processUserInput(String userMessage,
             List<AIAttachment> explicitAttachments) {
         var ui = UI.getCurrentOrThrow();
+        session = ui.getSession();
         checkFeatureFlag(ui);
 
         var attachments = getAttachmentsToProcess(explicitAttachments);
@@ -708,6 +742,7 @@ public class AIOrchestrator implements Serializable {
                 // (nothing started) or already handed the flag to the stream,
                 // whose doFinally release is idempotent with this one.
                 isProcessing.set(false);
+                updateSubmitDisabledLater();
                 throw t;
             }
         });
@@ -721,6 +756,7 @@ public class AIOrchestrator implements Serializable {
      */
     private void abortPostponedPrompt(UI ui, Throwable failure) {
         isProcessing.set(false);
+        updateSubmitDisabledLater();
         fireResponseListener("", failure, ui);
     }
 
@@ -768,9 +804,12 @@ public class AIOrchestrator implements Serializable {
                 isProcessing.set(false);
                 fireResponseListener("", t, ui);
                 throw t;
+            } finally {
+                updateSubmitDisabled();
             }
         }, () -> {
             isProcessing.set(false);
+            updateSubmitDisabledLater();
             LOGGER.warn("Postponed prompt abandoned: its UI was detached "
                     + "before interception completed");
         }).run();
@@ -783,6 +822,97 @@ public class AIOrchestrator implements Serializable {
      */
     private boolean isFileReceiverUploading() {
         return fileReceiver != null && fileReceiver.isUploading();
+    }
+
+    /**
+     * Disables submitting on the input while a request is being processed or a
+     * file is being uploaded, and enables it again when neither is the case.
+     * Reads the current state, so that it is correct no matter in which order
+     * the updates scheduled by the different threads run. Must be called while
+     * the session is locked.
+     * <p>
+     * Submitting that is already disabled is left as it is, and submitting is
+     * only enabled again if the orchestrator disabled it, so that a value set
+     * by the application is kept.
+     * <p>
+     * Only uploads that the browser reports count, as nothing would enable
+     * submitting again otherwise: custom receivers do not notify when an upload
+     * finishes, and the server finishes receiving a canceled upload outside of
+     * a client-server round-trip.
+     */
+    private void updateSubmitDisabled() {
+        if (input == null) {
+            return;
+        }
+        var processing = isProcessing.get() && finishedTurn != turnCount;
+        var uploading = fileReceiver instanceof UploadTrackingReceiver receiver
+                && receiver.isClientUploading();
+        if (processing || uploading) {
+            if (!submitDisabledByOrchestrator && !input.isSubmitDisabled()) {
+                input.setSubmitDisabled(true);
+                submitDisabledByOrchestrator = true;
+            }
+        } else if (submitDisabledByOrchestrator) {
+            input.setSubmitDisabled(false);
+            submitDisabledByOrchestrator = false;
+        }
+    }
+
+    /**
+     * Stops the given turn from disabling submitting before its response is
+     * reported, while the stream still holds {@link #isProcessing}, and enables
+     * submitting again if the orchestrator disabled it. A later turn that has
+     * already claimed the flag disables submitting again once the hooks have
+     * run.
+     */
+    private void finishTurn(int turn) {
+        finishedTurn = turn;
+        releaseSubmitDisabled();
+    }
+
+    /**
+     * Enables submitting again if the orchestrator disabled it, regardless of
+     * the current state. Followed by {@link #updateSubmitDisabled()}, this lets
+     * the response hooks in between disable submitting on their own: the
+     * orchestrator then leaves it as it is, also after an upload that is still
+     * running finishes.
+     */
+    private void releaseSubmitDisabled() {
+        if (submitDisabledByOrchestrator) {
+            input.setSubmitDisabled(false);
+            submitDisabledByOrchestrator = false;
+        }
+    }
+
+    /**
+     * Runs {@link #updateSubmitDisabled()} with the session locked, for a
+     * thread that may not hold the session lock. Runs in the session rather
+     * than in the UI of the turn, which may have been detached by a page
+     * refresh while the input lives on in a new UI.
+     */
+    private void updateSubmitDisabledLater() {
+        var currentSession = session;
+        if (input != null && currentSession != null) {
+            currentSession.access(this::updateSubmitDisabled);
+        }
+    }
+
+    /**
+     * Runs the given command with the session locked before returning, if the
+     * lock is free or held by the current thread. Otherwise the command is
+     * queued like a {@code ui.access()} task, so that it still runs before the
+     * tasks that are queued after it.
+     */
+    private void accessSessionFirst(Command command) {
+        var currentSession = session;
+        if (currentSession == null) {
+            return;
+        }
+        if (currentSession.hasLock()) {
+            command.execute();
+        } else {
+            currentSession.access(command);
+        }
     }
 
     private List<AIAttachment> getAttachmentsToProcess(
@@ -891,11 +1021,18 @@ public class AIOrchestrator implements Serializable {
 
     private void fireResponseListener(String responseText, Throwable error,
             UI ui) {
-        fireResponseListener(responseText, error, ui, null);
+        fireResponseListener(responseText, error, ui, null,
+                this::releaseSubmitDisabled);
     }
 
+    /**
+     * Reports the end of a turn. The given command runs on the UI thread before
+     * the hooks, so that submitting is enabled again before them and a hook can
+     * disable it. After the hooks, submitting is disabled again if a request is
+     * being processed or a file is being uploaded, unless a hook disabled it.
+     */
     private void fireResponseListener(String responseText, Throwable error,
-            UI ui, ResponseMetadata metadata) {
+            UI ui, ResponseMetadata metadata, Command beforeHooks) {
         var event = new ResponseListener.ResponseEvent(responseText, error,
                 metadata);
         // Both hooks run as one ui.access() task, the controller first, so
@@ -904,10 +1041,24 @@ public class AIOrchestrator implements Serializable {
         // contract with and without a controller. accessLater rather than
         // access: its detach handler also covers a UI that detaches after the
         // task is enqueued, and the listener must hear the turn end either way.
-        ui.accessLater(() -> notifyResponseListener(applyTurn(event)), () -> {
+        ui.accessLater(() -> {
+            beforeHooks.execute();
+            try {
+                notifyResponseListener(applyTurn(event));
+            } finally {
+                updateSubmitDisabled();
+            }
+        }, () -> {
             LOGGER.debug("Turn ended after its UI was detached; the response "
                     + "listener runs without a session");
-            notifyResponseListener(event);
+            // With @PreserveOnRefresh the input lives on in a new UI, where
+            // the listener can disable submitting with ui.access()
+            accessSessionFirst(beforeHooks);
+            try {
+                notifyResponseListener(event);
+            } finally {
+                updateSubmitDisabledLater();
+            }
         }).run();
     }
 
@@ -1126,10 +1277,15 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * The UI (message list, input, file receiver) is not modified -- those
          * components survive serialization and retain their state
-         * automatically.
+         * automatically. The only exception is that submitting on the input is
+         * enabled again if the orchestrator disabled it and no file is being
+         * uploaded, since a request that was being processed before
+         * serialization is not continued. When there is an input, call this
+         * method while the session is locked.
          */
         public void apply() {
             orchestrator.isProcessing.set(false);
+            orchestrator.updateSubmitDisabled();
             orchestrator.provider = provider;
             orchestrator.tools = tools;
             orchestrator.controller = controller;
@@ -1285,6 +1441,15 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the input component.
+         * <p>
+         * Submitting is disabled on the input with
+         * {@link AIInput#setSubmitDisabled(boolean)} while a request is being
+         * processed, and while a file is being uploaded to a file receiver set
+         * with {@link #withFileReceiver(UploadManager)} or
+         * {@link #withFileReceiver(Upload)}. Submitting that is already
+         * disabled stays disabled, and submitting is only enabled again if the
+         * orchestrator disabled it. This happens before the response listener
+         * is called, so the listener can disable submitting.
          *
          * @param input
          *            the input component
@@ -1298,6 +1463,16 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the input component using a Flow MessageInput component.
+         * <p>
+         * Submitting is disabled on the input with
+         * {@link MessageInput#setSubmitDisabled(boolean)} while a request is
+         * being processed, and while a file is being uploaded to a file
+         * receiver set with {@link #withFileReceiver(UploadManager)} or
+         * {@link #withFileReceiver(Upload)}. The user can keep typing
+         * meanwhile, and the typed text is kept. Submitting that is already
+         * disabled stays disabled, and submitting is only enabled again if the
+         * orchestrator disabled it. This happens before the response listener
+         * is called, so the listener can disable submitting.
          *
          * @param messageInput
          *            the Flow MessageInput component
@@ -1315,6 +1490,8 @@ public class AIOrchestrator implements Serializable {
          * While {@link AIFileReceiver#isUploading()} returns {@code true},
          * prompts from the input and from {@link AIOrchestrator#prompt(String)}
          * are ignored, so that the file is not left out of the prompt.
+         * Submitting is not disabled on the input during the upload, as the
+         * receiver does not notify when the upload finishes.
          *
          * @param fileReceiver
          *            the file receiver
@@ -1332,7 +1509,8 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * While a file is being uploaded, prompts from the input and from
          * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
-         * is not left out of the prompt.
+         * is not left out of the prompt, and submitting is disabled on the
+         * input.
          *
          * @param uploadManager
          *            the Flow UploadManager
@@ -1359,7 +1537,8 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * While a file is being uploaded, prompts from the input and from
          * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
-         * is not left out of the prompt.
+         * is not left out of the prompt, and submitting is disabled on the
+         * input.
          *
          * @param upload
          *            the Flow Upload component
@@ -1685,6 +1864,10 @@ public class AIOrchestrator implements Serializable {
                 if (input != null) {
                     input.addSubmitListener(
                             msg -> orchestrator.doPrompt(msg, null));
+                    if (fileReceiver instanceof UploadTrackingReceiver receiver) {
+                        receiver.setUploadStateListener(
+                                orchestrator::updateSubmitDisabled);
+                    }
                 }
 
                 if (attachmentClickListener != null && messageList != null) {
