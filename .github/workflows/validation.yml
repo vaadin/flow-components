@@ -273,7 +273,7 @@ jobs:
             echo "Running unit tests for: $pl"
             pl_arg="-pl $pl"
           fi
-          mvn test $pl_arg -Drelease -T $FORK_COUNT -Dsurefire.parallel=classes -Dsurefire.threadCount=2 -DskipSvgChartsBuild $MAVEN_ARGS
+          mvn test $pl_arg -Drelease -T $FORK_COUNT -DskipSvgChartsBuild $MAVEN_ARGS
 
       - name: Upload unit test reports
         if: always() && matrix.type == 'unit'
