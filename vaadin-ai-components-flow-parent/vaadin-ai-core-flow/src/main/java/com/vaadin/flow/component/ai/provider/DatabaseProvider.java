@@ -183,8 +183,10 @@ public interface DatabaseProvider extends Serializable {
      *             if the query or the page is {@code null}
      * @throws ToolException
      *             if the query fails and the implementation chooses to tell the
-     *             LLM why; any other exception is reported to the LLM as a
-     *             generic error
+     *             LLM why. The message reaches the LLM, and any other exception
+     *             is reported to it as a generic error, only when the page is
+     *             requested during a tool call. An exception thrown while a
+     *             component loads rows later is not reported to the LLM.
      * @since 25.4
      */
     default List<Map<String, Object>> executeQuery(String sql, QueryPage page) {
@@ -225,8 +227,10 @@ public interface DatabaseProvider extends Serializable {
      *             if the query is {@code null}
      * @throws ToolException
      *             if the query fails and the implementation chooses to tell the
-     *             LLM why; any other exception is reported to the LLM as a
-     *             generic error
+     *             LLM why. The message reaches the LLM, and any other exception
+     *             is reported to it as a generic error, only when the count is
+     *             requested during a tool call. An exception thrown while a
+     *             component loads rows later is not reported to the LLM.
      * @since 25.4
      */
     default int count(String sql) {
