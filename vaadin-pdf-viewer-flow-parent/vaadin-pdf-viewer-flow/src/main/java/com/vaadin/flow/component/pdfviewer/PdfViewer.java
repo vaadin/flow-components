@@ -163,6 +163,68 @@ public class PdfViewer extends Component implements HasSize {
         resetDocumentState();
     }
 
+    /**
+     * Gets the file name used by {@link #download()}.
+     *
+     * @return the file name, or {@code null} if the name of the document is
+     *         used
+     */
+    public String getFileName() {
+        return getElement().getProperty("fileName");
+    }
+
+    /**
+     * Sets the file name used by {@link #download()} and shown in the header.
+     * When not set, the name of the document is used.
+     *
+     * @param fileName
+     *            the file name, or {@code null} to use the name of the document
+     */
+    public void setFileName(String fileName) {
+        if (fileName == null) {
+            getElement().removeProperty("fileName");
+        } else {
+            getElement().setProperty("fileName", fileName);
+        }
+    }
+
+    /**
+     * Gets whether the toolbar shows the download button. The default is
+     * {@code true}.
+     *
+     * @return {@code true} if the download button is visible, {@code false}
+     *         otherwise
+     */
+    public boolean isDownloadButtonVisible() {
+        return !getElement().getProperty("downloadButtonHidden", false);
+    }
+
+    /**
+     * Sets whether the toolbar shows the download button. {@link #download()}
+     * works also while the button is hidden.
+     *
+     * @param downloadButtonVisible
+     *            {@code true} to show the download button, {@code false} to
+     *            hide it
+     */
+    public void setDownloadButtonVisible(boolean downloadButtonVisible) {
+        getElement().setProperty("downloadButtonHidden",
+                !downloadButtonVisible);
+    }
+
+    /**
+     * Downloads the document in the browser, like the download button of the
+     * toolbar does. If the document is still loading, it is downloaded once
+     * loaded. Does nothing if no document is set, it could not be loaded, or
+     * the viewer is not attached.
+     */
+    public void download() {
+        if (!isAttached()) {
+            return;
+        }
+        getElement().callJsFunction("download");
+    }
+
     private void resetDocumentState() {
         if (getPage() != 1) {
             getElement().setProperty("page", 1);
