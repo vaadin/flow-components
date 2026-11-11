@@ -256,8 +256,7 @@ public class PdfViewer extends Component implements HasSize {
      * While a document is loading, for example right after {@code setSrc}, it
      * scrolls once the document has loaded, and in a hidden viewer, once the
      * viewer is shown. Does not scroll if the page is not a page of the
-     * document. Does nothing without a document. If the viewer is not attached,
-     * it scrolls once the viewer is attached.
+     * document. Does nothing without a document.
      *
      * @param page
      *            the page to scroll to, starting from {@code 1}

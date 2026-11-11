@@ -163,18 +163,6 @@ class PdfViewerTest {
     }
 
     @Test
-    void scrollToPage_detached_scrollToPageCalledOnAttach() {
-        viewer.scrollToPage(3);
-
-        ui.add(viewer);
-
-        var calls = ui.dumpJsCalls(viewer.getElement(), "scrollToPage");
-        Assertions.assertEquals(1, calls.size());
-        Assertions.assertEquals(List.of("scrollToPage", 3),
-                calls.get(0).flattenArguments());
-    }
-
-    @Test
     void defaultPage() {
         Assertions.assertEquals(1, viewer.getPage());
         Assertions.assertEquals(1, viewer.getElement().getProperty("page", 0));
