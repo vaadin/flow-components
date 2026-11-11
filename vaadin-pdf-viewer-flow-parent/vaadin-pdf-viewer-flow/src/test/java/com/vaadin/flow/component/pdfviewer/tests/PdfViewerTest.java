@@ -151,6 +151,28 @@ class PdfViewerTest {
     }
 
     @Test
+    void scrollToPage_scrollToPageCalledOnClient() {
+        ui.add(viewer);
+
+        viewer.scrollToPage(3);
+
+        var calls = ui.dumpJsCalls(viewer.getElement(), "scrollToPage");
+        Assertions.assertEquals(1, calls.size());
+        Assertions.assertEquals(List.of("scrollToPage", 3),
+                calls.get(0).flattenArguments());
+    }
+
+    @Test
+    void scrollToPage_detached_scrollToPageNotCalledOnAttach() {
+        viewer.scrollToPage(3);
+
+        ui.add(viewer);
+
+        var calls = ui.dumpJsCalls(viewer.getElement(), "scrollToPage");
+        Assertions.assertTrue(calls.isEmpty());
+    }
+
+    @Test
     void defaultPage() {
         Assertions.assertEquals(1, viewer.getPage());
         Assertions.assertEquals(1, viewer.getElement().getProperty("page", 0));

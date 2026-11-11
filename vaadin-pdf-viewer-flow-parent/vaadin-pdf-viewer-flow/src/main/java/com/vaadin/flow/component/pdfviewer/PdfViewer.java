@@ -251,6 +251,27 @@ public class PdfViewer extends Component implements HasSize {
     }
 
     /**
+     * Scrolls to the start of the given page, which then becomes the current
+     * page. It scrolls also when the page is the current page already, for
+     * example to bring the start of the page back into view.
+     * <p>
+     * In a hidden viewer, it scrolls once the viewer is shown. Does not scroll
+     * if the page is not a page of the document. Does nothing if no document is
+     * loaded yet, or the viewer is not attached. To open a new document on a
+     * given page, call this from a {@link DocumentLoadEvent} listener.
+     *
+     * @param page
+     *            the page to scroll to, starting from {@code 1}
+     * @see #getPage()
+     */
+    public void scrollToPage(int page) {
+        if (!isAttached()) {
+            return;
+        }
+        getElement().callJsFunction("scrollToPage", page);
+    }
+
+    /**
      * Gets a read-only signal with the current page, which is the page that
      * takes up most of the visible area.
      * <p>
