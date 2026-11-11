@@ -31,8 +31,9 @@ final class QueryLimitCheck {
     private static final Pattern INNERMOST_PARENTHESES = Pattern
             .compile("\\([^()]*\\)");
 
-    private static final Pattern LIMIT_WORD = Pattern
-            .compile("\\b(?:limit|offset|fetch)\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern LIMIT_WORD = Pattern.compile(
+            "\\b(?:limit|offset|fetch|select\\s+top)\\b",
+            Pattern.CASE_INSENSITIVE);
 
     private QueryLimitCheck() {
         // Static methods only
@@ -40,9 +41,10 @@ final class QueryLimitCheck {
 
     /**
      * Returns whether the given query has a row limit of its own, which a limit
-     * cannot follow: the word LIMIT, OFFSET or FETCH outside of quoted
-     * identifiers, string literals, comments and parentheses. A query that is
-     * in parentheses as a whole is checked inside of them.
+     * cannot follow: the word LIMIT, OFFSET or FETCH, or TOP right after
+     * SELECT, outside of quoted identifiers, string literals, comments and
+     * parentheses. A query that is in parentheses as a whole is checked inside
+     * of them.
      *
      * @param sql
      *            the query to check

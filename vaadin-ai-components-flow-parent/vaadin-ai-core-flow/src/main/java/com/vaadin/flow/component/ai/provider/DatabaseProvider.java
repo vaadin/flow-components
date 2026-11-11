@@ -166,10 +166,10 @@ public interface DatabaseProvider extends Serializable {
      * {@link #executeQuery(String)}. Without sort orders, it runs the query
      * followed by {@code LIMIT limit OFFSET offset}, or {@code SELECT * FROM
      * (sql) AS _limited LIMIT limit OFFSET offset} when the query has a
-     * {@code LIMIT}, {@code OFFSET} or {@code FETCH} of its own. The sort
-     * orders name result columns of the query, written as quoted identifiers.
-     * The query may end in a semicolon, which is left out, or in a line
-     * comment.
+     * {@code LIMIT}, {@code OFFSET}, {@code FETCH} or {@code SELECT TOP} of its
+     * own. The sort orders name result columns of the query, written as quoted
+     * identifiers. The query may end in a semicolon, which is left out, or in a
+     * line comment.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
      * {@code OFFSET ... FETCH}, or when your provider can page more
