@@ -1,57 +1,25 @@
-<!-- Edit any field. This file is committed on the `repro/<issue>` branch and posted as the issue comment. -->
+<!-- Committed on the reproduction branch and posted as the issue comment. Before committing: pick one alternative inside each <… | …>, delete every line and block that does not apply, and delete this comment. Write a reference to another repository as `vaadin/<repo>#N`. -->
 
 > [!WARNING]
-> **Automated reproduction — produced by the Claude Code `repro` skill. Needs human verification.**
-> The steps, verdict, and root-cause pointer below were generated automatically and must be confirmed by a human before being treated as authoritative.
+> Automated reproduction by the Claude Code `repro` skill. Needs human verification.
 
-- **Verdict:** reproduced | not reproduced (fixed | addressed | obsolete API | unknown) | partially reproduced | works as designed (likely misuse) | duplicate of #N
-- **Hypothesis tested:** The bug is <X>, triggered by <Y>, observable as <Z>.
-- **Regression?:** worked in <ver> / broke in <ver> | not a regression (broken since introduction) | unknown
-- **Fixed by:** <repo>#PR (<one-line mechanism>) | broad rework (no single PR) | n/a
-- **Duplicate of:** <repo>#N (<open/closed; the issue the fixing PR closed, if any>) | none found
-- **Branch:** `repro/<issue>` — pushed to `vaadin/<repo>`
-- **Reproduced on:** <repo> @ <version or branch>
-- **Present on main?:** yes (still broken) | no (fixed in <line>) | n/a
-- **Theme / Browser:** <theme> / <browser>
-- **Screenshot** (static bug): ![<caption>](https://raw.githubusercontent.com/vaadin/<repo>/<commit-sha>/repro-<issue>.png) — embeds inline.
-- **Demo video** (motion bug): `repro-<issue>-<symptom>.webm` (on the branch; drag into the comment for inline playback)
+**<Reproduced | Partially reproduced | Not reproduced | Works as designed | Duplicate of <#N | vaadin/<repo>#N>>** on `<branch>` (<version>). <Also reproduced on `main`. | Fixed on `main` by #<PR>.> <Not a regression. | Regression: worked in <ver>, broke in <ver>, introduced by #<PR>. | Regression: worked in <ver>, broke in <ver>. | Regression status unknown.>
 
-## Observed behavior
+<Partially reproduced only: one sentence on which part of the report did not reproduce.>
 
-<What actually happened — cite the DOM snapshot, console output, or screenshot.>
+Same root cause and trigger as <#N | vaadin/<repo>#N> (<open | closed, fixed by #PR>). Recommend closing this issue as a duplicate.
 
-## Expected behavior
-
-<From the issue or the bug description.>
-
-## Steps to reproduce
-
-1. <step>
-2. <step>
-3. <step>
-
-## Reproduction
-
-How to run: start the server (`mvn … jetty:run`) and open the route below.
-
-- **Route / page:** `http://localhost:8080/repro-<issue>`
-- **Scaffold:** `<path to the View committed on this branch>`
-
-```
-<key View source — the minimal reproduction>
-```
-
-## Root cause (suspected)
-
-<short explanation of the problematic area>:
+**Root cause**: <2 to 4 sentences. What the code does, why that breaks, what triggers it. No fix proposal.>
 
 https://github.com/vaadin/<repo>/blob/<sha>/<path>#L<start>-L<end>
 
-## Duplicate
+**Reason**: <Not reproduced or works as designed, in place of the root cause: fixed on `main` by #PR | specific to <version> | obsolete API (<removed API>) | missing context (<what is needed>) | intended behavior, per <javadoc or documentation link>.>
 
-<!-- Include when this issue duplicates another one — including an already-fixed issue discovered via the fixing PR; otherwise delete this section. -->
-Same bug as **<repo>#N** (<open/closed; fixed by #PR if known>): identical root cause and trigger. <One line on why they match.> Recommend closing this issue as a duplicate of #N, citing the fixing PR when known.
+Reproduction: branch [`<pushed branch>`](https://github.com/vaadin/<repo>/tree/<pushed branch>), route `/repro-<issue>`.
 
-## Notes
+<details>
+<summary>Details</summary>
 
-<Anything else: version-specific findings, dependencies added to an IT pom, dead ends, related issues.>
+<Evidence that the lines above cannot carry: a Case / Result table, the exact gesture, a screenshot, the video file name, parts not verified.>
+
+</details>
