@@ -126,6 +126,34 @@ public class MessageInput extends Component
     }
 
     /**
+     * Gets whether submitting a message is disabled.
+     *
+     * @return {@code true} if submitting is disabled, {@code false} otherwise
+     * @see #setSubmitDisabled(boolean)
+     * @since 25.4
+     */
+    public boolean isSubmitDisabled() {
+        return getElement().getProperty("submitDisabled", false);
+    }
+
+    /**
+     * Sets whether submitting a message is disabled. When disabled, the Send
+     * button is disabled and pressing the Enter key does not submit the
+     * message. Unlike {@link #setEnabled(boolean)}, you can still type in the
+     * input field, and the typed text is kept. Use this, for example, to
+     * prevent sending a message while a file is still uploading.
+     * <p>
+     * The default value is {@code false}.
+     *
+     * @param submitDisabled
+     *            {@code true} to disable submitting, {@code false} to enable it
+     * @since 25.4
+     */
+    public void setSubmitDisabled(boolean submitDisabled) {
+        getElement().setProperty("submitDisabled", submitDisabled);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not

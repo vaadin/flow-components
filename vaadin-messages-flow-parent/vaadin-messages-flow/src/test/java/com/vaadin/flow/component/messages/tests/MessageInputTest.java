@@ -73,6 +73,23 @@ class MessageInputTest {
     }
 
     @Test
+    void submitDisabled() {
+        Assertions.assertFalse(messageInput.isSubmitDisabled());
+        Assertions.assertFalse(
+                messageInput.getElement().getProperty("submitDisabled", false));
+
+        messageInput.setSubmitDisabled(true);
+        Assertions.assertTrue(messageInput.isSubmitDisabled());
+        Assertions.assertTrue(
+                messageInput.getElement().getProperty("submitDisabled", false));
+
+        messageInput.setSubmitDisabled(false);
+        Assertions.assertFalse(messageInput.isSubmitDisabled());
+        Assertions.assertFalse(
+                messageInput.getElement().getProperty("submitDisabled", true));
+    }
+
+    @Test
     void implementsHasTooltip() {
         Assertions.assertTrue(messageInput instanceof HasTooltip);
     }
