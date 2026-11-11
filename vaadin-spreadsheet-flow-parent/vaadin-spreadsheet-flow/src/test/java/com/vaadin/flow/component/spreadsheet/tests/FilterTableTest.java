@@ -68,6 +68,29 @@ class FilterTableTest {
     }
 
     @Test
+    void init_selectAllLabelIncludesItemCount() {
+        Assertions.assertEquals("(Select all 4 items)",
+                getSelectAllCheckbox(1).getLabel());
+    }
+
+    @Test
+    void cellValuesChanged_reopenPopup_selectAllLabelUpdatesUniqueItemCount() {
+        spreadsheet.getCell(2, 1).setCellValue(4);
+        spreadsheet.refreshAllCellValues();
+        getPopupButton(1).openPopup();
+
+        Assertions.assertEquals("(Select all 3 items)",
+                getSelectAllCheckbox(1).getLabel());
+
+        spreadsheet.getCell(2, 1).setCellValue(3);
+        spreadsheet.refreshAllCellValues();
+        getPopupButton(1).openPopup();
+
+        Assertions.assertEquals("(Select all 4 items)",
+                getSelectAllCheckbox(1).getLabel());
+    }
+
+    @Test
     void filter_filteredRows_hasFilteredRow() {
         // Filter out row 4
         getFilterCheckboxGroup(1).deselect("4");
@@ -178,6 +201,8 @@ class FilterTableTest {
         Assertions.assertTrue(getFilterCheckboxGroup(1).getValue().isEmpty());
         Assertions.assertEquals(4, getItemFilter(1).getFilteredRows().size());
         Assertions.assertTrue(spreadsheet.isRowHidden(2));
+        Assertions.assertEquals("(Select all 4 items)",
+                getSelectAllCheckbox(1).getLabel());
     }
 
     @Test
@@ -199,6 +224,8 @@ class FilterTableTest {
         getPopupButton(1).openPopup();
 
         Assertions.assertFalse(getSelectAllCheckbox(1).isVisible());
+        Assertions.assertEquals("(Select all 0 items)",
+                getSelectAllCheckbox(1).getLabel());
     }
 
     @Test
@@ -209,6 +236,14 @@ class FilterTableTest {
         getPopupButton(1).openPopup();
 
         Assertions.assertTrue(getSelectAllCheckbox(1).isVisible());
+        Assertions.assertEquals("(Select all 3 items)",
+                getSelectAllCheckbox(1).getLabel());
+
+        getFilterCheckboxGroup(2).select("4");
+        getPopupButton(1).openPopup();
+
+        Assertions.assertEquals("(Select all 4 items)",
+                getSelectAllCheckbox(1).getLabel());
     }
 
     @Test
