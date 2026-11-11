@@ -55,7 +55,7 @@ Report in chat the run details that the summary excludes:
 The outward action is the user's; present it as an `AskUserQuestion` (2–4 options, recommended first), never a prose "want me to post…?":
 
 - **Reproduced:** `Push + post + label` · `Push branch only` · `Report only`.
-- **Not reproduced / fixed / duplicate:** the first option cites everything fix archaeology found — `Post close comment "Duplicate of <repo>#N, fixed by #PR"` (or just the PR / duplicate when only one is known); only when nothing was found offer the generic `Post "Could not reproduce using the latest Vaadin version. Closing as stale."`. Always include `Report only`.
+- **Not reproduced / fixed / duplicate:** the first option cites everything fix archaeology found — `Post close comment "Duplicate of <#N | vaadin/<repo>#N>, fixed by #PR"` (or just the PR / duplicate when only one is known); only when nothing was found offer the generic `Post "Could not reproduce using the latest Vaadin version. Closing as stale."`. Always include `Report only`.
 - **Reproduced but works-as-designed / already tracked by an enhancement:** `Report only` · `Push + post noting it`.
 
 Posting the comment is yours on approval; **closing the issue stays the user's action** unless they explicitly ask.
@@ -81,10 +81,10 @@ gh api repos/vaadin/<repo>/issues/<issue>/comments -F body=@repro-<issue>-summar
 
 Capture the returned `html_url`. Keep the `> [!WARNING]` disclaimer first. Then label (same confirmation): `gh issue edit <issue> --repo vaadin/<repo> --add-label "ai repro"`. The `ai repro` label exists in `vaadin/flow-components`; `vaadin/flow` currently has none — check `gh label list --repo vaadin/<repo> --search "ai repro"` and skip gracefully, noting it in the digest.
 
-**Duplicate:** state it in the comment and recommend closing as a duplicate of #N (link both; note if #N is fixed). Surface the close command and run it only on explicit approval — never close yourself:
+**Duplicate:** state it in the comment and recommend closing as a duplicate of #N, or `vaadin/<repo>#N` in another repository (link both; note if #N is fixed). Surface the close command and run it only on explicit approval — never close yourself:
 
 ```bash
-gh issue close <issue> --repo vaadin/<repo> --reason "not planned" --comment "Duplicate of #N"
+gh issue close <issue> --repo vaadin/<repo> --reason "not planned" --comment "Duplicate of <#N | vaadin/<repo>#N>"
 ```
 
 ## 4. Screenshot embedding + permalinks

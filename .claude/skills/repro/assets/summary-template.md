@@ -1,13 +1,13 @@
-<!-- Posted as the issue comment. Before posting: pick one alternative inside each <… | …>, delete every line and block that does not apply, and delete this comment. Write a reference to another repository as `vaadin/<repo>#N`. -->
+<!-- Committed on the reproduction branch and posted as the issue comment. Before committing: pick one alternative inside each <… | …>, delete every line and block that does not apply, and delete this comment. Write a reference to another repository as `vaadin/<repo>#N`. -->
 
 > [!WARNING]
 > Automated reproduction by the Claude Code `repro` skill. Needs human verification.
 
-**<Reproduced | Partially reproduced | Not reproduced | Works as designed | Duplicate of #N>** on `<branch>` (<version>). <Also reproduced on `main`. | Fixed on `main` by #<PR>.> <Not a regression. | Regression: worked in <ver>, broke in <ver>, introduced by #<PR>. | Regression: worked in <ver>, broke in <ver>. | Regression status unknown.>
+**<Reproduced | Partially reproduced | Not reproduced | Works as designed | Duplicate of <#N | vaadin/<repo>#N>>** on `<branch>` (<version>). <Also reproduced on `main`. | Fixed on `main` by #<PR>.> <Not a regression. | Regression: worked in <ver>, broke in <ver>, introduced by #<PR>. | Regression: worked in <ver>, broke in <ver>. | Regression status unknown.>
 
 <Partially reproduced only: one sentence on which part of the report did not reproduce.>
 
-Same root cause and trigger as #N (<open | closed, fixed by #PR>). Recommend closing this issue as a duplicate.
+Same root cause and trigger as <#N | vaadin/<repo>#N> (<open | closed, fixed by #PR>). Recommend closing this issue as a duplicate.
 
 **Root cause**: <2 to 4 sentences. What the code does, why that breaks, what triggers it. No fix proposal.>
 
