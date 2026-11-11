@@ -267,6 +267,11 @@ public interface DatabaseProvider extends Serializable {
      * cannot follow: the word LIMIT, OFFSET or FETCH outside of quoted
      * identifiers, string literals, comments and parentheses. A query that is
      * in parentheses as a whole is checked inside of them.
+     *
+     * @param sql
+     *            the query to check
+     * @return {@code true} if the query has a row limit of its own,
+     *         {@code false} otherwise
      */
     private static boolean limitsRows(String sql) {
         var bare = sql.replaceAll(
