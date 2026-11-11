@@ -177,13 +177,15 @@ public class GridAIController implements AIController {
 
             @Override
             public void updateData(String gridId, String query) {
-                // Validate eagerly by fetching one row, so an invalid
+                // Validate eagerly by fetching one row and counting the
+                // rows, as the grid does when it renders, so an invalid
                 // query is rejected within the turn. A DatabaseProvider
                 // that throws ToolException gets its message relayed to
                 // the LLM so it can fix the query; any other exception is
                 // replaced with a generic error.
                 databaseProvider.executeQuery(query,
                         new QueryPage(0, 1, List.of()));
+                databaseProvider.count(query);
                 GridEntry.getOrCreate(grid, gridId).setPendingQuery(query);
             }
 
