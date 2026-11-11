@@ -87,7 +87,7 @@ class DatabaseProviderTest {
     @ValueSource(strings = { "SELECT a AS \"Credit Limit\" FROM t",
             "SELECT a AS `Credit Limit` FROM t",
             "SELECT a FROM t WHERE b <> 'offset'",
-            "SELECT a -- the fetch\nFROM t", "SELECT a /* no limit */ FROM t",
+            "SELECT a -- the fetch\nFROM t", "SELECT a /* no\nlimit */ FROM t",
             "SELECT credit_limit FROM t", "SELECT limit2 FROM t",
             "SELECT * FROM (SELECT UPPER(a) FROM t LIMIT 5) AS s ORDER BY 1",
             "(SELECT a FROM t ORDER BY a)",
