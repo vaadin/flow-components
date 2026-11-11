@@ -19,7 +19,6 @@ import java.io.Serializable;
 
 import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.ai.ui.AIInput;
-import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
@@ -47,13 +46,6 @@ class SubmitDisabler implements Serializable {
      * application. Accessed only while the session is locked.
      */
     private boolean disabled;
-    /**
-     * Whether the response of the request that holds the flag has ended. The
-     * request then no longer disables submitting, although it holds the flag
-     * until the stream releases it. Otherwise submitting would be disabled
-     * again after a response listener that ran before the release.
-     */
-    private volatile boolean responseEnded;
     /**
      * The session that the latest prompt was made in. Submitting is updated in
      * the session rather than in the UI of the prompt, as a view with
@@ -92,58 +84,6 @@ class SubmitDisabler implements Serializable {
     }
 
     /**
-     * Marks the response of the request that holds the flag as ended. Must be
-     * called before the response is reported.
-     */
-    void responseEnded() {
-        responseEnded = true;
-    }
-
-    /**
-     * Runs the hooks that report the end of a turn in its UI task. Submitting
-     * is enabled before the hooks, so that a hook can disable it. After the
-     * hooks, submitting is disabled again if a request is being processed or a
-     * file is being uploaded, unless a hook disabled it.
-     *
-     * @param hooks
-     *            the hooks to run
-     */
-    void aroundResponseHooks(Command hooks) {
-        release();
-        try {
-            hooks.execute();
-        } finally {
-            update();
-        }
-    }
-
-    /**
-     * Does the same as {@link #aroundResponseHooks(Command)} for a turn whose
-     * UI was detached, where the thread may not hold the session lock. With
-     * {@code @PreserveOnRefresh} the input lives on in a new UI, where a hook
-     * can disable submitting with {@code ui.access()}. Submitting is updated
-     * after such a task.
-     *
-     * @param hooks
-     *            the hooks to run
-     */
-    void aroundDetachedResponseHooks(Command hooks) {
-        var currentSession = session;
-        if (currentSession != null && currentSession.hasLock()) {
-            release();
-        } else if (currentSession != null) {
-            currentSession.access(this::release);
-        }
-        try {
-            hooks.execute();
-        } finally {
-            if (currentSession != null) {
-                currentSession.access(this::update);
-            }
-        }
-    }
-
-    /**
      * Disables or enables submitting based on the current state. Reads the
      * current state, so that it is correct no matter in which order the updates
      * scheduled by the different threads run. Must be called while the session
@@ -153,25 +93,14 @@ class SubmitDisabler implements Serializable {
         if (input == null) {
             return;
         }
-        var processingRequest = processing.get() && !responseEnded;
         var uploading = uploadReceiver != null
                 && uploadReceiver.isReceivingFiles();
-        if (processingRequest || uploading) {
+        if (processing.get() || uploading) {
             if (!disabled && !input.isSubmitDisabled()) {
                 input.setSubmitDisabled(true);
                 disabled = true;
             }
-        } else {
-            release();
-        }
-    }
-
-    /**
-     * Enables submitting if it was disabled here, regardless of the current
-     * state.
-     */
-    private void release() {
-        if (disabled) {
+        } else if (disabled) {
             input.setSubmitDisabled(false);
             disabled = false;
         }
@@ -186,7 +115,6 @@ class SubmitDisabler implements Serializable {
      */
     private void processingChanged(boolean claimed) {
         if (claimed) {
-            responseEnded = false;
             var promptSession = VaadinSession.getCurrent();
             if (promptSession != null) {
                 session = promptSession;

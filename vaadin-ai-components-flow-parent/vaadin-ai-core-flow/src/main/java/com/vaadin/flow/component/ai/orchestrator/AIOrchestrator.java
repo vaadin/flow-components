@@ -472,8 +472,7 @@ public class AIOrchestrator implements Serializable {
             AtomicReference<ResponseMetadata> metadataHolder) {
         var responseBuilder = new StringBuilder();
         var responseStream = provider.stream(request)
-                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .doOnTerminate(submitDisabler::responseEnded);
+                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS));
         responseStream.doFinally(signal -> {
             isProcessing.set(false);
         }).subscribe(token -> {
@@ -915,12 +914,10 @@ public class AIOrchestrator implements Serializable {
         // contract with and without a controller. accessLater rather than
         // access: its detach handler also covers a UI that detaches after the
         // task is enqueued, and the listener must hear the turn end either way.
-        Command hooks = () -> notifyResponseListener(applyTurn(event));
-        ui.accessLater(() -> submitDisabler.aroundResponseHooks(hooks), () -> {
+        ui.accessLater(() -> notifyResponseListener(applyTurn(event)), () -> {
             LOGGER.debug("Turn ended after its UI was detached; the response "
                     + "listener runs without a session");
-            submitDisabler.aroundDetachedResponseHooks(
-                    () -> notifyResponseListener(event));
+            notifyResponseListener(event);
         }).run();
     }
 
@@ -1312,8 +1309,6 @@ public class AIOrchestrator implements Serializable {
          * is disabled during an upload only when server push or polling is
          * enabled. Submitting that is already disabled stays disabled, and
          * submitting is only enabled again if the orchestrator disabled it.
-         * This happens before the response listener is called, so the listener
-         * can disable submitting.
          *
          * @param input
          *            the input component
@@ -1337,8 +1332,7 @@ public class AIOrchestrator implements Serializable {
          * submitting is disabled during an upload only when server push or
          * polling is enabled. Submitting that is already disabled stays
          * disabled, and submitting is only enabled again if the orchestrator
-         * disabled it. This happens before the response listener is called, so
-         * the listener can disable submitting.
+         * disabled it.
          *
          * @param messageInput
          *            the Flow MessageInput component

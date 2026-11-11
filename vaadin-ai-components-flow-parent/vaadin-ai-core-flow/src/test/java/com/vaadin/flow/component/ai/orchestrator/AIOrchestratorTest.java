@@ -4297,23 +4297,6 @@ class AIOrchestratorTest {
                 .onResponse(Mockito.any());
     }
 
-    @Test
-    void prompt_currentUiDetached_responseListenerGetsError() {
-        var listenerError = new AtomicReference<Throwable>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withResponseListener(event -> listenerError
-                        .set(event.getError().orElse(null)))
-                .build();
-        // A UI that is still current, for example on a thread that kept it,
-        // after it was detached from its session
-        ui.getUI().getInternals().setSession(null);
-
-        var thrown = Assertions.assertThrows(IllegalStateException.class,
-                () -> orchestrator.prompt("Hello"));
-
-        Assertions.assertSame(thrown, listenerError.get());
-    }
-
     private AIOrchestrator orchestratorWith(AIController controller) {
         return AIOrchestrator.builder(mockProvider, null)
                 .withMessageList(mockMessageList).withController(controller)

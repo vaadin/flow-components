@@ -28,7 +28,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -245,75 +244,6 @@ class SubmitDisabledTest {
         });
 
         Assertions.assertFalse(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void responseListenerDisablesSubmit_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withResponseListener(
-                        event -> messageInput.setSubmitDisabled(true))
-                .build();
-        submitFromClient("Hello");
-
-        response.tryEmitComplete();
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void responseListenerDisablesSubmitOnError_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withResponseListener(
-                        event -> messageInput.setSubmitDisabled(true))
-                .build();
-        submitFromClient("Hello");
-
-        response.tryEmitError(new RuntimeException("Failed"));
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void responseListenerDisablesSubmitWhileUploading_submitStaysDisabledAfterUpload() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(uploadManager).withResponseListener(
-                        event -> messageInput.setSubmitDisabled(true))
-                .build();
-        submitFromClient("Hello");
-
-        receiveFile(uploadManagerConnector, response::tryEmitComplete);
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void responseCompletedWhileUploading_responseListener_submitStaysDisabledUntilUploadFinished() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withFileReceiver(uploadManager).withResponseListener(event -> {
-                    // Does not disable submitting
-                }).build();
-        submitFromClient("Hello");
-
-        receiveFile(uploadManagerConnector, () -> {
-            response.tryEmitComplete();
-            Assertions.assertTrue(messageInput.isSubmitDisabled());
-        });
-
-        Assertions.assertFalse(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void responseListener_submitAlreadyEnabled() {
-        var submitDisabledInListener = new AtomicReference<Boolean>();
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withResponseListener(event -> submitDisabledInListener
-                        .set(messageInput.isSubmitDisabled()))
-                .build();
-        submitFromClient("Hello");
-
-        response.tryEmitComplete();
-
-        Assertions.assertFalse(submitDisabledInListener.get());
     }
 
     @Test
@@ -677,67 +607,6 @@ class SubmitDisabledTest {
     }
 
     @Test
-    void preserveOnRefresh_responseListenerDisablesSubmitInInputUI_submitStaysDisabled() {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withResponseListener(event -> messageInput.getUI()
-                        .ifPresent(inputUI -> inputUI.access(
-                                () -> messageInput.setSubmitDisabled(true))))
-                .build();
-        submitFromClient("Hello");
-
-        refreshPreservingInput();
-        response.tryEmitComplete();
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void preserveOnRefresh_refreshedBeforeQueuedResponseTaskRuns_responseListenerDisablesSubmit_submitStaysDisabled() {
-        // The queued task runs with the session locked, so the listener's
-        // accessSynchronously() runs right away
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withResponseListener(event -> messageInput.getUI()
-                        .ifPresent(inputUI -> inputUI.accessSynchronously(
-                                () -> messageInput.setSubmitDisabled(true))))
-                .build();
-        submitFromClient("Hello");
-        var uiTasks = queueUiAccessTasks();
-
-        response.tryEmitComplete();
-        refreshPreservingInput();
-        // Tasks queued while running the tasks run after them
-        for (var i = 0; i < uiTasks.size(); i++) {
-            uiTasks.get(i).execute();
-        }
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void preserveOnRefresh_responseCompletedOnBackgroundThread_responseListenerDisablesSubmit_submitStaysDisabled()
-            throws InterruptedException {
-        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
-                .withResponseListener(event -> messageInput.getUI()
-                        .ifPresent(inputUI -> inputUI.access(
-                                () -> messageInput.setSubmitDisabled(true))))
-                .build();
-        submitFromClient("Hello");
-        refreshPreservingInput();
-        lockSessionInAccessTasks();
-
-        // The stream ends on a thread that does not hold the session lock
-        var streamEnded = new CountDownLatch(1);
-        new Thread(() -> {
-            response.tryEmitComplete();
-            streamEnded.countDown();
-        }).start();
-
-        Assertions.assertTrue(MockSession.awaitUnlocked(ui, streamEnded),
-                "The stream never ended");
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
-    }
-
-    @Test
     void preserveOnRefresh_postponedPromptFailedWhileUploadingAfterRefresh_submitStaysDisabledUntilUploadFinished() {
         var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
         var orchestrator = AIOrchestrator.builder(mockProvider, null)
@@ -754,25 +623,6 @@ class SubmitDisabledTest {
         });
 
         Assertions.assertFalse(messageInput.isSubmitDisabled());
-    }
-
-    @Test
-    void preserveOnRefresh_responseListenerDisablesSubmitAfterPostponedPromptFailed_submitStaysDisabled() {
-        var continuation = new AtomicReference<RequestInterceptor.RequestContinuation>();
-        var orchestrator = AIOrchestrator.builder(mockProvider, null)
-                .withInput(messageInput)
-                .withRequestInterceptor(event -> continuation
-                        .set(event.postpone(Duration.ofMinutes(1))))
-                .withResponseListener(event -> messageInput.getUI()
-                        .ifPresent(inputUI -> inputUI.access(
-                                () -> messageInput.setSubmitDisabled(true))))
-                .build();
-        orchestrator.prompt("Hello");
-
-        refreshPreservingInput();
-        continuation.get().fail(new RuntimeException("Failed"));
-
-        Assertions.assertTrue(messageInput.isSubmitDisabled());
     }
 
     /**
@@ -870,24 +720,6 @@ class SubmitDisabledTest {
             return CompletableFuture.completedFuture(null);
         }).when(ui.getSession()).access(Mockito.any());
         return tasks;
-    }
-
-    /**
-     * Runs the tasks run with {@code VaadinSession.access} with the session
-     * locked, as a real session does, instead of running them on the calling
-     * thread without the lock.
-     */
-    private void lockSessionInAccessTasks() {
-        var session = ui.getSession();
-        Mockito.doAnswer(invocation -> {
-            session.lock();
-            try {
-                invocation.<Command> getArgument(0).execute();
-            } finally {
-                session.unlock();
-            }
-            return CompletableFuture.completedFuture(null);
-        }).when(session).access(Mockito.any());
     }
 
     /**
