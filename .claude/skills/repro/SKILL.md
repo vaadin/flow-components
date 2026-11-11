@@ -41,13 +41,27 @@ The smallest View that exercises the hypothesis, starting from the reporter's ex
 3. **Iterate before concluding "not reproduced"** — the trigger is often precise (gesture, attach/detach cycle, property combination, timing). Record every attempted variation.
 4. Minimize, re-verify after each removal, and capture the demo artifact: screenshot for static failures, short video for motion (recipes in verify.md).
 
-## Phase 4 — Report
+## Phase 4 — Locate the root cause
 
-Fill `assets/summary-template.md` → `<ROOT>/repro-<issue>-summary.md` with **every** field. Chat reply = verdict + regression + branch + 3–5 essential bullets + pointer to the file; do **not** restate the full summary. Details in share.md.
+Run this phase only when the bug reproduced, fully or partially.
 
-## Phase 5 — Locate the root cause
+Point at the suspected cause as a **permalink pinned to a commit SHA** (format in share.md), searching the layer the evidence implicates — component module, connector JS, or Flow core (`<FLOW_CORE>`). If the evidence implicates the underlying web component itself, say so and point at `vaadin/web-components` source (read it at `<WC_ROOT>` when present, otherwise on GitHub) — reproducing there is out of scope.
 
-Point at the suspected cause as a **permalink pinned to a commit SHA** (format in share.md), searching the layer the evidence implicates — component module, connector JS, or Flow core (`<FLOW_CORE>`). If the evidence implicates the underlying web component itself, say so and point at `vaadin/web-components` source (read it at `<WC_ROOT>` when present, otherwise on GitHub) — reproducing there is out of scope. Don't fix the bug unless asked.
+For a regression, also find the PR that introduced it per share.md.
+
+Do not fix the bug, propose a fix, or list fix options unless asked. A suggested fix biases the person who takes the issue.
+
+## Phase 5 — Report
+
+Fill `assets/summary-template.md` → `<ROOT>/repro-<issue>-summary.md`. The summary becomes the issue comment, so keep it to a few lines:
+
+- verdict
+- regression status, with the introducing PR
+- root cause
+
+Put longer evidence in its `<details>` block. Delete each line that has nothing to say.
+
+Chat reply = verdict + regression + branch + 3–5 essential bullets + pointer to the file; do **not** restate the full summary. Details in share.md.
 
 ## Phase 6 — Decide the disposition (always ask)
 
