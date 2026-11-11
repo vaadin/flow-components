@@ -57,7 +57,7 @@ Fill `assets/summary-template.md` → `<ROOT>/repro-<issue>-summary.md`. The sum
 
 - verdict
 - regression status, with the introducing PR
-- root cause
+- root cause, or the reason it did not reproduce
 
 Put longer evidence in its `<details>` block. Delete each line that has nothing to say.
 

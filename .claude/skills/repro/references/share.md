@@ -4,13 +4,14 @@
 
 Copy [`assets/summary-template.md`](../assets/summary-template.md) to `<ROOT>/repro-<issue>-summary.md`. The summary becomes the issue comment, so a maintainer must get the result in a few seconds.
 
-**Visible part**: about 6 lines, in this order.
+**Visible part**: about 6 lines, in this order. Reference another repository's issue or PR as `vaadin/<repo>#N`; a bare `#N` links to this one.
 
 1. The verdict, with the branch and version you observed it on. When you also ran the View on `main`, add that result, and the fixing PR when `main` is fixed.
 2. The regression status: `Not a regression`, `Regression: worked in <ver>, broke in <ver>, introduced by #<PR>` (§5), or `Regression status unknown`. Base it on what you observed, not only on the issue text. When no introducing PR is known, omit that part.
-3. The root cause in 2 to 4 sentences: what the code does, why that breaks, and what triggers it.
-4. The root-cause permalink (§4) on its own line.
-5. The reproduction branch and route.
+3. For a partial reproduction, one sentence on which part of the report did not reproduce.
+4. The root cause in 2 to 4 sentences: what the code does, why that breaks, and what triggers it.
+5. The root-cause permalink (§4) on its own line.
+6. The reproduction branch as pushed (§3, including any `-2` suffix) and the route.
 
 **`<details>` block**: only evidence that the visible part cannot carry. When there is none, delete the block.
 
@@ -29,7 +30,7 @@ Copy [`assets/summary-template.md`](../assets/summary-template.md) to `<ROOT>/re
 - Environment details, the scaffold source, and run instructions. The branch carries them.
 - Dev-server noise. Cite only console output that belongs to the bug.
 
-**Not reproduced or works as designed**: say so plainly, and do not force a positive result. Replace the root cause with the reason:
+**Not reproduced or works as designed**: say so plainly, and do not force a positive result. Use the template's **Reason** line instead of the root cause, with one of:
 
 - fixed on `main`, with the fixing PR from fix archaeology
 - version-specific
