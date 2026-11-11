@@ -1033,12 +1033,10 @@ class GridAIControllerTest {
 
             simulateUpdate("SELECT a FROM t");
             var size = grid.getDataProvider().size(new Query<>());
-            grid.getDataProvider()
-                    .fetch(new Query<>(20, 10,
-                            List.of(new QuerySortOrder("a",
-                                    SortDirection.DESCENDING)),
-                            null, null))
-                    .toList();
+            grid.getDataProvider().fetch(new Query<>(20, 10,
+                    List.of(new QuerySortOrder("a", SortDirection.DESCENDING),
+                            new QuerySortOrder("b", SortDirection.ASCENDING)),
+                    null, null)).toList();
 
             Assertions.assertEquals(7, size);
             Assertions.assertEquals(List.of("SELECT a FROM t"), counts);
@@ -1050,9 +1048,9 @@ class GridAIControllerTest {
             var page = pages.getLast();
             Assertions.assertEquals(20, page.offset());
             Assertions.assertEquals(10, page.limit());
-            Assertions.assertEquals("a", page.sortOrders().get(0).getSorted());
-            Assertions.assertEquals(SortDirection.DESCENDING,
-                    page.sortOrders().get(0).getDirection());
+            Assertions.assertEquals(List.of("a DESCENDING", "b ASCENDING"),
+                    page.sortOrders().stream().map(order -> order.getSorted()
+                            + " " + order.getDirection()).toList());
             Assertions.assertTrue(statements.isEmpty(), statements::toString);
         }
 
