@@ -161,13 +161,13 @@ public interface DatabaseProvider extends Serializable {
 
     /**
      * Executes the given SQL query and returns one page of its rows, for a
-     * component that loads rows lazily. The default wraps the query in
-     * subqueries and runs the result through {@link #executeQuery(String)}:
-     * {@code SELECT * FROM (SELECT * FROM (sql) AS _t ORDER BY "column" ASC)
-     * AS _limited LIMIT limit OFFSET offset}, without the {@code ORDER BY}
-     * level when the page has no sort orders. The sort orders name result
-     * columns of the query, written as quoted identifiers. The query may end in
-     * a semicolon, which is left out, or in a line comment.
+     * component that loads rows lazily. The default wraps the query in a
+     * subquery and runs the result through {@link #executeQuery(String)}:
+     * {@code SELECT * FROM (sql) AS _t ORDER BY "column" ASC LIMIT limit
+     * OFFSET offset}, or {@code SELECT * FROM (sql) AS _limited LIMIT limit
+     * OFFSET offset} when the page has no sort orders. The sort orders name
+     * result columns of the query, written as quoted identifiers. The query may
+     * end in a semicolon, which is left out, or in a line comment.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
      * {@code OFFSET ... FETCH}, or when your provider can page more
@@ -192,7 +192,8 @@ public interface DatabaseProvider extends Serializable {
     default List<Map<String, Object>> executeQuery(String sql, QueryPage page) {
         Objects.requireNonNull(sql, "sql must not be null");
         Objects.requireNonNull(page, "page must not be null");
-        var ordered = asSubquery(sql);
+        var query = asSubquery(sql);
+        var limit = "LIMIT " + page.limit() + " OFFSET " + page.offset();
         if (!page.sortOrders().isEmpty()) {
             var orderBy = page.sortOrders().stream().map(sortOrder -> "\""
                     + sortOrder.getSorted().replace("\"", "\"\"") + "\" "
@@ -200,11 +201,13 @@ public interface DatabaseProvider extends Serializable {
                             ? "DESC"
                             : "ASC"))
                     .collect(Collectors.joining(", "));
-            ordered = "SELECT * FROM (" + ordered + ") AS _t ORDER BY "
-                    + orderBy;
+            // The sort and the limit go on one level, since a SQL engine may
+            // drop an ORDER BY of a sub-query that has no limit
+            return executeQuery("SELECT * FROM (" + query + ") AS _t ORDER BY "
+                    + orderBy + " " + limit);
         }
-        return executeQuery("SELECT * FROM (" + ordered + ") AS _limited LIMIT "
-                + page.limit() + " OFFSET " + page.offset());
+        return executeQuery(
+                "SELECT * FROM (" + query + ") AS _limited " + limit);
     }
 
     /**

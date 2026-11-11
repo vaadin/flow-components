@@ -70,14 +70,25 @@ class DatabaseProviderTest {
     }
 
     @Test
-    void page_withSortOrders_ordersByTheResultColumnsFirst() {
+    void page_withASortOrder_ordersAndLimitsOnOneLevel() {
+        provider.executeQuery(QUERY, new QueryPage(20, 10,
+                List.of(new QuerySortOrder("Name", SortDirection.ASCENDING))));
+
+        Assertions.assertEquals(
+                List.of("SELECT * FROM (" + QUERY
+                        + "\n) AS _t ORDER BY \"Name\" ASC LIMIT 10 OFFSET 20"),
+                provider.statements);
+    }
+
+    @Test
+    void page_withSeveralSortOrders_ordersByThemInTheGivenOrder() {
         provider.executeQuery(QUERY,
                 new QueryPage(0, 50, List.of(
                         new QuerySortOrder("Salary", SortDirection.DESCENDING),
                         new QuerySortOrder("Name", SortDirection.ASCENDING))));
 
-        Assertions.assertEquals(List.of("SELECT * FROM (SELECT * FROM (" + QUERY
-                + "\n) AS _t ORDER BY \"Salary\" DESC, \"Name\" ASC) AS _limited LIMIT 50 OFFSET 0"),
+        Assertions.assertEquals(List.of("SELECT * FROM (" + QUERY
+                + "\n) AS _t ORDER BY \"Salary\" DESC, \"Name\" ASC LIMIT 50 OFFSET 0"),
                 provider.statements);
     }
 
