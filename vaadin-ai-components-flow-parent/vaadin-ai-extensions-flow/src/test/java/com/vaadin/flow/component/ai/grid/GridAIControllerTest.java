@@ -902,20 +902,17 @@ class GridAIControllerTest {
             // First query is the validation in updateData, second is
             // the sample row fetch in renderGrid
             var sampleSql = dbProvider.executedQueries.get(1);
-            Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t\n) AS _limited LIMIT 1 OFFSET 0",
+            Assertions.assertEquals("SELECT a FROM t\nLIMIT 1 OFFSET 0",
                     sampleSql);
         }
 
         @Test
-        void fetch_wrapsQueryAsSubquery() {
+        void fetch_limitsQueryToThePage() {
             grid.getDataProvider()
                     .fetch(new Query<>(20, 10, List.of(), null, null));
 
             var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t\n) AS _limited LIMIT 10 OFFSET 20",
-                    sql);
+            Assertions.assertEquals("SELECT a FROM t\nLIMIT 10 OFFSET 20", sql);
         }
 
         @Test

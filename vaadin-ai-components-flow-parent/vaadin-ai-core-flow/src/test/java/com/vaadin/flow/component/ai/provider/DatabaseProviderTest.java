@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.data.provider.QuerySortOrder;
@@ -60,12 +62,54 @@ class DatabaseProviderTest {
     }
 
     @Test
-    void page_withoutSortOrders_wrapsTheQueryInALimit() {
+    void page_withoutSortOrders_appendsTheLimitToTheQuery() {
         provider.executeQuery(QUERY, new QueryPage(100, 50, List.of()));
 
+        Assertions.assertEquals(List.of(QUERY + "\nLIMIT 50 OFFSET 100"),
+                provider.statements);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { " LIMIT 5", " limit 5", " OFFSET 5 ROWS",
+            " FETCH FIRST 5 ROWS ONLY", " OFFSET 5 ROWS FETCH NEXT 5 ROWS ONLY",
+            // Read without the backslash escape, the last quote opens a
+            // literal that is never closed, and the text after it still counts
+            " WHERE name <> 'O\\'Hara' LIMIT 5" })
+    void page_withoutSortOrders_wrapsAQueryWithALimitOfItsOwn(String ending) {
+        provider.executeQuery(QUERY + ending, FIRST_ROW);
+
         Assertions.assertEquals(
-                List.of("SELECT * FROM (" + QUERY
-                        + "\n) AS _limited LIMIT 50 OFFSET 100"),
+                List.of("SELECT * FROM (" + QUERY + ending
+                        + "\n) AS _limited LIMIT 1 OFFSET 0"),
+                provider.statements);
+    }
+
+    @Test
+    void page_withoutSortOrders_wrapsAQueryWithALimitInASubquery() {
+        var query = "SELECT * FROM (" + QUERY + " LIMIT 5) AS e";
+
+        provider.executeQuery(query, FIRST_ROW);
+
+        Assertions.assertEquals(
+                List.of("SELECT * FROM (" + query
+                        + "\n) AS _limited LIMIT 1 OFFSET 0"),
+                provider.statements);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "SELECT credit AS \"Credit Limit\" FROM accounts",
+            "SELECT credit AS `Credit Limit` FROM accounts",
+            "SELECT name FROM accounts WHERE note <> 'offset'",
+            "SELECT name -- the fetch\nFROM accounts",
+            "SELECT name /* no limit */ FROM accounts",
+            "SELECT credit_limit FROM accounts", "SELECT limit2 FROM accounts",
+            "SELECT name FROM accounts WHERE note <> 'it''s a limit'",
+            "SELECT name AS \"a \"\"limit\"\" b\" FROM accounts" })
+    void page_withoutSortOrders_appendsToAQueryWithLimitOnlyInText(
+            String query) {
+        provider.executeQuery(query, FIRST_ROW);
+
+        Assertions.assertEquals(List.of(query + "\nLIMIT 1 OFFSET 0"),
                 provider.statements);
     }
 
@@ -117,13 +161,12 @@ class DatabaseProviderTest {
         provider.executeQuery(QUERY + " -- everyone", FIRST_ROW);
 
         Assertions.assertEquals(
-                List.of("SELECT * FROM (" + QUERY
-                        + " -- everyone\n) AS _limited LIMIT 1 OFFSET 0"),
+                List.of(QUERY + " -- everyone\nLIMIT 1 OFFSET 0"),
                 provider.statements);
     }
 
     @Test
-    void page_returnsTheRowsOfTheWrappedQuery() {
+    void page_returnsTheRowsOfThePagedQuery() {
         provider.rows = List.of(Map.of("Name", "Ann"));
 
         Assertions.assertEquals(provider.rows,
