@@ -45,9 +45,10 @@ public interface AIInput extends Serializable {
      * <p>
      * The {@link AIOrchestrator} disables submitting while it processes a
      * request, and while a file is being uploaded to a file receiver that is an
-     * {@code Upload} or an {@code UploadManager}. It only enables submitting
-     * again if it disabled it, see {@link #isSubmitDisabled()}. The default
-     * implementation does nothing.
+     * {@code Upload} or an {@code UploadManager}. During an upload, the browser
+     * shows this only when server push or polling is enabled. The orchestrator
+     * only enables submitting again if it disabled it, see
+     * {@link #isSubmitDisabled()}. The default implementation does nothing.
      *
      * @param submitDisabled
      *            {@code true} to disable submitting, {@code false} to enable it

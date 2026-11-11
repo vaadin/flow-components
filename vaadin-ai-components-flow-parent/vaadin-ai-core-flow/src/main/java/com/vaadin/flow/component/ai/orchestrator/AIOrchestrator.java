@@ -213,9 +213,8 @@ public class AIOrchestrator implements Serializable {
      */
     private final ProcessingFlag isProcessing = new ProcessingFlag();
     /**
-     * Disables submitting on the input while a request is being processed or a
-     * file is being uploaded. It is notified when {@link #isProcessing} is
-     * released, so the paths that release the flag do not update the input.
+     * Disables submitting on the input while busy. Notified when
+     * {@link #isProcessing} is released, so the release paths do not call it.
      */
     private final SubmitDisabler submitDisabler = new SubmitDisabler(
             isProcessing);
@@ -1136,11 +1135,9 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * The UI (message list, input, file receiver) is not modified -- those
          * components survive serialization and retain their state
-         * automatically. The only exception is that submitting on the input is
-         * enabled again if the orchestrator disabled it and no file is being
-         * uploaded, since a request that was being processed before
-         * serialization is not continued. When there is an input, call this
-         * method while the session is locked.
+         * automatically. The exception is that submitting is enabled again on
+         * the input if the orchestrator disabled it, so call this method while
+         * the session is locked.
          */
         public void apply() {
             orchestrator.isProcessing.set(false);
@@ -1301,14 +1298,9 @@ public class AIOrchestrator implements Serializable {
         /**
          * Sets the input component.
          * <p>
-         * Submitting is disabled on the input with
-         * {@link AIInput#setSubmitDisabled(boolean)} while a request is being
-         * processed, and while a file is being uploaded to a file receiver set
-         * with {@link #withFileReceiver(UploadManager)} or
-         * {@link #withFileReceiver(Upload)}. The browser shows that submitting
-         * is disabled during an upload only when server push or polling is
-         * enabled. Submitting that is already disabled stays disabled, and
-         * submitting is only enabled again if the orchestrator disabled it.
+         * Submitting is disabled on the input while a request is being
+         * processed or a file is being uploaded, see
+         * {@link AIInput#setSubmitDisabled(boolean)}.
          *
          * @param input
          *            the input component
@@ -1323,16 +1315,9 @@ public class AIOrchestrator implements Serializable {
         /**
          * Sets the input component using a Flow MessageInput component.
          * <p>
-         * Submitting is disabled on the input with
-         * {@link MessageInput#setSubmitDisabled(boolean)} while a request is
-         * being processed, and while a file is being uploaded to a file
-         * receiver set with {@link #withFileReceiver(UploadManager)} or
-         * {@link #withFileReceiver(Upload)}. The user can keep typing
-         * meanwhile, and the typed text is kept. The browser shows that
-         * submitting is disabled during an upload only when server push or
-         * polling is enabled. Submitting that is already disabled stays
-         * disabled, and submitting is only enabled again if the orchestrator
-         * disabled it.
+         * Submitting is disabled on the input while a request is being
+         * processed or a file is being uploaded, see
+         * {@link AIInput#setSubmitDisabled(boolean)}.
          *
          * @param messageInput
          *            the Flow MessageInput component
@@ -1350,8 +1335,6 @@ public class AIOrchestrator implements Serializable {
          * While {@link AIFileReceiver#isUploading()} returns {@code true},
          * prompts from the input and from {@link AIOrchestrator#prompt(String)}
          * are ignored, so that the file is not left out of the prompt.
-         * Submitting is not disabled on the input during the upload, as the
-         * receiver does not notify when the upload finishes.
          *
          * @param fileReceiver
          *            the file receiver
@@ -1369,9 +1352,7 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * While a file is being uploaded, prompts from the input and from
          * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
-         * is not left out of the prompt, and submitting is disabled on the
-         * input. The browser shows that submitting is disabled during the
-         * upload only when server push or polling is enabled.
+         * is not left out of the prompt.
          *
          * @param uploadManager
          *            the Flow UploadManager
@@ -1398,9 +1379,7 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * While a file is being uploaded, prompts from the input and from
          * {@link AIOrchestrator#prompt(String)} are ignored, so that the file
-         * is not left out of the prompt, and submitting is disabled on the
-         * input. The browser shows that submitting is disabled during the
-         * upload only when server push or polling is enabled.
+         * is not left out of the prompt.
          *
          * @param upload
          *            the Flow Upload component
