@@ -82,7 +82,21 @@ public interface QueryLanguage extends Serializable {
      * @return the example query, never {@code null}
      * @throws IllegalArgumentException
      *             if there are no columns or the lists differ in size
+     * @deprecated The tool descriptions are to stop rendering their examples
+     *             through the language. Instead:
+     *             <ul>
+     *             <li>The tool descriptions keep their fixed texts with SQL
+     *             examples and get a second version without any example.</li>
+     *             <li>The type of the provider decides which version the LLM
+     *             sees: the SQL one for a
+     *             {@link com.vaadin.flow.component.ai.provider.DatabaseProvider},
+     *             the one without examples for any other
+     *             {@link com.vaadin.flow.component.ai.provider.QueryableProvider}.</li>
+     *             <li>A language whose queries need examples lists them in
+     *             {@link #getRules()}, as many as it takes.</li>
+     *             </ul>
      */
+    @Deprecated(since = "25.4", forRemoval = true)
     String exampleQuery(String source, List<String> columns,
             List<String> aliases);
 }
