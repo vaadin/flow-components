@@ -340,6 +340,32 @@ class SubmitDisabledTest {
     }
 
     @Test
+    void requestInterceptorRejectsAndDisablesSubmit_submitStaysDisabled() {
+        var orchestrator = AIOrchestrator.builder(mockProvider, null)
+                .withInput(messageInput).withRequestInterceptor(event -> {
+                    event.reject();
+                    messageInput.setSubmitDisabled(true);
+                }).build();
+
+        orchestrator.prompt("Hello");
+
+        Assertions.assertTrue(messageInput.isSubmitDisabled());
+    }
+
+    @Test
+    void requestListenerDisablesSubmit_submitStaysDisabled() {
+        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+                .withRequestListener(
+                        event -> messageInput.setSubmitDisabled(true))
+                .build();
+        submitFromClient("Hello");
+
+        response.tryEmitComplete();
+
+        Assertions.assertTrue(messageInput.isSubmitDisabled());
+    }
+
+    @Test
     void responseReportedAfterNextPromptStarted_submitStaysDisabled() {
         var nextResponse = Sinks.many().unicast()
                 .<String> onBackpressureBuffer();
