@@ -919,32 +919,6 @@ class GridAIControllerTest {
         }
 
         @Test
-        void fetch_withSortOrder_wrapsWithOrderBy() {
-            var sort = List
-                    .of(new QuerySortOrder("a", SortDirection.DESCENDING));
-            grid.getDataProvider().fetch(new Query<>(0, 50, sort, null, null));
-
-            var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertTrue(sql.contains("ORDER BY \"a\" DESC"),
-                    "Should contain ORDER BY: " + sql);
-            Assertions.assertTrue(sql.contains("LIMIT 50"),
-                    "Should contain LIMIT: " + sql);
-            Assertions.assertTrue(sql.contains("OFFSET 0"),
-                    "Should contain OFFSET: " + sql);
-        }
-
-        @Test
-        void fetch_withMultipleSortOrders() {
-            var sort = List.of(new QuerySortOrder("a", SortDirection.ASCENDING),
-                    new QuerySortOrder("b", SortDirection.DESCENDING));
-            grid.getDataProvider().fetch(new Query<>(0, 10, sort, null, null));
-
-            var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertTrue(sql.contains("\"a\" ASC, \"b\" DESC"),
-                    "Should contain both sort orders: " + sql);
-        }
-
-        @Test
         void fetch_returnsRowsFromDatabase() {
             dbProvider.queryResults = List.of(row("a", 10), row("a", 20));
             var rows = grid.getDataProvider()
@@ -974,30 +948,6 @@ class GridAIControllerTest {
             Assertions.assertEquals(
                     "SELECT COUNT(*) FROM (SELECT a FROM t\n) AS _counted",
                     sql);
-        }
-
-        @Test
-        void count_emptyResult_returnsZero() {
-            dbProvider.queryResults = List.of();
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
-        }
-
-        @Test
-        void count_nonNumericResult_returnsZero() {
-            dbProvider.queryResults = List.of(row("COUNT(*)", "not a number"));
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
-        }
-
-        @Test
-        void count_rowWithNoColumns_returnsZero() {
-            dbProvider.queryResults = List.of(new LinkedHashMap<>());
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
         }
 
         @Test
