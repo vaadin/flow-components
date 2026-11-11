@@ -11,6 +11,8 @@ package com.vaadin.flow.component.richtexteditor;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -23,10 +25,13 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.JsonConstants;
 
 import elemental.json.JsonArray;
 
@@ -219,6 +224,65 @@ public class RichTextEditorTest {
     }
 
     @Test
+    public void deltaValueNotSynchronizedByDefault() {
+        RichTextEditor rte = new RichTextEditor();
+
+        Assert.assertTrue(
+                getSynchronizedProperties(rte, "change").contains("htmlValue"));
+        Assert.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+        Assert.assertFalse(getSynchronizedProperties(rte, "value-changed")
+                .contains("value"));
+    }
+
+    @Test
+    public void asDelta_deltaValueSynchronizedWithHtmlValue() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.asDelta();
+
+        Assert.assertTrue(getSynchronizedProperties(rte, "change")
+                .containsAll(Set.of("htmlValue", "value")));
+        Assert.assertFalse(getSynchronizedProperties(rte, "value-changed")
+                .contains("value"));
+    }
+
+    @Test
+    public void setValueChangeMode_asDelta_deltaValueSynchronizedWithHtmlValue() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setValueChangeMode(ValueChangeMode.ON_BLUR);
+        rte.asDelta();
+
+        Assert.assertTrue(getSynchronizedProperties(rte, "blur")
+                .containsAll(Set.of("htmlValue", "value")));
+        Assert.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+    }
+
+    @Test
+    public void asDelta_setValueChangeMode_deltaValueSynchronizedWithHtmlValue() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.asDelta();
+        rte.setValueChangeMode(ValueChangeMode.EAGER);
+
+        Assert.assertTrue(getSynchronizedProperties(rte, "html-value-changed")
+                .containsAll(Set.of("htmlValue", "value")));
+        Assert.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+    }
+
+    @Test
+    public void asDelta_setValueChangeModeNull_noSynchronization() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.asDelta();
+        rte.setValueChangeMode(null);
+
+        Assert.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("value"));
+        Assert.assertFalse(
+                getSynchronizedProperties(rte, "change").contains("htmlValue"));
+    }
+
+    @Test
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-rich-text-editor");
 
@@ -258,5 +322,16 @@ public class RichTextEditorTest {
                 List.of("#000000", "#0066cc", "#008a00", "#e60000"));
         List<String> options = rte.getColorOptions();
         Assert.assertEquals(4, options.size());
+    }
+
+    private static Set<String> getSynchronizedProperties(RichTextEditor rte,
+            String eventType) {
+        return rte.getElement().getNode().getFeature(ElementListenerMap.class)
+                .getExpressions(eventType).stream()
+                .filter(expression -> expression
+                        .startsWith(JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN))
+                .map(expression -> expression.substring(
+                        JsonConstants.SYNCHRONIZE_PROPERTY_TOKEN.length()))
+                .collect(Collectors.toSet());
     }
 }
