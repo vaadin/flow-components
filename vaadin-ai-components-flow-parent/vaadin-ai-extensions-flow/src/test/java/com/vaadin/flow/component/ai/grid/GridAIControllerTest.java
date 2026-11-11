@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.ai.AITurnEvents;
+import com.vaadin.flow.component.ai.common.QueryPage;
 import com.vaadin.flow.component.ai.provider.DatabaseProvider;
 import com.vaadin.flow.component.ai.provider.LLMProvider;
 import com.vaadin.flow.component.ai.provider.ToolException;
@@ -902,7 +903,7 @@ class GridAIControllerTest {
             // the sample row fetch in renderGrid
             var sampleSql = dbProvider.executedQueries.get(1);
             Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 1",
+                    "SELECT * FROM (SELECT a FROM t\n) AS _limited LIMIT 1 OFFSET 0",
                     sampleSql);
         }
 
@@ -913,34 +914,8 @@ class GridAIControllerTest {
 
             var sql = dbProvider.executedQueries.getFirst();
             Assertions.assertEquals(
-                    "SELECT * FROM (SELECT a FROM t) AS _limited LIMIT 10 OFFSET 20",
+                    "SELECT * FROM (SELECT a FROM t\n) AS _limited LIMIT 10 OFFSET 20",
                     sql);
-        }
-
-        @Test
-        void fetch_withSortOrder_wrapsWithOrderBy() {
-            var sort = List
-                    .of(new QuerySortOrder("a", SortDirection.DESCENDING));
-            grid.getDataProvider().fetch(new Query<>(0, 50, sort, null, null));
-
-            var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertTrue(sql.contains("ORDER BY \"a\" DESC"),
-                    "Should contain ORDER BY: " + sql);
-            Assertions.assertTrue(sql.contains("LIMIT 50"),
-                    "Should contain LIMIT: " + sql);
-            Assertions.assertTrue(sql.contains("OFFSET 0"),
-                    "Should contain OFFSET: " + sql);
-        }
-
-        @Test
-        void fetch_withMultipleSortOrders() {
-            var sort = List.of(new QuerySortOrder("a", SortDirection.ASCENDING),
-                    new QuerySortOrder("b", SortDirection.DESCENDING));
-            grid.getDataProvider().fetch(new Query<>(0, 10, sort, null, null));
-
-            var sql = dbProvider.executedQueries.getFirst();
-            Assertions.assertTrue(sql.contains("\"a\" ASC, \"b\" DESC"),
-                    "Should contain both sort orders: " + sql);
         }
 
         @Test
@@ -955,6 +930,15 @@ class GridAIControllerTest {
         }
 
         @Test
+        void fetch_withZeroLimit_returnsNoRowsWithoutQuerying() {
+            var rows = grid.getDataProvider()
+                    .fetch(new Query<>(0, 0, List.of(), null, null)).toList();
+
+            Assertions.assertTrue(rows.isEmpty());
+            Assertions.assertTrue(dbProvider.executedQueries.isEmpty());
+        }
+
+        @Test
         void count_wrapsQueryWithCount() {
             dbProvider.queryResults = List.of(row("COUNT(*)", 42));
             var size = grid.getDataProvider().size(new Query<>());
@@ -962,31 +946,62 @@ class GridAIControllerTest {
             Assertions.assertEquals(42, size);
             var sql = dbProvider.executedQueries.getFirst();
             Assertions.assertEquals(
-                    "SELECT COUNT(*) FROM (SELECT a FROM t) AS _counted", sql);
+                    "SELECT COUNT(*) FROM (SELECT a FROM t\n) AS _counted",
+                    sql);
         }
 
         @Test
-        void count_emptyResult_returnsZero() {
-            dbProvider.queryResults = List.of();
+        void providerWithItsOwnPaging_receivesPagesAndCountsInsteadOfSql() {
+            var statements = new ArrayList<String>();
+            var pages = new ArrayList<QueryPage>();
+            var counts = new ArrayList<String>();
+            controller = new GridAIController(grid, new DatabaseProvider() {
+                @Override
+                public String getSchema() {
+                    return "test schema";
+                }
+
+                @Override
+                public List<Map<String, Object>> executeQuery(String sql) {
+                    statements.add(sql);
+                    return List.of();
+                }
+
+                @Override
+                public List<Map<String, Object>> executeQuery(String sql,
+                        QueryPage page) {
+                    pages.add(page);
+                    return List.of(row("a", 1));
+                }
+
+                @Override
+                public int count(String sql) {
+                    counts.add(sql);
+                    return 7;
+                }
+            });
+
+            simulateUpdate("SELECT a FROM t");
             var size = grid.getDataProvider().size(new Query<>());
+            grid.getDataProvider().fetch(new Query<>(20, 10,
+                    List.of(new QuerySortOrder("a", SortDirection.DESCENDING),
+                            new QuerySortOrder("b", SortDirection.ASCENDING)),
+                    null, null)).toList();
 
-            Assertions.assertEquals(0, size);
-        }
-
-        @Test
-        void count_nonNumericResult_returnsZero() {
-            dbProvider.queryResults = List.of(row("COUNT(*)", "not a number"));
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
-        }
-
-        @Test
-        void count_rowWithNoColumns_returnsZero() {
-            dbProvider.queryResults = List.of(new LinkedHashMap<>());
-            var size = grid.getDataProvider().size(new Query<>());
-
-            Assertions.assertEquals(0, size);
+            Assertions.assertEquals(7, size);
+            Assertions.assertEquals(List.of("SELECT a FROM t"), counts);
+            // The validation in updateData and the sample row in renderGrid
+            Assertions.assertEquals(
+                    List.of(new QueryPage(0, 1, List.of()),
+                            new QueryPage(0, 1, List.of())),
+                    pages.subList(0, 2));
+            var page = pages.getLast();
+            Assertions.assertEquals(20, page.offset());
+            Assertions.assertEquals(10, page.limit());
+            Assertions.assertEquals(List.of("a DESCENDING", "b ASCENDING"),
+                    page.sortOrders().stream().map(order -> order.getSorted()
+                            + " " + order.getDirection()).toList());
+            Assertions.assertTrue(statements.isEmpty(), statements::toString);
         }
 
         @Test
