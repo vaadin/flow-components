@@ -204,7 +204,7 @@ public interface DatabaseProvider extends Serializable {
                     .collect(Collectors.joining(", "));
             ordered = "SELECT * FROM (" + ordered + ") AS _t ORDER BY "
                     + orderBy + " ";
-        } else if (limitsRows(ordered)) {
+        } else if (QueryLimitCheck.limitsRows(ordered)) {
             ordered = "SELECT * FROM (" + ordered + ") AS _limited ";
         }
         return executeQuery(
@@ -260,30 +260,5 @@ public interface DatabaseProvider extends Serializable {
             end--;
         }
         return sql.substring(0, end) + "\n";
-    }
-
-    /**
-     * Returns whether the given query has a row limit of its own, which a limit
-     * cannot follow: the word LIMIT, OFFSET or FETCH outside of quoted
-     * identifiers, string literals, comments and parentheses. A query that is
-     * in parentheses as a whole is checked inside of them.
-     *
-     * @param sql
-     *            the query to check
-     * @return {@code true} if the query has a row limit of its own,
-     *         {@code false} otherwise
-     */
-    private static boolean limitsRows(String sql) {
-        var bare = sql.replaceAll(
-                "'[^']*'|\"[^\"]*\"|`[^`]*`|--.*|(?s:/\\*.*?\\*/)", " ");
-        var outer = bare;
-        String previous;
-        do {
-            // Each round leaves out the innermost parentheses
-            previous = outer;
-            outer = outer.replaceAll("\\([^()]*\\)", " ");
-        } while (!outer.equals(previous));
-        return (outer.isBlank() ? bare : outer)
-                .matches("(?is).*\\b(limit|offset|fetch)\\b.*");
     }
 }
