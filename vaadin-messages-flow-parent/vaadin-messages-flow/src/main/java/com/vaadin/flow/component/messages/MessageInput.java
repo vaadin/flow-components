@@ -20,6 +20,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
@@ -127,9 +128,14 @@ public class MessageInput extends Component
      * input field, which can be obtained with {@link SubmitEvent#getValue()}.
      * <p>
      * The event is fired when clicking the Send button or pressing the Enter
-     * key. The event is not fired while submitting is disabled with
+     * key. The listener is not called while submitting is disabled with
      * {@link #setSubmitDisabled(boolean)}. If a listener disables submitting,
      * the remaining listeners still receive the current event.
+     * <p>
+     * This applies only to listeners added with this method. A listener that is
+     * registered for {@link SubmitEvent} in another way, for example with
+     * {@link ComponentUtil#addListener}, is still called if the client sends a
+     * submit while submitting is disabled.
      *
      * @param listener
      *            the listener
@@ -161,6 +167,10 @@ public class MessageInput extends Component
      * message. Unlike {@link #setEnabled(boolean)}, you can still type in the
      * input field, and the typed text is kept. Use this, for example, to
      * prevent sending a message while a file is still uploading.
+     * <p>
+     * The server also ignores a submit that the client sends while submitting
+     * is disabled, but only for listeners added with
+     * {@link #addSubmitListener(ComponentEventListener)}.
      * <p>
      * The default value is {@code false}.
      *
