@@ -156,6 +156,7 @@ public class MessageInput extends Component
      *
      * @return {@code true} if submitting is disabled, {@code false} otherwise
      * @see #setSubmitDisabled(boolean)
+     * @since 25.4
      */
     public boolean isSubmitDisabled() {
         return getElement().getProperty("submitDisabled", false);
@@ -176,6 +177,7 @@ public class MessageInput extends Component
      *
      * @param submitDisabled
      *            {@code true} to disable submitting, {@code false} to enable it
+     * @since 25.4
      */
     public void setSubmitDisabled(boolean submitDisabled) {
         getElement().setProperty("submitDisabled", submitDisabled);
