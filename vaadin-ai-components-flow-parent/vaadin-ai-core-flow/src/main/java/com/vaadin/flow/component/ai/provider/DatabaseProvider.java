@@ -36,13 +36,13 @@ import com.vaadin.flow.data.provider.SortDirection;
  * <p>
  * A component that loads rows lazily, such as a grid, asks for one page of a
  * query's rows at a time with {@link #executeQuery(String, QueryPage)} and for
- * the size of the result with {@link #count(String)}. By default both add
- * {@code ORDER BY}, {@code LIMIT} and {@code OFFSET}, or {@code COUNT(*)}, to
- * the query and run the result through {@link #executeQuery(String)}. Override
- * them when your SQL dialect pages or counts differently, or when your provider
- * can do it more efficiently. A provider that delegates to another provider
- * should delegate these methods too, so that the other provider's own paging is
- * used.
+ * the size of the result with {@link #count(String)}. By default both extend
+ * the query's SQL with {@code ORDER BY}, {@code LIMIT} and {@code OFFSET}, or
+ * with {@code COUNT(*)}, and run it through {@link #executeQuery(String)}.
+ * Override them when your SQL dialect pages or counts differently, or when your
+ * provider can do it more efficiently. A provider that delegates to another
+ * provider should delegate these methods too, so that the other provider's own
+ * paging is used.
  * </p>
  * <p>
  * <b>Note:</b> For security, the implementation should use a database account
@@ -161,23 +161,14 @@ public interface DatabaseProvider extends Serializable {
 
     /**
      * Executes the given SQL query and returns one page of its rows, for a
-     * component that loads rows lazily. The default builds one of the following
-     * statements and runs it through {@link #executeQuery(String)}:
-     * <ul>
-     * <li>With sort orders, {@code SELECT * FROM (sql) AS _t ORDER BY "column"
-     * ASC LIMIT limit OFFSET offset}. The sort orders name result columns of
-     * the query, written as quoted identifiers.</li>
-     * <li>Without sort orders, the query followed by
-     * {@code LIMIT limit OFFSET offset}, so that the rows keep the order of an
-     * {@code ORDER BY} in the query.</li>
-     * <li>Without sort orders, when the query has a row limit of its own,
-     * {@code SELECT * FROM (sql) AS _limited LIMIT limit OFFSET offset}. The
-     * query has a row limit of its own when the word {@code LIMIT},
-     * {@code OFFSET} or {@code FETCH} appears in it, in any letter case,
-     * outside of quoted identifiers, string literals and comments.</li>
-     * </ul>
-     * The query may end in a semicolon, which is left out, or in a line
-     * comment.
+     * component that loads rows lazily. The default runs {@code SELECT * FROM
+     * (sql) AS _t ORDER BY "column" ASC LIMIT limit OFFSET offset} through
+     * {@link #executeQuery(String)}. Without sort orders, it runs the query
+     * followed by {@code LIMIT limit OFFSET offset}, or {@code SELECT * FROM
+     * (sql) AS _limited LIMIT limit OFFSET offset} when the query has a
+     * {@code LIMIT}, {@code OFFSET} or {@code FETCH}. The sort orders name
+     * result columns of the query, written as quoted identifiers. The query may
+     * end in a semicolon, which is left out, or in a line comment.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
      * {@code OFFSET ... FETCH}, or when your provider can page more
@@ -202,8 +193,7 @@ public interface DatabaseProvider extends Serializable {
     default List<Map<String, Object>> executeQuery(String sql, QueryPage page) {
         Objects.requireNonNull(sql, "sql must not be null");
         Objects.requireNonNull(page, "page must not be null");
-        var query = asOpenQuery(sql);
-        var limit = "LIMIT " + page.limit() + " OFFSET " + page.offset();
+        var ordered = asSubquery(sql);
         if (!page.sortOrders().isEmpty()) {
             var orderBy = page.sortOrders().stream().map(sortOrder -> "\""
                     + sortOrder.getSorted().replace("\"", "\"\"") + "\" "
@@ -211,18 +201,13 @@ public interface DatabaseProvider extends Serializable {
                             ? "DESC"
                             : "ASC"))
                     .collect(Collectors.joining(", "));
-            // The sort and the limit go on one level, since a SQL engine may
-            // drop an ORDER BY of a sub-query that has no limit
-            return executeQuery("SELECT * FROM (" + query + ") AS _t ORDER BY "
-                    + orderBy + " " + limit);
+            ordered = "SELECT * FROM (" + ordered + ") AS _t ORDER BY "
+                    + orderBy + " ";
+        } else if (limitsRows(ordered)) {
+            ordered = "SELECT * FROM (" + ordered + ") AS _limited ";
         }
-        if (limitsRows(query)) {
-            // A sub-query with a limit keeps its rows and their order
-            return executeQuery(
-                    "SELECT * FROM (" + query + ") AS _limited " + limit);
-        }
-        // Appending keeps an ORDER BY of the query on the top level
-        return executeQuery(query + limit);
+        return executeQuery(
+                ordered + "LIMIT " + page.limit() + " OFFSET " + page.offset());
     }
 
     /**
@@ -254,7 +239,7 @@ public interface DatabaseProvider extends Serializable {
     default int count(String sql) {
         Objects.requireNonNull(sql, "sql must not be null");
         var result = executeQuery(
-                "SELECT COUNT(*) FROM (" + asOpenQuery(sql) + ") AS _counted");
+                "SELECT COUNT(*) FROM (" + asSubquery(sql) + ") AS _counted");
         if (result.isEmpty() || result.getFirst().isEmpty()) {
             return 0;
         }
@@ -263,12 +248,11 @@ public interface DatabaseProvider extends Serializable {
     }
 
     /**
-     * Returns the given query in a form that more SQL can follow, either a
-     * clause or the closing parenthesis of a sub-query: without semicolons and
-     * whitespace at its end, and with a line break that keeps a line comment
-     * that ends the query from reaching the SQL that follows.
+     * Returns the given query as it is written between the parentheses of a
+     * subquery. The line break at its end keeps a line comment that ends the
+     * query from reaching the closing parenthesis.
      */
-    private static String asOpenQuery(String sql) {
+    private static String asSubquery(String sql) {
         var end = sql.length();
         while (end > 0 && (sql.charAt(end - 1) == ';'
                 || Character.isWhitespace(sql.charAt(end - 1)))) {
@@ -278,64 +262,14 @@ public interface DatabaseProvider extends Serializable {
     }
 
     /**
-     * Returns whether the word {@code LIMIT}, {@code OFFSET} or {@code FETCH}
-     * appears in the given query outside of quoted identifiers, string literals
-     * and comments. This is a text check, which also finds a limit of a
-     * sub-query in the query. Appending a limit to a query that has one is an
-     * error, while wrapping it is not, so a doubtful case counts as a limit.
+     * Returns whether the given query has a row limit of its own, which a limit
+     * cannot follow: the word LIMIT, OFFSET or FETCH outside of quoted
+     * identifiers, string literals and comments.
      */
     private static boolean limitsRows(String sql) {
-        var start = 0;
-        while (start < sql.length()) {
-            var end = tokenEnd(sql, start);
-            var token = sql.substring(start, end);
-            if (token.equalsIgnoreCase("LIMIT")
-                    || token.equalsIgnoreCase("OFFSET")
-                    || token.equalsIgnoreCase("FETCH")) {
-                return true;
-            }
-            start = end;
-        }
-        return false;
-    }
-
-    /**
-     * Returns the end of the token that starts at the given index: a quoted
-     * identifier, a string literal, a comment, a word, or any other single
-     * character. An escaped quote, written as two quotes, ends a quoted token
-     * and starts the next one right away, so it needs no handling of its own.
-     */
-    private static int tokenEnd(String sql, int start) {
-        var first = sql.charAt(start);
-        if (first == '"' || first == '\'' || first == '`') {
-            return indexAfter(sql, String.valueOf(first), start + 1);
-        }
-        if (sql.startsWith("--", start)) {
-            return indexAfter(sql, "\n", start + 2);
-        }
-        if (sql.startsWith("/*", start)) {
-            return indexAfter(sql, "*/", start + 2);
-        }
-        var end = start + 1;
-        if (isWordPart(first)) {
-            while (end < sql.length() && isWordPart(sql.charAt(end))) {
-                end++;
-            }
-        }
-        return end;
-    }
-
-    /**
-     * Returns the index after the next occurrence of the given text from the
-     * given index on. When the text does not occur, returns the given index, so
-     * that the text after an unclosed quote or comment is still checked.
-     */
-    private static int indexAfter(String sql, String text, int from) {
-        var index = sql.indexOf(text, from);
-        return index < 0 ? from : index + text.length();
-    }
-
-    private static boolean isWordPart(char character) {
-        return Character.isLetterOrDigit(character) || character == '_';
+        return sql
+                .replaceAll("'[^']*'|\"[^\"]*\"|`[^`]*`|--.*|(?s:/\\*.*?\\*/)",
+                        " ")
+                .matches("(?is).*\\b(limit|offset|fetch)\\b.*");
     }
 }
