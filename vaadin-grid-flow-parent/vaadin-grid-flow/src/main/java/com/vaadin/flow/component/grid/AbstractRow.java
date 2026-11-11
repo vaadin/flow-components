@@ -388,7 +388,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         layer.addColumn(cellInsertIndex, group);
 
         layer.getColumns().removeAll(columnsToJoin);
-        CELL keeper = this.cells.get(elementInsertIndex);
+        CELL keeper = this.cells.get(cellInsertIndex);
         this.cells.removeAll(
                 cellsToJoin.stream().filter(cell -> cell != keeper).toList());
 
