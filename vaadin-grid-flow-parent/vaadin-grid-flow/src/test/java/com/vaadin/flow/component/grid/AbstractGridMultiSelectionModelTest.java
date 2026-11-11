@@ -329,6 +329,67 @@ class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    void refreshAll_updatesSelectAllCheckboxState() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        List<String> items = new java.util.ArrayList<>(List.of("foo", "bar"));
+        grid.setItems(items);
+
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // Select all existing items
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+
+        // Add a new item and refresh the data provider
+        items.add("baz");
+        grid.getDataProvider().refreshAll();
+
+        // Checkbox should reflect that only 2 of the 3 items are selected
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+    }
+
+    @Test
+    void refreshAll_whenGridBecomesEmpty_updatesSelectAllCheckboxState() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        List<String> items = new java.util.ArrayList<>(List.of("foo"));
+        grid.setItems(items);
+
+        GridMultiSelectionModel<String> selectionModel =
+                (GridMultiSelectionModel<String>) grid.getSelectionModel();
+
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        // Select the only existing item
+        selectionModel.select("foo");
+
+        Assertions.assertTrue(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+
+        // Remove the selected item and refresh the data provider
+        items.removeAll(selectionModel.getSelectedItems());
+        grid.getDataProvider().refreshAll();
+
+        // Clear the selection after refreshing
+        grid.asMultiSelect().setValue(java.util.Set.of());
+
+        // An empty grid must not show the Select All checkbox as checked
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("selectAll"));
+        Assertions.assertFalse(
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
+    }
+
+    @Test
     void selectAll_updatesCheckboxStates() {
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setItems("foo", "bar");

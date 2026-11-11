@@ -1918,6 +1918,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 && !(getSelectionModel() instanceof GridNoneSelectionModel)) {
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
         }
+        if (getSelectionModel() instanceof AbstractGridMultiSelectionModel<T> model) {
+            model.updateSelectAllCheckboxState();
+        }
     }
 
     protected void initConnector() {

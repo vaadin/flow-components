@@ -531,12 +531,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, userOriginated));
 
-        long size = getDataProviderSize();
-        selectionColumn.setSelectAllCheckboxState(
-                !isHierarchicalDataProvider() && size == selected.size());
-        selectionColumn.setSelectAllCheckboxIndeterminateState(
-                isHierarchicalDataProvider() ? selected.size() > 0
-                        : selected.size() > 0 && selected.size() < size);
+        updateSelectAllCheckboxState();
     }
 
     private Map<Object, T> mapItemsById(Set<T> items) {
@@ -571,6 +566,18 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private Object getItemId(T item) {
         return getGrid().getItemId(item);
+    }
+
+    void updateSelectAllCheckboxState() {
+        long size = getDataProviderSize();
+
+        selectionColumn.setSelectAllCheckboxState(
+                !isHierarchicalDataProvider() && size > 0
+                        && size == selected.size());
+
+        selectionColumn.setSelectAllCheckboxIndeterminateState(
+                isHierarchicalDataProvider() ? selected.size() > 0
+                        : selected.size() > 0 && selected.size() < size);
     }
 
     private long getDataProviderSize() {
