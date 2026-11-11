@@ -72,7 +72,8 @@ class DatabaseProviderTest {
     @ParameterizedTest
     @ValueSource(strings = { QUERY + " LIMIT 5", QUERY + " limit 5",
             QUERY + " OFFSET 5 ROWS", QUERY + " FETCH FIRST 5 ROWS ONLY",
-            "SELECT * FROM (" + QUERY + " LIMIT 5) AS e" })
+            "SELECT a FROM (SELECT a FROM t) AS s LIMIT 5",
+            "(" + QUERY + " LIMIT 5)" })
     void page_withoutSortOrders_wrapsAQueryWithALimit(String query) {
         provider.executeQuery(query, FIRST_ROW);
 
@@ -88,9 +89,11 @@ class DatabaseProviderTest {
             "SELECT a FROM t WHERE b <> 'offset'",
             "SELECT a -- the fetch\nFROM t", "SELECT a /* no limit */ FROM t",
             "SELECT credit_limit FROM t", "SELECT limit2 FROM t",
+            "SELECT * FROM (SELECT UPPER(a) FROM t LIMIT 5) AS s ORDER BY 1",
+            "(SELECT a FROM t ORDER BY a)",
             "SELECT a FROM t WHERE b <> 'it''s a limit'",
             "SELECT a AS \"a \"\"limit\"\" b\" FROM t" })
-    void page_withoutSortOrders_appendsWhenOnlyTextNamesALimit(String query) {
+    void page_withoutSortOrders_appendsWithoutALimitOfItsOwn(String query) {
         provider.executeQuery(query, FIRST_ROW);
 
         Assertions.assertEquals(List.of(query + "\nLIMIT 1 OFFSET 0"),

@@ -166,9 +166,10 @@ public interface DatabaseProvider extends Serializable {
      * {@link #executeQuery(String)}. Without sort orders, it runs the query
      * followed by {@code LIMIT limit OFFSET offset}, or {@code SELECT * FROM
      * (sql) AS _limited LIMIT limit OFFSET offset} when the query has a
-     * {@code LIMIT}, {@code OFFSET} or {@code FETCH}. The sort orders name
-     * result columns of the query, written as quoted identifiers. The query may
-     * end in a semicolon, which is left out, or in a line comment.
+     * {@code LIMIT}, {@code OFFSET} or {@code FETCH} of its own. The sort
+     * orders name result columns of the query, written as quoted identifiers.
+     * The query may end in a semicolon, which is left out, or in a line
+     * comment.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
      * {@code OFFSET ... FETCH}, or when your provider can page more
@@ -264,12 +265,20 @@ public interface DatabaseProvider extends Serializable {
     /**
      * Returns whether the given query has a row limit of its own, which a limit
      * cannot follow: the word LIMIT, OFFSET or FETCH outside of quoted
-     * identifiers, string literals and comments.
+     * identifiers, string literals, comments and parentheses. A query that is
+     * in parentheses as a whole is checked inside of them.
      */
     private static boolean limitsRows(String sql) {
-        return sql
-                .replaceAll("'[^']*'|\"[^\"]*\"|`[^`]*`|--.*|(?s:/\\*.*?\\*/)",
-                        " ")
+        var bare = sql.replaceAll(
+                "'[^']*'|\"[^\"]*\"|`[^`]*`|--.*|(?s:/\\*.*?\\*/)", " ");
+        var outer = bare;
+        String previous;
+        do {
+            // Each round leaves out the innermost parentheses
+            previous = outer;
+            outer = outer.replaceAll("\\([^()]*\\)", " ");
+        } while (!outer.equals(previous));
+        return (outer.isBlank() ? bare : outer)
                 .matches("(?is).*\\b(limit|offset|fetch)\\b.*");
     }
 }
