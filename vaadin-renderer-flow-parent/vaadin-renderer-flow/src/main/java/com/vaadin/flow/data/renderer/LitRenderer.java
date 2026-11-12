@@ -28,7 +28,8 @@ import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.trigger.ClientAction;
+import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.SinkTrigger;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -81,7 +82,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     // Ordered: the client receives the action names and the rendered action
     // functions as two positionally matched lists.
-    private final Map<String, ClientAction> clientActions = new LinkedHashMap<>();
+    private final Map<String, Action> clientActions = new LinkedHashMap<>();
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
@@ -230,11 +231,14 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // the user gesture still valid. The rows the renderer draws need no
         // server-side component of their own to fire it.
         List<JsFunction> actionFunctions = new ArrayList<>();
-        clientActions.forEach((name, action) -> registrations
-                .add(action.bindTo(container, actionFunction -> {
-                    actionFunctions.add(actionFunction);
-                    return () -> actionFunctions.remove(actionFunction);
-                })));
+        clientActions.forEach((name, action) -> {
+            SinkTrigger trigger = new SinkTrigger(container, actionFunction -> {
+                actionFunctions.add(actionFunction);
+                return () -> actionFunctions.remove(actionFunction);
+            });
+            trigger.triggers(action);
+            registrations.add(trigger::remove);
+        });
         JsFunction clientActionFunctions = packClientActions(actionFunctions);
 
         // Since the renderer is set manually on the client-side, an attach
@@ -461,8 +465,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      *            the action to run on the client, not <code>null</code>
      * @return this instance for method chaining
      */
-    public LitRenderer<SOURCE> withClientAction(String name,
-            ClientAction action) {
+    public LitRenderer<SOURCE> withClientAction(String name, Action action) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(action);
 
