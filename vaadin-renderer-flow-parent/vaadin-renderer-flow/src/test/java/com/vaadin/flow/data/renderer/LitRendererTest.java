@@ -16,6 +16,7 @@
 package com.vaadin.flow.data.renderer;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -106,18 +107,17 @@ class LitRendererTest {
         JsFunction actions = (JsFunction) parameters.get(7);
         Assertions.assertEquals("return [$0]", actions.getBody());
 
+        // The actions come from JavaScript declared in the bundle, so only
+        // their identity and captures are sent.
         JsFunction copy = (JsFunction) actions.getCaptures().get(0);
-        Assertions.assertEquals(List.of("event", "context"),
-                copy.getArgumentNames());
-        Assertions.assertTrue(
-                copy.getBody().contains("window.Vaadin.Flow.clipboard"),
-                "expected a clipboard write, got: " + copy.getBody());
+        Assertions.assertEquals("writeToClipboard",
+                Objects.requireNonNull(copy.getDeclaredCall()).methodName());
 
         // The copied value is the argument the template passes, so the same
         // function serves every rendered row.
         JsFunction text = (JsFunction) copy.getCaptures().get(0);
-        Assertions.assertEquals("return context?.[$0]?.[$1] ?? null",
-                text.getBody());
+        Assertions.assertEquals("contextValue",
+                Objects.requireNonNull(text.getDeclaredCall()).methodName());
         Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
     }
 
