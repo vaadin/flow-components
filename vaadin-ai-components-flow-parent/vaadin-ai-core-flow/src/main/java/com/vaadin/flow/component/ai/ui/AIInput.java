@@ -49,6 +49,15 @@ public interface AIInput extends Serializable {
      * shows this only when server push or polling is enabled. The orchestrator
      * only enables submitting again if it disabled it, see
      * {@link #isSubmitDisabled()}. The default implementation does nothing.
+     * <p>
+     * Disabling submitting while the orchestrator has it disabled, for example
+     * in a {@link AIOrchestrator.Builder#withResponseListener response
+     * listener}, does not last: the orchestrator enables submitting when the
+     * request and the uploads have ended. To keep the user from sending more
+     * messages, disable the input component itself, for example with
+     * {@code setEnabled(false)} on a {@code MessageInput}, or reject the
+     * prompts in a {@link AIOrchestrator.Builder#withRequestInterceptor request
+     * interceptor}.
      *
      * @param submitDisabled
      *            {@code true} to disable submitting, {@code false} to enable it
