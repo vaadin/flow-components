@@ -1391,20 +1391,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 rendererRegistration = null;
             }
 
-            if (renderer == null) {
-                return;
+            if (renderer != null) {
+                Rendering<T> rendering = renderer.render(getGrid().getElement(),
+                        getGrid().getDataCommunicator().getKeyMapper(),
+                        "rowDetailsRenderer");
+
+                rendererDataGenerator = rendering.getDataGenerator()
+                        .orElse(null);
+
+                rendererRegistration = Registration.combine(() -> {
+                    destroyAllData();
+                    rendererDataGenerator = null;
+                }, rendering.getRegistration());
             }
 
-            Rendering<T> rendering = renderer.render(getGrid().getElement(),
-                    getGrid().getDataCommunicator().getKeyMapper(),
-                    "rowDetailsRenderer");
-
-            rendererDataGenerator = rendering.getDataGenerator().orElse(null);
-
-            rendererRegistration = Registration.combine(() -> {
-                destroyAllData();
-                rendererDataGenerator = null;
-            }, rendering.getRegistration());
+            detailsVisible.values().stream().filter(getGrid()::isInActiveRange)
+                    .forEach(this::refresh);
         }
 
         /**
