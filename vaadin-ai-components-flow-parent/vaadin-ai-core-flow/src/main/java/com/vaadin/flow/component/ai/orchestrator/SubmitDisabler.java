@@ -51,8 +51,12 @@ class SubmitDisabler implements Serializable {
      * the session rather than in the UI of the prompt, as a view with
      * {@code @PreserveOnRefresh} moves its components to a new UI of the same
      * session when the page is refreshed.
+     * <p>
+     * Volatile, as the thread that releases the flag reads it without the
+     * session lock. Only the reference is shared this way: the session itself
+     * is accessed with its lock.
      */
-    private transient volatile VaadinSession session;
+    private transient volatile VaadinSession session; // NOSONAR
 
     /**
      * Creates a disabler that does nothing until an input is set with
