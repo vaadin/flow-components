@@ -638,6 +638,33 @@ class SubmitDisabledTest {
         Assertions.assertFalse(messageInput.isSubmitDisabled());
     }
 
+    @Test
+    void preserveOnRefresh_uploadCanceledByRefresh_submitEnabled() {
+        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+                .withFileReceiver(uploadManager).build();
+
+        // The browser cancels the upload when the page is refreshed
+        receive(uploadManagerConnector, new InputStream() {
+            @Override
+            public int read() throws IOException {
+                refreshPreservingInput();
+                throw new IOException("Connection reset");
+            }
+        });
+
+        Assertions.assertFalse(messageInput.isSubmitDisabled());
+    }
+
+    @Test
+    void preserveOnRefresh_fileReceivedAfterRefresh_submitEnabled() {
+        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+                .withFileReceiver(uploadManager).build();
+
+        receiveFile(uploadManagerConnector, this::refreshPreservingInput);
+
+        Assertions.assertFalse(messageInput.isSubmitDisabled());
+    }
+
     /**
      * Moves the components to a new UI and detaches the old one, as a page
      * refresh does for a view with {@code @PreserveOnRefresh}.

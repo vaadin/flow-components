@@ -21,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.vaadin.flow.component.ai.common.AIAttachment;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.function.SerializableRunnable;
-import com.vaadin.flow.server.streams.UploadHandler;
 
 /**
  * Wrapper for Flow Upload component to implement AIFileReceiver interface.
@@ -36,7 +35,7 @@ class UploadWrapper implements UploadTrackingReceiver {
 
     UploadWrapper(Upload upload) {
         this.upload = upload;
-        var handler = UploadHandler.inMemory((meta, data) -> {
+        var handler = uploadTracker.createHandler((meta, data) -> {
             var isDuplicate = pendingAttachments.stream()
                     .anyMatch(a -> a.name().equals(meta.fileName()));
             if (isDuplicate) {
@@ -46,7 +45,6 @@ class UploadWrapper implements UploadTrackingReceiver {
             pendingAttachments.add(new AIAttachment(meta.fileName(),
                     meta.contentType(), data));
         });
-        uploadTracker.track(handler);
         upload.setUploadHandler(handler);
         upload.addFileRemovedListener(event -> pendingAttachments
                 .removeIf(a -> a.name().equals(event.getFileName())));

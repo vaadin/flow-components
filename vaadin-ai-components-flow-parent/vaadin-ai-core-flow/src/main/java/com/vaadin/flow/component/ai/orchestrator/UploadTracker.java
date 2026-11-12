@@ -15,47 +15,62 @@
  */
 package com.vaadin.flow.component.ai.orchestrator;
 
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.server.streams.InMemoryUploadCallback;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
-import com.vaadin.flow.server.streams.TransferContext;
+import com.vaadin.flow.server.streams.UploadEvent;
 
 /**
- * Tracks the files that an upload handler is receiving, based on the progress
- * notifications of the handler, and notifies a listener when a file starts or
- * stops being received.
+ * Tracks the files that an upload handler is receiving, and notifies a listener
+ * when a file starts or stops being received.
  * <p>
- * The handler runs the notifications with the session locked while it handles
- * the upload request, which is not a client-server round-trip. The changes that
- * the listener makes therefore reach the browser during the upload only with
- * server push or polling.
+ * The listener is notified with the session locked while the upload request is
+ * being handled, which is not a client-server round-trip. The changes that the
+ * listener makes therefore reach the browser during the upload only with server
+ * push or polling.
  */
 class UploadTracker implements Serializable {
 
     /**
-     * The transfers that have started and not yet ended. A transfer is
-     * identified by its context, which is equal in all the notifications of the
-     * same transfer, so that a transfer that is reported to end twice ends only
-     * once. That happens when closing the request fails after the transfer has
-     * completed, which reports the transfer as failed as well. Accessed only
-     * while the session is locked. Not serialized, as the contexts refer to the
-     * requests, and a transfer does not continue after serialization.
+     * The number of files being received. Accessed only while the session is
+     * locked. Not serialized, as a file is no longer being received after
+     * serialization.
      */
-    private transient Set<TransferContext> transfers;
+    private transient int receiving;
     private SerializableRunnable listener;
 
     /**
-     * Tracks the transfers of the given handler.
+     * Creates an upload handler that keeps the received files in memory and
+     * whose uploads are tracked.
+     * <p>
+     * A file is tracked from the start to the end of its upload request, in the
+     * session of the request. The progress notifications of the handler are not
+     * used, as they run in the UI of the upload and are skipped once that UI is
+     * detached. A view with {@code @PreserveOnRefresh} moves its components to
+     * a new UI when the page is refreshed, so a file that was being received
+     * during the refresh would never stop being tracked.
      *
-     * @param handler
-     *            the handler to track
+     * @param callback
+     *            the callback that gets the received files
+     * @return the upload handler
      */
-    void track(InMemoryUploadHandler handler) {
-        handler.whenStart(this::transferStarted)
-                .whenComplete((context, success) -> transferEnded(context));
+    InMemoryUploadHandler createHandler(InMemoryUploadCallback callback) {
+        return new InMemoryUploadHandler(callback) {
+            @Override
+            public void handleUploadRequest(UploadEvent event)
+                    throws IOException {
+                var session = event.getSession();
+                session.access(() -> receivingChanged(1));
+                try {
+                    super.handleUploadRequest(event);
+                } finally {
+                    session.access(() -> receivingChanged(-1));
+                }
+            }
+        };
     }
 
     /**
@@ -64,7 +79,7 @@ class UploadTracker implements Serializable {
      * @return {@code true} if a file is being received
      */
     boolean isReceiving() {
-        return transfers != null && !transfers.isEmpty();
+        return receiving > 0;
     }
 
     /**
@@ -77,21 +92,8 @@ class UploadTracker implements Serializable {
         this.listener = listener;
     }
 
-    private void transferStarted(TransferContext context) {
-        if (transfers == null) {
-            transfers = new HashSet<>();
-        }
-        transfers.add(context);
-        notifyListener();
-    }
-
-    private void transferEnded(TransferContext context) {
-        if (transfers != null && transfers.remove(context)) {
-            notifyListener();
-        }
-    }
-
-    private void notifyListener() {
+    private void receivingChanged(int change) {
+        receiving += change;
         if (listener != null) {
             listener.run();
         }
