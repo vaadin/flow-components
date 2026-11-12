@@ -17,6 +17,7 @@ package com.vaadin.flow.data.renderer;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,13 +25,17 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.internal.ValueJs;
 import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.component.trigger.internal.TriggerJs;
 import com.vaadin.flow.component.trigger.internal.WriteToClipboardAction;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.js.JsCall;
+import com.vaadin.flow.js.JsSnippets;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.MockUIExtension;
 
 class LitRendererTest {
@@ -151,6 +156,30 @@ class LitRendererTest {
 
         Assertions.assertEquals("[]", parameters.get(6).toString());
         Assertions.assertEquals(JsFunction.of("return []"), parameters.get(7));
+    }
+
+    @Test
+    void removingTheRenderer_unbindsItsClientActions() {
+        TestDiv container = new TestDiv();
+        ui.add(container);
+        AtomicBoolean unbound = new AtomicBoolean();
+        Action action = new Action() {
+            @Override
+            protected JsFunction toJs(Trigger trigger) {
+                trigger.addCleanup(() -> unbound.set(true));
+                return JsSnippets.of(ValueJs.class).nullValue();
+            }
+        };
+
+        Registration registration = LitRenderer.<String> of("<span></span>")
+                .withClientAction("act", action)
+                .render(container.getElement(), new KeyMapper<>(), "renderer")
+                .getRegistration();
+        Assertions.assertFalse(unbound.get());
+
+        registration.remove();
+        Assertions.assertTrue(unbound.get(),
+                "removing the renderer must unbind its client actions");
     }
 
     @Test
