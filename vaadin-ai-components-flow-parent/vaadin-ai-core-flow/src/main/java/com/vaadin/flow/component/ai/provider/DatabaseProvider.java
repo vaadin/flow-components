@@ -36,9 +36,9 @@ import com.vaadin.flow.data.provider.SortDirection;
  * <p>
  * A component that loads rows lazily, such as a grid, asks for one page of a
  * query's rows at a time with {@link #executeQuery(String, QueryPage)} and for
- * the size of the result with {@link #count(String)}. By default both wrap the
- * query in a subquery with {@code ORDER BY}, {@code LIMIT} and {@code OFFSET},
- * or with {@code COUNT(*)}, and run it through {@link #executeQuery(String)}.
+ * the size of the result with {@link #count(String)}. By default both extend
+ * the query's SQL with {@code ORDER BY}, {@code LIMIT} and {@code OFFSET}, or
+ * with {@code COUNT(*)}, and run it through {@link #executeQuery(String)}.
  * Override them when your SQL dialect pages or counts differently, or when your
  * provider can do it more efficiently. A provider that delegates to another
  * provider should delegate these methods too, so that the other provider's own
@@ -161,13 +161,15 @@ public interface DatabaseProvider extends Serializable {
 
     /**
      * Executes the given SQL query and returns one page of its rows, for a
-     * component that loads rows lazily. The default wraps the query in
-     * subqueries and runs the result through {@link #executeQuery(String)}:
-     * {@code SELECT * FROM (SELECT * FROM (sql) AS _t ORDER BY "column" ASC)
-     * AS _limited LIMIT limit OFFSET offset}, without the {@code ORDER BY}
-     * level when the page has no sort orders. The sort orders name result
-     * columns of the query, written as quoted identifiers. The query may end in
-     * a semicolon, which is left out, or in a line comment.
+     * component that loads rows lazily. The default runs {@code SELECT * FROM
+     * (sql) AS _t ORDER BY "column" ASC LIMIT limit OFFSET offset} through
+     * {@link #executeQuery(String)}. Without sort orders, it runs the query
+     * followed by {@code LIMIT limit OFFSET offset}, or {@code SELECT * FROM
+     * (sql) AS _limited LIMIT limit OFFSET offset} when the query has a
+     * {@code LIMIT}, {@code OFFSET}, {@code FETCH} or {@code SELECT TOP} of its
+     * own. The sort orders name result columns of the query, written as quoted
+     * identifiers. The query may end in a semicolon, which is left out, or in a
+     * line comment.
      * <p>
      * Override this when your SQL dialect pages differently, for example with
      * {@code OFFSET ... FETCH}, or when your provider can page more
@@ -201,10 +203,12 @@ public interface DatabaseProvider extends Serializable {
                             : "ASC"))
                     .collect(Collectors.joining(", "));
             ordered = "SELECT * FROM (" + ordered + ") AS _t ORDER BY "
-                    + orderBy;
+                    + orderBy + " ";
+        } else if (QueryLimitCheck.limitsRows(ordered)) {
+            ordered = "SELECT * FROM (" + ordered + ") AS _limited ";
         }
-        return executeQuery("SELECT * FROM (" + ordered + ") AS _limited LIMIT "
-                + page.limit() + " OFFSET " + page.offset());
+        return executeQuery(
+                ordered + "LIMIT " + page.limit() + " OFFSET " + page.offset());
     }
 
     /**
