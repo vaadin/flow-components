@@ -64,6 +64,43 @@ class GridItemDetailsDataTest {
         assertDetailsDataGeneratedOnlyForVisibleDetails();
     }
 
+    @Test
+    void replaceRenderer_detailsDataGeneratedForVisibleDetails() {
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(
+                item -> new Span("Details of " + item)));
+        ui.add(grid);
+        grid.setDetailsVisible("Item 1", true);
+        ui.fakeClientCommunication();
+
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> {
+            detailsItems.add(item);
+            return new Span("New details of " + item);
+        }));
+        ui.fakeClientCommunication();
+
+        Assertions.assertEquals(List.of("Item 1"), detailsItems);
+    }
+
+    @Test
+    void replaceRenderer_itemRemoved_detailsDataNotGeneratedForRemovedItem() {
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(
+                item -> new Span("Details of " + item)));
+        ui.add(grid);
+        grid.setDetailsVisible("Item 1", true);
+        ui.fakeClientCommunication();
+
+        grid.setItems("Item 0", "Item 2");
+        ui.fakeClientCommunication();
+
+        grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> {
+            detailsItems.add(item);
+            return new Span("New details of " + item);
+        }));
+        ui.fakeClientCommunication();
+
+        Assertions.assertEquals(List.of(), detailsItems);
+    }
+
     private void assertDetailsDataGeneratedOnlyForVisibleDetails() {
         ui.add(grid);
         ui.fakeClientCommunication();
