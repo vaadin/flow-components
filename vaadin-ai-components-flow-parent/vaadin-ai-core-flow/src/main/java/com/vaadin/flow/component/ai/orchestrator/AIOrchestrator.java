@@ -358,7 +358,10 @@ public class AIOrchestrator implements Serializable {
      * history onto the new provider so it has full context for subsequent
      * prompts, unless the provider manages its conversation memory outside the
      * orchestrator. The UI is not modified -- message list, input, and file
-     * receiver components retain their state across serialization.
+     * receiver components retain their state across serialization. The
+     * exception is that submitting is enabled again on the input if the
+     * orchestrator disabled it, so call {@code apply()} while the session is
+     * locked.
      * </p>
      * <p>
      * This method should only be called on a deserialized instance where the
