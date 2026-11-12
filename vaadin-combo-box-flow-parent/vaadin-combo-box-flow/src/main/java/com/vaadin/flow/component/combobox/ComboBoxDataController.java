@@ -279,10 +279,11 @@ class ComboBoxDataController<TItem>
             dataCommunicator.setViewportRange(0, 0);
             dataCommunicator.reset();
         }
-        comboBox.runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                // Optional chaining is needed because on the first attach this
-                // JavaScript is called before initializing the connector.
-                "$0.$connector?.reset()", comboBox.getElement()));
+        // Optional chaining is needed because on the first attach this
+        // JavaScript is called before initializing the connector.
+        comboBox.runBeforeClientResponse(
+                ui -> ui.getPage().executeJs(ComboBoxJs.class)
+                        .resetConnector(comboBox.getElement()));
     }
 
     /**
