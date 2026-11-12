@@ -52,8 +52,20 @@ import com.vaadin.flow.server.startup.ApplicationConfiguration;
  * &#64;RegisterExtension
  * MockUIExtension ui = new MockUIExtension();
  * </pre>
+ * <p>
+ * In a module whose <code>csp.mode</code> Maven property is
+ * <code>strict</code>, the UI is set up with {@link CspMode#STRICT}, see
+ * {@link #setCspMode(CspMode)}. The mode reaches the tests as the
+ * {@value #CSP_MODE_PROPERTY} system property.
  */
 public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
+
+    /**
+     * The system property with the Content Security Policy mode that every UI
+     * is set up with, <code>off</code> or <code>strict</code>. Set from the
+     * <code>csp.mode</code> Maven property of the module.
+     */
+    public static final String CSP_MODE_PROPERTY = "vaadin.test.csp";
 
     // Keep the session and UI as fields to ensure they are not garbage
     // collected during the test
@@ -117,6 +129,10 @@ public class MockUIExtension implements BeforeEachCallback, AfterEachCallback {
 
         UI.setCurrent(ui);
         VaadinSession.setCurrent(session);
+
+        if ("strict".equalsIgnoreCase(System.getProperty(CSP_MODE_PROPERTY))) {
+            setCspMode(CspMode.STRICT);
+        }
     }
 
     /**

@@ -32,6 +32,8 @@ When a Flow component calls client-side JavaScript, always call through the comp
 
 When a Flow component only calls a named method on a web component, prefer `callJsFunction` over `executeJs`.
 
+Other JavaScript that a component runs is declared in a package-private `@JsDefinition` interface and called through `executeJs(Class)`, not sent as a string with `executeJs(String, ...)`. A string is compiled by the browser, which a Content Security Policy without `unsafe-eval` blocks. A module that sends no JavaScript as a string sets the `csp.mode` Maven property to `strict`, which turns on the `StringJavaScriptCheck` checkstyle rule, the strict mode in unit tests that use `MockUIExtension`, and the strict mode of the integration test server. Event data is added with `addEventDataPath` or a declared `DomEventData`, not with the deprecated `addEventData(String)`, and an event filter is a declared `DomEventFilter` set with `setFilterExpression`, not a string given to `setFilter`. The rule reports both.
+
 When server-side code initializes persistent client-side JavaScript via `Element.executeJs()` (e.g. initializing a connector, adding a listener) it must happen in the component's attach hook (`onAttach` override or attach listener). Flow recreates client elements on detach/re-attach and the attach handler guarantees the script is re-applied for every new element. The exceptions are one-time state sync fixes (e.g. force client property to a value when Flow's property tracking would not sync otherwise).
 
 When code clears an element property, prefer `getElement().removeProperty(name)` over `getElement().setProperty(name, null)`.

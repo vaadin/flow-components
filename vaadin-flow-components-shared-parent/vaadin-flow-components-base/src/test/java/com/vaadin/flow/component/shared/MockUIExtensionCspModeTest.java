@@ -30,8 +30,10 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.tests.MockUIExtension;
 
 /**
- * Covers {@link MockUIExtension#setCspMode(CspMode)}, with a component that
- * runs declared JavaScript through {@link ValidationJs}.
+ * Covers the CSP mode of {@link MockUIExtension}, with a component that runs
+ * declared JavaScript through {@link ValidationJs}. This module sets
+ * <code>csp.mode</code> to <code>strict</code>, so every UI starts in the
+ * strict mode.
  */
 class MockUIExtensionCspModeTest {
 
@@ -39,7 +41,17 @@ class MockUIExtensionCspModeTest {
     final MockUIExtension ui = new MockUIExtension();
 
     @Test
-    void noCspMode_stringJavaScript_runs() {
+    void strictModule_stringJavaScript_throws() {
+        TestComponent component = new TestComponent();
+        ui.add(component);
+
+        Assertions.assertThrows(CspViolationException.class,
+                () -> component.getElement().executeJs("this.foo = 1"));
+    }
+
+    @Test
+    void cspModeOff_stringJavaScript_runs() {
+        ui.setCspMode(CspMode.OFF);
         TestComponent component = new TestComponent();
         ui.add(component);
 
