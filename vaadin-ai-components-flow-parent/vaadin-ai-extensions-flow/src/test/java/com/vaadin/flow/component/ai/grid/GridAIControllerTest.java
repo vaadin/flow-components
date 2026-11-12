@@ -149,21 +149,6 @@ class GridAIControllerTest {
     }
 
     @Test
-    void updateDataTool_countFails_relaysMessage() {
-        controller = new GridAIController(grid, new StubDatabaseProvider() {
-            @Override
-            public int count(String sql) {
-                throw new ToolException("Duplicate column name 'id'");
-            }
-        });
-        var tool = findTool("update_grid_data");
-        var result = tool
-                .execute(json("{\"query\": \"SELECT a.id, b.id FROM a, b\"}"));
-        Assertions.assertEquals(
-                "Error updating grid data: Duplicate column name 'id'", result);
-    }
-
-    @Test
     void updateDataTool_providerThrowsUnexpectedException_returnsGenericError() {
         dbProvider.executeException = new RuntimeException("internal detail");
         var tool = findTool("update_grid_data");
@@ -914,9 +899,9 @@ class GridAIControllerTest {
             dbProvider.queryResults = List.of(row("a", 1));
             simulateUpdate("SELECT a FROM t");
 
-            // The first two queries are the validation in updateData,
-            // the third is the sample row fetch in renderGrid
-            var sampleSql = dbProvider.executedQueries.get(2);
+            // First query is the validation in updateData, second is
+            // the sample row fetch in renderGrid
+            var sampleSql = dbProvider.executedQueries.get(1);
             Assertions.assertEquals("SELECT a FROM t\nLIMIT 1 OFFSET 0",
                     sampleSql);
         }
@@ -1001,9 +986,7 @@ class GridAIControllerTest {
                     null, null)).toList();
 
             Assertions.assertEquals(7, size);
-            // The validation in updateData and the size of the grid
-            Assertions.assertEquals(
-                    List.of("SELECT a FROM t", "SELECT a FROM t"), counts);
+            Assertions.assertEquals(List.of("SELECT a FROM t"), counts);
             // The validation in updateData and the sample row in renderGrid
             Assertions.assertEquals(
                     List.of(new QueryPage(0, 1, List.of()),
