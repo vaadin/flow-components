@@ -108,13 +108,13 @@ class LitRendererTest {
         // them: one function for the whole renderer, not one per item.
         Assertions.assertEquals("[\"copy\"]", parameters.get(6).toString());
         JsFunction actions = (JsFunction) parameters.get(7);
-        Assertions.assertEquals("return [$0]", actions.getBody());
+        JsFunction copy = (JsFunction) actions.getCaptures().get(0);
+        Assertions.assertEquals(JsFunction.of("return [$0]", copy), actions);
 
         // The actions come from JavaScript declared in the bundle, so only
         // their identity and captures are sent.
         // The renderer calls each action with the event and the context that
         // carries the template's call arguments.
-        JsFunction copy = (JsFunction) actions.getCaptures().get(0);
         JsCall copyCall = Objects.requireNonNull(copy.getDeclaredCall());
         Assertions.assertEquals(WriteToClipboardAction.WriteToClipboardJs.class,
                 copyCall.definitionType());
@@ -150,8 +150,7 @@ class LitRendererTest {
                 .findFirst().orElseThrow().getParameters();
 
         Assertions.assertEquals("[]", parameters.get(6).toString());
-        Assertions.assertEquals("return []",
-                ((JsFunction) parameters.get(7)).getBody());
+        Assertions.assertEquals(JsFunction.of("return []"), parameters.get(7));
     }
 
     @Test
