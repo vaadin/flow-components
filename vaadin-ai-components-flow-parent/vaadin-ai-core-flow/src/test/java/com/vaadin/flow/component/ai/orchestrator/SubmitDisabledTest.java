@@ -140,6 +140,19 @@ class SubmitDisabledTest {
     }
 
     @Test
+    void inputSubmit_previousResponseCompleted_submitDisabled() {
+        AIOrchestrator.builder(mockProvider, null).withInput(messageInput)
+                .build();
+        submitFromClient("Hello");
+        response.tryEmitComplete();
+
+        response = Sinks.many().unicast().onBackpressureBuffer();
+        submitFromClient("Hello again");
+
+        Assertions.assertTrue(messageInput.isSubmitDisabled());
+    }
+
+    @Test
     void prompt_responseCompletedImmediately_submitEnabled() {
         Mockito.when(
                 mockProvider.stream(Mockito.any(LLMProvider.LLMRequest.class)))
