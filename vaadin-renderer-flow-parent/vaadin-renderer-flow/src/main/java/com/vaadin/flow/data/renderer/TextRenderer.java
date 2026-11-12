@@ -98,4 +98,9 @@ public class TextRenderer<ITEM> extends BasicRenderer<ITEM, ITEM> {
     protected String getTemplateExpression() {
         return "<span>${item.label}</span>";
     }
+
+    @Override
+    protected CompiledLitTemplate getTemplate() {
+        return builtInTemplates().textRenderer();
+    }
 }
