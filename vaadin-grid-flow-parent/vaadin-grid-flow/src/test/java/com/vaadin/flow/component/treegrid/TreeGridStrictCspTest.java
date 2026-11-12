@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.server.CspMode;
 import com.vaadin.flow.server.VaadinService;
@@ -34,9 +35,6 @@ import com.vaadin.tests.MockUIExtension;
  * Covers that TreeGrid only runs declared JavaScript, so that it works with a
  * strict Content Security Policy. In the strict mode, sending JavaScript as a
  * string throws.
- * <p>
- * The hierarchy column is not covered yet, as its template is still sent as a
- * string.
  */
 class TreeGridStrictCspTest {
 
@@ -68,6 +66,25 @@ class TreeGridStrictCspTest {
 
         Assertions.assertTrue(
                 getDeclaredCalls().contains("TreeGridJs.initConnector"));
+    }
+
+    @Test
+    void strictCsp_hierarchyColumns_onlyDeclaredTemplates() {
+        TreeGrid<String> treeGrid = new TreeGrid<>();
+        treeGrid.setItems(List.of("Parent"),
+                item -> item.equals("Parent") ? List.of("Child") : List.of());
+        treeGrid.addHierarchyColumn(item -> item);
+        treeGrid.addComponentHierarchyColumn(Span::new);
+
+        ui.add(treeGrid);
+        treeGrid.expand("Parent");
+
+        List<String> calls = getDeclaredCalls();
+        Assertions.assertEquals(2,
+                calls.stream()
+                        .filter("LitRendererJs.setLitRendererTemplate"::equals)
+                        .count());
+        Assertions.assertFalse(calls.contains("LitRendererJs.setLitRenderer"));
     }
 
     private List<String> getDeclaredCalls() {

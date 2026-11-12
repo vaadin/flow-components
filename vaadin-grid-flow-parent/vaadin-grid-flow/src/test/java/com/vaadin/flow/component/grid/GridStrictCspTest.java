@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,7 +29,14 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LocalDateRenderer;
+import com.vaadin.flow.data.renderer.NativeButtonRenderer;
+import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.server.CspMode;
+import com.vaadin.flow.server.CspViolationException;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.tests.MockUIExtension;
 
@@ -36,9 +44,6 @@ import com.vaadin.tests.MockUIExtension;
  * Covers that Grid only runs declared JavaScript, so that it works with a
  * strict Content Security Policy. In the strict mode, sending JavaScript as a
  * string throws.
- * <p>
- * Columns with template renderers (for example component columns) are not
- * covered yet, as their templates are still sent as strings.
  */
 class GridStrictCspTest {
 
@@ -80,6 +85,38 @@ class GridStrictCspTest {
                 "GridJs.setSorterDirections", "GridJs.scrollToEnd",
                 "GridJs.setHeaderRenderer", "GridJs.setFooterRenderer",
                 "GridJs.initTooltipGenerator", "EditorJs.patchRenderer")));
+    }
+
+    @Test
+    void strictCsp_rendererColumns_onlyDeclaredTemplates() {
+        Grid<String> grid = new Grid<>();
+        grid.setItems("Item 0", "Item 1");
+        grid.addComponentColumn(Span::new);
+        grid.addColumn(new TextRenderer<>(item -> item));
+        grid.addColumn(new NumberRenderer<>(String::length, "%d"));
+        grid.addColumn(new LocalDateRenderer<>(item -> LocalDate.now()));
+        grid.addColumn(new NativeButtonRenderer<>("Click", item -> {
+        }));
+        grid.setItemDetailsRenderer(
+                new ComponentRenderer<Span, String>(item -> new Span(item)));
+
+        ui.add(grid);
+
+        List<String> calls = getDeclaredCalls();
+        Assertions.assertEquals(6,
+                calls.stream()
+                        .filter("LitRendererJs.setLitRendererTemplate"::equals)
+                        .count());
+        Assertions.assertFalse(calls.contains("LitRendererJs.setLitRenderer"));
+    }
+
+    @Test
+    void strictCsp_stringTemplate_throws() {
+        Grid<String> grid = new Grid<>();
+        grid.addColumn(LitRenderer.<String> of("${index}"));
+
+        Assertions.assertThrows(CspViolationException.class,
+                () -> ui.add(grid));
     }
 
     private List<String> getDeclaredCalls() {
