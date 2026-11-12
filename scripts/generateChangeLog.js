@@ -84,7 +84,11 @@ async function getReleases() {
   }
   if (!from) {
     const branch = await run(`git rev-parse --abbrev-ref HEAD`);
-    await run(`git pull origin ${branch} --tags`);
+    try {
+      await run(`git fetch origin --tags`);
+    } catch (e) {
+      console.error(`Warning: could not fetch tags, using local ones: ${e.message}`);
+    }
     const tags = await run(`git tag --merged ${branch} --sort=-committerdate`);
     from = tags.split('\n')[0];
   }
