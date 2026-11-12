@@ -25,9 +25,12 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.trigger.ClientAction;
+import com.vaadin.flow.component.trigger.internal.TriggerJs;
+import com.vaadin.flow.component.trigger.internal.WriteToClipboardAction;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.js.JsCall;
 import com.vaadin.tests.MockUIExtension;
 
 class LitRendererTest {
@@ -109,15 +112,24 @@ class LitRendererTest {
 
         // The actions come from JavaScript declared in the bundle, so only
         // their identity and captures are sent.
+        // The renderer calls each action with the event and the context that
+        // carries the template's call arguments.
         JsFunction copy = (JsFunction) actions.getCaptures().get(0);
-        Assertions.assertEquals("writeToClipboard",
-                Objects.requireNonNull(copy.getDeclaredCall()).methodName());
+        JsCall copyCall = Objects.requireNonNull(copy.getDeclaredCall());
+        Assertions.assertEquals(WriteToClipboardAction.WriteToClipboardJs.class,
+                copyCall.definitionType());
+        Assertions.assertEquals("writeToClipboard", copyCall.methodName());
+        Assertions.assertEquals(List.of("event", "context"),
+                copyCall.getCalledWithNames());
 
         // The copied value is the argument the template passes, so the same
         // function serves every rendered row.
         JsFunction text = (JsFunction) copy.getCaptures().get(0);
-        Assertions.assertEquals("contextValue",
-                Objects.requireNonNull(text.getDeclaredCall()).methodName());
+        JsCall textCall = Objects.requireNonNull(text.getDeclaredCall());
+        Assertions.assertEquals(TriggerJs.class, textCall.definitionType());
+        Assertions.assertEquals("contextValue", textCall.methodName());
+        Assertions.assertEquals(List.of("event", "context"),
+                textCall.getCalledWithNames());
         Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
     }
 
