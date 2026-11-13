@@ -132,7 +132,7 @@ class LitRendererTest {
         JsFunction text = (JsFunction) copy.getCaptures().get(0);
         JsCall textCall = Objects.requireNonNull(text.getDeclaredCall());
         Assertions.assertEquals(TriggerJs.class, textCall.definitionType());
-        Assertions.assertEquals("contextValue", textCall.methodName());
+        Assertions.assertEquals("readContextValue", textCall.methodName());
         Assertions.assertEquals(List.of("event", "context"),
                 textCall.getCalledWithNames());
         Assertions.assertEquals(List.of("args", "0"), text.getCaptures());
@@ -167,7 +167,7 @@ class LitRendererTest {
             @Override
             protected JsFunction toJs(Trigger trigger) {
                 trigger.addCleanup(() -> unbound.set(true));
-                return JsSnippets.of(ValueJs.class).nullValue();
+                return JsSnippets.of(ValueJs.class).returnNull();
             }
         };
 
