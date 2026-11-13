@@ -211,7 +211,13 @@ public class AIOrchestrator implements Serializable {
      * deserialization. When adding a new path out of a prompt, decide which of
      * these owns the release; a missed release blocks all later prompts.
      */
-    private final AtomicBoolean isProcessing = new AtomicBoolean(false);
+    private final ProcessingFlag isProcessing = new ProcessingFlag();
+    /**
+     * Disables submitting on the input while busy. Notified when
+     * {@link #isProcessing} is released, so the release paths do not call it.
+     */
+    private final SubmitDisabler submitDisabler = new SubmitDisabler(
+            isProcessing);
     private final AtomicBoolean featureFlagChecked = new AtomicBoolean(false);
 
     /**
@@ -352,7 +358,10 @@ public class AIOrchestrator implements Serializable {
      * history onto the new provider so it has full context for subsequent
      * prompts, unless the provider manages its conversation memory outside the
      * orchestrator. The UI is not modified -- message list, input, and file
-     * receiver components retain their state across serialization.
+     * receiver components retain their state across serialization. The
+     * exception is that submitting is enabled again on the input if the
+     * orchestrator disabled it, so call {@code apply()} while the session is
+     * locked.
      * </p>
      * <p>
      * This method should only be called on a deserialized instance where the
@@ -557,6 +566,9 @@ public class AIOrchestrator implements Serializable {
             }
             throw t;
         }
+        // Here rather than when the flag is claimed, so that submitting which
+        // the interceptor or a request hook disabled is left as it is
+        submitDisabler.update();
     }
 
     private void processUserInput(String userMessage,
@@ -1126,10 +1138,13 @@ public class AIOrchestrator implements Serializable {
          * <p>
          * The UI (message list, input, file receiver) is not modified -- those
          * components survive serialization and retain their state
-         * automatically.
+         * automatically. The exception is that submitting is enabled again on
+         * the input if the orchestrator disabled it, so call this method while
+         * the session is locked.
          */
         public void apply() {
             orchestrator.isProcessing.set(false);
+            orchestrator.submitDisabler.update();
             orchestrator.provider = provider;
             orchestrator.tools = tools;
             orchestrator.controller = controller;
@@ -1285,6 +1300,10 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the input component.
+         * <p>
+         * Submitting is disabled on the input while a request is being
+         * processed or a file is being uploaded, see
+         * {@link AIInput#setSubmitDisabled(boolean)}.
          *
          * @param input
          *            the input component
@@ -1298,6 +1317,10 @@ public class AIOrchestrator implements Serializable {
 
         /**
          * Sets the input component using a Flow MessageInput component.
+         * <p>
+         * Submitting is disabled on the input while a request is being
+         * processed or a file is being uploaded, see
+         * {@link AIInput#setSubmitDisabled(boolean)}.
          *
          * @param messageInput
          *            the Flow MessageInput component
@@ -1685,6 +1708,7 @@ public class AIOrchestrator implements Serializable {
                 if (input != null) {
                     input.addSubmitListener(
                             msg -> orchestrator.doPrompt(msg, null));
+                    orchestrator.submitDisabler.attach(input, fileReceiver);
                 }
 
                 if (attachmentClickListener != null && messageList != null) {

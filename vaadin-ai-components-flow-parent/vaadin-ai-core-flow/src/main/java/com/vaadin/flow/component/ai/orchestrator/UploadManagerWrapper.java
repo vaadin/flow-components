@@ -19,23 +19,23 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.ai.common.AIAttachment;
-import com.vaadin.flow.component.ai.ui.AIFileReceiver;
 import com.vaadin.flow.component.upload.UploadManager;
-import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.function.SerializableRunnable;
 
 /**
  * Wrapper for Flow UploadManager component to implement AIFileReceiver
  * interface. Caches uploaded files in memory until they are consumed via
  * {@link #takeAttachments()}.
  */
-class UploadManagerWrapper implements AIFileReceiver {
+class UploadManagerWrapper implements UploadTrackingReceiver {
 
     final UploadManager uploadManager;
     private final List<AIAttachment> pendingAttachments = new CopyOnWriteArrayList<>();
+    private final UploadTracker uploadTracker = new UploadTracker();
 
     UploadManagerWrapper(UploadManager uploadManager) {
         this.uploadManager = uploadManager;
-        uploadManager.setUploadHandler(UploadHandler.inMemory((meta, data) -> {
+        var handler = uploadTracker.createHandler((meta, data) -> {
             var isDuplicate = pendingAttachments.stream()
                     .anyMatch(a -> a.name().equals(meta.fileName()));
             if (isDuplicate) {
@@ -44,7 +44,8 @@ class UploadManagerWrapper implements AIFileReceiver {
             }
             pendingAttachments.add(new AIAttachment(meta.fileName(),
                     meta.contentType(), data));
-        }));
+        });
+        uploadManager.setUploadHandler(handler);
         uploadManager.addFileRemovedListener(event -> pendingAttachments
                 .removeIf(a -> a.name().equals(event.getFileName())));
     }
@@ -52,6 +53,16 @@ class UploadManagerWrapper implements AIFileReceiver {
     @Override
     public boolean isUploading() {
         return uploadManager.isUploading();
+    }
+
+    @Override
+    public boolean isReceivingFiles() {
+        return uploadTracker.isReceiving();
+    }
+
+    @Override
+    public void setUploadStateListener(SerializableRunnable listener) {
+        uploadTracker.setListener(listener);
     }
 
     @Override
